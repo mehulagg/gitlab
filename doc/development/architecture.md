@@ -73,7 +73,7 @@ Compared to [our official installation methods](https://about.gitlab.com/install
 notable differences are:
 
 - Official Linux packages can access files on the same file system with different services.
-  [Shared files](shared_files.md) are not an option for the application running on the Kubernetes
+  Shared files (for instance, with NFS) are not an option for the application running on the Kubernetes
   platform.
 - Official Linux packages by default have services that have access to the shared configuration and
   network. This is not the case for services running in Kubernetes, where services might be running
