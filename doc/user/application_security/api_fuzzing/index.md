@@ -1177,18 +1177,16 @@ The API Fuzzing engine outputs an error message when it cannot establish a conne
 
 ### Application cannot determine the base URL for the target API
 
-The API Fuzzing analyzer outputs an error message when it cannot determine the target API after inspecting the OpenAPI document. This error message is shown when the target API has not been set in the `.gitlab-ci.yml` and it could not be inferred from the OpenAPI document. The solutions are either explicitly providing the base URL in your `.gitlab-ci.yml` file or by providing enough information in your OpenAPI document.
+The API Fuzzing analyzer outputs an error message when it cannot determine the target API after inspecting the OpenAPI document. This error message is shown when the target API has not been set in the `.gitlab-ci.yml` and it could not be inferred from the OpenAPI document. The best suited solution will depend on how your target API url is exposed for testing. If the target API is the same for each deployment, then the static solution should be used, oppositely if the target API changes for each deployment a dynamic solution should be implemented.
 
-**Error message**
 
-- In [GitLab 13.12 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/328733), `Application cannot determine the base URL for the target API.
-For more information about resolving this issue see the trouble shooting section of the documentation.`
+#### Static solution
 
-**Solution**
+A static solution will let you reuse the same target API for each different deployments. 
 
-**Updating the .gitlab-ci.yml**
+**Update your .gitlab-ci.yml**
 
-1. In your `.gitlab-ci.yml`, add a variable `FUZZAPI_TARGET_URL`. The variable must be set to the base URL of API testing target. As for example:
+1. In your `.gitlab-ci.yml`, add a variable `FUZZAPI_TARGET_URL`. The variable must be set to the base URL of API testing target. For example:
 
   ```yaml
   include:
@@ -1199,14 +1197,19 @@ For more information about resolving this issue see the trouble shooting section
       FUZZAPI_OPENAPI: test-api-specification.json
   ```
 
-**Updating your OpenAPI document**
+#### Dynamic solution
 
-1. The OpenAPI specification allows specifying the base URL as part of the document content. Depending on the OpenAPI version, you should update different sections of your OpenAPI document. Additionally, if the variable `FUZZAPI_OPENAPI` is set to an absolute URL, then the API Fuzzing runner will try to use it to get the data that the OpenAPI document does not provide.
+A dynamic solution will let you change the target API for each different deployments. 
 
-   1. For OpenAPI v2, make sure at least `host` node is provided. The `host` node could contain the port number, for example, to use port `8080`, the host should be `target-machine:8080`. Additionally, `schemes` and `basePath` nodes could be added to provide more information about the base URL. If they are not provided, then `schemes` node is set to `http` and `basePath` node defaults to `/`. If the environmental variable `FUZZAPI_OPENAPI` is set to an absolute URL, then any non-provided value for a node could be extracted from the absolute URL. For more information on how to set these values in your OpenAPI document checkout the [OpenAPI v2 Specification](https://spec.openapis.org/oas/v2.0)
-   
-   1. For OpenAPI v3.0.x make sure at least there is one entry in `servers` collection. Any entry in the server must provide `url`. The `url` will be used as the base URL. Additionally, if `url` is a relative URL and the environmental variable `FUZZAPI_OPENAPI` is set to an absolute URL, then the `url` will be relative to the URL provided by the environmental variable. For more information on how to set these values in your OpenAPI document checkout the [OpenAPI v3.0.0 Specification](https://spec.openapis.org/oas/v3.0.0)
-   
+**Use environment_url.txt**
+
+* Add the URL in an `environment_url.txt` file at the root of your project. Note that to run API fuzzing scan against a dynamic environment, the job that run prior to the API fuzzing scan must persist the application domain in the `environment_url.txt` file. 
+
+**Use OpenAPI document URL and its content**
+
+* Include in the OpenAPI document, the information about the target host. The host and target URL information should be included in the document content, their location depends on the Open API version. The [OpenAPI version 2.0](https://spec.openapis.org/oas/v2.0) and [OpenAPI version 3.0.x](https://spec.openapis.org/oas/v3.0.0) use different sections each to specify the target URL.
+* Optionally, serve the OpanAPI document using an absolute URL. if your OpenAPI document is served through an absolute URL, then the API fuzzing scan can use the document URL to infer the target API for any non-provided data in document content.
+
 <!--
 ### Target Container
 
