@@ -46,17 +46,7 @@ One is built into GitLab directly and has been around for a while (this is calle
 to as `Gitlab::Experiment` -- GLEX for short.
 
 Both approaches use [experiment](../feature_flags/index.md#experiment-type)
-feature flags, and there is currently no strong suggestion to use one over the other.
+feature flags, and we recommend using GLEX over `Experimentation Module` for new experiments.
 
-| Feature              | `Experimentation Module` | GLEX |
-| -------------------- |------------------------- | ---- |
-| Record user grouping | Yes                      | No   |
-| Uses feature flags   | Yes                      | Yes  |
-| Multivariate (A/B/n) | No                       | Yes  |
-
-- [Implementing an A/B experiment using `Experimentation Module`](experimentation.md)
 - [Implementing an A/B/n experiment using GLEX](gitlab_experiment.md)
-
-Historical Context: `Experimentation Module` was built iteratively with the needs that
-appeared while implementing Growth sub-department experiments, while GLEX was built
-with the learnings of the team and an easier to use API.
+- [Implementing an A/B experiment using `Experimentation Module`](experimentation.md)
