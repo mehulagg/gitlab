@@ -44,7 +44,7 @@ DevOps Adoption allows you to:
 
 ### Enabling data processing
 
-Group DevOps Adoption relies on data that has been gathered by a daily data processing task.
+Group DevOps Adoption relies on data that has been gathered by a weekly data processing task.
 This task is disabled by default.
 If you want to begin using Group DevOps Adoption,
 simply access the feature for the first time and GitLab will automatically enable the data processing for that group.
