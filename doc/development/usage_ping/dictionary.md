@@ -2900,6 +2900,18 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `counts.kubernetes_agent_proxy_request`
+
+Count of Kubernetes Agent Proxy requests
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210505015532_kubernetes_agent_proxy_request.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `counts.kubernetes_agents`
 
 Count of Kubernetes agents
@@ -4692,7 +4704,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Projects with repository mirroring enabled
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
 
 Group: `group::continuous integration`
 
@@ -16312,7 +16324,7 @@ Tiers: `free`
 
 Count creator_id from projects with repository mirroring enabled.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
 
 Group: `group::continuous integration`
 
@@ -18232,7 +18244,7 @@ Tiers: `free`
 
 Count creator_id from projects with repository mirroring enabled.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
 Group: `group::continuous integration`
 
