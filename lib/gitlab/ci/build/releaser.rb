@@ -37,7 +37,7 @@ module Gitlab
           result = + ""
           return result if config[:assets].nil?
 
-          config[:assets][:links]&.each { |elem| result.concat(" --assets-link \"#{elem.to_json}\"") }
+          config[:assets][:links]&.each { |elem| result.concat(" --assets-link #{elem.to_json.to_json}") }
 
           result
         end
