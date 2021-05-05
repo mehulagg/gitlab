@@ -44,6 +44,7 @@ Components marked with *** can be optionally run on reputable third party load b
 AWS ELB is known to work.
 Components marked with **** can be optionally run on reputable third party object storage (storage PaaS). 
 Google Cloud Storage and AWS S3 are known to work.
+For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 10k
@@ -2407,8 +2408,7 @@ future with further specific cloud provider details.
 
 NOTE:
 \* Nodes configuration is given as it is fixed for performance testing to ensure pod vcpu / memory ratios and avoid scaling during testing.
-In production deployments there is no need to assign pods to nodes - as long as the same aggregated vCPU and Memory are available
-within the cluster and the number of nodes and their location takes into account the desired availability.
+In production deployments there is no need to assign pods to nodes. A minimum of three nodes in three different availability zones is strongly recommended to align with resilient cloud architecture practices.
 
 Next are the backend components that run on static compute VMs via Omnibus (or External PaaS
 services where applicable):
@@ -2435,6 +2435,7 @@ Components marked with ** can be optionally run on reputable
 third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 Components marked with *** can be optionally run on reputable third party load balancing services (LB PaaS). 
 AWS ELB is known to work.
+For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 10k
