@@ -120,6 +120,26 @@ RSpec.describe ApplicationExperiment, :experiment do
         ]
       )
     end
+
+    it "psuedo anonymizes any record passed in for tracking" do
+      subject.track(:action, project: Project.new(id: 42), foo: Group.new(id: 42))
+
+      expect_snowplow_event(
+        category: 'namespaced/stub',
+        action: 'action',
+        anonymized_project: '71913b02ef71006e8b03eb5d8c13c751',
+        anonymized_foo: 'fcd752874910d3d4264360e2b5157e3d',
+        context: [
+          {
+            schema: 'iglu:com.gitlab/gitlab_standard/jsonschema/1-0-5',
+            data: hash_including(extra: {
+              anonymized_project: '71913b02ef71006e8b03eb5d8c13c751',
+              anonymized_foo: 'fcd752874910d3d4264360e2b5157e3d',
+            })
+          }
+        ]
+      )
+    end
   end
 
   describe "variant resolution" do
@@ -151,8 +171,8 @@ RSpec.describe ApplicationExperiment, :experiment do
 
       cache.clear(key: subject.name)
 
-      subject.use { } # setup the control
-      subject.try { } # setup the candidate
+      subject.use {} # setup the control
+      subject.try {} # setup the candidate
     end
 
     it "caches the variant determined by the variant resolver" do

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/NamespacedClass
+  SEED = ENV['EXPERIMENT_PSEUDO_ANONYMIZATION_SEED']
+
   def enabled?
     return false if Feature::Definition.get(feature_flag_name).nil? # there has to be a feature flag yaml file
     return false unless Gitlab.dev_env_or_com? # we have to be in an environment that allows experiments
@@ -25,7 +27,7 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     return unless should_track? # don't track events for excluded contexts
 
     # track the event, and mix in the experiment signature data
-    Gitlab::Tracking.event(name, action.to_s, **event_args.merge(
+    Gitlab::Tracking.event(name, action.to_s, **pseudo_anonymized(event_args).merge(
       context: (event_args[:context] || []) << SnowplowTracker::SelfDescribingJson.new(
         'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0', signature
       )
@@ -44,5 +46,15 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
 
   def experiment_group?
     Feature.enabled?(feature_flag_name, self, type: :experiment, default_enabled: :yaml)
+  end
+
+  def pseudo_anonymized(in_args)
+    in_args.each_with_object({}) do |(k, v), hash|
+      if v.respond_to?(:to_global_id)
+        hash["anonymized_#{k}".to_sym] = key_for(v, SEED)
+      else
+        hash[k] = v
+      end
+    end
   end
 end
