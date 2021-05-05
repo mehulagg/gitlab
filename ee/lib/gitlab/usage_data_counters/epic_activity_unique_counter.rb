@@ -14,6 +14,7 @@ module Gitlab
       EPIC_NOTE_UPDATED = 'g_project_management_users_updating_epic_notes'
       EPIC_NOTE_DESTROYED = 'g_project_management_users_destroying_epic_notes'
       EPIC_EMOJI_AWARDED = 'g_project_management_users_awarding_epic_emoji'
+      EPIC_EMOJI_REMOVED = 'g_project_management_users_removing_epic_emoji'
       EPIC_START_DATE_SET_AS_FIXED = 'g_project_management_users_setting_epic_start_date_as_fixed'
       EPIC_START_DATE_SET_AS_INHERITED = 'g_project_management_users_setting_epic_start_date_as_inherited'
       EPIC_DUE_DATE_SET_AS_FIXED = 'g_project_management_users_setting_epic_due_date_as_fixed'
@@ -60,6 +61,10 @@ module Gitlab
 
         def track_epic_emoji_awarded_action(author:)
           track_unique_action(EPIC_EMOJI_AWARDED, author)
+        end
+
+        def track_epic_emoji_removed_action(author:)
+          track_unique_action(EPIC_EMOJI_REMOVED, author)
         end
 
         def track_epic_start_date_set_as_fixed_action(author:)

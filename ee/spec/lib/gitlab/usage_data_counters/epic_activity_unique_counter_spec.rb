@@ -84,6 +84,16 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
     end
   end
 
+  context 'for epic emoji remove event' do
+    def track_action(params)
+      described_class.track_epic_emoji_removed_action(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_EMOJI_REMOVED }
+    end
+  end
+
   context 'for epic closing event' do
     def track_action(params)
       described_class.track_epic_closed_action(**params)
