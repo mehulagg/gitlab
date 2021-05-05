@@ -328,7 +328,7 @@ index alias to it which becomes the new `primary` index. At the end, we resume t
 > - A scheduled index deletion and the ability to cancel it was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38914) in GitLab 13.3.
 > - Support for retries during reindexing was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55681) in GitLab 13.12.
 
-Under **Admin Area > Settings > Advanced Search > Elasticsearch Zero-Downtime Reindexing**, select **Trigger cluster reindexing**.
+Under **Admin Area > Settings > Advanced Search > Elasticsearch zero-downtime reindexing**, select **Trigger cluster reindexing**.
 
 Reindexing can be a lengthy process depending on the size of your Elasticsearch cluster.
 

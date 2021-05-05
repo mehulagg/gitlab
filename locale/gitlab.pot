@@ -11888,9 +11888,6 @@ msgstr ""
 msgid "Elasticsearch HTTP client timeout value in seconds."
 msgstr ""
 
-msgid "Elasticsearch Zero-Downtime Reindexing"
-msgstr ""
-
 msgid "Elasticsearch indexing"
 msgstr ""
 
@@ -11907,6 +11904,9 @@ msgid "Elasticsearch reindexing triggered"
 msgstr ""
 
 msgid "Elasticsearch returned status code: %{status_code}"
+msgstr ""
+
+msgid "Elasticsearch zero-downtime reindexing"
 msgstr ""
 
 msgid "Elastic|None. Select namespaces to index."
@@ -32741,9 +32741,6 @@ msgstr ""
 msgid "This feature requires local storage to be enabled"
 msgstr ""
 
-msgid "This feature should be used with an index that was created after 13.0"
-msgstr ""
-
 msgid "This field is required."
 msgstr ""
 
@@ -33941,7 +33938,7 @@ msgstr ""
 msgid "Trigger cluster reindexing"
 msgstr ""
 
-msgid "Trigger cluster reindexing."
+msgid "Trigger cluster reindexing. This feature should be used with an index that was created after 13.0."
 msgstr ""
 
 msgid "Trigger manual job"
