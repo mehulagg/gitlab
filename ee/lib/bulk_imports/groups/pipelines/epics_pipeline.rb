@@ -6,16 +6,11 @@ module BulkImports
       class EpicsPipeline
         include ::BulkImports::Pipeline
 
-        extractor ::BulkImports::Common::Extractors::GraphqlExtractor,
-          query: ::BulkImports::Groups::Graphql::GetEpicsQuery
+        extractor ::BulkImports::Common::Extractors::NdjsonExtractor, relation: :epics
 
         transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
         transformer ::BulkImports::Common::Transformers::UserReferenceTransformer, reference: 'author'
         transformer ::BulkImports::Groups::Transformers::EpicAttributesTransformer
-
-        def transform(_, data)
-          cache_epic_source_params(data)
-        end
 
         def load(context, data)
           raise ::BulkImports::Pipeline::NotAllowedError unless authorized?
@@ -27,22 +22,6 @@ module BulkImports
 
         def authorized?
           context.current_user.can?(:admin_epic, context.group)
-        end
-
-        def cache_epic_source_params(data)
-          source_id = GlobalID.parse(data['id'])&.model_id
-          source_iid = data['iid']
-
-          if source_id
-            cache_key = "bulk_import:#{context.bulk_import.id}:entity:#{context.entity.id}:epic:#{source_iid}"
-            source_params = { source_id: source_id }
-
-            ::Gitlab::Redis::Cache.with do |redis|
-              redis.set(cache_key, source_params.to_json, ex: ::BulkImports::Pipeline::CACHE_KEY_EXPIRATION)
-            end
-          end
-
-          data
         end
       end
     end
