@@ -1,6 +1,6 @@
 <script>
 import { GlIcon, GlBadge } from '@gitlab/ui';
-import { HEALTH_STATUS_UI } from 'ee/geo_nodes_beta/constants';
+import { HEALTH_STATUS_UI, DEFAULT_HEALTH_STATUS } from 'ee/geo_nodes_beta/constants';
 
 export default {
   components: {
@@ -10,7 +10,8 @@ export default {
   props: {
     status: {
       type: String,
-      required: true,
+      required: false,
+      default: DEFAULT_HEALTH_STATUS,
     },
   },
   computed: {

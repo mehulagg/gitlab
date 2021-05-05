@@ -17,8 +17,7 @@ export default {
     node: {
       type: Object,
       required: true,
-      validator: (value) =>
-        ['id', 'name', 'geoNodeId', 'url', 'healthStatus'].every((prop) => value[prop]),
+      validator: (value) => ['id', 'name', 'url'].every((prop) => value[prop]),
     },
   },
   data() {

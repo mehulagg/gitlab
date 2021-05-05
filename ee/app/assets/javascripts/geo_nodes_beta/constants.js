@@ -27,6 +27,8 @@ export const GEO_REPLICATION_TYPES_URL = helpPagePath(
   'administration/geo/replication/datatypes.html',
 );
 
+export const DEFAULT_HEALTH_STATUS = 'Unknown';
+
 export const HEALTH_STATUS_UI = {
   healthy: {
     icon: 'status_success',
