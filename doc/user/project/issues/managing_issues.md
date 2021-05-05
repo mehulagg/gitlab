@@ -128,8 +128,8 @@ fields prefilled.
 | Field                | URL Parameter Name    | Notes                                                 |
 |----------------------|-----------------------|-------------------------------------------------------|
 | title                | `issue[title]`        |                                                       |
-| description          | `issue[description]`  | Cannot fill both the description and description template fields  |
-| description template | `issuable_template`   | Cannot fill both the description and description template fields  |
+| description          | `issue[description]`  | Cannot be used at the same time as `issuable_template`. |
+| description template | `issuable_template`   | Cannot be used at the same time as `issue[description]`.  |
 | issue type           | `issue[issue_type]`   | Either `incident` or `issue`                          |
 | confidential         | `issue[confidential]` | Parameter value must be `true` to set to confidential |
 
