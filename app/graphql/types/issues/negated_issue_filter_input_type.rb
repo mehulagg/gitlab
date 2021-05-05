@@ -24,4 +24,4 @@ module Types
   end
 end
 
-Types::Issues::NegatedIssueFilterInputType.prepend_if_ee('::EE::Types::Issues::NegatedIssueFilterInputType')
+Types::Issues::NegatedIssueFilterInputType.prepend_mod_with('::EE::Types::Issues::NegatedIssueFilterInputType')

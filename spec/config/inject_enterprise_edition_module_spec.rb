@@ -115,7 +115,7 @@ RSpec.describe InjectEnterpriseEditionModule do
     end
   end
 
-  describe '#prepend_if_ee' do
+  describe '#prepend_mod_with' do
     it_behaves_like 'expand the extension with', :prepend
   end
 

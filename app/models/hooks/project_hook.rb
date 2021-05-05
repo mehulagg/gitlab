@@ -31,4 +31,4 @@ class ProjectHook < WebHook
   end
 end
 
-ProjectHook.prepend_if_ee('EE::ProjectHook')
+ProjectHook.prepend_mod_with('EE::ProjectHook')

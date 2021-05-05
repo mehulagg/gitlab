@@ -561,4 +561,4 @@ class Member < ApplicationRecord
   end
 end
 
-Member.prepend_if_ee('EE::Member')
+Member.prepend_mod_with('EE::Member')

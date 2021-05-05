@@ -54,7 +54,7 @@ module SystemNoteHelper
   extend self
 end
 
-SystemNoteHelper.prepend_if_ee('EE::SystemNoteHelper')
+SystemNoteHelper.prepend_mod_with('EE::SystemNoteHelper')
 
 # The methods in `EE::SystemNoteHelper` should be available as both instance and
 # class methods.

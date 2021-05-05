@@ -44,4 +44,4 @@ module Groups::GroupMembersHelper
   end
 end
 
-Groups::GroupMembersHelper.prepend_if_ee('EE::Groups::GroupMembersHelper')
+Groups::GroupMembersHelper.prepend_mod_with('EE::Groups::GroupMembersHelper')

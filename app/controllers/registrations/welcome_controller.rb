@@ -74,4 +74,4 @@ module Registrations
   end
 end
 
-Registrations::WelcomeController.prepend_if_ee('EE::Registrations::WelcomeController')
+Registrations::WelcomeController.prepend_mod_with('EE::Registrations::WelcomeController')

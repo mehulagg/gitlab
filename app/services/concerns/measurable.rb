@@ -23,7 +23,7 @@
 #     end
 #   end
 #
-#   DummyService.prepend_if_ee('EE::DummyService')
+#   DummyService.prepend_mod_with('EE::DummyService')
 #   DummyService.prepend(Measurable)
 # ```
 #

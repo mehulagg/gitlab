@@ -437,7 +437,7 @@ module ApplicationSettingsHelper
   end
 end
 
-ApplicationSettingsHelper.prepend_if_ee('EE::ApplicationSettingsHelper')
+ApplicationSettingsHelper.prepend_mod_with('EE::ApplicationSettingsHelper')
 
 # The methods in `EE::ApplicationSettingsHelper` should be available as both
 # instance and class methods.

@@ -446,4 +446,4 @@ module API
   end
 end
 
-API::Issues.prepend_if_ee('EE::API::Issues')
+API::Issues.prepend_mod_with('EE::API::Issues')

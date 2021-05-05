@@ -2760,4 +2760,4 @@ class Project < ApplicationRecord
   end
 end
 
-Project.prepend_if_ee('EE::Project')
+Project.prepend_mod_with('EE::Project')

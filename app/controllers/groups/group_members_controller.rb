@@ -84,4 +84,4 @@ class Groups::GroupMembersController < Groups::ApplicationController
   end
 end
 
-Groups::GroupMembersController.prepend_if_ee('EE::Groups::GroupMembersController')
+Groups::GroupMembersController.prepend_mod_with('EE::Groups::GroupMembersController')

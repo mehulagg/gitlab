@@ -102,4 +102,4 @@ module Autocomplete
   end
 end
 
-Autocomplete::UsersFinder.prepend_if_ee('EE::Autocomplete::UsersFinder')
+Autocomplete::UsersFinder.prepend_mod_with('EE::Autocomplete::UsersFinder')

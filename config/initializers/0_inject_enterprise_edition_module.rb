@@ -3,7 +3,7 @@
 require 'active_support/inflector'
 
 module InjectEnterpriseEditionModule
-  def prepend_if_ee(constant_with_prefix, namespace: Object, with_descendants: false)
+  def prepend_mod_with(constant_with_prefix, namespace: Object, with_descendants: false)
     prepend_mod_for(
       constant_without_prefix(constant_with_prefix),
       namespace: namespace,

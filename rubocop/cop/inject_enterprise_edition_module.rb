@@ -9,12 +9,12 @@ module RuboCop
           ', outside of any class or module definitions'
 
       DISALLOWED_METHOD =
-        'EE modules must be injected using `include_if_ee`, `extend_if_ee`, or `prepend_if_ee`'
+        'EE modules must be injected using `include_if_ee`, `extend_if_ee`, or `prepend_mod_with`'
 
       INVALID_ARGUMENT = 'EE modules to inject must be specified as a String'
 
       CHECK_LINE_METHODS =
-        Set.new(%i[include_if_ee extend_if_ee prepend_if_ee]).freeze
+        Set.new(%i[include_if_ee extend_if_ee prepend_mod_with]).freeze
 
       DISALLOW_METHODS = Set.new(%i[include extend prepend]).freeze
 

@@ -74,4 +74,4 @@ module API
   end
 end
 
-API::Helpers::IssuesHelpers.prepend_if_ee('EE::API::Helpers::IssuesHelpers')
+API::Helpers::IssuesHelpers.prepend_mod_with('EE::API::Helpers::IssuesHelpers')

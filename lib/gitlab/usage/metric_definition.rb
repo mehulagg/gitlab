@@ -117,4 +117,4 @@ module Gitlab
   end
 end
 
-Gitlab::Usage::MetricDefinition.prepend_if_ee('EE::Gitlab::Usage::MetricDefinition')
+Gitlab::Usage::MetricDefinition.prepend_mod_with('EE::Gitlab::Usage::MetricDefinition')

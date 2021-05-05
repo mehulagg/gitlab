@@ -56,4 +56,4 @@ module QA
   end
 end
 
-QA::Page::Project::Menu.prepend_if_ee('Page::Project::Menu', namespace: QA)
+QA::Page::Project::Menu.prepend_mod_with('Page::Project::Menu', namespace: QA)

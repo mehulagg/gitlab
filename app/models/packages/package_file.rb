@@ -69,4 +69,4 @@ class Packages::PackageFile < ApplicationRecord
   end
 end
 
-Packages::PackageFile.prepend_if_ee('EE::Packages::PackageFile')
+Packages::PackageFile.prepend_mod_with('EE::Packages::PackageFile')

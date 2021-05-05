@@ -260,4 +260,4 @@ module Types
   end
 end
 
-Types::MergeRequestType.prepend_if_ee('::EE::Types::MergeRequestType')
+Types::MergeRequestType.prepend_mod_with('::EE::Types::MergeRequestType')
