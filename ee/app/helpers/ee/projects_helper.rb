@@ -12,37 +12,6 @@ module EE
       ]
     end
 
-    override :get_project_nav_tabs
-    def get_project_nav_tabs(project, current_user)
-      nav_tabs = super
-
-      if can?(current_user, :read_code_review_analytics, project)
-        nav_tabs << :code_review
-      end
-
-      if can?(current_user, :read_project_merge_request_analytics, project)
-        nav_tabs << :merge_request_analytics
-      end
-
-      if project.feature_available?(:issues_analytics) && can?(current_user, :read_project, project)
-        nav_tabs << :issues_analytics
-      end
-
-      if project.insights_available?
-        nav_tabs << :project_insights
-      end
-
-      if can?(current_user, :read_requirement, project)
-        nav_tabs << :requirements
-      end
-
-      if can?(current_user, :read_incident_management_oncall_schedule, project)
-        nav_tabs << :oncall_schedule
-      end
-
-      nav_tabs
-    end
-
     override :project_permissions_settings
     def project_permissions_settings(project)
       settings = super.merge(
@@ -239,10 +208,6 @@ module EE
       if can_create_feedback?(project, :dismissal)
         project_vulnerability_feedback_index_path(project)
       end
-    end
-
-    def any_project_nav_tab?(tabs)
-      tabs.any? { |tab| project_nav_tab?(tab) }
     end
 
     def show_discover_project_security?(project)
