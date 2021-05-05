@@ -22,6 +22,8 @@ module Security
     validates :project, presence: true, uniqueness: true
     validates :security_policy_management_project, presence: true
 
+    scope :for_project, -> (project_id) { where(project_id: project_id) }
+
     def enabled?
       ::Feature.enabled?(:security_orchestration_policies_configuration, project)
     end

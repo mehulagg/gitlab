@@ -84,5 +84,12 @@ module Types
     def normalized_target_url
       DastSiteValidation.get_normalized_url_base(object.dast_site.url)
     end
+
+    def referenced_in_security_policies
+      ::Gitlab::Graphql::Aggregations::SecurityOrchestrationPolicies::LazyDastProfileAggregate.new(
+        context,
+        object
+      )
+    end
   end
 end
