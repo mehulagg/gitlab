@@ -58,8 +58,8 @@ Don't tell them **how** to do this thing. Tell them **what it is**.
 
 If you start describing another topic, start a new concept and link to it.
 
-Also, do not use "Overview" or "Introduction" for the topic title.
-Instead, make the title a noun someone would search for.
+Also, do not use "Overview" or "Introduction" for the topic title. Instead,
+use a noun or phrase that someone would search for.
 
 Concept topics should be in this format:
 
