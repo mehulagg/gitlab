@@ -290,6 +290,10 @@ because GitLab has successfully assumed your provided role, but the role has
 insufficient permissions to retrieve the resources needed for the form. Make sure
 you've assigned the role the correct permissions.
 
+### Key Pairs are not loaded
+
+Gitlab loads the key pairs from the **Cluster Region** specified. Ensure that key pair exists in that region. 
+
 #### `ROLLBACK_FAILED` during cluster creation
 
 The creation process halted because GitLab encountered an error when creating
