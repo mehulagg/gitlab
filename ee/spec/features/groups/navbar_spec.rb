@@ -85,7 +85,7 @@ RSpec.describe 'Group navbar' do
       stub_feature_flags(epic_boards: false)
 
       insert_after_nav_item(
-        _('Group overview'),
+        _('Group information'),
         new_nav_item: {
           nav_item: _('Epics'),
           nav_sub_items: [
@@ -106,7 +106,7 @@ RSpec.describe 'Group navbar' do
       stub_licensed_features(epics: true)
 
       insert_after_nav_item(
-        _('Group overview'),
+        _('Group information'),
         new_nav_item: {
           nav_item: _('Epics'),
           nav_sub_items: [

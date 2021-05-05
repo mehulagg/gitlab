@@ -127,6 +127,6 @@ class Groups::EpicsController < Groups::ApplicationController
   end
 
   def verify_group_bulk_edit_enabled!
-    render_404 unless group.feature_available?(:group_bulk_edit)
+    render_404 unless group.licensed_feature_available?(:group_bulk_edit)
   end
 end

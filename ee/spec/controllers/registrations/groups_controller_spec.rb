@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Registrations::GroupsController do
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:user) { create(:user) }
 
   shared_examples 'hides email confirmation warning' do
@@ -25,8 +27,14 @@ RSpec.describe Registrations::GroupsController do
     end
   end
 
-  describe 'GET #new' do
+  describe 'GET #new', :aggregate_failures do
     let(:signup_onboarding_enabled) { true }
+    let(:learn_gitlab_context) do
+      {
+        in_experiment_group_a: false,
+        in_experiment_group_b: false
+      }
+    end
 
     subject { get :new }
 
@@ -51,10 +59,27 @@ RSpec.describe Registrations::GroupsController do
         expect(assigns(:group).visibility_level).to eq(Gitlab::CurrentSettings.default_group_visibility)
       end
 
-      it 'calls the record user method for trial_during_signup experiment' do
-        expect(controller).to receive(:record_experiment_user).with(:trial_during_signup)
+      context 'with different experiment rollouts' do
+        before do
+          stub_experiment_for_subject(learn_gitlab_a: experiment_a, learn_gitlab_b: experiment_b)
+        end
 
-        subject
+        where(:experiment_a, :experiment_b, :context) do
+          false       | false         | { in_experiment_group_a: false, in_experiment_group_b: false }
+          false       | true          | { in_experiment_group_a: false, in_experiment_group_b: true }
+          true        | false         | { in_experiment_group_a: true, in_experiment_group_b: false }
+          true        | true          | { in_experiment_group_a: true, in_experiment_group_b: false }
+        end
+
+        with_them do
+          it 'sets the correct context', :aggregate_failures do
+            expect(controller).to receive(:record_experiment_user).with(:trial_during_signup)
+            expect(controller).to receive(:record_experiment_user).with(:learn_gitlab_a, context)
+            expect(controller).to receive(:record_experiment_user).with(:learn_gitlab_b, context)
+
+            subject
+          end
+        end
       end
 
       context 'user without the ability to create a group' do
@@ -73,7 +98,7 @@ RSpec.describe Registrations::GroupsController do
     end
   end
 
-  describe 'POST #create' do
+  describe 'POST #create', :aggregate_failure do
     let_it_be(:glm_params) { {} }
     let_it_be(:trial_form_params) { { trial: 'false' } }
     let_it_be(:trial_onboarding_issues_enabled) { false }
@@ -184,6 +209,8 @@ RSpec.describe Registrations::GroupsController do
               expect(service).to receive(:execute).and_return(group)
             end
             expect(controller).to receive(:record_experiment_user).with(:trial_during_signup, trial_chosen: false, namespace_id: group.id)
+            expect(controller).to receive(:record_experiment_conversion_event).with(:learn_gitlab_a, namespace_id: group.id)
+            expect(controller).to receive(:record_experiment_conversion_event).with(:learn_gitlab_b, namespace_id: group.id)
 
             subject
           end

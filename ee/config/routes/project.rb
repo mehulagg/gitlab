@@ -40,7 +40,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :subscriptions, only: [:create, :destroy]
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
-          get '/alerts/:id', action: 'alert_details', constraints: { id: /\d+/ }, as: :threat_monitoring_alert
+          get '/alerts/:iid', action: 'alert_details', constraints: { iid: /\d+/ }, as: :threat_monitoring_alert
           resources :policies, only: [:new, :edit], controller: :threat_monitoring
         end
 
@@ -128,6 +128,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         namespace :incident_management, path: '' do
           resources :oncall_schedules, only: [:index], path: 'oncall_schedules'
+          resources :escalation_policies, only: [:index], path: 'escalation_policies'
         end
 
         resources :cluster_agents, only: [:show], param: :name

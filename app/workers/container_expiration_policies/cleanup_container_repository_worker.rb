@@ -3,11 +3,14 @@
 module ContainerExpirationPolicies
   class CleanupContainerRepositoryWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include LimitedCapacity::Worker
     include Gitlab::Utils::StrongMemoize
 
     queue_namespace :container_repository
     feature_category :container_registry
+    tags :exclude_from_kubernetes
     urgency :low
     worker_resource_boundary :unknown
     idempotent!

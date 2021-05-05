@@ -32,7 +32,12 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   POLLING_INTERVAL = 10_000
 
-  feature_category :continuous_integration
+  feature_category :continuous_integration, [
+                     :charts, :show, :config_variables, :stage, :cancel, :retry,
+                     :builds, :dag, :failures, :status, :downloadable_artifacts,
+                     :index, :create, :new, :destroy
+                   ]
+  feature_category :code_testing, [:test_report]
 
   def index
     @pipelines = Ci::PipelinesFinder
@@ -222,7 +227,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   end
 
   def render_show
-    @stages = @pipeline.stages.with_latest_and_retried_statuses
+    @stages = @pipeline.stages
 
     respond_to do |format|
       format.html do

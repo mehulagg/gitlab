@@ -34,8 +34,7 @@ module IncidentManagement
           return error_participants_without_permission if users_without_permissions?
         end
 
-        # Ensure shift history is up to date before saving new params
-        IncidentManagement::OncallRotations::PersistShiftsJob.new.perform(oncall_rotation.id)
+        ensure_rotation_is_up_to_date
 
         OncallRotation.transaction do
           oncall_rotation.update!(params)

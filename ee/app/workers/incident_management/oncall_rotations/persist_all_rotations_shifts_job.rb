@@ -5,8 +5,11 @@ module IncidentManagement
     class PersistAllRotationsShiftsJob
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       idempotent!
       feature_category :incident_management
+      tags :exclude_from_kubernetes
       queue_namespace :cronjob
 
       def perform

@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JiraIssuesListRoot renders issuable-list component with correct props 1`] = `
+Object {
+  "currentPage": 1,
+  "currentTab": "opened",
+  "defaultPageSize": 2,
+  "enableLabelPermalinks": true,
+  "initialFilterValue": Array [
+    Object {
+      "type": "filtered-search-term",
+      "value": Object {
+        "data": "foo",
+      },
+    },
+  ],
+  "initialSortBy": "created_desc",
+  "isManualOrdering": false,
+  "issuableSymbol": "#",
+  "issuables": Array [],
+  "issuablesLoading": false,
+  "labelFilterParam": "labels",
+  "namespace": "gitlab-org/gitlab-test",
+  "nextPage": 2,
+  "previousPage": 0,
+  "recentSearchesStorageKey": "jira_issues",
+  "searchInputPlaceholder": "Search Jira issues",
+  "searchTokens": Array [],
+  "showBulkEditSidebar": false,
+  "showPaginationControls": false,
+  "sortOptions": Array [
+    Object {
+      "id": 1,
+      "sortDirection": Object {
+        "ascending": "created_asc",
+        "descending": "created_desc",
+      },
+      "title": "Created date",
+    },
+    Object {
+      "id": 2,
+      "sortDirection": Object {
+        "ascending": "updated_asc",
+        "descending": "updated_desc",
+      },
+      "title": "Last updated",
+    },
+  ],
+  "tabCounts": null,
+  "tabs": Array [
+    Object {
+      "id": "state-opened",
+      "name": "opened",
+      "title": "Open",
+      "titleTooltip": "Filter by issues that are currently opened.",
+    },
+    Object {
+      "id": "state-closed",
+      "name": "closed",
+      "title": "Closed",
+      "titleTooltip": "Filter by issues that are currently closed.",
+    },
+    Object {
+      "id": "state-all",
+      "name": "all",
+      "title": "All",
+      "titleTooltip": "Show all issues.",
+    },
+  ],
+  "totalItems": 0,
+  "urlParams": Object {
+    "labels[]": undefined,
+    "page": 1,
+    "search": "foo",
+    "sort": "created_desc",
+    "state": "opened",
+  },
+}
+`;

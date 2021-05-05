@@ -35,6 +35,10 @@ module Dora
         return error(_('Container must be a project or a group.'), :bad_request)
       end
 
+      if group_project_ids.present? && !group?
+        return error(_('The group_project_ids parameter is only allowed for a group'), :bad_request)
+      end
+
       unless ::Dora::DailyMetrics::AVAILABLE_INTERVALS.include?(interval)
         return error(_("The interval must be one of %{intervals}.") % { intervals: ::Dora::DailyMetrics::AVAILABLE_INTERVALS.join(',') },
                      :bad_request)
@@ -72,7 +76,9 @@ module Dora
         # - In the subsequent projects, the assigned role at the group-level
         #   can't be lowered. For example, if the user is reporter at group-level,
         #   the user can be developer in subsequent projects, but can't be guest.
-        container.all_projects
+        projects = container.all_projects
+        projects = projects.id_in(group_project_ids) if group_project_ids.any?
+        projects
       end
     end
 
@@ -102,6 +108,10 @@ module Dora
 
     def metric
       params[:metric]
+    end
+
+    def group_project_ids
+      Array(params[:group_project_ids])
     end
   end
 end

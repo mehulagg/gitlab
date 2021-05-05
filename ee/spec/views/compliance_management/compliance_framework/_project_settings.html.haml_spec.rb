@@ -14,81 +14,59 @@ RSpec.describe 'projects/edit.html.haml' do
     stub_licensed_features(custom_compliance_frameworks: true)
   end
 
-  context 'feature enabled' do
-    before do
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
+  context 'group has compliance frameworks' do
+    let_it_be(:framework) { create(:compliance_framework, namespace: group, name: 'Custom framework 23') }
+
+    it 'includes a dropdown including that framework' do
+      render
+
+      expect(rendered).to match /Custom framework 23/
     end
 
-    context 'group has compliance frameworks' do
-      let_it_be(:framework) { create(:compliance_framework, namespace: group, name: 'Custom framework 23') }
+    it 'does not include warning message' do
+      render
 
-      it 'includes a dropdown including that framework' do
-        render
-
-        expect(rendered).to match /Custom framework 23/
-      end
-
-      it 'does not include warning message' do
-        render
-
-        expect(rendered).not_to match /Customizable by owners./
-      end
-
-      it 'contains the dropdown' do
-        render
-
-        expect(rendered).to have_css('select[id=project_compliance_framework_setting_attributes_framework]')
-        expect(rendered).not_to have_css('select[id=project_compliance_framework_setting_attributes_framework][disabled="disabled"]')
-      end
-
-      context 'user is group maintainer' do
-        let_it_be(:maintainer) { create(:user) }
-
-        before do
-          group.add_maintainer(maintainer)
-          allow(view).to receive(:current_user).and_return(maintainer)
-        end
-
-        it 'includes warning message' do
-          render
-
-          expect(rendered).to match /Customizable by owners./
-        end
-
-        it 'disables the dropdown' do
-          render
-
-          expect(rendered).to have_css('input[id=project_compliance_framework_setting_attributes_framework][disabled="disabled"]')
-        end
-      end
+      expect(rendered).not_to match /Customizable by owners./
     end
 
-    context 'group has no compliance frameworks' do
+    it 'contains the dropdown' do
+      render
+
+      expect(rendered).to have_css('select[id=project_compliance_framework_setting_attributes_framework]')
+      expect(rendered).not_to have_css('select[id=project_compliance_framework_setting_attributes_framework][disabled="disabled"]')
+    end
+
+    context 'user is group maintainer' do
+      let_it_be(:maintainer) { create(:user) }
+
       before do
-        group.compliance_management_frameworks.delete_all
+        group.add_maintainer(maintainer)
+        allow(view).to receive(:current_user).and_return(maintainer)
       end
 
-      it 'shows a notification' do
+      it 'includes warning message' do
         render
 
-        expect(rendered).to match /No compliance frameworks are in use. Create one using the GraphQL API./
+        expect(rendered).to match /Customizable by owners./
+      end
+
+      it 'disables the dropdown' do
+        render
+
+        expect(rendered).to have_css('input[id=project_compliance_framework_setting_attributes_framework][disabled="disabled"]')
       end
     end
   end
 
-  context 'feature disabled' do
+  context 'group has no compliance frameworks' do
     before do
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
+      group.compliance_management_frameworks.delete_all
     end
 
-    it 'includes a dropdown including only the hard-coded frameworks' do
+    it 'shows a notification' do
       render
 
-      expect(rendered).to match /GDPR/
-      expect(rendered).to match /HIPAA/
-      expect(rendered).to match /PCI-DSS/
-      expect(rendered).to match /SOC 2/
-      expect(rendered).to match /SOX/
+      expect(rendered).to match /No compliance frameworks are in use. Create one from the .* section in Group Settings./
     end
   end
 end

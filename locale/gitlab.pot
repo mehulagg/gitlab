@@ -4746,7 +4746,7 @@ msgstr ""
 msgid "Automatic deployment rollbacks"
 msgstr ""
 
-msgid "Automatically close incidents when the associated Prometheus alert resolves."
+msgid "Automatically close associated incident when a recovery alert notification resolves an alert"
 msgstr ""
 
 msgid "Automatically create merge requests for vulnerabilities that have fixes available."
@@ -6689,13 +6689,16 @@ msgstr ""
 msgid "CloudLicense|Buy subscription"
 msgstr ""
 
+msgid "CloudLicense|Enter activation code"
+msgstr ""
+
 msgid "CloudLicense|Free trial"
 msgstr ""
 
-msgid "CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab."
+msgid "CloudLicense|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}."
 msgstr ""
 
-msgid "CloudLicense|Learn how to %{linkStart}activate your subscription%{linkEnd}."
+msgid "CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab."
 msgstr ""
 
 msgid "CloudLicense|Maximum users"
@@ -6717,6 +6720,9 @@ msgid "CloudLicense|This is the highest peak of users on your installation since
 msgstr ""
 
 msgid "CloudLicense|This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license."
+msgstr ""
+
+msgid "CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription."
 msgstr ""
 
 msgid "CloudLicense|Users in subscription"
@@ -8174,9 +8180,6 @@ msgid "Compliance Dashboard"
 msgstr ""
 
 msgid "Compliance framework"
-msgstr ""
-
-msgid "Compliance framework  (optional)"
 msgstr ""
 
 msgid "Compliance framework (optional)"
@@ -11271,7 +11274,7 @@ msgstr ""
 msgid "DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin."
 msgstr ""
 
-msgid "DevopsAdoption|Feature adoption is based on usage in the last calendar month. Last updated: %{timestamp}."
+msgid "DevopsAdoption|Feature adoption is based on usage in the current calendar month. Last updated: %{timestamp}."
 msgstr ""
 
 msgid "DevopsAdoption|Filter by name"
@@ -11331,16 +11334,31 @@ msgstr ""
 msgid "DevopsReport|Adoption"
 msgstr ""
 
-msgid "DevopsReport|DevOps"
-msgstr ""
-
 msgid "DevopsReport|DevOps Score"
 msgstr ""
 
 msgid "DevopsReport|DevOps score metrics are based on usage over the last 30 days. Last updated: %{timestamp}."
 msgstr ""
 
+msgid "DevopsReport|High"
+msgstr ""
+
+msgid "DevopsReport|Leader usage"
+msgstr ""
+
+msgid "DevopsReport|Low"
+msgstr ""
+
+msgid "DevopsReport|Moderate"
+msgstr ""
+
 msgid "DevopsReport|Score"
+msgstr ""
+
+msgid "DevopsReport|Your score"
+msgstr ""
+
+msgid "DevopsReport|Your usage"
 msgstr ""
 
 msgid "Didn't receive a confirmation email?"
@@ -11416,6 +11434,9 @@ msgid "Disable two-factor authentication"
 msgstr ""
 
 msgid "Disabled"
+msgstr ""
+
+msgid "Disabled by %{parent} owner"
 msgstr ""
 
 msgid "Disabled mirrors can only be enabled by instance owners. It is recommended that you delete them."
@@ -12824,9 +12845,6 @@ msgstr ""
 msgid "Error occurred when saving reviewers"
 msgstr ""
 
-msgid "Error occurred when toggling the notification subscription"
-msgstr ""
-
 msgid "Error occurred while updating the issue status"
 msgstr ""
 
@@ -12951,6 +12969,21 @@ msgid "Errors found on line %{line_number}: %{error_lines}. Please check if thes
 msgstr ""
 
 msgid "Errors:"
+msgstr ""
+
+msgid "Escalation Policies"
+msgstr ""
+
+msgid "Escalation policies"
+msgstr ""
+
+msgid "EscalationPolicies|Add an escalation policy"
+msgstr ""
+
+msgid "EscalationPolicies|Create an escalation policy in GitLab"
+msgstr ""
+
+msgid "EscalationPolicies|Set up escalation policies to define who is paged, and when, in the event the first users paged don't respond."
 msgstr ""
 
 msgid "Estimate"
@@ -15444,6 +15477,9 @@ msgstr ""
 msgid "Group info:"
 msgstr ""
 
+msgid "Group information"
+msgstr ""
+
 msgid "Group is required when cluster_type is :group"
 msgstr ""
 
@@ -16466,6 +16502,9 @@ msgid "If you want to re-enable two-factor authentication, visit %{two_factor_li
 msgstr ""
 
 msgid "If you want to re-enable two-factor authentication, visit the %{settings_link_to} page."
+msgstr ""
+
+msgid "If you've purchased or renewed your subscription and have an activation code, please enter it below to start the activation process."
 msgstr ""
 
 msgid "If your HTTP repository is not publicly accessible, add your credentials."
@@ -18990,9 +19029,6 @@ msgid "Latest pipeline for the most recent commit on this branch"
 msgstr ""
 
 msgid "Launch a ready-to-code development environment for your project."
-msgstr ""
-
-msgid "Lead"
 msgstr ""
 
 msgid "Lead Time"
@@ -21897,7 +21933,7 @@ msgstr ""
 msgid "No compliance frameworks are in use."
 msgstr ""
 
-msgid "No compliance frameworks are in use. Create one using the GraphQL API."
+msgid "No compliance frameworks are in use. Create one from the %{link} section in Group Settings."
 msgstr ""
 
 msgid "No confirmation email received? Please check your spam folder or"
@@ -23006,6 +23042,9 @@ msgid "Package type must be Conan"
 msgstr ""
 
 msgid "Package type must be Debian"
+msgstr ""
+
+msgid "Package type must be Helm"
 msgstr ""
 
 msgid "Package type must be Maven"
@@ -30038,6 +30077,9 @@ msgstr ""
 msgid "Something went wrong while setting %{issuableType} confidentiality."
 msgstr ""
 
+msgid "Something went wrong while setting %{issuableType} notifications."
+msgstr ""
+
 msgid "Something went wrong while stopping this environment. Please try again."
 msgstr ""
 
@@ -30318,6 +30360,9 @@ msgid "SourcegraphPreferences|Uses %{linkStart}Sourcegraph.com%{linkEnd}."
 msgstr ""
 
 msgid "SourcegraphPreferences|Uses a custom %{linkStart}Sourcegraph instance%{linkEnd}."
+msgstr ""
+
+msgid "Spam Check API Key"
 msgstr ""
 
 msgid "Spam Logs"
@@ -30683,6 +30728,9 @@ msgstr ""
 msgid "StorageSize|Unknown"
 msgstr ""
 
+msgid "Subgroup information"
+msgstr ""
+
 msgid "Subgroup milestone"
 msgstr ""
 
@@ -31044,6 +31092,9 @@ msgid "SuperSonics|ID"
 msgstr ""
 
 msgid "SuperSonics|Last Sync"
+msgstr ""
+
+msgid "SuperSonics|Learn how to %{linkStart}activate your subscription%{linkEnd}."
 msgstr ""
 
 msgid "SuperSonics|Licensed to"
@@ -31585,6 +31636,9 @@ msgstr ""
 msgid "TestReports|%{rate}%{sign} success rate"
 msgstr ""
 
+msgid "TestReports|Attachment"
+msgstr ""
+
 msgid "TestReports|Jobs"
 msgstr ""
 
@@ -31668,6 +31722,9 @@ msgid_plural "The %{type} contains the following errors:"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "The API key used by GitLab for accessing the Spam Check service endpoint"
+msgstr ""
+
 msgid "The Advanced Search in GitLab is a powerful search service that saves you time. Instead of creating duplicate code and wasting time, you can now search for code within other teams that can help your own project."
 msgstr ""
 
@@ -31723,6 +31780,9 @@ msgid "The coding stage shows the time from the first commit to creating the mer
 msgstr ""
 
 msgid "The collection of events added to the data gathered for that stage."
+msgstr ""
+
+msgid "The comment you are editing has been changed by another user. Would you like to keep your changes and overwrite the new description or discard your changes?"
 msgstr ""
 
 msgid "The commit does not exist"
@@ -31853,10 +31913,16 @@ msgstr ""
 msgid "The group will be placed in 'pending removal' state"
 msgstr ""
 
+msgid "The group_project_ids parameter is only allowed for a group"
+msgstr ""
+
 msgid "The import will time out after %{timeout}. For repositories that take longer, use a clone/push combination."
 msgstr ""
 
 msgid "The interval must be one of %{intervals}."
+msgstr ""
+
+msgid "The invitation can not be found with the provided invite token."
 msgstr ""
 
 msgid "The invitation could not be accepted."
@@ -32561,7 +32627,10 @@ msgstr ""
 msgid "This also resolves this thread"
 msgstr ""
 
-msgid "This application was created by %{link_to_owner}."
+msgid "This application was created by %{user_link}."
+msgstr ""
+
+msgid "This application was created for group %{group_link}."
 msgstr ""
 
 msgid "This application will be able to:"
@@ -35204,10 +35273,10 @@ msgstr ""
 msgid "ValueStreamAnalytics|Average number of deployments to production per day."
 msgstr ""
 
-msgid "ValueStreamAnalytics|Median time from first commit to issue closed."
+msgid "ValueStreamAnalytics|Median time from issue created to issue closed."
 msgstr ""
 
-msgid "ValueStreamAnalytics|Median time from issue created to issue closed."
+msgid "ValueStreamAnalytics|Median time from issue first merge request created to issue closed."
 msgstr ""
 
 msgid "ValueStreamAnalytics|Number of new issues created."
@@ -37930,9 +37999,6 @@ msgstr ""
 msgid "https://your-bitbucket-server"
 msgstr ""
 
-msgid "i18n|%{language} (%{percent_translated}%% translated)"
-msgstr ""
-
 msgid "image diff"
 msgstr ""
 
@@ -38671,6 +38737,12 @@ msgid "revised"
 msgstr ""
 
 msgid "satisfied"
+msgstr ""
+
+msgid "scan-execution-policy: policy not applied, %{policy_path} file is invalid"
+msgstr ""
+
+msgid "scan-execution-policy: policy not applied, %{policy_path} file is missing"
 msgstr ""
 
 msgid "security Reports|There was an error creating the merge request"

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Group overview', :js, :aggregate_failures do
+RSpec.describe 'Group information', :js, :aggregate_failures do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:empty_project) { create(:project, namespace: group) }
@@ -14,7 +14,7 @@ RSpec.describe 'Group overview', :js, :aggregate_failures do
     sign_in(user)
   end
 
-  context 'when the default value of "Group Overview content" preference is used' do
+  context 'when the default value of "Group information content" preference is used' do
     it 'displays the Details view' do
       visit_page
 

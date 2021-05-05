@@ -3,6 +3,7 @@
 module Registrations
   class GroupsController < ApplicationController
     include GroupInviteMembers
+    include ::Gitlab::Utils::StrongMemoize
 
     layout 'checkout'
 
@@ -13,6 +14,8 @@ module Registrations
 
     def new
       record_experiment_user(:trial_during_signup)
+      record_experiment_user(:learn_gitlab_a, learn_gitlab_context)
+      record_experiment_user(:learn_gitlab_b, learn_gitlab_context)
       @group = Group.new(visibility_level: helpers.default_group_visibility)
     end
 
@@ -73,6 +76,8 @@ module Registrations
 
     def registration_onboarding_flow
       record_experiment_user(:trial_during_signup, trial_chosen: helpers.in_trial_during_signup_flow?, namespace_id: @group.id)
+      record_experiment_conversion_event(:learn_gitlab_a, namespace_id: @group.id)
+      record_experiment_conversion_event(:learn_gitlab_b, namespace_id: @group.id)
 
       if experiment_enabled?(:trial_during_signup)
         trial_during_signup_flow
@@ -146,16 +151,25 @@ module Registrations
       apply_trial_params = {
         uid: current_user.id,
         trial_user: params.permit(:glm_source, :glm_content).merge({
-          namespace_id: @group.id,
-          gitlab_com_trial: true,
-          sync_to_gl: true
-        })
+                                                                     namespace_id: @group.id,
+                                                                     gitlab_com_trial: true,
+                                                                     sync_to_gl: true
+                                                                   })
       }
 
       result = GitlabSubscriptions::ApplyTrialService.new.execute(apply_trial_params)
       flash[:alert] = result&.dig(:errors) unless result&.dig(:success)
 
       result&.dig(:success)
+    end
+
+    def learn_gitlab_context
+      strong_memoize(:learn_gitlab_context) do
+        in_experiment_group_a = Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user)
+        in_experiment_group_b = !in_experiment_group_a && Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
+
+        { in_experiment_group_a: in_experiment_group_a, in_experiment_group_b: in_experiment_group_b }
+      end
     end
   end
 end

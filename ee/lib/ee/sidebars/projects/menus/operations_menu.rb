@@ -12,6 +12,7 @@ module EE
             return false unless super
 
             insert_item_after(:incidents, on_call_schedules_menu_item)
+            insert_item_after(:on_call_schedules, escalation_policies_menu_item)
 
             true
           end
@@ -26,6 +27,17 @@ module EE
               link: project_incident_management_oncall_schedules_path(context.project),
               active_routes: { controller: :oncall_schedules },
               item_id: :on_call_schedules
+            )
+          end
+
+          def escalation_policies_menu_item
+            return unless can?(context.current_user, :read_incident_management_escalation_policy, context.project)
+
+            ::Sidebars::MenuItem.new(
+              title: _('Escalation policies'),
+              link: project_incident_management_escalation_policies_path(context.project),
+              active_routes: { controller: :escalation_policies },
+              item_id: :escalation_policies
             )
           end
         end

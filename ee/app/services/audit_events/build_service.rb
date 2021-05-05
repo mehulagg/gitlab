@@ -2,6 +2,8 @@
 
 module AuditEvents
   class BuildService
+    MissingAttributeError = Class.new(StandardError)
+
     def initialize(author:, scope:, target:, ip_address:, message:)
       @author = author
       @scope = scope
@@ -10,17 +12,28 @@ module AuditEvents
       @message = message
     end
 
+    # Create an instance of AuditEvent
+    #
+    # @raise [MissingAttributeError] when required attributes are blank
+    #
+    # @return [AuditEvent]
     def execute
+      raise MissingAttributeError if missing_attribute?
+
       AuditEvent.new(payload)
     end
 
     private
 
+    def missing_attribute?
+      @author.blank? || @scope.blank? || @target.blank? || @message.blank?
+    end
+
     def payload
       if License.feature_available?(:admin_audit_log)
         base_payload.merge(
           details: base_details_payload.merge(
-            ip_address: @ip_address,
+            ip_address: ip_address,
             entity_path: @scope.full_path
           ),
           ip_address: ip_address

@@ -47,7 +47,7 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Dependency do
 
       let(:project) { build_stubbed(:project) }
 
-      specify { expect(subject).to eql("/#{project.namespace.path}/#{project.name}/-/blob/#{project.default_branch_or_master}/#{lockfile}") }
+      specify { expect(subject).to eql("/#{project.namespace.path}/#{project.name}/-/blob/master/#{lockfile}") }
     end
   end
 end

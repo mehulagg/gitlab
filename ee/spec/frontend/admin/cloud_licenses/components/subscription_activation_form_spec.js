@@ -1,10 +1,14 @@
 import { GlForm, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import CloudLicenseSubscriptionActivationForm, {
+import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
-import { fieldRequiredMessage, subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
+import {
+  CONNECTIVITY_ERROR,
+  fieldRequiredMessage,
+  subscriptionQueries,
+} from 'ee/pages/admin/cloud_licenses/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -40,9 +44,9 @@ describe('CloudLicenseApp', () => {
     stopPropagation,
   });
 
-  const createComponentWithApollo = ({ props = {}, mutationMock, stubs = {} } = {}) => {
+  const createComponentWithApollo = ({ props = {}, mutationMock } = {}) => {
     wrapper = extendedWrapper(
-      shallowMount(CloudLicenseSubscriptionActivationForm, {
+      shallowMount(SubscriptionActivationForm, {
         localVue,
         apolloProvider: createMockApolloProvider(mutationMock),
         propsData: {
@@ -50,7 +54,6 @@ describe('CloudLicenseApp', () => {
         },
         stubs: {
           GlFormInput: GlFormInputStub,
-          ...stubs,
         },
       }),
     );
@@ -134,7 +137,7 @@ describe('CloudLicenseApp', () => {
       });
     });
 
-    describe('when the mutation is not successful but looks like it is', () => {
+    describe('when the mutation is not successful', () => {
       const mutationMock = jest
         .fn()
         .mockResolvedValue(activateLicenseMutationResponse.ERRORS_AS_DATA);
@@ -143,10 +146,30 @@ describe('CloudLicenseApp', () => {
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
-      it.todo('deals with failures in a meaningful way');
+      it('emits a unsuccessful event', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toBeUndefined();
+      });
     });
 
-    describe('when the mutation is not successful', () => {
+    describe('when the mutation is not successful with connectivity error', () => {
+      const mutationMock = jest
+        .fn()
+        .mockResolvedValue(activateLicenseMutationResponse.CONNECTIVITY_ERROR);
+      beforeEach(async () => {
+        createComponentWithApollo({ mutationMock });
+        await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
+        await findAgreementCheckbox().vm.$emit('input', true);
+        findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
+      });
+
+      it('emits an failure event with a connectivity error payload', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toEqual([
+          [CONNECTIVITY_ERROR],
+        ]);
+      });
+    });
+
+    describe('when the mutation request fails', () => {
       const mutationMock = jest.fn().mockRejectedValue(activateLicenseMutationResponse.FAILURE);
       beforeEach(() => {
         createComponentWithApollo({ mutationMock });
@@ -156,8 +179,6 @@ describe('CloudLicenseApp', () => {
       it('emits a unsuccessful event', () => {
         expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toBeUndefined();
       });
-
-      it.todo('deals with failures in a meaningful way');
     });
   });
 });

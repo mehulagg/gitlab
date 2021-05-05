@@ -284,6 +284,119 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         end
       end
     end
+
+    describe 'Escalation policies' do
+      before do
+        allow(view).to receive(:current_user).and_return(user)
+        stub_licensed_features(oncall_schedules: true, escalation_policies: true)
+      end
+
+      it 'has a link to the escalation policies page' do
+        render
+
+        expect(rendered).to have_link('Escalation policies', href: project_incident_management_escalation_policies_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the escalation policies page' do
+          render
+
+          expect(rendered).not_to have_link('Escalation policies')
+        end
+      end
+    end
+  end
+
+  describe 'Analytics' do
+    before do
+      allow(view).to receive(:current_user).and_return(user)
+    end
+
+    describe 'Code Review' do
+      it 'has a link to the Code Review analytics page' do
+        render
+
+        expect(rendered).to have_link('Code Review', href: project_analytics_code_reviews_path(project))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the Code Review analytics page' do
+          render
+
+          expect(rendered).not_to have_link('Code Review', href: project_analytics_code_reviews_path(project))
+        end
+      end
+    end
+
+    describe 'Insights' do
+      before do
+        stub_licensed_features(insights: true)
+      end
+
+      it 'has a link to the Insights analytics page' do
+        render
+
+        expect(rendered).to have_link('Insights', href: project_insights_path(project))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the Insights analytics page' do
+          render
+
+          expect(rendered).not_to have_link('Insights', href: project_insights_path(project))
+        end
+      end
+    end
+
+    describe 'Issue' do
+      before do
+        stub_licensed_features(issues_analytics: true)
+      end
+
+      it 'has a link to the issue analytics page' do
+        render
+
+        expect(rendered).to have_link('Issue', href: project_analytics_issues_analytics_path(project))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the issue analytics page' do
+          render
+
+          expect(rendered).not_to have_link('Issue', href: project_analytics_issues_analytics_path(project))
+        end
+      end
+    end
+
+    describe 'Merge Request' do
+      before do
+        stub_licensed_features(project_merge_request_analytics: true)
+      end
+
+      it 'has a link to the merge request analytics page' do
+        render
+
+        expect(rendered).to have_link('Merge Request', href: project_analytics_merge_request_analytics_path(project))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the merge request analytics page' do
+          render
+
+          expect(rendered).not_to have_link('Merge Request', href: project_analytics_merge_request_analytics_path(project))
+        end
+      end
+    end
   end
 
   describe 'Settings > Operations' do

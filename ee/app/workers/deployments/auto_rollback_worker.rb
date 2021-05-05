@@ -4,8 +4,11 @@ module Deployments
   class AutoRollbackWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     idempotent!
     feature_category :continuous_delivery
+    tags :exclude_from_kubernetes
     queue_namespace :deployment
 
     def perform(environment_id)

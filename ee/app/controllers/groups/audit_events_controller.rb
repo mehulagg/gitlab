@@ -25,7 +25,7 @@ class Groups::AuditEventsController < Groups::ApplicationController
 
   def check_audit_events_available!
     render_404 unless can?(current_user, :read_group_audit_events, group) &&
-      group.feature_available?(:audit_events)
+      group.licensed_feature_available?(:audit_events)
   end
 
   def events

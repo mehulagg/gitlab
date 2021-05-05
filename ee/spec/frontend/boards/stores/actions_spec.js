@@ -2,7 +2,7 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { GroupByParamType } from 'ee/boards/constants';
+import { BoardType, GroupByParamType, listsQuery, issuableTypes } from 'ee/boards/constants';
 import actions, { gqlClient } from 'ee/boards/stores/actions';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import * as types from 'ee/boards/stores/mutation_types';
@@ -10,8 +10,7 @@ import mutations from 'ee/boards/stores/mutations';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
 import { mockMoveIssueParams, mockMoveData, mockMoveState } from 'jest/boards/mock_data';
-import { formatBoardLists, formatListIssues } from '~/boards/boards_util';
-import { issuableTypes } from '~/boards/constants';
+import { formatListIssues } from '~/boards/boards_util';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import * as typesCE from '~/boards/stores/mutation_types';
 import * as commonUtils from '~/lib/utils/common_utils';
@@ -137,7 +136,7 @@ describe('performSearch', () => {
     });
   });
 
-  it('should dispatch setFilters, resetEpics, fetchEpicsSwimlanes, fetchIssueLists and resetIssues action when isSwimlanesOn', async () => {
+  it('should dispatch setFilters, resetEpics, fetchEpicsSwimlanes, fetchLists and resetIssues action when isSwimlanesOn', async () => {
     const getters = { isSwimlanesOn: true };
     await testAction({
       action: actions.performSearch,
@@ -147,81 +146,61 @@ describe('performSearch', () => {
         { type: 'resetEpics' },
         { type: 'resetIssues' },
         { type: 'fetchEpicsSwimlanes' },
-        { type: 'fetchIssueLists' },
+        { type: 'fetchLists' },
       ],
     });
   });
 });
 
 describe('fetchLists', () => {
-  it('should dispatch fetchIssueLists action when isEpicBoard is false', async () => {
-    const getters = { isEpicBoard: false };
-    await testAction({
-      action: actions.fetchLists,
-      state: { issuableType: issuableTypes.issue, ...getters },
-      expectedActions: [{ type: 'fetchIssueLists' }],
-    });
-  });
-
-  it('should dispatch fetchEpicLists action when isEpicBoard is true', async () => {
-    const getters = { isEpicBoard: true };
-    await testAction({
-      action: actions.fetchLists,
-      state: { issuableType: issuableTypes.epic, ...getters },
-      expectedActions: [{ type: 'fetchEpicLists' }],
-    });
-  });
-});
-
-describe('fetchEpicLists', () => {
-  const state = {
-    fullPath: 'gitlab-org',
-    boardId: '1',
-    filterParams: {},
-  };
-
   const queryResponse = {
     data: {
       group: {
-        epicBoard: {
+        board: {
+          hideBacklogList: true,
           lists: {
-            nodes: mockLists,
+            nodes: [mockLists[1]],
           },
         },
       },
     },
   };
 
-  const formattedLists = formatBoardLists(queryResponse.data.group.epicBoard.lists);
+  it.each`
+    issuableType          | boardType          | fullBoardId                           | isGroup      | isProject
+    ${issuableTypes.epic} | ${BoardType.group} | ${'gid://gitlab/Boards::EpicBoard/1'} | ${undefined} | ${undefined}
+  `(
+    'calls $issuableType query with correct variables',
+    async ({ issuableType, boardType, fullBoardId, isGroup, isProject }) => {
+      const commit = jest.fn();
+      const dispatch = jest.fn();
 
-  it('should commit mutations RECEIVE_BOARD_LISTS_SUCCESS on success', async () => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+      const state = {
+        fullPath: 'gitlab-org',
+        fullBoardId,
+        filterParams: {},
+        boardType,
+        issuableType,
+      };
 
-    await testAction({
-      action: actions.fetchEpicLists,
-      state,
-      expectedMutations: [
-        {
-          type: types.RECEIVE_BOARD_LISTS_SUCCESS,
-          payload: formattedLists,
+      const variables = {
+        query: listsQuery[issuableType].query,
+        variables: {
+          fullPath: 'gitlab-org',
+          boardId: fullBoardId,
+          filters: {},
+          isGroup,
+          isProject,
         },
-      ],
-    });
-  });
+      };
 
-  it('should commit mutations RECEIVE_BOARD_LISTS_FAILURE on failure', async () => {
-    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+      jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
-    await testAction({
-      action: actions.fetchEpicLists,
-      state,
-      expectedMutations: [
-        {
-          type: types.RECEIVE_BOARD_LISTS_FAILURE,
-        },
-      ],
-    });
-  });
+      await actions.fetchLists({ commit, state, dispatch });
+
+      expect(gqlClient.query).toHaveBeenCalledWith(variables);
+    },
+  );
 });
 
 describe('fetchEpicsSwimlanes', () => {
@@ -595,7 +574,7 @@ describe('toggleEpicSwimlanes', () => {
     );
   });
 
-  it('should dispatch fetchEpicsSwimlanes and fetchIssueLists actions when isShowingEpicsSwimlanes is true', () => {
+  it('should dispatch fetchEpicsSwimlanes and fetchLists actions when isShowingEpicsSwimlanes is true', () => {
     global.jsdom.reconfigure({
       url: `${TEST_HOST}/groups/gitlab-org/-/boards/1`,
     });
@@ -613,7 +592,7 @@ describe('toggleEpicSwimlanes', () => {
       null,
       state,
       [{ type: types.TOGGLE_EPICS_SWIMLANES }],
-      [{ type: 'fetchEpicsSwimlanes' }, { type: 'fetchIssueLists' }],
+      [{ type: 'fetchEpicsSwimlanes' }, { type: 'fetchLists' }],
       () => {
         expect(commonUtils.historyPushState).toHaveBeenCalledWith(
           mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href),

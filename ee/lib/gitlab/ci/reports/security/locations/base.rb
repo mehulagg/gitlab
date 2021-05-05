@@ -31,7 +31,7 @@ module Gitlab
             private
 
             def fingerprint_data
-              raise NotImplemented
+              raise NotImplementedError
             end
           end
         end

@@ -18,7 +18,7 @@
       %span
         = s_('GroupSAML|SAML Group Links')
 
-- if @group.feature_available?(:group_webhooks) || show_promotions?
+- if @group.licensed_feature_available?(:group_webhooks) || show_promotions?
   = nav_link(path: 'hooks#index') do
     = link_to group_hooks_path(@group), title: 'Webhooks' do
       %span

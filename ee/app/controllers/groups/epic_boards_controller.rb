@@ -5,7 +5,6 @@ class Groups::EpicBoardsController < Groups::ApplicationController
   include Gitlab::Utils::StrongMemoize
   extend ::Gitlab::Utils::Override
 
-  before_action :authorize_read_board!, only: [:index]
   before_action :assign_endpoint_vars
   before_action do
     push_frontend_feature_flag(:epic_boards, group, default_enabled: :yaml)

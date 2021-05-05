@@ -109,7 +109,7 @@ RSpec.describe GroupsController do
     end
   end
 
-  describe '"group overview content" preference behaviour' do
+  describe '"group information content" preference behaviour' do
     describe 'GET #show' do
       subject { get :show, params: { id: group.to_param }, format: format }
 

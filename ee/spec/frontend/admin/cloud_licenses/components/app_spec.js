@@ -1,11 +1,11 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import CloudLicenseApp from 'ee/pages/admin/cloud_licenses/components/app.vue';
-import SubscriptionActivationForm from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
+import SubscriptionManagementApp from 'ee/pages/admin/cloud_licenses/components/app.vue';
+import SubscriptionActivationCard from 'ee/pages/admin/cloud_licenses/components/subscription_activation_card.vue';
 import SubscriptionBreakdown from 'ee/pages/admin/cloud_licenses/components/subscription_breakdown.vue';
 import {
+  noActiveSubscription,
   subscriptionActivationNotificationText,
-  subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
   subscriptionQueries,
@@ -17,10 +17,10 @@ import { license, subscriptionHistory } from '../mock_data';
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
-describe('CloudLicenseApp', () => {
+describe('SubscriptionManagementApp', () => {
   let wrapper;
 
-  const findActivateSubscriptionForm = () => wrapper.findComponent(SubscriptionActivationForm);
+  const findActivateSubscriptionCard = () => wrapper.findComponent(SubscriptionActivationCard);
   const findSubscriptionBreakdown = () => wrapper.findComponent(SubscriptionBreakdown);
   const findSubscriptionActivationTitle = () =>
     wrapper.findByTestId('subscription-activation-title');
@@ -40,7 +40,7 @@ describe('CloudLicenseApp', () => {
 
   const createComponent = (props = {}, resolverMock) => {
     wrapper = extendedWrapper(
-      shallowMount(CloudLicenseApp, {
+      shallowMount(SubscriptionManagementApp, {
         localVue,
         apolloProvider: createMockApolloProvider(resolverMock),
         propsData: {
@@ -77,7 +77,7 @@ describe('CloudLicenseApp', () => {
         createComponent({}, [currentSubscriptionResolver, subscriptionHistoryResolver]);
       });
       it('shows a title saying there is no active subscription', () => {
-        expect(findSubscriptionActivationTitle().text()).toBe(subscriptionActivationTitle);
+        expect(findSubscriptionActivationTitle().text()).toBe(noActiveSubscription);
       });
 
       it('queries for the current history', () => {
@@ -85,7 +85,7 @@ describe('CloudLicenseApp', () => {
       });
 
       it('shows the subscription activation form', () => {
-        expect(findActivateSubscriptionForm().exists()).toBe(true);
+        expect(findActivateSubscriptionCard().exists()).toBe(true);
       });
 
       it('does not show the activation success notification', () => {

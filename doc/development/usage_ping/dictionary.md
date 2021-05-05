@@ -560,6 +560,90 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `counts.ci_runners_group_type_active`
+
+Total active instance Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.ci_runners_group_type_active_online`
+
+Total active and online group Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051922_ci_runners_group_type_active_online.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.ci_runners_instance_type_active`
+
+Total active group Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.ci_runners_instance_type_active_online`
+
+Total active and online instance Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051651_ci_runners_instance_type_active_online.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.ci_runners_online`
+
+Total online Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.ci_runners_project_type_active`
+
+Total active project Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050834_ci_runners_project_type_active.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.ci_runners_project_type_active_online`
+
+Total active and online project Runners
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
+
+Group: `group::continuous integration`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `counts.ci_triggers`
 
 Total configured Triggers in project
@@ -1015,6 +1099,54 @@ Group: `group::progressive delivery`
 Status: `data_available`
 
 Tiers: `free`
+
+### `counts.g_project_management_users_checking_epic_task_monthly`
+
+Counts of MAU checking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421080207_g_project_management_users_checking_epic_task_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `counts.g_project_management_users_checking_epic_task_weekly`
+
+Counts of WAU checking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210421075943_g_project_management_users_checking_epic_task_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `counts.g_project_management_users_unchecking_epic_task_monthly`
+
+Counts of MAU unchecking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421102516_g_project_management_users_unchecking_epic_task_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `counts.g_project_management_users_unchecking_epic_task_weekly`
+
+Counts of WAU unchecking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210421102812_g_project_management_users_unchecking_epic_task_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `counts.geo_event_log_max_id`
 
@@ -4562,11 +4694,11 @@ Projects with repository mirroring enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::release`
+Group: `group::continuous integration`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `counts.projects_mock_ci_active`
 
@@ -6346,7 +6478,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `database.pg_system_id`
 
-Missing description
+TBD
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183248_pg_system_id.yml)
 
@@ -7680,7 +7812,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Number of projects using 5 min production app CI template in last 7 days.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184515_p_ci_templates_5_min_production_app_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184515_p_ci_templates_5_min_production_app_weekly.yml)
 
 Group: `group::5-min-app`
 
@@ -10321,6 +10453,30 @@ Tiers: `premium`, `ultimate`
 Counts of WAU promoting issues to epics
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210331192332_g_project_management_issue_promoted_to_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_awarding_epic_emoji_monthly`
+
+Counts of MAU awarding emoji on epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210503011217_g_project_management_users_awarding_epic_emoji_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_awarding_epic_emoji_weekly`
+
+Counts of WAU awarding emoji on epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210503011355_g_project_management_users_awarding_epic_emoji_weekly.yml)
 
 Group: `group::product planning`
 
@@ -15286,6 +15442,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage.manage.custom_compliance_frameworks`
+
+Total count of all custom compliance framework labels
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210430081610_custom_compliance_frameworks.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `usage_activity_by_stage.manage.events`
 
 Missing description
@@ -15926,6 +16094,8 @@ Tiers: `free`
 
 Histogram (buckets 1 to 100) of projects with at least 1 enabled integration.
 
+[Object JSON schema](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/objects_schemas/projects_with_enabled_alert_integrations_histogram.json)
+
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210309165717_projects_with_enabled_alert_integrations_histogram.yml)
 
 Group: `group::monitor`
@@ -16164,15 +16334,15 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.release.projects_mirrored_with_pipelines_enabled`
 
-Projects with repository mirroring enabled
+Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::release`
+Group: `group::continuous integration`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.release.releases`
 
@@ -18084,15 +18254,15 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.release.projects_mirrored_with_pipelines_enabled`
 
-Projects with repository mirroring enabled
+Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::release`
+Group: `group::continuous integration`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.release.releases`
 

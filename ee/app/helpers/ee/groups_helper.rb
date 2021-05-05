@@ -72,7 +72,7 @@ module EE
 
     override :remove_group_message
     def remove_group_message(group)
-      return super unless group.feature_available?(:adjourned_deletion_for_projects_and_groups)
+      return super unless group.licensed_feature_available?(:adjourned_deletion_for_projects_and_groups)
 
       date = permanent_deletion_date(Time.now.utc)
 
@@ -91,7 +91,7 @@ module EE
     def show_discover_group_security?(group)
       !!current_user &&
         ::Gitlab.com? &&
-        !@group.feature_available?(:security_dashboard) &&
+        !@group.licensed_feature_available?(:security_dashboard) &&
         can?(current_user, :admin_group, @group)
     end
 
@@ -124,7 +124,7 @@ module EE
     end
 
     def show_delayed_project_removal_setting?(group)
-      group.feature_available?(:adjourned_deletion_for_projects_and_groups)
+      group.licensed_feature_available?(:adjourned_deletion_for_projects_and_groups)
     end
 
     private
@@ -146,7 +146,7 @@ module EE
         links << :epics
       end
 
-      if @group.feature_available?(:issues_analytics)
+      if @group.licensed_feature_available?(:issues_analytics)
         links << :analytics
       end
 
@@ -154,15 +154,15 @@ module EE
         links << :group_insights
       end
 
-      if @group.feature_available?(:productivity_analytics) && can?(current_user, :view_productivity_analytics, @group)
+      if @group.licensed_feature_available?(:productivity_analytics) && can?(current_user, :view_productivity_analytics, @group)
         links << :productivity_analytics
       end
 
-      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
+      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.licensed_feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
         links << :iterations
       end
 
-      if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
+      if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.licensed_feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
         links << :group_ci_cd_analytics
       end
 

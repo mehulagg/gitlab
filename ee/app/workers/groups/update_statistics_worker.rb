@@ -5,7 +5,10 @@ module Groups
   class UpdateStatisticsWorker
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     feature_category :source_code_management
+    tags :exclude_from_kubernetes
     idempotent!
     loggable_arguments 0, 1
 

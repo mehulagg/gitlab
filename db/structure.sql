@@ -9511,6 +9511,8 @@ CREATE TABLE application_settings (
     throttle_authenticated_packages_api_enabled boolean DEFAULT false NOT NULL,
     deactivate_dormant_users boolean DEFAULT false NOT NULL,
     whats_new_variant smallint DEFAULT 0,
+    encrypted_spam_check_api_key bytea,
+    encrypted_spam_check_api_key_iv bytea,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_ext_pipeline_validation_service_url_text_limit CHECK ((char_length(external_pipeline_validation_service_url) <= 255)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
@@ -12385,13 +12387,34 @@ CREATE SEQUENCE elastic_index_settings_id_seq
 
 ALTER SEQUENCE elastic_index_settings_id_seq OWNED BY elastic_index_settings.id;
 
+CREATE TABLE elastic_reindexing_slices (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    elastic_reindexing_subtask_id bigint NOT NULL,
+    elastic_slice smallint DEFAULT 0 NOT NULL,
+    elastic_max_slice smallint DEFAULT 0 NOT NULL,
+    retry_attempt smallint DEFAULT 0 NOT NULL,
+    elastic_task text,
+    CONSTRAINT check_ca30e1396e CHECK ((char_length(elastic_task) <= 255))
+);
+
+CREATE SEQUENCE elastic_reindexing_slices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE elastic_reindexing_slices_id_seq OWNED BY elastic_reindexing_slices.id;
+
 CREATE TABLE elastic_reindexing_subtasks (
     id bigint NOT NULL,
     elastic_reindexing_task_id bigint NOT NULL,
     alias_name text NOT NULL,
     index_name_from text NOT NULL,
     index_name_to text NOT NULL,
-    elastic_task text NOT NULL,
+    elastic_task text,
     documents_count_target integer,
     documents_count integer,
     created_at timestamp with time zone NOT NULL,
@@ -15616,6 +15639,15 @@ CREATE SEQUENCE packages_events_id_seq
 
 ALTER SEQUENCE packages_events_id_seq OWNED BY packages_events.id;
 
+CREATE TABLE packages_helm_file_metadata (
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    package_file_id bigint NOT NULL,
+    channel text NOT NULL,
+    metadata jsonb,
+    CONSTRAINT check_c34067922d CHECK ((char_length(channel) <= 63))
+);
+
 CREATE TABLE packages_maven_metadata (
     id bigint NOT NULL,
     package_id bigint NOT NULL,
@@ -15992,7 +16024,8 @@ CREATE TABLE plan_limits (
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
     daily_invites integer DEFAULT 0 NOT NULL,
     rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL
+    terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL,
+    helm_max_file_size bigint DEFAULT 5242880 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -18249,6 +18282,11 @@ CREATE SEQUENCE user_canonical_emails_id_seq
 
 ALTER SEQUENCE user_canonical_emails_id_seq OWNED BY user_canonical_emails.id;
 
+CREATE TABLE user_credit_card_validations (
+    user_id bigint NOT NULL,
+    credit_card_validated_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE user_custom_attributes (
     id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
@@ -19505,6 +19543,8 @@ ALTER TABLE ONLY draft_notes ALTER COLUMN id SET DEFAULT nextval('draft_notes_id
 
 ALTER TABLE ONLY elastic_index_settings ALTER COLUMN id SET DEFAULT nextval('elastic_index_settings_id_seq'::regclass);
 
+ALTER TABLE ONLY elastic_reindexing_slices ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_slices_id_seq'::regclass);
+
 ALTER TABLE ONLY elastic_reindexing_subtasks ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_subtasks_id_seq'::regclass);
 
 ALTER TABLE ONLY elastic_reindexing_tasks ALTER COLUMN id SET DEFAULT nextval('elastic_reindexing_tasks_id_seq'::regclass);
@@ -20756,6 +20796,9 @@ ALTER TABLE ONLY draft_notes
 ALTER TABLE ONLY elastic_index_settings
     ADD CONSTRAINT elastic_index_settings_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY elastic_reindexing_slices
+    ADD CONSTRAINT elastic_reindexing_slices_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY elastic_reindexing_subtasks
     ADD CONSTRAINT elastic_reindexing_subtasks_pkey PRIMARY KEY (id);
 
@@ -21245,6 +21288,9 @@ ALTER TABLE ONLY packages_dependency_links
 ALTER TABLE ONLY packages_events
     ADD CONSTRAINT packages_events_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY packages_helm_file_metadata
+    ADD CONSTRAINT packages_helm_file_metadata_pkey PRIMARY KEY (package_file_id);
+
 ALTER TABLE ONLY packages_maven_metadata
     ADD CONSTRAINT packages_maven_metadata_pkey PRIMARY KEY (id);
 
@@ -21614,6 +21660,9 @@ ALTER TABLE ONLY user_callouts
 ALTER TABLE ONLY user_canonical_emails
     ADD CONSTRAINT user_canonical_emails_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT user_credit_card_validations_pkey PRIMARY KEY (user_id);
+
 ALTER TABLE ONLY user_custom_attributes
     ADD CONSTRAINT user_custom_attributes_pkey PRIMARY KEY (id);
 
@@ -21930,6 +21979,8 @@ CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON d
 
 CREATE INDEX idx_eaprpb_external_approval_rule_id ON external_approval_rules_protected_branches USING btree (external_approval_rule_id);
 
+CREATE INDEX idx_elastic_reindexing_slices_on_elastic_reindexing_subtask_id ON elastic_reindexing_slices USING btree (elastic_reindexing_subtask_id);
+
 CREATE UNIQUE INDEX idx_environment_merge_requests_unique_index ON deployment_merge_requests USING btree (environment_id, merge_request_id);
 
 CREATE INDEX idx_geo_con_rep_updated_events_on_container_repository_id ON geo_container_repository_updated_events USING btree (container_repository_id);
@@ -21939,6 +21990,8 @@ CREATE INDEX idx_issues_on_health_status_not_null ON issues USING btree (health_
 CREATE INDEX idx_issues_on_project_id_and_created_at_and_id_and_state_id ON issues USING btree (project_id, created_at, id, state_id);
 
 CREATE INDEX idx_issues_on_project_id_and_due_date_and_id_and_state_id ON issues USING btree (project_id, due_date, id, state_id) WHERE (due_date IS NOT NULL);
+
+CREATE INDEX idx_issues_on_project_id_and_rel_asc_and_id ON issues USING btree (project_id, relative_position, id);
 
 CREATE INDEX idx_issues_on_project_id_and_rel_position_and_state_id_and_id ON issues USING btree (project_id, relative_position, state_id, id DESC);
 
@@ -22335,6 +22388,10 @@ CREATE INDEX index_ci_builds_on_user_id ON ci_builds USING btree (user_id);
 CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON ci_builds USING btree (user_id, created_at) WHERE ((type)::text = 'Ci::Build'::text);
 
 CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON ci_builds USING btree (project_id, status) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
+
+CREATE INDEX index_ci_builds_runner_id_pending_covering ON ci_builds USING btree (runner_id, id) INCLUDE (project_id) WHERE (((status)::text = 'pending'::text) AND ((type)::text = 'Ci::Build'::text));
+
+CREATE INDEX index_ci_builds_runner_id_running ON ci_builds USING btree (runner_id) WHERE (((status)::text = 'running'::text) AND ((type)::text = 'Ci::Build'::text));
 
 CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON ci_builds_runner_session USING btree (build_id);
 
@@ -23577,6 +23634,8 @@ CREATE UNIQUE INDEX index_packages_dependencies_on_name_and_version_pattern ON p
 CREATE INDEX index_packages_dependency_links_on_dependency_id ON packages_dependency_links USING btree (dependency_id);
 
 CREATE INDEX index_packages_events_on_package_id ON packages_events USING btree (package_id);
+
+CREATE INDEX index_packages_helm_file_metadata_on_channel ON packages_helm_file_metadata USING btree (channel);
 
 CREATE INDEX index_packages_maven_metadata_on_package_id_and_path ON packages_maven_metadata USING btree (package_id, path);
 
@@ -25038,9 +25097,6 @@ ALTER TABLE ONLY approvals
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_319256d87a FOREIGN KEY (file_template_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY merge_requests
-    ADD CONSTRAINT fk_3308fe130c FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY ci_group_variables
     ADD CONSTRAINT fk_33ae4d58d8 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -25893,6 +25949,9 @@ ALTER TABLE ONLY lfs_file_locks
 ALTER TABLE ONLY project_alerting_settings
     ADD CONSTRAINT fk_rails_27a84b407d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT fk_rails_27ebc03cbf FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY dast_site_validations
     ADD CONSTRAINT fk_rails_285c617324 FOREIGN KEY (dast_site_token_id) REFERENCES dast_site_tokens(id) ON DELETE CASCADE;
 
@@ -26589,6 +26648,9 @@ ALTER TABLE ONLY resource_milestone_events
 ALTER TABLE ONLY namespace_root_storage_statistics
     ADD CONSTRAINT fk_rails_a0702c430b FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY elastic_reindexing_slices
+    ADD CONSTRAINT fk_rails_a17d86aeb9 FOREIGN KEY (elastic_reindexing_subtask_id) REFERENCES elastic_reindexing_subtasks(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY project_aliases
     ADD CONSTRAINT fk_rails_a1804f74a7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -26612,6 +26674,9 @@ ALTER TABLE ONLY fork_network_members
 
 ALTER TABLE ONLY operations_feature_flag_scopes
     ADD CONSTRAINT fk_rails_a50a04d0a4 FOREIGN KEY (feature_flag_id) REFERENCES operations_feature_flags(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_helm_file_metadata
+    ADD CONSTRAINT fk_rails_a559865345 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY cluster_projects
     ADD CONSTRAINT fk_rails_a5a958bca1 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
@@ -26869,7 +26934,7 @@ ALTER TABLE ONLY pool_repositories
     ADD CONSTRAINT fk_rails_d2711daad4 FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY web_hooks
-    ADD CONSTRAINT fk_rails_d35697648e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT fk_rails_d35697648e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_group_links
     ADD CONSTRAINT fk_rails_d3a0488427 FOREIGN KEY (shared_group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -27125,6 +27190,9 @@ ALTER TABLE ONLY ci_builds_metadata
 
 ALTER TABLE ONLY services
     ADD CONSTRAINT fk_services_inherit_from_id FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY merge_requests
+    ADD CONSTRAINT fk_source_project FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY timelogs
     ADD CONSTRAINT fk_timelogs_issues_issue_id FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;

@@ -63,6 +63,7 @@ module EE
         field :dast_profiles,
               ::Types::Dast::ProfileType.connection_type,
               null: true,
+              resolver: ::Resolvers::AppSec::Dast::ProfileResolver,
               description: 'DAST Profiles associated with the project.'
 
         field :dast_site_profile,
@@ -152,10 +153,6 @@ module EE
           scan_modes: ::AppSec::Fuzzing::Api::CiConfiguration::SCAN_MODES,
           scan_profiles: configuration.scan_profiles
         }
-      end
-
-      def dast_profiles
-        Dast::ProfilesFinder.new(project_id: object.id).execute
       end
 
       def dast_scanner_profiles

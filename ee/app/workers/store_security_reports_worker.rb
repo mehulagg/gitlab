@@ -4,6 +4,8 @@
 #
 class StoreSecurityReportsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include SecurityScansQueue
 
   worker_resource_boundary :cpu

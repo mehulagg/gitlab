@@ -5,6 +5,8 @@ module Vulnerabilities
     class AdjustmentWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
 
+      sidekiq_options retry: 3
+
       feature_category :vulnerability_management
 
       def perform(project_ids)

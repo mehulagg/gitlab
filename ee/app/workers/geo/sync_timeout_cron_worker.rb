@@ -12,6 +12,7 @@ module Geo
     idempotent!
     sidekiq_options retry: false, dead: false
     feature_category :geo_replication
+    tags :exclude_from_kubernetes
 
     def perform
       Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|

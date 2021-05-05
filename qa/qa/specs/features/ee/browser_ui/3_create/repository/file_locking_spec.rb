@@ -9,6 +9,7 @@ module QA
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'file_locking'
+          project.initialize_with_readme = true
         end
       end
 
@@ -19,6 +20,7 @@ module QA
           push.project = project
           push.file_name = 'file'
           push.file_content = SecureRandom.hex(100000)
+          push.new_branch = false
         end
 
         add_to_project user: user_one

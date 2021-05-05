@@ -74,6 +74,16 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
     end
   end
 
+  context 'for epic emoji award event' do
+    def track_action(params)
+      described_class.track_epic_emoji_awarded_action(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_EMOJI_AWARDED }
+    end
+  end
+
   context 'for epic closing event' do
     def track_action(params)
       described_class.track_epic_closed_action(**params)
@@ -265,6 +275,30 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
 
     it_behaves_like 'a daily tracked issuable event' do
       let(:action) { described_class::ISSUE_EPIC_DESTROYED }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
+
+  context 'for margin epic task as checked' do
+    def track_action(params)
+      described_class.track_epic_task_checked(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_TASK_CHECKED }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
+
+  context 'for margin epic task as unchecked' do
+    def track_action(params)
+      described_class.track_epic_task_unchecked(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_TASK_UNCHECKED }
     end
 
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity

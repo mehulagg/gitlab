@@ -21,11 +21,11 @@ exports[`TimeMetricsCard Time summary renders the Time summary metric 1`] = `
 "<div>
   <div class=\\"gl-pr-9\\">
     <gl-single-stat-stub title=\\"Lead Time\\" value=\\"4.5\\" unit=\\"days\\" variant=\\"muted\\" shouldanimate=\\"true\\" animationdecimalplaces=\\"0\\" id=\\"lead-time\\" tabindex=\\"0\\"></gl-single-stat-stub>
-    <gl-popover-stub cssclasses=\\"\\" target=\\"lead-time\\" placement=\\"bottom\\"> <span>Median time from issue created to issue closed.</span></gl-popover-stub>
+    <gl-popover-stub cssclasses=\\"\\" target=\\"lead-time\\" placement=\\"bottom\\"> <span>Median time from issue first merge request created to issue closed.</span></gl-popover-stub>
   </div>
   <div class=\\"gl-pr-9\\">
     <gl-single-stat-stub title=\\"Cycle Time\\" value=\\"3.0\\" unit=\\"days\\" variant=\\"muted\\" shouldanimate=\\"true\\" animationdecimalplaces=\\"0\\" id=\\"cycle-time\\" tabindex=\\"0\\"></gl-single-stat-stub>
-    <gl-popover-stub cssclasses=\\"\\" target=\\"cycle-time\\" placement=\\"bottom\\"> <span>Median time from first commit to issue closed.</span></gl-popover-stub>
+    <gl-popover-stub cssclasses=\\"\\" target=\\"cycle-time\\" placement=\\"bottom\\"> <span>Median time from issue created to issue closed.</span></gl-popover-stub>
   </div>
 </div>"
 `;

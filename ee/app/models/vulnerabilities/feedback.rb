@@ -58,11 +58,11 @@ module Vulnerabilities
     def self.validate_enums(feedback_params)
       unless feedback_types.include?(feedback_params[:feedback_type])
 
-        raise ArgumentError.new("'#{feedback_params[:feedback_type]}' is not a valid feedback_type")
+        raise ArgumentError, "'#{feedback_params[:feedback_type]}' is not a valid feedback_type"
       end
 
       unless categories.include?(feedback_params[:category])
-        raise ArgumentError.new("'#{feedback_params[:category]}' is not a valid category")
+        raise ArgumentError, "'#{feedback_params[:category]}' is not a valid category"
       end
     end
 

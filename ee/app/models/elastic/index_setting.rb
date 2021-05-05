@@ -26,6 +26,19 @@ module Elastic
       def number_of_shards
         default.number_of_shards
       end
+
+      def every_alias
+        aliases.each do |alias_name|
+          yield self[alias_name]
+        end
+      end
+
+      private
+
+      def aliases
+        helper = Gitlab::Elastic::Helper.default
+        [helper.target_name] + helper.standalone_indices_proxies.map(&:index_name)
+      end
     end
   end
 end

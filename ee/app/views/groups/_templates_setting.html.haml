@@ -1,4 +1,4 @@
-- return unless @group.feature_available?(:custom_file_templates_for_namespace)
+- return unless @group.licensed_feature_available?(:custom_file_templates_for_namespace)
 
 %section.settings.no-animate#js-templates{ class: ('expanded' if expanded), data: { qa_selector: 'file_template_repositories' } }
   .settings-header

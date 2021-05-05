@@ -403,7 +403,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 1.1.1', require: false
+  gem 'gitlab-dangerfiles', '~> 2.0.0', require: false
 end
 
 group :development, :test, :coverage do
@@ -477,12 +477,15 @@ group :ed25519 do
   gem 'bcrypt_pbkdf', '~> 1.0'
 end
 
+# Spamcheck GRPC protocol definitions
+gem 'spamcheck', '~> 0.0.5'
+
 # Gitaly GRPC protocol definitions
 gem 'gitaly', '~> 13.11.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
-gem 'google-protobuf', '~> 3.15.8'
+gem 'google-protobuf', '~> 3.14.0'
 
 gem 'toml-rb', '~> 1.0.0'
 

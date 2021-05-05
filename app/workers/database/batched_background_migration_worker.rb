@@ -3,9 +3,12 @@
 module Database
   class BatchedBackgroundMigrationWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
     feature_category :database
+    tags :exclude_from_kubernetes
     idempotent!
 
     LEASE_TIMEOUT_MULTIPLIER = 3

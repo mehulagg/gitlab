@@ -13,6 +13,7 @@ module Gitlab
       EPIC_NOTE_CREATED = 'g_project_management_users_creating_epic_notes'
       EPIC_NOTE_UPDATED = 'g_project_management_users_updating_epic_notes'
       EPIC_NOTE_DESTROYED = 'g_project_management_users_destroying_epic_notes'
+      EPIC_EMOJI_AWARDED = 'g_project_management_users_awarding_epic_emoji'
       EPIC_START_DATE_SET_AS_FIXED = 'g_project_management_users_setting_epic_start_date_as_fixed'
       EPIC_START_DATE_SET_AS_INHERITED = 'g_project_management_users_setting_epic_start_date_as_inherited'
       EPIC_DUE_DATE_SET_AS_FIXED = 'g_project_management_users_setting_epic_due_date_as_fixed'
@@ -29,6 +30,8 @@ module Gitlab
       EPIC_VISIBLE = 'g_project_management_users_setting_epic_visible'
       EPIC_LABELS = 'g_project_management_epic_users_changing_labels'
       EPIC_DESTROYED = 'g_project_management_epic_destroyed'
+      EPIC_TASK_CHECKED = 'project_management_users_checking_epic_task'
+      EPIC_TASK_UNCHECKED = 'project_management_users_unchecking_epic_task'
 
       class << self
         def track_epic_created_action(author:)
@@ -53,6 +56,10 @@ module Gitlab
 
         def track_epic_note_destroyed_action(author:)
           track_unique_action(EPIC_NOTE_DESTROYED, author)
+        end
+
+        def track_epic_emoji_awarded_action(author:)
+          track_unique_action(EPIC_EMOJI_AWARDED, author)
         end
 
         def track_epic_start_date_set_as_fixed_action(author:)
@@ -117,6 +124,14 @@ module Gitlab
 
         def track_epic_destroyed(author:)
           track_unique_action(EPIC_DESTROYED, author)
+        end
+
+        def track_epic_task_checked(author:)
+          track_unique_action(EPIC_TASK_CHECKED, author)
+        end
+
+        def track_epic_task_unchecked(author:)
+          track_unique_action(EPIC_TASK_UNCHECKED, author)
         end
 
         private

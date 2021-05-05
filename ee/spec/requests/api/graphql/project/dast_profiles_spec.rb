@@ -12,15 +12,17 @@ RSpec.describe 'Query.project(fullPath).dastProfiles' do
   let_it_be(:dast_profile3) { create(:dast_profile, project: project) }
   let_it_be(:dast_profile4) { create(:dast_profile, project: project) }
 
-  subject do
+  let(:query) do
     fields = all_graphql_fields_for('DastProfile')
 
-    query = graphql_query_for(
+    graphql_query_for(
       :project,
       { full_path: project.full_path },
       query_nodes(:dast_profiles, fields)
     )
+  end
 
+  subject do
     post_graphql(
       query,
       current_user: current_user,
@@ -76,6 +78,22 @@ RSpec.describe 'Query.project(fullPath).dastProfiles' do
       subject
 
       expect(graphql_data_at(:project, :dast_profiles, :nodes, 0, 'branch')).to eq('name' => 'master', 'exists' => true)
+    end
+
+    it 'avoids N+1 queries' do
+      control = ActiveRecord::QueryRecorder.new do
+        post_graphql(
+          query,
+          current_user: current_user,
+          variables: {
+            fullPath: project.full_path
+          }
+        )
+      end
+
+      create_list(:dast_profile, 2, project: project)
+
+      expect { subject }.not_to exceed_query_limit(control)
     end
   end
 

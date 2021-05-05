@@ -8,7 +8,7 @@ RSpec.describe Dast::SiteProfileSecretVariables::DestroyService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
-  let_it_be(:dast_site_profile_secret_variable, reload: true) { create(:dast_site_profile_secret_variable, dast_site_profile: dast_site_profile) }
+  let_it_be(:dast_site_profile_secret_variable, refind: true) { create(:dast_site_profile_secret_variable, dast_site_profile: dast_site_profile) }
 
   subject do
     described_class.new(

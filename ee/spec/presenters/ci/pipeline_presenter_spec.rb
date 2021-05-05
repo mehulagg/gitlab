@@ -14,7 +14,7 @@ RSpec.describe Ci::PipelinePresenter do
         pipeline.failure_reason = :activity_limit_exceeded
 
         expect(presenter.failure_reason)
-          .to eq 'Pipeline activity limit exceeded!'
+          .to eq 'The pipeline activity limit was exceeded.'
       end
     end
 

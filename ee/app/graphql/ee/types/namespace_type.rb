@@ -57,7 +57,7 @@ module EE
         field :compliance_frameworks,
               ::Types::ComplianceManagement::ComplianceFrameworkType.connection_type,
               null: true,
-              description: 'Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.',
+              description: 'Compliance frameworks available to projects in this namespace.',
               resolver: ::Resolvers::ComplianceManagement::FrameworkResolver
 
         def additional_purchased_storage_size

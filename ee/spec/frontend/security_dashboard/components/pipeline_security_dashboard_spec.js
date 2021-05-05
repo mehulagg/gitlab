@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline_security_dashboard.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
 import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
+import VulnerabilityReport from 'ee/security_dashboard/components/vulnerability_report.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -25,6 +26,7 @@ describe('Pipeline Security Dashboard component', () => {
   let wrapper;
 
   const findSecurityDashboard = () => wrapper.findComponent(SecurityDashboard);
+  const findVulnerabilityReport = () => wrapper.findComponent(VulnerabilityReport);
 
   const factory = (options) => {
     store = new Vuex.Store({
@@ -95,27 +97,23 @@ describe('Pipeline Security Dashboard component', () => {
   });
 
   describe(':pipeline_security_dashboard_graphql feature flag', () => {
-    it('does not show the security layout when the feature flag is on', () => {
+    const factoryWithFeatureFlag = (value) =>
       factory({
         provide: {
           glFeatures: {
-            pipelineSecurityDashboardGraphql: true,
+            pipelineSecurityDashboardGraphql: value,
           },
         },
       });
 
+    it('does not show the security layout when the feature flag is on but the vulnerability report', () => {
+      factoryWithFeatureFlag(true);
       expect(findSecurityDashboard().exists()).toBe(false);
+      expect(findVulnerabilityReport().exists()).toBe(true);
     });
 
     it('shows the security layout when the feature flag is off', () => {
-      factory({
-        provide: {
-          glFeatures: {
-            pipelineSecurityDashboardGraphql: false,
-          },
-        },
-      });
-
+      factoryWithFeatureFlag(false);
       expect(findSecurityDashboard().exists()).toBe(true);
     });
   });

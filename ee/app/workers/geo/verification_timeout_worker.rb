@@ -9,6 +9,7 @@ module Geo
 
     idempotent!
     sidekiq_options retry: false, dead: false
+    tags :exclude_from_kubernetes
     loggable_arguments 0
 
     def perform(replicable_name)

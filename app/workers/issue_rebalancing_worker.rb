@@ -3,9 +3,12 @@
 class IssueRebalancingWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   idempotent!
   urgency :low
   feature_category :issue_tracking
+  tags :exclude_from_kubernetes
 
   def perform(ignore = nil, project_id = nil)
     return if project_id.nil?

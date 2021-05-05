@@ -5,16 +5,6 @@ module EE
     module NavbarHelper
       extend ::Gitlab::Utils::Override
 
-      override :project_analytics_navbar_links
-      def project_analytics_navbar_links(project, current_user)
-        super + [
-          insights_navbar_link(project, current_user),
-          code_review_analytics_navbar_link(project, current_user),
-          project_issues_analytics_navbar_link(project, current_user),
-          project_merge_request_analytics_navbar_link(project, current_user)
-        ].compact
-      end
-
       override :group_analytics_navbar_links
       def group_analytics_navbar_links(group, current_user)
         super + [
@@ -31,27 +21,6 @@ module EE
       end
 
       private
-
-      def project_issues_analytics_navbar_link(project, current_user)
-        return unless ::Feature.enabled?(:project_level_issues_analytics, project, default_enabled: true)
-        return unless project_nav_tab?(:issues_analytics)
-
-        navbar_sub_item(
-          title: _('Issue'),
-          path: 'issues_analytics#show',
-          link: project_analytics_issues_analytics_path(project)
-        )
-      end
-
-      def project_merge_request_analytics_navbar_link(project, current_user)
-        return unless project_nav_tab?(:merge_request_analytics)
-
-        navbar_sub_item(
-          title: _('Merge Request'),
-          path: 'projects/analytics/merge_request_analytics#show',
-          link: project_analytics_merge_request_analytics_path(project)
-        )
-      end
 
       # Currently an empty page, so don't show it on the navbar for now
       def group_merge_request_analytics_navbar_link(group, current_user)
@@ -128,7 +97,7 @@ module EE
       end
 
       def group_ci_cd_analytics_navbar_link(group, current_user)
-        return unless group.feature_available?(:group_ci_cd_analytics)
+        return unless group.licensed_feature_available?(:group_ci_cd_analytics)
         return unless group_sidebar_link?(:group_ci_cd_analytics)
 
         navbar_sub_item(
@@ -139,34 +108,13 @@ module EE
       end
 
       def group_repository_analytics_navbar_link(group, current_user)
-        return unless group.feature_available?(:group_coverage_reports)
+        return unless group.licensed_feature_available?(:group_coverage_reports)
         return unless group_sidebar_link?(:repository_analytics)
 
         navbar_sub_item(
           title: _('Repositories'),
           path: 'groups/analytics/repository_analytics#show',
           link: group_analytics_repository_analytics_path(group)
-        )
-      end
-
-      def insights_navbar_link(project, current_user)
-        return unless project_nav_tab?(:project_insights)
-
-        navbar_sub_item(
-          title: _('Insights'),
-          path: 'insights#show',
-          link: project_insights_path(project),
-          link_to_options: { class: 'shortcuts-project-insights', data: { qa_selector: 'project_insights_link' } }
-        )
-      end
-
-      def code_review_analytics_navbar_link(project, current_user)
-        return unless project_nav_tab?(:code_review)
-
-        navbar_sub_item(
-          title: _('Code Review'),
-          path: 'projects/analytics/code_reviews#index',
-          link: project_analytics_code_reviews_path(project)
         )
       end
     end
