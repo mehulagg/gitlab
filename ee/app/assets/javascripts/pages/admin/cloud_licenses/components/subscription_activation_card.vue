@@ -44,7 +44,7 @@ export default {
       </h5>
     </template>
     <div v-if="error" class="gl-p-5 gl-border-b-1 gl-border-gray-100 gl-border-b-solid">
-      <subscription-activation-errors v-if="error" class="mb-4" :error="error" />
+      <subscription-activation-errors class="mb-4" :error="error" />
     </div>
     <p class="gl-mb-0 gl-px-5 gl-pt-5">
       <gl-sprintf :message="$options.i18n.howToActivateSubscription">
