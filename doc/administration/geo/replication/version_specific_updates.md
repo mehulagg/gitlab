@@ -22,7 +22,7 @@ It is still possible to complete a zero downtime update to this version however.
 final `sudo gitlab-rake db:migrate` command on the deploy node, you can execute the following queries via
 the PostgreSQL console (or `sudo gitlab-psql`) to drop the problematic triggers:
 
-```
+```sql
 drop trigger trigger_e40a6f1858e6 on application_settings;
 drop trigger trigger_0d588df444c8 on application_settings;
 drop trigger trigger_1572cbc9a15f on application_settings;
