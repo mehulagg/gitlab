@@ -81,7 +81,7 @@ describe('content_editor/components/toolbar_button', () => {
       await findButton().trigger('click');
 
       expect(toggleFooSpy).toHaveBeenCalled();
-      expect(wrapper.emitted().click).toHaveLength(1);
+      expect(wrapper.emitted().execute).toHaveLength(1);
     });
 
     it('does not executes the content type command when executeCommand = false', async () => {
@@ -90,7 +90,7 @@ describe('content_editor/components/toolbar_button', () => {
       await findButton().trigger('click');
 
       expect(toggleFooSpy).not.toHaveBeenCalled();
-      expect(wrapper.emitted().click).toHaveLength(1);
+      expect(wrapper.emitted().execute).toHaveLength(1);
     });
   });
 });
