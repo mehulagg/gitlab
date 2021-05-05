@@ -22,19 +22,22 @@ The GitLab Code Owners feature defines who owns specific
 files or paths in a repository, allowing other users to understand
 who is responsible for each file or path.
 
+Code Owners is created and managed as part of the source code management
+process, however, some of its outputs are consumed in the code review process
+of the software development lifecycle.
+
 ## Why is this useful?
 
 Code Owners allows for a version controlled, single source of
 truth file outlining the exact GitLab users or groups that
-own certain files or paths in a repository. Code Owners can be
-used in the merge request approval process which can streamline
-the process of finding the right reviewers and approvers for a given
-merge request.
+own certain files or paths in a repository. In larger organizations
+or popular open source projects, Code Owners can help you understand 
+who to contact if you have a question about a specific portion of
+the codebase.
 
-In larger organizations or popular open source projects, Code Owners
-can help you understand who to contact if you have
-a question that may not be related to code review or a merge request
-approval.
+Code Owners can also be used in the merge request approval process
+which can streamline the process of finding the most relevant reviewers
+and approvers for a given change.
 
 ## How to set up Code Owners
 
