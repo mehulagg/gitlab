@@ -9,6 +9,26 @@ module Resolvers
         required: false,
         default_value: :created_desc
 
+    argument :package_name, GraphQL::STRING_TYPE,
+        description: 'Search a package by name.',
+        required: false,
+        default_value: nil
+
+    argument :package_type, Types::Packages::PackageTypeEnum,
+        description: 'Filter a package by type.',
+        required: false,
+        default_value: nil
+
+    argument :status, Types::Packages::PackageStatusEnum,
+        description: 'Filter a package by status.',
+        required: false,
+        default_value: nil
+
+    argument :include_versionless, GraphQL::BOOLEAN_TYPE,
+        description: 'Include versionless packages',
+        required: false,
+        default_value: false
+
     SORT_TO_PARAMS_MAP = {
       created_desc: { order_by: 'created', sort: 'desc' },
       created_asc: { order_by: 'created', sort: 'asc' },
@@ -20,10 +40,10 @@ module Resolvers
       type_asc: { order_by: 'type', sort: 'asc' }
     }.freeze
 
-    def resolve(sort:)
+    def resolve(sort:, **filters)
       return unless packages_available?
 
-      ::Packages::PackagesFinder.new(object, SORT_TO_PARAMS_MAP.fetch(sort)).execute
+      ::Packages::PackagesFinder.new(object, filters.merge(SORT_TO_PARAMS_MAP.fetch(sort))).execute
     end
 
     private
