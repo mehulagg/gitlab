@@ -483,7 +483,8 @@ export const fetchValueStreams = ({ commit, dispatch, getters }) => {
     });
 };
 
-export const setFilters = ({ dispatch }) => {
+export const setFilters = ({ dispatch, getters: { isOverviewStageSelected } }) => {
+  if (!isOverviewStageSelected) dispatch('fetchStageData');
   return dispatch('fetchCycleAnalyticsData');
 };
 

@@ -6,7 +6,7 @@ import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
+import { PROJECTS_PER_PAGE } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
@@ -82,6 +82,7 @@ export default {
       'enableCustomOrdering',
       'cycleAnalyticsRequestParams',
       'pathNavigationData',
+      'isOverviewStageSelected',
     ]),
     ...mapGetters('customStages', ['customStageFormActive']),
     shouldRenderEmptyState() {
@@ -89,9 +90,6 @@ export default {
     },
     shouldDisplayFilters() {
       return !this.errorCode;
-    },
-    isOverviewStageSelected() {
-      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
     },
     shouldDisplayDurationChart() {
       return (
@@ -166,7 +164,7 @@ export default {
     },
     onStageSelect(stage) {
       this.hideForm();
-      if (stage.slug === OVERVIEW_STAGE_ID) {
+      if (this.isOverviewStageSelected) {
         this.setDefaultSelectedStage();
       } else {
         this.setSelectedStage(stage);

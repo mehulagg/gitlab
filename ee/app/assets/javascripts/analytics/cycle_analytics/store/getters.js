@@ -9,6 +9,7 @@ import {
   OVERVIEW_STAGE_CONFIG,
   PAGINATION_TYPE,
   PAGINATION_SORT_FIELD,
+  OVERVIEW_STAGE_ID,
 } from '../constants';
 import { transformStagesForPathNavigation } from '../utils';
 
@@ -68,6 +69,9 @@ export const enableCustomOrdering = ({ stages, errorSavingStageOrder }) =>
 
 export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomStage }) =>
   Boolean(isCreatingCustomStage || isEditingCustomStage);
+
+export const isOverviewStageSelected = ({ selectedStage }) =>
+  selectedStage?.id === OVERVIEW_STAGE_ID;
 
 /**
  * Until there are controls in place to edit stages outside of the stage table,
