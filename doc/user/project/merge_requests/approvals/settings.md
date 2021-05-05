@@ -42,7 +42,7 @@ By default, an approval on a merge request remains in place, even if you add mor
 after the approval. If you want to remove all existing approvals on a merge request
 when more changes are added to it:
 
-1. Go to your project's **Settings > General** page.
+1. Go to your project and select **Settings > General**.
 1. Expand **Merge request (MR) approvals**.
 1. Select the **Require new approvals when new commits are added to an MR** checkbox.
 1. Select **Save changes**.
@@ -57,7 +57,7 @@ However, approvals are reset if the target branch is changed.
 
 By default, the author of a merge request cannot approve it. To change this setting:
 
-1. Go to your project and **Settings > General**.
+1. Go to your project and select **Settings > General**.
 1. Expand **Merge request (MR) approvals**.
 1. Clear the **Prevent MR approval by the author** checkbox.
 1. Select **Save changes**.
