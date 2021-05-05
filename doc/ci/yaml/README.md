@@ -4683,16 +4683,16 @@ released_at: '2021-03-15T08:00:00Z'
 
 #### `release:assets:links`
 
-Include [asset links](../../user/project/releases/index.md#links) in the release. 
+Include [asset links](../../user/project/releases/index.md#links) in the release.
 
 ```yaml
-assets: 
+assets:
   links:
     - name: 'asset1'
       url: 'https://example.com/assets/1'
     - name: 'asset2'
       url: 'https://example.com/assets/2'
-      filepath: '/pretty/url/1' # Optional, 
+      filepath: '/pretty/url/1' # optional
       link_type: 'other' # optional
 ```
 
@@ -4776,7 +4776,7 @@ tags. You can't use these options together, so choose one:
         - 'm2'
         - 'm3'
       released_at: '2020-07-15T08:00:00Z'  # Optional, is auto generated if not defined, or can use a variable.
-      assets: 
+      assets:
         links:
           - name: 'asset1'
             url: 'https://example.com/assets/1'
