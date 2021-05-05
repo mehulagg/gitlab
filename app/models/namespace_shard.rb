@@ -17,6 +17,10 @@ class NamespaceShard < ApplicationRecord
     connects_to shards: default_shard
   end
 
+  def database_shard_id
+    self.class.id_to_shard(id) if id
+  end
+
   def self.sharded_read_from_namespace_id(namespace_id, &block)
     raise "No block given" unless block_given?
 
@@ -62,18 +66,23 @@ class NamespaceShard < ApplicationRecord
   # The intention is to eventually lookup from a DB
   def self.find_shard_from_full_path(full_path)
     if full_path == 'lost-and-found' || full_path.start_with?('lost-and-found/')
-      :shard_one
+      :shard_1
     else
       :default
     end
   end
 
+  def self.id_to_shard(id)
+    (id >> 10) & (1<<13 - 1)
+  end
+
   # The intention is to eventually lookup from a DB
   def self.find_shard_from_namespace_id(namespace_id)
-    if namespace_id.to_i == 2
-      :shard_one
+    shard_id = id_to_shard(namespace_id.to_i)
+    if shard_id > 0
+      :"shard_#{shard_id}"
     else
-      :default
+      :primary
     end
   end
 end
