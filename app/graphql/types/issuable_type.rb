@@ -20,4 +20,4 @@ module Types
   end
 end
 
-Types::IssuableType.prepend_mod_with('::EE::Types::IssuableType')
+Types::IssuableType.prepend_mod_with('Types::IssuableType')

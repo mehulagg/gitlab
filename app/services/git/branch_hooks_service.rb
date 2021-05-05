@@ -227,4 +227,4 @@ module Git
   end
 end
 
-Git::BranchHooksService.prepend_mod_with('::EE::Git::BranchHooksService')
+Git::BranchHooksService.prepend_mod_with('Git::BranchHooksService')

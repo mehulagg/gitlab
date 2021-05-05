@@ -56,4 +56,4 @@ class LicenseTemplateFinder
   end
 end
 
-LicenseTemplateFinder.prepend_mod_with('::EE::LicenseTemplateFinder')
+LicenseTemplateFinder.prepend_mod_with('LicenseTemplateFinder')

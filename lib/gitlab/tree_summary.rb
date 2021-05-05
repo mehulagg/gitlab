@@ -161,4 +161,4 @@ module Gitlab
   end
 end
 
-Gitlab::TreeSummary.prepend_mod_with('::EE::Gitlab::TreeSummary')
+Gitlab::TreeSummary.prepend_mod_with('Gitlab::TreeSummary')

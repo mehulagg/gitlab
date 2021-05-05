@@ -102,4 +102,4 @@ module Mutations
   end
 end
 
-Mutations::Issues::Create.prepend_mod_with('::EE::Mutations::Issues::Create')
+Mutations::Issues::Create.prepend_mod_with('Mutations::Issues::Create')

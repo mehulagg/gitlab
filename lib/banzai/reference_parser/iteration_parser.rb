@@ -19,4 +19,4 @@ module Banzai
   end
 end
 
-Banzai::ReferenceParser::IterationParser.prepend_mod_with('::EE::Banzai::ReferenceParser::IterationParser')
+Banzai::ReferenceParser::IterationParser.prepend_mod_with('Banzai::ReferenceParser::IterationParser')

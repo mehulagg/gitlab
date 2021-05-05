@@ -49,4 +49,4 @@ module Gitlab
   end
 end
 
-Gitlab::Auth::Ldap::User.prepend_mod_with('::EE::Gitlab::Auth::Ldap::User')
+Gitlab::Auth::Ldap::User.prepend_mod_with('Gitlab::Auth::Ldap::User')

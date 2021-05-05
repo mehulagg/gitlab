@@ -30,4 +30,4 @@ module IdeHelper
   end
 end
 
-::IdeHelper.prepend_mod_with('::EE::IdeHelper')
+::IdeHelper.prepend_mod_with('IdeHelper')

@@ -36,4 +36,4 @@ module Ci
   end
 end
 
-Ci::JobsHelper.prepend_mod_with('::EE::Ci::JobsHelper')
+Ci::JobsHelper.prepend_mod_with('Ci::JobsHelper')

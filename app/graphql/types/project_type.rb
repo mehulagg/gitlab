@@ -390,4 +390,4 @@ module Types
   end
 end
 
-Types::ProjectType.prepend_mod_with('::EE::Types::ProjectType')
+Types::ProjectType.prepend_mod_with('Types::ProjectType')

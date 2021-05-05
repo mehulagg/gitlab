@@ -169,4 +169,4 @@ module Types
   end
 end
 
-Types::Ci::PipelineType.prepend_mod_with('::EE::Types::Ci::PipelineType')
+Types::Ci::PipelineType.prepend_mod_with('Types::Ci::PipelineType')

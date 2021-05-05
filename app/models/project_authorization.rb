@@ -31,4 +31,4 @@ class ProjectAuthorization < ApplicationRecord
   end
 end
 
-ProjectAuthorization.prepend_mod_with('::EE::ProjectAuthorization')
+ProjectAuthorization.prepend_mod_with('ProjectAuthorization')

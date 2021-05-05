@@ -100,4 +100,4 @@ module Gitlab
   end
 end
 
-Gitlab::Email::Handler::ReplyProcessing.prepend_mod_with('::EE::Gitlab::Email::Handler::ReplyProcessing')
+Gitlab::Email::Handler::ReplyProcessing.prepend_mod_with('Gitlab::Email::Handler::ReplyProcessing')

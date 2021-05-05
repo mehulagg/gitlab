@@ -16,4 +16,4 @@ module FeatureFlagsHelper
   end
 end
 
-FeatureFlagsHelper.prepend_mod_with('::EE::FeatureFlagsHelper')
+FeatureFlagsHelper.prepend_mod_with('FeatureFlagsHelper')

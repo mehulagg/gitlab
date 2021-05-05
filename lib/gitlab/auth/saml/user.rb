@@ -62,4 +62,4 @@ module Gitlab
   end
 end
 
-Gitlab::Auth::Saml::User.prepend_mod_with('::EE::Gitlab::Auth::Saml::User')
+Gitlab::Auth::Saml::User.prepend_mod_with('Gitlab::Auth::Saml::User')

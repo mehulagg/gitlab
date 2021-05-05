@@ -50,4 +50,4 @@ module Types
   # rubocop: enable Graphql/AuthorizeTypes
 end
 
-Types::BoardListType.prepend_mod_with('::EE::Types::BoardListType')
+Types::BoardListType.prepend_mod_with('Types::BoardListType')

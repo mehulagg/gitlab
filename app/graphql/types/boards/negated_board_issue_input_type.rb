@@ -7,4 +7,4 @@ module Types
   end
 end
 
-Types::Boards::NegatedBoardIssueInputType.prepend_mod_with('::EE::Types::Boards::NegatedBoardIssueInputType')
+Types::Boards::NegatedBoardIssueInputType.prepend_mod_with('Types::Boards::NegatedBoardIssueInputType')

@@ -122,7 +122,7 @@ class User
   #...
 end
 
-User.prepend_mod_with('::EE::UserExtension')
+User.prepend_mod_with('UserExtension')
 ```
 
 Since the module would require an `EE` namespace, the file should also be

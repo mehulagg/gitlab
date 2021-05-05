@@ -49,4 +49,4 @@ class List < ApplicationRecord
   end
 end
 
-List.prepend_mod_with('::EE::List')
+List.prepend_mod_with('List')

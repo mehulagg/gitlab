@@ -45,4 +45,4 @@ module Gitlab
   end
 end
 
-Gitlab::SnippetSearchResults.prepend_mod_with('::EE::Gitlab::SnippetSearchResults')
+Gitlab::SnippetSearchResults.prepend_mod_with('Gitlab::SnippetSearchResults')

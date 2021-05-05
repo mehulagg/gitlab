@@ -612,5 +612,5 @@ end
 
 require_relative('../../../ee/spec/support/helpers/ee/test_env') if Gitlab.ee?
 
-::TestEnv.prepend_mod_with('::EE::TestEnv')
-::TestEnv.extend_mod_with('::EE::TestEnv')
+::TestEnv.prepend_mod_with('TestEnv')
+::TestEnv.extend_mod_with('TestEnv')

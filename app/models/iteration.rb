@@ -13,4 +13,4 @@ class Iteration < ApplicationRecord
   end
 end
 
-Iteration.prepend_mod_with('::EE::Iteration')
+Iteration.prepend_mod_with('Iteration')

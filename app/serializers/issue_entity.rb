@@ -77,4 +77,4 @@ class IssueEntity < IssuableEntity
   end
 end
 
-IssueEntity.prepend_mod_with('::EE::IssueEntity')
+IssueEntity.prepend_mod_with('IssueEntity')

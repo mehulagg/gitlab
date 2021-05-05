@@ -69,4 +69,4 @@ module RepositoryCheck
   end
 end
 
-RepositoryCheck::SingleRepositoryWorker.prepend_mod_with('::EE::RepositoryCheck::SingleRepositoryWorker')
+RepositoryCheck::SingleRepositoryWorker.prepend_mod_with('RepositoryCheck::SingleRepositoryWorker')

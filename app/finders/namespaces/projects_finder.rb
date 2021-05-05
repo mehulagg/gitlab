@@ -60,4 +60,4 @@ module Namespaces
   end
 end
 
-Namespaces::ProjectsFinder.prepend_mod_with('::EE::Namespaces::ProjectsFinder')
+Namespaces::ProjectsFinder.prepend_mod_with('Namespaces::ProjectsFinder')

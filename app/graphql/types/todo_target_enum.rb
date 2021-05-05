@@ -10,4 +10,4 @@ module Types
   end
 end
 
-Types::TodoTargetEnum.prepend_mod_with('::EE::Types::TodoTargetEnum')
+Types::TodoTargetEnum.prepend_mod_with('Types::TodoTargetEnum')

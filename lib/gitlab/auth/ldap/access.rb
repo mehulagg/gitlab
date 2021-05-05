@@ -117,4 +117,4 @@ module Gitlab
   end
 end
 
-Gitlab::Auth::Ldap::Access.prepend_mod_with('::EE::Gitlab::Auth::Ldap::Access')
+Gitlab::Auth::Ldap::Access.prepend_mod_with('Gitlab::Auth::Ldap::Access')

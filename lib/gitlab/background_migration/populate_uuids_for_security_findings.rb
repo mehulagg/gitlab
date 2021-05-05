@@ -15,4 +15,4 @@ module Gitlab
   end
 end
 
-Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings.prepend_mod_with('::EE::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings')
+Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings.prepend_mod_with('Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings')

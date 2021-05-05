@@ -39,4 +39,4 @@ class CommitStatusPresenter < Gitlab::View::Presenter::Delegated
   end
 end
 
-CommitStatusPresenter.prepend_mod_with('::EE::CommitStatusPresenter')
+CommitStatusPresenter.prepend_mod_with('CommitStatusPresenter')
