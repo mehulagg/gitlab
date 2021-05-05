@@ -426,7 +426,7 @@ FactoryBot.define do
             description: 'Created using the release-cli $EXTRA_DESCRIPTION',
             tag_name: 'release-$CI_COMMIT_SHA',
             ref: '$CI_COMMIT_SHA',
-            assets: [{ name: 'asset1', url: 'https://example.com/assets/1' }]
+            assets: { links: [{ name: 'asset1', url: 'https://example.com/assets/1' }] }
           }
         }
       end
