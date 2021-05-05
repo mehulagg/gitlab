@@ -178,4 +178,4 @@ ServicesHelper.prepend_mod_with('EE::ServicesHelper')
 
 # The methods in `EE::ServicesHelper` should be available as both instance and
 # class methods.
-ServicesHelper.extend_if_ee('EE::ServicesHelper')
+ServicesHelper.extend_mod_with('EE::ServicesHelper')

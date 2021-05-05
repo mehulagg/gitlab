@@ -86,19 +86,19 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     SOURCE
   end
 
-  it 'flags the use of `extend_if_ee EE` in the middle of a file' do
+  it 'flags the use of `extend_mod_with EE` in the middle of a file' do
     expect_offense(<<~SOURCE)
     class Foo
-      extend_if_ee 'EE::Foo'
+      extend_mod_with 'EE::Foo'
       ^^^^^^^^^^^^^^^^^^^^^^ Injecting EE modules must be done on the last line of this file, outside of any class or module definitions
     end
     SOURCE
   end
 
-  it 'flags the use of `extend_if_ee ::EE` in the middle of a file' do
+  it 'flags the use of `extend_mod_with ::EE` in the middle of a file' do
     expect_offense(<<~SOURCE)
     class Foo
-      extend_if_ee '::EE::Foo'
+      extend_mod_with '::EE::Foo'
       ^^^^^^^^^^^^^^^^^^^^^^^^ Injecting EE modules must be done on the last line of this file, outside of any class or module definitions
     end
     SOURCE
@@ -123,7 +123,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
   it 'does not flag extending using regular modules' do
     expect_no_offenses(<<~SOURCE)
     class Foo
-      extend_if_ee 'Foo'
+      extend_mod_with 'Foo'
     end
     SOURCE
   end
@@ -146,12 +146,12 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     SOURCE
   end
 
-  it 'does not flag the use of `extend_if_ee EE` on the last line' do
+  it 'does not flag the use of `extend_mod_with EE` on the last line' do
     expect_no_offenses(<<~SOURCE)
     class Foo
     end
 
-    Foo.extend_if_ee('EE::Foo')
+    Foo.extend_mod_with('EE::Foo')
     SOURCE
   end
 
@@ -160,7 +160,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     class Foo
     end
 
-    Foo.extend_if_ee('EE::Foo')
+    Foo.extend_mod_with('EE::Foo')
     Foo.include_if_ee('EE::Foo')
     Foo.prepend_mod_with('EE::Foo')
     SOURCE
@@ -203,7 +203,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     end
 
     Foo.prepend(EE::Foo)
-    ^^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_if_ee`, or `prepend_mod_with`
+    ^^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_mod_with`, or `prepend_mod_with`
     SOURCE
   end
 
@@ -213,7 +213,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     end
 
     Foo.prepend(QA::EE::Foo)
-    ^^^^^^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_if_ee`, or `prepend_mod_with`
+    ^^^^^^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_mod_with`, or `prepend_mod_with`
     SOURCE
   end
 
@@ -223,7 +223,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     end
 
     Foo.extend(EE::Foo)
-    ^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_if_ee`, or `prepend_mod_with`
+    ^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_mod_with`, or `prepend_mod_with`
     SOURCE
   end
 
@@ -233,7 +233,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     end
 
     Foo.include(EE::Foo)
-    ^^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_if_ee`, or `prepend_mod_with`
+    ^^^^^^^^^^^^^^^^^^^^ EE modules must be injected using `include_if_ee`, `extend_mod_with`, or `prepend_mod_with`
     SOURCE
   end
 
@@ -257,12 +257,12 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     SOURCE
   end
 
-  it 'disallows the use of extend_if_ee without a String' do
+  it 'disallows the use of extend_mod_with without a String' do
     expect_offense(<<~SOURCE)
     class Foo
     end
 
-    Foo.extend_if_ee(EE::Foo)
+    Foo.extend_mod_with(EE::Foo)
                      ^^^^^^^ EE modules to inject must be specified as a String
     SOURCE
   end

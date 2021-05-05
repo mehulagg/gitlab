@@ -10,7 +10,7 @@ module InjectEnterpriseEditionModule
       with_descendants: with_descendants)
   end
 
-  def extend_if_ee(constant_with_prefix, namespace: Object)
+  def extend_mod_with(constant_with_prefix, namespace: Object)
     each_extension_for(
       constant_without_prefix(constant_with_prefix),
       namespace,
