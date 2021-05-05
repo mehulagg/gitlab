@@ -17,8 +17,8 @@ members can choose to accept or reject it.
 
 You can view merge requests for a specific project, or for all projects in a group:
 
-- **Specific project**: In the left sidebar, go to **Project > Merge Requests**.
-- **All projects in a group**: In the left sidebar, go to **Group > Merge Requests**.
+- **Specific project**: Go to your project and select **Merge Requests**.
+- **All projects in a group**: Go to your group and select **Merge Requests**.
   If your group contains subgroups, this view also displays merge requests from the subgroup projects.
   GitLab displays a count of open merge requests in the left sidebar, but
   [caches the value](#cached-merge-request-count) for groups with a large number of
@@ -74,8 +74,8 @@ When you submit your review, GitLab:
 
 ### Resolving/Unresolving threads
 
-Review comments can also resolve/unresolve [resolvable threads](../../../discussions/index.md#resolvable-comments-and-threads).
-When replying to a comment, a checkbox is displayed that you can click to resolve or unresolve
+Review comments can also resolve or unresolve [resolvable threads](../../../discussions/index.md#resolvable-comments-and-threads).
+When replying to a comment, a checkbox is displayed to resolve or unresolve
 the thread after publication.
 
 ![Resolve checkbox](img/mr_review_resolve.png)
@@ -111,7 +111,7 @@ option under **Merge Requests: Merge method** and save your changes.
 In a merge request, you can leave comments in any part of the file being changed.
 In the Merge Request Diff UI, you can:
 
-- **Comment on a single line**: Click the **{comment}** **comment** icon in the
+- **Comment on a single line**: Select the **{comment}** **comment** icon in the
   gutter to expand the diff lines and display a comment box.
 - [**Comment on multiple lines**](#comment-on-multiple-lines).
 
@@ -126,9 +126,9 @@ to by either:
 
 ![Comment on any diff file line](img/comment-on-any-diff-line_v13_10.png)
 
-- Clicking and dragging the **{comment}** **comment** icon in the gutter to highlight
+- Dragging the **{comment}** **comment** icon in the gutter to highlight
   lines in the diff. GitLab expands the diff lines and displays a comment box.
-- After starting a comment by clicking the **{comment}** **comment** icon in the
+- After starting a comment by selecting the **{comment}** **comment** icon in the
   gutter, select the first line number your comment refers to in the **Commenting on lines**
   select box. New comments default to single-line comments, unless you select
   a different starting line.
@@ -194,7 +194,7 @@ These features are associated with merge requests:
 - [Bulk editing merge requests](../../../project/bulk_editing.md):
   Update the attributes of multiple merge requests simultaneously.
 - [Cherry-pick changes](../cherry_pick_changes.md):
-  Cherry-pick any commit in the UI by clicking the **Cherry-pick** button in a merged merge requests or a commit.
+  Cherry-pick any commit in the UI by selecting the **Cherry-pick** button in a merged merge requests or a commit.
 - [Fast-forward merge requests](../fast_forward_merge.md):
   For a linear Git history and a way to accept merge requests without creating merge commits
 - [Find the merge request that introduced a change](../versions.md):
@@ -244,27 +244,27 @@ the command line.
 The merge request sidebar contains the branch reference for the source branch
 used to contribute changes for this merge request.
 
-To copy the branch reference into your clipboard, click the **Copy branch name** button
+To copy the branch reference into your clipboard, select the **Copy branch name** button
 (**{copy-to-clipboard}**) in the right sidebar. Use it to checkout the branch locally
-via command line by running `git checkout <branch-name>`.
+from the command line by running `git checkout <branch-name>`.
 
 ### Checkout merge requests locally through the `head` ref
 
 A merge request contains all the history from a repository, plus the additional
 commits added to the branch associated with the merge request. Here's a few
-ways to checkout a merge request locally.
+ways to check out a merge request locally.
 
-You can checkout a merge request locally even if the source
+You can check out a merge request locally even if the source
 project is a fork (even a private fork) of the target project.
 
 This relies on the merge request `head` ref (`refs/merge-requests/:iid/head`)
 that is available for each merge request. It allows checking out a merge
-request via its ID instead of its branch.
+request by using its ID instead of its branch.
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223156) in GitLab
 13.4, 14 days after a merge request gets closed or merged, the merge request
-`head` ref is deleted. This means that the merge request is not available
-for local checkout via the merge request `head` ref anymore. The merge request
+`head` ref is deleted. This means that the merge request isn't available
+for local checkout from the merge request `head` ref anymore. The merge request
 can still be re-opened. If the merge request's branch
 exists, you can still check out the branch, as it isn't affected.
 
@@ -349,9 +349,9 @@ All the above can be done with the [`git-mr`](https://gitlab.com/glensc/git-mr) 
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-cached-merge-request-count).
 
 WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+This feature might not be available to you. Refer to the previous **version history** note for details.
 
-In a group, the sidebar displays the total count of open merge requests and this value is cached if higher
+In a group, the sidebar displays the total count of open merge requests. This value is cached if it's greater than
 than 1000. The cached value is rounded to thousands (or millions) and updated every 24 hours.
 
 ### Enable or disable cached merge request count **(FREE SELF)**
