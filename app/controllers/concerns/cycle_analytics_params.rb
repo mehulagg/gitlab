@@ -43,4 +43,4 @@ module CycleAnalyticsParams
   end
 end
 
-CycleAnalyticsParams.prepend_mod_with('EE::CycleAnalyticsParams')
+CycleAnalyticsParams.prepend_mod_with('CycleAnalyticsParams')

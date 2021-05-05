@@ -49,4 +49,4 @@ module ProtectedBranches
   end
 end
 
-ProtectedBranches::LegacyApiUpdateService.prepend_mod_with('EE::ProtectedBranches::LegacyApiUpdateService')
+ProtectedBranches::LegacyApiUpdateService.prepend_mod_with('ProtectedBranches::LegacyApiUpdateService')

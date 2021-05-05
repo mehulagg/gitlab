@@ -147,4 +147,4 @@ class Key < ApplicationRecord
   end
 end
 
-Key.prepend_mod_with('EE::Key')
+Key.prepend_mod_with('Key')

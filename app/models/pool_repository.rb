@@ -115,4 +115,4 @@ class PoolRepository < ApplicationRecord
   end
 end
 
-PoolRepository.prepend_mod_with('EE::PoolRepository')
+PoolRepository.prepend_mod_with('PoolRepository')

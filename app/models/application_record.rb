@@ -86,4 +86,4 @@ class ApplicationRecord < ActiveRecord::Base
   end
 end
 
-ApplicationRecord.prepend_mod_with('EE::ApplicationRecordHelpers')
+ApplicationRecord.prepend_mod_with('ApplicationRecordHelpers')

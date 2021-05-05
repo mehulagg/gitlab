@@ -99,4 +99,4 @@ module Boards
   end
 end
 
-Boards::ListsController.prepend_mod_with('EE::Boards::ListsController')
+Boards::ListsController.prepend_mod_with('Boards::ListsController')

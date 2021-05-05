@@ -86,4 +86,4 @@ module Mutations
   end
 end
 
-Mutations::Boards::Issues::IssueMoveList.prepend_mod_with('EE::Mutations::Boards::Issues::IssueMoveList')
+Mutations::Boards::Issues::IssueMoveList.prepend_mod_with('Mutations::Boards::Issues::IssueMoveList')

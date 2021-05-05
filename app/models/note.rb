@@ -639,4 +639,4 @@ class Note < ApplicationRecord
   end
 end
 
-Note.prepend_mod_with('EE::Note')
+Note.prepend_mod_with('Note')

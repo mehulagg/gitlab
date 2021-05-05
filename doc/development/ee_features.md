@@ -254,7 +254,7 @@ class ApplicationController < ActionController::Base
   # ...
 end
 
-ApplicationController.prepend_mod_with('EE::ApplicationController')
+ApplicationController.prepend_mod_with('ApplicationController')
 ```
 
 And create a new file in the `ee/` sub-directory with the altered
@@ -429,7 +429,7 @@ module Gitlab
   end
 end
 
-Gitlab::BackgroundMigration::PruneOrphanedGeoEvents.prepend_mod_with('EE::Gitlab::BackgroundMigration::PruneOrphanedGeoEvents')
+Gitlab::BackgroundMigration::PruneOrphanedGeoEvents.prepend_mod_with('Gitlab::BackgroundMigration::PruneOrphanedGeoEvents')
 ```
 
 GitLab EE:
@@ -642,7 +642,7 @@ module API
   end
 end
 
-API::Helpers::ProjectsHelpers.prepend_mod_with('EE::API::Helpers::ProjectsHelpers')
+API::Helpers::ProjectsHelpers.prepend_mod_with('API::Helpers::ProjectsHelpers')
 ```
 
 We could override it in EE module:
@@ -683,7 +683,7 @@ module API
   end
 end
 
-API::JobArtifacts.prepend_mod_with('EE::API::JobArtifacts')
+API::JobArtifacts.prepend_mod_with('API::JobArtifacts')
 ```
 
 And then we can follow regular object-oriented practices to override it:
@@ -736,7 +736,7 @@ module API
   end
 end
 
-API::MergeRequests.prepend_mod_with('EE::API::MergeRequests')
+API::MergeRequests.prepend_mod_with('API::MergeRequests')
 ```
 
 Note that `update_merge_request_ee` doesn't do anything in CE, but
@@ -798,7 +798,7 @@ module API
   end
 end
 
-API::MergeRequests::Parameters.prepend_mod_with('EE::API::MergeRequests::Parameters')
+API::MergeRequests::Parameters.prepend_mod_with('API::MergeRequests::Parameters')
 
 # api/merge_requests.rb
 module API
@@ -848,7 +848,7 @@ class Identity < ActiveRecord::Base
     [:provider]
   end
 
-  prepend_mod_with('EE::Identity')
+  prepend_mod_with('Identity')
 
   validates :extern_uid,
     allow_blank: true,
@@ -900,7 +900,7 @@ class Identity < ActiveRecord::Base
   end
 end
 
-Identity::UniquenessScopes.prepend_mod_with('EE::Identity::UniquenessScopes')
+Identity::UniquenessScopes.prepend_mod_with('Identity::UniquenessScopes')
 
 # app/models/identity.rb
 class Identity < ActiveRecord::Base

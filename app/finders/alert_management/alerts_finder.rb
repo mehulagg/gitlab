@@ -67,4 +67,4 @@ module AlertManagement
   end
 end
 
-AlertManagement::AlertsFinder.prepend_mod_with('EE::AlertManagement::AlertsFinder')
+AlertManagement::AlertsFinder.prepend_mod_with('AlertManagement::AlertsFinder')

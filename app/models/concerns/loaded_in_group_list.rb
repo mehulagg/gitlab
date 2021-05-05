@@ -79,4 +79,4 @@ module LoadedInGroupList
   end
 end
 
-LoadedInGroupList::ClassMethods.prepend_mod_with('EE::LoadedInGroupList::ClassMethods')
+LoadedInGroupList::ClassMethods.prepend_mod_with('LoadedInGroupList::ClassMethods')

@@ -72,4 +72,4 @@ class Groups::ApplicationController < ApplicationController
   end
 end
 
-Groups::ApplicationController.prepend_mod_with('EE::Groups::ApplicationController')
+Groups::ApplicationController.prepend_mod_with('Groups::ApplicationController')

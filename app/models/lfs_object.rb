@@ -50,4 +50,4 @@ class LfsObject < ApplicationRecord
   end
 end
 
-LfsObject.prepend_mod_with('EE::LfsObject')
+LfsObject.prepend_mod_with('LfsObject')

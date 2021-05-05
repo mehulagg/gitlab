@@ -107,4 +107,4 @@ module Notes
   end
 end
 
-Notes::UpdateService.prepend_mod_with('EE::Notes::UpdateService')
+Notes::UpdateService.prepend_mod_with('Notes::UpdateService')

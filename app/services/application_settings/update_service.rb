@@ -120,4 +120,4 @@ module ApplicationSettings
   end
 end
 
-ApplicationSettings::UpdateService.prepend_mod_with('EE::ApplicationSettings::UpdateService')
+ApplicationSettings::UpdateService.prepend_mod_with('ApplicationSettings::UpdateService')

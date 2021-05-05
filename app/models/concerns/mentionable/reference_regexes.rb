@@ -37,4 +37,4 @@ module Mentionable
   end
 end
 
-Mentionable::ReferenceRegexes.prepend_mod_with('EE::Mentionable::ReferenceRegexes')
+Mentionable::ReferenceRegexes.prepend_mod_with('Mentionable::ReferenceRegexes')

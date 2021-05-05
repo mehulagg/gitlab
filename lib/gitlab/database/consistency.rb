@@ -28,4 +28,4 @@ module Gitlab
   end
 end
 
-::Gitlab::Database::Consistency.singleton_class.prepend_mod_with('EE::Gitlab::Database::Consistency')
+::Gitlab::Database::Consistency.singleton_class.prepend_mod_with('Gitlab::Database::Consistency')

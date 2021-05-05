@@ -133,4 +133,4 @@ module Gitlab
   end
 end
 
-Gitlab::Analytics::CycleAnalytics::RecordsFetcher.prepend_mod_with('EE::Gitlab::Analytics::CycleAnalytics::RecordsFetcher')
+Gitlab::Analytics::CycleAnalytics::RecordsFetcher.prepend_mod_with('Gitlab::Analytics::CycleAnalytics::RecordsFetcher')

@@ -66,4 +66,4 @@ module Emails
   end
 end
 
-Emails::Projects.prepend_mod_with('EE::Emails::Projects')
+Emails::Projects.prepend_mod_with('Emails::Projects')

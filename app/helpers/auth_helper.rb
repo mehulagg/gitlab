@@ -191,8 +191,8 @@ module AuthHelper
   extend self
 end
 
-AuthHelper.prepend_mod_with('EE::AuthHelper')
+AuthHelper.prepend_mod_with('AuthHelper')
 
 # The methods added in EE should be available as both class and instance
 # methods, just like the methods provided by `AuthHelper` itself.
-AuthHelper.extend_mod_with('EE::AuthHelper')
+AuthHelper.extend_mod_with('AuthHelper')

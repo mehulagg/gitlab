@@ -10,4 +10,4 @@ module Gitlab
   end
 end
 
-Gitlab::BackgroundMigration::BackfillVersionDataFromGitaly.prepend_mod_with('EE::Gitlab::BackgroundMigration::BackfillVersionDataFromGitaly')
+Gitlab::BackgroundMigration::BackfillVersionDataFromGitaly.prepend_mod_with('Gitlab::BackgroundMigration::BackfillVersionDataFromGitaly')

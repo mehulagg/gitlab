@@ -26,4 +26,4 @@ module Users
   end
 end
 
-Users::CreateService.prepend_mod_with('EE::Users::CreateService')
+Users::CreateService.prepend_mod_with('Users::CreateService')

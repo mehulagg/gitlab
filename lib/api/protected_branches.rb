@@ -104,4 +104,4 @@ module API
   end
 end
 
-API::ProtectedBranches.prepend_mod_with('EE::API::ProtectedBranches')
+API::ProtectedBranches.prepend_mod_with('API::ProtectedBranches')

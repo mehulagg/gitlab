@@ -101,4 +101,4 @@ class GroupMember < Member
   end
 end
 
-GroupMember.prepend_mod_with('EE::GroupMember')
+GroupMember.prepend_mod_with('GroupMember')

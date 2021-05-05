@@ -118,4 +118,4 @@ class NotificationSetting < ApplicationRecord
   end
 end
 
-NotificationSetting.prepend_mod_with('EE::NotificationSetting')
+NotificationSetting.prepend_mod_with('NotificationSetting')

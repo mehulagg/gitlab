@@ -18,4 +18,4 @@ class Epic < ApplicationRecord
   end
 end
 
-Epic.prepend_mod_with('EE::Epic')
+Epic.prepend_mod_with('Epic')

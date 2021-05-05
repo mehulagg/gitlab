@@ -472,4 +472,4 @@ class Service < ApplicationRecord
   end
 end
 
-Service.prepend_mod_with('EE::Service')
+Service.prepend_mod_with('Service')

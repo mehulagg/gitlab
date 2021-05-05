@@ -24,4 +24,4 @@ module Notes
   end
 end
 
-Notes::DestroyService.prepend_mod_with('EE::Notes::DestroyService')
+Notes::DestroyService.prepend_mod_with('Notes::DestroyService')

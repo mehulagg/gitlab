@@ -278,4 +278,4 @@ module AlertManagement
   end
 end
 
-AlertManagement::Alert.prepend_mod_with('EE::AlertManagement::Alert')
+AlertManagement::Alert.prepend_mod_with('AlertManagement::Alert')

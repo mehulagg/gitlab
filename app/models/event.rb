@@ -448,4 +448,4 @@ class Event < ApplicationRecord
   end
 end
 
-Event.prepend_mod_with('EE::Event')
+Event.prepend_mod_with('Event')

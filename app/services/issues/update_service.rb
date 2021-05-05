@@ -210,4 +210,4 @@ module Issues
   end
 end
 
-Issues::UpdateService.prepend_mod_with('EE::Issues::UpdateService')
+Issues::UpdateService.prepend_mod_with('Issues::UpdateService')

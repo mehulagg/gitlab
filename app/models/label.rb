@@ -290,4 +290,4 @@ class Label < ApplicationRecord
   end
 end
 
-Label.prepend_mod_with('EE::Label')
+Label.prepend_mod_with('Label')

@@ -79,4 +79,4 @@ module Gitlab
   end
 end
 
-Gitlab::Cleanup::OrphanJobArtifactFilesBatch.prepend_mod_with('EE::Gitlab::Cleanup::OrphanJobArtifactFilesBatch')
+Gitlab::Cleanup::OrphanJobArtifactFilesBatch.prepend_mod_with('Gitlab::Cleanup::OrphanJobArtifactFilesBatch')

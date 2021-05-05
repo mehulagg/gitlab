@@ -212,4 +212,4 @@ module Groups
   end
 end
 
-Groups::TransferService.prepend_mod_with('EE::Groups::TransferService')
+Groups::TransferService.prepend_mod_with('Groups::TransferService')

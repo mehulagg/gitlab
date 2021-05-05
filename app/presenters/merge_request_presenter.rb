@@ -273,4 +273,4 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
   end
 end
 
-MergeRequestPresenter.prepend_mod_with('EE::MergeRequestPresenter')
+MergeRequestPresenter.prepend_mod_with('MergeRequestPresenter')

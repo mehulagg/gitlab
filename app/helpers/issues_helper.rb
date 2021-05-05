@@ -209,4 +209,4 @@ module IssuesHelper
   end
 end
 
-IssuesHelper.prepend_mod_with('EE::IssuesHelper')
+IssuesHelper.prepend_mod_with('IssuesHelper')

@@ -471,4 +471,4 @@ class Environment < ApplicationRecord
   end
 end
 
-Environment.prepend_mod_with('EE::Environment')
+Environment.prepend_mod_with('Environment')

@@ -234,4 +234,4 @@ class ProjectTeam
   end
 end
 
-ProjectTeam.prepend_mod_with('EE::ProjectTeam')
+ProjectTeam.prepend_mod_with('ProjectTeam')

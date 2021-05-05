@@ -37,4 +37,4 @@ module ShaAttribute
   end
 end
 
-ShaAttribute::ClassMethods.prepend_mod_with('EE::ShaAttribute')
+ShaAttribute::ClassMethods.prepend_mod_with('ShaAttribute')

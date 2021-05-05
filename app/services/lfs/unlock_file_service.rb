@@ -46,4 +46,4 @@ module Lfs
   end
 end
 
-Lfs::UnlockFileService.prepend_mod_with('EE::Lfs::UnlockFileService')
+Lfs::UnlockFileService.prepend_mod_with('Lfs::UnlockFileService')

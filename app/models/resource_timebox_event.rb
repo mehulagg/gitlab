@@ -41,4 +41,4 @@ class ResourceTimeboxEvent < ResourceEvent
   end
 end
 
-ResourceTimeboxEvent.prepend_mod_with('EE::ResourceTimeboxEvent')
+ResourceTimeboxEvent.prepend_mod_with('ResourceTimeboxEvent')

@@ -223,4 +223,4 @@ class Notify < ApplicationMailer
   end
 end
 
-Notify.prepend_mod_with('EE::Notify')
+Notify.prepend_mod_with('Notify')

@@ -371,4 +371,4 @@ class TodoService
   end
 end
 
-TodoService.prepend_mod_with('EE::TodoService')
+TodoService.prepend_mod_with('TodoService')

@@ -113,4 +113,4 @@ module Commits
   end
 end
 
-Commits::CreateService.prepend_mod_with('EE::Commits::CreateService')
+Commits::CreateService.prepend_mod_with('Commits::CreateService')

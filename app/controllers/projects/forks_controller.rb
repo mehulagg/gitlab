@@ -131,4 +131,4 @@ class Projects::ForksController < Projects::ApplicationController
   end
 end
 
-Projects::ForksController.prepend_mod_with('EE::Projects::ForksController')
+Projects::ForksController.prepend_mod_with('Projects::ForksController')

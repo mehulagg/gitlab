@@ -62,4 +62,4 @@ module Boards
   end
 end
 
-Boards::Issues::MoveService.prepend_mod_with('EE::Boards::Issues::MoveService')
+Boards::Issues::MoveService.prepend_mod_with('Boards::Issues::MoveService')

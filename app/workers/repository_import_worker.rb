@@ -63,4 +63,4 @@ class RepositoryImportWorker # rubocop:disable Scalability/IdempotentWorker
   end
 end
 
-RepositoryImportWorker.prepend_mod_with('EE::RepositoryImportWorker')
+RepositoryImportWorker.prepend_mod_with('RepositoryImportWorker')

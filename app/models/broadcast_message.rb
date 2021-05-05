@@ -127,4 +127,4 @@ class BroadcastMessage < ApplicationRecord
   end
 end
 
-BroadcastMessage.prepend_mod_with('EE::BroadcastMessage')
+BroadcastMessage.prepend_mod_with('BroadcastMessage')

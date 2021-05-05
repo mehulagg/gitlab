@@ -2079,4 +2079,4 @@ class User < ApplicationRecord
   end
 end
 
-User.prepend_mod_with('EE::User')
+User.prepend_mod_with('User')

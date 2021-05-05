@@ -14,4 +14,4 @@ module API
   end
 end
 
-API::Entities::Namespace.prepend_mod_with('EE::API::Entities::Namespace')
+API::Entities::Namespace.prepend_mod_with('API::Entities::Namespace')

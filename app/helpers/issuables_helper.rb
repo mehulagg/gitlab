@@ -426,4 +426,4 @@ module IssuablesHelper
   end
 end
 
-IssuablesHelper.prepend_mod_with('EE::IssuablesHelper')
+IssuablesHelper.prepend_mod_with('IssuablesHelper')

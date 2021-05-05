@@ -318,4 +318,4 @@ module MarkupHelper
   extend self
 end
 
-MarkupHelper.prepend_mod_with('EE::MarkupHelper')
+MarkupHelper.prepend_mod_with('MarkupHelper')

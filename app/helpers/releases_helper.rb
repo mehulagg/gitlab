@@ -72,4 +72,4 @@ module ReleasesHelper
   end
 end
 
-ReleasesHelper.prepend_mod_with('EE::ReleasesHelper')
+ReleasesHelper.prepend_mod_with('ReleasesHelper')

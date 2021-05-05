@@ -391,4 +391,4 @@ class Snippet < ApplicationRecord
   end
 end
 
-Snippet.prepend_mod_with('EE::Snippet')
+Snippet.prepend_mod_with('Snippet')

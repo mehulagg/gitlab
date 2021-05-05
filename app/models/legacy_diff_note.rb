@@ -112,4 +112,4 @@ class LegacyDiffNote < Note
   end
 end
 
-LegacyDiffNote.prepend_mod_with('EE::LegacyDiffNote')
+LegacyDiffNote.prepend_mod_with('LegacyDiffNote')

@@ -190,4 +190,4 @@ module QuickActions
   end
 end
 
-QuickActions::InterpretService.prepend_mod_with('EE::QuickActions::InterpretService')
+QuickActions::InterpretService.prepend_mod_with('QuickActions::InterpretService')

@@ -96,4 +96,4 @@ module Users
   end
 end
 
-Users::UpdateService.prepend_mod_with('EE::Users::UpdateService')
+Users::UpdateService.prepend_mod_with('Users::UpdateService')

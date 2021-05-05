@@ -208,4 +208,4 @@ module MergeRequests
   end
 end
 
-MergeRequests::BaseService.prepend_mod_with('EE::MergeRequests::BaseService')
+MergeRequests::BaseService.prepend_mod_with('MergeRequests::BaseService')

@@ -140,4 +140,4 @@ class ContainerRepository < ApplicationRecord
   end
 end
 
-ContainerRepository.prepend_mod_with('EE::ContainerRepository')
+ContainerRepository.prepend_mod_with('ContainerRepository')

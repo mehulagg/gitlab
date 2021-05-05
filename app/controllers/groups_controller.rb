@@ -365,4 +365,4 @@ class GroupsController < Groups::ApplicationController
   end
 end
 
-GroupsController.prepend_mod_with('EE::GroupsController')
+GroupsController.prepend_mod_with('GroupsController')

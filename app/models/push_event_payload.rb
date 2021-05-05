@@ -25,4 +25,4 @@ class PushEventPayload < ApplicationRecord
   }
 end
 
-PushEventPayload.prepend_mod_with('EE::PushEventPayload')
+PushEventPayload.prepend_mod_with('PushEventPayload')

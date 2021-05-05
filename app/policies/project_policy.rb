@@ -745,4 +745,4 @@ class ProjectPolicy < BasePolicy
   end
 end
 
-ProjectPolicy.prepend_mod_with('EE::ProjectPolicy')
+ProjectPolicy.prepend_mod_with('ProjectPolicy')

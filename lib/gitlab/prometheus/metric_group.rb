@@ -31,4 +31,4 @@ module Gitlab
   end
 end
 
-Gitlab::Prometheus::MetricGroup.prepend_mod_with('EE::Gitlab::Prometheus::MetricGroup')
+Gitlab::Prometheus::MetricGroup.prepend_mod_with('Gitlab::Prometheus::MetricGroup')

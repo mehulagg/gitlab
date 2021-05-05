@@ -211,4 +211,4 @@ module Mentionable
   end
 end
 
-Mentionable.prepend_mod_with('EE::Mentionable')
+Mentionable.prepend_mod_with('Mentionable')

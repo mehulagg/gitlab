@@ -19,4 +19,4 @@ class ForkTargetsFinder
   attr_reader :project, :user
 end
 
-ForkTargetsFinder.prepend_mod_with('EE::ForkTargetsFinder')
+ForkTargetsFinder.prepend_mod_with('ForkTargetsFinder')

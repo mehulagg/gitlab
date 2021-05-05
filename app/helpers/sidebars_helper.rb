@@ -48,4 +48,4 @@ module SidebarsHelper
   end
 end
 
-SidebarsHelper.prepend_mod_with('EE::SidebarsHelper')
+SidebarsHelper.prepend_mod_with('SidebarsHelper')

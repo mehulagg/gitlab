@@ -66,4 +66,4 @@ module DashboardHelper
   end
 end
 
-DashboardHelper.prepend_mod_with('EE::DashboardHelper')
+DashboardHelper.prepend_mod_with('DashboardHelper')

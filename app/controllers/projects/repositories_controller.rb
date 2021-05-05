@@ -127,4 +127,4 @@ class Projects::RepositoriesController < Projects::ApplicationController
   end
 end
 
-Projects::RepositoriesController.prepend_mod_with('EE::Projects::RepositoriesController')
+Projects::RepositoriesController.prepend_mod_with('Projects::RepositoriesController')

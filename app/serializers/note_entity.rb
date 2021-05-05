@@ -103,4 +103,4 @@ class NoteEntity < API::Entities::Note
   end
 end
 
-NoteEntity.prepend_mod_with('EE::NoteEntity')
+NoteEntity.prepend_mod_with('NoteEntity')

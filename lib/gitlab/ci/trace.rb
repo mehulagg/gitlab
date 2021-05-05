@@ -317,4 +317,4 @@ module Gitlab
   end
 end
 
-::Gitlab::Ci::Trace.prepend_mod_with('EE::Gitlab::Ci::Trace')
+::Gitlab::Ci::Trace.prepend_mod_with('Gitlab::Ci::Trace')

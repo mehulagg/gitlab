@@ -136,4 +136,4 @@ module WikiHelper
   end
 end
 
-WikiHelper.prepend_mod_with('EE::WikiHelper')
+WikiHelper.prepend_mod_with('WikiHelper')

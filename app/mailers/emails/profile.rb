@@ -132,4 +132,4 @@ module Emails
   end
 end
 
-Emails::Profile.prepend_mod_with('EE::Emails::Profile')
+Emails::Profile.prepend_mod_with('Emails::Profile')

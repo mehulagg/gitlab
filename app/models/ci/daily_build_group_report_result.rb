@@ -30,4 +30,4 @@ module Ci
   end
 end
 
-Ci::DailyBuildGroupReportResult.prepend_mod_with('EE::Ci::DailyBuildGroupReportResult')
+Ci::DailyBuildGroupReportResult.prepend_mod_with('Ci::DailyBuildGroupReportResult')

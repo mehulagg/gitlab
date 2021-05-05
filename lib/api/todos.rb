@@ -124,4 +124,4 @@ module API
   end
 end
 
-API::Todos.prepend_mod_with('EE::API::Todos')
+API::Todos.prepend_mod_with('API::Todos')

@@ -172,4 +172,4 @@ module API
   end
 end
 
-API::Services.prepend_mod_with('EE::API::Services')
+API::Services.prepend_mod_with('API::Services')

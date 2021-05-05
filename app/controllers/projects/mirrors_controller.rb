@@ -94,4 +94,4 @@ class Projects::MirrorsController < Projects::ApplicationController
   end
 end
 
-Projects::MirrorsController.prepend_mod_with('EE::Projects::MirrorsController')
+Projects::MirrorsController.prepend_mod_with('Projects::MirrorsController')

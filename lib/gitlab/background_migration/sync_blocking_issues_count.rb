@@ -10,4 +10,4 @@ module Gitlab
   end
 end
 
-Gitlab::BackgroundMigration::SyncBlockingIssuesCount.prepend_mod_with('EE::Gitlab::BackgroundMigration::SyncBlockingIssuesCount')
+Gitlab::BackgroundMigration::SyncBlockingIssuesCount.prepend_mod_with('Gitlab::BackgroundMigration::SyncBlockingIssuesCount')

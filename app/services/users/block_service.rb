@@ -26,4 +26,4 @@ module Users
   end
 end
 
-Users::BlockService.prepend_mod_with('EE::Users::BlockService')
+Users::BlockService.prepend_mod_with('Users::BlockService')

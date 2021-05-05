@@ -31,4 +31,4 @@ module Preloaders
   end
 end
 
-Preloaders::LabelsPreloader.prepend_mod_with('EE::Preloaders::LabelsPreloader')
+Preloaders::LabelsPreloader.prepend_mod_with('Preloaders::LabelsPreloader')

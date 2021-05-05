@@ -36,4 +36,4 @@ class ConfirmationsController < Devise::ConfirmationsController
   end
 end
 
-ConfirmationsController.prepend_mod_with('EE::ConfirmationsController')
+ConfirmationsController.prepend_mod_with('ConfirmationsController')

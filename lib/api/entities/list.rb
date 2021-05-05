@@ -10,4 +10,4 @@ module API
   end
 end
 
-API::Entities::List.prepend_mod_with('EE::API::Entities::List')
+API::Entities::List.prepend_mod_with('API::Entities::List')

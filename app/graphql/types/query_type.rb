@@ -167,4 +167,4 @@ module Types
   end
 end
 
-Types::QueryType.prepend_mod_with('EE::Types::QueryType')
+Types::QueryType.prepend_mod_with('Types::QueryType')

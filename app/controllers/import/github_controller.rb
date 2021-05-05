@@ -265,4 +265,4 @@ class Import::GithubController < Import::BaseController
   end
 end
 
-Import::GithubController.prepend_mod_with('EE::Import::GithubController')
+Import::GithubController.prepend_mod_with('Import::GithubController')

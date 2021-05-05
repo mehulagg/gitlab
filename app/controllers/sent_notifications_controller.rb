@@ -53,4 +53,4 @@ class SentNotificationsController < ApplicationController
   end
 end
 
-SentNotificationsController.prepend_mod_with('EE::SentNotificationsController')
+SentNotificationsController.prepend_mod_with('SentNotificationsController')

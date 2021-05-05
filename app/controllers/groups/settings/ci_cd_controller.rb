@@ -100,4 +100,4 @@ module Groups
   end
 end
 
-Groups::Settings::CiCdController.prepend_mod_with('EE::Groups::Settings::CiCdController')
+Groups::Settings::CiCdController.prepend_mod_with('Groups::Settings::CiCdController')

@@ -51,4 +51,4 @@ class LabelPresenter < Gitlab::View::Presenter::Delegated
   end
 end
 
-LabelPresenter.prepend_mod_with('EE::LabelPresenter')
+LabelPresenter.prepend_mod_with('LabelPresenter')

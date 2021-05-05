@@ -48,4 +48,4 @@ module Gitlab
   end
 end
 
-Gitlab::GitAccessWiki.prepend_mod_with('EE::Gitlab::GitAccessWiki')
+Gitlab::GitAccessWiki.prepend_mod_with('Gitlab::GitAccessWiki')

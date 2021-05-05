@@ -126,4 +126,4 @@ class GroupProjectsFinder < ProjectsFinder
   end
 end
 
-GroupProjectsFinder.prepend_mod_with('EE::GroupProjectsFinder')
+GroupProjectsFinder.prepend_mod_with('GroupProjectsFinder')

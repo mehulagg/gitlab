@@ -87,4 +87,4 @@ class InstanceClusterablePresenter < ClusterablePresenter
   end
 end
 
-InstanceClusterablePresenter.prepend_mod_with('EE::InstanceClusterablePresenter')
+InstanceClusterablePresenter.prepend_mod_with('InstanceClusterablePresenter')

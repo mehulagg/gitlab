@@ -120,4 +120,4 @@ module ResourceAccessTokens
   end
 end
 
-ResourceAccessTokens::CreateService.prepend_mod_with('EE::ResourceAccessTokens::CreateService')
+ResourceAccessTokens::CreateService.prepend_mod_with('ResourceAccessTokens::CreateService')

@@ -113,4 +113,4 @@ class GlobalPolicy < BasePolicy
   rule { external_user }.prevent :create_snippet
 end
 
-GlobalPolicy.prepend_mod_with('EE::GlobalPolicy')
+GlobalPolicy.prepend_mod_with('GlobalPolicy')

@@ -255,4 +255,4 @@ class NotifyPreview < ActionMailer::Preview
   end
 end
 
-NotifyPreview.prepend_mod_with('EE::Preview::NotifyPreview')
+NotifyPreview.prepend_mod_with('Preview::NotifyPreview')

@@ -51,4 +51,4 @@ module Ci
   end
 end
 
-Ci::BuildPresenter.prepend_mod_with('EE::Ci::BuildPresenter')
+Ci::BuildPresenter.prepend_mod_with('Ci::BuildPresenter')

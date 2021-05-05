@@ -79,4 +79,4 @@ class LabelNote < SyntheticNote
   end
 end
 
-LabelNote.prepend_mod_with('EE::LabelNote')
+LabelNote.prepend_mod_with('LabelNote')

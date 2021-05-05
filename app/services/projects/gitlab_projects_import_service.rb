@@ -77,4 +77,4 @@ module Projects
   end
 end
 
-Projects::GitlabProjectsImportService.prepend_mod_with('EE::Projects::GitlabProjectsImportService')
+Projects::GitlabProjectsImportService.prepend_mod_with('Projects::GitlabProjectsImportService')

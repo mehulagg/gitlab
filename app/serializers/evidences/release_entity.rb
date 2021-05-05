@@ -12,4 +12,4 @@ module Evidences
   end
 end
 
-Evidences::ReleaseEntity.prepend_mod_with('EE::Evidences::ReleaseEntity')
+Evidences::ReleaseEntity.prepend_mod_with('Evidences::ReleaseEntity')

@@ -10,4 +10,4 @@ module Gitlab
   end
 end
 
-Gitlab::BackgroundMigration::RemoveDuplicateCsFindings.prepend_mod_with('EE::Gitlab::BackgroundMigration::RemoveDuplicateCsFindings')
+Gitlab::BackgroundMigration::RemoveDuplicateCsFindings.prepend_mod_with('Gitlab::BackgroundMigration::RemoveDuplicateCsFindings')

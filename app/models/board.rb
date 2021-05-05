@@ -47,4 +47,4 @@ class Board < ApplicationRecord
   end
 end
 
-Board.prepend_mod_with('EE::Board')
+Board.prepend_mod_with('Board')

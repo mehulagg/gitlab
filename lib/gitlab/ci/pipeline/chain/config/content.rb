@@ -52,4 +52,4 @@ module Gitlab
   end
 end
 
-Gitlab::Ci::Pipeline::Chain::Config::Content.prepend_mod_with('EE::Gitlab::Ci::Pipeline::Chain::Config::Content')
+Gitlab::Ci::Pipeline::Chain::Config::Content.prepend_mod_with('Gitlab::Ci::Pipeline::Chain::Config::Content')

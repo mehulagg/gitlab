@@ -252,4 +252,4 @@ class Todo < ApplicationRecord
   end
 end
 
-Todo.prepend_mod_with('EE::Todo')
+Todo.prepend_mod_with('Todo')

@@ -95,4 +95,4 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 end
 
-Groups::MilestonesController.prepend_mod_with('EE::Groups::MilestonesController')
+Groups::MilestonesController.prepend_mod_with('Groups::MilestonesController')

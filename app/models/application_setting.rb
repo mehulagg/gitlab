@@ -664,4 +664,4 @@ class ApplicationSetting < ApplicationRecord
   end
 end
 
-ApplicationSetting.prepend_mod_with('EE::ApplicationSetting')
+ApplicationSetting.prepend_mod_with('ApplicationSetting')

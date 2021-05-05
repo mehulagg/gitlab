@@ -52,7 +52,7 @@ class DummyService
   end
 end
 
-DummyService.prepend_mod_with('EE::DummyService')
+DummyService.prepend_mod_with('DummyService')
 DummyService.prepend(Measurable)
 ```
 

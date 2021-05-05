@@ -49,4 +49,4 @@ class BaseCountService
   end
 end
 
-BaseCountService.prepend_mod_with('EE::BaseCountService')
+BaseCountService.prepend_mod_with('BaseCountService')

@@ -44,7 +44,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
   it 'flags the use of `prepend_mod_with(EE::Foo::Bar)` in the middle of a file' do
     expect_offense(<<~SOURCE)
     class Foo
-      prepend_mod_with('EE::Foo::Bar')
+      prepend_mod_with('Foo::Bar')
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Injecting EE modules must be done on the last line of this file, outside of any class or module definitions
     end
     SOURCE
@@ -133,7 +133,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     class Foo
     end
 
-    Foo.prepend_mod_with('EE::Foo')
+    Foo.prepend_mod_with('Foo')
     SOURCE
   end
 
@@ -142,7 +142,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     class Foo
     end
 
-    Foo.include_mod_with('EE::Foo')
+    Foo.include_mod_with('Foo')
     SOURCE
   end
 
@@ -151,7 +151,7 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     class Foo
     end
 
-    Foo.extend_mod_with('EE::Foo')
+    Foo.extend_mod_with('Foo')
     SOURCE
   end
 
@@ -160,9 +160,9 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     class Foo
     end
 
-    Foo.extend_mod_with('EE::Foo')
-    Foo.include_mod_with('EE::Foo')
-    Foo.prepend_mod_with('EE::Foo')
+    Foo.extend_mod_with('Foo')
+    Foo.include_mod_with('Foo')
+    Foo.prepend_mod_with('Foo')
     SOURCE
   end
 
@@ -171,8 +171,8 @@ RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule do
     class Foo
     end
 
-    Foo.include_mod_with('EE::Foo')
-    Foo.prepend_mod_with('EE::Foo')
+    Foo.include_mod_with('Foo')
+    Foo.prepend_mod_with('Foo')
 
     Foo.include(Bar)
     # comment on prepending Bar

@@ -100,4 +100,4 @@ module ButtonHelper
   end
 end
 
-ButtonHelper.prepend_mod_with('EE::ButtonHelper')
+ButtonHelper.prepend_mod_with('ButtonHelper')

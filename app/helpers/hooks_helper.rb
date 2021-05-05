@@ -38,4 +38,4 @@ module HooksHelper
   end
 end
 
-HooksHelper.prepend_mod_with('EE::HooksHelper')
+HooksHelper.prepend_mod_with('HooksHelper')

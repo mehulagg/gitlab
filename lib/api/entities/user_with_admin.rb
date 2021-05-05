@@ -9,4 +9,4 @@ module API
   end
 end
 
-API::Entities::UserWithAdmin.prepend_mod_with('EE::API::Entities::UserWithAdmin')
+API::Entities::UserWithAdmin.prepend_mod_with('API::Entities::UserWithAdmin')

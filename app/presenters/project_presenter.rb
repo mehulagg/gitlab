@@ -480,4 +480,4 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 end
 
-ProjectPresenter.prepend_mod_with('EE::ProjectPresenter')
+ProjectPresenter.prepend_mod_with('ProjectPresenter')

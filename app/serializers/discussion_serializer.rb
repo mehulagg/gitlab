@@ -18,4 +18,4 @@ class DiscussionSerializer < BaseSerializer
   end
 end
 
-DiscussionSerializer.prepend_mod_with('EE::DiscussionSerializer')
+DiscussionSerializer.prepend_mod_with('DiscussionSerializer')

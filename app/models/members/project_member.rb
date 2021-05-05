@@ -154,4 +154,4 @@ class ProjectMember < Member
   # rubocop: enable CodeReuse/ServiceClass
 end
 
-ProjectMember.prepend_mod_with('EE::ProjectMember')
+ProjectMember.prepend_mod_with('ProjectMember')

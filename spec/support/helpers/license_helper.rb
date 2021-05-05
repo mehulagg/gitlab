@@ -7,4 +7,4 @@ module LicenseHelpers
   end
 end
 
-LicenseHelpers.prepend_mod_with('EE::LicenseHelpers')
+LicenseHelpers.prepend_mod_with('LicenseHelpers')

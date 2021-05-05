@@ -84,4 +84,4 @@ module Emails
   end
 end
 
-Emails::Notes.prepend_mod_with('EE::Emails::Notes')
+Emails::Notes.prepend_mod_with('Emails::Notes')

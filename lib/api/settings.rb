@@ -234,4 +234,4 @@ module API
   end
 end
 
-API::Settings.prepend_mod_with('EE::API::Settings')
+API::Settings.prepend_mod_with('API::Settings')

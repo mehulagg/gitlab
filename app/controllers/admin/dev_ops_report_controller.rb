@@ -24,4 +24,4 @@ class Admin::DevOpsReportController < Admin::ApplicationController
   end
 end
 
-Admin::DevOpsReportController.prepend_mod_with('EE::Admin::DevOpsReportController')
+Admin::DevOpsReportController.prepend_mod_with('Admin::DevOpsReportController')

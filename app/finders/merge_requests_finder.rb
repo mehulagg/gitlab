@@ -220,4 +220,4 @@ class MergeRequestsFinder < IssuableFinder
   end
 end
 
-MergeRequestsFinder.prepend_mod_with('EE::MergeRequestsFinder')
+MergeRequestsFinder.prepend_mod_with('MergeRequestsFinder')

@@ -98,4 +98,4 @@ class EnvironmentSerializer < BaseSerializer
   # rubocop: enable CodeReuse/ActiveRecord
 end
 
-EnvironmentSerializer.prepend_mod_with('EE::EnvironmentSerializer')
+EnvironmentSerializer.prepend_mod_with('EnvironmentSerializer')

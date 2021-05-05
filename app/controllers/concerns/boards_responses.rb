@@ -91,4 +91,4 @@ module BoardsResponses
   end
 end
 
-BoardsResponses.prepend_mod_with('EE::BoardsResponses')
+BoardsResponses.prepend_mod_with('BoardsResponses')

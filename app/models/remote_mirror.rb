@@ -339,4 +339,4 @@ class RemoteMirror < ApplicationRecord
   end
 end
 
-RemoteMirror.prepend_mod_with('EE::RemoteMirror')
+RemoteMirror.prepend_mod_with('RemoteMirror')

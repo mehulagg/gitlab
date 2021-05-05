@@ -251,4 +251,4 @@ module Auth
   end
 end
 
-Auth::ContainerRegistryAuthenticationService.prepend_mod_with('EE::Auth::ContainerRegistryAuthenticationService')
+Auth::ContainerRegistryAuthenticationService.prepend_mod_with('Auth::ContainerRegistryAuthenticationService')

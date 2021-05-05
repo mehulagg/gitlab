@@ -13,4 +13,4 @@ class IssueAssignee < ApplicationRecord
   scope :for_assignee, ->(user) { where(assignee: user) }
 end
 
-IssueAssignee.prepend_mod_with('EE::IssueAssignee')
+IssueAssignee.prepend_mod_with('IssueAssignee')

@@ -215,4 +215,4 @@ module NotesHelper
   end
 end
 
-NotesHelper.prepend_mod_with('EE::NotesHelper')
+NotesHelper.prepend_mod_with('NotesHelper')

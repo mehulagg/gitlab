@@ -6,4 +6,4 @@ module SubscribableBannerHelper
   end
 end
 
-SubscribableBannerHelper.prepend_mod_with('EE::SubscribableBannerHelper')
+SubscribableBannerHelper.prepend_mod_with('SubscribableBannerHelper')

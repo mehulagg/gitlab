@@ -539,4 +539,4 @@ class JiraService < IssueTrackerService
   end
 end
 
-JiraService.prepend_mod_with('EE::JiraService')
+JiraService.prepend_mod_with('JiraService')

@@ -48,4 +48,4 @@ module API
   end
 end
 
-API::Entities::Issue.prepend_mod_with('EE::API::Entities::Issue')
+API::Entities::Issue.prepend_mod_with('API::Entities::Issue')

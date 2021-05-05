@@ -10,4 +10,4 @@ class Identity < ApplicationRecord
   end
 end
 
-Identity::UniquenessScopes.prepend_mod_with('EE::Identity::UniquenessScopes')
+Identity::UniquenessScopes.prepend_mod_with('Identity::UniquenessScopes')

@@ -68,4 +68,4 @@ class Projects::ProtectedRefsController < Projects::ApplicationController
   end
 end
 
-Projects::ProtectedRefsController.prepend_mod_with('EE::Projects::ProtectedRefsController')
+Projects::ProtectedRefsController.prepend_mod_with('Projects::ProtectedRefsController')

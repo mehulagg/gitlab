@@ -49,4 +49,4 @@ class ProjectGroupLink < ApplicationRecord
   end
 end
 
-ProjectGroupLink.prepend_mod_with('EE::ProjectGroupLink')
+ProjectGroupLink.prepend_mod_with('ProjectGroupLink')

@@ -60,4 +60,4 @@ module Notes
   end
 end
 
-Notes::QuickActionsService.prepend_mod_with('EE::Notes::QuickActionsService')
+Notes::QuickActionsService.prepend_mod_with('Notes::QuickActionsService')

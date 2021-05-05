@@ -58,4 +58,4 @@ module Projects
   end
 end
 
-Projects::CreateFromTemplateService.prepend_mod_with('EE::Projects::CreateFromTemplateService')
+Projects::CreateFromTemplateService.prepend_mod_with('Projects::CreateFromTemplateService')

@@ -29,4 +29,4 @@ class MergeRequestUserEntity < ::API::Entities::UserBasic
   end
 end
 
-MergeRequestUserEntity.prepend_mod_with('EE::MergeRequestUserEntity')
+MergeRequestUserEntity.prepend_mod_with('MergeRequestUserEntity')

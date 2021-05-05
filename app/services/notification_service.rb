@@ -876,4 +876,4 @@ class NotificationService
   end
 end
 
-NotificationService.prepend_mod_with('EE::NotificationService')
+NotificationService.prepend_mod_with('NotificationService')

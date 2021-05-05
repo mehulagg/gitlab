@@ -117,4 +117,4 @@ module Members
   end
 end
 
-Members::DestroyService.prepend_mod_with('EE::Members::DestroyService')
+Members::DestroyService.prepend_mod_with('Members::DestroyService')

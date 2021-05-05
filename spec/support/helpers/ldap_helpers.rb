@@ -71,4 +71,4 @@ module LdapHelpers
   end
 end
 
-LdapHelpers.include_mod_with('EE::LdapHelpers')
+LdapHelpers.include_mod_with('LdapHelpers')

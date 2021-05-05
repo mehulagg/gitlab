@@ -53,4 +53,4 @@ module MergeRequests
   end
 end
 
-MergeRequests::CreateService.include_mod_with('EE::MergeRequests::CreateService')
+MergeRequests::CreateService.include_mod_with('MergeRequests::CreateService')

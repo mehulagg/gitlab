@@ -145,4 +145,4 @@ module Gitlab
   end
 end
 
-Gitlab::Middleware::ReadOnly::Controller.prepend_mod_with('EE::Gitlab::Middleware::ReadOnly::Controller')
+Gitlab::Middleware::ReadOnly::Controller.prepend_mod_with('Gitlab::Middleware::ReadOnly::Controller')

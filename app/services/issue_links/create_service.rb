@@ -43,4 +43,4 @@ module IssueLinks
   end
 end
 
-IssueLinks::CreateService.prepend_mod_with('EE::IssueLinks::CreateService')
+IssueLinks::CreateService.prepend_mod_with('IssueLinks::CreateService')

@@ -73,4 +73,4 @@ module Users
   end
 end
 
-Users::DestroyService.prepend_mod_with('EE::Users::DestroyService')
+Users::DestroyService.prepend_mod_with('Users::DestroyService')

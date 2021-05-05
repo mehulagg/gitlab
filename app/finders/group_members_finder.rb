@@ -88,4 +88,4 @@ class GroupMembersFinder < UnionFinder
   end
 end
 
-GroupMembersFinder.prepend_mod_with('EE::GroupMembersFinder')
+GroupMembersFinder.prepend_mod_with('GroupMembersFinder')

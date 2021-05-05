@@ -10,4 +10,4 @@ module ProtectedBranches
   end
 end
 
-ProtectedBranches::DestroyService.prepend_mod_with('EE::ProtectedBranches::DestroyService')
+ProtectedBranches::DestroyService.prepend_mod_with('ProtectedBranches::DestroyService')

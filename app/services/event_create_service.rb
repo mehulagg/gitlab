@@ -222,4 +222,4 @@ class EventCreateService
   end
 end
 
-EventCreateService.prepend_mod_with('EE::EventCreateService')
+EventCreateService.prepend_mod_with('EventCreateService')

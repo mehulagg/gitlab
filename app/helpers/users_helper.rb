@@ -322,4 +322,4 @@ module UsersHelper
   end
 end
 
-UsersHelper.prepend_mod_with('EE::UsersHelper')
+UsersHelper.prepend_mod_with('UsersHelper')

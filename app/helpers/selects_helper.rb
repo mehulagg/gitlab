@@ -91,4 +91,4 @@ module SelectsHelper
   end
 end
 
-SelectsHelper.prepend_mod_with('EE::SelectsHelper')
+SelectsHelper.prepend_mod_with('SelectsHelper')

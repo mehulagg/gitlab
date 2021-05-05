@@ -57,4 +57,4 @@ module Milestoneable
   end
 end
 
-Milestoneable.prepend_mod_with('EE::Milestoneable')
+Milestoneable.prepend_mod_with('Milestoneable')

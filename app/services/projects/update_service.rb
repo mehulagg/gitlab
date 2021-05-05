@@ -170,4 +170,4 @@ module Projects
   end
 end
 
-Projects::UpdateService.prepend_mod_with('EE::Projects::UpdateService')
+Projects::UpdateService.prepend_mod_with('Projects::UpdateService')

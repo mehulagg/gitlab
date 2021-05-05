@@ -46,4 +46,4 @@ module InternalRedirect
   end
 end
 
-InternalRedirect.prepend_mod_with('EE::InternalRedirect')
+InternalRedirect.prepend_mod_with('InternalRedirect')

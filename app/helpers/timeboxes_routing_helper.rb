@@ -18,4 +18,4 @@ module TimeboxesRoutingHelper
   end
 end
 
-TimeboxesRoutingHelper.prepend_mod_with('EE::TimeboxesRoutingHelper')
+TimeboxesRoutingHelper.prepend_mod_with('TimeboxesRoutingHelper')

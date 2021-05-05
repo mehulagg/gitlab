@@ -117,4 +117,4 @@ class IssuesFinder < IssuableFinder
   end
 end
 
-IssuesFinder.prepend_mod_with('EE::IssuesFinder')
+IssuesFinder.prepend_mod_with('IssuesFinder')

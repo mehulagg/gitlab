@@ -217,4 +217,4 @@ module API
   end
 end
 
-API::Releases.prepend_mod_with('EE::API::Releases')
+API::Releases.prepend_mod_with('API::Releases')

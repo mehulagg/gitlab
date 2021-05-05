@@ -16,4 +16,4 @@ class IssuePresenter < Gitlab::View::Presenter::Delegated
   end
 end
 
-IssuePresenter.prepend_mod_with('EE::IssuePresenter')
+IssuePresenter.prepend_mod_with('IssuePresenter')

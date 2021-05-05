@@ -28,4 +28,4 @@ module Ci
   end
 end
 
-Ci::PipelineEditorHelper.prepend_mod_with('EE::Ci::PipelineEditorHelper')
+Ci::PipelineEditorHelper.prepend_mod_with('Ci::PipelineEditorHelper')

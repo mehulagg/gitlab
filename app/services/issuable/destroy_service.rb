@@ -35,4 +35,4 @@ module Issuable
   end
 end
 
-Issuable::DestroyService.prepend_mod_with('EE::Issuable::DestroyService')
+Issuable::DestroyService.prepend_mod_with('Issuable::DestroyService')

@@ -92,4 +92,4 @@ class AuditEvent < ApplicationRecord
   end
 end
 
-AuditEvent.prepend_mod_with('EE::AuditEvent')
+AuditEvent.prepend_mod_with('AuditEvent')

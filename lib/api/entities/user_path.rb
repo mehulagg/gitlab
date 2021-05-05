@@ -13,4 +13,4 @@ module API
   end
 end
 
-API::Entities::UserPath.prepend_mod_with('EE::API::Entities::UserPath')
+API::Entities::UserPath.prepend_mod_with('API::Entities::UserPath')

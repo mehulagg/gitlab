@@ -490,4 +490,4 @@ class Namespace < ApplicationRecord
   end
 end
 
-Namespace.prepend_mod_with('EE::Namespace')
+Namespace.prepend_mod_with('Namespace')

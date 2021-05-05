@@ -65,4 +65,4 @@ module Banzai
   end
 end
 
-Banzai::Filter::SanitizationFilter.prepend_mod_with('EE::Banzai::Filter::SanitizationFilter')
+Banzai::Filter::SanitizationFilter.prepend_mod_with('Banzai::Filter::SanitizationFilter')

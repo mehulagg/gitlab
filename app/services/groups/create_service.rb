@@ -103,4 +103,4 @@ module Groups
   end
 end
 
-Groups::CreateService.prepend_mod_with('EE::Groups::CreateService')
+Groups::CreateService.prepend_mod_with('Groups::CreateService')

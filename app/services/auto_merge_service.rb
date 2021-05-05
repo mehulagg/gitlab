@@ -74,4 +74,4 @@ class AutoMergeService < BaseService
   end
 end
 
-AutoMergeService.prepend_mod_with('EE::AutoMergeService')
+AutoMergeService.prepend_mod_with('AutoMergeService')

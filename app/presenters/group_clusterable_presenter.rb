@@ -49,4 +49,4 @@ class GroupClusterablePresenter < ClusterablePresenter
   end
 end
 
-GroupClusterablePresenter.prepend_mod_with('EE::GroupClusterablePresenter')
+GroupClusterablePresenter.prepend_mod_with('GroupClusterablePresenter')

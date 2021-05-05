@@ -28,4 +28,4 @@ module GraphHelper
   end
 end
 
-GraphHelper.prepend_mod_with('EE::GraphHelper')
+GraphHelper.prepend_mod_with('GraphHelper')

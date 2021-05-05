@@ -109,4 +109,4 @@ module Issuable
   end
 end
 
-Issuable::CommonSystemNotesService.prepend_mod_with('EE::Issuable::CommonSystemNotesService')
+Issuable::CommonSystemNotesService.prepend_mod_with('Issuable::CommonSystemNotesService')

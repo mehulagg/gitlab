@@ -187,4 +187,4 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
   end
 end
 
-MergeRequestPollCachedWidgetEntity.prepend_mod_with('EE::MergeRequestPollCachedWidgetEntity')
+MergeRequestPollCachedWidgetEntity.prepend_mod_with('MergeRequestPollCachedWidgetEntity')

@@ -973,4 +973,4 @@ module Gitlab
   end
 end
 
-Gitlab::UsageData.prepend_mod_with('EE::Gitlab::UsageData')
+Gitlab::UsageData.prepend_mod_with('Gitlab::UsageData')
