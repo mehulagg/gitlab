@@ -292,7 +292,7 @@ you've assigned the role the correct permissions.
 
 ### Key Pairs are not loaded
 
-Gitlab loads the key pairs from the **Cluster Region** specified. Ensure that key pair exists in that region. 
+GitLab loads the key pairs from the **Cluster Region** specified. Ensure that key pair exists in that region. 
 
 #### `ROLLBACK_FAILED` during cluster creation
 
