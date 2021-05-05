@@ -18,8 +18,22 @@ that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3.
 We are working on a patch and recommend delaying any upgrade attempt until a fixed version
 is released.
 
-Currently it is not possible to achieve a true [zero downtime update](https://docs.gitlab.com/13.8/omnibus/update/#zero-downtime-updates)
-when updating to `13.9.x`.
+It is still possible to complete a zero downtime update to this version however. Before running the
+final `sudo gitlab-rake db:migrate` command on the deploy node, you can execute the following queries via
+the PostgreSQL console (or `sudo gitlab-psql`) to drop the problematic triggers:
+
+```
+drop trigger trigger_e40a6f1858e6 on application_settings;
+drop trigger trigger_0d588df444c8 on application_settings;
+drop trigger trigger_1572cbc9a15f on application_settings;
+```
+
+Afterwards, you can run the final `sudo gitlab-rake db:migrate` command.
+
+If you have already run the final `sudo gitlab-rake db:migrate` command on the deploy node and have
+encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you can still
+proceed to execute the aforementioned queries and then run the `sudo gitlab-rake db:migrate` command
+again to complete the update.
 
 More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
