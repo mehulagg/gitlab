@@ -7,9 +7,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { visitUrl } from '~/lib/utils/url_utility';
-
-jest.mock('~/lib/utils/url_utility');
 
 const localVue = createLocalVue();
 
@@ -93,7 +90,7 @@ describe('Iteration cadence form', () => {
     it('cancel button links to list page', () => {
       clickCancel();
 
-      expect(push).toHaveBeenCalledWith('index');
+      expect(push).toHaveBeenCalledWith({ name: 'index' });
     });
 
     describe('save', () => {
@@ -138,7 +135,7 @@ describe('Iteration cadence form', () => {
 
         await waitForPromises();
 
-        expect(visitUrl).toHaveBeenCalled();
+        expect(push).toHaveBeenCalledWith({ name: 'index' });
       });
 
       it('does not submit if required fields missing', () => {

@@ -9,7 +9,6 @@ import {
   GlFormInput,
   GlFormSelect,
 } from '@gitlab/ui';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { s__, __ } from '~/locale';
 import createCadence from '../queries/create_cadence.mutation.graphql';
 
@@ -143,7 +142,7 @@ export default {
       return this.createCadence();
     },
     cancel() {
-      this.$router.push('index');
+      this.$router.push({ name: 'index' });
     },
     createCadence() {
       return this.$apollo
@@ -164,7 +163,7 @@ export default {
             return;
           }
 
-          visitUrl(this.cadencesListPath);
+          this.$router.push({ name: 'index' });
         })
         .catch((e) => {
           this.errorMessage = __('Unable to save cadence. Please try again');
