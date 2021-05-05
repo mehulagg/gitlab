@@ -16,6 +16,10 @@ This in-development feature might not be available for your use. There can be
 [risks when enabling features still in development](../../feature_flags.md#risks-when-enabling-features-still-in-development).
 Refer to this feature's version history for more details.
 
+Prerequisites:
+
+- A minimum of [Reporter access](../../permissions.md) to the group.
+
 To access Group DevOps Adoption, go to your group and select **Analytics > DevOps Adoption**.
 
 Group DevOps Adoption shows you how individual groups and sub-groups within your organization use the following features:
