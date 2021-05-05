@@ -816,8 +816,10 @@ RSpec.describe User do
 
   describe '#user_authorized_by_provisioning_group?' do
     context 'when user is provisioned by group' do
+      let(:group) { build(:group) }
+
       before do
-        user.user_detail.provisioned_by_group = build(:group)
+        user.user_detail.provisioned_by_group = group
       end
 
       it 'is true' do
@@ -831,6 +833,24 @@ RSpec.describe User do
 
         it 'is false' do
           expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+      end
+
+      context 'with feature flag switched on for particular groups' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false when provisioned by group without feature flag' do
+          stub_feature_flags(block_password_auth_for_saml_users: create(:group))
+
+          expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+
+        it 'is true when provisioned by group with feature flag' do
+          stub_feature_flags(block_password_auth_for_saml_users: group)
+
+          expect(user.user_authorized_by_provisioning_group?).to eq true
         end
       end
     end
