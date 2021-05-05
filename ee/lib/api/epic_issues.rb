@@ -71,7 +71,8 @@ module API
 
           present paginate(related_issues(epic)),
             with: EE::API::Entities::EpicIssue,
-            current_user: current_user
+            current_user: current_user,
+            include_subscribed: false
         end
       end
 
