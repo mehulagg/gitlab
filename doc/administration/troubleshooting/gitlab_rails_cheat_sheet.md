@@ -307,7 +307,8 @@ pp p.statistics  # compare with earlier values
 
 ### Identify deploy keys associated with blocked and non-member users 
 
-When the user who created a deploy key is blocked or removed from the project the key can no longer be used to push to the project (see https://gitlab.com/gitlab-org/gitlab/-/issues/329742).
+When the user who created a deploy key is blocked or removed from the project the key 
+can no longer be used to push to the project. This script identifies unusable deploy keys.
 
 ```ruby
 def deploy_key_allowed(deploy_key, project)
