@@ -219,4 +219,30 @@ RSpec.describe Banzai::Filter::References::SnippetReferenceFilter do
       expect(reference_filter(act, project: nil, group: create(:group)).to_html).to eq exp
     end
   end
+
+  context 'checking N+1' do
+    let(:namespace2) { create(:namespace) }
+    let(:project2)   { create(:project, :public, namespace: namespace2) }
+    let(:snippet2)   { create(:project_snippet, project: project2) }
+    let(:reference2) { "#{project2.full_path}$#{snippet2.id}" }
+
+    it 'does not have N+1 per multiple references per project', :use_sql_query_cache do
+      markdown = "#{reference} $9999990"
+
+      ActiveRecord::QueryRecorder.new(query_recorder_debug: true, skip_cached: false) do
+        reference_filter(markdown)
+      end
+
+      markdown = "#{reference} $9999990 $9999991 $9999992 $9999993 #{reference2} something/cool$12"
+
+      # Since we're not batching snippet queries across projects,
+      # we have to account for that.
+      # 1 for both projects, 1 for snippets in each project == 3
+      max_count = 3
+
+      expect do
+        reference_filter(markdown)
+      end.not_to exceed_all_query_limit(max_count)
+    end
+  end
 end
