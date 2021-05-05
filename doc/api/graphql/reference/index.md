@@ -8931,7 +8931,11 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="grouppackagesincludeversionless"></a>`includeVersionless` | [`Boolean`](#boolean) | Include versionless packages. |
+| <a id="grouppackagespackagename"></a>`packageName` | [`String`](#string) | Search a package by name. |
+| <a id="grouppackagespackagetype"></a>`packageType` | [`PackageTypeEnum`](#packagetypeenum) | Filter a package by type. |
 | <a id="grouppackagessort"></a>`sort` | [`PackageGroupSort`](#packagegroupsort) | Sort packages by this criteria. |
+| <a id="grouppackagesstatus"></a>`status` | [`PackageStatusEnum`](#packagestatusenum) | Filter a package by status. |
 
 ##### `Group.projects`
 
@@ -11140,7 +11144,11 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="projectpackagesincludeversionless"></a>`includeVersionless` | [`Boolean`](#boolean) | Include versionless packages. |
+| <a id="projectpackagespackagename"></a>`packageName` | [`String`](#string) | Search a package by name. |
+| <a id="projectpackagespackagetype"></a>`packageType` | [`PackageTypeEnum`](#packagetypeenum) | Filter a package by type. |
 | <a id="projectpackagessort"></a>`sort` | [`PackageSort`](#packagesort) | Sort packages by this criteria. |
+| <a id="projectpackagesstatus"></a>`status` | [`PackageStatusEnum`](#packagestatusenum) | Filter a package by status. |
 
 ##### `Project.pipeline`
 
