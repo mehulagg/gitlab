@@ -17,7 +17,10 @@ class Projects::RunnerProjectsController < Projects::ApplicationController
     if @runner.assign_to(project, current_user)
       redirect_to path
     else
-      redirect_to path, alert: 'Failed adding runner to project'
+      assign_to_messages = @runner.errors.messages[:assign_to] if @runner.errors.messages.include?(:assign_to)
+      alert = assign_to_messages.join(',') if assign_to_messages
+
+      redirect_to path, alert: alert || 'Failed adding runner to project'
     end
   end
 
