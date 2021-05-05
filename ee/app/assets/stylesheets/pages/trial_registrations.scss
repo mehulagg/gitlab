@@ -1,0 +1,22 @@
+[data-page^=trials],
+[data-page^=trial_registrations] {
+  $gl-spacing-scale-60: 60 * $grid-size;
+
+  .gl-xl-display-block {
+    @media (min-width: $breakpoint-xl) {
+      @include gl-display-block;
+    }
+  }
+
+  .gl-w-60 {
+    width: $gl-spacing-scale-60;
+  }
+
+  .gl-max-w-60 {
+    max-width: $gl-spacing-scale-60;
+  }
+
+  .gl-min-h-full {
+    min-height: 100vh;
+  }
+}

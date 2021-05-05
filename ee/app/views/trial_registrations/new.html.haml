@@ -4,6 +4,12 @@
   = render "layouts/google_tag_manager_head"
 = render "layouts/google_tag_manager_body"
 
+- in_experiment = true
+
+- if in_experiment
+  - content_for(:aside) do
+    %h1 Left side
+
 %h2.center.pt-6.pb-4.gl-mb-0
   = _('Start a Free Ultimate Trial')
 

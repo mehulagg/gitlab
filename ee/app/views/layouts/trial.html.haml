@@ -1,10 +1,17 @@
+- page_classes = page_class << @html_class
+- page_classes = page_classes.flatten.compact
+
 !!! 5
-%html{ lang: "en" }
+%html.gl-min-h-full{ lang: I18n.locale, class: page_classes }
   = render "layouts/head"
-  %body.ui-indigo.login-page.application.navless
+  %body.navless.gl-min-h-full{ class: "#{user_application_theme} #{@body_class} #{client_class_list}", data: body_data }
     = render "layouts/header/logo_with_title"
     = render "layouts/broadcast"
-    .container.navless-container.pt-0
-      .content.mw-460.mx-auto
-        = render "layouts/flash"
-        = yield
+    .container-fluid.gl-display-flex.gl-flex-direction-row.gl-min-h-full.gl-pt-8
+      - if content_for(:aside)
+        %aside.gl-w-60.gl-flex-grow-0.gl-bg-gray-10.gl-display-none.gl-xl-display-block
+          = yield :aside
+      %section.content.gl-flex-grow-1
+        .gl-max-w-60.gl-mx-auto
+          = render "layouts/flash"
+          = yield
