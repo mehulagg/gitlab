@@ -7,29 +7,49 @@ type: reference, howto
 
 # Web API Fuzz Testing **(ULTIMATE)**
 
-You can add web API fuzzing to your [GitLab CI/CD](../../../ci/README.md)
-pipelines. This helps you discover bugs and potential security issues that other QA processes may
-miss. API fuzzing performs fuzz testing of API operation parameters. Fuzz testing sets operation
+Web API fuzzing performs fuzz testing of API operation parameters. Fuzz testing sets operation
 parameters to unexpected values in an effort to cause unexpected behavior and errors in the API
-backend.
+backend. This helps you discover bugs and potential security issues that other QA processes may
+miss.
 
 We recommend that you use fuzz testing in addition to [GitLab Secure](../index.md)'s
 other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
 you can run fuzz tests as part your CI/CD workflow.
 
-## Requirements
+## Web API fuzzing scan
 
-- One of the following web API types:
-  - REST API
-  - SOAP
-  - GraphQL
-  - Form bodies, JSON, or XML
-- One of the following assets to provide APIs to test:
-  - OpenAPI v2 or v3 API definition
-  - HTTP Archive (HAR) of API requests to test
-  - Postman Collection v2.0 or v2.1
+Web API fuzzing runs in the `fuzz` stage of the CI/CD pipeline. To ensure API fuzzing scans the
+latest code, your CI/CD pipeline should deploy changes to a test environment in one of the jobs
+preceding the `fuzz` job.
 
-## When fuzzing scans run
+If your pipeline is configured to deploy to the same web server on each run, running a
+pipeline while another is still running could cause a race condition in which one pipeline
+overwrites the code from another. The API to scan should be excluded from changes for the duration
+of a fuzzing scan. The only changes to the API should be from the fuzzing scanner. Any changes made
+to the API (for example, by users, scheduled tasks, database changes, code changes, other pipelines,
+or other scanners) during a scan could cause inaccurate results.
+
+You can run a Web API fuzzing scan using the following methods:
+
+- [OpenAPI specification](#openapi-specification) - version 2 or 3
+- [HTTP Archive](#http-archive-har) (HAR)
+- [Postman Collection](#postman-collection) - version 2.0 or 2.1
+
+Example projects using these methods are available:
+
+- [Example OpenAPI v2 specification project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/openapi)
+- [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/har)
+- [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/postman-api-fuzzing-example)
+- [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/graphql-api-fuzzing-example)
+
+## API fuzzing profiles
+
+The GitLab [API fuzzing configuration file](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml)
+contains several testing profiles defined with varying amounts of fuzzing. We recommend that you
+start with the `Quick-10` profile. Testing with this profile completes quickly, allowing for easier
+configuration validation.
+
+/==============/
 
 In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), to enable API fuzzing you must include the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml) provided as part of your GitLab installation. Additionally, you must add the stage `fuzz` in your `.gitlab-ci.yml`, for example:
 
@@ -44,33 +64,25 @@ include:
   - template: API-Fuzzing.gitlab-ci.yml
 ```
 
-In GitLab 13.12 and earlier, when using the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). The template already defines `build`,`test`, `deploy`, and `fuzz` stages, and the `fuzz` stage runs last by default. 
+In GitLab 13.12 and earlier, when using the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). The template already defines `build`,`test`, `deploy`, and `fuzz` stages, and the `fuzz` stage runs last by default.
 
 In GitLab 13.11, the predefined stages are deprecated, thus they've been removed from the `API-Fuzzing.latest.gitlab-ci.yml` template. Anyone can test and see if any changes are needed in their configuration files.
 
-Always, to ensure API fuzzing scans the latest code, your CI pipeline should deploy changes to a test environment in one of the jobs preceding the `fuzz` job.
+/===========/
 
-Note that if your pipeline is configured to deploy to the same web server on each run, running a
-pipeline while another is still running could cause a race condition in which one pipeline
-overwrites the code from another. The API to scan should be excluded from changes for the duration
-of a fuzzing scan. The only changes to the API should be from the fuzzing scanner. Be aware that
-any changes made to the API (for example, by users, scheduled tasks, database changes, code
-changes, other pipelines, or other scanners) during a scan could cause inaccurate results.
+## Enable Web API fuzzing
 
-## Configuration
+Requirements:
 
-There are three ways to perform scans. See the configuration section for the one you wish to use:
-
-- [OpenAPI v2 or v3 specification](#openapi-specification)
-- [HTTP Archive (HAR)](#http-archive-har)
-- [Postman Collection v2.0 or v2.1](#postman-collection)
-
-Examples of both configurations can be found here:
-
-- [Example OpenAPI v2 specification project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/openapi)
-- [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/har)
-- [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/postman-api-fuzzing-example)
-- [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/graphql-api-fuzzing-example)
+- One of the following web API types:
+  - REST API
+  - SOAP
+  - GraphQL
+  - Form bodies, JSON, or XML
+- One of the following assets to provide APIs to test:
+  - OpenAPI v2 or v3 API definition
+  - HTTP Archive (HAR) of API requests to test
+  - Postman Collection v2.0 or v2.1
 
 WARNING:
 GitLab 14.0 will require that you place API fuzzing configuration files (for example,
@@ -78,7 +90,16 @@ GitLab 14.0 will require that you place API fuzzing configuration files (for exa
 repository's root. You can continue using your existing configuration files as they are, but
 starting in GitLab 14.0, GitLab will not check your repository's root for configuration files.
 
-### Configuration form
+You can enable Web API fuzzing either manually, or from GitLab 13.10 and later, using the Web API
+fuzzing configuration form.
+
+- For manual configuration instructions, see the respective section, depending on the API type:
+  - [OpenAPI Specification](#openapi-specification)
+  - [HTTP Archive (HAR)](#http-archive-har)
+  - [Postman Collection](#postman-collection)
+- Otherwise, see [Web API fuzzing configuration form](#web-api-fuzzing-configuration-form).
+
+### Web API fuzzing configuration form
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299234) in GitLab 13.10.
 
@@ -89,6 +110,8 @@ The API fuzzing configuration form helps you create or modify your project's API
 configuration. The form lets you choose values for the most common API fuzzing options and builds
 a YAML snippet that you can paste in your GitLab CI/CD configuration.
 
+#### Configure Web API fuzzing with the configuration form
+
 To generate an API Fuzzing configuration snippet:
 
 1. From your project's home page, go to **Security & Compliance > Configuration** in the left
@@ -96,22 +119,20 @@ To generate an API Fuzzing configuration snippet:
 1. Select **Configure** in the **API Fuzzing** row.
 1. Complete the form as needed. Read below for more information on available configuration options.
 1. Select **Generate code snippet**.
+   A modal opens with the YAML snippet corresponding to the options you've selected in the form.
+   ![API Fuzzing configuration snippet](img/api_fuzzing_configuration_snippet_v13.10.png)
+1. Choose one of the following actions:
+   1. Select **Copy code and open `.gitlab-ci.yml` file** to copy the snippet to your clipboard and
+      be redirected to your project's `.gitlab-ci.yml` file where you can paste the YAML
+      configuration.
+   1. Select **Copy code only** to copy the snippet to your clipboard and close the modal.
 
-A modal opens with the YAML snippet corresponding to the options you've selected in the form.
-
-![API Fuzzing configuration snippet](img/api_fuzzing_configuration_snippet_v13.10.png)
-
-Select **Copy code and open `.gitlab-ci.yml` file** to copy the snippet to your clipboard and be redirected
-to your project's `.gitlab-ci.yml` file where you can paste the YAML configuration.
-
-Select **Copy code only** to copy the snippet to your clipboard and close the modal.
-
-### OpenAPI Specification
+### OpenAPI specification
 
 > Support for OpenAPI Specification v3 was
 > [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228652) in GitLab 13.9.
 
-The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an
+The [OpenAPI specification](https://www.openapis.org/) (formerly the Swagger Specification) is an
 API description format for REST APIs. This section shows you how to configure API fuzzing by using
 an OpenAPI specification to provide information about the target API to test. OpenAPI specifications
 are provided as a file system resource or URL.
@@ -123,76 +144,52 @@ the body generation is limited to these body types:
 - `multipart/form-data`
 - `application/json`
 
-Follow these steps to configure API fuzzing in GitLab with an OpenAPI specification:
+#### Configure Web API fuzzing with an OpenAPI Specification
 
-1. In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), to enable API fuzzing in your pipeline, you must add `fuzz` stage to your `.gitlab-ci.yml` file:
+To configure API fuzzing in GitLab with an OpenAPI specification:
 
-   ```yaml
-   stages:
-     - fuzz
+1. Enable Web API fuzzing in the `.gitlab-ci.yml` file.
+   1. In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), add the
+   `fuzz` stage to your `.gitlab-ci.yml` file:
 
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-   ```
-   
-1. To use API fuzzing, you must [include](../../../ci/yaml/README.md#includetemplate)
-   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
-   that's provided as part of your GitLab installation. To do so, add the following to your
-   `.gitlab-ci.yml` file:
+      ```yaml
+      stages:
+        - fuzz
 
-   ```yaml
-   stages:
-     - fuzz
+      include:
+        - template: API-Fuzzing.gitlab-ci.yml
+      ```
 
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-   ```
+   1. In GitLab 13.12 and earlier, [include](../../../ci/yaml/README.md#includetemplate)
+      add the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
+      to your `.gitlab-ci.yml` file:
+
+      ```yaml
+      stages:
+        - fuzz
+
+      include:
+        - template: API-Fuzzing.gitlab-ci.yml
+      ```
 
 1. Add the configuration file [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml) to your repository's root as `.gitlab-api-fuzzing.yml`.
 
-1. The [configuration file](#configuration-files) has several testing profiles defined with varying
-   amounts of fuzzing. We recommend that you start with the `Quick-10` profile. Testing with this
-   profile completes quickly, allowing for easier configuration validation.
-
-   Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
-   substituting `Quick-10` for the profile you choose:
-
-   ```yaml
-   stages:
-     - fuzz
-
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-
-   variables:
-     FUZZAPI_PROFILE: Quick-10
-   ```
+   Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file.
+   Replace `Quick-10` with the profile you choose.
 
 1. Provide the location of the OpenAPI specification. You can provide the specification as a file
-   or URL. Specify the location by adding the `FUZZAPI_OPENAPI` variable:
+   or URL. Specify the location by adding the `FUZZAPI_OPENAPI` variable.
 
-   ```yaml
-   stages:
-     - fuzz
-
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-
-   variables:
-     FUZZAPI_PROFILE: Quick-10
-     FUZZAPI_OPENAPI: test-api-specification.json
-   ```
-
-1. The target API instance's base URL is also required. Provide it by using the `FUZZAPI_TARGET_URL`
-   variable or an `environment_url.txt` file.
+1. Provide the target API instance's base URL. Use either the `FUZZAPI_TARGET_URL` variable or an
+   `environment_url.txt` file.
 
    Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
-   dynamic environments. To run API fuzzing against an app dynamically created during a GitLab CI/CD
-   pipeline, have the app persist its domain in an `environment_url.txt` file. API fuzzing
-   automatically parses that file to find its scan target. You can see an
-   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
+   dynamic environments. To run API fuzzing against an application dynamically created during a
+   GitLab CI/CD pipeline, have the application persist its domain in an `environment_url.txt` file.
+   API fuzzing automatically parses that file to find its scan target. You can see an
+   example of this in the [Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
-   Here's an example of using `FUZZAPI_TARGET_URL`:
+Example `.gitlab-ci.yml` file using an OpenAPI specification:
 
    ```yaml
    stages:
@@ -237,66 +234,41 @@ WARNING:
 HAR files may contain sensitive information such as authentication tokens, API keys, and session
 cookies. We recommend that you review the HAR file contents before adding them to a repository.
 
-Follow these steps to configure API fuzzing to use a HAR file that provides information about the
-target API to test:
+#### Configure Web API fuzzing with a HAR file
 
-1. In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), to enable API fuzzing in your pipeline, you must add `fuzz` stage to your `.gitlab-ci.yml` file:
+To configure API fuzzing to use a HAR file:
 
-   ```yaml
-   stages:
-     - fuzz
+1. Enable Web API fuzzing in the `.gitlab-ci.yml` file.
+   1. In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), add the
+      `fuzz` stage to your `.gitlab-ci.yml` file:
 
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-   ```
+      ```yaml
+      stages:
+        - fuzz
 
-1. To use API fuzzing, you must [include](../../../ci/yaml/README.md#includetemplate)
-   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
-   that's provided as part of your GitLab installation. To do so, add the following to your
-   `.gitlab-ci.yml` file:
+      include:
+        - template: API-Fuzzing.gitlab-ci.yml
+      ```
 
-   ```yaml
-   stages:
-     - fuzz
+   1. In GitLab 13.12 and earlier, [include](../../../ci/yaml/README.md#includetemplate)
+      the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
+      in your `.gitlab-ci.yml` file:
 
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-   ```
+      ```yaml
+      stages:
+        - fuzz
+
+      include:
+        - template: API-Fuzzing.gitlab-ci.yml
+      ```
 
 1. Add the configuration file [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml) to your repository's root as `.gitlab-api-fuzzing.yml`.
 
-1. The [configuration file](#configuration-files) has several testing profiles defined with varying
-   amounts of fuzzing. We recommend that you start with the `Quick-10` profile. Testing with this
-   profile completes quickly, allowing for easier configuration validation.
-
-   Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
-   substituting `Quick-10` for the profile you choose:
-
-   ```yaml
-   stages:
-     - fuzz
-
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-
-   variables:
-     FUZZAPI_PROFILE: Quick-10
-   ```
+1. Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file.
+   Replace `Quick-10` with the profile you choose.
 
 1. Provide the location of the HAR specification. You can provide the specification as a file
-   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_HAR` variable:
-
-   ```yaml
-   stages:
-     - fuzz
-
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-
-   variables:
-     FUZZAPI_PROFILE: Quick-10
-     FUZZAPI_HAR: test-api-recording.har
-   ```
+   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_HAR` variable.
 
 1. The target API instance's base URL is also required. Provide it by using the `FUZZAPI_TARGET_URL`
    variable or an `environment_url.txt` file.
@@ -307,7 +279,7 @@ target API to test:
    automatically parses that file to find its scan target. You can see an
    [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
-   Here's an example of using `FUZZAPI_TARGET_URL`:
+Example `.gitlab-ci.yml` file using a HAR file:
 
    ```yaml
    stages:
@@ -322,7 +294,7 @@ target API to test:
      FUZZAPI_TARGET_URL: http://test-deployment/
    ```
 
-This is a minimal configuration for API Fuzzing. From here you can:
+This is a minimal configuration for API fuzzing. From here you can:
 
 - [Run your first scan](#running-your-first-scan).
 - [Add authentication](#authentication).
@@ -350,70 +322,46 @@ Postman Collection files may contain sensitive information such as authenticatio
 and session cookies. We recommend that you review the Postman Collection file contents before adding
 them to a repository.
 
-Follow these steps to configure API fuzzing to use a Postman Collection file that provides
-information about the target API to test:
+#### Configure Web API fuzzing with a Postman Collection file
 
-1. In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), to enable API fuzzing in your pipeline, you must add `fuzz` stage to your `.gitlab-ci.yml` file:
+To configure API fuzzing to use a Postman Collection file:
 
-   ```yaml
-   stages:
-     - fuzz
+1. Enable Web API fuzzing in the `.gitlab-ci.yml` file.
+   1. In [GitLab 14.0 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/326065), add `fuzz` stage to your `.gitlab-ci.yml` file:
 
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-   ```
+      ```yaml
+      stages:
+        - fuzz
 
-1. To use API fuzzing, you must [include](../../../ci/yaml/README.md#includetemplate)
+        include:
+          - template: API-Fuzzing.gitlab-ci.yml
+      ```
+
+   1. In GitLab 13.12 and earlier, [include](../../../ci/yaml/README.md#includetemplate)
    the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
-   that's provided as part of your GitLab installation. To do so, add the following to your
-   `.gitlab-ci.yml` file:
+   in your `.gitlab-ci.yml` file:
 
-   ```yaml
-   stages:
-     - fuzz
+     ```yaml
+     stages:
+       - fuzz
 
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-   ```
+       include:
+         - template: API-Fuzzing.gitlab-ci.yml
+     ```
 
 1. Add the configuration file [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml)
    to your repository's root as `.gitlab-api-fuzzing.yml`.
 
-1. The [configuration file](#configuration-files) has several testing profiles defined with varying
-   amounts of fuzzing. We recommend that you start with the `Quick-10` profile. Testing with this
-   profile completes quickly, allowing for easier configuration validation.
+1. Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file.
+   Substitute `Quick-10` for the profile you choose.
 
-   Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file,
-   substituting `Quick-10` for the profile you choose:
+1. Provide the location of the Postman Collection specification. You can provide the specification
+   as a file or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020)
+   in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_POSTMAN_COLLECTION`
+   variable.
 
-   ```yaml
-   stages:
-     - fuzz
-
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-
-   variables:
-     FUZZAPI_PROFILE: Quick-10
-   ```
-
-1. Provide the location of the Postman Collection specification. You can provide the specification as a file
-   or URL. [URL support was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285020) in GitLab 13.10 and later. Specify the location by adding the `FUZZAPI_POSTMAN_COLLECTION` variable:
-
-   ```yaml
-   stages:
-     - fuzz
-
-   include:
-     - template: API-Fuzzing.gitlab-ci.yml
-
-   variables:
-     FUZZAPI_PROFILE: Quick-10
-     FUZZAPI_POSTMAN_COLLECTION: postman-collection_serviceA.json
-   ```
-
-1. The target API instance's base URL is also required. Provide it by using the `FUZZAPI_TARGET_URL`
-   variable or an `environment_url.txt` file.
+1. Provide the target API instance's base URL. Use either the `FUZZAPI_TARGET_URL` variable or an
+   `environment_url.txt` file.
 
    Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
    dynamic environments. To run API fuzzing against an app dynamically created during a GitLab CI/CD
@@ -421,7 +369,7 @@ information about the target API to test:
    automatically parses that file to find its scan target. You can see an
    [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
-   Here's an example of using `FUZZAPI_TARGET_URL`:
+Example `.gitlab-ci.yml` file using a Postman Collection file:
 
    ```yaml
    stages:
