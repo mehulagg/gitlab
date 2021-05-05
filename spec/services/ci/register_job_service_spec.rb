@@ -636,47 +636,6 @@ module Ci
             expect(execute(specific_runner)).to eq(pending_job)
           end
         end
-
-        context 'when ci_register_job_temporary_lock is enabled' do
-          before do
-            stub_feature_flags(ci_register_job_temporary_lock: true)
-
-            allow(Gitlab::Ci::Queue::Metrics.queue_operations_total).to receive(:increment)
-          end
-
-          context 'when a build is temporarily locked' do
-            let(:service) { described_class.new(specific_runner) }
-
-            before do
-              service.send(:acquire_temporary_lock, pending_job.id)
-            end
-
-            it 'skips this build and marks queue as invalid' do
-              expect(Gitlab::Ci::Queue::Metrics.queue_operations_total).to receive(:increment)
-                .with(operation: :queue_iteration)
-              expect(Gitlab::Ci::Queue::Metrics.queue_operations_total).to receive(:increment)
-                .with(operation: :build_temporary_locked)
-
-              expect(service.execute).not_to be_valid
-            end
-
-            context 'when there is another build in queue' do
-              let!(:next_pending_job) { create(:ci_build, pipeline: pipeline) }
-
-              it 'skips this build and picks another build' do
-                expect(Gitlab::Ci::Queue::Metrics.queue_operations_total).to receive(:increment)
-                  .with(operation: :queue_iteration).twice
-                expect(Gitlab::Ci::Queue::Metrics.queue_operations_total).to receive(:increment)
-                  .with(operation: :build_temporary_locked)
-
-                result = service.execute
-
-                expect(result.build).to eq(next_pending_job)
-                expect(result).to be_valid
-              end
-            end
-          end
-        end
       end
 
       context 'when ci_register_job_service_one_by_one is enabled' do
