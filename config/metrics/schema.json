@@ -49,7 +49,7 @@
     },
     "data_source": {
       "type": "string",
-      "enum": ["database", "redis", "redis_hll", "prometheus", "ruby"]
+      "enum": ["database", "redis", "redis_hll", "prometheus", "ruby", "system"]
     },
     "distribution": {
       "type": "array",
