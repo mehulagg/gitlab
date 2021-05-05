@@ -35,5 +35,29 @@ RSpec.shared_examples 'group and projects packages resolver' do
         it { is_expected.to eq([conan_package, maven_package]) }
       end
     end
+
+    context 'filter by package_name' do
+      let(:args) { { package_name: 'bar', sort: :created_desc } }
+
+      it { is_expected.to eq([conan_package]) }
+    end
+
+    context 'filter by package_type' do
+      let(:args) { { package_type: 'conan', sort: :created_desc } }
+
+      it { is_expected.to eq([conan_package]) }
+    end
+
+    context 'filter by status' do
+      let(:args) { { status: 'error', sort: :created_desc } }
+
+      it { is_expected.to eq([maven_package]) }
+    end
+
+    context 'include_versionless' do
+      let(:args) { { include_versionless: true, sort: :created_desc } }
+
+      it { is_expected.to include(repository3) }
+    end
   end
 end
