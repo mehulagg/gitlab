@@ -33,6 +33,8 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
   end
 
   def redirect_link
+    return params[:redirect_to] if params[:redirect_to]
+
     case @track
     when :create
       create_track_url

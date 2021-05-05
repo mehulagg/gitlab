@@ -10,6 +10,7 @@ RSpec.describe Groups::EmailCampaignsController do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, group: group) }
     let_it_be(:user) { create(:user) }
+    let(:params) { {} }
     let(:track) { 'create' }
     let(:series) { '0' }
     let(:schema) { described_class::EMAIL_CAMPAIGNS_SCHEMA_URL }
@@ -29,7 +30,7 @@ RSpec.describe Groups::EmailCampaignsController do
     end
 
     subject do
-      get group_email_campaigns_url(group, track: track, series: series)
+      get group_email_campaigns_url(group, track: track, series: series, **params)
       response
     end
 
@@ -123,6 +124,16 @@ RSpec.describe Groups::EmailCampaignsController do
         with_them do
           it_behaves_like 'no track and 404'
         end
+      end
+    end
+
+    describe 'redirect_to parameter' do
+      let(:params) { { redirect_to: 'https://docs.gitlab.com' } }
+
+      it_behaves_like 'track and redirect'
+
+      it 'redirects to given URL' do
+        expect(subject.redirect_url).to eq('https://docs.gitlab.com')
       end
     end
   end
