@@ -507,7 +507,7 @@ module Gitlab
       end
 
       def last_28_days_time_period(column: :created_at)
-        { column => 30.days.ago..2.days.ago }
+        { column => batch_counter_monthly_time_range.start_date..batch_counter_monthly_time_range.end_date }
       end
 
       # Source: https://gitlab.com/gitlab-data/analytics/blob/master/transform/snowflake-dbt/data/ping_metrics_to_stage_mapping_data.csv
@@ -723,7 +723,7 @@ module Gitlab
           hash[target] = redis_usage_data { unique_visit_service.unique_visits_for(targets: target) }
         end
         results['analytics_unique_visits_for_any_target'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :analytics) }
-        results['analytics_unique_visits_for_any_target_monthly'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :analytics, start_date: 4.weeks.ago.to_date, end_date: Date.current) }
+        results['analytics_unique_visits_for_any_target_monthly'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :analytics, start_date: **monthly_time_range) }
 
         { analytics_unique_visits: results }
       end
@@ -733,7 +733,7 @@ module Gitlab
           hash[target] = redis_usage_data { unique_visit_service.unique_visits_for(targets: target) }
         end
         results['compliance_unique_visits_for_any_target'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :compliance) }
-        results['compliance_unique_visits_for_any_target_monthly'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :compliance, start_date: 4.weeks.ago.to_date, end_date: Date.current) }
+        results['compliance_unique_visits_for_any_target_monthly'] = redis_usage_data { unique_visit_service.unique_visits_for(targets: :compliance, start_date: **monthly_time_range}) }
 
         { compliance_unique_visits: results }
       end
@@ -741,11 +741,11 @@ module Gitlab
       def search_unique_visits_data
         events = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category('search')
         results = events.each_with_object({}) do |event, hash|
-          hash[event] = redis_usage_data { ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: event, start_date: 7.days.ago.to_date, end_date: Date.current) }
+          hash[event] = redis_usage_data { ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: event, **weekly_time_range)
         end
 
-        results['search_unique_visits_for_any_target_weekly'] = redis_usage_data { ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: events, start_date: 7.days.ago.to_date, end_date: Date.current) }
-        results['search_unique_visits_for_any_target_monthly'] = redis_usage_data { ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: events, start_date: 4.weeks.ago.to_date, end_date: Date.current) }
+        results['search_unique_visits_for_any_target_weekly'] = redis_usage_data { ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: events, **weekly_time_range) }
+        results['search_unique_visits_for_any_target_monthly'] = redis_usage_data { ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: events, **monthly_time_range) }
 
         { search_unique_visits: results }
       end

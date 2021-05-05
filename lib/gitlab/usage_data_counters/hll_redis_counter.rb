@@ -98,14 +98,6 @@ module Gitlab
           end
         end
 
-        def weekly_time_range
-          { start_date: 7.days.ago.to_date, end_date: Date.current }
-        end
-
-        def monthly_time_range
-          { start_date: 4.weeks.ago.to_date, end_date: Date.current }
-        end
-
         def known_event?(event_name)
           event_for(event_name).present?
         end

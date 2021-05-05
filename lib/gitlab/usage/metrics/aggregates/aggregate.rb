@@ -24,7 +24,7 @@ module Gitlab
         class Aggregate
           delegate :weekly_time_range,
                    :monthly_time_range,
-                   to: Gitlab::UsageDataCounters::HLLRedisCounter
+                   to: Gitlab::Utils::UsageData
 
           def initialize(recorded_at)
             @aggregated_metrics = load_metrics(AGGREGATED_METRICS_PATH)
