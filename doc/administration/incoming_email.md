@@ -188,7 +188,7 @@ gitlab_rails['incoming_email_enabled'] = true
 # The email address including the %{key} placeholder that will be replaced to reference the
 # item being replied to. This %{key} should be included in its entirety within the email
 # address and not replaced by another value.
-# For example: emailadress+%{key}@gmail.com.
+# For example: emailaddress+%{key}@gmail.com.
 # The placeholder must appear in the "user" part of the address (before the `@`).
 gitlab_rails['incoming_email_address'] = "incoming+%{key}@gitlab.example.com"
 
@@ -226,7 +226,7 @@ incoming_email:
     # The email address including the %{key} placeholder that will be replaced to reference the
     # item being replied to. This %{key} should be included in its entirety within the email
     # address and not replaced by another value.
-    # For example: emailadress+%{key}@gmail.com.
+    # For example: emailaddress+%{key}@gmail.com.
     # The placeholder must appear in the "user" part of the address (before the `@`).
     address: "incoming+%{key}@gitlab.example.com"
 
@@ -270,7 +270,7 @@ gitlab_rails['incoming_email_enabled'] = true
 # The email address including the %{key} placeholder that will be replaced to reference the
 # item being replied to. This %{key} should be included in its entirety within the email
 # address and not replaced by another value.
-# For example: emailadress+%{key}@gmail.com.
+# For example: emailaddress+%{key}@gmail.com.
 # The placeholder must appear in the "user" part of the address (before the `@`).
 gitlab_rails['incoming_email_address'] = "gitlab-incoming+%{key}@gmail.com"
 
@@ -308,7 +308,7 @@ incoming_email:
     # The email address including the %{key} placeholder that will be replaced to reference the
     # item being replied to. This %{key} should be included in its entirety within the email
     # address and not replaced by another value.
-    # For example: emailadress+%{key}@gmail.com.
+    # For example: emailaddress+%{key}@gmail.com.
     # The placeholder must appear in the "user" part of the address (before the `@`).
     address: "gitlab-incoming+%{key}@gmail.com"
 
