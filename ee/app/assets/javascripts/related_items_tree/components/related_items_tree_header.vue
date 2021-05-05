@@ -1,8 +1,9 @@
 <script>
 import { GlTooltip, GlIcon } from '@gitlab/ui';
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 
 import { issuableTypesMap } from '~/related_issues/constants';
+import { ChildType } from '../constants';
 
 import EpicHealthStatus from './epic_health_status.vue';
 import EpicActionsSplitButton from './epic_issue_actions_split_button.vue';
@@ -17,11 +18,13 @@ export default {
   computed: {
     ...mapState([
       'parentItem',
+      'children',
       'descendantCounts',
       'healthStatus',
       'allowSubEpics',
       'allowIssuableHealthStatus',
     ]),
+    ...mapGetters(['directChildren']),
     totalEpicsCount() {
       return this.descendantCounts.openedEpics + this.descendantCounts.closedEpics;
     },
@@ -31,6 +34,22 @@ export default {
     showHealthStatus() {
       return this.healthStatus && this.allowIssuableHealthStatus;
     },
+    recursiveTotalWeight() {
+      const queue = [...this.directChildren];
+      let accumulatedWeight = 0;
+
+      while(queue.length > 0) {
+        const item = queue.pop();
+
+        if (item.type === ChildType.Issue) {
+          accumulatedWeight += item.weight || 0;
+        } else if (item.type === ChildType.Epic && this.children[item.reference]) {
+          queue.push(...this.children[item.reference]);
+        }
+      }
+
+      return accumulatedWeight;
+    }
   },
   methods: {
     ...mapActions([
@@ -104,6 +123,10 @@ export default {
         <span class="d-inline-flex align-items-center" :class="{ 'ml-3': allowSubEpics }">
           <gl-icon name="issues" class="mr-1" />
           {{ totalIssuesCount }}
+        </span>
+        <span class="d-inline-flex align-items-center" :class="{ 'ml-3': allowSubEpics }">
+          <gl-icon name="weight" class="mr-1" />
+          {{ recursiveTotalWeight }}
         </span>
       </div>
       <epic-health-status v-if="showHealthStatus" :health-status="healthStatus" />
