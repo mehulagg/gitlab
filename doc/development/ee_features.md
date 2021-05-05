@@ -114,7 +114,7 @@ Vulnerabilities::Finding.prepend_ee_mod
 will prepend the module named `::EE::Vulnerabilities::Finding`.
 
 If the extending module does not follow this naming convention, you can also provide the module name
-by using `prepend_mod_with`, `extend_mod_with`, or `include_if_ee`. These methods take a
+by using `prepend_mod_with`, `extend_mod_with`, or `include_mod_with`. These methods take a
 _String_ containing the full module name as the argument, not the module itself, like so;
 
 ```ruby

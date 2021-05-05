@@ -73,4 +73,4 @@ module EE
   end
 end
 
-EE::MergeRequestPresenter.include_if_ee('::EE::ProjectsHelper')
+EE::MergeRequestPresenter.include_mod_with('::EE::ProjectsHelper')

@@ -56,4 +56,4 @@ class Vulnerabilities::FindingEntity < Grape::Entity
   end
 end
 
-Vulnerabilities::FindingEntity.include_if_ee('::EE::ProjectsHelper')
+Vulnerabilities::FindingEntity.include_mod_with('::EE::ProjectsHelper')

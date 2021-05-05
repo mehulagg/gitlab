@@ -53,7 +53,7 @@ module ProtectedRefAccess
   end
 end
 
-ProtectedRefAccess.include_if_ee('EE::ProtectedRefAccess::Scopes')
+ProtectedRefAccess.include_mod_with('EE::ProtectedRefAccess::Scopes')
 ProtectedRefAccess.prepend_mod_with('EE::ProtectedRefAccess')
 
 # When using `prepend` (or `include` for that matter), the `ClassMethods`
