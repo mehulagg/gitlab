@@ -20,10 +20,9 @@ import {
   member2faEnabled,
   group,
   invite,
-  membersJsonString,
   members,
-  paginationJsonString,
   pagination,
+  dataAttribute,
 } from './mock_data';
 
 const IS_CURRENT_USER_ID = 123;
@@ -260,23 +259,23 @@ describe('Members Utils', () => {
 
     beforeEach(() => {
       el = document.createElement('div');
-      el.setAttribute('data-members', membersJsonString);
-      el.setAttribute('data-pagination', paginationJsonString);
-      el.setAttribute('data-source-id', '234');
-      el.setAttribute('data-can-manage-members', 'true');
+      el.setAttribute('data-data', dataAttribute);
     });
 
     afterEach(() => {
       el = null;
     });
 
-    it('correctly parses the data attributes', () => {
-      expect(parseDataAttributes(el)).toEqual({
-        members,
-        pagination,
-        sourceId: 234,
-        canManageMembers: true,
-      });
+    it('correctly parses the data attribute', () => {
+      expect(parseDataAttributes(el)).toEqual(
+        expect.objectContaining({
+          members,
+          pagination,
+          sourceId: 234,
+          canManageMembers: true,
+          memberPath: '/groups/foo-bar/-/group_members/:id',
+        }),
+      );
     });
   });
 

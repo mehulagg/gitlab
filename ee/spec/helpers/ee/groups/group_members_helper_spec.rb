@@ -22,15 +22,17 @@ RSpec.describe Groups::GroupMembersHelper do
     end
   end
 
-  describe '#group_members_list_data_attributes' do
+  describe '#group_members_list_data_json' do
+    subject { Gitlab::Json.parse(helper.group_members_list_data_json(group, [])) }
+
     before do
       allow(helper).to receive(:override_group_group_member_path).with(group, ':id').and_return('/groups/foo-bar/-/group_members/:id/override')
       allow(helper).to receive(:group_group_member_path).with(group, ':id').and_return('/groups/foo-bar/-/group_members/:id')
       allow(helper).to receive(:can?).with(current_user, :admin_group_member, group).and_return(true)
     end
 
-    it 'adds `ldap_override_path` to returned hash' do
-      expect(helper.group_members_list_data_attributes(group, [])).to include(ldap_override_path: '/groups/foo-bar/-/group_members/:id/override')
+    it 'adds `ldap_override_path` to returned json' do
+      expect(subject['ldap_override_path']).to eq('/groups/foo-bar/-/group_members/:id/override')
     end
   end
 end

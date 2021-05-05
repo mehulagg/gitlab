@@ -1,4 +1,4 @@
-import { membersJsonString } from 'jest/members/mock_data';
+import { dataAttribute } from 'jest/members/mock_data';
 import { MEMBER_TYPES } from '~/members/constants';
 import { initMembersApp } from '~/members/index';
 
@@ -14,10 +14,7 @@ describe('initMembersApp', () => {
 
   beforeEach(() => {
     el = document.createElement('div');
-    el.setAttribute('data-members', membersJsonString);
-    el.setAttribute('data-source-id', '234');
-    el.setAttribute('data-member-path', '/groups/foo-bar/-/group_members/:id');
-    el.setAttribute('data-ldap-override-path', '/groups/ldap-group/-/group_members/:id/override');
+    el.setAttribute('data-data', dataAttribute);
   });
 
   afterEach(() => {
