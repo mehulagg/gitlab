@@ -57,6 +57,7 @@ describe('GeoNodeCoreDetails', () => {
       it('renders the Node Url correctly', () => {
         expect(findNodeUrl().exists()).toBe(true);
         expect(findNodeUrl().attributes('href')).toBe(MOCK_NODES[0].url);
+        expect(findNodeUrl().attributes('target')).toBe('_blank');
         expect(findNodeUrl().text()).toBe(MOCK_NODES[0].url);
       });
 

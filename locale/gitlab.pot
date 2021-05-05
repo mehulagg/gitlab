@@ -14841,10 +14841,10 @@ msgstr ""
 msgid "Geo|Verification failed - %{error}"
 msgstr ""
 
-msgid "Geo|Verification status"
+msgid "Geo|Verification information"
 msgstr ""
 
-msgid "Geo|Verificaton information"
+msgid "Geo|Verification status"
 msgstr ""
 
 msgid "Geo|Waiting for scheduler"

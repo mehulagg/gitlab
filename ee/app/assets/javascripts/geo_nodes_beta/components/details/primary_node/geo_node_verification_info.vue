@@ -8,7 +8,7 @@ import GeoNodeProgressBar from '../geo_node_progress_bar.vue';
 export default {
   name: 'GeoNodeVerificationInfo',
   i18n: {
-    verificationInfo: s__('Geo|Verificaton information'),
+    verificationInfo: s__('Geo|Verification information'),
     replicationHelpText: s__(
       'Geo|Replicated data is verified with the secondary node(s) using checksums.',
     ),
