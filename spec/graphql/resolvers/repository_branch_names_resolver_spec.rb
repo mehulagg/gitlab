@@ -12,24 +12,37 @@ RSpec.describe Resolvers::RepositoryBranchNamesResolver do
       resolve(
         described_class,
         obj: project.repository,
-        args: { search_pattern: pattern },
+        args: { search_pattern: pattern, offset: offset, limit: 1 },
         ctx: { current_user: project.creator }
       )
     end
 
-    context 'with empty search pattern' do
-      let(:pattern) { '' }
+    context 'with zero offset' do
+      let(:offset) { 0 }
 
-      it 'returns nil' do
-        expect(resolve_branch_names).to eq(nil)
+      context 'with empty search pattern' do
+        let(:pattern) { '' }
+
+        it 'returns nil' do
+          expect(resolve_branch_names).to eq(nil)
+        end
+      end
+
+      context 'with a valid search pattern' do
+        let(:pattern) { 'mas*' }
+
+        it 'returns matching branches' do
+          expect(resolve_branch_names).to match_array(['master'])
+        end
       end
     end
 
-    context 'with a valid search pattern' do
+    context 'with offset' do
       let(:pattern) { 'mas*' }
+      let(:offset) { 10 }
 
-      it 'returns matching branches' do
-        expect(resolve_branch_names).to match_array(['master'])
+      it 'returns empty array' do
+        expect(resolve_branch_names).to match_array([])
       end
     end
   end

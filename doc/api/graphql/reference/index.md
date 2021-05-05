@@ -11708,6 +11708,8 @@ Returns [`[String!]`](#string).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="repositorybranchnameslimit"></a>`limit` | [`Int!`](#int) | The number of branch names to return. |
+| <a id="repositorybranchnamesoffset"></a>`offset` | [`Int!`](#int) | The number of branch names to skip. |
 | <a id="repositorybranchnamessearchpattern"></a>`searchPattern` | [`String!`](#string) | The pattern to search for branch names by. |
 
 ##### `Repository.tree`
