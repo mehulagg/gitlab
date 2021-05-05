@@ -27,7 +27,7 @@ RSpec.describe Gitlab::Ci::Build::Releaser do
       end
 
       it 'generates the script' do
-        expect(subject).to eq(['release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using the release-cli $EXTRA_DESCRIPTION" --tag-name "release-$CI_COMMIT_SHA" --ref "$CI_COMMIT_SHA" --released-at "2020-07-15T08:00:00Z" --milestone "m1" --milestone "m2" --milestone "m3" --assets-link "{"name":"asset1","url":"https://example.com/assets/1","link_type":"other","filepath":"/pretty/asset/1"}" --assets-link "{"name":"asset2","url":"https://example.com/assets/2","link_type":"other","filepath":"/pretty/asset/2"}"'])
+        expect(subject).to eq(['release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using the release-cli $EXTRA_DESCRIPTION" --tag-name "release-$CI_COMMIT_SHA" --ref "$CI_COMMIT_SHA" --released-at "2020-07-15T08:00:00Z" --milestone "m1" --milestone "m2" --milestone "m3" --assets-link "{\"name\":\"asset1\",\"url\":\"https://example.com/assets/1\",\"link_type\":\"other\",\"filepath\":\"/pretty/asset/1\"}" --assets-link "{\"name\":\"asset2\",\"url\":\"https://example.com/assets/2\",\"link_type\":\"other\",\"filepath\":\"/pretty/asset/2\"}"'])
       end
     end
 
