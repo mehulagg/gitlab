@@ -555,4 +555,4 @@ class ApplicationController < ActionController::Base
   end
 end
 
-ApplicationController.prepend_ee_mod
+ApplicationController.prepend_mod

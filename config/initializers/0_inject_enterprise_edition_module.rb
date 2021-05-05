@@ -27,17 +27,14 @@ module InjectEnterpriseEditionModule
   def prepend_mod(with_descendants: false)
     prepend_mod_for(name, with_descendants: with_descendants)
   end
-  alias_method :prepend_ee_mod, :prepend_mod
 
   def extend_mod
     each_extension_for(name, Object, &method(:extend))
   end
-  alias_method :extend_ee_mod, :extend_mod
 
   def include_mod
     each_extension_for(name, Object, &method(:include))
   end
-  alias_method :include_ee_mod, :include_mod
 
   private
 

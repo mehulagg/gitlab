@@ -94,11 +94,11 @@ class User < ActiveRecord::Base
   # ... lots of code here ...
 end
 
-User.prepend_ee_mod
+User.prepend_mod
 ```
 
 Do not use methods such as `prepend`, `extend`, and `include`. Instead, use
-`prepend_ee_mod`, `extend_ee_mod`, or `include_ee_mod`. These methods will try to
+`prepend_mod`, `extend_mod`, or `include_mod`. These methods will try to
 find the relevant EE module by the name of the receiver module, for example;
 
 ```ruby
@@ -108,7 +108,7 @@ module Vulnerabilities
   end
 end
 
-Vulnerabilities::Finding.prepend_ee_mod
+Vulnerabilities::Finding.prepend_mod
 ```
 
 will prepend the module named `::EE::Vulnerabilities::Finding`.
