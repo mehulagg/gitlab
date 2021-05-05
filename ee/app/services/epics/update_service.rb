@@ -135,6 +135,19 @@ module Epics
 
       if epic.saved_change_to_attribute?(:description)
         ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_description_changed_action(author: current_user)
+        track_task_changes(epic)
+      end
+    end
+
+    def track_task_changes(epic)
+      return if epic.updated_tasks.blank?
+
+      epic.updated_tasks.each do |task|
+        if task.complete?
+          Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_task_checked(author: current_user)
+        else
+          Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_task_unchecked(author: current_user)
+        end
       end
     end
   end

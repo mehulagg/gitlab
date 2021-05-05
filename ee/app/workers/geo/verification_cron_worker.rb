@@ -16,6 +16,7 @@ module Geo
     idempotent!
 
     feature_category :geo_replication
+    tags :exclude_from_kubernetes
 
     def perform
       Gitlab::Geo.verification_enabled_replicator_classes.each do |replicator_class|

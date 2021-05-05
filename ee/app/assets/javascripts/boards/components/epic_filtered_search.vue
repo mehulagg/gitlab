@@ -1,4 +1,5 @@
 <script>
+import { pickBy } from 'lodash';
 import { mapActions, mapState } from 'vuex';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
@@ -13,6 +14,8 @@ export default {
     search: __('Search'),
     label: __('Label'),
     author: __('Author'),
+    is: __('is'),
+    isNot: __('is not'),
   },
   components: { FilteredSearch },
   inject: ['initialFilterParams'],
@@ -24,12 +27,16 @@ export default {
   computed: {
     ...mapState(['fullPath']),
     tokens() {
+      const { label, is, isNot, author } = this.$options.i18n;
       return [
         {
           icon: 'labels',
-          title: this.$options.i18n.label,
+          title: label,
           type: 'label_name',
-          operators: [{ value: '=', description: 'is' }],
+          operators: [
+            { value: '=', description: is },
+            { value: '!=', description: isNot },
+          ],
           token: LabelToken,
           unique: false,
           symbol: '~',
@@ -37,9 +44,12 @@ export default {
         },
         {
           icon: 'pencil',
-          title: this.$options.i18n.author,
+          title: author,
           type: 'author_username',
-          operators: [{ value: '=', description: 'is' }],
+          operators: [
+            { value: '=', description: is },
+            { value: '!=', description: isNot },
+          ],
           symbol: '@',
           token: AuthorToken,
           unique: true,
@@ -49,8 +59,20 @@ export default {
     },
     urlParams() {
       const { authorUsername, labelName, search } = this.filterParams;
+      let notParams = {};
+
+      if (Object.prototype.hasOwnProperty.call(this.filterParams, 'not')) {
+        notParams = pickBy(
+          {
+            'not[label_name][]': this.filterParams.not.labelName,
+            'not[author_username]': this.filterParams.not.authorUsername,
+          },
+          undefined,
+        );
+      }
 
       return {
+        ...notParams,
         author_username: authorUsername,
         'label_name[]': labelName,
         search,
@@ -66,7 +88,7 @@ export default {
       if (authorUsername) {
         filteredSearchValue.push({
           type: 'author_username',
-          value: { data: authorUsername },
+          value: { data: authorUsername, operator: '=' },
         });
       }
 
@@ -74,7 +96,23 @@ export default {
         filteredSearchValue.push(
           ...labelName.map((label) => ({
             type: 'label_name',
-            value: { data: label },
+            value: { data: label, operator: '=' },
+          })),
+        );
+      }
+
+      if (this.filterParams['not[authorUsername]']) {
+        filteredSearchValue.push({
+          type: 'author_username',
+          value: { data: this.filterParams['not[authorUsername]'], operator: '!=' },
+        });
+      }
+
+      if (this.filterParams['not[labelName]']) {
+        filteredSearchValue.push(
+          ...this.filterParams['not[labelName]'].map((label) => ({
+            type: 'label_name',
+            value: { data: label, operator: '!=' },
           })),
         );
       }
@@ -86,6 +124,12 @@ export default {
       return filteredSearchValue;
     },
     getFilterParams(filters = []) {
+      const notFilters = filters.filter((item) => item.value.operator === '!=');
+      const equalsFilters = filters.filter((item) => item.value.operator === '=');
+
+      return { ...this.generateParams(equalsFilters), not: { ...this.generateParams(notFilters) } };
+    },
+    generateParams(filters = []) {
       const filterParams = {};
       const labels = [];
       const plainText = [];

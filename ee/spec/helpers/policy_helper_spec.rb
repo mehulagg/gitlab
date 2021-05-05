@@ -62,11 +62,11 @@ RSpec.describe PolicyHelper do
     let(:alert) { build(:alert_management_alert, project: project) }
 
     context 'when a new alert is created' do
-      subject { helper.threat_monitoring_alert_details_data(project, alert.id) }
+      subject { helper.threat_monitoring_alert_details_data(project, alert.iid) }
 
       it 'returns expected policy data' do
         expect(subject).to match({
-          'alert-id' => alert.id,
+          'alert-id' => alert.iid,
           'project-path' => project.full_path,
           'project-id' => project.id,
           'project-issues-path' => project_issues_path(project),

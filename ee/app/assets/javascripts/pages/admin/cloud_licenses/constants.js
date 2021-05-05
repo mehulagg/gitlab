@@ -115,3 +115,14 @@ export const buySubscriptionCard = {
   ),
   buttonLabel: s__('CloudLicense|Buy subscription'),
 };
+
+export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
+export const connectivityErrorAlert = {
+  title: s__('There is a connectivity issue'),
+  subtitle: s__(
+    'CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription.',
+  ),
+  helpText: s__(
+    'CloudLicense|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
+  ),
+};

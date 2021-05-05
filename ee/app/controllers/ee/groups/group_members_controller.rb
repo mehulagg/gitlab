@@ -57,7 +57,7 @@ module EE
 
       override :membershipable_members
       def membershipable_members
-        return super unless group.feature_available?(:minimal_access_role)
+        return super unless group.licensed_feature_available?(:minimal_access_role)
 
         group.all_group_members
       end

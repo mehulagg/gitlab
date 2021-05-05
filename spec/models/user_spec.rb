@@ -83,6 +83,7 @@ RSpec.describe User do
     it { is_expected.to have_one(:user_detail) }
     it { is_expected.to have_one(:atlassian_identity) }
     it { is_expected.to have_one(:user_highest_role) }
+    it { is_expected.to have_one(:credit_card_validation) }
     it { is_expected.to have_many(:snippets).dependent(:destroy) }
     it { is_expected.to have_many(:members) }
     it { is_expected.to have_many(:project_members) }
@@ -136,7 +137,7 @@ RSpec.describe User do
       it 'creates `user_detail` when `bio` is first updated' do
         user = create(:user)
 
-        expect { user.update(bio: 'my bio') }.to change { user.user_detail.persisted? }.from(false).to(true)
+        expect { user.update!(bio: 'my bio') }.to change { user.user_detail.persisted? }.from(false).to(true)
       end
     end
 
@@ -659,9 +660,10 @@ RSpec.describe User do
         it 'does not accept not verified emails' do
           email = create(:email)
           user = email.user
-          user.update(notification_email: email.email)
+          user.notification_email = email.email
 
           expect(user).to be_invalid
+          expect(user.errors[:notification_email]).to include('is not an email you own')
         end
       end
 
@@ -669,7 +671,7 @@ RSpec.describe User do
         it 'accepts verified emails' do
           email = create(:email, :confirmed, email: 'test@test.com')
           user = email.user
-          user.update(public_email: email.email)
+          user.notification_email = email.email
 
           expect(user).to be_valid
         end
@@ -677,9 +679,10 @@ RSpec.describe User do
         it 'does not accept not verified emails' do
           email = create(:email)
           user = email.user
-          user.update(public_email: email.email)
+          user.public_email = email.email
 
           expect(user).to be_invalid
+          expect(user.errors[:public_email]).to include('is not an email you own')
         end
       end
 
@@ -1293,7 +1296,7 @@ RSpec.describe User do
           let(:secondary) { create(:email, :confirmed, email: 'secondary@example.com', user: user) }
 
           before do
-            user.emails.create(email_attrs)
+            user.emails.create!(email_attrs)
             user.tap { |u| u.update!(notification_email: email_attrs[:email]) }.reload
           end
 
@@ -1385,6 +1388,26 @@ RSpec.describe User do
     end
   end
 
+  describe '#credit_card_validated_at' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when credit_card_validation does not exist' do
+      it 'returns nil' do
+        expect(user.credit_card_validated_at).to be nil
+      end
+    end
+
+    context 'when credit_card_validation exists' do
+      it 'returns the credit card validated time' do
+        credit_card_validated_time = Time.current - 1.day
+
+        create(:credit_card_validation, credit_card_validated_at: credit_card_validated_time, user: user)
+
+        expect(user.credit_card_validated_at).to eq(credit_card_validated_time)
+      end
+    end
+  end
+
   describe '#update_tracked_fields!', :clean_gitlab_redis_shared_state do
     let(:request) { OpenStruct.new(remote_ip: "127.0.0.1") }
     let(:user) { create(:user) }
@@ -1447,7 +1470,7 @@ RSpec.describe User do
     let!(:accessible_deploy_keys_project) { create(:deploy_keys_project, project: project) }
 
     before do
-      public_deploy_keys_project.deploy_key.update(public: true)
+      public_deploy_keys_project.deploy_key.update!(public: true)
       project.add_developer(user)
     end
 
@@ -1537,13 +1560,13 @@ RSpec.describe User do
       it 'receives callback when external changes' do
         expect(user).to receive(:ensure_user_rights_and_limits)
 
-        user.update(external: false)
+        user.update!(external: false)
       end
 
       it 'ensures correct rights and limits for user' do
         stub_config_setting(default_can_create_group: true)
 
-        expect { user.update(external: false) }.to change { user.can_create_group }.to(true)
+        expect { user.update!(external: false) }.to change { user.can_create_group }.to(true)
           .and change { user.projects_limit }.to(Gitlab::CurrentSettings.default_projects_limit)
       end
     end
@@ -1554,11 +1577,11 @@ RSpec.describe User do
       it 'receives callback when external changes' do
         expect(user).to receive(:ensure_user_rights_and_limits)
 
-        user.update(external: true)
+        user.update!(external: true)
       end
 
       it 'ensures correct rights and limits for user' do
-        expect { user.update(external: true) }.to change { user.can_create_group }.to(false)
+        expect { user.update!(external: true) }.to change { user.can_create_group }.to(false)
           .and change { user.projects_limit }.to(0)
       end
     end
@@ -2454,7 +2477,7 @@ RSpec.describe User do
     end
 
     context 'with a redirect route matching the given path' do
-      let!(:redirect_route) { user.namespace.redirect_routes.create(path: 'foo') }
+      let!(:redirect_route) { user.namespace.redirect_routes.create!(path: 'foo') }
 
       context 'without the follow_redirects option' do
         it 'returns nil' do
@@ -2555,7 +2578,7 @@ RSpec.describe User do
 
       expect(Gitlab::AvatarCache).to receive(:delete_by_email).with(*user.verified_emails)
 
-      user.update(avatar: fixture_file_upload('spec/fixtures/dk.png'))
+      user.update!(avatar: fixture_file_upload('spec/fixtures/dk.png'))
     end
   end
 
@@ -2869,12 +2892,12 @@ RSpec.describe User do
       expect(user.starred?(project1)).to be_truthy
       expect(user.starred?(project2)).to be_truthy
 
-      star1.destroy
+      star1.destroy!
 
       expect(user.starred?(project1)).to be_falsey
       expect(user.starred?(project2)).to be_truthy
 
-      star2.destroy
+      star2.destroy!
 
       expect(user.starred?(project1)).to be_falsey
       expect(user.starred?(project2)).to be_falsey
@@ -3424,7 +3447,7 @@ RSpec.describe User do
 
       expect(user.authorized_projects).to include(project)
 
-      member.destroy
+      member.destroy!
 
       expect(user.authorized_projects).not_to include(project)
     end
@@ -3449,7 +3472,7 @@ RSpec.describe User do
 
       expect(user2.authorized_projects).to include(project)
 
-      project.destroy
+      project.destroy!
 
       expect(user2.authorized_projects).not_to include(project)
     end
@@ -3463,7 +3486,7 @@ RSpec.describe User do
 
       expect(user.authorized_projects).to include(project)
 
-      group.destroy
+      group.destroy!
 
       expect(user.authorized_projects).not_to include(project)
     end
@@ -4463,9 +4486,10 @@ RSpec.describe User do
             end
 
             it 'adds the namespace errors to the user' do
-              user.update(username: new_username)
+              user.username = new_username
 
-              expect(user.errors.full_messages.first).to eq('A user, alias, or group already exists with that username.')
+              expect(user).to be_invalid
+              expect(user.errors[:base]).to include('A user, alias, or group already exists with that username.')
             end
           end
         end
@@ -5287,6 +5311,26 @@ RSpec.describe User do
     end
   end
 
+  describe 'user credit card validation' do
+    context 'when user is initialized' do
+      let(:user) { build(:user) }
+
+      it { expect(user.credit_card_validation).not_to be_present }
+    end
+
+    context 'when create user without credit card validation' do
+      let(:user) { create(:user) }
+
+      it { expect(user.credit_card_validation).not_to be_present }
+    end
+
+    context 'when user credit card validation exists' do
+      let(:user) { create(:user, :with_credit_card_validation) }
+
+      it { expect(user.credit_card_validation).to be_persisted }
+    end
+  end
+
   describe 'user detail' do
     context 'when user is initialized' do
       let(:user) { build(:user) }
@@ -5356,21 +5400,21 @@ RSpec.describe User do
 
         with_them do
           context 'when state was changed' do
-            subject { user.update(attributes) }
+            subject { user.update!(attributes) }
 
             include_examples 'update highest role with exclusive lease'
           end
         end
 
         context 'when state was not changed' do
-          subject { user.update(email: 'newmail@example.com') }
+          subject { user.update!(email: 'newmail@example.com') }
 
           include_examples 'does not update the highest role'
         end
       end
 
       describe 'destroy user' do
-        subject { user.destroy }
+        subject { user.destroy! }
 
         include_examples 'does not update the highest role'
       end
@@ -5392,7 +5436,7 @@ RSpec.describe User do
 
     context 'when user is a ghost user' do
       before do
-        user.update(user_type: :ghost)
+        user.update!(user_type: :ghost)
       end
 
       it { is_expected.to be false }
@@ -5410,7 +5454,7 @@ RSpec.describe User do
 
       with_them do
         before do
-          user.update(user_type: user_type)
+          user.update!(user_type: user_type)
         end
 
         it { is_expected.to be expected_result }
@@ -5433,7 +5477,7 @@ RSpec.describe User do
 
     context 'when user is an internal user' do
       before do
-        user.update(user_type: :ghost)
+        user.update!(user_type: :ghost)
       end
 
       it { is_expected.to be :forbidden }
@@ -5467,7 +5511,7 @@ RSpec.describe User do
 
     context 'when user is an internal user' do
       before do
-        user.update(user_type: 'alert_bot')
+        user.update!(user_type: 'alert_bot')
       end
 
       it_behaves_like 'does not require password to be present'
@@ -5475,7 +5519,7 @@ RSpec.describe User do
 
     context 'when user is a project bot user' do
       before do
-        user.update(user_type: 'project_bot')
+        user.update!(user_type: 'project_bot')
       end
 
       it_behaves_like 'does not require password to be present'

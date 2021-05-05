@@ -6,7 +6,7 @@ module EE
       extend ActiveSupport::Concern
 
       def check_group_feature_available!(feature)
-        render_404 unless group.feature_available?(feature)
+        render_404 unless group.licensed_feature_available?(feature)
       end
 
       def method_missing(method_sym, *arguments, &block)

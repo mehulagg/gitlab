@@ -15,6 +15,7 @@ export const mockParentItem = {
   id: 'gid://gitlab/Epic/42',
   iid: 1,
   fullPath: 'gitlab-org',
+  groupName: 'GitLab Org',
   title: 'Some sample epic',
   reference: 'gitlab-org&1',
   type: 'Epic',

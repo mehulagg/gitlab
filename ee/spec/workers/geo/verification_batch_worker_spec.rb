@@ -38,7 +38,7 @@ RSpec.describe Geo::VerificationBatchWorker, :geo do
     it 'returns remaining_verification_batch_count' do
       expected = 7
       args = { max_batch_count: 95 }
-      allow(job).to receive(:remaining_capacity).and_return(args[:max_batch_count])
+      allow(job).to receive(:max_running_jobs).and_return(args[:max_batch_count])
       allow(::Gitlab::Geo::Replicator).to receive(:for_replicable_name).with(replicable_name).and_return(replicator_class)
 
       expect(replicator_class).to receive(:remaining_verification_batch_count).with(args).and_return(expected)

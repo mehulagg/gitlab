@@ -92,7 +92,7 @@ module Resolvers
     end
 
     def epic_feature_enabled?
-      group.feature_available?(:epics)
+      group.licensed_feature_available?(:epics)
     end
 
     def transform_args(args)

@@ -64,7 +64,7 @@ describe('DastSiteAuthSection', () => {
       'makes the component emit an "input" event when changed',
       async (enabled) => {
         await setAuthentication({ enabled });
-        expect(getLatestInputEventPayload().fields.enabled.value).toBe(enabled);
+        expect(getLatestInputEventPayload().fields.enabled).toBe(enabled);
       },
     );
   });
@@ -89,13 +89,13 @@ describe('DastSiteAuthSection', () => {
         expect(findByNameAttribute(inputFieldName).exists()).toBe(true);
       });
 
-      it('makes the component emit an "input" event when its value changes', () => {
+      it('makes the component emit an "input" event when its value changes', async () => {
         const input = findByNameAttribute(inputFieldName);
         const newValue = 'foo';
 
-        input.setValue(newValue);
+        await input.setValue(newValue);
 
-        expect(getLatestInputEventPayload().fields[inputFieldName].value).toBe(newValue);
+        expect(getLatestInputEventPayload().fields[inputFieldName]).toBe(newValue);
       });
     });
 
@@ -112,13 +112,13 @@ describe('DastSiteAuthSection', () => {
         expect(getLatestInputEventPayload().state).toBe(true);
       });
 
-      it('is valid once all fields have been entered correctly', () => {
+      it('is valid once all fields have been entered correctly', async () => {
         Object.entries(inputFieldsWithValues).forEach(([inputFieldName, inputFieldValue]) => {
           const input = findByNameAttribute(inputFieldName);
           input.setValue(inputFieldValue);
           input.trigger('blur');
         });
-
+        await wrapper.vm.$nextTick();
         expect(getLatestInputEventPayload().state).toBe(true);
       });
     });

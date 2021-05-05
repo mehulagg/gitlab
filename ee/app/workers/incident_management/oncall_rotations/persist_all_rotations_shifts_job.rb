@@ -9,6 +9,7 @@ module IncidentManagement
 
       idempotent!
       feature_category :incident_management
+      tags :exclude_from_kubernetes
       queue_namespace :cronjob
 
       def perform

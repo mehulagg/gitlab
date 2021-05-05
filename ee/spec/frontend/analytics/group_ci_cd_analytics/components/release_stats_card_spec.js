@@ -1,5 +1,6 @@
 import { GlSkeletonLoader, GlCard } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { merge } from 'lodash';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import ReleaseStatsCard from 'ee/analytics/group_ci_cd_analytics/components/release_stats_card.vue';
@@ -74,6 +75,33 @@ describe('Release stats card', () => {
 
     it('renders the statistics', () => {
       expect(findStats().text()).toMatchInterpolatedText('2811 Releases 9% Projects with releases');
+    });
+  });
+
+  describe('when the data is successfully returned, but the stats are all 0', () => {
+    beforeEach(() => {
+      const responseWithZeros = merge({}, groupReleaseStatsQueryResponse, {
+        data: {
+          group: {
+            stats: {
+              releaseStats: {
+                releasesCount: 0,
+                releasesPercentage: 0,
+              },
+            },
+          },
+        },
+      });
+
+      const apolloProvider = createMockApollo([
+        [groupReleaseStatsQuery, jest.fn().mockResolvedValueOnce(responseWithZeros)],
+      ]);
+
+      createComponent({ apolloProvider });
+    });
+
+    it('renders the statistics', () => {
+      expect(findStats().text()).toMatchInterpolatedText('0 Releases 0% Projects with releases');
     });
   });
 

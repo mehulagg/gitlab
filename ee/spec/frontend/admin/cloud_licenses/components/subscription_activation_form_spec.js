@@ -1,8 +1,10 @@
-import { GlForm, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
+import { GlAlert, GlForm, GlFormInput, GlFormCheckbox, GlLink, GlSprintf } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import CloudLicenseSubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
+  troubleshootingHelpLink,
+  subscriptionActivationHelpLink,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
 import { fieldRequiredMessage, subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -30,6 +32,7 @@ describe('CloudLicenseApp', () => {
   const findActivationCodeFormGroup = () => wrapper.findByTestId('form-group-activation-code');
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
   const findActivateSubscriptionForm = () => wrapper.findComponent(GlForm);
+  const findConnectivityErrorAlert = () => wrapper.findComponent(GlAlert);
 
   const GlFormInputStub = stubComponent(GlFormInput, {
     template: `<input />`,
@@ -144,6 +147,25 @@ describe('CloudLicenseApp', () => {
       });
 
       it.todo('deals with failures in a meaningful way');
+    });
+
+    describe('when the mutation is not successful with connectivity error', () => {
+      const mutationMock = jest
+        .fn()
+        .mockResolvedValue(activateLicenseMutationResponse.CONNECTIVITY_ERROR);
+      beforeEach(async () => {
+        createComponentWithApollo({ mutationMock, stubs: { GlSprintf } });
+        await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
+        await findAgreementCheckbox().vm.$emit('input', true);
+        findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
+      });
+
+      it('shows alert component guiding the user to resolve the connectivity problem', () => {
+        const alert = findConnectivityErrorAlert();
+        expect(alert.exists()).toBe(true);
+        expect(alert.findAll(GlLink).at(0).attributes('href')).toBe(subscriptionActivationHelpLink);
+        expect(alert.findAll(GlLink).at(1).attributes('href')).toBe(troubleshootingHelpLink);
+      });
     });
 
     describe('when the mutation is not successful', () => {

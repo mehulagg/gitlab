@@ -11,6 +11,7 @@ module Analytics
 
       feature_category :devops_reports
       idempotent!
+      tags :exclude_from_kubernetes
 
       # range_end was deprecated and must be removed in 14.0
       #

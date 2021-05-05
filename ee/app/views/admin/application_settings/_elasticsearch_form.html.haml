@@ -80,11 +80,9 @@
                   %th= _('Number of shards')
                   %th= _('Number of replicas')
               %tbody
-                - aliases = [elastic_helper.target_name] + elastic_helper.standalone_indices_proxies.map(&:index_name)
-                - aliases.each do |alias_name|
+                - Elastic::IndexSetting.every_alias do |setting|
                   %tr
-                    - setting = Elastic::IndexSetting[alias_name]
-                    %td= alias_name
+                    %td= setting.alias_name
                     %td
                       = f.number_field :elasticsearch_shards, name: "application_setting[elasticsearch_shards][#{setting.alias_name}]", value: setting.number_of_shards, class: 'form-control gl-form-input', id: "application_setting_elasticsearch_shards[#{setting.alias_name}]"
                     %td

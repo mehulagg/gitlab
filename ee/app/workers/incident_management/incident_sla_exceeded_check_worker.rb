@@ -9,6 +9,7 @@ module IncidentManagement
 
     idempotent!
     feature_category :incident_management
+    tags :exclude_from_kubernetes
 
     def perform
       IssuableSla.exceeded_for_issues.find_each do |incident_sla|

@@ -18,7 +18,7 @@ module EE
     end
 
     def by_security_reports_presence(collection)
-      if params[:with_security_reports] && group.feature_available?(:security_dashboard)
+      if params[:with_security_reports] && group.licensed_feature_available?(:security_dashboard)
         collection.with_security_reports
       else
         collection

@@ -12,12 +12,12 @@ const shift = {
     },
   },
   // 3.5 days
-  startsAt: '2021-01-12T10:04:56.333Z',
-  endsAt: '2021-01-15T22:04:56.333Z',
+  startsAt: '2021-01-15T04:00:00.000Z',
+  endsAt: '2021-01-15T06:00:00.000Z', // absolute shift length is 2 hours(7200000 milliseconds)
 };
 
 const CELL_WIDTH = 50;
-const timeframeItem = new Date(2021, 0, 13);
+const timeframeItem = new Date(2021, 0, 13); // Timeframe starts on the 13th
 const timeframe = [timeframeItem, new Date(nDaysAfter(timeframeItem, DAYS_IN_WEEK))];
 
 describe('ee/oncall_schedules/components/schedule/components/shifts/components/shift_item.vue', () => {
@@ -28,8 +28,8 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
       propsData: {
         shift,
         timeframe,
-        presetType: PRESET_TYPES.WEEKS,
-        timelineWidth: CELL_WIDTH * 14,
+        presetType: PRESET_TYPES.WEEKS, // Total grid time in MS: 1209600000
+        timelineWidth: CELL_WIDTH * 14, // Total grid width in px: 700
         ...props,
       },
     });
@@ -45,42 +45,28 @@ describe('ee/oncall_schedules/components/schedule/components/shifts/components/s
 
   const findRotationAssignee = () => wrapper.findComponent(RotationsAssignee);
 
-  describe('shift overlaps inside the current time-frame with a shift greater than 24 hours', () => {
-    it('should render a rotation assignee child component', () => {
-      expect(findRotationAssignee().exists()).toBe(true);
-    });
+  it('should render a rotation assignee child component', () => {
+    expect(findRotationAssignee().exists()).toBe(true);
   });
 
-  describe('shift overlaps inside the current time-frame with a shift equal to 24 hours', () => {
-    beforeEach(() => {
-      createComponent({
-        props: { shift: { ...shift, startsAt: '2021-01-14T10:04:56.333Z' } },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
-      });
-    });
-
-    it('should render a rotation assignee child component', () => {
-      expect(findRotationAssignee().exists()).toBe(true);
-    });
+  it('should calculate a rotation assignee child components width based on its absolute time', () => {
+    // See `getPixelWidth`
+    // const width = ((durationMillis + DLSOffset) * timelineWidth) / totalTime;
+    // ((7200000 + 0) * 700) / 1209600000
+    expect(findRotationAssignee().props('rotationAssigneeStyle').width).toBe('4px');
   });
 
-  describe('shift overlaps inside the current time-frame with a shift less than 24 hours', () => {
-    beforeEach(() => {
-      createComponent({
-        props: {
-          shift: {
-            ...shift,
-            startsAt: '2021-01-14T10:04:56.333Z',
-            endsAt: '2021-01-14T12:04:56.333Z',
-          },
-          rotationLength: { lengthUnit: 'HOURS' },
-        },
-        data: { shiftTimeUnitWidth: CELL_WIDTH },
-      });
-    });
+  it('should calculate a shift width the same as rotation assignee child components width', () => {
+    expect(findRotationAssignee().props('shiftWidth')).toBe(4);
+  });
 
-    it('should render a rotation assignee child component', () => {
-      expect(findRotationAssignee().exists()).toBe(true);
-    });
+  it('should a rotation assignee child components offset based on its absolute time', () => {
+    // See `getPixelOffset`
+    // const left = (timelineWidth * timeOffset) / totalTime;
+    // (700 * 187200000) / 1209600000
+    const rotationAssigneeOffset = parseFloat(
+      findRotationAssignee().props('rotationAssigneeStyle').left,
+    );
+    expect(rotationAssigneeOffset).toBeCloseTo(108.33);
   });
 });

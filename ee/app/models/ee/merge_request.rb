@@ -102,6 +102,11 @@ module EE
         grouping_columns << ::MergeRequest::Metrics.review_time_field if sort.to_s == 'review_time_desc'
         grouping_columns
       end
+
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
+      end
     end
 
     override :mergeable?

@@ -37,6 +37,9 @@ export default () => {
     store: createDashboardStore({
       dashboardType: DASHBOARD_TYPES.PIPELINE,
     }),
+    provide: {
+      dashboardType: DASHBOARD_TYPES.PIPELINE,
+    },
     render(createElement) {
       return createElement(PipelineSecurityDashboard, {
         props: {

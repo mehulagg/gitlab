@@ -21,11 +21,11 @@ module Gitlab
             end
 
             def start_event_identifier
-              raise NotImplementedError.new("Expected #{self.name} to implement start_event_identifier")
+              raise NotImplementedError, "Expected #{self.name} to implement start_event_identifier"
             end
 
             def end_event_identifier
-              raise NotImplementedError.new("Expected #{self.name} to implement end_event_identifier")
+              raise NotImplementedError, "Expected #{self.name} to implement end_event_identifier"
             end
 
             private

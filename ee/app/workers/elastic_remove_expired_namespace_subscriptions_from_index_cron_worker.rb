@@ -8,6 +8,7 @@ class ElasticRemoveExpiredNamespaceSubscriptionsFromIndexCronWorker
   include CronjobQueue
 
   feature_category :global_search
+  tags :exclude_from_kubernetes
   idempotent!
 
   def perform

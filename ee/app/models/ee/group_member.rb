@@ -34,7 +34,7 @@ module EE
     end
 
     def group_has_domain_limitations?
-      group.feature_available?(:group_allowed_email_domains) && group_allowed_email_domains.any?
+      group.licensed_feature_available?(:group_allowed_email_domains) && group_allowed_email_domains.any?
     end
 
     def group_domain_limitations

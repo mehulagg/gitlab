@@ -176,7 +176,8 @@ module EE
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone).parse!
+        signatures_enabled = ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone, signatures_enabled).parse!
         security_report.merge!(report_clone)
       end
 

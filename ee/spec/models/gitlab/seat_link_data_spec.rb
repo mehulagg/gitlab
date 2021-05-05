@@ -119,7 +119,7 @@ RSpec.describe Gitlab::SeatLinkData do
   end
 
   describe '#should_sync_seats?' do
-    let_it_be(:historical_data) { create(:historical_data, recorded_at: timestamp) }
+    let_it_be(:historical_data, refind: true) { create(:historical_data, recorded_at: timestamp) }
 
     let(:license) { build(:license, :cloud) }
 

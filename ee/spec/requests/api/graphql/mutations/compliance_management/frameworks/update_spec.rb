@@ -42,10 +42,9 @@ RSpec.describe 'Update a compliance framework' do
                     errors: ["The resource that you are attempting to access does not exist or you don't have permission to perform this action"]
   end
 
-  context 'feature is licensed and enabled' do
+  context 'feature is licensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     context 'with valid params' do

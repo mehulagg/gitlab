@@ -117,6 +117,25 @@ RSpec.describe Group do
         expect(subject).to contain_exactly(group_with_no_pat_expiry_policy)
       end
     end
+
+    describe '.user_is_member' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:not_member_group) { create(:group) }
+      let_it_be(:shared_group) { create(:group) }
+      let_it_be(:direct_group) { create(:group) }
+      let_it_be(:inherited_group) { create(:group, parent: direct_group) }
+      let_it_be(:group_link) { create(:group_group_link, shared_group: shared_group, shared_with_group: direct_group) }
+      let_it_be(:minimal_access_group) { create(:group) }
+
+      before do
+        direct_group.add_guest(user)
+        create(:group_member, :minimal_access, user: user, source: minimal_access_group)
+      end
+
+      it 'returns only groups where user is direct or indirect member ignoring inheritance and minimal access level' do
+        expect(described_class.user_is_member(user)).to match_array([shared_group, direct_group])
+      end
+    end
   end
 
   describe 'validations' do

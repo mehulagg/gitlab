@@ -277,48 +277,9 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
   end
 
-  context 'when custom compliance frameworks are disabled' do
-    let(:project_setting) { create(:compliance_framework_project_setting, :gdpr) }
-
-    before do
-      stub_licensed_features(compliance_framework: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
-      project.update!(compliance_framework_setting: project_setting)
-    end
-
-    context 'when framework is not blank' do
-      let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:hipaa] }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
-
-      it 'saves the framework' do
-        expect { update_project(project, user, opts) }.to change {
-          project
-            .reload
-            .compliance_framework_setting
-            .compliance_management_framework
-            .name
-        }.from('GDPR').to('HIPAA')
-      end
-    end
-
-    context 'when framework is blank' do
-      let(:opts) { { compliance_framework_setting_attributes: { framework: '' } } }
-
-      it 'removes the framework record' do
-        update_project(project, user, opts)
-
-        expect(project.reload.compliance_framework_setting).to be_nil
-      end
-    end
-  end
-
-  context 'when ff_custom_compliance_frameworks flag is enabled' do
+  context 'custom compliance frameworks' do
     let(:framework) { create(:compliance_framework, namespace: project.namespace) }
     let(:opts) { { compliance_framework_setting_attributes: { framework: framework.id } } }
-
-    before do
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
-    end
 
     context 'when current_user has :admin_compliance_framework ability' do
       before do
@@ -353,35 +314,6 @@ RSpec.describe Projects::UpdateService, '#execute' do
         update_project(project, user, opts)
 
         expect(project.reload.compliance_management_framework).not_to be_present
-      end
-    end
-  end
-
-  context 'when compliance framework feature is disabled' do
-    let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS_BY_IDENTIFIER[:sox] }
-    let(:opts) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
-
-    before do
-      stub_licensed_features(compliance_framework: false)
-    end
-
-    context 'the project had the feature before' do
-      let(:project_setting) { create(:compliance_framework_project_setting) }
-
-      before do
-        project.update!(compliance_framework_setting: project_setting)
-      end
-
-      it 'does not save the new framework and retains the old setting' do
-        expect { update_project(project, user, opts) }.not_to change { framework.name }
-      end
-    end
-
-    context 'the project never had the feature' do
-      it 'does not save the framework' do
-        update_project(project, user, opts)
-
-        expect(project.reload.compliance_framework_setting).to be_nil
       end
     end
   end

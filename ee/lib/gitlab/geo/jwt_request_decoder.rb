@@ -59,7 +59,7 @@ module Gitlab
         rescue OpenSSL::Cipher::CipherError
           message = 'Error decrypting the Geo secret from the database. Check that the primary and secondary have the same db_key_base.'
           log_error(message)
-          raise InvalidDecryptionKeyError.new(message)
+          raise InvalidDecryptionKeyError, message
         end
 
         return unless data.present?
@@ -81,7 +81,7 @@ module Gitlab
         rescue JWT::ImmatureSignature, JWT::ExpiredSignature
           message = "Signature not within leeway of #{IAT_LEEWAY} seconds. Check your system clocks!"
           log_error(message)
-          raise InvalidSignatureTimeError.new(message)
+          raise InvalidSignatureTimeError, message
         rescue JWT::DecodeError => e
           log_error("Error decoding Geo request: #{e}")
           nil

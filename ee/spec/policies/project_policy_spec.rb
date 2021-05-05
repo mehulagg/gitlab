@@ -1359,29 +1359,26 @@ RSpec.describe ProjectPolicy do
 
     let(:policy) { :admin_compliance_framework }
 
-    where(:role, :feature_enabled, :admin_mode, :custom_framework_flag, :allowed) do
-      :guest      | false | nil   | false | false
-      :guest      | true  | nil   | false | false
-      :reporter   | false | nil   | false | false
-      :reporter   | true  | nil   | false | false
-      :developer  | false | nil   | false | false
-      :developer  | true  | nil   | false | false
-      :maintainer | false | nil   | false | false
-      :maintainer | true  | nil   | false | true
-      :maintainer | true  | nil   | true  | false
-      :owner      | false | nil   | false | false
-      :owner      | true  | nil   | false | true
-      :admin      | false | false | false | false
-      :admin      | false | true  | false | false
-      :admin      | true  | false | false | false
-      :admin      | true  | true  | false | true
+    where(:role, :feature_enabled, :admin_mode, :allowed) do
+      :guest      | false | nil   | false
+      :guest      | true  | nil   | false
+      :reporter   | false | nil   | false
+      :reporter   | true  | nil   | false
+      :developer  | false | nil   | false
+      :maintainer | false | nil   | false
+      :maintainer | true  | nil   | true
+      :owner      | false | nil   | false
+      :owner      | true  | nil   | true
+      :admin      | false | false | false
+      :admin      | false | true  | false
+      :admin      | true  | false | false
+      :admin      | true  | true  | true
     end
 
     with_them do
       let(:current_user) { public_send(role) }
 
       before do
-        stub_feature_flags(ff_custom_compliance_frameworks: custom_framework_flag)
         stub_licensed_features(compliance_framework: feature_enabled)
         enable_admin_mode!(current_user) if admin_mode
       end

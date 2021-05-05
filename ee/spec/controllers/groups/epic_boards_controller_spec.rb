@@ -11,18 +11,50 @@ RSpec.describe Groups::EpicBoardsController do
   let(:group) { public_group }
 
   before do
+    stub_licensed_features(epics: true)
+
     group.add_maintainer(user)
     sign_in(user)
   end
 
   describe 'GET index' do
-    it 'creates a new board when group does not have one' do
-      expect { list_boards }.to change(group.epic_boards, :count).by(1)
+    context 'with epics disabled' do
+      before do
+        stub_licensed_features(epics: false)
+      end
+
+      it 'does not create a new board when group does not have one' do
+        expect { list_boards }.not_to change(group.epic_boards, :count)
+      end
+
+      it 'returns a not found 404 response' do
+        list_boards
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'with authorized user' do
+      it 'creates a new board when group does not have one' do
+        expect { list_boards }.to change(group.epic_boards, :count).by(1)
+      end
+
+      it 'returns correct response' do
+        list_boards
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
     end
 
     context 'with unauthorized user' do
+      let_it_be(:group) { private_group }
+
       before do
         sign_in(other_user)
+      end
+
+      it 'does not create a new board when group does not have one' do
+        expect { list_boards }.not_to change(group.epic_boards, :count)
       end
 
       it 'returns a not found 404 response' do
@@ -52,6 +84,18 @@ RSpec.describe Groups::EpicBoardsController do
 
   describe 'GET show' do
     let!(:board) { create(:epic_board, group: group) }
+
+    context 'with epics disabled' do
+      before do
+        stub_licensed_features(epics: false)
+      end
+
+      it 'returns a not found 404 response' do
+        read_board(board: board)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
 
     context 'json request' do
       it 'is not supported' do

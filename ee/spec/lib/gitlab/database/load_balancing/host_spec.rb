@@ -17,7 +17,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
   def raise_and_wrap(wrapper, original)
     raise original
   rescue original.class
-    raise wrapper.new('boom')
+    raise wrapper, 'boom'
   end
 
   def wrapped_exception(wrapper, original)

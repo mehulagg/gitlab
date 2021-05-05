@@ -97,6 +97,7 @@ export default {
     v-else-if="hasEmptyState"
     :title="s__('Licenses|View license details for your project')"
     :svg-path="emptyStateSvgPath"
+    data-qa-selector="license_compliance_empty_state_description_content"
   >
     <template #description>
       {{

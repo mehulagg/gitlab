@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAlert,
   GlButton,
   GlCard,
   GlForm,
@@ -13,6 +14,8 @@ import produce from 'immer';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import validation from '~/vue_shared/directives/validation';
 import {
+  CONNECTIVITY_ERROR,
+  connectivityErrorAlert,
   fieldRequiredMessage,
   subscriptionActivationForm,
   subscriptionQueries,
@@ -32,10 +35,13 @@ const getErrorsAsData = ({
 
 export const SUBSCRIPTION_ACTIVATION_FAILURE_EVENT = 'subscription-activation-failure';
 export const adminLicenseUrl = helpPagePath('/user/admin_area/license');
+export const troubleshootingHelpLink = helpPagePath('user/admin_area/license.html#troubleshooting');
+export const subscriptionActivationHelpLink = helpPagePath('user/admin_area/license.html');
 
 export default {
   name: 'CloudLicenseSubscriptionActivationForm',
   components: {
+    GlAlert,
     GlButton,
     GlCard,
     GlForm,
@@ -53,9 +59,16 @@ export default {
     acceptTerms: subscriptionActivationForm.acceptTerms,
     activateLabel: subscriptionActivationForm.activateLabel,
     fieldRequiredMessage,
+    alert: {
+      title: connectivityErrorAlert.title,
+      subtitle: connectivityErrorAlert.subtitle,
+      helpText: connectivityErrorAlert.helpText,
+    },
   },
   links: {
     adminLicenseUrl,
+    troubleshootingHelpLink,
+    subscriptionActivationHelpLink,
   },
   directives: {
     validation: validation(),
@@ -80,6 +93,7 @@ export default {
     return {
       form,
       isLoading: false,
+      hasConnectivityIssue: false,
     };
   },
   computed: {
@@ -101,6 +115,7 @@ export default {
       }
       this.form.showValidation = false;
       this.isLoading = true;
+      this.hasConnectivityIssue = false;
       this.$apollo
         .mutate({
           mutation: subscriptionQueries.mutation,
@@ -111,6 +126,9 @@ export default {
           },
           update: (cache, mutation) => {
             const license = getLicenseFromData(mutation);
+            if (!license) {
+              return;
+            }
             const { query } = subscriptionQueries;
             const data = produce(license, (draftData) => {
               draftData.currentLicense = license;
@@ -121,6 +139,9 @@ export default {
         .then((res) => {
           const errors = getErrorsAsData(res);
           if (errors.length) {
+            if (errors.find((error) => error === CONNECTIVITY_ERROR)) {
+              this.hasConnectivityIssue = true;
+            }
             throw new Error();
           }
         })
@@ -135,68 +156,99 @@ export default {
 };
 </script>
 <template>
-  <gl-card>
+  <gl-card body-class="gl-p-0">
     <template #header>
       <h5 class="gl-my-0 gl-font-weight-bold">{{ $options.i18n.title }}</h5>
     </template>
-    <p>
-      <gl-sprintf :message="$options.i18n.howToActivateSubscription">
-        <template #link="{ content }">
-          <gl-link :href="$options.links.adminLicenseUrl" target="_blank">{{ content }}</gl-link>
-        </template>
-      </gl-sprintf>
-    </p>
-    <gl-form novalidate @submit.prevent="submit">
-      <div class="gl-display-flex gl-flex-wrap">
-        <gl-form-group
-          class="gl-flex-grow-1"
-          :invalid-feedback="form.fields.activationCode.feedback"
-          data-testid="form-group-activation-code"
-        >
-          <label class="gl-w-full" for="activation-code-group">
-            {{ $options.i18n.activationCode }}
-          </label>
-          <gl-form-input
-            id="activation-code-group"
-            v-model="form.fields.activationCode.value"
-            v-validation:[form.showValidation]
-            :disabled="isLoading"
-            :placeholder="$options.i18n.pasteActivationCode"
-            :state="form.fields.activationCode.state"
-            name="activationCode"
-            class="gl-mb-4"
-            required
-          />
-        </gl-form-group>
 
-        <gl-form-group
-          class="gl-mb-0"
-          :state="isCheckboxValid"
-          :invalid-feedback="$options.i18n.fieldRequiredMessage"
-          data-testid="form-group-terms"
-        >
-          <gl-form-checkbox v-model="form.fields.terms.state" :state="isCheckboxValid">
-            <gl-sprintf :message="$options.i18n.acceptTerms">
-              <template #link="{ content }">
-                <gl-link href="https://about.gitlab.com/terms/" target="_blank"
-                  >{{ content }}
-                </gl-link>
-              </template>
-            </gl-sprintf>
-          </gl-form-checkbox>
-        </gl-form-group>
+    <div
+      v-if="hasConnectivityIssue"
+      class="gl-p-5 gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
+    >
+      <gl-alert variant="danger" :title="$options.i18n.alert.title" :dismissible="false">
+        <gl-sprintf :message="$options.i18n.alert.subtitle">
+          <template #link="{ content }">
+            <gl-link
+              :href="$options.links.subscriptionActivationHelpLink"
+              target="_blank"
+              class="gl-text-decoration-none!"
+              >{{ content }}</gl-link
+            >
+          </template>
+        </gl-sprintf>
+        <gl-sprintf :message="$options.i18n.alert.helpText">
+          <template #link="{ content }">
+            <gl-link
+              :href="$options.links.troubleshootingHelpLink"
+              target="_blank"
+              class="gl-text-decoration-none!"
+            >
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </gl-alert>
+    </div>
+    <div class="gl-p-5">
+      <p>
+        <gl-sprintf :message="$options.i18n.howToActivateSubscription">
+          <template #link="{ content }">
+            <gl-link href="$options.links.adminLicenseUrl" target="_blank">{{ content }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
+      <gl-form novalidate @submit.prevent="submit">
+        <div class="gl-display-flex gl-flex-wrap">
+          <gl-form-group
+            class="gl-flex-grow-1"
+            :invalid-feedback="form.fields.activationCode.feedback"
+            data-testid="form-group-activation-code"
+          >
+            <label class="gl-w-full" for="activation-code-group">
+              {{ $options.i18n.activationCode }}
+            </label>
+            <gl-form-input
+              id="activation-code-group"
+              v-model="form.fields.activationCode.value"
+              v-validation:[form.showValidation]
+              :disabled="isLoading"
+              :placeholder="$options.i18n.pasteActivationCode"
+              :state="form.fields.activationCode.state"
+              name="activationCode"
+              class="gl-mb-4"
+              required
+            />
+          </gl-form-group>
 
-        <gl-button
-          :loading="isRequestingActivation"
-          category="primary"
-          class="gl-mt-6 js-no-auto-disable"
-          data-testid="activate-button"
-          type="submit"
-          variant="confirm"
-        >
-          {{ $options.i18n.activateLabel }}
-        </gl-button>
-      </div>
-    </gl-form>
+          <gl-form-group
+            class="gl-mb-0"
+            :state="isCheckboxValid"
+            :invalid-feedback="$options.i18n.fieldRequiredMessage"
+            data-testid="form-group-terms"
+          >
+            <gl-form-checkbox v-model="form.fields.terms.state" :state="isCheckboxValid">
+              <gl-sprintf :message="$options.i18n.acceptTerms">
+                <template #link="{ content }">
+                  <gl-link href="https://about.gitlab.com/terms/" target="_blank"
+                    >{{ content }}
+                  </gl-link>
+                </template>
+              </gl-sprintf>
+            </gl-form-checkbox>
+          </gl-form-group>
+
+          <gl-button
+            :loading="isRequestingActivation"
+            category="primary"
+            class="gl-mt-6 js-no-auto-disable"
+            data-testid="activate-button"
+            type="submit"
+            variant="confirm"
+          >
+            {{ $options.i18n.activateLabel }}
+          </gl-button>
+        </div>
+      </gl-form>
+    </div>
   </gl-card>
 </template>

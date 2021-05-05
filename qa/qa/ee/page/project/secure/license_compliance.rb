@@ -9,6 +9,7 @@ module QA
             include QA::Page::Component::Select2
 
             view 'ee/app/assets/javascripts/license_compliance/components/app.vue' do
+              element :license_compliance_empty_state_description_content
               element :policies_tab
             end
 
@@ -22,6 +23,12 @@ module QA
 
             view 'ee/app/assets/javascripts/vue_shared/license_compliance/components/admin_license_management_row.vue' do
               element :admin_license_compliance_container
+            end
+
+            def has_empty_state_description?(text)
+              within_element(:license_compliance_empty_state_description_content) do
+                has_text?(text)
+              end
             end
 
             def approve_license(license)

@@ -172,6 +172,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         another_project = create(:project, :repository, creator: another_user)
         create(:remote_mirror, project: another_project, enabled: false)
         create(:snippet, author: user)
+        create(:suggestion, note: create(:note, project: project))
       end
 
       expect(described_class.usage_activity_by_stage_create({})).to include(
@@ -181,7 +182,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_disable_overriding_approvers_per_merge_request: 2,
         projects_without_disable_overriding_approvers_per_merge_request: 6,
         remote_mirrors: 2,
-        snippets: 2
+        snippets: 2,
+        suggestions: 2
       )
       expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
         deploy_keys: 1,
@@ -190,7 +192,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_disable_overriding_approvers_per_merge_request: 1,
         projects_without_disable_overriding_approvers_per_merge_request: 3,
         remote_mirrors: 1,
-        snippets: 1
+        snippets: 1,
+        suggestions: 1
       )
     end
   end
@@ -741,6 +744,29 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(counts_monthly[:projects_with_alerts_created]).to eq(1)
       expect(counts_monthly[:packages]).to eq(1)
       expect(counts_monthly[:promoted_issues]).to eq(1)
+    end
+  end
+
+  describe '.runners_usage' do
+    before do
+      project = build(:project)
+      create_list(:ci_runner, 2, :instance_type, :online)
+      create(:ci_runner, :group, :online)
+      create(:ci_runner, :group, :inactive)
+      create_list(:ci_runner, 3, :project_type, :online, projects: [project])
+    end
+
+    subject { described_class.runners_usage }
+
+    it 'gathers runner usage counts correctly' do
+      expect(subject[:ci_runners]).to eq(7)
+      expect(subject[:ci_runners_instance_type_active]).to eq(2)
+      expect(subject[:ci_runners_group_type_active]).to eq(1)
+      expect(subject[:ci_runners_project_type_active]).to eq(3)
+
+      expect(subject[:ci_runners_instance_type_active_online]).to eq(2)
+      expect(subject[:ci_runners_group_type_active_online]).to eq(1)
+      expect(subject[:ci_runners_project_type_active_online]).to eq(3)
     end
   end
 

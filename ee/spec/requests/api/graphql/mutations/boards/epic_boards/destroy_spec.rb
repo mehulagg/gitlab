@@ -8,7 +8,7 @@ RSpec.describe Mutations::Boards::EpicBoards::Destroy do
   let_it_be_with_reload(:current_user) { create(:user) }
   let_it_be_with_reload(:group) { create(:group) }
   let_it_be(:board) { create(:epic_board, group: group) }
-  let_it_be(:other_board) { create(:epic_board, group: group) }
+  let_it_be(:other_board, refind: true) { create(:epic_board, group: group) }
 
   let(:mutation) do
     variables = {

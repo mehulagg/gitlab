@@ -128,7 +128,7 @@ module EE
       end
 
       def group_ci_cd_analytics_navbar_link(group, current_user)
-        return unless group.feature_available?(:group_ci_cd_analytics)
+        return unless group.licensed_feature_available?(:group_ci_cd_analytics)
         return unless group_sidebar_link?(:group_ci_cd_analytics)
 
         navbar_sub_item(
@@ -139,7 +139,7 @@ module EE
       end
 
       def group_repository_analytics_navbar_link(group, current_user)
-        return unless group.feature_available?(:group_coverage_reports)
+        return unless group.licensed_feature_available?(:group_coverage_reports)
         return unless group_sidebar_link?(:repository_analytics)
 
         navbar_sub_item(

@@ -13,6 +13,10 @@ const TEST_DATA = {
   [REPORT_TYPES.list]: {
     items: [],
   },
+  [REPORT_TYPES.diff]: {
+    before: 'foo',
+    after: 'bar',
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {

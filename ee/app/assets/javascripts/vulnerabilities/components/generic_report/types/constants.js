@@ -3,11 +3,13 @@ import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 export const REPORT_TYPES = {
   list: 'list',
   url: 'url',
+  diff: 'diff',
 };
 
 const REPORT_TYPE_TO_COMPONENT_MAP = {
   [REPORT_TYPES.list]: () => import('./list.vue'),
   [REPORT_TYPES.url]: () => import('./url.vue'),
+  [REPORT_TYPES.diff]: () => import('./diff.vue'),
 };
 
 export const getComponentNameForType = (reportType) =>

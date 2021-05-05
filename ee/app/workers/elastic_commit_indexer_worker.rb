@@ -25,7 +25,7 @@ class ElasticCommitIndexerWorker
     project = Project.find(project_id)
     return true unless project.use_elasticsearch?
 
-    in_lock("#{self.class.name}/#{project_id}/#{wiki}", ttl: 1.hour, retries: 0) do
+    in_lock("#{self.class.name}/#{project_id}/#{wiki}", ttl: 1.day, retries: 0) do
       Gitlab::Elastic::Indexer.new(project, wiki: wiki).run
     end
   end

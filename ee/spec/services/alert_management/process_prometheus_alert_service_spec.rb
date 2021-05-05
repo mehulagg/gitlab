@@ -42,7 +42,7 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
         context 'with resolving payload' do
           let(:payload) { raw_payload.merge('status' => 'resolved') }
 
-          include_examples 'oncall users are correctly notified of Prometheus recovery alert'
+          include_examples 'oncall users are correctly notified of recovery alert'
         end
       end
     end
