@@ -6,6 +6,8 @@ module Geo
   class ContainerRepositorySync
     include Gitlab::Utils::StrongMemoize
 
+    FOREIGN_MEDIA_TYPE = 'application/vnd.docker.image.rootfs.foreign.diff.tar.gzip'
+
     attr_reader :name, :container_repository
 
     def initialize(container_repository)
@@ -46,17 +48,20 @@ module Geo
     end
 
     def list_blobs(manifest)
-      layers = manifest['layers'].map do |layer|
-        layer['digest']
+      layers = manifest['layers'].filter_map do |layer|
+        layer['digest'] unless foreign_layer?(layer)
       end
 
       layers.push(manifest.dig('config', 'digest')).compact
     end
 
+    def foreign_layer?(layer)
+      layer['mediaType'] == FOREIGN_MEDIA_TYPE
+    end
+
     def primary_tags
       @primary_tags ||= begin
         manifest = client.repository_tags(name)
-
         return [] unless manifest && manifest['tags']
 
         manifest['tags'].map do |tag|

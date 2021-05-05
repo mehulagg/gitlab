@@ -13,7 +13,7 @@ RSpec.describe Geo::ContainerRepositorySync, :geo do
   # Break symbol will be removed if JSON encode/decode operation happens
   # so we use this to prove that it does not happen and we preserve original
   # human readable JSON
-  let(:manifest) { "{\"schemaVersion\":2,\n\"layers\":[]}" }
+  let(:manifest) { "{\"schemaVersion\":2,\n\"layers\":[{\n\"mediaType\":\"application/vnd.docker.image.rootfs.foreign.diff.tar.gzip\",\n\"size\":1234,\n\"digest\":\"sha256:1234\",\n\"urls\":[\"https://foo.bar/v2/zoo/blobs/sha256:1234\"]}]}" }
 
   before do
     stub_container_registry_config(enabled: true,
@@ -80,6 +80,7 @@ RSpec.describe Geo::ContainerRepositorySync, :geo do
   describe 'execute' do
     it 'determines list of tags to sync and to remove correctly' do
       expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:aaaaa')
+
       expect_next_instance_of(described_class) do |instance|
         expect(instance).to receive(:sync_tag).with('tag-to-sync').and_call_original
       end
