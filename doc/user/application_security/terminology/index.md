@@ -78,7 +78,7 @@ An asset that has the potential to be vulnerable, identified in a project by an 
 include but are not restricted to source code, binary packages, containers, dependencies, networks,
 applications, and infrastructure.
 
-Findings are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability (object)(see [vulnerability](#vulnerability)).
+Findings are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a [vulnerability](#vulnerability).
 
 ### Insignificant finding
 
