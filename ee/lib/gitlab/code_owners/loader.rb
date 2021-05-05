@@ -62,7 +62,7 @@ module Gitlab
       end
 
       def code_owners_file
-        if RequestStore.active?
+        @code_owners_file ||= if RequestStore.active?
           RequestStore.fetch("project-#{@project.id}:code-owners:#{@ref}") do
             load_code_owners_file
           end

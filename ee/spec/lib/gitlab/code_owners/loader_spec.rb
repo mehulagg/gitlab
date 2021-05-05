@@ -43,6 +43,12 @@ RSpec.describe Gitlab::CodeOwners::Loader do
       expect(loader.entries).to contain_exactly(expected_entry)
     end
 
+    it 'only calls out to the repository once' do
+      expect(project.repository).to receive(:code_owners_blob).once
+
+      2.times { loader.entries }
+    end
+
     it 'loads all users that are members of the project into the entry' do
       expect(first_entry.users).to contain_exactly(owner_1, email_owner, documentation_owner)
     end
