@@ -25,7 +25,7 @@ module Resolvers
         default_value: nil
 
     argument :include_versionless, GraphQL::BOOLEAN_TYPE,
-        description: 'Include versionless packages',
+        description: 'Include versionless packages.',
         required: false,
         default_value: false
 

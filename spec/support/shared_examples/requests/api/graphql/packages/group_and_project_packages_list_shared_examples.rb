@@ -18,7 +18,6 @@ RSpec.shared_examples 'group and project packages query' do
   let(:target_shas) { graphql_data_at(resource_type, :packages, :nodes, :metadata, :target_sha) }
   let(:packages) { graphql_data_at(resource_type, :packages, :nodes) }
 
-
   let(:fields) do
     <<~QUERY
     nodes {
