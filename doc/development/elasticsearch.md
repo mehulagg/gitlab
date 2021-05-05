@@ -316,11 +316,11 @@ choose to remove the migration code and tests so that:
   anymore.
 
 To be extra safe, we will not delete migrations that were created in the last
-minor version before the major upgrade. So, if the we are upgrading to `%14.0`,
-we should not delete migrations that were only added in `%13.11`. This is an
+minor version before the major upgrade. So, if we are upgrading to `%14.0`,
+we should not delete migrations that were only added in `%13.12`. This is an
 extra safety net as we expect there are migrations that get merged that may
 take multiple weeks to finish on GitLab.com. It would be bad if we upgraded
-GitLab.com to `%14.0` before the migrations in `%13.11` were finished. Since
+GitLab.com to `%14.0` before the migrations in `%13.12` were finished. Since
 our deployments to GitLab.com are automated and we currently don't have
 automated checks to prevent this, the extra precaution is warranted.
 Additionally, even if we did have automated checks to prevent it, we wouldn't
