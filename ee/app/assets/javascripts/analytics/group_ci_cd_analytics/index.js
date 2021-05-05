@@ -20,7 +20,7 @@ export default () => {
     el,
     apolloProvider,
     provide: {
-      fullPath,
+      groupPath: fullPath,
     },
     render: (createElement) => createElement(CiCdAnalyticsApp),
   });

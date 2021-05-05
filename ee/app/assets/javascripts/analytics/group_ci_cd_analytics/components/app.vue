@@ -1,5 +1,6 @@
 <script>
 import { GlTabs, GlTab } from '@gitlab/ui';
+import DeploymentFrequencyCharts from 'ee/dora/components/deployment_frequency_charts.vue';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import { TABS } from '../constants';
 import ReleaseStatsCard from './release_stats_card.vue';
@@ -10,6 +11,7 @@ export default {
     ReleaseStatsCard,
     GlTabs,
     GlTab,
+    DeploymentFrequencyCharts,
   },
   data() {
     return {
@@ -41,6 +43,9 @@ export default {
     <gl-tabs :value="selectedTabIndex" @input="onTabChange">
       <gl-tab :title="s__('CICDAnalytics|Release statistics')">
         <release-stats-card class="gl-mt-5" />
+      </gl-tab>
+      <gl-tab :title="s__('CICDAnalytics|Deployment frequency')">
+        <deployment-frequency-charts />
       </gl-tab>
     </gl-tabs>
   </div>
