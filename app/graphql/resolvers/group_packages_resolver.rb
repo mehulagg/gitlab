@@ -5,6 +5,11 @@ module Resolvers
   class GroupPackagesResolver < ProjectPackagesResolver
     # The GraphQL type is defined in the extended class
 
+    argument :sort, Types::Packages::PackageGroupSortEnum,
+    description: 'Sort packages by this criteria.',
+    required: false,
+    default_value: :created_desc
+
     GROUP_SORT_TO_PARAMS_MAP = SORT_TO_PARAMS_MAP.merge({
       project_path_desc: { order_by: 'project_path', sort: 'desc' },
       project_path_asc: { order_by: 'project_path', sort: 'asc' }
