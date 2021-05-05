@@ -77,6 +77,10 @@ module EE
         has_issue_weights_feature: project.feature_available?(:issue_weights).to_s
       )
 
+      if project.feature_available?(:epics)
+        data[:group_epics_path] = group_epics_path(project&.group, format: :json)
+      end
+
       if project.feature_available?(:iterations)
         data[:project_iterations_path] = api_v4_projects_iterations_path(id: project.id)
       end

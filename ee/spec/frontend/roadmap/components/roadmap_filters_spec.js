@@ -216,8 +216,8 @@ describe('RoadmapFilters', () => {
           symbol: '&',
           token: EpicToken,
           operators,
+          idProperty: 'iid',
           fetchEpics: expect.any(Function),
-          fetchSingleEpic: expect.any(Function),
         },
       ];
 

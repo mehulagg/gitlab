@@ -261,6 +261,16 @@ export const filters = {
       [OPERATOR_IS_NOT]: 'not[iteration_title]',
     },
   },
+  epic_id: {
+    apiParam: {
+      [OPERATOR_IS]: 'epic_id',
+      [OPERATOR_IS_NOT]: 'not[epic_id]',
+    },
+    urlParam: {
+      [OPERATOR_IS]: 'epic_id',
+      [OPERATOR_IS_NOT]: 'not[epic_id]',
+    },
+  },
   weight: {
     apiParam: {
       [OPERATOR_IS]: 'weight',
