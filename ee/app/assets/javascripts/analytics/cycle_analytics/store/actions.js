@@ -64,6 +64,8 @@ export const fetchStageData = ({ dispatch, getters, commit }, stageId) => {
   } = getters;
   dispatch('requestStageData');
 
+  console.log('fetchStageData::cycleAnalyticsRequestParams', cycleAnalyticsRequestParams);
+
   return Api.cycleAnalyticsStageEvents({
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
@@ -341,18 +343,22 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       selectedStage
         ? dispatch('setSelectedStage', selectedStage)
         : dispatch('setDefaultSelectedStage'),
-      selectedStage?.id ? dispatch('fetchStageData', selectedStage.id) : Promise.resolve(),
-      dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
         selectedMilestone,
         selectedAssigneeList,
         selectedLabelList,
       }),
+      dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('durationChart/setLoading', true),
       dispatch('typeOfWork/setLoading', true),
     ])
-      .then(() => dispatch('fetchCycleAnalyticsData'))
+      .then(() =>
+        Promise.all([
+          selectedStage?.id ? dispatch('fetchStageData', selectedStage.id) : Promise.resolve(),
+          dispatch('fetchCycleAnalyticsData'),
+        ]),
+      )
       .then(() => dispatch('initializeCycleAnalyticsSuccess'));
   }
 
