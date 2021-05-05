@@ -82,6 +82,7 @@ module QA
             args << '--docker-tlsverify=false'
             args << '--docker-privileged=true'
             args << "--docker-network-mode=#{network}"
+            args << "--docker-volumes=/certs/client"
           end
 
           <<~CMD.strip
