@@ -554,6 +554,10 @@ class License < ApplicationRecord
     !!license&.cloud_licensing?
   end
 
+  def usage_ping?
+    !!license&.usage_ping_required_metrics?
+  end
+
   def license_type
     cloud_license? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
   end
