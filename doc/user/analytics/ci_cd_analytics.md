@@ -66,7 +66,7 @@ frequency to the `production` environment. The environment must be part of the
 [production deployment tier](../../ci/environments/index.md#deployment-tier-of-environments)
 for its deployment information to appear on the graphs.
 
-![Deployment frequency](img/deployment_frequency_chart_v13_12.png)
+![Deployment frequency](img/deployment_frequency_charts_v13_12.png)
 
 These charts are available for both groups and projects.
 
