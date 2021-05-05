@@ -119,17 +119,6 @@ RSpec.describe SessionsController do
         end
       end
 
-      context 'when user is not allowed to log in using password' do
-        let(:user) { create(:omniauth_user, provider: 'ldapmain')}
-
-        it 'does not authenticate the user' do
-          post_action
-
-          expect(@request.env['warden']).not_to be_authenticated
-          expect(flash[:alert]).to include('You are not allowed to log in using password')
-        end
-      end
-
       context 'when using valid password', :clean_gitlab_redis_shared_state do
         let(:user) { create(:user) }
         let(:user_params) { { login: user.username, password: user.password } }

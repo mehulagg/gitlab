@@ -1110,6 +1110,11 @@ class User < ApplicationRecord
     Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !password_based_omniauth_user?
   end
 
+  #method overriden in EE
+  def user_authorized_by_provisioning_group?
+    false
+  end
+
   def can_change_username?
     gitlab_config.username_changing_enabled
   end
