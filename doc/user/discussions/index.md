@@ -91,7 +91,7 @@ current merge request.
 
 ### Marking a comment or thread as resolved
 
-You can mark a thread as resolved by clicking the **Resolve thread**
+You can mark a thread as resolved by selecting the **Resolve thread**
 button at the bottom of the thread.
 
 !["Resolve thread" button](img/resolve_thread_button_v13_3.png)
@@ -102,8 +102,8 @@ Alternatively, you can mark each comment as resolved individually.
 
 ### Move all unresolved threads in a merge request to an issue
 
-To continue all open threads from a merge request in a new issue, click the
-**Resolve all threads in new issue** button.
+To continue all open threads from a merge request in a new issue, select
+**Resolve all threads in new issue**.
 
 ![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
 
@@ -313,7 +313,7 @@ To reply to a standard (non-thread) comment, you can use the **Reply to comment*
 
 The **Reply to comment** button is only displayed if you have permissions to reply to an existing thread, or start a thread from a standard comment.
 
-Clicking on the **Reply to comment** button brings the reply area into focus and you can type your reply.
+Selecting the **Reply to comment** button brings the reply area into focus and you can type your reply.
 
 ![Reply to comment feature](img/reply_to_comment.gif)
 
@@ -330,9 +330,9 @@ not supported yet.
 
 You can assign an issue to a user who made a comment.
 
-In the comment, click the **More Actions** menu and click **Assign to commenting user**.
+In the comment, select the **More Actions** menu, and then select **Assign to commenting user**.
 
-  Click the button again to unassign the commenter.
+Select the button again to unassign the commenter.
 
 ![Assign to commenting user](img/quickly_assign_commenter_v13_1.png)
 
