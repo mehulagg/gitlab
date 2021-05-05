@@ -1257,7 +1257,7 @@ Read more in the [Group Badges](group_badges.md) documentation.
 
 ## Group Import/Export
 
-Read more in the [Group Import/Export](group_import_export.md) documentation.
+Read more in the [Group Import/Export](group_import_export.md) & [Group Relations Export](group_relations_export.md) documentation.
 
 ## Share Groups with Groups
 
