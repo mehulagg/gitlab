@@ -77,8 +77,10 @@ module Sidebars
         private
 
         def list_menu_item
+          title = Feature.enabled?(:sidebar_refactor, context.current_user) ? _('All') : _('List')
+
           ::Sidebars::MenuItem.new(
-            title: _('List'),
+            title: title,
             link: project_issues_path(context.project),
             active_routes: { path: 'projects/issues#index' },
             container_html_options: { aria: { label: _('Issues') } },

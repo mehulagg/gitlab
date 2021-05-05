@@ -17,8 +17,8 @@
         %span.badge.badge-pill.count.epic_counter.fly-out-badge= number_with_delimiter(epics_count)
     %li.divider.fly-out-top-item
     = nav_link(path: 'epics#index', html_options: { class: 'home' }) do
-      = link_to group_epics_path(group), title: 'List' do
-        %span= _('List')
+      = link_to group_epics_path(group), title: list_title do
+        %span= list_title
 
     - if Feature.enabled?(:epic_boards, group)
       = nav_link(path: ['epic_boards#index', 'epic_boards#show'], html_options: { class: "home" }) do
