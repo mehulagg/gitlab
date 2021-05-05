@@ -16,7 +16,7 @@ FactoryBot.define do
     end
 
     trait :cloud do
-      type { 'cloud' }
+      cloud_licensing_enabled { true }
     end
 
     transient do

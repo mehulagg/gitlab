@@ -12,7 +12,7 @@ RSpec.describe 'Admin views Cloud License', :js do
   end
 
   context 'Cloud license' do
-    let_it_be(:license) { create_current_license(type: License::CLOUD_LICENSE_TYPE, plan: License::ULTIMATE_PLAN) }
+    let_it_be(:license) { create_current_license(cloud_licensing_enabled: true, plan: License::ULTIMATE_PLAN) }
 
     before do
       visit(admin_cloud_license_path)
@@ -35,7 +35,7 @@ RSpec.describe 'Admin views Cloud License', :js do
     end
 
     it 'fails to sync the subscription' do
-      create_current_license(type: License::CLOUD_LICENSE_TYPE, plan: License::ULTIMATE_PLAN, expires_at: nil)
+      create_current_license(cloud_licensing_enabled: true, plan: License::ULTIMATE_PLAN, expires_at: nil)
 
       page.within(find('#content-body', match: :first)) do
         click_button('Sync subscription details')

@@ -551,7 +551,7 @@ class License < ApplicationRecord
   end
 
   def cloud_license?
-    license&.type == CLOUD_LICENSE_TYPE
+    !!license&.cloud_licensing?
   end
 
   def license_type

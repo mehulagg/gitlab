@@ -1,3 +1,10 @@
+GIT
+  remote: git@dev.gitlab.org:gitlab/gitlab-license.git
+  revision: f75c4da5faea0c437cadceb98f0ab05f4362ce9c
+  branch: 3067_add_new_fields
+  specs:
+    gitlab-license (1.5.0)
+
 PATH
   remote: vendor/gems/mail-smtp_pool
   specs:
@@ -474,7 +481,6 @@ GEM
       opentracing (~> 0.4)
       pg_query (~> 1.3)
       redis (> 3.0.0, < 5.0.0)
-    gitlab-license (1.4.0)
     gitlab-mail_room (0.0.9)
     gitlab-markup (1.7.1)
     gitlab-net-dns (0.9.1)
@@ -1454,7 +1460,7 @@ DEPENDENCIES
   gitlab-fog-azure-rm (~> 1.0.1)
   gitlab-fog-google (~> 1.13)
   gitlab-labkit (~> 0.16.2)
-  gitlab-license (~> 1.4)
+  gitlab-license!
   gitlab-mail_room (~> 0.0.9)
   gitlab-markup (~> 1.7.1)
   gitlab-net-dns (~> 0.9.1)

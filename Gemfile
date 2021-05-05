@@ -300,7 +300,7 @@ gem 'gon', '~> 6.4.0'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
 
-gem "gitlab-license", "~> 1.4"
+gem 'gitlab-license', git: 'git@dev.gitlab.org:gitlab/gitlab-license.git', branch: '3067_add_new_fields'
 
 # Protect against bruteforcing
 gem 'rack-attack', '~> 6.3.0'
