@@ -32,7 +32,7 @@ RSpec.describe PipelineDetailsEntity do
         expect(subject[:details])
           .to include :duration, :finished_at
         expect(subject[:details])
-          .to include :stages, :artifacts, :has_downloadable_artifacts, :manual_actions, :scheduled_actions
+          .to include :stages, :has_downloadable_artifacts, :manual_actions, :scheduled_actions
         expect(subject[:details][:status]).to include :icon, :favicon, :text, :label
       end
 
@@ -184,8 +184,6 @@ RSpec.describe PipelineDetailsEntity do
         expect(source_jobs[child_pipeline.id][:name]).to eq('child')
       end
     end
-
-    it_behaves_like 'public artifacts'
 
     context 'when pipeline has downloadable artifacts' do
       subject(:entity) { described_class.represent(pipeline, request: request, disable_artifacts: disable_artifacts).as_json }
