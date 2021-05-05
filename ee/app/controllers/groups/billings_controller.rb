@@ -17,5 +17,7 @@ class Groups::BillingsController < Groups::ApplicationController
       .execute
     track_experiment_event(:contact_sales_btn_in_app, 'page_view:billing_plans:group')
     record_experiment_user(:contact_sales_btn_in_app)
+
+    render 'groups/billings/customers_dot_error' unless @plans_data
   end
 end
