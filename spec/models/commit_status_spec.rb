@@ -599,6 +599,41 @@ RSpec.describe CommitStatus do
     end
   end
 
+  describe '#matrix_id_string' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:commit_status) do
+      build(:commit_status, pipeline: pipeline, stage: 'test')
+    end
+
+    subject { commit_status.matrix_id_string }
+
+    where(:name, :matrix_id_string) do
+      'rspec:windows 0 1 [aws] 2/2'                         | '[aws]'
+      'rspec:windows 0 1 name [aws] 2/2'                    | '[aws]'
+      'rspec: [aws]'                                        | '[aws]'
+      'rspec: [aws] 0/1'                                    | '[aws]'
+      'rspec: [aws, max memory]'                            | '[aws, max memory]'
+      'rspec:linux: [aws, max memory, data]'                | '[aws, max memory, data]'
+      'rspec: [inception: [something, other thing], value]' | '[inception: [something, other thing], value]'
+      'rspec:windows 0/1: [name, other]'                    | '[name, other]'
+      'rspec:windows: [name, other] 0/1'                    | '[name, other]'
+      'rspec:windows: [name, 0/1] 0/1'                      | '[name, 0/1]'
+      'rspec:windows: [0/1, name]'                          | '[0/1, name]'
+      'rspec:windows: [, ]'                                 | '[, ]'
+      'rspec:windows: [name]'                               | '[name]'
+      'rspec:windows: [name,other]'                         | '[name,other]'
+    end
+
+    with_them do
+      it "#{params[:name]} puts in #{params[:group_name]}" do
+        commit_status.name = name
+
+        is_expected.to eq(matrix_id_string)
+      end
+    end
+  end
+
   describe '#detailed_status' do
     let(:user) { create(:user) }
 

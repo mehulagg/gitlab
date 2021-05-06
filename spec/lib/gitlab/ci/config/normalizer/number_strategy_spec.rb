@@ -48,8 +48,18 @@ RSpec.describe Gitlab::Ci::Config::Normalizer::NumberStrategy do
       end
 
       it 'has parallelized name' do
-        expect(subject.map(&:name)).to match_array(
-          ['test 1/3', 'test 2/3', 'test 3/3'])
+      end
+
+      describe 'names' do
+        it 'are parallelized' do
+          expect(subject.map(&:name)).to match_array(['test 1/3', 'test 2/3', 'test 3/3'])
+        end
+
+        it 'match the class-level extraction regex' do
+          subject.map(&:name).each do |job_name|
+            expect(job_name).to_match described_class::SUFFIX_REGEX
+          end
+        end
       end
     end
 

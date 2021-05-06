@@ -5,6 +5,8 @@ module Gitlab
     class Config
       class Normalizer
         class MatrixStrategy
+          SUFFIX_REGEX = /: \[.*\]\z/.freeze
+
           class << self
             def applies_to?(config)
               config.is_a?(Hash) && config.key?(:matrix)

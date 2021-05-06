@@ -102,10 +102,16 @@ RSpec.describe Gitlab::Ci::Config::Normalizer::MatrixStrategy do
       )
     end
 
-    it 'has parallelized name' do
-      expect(subject.map(&:name)).to match_array(
-        ['test: [aws, app1]', 'test: [aws, app2]', 'test: [gcp, app]', 'test: [ovh, app]']
-      )
+    describe 'names' do
+      it 'are parallelized' do
+        expect(subject.map(&:name)).to match_array(['test: [aws, app1]', 'test: [aws, app2]', 'test: [gcp, app]', 'test: [ovh, app]'])
+      end
+
+      it 'match the class-level extraction regex' do
+        subject.map(&:name).each do |job_name|
+          expect(job_name).to_match described_class::SUFFIX_REGEX
+        end
+      end
     end
   end
 end

@@ -207,7 +207,16 @@ class CommitStatus < ApplicationRecord
   end
 
   def group_name
-    name.to_s.sub(%r{([\b\s:]+((\[.*\])|(\d+[\s:\/\\]+\d+)))+\s*\z}, '').strip
+    name.to_s.sub(%r{
+      (#{Gitlab::Ci::Config::Normalizer::NumberStrategy::SUFFIX_REGEX})|
+      (#{Gitlab::Ci::Config::Normalizer::MatrixStrategy::SUFFIX_REGEX})
+      }, ''
+    ).strip
+  end
+
+  def matrix_id_string
+    full_suffix = name.to_s.match(Gitlab::Ci::Config::Normalizer::MatrixStrategy::SUFFIX_REGEX)[0]
+    full_suffix.sub(/\A: /)
   end
 
   def failed_but_allowed?

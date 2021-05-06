@@ -5,6 +5,8 @@ module Gitlab
     class Config
       class Normalizer
         class NumberStrategy
+          SUFFIX_REGEX = /[0-9]+\/[0-9]+\z/.freeze
+
           class << self
             def applies_to?(config)
               config.is_a?(Integer) || config.is_a?(Hash) && config.key?(:number)
