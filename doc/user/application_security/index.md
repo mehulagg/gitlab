@@ -176,13 +176,13 @@ From the merge request security widget, clicking Expand will unfold the widget, 
 
 This list in the security tab of the pipeline shows all findings in the current branch. You will see both new findings introduced by this branch as well as any existing vulnerabilities that were already present when the branch was created. These results likely do not match the findings displayed in the Merge Request security widget as those do not include the existing vulnerabilities (with the exception of showing any existing vulnerabilities that are no longer detected in the feature branch).
 
-[Read more about security tab](/security_dashboard/#pipeline-security)
+For more details, see [security tab](security_dashboard/index.md#pipeline-security).
 
 ## View security scan information in the Security Dashboard
 
 Security Dashboards show vulnerabilities present in project default branches. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default will show up after the refresh job.
 
-[Read more about security dashboard](/security_dashboard/)
+For more details, see [Security Dashboard](security_dashboard/index.md).
 
 ## View security scan information in the Vulnerability Report
 
@@ -335,7 +335,7 @@ You can do it quickly by following the hyperlink given to run a new pipeline.
 
 ## DAST On-Demand Scans
 
-If you don’t want scans running in your normal DevOps process you can use On-Demand scans instead. Read more about our [on-demand scans](/dast/#on-demand-scans)  functionality. Currently, this is only available for DAST. If you run an on-demand scan against the default branch, it will be reported as a “successful pipeline” and these results will appear in locations such as the security dashboard and vulnerability report.
+If you don’t want scans running in your normal DevOps process you can use on-demand scans instead. For more details, see [on-demand scans](dast/index.md#on-demand-scans). Currently, this is only available for DAST. If you run an on-demand scan against the default branch, it will be reported as a “successful pipeline” and these results will appear in locations such as the security dashboard and vulnerability report.
 
 ## Security report validation
 
