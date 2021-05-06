@@ -6,7 +6,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
   ROOTS_MIGRATION = 'BackfillNamespaceTraversalIdsRoots'
   CHILDREN_MIGRATION = 'BackfillNamespaceTraversalIdsChildren'
   DOWNTIME = false
-  BATCH_SIZE = 500
+  BATCH_SIZE = 1_000
   SUB_BATCH_SIZE = 100
   DELAY_INTERVAL = 2.minutes
 
