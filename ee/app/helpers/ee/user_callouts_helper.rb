@@ -13,6 +13,7 @@ module EE
     PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
     EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
     EOA_BRONZE_PLAN_END_DATE       = '2022-01-26'
+    CC_VALIDATION_REQUIRED         = 'cc_verification_required'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -87,6 +88,15 @@ module EE
       return false if user_dismissed?(EOA_BRONZE_PLAN_BANNER)
 
       (namespace.group? && namespace.has_owner?(current_user.id)) || !namespace.group?
+    end
+
+    def should_enforce_credit_card_validation?(namespace)
+      root_namespace = namespace.root_ancestor
+
+      return true if root_namespace.free? && ::Feature.enabled?(:billings_cc_validation_free_plans)
+      return true if root_namespace.trial? && ::Feature.enabled?(:billings_cc_validation_trial_plans)
+
+      current_user&.credit_card_validated_at.present?
     end
 
     private

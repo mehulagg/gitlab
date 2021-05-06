@@ -31,7 +31,8 @@ class UserCallout < ApplicationRecord
     unfinished_tag_cleanup_callout: 27,
     eoa_bronze_plan_banner: 28,                # EE-only
     pipeline_needs_banner: 29,
-    pipeline_needs_hover_tip: 30
+    pipeline_needs_hover_tip: 30,
+    cc_validation_required_banner: 31          # EE-only
   }
 
   validates :user, presence: true

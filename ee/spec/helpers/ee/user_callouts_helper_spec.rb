@@ -368,4 +368,40 @@ RSpec.describe EE::UserCalloutsHelper do
       expect(helper.send(:eoa_bronze_plan_end_date).is_a?(Date)).to eq(true)
     end
   end
+
+  describe '#should_enforce_credit_card_validation?' do
+    let(:group) { create(:group) }
+    let(:current_user) { user}
+
+    subject(:should_enforce_credit_card_validation) { helper.should_enforce_credit_card_validation? }
+
+    before do
+      group.add_owner(current_user.id)
+      allow(helper).to receive(:current_user).and_return(current_user)
+    end
+
+    context 'with free namespace' do
+      before do
+        allow(group).to receive(:free?).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with trial namespace' do
+      before do
+        allow(group).to receive(:free?).and_return(true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'with paid namespace' do
+      before do
+        allow(group).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
 end
