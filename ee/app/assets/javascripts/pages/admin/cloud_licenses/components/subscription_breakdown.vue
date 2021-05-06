@@ -11,6 +11,7 @@ import {
   subscriptionType,
   syncSubscriptionButtonText,
 } from '../constants';
+import SubscriptionActivationModal from './subscription_activation_modal.vue';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
 import SubscriptionDetailsHistory from './subscription_details_history.vue';
 import SubscriptionDetailsUserInfo from './subscription_details_user_info.vue';
@@ -36,7 +37,7 @@ export default {
   },
   components: {
     GlButton,
-    SubscriptionActivationModal: () => import('./subscription_activation_modal.vue'),
+    SubscriptionActivationModal,
     SubscriptionDetailsCard,
     SubscriptionDetailsHistory,
     SubscriptionDetailsUserInfo,
