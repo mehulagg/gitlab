@@ -23,6 +23,7 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Validate::External,
                 Gitlab::Ci::Pipeline::Chain::Populate,
                 Gitlab::Ci::Pipeline::Chain::StopDryRun,
+                Gitlab::Ci::Pipeline::Chain::MatchRunnersValidation,
                 Gitlab::Ci::Pipeline::Chain::Create,
                 Gitlab::Ci::Pipeline::Chain::Limit::Activity,
                 Gitlab::Ci::Pipeline::Chain::Limit::JobActivity,

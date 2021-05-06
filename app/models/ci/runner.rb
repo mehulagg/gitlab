@@ -196,6 +196,37 @@ module Ci
       end
     end
 
+    def self.build_matching_attributes_map
+      @build_matching_attributes_map ||= {
+        tag_list: Arel.sql("(" +
+          ActsAsTaggableOn::Tagging
+            .joins(:tag)
+            .select('COALESCE(array_agg(tags.name ORDER BY name), ARRAY[]::text[])')
+            .where("taggings.taggable_type='Ci::Runner' AND taggings.taggable_id=ci_runners.id")
+            .to_sql + ")")
+      }.freeze
+    end
+
+    def self.build_matchers
+      params = ::Gitlab::Ci::Runner::BuildMatching::ATTRIBUTES.map do |attribute|
+        build_matching_attributes_map.fetch(attribute, attribute)
+      end
+
+      # we use distinct to de-duplicate data
+      distinct.pluck(*params).map do |attributes|
+        ::Gitlab::Ci::Runner::BuildMatching.new(
+          ::Gitlab::Ci::Runner::BuildMatching::ATTRIBUTES.zip(attributes).to_h)
+      end
+    end
+
+    def build_matching
+      attributes = ::Gitlab::Ci::Runner::BuildMatching::ATTRIBUTES.to_h do |attribute|
+        [attribute, public_send(attribute)] # rubocop:disable GitlabSecurity/PublicSend
+      end
+
+      ::Gitlab::Ci::Runner::BuildMatching.new(attributes)
+    end
+
     def assign_to(project, current_user = nil)
       if instance_type?
         self.runner_type = :project_type
