@@ -1,15 +1,16 @@
 import Vue from 'vue';
-import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import issuableApp from './components/app.vue';
 import incidentTabs from './components/incidents/incident_tabs.vue';
-
-Vue.use(VueApollo);
+import apolloProvider from './graphql';
+import getIssueStateQuery from './queries/get_issue_state.query.graphql';
 
 export default function initIssuableApp(issuableData = {}) {
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
+  apolloProvider.clients.defaultClient.cache.writeQuery({
+    query: getIssueStateQuery,
+    data: {
+      issueState: {},
+    },
   });
 
   const {

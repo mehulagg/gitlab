@@ -1,10 +1,32 @@
-import Vue from 'vue';
+import { nextTick } from 'vue';
+import { shallowMount } from '@vue/test-utils';
 import editActions from '~/issue_show/components/edit_actions.vue';
 import eventHub from '~/issue_show/event_hub';
 import Store from '~/issue_show/stores';
 
 describe('Edit Actions components', () => {
-  let vm;
+  let wrapper;
+
+  const createComponent = ({ data } = {}) =>  {
+    wrapper = shallowMount(IssueTypeField, {
+      propsData: {
+        formState: {
+          issue_type: IssuableTypes.issue,
+        },
+        canDestroy: true,
+        issuableType: 'issue',
+      },
+      data() {
+        return {
+          issueState: null,
+          ...data,
+        };
+      },
+      mocks: {
+        $apollo,
+      },
+    });
+  };
 
   beforeEach((done) => {
     const Component = Vue.extend(editActions);

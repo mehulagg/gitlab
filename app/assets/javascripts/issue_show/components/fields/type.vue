@@ -3,6 +3,8 @@ import { GlFormGroup, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { capitalize } from 'lodash';
 import { __ } from '~/locale';
 import { IssuableTypes } from '../../constants';
+import getIssueStateQuery from '../../queries/get_issue_state.query.graphql';
+import updateIssueStateMutation from '../../queries/update_issue_state.mutation.graphql';
 
 export const i18n = {
   label: __('Issue Type'),
@@ -22,18 +24,40 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      issueState: null,
+    };
+  },
+  apollo: {
+    issueState: {
+      query: getIssueStateQuery,
+    }
+  },
   computed: {
     dropdownText() {
       const {
-        formState: { issue_type },
+        typeToShow
       } = this;
-      return capitalize(issue_type);
+      return capitalize(typeToShow);
+    },
+    typeToShow() {
+      const {
+        issueState,
+        formState,
+      } = this;
+
+      return issueState?.issue_type || formState.issue_type;
     },
   },
   methods: {
     updateIssueType(value) {
-      const { formState } = this;
-      this.$emit('update-store-from-state', { ...formState, issue_type: value });
+      this.$apollo.mutate({
+        mutation: updateIssueStateMutation,
+        variables: {
+          issue_type: value,
+        },
+      });
     },
   },
 };
@@ -52,7 +76,7 @@ export default {
       <gl-dropdown-item
         v-for="type in $options.IssuableTypes"
         :key="type.value"
-        :is-checked="formState.issue_type === type.value"
+        :is-checked="typeToShow === type.value"
         is-check-item
         @click="updateIssueType(type.value)"
       >

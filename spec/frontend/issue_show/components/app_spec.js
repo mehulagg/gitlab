@@ -620,24 +620,5 @@ describe('Issuable output', () => {
         expect(findPinnedLinks().attributes('class')).not.toContain(borderClass);
       });
     });
-
-    describe('updateStoreFromState', () => {
-      beforeEach(() => {
-        mountComponent(
-          {
-            canUpdate: true,
-          },
-          {},
-          {
-            showForm: true,
-          },
-        );
-      });
-
-      it('updates the state if emitted states are different', () => {
-        findIssuableForm().vm.$emit('update-store-from-state', { ...secondRequest });
-        expect(wrapper.vm.store.formState).toEqual(secondRequest);
-      });
-    });
   });
 });

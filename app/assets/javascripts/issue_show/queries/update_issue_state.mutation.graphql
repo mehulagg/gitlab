@@ -1,0 +1,3 @@
+mutation updateIssueState($issue_type: String) {
+    updateIssueState(issue_type: $issue_type) @client
+}
