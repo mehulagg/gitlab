@@ -2,7 +2,7 @@
 
 module Packages
   module Pypi
-    class PackagesFinder < ::Packages::GroupOrPackageFinder
+    class PackagesFinder < ::Packages::GroupOrProjectPackageFinder
       def execute!
         packages.with_normalized_pypi_name(@params[:package_name])
 

@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 module Packages
-  class GroupOrPackageFinder
+  class GroupOrProjectPackageFinder
     include ::Packages::FinderHelper
-
-    MAX_PACKAGES_COUNT = 300
 
     def initialize(current_user, project_or_group, params)
       @current_user = current_user

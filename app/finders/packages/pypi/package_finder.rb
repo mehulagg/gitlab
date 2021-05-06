@@ -2,7 +2,7 @@
 
 module Packages
   module Pypi
-    class PackageFinder < ::Packages::GroupOrPackageFinder
+    class PackageFinder < ::Packages::GroupOrProjectPackageFinder
       def execute
         packages.by_file_name_and_sha256(@params[:filename], @params[:sha256])
       end
