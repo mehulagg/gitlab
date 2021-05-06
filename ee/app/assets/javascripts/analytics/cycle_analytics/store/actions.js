@@ -36,11 +36,12 @@ export const setSelectedStage = ({ commit }, stage) => {
   commit(types.SET_PAGINATION, { page: 1, hasNextPage: null });
 };
 
-export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDate, endDate }) => {
+export const setDateRange = (
+  { commit, dispatch, getters: { isOverviewStageSelected }, state: { selectedStage } },
+  { startDate, endDate },
+) => {
   commit(types.SET_DATE_RANGE, { startDate, endDate });
-
-  if (skipFetch) return false;
-
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };
 
