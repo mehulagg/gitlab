@@ -8,4 +8,7 @@
     .container.pt-6.mw-100.text-center
       .mt-9.mb-4= image_tag 'illustrations/subscription-success.svg'
       %h2.font-weight-bold= _('Thank you for your feedback!')
-      %p.pt-1= _('Your response has been recorded.')
+      .pt-1= _('Your response has been recorded.')
+      - if @cta_link
+        %div= _('We love speaking to our users. Got more to say about your GitLab experiences?')
+        .pt-4= link_to _("Let's talk!"), @cta_link, target: '_blank', rel: 'noopener noreferrer', class: 'gl-button btn btn-confirm'

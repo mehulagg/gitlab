@@ -2,20 +2,24 @@
 
 class SurveyResponsesController < ApplicationController
   SURVEY_RESPONSE_SCHEMA_URL = 'iglu:com.gitlab/survey_response/jsonschema/1-0-0'
+  CALENDLY_INVITE_LINK = 'https://calendly.com/mkarampalas/30min'
+
+  before_action :set_cta_link, only: :index
+  before_action :track_response, only: :index
 
   skip_before_action :authenticate_user!
 
   feature_category :navigation
 
   def index
-    track_response if Gitlab.com?
-
     render layout: false
   end
 
   private
 
   def track_response
+    return unless Gitlab.com?
+
     data = {
       survey_id: to_number(params[:survey_id]),
       instance_id: to_number(params[:instance_id]),
@@ -33,5 +37,12 @@ class SurveyResponsesController < ApplicationController
 
   def to_number(param)
     param.to_i if param&.match?(/^\d+$/)
+  end
+
+  def set_cta_link
+    return unless Gitlab.com?
+    return unless params[:talk_cta].present?
+
+    @cta_link = CALENDLY_INVITE_LINK
   end
 end
