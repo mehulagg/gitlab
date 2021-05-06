@@ -61,6 +61,7 @@ describe('PathNavigation', () => {
           expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
         });
 
+        // TODO: make this test more granular
         it('matches the snapshot', () => {
           expect(wrapper.element).toMatchSnapshot();
         });

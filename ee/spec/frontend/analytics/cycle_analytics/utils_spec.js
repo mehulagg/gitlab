@@ -15,7 +15,6 @@ import {
   flattenTaskByTypeSeries,
   orderByDate,
   toggleSelectedLabel,
-  transformStagesForPathNavigation,
   prepareTimeMetricsData,
   prepareStageErrors,
   timeSummaryForPathNavigation,
@@ -23,6 +22,7 @@ import {
   medianTimeToParsedSeconds,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
+import { rawStageMedians } from 'jest/cycle_analytics/mock_data';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import { slugify } from '~/lib/utils/text_utility';
 import {
@@ -38,12 +38,7 @@ import {
   issueStage,
   rawCustomStage,
   rawTasksByTypeData,
-  allowedStages,
-  stageMediansWithNumericIds,
-  pathNavIssueMetric,
   timeMetricsData,
-  rawStageMedians,
-  stageCounts,
 } from './mock_data';
 
 const labelEventIds = labelEvents.map((ev) => ev.identifier);
@@ -338,35 +333,6 @@ describe('Value Stream Analytics utils', () => {
 
     it('will add an id that does not exist', () => {
       expect(toggleSelectedLabel({ selectedLabelIds, value: 4 })).toEqual([1, 2, 3, 4]);
-    });
-  });
-
-  describe('transformStagesForPathNavigation', () => {
-    const stages = allowedStages;
-    const response = transformStagesForPathNavigation({
-      stages,
-      medians: stageMediansWithNumericIds,
-      selectedStage: issueStage,
-      stageCounts,
-    });
-
-    describe('transforms the data as expected', () => {
-      it('returns an array of stages', () => {
-        expect(Array.isArray(response)).toBe(true);
-        expect(response.length).toEqual(stages.length);
-      });
-
-      it('selects the correct stage', () => {
-        const selected = response.filter((stage) => stage.selected === true)[0];
-
-        expect(selected.title).toEqual(issueStage.title);
-      });
-
-      it('includes the correct metric for the associated stage', () => {
-        const issue = response.filter((stage) => stage.name === 'Issue')[0];
-
-        expect(issue.metric).toEqual(pathNavIssueMetric);
-      });
     });
   });
 

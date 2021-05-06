@@ -1,5 +1,18 @@
-import { decorateEvents, decorateData } from '~/cycle_analytics/utils';
-import { selectedStage, rawData, convertedData, rawEvents } from './mock_data';
+import {
+  decorateEvents,
+  decorateData,
+  transformStagesForPathNavigation,
+} from '~/cycle_analytics/utils';
+import {
+  selectedStage,
+  rawData,
+  convertedData,
+  rawEvents,
+  allowedStages,
+  stageMediansWithNumericIds,
+  pathNavIssueMetric,
+  stageCounts,
+} from './mock_data';
 
 describe('Value stream analytics utils', () => {
   describe('decorateEvents', () => {
@@ -71,6 +84,35 @@ describe('Value stream analytics utils', () => {
         emptyStageText: txt,
         slug: 'issue',
         component: 'stage-issue-component',
+      });
+    });
+  });
+
+  describe('transformStagesForPathNavigation', () => {
+    const stages = allowedStages;
+    const response = transformStagesForPathNavigation({
+      stages,
+      medians: stageMediansWithNumericIds,
+      selectedStage,
+      stageCounts,
+    });
+
+    describe('transforms the data as expected', () => {
+      it('returns an array of stages', () => {
+        expect(Array.isArray(response)).toBe(true);
+        expect(response.length).toEqual(stages.length);
+      });
+
+      it('selects the correct stage', () => {
+        const selected = response.filter((stage) => stage.selected === true)[0];
+
+        expect(selected.title).toEqual(selectedStage.title);
+      });
+
+      it('includes the correct metric for the associated stage', () => {
+        const issue = response.filter((stage) => stage.name === 'issue')[0];
+
+        expect(issue.metric).toEqual(pathNavIssueMetric);
       });
     });
   });

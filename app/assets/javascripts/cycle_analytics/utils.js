@@ -1,7 +1,17 @@
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { roundToNearestHalf, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { dasherize } from '~/lib/utils/text_utility';
-import { __ } from '../locale';
+import { unescape } from 'lodash';
+import { sanitize } from '~/lib/dompurify';
+import {
+  newDate,
+  dayAfter,
+  secondsToDays,
+  getDatesInRange,
+  parseSeconds,
+} from '~/lib/utils/datetime_utility';
+import { __, s__, sprintf } from '../locale';
 import DEFAULT_EVENT_OBJECTS from './default_event_objects';
+import { OVERVIEW_STAGE_ID } from './constants';
 
 const EMPTY_STAGE_TEXTS = {
   issue: __(
@@ -53,11 +63,96 @@ const mapToStage = (permissions, item) => {
 };
 
 const mapToSummary = ({ value, ...rest }) => ({ ...rest, value: value || '-' });
+const mapToMedians = ({ id, name, value }) => ({ id, name, value });
 
 export const decorateData = (data = {}) => {
   const { permissions, stats, summary } = data;
   return {
     stages: stats?.map((item) => mapToStage(permissions, item)) || [],
     summary: summary?.map((item) => mapToSummary(item)) || [],
+    medians: stats?.map((item) => mapToMedians(item)) || [],
   };
 };
+
+/**
+ * Takes the stages and median data, combined with the selected stage, to build an
+ * array which is formatted to proivde the data required for the path navigation.
+ *
+ * @param {Array} stages - The stages available to the group / project
+ * @param {Object} medians - The median values for the stages available to the group / project
+ * @param {Object} stageCounts - The total item count for the stages available
+ * @param {Object} selectedStage - The currently selected stage
+ * @returns {Array} An array of stages formatted with data required for the path navigation
+ */
+export const transformStagesForPathNavigation = ({
+  stages,
+  medians,
+  stageCounts = {},
+  selectedStage,
+}) => {
+  // TODO: do we need popovers for the project path
+  // - medians, start / end events + descriptions
+  const formattedStages = stages.map((stage) => {
+    return {
+      metric: medians[stage?.id],
+      selected: stage.id === selectedStage.id,
+      stageCount: stageCounts && stageCounts[stage?.id],
+      icon: null,
+      ...stage,
+    };
+  });
+
+  return formattedStages;
+};
+
+export const timeSummaryForPathNavigation = ({ seconds, hours, days, minutes, weeks, months }) => {
+  if (months) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}M'), {
+      value: roundToNearestHalf(months),
+    });
+  } else if (weeks) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}w'), {
+      value: roundToNearestHalf(weeks),
+    });
+  } else if (days) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}d'), {
+      value: roundToNearestHalf(days),
+    });
+  } else if (hours) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}h'), { value: hours });
+  } else if (minutes) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}m'), { value: minutes });
+  } else if (seconds) {
+    return unescape(sanitize(s__('ValueStreamAnalytics|&lt;1m'), { ALLOWED_TAGS: [] }));
+  }
+  return '-';
+};
+
+/**
+ * Takes a raw median value in seconds and converts it to a string representation
+ * ie. converts 172800 => 2d (2 days)
+ *
+ * @param {Number} Median - The number of seconds for the median calculation
+ * @returns {String} String representation ie 2w
+ */
+export const medianTimeToParsedSeconds = (value) =>
+  timeSummaryForPathNavigation({
+    ...parseSeconds(value, { daysPerWeek: 7, hoursPerDay: 24 }),
+    seconds: value,
+  });
+
+/**
+ * Takes the raw median value arrays and converts them into a useful object
+ * containing the string for display in the path navigation
+ * ie. converts [{ id: 'test', value: 172800 }] => { 'test': '2d' }
+ *
+ * @param {Array} Medians - Array of stage median objects, each contains a `id`, `value` and `error`
+ * @returns {Object} Returns key value pair with the stage name and its display median value
+ */
+export const formatMedianValues = (medians = []) =>
+  medians.reduce((acc, { id, value = 0 }) => {
+    return {
+      ...acc,
+      [id]: value ? medianTimeToParsedSeconds(value) : '-',
+    };
+  }, {});

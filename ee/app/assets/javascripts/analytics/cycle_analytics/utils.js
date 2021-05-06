@@ -1,18 +1,11 @@
 import dateFormat from 'dateformat';
-import { unescape, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
+import { medianTimeToParsedSeconds } from '~/cycle_analytics/utils';
 import createFlash, { hideFlash } from '~/flash';
-import { sanitize } from '~/lib/dompurify';
-import { convertObjectPropsToCamelCase, roundToNearestHalf } from '~/lib/utils/common_utils';
-import {
-  newDate,
-  dayAfter,
-  secondsToDays,
-  getDatesInRange,
-  parseSeconds,
-} from '~/lib/utils/datetime_utility';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { newDate, dayAfter, secondsToDays, getDatesInRange } from '~/lib/utils/datetime_utility';
 import httpStatus from '~/lib/utils/http_status';
 import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
-import { s__, sprintf } from '~/locale';
 import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
 import { OVERVIEW_STAGE_ID } from './constants';
@@ -357,42 +350,6 @@ export const throwIfUserForbidden = (error) => {
   }
 };
 
-export const timeSummaryForPathNavigation = ({ seconds, hours, days, minutes, weeks, months }) => {
-  if (months) {
-    return sprintf(s__('ValueStreamAnalytics|%{value}M'), {
-      value: roundToNearestHalf(months),
-    });
-  } else if (weeks) {
-    return sprintf(s__('ValueStreamAnalytics|%{value}w'), {
-      value: roundToNearestHalf(weeks),
-    });
-  } else if (days) {
-    return sprintf(s__('ValueStreamAnalytics|%{value}d'), {
-      value: roundToNearestHalf(days),
-    });
-  } else if (hours) {
-    return sprintf(s__('ValueStreamAnalytics|%{value}h'), { value: hours });
-  } else if (minutes) {
-    return sprintf(s__('ValueStreamAnalytics|%{value}m'), { value: minutes });
-  } else if (seconds) {
-    return unescape(sanitize(s__('ValueStreamAnalytics|&lt;1m'), { ALLOWED_TAGS: [] }));
-  }
-  return '-';
-};
-
-/**
- * Takes a raw median value in seconds and converts it to a string representation
- * ie. converts 172800 => 2d (2 days)
- *
- * @param {Number} Median - The number of seconds for the median calculation
- * @returns {String} String representation ie 2w
- */
-export const medianTimeToParsedSeconds = (value) =>
-  timeSummaryForPathNavigation({
-    ...parseSeconds(value, { daysPerWeek: 7, hoursPerDay: 24 }),
-    seconds: value,
-  });
-
 /**
  * Takes the raw median value arrays and converts them into a useful object
  * containing the string for display in the path navigation, additionally
@@ -420,35 +377,6 @@ export const formatMedianValuesWithOverview = (medians = []) => {
     ...calculatedMedians,
     [OVERVIEW_STAGE_ID]: overviewMedian ? medianTimeToParsedSeconds(overviewMedian) : '-',
   };
-};
-
-/**
- * Takes the stages and median data, combined with the selected stage, to build an
- * array which is formatted to proivde the data required for the path navigation.
- *
- * @param {Array} stages - The stages available to the group / project
- * @param {Object} medians - The median values for the stages available to the group / project
- * @param {Object} stageCounts - The total item count for the stages available
- * @param {Object} selectedStage - The currently selected stage
- * @returns {Array} An array of stages formatted with data required for the path navigation
- */
-export const transformStagesForPathNavigation = ({
-  stages,
-  medians,
-  stageCounts,
-  selectedStage,
-}) => {
-  const formattedStages = stages.map((stage) => {
-    return {
-      metric: medians[stage?.id],
-      selected: stage.id === selectedStage.id,
-      stageCount: stageCounts[stage?.id],
-      icon: null,
-      ...stage,
-    };
-  });
-
-  return formattedStages;
 };
 
 /**

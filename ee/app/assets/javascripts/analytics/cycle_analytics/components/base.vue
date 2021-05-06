@@ -57,7 +57,6 @@ export default {
       'errorCode',
       'startDate',
       'endDate',
-      'medians',
       'isLoadingValueStreams',
       'selectedStageError',
       'selectedValueStream',
