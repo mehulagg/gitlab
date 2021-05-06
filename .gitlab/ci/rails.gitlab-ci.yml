@@ -152,8 +152,9 @@ setup-test-env:
   stage: prepare
   variables:
     GITLAB_TEST_EAGER_LOAD: "0"
+    SETUP_DB: "false"
   script:
-    - run_timed_command "bundle exec ruby -I. -e 'require \"config/environment\"; TestEnv.init'"
+    - run_timed_command "bundle exec ruby -I. -e 'require \"spec/support/helpers/test_env\"; TestEnv.init'"
     - run_timed_command "scripts/gitaly-test-build"  # Do not use 'bundle exec' here
   artifacts:
     expire_in: 7d
