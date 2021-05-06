@@ -267,34 +267,6 @@ You can view the exact JSON payload in the administration panel. To view the pay
 1. Navigate to **Admin Area > Settings > Metrics and profiling** and expand **Seat Link**.
 1. Click **Preview payload**.
 
-#### Disable Seat Link
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/212375) in GitLab 12.10.
-
-Seat Link is enabled by default.
-
-To disable this feature, go to **Admin Area > Settings > Metrics and profiling**, uncheck the **Enable Seat Link** checkbox > **Save changes**.
-
-To disable Seat Link in an Omnibus GitLab installation, and prevent it from
-being configured in the future through the administration panel, set the following in
-[`gitlab.rb`](https://docs.gitlab.com/omnibus/settings/configuration.html#configuration-options):
-
-```ruby
-gitlab_rails['seat_link_enabled'] = false
-```
-
-To disable Seat Link in a GitLab source installation, and prevent it from
-being configured in the future through the administration panel,
-set the following in `gitlab.yml`:
-
-```yaml
-production: &base
-  # ...
-  gitlab:
-    # ...
-    seat_link_enabled: false
-```
-
 ## Upgrade your subscription tier
 
 To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
