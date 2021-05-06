@@ -25,10 +25,7 @@ module Gitlab
 
         ranged_query.each_batch(of: sub_batch_size) do |sub_batch|
           sub_batch.update_all('traversal_ids = ARRAY[id]')
-          sleep PAUSE_SECONDS
         end
-
-        mark_job_as_succeeded(start_id, end_id, sub_batch_size)
       end
 
       private

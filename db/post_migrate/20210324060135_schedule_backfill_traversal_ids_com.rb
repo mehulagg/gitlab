@@ -13,8 +13,6 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
   disable_ddl_transaction!
 
   def up
-    return unless Gitlab.com?
-
     # Personal namespaces and top-level groups
     final_delay = queue_background_migration_jobs_by_range_at_intervals(
       ::Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsRoots.base_query,
@@ -22,7 +20,7 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
       DELAY_INTERVAL,
       batch_size: BATCH_SIZE,
       other_job_arguments: [SUB_BATCH_SIZE],
-      track_jobs: true
+      track_jobs: false
     )
     final_delay += DELAY_INTERVAL
 
@@ -32,9 +30,8 @@ class ScheduleBackfillTraversalIdsCom < ActiveRecord::Migration[6.0]
       CHILDREN_MIGRATION,
       DELAY_INTERVAL,
       batch_size: BATCH_SIZE,
-      initial_delay: final_delay,
       other_job_arguments: [SUB_BATCH_SIZE],
-      track_jobs: true
+      track_jobs: false
     )
   end
 end
