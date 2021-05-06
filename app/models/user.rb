@@ -1111,7 +1111,7 @@ class User < ApplicationRecord
   end
 
   # method overriden in EE
-  def user_authorized_by_provisioning_group?
+  def password_based_login_forbidden?
     false
   end
 

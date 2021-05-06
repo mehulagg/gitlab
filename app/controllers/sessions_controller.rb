@@ -76,7 +76,7 @@ class SessionsController < Devise::SessionsController
         flash[:notice] = nil
       end
 
-      if password_based_login? && resource.user_authorized_by_provisioning_group?
+      if password_based_login? && resource.password_based_login_forbidden?
         sign_out
         flash[:alert] = _('You are not allowed to log in using password')
         redirect_to new_user_session_path
