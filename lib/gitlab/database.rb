@@ -43,10 +43,27 @@ module Gitlab
     # It does not include the default public schema
     EXTRA_SCHEMAS = [DYNAMIC_PARTITIONS_SCHEMA, STATIC_PARTITIONS_SCHEMA].freeze
 
+    DEFAULT_POOL_HEADROOM = 10
+
+    # We configure the database connection pool size automatically based on the
+    # configured concurrency. We also add some headroom, to make sure we don't run
+    # out of connections when more threads besides the 'user-facing' ones are
+    # running.
+    #
+    # Read more about this in doc/development/database/client_side_connection_pool.md
+    def self.default_pool_size
+      headroom = (ENV["DB_POOL_HEADROOM"].presence || DEFAULT_POOL_HEADROOM).to_i
+
+      Gitlab::Runtime.max_threads + headroom
+    end
+
     def self.config
       default_config_hash = ActiveRecord::Base.configurations.find_db_config(Rails.env)&.config || {}
 
-      default_config_hash.with_indifferent_access
+      default_config_hash.with_indifferent_access.tap do |hash|
+        # Match config/initializers/database_config.rb
+        hash[:pool] ||= default_pool_size
+      end
     end
 
     def self.username
