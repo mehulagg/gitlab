@@ -109,7 +109,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'renders a disabled trigger cluster reindexing link' do
         render
 
-        expect(rendered).to have_css('a.gl-button[disabled="disabled"]', text: 'Trigger cluster reindexing')
+        expect(rendered).to have_button('Trigger cluster reindexing', disabled: true)
       end
     end
 

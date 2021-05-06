@@ -20095,6 +20095,9 @@ msgstr ""
 msgid "Maximum push size (MB)"
 msgstr ""
 
+msgid "Maximum running slices"
+msgstr ""
+
 msgid "Maximum size limit for a single commit."
 msgstr ""
 
@@ -29838,6 +29841,9 @@ msgid "SlackService|See list of available commands in Slack after setting up thi
 msgstr ""
 
 msgid "SlackService|This service allows users to perform common operations on this project by entering slash commands in Slack."
+msgstr ""
+
+msgid "Slice multiplier"
 msgstr ""
 
 msgid "Smartcard"

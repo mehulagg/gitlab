@@ -231,14 +231,14 @@
     = form_for :elasticsearch_reindexing_task, url: admin_elasticsearch_trigger_reindexing_path, method: :post, html: { class: 'fieldset-form' } do |f|
       %fieldset
         .form-group
-          = f.label :slice_multiplier, 'Slice multiplier', class: 'label-bold'
-          = f.text_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task&.in_progress? ? @elasticsearch_reindexing_task.slice_multiplier : '', placeholder: 2
+          = f.label :slice_multiplier, _('Slice multiplier'), class: 'label-bold'
+          = f.text_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task&.in_progress? ? @elasticsearch_reindexing_task.slice_multiplier : 2, placeholder: '2'
           .form-text.gl-text-gray-600.gl-mt-0
             = _('Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2.')
 
         .form-group
-          = f.label :max_slices_running, 'Maximum running slices', class: 'label-bold'
-          = f.text_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task&.in_progress? ? @elasticsearch_reindexing_task.max_slices_running : '', placeholder: 60
+          = f.label :max_slices_running, _('Maximum running slices'), class: 'label-bold'
+          = f.text_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task&.in_progress? ? @elasticsearch_reindexing_task.max_slices_running : 60, placeholder: '60'
           .form-text.gl-text-gray-600.gl-mt-0
             = _('The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60.')
 
