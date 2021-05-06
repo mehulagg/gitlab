@@ -5541,7 +5541,7 @@ msgstr ""
 msgid "By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. "
 msgstr ""
 
-msgid "By clicking Register, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
+msgid "By clicking %{button_text}, I agree that I have read and accepted the %{company_name} %{link_start}Terms of Use and Privacy Policy%{link_end}"
 msgstr ""
 
 msgid "By default GitLab sends emails in HTML and plain text formats so mail clients can choose what format to use. Disable this option if you only want to send emails in plain text format."
