@@ -1,0 +1,4 @@
+- return unless current_user
+
+- if show_cc_verification_requied_callout?(current_user)
+  #js-cc-verification-required-callout{ data: { feature_id: ::EE::UserCalloutsHelper::CC_VERIFICATION_REQUIRED, dismiss_endpoint: user_callouts_path, container_class: [container_class, @content_class, 'gl-pt-5!'].to_json, iframe_url: ::Gitlab::SubscriptionPortal::PAYMENT_FORM_URL, allowed_origin: ::Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL } }
