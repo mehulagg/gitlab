@@ -9,7 +9,7 @@ module API
   module Helpers
     module Caching
       # @return [ActiveSupport::Duration]
-      DEFAULT_EXPIRY = 1.day
+      DEFAULT_EXPIRY = 10.minutes
 
       # @return [ActiveSupport::Cache::Store]
       def cache
