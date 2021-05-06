@@ -64,8 +64,6 @@ export const fetchStageData = ({ dispatch, getters, commit }, stageId) => {
   } = getters;
   dispatch('requestStageData');
 
-  console.log('fetchStageData::cycleAnalyticsRequestParams', cycleAnalyticsRequestParams);
-
   return Api.cycleAnalyticsStageEvents({
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
@@ -343,13 +341,13 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       selectedStage
         ? dispatch('setSelectedStage', selectedStage)
         : dispatch('setDefaultSelectedStage'),
+      dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
         selectedMilestone,
         selectedAssigneeList,
         selectedLabelList,
       }),
-      dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('durationChart/setLoading', true),
       dispatch('typeOfWork/setLoading', true),
     ])
@@ -483,8 +481,12 @@ export const fetchValueStreams = ({ commit, dispatch, getters }) => {
     });
 };
 
-export const setFilters = ({ dispatch, getters: { isOverviewStageSelected } }) => {
-  if (!isOverviewStageSelected) dispatch('fetchStageData');
+export const setFilters = ({
+  dispatch,
+  getters: { isOverviewStageSelected },
+  state: { selectedStage },
+}) => {
+  if (!isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };
 

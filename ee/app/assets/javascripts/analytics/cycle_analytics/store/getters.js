@@ -42,8 +42,6 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
     assignee_username: selectedAssigneeList,
   });
 
-  console.log('filterBarQuery', filterBarQuery);
-
   return {
     project_ids: getters.selectedProjectIds,
     created_after: startDate ? dateFormat(startDate, dateFormats.isoDate) : null,

@@ -6,7 +6,7 @@ import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE } from '../constants';
+import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
 import CustomStageForm from './custom_stage_form.vue';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
@@ -164,7 +164,7 @@ export default {
     },
     onStageSelect(stage) {
       this.hideForm();
-      if (this.isOverviewStageSelected) {
+      if (stage.slug === OVERVIEW_STAGE_ID) {
         this.setDefaultSelectedStage();
       } else {
         this.setSelectedStage(stage);
