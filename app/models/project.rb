@@ -1004,7 +1004,7 @@ class Project < ApplicationRecord
   end
 
   def latest_successful_build_for_ref!(job_name, ref = default_branch)
-    latest_successful_build_for_ref(job_name, ref) || raise(ActiveRecord::RecordNotFound.new("Couldn't find job #{job_name}"))
+    latest_successful_build_for_ref(job_name, ref) || raise(ActiveRecord::RecordNotFound, "Couldn't find job #{job_name}")
   end
 
   def latest_pipeline(ref = default_branch, sha = nil)
@@ -2532,8 +2532,10 @@ class Project < ApplicationRecord
       .exists?
   end
 
-  def default_branch_or_master
-    default_branch || 'master'
+  def default_branch_or_main
+    return default_branch if default_branch
+
+    Feature.enabled?(:main_branch_over_master, self, default_enabled: :yaml) ? 'main' : 'master'
   end
 
   def ci_config_path_or_default
@@ -2566,6 +2568,10 @@ class Project < ApplicationRecord
 
   def inherited_issuable_templates_enabled?
     Feature.enabled?(:inherited_issuable_templates, self, default_enabled: :yaml)
+  end
+
+  def activity_path
+    Gitlab::Routing.url_helpers.activity_project_path(self)
   end
 
   private

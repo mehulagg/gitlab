@@ -28,7 +28,7 @@ module Geo
       replicator_class = replicator_class_for(replicable_name)
 
       @remaining_work_count ||= replicator_class
-        .remaining_reverification_batch_count(max_batch_count: remaining_capacity)
+        .remaining_reverification_batch_count(max_batch_count: max_running_jobs)
     end
 
     def max_running_jobs

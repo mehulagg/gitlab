@@ -90,10 +90,6 @@ RSpec.describe MergeRequest, :elastic do
     ).merge({
       'state' => merge_request.state,
       'type' => merge_request.es_type,
-      'join_field' => {
-        'name' => merge_request.es_type,
-        'parent' => merge_request.es_parent
-      },
       'merge_requests_access_level' => ProjectFeature::ENABLED,
       'visibility_level' => Gitlab::VisibilityLevel::INTERNAL,
       'project_id' => merge_request.target_project.id

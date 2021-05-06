@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_25_150435) do
+ActiveRecord::Schema.define(version: 2021_04_20_180119) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -118,6 +118,15 @@ ActiveRecord::Schema.define(version: 2021_03_25_150435) do
     t.integer "state", limit: 2, default: 0, null: false
     t.integer "retry_count", limit: 2, default: 0
     t.text "last_sync_failure"
+    t.datetime_with_timezone "verification_started_at"
+    t.datetime_with_timezone "verified_at"
+    t.datetime_with_timezone "verification_retry_at"
+    t.integer "verification_retry_count"
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.boolean "checksum_mismatch"
+    t.binary "verification_checksum"
+    t.binary "verification_checksum_mismatched"
+    t.string "verification_failure", limit: 255
     t.index ["merge_request_diff_id"], name: "index_merge_request_diff_registry_on_mr_diff_id"
     t.index ["retry_at"], name: "index_merge_request_diff_registry_on_retry_at"
     t.index ["state"], name: "index_merge_request_diff_registry_on_state"
@@ -271,9 +280,22 @@ ActiveRecord::Schema.define(version: 2021_03_25_150435) do
     t.datetime_with_timezone "last_synced_at"
     t.datetime_with_timezone "created_at", null: false
     t.text "last_sync_failure"
+    t.datetime_with_timezone "verification_started_at"
+    t.datetime_with_timezone "verified_at"
+    t.datetime_with_timezone "verification_retry_at"
+    t.integer "verification_retry_count", default: 0
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.boolean "checksum_mismatch", default: false, null: false
+    t.binary "verification_checksum"
+    t.binary "verification_checksum_mismatched"
+    t.string "verification_failure", limit: 255
     t.index ["retry_at"], name: "index_terraform_state_version_registry_on_retry_at"
     t.index ["state"], name: "index_terraform_state_version_registry_on_state"
+    t.index ["terraform_state_version_id"], name: "index_terraform_state_version_registry_on_t_state_version_id", unique: true
     t.index ["terraform_state_version_id"], name: "index_tf_state_versions_registry_tf_state_versions_id_unique", unique: true
+    t.index ["verification_retry_at"], name: "terraform_state_version_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
+    t.index ["verification_state"], name: "terraform_state_version_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
+    t.index ["verified_at"], name: "terraform_state_version_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
 end

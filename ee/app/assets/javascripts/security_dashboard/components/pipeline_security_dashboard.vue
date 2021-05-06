@@ -7,6 +7,7 @@ import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import pipelineSecurityReportSummaryQuery from '../graphql/queries/pipeline_security_report_summary.query.graphql';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
+import VulnerabilityReport from './vulnerability_report.vue';
 
 export default {
   name: 'PipelineSecurityDashboard',
@@ -14,6 +15,7 @@ export default {
     GlEmptyState,
     SecurityReportsSummary,
     SecurityDashboard,
+    VulnerabilityReport,
   },
   mixins: [glFeatureFlagMixin()],
   apollo: {
@@ -123,5 +125,6 @@ export default {
         <gl-empty-state v-bind="emptyStateProps" />
       </template>
     </security-dashboard>
+    <vulnerability-report v-else />
   </div>
 </template>

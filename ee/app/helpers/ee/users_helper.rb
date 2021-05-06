@@ -15,7 +15,7 @@ module EE
         if !::Gitlab.com? && user.using_license_seat?
           it_s_you_index = badges.index { |badge| badge[:text] == "It's you!" } || -1
 
-          badges.insert(it_s_you_index, { text: s_('AdminUsers|Is using seat'), variant: 'light' })
+          badges.insert(it_s_you_index, { text: s_('AdminUsers|Is using seat'), variant: 'neutral' })
         end
       end
     end
@@ -23,7 +23,6 @@ module EE
     def show_upgrade_link?(user)
       return unless user
       return unless ::Gitlab.com?
-      return unless ::Feature.enabled?(:upgrade_link_in_user_menu_a, default_enabled: :yaml)
 
       Rails.cache.fetch(['users', user.id, 'show_upgrade_link?'], expires_in: 10.minutes) do
         user.owns_upgradeable_namespace?

@@ -51,15 +51,25 @@ module EE
       def update_elasticsearch_index_settings(number_of_replicas:, number_of_shards:)
         return if number_of_replicas.nil? && number_of_shards.nil?
 
-        number_of_shards.to_h.each do |index_name, shards|
-          replicas = number_of_replicas[index_name]
+        if number_of_shards&.respond_to?(:to_h)
+          number_of_shards.to_h.each do |index_name, shards|
+            replicas = number_of_replicas[index_name]
 
-          next if shards.blank? || replicas.blank?
+            next if shards.blank? || replicas.blank?
 
-          Elastic::IndexSetting[index_name].update!(
-            number_of_replicas: replicas.to_i,
-            number_of_shards: shards.to_i
-          )
+            Elastic::IndexSetting[index_name].update!(
+              number_of_replicas: replicas.to_i,
+              number_of_shards: shards.to_i
+            )
+          end
+        else
+          # This method still receives non-hash values from API
+          Elastic::IndexSetting.every_alias do |setting|
+            setting.update!(
+              number_of_replicas: number_of_replicas || setting.number_of_replicas,
+              number_of_shards: number_of_shards || setting.number_of_shards
+            )
+          end
         end
       end
 

@@ -3,9 +3,11 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 
 import AncestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
 
+import { IssuableType } from '~/issue_show/constants';
 import notesEventHub from '~/notes/event_hub';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import sidebarEventHub from '~/sidebar/event_hub';
 import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapsed_grouped_date_picker.vue';
 
@@ -14,7 +16,6 @@ import epicUtils from '../utils/epic_utils';
 import SidebarDatePicker from './sidebar_items/sidebar_date_picker.vue';
 import SidebarHeader from './sidebar_items/sidebar_header.vue';
 import SidebarLabels from './sidebar_items/sidebar_labels.vue';
-import SidebarSubscription from './sidebar_items/sidebar_subscription.vue';
 import SidebarTodo from './sidebar_items/sidebar_todo.vue';
 
 export default {
@@ -27,8 +28,8 @@ export default {
     SidebarLabels,
     AncestorsTree,
     SidebarParticipants,
-    SidebarSubscription,
     SidebarConfidentialityWidget,
+    SidebarSubscriptionsWidget,
   },
   inject: ['iid'],
   data() {
@@ -69,6 +70,9 @@ export default {
       'dueDateForCollapsedSidebar',
       'ancestors',
     ]),
+    issuableType() {
+      return IssuableType.Epic;
+    },
   },
   mounted() {
     this.toggleSidebarFlag(epicUtils.getCollapsedGutter());
@@ -225,7 +229,7 @@ export default {
       <sidebar-confidentiality-widget
         :iid="String(iid)"
         :full-path="fullPath"
-        issuable-type="epic"
+        :issuable-type="issuableType"
         @closeForm="handleSidebarToggle"
         @expandSidebar="handleSidebarToggle"
         @confidentialityUpdated="updateConfidentialityOnIssuable($event)"
@@ -239,7 +243,13 @@ export default {
           @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
         />
       </div>
-      <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" data-testid="subscribe" />
+      <sidebar-subscriptions-widget
+        :iid="String(iid)"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        data-testid="subscribe"
+        @expandSidebar="handleSidebarToggle"
+      />
     </div>
   </aside>
 </template>

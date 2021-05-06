@@ -328,11 +328,11 @@ module EE
     end
 
     def user_authorized_by_provisioning_group?
-      ::Feature.enabled?(:block_password_auth_for_saml_users, type: :ops) && user_detail.provisioned_by_group?
+      user_detail.provisioned_by_group? && ::Feature.enabled?(:block_password_auth_for_saml_users, user_detail.provisioned_by_group, type: :ops)
     end
 
     def authorized_by_provisioning_group?(group)
-      ::Feature.enabled?(:block_password_auth_for_saml_users, type: :ops) && provisioned_by_group == group
+      user_authorized_by_provisioning_group? && provisioned_by_group == group
     end
 
     def gitlab_employee?
@@ -370,10 +370,12 @@ module EE
 
     # Returns the groups a user has access to, either through a membership or a project authorization
     override :authorized_groups
-    def authorized_groups
+    def authorized_groups(with_minimal_access: true)
+      return super() unless with_minimal_access
+
       ::Group.unscoped do
         ::Group.from_union([
-          super,
+          super(),
           available_minimal_access_groups
         ])
       end

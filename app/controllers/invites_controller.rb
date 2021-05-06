@@ -71,7 +71,7 @@ class InvitesController < ApplicationController
   def ensure_member_exists
     return if member
 
-    render_404
+    redirect_back_or_default(options: { alert: _("The invitation can not be found with the provided invite token.") })
   end
 
   def track_invite_join_click
@@ -125,14 +125,14 @@ class InvitesController < ApplicationController
                             name: member.source.full_name,
                             url: project_url(member.source),
                             title: _("project"),
-                            path: activity_project_path(member.source)
+                            path: member.source.activity_path
                           }
                         when Group
                           {
                             name: member.source.name,
                             url: group_url(member.source),
                             title: _("group"),
-                            path: activity_group_path(member.source)
+                            path: member.source.activity_path
                           }
                         end
   end

@@ -40,6 +40,15 @@ const TEST_DATA = {
       { type: MOCK_REPORT_TYPE_UNSUPPORTED },
     ],
   },
+  namedList: {
+    type: REPORT_TYPES.namedList,
+    name: 'rootNamedList',
+    items: {
+      url1: { type: REPORT_TYPES.url, name: 'foo' },
+      url2: { type: REPORT_TYPES.url, name: 'bar' },
+      unsupported: { type: MOCK_REPORT_TYPE_UNSUPPORTED },
+    },
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/types/utils', () => {
@@ -68,6 +77,21 @@ describe('ee/vulnerabilities/components/generic_report/types/utils', () => {
       it('filters items with types that are not supported', () => {
         expect(includesUnsupportedType(getListAtCurrentDepth(TEST_DATA).items)).toBe(true);
         expect(includesUnsupportedType(getListAtCurrentDepth(filteredData).items)).toBe(false);
+      });
+    });
+
+    describe('with named lists', () => {
+      const filteredData = filterTypesAndLimitListDepth(TEST_DATA);
+
+      it('filters items with types that are not supported', () => {
+        expect(includesUnsupportedType(filteredData.namedList.items)).toBe(false);
+      });
+
+      it('transforms the items object into an array of report-items with labels', () => {
+        expect(filteredData.namedList.items).toEqual([
+          { label: 'url1', type: REPORT_TYPES.url, name: 'foo' },
+          { label: 'url2', type: REPORT_TYPES.url, name: 'bar' },
+        ]);
       });
     });
   });

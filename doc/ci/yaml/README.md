@@ -226,13 +226,15 @@ If your rules match both branch pipelines and merge request pipelines,
 #### `workflow:rules:variables`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/294232) in GitLab 13.11.
-> - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-workflowrulesvariables). **(CORE ONLY)**
+> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/300997) in GitLab 13.12.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-workflowrulesvariables). **(FREE SELF)**
 
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+There can be
+[risks when disabling released features](../../user/feature_flags.md#risks-when-disabling-released-features).
+Refer to this feature's version history for more details.
 
 You can use [`variables`](#variables) in `workflow:rules:` to define variables for specific pipeline conditions.
 
@@ -285,12 +287,12 @@ When the branch is something else:
 - job1's `DEPLOY_VARIABLE` is `job1-default-deploy`.
 - job2's `DEPLOY_VARIABLE` is `default-deploy`.
 
-##### Enable or disable workflow:rules:variables **(CORE ONLY)**
+##### Enable or disable workflow:rules:variables **(FREE SELF)**
 
-rules:variables is under development and not ready for production use.
-It is deployed behind a feature flag that is **disabled by default**.
+workflow:rules:variables is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -3318,25 +3320,25 @@ Files matched by [`artifacts:untracked`](#artifactsuntracked) can be excluded us
 
 #### `artifacts:expire_in`
 
-Use `expire_in` to specify how long artifacts are active before they
-expire and are deleted.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16267) in GitLab 13.0 behind a disabled feature flag, the latest job artifacts are kept regardless of expiry time.
+> - [Made default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936) in GitLab 13.4.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241026) in GitLab 13.8, keeping latest job artifacts can be disabled at the project level.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276583) in GitLab 13.9, keeping latest job artifacts can be disabled instance-wide.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321323) in GitLab 13.12, the latest pipeline artifacts are kept regardless of expiry time.
 
-The expiration time period begins when the artifact is uploaded and
-stored on GitLab. If the expiry time is not defined, it defaults to the
-[instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
-(30 days by default).
+Use `expire_in` to specify how long [job artifacts](../pipelines/job_artifacts.md) are stored before
+they expire and are deleted. The `expire_in` setting does not affect:
 
-To override the expiration date and protect artifacts from being automatically deleted:
+- Artifacts from the latest job, unless this keeping the latest job artifacts is:
+  - [Disabled at the project level](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs).
+  - [Disabled instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
+- [Pipeline artifacts](../pipelines/pipeline_artifacts.md). It's not possible to specify an
+  expiration date for these:
+  - Pipeline artifacts from the latest pipeline are kept forever.
+  - Other pipeline artifacts are erased after one week.
 
-- Use the **Keep** button on the job page.
-- Set the value of `expire_in` to `never`. [Available](https://gitlab.com/gitlab-org/gitlab/-/issues/22761)
-  in GitLab 13.3 and later.
-
-After their expiry, artifacts are deleted hourly by default (via a cron job),
-and are not accessible anymore.
-
-The value of `expire_in` is an elapsed time in seconds, unless a unit is
-provided. Examples of valid values:
+The value of `expire_in` is an elapsed time in seconds, unless a unit is provided. Valid values
+include:
 
 - `'42'`
 - `42 seconds`
@@ -3348,7 +3350,7 @@ provided. Examples of valid values:
 - `3 weeks and 2 days`
 - `never`
 
-To expire artifacts 1 week after being uploaded:
+To expire artifacts one week after being uploaded:
 
 ```yaml
 job:
@@ -3356,12 +3358,19 @@ job:
     expire_in: 1 week
 ```
 
-The latest artifacts for refs are locked against deletion, and kept regardless of
-the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
-GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
-in GitLab 13.4.
+The expiration time period begins when the artifact is uploaded and stored on GitLab. If the expiry
+time is not defined, it defaults to the
+[instance wide setting](../../user/admin_area/settings/continuous_integration.md#default-artifacts-expiration)
+(30 days by default).
 
-In [GitLab 13.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/241026), you can [disable this behavior at the project level in the CI/CD settings](../pipelines/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs). In [GitLab 13.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/276583), you can [disable this behavior instance-wide](../../user/admin_area/settings/continuous_integration.md#keep-the-latest-artifacts-for-all-jobs-in-the-latest-successful-pipelines).
+To override the expiration date and protect artifacts from being automatically deleted:
+
+- Use the **Keep** button on the job page.
+- [In GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/22761), set the value of
+  `expire_in` to `never`.
+
+After their expiry, artifacts are deleted hourly by default (using a cron job), and are not
+accessible anymore.
 
 #### `artifacts:expose_as`
 

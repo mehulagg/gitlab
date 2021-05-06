@@ -2,7 +2,7 @@
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
-import { scanners } from '~/security_configuration/components/scanners_constants';
+import { scanners } from '~/security_configuration/components/constants';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AutoFixSettings from './auto_fix_settings.vue';

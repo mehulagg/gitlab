@@ -30,6 +30,10 @@ class ElasticDeleteProjectWorker
       index_names << helper.standalone_indices_proxies(target_classes: [Note]).map(&:index_name)
     end
 
+    if Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
+      index_names << helper.standalone_indices_proxies(target_classes: [MergeRequest]).map(&:index_name)
+    end
+
     index_names
   end
 

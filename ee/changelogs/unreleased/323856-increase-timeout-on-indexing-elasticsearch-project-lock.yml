@@ -1,0 +1,5 @@
+---
+title: Update lock timeout in ElasticCommitIndexerWorker
+merge_request: 60768
+author:
+type: fixed

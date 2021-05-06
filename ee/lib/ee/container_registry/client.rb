@@ -16,7 +16,7 @@ module EE
 
         response = faraday.put(url, payload, headers)
 
-        raise Error.new("Push Blob error: #{response.body}") unless response.success?
+        raise Error, "Push Blob error: #{response.body}" unless response.success?
 
         true
       end
@@ -24,7 +24,7 @@ module EE
       def push_manifest(name, tag, manifest, manifest_type)
         response = faraday.put("v2/#{name}/manifests/#{tag}", manifest, { 'Content-Type' => manifest_type })
 
-        raise Error.new("Push manifest error: #{response.body}") unless response.success?
+        raise Error, "Push manifest error: #{response.body}" unless response.success?
 
         true
       end
@@ -60,7 +60,7 @@ module EE
           file.write(chunk)
         end
 
-        raise Error.new("Could not download the blob: #{digest}") unless response.status.success?
+        raise Error, "Could not download the blob: #{digest}" unless response.status.success?
 
         file
       ensure
@@ -76,7 +76,7 @@ module EE
       def get_upload_url(name, digest)
         response = faraday.post("/v2/#{name}/blobs/uploads/")
 
-        raise Error.new("Get upload URL error: #{response.body}") unless response.success?
+        raise Error, "Get upload URL error: #{response.body}" unless response.success?
 
         upload_url = URI(response.headers['location'])
         upload_url.query = "#{upload_url.query}&#{URI.encode_www_form(digest: digest)}"

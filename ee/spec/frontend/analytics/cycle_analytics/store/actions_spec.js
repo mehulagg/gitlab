@@ -140,20 +140,6 @@ describe('Value Stream Analytics actions', () => {
     });
   });
 
-  describe('setDateRange', () => {
-    const payload = { startDate, endDate };
-
-    it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(
-        actions.setDateRange,
-        payload,
-        state,
-        [{ type: types.SET_DATE_RANGE, payload: { startDate, endDate } }],
-        [{ type: 'fetchCycleAnalyticsData' }],
-      );
-    });
-  });
-
   describe('fetchStageData', () => {
     const headers = {
       'X-Next-Page': 2,
@@ -1363,9 +1349,34 @@ describe('Value Stream Analytics actions', () => {
     });
   });
 
-  describe('setFilters', () => {
+  describe.each`
+    targetAction            | payload                   | mutations
+    ${actions.setDateRange} | ${{ startDate, endDate }} | ${[{ type: 'SET_DATE_RANGE', payload: { startDate, endDate } }]}
+    ${actions.setFilters}   | ${''}                     | ${[]}
+  `('$action', ({ targetAction, payload, mutations }) => {
+    let stateWithOverview = null;
+
+    beforeEach(() => {
+      stateWithOverview = { ...state, isOverviewStageSelected: () => true };
+    });
+
     it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(actions.setFilters, null, state, [], [{ type: 'fetchCycleAnalyticsData' }]);
+      return testAction(targetAction, payload, stateWithOverview, mutations, [
+        { type: 'fetchCycleAnalyticsData' },
+      ]);
+    });
+
+    describe('with a stage selected', () => {
+      beforeEach(() => {
+        stateWithOverview = { ...state, selectedStage };
+      });
+
+      it('dispatches the fetchStageData action', () => {
+        return testAction(targetAction, payload, stateWithOverview, mutations, [
+          { type: 'fetchStageData', payload: selectedStage.id },
+          { type: 'fetchCycleAnalyticsData' },
+        ]);
+      });
     });
   });
 });

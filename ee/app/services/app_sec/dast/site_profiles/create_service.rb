@@ -12,14 +12,17 @@ module AppSec
           end
         end
 
-        attr_reader :dast_site_profile
+        attr_reader :dast_site, :dast_site_profile, :dast_site_validation
 
         def execute(name:, target_url:, **params)
           return ServiceResponse.error(message: _('Insufficient permissions')) unless allowed?
 
           ActiveRecord::Base.transaction do
-            dast_site = ::DastSites::FindOrCreateService.new(project, current_user).execute!(url: target_url)
+            @dast_site = ::DastSites::FindOrCreateService.new(project, current_user).execute!(url: target_url)
             params.merge!(project: project, dast_site: dast_site, name: name).compact!
+
+            @dast_site_validation = find_existing_dast_site_validation
+            associate_dast_site_validation! if dast_site_validation
 
             @dast_site_profile = DastSiteProfile.create!(params.except(:request_headers, :auth_password))
             create_secret_variable!(::Dast::SiteProfileSecretVariable::PASSWORD, params[:auth_password])
@@ -39,6 +42,10 @@ module AppSec
           Ability.allowed?(current_user, :create_on_demand_dast_scan, project)
         end
 
+        def associate_dast_site_validation!
+          dast_site.update!(dast_site_validation_id: dast_site_validation.id)
+        end
+
         def create_secret_variable!(key, value)
           return ServiceResponse.success unless value
 
@@ -51,6 +58,15 @@ module AppSec
           raise Rollback, response.errors if response.error?
 
           response
+        end
+
+        def find_existing_dast_site_validation
+          url_base = DastSiteValidation.get_normalized_url_base(dast_site.url)
+
+          DastSiteValidationsFinder.new(
+            project_id: project.id,
+            url_base: url_base
+          ).execute.first
         end
       end
     end

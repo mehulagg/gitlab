@@ -462,7 +462,7 @@ module Security
       vulnerability_issue_feedback = vulnerability.finding.feedback(feedback_type: 'issue')
       return unless vulnerability_issue_feedback
 
-      vulnerability.issue_links.create!(issue_id: vulnerability_issue_feedback.issue_id)
+      vulnerability.issue_links.safe_find_or_create_by!(issue_id: vulnerability_issue_feedback.issue_id)
     end
 
     def scanners_objects

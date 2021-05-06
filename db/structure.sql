@@ -12447,6 +12447,8 @@ CREATE TABLE elastic_reindexing_tasks (
     error_message text,
     documents_count_target integer,
     delete_original_index_at timestamp with time zone,
+    max_slices_running smallint DEFAULT 60 NOT NULL,
+    slice_multiplier smallint DEFAULT 2 NOT NULL,
     CONSTRAINT check_04151aca42 CHECK ((char_length(index_name_from) <= 255)),
     CONSTRAINT check_7f64acda8e CHECK ((char_length(error_message) <= 255)),
     CONSTRAINT check_85ebff7124 CHECK ((char_length(index_name_to) <= 255)),
@@ -13565,7 +13567,9 @@ CREATE TABLE import_export_uploads (
     project_id integer,
     import_file text,
     export_file text,
-    group_id bigint
+    group_id bigint,
+    remote_import_url text,
+    CONSTRAINT check_58f0d37481 CHECK ((char_length(remote_import_url) <= 512))
 );
 
 CREATE SEQUENCE import_export_uploads_id_seq
@@ -13993,6 +13997,9 @@ CREATE TABLE iterations_cadences (
     active boolean DEFAULT true NOT NULL,
     automatic boolean DEFAULT true NOT NULL,
     title text NOT NULL,
+    roll_over boolean DEFAULT false NOT NULL,
+    description text,
+    CONSTRAINT check_5c5d2b44bd CHECK ((char_length(description) <= 5000)),
     CONSTRAINT check_fedff82d3b CHECK ((char_length(title) <= 255))
 );
 
@@ -15639,6 +15646,15 @@ CREATE SEQUENCE packages_events_id_seq
 
 ALTER SEQUENCE packages_events_id_seq OWNED BY packages_events.id;
 
+CREATE TABLE packages_helm_file_metadata (
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    package_file_id bigint NOT NULL,
+    channel text NOT NULL,
+    metadata jsonb,
+    CONSTRAINT check_c34067922d CHECK ((char_length(channel) <= 63))
+);
+
 CREATE TABLE packages_maven_metadata (
     id bigint NOT NULL,
     package_id bigint NOT NULL,
@@ -16015,7 +16031,10 @@ CREATE TABLE plan_limits (
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
     daily_invites integer DEFAULT 0 NOT NULL,
     rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL
+    terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL,
+    helm_max_file_size bigint DEFAULT 5242880 NOT NULL,
+    ci_registered_group_runners integer DEFAULT 1000 NOT NULL,
+    ci_registered_project_runners integer DEFAULT 1000 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -18059,6 +18078,8 @@ CREATE TABLE terraform_state_versions (
     verification_checksum bytea,
     verification_failure text,
     ci_build_id bigint,
+    verification_started_at timestamp with time zone,
+    verification_state smallint DEFAULT 0 NOT NULL,
     CONSTRAINT check_0824bb7bbd CHECK ((char_length(file) <= 255)),
     CONSTRAINT tf_state_versions_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
@@ -18271,6 +18292,11 @@ CREATE SEQUENCE user_canonical_emails_id_seq
     CACHE 1;
 
 ALTER SEQUENCE user_canonical_emails_id_seq OWNED BY user_canonical_emails.id;
+
+CREATE TABLE user_credit_card_validations (
+    user_id bigint NOT NULL,
+    credit_card_validated_at timestamp with time zone NOT NULL
+);
 
 CREATE TABLE user_custom_attributes (
     id integer NOT NULL,
@@ -19085,7 +19111,10 @@ CREATE TABLE web_hooks (
     releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL,
-    subgroup_events boolean DEFAULT false NOT NULL
+    subgroup_events boolean DEFAULT false NOT NULL,
+    recent_failures smallint DEFAULT 0 NOT NULL,
+    backoff_count smallint DEFAULT 0 NOT NULL,
+    disabled_until timestamp with time zone
 );
 
 CREATE SEQUENCE web_hooks_id_seq
@@ -21273,6 +21302,9 @@ ALTER TABLE ONLY packages_dependency_links
 ALTER TABLE ONLY packages_events
     ADD CONSTRAINT packages_events_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY packages_helm_file_metadata
+    ADD CONSTRAINT packages_helm_file_metadata_pkey PRIMARY KEY (package_file_id);
+
 ALTER TABLE ONLY packages_maven_metadata
     ADD CONSTRAINT packages_maven_metadata_pkey PRIMARY KEY (id);
 
@@ -21642,6 +21674,9 @@ ALTER TABLE ONLY user_callouts
 ALTER TABLE ONLY user_canonical_emails
     ADD CONSTRAINT user_canonical_emails_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT user_credit_card_validations_pkey PRIMARY KEY (user_id);
+
 ALTER TABLE ONLY user_custom_attributes
     ADD CONSTRAINT user_custom_attributes_pkey PRIMARY KEY (id);
 
@@ -21969,6 +22004,8 @@ CREATE INDEX idx_issues_on_health_status_not_null ON issues USING btree (health_
 CREATE INDEX idx_issues_on_project_id_and_created_at_and_id_and_state_id ON issues USING btree (project_id, created_at, id, state_id);
 
 CREATE INDEX idx_issues_on_project_id_and_due_date_and_id_and_state_id ON issues USING btree (project_id, due_date, id, state_id) WHERE (due_date IS NOT NULL);
+
+CREATE INDEX idx_issues_on_project_id_and_rel_asc_and_id ON issues USING btree (project_id, relative_position, id);
 
 CREATE INDEX idx_issues_on_project_id_and_rel_position_and_state_id_and_id ON issues USING btree (project_id, relative_position, state_id, id DESC);
 
@@ -22366,6 +22403,10 @@ CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON c
 
 CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON ci_builds USING btree (project_id, status) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
 
+CREATE INDEX index_ci_builds_runner_id_pending_covering ON ci_builds USING btree (runner_id, id) INCLUDE (project_id) WHERE (((status)::text = 'pending'::text) AND ((type)::text = 'Ci::Build'::text));
+
+CREATE INDEX index_ci_builds_runner_id_running ON ci_builds USING btree (runner_id) WHERE (((status)::text = 'running'::text) AND ((type)::text = 'Ci::Build'::text));
+
 CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON ci_builds_runner_session USING btree (build_id);
 
 CREATE INDEX index_ci_daily_build_group_report_results_on_group_id ON ci_daily_build_group_report_results USING btree (group_id);
@@ -22718,7 +22759,7 @@ CREATE INDEX index_deployments_on_id_and_status_and_created_at ON deployments US
 
 CREATE INDEX index_deployments_on_id_where_cluster_id_present ON deployments USING btree (id) WHERE (cluster_id IS NOT NULL);
 
-CREATE INDEX index_deployments_on_project_and_environment_and_updated_at ON deployments USING btree (project_id, environment_id, updated_at);
+CREATE INDEX index_deployments_on_project_and_environment_and_updated_at_id ON deployments USING btree (project_id, environment_id, updated_at, id);
 
 CREATE INDEX index_deployments_on_project_and_finished ON deployments USING btree (project_id, finished_at) WHERE (status = 2);
 
@@ -23416,6 +23457,8 @@ CREATE UNIQUE INDEX index_namespace_root_storage_statistics_on_namespace_id ON n
 
 CREATE UNIQUE INDEX index_namespace_statistics_on_namespace_id ON namespace_statistics USING btree (namespace_id);
 
+CREATE INDEX index_namespaces_id_parent_id_is_not_null ON namespaces USING btree (id) WHERE (parent_id IS NOT NULL);
+
 CREATE INDEX index_namespaces_id_parent_id_is_null ON namespaces USING btree (id) WHERE (parent_id IS NULL);
 
 CREATE INDEX index_namespaces_on_created_at ON namespaces USING btree (created_at);
@@ -23607,6 +23650,8 @@ CREATE UNIQUE INDEX index_packages_dependencies_on_name_and_version_pattern ON p
 CREATE INDEX index_packages_dependency_links_on_dependency_id ON packages_dependency_links USING btree (dependency_id);
 
 CREATE INDEX index_packages_events_on_package_id ON packages_events USING btree (package_id);
+
+CREATE INDEX index_packages_helm_file_metadata_on_channel ON packages_helm_file_metadata USING btree (channel);
 
 CREATE INDEX index_packages_maven_metadata_on_package_id_and_path ON packages_maven_metadata USING btree (package_id, path);
 
@@ -24250,11 +24295,19 @@ CREATE INDEX index_term_agreements_on_term_id ON term_agreements USING btree (te
 
 CREATE INDEX index_term_agreements_on_user_id ON term_agreements USING btree (user_id);
 
+CREATE INDEX index_terraform_state_versions_failed_verification ON terraform_state_versions USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX index_terraform_state_versions_needs_verification ON terraform_state_versions USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
 CREATE INDEX index_terraform_state_versions_on_ci_build_id ON terraform_state_versions USING btree (ci_build_id);
 
 CREATE INDEX index_terraform_state_versions_on_created_by_user_id ON terraform_state_versions USING btree (created_by_user_id);
 
 CREATE UNIQUE INDEX index_terraform_state_versions_on_state_id_and_version ON terraform_state_versions USING btree (terraform_state_id, version);
+
+CREATE INDEX index_terraform_state_versions_on_verification_state ON terraform_state_versions USING btree (verification_state);
+
+CREATE INDEX index_terraform_state_versions_pending_verification ON terraform_state_versions USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
 
 CREATE INDEX index_terraform_states_on_file_store ON terraform_states USING btree (file_store);
 
@@ -24527,6 +24580,8 @@ CREATE INDEX index_web_hook_logs_part_on_web_hook_id ON ONLY web_hook_logs USING
 CREATE INDEX index_web_hooks_on_group_id ON web_hooks USING btree (group_id) WHERE ((type)::text = 'GroupHook'::text);
 
 CREATE INDEX index_web_hooks_on_project_id ON web_hooks USING btree (project_id);
+
+CREATE INDEX index_web_hooks_on_project_id_recent_failures ON web_hooks USING btree (project_id, recent_failures);
 
 CREATE INDEX index_web_hooks_on_service_id ON web_hooks USING btree (service_id);
 
@@ -25067,9 +25122,6 @@ ALTER TABLE ONLY approvals
 
 ALTER TABLE ONLY namespaces
     ADD CONSTRAINT fk_319256d87a FOREIGN KEY (file_template_project_id) REFERENCES projects(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY merge_requests
-    ADD CONSTRAINT fk_3308fe130c FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY ci_group_variables
     ADD CONSTRAINT fk_33ae4d58d8 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -25923,6 +25975,9 @@ ALTER TABLE ONLY lfs_file_locks
 ALTER TABLE ONLY project_alerting_settings
     ADD CONSTRAINT fk_rails_27a84b407d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY user_credit_card_validations
+    ADD CONSTRAINT fk_rails_27ebc03cbf FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY dast_site_validations
     ADD CONSTRAINT fk_rails_285c617324 FOREIGN KEY (dast_site_token_id) REFERENCES dast_site_tokens(id) ON DELETE CASCADE;
 
@@ -26646,6 +26701,9 @@ ALTER TABLE ONLY fork_network_members
 ALTER TABLE ONLY operations_feature_flag_scopes
     ADD CONSTRAINT fk_rails_a50a04d0a4 FOREIGN KEY (feature_flag_id) REFERENCES operations_feature_flags(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY packages_helm_file_metadata
+    ADD CONSTRAINT fk_rails_a559865345 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY cluster_projects
     ADD CONSTRAINT fk_rails_a5a958bca1 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
@@ -26902,7 +26960,7 @@ ALTER TABLE ONLY pool_repositories
     ADD CONSTRAINT fk_rails_d2711daad4 FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY web_hooks
-    ADD CONSTRAINT fk_rails_d35697648e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE NOT VALID;
+    ADD CONSTRAINT fk_rails_d35697648e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY group_group_links
     ADD CONSTRAINT fk_rails_d3a0488427 FOREIGN KEY (shared_group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -27158,6 +27216,9 @@ ALTER TABLE ONLY ci_builds_metadata
 
 ALTER TABLE ONLY services
     ADD CONSTRAINT fk_services_inherit_from_id FOREIGN KEY (inherit_from_id) REFERENCES services(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY merge_requests
+    ADD CONSTRAINT fk_source_project FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY timelogs
     ADD CONSTRAINT fk_timelogs_issues_issue_id FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;

@@ -2147,11 +2147,13 @@ RSpec.describe Project do
 
   describe '#update_root_ref' do
     let(:project) { create(:project, :repository) }
+    let(:url) { 'http://git.example.com/remote-repo.git' }
+    let(:auth) { 'Basic secret' }
 
     it 'updates the default branch when HEAD has changed' do
       stub_find_remote_root_ref(project, ref: 'feature')
 
-      expect { project.update_root_ref('origin') }
+      expect { project.update_root_ref('origin', url, auth) }
         .to change { project.default_branch }
         .from('master')
         .to('feature')
@@ -2162,7 +2164,7 @@ RSpec.describe Project do
 
       expect(project).to receive(:change_head).with('master').and_call_original
 
-      project.update_root_ref('origin')
+      project.update_root_ref('origin', url, auth)
 
       # For good measure, expunge the root ref cache and reload.
       project.repository.expire_all_method_caches
@@ -2172,14 +2174,14 @@ RSpec.describe Project do
     it 'does not update the default branch when HEAD does not exist' do
       stub_find_remote_root_ref(project, ref: 'foo')
 
-      expect { project.update_root_ref('origin') }
+      expect { project.update_root_ref('origin', url, auth) }
         .not_to change { project.default_branch }
     end
 
     def stub_find_remote_root_ref(project, ref:)
       allow(project.repository)
         .to receive(:find_remote_root_ref)
-        .with('origin')
+        .with('origin', url, auth)
         .and_return(ref)
     end
   end

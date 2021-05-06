@@ -471,7 +471,7 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'PUT /projects/:id/issues/:issue_id to update weight' do
+  describe 'PUT /projects/:id/issues/:issue_iid to update weight' do
     let!(:issue) { create :issue, author: user, project: project }
 
     it 'updates an issue with no weight' do
@@ -531,14 +531,14 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'PUT /projects/:id/issues/:issue_id to update epic' do
+  describe 'PUT /projects/:id/issues/:issue_iid to update epic' do
     it_behaves_like 'with epic parameter' do
       let(:issue_with_epic) { create(:issue, project: target_project) }
       let(:request) { put api("/projects/#{target_project.id}/issues/#{issue_with_epic.iid}", user), params: params }
     end
   end
 
-  describe 'POST /projects/:id/issues/:issue_id/metric_images' do
+  describe 'POST /projects/:id/issues/:issue_iid/metric_images' do
     include WorkhorseHelpers
     using RSpec::Parameterized::TableSyntax
 
@@ -643,7 +643,7 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'GET /projects/:id/issues/:issue_id/metric_images' do
+  describe 'GET /projects/:id/issues/:issue_iid/metric_images' do
     using RSpec::Parameterized::TableSyntax
 
     let_it_be(:project) do
@@ -701,7 +701,7 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
-  describe 'DELETE /projects/:id/issues/:issue_id/metric_images/:metric_image_id' do
+  describe 'DELETE /projects/:id/issues/:issue_iid/metric_images/:metric_image_id' do
     using RSpec::Parameterized::TableSyntax
 
     let_it_be(:project) do

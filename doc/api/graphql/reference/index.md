@@ -24,7 +24,9 @@ Fields that are deprecated are marked with **{warning-solid}**.
 Items (fields, enums, etc) that have been removed according to our [deprecation process](../index.md#deprecation-and-removal-process) can be found
 in [Removed Items](../removed_items.md).
 
-<!-- vale gitlab.Spelling = NO -->
+<!-- vale off -->
+<!-- Docs linting disabled after this line. -->
+<!-- See https://docs.gitlab.com/ee/development/documentation/testing.html#disable-vale-tests -->
 
 ## `Query` type
 
@@ -282,6 +284,18 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="queryprojectssearch"></a>`search` | [`String`](#string) | Search query for project name, path, or description. |
 | <a id="queryprojectssearchnamespaces"></a>`searchNamespaces` | [`Boolean`](#boolean) | Include namespace in project search. |
 | <a id="queryprojectssort"></a>`sort` | [`String`](#string) | Sort order of results. |
+
+### `Query.runner`
+
+Find a runner. Available only when feature flag `runner_graphql_query` is enabled.
+
+Returns [`CiRunner`](#cirunner).
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="queryrunnerid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | Runner ID. |
 
 ### `Query.runnerPlatforms`
 
@@ -2486,9 +2500,11 @@ Input type: `IterationCadenceCreateInput`
 | <a id="mutationiterationcadencecreateactive"></a>`active` | [`Boolean!`](#boolean) | Whether the iteration cadence is active. |
 | <a id="mutationiterationcadencecreateautomatic"></a>`automatic` | [`Boolean!`](#boolean) | Whether the iteration cadence should automatically generate future iterations. |
 | <a id="mutationiterationcadencecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationiterationcadencecreatedescription"></a>`description` | [`String`](#string) | Description of the iteration cadence. Maximum length is 5000 characters. |
 | <a id="mutationiterationcadencecreatedurationinweeks"></a>`durationInWeeks` | [`Int`](#int) | Duration in weeks of the iterations within this cadence. |
 | <a id="mutationiterationcadencecreategrouppath"></a>`groupPath` | [`ID!`](#id) | The group where the iteration cadence is created. |
 | <a id="mutationiterationcadencecreateiterationsinadvance"></a>`iterationsInAdvance` | [`Int`](#int) | Future iterations to be created when iteration cadence is set to automatic. |
+| <a id="mutationiterationcadencecreaterollover"></a>`rollOver` | [`Boolean`](#boolean) | Whether the iteration cadence should roll over issues to the next iteration or not. |
 | <a id="mutationiterationcadencecreatestartdate"></a>`startDate` | [`Time`](#time) | Timestamp of the iteration cadence start date. |
 | <a id="mutationiterationcadencecreatetitle"></a>`title` | [`String`](#string) | Title of the iteration cadence. |
 
@@ -2530,9 +2546,11 @@ Input type: `IterationCadenceUpdateInput`
 | <a id="mutationiterationcadenceupdateactive"></a>`active` | [`Boolean`](#boolean) | Whether the iteration cadence is active. |
 | <a id="mutationiterationcadenceupdateautomatic"></a>`automatic` | [`Boolean`](#boolean) | Whether the iteration cadence should automatically generate future iterations. |
 | <a id="mutationiterationcadenceupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationiterationcadenceupdatedescription"></a>`description` | [`String`](#string) | Description of the iteration cadence. Maximum length is 5000 characters. |
 | <a id="mutationiterationcadenceupdatedurationinweeks"></a>`durationInWeeks` | [`Int`](#int) | Duration in weeks of the iterations within this cadence. |
 | <a id="mutationiterationcadenceupdateid"></a>`id` | [`IterationsCadenceID!`](#iterationscadenceid) | Global ID of the iteration cadence. |
 | <a id="mutationiterationcadenceupdateiterationsinadvance"></a>`iterationsInAdvance` | [`Int`](#int) | Future iterations to be created when iteration cadence is set to automatic. |
+| <a id="mutationiterationcadenceupdaterollover"></a>`rollOver` | [`Boolean`](#boolean) | Whether the iteration cadence should roll over issues to the next iteration or not. |
 | <a id="mutationiterationcadenceupdatestartdate"></a>`startDate` | [`Time`](#time) | Timestamp of the iteration cadence start date. |
 | <a id="mutationiterationcadenceupdatetitle"></a>`title` | [`String`](#string) | Title of the iteration cadence. |
 
@@ -2585,6 +2603,44 @@ Input type: `JiraImportUsersInput`
 | <a id="mutationjiraimportusersclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationjiraimportuserserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationjiraimportusersjirausers"></a>`jiraUsers` | [`[JiraUser!]`](#jirauser) | Users returned from Jira, matched by email and name if possible. |
+
+### `Mutation.jobPlay`
+
+Input type: `JobPlayInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationjobplayclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationjobplayid"></a>`id` | [`CiBuildID!`](#cibuildid) | The ID of the job to mutate. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationjobplayclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationjobplayerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationjobplayjob"></a>`job` | [`CiJob`](#cijob) | The job after the mutation. |
+
+### `Mutation.jobRetry`
+
+Input type: `JobRetryInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationjobretryclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationjobretryid"></a>`id` | [`CiBuildID!`](#cibuildid) | The ID of the job to mutate. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationjobretryclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationjobretryerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationjobretryjob"></a>`job` | [`CiJob`](#cijob) | The job after the mutation. |
 
 ### `Mutation.labelCreate`
 
@@ -7242,6 +7298,7 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cijobstatus"></a>`status` | [`CiJobStatus`](#cijobstatus) | Status of the job. |
 | <a id="cijobtags"></a>`tags` | [`[String!]`](#string) | Tags for the current job. |
 | <a id="cijobtriggered"></a>`triggered` | [`Boolean`](#boolean) | Whether the job was triggered. |
+| <a id="cijobuserpermissions"></a>`userPermissions` | [`JobPermissions!`](#jobpermissions) | Permissions for the current user on the resource. |
 
 ### `CiJobArtifact`
 
@@ -7251,6 +7308,28 @@ Represents the total number of issues and their weights for a particular day.
 | ---- | ---- | ----------- |
 | <a id="cijobartifactdownloadpath"></a>`downloadPath` | [`String`](#string) | URL for downloading the artifact's file. |
 | <a id="cijobartifactfiletype"></a>`fileType` | [`JobArtifactFileType`](#jobartifactfiletype) | File type of the artifact. |
+
+### `CiRunner`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="cirunneraccesslevel"></a>`accessLevel` | [`CiRunnerAccessLevel!`](#cirunneraccesslevel) | Access level of the runner. |
+| <a id="cirunneractive"></a>`active` | [`Boolean!`](#boolean) | Indicates the runner is allowed to receive jobs. |
+| <a id="cirunnercontactedat"></a>`contactedAt` | [`Time`](#time) | Last contact from the runner. |
+| <a id="cirunnerdescription"></a>`description` | [`String`](#string) | Description of the runner. |
+| <a id="cirunnerid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner. |
+| <a id="cirunneripaddress"></a>`ipAddress` | [`String!`](#string) | IP address of the runner. |
+| <a id="cirunnerlocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
+| <a id="cirunnermaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
+| <a id="cirunnerrevision"></a>`revision` | [`String!`](#string) | Revision of the runner. |
+| <a id="cirunnerrununtagged"></a>`runUntagged` | [`Boolean!`](#boolean) | Indicates the runner is able to run untagged jobs. |
+| <a id="cirunnerrunnertype"></a>`runnerType` | [`CiRunnerType!`](#cirunnertype) | Type of the runner. |
+| <a id="cirunnershortsha"></a>`shortSha` | [`String`](#string) | First eight characters of the runner's token used to authenticate new job requests. Used as the runner's unique ID. |
+| <a id="cirunnerstatus"></a>`status` | [`CiRunnerStatus!`](#cirunnerstatus) | Status of the runner. |
+| <a id="cirunnertaglist"></a>`tagList` | [`[String!]`](#string) | Tags associated with the runner. |
+| <a id="cirunnerversion"></a>`version` | [`String!`](#string) | Version of the runner. |
 
 ### `CiStage`
 
@@ -7262,6 +7341,17 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cistagegroups"></a>`groups` | [`CiGroupConnection`](#cigroupconnection) | Group of jobs for the stage. (see [Connections](#connections)) |
 | <a id="cistagejobs"></a>`jobs` | [`CiJobConnection`](#cijobconnection) | Jobs for the stage. (see [Connections](#connections)) |
 | <a id="cistagename"></a>`name` | [`String`](#string) | Name of the stage. |
+
+### `CiTemplate`
+
+GitLab CI/CD configuration template.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="citemplatecontent"></a>`content` | [`String!`](#string) | Contents of the CI template. |
+| <a id="citemplatename"></a>`name` | [`String!`](#string) | Name of the CI template. |
 
 ### `ClusterAgent`
 
@@ -8632,7 +8722,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ##### `Group.complianceFrameworks`
 
-Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.
+Compliance frameworks available to projects in this namespace.
 
 Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection).
 
@@ -8955,7 +9045,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ##### `Group.timelogs`
 
-Time logged on issues in the group and its subgroups.
+Time logged on issues and merge requests in the group and its subgroups.
 
 Returns [`TimelogConnection!`](#timelogconnection).
 
@@ -9385,9 +9475,11 @@ Represents an iteration cadence.
 | ---- | ---- | ----------- |
 | <a id="iterationcadenceactive"></a>`active` | [`Boolean`](#boolean) | Whether the iteration cadence is active. |
 | <a id="iterationcadenceautomatic"></a>`automatic` | [`Boolean`](#boolean) | Whether the iteration cadence should automatically generate future iterations. |
+| <a id="iterationcadencedescription"></a>`description` | [`String`](#string) | Description of the iteration cadence. Maximum length is 5000 characters. |
 | <a id="iterationcadencedurationinweeks"></a>`durationInWeeks` | [`Int`](#int) | Duration in weeks of the iterations within this cadence. |
 | <a id="iterationcadenceid"></a>`id` | [`IterationsCadenceID!`](#iterationscadenceid) | Global ID of the iteration cadence. |
 | <a id="iterationcadenceiterationsinadvance"></a>`iterationsInAdvance` | [`Int`](#int) | Future iterations to be created when iteration cadence is set to automatic. |
+| <a id="iterationcadencerollover"></a>`rollOver` | [`Boolean!`](#boolean) | Whether the iteration cadence should roll over issues to the next iteration or not. |
 | <a id="iterationcadencestartdate"></a>`startDate` | [`Time`](#time) | Timestamp of the iteration cadence start date. |
 | <a id="iterationcadencetitle"></a>`title` | [`String!`](#string) | Title of the iteration cadence. |
 
@@ -9455,6 +9547,26 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="jirauserjiradisplayname"></a>`jiraDisplayName` | [`String!`](#string) | Display name of the Jira user. |
 | <a id="jirauserjiraemail"></a>`jiraEmail` | [`String`](#string) | Email of the Jira user, returned only for users with public emails. |
 
+### `JobPermissions`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="jobpermissionsreadbuild"></a>`readBuild` | [`Boolean!`](#boolean) | Indicates the user can perform `read_build` on this resource. |
+| <a id="jobpermissionsreadjobartifacts"></a>`readJobArtifacts` | [`Boolean!`](#boolean) | Indicates the user can perform `read_job_artifacts` on this resource. |
+| <a id="jobpermissionsupdatebuild"></a>`updateBuild` | [`Boolean!`](#boolean) | Indicates the user can perform `update_build` on this resource. |
+
+### `Kas`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="kasenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether the Kubernetes Agent Server is enabled. |
+| <a id="kasexternalurl"></a>`externalUrl` | [`String`](#string) | The URL used by the Agents to communicate with KAS. |
+| <a id="kasversion"></a>`version` | [`String`](#string) | KAS version. |
+
 ### `Label`
 
 #### Fields
@@ -9505,6 +9617,22 @@ Represents an entry from the Cloud License history.
 | <a id="licensehistoryentrystartsat"></a>`startsAt` | [`Date`](#date) | Date when the license started. |
 | <a id="licensehistoryentrytype"></a>`type` | [`String!`](#string) | Type of the license. |
 | <a id="licensehistoryentryusersinlicensecount"></a>`usersInLicenseCount` | [`Int`](#int) | Number of paid users in the license. |
+
+### `MavenMetadata`
+
+Maven metadata.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mavenmetadataappgroup"></a>`appGroup` | [`String!`](#string) | App group of the Maven package. |
+| <a id="mavenmetadataappname"></a>`appName` | [`String!`](#string) | App name of the Maven package. |
+| <a id="mavenmetadataappversion"></a>`appVersion` | [`String`](#string) | App version of the Maven package. |
+| <a id="mavenmetadatacreatedat"></a>`createdAt` | [`Time!`](#time) | Date of creation. |
+| <a id="mavenmetadataid"></a>`id` | [`PackagesMavenMetadatumID!`](#packagesmavenmetadatumid) | ID of the metadatum. |
+| <a id="mavenmetadatapath"></a>`path` | [`String!`](#string) | Path of the Maven package. |
+| <a id="mavenmetadataupdatedat"></a>`updatedAt` | [`Time!`](#time) | Date of most recent update. |
 
 ### `MergeRequest`
 
@@ -10038,6 +10166,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="metadatakas"></a>`kas` | [`Kas!`](#kas) | Metadata about KAS. |
 | <a id="metadatarevision"></a>`revision` | [`String!`](#string) | Revision. |
 | <a id="metadataversion"></a>`version` | [`String!`](#string) | Version. |
 
@@ -10162,7 +10291,7 @@ Contains statistics about a milestone.
 
 ##### `Namespace.complianceFrameworks`
 
-Compliance frameworks available to projects in this namespace. Available only when feature flag `ff_custom_compliance_frameworks` is enabled.
+Compliance frameworks available to projects in this namespace.
 
 Returns [`ComplianceFrameworkConnection`](#complianceframeworkconnection).
 
@@ -10274,6 +10403,7 @@ Represents a package in the Package Registry. Note that this type is in beta and
 | <a id="packagepackagetype"></a>`packageType` | [`PackageTypeEnum!`](#packagetypeenum) | Package type. |
 | <a id="packagepipelines"></a>`pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines that built the package. (see [Connections](#connections)) |
 | <a id="packageproject"></a>`project` | [`Project!`](#project) | Project where the package is stored. |
+| <a id="packagestatus"></a>`status` | [`PackageStatus!`](#packagestatus) | Package status. |
 | <a id="packagetags"></a>`tags` | [`PackageTagConnection`](#packagetagconnection) | Package tags. (see [Connections](#connections)) |
 | <a id="packageupdatedat"></a>`updatedAt` | [`Time!`](#time) | Date of most recent update. |
 | <a id="packageversion"></a>`version` | [`String`](#string) | Version string. |
@@ -10308,6 +10438,7 @@ Represents a package details in the Package Registry. Note that this type is in 
 | <a id="packagedetailstypepackagetype"></a>`packageType` | [`PackageTypeEnum!`](#packagetypeenum) | Package type. |
 | <a id="packagedetailstypepipelines"></a>`pipelines` | [`PipelineConnection`](#pipelineconnection) | Pipelines that built the package. (see [Connections](#connections)) |
 | <a id="packagedetailstypeproject"></a>`project` | [`Project!`](#project) | Project where the package is stored. |
+| <a id="packagedetailstypestatus"></a>`status` | [`PackageStatus!`](#packagestatus) | Package status. |
 | <a id="packagedetailstypetags"></a>`tags` | [`PackageTagConnection`](#packagetagconnection) | Package tags. (see [Connections](#connections)) |
 | <a id="packagedetailstypeupdatedat"></a>`updatedAt` | [`Time!`](#time) | Date of most recent update. |
 | <a id="packagedetailstypeversion"></a>`version` | [`String`](#string) | Version string. |
@@ -10753,6 +10884,18 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectboardsid"></a>`id` | [`BoardID`](#boardid) | Find a board by its ID. |
+
+##### `Project.ciTemplate`
+
+Find a single CI/CD template by name.
+
+Returns [`CiTemplate`](#citemplate).
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectcitemplatename"></a>`name` | [`String!`](#string) | Name of the CI/CD template to search for. |
 
 ##### `Project.clusterAgent`
 
@@ -12397,6 +12540,7 @@ Represents a historically accurate report about the timebox.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="timelogissue"></a>`issue` | [`Issue`](#issue) | The issue that logged time was added to. |
+| <a id="timelogmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request that logged time was added to. |
 | <a id="timelognote"></a>`note` | [`Note`](#note) | The note where the quick action to add the logged time was executed. |
 | <a id="timelogspentat"></a>`spentAt` | [`Time`](#time) | Timestamp of when the time tracked was spent at. |
 | <a id="timelogtimespent"></a>`timeSpent` | [`Int!`](#int) | The time spent displayed in seconds. |
@@ -13329,6 +13473,30 @@ Values for YAML processor result.
 | <a id="cijobstatussuccess"></a>`SUCCESS` | A job that is success. |
 | <a id="cijobstatuswaiting_for_resource"></a>`WAITING_FOR_RESOURCE` | A job that is waiting for resource. |
 
+### `CiRunnerAccessLevel`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="cirunneraccesslevelnot_protected"></a>`NOT_PROTECTED` | A runner that is not protected. |
+| <a id="cirunneraccesslevelref_protected"></a>`REF_PROTECTED` | A runner that is ref protected. |
+
+### `CiRunnerStatus`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="cirunnerstatusactive"></a>`ACTIVE` | A runner that is active. |
+| <a id="cirunnerstatusoffline"></a>`OFFLINE` | A runner that is offline. |
+| <a id="cirunnerstatusonline"></a>`ONLINE` | A runner that is online. |
+| <a id="cirunnerstatuspaused"></a>`PAUSED` | A runner that is paused. |
+
+### `CiRunnerType`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="cirunnertypegroup_type"></a>`GROUP_TYPE` | A runner that is group type. |
+| <a id="cirunnertypeinstance_type"></a>`INSTANCE_TYPE` | A runner that is instance type. |
+| <a id="cirunnertypeproject_type"></a>`PROJECT_TYPE` | A runner that is project type. |
+
 ### `CommitActionMode`
 
 Mode of a commit action.
@@ -13921,6 +14089,15 @@ Values for sorting package.
 | <a id="packagesortversion_asc"></a>`VERSION_ASC` | Ordered by version in ascending order. |
 | <a id="packagesortversion_desc"></a>`VERSION_DESC` | Ordered by version in descending order. |
 
+### `PackageStatus`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="packagestatusdefault"></a>`DEFAULT` | Packages with a default status. |
+| <a id="packagestatuserror"></a>`ERROR` | Packages with a error status. |
+| <a id="packagestatushidden"></a>`HIDDEN` | Packages with a hidden status. |
+| <a id="packagestatusprocessing"></a>`PROCESSING` | Packages with a processing status. |
+
 ### `PackageTypeEnum`
 
 | Value | Description |
@@ -13930,6 +14107,7 @@ Values for sorting package.
 | <a id="packagetypeenumdebian"></a>`DEBIAN` | Packages from the Debian package manager. |
 | <a id="packagetypeenumgeneric"></a>`GENERIC` | Packages from the Generic package manager. |
 | <a id="packagetypeenumgolang"></a>`GOLANG` | Packages from the Golang package manager. |
+| <a id="packagetypeenumhelm"></a>`HELM` | Packages from the Helm package manager. |
 | <a id="packagetypeenummaven"></a>`MAVEN` | Packages from the Maven package manager. |
 | <a id="packagetypeenumnpm"></a>`NPM` | Packages from the npm package manager. |
 | <a id="packagetypeenumnuget"></a>`NUGET` | Packages from the Nuget package manager. |
@@ -14428,11 +14606,23 @@ An example `BoardsEpicListID` is: `"gid://gitlab/Boards::EpicList/1"`.
 
 Represents `true` or `false` values.
 
+### `CiBuildID`
+
+A `CiBuildID` is a global ID. It is encoded as a string.
+
+An example `CiBuildID` is: `"gid://gitlab/Ci::Build/1"`.
+
 ### `CiPipelineID`
 
 A `CiPipelineID` is a global ID. It is encoded as a string.
 
 An example `CiPipelineID` is: `"gid://gitlab/Ci::Pipeline/1"`.
+
+### `CiRunnerID`
+
+A `CiRunnerID` is a global ID. It is encoded as a string.
+
+An example `CiRunnerID` is: `"gid://gitlab/Ci::Runner/1"`.
 
 ### `ClustersAgentID`
 
@@ -14705,6 +14895,12 @@ A `PackagesConanMetadatumID` is a global ID. It is encoded as a string.
 
 An example `PackagesConanMetadatumID` is: `"gid://gitlab/Packages::Conan::Metadatum/1"`.
 
+### `PackagesMavenMetadatumID`
+
+A `PackagesMavenMetadatumID` is a global ID. It is encoded as a string.
+
+An example `PackagesMavenMetadatumID` is: `"gid://gitlab/Packages::Maven::Metadatum/1"`.
+
 ### `PackagesPackageFileID`
 
 A `PackagesPackageFileID` is a global ID. It is encoded as a string.
@@ -14840,6 +15036,7 @@ One of:
 
 - [`ComposerMetadata`](#composermetadata)
 - [`ConanMetadata`](#conanmetadata)
+- [`MavenMetadata`](#mavenmetadata)
 
 #### `VulnerabilityDetail`
 

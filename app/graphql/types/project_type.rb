@@ -180,14 +180,15 @@ module Types
           resolver: Resolvers::IssuesResolver.single
 
     field :packages,
-         description: 'Packages of the project.',
-         resolver: Resolvers::ProjectPackagesResolver
+          description: 'Packages of the project.',
+          resolver: Resolvers::ProjectPackagesResolver
 
     field :jobs,
-         Types::Ci::JobType.connection_type,
-         null: true,
-         description: 'Jobs of a project. This field can only be resolved for one project in any single request.',
-         resolver: Resolvers::ProjectJobsResolver
+          type: Types::Ci::JobType.connection_type,
+          null: true,
+          authorize: :read_commit_status,
+          description: 'Jobs of a project. This field can only be resolved for one project in any single request.',
+          resolver: Resolvers::ProjectJobsResolver
 
     field :pipelines,
           null: true,
@@ -336,6 +337,10 @@ module Types
     field :pipeline_analytics, Types::Ci::AnalyticsType, null: true,
           description: 'Pipeline analytics.',
           resolver: Resolvers::ProjectPipelineStatisticsResolver
+
+    field :ci_template, Types::Ci::TemplateType, null: true,
+          description: 'Find a single CI/CD template by name.',
+          resolver: Resolvers::Ci::TemplateResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|

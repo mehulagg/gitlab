@@ -32,7 +32,7 @@ module Ci
           reset_ci_minutes!(namespaces)
         end
 
-        raise BatchNotResetError.new(@failed_batches) if @failed_batches.any?
+        raise BatchNotResetError, @failed_batches if @failed_batches.any?
       end
 
       private

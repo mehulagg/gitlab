@@ -30,7 +30,7 @@ module EE
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
       has_many :saml_group_links, foreign_key: 'group_id'
-      has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
+      has_many :hooks, class_name: 'GroupHook'
 
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
@@ -105,6 +105,8 @@ module EE
         epics_query = epics.select(:group_id)
         joins("INNER JOIN (#{epics_query.to_sql}) as epics on epics.group_id = namespaces.id")
       end
+
+      scope :user_is_member, -> (user) { id_in(user.authorized_groups(with_minimal_access: false)) }
 
       state_machine :ldap_sync_status, namespace: :ldap_sync, initial: :ready do
         state :ready

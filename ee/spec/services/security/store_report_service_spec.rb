@@ -482,6 +482,30 @@ RSpec.describe Security::StoreReportService, '#execute' do
             expect(issue_link).not_to be_nil
           end
         end
+
+        context 'when there is an issue link created for an issue for a vulnerabiltiy' do
+          let(:issue) { create(:issue, project: project) }
+          let!(:issue_feedback) do
+            create(
+              :vulnerability_feedback,
+              :sast,
+              :issue,
+              issue: issue,
+              project: project,
+              project_fingerprint: new_report.findings.find { |f| f.location.fingerprint == finding.location_fingerprint }.project_fingerprint
+            )
+          end
+
+          let!(:issue_link) { create(:vulnerabilities_issue_link, issue: issue, vulnerability_id: vulnerability.id) }
+
+          it 'will not raise an error' do
+            expect { subject }.not_to raise_error(ActiveRecord::RecordInvalid)
+          end
+
+          it 'does not insert issue link from the new pipeline' do
+            expect { subject }.to change { Vulnerabilities::IssueLink.count }.by(0)
+          end
+        end
       end
     end
 
@@ -577,6 +601,98 @@ RSpec.describe Security::StoreReportService, '#execute' do
           subject
         end
       end
+    end
+  end
+
+  context 'vulnerability tracking' do
+    let!(:artifact) { create(:ee_ci_job_artifact, :sast_minimal) }
+
+    def generate_new_pipeline
+      pipeline = create(:ci_pipeline, :success, project: project)
+      build = create(:ci_build, :success, pipeline: pipeline, project: project)
+      artifact = create(:ee_ci_job_artifact, :sast_minimal, job: build, project: project)
+
+      [
+        pipeline,
+        pipeline.security_reports.get_report('sast', artifact)
+      ]
+    end
+
+    before do
+      project.add_developer(user)
+      allow(pipeline).to receive(:user).and_return(user)
+    end
+
+    # This spec runs three pipelines, ensuring findings are tracked as expected:
+    #  1. pipeline creates initial findings without tracking signatures
+    #  2. pipeline creates identical findings with tracking signatures
+    #  3. pipeline updates previous findings using tracking signatures
+    it 'remaps findings across pipeline executions', :aggregate_failures do
+      stub_licensed_features(
+        sast: true,
+        security_dashboard: true,
+        vulnerability_finding_signatures: false
+      )
+      stub_feature_flags(
+        vulnerability_finding_tracking_signatures: false
+      )
+      stub_feature_flags(optimize_sql_query_for_security_report: true)
+
+      expect do
+        expect do
+          described_class.new(pipeline, report).execute
+        end.not_to(raise_error)
+      end.to change { Vulnerabilities::FindingPipeline.count }.by(1)
+        .and change { Vulnerability.count }.by(1)
+        .and change { Vulnerabilities::Finding.count }.by(1)
+        .and change { Vulnerabilities::FindingSignature.count }.by(0)
+
+      stub_licensed_features(
+        sast: true,
+        security_dashboard: true,
+        vulnerability_finding_signatures: true
+      )
+      stub_feature_flags(vulnerability_finding_tracking_signatures: true)
+
+      pipeline, report = generate_new_pipeline
+
+      allow(pipeline).to receive(:user).and_return(user)
+
+      expect do
+        expect do
+          described_class.new(pipeline, report).execute
+        end.not_to(raise_error)
+      end.to change { Vulnerabilities::FindingPipeline.count }.by(1)
+        .and change { Vulnerability.count }.by(1)
+        .and change { Vulnerabilities::Finding.count }.by(1)
+        .and change { Vulnerabilities::FindingSignature.count }.by(2)
+
+      pipeline, report = generate_new_pipeline
+
+      # Update the location of the finding to trigger persistence of signatures
+      finding = report.findings.first
+      location_data = finding.location.as_json.symbolize_keys.tap { |h| h.delete(:fingerprint) }
+      location_data[:start_line] += 1
+      location_data[:end_line] += 1
+
+      allow(finding).to receive(:location).and_return(
+        Gitlab::Ci::Reports::Security::Locations::Sast.new(**location_data)
+      )
+      allow(finding).to receive(:raw_metadata).and_return(
+        Gitlab::Json.parse(finding.raw_metadata).merge("location" => location_data).to_json
+      )
+      allow(pipeline).to receive(:user).and_return(user)
+
+      expect do
+        expect do
+          described_class.new(pipeline, report).execute
+        end.not_to(raise_error)
+      end.to change { Vulnerabilities::FindingPipeline.count }.by(1)
+        .and change { Vulnerability.count }.by(0)
+        .and change { Vulnerabilities::Finding.count }.by(0)
+        .and change { Vulnerabilities::FindingSignature.count }.by(0)
+        .and change { Vulnerabilities::Finding.last.location['start_line'] }.from(29).to(30)
+        .and change { Vulnerabilities::Finding.last.location['end_line'] }.from(29).to(30)
     end
   end
 end

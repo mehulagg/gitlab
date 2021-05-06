@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# EpicsFinder
+#
+# Used to find and filter epics in a single group or a single group hierarchy.
+# It can not be used for finding epics in multiple top-level groups.
+#
 # Params:
 #   iids: integer[]
 #   state: 'open' or 'closed' or 'all'
@@ -97,6 +102,15 @@ class EpicsFinder < IssuableFinder
       # all epics in all subgroups
       next groups if can_read_all_epics_in_related_groups?(groups, include_confidential: false)
 
+      if Feature.enabled?(:limit_epic_groups_query, group)
+        next groups.public_to_user unless current_user
+        next groups.public_to_user(current_user) unless groups.user_is_member(current_user).exists?
+      end
+
+      # when traversal ids are enabled, we could avoid N+1 issue
+      # by taking all public groups plus groups where user is member
+      # and its descendants, but for now we have to check groups
+      # one by one
       groups_user_can_read_epics(groups)
     end
   end
@@ -221,11 +235,10 @@ class EpicsFinder < IssuableFinder
     # `read_confidential_epic` policy. If that's the case we don't need to
     # check membership on subgroups.
     #
-    # `groups` is a list of groups in the same group hierarchy, by default
-    # these should be ordered by nested level in the group hierarchy in
-    # descending order (so top-level first), except if we fetch ancestors
-    # - in that case top-level group is group's root parent
-    parent = params.fetch(:include_ancestor_groups, false) ? groups.first.root_ancestor : group
+    # `groups` is a list of groups in the same group hierarchy, group is
+    # highest in the group hierarchy except if we fetch ancestors - in that
+    # case top-level group is group's root parent
+    parent = params.fetch(:include_ancestor_groups, false) ? group.root_ancestor : group
 
     # If they can view confidential epics in this parent group they can
     # definitely view confidential epics in subgroups.

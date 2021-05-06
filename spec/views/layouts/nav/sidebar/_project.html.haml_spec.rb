@@ -471,56 +471,71 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
     end
 
-    describe 'Serverless' do
-      it 'has a link to the serverless page' do
-        render
-
-        expect(rendered).to have_link('Serverless', href: project_serverless_functions_path(project))
+    context 'when feature flag :sidebar_refactor is disabled' do
+      before do
+        stub_feature_flags(sidebar_refactor: false)
       end
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        it 'does not have a link to the serverless page' do
+      describe 'Serverless' do
+        it 'has a link to the serverless page' do
           render
 
-          expect(rendered).not_to have_link('Serverless')
+          page = Nokogiri::HTML.parse(rendered)
+
+          expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Serverless"]')).not_to be_empty
+          expect(rendered).to have_link('Serverless', href: project_serverless_functions_path(project))
+        end
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          it 'does not have a link to the serverless page' do
+            render
+
+            expect(rendered).not_to have_link('Serverless')
+          end
         end
       end
-    end
 
-    describe 'Terraform' do
-      it 'has a link to the terraform page' do
-        render
-
-        expect(rendered).to have_link('Terraform', href: project_terraform_index_path(project))
-      end
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        it 'does not have a link to the terraform page' do
+      describe 'Terraform' do
+        it 'has a link to the terraform page' do
           render
 
-          expect(rendered).not_to have_link('Terraform')
+          page = Nokogiri::HTML.parse(rendered)
+
+          expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Terraform"]')).not_to be_empty
+          expect(rendered).to have_link('Terraform', href: project_terraform_index_path(project))
+        end
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          it 'does not have a link to the terraform page' do
+            render
+
+            expect(rendered).not_to have_link('Terraform')
+          end
         end
       end
-    end
 
-    describe 'Kubernetes' do
-      it 'has a link to the kubernetes page' do
-        render
-
-        expect(rendered).to have_link('Kubernetes', href: project_clusters_path(project))
-      end
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        it 'does not have a link to the kubernetes page' do
+      describe 'Kubernetes' do
+        it 'has a link to the kubernetes page' do
           render
 
-          expect(rendered).not_to have_link('Kubernetes')
+          page = Nokogiri::HTML.parse(rendered)
+
+          expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Kubernetes"]')).not_to be_empty
+          expect(rendered).to have_link('Kubernetes', href: project_clusters_path(project))
+        end
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          it 'does not have a link to the kubernetes page' do
+            render
+
+            expect(rendered).not_to have_link('Kubernetes')
+          end
         end
       end
     end
@@ -580,89 +595,227 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'packages tab' do
-    before do
-      stub_container_registry_config(enabled: true)
+  describe 'Infrastructure' do
+    describe 'Serverless platform' do
+      it 'has a link to the serverless page' do
+        render
 
-      allow(controller).to receive(:controller_name)
-        .and_return('repositories')
-      allow(controller).to receive(:controller_path)
-        .and_return('projects/registry/repositories')
+        expect(rendered).to have_link('Serverless platform', href: project_serverless_functions_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the serverless page' do
+          render
+
+          expect(rendered).not_to have_link('Serverless platform')
+        end
+      end
     end
 
-    it 'highlights sidebar item and flyout' do
-      render
+    describe 'Terraform' do
+      it 'has a link to the terraform page' do
+        render
 
-      expect(rendered).to have_css('.sidebar-top-level-items > li.active', count: 1)
-      expect(rendered).to have_css('.sidebar-sub-level-items > li.fly-out-top-item.active', count: 1)
+        expect(rendered).to have_link('Terraform', href: project_terraform_index_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the terraform page' do
+          render
+
+          expect(rendered).not_to have_link('Terraform')
+        end
+      end
     end
 
-    it 'highlights container registry tab' do
-      render
+    describe 'Kubernetes clusters' do
+      it 'has a link to the kubernetes page' do
+        render
 
-      expect(rendered).to have_css('.sidebar-sub-level-items > li:not(.fly-out-top-item).active', text: 'Container Registry')
+        expect(rendered).to have_link('Kubernetes clusters', href: project_clusters_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the kubernetes page' do
+          render
+
+          expect(rendered).not_to have_link('Kubernetes clusters')
+        end
+      end
     end
   end
 
-  describe 'Packages' do
-    let_it_be(:user) { create(:user) }
-
-    let_it_be(:package_menu_name) { 'Packages & Registries' }
-    let_it_be(:package_entry_name) { 'Package Registry' }
+  describe 'Packages and Registries' do
+    let(:registry_enabled) { true }
+    let(:packages_enabled) { true }
 
     before do
-      project.team.add_developer(user)
-      sign_in(user)
-      stub_container_registry_config(enabled: true)
+      stub_container_registry_config(enabled: registry_enabled)
+      stub_config(packages: { enabled: packages_enabled })
     end
 
-    context 'when packages is enabled' do
-      it 'packages link is visible' do
+    it 'top level navigation link is visible and points to package registry page' do
+      render
+
+      expect(rendered).to have_link('Packages & Registries', href: project_packages_path(project))
+    end
+
+    describe 'Packages Registry' do
+      it 'shows link to package registry page' do
         render
 
-        expect(rendered).to have_link(package_menu_name, href: project_packages_path(project))
+        expect(rendered).to have_link('Package Registry', href: project_packages_path(project))
       end
 
-      it 'packages list link is visible' do
-        render
+      context 'when packages config setting is not enabled' do
+        let(:packages_enabled) { false }
 
-        expect(rendered).to have_link(package_entry_name, href: project_packages_path(project))
+        it 'does not show link to package registry page' do
+          render
+
+          expect(rendered).not_to have_link('Package Registry', href: project_packages_path(project))
+        end
       end
+    end
 
-      it 'container registry link is visible' do
+    describe 'Container Registry' do
+      it 'shows link to container registry page' do
         render
 
         expect(rendered).to have_link('Container Registry', href: project_container_registry_index_path(project))
       end
+
+      context 'when container config setting is not enabled' do
+        let(:registry_enabled) { false }
+
+        it 'does not show link to package registry page' do
+          render
+
+          expect(rendered).not_to have_link('Container Registry', href: project_container_registry_index_path(project))
+        end
+      end
     end
 
-    context 'when container registry is disabled' do
-      before do
-        stub_container_registry_config(enabled: false)
-      end
-
-      it 'packages top level and list link are visible' do
+    describe 'Infrastructure Registry' do
+      it 'shows link to infrastructure registry page' do
         render
 
-        expect(rendered).to have_link(package_menu_name, href: project_packages_path(project))
-        expect(rendered).to have_link(package_entry_name, href: project_packages_path(project))
+        expect(rendered).to have_link('Infrastructure Registry', href: project_infrastructure_registry_index_path(project))
       end
 
-      it 'container registry link is not visible' do
-        render
+      context 'when feature flag :infrastructure_registry_page is disabled' do
+        it 'does not show link to package registry page' do
+          stub_feature_flags(infrastructure_registry_page: false)
 
-        expect(rendered).not_to have_link('Container Registry', href: project_container_registry_index_path(project))
+          render
+
+          expect(rendered).not_to have_link('Infrastructure Registry', href: project_infrastructure_registry_index_path(project))
+        end
       end
     end
   end
 
-  describe 'wiki entry tab' do
-    let(:can_read_wiki) { true }
+  describe 'Analytics' do
+    it 'top level navigation link is visible points to the value stream page' do
+      render
 
-    before do
-      allow(view).to receive(:can?).with(user, :read_wiki, project).and_return(can_read_wiki)
+      expect(rendered).to have_link('Analytics', href: project_cycle_analytics_path(project))
     end
 
+    describe 'CI/CD' do
+      it 'has a link to the CI/CD analytics page' do
+        render
+
+        expect(rendered).to have_link('CI/CD', href: charts_project_pipelines_path(project))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the CI/CD analytics page' do
+          render
+
+          expect(rendered).not_to have_link('CI/CD', href: charts_project_pipelines_path(project))
+        end
+      end
+    end
+
+    describe 'Repository' do
+      it 'has a link to the repository analytics page' do
+        render
+
+        expect(rendered).to have_link('Repository', href: charts_project_graph_path(project, 'master'))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the repository analytics page' do
+          render
+
+          expect(rendered).not_to have_link('Repository', href: charts_project_graph_path(project, 'master'))
+        end
+      end
+    end
+
+    describe 'Value Stream' do
+      it 'has a link to the value stream page' do
+        render
+
+        expect(rendered).to have_link('Value Stream', href: project_cycle_analytics_path(project))
+      end
+
+      context 'when user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the value stream page' do
+          render
+
+          expect(rendered).not_to have_link('Value Stream', href: project_cycle_analytics_path(project))
+        end
+      end
+    end
+  end
+
+  describe 'Confluence' do
+    let!(:service) { create(:confluence_service, project: project, active: active) }
+
+    before do
+      render
+    end
+
+    context 'when the Confluence integration is active' do
+      let(:active) { true }
+
+      it 'shows the Confluence link' do
+        expect(rendered).to have_link('Confluence', href: project_wikis_confluence_path(project))
+      end
+
+      it 'does not show the GitLab wiki link' do
+        expect(rendered).not_to have_link('Wiki')
+      end
+    end
+
+    context 'when it is disabled' do
+      let(:active) { false }
+
+      it 'does not show the Confluence link' do
+        expect(rendered).not_to have_link('Confluence')
+      end
+
+      it 'shows the GitLab wiki link' do
+        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
+      end
+    end
+  end
+
+  describe 'Wiki' do
     describe 'when wiki is enabled' do
       it 'shows the wiki tab with the wiki internal link' do
         render
@@ -672,9 +825,9 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
 
     describe 'when wiki is disabled' do
-      let(:can_read_wiki) { false }
+      let(:user) { nil }
 
-      it 'does not show the wiki tab' do
+      it 'does not show the wiki link' do
         render
 
         expect(rendered).not_to have_link('Wiki')
@@ -682,7 +835,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'external wiki entry tab' do
+  describe 'External Wiki' do
     let(:properties) { { 'external_wiki_url' => 'https://gitlab.com' } }
     let(:service_status) { true }
 
@@ -702,7 +855,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     context 'when it is disabled' do
       let(:service_status) { false }
 
-      it 'does not show the external wiki tab' do
+      it 'does not show the external wiki link' do
         render
 
         expect(rendered).not_to have_link('External wiki')
@@ -710,60 +863,42 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'confluence tab' do
-    let!(:service) { create(:confluence_service, project: project, active: active) }
-
+  describe 'Snippets' do
     before do
       render
     end
 
-    context 'when the Confluence integration is active' do
-      let(:active) { true }
-
-      it 'shows the Confluence tab' do
-        expect(rendered).to have_link('Confluence', href: project_wikis_confluence_path(project))
-      end
-
-      it 'does not show the GitLab wiki tab' do
-        expect(rendered).not_to have_link('Wiki')
+    context 'when user can access snippets' do
+      it 'shows Snippets link' do
+        expect(rendered).to have_link('Snippets', href: project_snippets_path(project))
       end
     end
 
-    context 'when it is disabled' do
-      let(:active) { false }
+    context 'when user cannot access snippets' do
+      let(:user) { nil }
 
-      it 'does not show the Confluence tab' do
-        expect(rendered).not_to have_link('Confluence')
-      end
-
-      it 'shows the GitLab wiki tab' do
-        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
+      it 'does not show Snippets link' do
+        expect(rendered).not_to have_link('Snippets')
       end
     end
   end
 
-  describe 'value stream analytics entry' do
-    let(:read_cycle_analytics) { true }
-
+  describe 'Members' do
     before do
-      allow(view).to receive(:can?).with(user, :read_cycle_analytics, project).and_return(read_cycle_analytics)
+      render
     end
 
-    describe 'when value stream analytics is enabled' do
-      it 'shows the value stream analytics entry' do
-        render
-
-        expect(rendered).to have_link('Value Stream', href: project_cycle_analytics_path(project))
+    context 'when user can access members' do
+      it 'show Members link' do
+        expect(rendered).to have_link('Members', href: project_project_members_path(project))
       end
     end
 
-    describe 'when value stream analytics is disabled' do
-      let(:read_cycle_analytics) { false }
+    context 'when user cannot access members' do
+      let(:user) { nil }
 
-      it 'does not show the value stream analytics entry' do
-        render
-
-        expect(rendered).not_to have_link('Value Stream', href: project_cycle_analytics_path(project))
+      it 'show Members link' do
+        expect(rendered).not_to have_link('Members')
       end
     end
   end

@@ -20,6 +20,8 @@ module Gitlab
           return unless worker_class.include?(::ApplicationWorker)
           return unless worker_class.get_data_consistency_feature_flag_enabled?
 
+          return if location_already_provided?(job)
+
           job['worker_data_consistency'] = worker_class.get_data_consistency
 
           return if worker_class.get_data_consistency == :always
@@ -29,6 +31,10 @@ module Gitlab
           else
             job['database_replica_location'] = load_balancer.host.database_replica_location
           end
+        end
+
+        def location_already_provided?(job)
+          job['database_replica_location'] || job['database_write_location']
         end
 
         def load_balancer

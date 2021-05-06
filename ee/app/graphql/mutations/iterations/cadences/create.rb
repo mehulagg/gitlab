@@ -31,6 +31,12 @@ module Mutations
         argument :active, GraphQL::BOOLEAN_TYPE, required: true,
           description: copy_field_description(Types::Iterations::CadenceType, :active)
 
+        argument :roll_over, GraphQL::BOOLEAN_TYPE, required: false,
+          description: copy_field_description(Types::Iterations::CadenceType, :roll_over)
+
+        argument :description, GraphQL::STRING_TYPE, required: false,
+          description: copy_field_description(Types::Iterations::CadenceType, :description)
+
         field :iteration_cadence, Types::Iterations::CadenceType, null: true,
           description: 'The created iteration cadence.'
 

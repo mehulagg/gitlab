@@ -16,7 +16,9 @@ RSpec.describe 'Creating an iteration cadence' do
       duration_in_weeks: 1,
       iterations_in_advance: 1,
       automatic: false,
-      active: false
+      active: false,
+      roll_over: true,
+      description: 'Iteration cadence description'
     }
   end
 

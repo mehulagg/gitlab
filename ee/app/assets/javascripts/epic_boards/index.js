@@ -6,7 +6,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapActions, mapState } from 'vuex';
 
-import { transformBoardConfig } from 'ee_component/boards/boards_util';
+import { fullEpicBoardId, transformBoardConfig } from 'ee_component/boards/boards_util';
 import BoardSidebar from 'ee_component/boards/components/board_sidebar';
 import toggleLabels from 'ee_component/boards/toggle_labels';
 
@@ -62,7 +62,7 @@ export default () => {
       groupId: parseInt($boardApp.dataset.groupId, 10),
       rootPath: $boardApp.dataset.rootPath,
       currentUserId: gon.current_user_id || null,
-      canUpdate: $boardApp.dataset.canUpdate,
+      canUpdate: parseBoolean($boardApp.dataset.canUpdate),
       canAdminList: parseBoolean($boardApp.dataset.canAdminList),
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
@@ -99,6 +99,7 @@ export default () => {
     created() {
       this.setInitialBoardData({
         boardId: $boardApp.dataset.boardId,
+        fullBoardId: fullEpicBoardId($boardApp.dataset.boardId),
         fullPath: $boardApp.dataset.fullPath,
         boardType: this.parent,
         disabled: this.disabled,

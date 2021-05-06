@@ -56,7 +56,6 @@ module Gitlab
         print_container_repositories_status
         print_design_repositories_status
         print_replicators_status
-        print_repositories_checked_status
         print_replicators_verification_status
       end
 
@@ -112,7 +111,8 @@ module Gitlab
 
       def conditional_replication_and_verification_checks_status
         [].tap do |status|
-          if Gitlab::CurrentSettings.repository_checks_enabled && current_node_status.repositories_count.to_i > 0
+          if Gitlab::CurrentSettings.repository_checks_enabled && current_node_status.repositories_count.to_i > 0 && \
+              !Gitlab::Geo.secondary?
             status.push current_node_status.repositories_checked_in_percentage
           end
 
