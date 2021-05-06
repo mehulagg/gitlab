@@ -1,5 +1,5 @@
 import dateFormat from 'dateformat';
-import { isNumber, rest } from 'lodash';
+import { isNumber } from 'lodash';
 import {
   filterStagesByHiddenStatus,
   pathNavigationData as basePathNavigationData,
@@ -9,7 +9,6 @@ import httpStatus from '~/lib/utils/http_status';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
 import { DEFAULT_VALUE_STREAM_ID, OVERVIEW_STAGE_CONFIG, PAGINATION_TYPE } from '../constants';
-import { transformStagesForPathNavigation } from '../utils';
 
 export const hasNoAccessError = (state) => state.errorCode === httpStatus.FORBIDDEN;
 

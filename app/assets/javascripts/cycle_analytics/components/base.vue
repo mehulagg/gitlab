@@ -158,39 +158,11 @@ export default {
         </div>
       </div>
       <div class="stage-panel-container">
-        <div class="card stage-panel">
+        <div class="card stage-panel gl-px-5">
           <div class="card-header border-bottom-0">
             <nav class="col-headers">
-              <ul>
-                <li class="stage-header pl-5">
-                  <span class="stage-name font-weight-bold">{{
-                    s__('ProjectLifecycle|Stage')
-                  }}</span>
-                  <span
-                    class="has-tooltip"
-                    data-placement="top"
-                    :title="__('The phase of the development lifecycle.')"
-                    aria-hidden="true"
-                  >
-                    <gl-icon name="question-o" class="gl-text-gray-500" />
-                  </span>
-                </li>
-                <li class="median-header">
-                  <span class="stage-name font-weight-bold">{{ __('Median') }}</span>
-                  <span
-                    class="has-tooltip"
-                    data-placement="top"
-                    :title="
-                      __(
-                        'The value lying at the midpoint of a series of observed values. E.g., between 3, 5, 9, the median is 5. Between 3, 5, 7, 8, the median is (5+7)/2 = 6.',
-                      )
-                    "
-                    aria-hidden="true"
-                  >
-                    <gl-icon name="question-o" class="gl-text-gray-500" />
-                  </span>
-                </li>
-                <li class="event-header pl-3">
+              <ul class="gl-display-flex gl-justify-content-space-between">
+                <li>
                   <span v-if="selectedStage" class="stage-name font-weight-bold">{{
                     selectedStage.legend ? __(selectedStage.legend) : __('Related Issues')
                   }}</span>
@@ -205,7 +177,7 @@ export default {
                     <gl-icon name="question-o" class="gl-text-gray-500" />
                   </span>
                 </li>
-                <li class="total-time-header pr-5 text-right">
+                <li>
                   <span class="stage-name font-weight-bold">{{ __('Time') }}</span>
                   <span
                     class="has-tooltip"
@@ -219,22 +191,8 @@ export default {
               </ul>
             </nav>
           </div>
-
           <div class="stage-panel-body">
-            <nav class="stage-nav">
-              <ul>
-                <stage-nav-item
-                  v-for="stage in stages"
-                  :key="stage.title"
-                  :title="stage.title"
-                  :is-user-allowed="stage.isUserAllowed"
-                  :value="stage.value"
-                  :is-active="isActiveStage(stage)"
-                  @select="onSelectStage(stage)"
-                />
-              </ul>
-            </nav>
-            <section class="stage-events overflow-auto">
+            <section class="stage-events overflow-auto gl-w-full">
               <gl-loading-icon v-show="isLoadingStage" size="lg" />
               <template v-if="displayNoAccess">
                 <gl-empty-state
