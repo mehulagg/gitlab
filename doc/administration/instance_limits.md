@@ -205,6 +205,21 @@ Plan.default.actual_limits.update!(group_hooks: 100)
 
 Set the limit to `0` to disable it.
 
+## Webhook calls
+
+Limit the number of times any given webhook can be called per minute.
+
+Calls over the rate limit are logged into `auth.log`.
+
+```ruby
+# If limits don't exist for the default plan, you can create one with:
+# Plan.default.create_limits!
+
+Plan.default.actual_limits.update!(web_hook_calls: 10)
+```
+
+Set the limit to `0` to disable it.
+
 ## Pull Mirroring Interval
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/237891) in GitLab 13.7.
