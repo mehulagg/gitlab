@@ -168,7 +168,7 @@ Within a merge request there is a security widget which will display a summary o
 
 It is recommended you run a scan of the `default` branch before enabling feature branch scans for your developers. Otherwise, there will be no base for comparison and all feature branches will display the full scan results in the merge request security widget.
 
-The merge request security scan display will not match the generated JSON artifact because the JSON artifact contains both NEW and EXISTING findings.
+The merge request security widget will only display a subset of the vulnerabilities the generated JSON artifact because the JSON artifact contains both NEW and EXISTING findings.
 
 From the merge request security widget, clicking Expand will unfold the widget, displaying any new and no long detected (removed) findings by scan type. Click View Full Report to go directly to the `Security` tab in the latest branch pipeline.
 
