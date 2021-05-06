@@ -7,7 +7,7 @@
   To #{License.current ? "continue" : "start"} using GitLab Enterprise Edition, upload the <code>.gitlab-license</code> file or enter the license key you have received from GitLab Inc.
 
 %hr
-= form_for @license, url: admin_license_path, html: { multipart: true, class: 'fieldset-form' } do |f|
+= form_for @license, url: current_admin_license_path, html: { multipart: true, class: 'fieldset-form' } do |f|
   - if @license.errors.any?
     #error_explanation
       .gl-alert.gl-alert-danger.gl-mb-5

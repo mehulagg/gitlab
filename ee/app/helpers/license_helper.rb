@@ -52,6 +52,10 @@ module LicenseHelper
     end
   end
 
+  def current_admin_license_path
+    Gitlab::CurrentSettings.cloud_license_enabled? ? admin_cloud_license_path : admin_license_path
+  end
+
   def cloud_license_view_data
     {
       has_active_license: (has_active_license? ? 'true' : 'false'),
