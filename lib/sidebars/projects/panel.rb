@@ -16,6 +16,7 @@ module Sidebars
         add_menu(Sidebars::Projects::Menus::MergeRequestsMenu.new(context))
         add_menu(Sidebars::Projects::Menus::CiCdMenu.new(context))
         add_menu(Sidebars::Projects::Menus::SecurityComplianceMenu.new(context))
+        add_menu(Sidebars::Projects::Menus::DeploymentsMenu.new(context))
         add_menu(Sidebars::Projects::Menus::OperationsMenu.new(context))
         add_menu(Sidebars::Projects::Menus::InfrastructureMenu.new(context))
         add_menu(Sidebars::Projects::Menus::PackagesRegistriesMenu.new(context))

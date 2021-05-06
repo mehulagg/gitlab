@@ -66,6 +66,7 @@ module Sidebars
         end
 
         def releases_menu_item
+          return if Feature.enabled?(:sidebar_refactor, context.current_user)
           return unless can?(context.current_user, :read_release, context.project)
           return if context.project.empty_repo?
 

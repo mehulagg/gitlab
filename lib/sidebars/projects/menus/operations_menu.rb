@@ -178,6 +178,7 @@ module Sidebars
         end
 
         def environments_menu_item
+          return if Feature.enabled?(:sidebar_refactor, context.current_user)
           return unless can?(context.current_user, :read_environment, context.project)
 
           ::Sidebars::MenuItem.new(
@@ -190,6 +191,7 @@ module Sidebars
         end
 
         def feature_flags_menu_item
+          return if Feature.enabled?(:sidebar_refactor, context.current_user)
           return unless can?(context.current_user, :read_feature_flag, context.project)
 
           ::Sidebars::MenuItem.new(
