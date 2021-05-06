@@ -32,6 +32,9 @@ module Types
       field :web_path, GraphQL::STRING_TYPE, null: true,
             description: 'Web path of the blob.'
 
+      field :ide_edit_path, GraphQL::STRING_TYPE, null: true,
+            description: 'Path to edit this blob in the Web IDE.'
+
       field :size, GraphQL::INT_TYPE, null: true,
             description: 'Size (in bytes) of the blob.'
 
@@ -53,6 +56,9 @@ module Types
       field :raw_path, GraphQL::STRING_TYPE, null: true,
             description: 'Web path to download the raw blob.'
 
+      field :external_storage_url, GraphQL::STRING_TYPE, null: true,
+            description: 'Web path to download the raw blob via external storage, if enabled.'
+
       field :replace_path, GraphQL::STRING_TYPE, null: true,
             description: 'Web path to replace the blob content.'
 
@@ -71,6 +77,10 @@ module Types
             description: 'Blob plain highlighted data.',
             null: true,
             calls_gitaly: true
+
+      field :can_modify_blob, GraphQL::BOOLEAN_TYPE, null: true, method: :can_modify_blob?,
+            calls_gitaly: true,
+            description: 'Whether the current user can modify the blob.'
 
       def raw_text_blob
         object.data unless object.binary?
