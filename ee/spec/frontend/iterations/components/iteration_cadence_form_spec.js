@@ -1,5 +1,6 @@
 import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
-import { createLocalVue, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceForm from 'ee/iterations/components/iteration_cadence_form.vue';
 import createCadence from 'ee/iterations/queries/create_cadence.mutation.graphql';
@@ -8,15 +9,13 @@ import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
-const localVue = createLocalVue();
-
 const push = jest.fn();
 const $router = {
   push,
 };
 
 function createMockApolloProvider(requestHandlers) {
-  localVue.use(VueApollo);
+  Vue.use(VueApollo);
 
   return createMockApollo(requestHandlers);
 }
@@ -47,7 +46,6 @@ describe('Iteration cadence form', () => {
     wrapper = extendedWrapper(
       mount(IterationCadenceForm, {
         apolloProvider,
-        localVue,
         mocks: {
           $router,
         },
