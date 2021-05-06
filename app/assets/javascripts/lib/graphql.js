@@ -20,7 +20,7 @@ export const fetchPolicies = {
 
 export default (resolvers = {}, config = {}) => {
   const {
-    assumeImmutableResults,
+    assumeImmutableResults = gon.features?.apolloDefaultImmutable,
     baseUrl,
     batchMax = 10,
     cacheConfig,
