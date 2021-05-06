@@ -7,6 +7,7 @@ import updateMixin from '../mixins/update';
 const issuableTypes = {
   issue: __('Issue'),
   epic: __('Epic'),
+  incident: __('Incident'),
 };
 
 export default {
@@ -36,19 +37,28 @@ export default {
   data() {
     return {
       deleteLoading: false,
+      issueState: null,
     };
   },
   computed: {
+    deleteIssuableButtonText() {
+      return sprintf(__('Delete %{issuableType}'), {
+        issuableType: this.typeToShow.toLowerCase(),
+      });
+    },
     isSubmitEnabled() {
       return this.formState.title.trim() !== '';
     },
     shouldShowDeleteButton() {
       return this.canDestroy && this.showDeleteButton;
     },
-    deleteIssuableButtonText() {
-      return sprintf(__('Delete %{issuableType}'), {
-        issuableType: issuableTypes[this.issuableType].toLowerCase(),
-      });
+    typeToShow() {
+      const { formState, issuableType } = this;
+      if(formState.issue_type) {
+        return issuableTypes[formState.issue_type];
+      }
+
+      return issuableTypes[issuableType];
     },
   },
   methods: {
@@ -60,7 +70,7 @@ export default {
         this.issuableType === 'epic'
           ? __('Delete this epic and all descendants?')
           : sprintf(__('%{issuableType} will be removed! Are you sure?'), {
-              issuableType: issuableTypes[this.issuableType],
+              issuableType: this.typeToShow,
             });
       // eslint-disable-next-line no-alert
       if (window.confirm(confirmMessage)) {

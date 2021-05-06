@@ -1,6 +1,5 @@
 <script>
 import { GlIcon, GlIntersectionObserver } from '@gitlab/ui';
-import { isEqual } from 'lodash';
 import Visibility from 'visibilityjs';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
@@ -8,6 +7,7 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import { __, s__, sprintf } from '~/locale';
 import { IssuableStatus, IssuableStatusText, IssuableType } from '../constants';
 import eventHub from '../event_hub';
+import getIssueStateQuery from '../queries/get_issue_state.query.graphql';
 import Service from '../services/index';
 import Store from '../stores';
 import descriptionComponent from './description.vue';
@@ -202,8 +202,13 @@ export default {
       showForm: false,
       templatesRequested: false,
       isStickyHeaderShowing: false,
-      issueTypeChanged: false,
+      issueState: null,
     };
+  },
+  apollo: {
+    issueState: {
+      query: getIssueStateQuery,
+    },
   },
   computed: {
     issuableTemplates() {
@@ -357,16 +362,16 @@ export default {
     updateIssuable() {
       this.clearFlash();
       return this.service
-        .updateIssuable(this.store.formState)
+        .updateIssuable({ ...this.store.formState, issue_type: this.issueState?.issue_type })
         .then((res) => res.data)
         .then((data) => {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
 
-          if (this.issueTypeChanged) {
+          if (this.issueState) {
             const URI =
-              this.store.formState.issue_type === 'incident'
+              this.issueState.issue_type === 'incident'
                 ? data.web_url.replace('issues', 'issues/incident')
                 : data.web_url;
             visitUrl(URI);
@@ -393,15 +398,6 @@ export default {
 
           this.flashContainer = createFlash(errMsg);
         });
-    },
-
-    updateStoreFromState(state) {
-      if (isEqual(this.store.formState, state)) {
-        return;
-      }
-
-      this.store.formState = state;
-      this.issueTypeChanged = true;
     },
 
     deleteIssuable(payload) {
@@ -456,7 +452,6 @@ export default {
         :can-attach-file="canAttachFile"
         :enable-autocomplete="enableAutocomplete"
         :issuable-type="issuableType"
-        @update-store-from-state="updateStoreFromState"
       />
     </div>
     <div v-else>
