@@ -62,6 +62,12 @@ The process for configuring Jira depends on whether you host Jira on your own se
   Atlassian cloud, an email and API token are required. For more information, read
   [set up a user in Jira on Atlassian cloud](jira_cloud_configuration.md).
 
+## Privacy considerations
+
+If you integrate a private GitLab project with Jira using the **Basic Jira Integration**,
+actions in GitLab issues and merge requests linked to a Jira issue leak information
+about the private project to non-administrator Jira users.
+
 ## Troubleshooting
 
 If these features do not work as expected, it is likely due to a problem with the way the integration settings were configured.
