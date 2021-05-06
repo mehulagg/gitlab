@@ -4,10 +4,10 @@ import { getByText } from '@testing-library/dom';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_app.vue';
 import DevopsAdoptionEmptyState from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_empty_state.vue';
 import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
 import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table.vue';
+import DevopsReportApp from 'ee/analytics/devops_report/devops_adoption/components/devops_report_app.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
@@ -89,7 +89,7 @@ describe('DevopsAdoptionApp', () => {
   function createComponent(options = {}) {
     const { mockApollo, data = {}, provide = {} } = options;
 
-    return shallowMount(DevopsAdoptionApp, {
+    return shallowMount(DevopsReportApp, {
       localVue,
       apolloProvider: mockApollo,
       provide,

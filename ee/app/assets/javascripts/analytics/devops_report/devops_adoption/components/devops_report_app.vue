@@ -6,9 +6,12 @@ import {
   GlAlert,
   GlModalDirective,
   GlTooltipDirective,
+  GlTabs,
+  GlTab,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import dateformat from 'dateformat';
+import DevopsScore from '../../../../../../../../app/assets/javascripts/analytics/devops_report/components/devops_score.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
@@ -38,6 +41,9 @@ export default {
     DevopsAdoptionTable,
     GlButton,
     GlSprintf,
+    DevopsScore,
+    GlTabs,
+    GlTab,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -49,6 +55,15 @@ export default {
     },
     groupGid: {
       default: null,
+    },
+    devopsScoreMetrics: {
+      default: null,
+    },
+    devopsReportDocsPath: {
+      default: '',
+    },
+    noDataImagePath: {
+      default: '',
     },
   },
   i18n: {
@@ -246,59 +261,68 @@ export default {
 };
 </script>
 <template>
-  <div v-if="hasLoadingError">
-    <template v-for="(error, key) in errors">
-      <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
-        {{ $options.i18n[key] }}
-      </gl-alert>
-    </template>
-  </div>
-  <gl-loading-icon v-else-if="isLoading" size="md" class="gl-my-5" />
-  <div v-else>
-    <devops-adoption-segment-modal
-      v-if="hasGroupData"
-      :key="modalKey"
-      :groups="groups.nodes"
-      :enabled-groups="devopsAdoptionSegments.nodes"
-      @segmentsAdded="addSegmentsToCache"
-      @segmentsRemoved="deleteSegmentsFromCache"
-      @trackModalOpenState="trackModalOpenState"
-    />
-    <div v-if="hasSegmentsData" class="gl-mt-3">
-      <div
-        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-my-3"
-        data-testid="tableHeader"
-      >
-        <span class="gl-text-gray-400">
-          <gl-sprintf :message="$options.i18n.tableHeader.text">
-            <template #timestamp>{{ timestamp }}</template>
-          </gl-sprintf>
-        </span>
-        <span
-          v-if="hasGroupData"
-          v-gl-tooltip.hover="addSegmentButtonTooltipText"
-          data-testid="segmentButtonWrapper"
-        >
-          <gl-button
-            v-gl-modal="$options.devopsSegmentModalId"
-            :disabled="segmentLimitReached"
-            @click="clearSelectedSegment"
-            >{{ editGroupsButtonLabel }}</gl-button
-          ></span
-        >
+  <gl-tabs>
+    <gl-tab v-if="!isGroup">
+      <template #title>{{ __('DevOps Score') }}</template>
+      <devops-score />
+    </gl-tab>
+    <gl-tab>
+      <template #title>{{ __('Adoption') }}</template>
+      <div v-if="hasLoadingError">
+        <template v-for="(error, key) in errors">
+          <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
+            {{ $options.i18n[key] }}
+          </gl-alert>
+        </template>
       </div>
-      <devops-adoption-table
-        :segments="devopsAdoptionSegments.nodes"
-        :selected-segment="selectedSegment"
-        @set-selected-segment="setSelectedSegment"
-        @segmentsRemoved="deleteSegmentsFromCache"
-        @trackModalOpenState="trackModalOpenState"
-      />
-    </div>
-    <devops-adoption-empty-state
-      v-else
-      :has-groups-data="hasGroupData"
-      @clear-selected-segment="clearSelectedSegment"
-    />
-  </div>
+      <gl-loading-icon v-else-if="isLoading" size="md" class="gl-my-5" />
+      <div v-else>
+        <devops-adoption-segment-modal
+          v-if="hasGroupData"
+          :key="modalKey"
+          :groups="groups.nodes"
+          :enabled-groups="devopsAdoptionSegments.nodes"
+          @segmentsAdded="addSegmentsToCache"
+          @segmentsRemoved="deleteSegmentsFromCache"
+          @trackModalOpenState="trackModalOpenState"
+        />
+        <div v-if="hasSegmentsData" class="gl-mt-3">
+          <div
+            class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-my-3"
+            data-testid="tableHeader"
+          >
+            <span class="gl-text-gray-400">
+              <gl-sprintf :message="$options.i18n.tableHeader.text">
+                <template #timestamp>{{ timestamp }}</template>
+              </gl-sprintf>
+            </span>
+            <span
+              v-if="hasGroupData"
+              v-gl-tooltip.hover="addSegmentButtonTooltipText"
+              data-testid="segmentButtonWrapper"
+            >
+              <gl-button
+                v-gl-modal="$options.devopsSegmentModalId"
+                :disabled="segmentLimitReached"
+                @click="clearSelectedSegment"
+                >{{ editGroupsButtonLabel }}</gl-button
+              ></span
+            >
+          </div>
+          <devops-adoption-table
+            :segments="devopsAdoptionSegments.nodes"
+            :selected-segment="selectedSegment"
+            @set-selected-segment="setSelectedSegment"
+            @segmentsRemoved="deleteSegmentsFromCache"
+            @trackModalOpenState="trackModalOpenState"
+          />
+        </div>
+        <devops-adoption-empty-state
+          v-else
+          :has-groups-data="hasGroupData"
+          @clear-selected-segment="clearSelectedSegment"
+        />
+      </div>
+    </gl-tab>
+  </gl-tabs>
 </template>
