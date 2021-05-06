@@ -11,12 +11,15 @@ import {
   LABEL_PRIORITY_DESC,
   MILESTONE_DUE_ASC,
   MILESTONE_DUE_DESC,
+  NORMAL_FILTER,
   POPULARITY_ASC,
   POPULARITY_DESC,
   PRIORITY_ASC,
   PRIORITY_DESC,
   RELATIVE_POSITION_ASC,
   sortParams,
+  SPECIAL_FILTER,
+  SPECIAL_FILTER_VALUES,
   UPDATED_ASC,
   UPDATED_DESC,
   WEIGHT_ASC,
@@ -124,13 +127,21 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
 
 const tokenTypes = Object.keys(filters);
 
-const urlParamKeys = tokenTypes.flatMap((key) => Object.values(filters[key].urlParam));
+const urlParamKeys = tokenTypes.flatMap((key) =>
+  Object.values(filters[key].urlParam).flatMap((filterObj) => Object.values(filterObj)),
+);
 
 const getTokenTypeFromUrlParamKey = (urlParamKey) =>
-  tokenTypes.find((key) => Object.values(filters[key].urlParam).includes(urlParamKey));
+  tokenTypes.find((key) =>
+    Object.values(filters[key].urlParam)
+      .flatMap((filterObj) => Object.values(filterObj))
+      .includes(urlParamKey),
+  );
 
 const getOperatorFromUrlParamKey = (tokenType, urlParamKey) =>
-  Object.entries(filters[tokenType].urlParam).find(([, urlParam]) => urlParam === urlParamKey)[0];
+  Object.entries(filters[tokenType].urlParam).find(([, filterObj]) =>
+    Object.values(filterObj).includes(urlParamKey),
+  )[0];
 
 const convertToFilteredTokens = (locationSearch) =>
   Array.from(new URLSearchParams(locationSearch).entries())
@@ -168,7 +179,10 @@ export const convertToApiParams = (filterTokens) =>
   filterTokens
     .filter((token) => token.type !== FILTERED_SEARCH_TERM)
     .reduce((acc, token) => {
-      const apiParam = filters[token.type].apiParam[token.value.operator];
+      const filterType = SPECIAL_FILTER_VALUES.includes(token.value.data)
+        ? SPECIAL_FILTER
+        : NORMAL_FILTER;
+      const apiParam = filters[token.type].apiParam[token.value.operator][filterType];
       return Object.assign(acc, {
         [apiParam]: acc[apiParam] ? `${acc[apiParam]},${token.value.data}` : token.value.data,
       });
@@ -178,7 +192,10 @@ export const convertToUrlParams = (filterTokens) =>
   filterTokens
     .filter((token) => token.type !== FILTERED_SEARCH_TERM)
     .reduce((acc, token) => {
-      const urlParam = filters[token.type].urlParam[token.value.operator];
+      const filterType = SPECIAL_FILTER_VALUES.includes(token.value.data)
+        ? SPECIAL_FILTER
+        : NORMAL_FILTER;
+      const urlParam = filters[token.type].urlParam[token.value.operator]?.[filterType];
       return Object.assign(acc, {
         [urlParam]: acc[urlParam] ? acc[urlParam].concat(token.value.data) : [token.value.data],
       });
