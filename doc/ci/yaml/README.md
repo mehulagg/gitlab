@@ -868,6 +868,8 @@ job 5:
   script: make something useful at the end of pipeline
 ```
 
+If you define [`stages`](#stages) in the pipeline and attempt to [`include`](#include) a job in a `stage` that you did not define, an error will occur. It is important to define each `stage` so that GitLab CI knows when to run the job. 
+
 #### Use your own runners
 
 When you use your own runners, each runner runs only one job at a time by default.
