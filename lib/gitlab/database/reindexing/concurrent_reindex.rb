@@ -11,7 +11,7 @@ module Gitlab
         PG_IDENTIFIER_LENGTH = 63
         TEMPORARY_INDEX_PREFIX = 'tmp_reindex_'
         REPLACED_INDEX_PREFIX = 'old_reindex_'
-        STATEMENT_TIMEOUT = 6.hours
+        STATEMENT_TIMEOUT = 9.hours
 
         # When dropping an index, we acquire a SHARE UPDATE EXCLUSIVE lock,
         # which only conflicts with DDL and vacuum. We therefore execute this with a rather
