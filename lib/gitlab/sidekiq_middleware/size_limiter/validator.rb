@@ -48,6 +48,8 @@ module Gitlab
           end
 
           @size_limit = (size_limit || DEFAULT_SIZE_LIMIT).to_i
+          @compression_threshold = (compression_threshold || DEFAULT_COMPRESION_THRESHOLD_BYTES).to_i
+
           if @size_limit < 0
             ::Sidekiq.logger.warn "Invalid Sidekiq size limiter limit: #{@size_limit}"
           end
@@ -61,7 +63,11 @@ module Gitlab
           job_args = ::Sidekiq.dump_json(@job['args'])
           job_size = job_args.bytesize
 
-          return compress(job_args) if compress_mode?
+          if compress_mode? && job_size >= @compression_threshold
+            job_args = compress(job_args)
+            job_size = job_args.bytesize
+          end
+
           return if job_size <= @size_limit
 
           exception = ExceedLimitError.new(@worker_class, job_size, @size_limit)
