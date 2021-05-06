@@ -52,6 +52,7 @@ your integration.
 1. In the **Name** field, enter a descriptive name for the integration, such as `Jira`.
 1. In the **Redirect URI** field, enter the URI appropriate for your version of GitLab,
    replacing `<gitlab.example.com>` with your GitLab instance domain:
+   - *For GitLab versions 13.0 and later and Jira versions 8.14 and later,* use the generated `Redirect URL` from [Linking GitLab accounts with Jira](https://confluence.atlassian.com/adminjiraserver/linking-gitlab-accounts-1027142272.html).
    - *For GitLab versions 11.3 and later,* use `https://<gitlab.example.com>/login/oauth/callback`.
      If you use GitLab.com, the URL is `https://gitlab.com/login/oauth/callback`.
    - *For GitLab versions 11.2 and earlier,* use
@@ -78,12 +79,15 @@ it completes, refreshes every 60 minutes:
 1. To create a new integration, select the appropriate value for **Host**:
    - *For Jira versions 8.14 and later:* Select **GitLab** or
      <!-- vale gitlab.Substitutions = NO -->
-     **GitLab Self-Hosted**.
+     **GitLab Self-Managed**.
      <!-- vale gitlab.Substitutions = YES -->
    - *For Jira versions 8.13 and earlier:* Select **GitHub Enterprise**.
 1. For **Team or User Account**, enter either:
-   - The relative path of a top-level GitLab group that you have access to.
-   - The relative path of your personal namespace.
+   - *For Jira versions 8.14 and later:*
+      - The relative path of a top-level GitLab group that you have access to.
+   - *For Jira versions 8.13 and earlier:*
+      - The relative path of a top-level GitLab group that you have access to.
+      - The relative path of your personal namespace.
 
 1. In the **Host URL** field, enter the URI appropriate for your version of GitLab,
    replacing `<gitlab.example.com>` with your GitLab instance domain:
