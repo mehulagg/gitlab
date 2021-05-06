@@ -3,7 +3,7 @@ import { reportToSentry } from '../../utils';
 
 export const reportPerformance = (path, stats) => {
   // FIXME: This is a workaround for a flaky test where `path`
-  // was undefined and it ended up calling axios insteam of
+  // was undefined and it ended up calling axios instead of
   // axios-mock-adapter
   if (!path) {
     return;
