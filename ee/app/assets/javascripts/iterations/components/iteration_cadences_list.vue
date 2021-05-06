@@ -145,16 +145,19 @@ export default {
         />
       </div>
     </gl-tab>
-    <!-- <template v-if="canAdmin" #tabs-end>
+    <template #tabs-end>
+      <!-- TODO canAdmin -->
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
-        <gl-button
-          variant="confirm"
-          data-qa-selector="new_iteration_button"
-          :href="newIterationPath"
+        <router-link
+          :to="{
+            name: 'new',
+          }"
         >
-          {{ __('New iteration') }}
-        </gl-button>
+          <gl-button variant="confirm" data-qa-selector="new_iteration_button" @click="go">
+            {{ __('New iteration') }}
+          </gl-button></router-link
+        >
       </li>
-    </template> -->
+    </template>
   </gl-tabs>
 </template>
