@@ -127,20 +127,19 @@ RSpec.describe 'Projects > Files > User edits files', :js do
       wait_for_requests
     end
 
+    def fork_suggestion_message
+      "You can't edit files directly in this project. "\
+      "Fork this project to make your changes and submit a merge request."
+    end
+
     def expect_fork_prompt
       expect(page).to have_selector(:link_or_button, 'Fork')
       expect(page).to have_selector(:link_or_button, 'Cancel')
-      expect(page).to have_content(
-        "You're not allowed to edit files in this project directly. "\
-        "Please fork this project, make your changes there, and submit a merge request."
-      )
+      expect(page).to have_content(fork_suggestion_message)
     end
 
     def expect_fork_status
-      expect(page).to have_content(
-        "You're not allowed to make changes to this project directly. "\
-        "A fork of this project has been created that you can make changes in, so you can submit a merge request."
-      )
+      expect(page).to have_content(fork_suggestion_message)
     end
 
     it 'inserts a content of a file in a forked project', :sidekiq_might_not_need_inline do
