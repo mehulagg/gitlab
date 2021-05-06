@@ -29,6 +29,13 @@ RSpec.describe 'Epics through GroupQuery' do
             userPermissions {
               adminEpic
             }
+            ancestors {
+              edges {
+                node {
+                  iid
+                }
+              }
+            }
           }
         }
       NODE
@@ -141,6 +148,19 @@ RSpec.describe 'Epics through GroupQuery' do
         )
       end
 
+      it 'has ancestors information' do
+        ancestor_a = create(:epic, group: group)
+        ancestor_b = create(:epic, group: group, parent: ancestor_a)
+        epic.update!(parent: ancestor_b)
+
+        post_graphql(query, current_user: user)
+
+        expect(epic_node_array('ancestors')).to include(
+          { 'edges' => [{ 'node' => { 'iid' => ancestor_a.iid.to_s } }] },
+          { 'edges' => [{ 'node' => { 'iid' => ancestor_b.iid.to_s } }, { 'node' => { 'iid' => ancestor_a.iid.to_s } }] }
+        )
+      end
+
       describe 'can admin epics' do
         context 'when permission is absent' do
           it 'returns false for adminEpic' do
@@ -165,39 +185,84 @@ RSpec.describe 'Epics through GroupQuery' do
 
       context 'query performance' do
         let!(:child_epic) { create(:epic, group: group, parent: epic2) }
-        let(:epic_node) do
-          <<~NODE
-            edges {
-              node {
-                parent {
-                  id
-                }
-              }
-            }
-          NODE
-        end
 
         before do
           group.reload
         end
 
-        it 'avoids n+1 queries when loading parent field' do
-          # warm up
-          post_graphql(query({ iids: [epic.iid] }), current_user: user)
-
-          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
-            post_graphql(query({ iids: [epic.iid] }), current_user: user)
-          end.count
-
-          epics_with_parent = create_list(:epic, 3, group: group) do |epic|
-            epic.update!(parent: create(:epic, group: group))
+        context 'when loading parent field' do
+          let(:epic_node) do
+            <<~NODE
+              edges {
+                node {
+                  parent {
+                    id
+                  }
+                }
+              }
+            NODE
           end
-          group.reload
 
-          # Added +5 to control_count due to an existing N+1 with licenses
-          expect do
-            post_graphql(query({ iids: epics_with_parent.pluck(:iid) }), current_user: user)
-          end.not_to exceed_all_query_limit(control_count + 5)
+          it 'avoids n+1 queries' do
+            # warm up
+            post_graphql(query({ iids: [epic.iid] }), current_user: user)
+
+            control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+              post_graphql(query({ iids: [epic.iid] }), current_user: user)
+            end.count
+
+            epics_with_parent = create_list(:epic, 3, group: group) do |epic|
+              epic.update!(parent: create(:epic, group: group))
+            end
+            group.reload
+
+            # Added +5 to control_count due to an existing N+1 with licenses
+            expect do
+              post_graphql(query({ iids: epics_with_parent.pluck(:iid) }), current_user: user)
+            end.not_to exceed_all_query_limit(control_count + 5)
+          end
+        end
+
+        context 'when loading ancestors field' do
+          let_it_be(:top_parent_epic) { create(:epic, group: group, title: 'Top Parent Epic') }
+          let_it_be(:parent_epic) { create(:epic, group: group, title: 'Parent Epic', parent: top_parent_epic) }
+          let(:epic_node) do
+            <<~NODE
+              edges {
+                node {
+                  title
+                  ancestors {
+                    edges {
+                      node {
+                        title
+                      }
+                    }
+                  }
+                }
+              }
+            NODE
+          end
+
+          before do
+            epic.update!(parent: parent_epic)
+          end
+
+          it 'avoids n+1 queries' do
+            # warm up
+            post_graphql(query({ iids: [epic.iid] }), current_user: user)
+
+            control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+              post_graphql(query({ iids: [epic.iid] }), current_user: user)
+            end.count
+
+            epics_with_ancestors = create_list(:epic, 3, group: group, parent: parent_epic)
+            group.reload
+
+            # Added +5 to control_count due to an existing N+1 with licenses
+            expect do
+              post_graphql(query({ iids: epics_with_ancestors.pluck(:iid) }), current_user: user)
+            end.not_to exceed_all_query_limit(control_count + 5)
+          end
         end
       end
     end

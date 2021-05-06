@@ -6948,6 +6948,7 @@ Represents an epic on an issue board.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="boardepicancestors"></a>`ancestors` | [`EpicConnection`](#epicconnection) | Ancestors (parents) of the epic. (see [Connections](#connections)) |
 | <a id="boardepicauthor"></a>`author` | [`UserCore!`](#usercore) | Author of the epic. |
 | <a id="boardepicawardemoji"></a>`awardEmoji` | [`AwardEmojiConnection`](#awardemojiconnection) | A list of award emojis associated with the epic. (see [Connections](#connections)) |
 | <a id="boardepicclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
@@ -8087,6 +8088,7 @@ Represents an epic.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="epicancestors"></a>`ancestors` | [`EpicConnection`](#epicconnection) | Ancestors (parents) of the epic. (see [Connections](#connections)) |
 | <a id="epicauthor"></a>`author` | [`UserCore!`](#usercore) | Author of the epic. |
 | <a id="epicawardemoji"></a>`awardEmoji` | [`AwardEmojiConnection`](#awardemojiconnection) | A list of award emojis associated with the epic. (see [Connections](#connections)) |
 | <a id="epicclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the epic was closed. |
