@@ -1,0 +1,8 @@
+---
+name: billings_cc_verification_trial_plans
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.12'
+type: ops
+group: group::fulfillment
+default_enabled: false
