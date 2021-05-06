@@ -15156,39 +15156,39 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_exact_required_approvers`
 
-Missing description
+Count approval rules with exact required approvers
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183355_approval_project_rules_with_exact_required_approvers.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183355_approval_project_rules_with_exact_required_approvers.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_less_approvers_than_required`
 
-Missing description
+Count approval rules with less approvers than required
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183354_approval_project_rules_with_less_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183354_approval_project_rules_with_less_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_more_approvers_than_required`
 
-Missing description
+Count approval rules with more approvers than required
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183352_approval_project_rules_with_more_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183352_approval_project_rules_with_more_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_target_branch`
 
@@ -15264,15 +15264,15 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.merge_requests_with_overridden_project_rules`
 
-Missing description
+Number of merge requests which have overriden rules created at the project level
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183339_merge_requests_with_overridden_project_rules.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183339_merge_requests_with_overridden_project_rules.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.merge_requests_with_required_codeowners`
 
@@ -17102,39 +17102,39 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_exact_required_approvers`
 
-Missing description
+Count approval rules with exact required approvers
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183622_approval_project_rules_with_exact_required_approvers.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183622_approval_project_rules_with_exact_required_approvers.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_less_approvers_than_required`
 
-Missing description
+Count approval rules with less approvers than required
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183620_approval_project_rules_with_less_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183620_approval_project_rules_with_less_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_more_approvers_than_required`
 
-Missing description
+Count approval rules with more approvers than required.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183618_approval_project_rules_with_more_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183618_approval_project_rules_with_more_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_target_branch`
 
