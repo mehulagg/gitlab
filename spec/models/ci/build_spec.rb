@@ -48,8 +48,20 @@ RSpec.describe Ci::Build do
 
   describe 'callbacks' do
     context 'when running after_create callback' do
-      it 'triggers asynchronous build hooks worker' do
-        expect(BuildHooksWorker).to receive(:perform_async)
+      context 'when delayed_perform_for_build_hooks_worker feature flag is disabled' do
+        before do
+          stub_feature_flags(delayed_perform_for_build_hooks_worker: false)
+        end
+
+        it 'triggers asynchronous build hooks worker' do
+          expect(BuildHooksWorker).to receive(:perform_async)
+
+          create(:ci_build)
+        end
+      end
+
+      it 'triggers delayed asynchronous build hooks worker' do
+        expect(BuildHooksWorker).to receive(:perform_in).with(3.seconds.from_now)
 
         create(:ci_build)
       end

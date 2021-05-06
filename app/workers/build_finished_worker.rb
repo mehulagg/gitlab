@@ -35,7 +35,12 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
     Ci::BuildReportResultService.new.execute(build)
 
     # We execute these async as these are independent operations.
-    BuildHooksWorker.perform_async(build.id)
+    if Feature.enabled?(:delayed_perform_for_build_hooks_worker, default_enabled: :yaml)
+      BuildHooksWorker.perform_in(3.seconds.from_now, build.id)
+    else
+      BuildHooksWorker.perform_async(build.id)
+    end
+
     ChatNotificationWorker.perform_async(build.id) if build.pipeline.chat?
 
     if build.failed?

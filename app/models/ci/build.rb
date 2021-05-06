@@ -213,7 +213,13 @@ module Ci
     before_destroy { unscoped_project }
 
     after_create unless: :importing? do |build|
-      run_after_commit { BuildHooksWorker.perform_async(build.id) }
+      run_after_commit do
+        if Feature.enabled?(:delayed_perform_for_build_hooks_worker, default_enabled: :yaml)
+          BuildHooksWorker.perform_in(3.seconds.from_now, build.id)
+        else
+          BuildHooksWorker.perform_async(build.id)
+        end
+      end
     end
 
     class << self
@@ -306,7 +312,11 @@ module Ci
         build.run_after_commit do
           build.pipeline.persistent_ref.create
 
-          BuildHooksWorker.perform_async(id)
+          if Feature.enabled?(:delayed_perform_for_build_hooks_worker, default_enabled: :yaml)
+            BuildHooksWorker.perform_in(3.seconds.from_now, id)
+          else
+            BuildHooksWorker.perform_async(id)
+          end
         end
       end
 

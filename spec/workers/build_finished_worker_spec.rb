@@ -13,6 +13,27 @@ RSpec.describe BuildFinishedWorker do
         expect(Ci::Build).to receive(:find_by).with(id: build.id).and_return(build)
       end
 
+      context 'when delayed_perform_for_build_hooks_worker feature flag is disabled' do
+        before do
+          stub_feature_flags(delayed_perform_for_build_hooks_worker: false)
+        end
+
+        it 'calculates coverage and calls hooks', :aggregate_failures do
+          expect(build).to receive(:parse_trace_sections!).ordered
+          expect(build).to receive(:update_coverage).ordered
+
+          expect_next_instance_of(Ci::BuildReportResultService) do |build_report_result_service|
+            expect(build_report_result_service).to receive(:execute).with(build)
+          end
+
+          expect(BuildHooksWorker).to receive(:perform_async)
+          expect(ChatNotificationWorker).not_to receive(:perform_async)
+          expect(ArchiveTraceWorker).to receive(:perform_in)
+
+          subject
+        end
+      end
+
       it 'calculates coverage and calls hooks', :aggregate_failures do
         expect(build).to receive(:parse_trace_sections!).ordered
         expect(build).to receive(:update_coverage).ordered
@@ -21,7 +42,7 @@ RSpec.describe BuildFinishedWorker do
           expect(build_report_result_service).to receive(:execute).with(build)
         end
 
-        expect(BuildHooksWorker).to receive(:perform_async)
+        expect(BuildHooksWorker).to receive(:perform_in).with(3.seconds.from_now)
         expect(ChatNotificationWorker).not_to receive(:perform_async)
         expect(ArchiveTraceWorker).to receive(:perform_in)
 
