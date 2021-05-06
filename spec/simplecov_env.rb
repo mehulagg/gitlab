@@ -8,7 +8,7 @@ module SimpleCovEnv
   extend self
 
   def start!
-    return unless ENV['SIMPLECOV']
+    return if ENV['SIMPLECOV']
 
     configure_profile
     configure_job
