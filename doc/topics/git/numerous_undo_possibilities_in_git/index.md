@@ -7,19 +7,14 @@ type: howto
 
 # Undo possibilities in Git **(FREE)**
 
-When working in Git, you can undo your work.
 [Nothing in Git is deleted](https://git-scm.com/book/en/v2/Git-Internals-Maintenance-and-Data-Recovery),
-so you can undo the actions you've taken.
+so when you work in Git, you can undo your work.
 
-A few different techniques exist to undo your changes, based on which
+All version control systems have options for undoing work. However,
+because of the de-centralized nature of Git, these options are multiplied.
+The actions you take are based on the
 [stage of development](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository)
 you are in.
-
-Options exist for undoing your work with any version control system. However,
-because of the de-centralized nature of Git, these options are multiplied (or limited)
-depending on the stage of your process. You can rewrite history in Git, but you
-should avoid it, because it can cause problems when multiple developers are
-contributing to the same codebase.
 
 For more information about working with Git and GitLab:
 
@@ -32,7 +27,7 @@ For more information about working with Git and GitLab:
 In the standard Git workflow:
 
 1. You create or edit a file. It starts in the unstaged state. If it's new, it is not yet tracked by Git.
-1. You add the file to a repository (`git add`), which puts the file into the staged state.
+1. You add the file to your local repository (`git add`), which puts the file into the staged state.
 1. You commit the file to your local repository (`git commit`).
 1. You can then share the file with other developers, by committing to a remote repository (`git push`).
 
@@ -89,9 +84,7 @@ When you make a change, but have not yet staged it, you can undo your work.
 
 ### Undo staged local changes before you commit
 
-If you add some files to staging, but you want to remove them from the
-current commit while retaining those changes, move them outside
-of the staging tree.
+If you added a file to staging, you can undo it.
 
 1. Confirm that the file is staged (that you used `git add <file>`) by running `git status`:
 
@@ -237,6 +230,9 @@ these options to remove all or part of it from our repository:
   ```
 
 ### With history modification
+
+You can rewrite history in Git, but you should avoid it, because it can cause problems
+when multiple developers are contributing to the same codebase.
 
 There is one command for history modification and that is `git rebase`. Command
 provides interactive mode (`-i` flag) which enables you to:
