@@ -151,7 +151,7 @@ is listed as GitLab.
 
 ### Vulnerability
 
-Also refered to as a Standalone Vulnerability Object. A flaw that has a negative impact on the security of its environment. Vulnerabilities describe the
+A flaw that has a negative impact on the security of its environment. Vulnerabilities describe the
 error or weakness, and don't describe where the error is located (see [finding](#finding)).
 Each vulnerability maps to a unique finding.
 
