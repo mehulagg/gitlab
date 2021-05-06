@@ -1,6 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { OVERVIEW_STAGE_CONFIG } from 'ee/analytics/cycle_analytics/constants';
+import { OVERVIEW_STAGE_CONFIG, OVERVIEW_STAGE_ID } from 'ee/analytics/cycle_analytics/constants';
 import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
@@ -1366,6 +1366,36 @@ describe('Value Stream Analytics actions', () => {
   describe('setFilters', () => {
     it('dispatches the fetchCycleAnalyticsData action', () => {
       return testAction(actions.setFilters, null, state, [], [{ type: 'fetchCycleAnalyticsData' }]);
+    });
+
+    describe('with a stage selected', () => {
+      it('dispatches the fetchStageData action', () => {
+        return testAction(
+          actions.setFilters,
+          null,
+          { ...state, selectedStage },
+          [],
+          [
+            { type: 'fetchStageData', payload: selectedStage.id },
+            { type: 'fetchCycleAnalyticsData' },
+          ],
+        );
+      });
+    });
+
+    describe('with the overview stage selected', () => {
+      it('does not dispatch the fetchStageData action', () => {
+        return testAction(
+          actions.setFilters,
+          null,
+          {
+            ...state,
+            isOverviewStageSelected: () => true,
+          },
+          [],
+          [{ type: 'fetchCycleAnalyticsData' }],
+        );
+      });
     });
   });
 });

@@ -486,7 +486,7 @@ export const setFilters = ({
   getters: { isOverviewStageSelected },
   state: { selectedStage },
 }) => {
-  if (!isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };
 
