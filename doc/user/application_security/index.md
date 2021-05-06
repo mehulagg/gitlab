@@ -376,12 +376,19 @@ For example, the configuration below enables validation for only the `sast` job:
   .secret-analyzer:
     stage: security-scan
   ```
+## Interacting with findings and vulnerabilities
 
-## Addressing findings
+There are a variety of locations and ways to interact with the results of the security scanning tools;
+- [Scan information in merge requests](https://docs.gitlab.com/ee/user/application_security/#view-security-scan-information-in-merge-requests) 
+- [Project Security Dashboard](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#project-security-dashboard)
+- [Security pipeline tab](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#pipeline-security)
+- [Group Security Dashboard](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#group-security-dashboard)
+- [Security Center](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#security-center)
+- [Vulnerability Report](https://docs.gitlab.com/ee/user/application_security/vulnerability_report/)
+- [Vulnerability Pages](https://docs.gitlab.com/ee/user/application_security/vulnerabilities/)
+- [Dependency List](https://docs.gitlab.com/ee/user/application_security/dependency_list/)
 
-When triaging  or interacting with findings they start out as “detected” - you can change the status to; dismiss, confirm, or resolve. You can also create issues from the findings. In some cases you can also [apply an automatic remediation for a vulnerability](#apply-an-automatic-remediation-for-a-vulnerability)
-
-Read more about [addressing vulnerabilities](#addressing-vulnerabilities)
+You can read more about which findings and/or vulnerabilities you can view in each of those locations by clicking the links above. Each page details the ways in which you can interact with the findings and vulnerabilities. As an example, in most cases findings will start out as “detected” and you have the option to change the status, create an issue, link it to an existing issue, or in some cases you can also [apply an automatic remediation for a vulnerability](#apply-an-automatic-remediation-for-a-vulnerability).
 
 ## Troubleshooting
 
