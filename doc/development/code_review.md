@@ -435,7 +435,7 @@ When in doubt, ask someone from `@gitlab-com/gl-security/appsec` to review the m
 - For merge requests that have had [Squash and
   merge](../user/project/merge_requests/squash_and_merge.md#squash-and-merge) set,
   the squashed commit’s default commit message is taken from the merge request title.
-  You're encouraged to [select a commit with a more informative commit message](../user/project/merge_requests/squash_and_merge.md#overview) before merging or setting "Merge When Pipeline Succeeds".
+  You're encouraged to [select a commit with a more informative commit message](../user/project/merge_requests/squash_and_merge.md#overview) before merging.
 
 Thanks to **Pipeline for Merged Results**, authors no longer have to rebase their
 branch as frequently anymore (only when there are conflicts) because the Merge
