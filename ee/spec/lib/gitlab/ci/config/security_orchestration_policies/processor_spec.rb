@@ -63,7 +63,8 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
       EOS
     end
 
-    it 'does not modify the config' do
+    it 'does not modify the config', :aggregate_failures do
+      expect(config).not_to receive(:deep_merge)
       expect(subject).to eq(config)
     end
   end
