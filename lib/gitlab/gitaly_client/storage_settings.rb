@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/hash_with_indifferent_access'
+
 module Gitlab
   module GitalyClient
     # This is a chokepoint that is meant to help us stop remove all places
@@ -52,7 +54,7 @@ module Gitlab
         @legacy_disk_path = File.expand_path(storage['path'], Rails.root) if storage['path']
 
         storage['path'] = Deprecated
-        @hash = storage.with_indifferent_access
+        @hash = ActiveSupport::HashWithIndifferentAccess.new(storage)
       end
 
       def gitaly_address

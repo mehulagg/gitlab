@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+load File.expand_path('../../../../../lib/tasks/gitlab/helpers.rake', __dir__)
+load File.expand_path('../../../../lib/tasks/gitlab/indexer.rake', __dir__)
+
+require_relative '../../../../lib/gitlab/elastic/indexer' unless defined?(Gitlab::Elastic::Indexer)
+
 module EE
   module TestEnv
     def init(*args, &blk)
@@ -9,13 +14,14 @@ module EE
     end
 
     def setup_indexer
-      indexer_args = [indexer_path, indexer_url].compact.join(',')
+      indexer_args = [indexer_path, indexer_url].compact
 
       component_timed_setup(
         'GitLab Elasticsearch Indexer',
         install_dir: indexer_path,
         version: indexer_version,
-        task: "gitlab:indexer:install[#{indexer_args}]"
+        task: "gitlab:indexer:install",
+        task_args: indexer_args
       )
 
       Settings.elasticsearch['indexer_path'] = indexer_bin_path

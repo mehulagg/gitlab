@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+require 'omniauth'
+require 'omniauth-github'
+require 'etc'
+require 'active_support/hash_with_indifferent_access'
+
+require_relative '../../lib/gitlab/access'
 require_relative '../settings'
 require_relative '../object_store_settings'
 require_relative '../smime_signature_settings'

@@ -1,7 +1,36 @@
 # frozen_string_literal: true
 
+unless defined?(Rails)
+  require 'request_store'
+  require 'rake'
+  require 'active_support/dependencies'
+  require 'active_support/core_ext/numeric'
+  require 'active_support/string_inquirer'
+
+  module Rails
+    extend self
+
+    def root
+      Pathname.new(File.expand_path('../../..', __dir__))
+    end
+
+    def env
+      @_env ||= ActiveSupport::StringInquirer.new(ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "test")
+    end
+  end
+
+  ActiveSupport::Dependencies.autoload_paths << 'lib'
+
+  load File.expand_path('../../../lib/tasks/gitlab/helpers.rake', __dir__)
+  load File.expand_path('../../../lib/tasks/gitlab/gitaly.rake', __dir__)
+
+  # Some files required in the requiring chain of config/initializers/1_settings needs the following.
+  require_relative '../../../lib/gitlab'
+  require_relative '../../../config/initializers/0_inject_enterprise_edition_module'
+  require_relative '../../../config/initializers/1_settings'
+end
+
 module TestEnv
-  extend ActiveSupport::Concern
   extend self
 
   ComponentFailedToInstallError = Class.new(StandardError)
@@ -124,12 +153,6 @@ module TestEnv
     setup_forked_repo
   end
 
-  included do |config|
-    config.append_before do
-      set_current_example_group
-    end
-  end
-
   def disable_mailer
     allow_any_instance_of(NotificationService).to receive(:mailer)
       .and_return(double.as_null_object)
@@ -164,12 +187,13 @@ module TestEnv
   end
 
   def setup_gitaly
-    install_gitaly_args = [gitaly_dir, repos_path, gitaly_url].compact.join(',')
+    install_gitaly_args = [gitaly_dir, repos_path, gitaly_url].compact
 
     component_timed_setup('Gitaly',
       install_dir: gitaly_dir,
       version: Gitlab::GitalyClient.expected_server_version,
-      task: "gitlab:gitaly:install[#{install_gitaly_args}]") do
+      task: "gitlab:gitaly:install",
+      task_args: install_gitaly_args) do
         Gitlab::SetupHelper::Gitaly.create_configuration(
           gitaly_dir,
           { 'default' => repos_path },
@@ -468,10 +492,6 @@ module TestEnv
 
   private
 
-  def set_current_example_group
-    Thread.current[:current_example_group] = ::RSpec.current_example.metadata[:example_group]
-  end
-
   # These are directories that should be preserved at cleanup time
   def test_dirs
     @test_dirs ||= %w[
@@ -526,7 +546,7 @@ module TestEnv
     end
   end
 
-  def component_timed_setup(component, install_dir:, version:, task:)
+  def component_timed_setup(component, install_dir:, version:, task:, task_args: [])
     start = Time.now
 
     ensure_component_dir_name_is_correct!(component, install_dir)
@@ -539,7 +559,7 @@ module TestEnv
       # Cleanup the component entirely to ensure we start fresh
       FileUtils.rm_rf(install_dir)
 
-      unless system('rake', task)
+      unless Rake::Task[task].invoke(*task_args)
         raise ComponentFailedToInstallError
       end
 

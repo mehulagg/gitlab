@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rainbow/ext/string'
+
 require_dependency 'gitlab/utils/strong_memoize'
 
 # rubocop:disable Rails/Output
