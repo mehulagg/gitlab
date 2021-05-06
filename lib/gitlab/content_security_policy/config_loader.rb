@@ -19,7 +19,7 @@ module Gitlab
             'font_src' => "'self'",
             'form_action' => "'self' https: http:",
             'frame_ancestors' => "'self'",
-            'frame_src' => "'self' https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
+            'frame_src' => "#{Gitlab::Utils.append_path(Gitlab.config.gitlab.relative_url_root, '/-/speedscope/index.html')} https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
             'img_src' => "'self' data: blob: http: https:",
             'manifest_src' => "'self'",
             'media_src' => "'self'",
