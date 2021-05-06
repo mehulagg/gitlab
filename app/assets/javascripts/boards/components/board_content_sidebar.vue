@@ -32,6 +32,12 @@ export default {
       import('ee_component/sidebar/components/sidebar_iteration_widget.vue'),
   },
   inject: {
+    epicFeatureAvailable: {
+      default: false,
+    },
+    iterationFeatureAvailable: {
+      default: false,
+    },
     weightFeatureAvailable: {
       default: false,
     },
@@ -52,15 +58,6 @@ export default {
     },
     fullPath() {
       return this.activeBoardItem?.referencePath?.split('#')[0] || '';
-    },
-    showEpicSelector() {
-      return false;
-    },
-    showIterationSelector() {
-      return false;
-    },
-    showWeightSelector() {
-      return false;
     },
   },
   methods: {
@@ -89,11 +86,11 @@ export default {
         class="assignee"
         @assignees-updated="setAssignees"
       />
-      <board-sidebar-epic-select v-if="showEpicSelector" class="epic" />
+      <board-sidebar-epic-select v-if="epicFeatureAvailable" class="epic" />
       <div>
         <board-sidebar-milestone-select />
         <sidebar-iteration-widget
-          v-if="showIterationSelector"
+          v-if="iterationFeatureAvailable"
           :iid="activeBoardItem.iid"
           :workspace-path="projectPathForActiveIssue"
           :iterations-workspace-path="groupPathForActiveIssue"
@@ -104,10 +101,7 @@ export default {
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <board-sidebar-due-date />
       <board-sidebar-labels-select class="labels" />
-      <board-sidebar-weight-input
-        v-if="weightFeatureAvailable && showWeightSelector"
-        class="weight"
-      />
+      <board-sidebar-weight-input v-if="weightFeatureAvailable" class="weight" />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"
         :full-path="fullPath"

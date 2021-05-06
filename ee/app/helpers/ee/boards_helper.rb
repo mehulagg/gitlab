@@ -29,6 +29,8 @@ module EE
         milestone_lists_available: current_board_parent.feature_available?(:board_milestone_lists).to_s,
         assignee_lists_available: current_board_parent.feature_available?(:board_assignee_lists).to_s,
         iteration_lists_available: current_board_parent.feature_available?(:board_iteration_lists).to_s,
+        epic_feature_available: current_board_parent.feature_available?(:epics).to_s,
+        iteration_feature_available: current_board_parent.feature_available?(:iterations).to_s,
         show_promotion: show_feature_promotion,
         scoped_labels: current_board_parent.feature_available?(:scoped_labels)&.to_s,
         can_update: can_update?.to_s,
