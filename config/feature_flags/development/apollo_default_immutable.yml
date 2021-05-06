@@ -1,0 +1,8 @@
+---
+name: apollo_default_immutable
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.12'
+type: development
+group: group::project management
+default_enabled: true
