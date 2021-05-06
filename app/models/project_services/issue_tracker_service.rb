@@ -73,9 +73,9 @@ class IssueTrackerService < Service
 
   def fields
     [
-      { type: 'text', name: 'project_url', title: _('Project URL'), required: true },
-      { type: 'text', name: 'issues_url', title: s_('ProjectService|Issue URL'), required: true },
-      { type: 'text', name: 'new_issue_url', title: s_('ProjectService|New issue URL'), required: true }
+      { type: 'text', name: 'project_url', title: _('Project URL'), help: s_('ProjectService|The URL to the project in the external issue tracker.'), required: true },
+      { type: 'text', name: 'issues_url', title: s_('ProjectService|Issue URL'), help: s_('ProjectService|The URL to view an issue in the external issue tracker. Must contain %{code_open}:id%{code_close}.'), required: true },
+      { type: 'text', name: 'new_issue_url', title: s_('ProjectService|New issue URL'), help: s_('ProjectService|The URL to create an issue in the external issue tracker.'), required: true }
     ]
   end
 
@@ -139,6 +139,7 @@ class IssueTrackerService < Service
     Gitlab.config.issues_tracker[to_param]
   end
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def one_issue_tracker
     return if template? || instance?
     return if project.blank?
@@ -147,6 +148,7 @@ class IssueTrackerService < Service
       errors.add(:base, _('Another issue tracker is already in use. Only one issue tracker service can be active at a time'))
     end
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 end
 
 IssueTrackerService.prepend_if_ee('EE::IssueTrackerService')
