@@ -60,16 +60,17 @@ RSpec.shared_examples 'namespace traversal' do
   end
 
   describe '#self_and_ancestors' do
-    let(:group) { create(:group) }
-    let(:nested_group) { create(:group, parent: group) }
-    let(:deep_nested_group) { create(:group, parent: nested_group) }
-    let(:very_deep_nested_group) { create(:group, parent: deep_nested_group) }
+    let!(:group) { create(:group) }
+    let!(:nested_group) { create(:group, parent: group) }
+    let!(:deep_nested_group) { create(:group, parent: nested_group) }
+    let!(:very_deep_nested_group) { create(:group, parent: deep_nested_group) }
 
     it 'returns the correct ancestors' do
-      expect(very_deep_nested_group.self_and_ancestors).to contain_exactly(group, nested_group, deep_nested_group, very_deep_nested_group)
-      expect(deep_nested_group.self_and_ancestors).to contain_exactly(group, nested_group, deep_nested_group)
-      expect(nested_group.self_and_ancestors).to contain_exactly(group, nested_group)
-      expect(group.self_and_ancestors).to contain_exactly(group)
+      # #reload is called to make sure traversal_ids are reloaded
+      expect(very_deep_nested_group.reload.self_and_ancestors).to contain_exactly(group, nested_group, deep_nested_group, very_deep_nested_group)
+      expect(deep_nested_group.reload.self_and_ancestors).to contain_exactly(group, nested_group, deep_nested_group)
+      expect(nested_group.reload.self_and_ancestors).to contain_exactly(group, nested_group)
+      expect(group.reload.self_and_ancestors).to contain_exactly(group)
     end
 
     describe '#recursive_self_and_ancestors' do
