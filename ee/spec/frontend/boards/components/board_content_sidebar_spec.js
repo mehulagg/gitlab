@@ -1,9 +1,11 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
+import BoardSidebarEpicSelect from 'ee_component/boards/components/sidebar/board_sidebar_epic_select.vue';
+import BoardSidebarWeightInput from 'ee_component/boards/components/sidebar/board_sidebar_weight_input.vue';
 import SidebarIterationWidget from 'ee_component/sidebar/components/sidebar_iteration_widget';
 import { stubComponent } from 'helpers/stub_component';
-import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
 import { ISSUABLE, issuableTypes } from '~/boards/constants';
 import { mockIssue, mockIssueGroupPath, mockIssueProjectPath } from '../mock_data';
 
@@ -45,6 +47,7 @@ describe('ee/BoardContentSidebar', () => {
         canUpdate: true,
         rootPath: '/',
         groupId: 1,
+        weightFeatureAvailable: true,
       },
       store,
       stubs: {
@@ -82,5 +85,13 @@ describe('ee/BoardContentSidebar', () => {
 
   it('renders SidebarIterationWidget', () => {
     expect(wrapper.find(SidebarIterationWidget).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarEpicSelect', () => {
+    expect(wrapper.find(BoardSidebarEpicSelect).exists()).toBe(true);
+  });
+
+  it('renders BoardSidebarWeightInput', () => {
+    expect(wrapper.find(BoardSidebarWeightInput).exists()).toBe(true);
   });
 });
