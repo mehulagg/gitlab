@@ -43,6 +43,16 @@ RSpec.describe 'Admin views Cloud License', :js do
         expect(page).to have_content('You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by troubleshooting the activation code')
       end
     end
+
+    context 'activate another subscription' do
+      it 'shows the activation modal' do
+        click_button('Enter activation code')
+
+        page.within(find('#subscription-activation-modal', match: :first)) do
+          expect(page).to have_content('Activate subscription')
+        end
+      end
+    end
   end
 
   context 'when there is no license' do
