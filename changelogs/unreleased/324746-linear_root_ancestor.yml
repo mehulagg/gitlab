@@ -1,0 +1,5 @@
+---
+title: Linear traversal query for Namespace#root_ancestor
+merge_request: 61163
+author:
+type: performance
