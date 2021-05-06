@@ -10,11 +10,12 @@
 module GitlabSubscriptions
   class CheckFutureRenewalService
     def initialize(namespace:)
-      @namespace = namespace
+      @namespace = namespace.root_ancestor
     end
 
     def execute
       return false unless Feature.enabled?(:gitlab_subscription_future_renewal, default_enabled: :yaml)
+      return false unless namespace.gitlab_subscription.present?
 
       future_renewal
     end
