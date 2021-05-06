@@ -18,10 +18,10 @@ module Projects
       attr_reader :project
 
       def all_possible_avenues_of_membership
-        avenues = [project_members_without_invites_and_requests]
+        avenues = [authorizable_project_members]
 
         avenues << if project.group
-                     members_from_group
+                     authorizable_group_members
                    else
                      project_owner_acting_as_maintainer
                    end
@@ -33,19 +33,22 @@ module Projects
         avenues
       end
 
-      def project_members_without_invites_and_requests
-        project.members.without_invites_and_requests.select(*user_id_and_access_level)
+      def authorizable_project_members
+        project.members.authorizable.select(*user_id_and_access_level)
       end
 
-      def members_from_group
-        project.group.members_with_parents.select(*user_id_and_access_level)
+      def authorizable_group_members
+        project.group.authorizable_members_with_parents.select(*user_id_and_access_level)
       end
 
       def project_owner_acting_as_maintainer
+        user_id = project.namespace.owner.id
+        access_level = Gitlab::Access::MAINTAINER
+
         # rubocop: disable CodeReuse/ActiveRecord
-        Project.where(id: project.id)
-          .select(*user_id_and_access_level_with_owner_as_maintainer)
-          .reorder(nil)
+        Project
+          .from("(VALUES (#{user_id}, #{access_level})) projects (user_id, access_level)")
+          .limit(1)
         # rubocop: enable CodeReuse/ActiveRecord
       end
 
@@ -53,7 +56,7 @@ module Projects
         members = []
 
         project.project_group_links.find_each do |link|
-          members << link.group.members_with_parents.select(*user_id_and_access_level_for_project_group_shares(link))
+          members << link.group.authorizable_members_with_parents.select(*user_id_and_access_level_for_project_group_shares(link))
         end
 
         Member.from_union(members)
@@ -67,13 +70,6 @@ module Projects
 
       def user_id_and_access_level
         [:user_id, :access_level]
-      end
-
-      def user_id_and_access_level_with_owner_as_maintainer
-        [
-          "#{project.namespace.owner.id} as user_id",
-          "#{Gitlab::Access::MAINTAINER} as access_level"
-        ]
       end
 
       def user_id_and_access_level_for_project_group_shares(link)
