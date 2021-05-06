@@ -112,7 +112,6 @@ review-stop:
 
 .review-qa-base:
   extends:
-    - .default-retry
     - .use-docker-in-docker
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-qa-alpine-ruby-2.7
   stage: qa
@@ -145,12 +144,14 @@ review-qa-smoke:
   extends:
     - .review-qa-base
     - .review:rules:review-qa-smoke
+  retry: 1
   script:
     - gitlab-qa Test::Instance::Smoke "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}"
 
 review-qa-all:
   extends:
     - .review-qa-base
+    - .default-retry
     - .review:rules:review-qa-all
   parallel: 5
   script:
