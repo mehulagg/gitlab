@@ -144,7 +144,15 @@ review-qa-smoke:
   extends:
     - .review-qa-base
     - .review:rules:review-qa-smoke
-  retry: 1
+  retry:
+    max: 1  # This is confusing but this means "2 runs at max".
+    when:
+      - unknown_failure
+      - api_failure
+      - runner_system_failure
+      - job_execution_timeout
+      - stuck_or_timeout_failure
+      - script_failure
   script:
     - gitlab-qa Test::Instance::Smoke "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}"
 
