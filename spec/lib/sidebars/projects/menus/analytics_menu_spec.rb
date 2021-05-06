@@ -26,7 +26,7 @@ RSpec.describe Sidebars::Projects::Menus::AnalyticsMenu do
 
       context 'when menu does not have any menu items' do
         it 'returns false' do
-          allow(subject).to receive(:has_items?).and_return(false)
+          allow(subject).to receive(:has_renderable_items?).and_return(false)
 
           expect(subject.render?).to be false
         end
