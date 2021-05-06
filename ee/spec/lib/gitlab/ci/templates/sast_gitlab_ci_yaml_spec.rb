@@ -10,13 +10,15 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
     let(:files) { { 'README.txt' => '' } }
     let(:project) { create(:project, :custom_repo, files: files) }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master') }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
       stub_ci_pipeline_yaml_file(template.content)
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 

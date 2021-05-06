@@ -80,7 +80,7 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
         end
 
         context 'when project has Ultimate license' do
-          let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+          let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
           before do
             allow(License).to receive(:current).and_return(license)
@@ -120,7 +120,7 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
           end
 
           context 'when project has Ultimate license' do
-            let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+            let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
             before do
               allow(License).to receive(:current).and_return(license)
@@ -192,7 +192,7 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
         end
 
         context 'when project has Ultimate license' do
-          let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+          let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
           before do
             allow(License).to receive(:current).and_return(license)
