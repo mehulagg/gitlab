@@ -92,8 +92,8 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   });
 }
 
-export function initCadenceForm() {
-  const el = document.querySelector('.js-iteration-cadence-form');
+export function initCadenceApp() {
+  const el = document.querySelector('.js-iteration-cadence-app');
 
   if (!el) {
     return null;
