@@ -191,7 +191,8 @@ module Gitlab
           import_source: :github,
           project_id: project_id,
           importer: importer_class.name,
-          parallel: parallel?
+          parallel: parallel?,
+          'github_importer.phase': :parallel_scheduling
         )
       end
 

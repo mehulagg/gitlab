@@ -27,9 +27,13 @@ module Gitlab
       # client - An instance of `Gitlab::GithubImport::Client`
       # hash - A Hash containing the details of the object to import.
       def import(project, client, hash)
+        object = representation_class.from_json_hash(hash)
+
+        # To better express in the logs what object is being imported.
+        self.github_id = object.attributes.fetch(:github_id)
+
         info(project.id, message: 'starting importer')
 
-        object = representation_class.from_json_hash(hash)
         importer_class.new(object, project, client).execute
 
         counter.increment
@@ -65,6 +69,8 @@ module Gitlab
 
       private
 
+      attr_accessor :github_id
+
       def info(project_id, extra = {})
         logger.info(log_attributes(project_id, extra))
       end
@@ -88,7 +94,9 @@ module Gitlab
         extra.merge(
           import_source: :github,
           project_id: project_id,
-          importer: importer_class.name
+          importer: importer_class.name,
+          'github_id': github_id,
+          'github_importer.phase': :object_importer
         )
       end
     end

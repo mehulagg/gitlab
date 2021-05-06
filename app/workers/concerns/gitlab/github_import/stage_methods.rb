@@ -59,7 +59,8 @@ module Gitlab
         extra.merge(
           import_source: :github,
           project_id: project_id,
-          import_stage: self.class.name
+          import_stage: self.class.name,
+          'github_importer.phase': :stage
         )
       end
 
