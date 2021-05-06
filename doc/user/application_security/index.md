@@ -121,7 +121,7 @@ While you cannot directly customize Auto DevOps, you can [include the Auto DevOp
 
 ### Secure jobs in your pipeline
 
-If you add the security scanning jobs as described in [Security scanning with Auto DevOps](#Security-scanning-with-Auto-DevOps) or [Security scanning without Auto DevOps](#Security-scanning-without-Auto-DevOps) to your `.gitlab-ci.yml` each added [security scanning tool](#security-scanning-tools) will behave in as described below.
+If you add the security scanning jobs as described in [Security scanning with Auto DevOps](#Security-scanning-with-Auto-DevOps) or [Security scanning without Auto DevOps](#Security-scanning-without-Auto-DevOps) to your `.gitlab-ci.yml` each added [security scanning tool](#security-scanning-tools) will behave as described below.
 
 A job, for each compatible analyzer, will be created in the `Test`, `Dast` or `Fuzz` stage of your pipeline and will run on the next new branch pipeline. Some features like the [Security Dashboard](/security_dashboard/), [Vulnerability Report](/vulnerability_report/), and [Dependency List](/dependency_list/) that rely on this scan data will only show results from pipelines on the default branch. Please note that one tool may use many analyzers.
 
