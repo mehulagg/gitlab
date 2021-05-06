@@ -37,9 +37,9 @@ RSpec.describe Sidebars::Projects::Menus::JiraMenu do
         end
 
         it 'contains issue list and open jira menu items' do
-          expect(subject.items).not_to be_empty
-          expect(subject.items[0].item_id).to eq :issue_list
-          expect(subject.items[1].item_id).to eq :open_jira
+          expect(subject.renderable_items).not_to be_empty
+          expect(subject.renderable_items[0].item_id).to eq :issue_list
+          expect(subject.renderable_items[1].item_id).to eq :open_jira
         end
       end
     end

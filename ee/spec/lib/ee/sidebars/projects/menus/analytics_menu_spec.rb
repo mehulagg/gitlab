@@ -11,7 +11,7 @@ RSpec.describe Sidebars::Projects::Menus::AnalyticsMenu do
   subject { described_class.new(context) }
 
   describe 'Menu items' do
-    subject { described_class.new(context).items.index { |e| e.item_id == item_id } }
+    subject { described_class.new(context).renderable_items.index { |e| e.item_id == item_id } }
 
     describe 'Code Review' do
       let(:item_id) { :code_review }

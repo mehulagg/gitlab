@@ -54,7 +54,7 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
   end
 
   context 'Menu items' do
-    subject { described_class.new(context).items.index { |e| e.item_id == item_id } }
+    subject { described_class.new(context).renderable_items.index { |e| e.item_id == item_id } }
 
     describe 'Metrics Dashboard' do
       let(:item_id) { :metrics }

@@ -8,7 +8,7 @@ RSpec.describe Sidebars::Projects::Menus::IssuesMenu do
   let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project) }
 
   describe 'Iterations' do
-    subject { described_class.new(context).items.index { |e| e.item_id == :iterations} }
+    subject { described_class.new(context).renderable_items.index { |e| e.item_id == :iterations} }
 
     context 'when licensed feature iterations is not enabled' do
       it 'does not include iterations menu item' do

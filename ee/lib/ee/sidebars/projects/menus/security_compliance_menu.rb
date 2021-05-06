@@ -31,7 +31,7 @@ module EE
             return audit_events_menu_item.link if audit_events_menu_item
             return dependencies_menu_item.link if dependencies_menu_item
 
-            items.first.link
+            renderable_items.first.link
           end
 
           override :render?
