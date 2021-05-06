@@ -34,7 +34,7 @@ module Ci
     protected
 
     def build_comparer(base_report, head_report)
-      comparer_class.new(base_report, head_report)
+      comparer_class.new(project, base_report, head_report)
     end
 
     private
