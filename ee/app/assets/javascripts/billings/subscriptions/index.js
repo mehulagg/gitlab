@@ -21,6 +21,7 @@ export default (containerId = 'js-billing-plans') => {
     customerPortalUrl,
     billableSeatsHref,
     planName,
+    freePersonalNamespace,
   } = containerEl.dataset;
 
   return new Vue({
@@ -35,6 +36,7 @@ export default (containerId = 'js-billing-plans') => {
       customerPortalUrl,
       billableSeatsHref,
       planName,
+      freePersonalNamespace,
     },
     render(createElement) {
       return createElement(SubscriptionApp);
