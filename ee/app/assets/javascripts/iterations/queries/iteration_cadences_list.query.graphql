@@ -1,0 +1,27 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query IterationCadences(
+  $fullPath: ID!
+  $beforeCursor: String = ""
+  $afterCursor: String = ""
+  $firstPageSize: Int
+  $lastPageSize: Int
+) {
+  group(fullPath: $fullPath) {
+    iterationCadences(
+      before: $beforeCursor
+      after: $afterCursor
+      first: $firstPageSize
+      last: $lastPageSize
+    ) {
+      nodes {
+        id
+        title
+        durationInWeeks
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}
