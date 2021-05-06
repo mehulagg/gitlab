@@ -145,6 +145,7 @@ review-qa-smoke:
   extends:
     - .review-qa-base
     - .review:rules:review-qa-smoke
+  needs: ["review-deploy"]
   script:
     - gitlab-qa Test::Instance::Smoke "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}"
 
