@@ -153,4 +153,40 @@ RSpec.describe 'Git HTTP requests' do
 
     it_behaves_like 'pulls are allowed'
   end
+
+  describe 'when user cannot use password-based login' do
+    let(:user) { create(:user) }
+    let(:group) { create(:group) }
+    let(:project) { create(:project, :repository, :private, group: group) }
+    let(:env) { { user: user.username, password: user.password } }
+    let(:path) { "#{project.full_path}.git" }
+
+    before do
+      project.add_developer(user)
+      user.update!(provisioned_by_group: group)
+    end
+
+    context 'with feature flag switched off' do
+      before do
+        stub_feature_flags(block_password_auth_for_saml_users: false)
+      end
+
+      it_behaves_like 'pulls are allowed'
+      it_behaves_like 'pushes are allowed'
+    end
+
+    context 'with feature flag switched on' do
+      it 'responds with status 401 Unauthorized for pull action' do
+        download(path, **env) do |response|
+          expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+      end
+
+      it 'responds with status 401 Unauthorized for push action' do
+        upload(path, **env) do |response|
+          expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+      end
+    end
+  end
 end

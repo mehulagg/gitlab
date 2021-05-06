@@ -898,6 +898,44 @@ RSpec.describe User do
     end
   end
 
+  describe '#password_based_login_forbidden?' do
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = build(:group)
+      end
+
+      it 'is true' do
+        expect(user.password_based_login_forbidden?).to eq true
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.password_based_login_forbidden?).to eq false
+        end
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'is false' do
+        expect(user.password_based_login_forbidden?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.password_based_login_forbidden?).to eq false
+        end
+      end
+    end
+  end
+
   describe '#using_license_seat?' do
     let(:user) { create(:user) }
 
