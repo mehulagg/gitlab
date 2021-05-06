@@ -10,8 +10,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Using the importer, you can import your GitHub repositories to GitLab.com or to
 your self-managed GitLab instance.
 
-## Overview
-
 The following aspects of a project are imported:
 
 - Repository description (GitLab.com & 7.7+)
@@ -37,7 +35,7 @@ The namespace is a user or group in GitLab, such as `gitlab.com/janedoe` or `git
 
 This process does not migrate or import any types of groups or organizations from GitHub to GitLab.
 
-### Use cases
+## Use cases
 
 The steps you take depend on whether you are importing from GitHub.com or GitHub Enterprise, as well as whether you are importing to GitLab.com or self-managed GitLab instance.
 
@@ -93,7 +91,7 @@ For an overview of the import process, see the video [Migrating from GitHub to G
 
 ## Import your GitHub repository into GitLab
 
-### Using the GitHub integration
+### Use the GitHub integration
 
 Before you begin, ensure that any GitHub users who you want to map to GitLab users have either:
 
@@ -114,7 +112,7 @@ If you are using a self-managed GitLab instance or if you are importing from Git
 1. Click **Authorize GitlabHQ**. You are redirected back to the GitLab Import page and all of your GitHub repositories are listed.
 1. Continue on to [selecting which repositories to import](#selecting-which-repositories-to-import).
 
-### Using a GitHub token
+### Use a GitHub token
 
 NOTE:
 Using a personal access token to import projects is not recommended. If you are a GitLab.com user,
@@ -136,7 +134,7 @@ If you are not using the GitHub integration, you can still perform an authorizat
 1. Hit the **List Your GitHub Repositories** button and wait while GitLab reads your repositories' information.
    Once done, you'll be taken to the importer page to select the repositories to import.
 
-### Selecting which repositories to import
+### Select which repositories to import
 
 After you have authorized access to your GitHub repositories, you are redirected to the GitHub importer page and
 your GitHub repositories are listed.
@@ -162,7 +160,7 @@ Additionally, you can configure GitLab to send pipeline status updates back GitH
 If you import your project using [CI/CD for external repository](../../../ci/ci_cd_for_external_repos/index.md), then both
 of the above are automatically configured. **(PREMIUM)**
 
-## Improving the speed of imports on self-managed instances
+## Improve the speed of imports on self-managed instances
 
 NOTE:
 Administrator access to the GitLab server is required.
