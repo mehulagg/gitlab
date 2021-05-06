@@ -106,9 +106,9 @@ You can manage the trade-off between coverage and scan time with the following m
 
 ## Debugging scans using logging
 
-Logging can be used to facilitate further analysis of what is happening with a scan. 
+Logging can be used to help you troubleshoot a scan.
 
-The CI/CD variable `DAST_BROWSER_LOG` configures the logging level for particular modules of the crawler. Each module represents a component of the browser-based crawler and is separated so that debug logs can be configured just for the area of the crawler that requires further inspection. 
+The CI/CD variable `DAST_BROWSER_LOG` configures the logging level for particular modules of the crawler. Each module represents a component of the browser-based crawler and is separated so that debug logs can be configured just for the area of the crawler that requires further inspection. For more details, see [Crawler modules](#crawler-modules).
 
 For example, the following job definition enables the browsing module and the authentication module to be logged in debug-mode:
 
@@ -122,11 +122,15 @@ variables:
   DAST_BROWSER_LOG: "brows:debug,auth:debug"
 ```
 
-Log messages have the format `[time] [log level] [log module] [message] [additional properties]`. For example, the following log entry has level `INFO`, is part of the `CRAWL` log module and has message `Crawled path`.
+### Log message format
+
+Log messages have the format `[time] [log level] [log module] [message] [additional properties]`. For example, the following log entry has level `INFO`, is part of the `CRAWL` log module, and has the message `Crawled path`.
 
 ```txt
 2021-04-21T00:34:04.000 INF CRAWL Crawled path nav_id=0cc7fd path="LoadURL [https://my.site.com:8090]"
 ```
+
+### Crawler modules
 
 The modules that can be configured for logging are as follows:
 
