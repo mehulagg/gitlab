@@ -19,10 +19,15 @@ module Gitlab
         end
 
         DEFAULT_SIZE_LIMIT = 0
+        DEFAULT_COMPRESION_THRESHOLD_BYTES = 100_000 # 100kb
+
+        # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/1054#note_568129605
+        COMPRESS_LEVEL = 5
 
         MODES = [
           TRACK_MODE = 'track',
-          RAISE_MODE = 'raise'
+          RAISE_MODE = 'raise',
+          COMPRESS_MODE = 'compress'
         ].freeze
 
         attr_reader :mode, :size_limit
@@ -30,7 +35,8 @@ module Gitlab
         def initialize(
           worker_class, job,
           mode: ENV['GITLAB_SIDEKIQ_SIZE_LIMITER_MODE'],
-          size_limit: ENV['GITLAB_SIDEKIQ_SIZE_LIMITER_LIMIT_BYTES']
+          size_limit: ENV['GITLAB_SIDEKIQ_SIZE_LIMITER_LIMIT_BYTES'],
+          compression_threshold: ENV['GITLAB_SIDEKIQ_SIZE_LIMITER_COMPRESSION_THRESHOLD_BYTES']
         )
           @worker_class = worker_class
           @job = job
@@ -51,6 +57,11 @@ module Gitlab
           return unless @size_limit > 0
 
           return if allow_big_payload?
+
+          job_args = ::Sidekiq.dump_json(@job['args'])
+          job_size = job_args.bytesize
+
+          return compress(job_args) if compress_mode?
           return if job_size <= @size_limit
 
           exception = ExceedLimitError.new(@worker_class, job_size, @size_limit)
@@ -59,7 +70,7 @@ module Gitlab
           # https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/396
           exception.set_backtrace(backtrace)
 
-          if raise_mode?
+          if raise_mode? || compress_mode?
             raise exception
           else
             track(exception)
@@ -68,11 +79,9 @@ module Gitlab
 
         private
 
-        def job_size
-          # This maynot be the optimal solution, but can be acceptable solution
-          # for now. Internally, Sidekiq calls Sidekiq.dump_json everywhere.
-          # There is no clean way to intefere to prevent double serialization.
-          @job_size ||= ::Sidekiq.dump_json(@job).bytesize
+        def compress(job_args)
+          @job['args'] = []
+          @job['compressed_args'] = Base64.encode64(Zlib::Deflate.deflate(job_args, COMPRESS_LEVEL))
         end
 
         def allow_big_payload?
@@ -82,6 +91,10 @@ module Gitlab
 
         def raise_mode?
           @mode == RAISE_MODE
+        end
+
+        def compress_mode?
+          @mode == COMPRESS_MODE
         end
 
         def track(exception)
