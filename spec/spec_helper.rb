@@ -266,10 +266,6 @@ RSpec.configure do |config|
 
       stub_feature_flags(unified_diff_components: false)
 
-      # The following `vue_issues_list` stub can be removed once the
-      # Vue issues page has feature parity with the current Haml page
-      stub_feature_flags(vue_issues_list: false)
-
       # Disable `refactor_blob_viewer` as we refactor
       # the blob viewer. See the follwing epic for more:
       # https://gitlab.com/groups/gitlab-org/-/epics/5531
