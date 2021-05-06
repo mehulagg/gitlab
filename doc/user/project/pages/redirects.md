@@ -29,9 +29,10 @@ Note that supported paths must start with a forward slash `/`.
 
 | Feature | Supported | Example |
 | ------- | --------- | ------- |
-| Redirects (`301`, `302`) | **{check-circle}** Yes | `/wardrobe.html /narnia.html 302`
-| Rewrites (other status codes) | **{dotted-circle}** No | `/en/* /en/404.html 404` |
-| [Splats](https://docs.netlify.com/routing/redirects/redirect-options/#splats) | **{dotted-circle}** No | `/news/*  /blog/:splat` |
+| [Redirects (`301`, `302`)](#redirects) | **{check-circle}** Yes | `/wardrobe.html /narnia.html 302`
+| [Rewrites (`200`)](#rewrites) | **{dotted-circle}** Yes | `/* / 200` |
+| Rewrites (other than `200`) | **{dotted-circle}** No | `/en/* /en/404.html 404` |
+| [Splats](#splats) | **{check-circle}** Yes | `/news/*  /blog/:splat` |
 | Placeholders | **{dotted-circle}** No | `/news/:year/:month/:date/:slug  /blog/:year/:month/:date/:slug` |
 | Query parameters | **{dotted-circle}** No | `/store id=:id  /blog/:id  301` |
 | Force ([shadowing](https://docs.netlify.com/routing/redirects/rewrites-proxies/#shadowing)) | **{dotted-circle}** No | `/app/  /app/index.html  200!` |
@@ -64,6 +65,114 @@ your `_redirect` file would look like:
 /cake-portal.html /still-alive.html 302
 /wardrobe.html /narnia.html 302
 /pit.html /spikes.html 302
+```
+
+## Redirects
+
+### Permanent (301) redirects
+
+To create a permanent redirect (`301`), create a rule that includes a `from`
+path, a `to` path, and a `301` status code:
+
+```plaintext
+/old/file.html /new/file.html 301
+```
+
+A default status code of `301` is applied if no status code is provided, so this
+rule can be simplified to:
+
+```plaintext
+/old/file.html /new/file.html
+```
+
+### Temporary (302) redirects
+
+Temporary redirect (`302`) rules are similar to permanent redirect rules:
+
+```plaintext
+/old/file.html /new/file.html 302
+```
+
+## Rewrites
+
+Provide a status code of `200` to serve the content of the `to` path when the
+request matches the `from`:
+
+```plaintext
+/old/file.html /new/file.html 200
+```
+
+This is typically used in combination with [splat rules](#splats) to dynamically
+rewrite the URL.
+
+## Splats
+
+A rule with an asterisk (`*`) - or "splat" - in its `from` path will match
+anything at the start, middle, or end of requested path.
+
+```plaintext
+/old/* /new/file.html 200
+```
+
+## Splat placeholders
+
+The content matched by a `*` in a rule's `from` path can be injected
+into the `to` path using the `:splat` placeholder:
+
+```plaintext
+/old/* /new/:splat 200
+```
+
+For example, using the configuration above, a request to `/old/file.html` would
+serve the contents of `new/file.html` with a `200`.
+
+### Valid examples
+
+The following are examples of valid splat rules:
+
+```plaintext
+# Valid rules
+
+/old/* /new/file.html 200
+/old/* /new/file.html 302
+/old/* /new/:splat
+/old/*/path /new/:splat/location
+/*/old/path /:splat/new/location
+```
+
+### Invalid examples
+
+The follow are examples of **invalid** splat rules:
+
+```plaintext
+# Invalid rules
+
+# Multiple splats are not allowed
+/multiple/*/splats/* /new/path.html
+
+# Multiple splat placeholders are not allowed
+/old/path /multiple/:splat/placeholders/:splat
+
+# Splat replacements must have a matching splat
+/old/path /new/path/:splat
+
+# No splats in the "to" url
+/old/path /to/*
+
+# No splat placeholders in the "from" url
+/:splat/path /to/path
+```
+
+### Rewrite all requests to a root `index.html`
+
+Single page applications (SPAs) often perform their own routing using client-side
+routes. For these applications, it's important that _all_ requests are rewritten
+to the root `index.html` so that the routing logic can be handled by the
+JavaScript application. This is easily accomplished with a `_redirects` file
+like this:
+
+```plaintext
+/* / 200
 ```
 
 ## Files override redirects
