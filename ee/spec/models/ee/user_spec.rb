@@ -1674,4 +1674,27 @@ RSpec.describe User do
       end
     end
   end
+
+  describe "#owns_group_without_trial" do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+
+    subject { user.owns_group_without_trial? }
+
+    it 'returns true if owns a group' do
+      group.add_owner(user)
+
+      is_expected.to be_truthy
+    end
+
+    it 'returns false if is a member group' do
+      group.add_maintainer(user)
+
+      is_expected.to be_falsey
+    end
+
+    it 'returns false if is not a member of any group' do
+      is_expected.to be_falsey
+    end
+  end
 end

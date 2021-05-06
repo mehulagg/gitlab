@@ -229,11 +229,11 @@ module EE
       super || DEFAULT_GROUP_VIEW
     end
 
-    # Returns true if the user is a Reporter or higher on any namespace
+    # Returns true if the user owns a group
     # that has never had a trial (now or in the past)
-    def any_namespace_without_trial?
+    def owns_group_without_trial?
       ::Namespace
-        .from("(#{namespace_union_for_reporter_developer_maintainer_owned}) #{::Namespace.table_name}")
+        .from("(#{group_union_for_owned}) #{::Namespace.table_name}")
         .include_gitlab_subscription
         .where(gitlab_subscriptions: { trial_ends_on: nil })
         .any?
@@ -412,6 +412,10 @@ module EE
         ::Namespace.select(select).where(type: nil, owner: self),
         owned_groups.select(select).where(parent_id: nil)
       ]).to_sql
+    end
+
+    def group_union_for_owned(select = :id)
+      ::Gitlab::SQL::Union.new([owned_groups.select(select).where(parent_id: nil)]).to_sql
     end
 
     def namespace_union_for_reporter_developer_maintainer_owned(select = :id)
