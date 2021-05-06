@@ -34,13 +34,8 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   computed: {
-    ...mapGetters([
-      'isSidebarOpen',
-      'activeBoardItem',
-      'groupPathForActiveIssue',
-      'projectPathForActiveIssue',
-    ]),
-    ...mapState(['sidebarType', 'issuableType']),
+    ...mapGetters(['isSidebarOpen', 'activeBoardItem', 'projectPathForActiveIssue']),
+    ...mapState(['sidebarType', 'issuableType', 'groupPath']),
     isIssuableSidebar() {
       return this.sidebarType === ISSUABLE;
     },
@@ -83,7 +78,7 @@ export default {
         <sidebar-iteration-widget
           :iid="activeBoardItem.iid"
           :workspace-path="projectPathForActiveIssue"
-          :iterations-workspace-path="groupPathForActiveIssue"
+          :iterations-workspace-path="groupPath"
           :issuable-type="issuableType"
           class="gl-mt-5"
         />

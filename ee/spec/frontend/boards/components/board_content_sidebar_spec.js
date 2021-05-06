@@ -5,7 +5,7 @@ import SidebarIterationWidget from 'ee_component/sidebar/components/sidebar_iter
 import { stubComponent } from 'helpers/stub_component';
 import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
 import { ISSUABLE, issuableTypes } from '~/boards/constants';
-import { mockIssue, mockIssueGroupPath, mockIssueProjectPath } from '../mock_data';
+import { mockIssue, mockIssueProjectPath } from '../mock_data';
 
 describe('ee/BoardContentSidebar', () => {
   let wrapper;
@@ -24,7 +24,6 @@ describe('ee/BoardContentSidebar', () => {
           return { ...mockIssue, epic: null };
         },
         projectPathForActiveIssue: () => mockIssueProjectPath,
-        groupPathForActiveIssue: () => mockIssueGroupPath,
         isSidebarOpen: () => true,
         ...mockGetters,
       },

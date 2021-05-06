@@ -138,6 +138,7 @@ export default () => {
         boardId: $boardApp.dataset.boardId,
         fullBoardId: fullBoardId($boardApp.dataset.boardId),
         fullPath: $boardApp.dataset.fullPath,
+        groupPath: $boardApp.dataset.groupPath,
         boardType: this.parent,
         disabled: this.disabled,
         issuableType: issuableTypes.issue,

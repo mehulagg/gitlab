@@ -23,7 +23,8 @@ module BoardsHelper
       labels_filter_base_path: build_issue_link_base,
       labels_fetch_path: labels_fetch_path,
       labels_manage_path: labels_manage_path,
-      board_type: board.to_type
+      board_type: board.to_type,
+      group_path: group_full_path
     }
   end
 
@@ -31,6 +32,14 @@ module BoardsHelper
     return @group.id if board.group_board?
 
     @project&.group&.id
+  end
+
+  def group_full_path
+    if board.group_board?
+      @group.full_path
+    else
+      @project&.group&.full_path
+    end
   end
 
   def full_path

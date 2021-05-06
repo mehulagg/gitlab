@@ -9,7 +9,7 @@ import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sideb
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
-import { mockIssue, mockIssueGroupPath, mockIssueProjectPath } from '../mock_data';
+import { mockIssue, mockIssueProjectPath } from '../mock_data';
 
 describe('BoardContentSidebar', () => {
   let wrapper;
@@ -27,7 +27,6 @@ describe('BoardContentSidebar', () => {
         activeBoardItem: () => {
           return { ...mockIssue, epic: null };
         },
-        groupPathForActiveIssue: () => mockIssueGroupPath,
         projectPathForActiveIssue: () => mockIssueProjectPath,
         isSidebarOpen: () => true,
         ...mockGetters,

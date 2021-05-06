@@ -19,11 +19,6 @@ export default {
     return state.boardItems[state.activeId] || {};
   },
 
-  groupPathForActiveIssue: (_, getters) => {
-    const { referencePath = '' } = getters.activeBoardItem;
-    return referencePath.slice(0, referencePath.indexOf('/'));
-  },
-
   projectPathForActiveIssue: (_, getters) => {
     const { referencePath = '' } = getters.activeBoardItem;
     return referencePath.slice(0, referencePath.indexOf('#'));
