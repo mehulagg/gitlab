@@ -851,6 +851,36 @@ using expectations, or dependency injection along with stubs, to avoid the need
 for modifications. If you have no other choice, an `around` block like the global
 variables example can be used, but avoid this if at all possible.
 
+#### Elasticsearch
+
+Specs that require Elasticsearch must be marked with the `:elastic` trait. This will 
+create and delete indices between examples to ensure a clean index so there is no possibility of test data pollution. 
+Most tests for Elasticsearch logic relate to creating data in Postgres, waiting for it to be indexed in Elasticsearch, 
+searching for that data, and asserting that the test gives the expected result. There are some exceptions where tests are 
+checking for more structural changes to the index which aren't individual records. 
+
+The `:elastic_with_delete_by_query` trait was added to reduce run time for pipelines by creating and deleting indices
+at the start and end of each context only. The [Elasticsearch DeleteByQuery API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html) 
+is used to delete data in all indices in between examples to ensure a clean index.
+
+NOTE:
+Elasticsearch indexing uses [`Gitlab::Redis::SharedState`](../../../ee/development/redis.md#gitlabrediscachesharedstatequeues) therefore it is recommended to use
+`:clean_gitlab_redis_shared_state` in conjunction with the Elasticsearch traits.
+
+Specs using Elasticsearch require data to be created in Postgres and then index that data into Elasticsearch.
+The Application Settings for Elasticsearch are disabled by default and must be enabled for search and indexing to work in specs.
+
+```ruby
+before do
+  stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+end
+```
+
+Additionally the `ensure_elasticsearch_index!` method is provided to overcome the asynchronous nature of Elasticsearch. 
+It uses the [Elasticsearch Refresh API](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc)
+to make sure all operations performed on an index since the last refresh are available for search. This method is typically
+called after loading data into Postgres to make sure the data is indexed and searchable.
+
 #### Test Snowplow events
 
 WARNING:
