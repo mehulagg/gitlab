@@ -19,7 +19,7 @@ module Sidebars
 
         override :link
         def link
-          return cycle_analytics_menu_item.link if cycle_analytics_menu_item
+          return cycle_analytics_menu_item.link if cycle_analytics_menu_item.render
 
           renderable_items.first.link
         end
@@ -44,40 +44,39 @@ module Sidebars
         private
 
         def ci_cd_analytics_menu_item
-          return if context.project.empty_repo?
-          return unless context.project.feature_available?(:builds, context.current_user)
-          return unless can?(context.current_user, :read_build, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('CI/CD'),
             link: charts_project_pipelines_path(context.project),
             active_routes: { path: 'pipelines#charts' },
-            item_id: :ci_cd_analytics
+            item_id: :ci_cd_analytics,
+            render: -> do
+              !context.project.empty_repo? &&
+                context.project.feature_available?(:builds, context.current_user) &&
+                can?(context.current_user, :read_build, context.project)
+            end
           )
         end
 
         def repository_analytics_menu_item
-          return if context.project.empty_repo?
-
           ::Sidebars::MenuItem.new(
             title: _('Repository'),
             link: charts_project_graph_path(context.project, context.current_ref),
             container_html_options: { class: 'shortcuts-repository-charts' },
             active_routes: { path: 'graphs#charts' },
-            item_id: :repository_analytics
+            item_id: :repository_analytics,
+            render: -> { !context.project.empty_repo? }
           )
         end
 
         def cycle_analytics_menu_item
           strong_memoize(:cycle_analytics_menu_item) do
-            next unless can?(context.current_user, :read_cycle_analytics, context.project)
-
             ::Sidebars::MenuItem.new(
               title: _('Value Stream'),
               link: project_cycle_analytics_path(context.project),
               container_html_options: { class: 'shortcuts-project-cycle-analytics' },
               active_routes: { path: 'cycle_analytics#show' },
-              item_id: :cycle_analytics
+              item_id: :cycle_analytics,
+              render: -> { can?(context.current_user, :read_cycle_analytics, context.project) }
             )
           end
         end

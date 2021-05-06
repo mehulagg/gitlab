@@ -34,13 +34,12 @@ module Sidebars
 
         def configuration_menu_item
           strong_memoize(:configuration_menu_item) do
-            next unless render_configuration_menu_item?
-
             ::Sidebars::MenuItem.new(
               title: _('Configuration'),
               link: project_security_configuration_path(context.project),
               active_routes: { path: configuration_menu_item_paths },
-              item_id: :configuration
+              item_id: :configuration,
+              render: -> { render_configuration_menu_item? }
             )
           end
         end

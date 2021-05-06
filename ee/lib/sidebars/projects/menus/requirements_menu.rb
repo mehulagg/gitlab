@@ -37,13 +37,12 @@ module Sidebars
         private
 
         def list_menu_item
-          return if Feature.enabled?(:sidebar_refactor, context.current_user)
-
           ::Sidebars::MenuItem.new(
             title: _('List'),
             link: project_requirements_management_requirements_path(context.project),
             active_routes: { path: 'requirements#index' },
-            item_id: :requirements_list
+            item_id: :requirements_list,
+            render: -> { Feature.disabled?(:sidebar_refactor, context.current_user) }
           )
         end
       end

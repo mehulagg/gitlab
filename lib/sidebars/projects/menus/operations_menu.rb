@@ -58,109 +58,110 @@ module Sidebars
         private
 
         def metrics_dashboard_menu_item
-          return unless can?(context.current_user, :metrics_dashboard, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Metrics'),
             link: project_metrics_dashboard_path(context.project),
             active_routes: { path: 'metrics_dashboard#show' },
             container_html_options: { class: 'shortcuts-metrics' },
-            item_id: :metrics
+            item_id: :metrics,
+            render: -> { can?(context.current_user, :metrics_dashboard, context.project) }
           )
         end
 
         def logs_menu_item
-          return unless can?(context.current_user, :read_environment, context.project)
-          return unless can?(context.current_user, :read_pod_logs, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Logs'),
             link: project_logs_path(context.project),
             active_routes: { path: 'logs#index' },
-            item_id: :logs
+            item_id: :logs,
+            render: -> do
+              can?(context.current_user, :read_environment, context.project) &&
+                can?(context.current_user, :read_pod_logs, context.project)
+            end
           )
         end
 
         def tracing_menu_item
-          return unless can?(context.current_user, :read_environment, context.project)
-          return unless can?(context.current_user, :admin_project, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Tracing'),
             link: project_tracing_path(context.project),
             active_routes: { path: 'tracings#show' },
-            item_id: :tracing
+            item_id: :tracing,
+            render: -> do
+              can?(context.current_user, :read_environment, context.project) &&
+                can?(context.current_user, :admin_project, context.project)
+            end
           )
         end
 
         def error_tracking_menu_item
-          return unless can?(context.current_user, :read_sentry_issue, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Error Tracking'),
             link: project_error_tracking_index_path(context.project),
             active_routes: { controller: :error_tracking },
-            item_id: :error_tracking
+            item_id: :error_tracking,
+            render: -> { can?(context.current_user, :read_sentry_issue, context.project) }
           )
         end
 
         def alert_management_menu_item
-          return unless can?(context.current_user, :read_alert_management_alert, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Alerts'),
             link: project_alert_management_index_path(context.project),
             active_routes: { controller: :alert_management },
-            item_id: :alert_management
+            item_id: :alert_management,
+            render: -> { can?(context.current_user, :read_alert_management_alert, context.project) }
           )
         end
 
         def incidents_menu_item
-          return unless can?(context.current_user, :read_issue, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Incidents'),
             link: project_incidents_path(context.project),
             active_routes: { controller: [:incidents, :incident_management] },
-            item_id: :incidents
+            item_id: :incidents,
+            render: -> { can?(context.current_user, :read_issue, context.project) }
           )
         end
 
         def serverless_menu_item
-          return if Feature.enabled?(:sidebar_refactor, context.current_user)
-          return unless can?(context.current_user, :read_cluster, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Serverless'),
             link: project_serverless_functions_path(context.project),
             active_routes: { controller: :functions },
-            item_id: :serverless
+            item_id: :serverless,
+            render: -> do
+              Feature.disabled?(:sidebar_refactor, context.current_user) &&
+                can?(context.current_user, :read_cluster, context.project)
+            end
           )
         end
 
         def terraform_menu_item
-          return if Feature.enabled?(:sidebar_refactor, context.current_user)
-          return unless can?(context.current_user, :read_terraform_state, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Terraform'),
             link: project_terraform_index_path(context.project),
             active_routes: { controller: :terraform },
-            item_id: :terraform
+            item_id: :terraform,
+            render: -> do
+              Feature.disabled?(:sidebar_refactor, context.current_user) &&
+                can?(context.current_user, :read_terraform_state, context.project)
+            end
           )
         end
 
         def kubernetes_menu_item
-          return if Feature.enabled?(:sidebar_refactor, context.current_user)
-          return unless can?(context.current_user, :read_cluster, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Kubernetes'),
             link: project_clusters_path(context.project),
             active_routes: { controller: [:cluster_agents, :clusters] },
             container_html_options: { class: 'shortcuts-kubernetes' },
             hint_html_options: kubernetes_hint_html_options,
-            item_id: :kubernetes
+            item_id: :kubernetes,
+            render: -> do
+              Feature.disabled?(:sidebar_refactor, context.current_user) &&
+                can?(context.current_user, :read_cluster, context.project)
+            end
           )
         end
 
@@ -178,38 +179,37 @@ module Sidebars
         end
 
         def environments_menu_item
-          return unless can?(context.current_user, :read_environment, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Environments'),
             link: project_environments_path(context.project),
             active_routes: { controller: :environments },
             container_html_options: { class: 'shortcuts-environments' },
-            item_id: :environments
+            item_id: :environments,
+            render: -> { can?(context.current_user, :read_environment, context.project) }
           )
         end
 
         def feature_flags_menu_item
-          return unless can?(context.current_user, :read_feature_flag, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Feature Flags'),
             link: project_feature_flags_path(context.project),
             active_routes: { controller: :feature_flags },
             container_html_options: { class: 'shortcuts-feature-flags' },
-            item_id: :feature_flags
+            item_id: :feature_flags,
+            render: -> { can?(context.current_user, :read_feature_flag, context.project) }
           )
         end
 
         def product_analytics_menu_item
-          return if Feature.disabled?(:product_analytics, context.project)
-          return unless can?(context.current_user, :read_product_analytics, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Product Analytics'),
             link: project_product_analytics_path(context.project),
             active_routes: { controller: :product_analytics },
-            item_id: :product_analytics
+            item_id: :product_analytics,
+            render: -> do
+              Feature.enabled?(:product_analytics, context.project) &&
+                can?(context.current_user, :read_product_analytics, context.project)
+            end
           )
         end
       end

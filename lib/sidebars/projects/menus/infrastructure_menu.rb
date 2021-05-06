@@ -41,15 +41,14 @@ module Sidebars
         private
 
         def kubernetes_menu_item
-          return unless can?(context.current_user, :read_cluster, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Kubernetes clusters'),
             link: project_clusters_path(context.project),
             active_routes: { controller: [:cluster_agents, :clusters] },
             container_html_options: { class: 'shortcuts-kubernetes' },
             hint_html_options: kubernetes_hint_html_options,
-            item_id: :kubernetes
+            item_id: :kubernetes,
+            render: -> { can?(context.current_user, :read_cluster, context.project) }
           )
         end
 
@@ -67,24 +66,22 @@ module Sidebars
         end
 
         def serverless_menu_item
-          return unless can?(context.current_user, :read_cluster, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Serverless platform'),
             link: project_serverless_functions_path(context.project),
             active_routes: { controller: :functions },
-            item_id: :serverless
+            item_id: :serverless,
+            render: -> { can?(context.current_user, :read_cluster, context.project) }
           )
         end
 
         def terraform_menu_item
-          return unless can?(context.current_user, :read_terraform_state, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Terraform'),
             link: project_terraform_index_path(context.project),
             active_routes: { controller: :terraform },
-            item_id: :terraform
+            item_id: :terraform,
+            render: -> { can?(context.current_user, :read_terraform_state, context.project) }
           )
         end
       end

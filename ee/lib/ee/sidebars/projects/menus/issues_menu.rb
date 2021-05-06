@@ -19,14 +19,15 @@ module EE
           private
 
           def iterations_menu_item
-            return unless context.project.licensed_feature_available?(:iterations)
-            return unless can?(context.current_user, :read_iteration, context.project)
-
             ::Sidebars::MenuItem.new(
               title: _('Iterations'),
               link: project_iterations_path(context.project),
               active_routes: { controller: :iterations },
-              item_id: :iterations
+              item_id: :iterations,
+              render: -> do
+                context.project.licensed_feature_available?(:iterations) &&
+                  can?(context.current_user, :read_iteration, context.project)
+              end
             )
           end
         end

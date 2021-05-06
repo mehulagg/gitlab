@@ -25,49 +25,47 @@ module EE
           private
 
           def insights_menu_item
-            return unless context.project.insights_available?
-
             ::Sidebars::MenuItem.new(
               title: _('Insights'),
               link: project_insights_path(context.project),
               active_routes: { path: 'insights#show' },
               container_html_options: { class: 'shortcuts-project-insights' },
-              item_id: :insights
+              item_id: :insights,
+              render: -> { context.project.insights_available? }
             )
           end
 
           def code_review_analytics_menu_item
-            return unless can?(context.current_user, :read_code_review_analytics, context.project)
-
             ::Sidebars::MenuItem.new(
               title: _('Code Review'),
               link: project_analytics_code_reviews_path(context.project),
               active_routes: { path: 'projects/analytics/code_reviews#index' },
-              item_id: :code_review
+              item_id: :code_review,
+              render: -> { can?(context.current_user, :read_code_review_analytics, context.project) }
             )
           end
 
           def issues_analytics_menu_item
-            return unless ::Feature.enabled?(:project_level_issues_analytics, context.project, default_enabled: true)
-            return unless context.project.licensed_feature_available?(:issues_analytics)
-            return unless can?(context.current_user, :read_project, context.project)
-
             ::Sidebars::MenuItem.new(
               title: _('Issue'),
               link: project_analytics_issues_analytics_path(context.project),
               active_routes: { path: 'issues_analytics#show' },
-              item_id: :issues
+              item_id: :issues,
+              render: -> do
+                ::Feature.enabled?(:project_level_issues_analytics, context.project, default_enabled: true) &&
+                  context.project.licensed_feature_available?(:issues_analytics) &&
+                  can?(context.current_user, :read_project, context.project)
+              end
             )
           end
 
           def merge_request_analytics_menu_item
-            return unless can?(context.current_user, :read_project_merge_request_analytics, context.project)
-
             ::Sidebars::MenuItem.new(
               title: _('Merge Request'),
               link: project_analytics_merge_request_analytics_path(context.project),
               active_routes: { path: 'projects/analytics/merge_request_analytics#show' },
-              item_id: :merge_requests
+              item_id: :merge_requests,
+              render: -> { can?(context.current_user, :read_project_merge_request_analytics, context.project) }
             )
           end
         end

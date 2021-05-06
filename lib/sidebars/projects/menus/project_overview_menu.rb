@@ -66,15 +66,15 @@ module Sidebars
         end
 
         def releases_menu_item
-          return unless can?(context.current_user, :read_release, context.project)
-          return if context.project.empty_repo?
-
           ::Sidebars::MenuItem.new(
             title: _('Releases'),
             link: project_releases_path(context.project),
             item_id: :releases,
             active_routes: { controller: :releases },
-            container_html_options: { class: 'shortcuts-project-releases' }
+            container_html_options: { class: 'shortcuts-project-releases' },
+            render: -> do
+              can?(context.current_user, :read_release, context.project) && !context.project.empty_repo?
+            end
           )
         end
       end

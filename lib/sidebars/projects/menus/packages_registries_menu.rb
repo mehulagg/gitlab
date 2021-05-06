@@ -31,38 +31,39 @@ module Sidebars
         private
 
         def packages_registry_menu_item
-          return unless ::Gitlab.config.packages.enabled
-          return unless can?(context.current_user, :read_package, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Package Registry'),
             link: project_packages_path(context.project),
             active_routes: { controller: :packages },
             item_id: :packages_registry,
-            container_html_options: { class: 'shortcuts-container-registry' }
+            container_html_options: { class: 'shortcuts-container-registry' },
+            render: -> do
+              ::Gitlab.config.packages.enabled &&
+                can?(context.current_user, :read_package, context.project)
+            end
           )
         end
 
         def container_registry_menu_item
-          return unless ::Gitlab.config.registry.enabled
-          return unless can?(context.current_user, :read_container_image, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Container Registry'),
             link: project_container_registry_index_path(context.project),
             active_routes: { controller: :repositories },
-            item_id: :container_registry
+            item_id: :container_registry,
+            render: -> do
+              ::Gitlab.config.registry.enabled &&
+                can?(context.current_user, :read_container_image, context.project)
+            end
           )
         end
 
         def infrastructure_registry_menu_item
-          return if Feature.disabled?(:infrastructure_registry_page, context.current_user)
-
           ::Sidebars::MenuItem.new(
             title: _('Infrastructure Registry'),
             link: project_infrastructure_registry_index_path(context.project),
             active_routes: { controller: :infrastructure_registry },
-            item_id: :infrastructure_registry
+            item_id: :infrastructure_registry,
+            render: -> { Feature.enabled?(:infrastructure_registry_page, context.current_user) }
           )
         end
       end

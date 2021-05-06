@@ -26,7 +26,7 @@ RSpec.describe Sidebars::Projects::Menus::AnalyticsMenu do
 
       context 'when menu does not have any menu items' do
         it 'returns false' do
-          allow(subject).to receive(:has_items?).and_return(false)
+          allow(subject).to receive(:has_renderable_items?).and_return(false)
 
           expect(subject.render?).to be false
         end
@@ -47,7 +47,7 @@ RSpec.describe Sidebars::Projects::Menus::AnalyticsMenu do
 
     context 'when Value Stream is not visible' do
       it 'returns link to the the first visible menu item' do
-        allow(subject).to receive(:cycle_analytics_menu_item).and_return(nil)
+        allow(subject).to receive(:cycle_analytics_menu_item).and_return(double(render: false))
 
         expect(subject.link).to eq subject.renderable_items.first.link
       end

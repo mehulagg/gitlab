@@ -65,13 +65,12 @@ module Sidebars
         end
 
         def pipelines_editor_menu_item
-          return unless context.can_view_pipeline_editor
-
           ::Sidebars::MenuItem.new(
             title: s_('Pipelines|Editor'),
             link: project_ci_pipeline_editor_path(context.project),
             active_routes: { path: 'projects/ci/pipeline_editor#show' },
-            item_id: :pipelines_editor
+            item_id: :pipelines_editor,
+            render: -> { context.can_view_pipeline_editor }
           )
         end
 
@@ -86,14 +85,13 @@ module Sidebars
         end
 
         def artifacts_menu_item
-          return unless Feature.enabled?(:artifacts_management_page, context.project)
-
           ::Sidebars::MenuItem.new(
             title: _('Artifacts'),
             link: project_artifacts_path(context.project),
             container_html_options: { class: 'shortcuts-builds' },
             active_routes: { path: 'artifacts#index' },
-            item_id: :artifacts
+            item_id: :artifacts,
+            render: -> { Feature.enabled?(:artifacts_management_page, context.project) }
           )
         end
 

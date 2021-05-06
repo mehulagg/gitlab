@@ -19,13 +19,12 @@ module EE
           private
 
           def file_locks_menu_item
-            return unless context.project.licensed_feature_available?(:file_locks)
-
             ::Sidebars::MenuItem.new(
               title: _('Locked Files'),
               link: project_path_locks_path(context.project),
               active_routes: { controller: :path_locks },
-              item_id: :file_locks
+              item_id: :file_locks,
+              render: -> { context.project.licensed_feature_available?(:file_locks) }
             )
           end
         end
