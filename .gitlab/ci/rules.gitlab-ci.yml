@@ -34,6 +34,9 @@
 .if-merge-request: &if-merge-request
   if: '$CI_MERGE_REQUEST_IID'
 
+.if-merge-request-from-renovate-forks: &if-merge-request-from-renovate-forks
+  if: '$CI_MERGE_REQUEST_IID && $CI_PROJECT_ROOT_NAMESPACE == "gitlab-renovate-forks"'
+
 .if-merge-request-title-as-if-foss: &if-merge-request-title-as-if-foss
   if: '$CI_MERGE_REQUEST_TITLE =~ /RUN AS-IF-FOSS/'
 
@@ -1034,7 +1037,7 @@
 .reports:rules:package_hunter:
   rules:
     - <<: *if-default-branch-schedule-2-hourly
-    - <<: *if-merge-request
+    - <<: *if-merge-request-from-renovate-forks
       changes: ["yarn.lock"]
 
 .reports:rules:license_scanning:
