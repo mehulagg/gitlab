@@ -333,7 +333,7 @@ You can do it quickly by following the hyperlink given to run a new pipeline.
 
 ![Run a new pipeline](img/outdated_report_pipeline_v12_9.png)
 
-## On-Demand Scans
+## DAST On-Demand Scans
 
 If you don’t want scans running in your normal DevOps process you can use On-Demand scans instead. Read more about our [on-demand scans](/dast/#on-demand-scans)  functionality. Currently, this is only available for DAST. If you run an on-demand scan against the default branch, it will be reported as a “successful pipeline” and these results will appear in locations such as the security dashboard and vulnerability report.
 
