@@ -1,5 +1,9 @@
 import dateFormat from 'dateformat';
-import { isNumber } from 'lodash';
+import { isNumber, rest } from 'lodash';
+import {
+  filterStagesByHiddenStatus,
+  pathNavigationData as basePathNavigationData,
+} from '~/cycle_analytics/store/getters';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import httpStatus from '~/lib/utils/http_status';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
@@ -51,9 +55,6 @@ export const paginationParams = ({ pagination: { page, sort, direction } }) => (
   page,
 });
 
-const filterStagesByHiddenStatus = (stages = [], isHidden = true) =>
-  stages.filter(({ hidden = false }) => hidden === isHidden);
-
 export const hiddenStages = ({ stages }) => filterStagesByHiddenStatus(stages);
 export const activeStages = ({ stages }) => filterStagesByHiddenStatus(stages, false);
 
@@ -70,8 +71,4 @@ export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomSt
  * https://gitlab.com/gitlab-org/gitlab/-/issues/216227
  */
 export const pathNavigationData = ({ stages, medians, selectedStage }) =>
-  transformStagesForPathNavigation({
-    stages: [OVERVIEW_STAGE_CONFIG, ...filterStagesByHiddenStatus(stages, false)],
-    medians,
-    selectedStage,
-  });
+  basePathNavigationData({ stages: [OVERVIEW_STAGE_CONFIG, ...stages], medians, selectedStage });
