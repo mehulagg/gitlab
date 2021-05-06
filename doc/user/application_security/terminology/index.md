@@ -155,7 +155,7 @@ Also refered to as a Standalone Vulnerability Object. A flaw that has a negative
 error or weakness, and don't describe where the error is located (see [finding](#finding)).
 Each vulnerability maps to a unique finding.
 
-Vulnerabilities exist in the default branch. Findings (see [finding](#finding)) are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability (object).
+Vulnerabilities exist in the default branch. Findings (see [finding](#finding)) are all potential vulnerability items scanners identify in MRs/feature branches. Only after merging to default does a finding become a vulnerability.
 
 ### Vulnerability finding
 
