@@ -47,7 +47,8 @@ module Ci
         return if live_consumption == 0
 
         difference = consumption.to_f - live_consumption.to_f
-        metrics.ci_minutes_comparison_histogram.observe({}, difference)
+        metrics.gitlab_ci_difference_live_vs_actual_minutes
+          .observe({ plan: namespace.actual_plan_name }, difference)
       end
 
       def namespace_statistics
@@ -63,7 +64,7 @@ module Ci
       end
 
       def metrics
-        @metrics ||= ::Gitlab::Ci::Pipeline::Metrics.new
+        @metrics ||= ::Gitlab::Ci::Pipeline::Metrics
       end
     end
   end
