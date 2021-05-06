@@ -24,7 +24,7 @@ for details on which headers and token types are supported.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225545) in GitLab 13.12.
 
-Download a PyPI package file. The [simple API](#simple-api-entry-point)
+Download a PyPI package file. The [simple API](#group-level-simple-api-entry-point)
 normally supplies this URL.
 
 ```plaintext
@@ -49,7 +49,7 @@ curl --user <username>:<personal_access_token> "https://gitlab.example.com/api/v
 
 This writes the downloaded file to `my.pypi.package-0.0.1.tar.gz` in the current directory.
 
-## Simple API entry point - group level
+## Group level simple API entry point
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225545) in GitLab 13.12.
 
@@ -95,7 +95,7 @@ This writes the downloaded file to `simple.html` in the current directory.
 
 > Introduced in GitLab 12.10.
 
-Download a PyPI package file. The [simple API](#simple-api-entry-point)
+Download a PyPI package file. The [simple API](#project-level-simple-api-entry-point)
 normally supplies this URL.
 
 ```plaintext
@@ -120,7 +120,7 @@ curl --user <username>:<personal_access_token> "https://gitlab.example.com/api/v
 
 This writes the downloaded file to `my.pypi.package-0.0.1.tar.gz` in the current directory.
 
-## Simple API entry point - project level
+## Project level simple API entry point
 
 > Introduced in GitLab 12.10.
 
