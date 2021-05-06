@@ -13,6 +13,13 @@ module Gitlab
         REPLACED_INDEX_PREFIX = 'old_reindex_'
         STATEMENT_TIMEOUT = 6.hours
 
+        # When dropping an index, we acquire a SHARE UPDATE EXCLUSIVE lock,
+        # which only conflicts with DDL and vacuum. We therefore execute this with a rather
+        # high lock timeout and a long pause in between retries. This is an alternative to
+        # setting a high statement timeout, which would lead to a long running query with effects
+        # on e.g. vacuum.
+        REMOVE_INDEX_RETRY_CONFIG = [[1.minute, 9.minutes]] * 30
+
         attr_reader :index, :logger
 
         def initialize(index, logger: Gitlab::AppLogger)
@@ -95,7 +102,7 @@ module Gitlab
         def remove_index(schema, name)
           logger.info("Removing index #{schema}.#{name}")
 
-          set_statement_timeout do
+          with_lock_retries(timing_configuration: REMOVE_INDEX_RETRY_CONFIG, raise_on_exhaustion: false) do
             connection.execute(<<~SQL)
               DROP INDEX CONCURRENTLY
               IF EXISTS #{quote_table_name(schema)}.#{quote_table_name(name)}
@@ -119,10 +126,11 @@ module Gitlab
           @replaced_index_name ||= "#{REPLACED_INDEX_PREFIX}#{index.indexrelid}"
         end
 
-        def with_lock_retries(&block)
+        def with_lock_retries(timing_configuration: nil, raise_on_exhaustion: true, &block)
           arguments = { klass: self.class, logger: logger }
+          arguments[:timing_configuration] = timing_configuration if timing_configuration
 
-          Gitlab::Database::WithLockRetries.new(**arguments).run(raise_on_exhaustion: true, &block)
+          Gitlab::Database::WithLockRetries.new(**arguments).run(raise_on_exhaustion: raise_on_exhaustion, &block)
         end
 
         def set_statement_timeout
