@@ -10,6 +10,8 @@ module EE
         create_merged_result_pipeline_for(merge_request) || super
       end
 
+      private
+
       def create_merged_result_pipeline_for(merge_request)
         return unless can_create_merged_result_pipeline_for?(merge_request)
 

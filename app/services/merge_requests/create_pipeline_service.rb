@@ -8,6 +8,8 @@ module MergeRequests
       create_detached_merge_request_pipeline(merge_request)
     end
 
+    private
+
     def create_detached_merge_request_pipeline(merge_request)
       Ci::CreatePipelineService.new(pipeline_project(merge_request),
                                     current_user,
@@ -16,20 +18,13 @@ module MergeRequests
     end
 
     def can_create_pipeline_for?(merge_request)
-      ##
-      # UpdateMergeRequestsWorker could be retried by an exception.
-      # pipelines for merge request should not be recreated in such case.
-      return false if !allow_duplicate && merge_request.find_actual_head_pipeline&.merge_request?
-      return false if merge_request.has_no_commits?
-
-      true
+      merge_request.has_commits? &&
+        (allow_duplicate || merge_request.find_actual_head_pipeline.nil?)
     end
 
     def allow_duplicate
       params[:allow_duplicate]
     end
-
-    private
 
     def pipeline_project(merge_request)
       if can_create_pipeline_in_target_project?(merge_request)
