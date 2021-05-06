@@ -8,7 +8,7 @@ RSpec.describe Projects::GroupsFinder do
     let_it_be(:root_group) { create(:group, :public) }
     let_it_be(:project_group) { create(:group, :public, parent: root_group) }
     let_it_be(:shared_group_with_dev_access) { create(:group, :private, parent: root_group) }
-    let_it_be(:shared_group_with_reporter_access) { create(:group, :private) }
+    let_it_be(:shared_group_with_reporter_access) { create(:group, :public) }
 
     let_it_be(:public_project) { create(:project, :public, group: project_group) }
     let_it_be(:private_project) { create(:project, :private, group: project_group) }
@@ -51,6 +51,24 @@ RSpec.describe Projects::GroupsFinder do
 
           it 'returns ancestor and shared groups with at least developer access' do
             is_expected.to match_array([project_group, root_group, shared_group_with_dev_access])
+          end
+        end
+
+        context 'when visible_only is on' do
+          let(:params) { super().merge(visible_only: true) }
+
+          it 'returns ancestor and public shared groups' do
+            is_expected.to match_array([project_group, root_group, shared_group_with_reporter_access])
+          end
+
+          context 'when user has access to the private shared group' do
+            before do
+              shared_group_with_dev_access.add_guest(current_user)
+            end
+
+            it 'returns ancestor and shared groups user has access to' do
+              is_expected.to match_array([project_group, root_group, shared_group_with_reporter_access, shared_group_with_dev_access])
+            end
           end
         end
       end

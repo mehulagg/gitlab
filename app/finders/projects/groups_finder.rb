@@ -51,6 +51,12 @@ module Projects
           )
         end
 
+        if params[:visible_only]
+          groups << shared_groups.public_to_user(current_user)
+
+          shared_groups = shared_groups.for_authorized_group_members(current_user.id)
+        end
+
         groups << shared_groups
       end
 
