@@ -46,6 +46,28 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
     end
   end
 
+  shared_examples 'when policy is invalid' do
+    let_it_be(:policy_yml) do
+      <<-EOS
+      scan_execution_policy:
+        -  name: Run DAST in every pipeline
+           description: This policy enforces to run DAST for every pipeline within the project
+           enabled: true
+           rules:
+           - type: pipeline
+             branches: "production"
+           actions:
+           - scan: dast
+             site_profile: Site Profile
+             scanner_profile: Scanner Profile
+      EOS
+    end
+
+    it 'does not modify the config' do
+      expect(subject).to eq(config)
+    end
+  end
+
   context 'when feature is not licensed' do
     it 'does not modify the config' do
       expect(subject).to eq(config)
@@ -91,6 +113,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
         end
 
         it_behaves_like 'with pipeline source applicable for CI'
+        it_behaves_like 'when policy is invalid'
 
         context 'when DAST profiles are found' do
           let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, name: 'Scanner Profile') }
@@ -133,6 +156,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
           end
 
           it_behaves_like 'with pipeline source applicable for CI'
+          it_behaves_like 'when policy is invalid'
         end
       end
     end
