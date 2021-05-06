@@ -22,7 +22,7 @@ invalidated.
 Response codes:
 
 - `200`: Accepted
-- `4XX`: Rejected
+- `406`: Rejected
 - All other codes: accepted and logged
 
 ### Service Result
