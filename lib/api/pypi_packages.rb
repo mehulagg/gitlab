@@ -24,27 +24,65 @@ module API
       render_api_error!(e.message, 400)
     end
 
-    helpers do
-      def packages_finder(project = authorized_user_project)
-        project
-          .packages
-          .pypi
-          .has_version
-          .processed
-      end
-
-      def find_package_versions
-        packages = packages_finder
-          .with_normalized_pypi_name(params[:package_name])
-
-        not_found!('Package') if packages.empty?
-
-        packages
-      end
-    end
-
     before do
       require_packages_enabled!
+    end
+
+    params do
+      requires :id, type: Integer, desc: 'The ID of a group'
+    end
+    resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+      before do
+        unauthorized_user_group!
+      end
+
+      namespace ':id/-/packages/pypi' do
+        params do
+          requires :file_identifier, type: String, desc: 'The PyPi package file identifier', file_path: true
+          requires :sha256, type: String, desc: 'The PyPi package sha256 check sum'
+        end
+
+        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        get 'files/:sha256/*file_identifier' do
+          group = unauthorized_user_group!
+
+          filename = "#{params[:file_identifier]}.#{params[:format]}"
+          package = Packages::Pypi::PackageFinder.new(current_user, group, { filename: filename, sha256: params[:sha256] }).execute
+          package_file = ::Packages::PackageFileFinder.new(package, filename, with_file_name_like: false).execute
+
+          track_package_event('pull_package', :pypi)
+
+          present_carrierwave_file!(package_file.file, supports_direct_download: true)
+        end
+
+        desc 'The PyPi Simple Endpoint' do
+          detail 'This feature was introduced in GitLab 12.10'
+        end
+
+        params do
+          requires :package_name, type: String, file_path: true, desc: 'The PyPi package name'
+        end
+
+        # An Api entry point but returns an HTML file instead of JSON.
+        # PyPi simple API returns the package descriptor as a simple HTML file.
+        route_setting :authentication, deploy_token_allowed: true, basic_auth_personal_access_token: true, job_token_allowed: :basic_auth
+        get 'simple/*package_name', format: :txt do
+          group = find_authorized_group!
+          authorize_read_package!(group)
+
+          track_package_event('list_package', :pypi)
+
+          packages = Packages::Pypi::PackagesFinder.new(current_user, group, { package_name: params[:package_name] }).execute!
+          presenter = ::Packages::Pypi::PackagePresenter.new(packages, group)
+
+          # Adjusts grape output format
+          # to be HTML
+          content_type "text/html; charset=utf-8"
+          env['api.format'] = :binary
+
+          body presenter.body
+        end
+      end
     end
 
     params do
@@ -71,7 +109,7 @@ module API
           project = unauthorized_user_project!
 
           filename = "#{params[:file_identifier]}.#{params[:format]}"
-          package = packages_finder(project).by_file_name_and_sha256(filename, params[:sha256])
+          package = Packages::Pypi::PackageFinder.new(current_user, project, { filename: filename, sha256: params[:sha256] }).execute
           package_file = ::Packages::PackageFileFinder.new(package, filename, with_file_name_like: false).execute
 
           track_package_event('pull_package', :pypi)
@@ -95,7 +133,7 @@ module API
 
           track_package_event('list_package', :pypi)
 
-          packages = find_package_versions
+          packages = Packages::Pypi::PackagesFinder.new(current_user, authorized_user_project, { package_name: params[:package_name] }).execute!
           presenter = ::Packages::Pypi::PackagePresenter.new(packages, authorized_user_project)
 
           # Adjusts grape output format
