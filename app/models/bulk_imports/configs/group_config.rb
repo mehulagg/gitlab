@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 module BulkImports
-  module Exports
-    class ProjectConfig < BaseConfig
+  module Configs
+    class GroupConfig < BaseConfig
       def base_export_path
-        exportable.disk_path
+        portable.full_path
       end
 
       def import_export_yaml
-        ::Gitlab::ImportExport.config_file
+        ::Gitlab::ImportExport.group_config_file
       end
     end
   end

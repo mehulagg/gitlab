@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Exports::GroupConfig do
+RSpec.describe BulkImports::Configs::GroupConfig do
   let_it_be(:exportable) { create(:group) }
   let_it_be(:hex) { '123' }
 
@@ -18,7 +18,7 @@ RSpec.describe BulkImports::Exports::GroupConfig do
         expect(finder).to receive(:find_root).with(:group).and_call_original
       end
 
-      expect(subject.exportable_tree).not_to be_empty
+      expect(subject.import_export_tree).not_to be_empty
     end
   end
 
@@ -32,7 +32,7 @@ RSpec.describe BulkImports::Exports::GroupConfig do
 
   describe '#exportable_relations' do
     it 'returns a list of top level exportable relations' do
-      expect(subject.exportable_relations).to include('milestones', 'badges', 'boards', 'labels')
+      expect(subject.portable_relations).to include('milestones', 'badges', 'boards', 'labels')
     end
   end
 end

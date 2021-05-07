@@ -17,9 +17,9 @@ module Gitlab
       def save
         if compress_and_save
           Gitlab::Export::Logger.info(
-            message: 'Export archive saved',
-            exportable_class: @exportable.class.to_s,
-            archive_file: archive_file
+            message:        'Export archive saved',
+            portable_class: @exportable.class.to_s,
+            archive_file:   archive_file
           )
 
           save_upload
