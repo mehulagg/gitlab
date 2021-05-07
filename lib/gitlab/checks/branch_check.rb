@@ -28,7 +28,7 @@ module Gitlab
         return unless branch_name
 
         logger.log_timed(LOG_MESSAGES[:delete_default_branch_check]) do
-          if deletion? && branch_name == project.default_branch
+          if deletion?(oldrev, newrev) && branch_name == project.default_branch
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:delete_default_branch]
           end
         end
@@ -58,9 +58,9 @@ module Gitlab
 
         if project.empty_repo?
           protected_branch_push_checks
-        elsif creation?
+        elsif creation?(oldrev, newrev)
           protected_branch_creation_checks
-        elsif deletion?
+        elsif deletion?(oldrev, newrev)
           protected_branch_deletion_checks
         else
           protected_branch_push_checks

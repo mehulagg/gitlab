@@ -22,13 +22,13 @@ module Gitlab
       end
 
       def validate!
-        if !@default_branch || creation? || deletion?
+        if !@default_branch || creation?(oldrev, newrev) || deletion?(oldrev, newrev)
           raise GitAccess::ForbiddenError, ERROR_MESSAGES[:create_delete_branch]
         end
 
         true
       rescue GitAccess::ForbiddenError => e
-        Gitlab::ErrorTracking.log_exception(e, default_branch: @default_branch, branch_name: @branch_name, creation: creation?, deletion: deletion?)
+        Gitlab::ErrorTracking.log_exception(e, default_branch: @default_branch, branch_name: @branch_name, creation: creation?(oldrev, newrev), deletion: deletion?(oldrev, newrev))
 
         raise e
       end
@@ -40,8 +40,8 @@ module Gitlab
       # We allow the first branch creation no matter the name because
       # it can be even an imported snippet from an instance with a different
       # default branch.
-      def creation?
-        super && @root_ref && (@branch_name != @default_branch)
+      def creation?(oldrev, newrev)
+        super(oldrev, newrev) && @root_ref && (@branch_name != @default_branch)
       end
     end
   end

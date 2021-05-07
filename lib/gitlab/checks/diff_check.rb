@@ -10,7 +10,7 @@ module Gitlab
       }.freeze
 
       def validate!
-        return if deletion?
+        return if deletion?(oldrev, newrev)
         return unless should_run_validations?
         return if commits(newrev).empty?
 

@@ -19,7 +19,7 @@ module Gitlab
         return unless tag_name
 
         logger.log_timed(LOG_MESSAGES[:tag_checks]) do
-          if tag_exists? && user_access.cannot_do_action?(:admin_tag)
+          if tag_exists?(tag_name) && user_access.cannot_do_action?(:admin_tag)
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:change_existing_tags]
           end
         end
@@ -33,8 +33,8 @@ module Gitlab
         logger.log_timed(LOG_MESSAGES[__method__]) do
           return unless ProtectedTag.protected?(project, tag_name) # rubocop:disable Cop/AvoidReturnFromBlocks
 
-          raise(GitAccess::ForbiddenError, ERROR_MESSAGES[:update_protected_tag]) if update?
-          raise(GitAccess::ForbiddenError, ERROR_MESSAGES[:delete_protected_tag]) if deletion?
+          raise(GitAccess::ForbiddenError, ERROR_MESSAGES[:update_protected_tag]) if update?(oldrev, newrev)
+          raise(GitAccess::ForbiddenError, ERROR_MESSAGES[:delete_protected_tag]) if deletion?(oldrev, newrev)
 
           unless user_access.can_create_tag?(tag_name)
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:create_protected_tag]

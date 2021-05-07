@@ -18,23 +18,23 @@ module Gitlab
 
       private
 
-      def creation?
+      def creation?(oldrev, newrev)
         Gitlab::Git.blank_ref?(oldrev)
       end
 
-      def deletion?
+      def deletion?(oldrev, newrev)
         Gitlab::Git.blank_ref?(newrev)
       end
 
-      def update?
-        !creation? && !deletion?
+      def update?(oldrev, newrev)
+        !creation?(oldrev, newrev) && !deletion?(oldrev, newrev)
       end
 
       def updated_from_web?
         protocol == 'web'
       end
 
-      def tag_exists?
+      def tag_exists?(tag_name)
         project.repository.tag_exists?(tag_name)
       end
 
