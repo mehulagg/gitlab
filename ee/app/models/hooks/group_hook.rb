@@ -32,4 +32,8 @@ class GroupHook < WebHook
   def pluralized_name
     _('Group Hooks')
   end
+
+  def web_hooks_disable_failed?
+    Feature.enabled?(:web_hooks_disable_failed, group)
+  end
 end

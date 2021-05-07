@@ -707,8 +707,8 @@ module EE
     end
 
     # Update the default branch querying the remote to determine its HEAD
-    def update_root_ref(remote_name)
-      root_ref = repository.find_remote_root_ref(remote_name)
+    def update_root_ref(remote, remote_url, authorization)
+      root_ref = repository.find_remote_root_ref(remote, remote_url, authorization)
       change_head(root_ref) if root_ref.present?
     end
 

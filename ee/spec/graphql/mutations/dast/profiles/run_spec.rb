@@ -63,6 +63,10 @@ RSpec.describe Mutations::Dast::Profiles::Run do
           end
         end
 
+        it_behaves_like 'it checks branch permissions before creating a DAST on-demand scan pipeline' do
+          let(:branch_name) { dast_profile.branch_name }
+        end
+
         it_behaves_like 'it delegates scan creation to another service' do
           let(:delegated_params) { hash_including(dast_profile: dast_profile) }
         end

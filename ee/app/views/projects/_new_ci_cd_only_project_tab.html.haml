@@ -1,8 +1,0 @@
-- return unless ci_cd_projects_available?
-
-%li.nav-item{ class: active_when(active_tab == 'ci_cd_only'), role: 'presentation' }
-  %a.nav-link{ href: '#ci-cd-project-pane', id: 'ci-cd-project-tab', data: { qa_selector: 'ci_cd_project_tab', toggle: 'tab', experiment_track_label: 'cicd_for_external_repo' }, role: 'tab' }
-    %span.d-none.d-sm-block
-      = _('CI/CD for external repo')
-    %span.d-block.d-sm-none
-      = _('CI/CD')

@@ -1,4 +1,6 @@
+import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from '../constants';
 import { transformRawStages, prepareStageErrors, formatMedianValuesWithOverview } from '../utils';
 import * as types from './mutation_types';
 
@@ -97,6 +99,7 @@ export default {
       selectedProjects = [],
       selectedValueStream = {},
       defaultStageConfig = [],
+      pagination = {},
     } = {},
   ) {
     state.isLoading = true;
@@ -106,6 +109,12 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
     state.defaultStageConfig = defaultStageConfig;
+
+    Vue.set(state, 'pagination', {
+      page: pagination.page ?? state.pagination.page,
+      sort: pagination.sort ?? state.pagination.sort,
+      direction: pagination.direction ?? state.pagination.direction,
+    });
   },
   [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
@@ -183,7 +192,12 @@ export default {
         return aName.toUpperCase() > bName.toUpperCase() ? 1 : -1;
       });
   },
-  [types.SET_PAGINATION](state, { page, hasNextPage }) {
-    state.pagination = { page, hasNextPage };
+  [types.SET_PAGINATION](state, { page, hasNextPage, sort, direction }) {
+    Vue.set(state, 'pagination', {
+      page,
+      hasNextPage,
+      sort: sort || PAGINATION_SORT_FIELD_END_EVENT,
+      direction: direction || PAGINATION_SORT_DIRECTION_DESC,
+    });
   },
 };

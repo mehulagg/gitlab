@@ -18,7 +18,7 @@ module EE
                 super.deep_merge(
                   namespace: {
                     plan: namespace.actual_plan_name,
-                    trial: namespace.trial_active?
+                    trial: namespace.root_ancestor.trial_active?
                   }
                 )
               end

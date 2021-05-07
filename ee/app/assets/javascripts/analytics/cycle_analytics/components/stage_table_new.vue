@@ -1,10 +1,20 @@
 <script>
 import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlPagination, GlTable } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { NOT_ENOUGH_DATA_ERROR } from '../constants';
+import {
+  NOT_ENOUGH_DATA_ERROR,
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_FIELD_DURATION,
+  PAGINATION_SORT_DIRECTION_ASC,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from '../constants';
 import TotalTime from './total_time_component.vue';
 
-const DEFAULT_WORKFLOW_TITLE_PROPERTIES = { thClass: 'gl-w-half', key: 'workflowTitleKey' };
+const DEFAULT_WORKFLOW_TITLE_PROPERTIES = {
+  thClass: 'gl-w-half',
+  key: PAGINATION_SORT_FIELD_END_EVENT,
+  sortable: true,
+};
 const WORKFLOW_COLUMN_TITLES = {
   issues: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Issues') },
   jobs: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Jobs') },
@@ -50,6 +60,15 @@ export default {
       required: true,
     },
   },
+  data() {
+    const {
+      pagination: { sort, direction },
+    } = this;
+    return {
+      sort,
+      sortDesc: direction === PAGINATION_SORT_DIRECTION_DESC,
+    };
+  },
   computed: {
     isEmptyStage() {
       return !this.stageEvents.length;
@@ -81,7 +100,15 @@ export default {
       return WORKFLOW_COLUMN_TITLES.issues;
     },
     fields() {
-      return [this.workflowTitle, { key: 'time', label: __('Time'), thClass: 'gl-w-half' }];
+      return [
+        this.workflowTitle,
+        {
+          key: PAGINATION_SORT_FIELD_DURATION,
+          label: __('Time'),
+          thClass: 'gl-w-half',
+          sortable: true,
+        },
+      ];
     },
     prevPage() {
       return Math.max(this.pagination.page - 1, 0);
@@ -98,7 +125,16 @@ export default {
       return item.title || item.name;
     },
     onSelectPage(page) {
-      this.$emit('handleSelectPage', { page });
+      const { sort, direction } = this.pagination;
+      this.$emit('handleUpdatePagination', { sort, direction, page });
+    },
+    onSort({ sortBy, sortDesc }) {
+      this.sort = sortBy;
+      this.sortDesc = sortDesc;
+      this.$emit('handleUpdatePagination', {
+        sort: sortBy,
+        direction: sortDesc ? PAGINATION_SORT_DIRECTION_DESC : PAGINATION_SORT_DIRECTION_ASC,
+      });
     },
   },
 };
@@ -113,11 +149,15 @@ export default {
       stacked="lg"
       thead-class="border-bottom"
       show-empty
+      :sort-by.sync="sort"
+      :sort-direction.sync="pagination.direction"
+      :sort-desc.sync="sortDesc"
       :fields="fields"
       :items="stageEvents"
       :empty-text="emptyStateMessage"
+      @sort-changed="onSort"
     >
-      <template #cell(workflowTitleKey)="{ item }">
+      <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
           <div v-if="item.id" data-testid="vsa-stage-content">
             <p class="gl-m-0">
@@ -204,7 +244,7 @@ export default {
           </div>
         </div>
       </template>
-      <template #cell(time)="{ item }">
+      <template #cell(duration)="{ item }">
         <total-time :time="item.totalTime" data-testid="vsa-stage-event-time" />
       </template>
     </gl-table>

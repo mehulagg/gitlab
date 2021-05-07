@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Search::GroupService, :elastic do
+RSpec.describe Search::GroupService do
   include SearchResultHelpers
   include ProjectHelpers
   using RSpec::Parameterized::TableSyntax
@@ -50,7 +50,7 @@ RSpec.describe Search::GroupService, :elastic do
       ensure_elasticsearch_index!
     end
 
-    context 'finding projects by name', :sidekiq_might_not_need_inline do
+    context 'finding projects by name', :elastic, :sidekiq_might_not_need_inline do
       subject { results.objects('projects') }
 
       context 'in parent group' do
@@ -67,7 +67,7 @@ RSpec.describe Search::GroupService, :elastic do
     end
   end
 
-  context 'notes search' do
+  context 'notes search', :elastic do
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, namespace: group) }
 
@@ -76,7 +76,7 @@ RSpec.describe Search::GroupService, :elastic do
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
   end
 
-  context 'visibility', :sidekiq_inline do
+  context 'visibility', :elastic_delete_by_query, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
     shared_examples 'search respects visibility' do
@@ -331,7 +331,7 @@ RSpec.describe Search::GroupService, :elastic do
     end
   end
 
-  context 'sorting' do
+  context 'sorting', :elastic do
     context 'issues' do
       let(:scope) { 'issues' }
       let_it_be(:group) { create(:group) }

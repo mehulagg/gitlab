@@ -8,7 +8,7 @@ module Ci
         return unless build.complete?
         return unless build.duration&.positive?
 
-        consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build).amount
+        consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build, build.duration).amount
 
         return unless consumption > 0
 

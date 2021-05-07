@@ -14,7 +14,7 @@ module QA
               prepend QA::Page::Project::SubMenus::Common
               prepend SubMenus::LicenseCompliance
               prepend SubMenus::SecurityCompliance
-              prepend SubMenus::Project
+              prepend SubMenus::Analytics
               prepend SubMenus::Repository
               prepend SubMenus::Settings
             end

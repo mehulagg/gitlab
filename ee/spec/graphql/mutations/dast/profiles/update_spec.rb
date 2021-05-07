@@ -7,7 +7,7 @@ RSpec.describe Mutations::Dast::Profiles::Update do
 
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project, branch_name: 'audio') }
+  let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
 
   let(:dast_profile_gid) { dast_profile.to_global_id }
   let(:run_after_update) { false }
@@ -83,6 +83,10 @@ RSpec.describe Mutations::Dast::Profiles::Update do
           let(:run_after_update) { true }
 
           it_behaves_like 'it creates a DAST on-demand scan pipeline'
+
+          it_behaves_like 'it checks branch permissions before creating a DAST on-demand scan pipeline' do
+            let(:branch_name) { params[:branch_name] }
+          end
 
           it_behaves_like 'it delegates scan creation to another service' do
             let(:delegated_params) { hash_including(dast_profile: dast_profile) }

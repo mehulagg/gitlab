@@ -1,5 +1,5 @@
 <script>
-import { GlCard } from '@gitlab/ui';
+import { GlCard, GlSprintf } from '@gitlab/ui';
 import { parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
 import { __, s__ } from '~/locale';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -10,6 +10,7 @@ export default {
     otherInfo: __('Other information'),
     dbReplicationLag: s__('Geo|Data replication lag'),
     lastEventId: s__('Geo|Last event ID from primary'),
+    lastEvent: s__('Geo|%{eventId} (%{timeAgo})'),
     lastCursorEventId: s__('Geo|Last event ID processed by cursor'),
     storageConfig: s__('Geo|Storage config'),
     shardsNotMatched: s__('Geo|Does not match the primary storage configuration'),
@@ -18,6 +19,7 @@ export default {
   },
   components: {
     GlCard,
+    GlSprintf,
     TimeAgo,
   },
   props: {
@@ -73,30 +75,37 @@ export default {
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.lastEventId }}</span>
-      <span class="gl-font-weight-bold gl-mt-2"
-        >{{ node.lastEventId || 0 }} (<time-ago
-          data-testid="last-event"
-          :time="lastEventTimestamp"
-        />)</span
-      >
+      <span class="gl-font-weight-bold gl-mt-2" data-testid="last-event">
+        <gl-sprintf v-if="node.lastEventId" :message="$options.i18n.lastEvent">
+          <template #eventId>
+            {{ node.lastEventId }}
+          </template>
+          <template #timeAgo>
+            <time-ago :time="lastEventTimestamp" />
+          </template>
+        </gl-sprintf>
+        <span v-else>{{ $options.i18n.unknown }}</span>
+      </span>
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.lastCursorEventId }}</span>
-      <span class="gl-font-weight-bold gl-mt-2"
-        >{{ node.cursorLastEventId || 0 }} (<time-ago
-          data-testid="last-cursor-event"
-          :time="lastCursorEventTimestamp"
-        />)</span
-      >
+      <span class="gl-font-weight-bold gl-mt-2" data-testid="last-cursor-event">
+        <gl-sprintf v-if="node.cursorLastEventId" :message="$options.i18n.lastEvent">
+          <template #eventId>
+            {{ node.cursorLastEventId }}
+          </template>
+          <template #timeAgo>
+            <time-ago :time="lastCursorEventTimestamp" />
+          </template>
+        </gl-sprintf>
+        <span v-else>{{ $options.i18n.unknown }}</span>
+      </span>
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.storageConfig }}</span>
-      <span
-        :class="{ 'gl-text-red-500': !node.storageShardsMatch }"
-        class="gl-font-weight-bold gl-mt-2"
-        data-testid="storage-shards"
-        >{{ storageShardsStatus }}</span
-      >
+      <span class="gl-font-weight-bold gl-mt-2" data-testid="storage-shards">{{
+        storageShardsStatus
+      }}</span>
     </div>
   </gl-card>
 </template>

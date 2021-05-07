@@ -128,7 +128,7 @@ RSpec.describe 'CI shared runner limits' do
           allow_any_instance_of(EE::Namespace).to receive(:shared_runners_seconds).and_return(minutes_used.minutes)
         end
 
-        it 'displays a warning message on group overview page' do
+        it 'displays a warning message on group information page' do
           visit group_path(group)
 
           expect_quota_exceeded_alert(message)
@@ -143,7 +143,7 @@ RSpec.describe 'CI shared runner limits' do
           "Unless you buy additional pipeline minutes, no new jobs or pipelines in its projects will run."
       end
 
-      it 'displays a warning message on group overview page' do
+      it 'displays a warning message on group information page' do
         visit group_path(group)
 
         expect_quota_exceeded_alert(message)
@@ -153,7 +153,7 @@ RSpec.describe 'CI shared runner limits' do
     context 'when limit not yet exceeded' do
       let(:group) { create(:group, :with_not_used_build_minutes_limit) }
 
-      it 'does not display a warning message on group overview page' do
+      it 'does not display a warning message on group information page' do
         visit group_path(group)
 
         expect_no_quota_exceeded_alert

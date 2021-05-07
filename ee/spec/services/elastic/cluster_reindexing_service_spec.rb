@@ -78,7 +78,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
   end
 
   context 'state: reindexing' do
-    let!(:task) { create(:elastic_reindexing_task, state: :reindexing) }
+    let!(:task) { create(:elastic_reindexing_task, state: :reindexing, max_slices_running: 1) }
     let!(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count: 10) }
     let!(:slices) { [slice_1, slice_2, slice_3] }
     let(:slice_1) { create(:elastic_reindexing_slice, elastic_reindexing_subtask: subtask, elastic_max_slice: 3, elastic_slice: 0) }
@@ -106,7 +106,10 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
         end
 
         it 'errors if documents count is different' do
-          cluster_reindexing_service.execute # run once to kick off reindexing for slices
+          # kick off reindexing for each slice
+          slices.count.times do
+            cluster_reindexing_service.execute
+          end
 
           expect { cluster_reindexing_service.execute }.to change { task.reload.state }.from('reindexing').to('failure')
           expect(task.reload.error_message).to match(/count is different/)
@@ -180,15 +183,13 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
 
     context 'slice batching' do
       it 'kicks off the next set of slices if the current slice is finished', :aggregate_failures do
-        stub_const("#{described_class.name}::REINDEX_MAX_TOTAL_SLICES_RUNNING", 1)
-
-        expect { cluster_reindexing_service.execute }.to change { slices.first.reload.elastic_task }
+        expect { cluster_reindexing_service.execute }.to change { slice_1.reload.elastic_task }
         expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 3, slice: 0)
 
-        expect { cluster_reindexing_service.execute }.to change { slices.second.reload.elastic_task }
+        expect { cluster_reindexing_service.execute }.to change { slice_2.reload.elastic_task }
         expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 3, slice: 1)
 
-        expect { cluster_reindexing_service.execute }.to change { slices.third.reload.elastic_task }
+        expect { cluster_reindexing_service.execute }.to change { slice_3.reload.elastic_task }
         expect(helper).to have_received(:reindex).with(from: subtask.index_name_from, to: subtask.index_name_to, max_slice: 3, slice: 2)
       end
     end
@@ -205,14 +206,17 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
         before do
           allow(helper).to receive(:documents_count).with(index_name: subtask.index_name_to).and_return(subtask.reload.documents_count)
           allow(helper).to receive(:get_settings).with(index_name: subtask.index_name_from).and_return(current_settings.with_indifferent_access)
-
-          cluster_reindexing_service.execute # run once to kick off reindexing for slices
         end
 
         it 'launches all state steps' do
           expect(helper).to receive(:update_settings).with(index_name: subtask.index_name_to, settings: expected_default_settings)
           expect(helper).to receive(:switch_alias).with(to: subtask.index_name_to, from: subtask.index_name_from, alias_name: subtask.alias_name)
           expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
+
+          # kick off reindexing for each slice
+          slices.count.times do
+            cluster_reindexing_service.execute
+          end
 
           expect { cluster_reindexing_service.execute }.to change { task.reload.state }.from('reindexing').to('success')
           expect(task.reload.delete_original_index_at).to be_within(1.minute).of(described_class::DELETE_ORIGINAL_INDEX_AFTER.from_now)

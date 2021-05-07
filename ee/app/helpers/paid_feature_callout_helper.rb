@@ -14,25 +14,33 @@ module PaidFeatureCalloutHelper
   end
 
   def paid_feature_badge_data_attrs(feature_name)
-    { id: feature_callout_container_id(feature_name) }
+    base_attrs = base_paid_feature_data_attrs(feature_name)
+
+    base_attrs.merge({
+      id: feature_callout_container_id(feature_name)
+    })
   end
 
   def paid_feature_popover_data_attrs(group:, feature_name:)
+    base_attrs = base_paid_feature_data_attrs(feature_name)
     container_id = feature_callout_container_id(feature_name)
 
-    {
+    base_attrs.merge({
       container_id: container_id,
       days_remaining: group.trial_days_remaining,
-      feature_name: feature_name,
       plan_name_for_trial: group.gitlab_subscription&.plan_title,
       plan_name_for_upgrade: 'Premium',
       target_id: container_id
-    }
+    })
   end
 
   private
 
   def feature_callout_container_id(feature_name)
     "#{feature_name.parameterize}-callout"
+  end
+
+  def base_paid_feature_data_attrs(feature_name)
+    { feature_name: feature_name }
   end
 end

@@ -125,6 +125,12 @@ module QA
           end
         end
 
+        def click_user_profile_link
+          within_user_menu do
+            click_element(:user_profile_link)
+          end
+        end
+
         def search_for(term)
           fill_element :search_term_field, "#{term}\n"
         end
@@ -175,4 +181,4 @@ module QA
   end
 end
 
-QA::Page::Main::Menu.prepend_if_ee('QA::EE::Page::Main::Menu')
+QA::Page::Main::Menu.prepend_if_ee('Page::Main::Menu', namespace: QA)

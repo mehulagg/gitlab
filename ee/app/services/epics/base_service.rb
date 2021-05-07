@@ -29,13 +29,25 @@ module Epics
     def assign_parent_epic_for(epic)
       return unless parent_epic
 
-      EpicLinks::CreateService.new(parent_epic, current_user, { target_issuable: epic }).execute
+      result = EpicLinks::CreateService.new(parent_epic, current_user, { target_issuable: epic }).execute
+
+      unless result[:status] == :error
+        track_epic_parent_updated
+      end
+
+      result
     end
 
     def assign_child_epic_for(epic)
       return unless child_epic
 
-      EpicLinks::CreateService.new(epic, current_user, { target_issuable: child_epic }).execute
+      result = EpicLinks::CreateService.new(epic, current_user, { target_issuable: child_epic }).execute
+
+      unless result[:status] == :error
+        track_epic_parent_updated
+      end
+
+      result
     end
 
     def available_labels
@@ -57,6 +69,10 @@ module Epics
 
     def reopen_service
       Epics::ReopenService
+    end
+
+    def track_epic_parent_updated
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_parent_updated_action(author: current_user)
     end
   end
 end

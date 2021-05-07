@@ -29,7 +29,7 @@ module Gitlab
             # rubocop: disable CodeReuse/ActiveRecord
             def deployment_count_via_finder
               deployments = DeploymentsFinder
-                .new(group: group, finished_after: options[:from], finished_before: options[:to], status: :success)
+                .new(group: group, finished_after: options[:from], finished_before: options[:to], status: :success, order_by: :finished_at)
                 .execute
 
               deployments = deployments.where(project_id: options[:projects]) if options[:projects].present?

@@ -10,6 +10,7 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Build::Associations,
                 Gitlab::Ci::Pipeline::Chain::Validate::Abilities,
                 Gitlab::Ci::Pipeline::Chain::Validate::Repository,
+                Gitlab::Ci::Pipeline::Chain::Validate::SecurityOrchestrationPolicy,
                 Gitlab::Ci::Pipeline::Chain::Config::Content,
                 Gitlab::Ci::Pipeline::Chain::Config::Process,
                 Gitlab::Ci::Pipeline::Chain::RemoveUnwantedChatJobs,
@@ -84,7 +85,6 @@ module Ci
 
       if pipeline.persisted?
         schedule_head_pipeline_update
-        record_conversion_event
         create_namespace_onboarding_action
       end
 
@@ -120,12 +120,6 @@ module Ci
       pipeline.all_merge_requests.opened.each do |merge_request|
         UpdateHeadPipelineForMergeRequestWorker.perform_async(merge_request.id)
       end
-    end
-
-    def record_conversion_event
-      return unless project.namespace.recent?
-
-      Experiments::RecordConversionEventWorker.perform_async(:ci_syntax_templates_b, current_user.id)
     end
 
     def create_namespace_onboarding_action

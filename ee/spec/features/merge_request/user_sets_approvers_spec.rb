@@ -154,19 +154,52 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         sign_in(user)
       end
 
-      it 'allows setting groups as approvers' do
+      context 'with show_relevant_approval_rule_approvers feature flag disabled' do
+        before do
+          stub_feature_flags(show_relevant_approval_rule_approvers: false)
+        end
+
+        it 'allows setting groups as approvers' do
+          group = create :group
+          group.add_developer(other_user)
+
+          visit edit_project_merge_request_path(project, merge_request)
+
+          open_modal(text: 'Add approval rule')
+          open_approver_select
+
+          expect(find('.select2-results')).not_to have_content(group.name)
+
+          close_approver_select
+          group.add_developer(user) # only display groups that user has access to
+          open_approver_select
+
+          expect(find('.select2-results')).to have_content(group.name)
+
+          find('.select2-results .user-result', text: group.name).click
+          close_approver_select
+          within('.modal-content') do
+            click_button 'Add approval rule'
+          end
+
+          click_on("Save changes")
+          wait_for_all_requests
+
+          expect(page).to have_content("Requires approval.")
+          expect(page).to have_selector("img[alt='#{other_user.name}']")
+        end
+      end
+
+      it 'allows setting groups as approvers when there is possible group approvers' do
         group = create :group
+        group_project = create(:project, :public, :repository, namespace: group)
+        group_project_merge_request = create(:merge_request, source_project: group_project)
+        group.add_developer(user)
         group.add_developer(other_user)
 
-        visit edit_project_merge_request_path(project, merge_request)
+        visit edit_project_merge_request_path(group_project, group_project_merge_request)
 
         open_modal(text: 'Add approval rule')
-        open_approver_select
-
-        expect(find('.select2-results')).not_to have_content(group.name)
-
-        close_approver_select
-        group.add_developer(user) # only display groups that user has access to
         open_approver_select
 
         expect(find('.select2-results')).to have_content(group.name)
@@ -181,6 +214,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         wait_for_all_requests
 
         expect(page).to have_content("Requires approval.")
+        expect(page).to have_selector("img[alt='#{user.name}']")
         expect(page).to have_selector("img[alt='#{other_user.name}']")
       end
 

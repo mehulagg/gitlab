@@ -1,7 +1,7 @@
 <script>
 import { GlDropdownDivider, GlDropdownItem, GlTruncate } from '@gitlab/ui';
-import { union, uniq, without, get, set, keyBy } from 'lodash';
-import { DEFAULT_SCANNER } from 'ee/security_dashboard/constants';
+import { union, without, get, set, keyBy } from 'lodash';
+import { DEFAULT_SCANNER, SCANNER_ID_PREFIX } from 'ee/security_dashboard/constants';
 import { createScannerOption } from '../../helpers';
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
@@ -29,7 +29,7 @@ export default {
      *         id: 'used for querystring',
      *         reportType: 'used for GraphQL',
      *         name: 'used for Vue template',
-     *         externalIds: ['used', 'for', 'GraphQL'],
+     *         scannerIds: ['used', 'for', 'GraphQL'],
      *       },
      *       $category: { ... }
      *     },
@@ -43,8 +43,8 @@ export default {
      * parent keys are used for O(1) lookups so we can assign the entries in the scanners array to
      * the correct category object:
      *
-     *   const scanners = [{ vendor: 'GitLab', report_type: 'SAST', external_id: 'eslint'}]
-     *   this.groups.GitLab.SAST.externalIds.push(scanner[0].external_id)
+     *   const scanners = [{ vendor: 'GitLab', report_type: 'SAST', id: 123}]
+     *   this.groups.GitLab.SAST.scannerIds.push(scanner[0].id)
      *
      * In the template, we use Object.entries() and Object.values() on this computed property to
      * render the hierarchical options.
@@ -63,17 +63,15 @@ export default {
           set(groups, id, createScannerOption(vendor, reportType));
         }
 
-        // Add the external ID to the group's report type.
-        groups[vendor][reportType].externalIds.push(scanner.external_id);
+        // Add the scanner ID to the group's report type.
+        groups[vendor][reportType].scannerIds.push(scanner.id);
       });
 
       return groups;
     },
     filterObject() {
-      const reportType = uniq(this.selectedOptions.map((x) => x.reportType));
-      const scanner = uniq(this.selectedOptions.flatMap((x) => x.externalIds));
-
-      return { reportType, scanner };
+      const ids = this.selectedOptions.flatMap((x) => x.scannerIds);
+      return { scannerId: ids.map((x) => `${SCANNER_ID_PREFIX}${x}`) };
     },
   },
   methods: {

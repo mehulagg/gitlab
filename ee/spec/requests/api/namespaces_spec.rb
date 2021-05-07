@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::Namespaces do
+  include AfterNextHelpers
+
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
 
@@ -217,6 +219,34 @@ RSpec.describe API::Namespaces do
         expect(json_response['shared_runners_minutes_limit']).to eq(params[:shared_runners_minutes_limit])
         expect(json_response['additional_purchased_storage_size']).to eq(params[:additional_purchased_storage_size])
         expect(json_response['additional_purchased_storage_ends_on']).to eq(params[:additional_purchased_storage_ends_on])
+      end
+
+      it 'expires the CI minutes CachedQuota' do
+        expect_next(Gitlab::Ci::Minutes::CachedQuota).to receive(:expire!)
+
+        put api("/namespaces/#{group1.id}", admin), params: params
+      end
+
+      context 'when request has extra_shared_runners_minutes_limit param' do
+        before do
+          params[:extra_shared_runners_minutes_limit] = 1000
+          params.delete(:shared_runners_minutes_limit)
+        end
+
+        it 'expires the CI minutes CachedQuota' do
+          expect_next(Gitlab::Ci::Minutes::CachedQuota).to receive(:expire!)
+
+          put api("/namespaces/#{group1.id}", admin), params: params
+        end
+      end
+
+      context 'when neither minutes limit params is provided' do
+        it 'does not expire the CI minutes CachedQuota' do
+          params.delete(:shared_runners_minutes_limit)
+          expect(Gitlab::Ci::Minutes::CachedQuota).not_to receive(:new)
+
+          put api("/namespaces/#{group1.id}", admin), params: params
+        end
       end
     end
 

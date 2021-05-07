@@ -18,5 +18,6 @@ RSpec.describe ::Iterations::Cadence do
     it { is_expected.to validate_presence_of(:group_id) }
     it { is_expected.not_to allow_value(nil).for(:active) }
     it { is_expected.not_to allow_value(nil).for(:automatic) }
+    it { is_expected.to validate_length_of(:description).is_at_most(5000) }
   end
 end

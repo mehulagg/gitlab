@@ -23,5 +23,6 @@ module IncidentManagement
 
     scope :not_removed, -> { where(is_removed: false) }
     scope :removed, -> { where(is_removed: true) }
+    scope :for_user, -> (user) { where(user: user) }
   end
 end

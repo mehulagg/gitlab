@@ -4,13 +4,6 @@ module EE
   module ProjectsHelper
     extend ::Gitlab::Utils::Override
 
-    override :sidebar_settings_paths
-    def sidebar_settings_paths
-      super + %w[
-        operations#show
-      ]
-    end
-
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
@@ -123,6 +116,14 @@ module EE
       end
 
       { data: data }
+    end
+
+    def status_checks_app_data(project)
+      {
+        data: {
+          status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+        }
+      }
     end
 
     def can_modify_approvers(project = @project)

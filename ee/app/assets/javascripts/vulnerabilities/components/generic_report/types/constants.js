@@ -4,12 +4,14 @@ export const REPORT_TYPES = {
   list: 'list',
   url: 'url',
   diff: 'diff',
+  namedList: 'named-list',
 };
 
 const REPORT_TYPE_TO_COMPONENT_MAP = {
   [REPORT_TYPES.list]: () => import('./list.vue'),
   [REPORT_TYPES.url]: () => import('./url.vue'),
   [REPORT_TYPES.diff]: () => import('./diff.vue'),
+  [REPORT_TYPES.namedList]: () => import('./named_list.vue'),
 };
 
 export const getComponentNameForType = (reportType) =>

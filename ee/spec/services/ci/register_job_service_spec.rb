@@ -47,7 +47,7 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        context 'with flags enabled' do
+        context 'with traversal_ids enabled' do
           before do
             stub_feature_flags(sync_traversal_ids: true)
             stub_feature_flags(traversal_ids_for_quota_calculation: true)
@@ -56,12 +56,18 @@ RSpec.describe Ci::RegisterJobService do
           it { is_expected.to be_kind_of(Ci::Build) }
         end
 
-        context 'with flag disabled' do
+        context 'with traversal_ids disabled' do
           before do
             stub_feature_flags(traversal_ids_for_quota_calculation: false)
           end
 
           it { is_expected.to be_kind_of(Ci::Build) }
+        end
+
+        it 'when in disaster recovery it ignores quota and returns anyway' do
+          stub_feature_flags(ci_queueing_disaster_recovery: true)
+
+          is_expected.to be_kind_of(Ci::Build)
         end
       end
 
@@ -71,7 +77,7 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        context 'with flags enabled' do
+        context 'with traversal_ids enabled' do
           before do
             stub_feature_flags(sync_traversal_ids: true)
             stub_feature_flags(traversal_ids_for_quota_calculation: true)
@@ -80,12 +86,18 @@ RSpec.describe Ci::RegisterJobService do
           it { is_expected.to be_nil }
         end
 
-        context 'with flag disabled' do
+        context 'with traversal_ids disabled' do
           before do
             stub_feature_flags(traversal_ids_for_quota_calculation: false)
           end
 
           it { is_expected.to be_nil }
+        end
+
+        it 'when in disaster recovery it ignores quota and returns anyway' do
+          stub_feature_flags(ci_queueing_disaster_recovery: true)
+
+          is_expected.to be_kind_of(Ci::Build)
         end
       end
 

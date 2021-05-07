@@ -1322,6 +1322,7 @@ export const mockJobsInTable = [
     playable: true,
     cancelable: false,
     active: false,
+    userPermissions: { readBuild: true, __typename: 'JobPermissions' },
     __typename: 'CiJob',
   },
   {
@@ -1360,6 +1361,7 @@ export const mockJobsInTable = [
     playable: false,
     cancelable: false,
     active: false,
+    userPermissions: { readBuild: true, __typename: 'JobPermissions' },
     __typename: 'CiJob',
   },
   {
@@ -1405,6 +1407,7 @@ export const mockJobsInTable = [
     playable: false,
     cancelable: false,
     active: false,
+    userPermissions: { readBuild: false, __typename: 'JobPermissions' },
     __typename: 'CiJob',
   },
 ];
@@ -1464,8 +1467,8 @@ export const mockJobsQueryResponse = {
               __typename: 'DetailedStatus',
             },
             id: 'gid://gitlab/Ci::Build/2336',
-            refName: 'master',
-            refPath: '/root/ci-project/-/commits/master',
+            refName: 'main',
+            refPath: '/root/ci-project/-/commits/main',
             tags: [],
             shortSha: '4408fa2a',
             commitPath: '/root/ci-project/-/commit/4408fa2a27aaadfdf42d8dda3d6a9c01ce6cad78',
@@ -1492,6 +1495,7 @@ export const mockJobsQueryResponse = {
             playable: false,
             cancelable: false,
             active: false,
+            userPermissions: { readBuild: true, __typename: 'JobPermissions' },
             __typename: 'CiJob',
           },
         ],

@@ -28,7 +28,7 @@ module QA
                 element :template_option_row
               end
 
-              view 'app/assets/javascripts/projects/experiment_new_project_creation/components/welcome.vue' do
+              view 'app/assets/javascripts/vue_shared/new_namespace/components/welcome.vue' do
                 element :cicd_for_external_repo_link, ':data-qa-selector="`${panel.name}_link`"' # rubocop:disable QA/ElementWithPattern
               end
             end

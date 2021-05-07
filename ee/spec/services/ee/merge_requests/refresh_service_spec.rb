@@ -122,6 +122,12 @@ RSpec.describe MergeRequests::RefreshService do
 
             it_behaves_like 'does not refresh the code owner rules'
           end
+
+          context 'when the branch is deleted' do
+            let(:newrev) { Gitlab::Git::BLANK_SHA }
+
+            it_behaves_like 'does not refresh the code owner rules'
+          end
         end
 
         context 'when the branch is not protected' do

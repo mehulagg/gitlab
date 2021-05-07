@@ -1,13 +1,14 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
 import {
+  activateSubscription,
+  noActiveSubscription,
   subscriptionActivationNotificationText,
-  subscriptionActivationTitle,
   subscriptionHistoryQueries,
   subscriptionMainTitle,
   subscriptionQueries,
 } from '../constants';
-import CloudLicenseSubscriptionActivationForm from './subscription_activation_form.vue';
+import SubscriptionActivationCard from './subscription_activation_card.vue';
 import SubscriptionBreakdown from './subscription_breakdown.vue';
 import SubscriptionPurchaseCard from './subscription_purchase_card.vue';
 import SubscriptionTrialCard from './subscription_trial_card.vue';
@@ -16,14 +17,15 @@ export default {
   name: 'CloudLicenseApp',
   components: {
     GlAlert,
-    CloudLicenseSubscriptionActivationForm,
+    SubscriptionActivationCard,
     SubscriptionBreakdown,
     SubscriptionPurchaseCard,
     SubscriptionTrialCard,
   },
   i18n: {
+    activateSubscription,
+    noActiveSubscription,
     subscriptionActivationNotificationText,
-    subscriptionActivationTitle,
     subscriptionMainTitle,
   },
   props: {
@@ -98,9 +100,9 @@ export default {
     <div v-else class="row">
       <div class="col-12 col-lg-8 offset-lg-2">
         <h3 class="gl-mb-7 gl-mt-6 gl-text-center" data-testid="subscription-activation-title">
-          {{ $options.i18n.subscriptionActivationTitle }}
+          {{ $options.i18n.noActiveSubscription }}
         </h3>
-        <cloud-license-subscription-activation-form />
+        <subscription-activation-card />
         <div class="row gl-mt-7">
           <div class="col-lg-6">
             <subscription-trial-card />

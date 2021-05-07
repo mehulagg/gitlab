@@ -32,7 +32,7 @@ RSpec.describe Groups::UpdateRepositoryStorageService do
     end
 
     context 'when the move succeeds' do
-      it 'moves the repository to the new storage and unmarks the repository as read only', :aggregate_failures do
+      it 'moves the repository to the new storage and unmarks the repository as read-only', :aggregate_failures do
         old_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
           wiki.repository.path_to_repo
         end

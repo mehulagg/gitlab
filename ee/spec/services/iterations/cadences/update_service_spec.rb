@@ -14,7 +14,9 @@ RSpec.describe Iterations::Cadences::UpdateService do
       title: 'Updated iteration cadence',
       start_date: 2.days.from_now.to_s,
       duration_in_weeks: 4,
-      iterations_in_advance: 5
+      iterations_in_advance: 5,
+      roll_over: true,
+      description: 'updated cadence description'
     }
   end
 
@@ -64,6 +66,10 @@ RSpec.describe Iterations::Cadences::UpdateService do
             change(iteration_cadence, :duration_in_weeks).to(4)
           ).and(
             change(iteration_cadence, :iterations_in_advance).to(5)
+          ).and(
+            change(iteration_cadence, :roll_over).from(false).to(true)
+          ).and(
+            change(iteration_cadence, :description).to('updated cadence description')
           )
         end
 

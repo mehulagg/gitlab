@@ -1483,6 +1483,76 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'Escalation Policies' do
+    using RSpec::Parameterized::TableSyntax
+
+    context ':read_incident_management_escalation_policy' do
+      let(:policy) { :read_incident_management_escalation_policy }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | true
+        :developer  | nil   | true
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with unavailable escalation policies' do
+          before do
+            allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
+    end
+
+    context ':admin_incident_management_escalation_policy' do
+      let(:policy) { :admin_incident_management_escalation_policy }
+
+      where(:role, :admin_mode, :allowed) do
+        :guest      | nil   | false
+        :reporter   | nil   | false
+        :developer  | nil   | false
+        :maintainer | nil   | true
+        :owner      | nil   | true
+        :admin      | false | false
+        :admin      | true  | true
+      end
+
+      before do
+        enable_admin_mode!(current_user) if admin_mode
+        allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(true)
+      end
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+        context 'with unavailable escalation policies' do
+          before do
+            allow(::Gitlab::IncidentManagement).to receive(:escalation_policies_available?).with(project).and_return(false)
+          end
+
+          it { is_expected.to(be_disallowed(policy)) }
+        end
+      end
+    end
+  end
+
   context 'when project is readonly because the storage usage limit has been exceeded on the root namespace' do
     let(:current_user) { owner }
     let(:abilities) do

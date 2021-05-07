@@ -82,6 +82,7 @@ export default {
       'enableCustomOrdering',
       'cycleAnalyticsRequestParams',
       'pathNavigationData',
+      'isOverviewStageSelected',
     ]),
     ...mapGetters('customStages', ['customStageFormActive']),
     shouldRenderEmptyState() {
@@ -89,9 +90,6 @@ export default {
     },
     shouldDisplayFilters() {
       return !this.errorCode;
-    },
-    isOverviewStageSelected() {
-      return this.selectedStage?.id === OVERVIEW_STAGE_ID;
     },
     shouldDisplayDurationChart() {
       return (
@@ -124,15 +122,20 @@ export default {
     },
     query() {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
+      const stageParams = this.featureFlags.hasPathNavigation
+        ? {
+            sort: (!this.isOverviewStageSelected && this.pagination?.sort) || null,
+            direction: (!this.isOverviewStageSelected && this.pagination?.direction) || null,
+          }
+        : {};
 
       return {
         value_stream_id: this.selectedValueStream?.id || null,
         project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
-        // the `overview` stage is always the default, so dont persist the id if its selected
-        stage_id:
-          this.selectedStage?.id && !this.isOverviewStageSelected ? this.selectedStage.id : null,
+        stage_id: (!this.isOverviewStageSelected && this.selectedStage?.id) || null, // the `overview` stage is always the default, so dont persist the id if its selected
+        ...stageParams,
       };
     },
     stageCount() {
@@ -192,7 +195,7 @@ export default {
     onStageReorder(data) {
       this.reorderStage(data);
     },
-    onHandleSelectPage(data) {
+    onHandleUpdatePagination(data) {
       this.updateStageTablePagination(data);
     },
   },
@@ -287,7 +290,7 @@ export default {
             :empty-state-message="selectedStageError"
             :no-data-svg-path="noDataSvgPath"
             :pagination="pagination"
-            @handleSelectPage="onHandleSelectPage"
+            @handleUpdatePagination="onHandleUpdatePagination"
           />
         </template>
         <stage-table

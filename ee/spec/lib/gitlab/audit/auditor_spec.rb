@@ -13,8 +13,8 @@ RSpec.describe Gitlab::Audit::Auditor do
   let(:remove_message) { 'Removed an interesting field from project Gotham' }
   let(:operation) do
     proc do
-      ::Gitlab::Audit::EventQueue.current << add_message
-      ::Gitlab::Audit::EventQueue.current << remove_message
+      ::Gitlab::Audit::EventQueue.push(add_message)
+      ::Gitlab::Audit::EventQueue.push(remove_message)
     end
   end
 

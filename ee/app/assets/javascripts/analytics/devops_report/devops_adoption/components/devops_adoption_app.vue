@@ -18,6 +18,7 @@ import {
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
+  DEVOPS_ADOPTION_TABLE_CONFIGURATION,
 } from '../constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
@@ -57,6 +58,7 @@ export default {
   },
   maxSegments: MAX_SEGMENTS,
   devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
     return {
       isLoadingGroups: false,
@@ -288,6 +290,7 @@ export default {
         >
       </div>
       <devops-adoption-table
+        :cols="$options.devopsAdoptionTableConfiguration[0].cols"
         :segments="devopsAdoptionSegments.nodes"
         :selected-segment="selectedSegment"
         @set-selected-segment="setSelectedSegment"

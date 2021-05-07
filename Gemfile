@@ -403,7 +403,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 1.1.1', require: false
+  gem 'gitlab-dangerfiles', '~> 2.0.0', require: false
 end
 
 group :development, :test, :coverage do
@@ -478,10 +478,10 @@ group :ed25519 do
 end
 
 # Spamcheck GRPC protocol definitions
-gem 'spamcheck', '~> 0.0.5'
+gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.11.0.pre.rc1'
+gem 'gitaly', '~> 13.12.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
@@ -494,7 +494,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.3'
+gem 'gitlab-experiment', '~> 0.5.4'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

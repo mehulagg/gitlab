@@ -42,6 +42,40 @@ RSpec.describe Users::DestroyService do
         end
       end
 
+      context 'when user has oncall rotations' do
+        let(:schedule) { create(:incident_management_oncall_schedule, project: project) }
+        let(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+        let!(:participant) { create(:incident_management_oncall_participant, rotation: rotation, user: user) }
+
+        context 'in their own project' do
+          let(:project) { create(:project, namespace: user.namespace) }
+
+          it 'deletes the project and the schedule' do
+            operation
+
+            expect { project.reload }.to raise_error(ActiveRecord::RecordNotFound)
+            expect { schedule.reload }.to raise_error(ActiveRecord::RecordNotFound)
+          end
+        end
+
+        context 'in a group project' do
+          let(:group) { create(:group) }
+          let(:project) { create(:project, namespace: group) }
+
+          before do
+            project.add_developer(user)
+          end
+
+          it 'deletes the participant from the rotation' do
+            expect(rotation.participants.reload).to include(participant)
+
+            operation
+
+            expect(rotation.participants.reload).not_to include(participant)
+          end
+        end
+      end
+
       describe 'audit events' do
         include_examples 'audit event logging' do
           let(:fail_condition!) do
