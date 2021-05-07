@@ -12497,7 +12497,7 @@ Represents a historically accurate report about the timebox.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="timeloghumantimespent"></a>`humanTimeSpent` | [`String`](#string) | The time spent displayed in human-readable form. |
+| <a id="timeloghumantimespent"></a>`humanTimeSpent` | [`String`](#string) | The time spent displayed in human-readable form instead of the number of seconds. For example, `1m` or `1h`. |
 | <a id="timelogissue"></a>`issue` | [`Issue`](#issue) | The issue that logged time was added to. |
 | <a id="timelogmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request that logged time was added to. |
 | <a id="timelognote"></a>`note` | [`Note`](#note) | The note where the quick action to add the logged time was executed. |
