@@ -44,7 +44,7 @@ To add groups to a project:
 
 1. Go to your project and from the left sidebar, select **Members**.
 1. On the **Invite group** tab, under **Select a group to invite**, choose a group.
-1. Select a [role](../../permissions.md). 
+1. Select the highest max [role](../../permissions.md) for users in the group. 
 1. Optional. Choose an expiration date. On that date, the user can no longer access the project.
 1. Select **Invite**.
 
