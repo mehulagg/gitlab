@@ -5,9 +5,9 @@ require 'spec_helper'
 RSpec.describe Gitlab::Checks::BranchCheck do
   include_context 'change access checks context'
 
-  describe '#validate!' do
+  describe '#validate_change!' do
     it 'does not raise any error' do
-      expect { subject.validate! }.not_to raise_error
+      expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
     end
 
     context 'trying to delete the default branch' do
@@ -15,29 +15,24 @@ RSpec.describe Gitlab::Checks::BranchCheck do
       let(:ref) { 'refs/heads/master' }
 
       it 'raises an error' do
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'The default branch of a project cannot be deleted.')
+        expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'The default branch of a project cannot be deleted.')
       end
     end
 
     context "prohibited branches check" do
       it "prohibits 40-character hexadecimal branch names" do
-        allow(subject).to receive(:branch_name).and_return("267208abfe40e546f5e847444276f7d43a39503e")
-
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "You cannot create a branch with a 40-character hexadecimal branch name.")
+        expect { subject.validate_change!(oldrev, newrev, "refs/heads/267208abfe40e546f5e847444276f7d43a39503e") }.to raise_error(Gitlab::GitAccess::ForbiddenError, "You cannot create a branch with a 40-character hexadecimal branch name.")
       end
 
       it "doesn't prohibit a nested hexadecimal in a branch name" do
-        allow(subject).to receive(:branch_name).and_return("fix-267208abfe40e546f5e847444276f7d43a39503e")
-
-        expect { subject.validate! }.not_to raise_error
+        expect { subject.validate_change!(oldrev, newrev, "refs/heads/fix-267208abfe40e546f5e847444276f7d43a39503e") }.not_to raise_error
       end
 
       context "the feature flag is disabled" do
         it "doesn't prohibit a 40-character hexadecimal branch name" do
           stub_feature_flags(prohibit_hexadecimal_branch_names: false)
-          allow(subject).to receive(:branch_name).and_return("267208abfe40e546f5e847444276f7d43a39503e")
 
-          expect { subject.validate! }.not_to raise_error
+          expect { subject.validate_change!(oldrev, newrev, "refs/heads/267208abfe40e546f5e847444276f7d43a39503e") }.not_to raise_error
         end
       end
     end
@@ -51,7 +46,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
       it 'raises an error if the user is not allowed to do forced pushes to protected branches' do
         expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to force push code to a protected branch on this project.')
+        expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to force push code to a protected branch on this project.')
       end
 
       it 'raises an error if the user is not allowed to merge to protected branches' do
@@ -61,13 +56,13 @@ RSpec.describe Gitlab::Checks::BranchCheck do
         expect(user_access).to receive(:can_merge_to_branch?).and_return(false)
         expect(user_access).to receive(:can_push_to_branch?).and_return(false)
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to merge code into protected branches on this project.')
+        expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to merge code into protected branches on this project.')
       end
 
       it 'raises an error if the user is not allowed to push to protected branches' do
         expect(user_access).to receive(:can_push_to_branch?).and_return(false)
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to push code to protected branches on this project.')
+        expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to push code to protected branches on this project.')
       end
 
       context 'when user has push access' do
@@ -88,7 +83,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           it 'allows force push' do
             expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
 
-            expect { subject.validate! }.not_to raise_error
+            expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
           end
         end
 
@@ -103,7 +98,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           it 'prevents force push' do
             expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
 
-            expect { subject.validate! }.to raise_error
+            expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error
           end
         end
       end
@@ -126,7 +121,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           it 'prevents force push' do
             expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
 
-            expect { subject.validate! }.to raise_error
+            expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error
           end
         end
 
@@ -141,7 +136,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           it 'prevents force push' do
             expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
 
-            expect { subject.validate! }.to raise_error
+            expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error
           end
         end
       end
@@ -157,7 +152,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           end
 
           it 'raises an error' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /Ask a project Owner or Maintainer to create a default branch/)
+            expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, /Ask a project Owner or Maintainer to create a default branch/)
           end
         end
 
@@ -169,7 +164,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           end
 
           it 'allows branch creation' do
-            expect { subject.validate! }.not_to raise_error
+            expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
           end
         end
       end
@@ -187,7 +182,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
           end
 
           it 'does not raise an error' do
-            expect { subject.validate! }.not_to raise_error
+            expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
           end
         end
 
@@ -208,7 +203,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
             end
 
             it 'raises an error' do
-              expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to create protected branches on this project.')
+              expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to create protected branches on this project.')
             end
           end
 
@@ -234,7 +229,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
               end
 
               it 'raises an error' do
-                expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only use an existing protected branch ref as the basis of a new protected branch.')
+                expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only use an existing protected branch ref as the basis of a new protected branch.')
               end
             end
 
@@ -250,13 +245,13 @@ RSpec.describe Gitlab::Checks::BranchCheck do
                 let(:protocol) { 'web' }
 
                 it 'allows branch creation' do
-                  expect { subject.validate! }.not_to raise_error
+                  expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
                 end
               end
 
               context 'via SSH' do
                 it 'raises an error' do
-                  expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only create protected branches using the web interface and API.')
+                  expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only create protected branches using the web interface and API.')
                 end
               end
             end
@@ -270,7 +265,7 @@ RSpec.describe Gitlab::Checks::BranchCheck do
 
         context 'if the user is not allowed to delete protected branches' do
           it 'raises an error' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to delete protected branches from this project. Only a project maintainer or owner can delete a protected branch.')
+            expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to delete protected branches from this project. Only a project maintainer or owner can delete a protected branch.')
           end
         end
 
@@ -283,13 +278,13 @@ RSpec.describe Gitlab::Checks::BranchCheck do
             let(:protocol) { 'web' }
 
             it 'allows branch deletion' do
-              expect { subject.validate! }.not_to raise_error
+              expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
             end
           end
 
           context 'over SSH or HTTP' do
             it 'raises an error' do
-              expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only delete protected branches using the web interface.')
+              expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only delete protected branches using the web interface.')
             end
           end
         end

@@ -24,7 +24,8 @@ module Gitlab
         protected_branch_deletion_checks: "Checking if you are allowed to delete the protected branch..."
       }.freeze
 
-      def validate!
+      def validate_change!(oldrev, newrev, ref)
+        branch_name = Gitlab::Git.branch_name(ref)
         return unless branch_name
 
         logger.log_timed(LOG_MESSAGES[:delete_default_branch_check]) do
@@ -33,13 +34,13 @@ module Gitlab
           end
         end
 
-        prohibited_branch_checks
-        protected_branch_checks
+        prohibited_branch_checks(branch_name)
+        protected_branch_checks(oldrev, newrev, branch_name)
       end
 
       private
 
-      def prohibited_branch_checks
+      def prohibited_branch_checks(branch_name)
         return unless Feature.enabled?(:prohibit_hexadecimal_branch_names, project, default_enabled: true)
 
         if branch_name =~ /\A\h{40}\z/
@@ -47,27 +48,27 @@ module Gitlab
         end
       end
 
-      def protected_branch_checks
+      def protected_branch_checks(oldrev, newrev, branch_name)
         logger.log_timed(LOG_MESSAGES[:protected_branch_checks]) do
           return unless ProtectedBranch.protected?(project, branch_name) # rubocop:disable Cop/AvoidReturnFromBlocks
 
-          if forced_push? && !ProtectedBranch.allow_force_push?(project, branch_name)
+          if forced_push?(oldrev, newrev) && !ProtectedBranch.allow_force_push?(project, branch_name)
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:force_push_protected_branch]
           end
         end
 
         if project.empty_repo?
-          protected_branch_push_checks
+          protected_branch_push_checks(newrev, branch_name)
         elsif creation?(oldrev, newrev)
-          protected_branch_creation_checks
+          protected_branch_creation_checks(newrev, branch_name)
         elsif deletion?(oldrev, newrev)
-          protected_branch_deletion_checks
+          protected_branch_deletion_checks(branch_name)
         else
-          protected_branch_push_checks
+          protected_branch_push_checks(newrev, branch_name)
         end
       end
 
-      def protected_branch_creation_checks
+      def protected_branch_creation_checks(newrev, branch_name)
         logger.log_timed(LOG_MESSAGES[:protected_branch_creation_checks]) do
           break if user_access.can_push_to_branch?(branch_name)
 
@@ -75,7 +76,7 @@ module Gitlab
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:create_protected_branch]
           end
 
-          unless safe_commit_for_new_protected_branch?
+          unless safe_commit_for_new_protected_branch?(newrev)
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:invalid_commit_create_protected_branch]
           end
 
@@ -85,7 +86,7 @@ module Gitlab
         end
       end
 
-      def protected_branch_deletion_checks
+      def protected_branch_deletion_checks(branch_name)
         logger.log_timed(LOG_MESSAGES[:protected_branch_deletion_checks]) do
           unless user_access.can_delete_branch?(branch_name)
             raise GitAccess::ForbiddenError, ERROR_MESSAGES[:non_master_delete_protected_branch]
@@ -97,9 +98,9 @@ module Gitlab
         end
       end
 
-      def protected_branch_push_checks
+      def protected_branch_push_checks(newrev, branch_name)
         logger.log_timed(LOG_MESSAGES[:protected_branch_push_checks]) do
-          if matching_merge_request?
+          if matching_merge_request?(newrev, branch_name)
             unless user_access.can_merge_to_branch?(branch_name) || user_access.can_push_to_branch?(branch_name)
               raise GitAccess::ForbiddenError, ERROR_MESSAGES[:merge_protected_branch]
             end
@@ -134,15 +135,15 @@ module Gitlab
         Gitlab::Routing.url_helpers.project_project_members_url(project)
       end
 
-      def matching_merge_request?
+      def matching_merge_request?(newrev, branch_name)
         Checks::MatchingMergeRequest.new(newrev, branch_name, project).match?
       end
 
-      def forced_push?
+      def forced_push?(oldrev, newrev)
         Gitlab::Checks::ForcePush.force_push?(project, oldrev, newrev)
       end
 
-      def safe_commit_for_new_protected_branch?
+      def safe_commit_for_new_protected_branch?(newrev)
         ProtectedBranch.any_protected?(project, project.repository.branch_names_contains_sha(newrev))
       end
     end
