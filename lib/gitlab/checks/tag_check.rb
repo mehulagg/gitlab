@@ -15,7 +15,8 @@ module Gitlab
         protected_tag_checks: "Checking if you are creating, updating or deleting a protected tag..."
       }.freeze
 
-      def validate!
+      def validate_change!(oldrev, newrev, ref)
+        tag_name = Gitlab::Git.tag_name(ref)
         return unless tag_name
 
         logger.log_timed(LOG_MESSAGES[:tag_checks]) do
@@ -24,12 +25,12 @@ module Gitlab
           end
         end
 
-        protected_tag_checks
+        protected_tag_checks(oldrev, newrev, tag_name)
       end
 
       private
 
-      def protected_tag_checks
+      def protected_tag_checks(oldrev, newrev, tag_name)
         logger.log_timed(LOG_MESSAGES[__method__]) do
           return unless ProtectedTag.protected?(project, tag_name) # rubocop:disable Cop/AvoidReturnFromBlocks
 
