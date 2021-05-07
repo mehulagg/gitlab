@@ -31985,7 +31985,7 @@ msgstr ""
 msgid "The maximum file size is %{size}."
 msgstr ""
 
-msgid "The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60. Learn more about %{max_slices_running_docs}."
+msgid "The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Learn more about %{max_slices_running_docs}."
 msgstr ""
 
 msgid "The maximum number of tags that a single worker accepts for cleanup. If the number of tags goes above this limit, the list of tags to delete is truncated to this number. To remove this limit, set it to 0."
@@ -34907,7 +34907,7 @@ msgstr ""
 msgid "Used programming language"
 msgstr ""
 
-msgid "Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2. Learn more about %{slice_multiplier_docs}."
+msgid "Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Learn more about %{slice_multiplier_docs}."
 msgstr ""
 
 msgid "Used to help configure your identity provider"

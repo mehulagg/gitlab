@@ -235,14 +235,14 @@
           = f.number_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.slice_multiplier
           .form-text.gl-text-gray-600.gl-mt-0
             - slice_multiplier_docs = link_to(_("slice multiplier configuration"), help_page_path('integration/elasticsearch.md', anchor: 'slice-multiplier'))
-            = _('Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2. Learn more about %{slice_multiplier_docs}.').html_safe % { slice_multiplier_docs: slice_multiplier_docs }
+            = _('Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Learn more about %{slice_multiplier_docs}.').html_safe % { slice_multiplier_docs: slice_multiplier_docs }
 
         .form-group
           = f.label :max_slices_running, _('Maximum running slices'), class: 'label-bold'
           = f.number_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.max_slices_running
           .form-text.gl-text-gray-600.gl-mt-0
             - max_slices_running_docs = link_to(_("maximum running slices configuration"), help_page_path('integration/elasticsearch.md', anchor: 'maximum-running-slices'))
-            = _('The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60. Learn more about %{max_slices_running_docs}.').html_safe % { max_slices_running_docs: max_slices_running_docs }
+            = _('The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Learn more about %{max_slices_running_docs}.').html_safe % { max_slices_running_docs: max_slices_running_docs }
 
         = f.submit _('Trigger cluster reindexing'), class: "gl-button btn btn-info", disabled: @last_elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to reindex?') }
         .form-text.gl-text-gray-600
