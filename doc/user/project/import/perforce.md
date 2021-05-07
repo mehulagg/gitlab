@@ -62,8 +62,8 @@ idea to spend time and CPU to properly repack your repository before
 sending it for the first time to your GitLab server. See
 [this StackOverflow question](https://stackoverflow.com/questions/28720151/git-gc-aggressive-vs-git-repack/).
 
-Alternative, Perforce has a tool called Git Fusion that can be used to translate Helix Core depot into a Git repository. You will need to coontact Perforce for the installation instructions. Here are some links to the documentation:
+Alternatively, Perforce has a tool called [Git Fusion](https://www.perforce.com/manuals/git-fusion/#Git-Fusion/section_avy_hyc_gl.html%3FTocPath%3D_____2)
+that can be used to [translate Helix Core depot into a Git repository](https://www.perforce.com/manuals/git-fusion/#Git-Fusion/section_rg2_p32_2k.html%3FTocPath%3DSetting%2520up%2520repos%7C_____1).
+For further installation instructions and support on their end, contact Perforce.
 
-- [Git Fusion Guide](https://www.perforce.com/manuals/git-fusion/#Git-Fusion/section_avy_hyc_gl.html%3FTocPath%3D_____2)
-- [How does Git Fusion map Helix Core depots to Git repos?](
 https://www.perforce.com/manuals/git-fusion/#Git-Fusion/section_rg2_p32_2k.html%3FTocPath%3DSetting%2520up%2520repos%7C_____1)
