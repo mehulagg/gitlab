@@ -158,7 +158,6 @@ module EE
           mirror_max_delay: Settings.gitlab['mirror_max_delay'],
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
-          seat_link_enabled: Settings.gitlab['seat_link_enabled'],
           secret_detection_token_revocation_enabled: false,
           secret_detection_token_revocation_url: nil,
           secret_detection_token_revocation_token: nil,
