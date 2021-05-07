@@ -25,8 +25,13 @@ class Admin::ElasticsearchController < Admin::ApplicationController
     if Elastic::ReindexingTask.running?
       flash[:warning] = _('Elasticsearch reindexing is already in progress')
     else
-      Elastic::ReindexingTask.create!(trigger_reindexing_params)
-      flash[:notice] = _('Elasticsearch reindexing triggered')
+      @elasticsearch_reindexing_task = Elastic::ReindexingTask.new(trigger_reindexing_params)
+      if @elasticsearch_reindexing_task.save
+        flash[:notice] = _('Elasticsearch reindexing triggered')
+      else
+        errors = @elasticsearch_reindexing_task.errors.full_messages.join(', ')
+        flash[:alert] = _("Elasticsearch reindexing was not started : %{errors}") % { errors: errors }
+      end
     end
 
     redirect_to redirect_path(anchor: 'js-elasticsearch-reindexing')
@@ -63,7 +68,6 @@ class Admin::ElasticsearchController < Admin::ApplicationController
   end
 
   def trigger_reindexing_params
-    reindexing_params = params.permit(elasticsearch_reindexing_task: %i(max_slices_running slice_multiplier))
-    reindexing_params[:elasticsearch_reindexing_task].select { |_, v| v.present? } if reindexing_params.present?
+    params.require(:elastic_reindexing_task).permit(%i(max_slices_running slice_multiplier))
   end
 end

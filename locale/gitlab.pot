@@ -11903,6 +11903,9 @@ msgstr ""
 msgid "Elasticsearch reindexing triggered"
 msgstr ""
 
+msgid "Elasticsearch reindexing was not started : %{errors}"
+msgstr ""
+
 msgid "Elasticsearch returned status code: %{status_code}"
 msgstr ""
 
@@ -31982,7 +31985,7 @@ msgstr ""
 msgid "The maximum file size is %{size}."
 msgstr ""
 
-msgid "The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60."
+msgid "The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60. Learn more about %{max_slices_running_docs}."
 msgstr ""
 
 msgid "The maximum number of tags that a single worker accepts for cleanup. If the number of tags goes above this limit, the list of tags to delete is truncated to this number. To remove this limit, set it to 0."
@@ -34904,7 +34907,7 @@ msgstr ""
 msgid "Used programming language"
 msgstr ""
 
-msgid "Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2."
+msgid "Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2. Learn more about %{slice_multiplier_docs}."
 msgstr ""
 
 msgid "Used to help configure your identity provider"
@@ -38187,6 +38190,9 @@ msgstr ""
 msgid "math|There was an error rendering this math block"
 msgstr ""
 
+msgid "maximum running slices configuration"
+msgstr ""
+
 msgid "merge request"
 msgid_plural "merge requests"
 msgstr[0] ""
@@ -38812,6 +38818,9 @@ msgid "show less"
 msgstr ""
 
 msgid "sign in"
+msgstr ""
+
+msgid "slice multiplier configuration"
 msgstr ""
 
 msgid "smartcn custom analyzer"

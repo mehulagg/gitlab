@@ -228,31 +228,33 @@
       = _('Trigger cluster reindexing. This feature should be used with an index that was created after 13.0.')
 
   .settings-content
-    = form_for :elasticsearch_reindexing_task, url: admin_elasticsearch_trigger_reindexing_path, method: :post, html: { class: 'fieldset-form' } do |f|
+    = form_for @elasticsearch_reindexing_task, url: admin_elasticsearch_trigger_reindexing_path, method: :post, html: { class: 'fieldset-form' } do |f|
       %fieldset
         .form-group
           = f.label :slice_multiplier, _('Slice multiplier'), class: 'label-bold'
-          = f.text_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task&.in_progress? ? @elasticsearch_reindexing_task.slice_multiplier : 2, placeholder: '2'
+          = f.number_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.slice_multiplier
           .form-text.gl-text-gray-600.gl-mt-0
-            = _('Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2.')
+            - slice_multiplier_docs = link_to(_("slice multiplier configuration"), help_page_path('integration/elasticsearch.md', anchor: 'slice-multiplier'))
+            = _('Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Defaults to 2. Learn more about %{slice_multiplier_docs}.').html_safe % { slice_multiplier_docs: slice_multiplier_docs }
 
         .form-group
           = f.label :max_slices_running, _('Maximum running slices'), class: 'label-bold'
-          = f.text_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task&.in_progress? ? @elasticsearch_reindexing_task.max_slices_running : 60, placeholder: '60'
+          = f.number_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.max_slices_running
           .form-text.gl-text-gray-600.gl-mt-0
-            = _('The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60.')
+            - max_slices_running_docs = link_to(_("maximum running slices configuration"), help_page_path('integration/elasticsearch.md', anchor: 'maximum-running-slices'))
+            = _('The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60. Learn more about %{max_slices_running_docs}.').html_safe % { max_slices_running_docs: max_slices_running_docs }
 
-        = f.submit _('Trigger cluster reindexing'), class: "gl-button btn btn-info", disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to reindex?') }
+        = f.submit _('Trigger cluster reindexing'), class: "gl-button btn btn-info", disabled: @last_elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to reindex?') }
         .form-text.gl-text-gray-600
         - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
           .form-text.gl-text-red-500.gl-mt-0
             = _("Unused, previous indices: %{index_names} will be deleted after %{time} automatically.") % { index_names: task.subtasks.map(&:index_name_from).join(', '), time: task.delete_original_index_at }
             = link_to _('Cancel index deletion'), admin_elasticsearch_cancel_index_deletion_path(task_id: task.id), class: 'gl-mb-2', method: :post
-        - if @elasticsearch_reindexing_task
-          %h5= _('Reindexing Status: %{status} (Slice multiplier: %{multiplier}, Maximum running slices: %{max_slices})') % { status: @elasticsearch_reindexing_task.state, max_slices: @elasticsearch_reindexing_task.max_slices_running, multiplier: @elasticsearch_reindexing_task.slice_multiplier }
-          - if @elasticsearch_reindexing_task.error_message
-            %p= _('Error: %{error_message}') % { error_message: @elasticsearch_reindexing_task.error_message }
-          - @elasticsearch_reindexing_task.subtasks.order_by_alias_name_asc.each do |subtask|
+        - if @last_elasticsearch_reindexing_task
+          %h5= _('Reindexing Status: %{status} (Slice multiplier: %{multiplier}, Maximum running slices: %{max_slices})') % { status: @last_elasticsearch_reindexing_task.state, max_slices: @last_elasticsearch_reindexing_task.max_slices_running, multiplier: @last_elasticsearch_reindexing_task.slice_multiplier }
+          - if @last_elasticsearch_reindexing_task.error_message
+            %p= _('Error: %{error_message}') % { error_message: @last_elasticsearch_reindexing_task.error_message }
+          - @last_elasticsearch_reindexing_task.subtasks.order_by_alias_name_asc.each do |subtask|
             .gl-card-body.form-group
               %h5= subtask.alias_name
               - expected_documents = subtask.documents_count
