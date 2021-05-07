@@ -64,4 +64,4 @@ sending it for the first time to your GitLab server. See
 
 Alternatively, Perforce has a tool called [Git Fusion](https://www.perforce.com/manuals/git-fusion/#Git-Fusion/section_avy_hyc_gl.html%3FTocPath%3D_____2)
 that can be used to [translate Helix Core depot into a Git repository](https://www.perforce.com/manuals/git-fusion/#Git-Fusion/section_rg2_p32_2k.html%3FTocPath%3DSetting%2520up%2520repos%7C_____1).
-For further installation instructions and support on their end, contact Perforce.
+For further installation instructions and support, contact Perforce.
