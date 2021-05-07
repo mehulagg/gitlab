@@ -62,4 +62,4 @@ gitlab:
     maximum_text_highlight_size_kilobytes: 512
 ```
 
-The file size is measured in kilobytes, and is set to a default of `512 kb`.
+The file size is measured in kilobytes, and is set to a default of `512 kb`. Any file _over_ the file size listed here will be rendered in plain text.
