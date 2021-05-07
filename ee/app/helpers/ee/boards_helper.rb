@@ -25,6 +25,7 @@ module EE
         label_ids: board.label_ids,
         labels: board.labels.to_json(only: [:id, :title, :color, :text_color] ),
         board_weight: board.weight,
+        multiple_assignees_feature_available: current_board_parent.feature_available?(:multiple_issue_assignees).to_s,
         weight_feature_available: current_board_parent.feature_available?(:issue_weights).to_s,
         milestone_lists_available: current_board_parent.feature_available?(:board_milestone_lists).to_s,
         assignee_lists_available: current_board_parent.feature_available?(:board_assignee_lists).to_s,
