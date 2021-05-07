@@ -13,7 +13,7 @@ module DesignManagement
     attr_reader :issue
 
     def target_branch
-      repository.root_ref || "master"
+      project.default_branch_or_main
     end
 
     def collection

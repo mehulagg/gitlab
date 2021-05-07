@@ -86,7 +86,7 @@ module DesignManagement
       def with_temporary_branch(&block)
         target_repository.create_if_not_exists
 
-        create_master_branch! if target_repository.empty?
+        create_main_branch! if target_repository.empty?
         create_temporary_branch!
 
         yield
@@ -95,9 +95,9 @@ module DesignManagement
       end
 
       # A project that does not have any designs will have a blank design
-      # repository. To create a temporary branch from `master` we need
-      # create `master` first by adding a file to it.
-      def create_master_branch!
+      # repository. To create a temporary branch from `main` we need
+      # create `main` first by adding a file to it.
+      def create_main_branch!
         target_repository.create_file(
           git_user,
           ".CopyDesignCollectionService_#{Time.now.to_i}",
