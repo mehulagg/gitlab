@@ -26,6 +26,10 @@ class Timelog < ApplicationRecord
     issue || merge_request
   end
 
+  def human_time_spent
+    Gitlab::TimeTrackingFormatter.output(time_spent)
+  end
+
   private
 
   def issuable_id_is_present
