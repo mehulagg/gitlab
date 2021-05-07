@@ -32,9 +32,9 @@ If you used an email address, the user receives an email.
 
 ## Add groups to a project
 
-Rather than adding individual users to a project, you can add groups.
-This action adds groups as members of a project, so all of the users in the
-group get the assigned access.
+When you assign a group to a project, each user in the group gets access to the project,
+based on the role they're assigned in the group. However, the user's access is also
+limited by the maximum role you choose when you invite the group.
 
 Prerequisite:
 
