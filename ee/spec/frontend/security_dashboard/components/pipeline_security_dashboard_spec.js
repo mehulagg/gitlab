@@ -14,6 +14,7 @@ const emptyStateSvgPath = '/svgs/empty/svg';
 const pipelineId = 1234;
 const pipelineIid = 4321;
 const projectId = 5678;
+const projectFullPath = '/path';
 const sourceBranch = 'feature-branch-1';
 const vulnerabilitiesEndpoint = '/vulnerabilities';
 const loadingErrorIllustrations = {
@@ -57,6 +58,7 @@ describe('Pipeline Security Dashboard component', () => {
         pipelineId,
         pipelineIid,
         projectId,
+        projectFullPath,
         sourceBranch,
         vulnerabilitiesEndpoint,
         loadingErrorIllustrations,

@@ -28612,9 +28612,6 @@ msgstr ""
 msgid "SecurityReports|Download %{artifactName}"
 msgstr ""
 
-msgid "SecurityReports|Download Report"
-msgstr ""
-
 msgid "SecurityReports|Download results"
 msgstr ""
 
