@@ -10,21 +10,21 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
   shared_examples "push checks" do
     before do
       allow_any_instance_of(EE::Gitlab::Checks::PushRules::FileSizeCheck)
-        .to receive(:validate!).and_return(nil)
+        .to receive(:validate_change!).and_return(nil)
       allow_any_instance_of(EE::Gitlab::Checks::PushRules::TagCheck)
-        .to receive(:validate!).and_return(nil)
+        .to receive(:validate_change!).and_return(nil)
       allow_any_instance_of(EE::Gitlab::Checks::PushRules::BranchCheck)
-        .to receive(:validate!).and_return(nil)
+        .to receive(:validate_change!).and_return(nil)
     end
 
     it "returns nil on success" do
-      expect(subject.validate!).to be_nil
+      expect(subject.validate_change!).to be_nil
     end
 
     it "raises an error on failure" do
-      expect_any_instance_of(EE::Gitlab::Checks::PushRules::FileSizeCheck).to receive(:validate!).and_raise(Gitlab::GitAccess::ForbiddenError)
+      expect_any_instance_of(EE::Gitlab::Checks::PushRules::FileSizeCheck).to receive(:validate_change!).and_raise(Gitlab::GitAccess::ForbiddenError)
 
-      expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+      expect { subject.validate_change! }.to raise_error(Gitlab::GitAccess::ForbiddenError)
     end
 
     context 'when tag name exists' do
@@ -34,11 +34,11 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
 
       it 'validates tags push rules' do
         expect_any_instance_of(EE::Gitlab::Checks::PushRules::TagCheck)
-          .to receive(:validate!)
+          .to receive(:validate_change!)
         expect_any_instance_of(EE::Gitlab::Checks::PushRules::BranchCheck)
-          .not_to receive(:validate!)
+          .not_to receive(:validate_change!)
 
-        subject.validate!
+        subject.validate_change!
       end
     end
 
@@ -49,16 +49,16 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
 
       it 'validates branches push rules' do
         expect_any_instance_of(EE::Gitlab::Checks::PushRules::TagCheck)
-          .not_to receive(:validate!)
+          .not_to receive(:validate_change!)
         expect_any_instance_of(EE::Gitlab::Checks::PushRules::BranchCheck)
-          .to receive(:validate!)
+          .to receive(:validate_change!)
 
-        subject.validate!
+        subject.validate_change!
       end
     end
   end
 
-  describe '#validate!' do
+  describe '#validate_change!' do
     context "parallel push checks" do
       it_behaves_like "push checks"
 
@@ -74,7 +74,7 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
                                         .and_call_original
 
         # This push fails because of the commit message check
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+        expect { subject.validate_change! }.to raise_error(Gitlab::GitAccess::ForbiddenError)
       end
     end
 

@@ -12,15 +12,15 @@ module EE
 
           LOG_MESSAGE = "Checking if commits follow defined push rules..."
 
-          def validate!
+          def validate_change!(oldrev, newrev, ref)
             return unless push_rule
 
             commit_validation = push_rule.commit_validation?
             # if newrev is blank, the branch was deleted
-            return if deletion? || !commit_validation
+            return if deletion?(oldrev, newrev) || !commit_validation
 
             logger.log_timed(LOG_MESSAGE) do
-              commits.each do |commit|
+              commits(newrev).each do |commit|
                 logger.check_timeout_reached
 
                 push_rule_commit_check(commit)

@@ -4,13 +4,13 @@ module EE
   module Gitlab
     module Checks
       class PushRuleCheck < ::Gitlab::Checks::BaseChecker
-        def validate!
+        def validate_change!(oldrev, newrev, ref)
           return unless push_rule
 
           if ::Feature.enabled?(:parallel_push_checks, project, type: :ops)
-            run_checks_in_parallel!
+            run_checks_in_parallel!(oldrev, newrev, ref)
           else
-            run_checks_in_sequence!
+            run_checks_in_sequence!(oldrev, newrev, ref)
           end
         end
 
@@ -18,18 +18,18 @@ module EE
 
         # @return [Nil] returns nil unless an error is raised
         # @raise [Gitlab::GitAccess::ForbiddenError] if check fails
-        def check_tag_or_branch!
+        def check_tag_or_branch!(oldrev, newrev, ref)
           if tag_name
-            PushRules::TagCheck.new(change_access).validate!
+            PushRules::TagCheck.new(change_access).validate_change!(oldrev, newrev, ref)
           else
-            PushRules::BranchCheck.new(change_access).validate!
+            PushRules::BranchCheck.new(change_access).validate_change!(oldrev, newrev, ref)
           end
         end
 
         # @return [Nil] returns nil unless an error is raised
         # @raise [Gitlab::GitAccess::ForbiddenError] if check fails
-        def check_file_size!
-          PushRules::FileSizeCheck.new(change_access).validate!
+        def check_file_size!(oldrev, newrev, ref)
+          PushRules::FileSizeCheck.new(change_access).validate_change!(oldrev, newrev, ref)
         end
 
         # Run the checks one after the other.
@@ -37,8 +37,8 @@ module EE
         # @return [Nil] returns nil unless an error is raised
         # @raise [Gitlab::GitAccess::ForbiddenError] if any check fails
         def run_checks_in_sequence!
-          check_tag_or_branch!
-          check_file_size!
+          check_tag_or_branch!(oldrev, newrev, ref)
+          check_file_size!(oldrev, newrev, ref)
         end
 
         # Run the checks in separate threads for performance benefits.
@@ -49,12 +49,12 @@ module EE
         #
         # @return [Nil] returns nil unless an error is raised
         # @raise [Gitlab::GitAccess::ForbiddenError] if any check fails
-        def run_checks_in_parallel!
+        def run_checks_in_parallel!(oldrev, newrevf, ref)
           git_env = ::Gitlab::Git::HookEnv.all(project.repository.gl_repository)
           @threads = []
 
           parallelize(git_env) do
-            check_tag_or_branch!
+            check_tag_or_branch!(oldrev, newrev, ref)
           end
 
           parallelize(git_env) do

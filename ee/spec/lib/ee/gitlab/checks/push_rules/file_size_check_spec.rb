@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe EE::Gitlab::Checks::PushRules::FileSizeCheck do
   include_context 'push rules checks context'
 
-  describe '#validate!' do
+  describe '#validate_change!' do
     let(:push_rule) { create(:push_rule, max_file_size: 1) }
     # SHA of the 2-mb-file branch
     let(:newrev)    { 'bf12d2567099e26f59692896f73ac819bae45b00' }
@@ -19,7 +19,7 @@ RSpec.describe EE::Gitlab::Checks::PushRules::FileSizeCheck do
     it_behaves_like 'check ignored when push rule unlicensed'
 
     it 'returns an error if file exceeds the maximum file size' do
-      expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "File \"file.bin\" is larger than the allowed size of 1 MB")
+      expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, "File \"file.bin\" is larger than the allowed size of 1 MB")
     end
   end
 end
