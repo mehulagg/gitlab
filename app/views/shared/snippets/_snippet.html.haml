@@ -8,7 +8,7 @@
     = link_to gitlab_snippet_path(snippet) do
       = snippet.title
 
-    %ul.controls
+    %ul.controls{ data: { qa_selector: 'snippet_file_count_content', qa_snippet_files: snippet.statistics&.file_count } }
       %li
         = snippet_file_count(snippet)
       %li
