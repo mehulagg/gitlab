@@ -1,135 +1,123 @@
-import { nextTick } from 'vue';
+import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import editActions from '~/issue_show/components/edit_actions.vue';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import IssuableEditActions from '~/issue_show/components/edit_actions.vue';
 import eventHub from '~/issue_show/event_hub';
-import Store from '~/issue_show/stores';
 
 describe('Edit Actions components', () => {
   let wrapper;
 
-  const createComponent = ({ data } = {}) =>  {
-    wrapper = shallowMount(IssueTypeField, {
-      propsData: {
-        formState: {
-          issue_type: IssuableTypes.issue,
-        },
-        canDestroy: true,
-        issuableType: 'issue',
-      },
-      data() {
-        return {
-          issueState: null,
-          ...data,
-        };
-      },
-      mocks: {
-        $apollo,
-      },
-    });
+  const $apollo = {
+    mutate: jest.fn().mockResolvedValue(),
   };
 
-  beforeEach((done) => {
-    const Component = Vue.extend(editActions);
-    const store = new Store({
-      titleHtml: '',
-      descriptionHtml: '',
-      issuableRef: '',
-    });
-    store.formState.title = 'test';
+  const createComponent = ({ props, data } = {}) => {
+    wrapper = extendedWrapper(
+      shallowMount(IssuableEditActions, {
+        propsData: {
+          formState: {
+            issue_type: 'issue',
+            title: 'GitLab Issue',
+          },
+          canDestroy: true,
+          issuableType: 'issue',
+          ...props,
+        },
+        data() {
+          return {
+            ...data,
+          };
+        },
+        mocks: {
+          $apollo,
+        },
+      }),
+    );
+  };
 
-    jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+  const findEditButtons = () => wrapper.findAllComponents(GlButton);
+  const findDeleteButton = () => wrapper.findByTestId('issuable-delete-button');
+  const findSaveButton = () => wrapper.findByTestId('issuable-save-button');
+  const findCancelButton = () => wrapper.findByTestId('issuable-cancel-button');
 
-    vm = new Component({
-      propsData: {
-        canDestroy: true,
-        formState: store.formState,
-        issuableType: 'issue',
-      },
-    }).$mount();
+  beforeEach(() => {
+    createComponent();
+  });
 
-    Vue.nextTick(done);
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders all buttons as enabled', () => {
-    expect(vm.$el.querySelectorAll('.disabled').length).toBe(0);
-
-    expect(vm.$el.querySelectorAll('[disabled]').length).toBe(0);
-  });
-
-  it('does not render delete button if canUpdate is false', (done) => {
-    vm.canDestroy = false;
-
-    Vue.nextTick(() => {
-      expect(vm.$el.querySelector('.btn-danger')).toBeNull();
-
-      done();
+    const buttons = findEditButtons().wrappers;
+    buttons.forEach((button) => {
+      expect(button.attributes('disabled')).toBeFalsy();
     });
   });
 
-  it('disables submit button when title is blank', (done) => {
-    vm.formState.title = '';
-
-    Vue.nextTick(() => {
-      expect(vm.$el.querySelector('.btn-confirm').getAttribute('disabled')).toBe('disabled');
-
-      done();
-    });
+  it('does not render the delete button if canDestroy is false', () => {
+    createComponent({ props: { canDestroy: false } });
+    expect(findDeleteButton().exists()).toBe(false);
   });
 
-  it('should not show delete button if showDeleteButton is false', (done) => {
-    vm.showDeleteButton = false;
+  it('updates the delete button copy when a different type is selected', () => {
+    createComponent({ props: { formState: { title: 'GitLab Incident', issue_type: 'incident' } } });
+    expect(findDeleteButton().text()).toBe(`Delete incident`);
+  });
 
-    Vue.nextTick(() => {
-      expect(vm.$el.querySelector('.btn-danger')).toBeNull();
-      done();
-    });
+  it('disables save button when title is blank', () => {
+    createComponent({ props: { formState: { title: '' } } });
+
+    expect(findSaveButton().attributes('disabled')).toBe('true');
+  });
+
+  it('does not render the delete button if showDeleteButton is false', () => {
+    createComponent({ props: { showDeleteButton: false } });
+
+    expect(findDeleteButton().exists()).toBe(false);
   });
 
   describe('updateIssuable', () => {
+    beforeEach(() => {
+      jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+    });
+
     it('sends update.issauble event when clicking save button', () => {
-      vm.$el.querySelector('.btn-confirm').click();
+      findSaveButton().vm.$emit('click', { preventDefault: jest.fn() });
 
       expect(eventHub.$emit).toHaveBeenCalledWith('update.issuable');
     });
-
-    it('disabled button after clicking save button', (done) => {
-      vm.$el.querySelector('.btn-confirm').click();
-
-      Vue.nextTick(() => {
-        expect(vm.$el.querySelector('.btn-confirm').getAttribute('disabled')).toBe('disabled');
-
-        done();
-      });
-    });
   });
-
   describe('closeForm', () => {
+    beforeEach(() => {
+      jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+    });
+
     it('emits close.form when clicking cancel', () => {
-      vm.$el.querySelector('.btn-default').click();
+      findCancelButton().vm.$emit('click');
 
       expect(eventHub.$emit).toHaveBeenCalledWith('close.form');
     });
   });
 
   describe('deleteIssuable', () => {
+    beforeEach(() => {
+      jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+    });
+
     it('sends delete.issuable event when clicking save button', () => {
       jest.spyOn(window, 'confirm').mockReturnValue(true);
-      vm.$el.querySelector('.btn-danger').click();
+      findDeleteButton().vm.$emit('click');
 
       expect(eventHub.$emit).toHaveBeenCalledWith('delete.issuable', { destroy_confirm: true });
     });
 
-    it('does no actions when confirm is false', (done) => {
+    it('does nothing when confirm is false', () => {
       jest.spyOn(window, 'confirm').mockReturnValue(false);
-      vm.$el.querySelector('.btn-danger').click();
+      findDeleteButton().vm.$emit('click');
 
-      Vue.nextTick(() => {
-        expect(eventHub.$emit).not.toHaveBeenCalledWith('delete.issuable');
-
-        expect(vm.$el.querySelector('.btn-danger .fa')).toBeNull();
-
-        done();
-      });
+      expect(eventHub.$emit).not.toHaveBeenCalledWith('delete.issuable');
     });
   });
 });

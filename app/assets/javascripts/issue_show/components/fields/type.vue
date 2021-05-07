@@ -32,20 +32,15 @@ export default {
   apollo: {
     issueState: {
       query: getIssueStateQuery,
-    }
+    },
   },
   computed: {
     dropdownText() {
-      const {
-        typeToShow
-      } = this;
+      const { typeToShow } = this;
       return capitalize(typeToShow);
     },
     typeToShow() {
-      const {
-        issueState,
-        formState,
-      } = this;
+      const { issueState, formState } = this;
 
       return issueState?.issue_type || formState.issue_type;
     },
