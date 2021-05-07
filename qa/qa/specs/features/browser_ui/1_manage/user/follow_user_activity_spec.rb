@@ -8,7 +8,7 @@ module QA
       let(:user) do
         Resource::User.fabricate_via_api! do |user|
           user.api_client = admin_api_client
-          user.email = "noreply+#{SecureRandom.hex(4)}@gitlab.com"
+          user.email = "noreply+#{user.username}@gitlab.com"
         end
       end
 
