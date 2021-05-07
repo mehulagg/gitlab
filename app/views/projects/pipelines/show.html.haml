@@ -11,6 +11,10 @@
 
 .js-pipeline-container{ data: { controller_action: "#{controller.action_name}" } }
   #js-pipeline-header-vue.pipeline-header-container{ data: { full_path: @project.full_path, pipeline_iid: @pipeline.iid, pipeline_id: @pipeline.id, pipelines_path: project_pipelines_path(@project) } }
+
+  - if @pipeline.failed_due_to_missing_user_verification?
+    #js-cc-validation-required-alert{ data: { iframe_url: ::Gitlab::SubscriptionPortal::PAYMENT_FORM_URL, allowed_origin: ::Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL } }
+
   - if @pipeline.commit.present?
     = render "projects/pipelines/info", commit: @pipeline.commit
 
