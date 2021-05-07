@@ -10,7 +10,6 @@ module Users
       return error('An internal user cannot be shadow_banned', 403) if user.internal?
 
       if user.block
-        after_block_hook(user)
         success
       else
         messages = user.errors.full_messages

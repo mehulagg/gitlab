@@ -140,7 +140,6 @@ class Admin::UsersController < Admin::ApplicationController
     end
   end
 
-
   def unlock
     if update_user { |user| user.unlock_access! }
       redirect_back_or_admin_user(alert: _("Successfully unlocked"))

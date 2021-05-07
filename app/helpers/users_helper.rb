@@ -162,6 +162,19 @@ module UsersHelper
     header + list
   end
 
+  def user_shadow_ban_data(user, message)
+    {
+      path: shadow_ban_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Shadow ban user %{username}?') % { username: sanitize_name(user.name) },
+        messageHtml: message,
+        okVariant: 'warning',
+        okTitle: s_('AdminUsers|Shadow ban')
+      }.to_json
+    }
+  end
+
   def user_shadow_ban_effects
     header = tag.p s_('AdminUsers|Shadow banning the user has the following effects:')
 
