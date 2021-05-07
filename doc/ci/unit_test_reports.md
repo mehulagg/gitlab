@@ -344,13 +344,20 @@ When [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/6061) is complet
 
 If JUnit report format XML files contain an `attachment` tag, GitLab parses the attachment.
 
-Upload your screenshots as [artifacts](yaml/README.md#artifactsreportsjunit) to GitLab. The `attachment` tag **must** contain the absolute path to the screenshots you uploaded.
+Upload your screenshots as [artifacts](yaml/README.md#artifactsreportsjunit) to GitLab. Note that:
 
-```xml
-<testcase time="1.00" name="Test">
-  <system-out>[[ATTACHMENT|/absolute/path/to/some/file]]</system-out>
-</testcase>
-```
+- The `attachment` tag **must** contain the absolute path to the screenshots you uploaded. For
+  example:
+
+  ```xml
+  <testcase time="1.00" name="Test">
+    <system-out>[[ATTACHMENT|/absolute/path/to/some/file]]</system-out>
+  </testcase>
+  ```
+
+- You should set the job that uploads the screenshot to
+  [`when: always`](yaml/README.md#https://docs.gitlab.com/ee/ci/yaml/#when) so that it uploads a
+  screenshot when a test fails.
 
 ### Enabling the JUnit screenshots feature **(FREE SELF)**
 
