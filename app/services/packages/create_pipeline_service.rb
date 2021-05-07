@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# This service is responsible for creating a pipeline for a given
-# ExternalPullRequest coming from other providers such as GitHub.
+# This service is responsible for creating a pipeline for a package
+# push.
 
 module Packages
   class CreatePipelineService < BaseContainerService
@@ -16,6 +16,9 @@ module Packages
     private
 
     def create_pipeline_for(push)
+      # TODO: [package ci pipeline] A package push never references a git sha.
+      # The Push model was created to simulate one but we have still
+      # mandatory properties refering to a repository such as "ref".
       Ci::CreatePipelineService.new(
         project,
         current_user,
