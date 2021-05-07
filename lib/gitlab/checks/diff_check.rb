@@ -9,7 +9,7 @@ module Gitlab
         validate_file_paths: "Validating diffs' file paths..."
       }.freeze
 
-      def validate!
+      def validate!(oldrev, newrev)
         return if deletion?(oldrev, newrev)
         return unless should_run_validations?
         return if commits(newrev).empty?

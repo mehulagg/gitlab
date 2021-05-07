@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
       it 'does not call find_changed_paths' do
         expect(project.repository).not_to receive(:find_changed_paths)
 
-        subject.validate!
+        subject.validate!(oldrev, newrev)
       end
     end
 
@@ -27,7 +27,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         it 'does not call find_changed_paths' do
           expect(project.repository).not_to receive(:find_changed_paths)
 
-          subject.validate!
+          subject.validate!(oldrev, newrev)
         end
       end
 
@@ -39,7 +39,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         it 'does not invoke :lfs_file_locks_validation' do
           expect(subject).not_to receive(:lfs_file_locks_validation)
 
-          subject.validate!
+          subject.validate!(oldrev, newrev)
         end
       end
 
@@ -53,7 +53,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
 
         context 'when change is sent by a different user' do
           it 'raises an error if the user is not allowed to update the file' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "The path 'README' is locked in Git LFS by #{lock.user.name}")
+            expect { subject.validate!(oldrev, newrev) }.to raise_error(Gitlab::GitAccess::ForbiddenError, "The path 'README' is locked in Git LFS by #{lock.user.name}")
           end
         end
 
@@ -61,7 +61,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
           let(:user) { owner }
 
           it "doesn't raise any error" do
-            expect { subject.validate! }.not_to raise_error
+            expect { subject.validate!(oldrev, newrev) }.not_to raise_error
           end
         end
       end
