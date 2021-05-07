@@ -10,47 +10,47 @@ RSpec.describe Gitlab::Checks::ChangeAccess do
 
     context 'without failed checks' do
       it "doesn't raise an error" do
-        expect { subject.validate! }.not_to raise_error
+        expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
       end
 
       it 'calls pushes checks' do
         expect_next_instance_of(Gitlab::Checks::PushCheck) do |instance|
-          expect(instance).to receive(:validate!)
+          expect(instance).to receive(:validate_change!).with(oldrev, newrev, ref)
         end
 
-        subject.validate!
+        subject.validate_change!(oldrev, newrev, ref)
       end
 
       it 'calls branches checks' do
         expect_next_instance_of(Gitlab::Checks::BranchCheck) do |instance|
-          expect(instance).to receive(:validate!)
+          expect(instance).to receive(:validate_change!).with(oldrev, newrev, ref)
         end
 
-        subject.validate!
+        subject.validate_change!(oldrev, newrev, ref)
       end
 
       it 'calls tags checks' do
         expect_next_instance_of(Gitlab::Checks::TagCheck) do |instance|
-          expect(instance).to receive(:validate!)
+          expect(instance).to receive(:validate_change!).with(oldrev, newrev, ref)
         end
 
-        subject.validate!
+        subject.validate_change!(oldrev, newrev, ref)
       end
 
       it 'calls lfs checks' do
         expect_next_instance_of(Gitlab::Checks::LfsCheck) do |instance|
-          expect(instance).to receive(:validate!)
+          expect(instance).to receive(:validate_change!).with(oldrev, newrev, ref)
         end
 
-        subject.validate!
+        subject.validate_change!(oldrev, newrev, ref)
       end
 
       it 'calls diff checks' do
         expect_next_instance_of(Gitlab::Checks::DiffCheck) do |instance|
-          expect(instance).to receive(:validate!)
+          expect(instance).to receive(:validate!).with(oldrev, newrev)
         end
 
-        subject.validate!
+        subject.validate_change!(oldrev, newrev, ref)
       end
     end
 
@@ -63,7 +63,7 @@ RSpec.describe Gitlab::Checks::ChangeAccess do
                                      protocol: protocol,
                                      logger: logger)
 
-        expect { access.validate! }.to raise_error(Gitlab::Checks::TimedLogger::TimeoutError)
+        expect { access.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::Checks::TimedLogger::TimeoutError)
       end
     end
   end

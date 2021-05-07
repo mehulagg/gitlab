@@ -25,11 +25,11 @@ module Gitlab
         @logger.append_message("Running checks for ref: #{@branch_name || @tag_name}")
       end
 
-      def validate!
-        ref_level_checks
+      def validate_change!(oldrev, newrev, ref)
+        ref_level_checks(oldrev, newrev, ref)
         # Check of commits should happen as the last step
         # given they're expensive in terms of performance
-        commits_check
+        commits_check(oldrev, newrev)
 
         true
       end
@@ -41,14 +41,14 @@ module Gitlab
 
       protected
 
-      def ref_level_checks
+      def ref_level_checks(oldrev, newrev, ref)
         Gitlab::Checks::PushCheck.new(self).validate_change!(oldrev, newrev, ref)
         Gitlab::Checks::BranchCheck.new(self).validate_change!(oldrev, newrev, ref)
         Gitlab::Checks::TagCheck.new(self).validate_change!(oldrev, newrev, ref)
         Gitlab::Checks::LfsCheck.new(self).validate_change!(oldrev, newrev, ref)
       end
 
-      def commits_check
+      def commits_check(oldrev, newrev)
         Gitlab::Checks::DiffCheck.new(self).validate!(oldrev, newrev)
       end
     end

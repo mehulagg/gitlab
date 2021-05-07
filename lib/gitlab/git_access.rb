@@ -345,14 +345,16 @@ module Gitlab
 
         # If user does not have access to make at least one change, cancel all
         # push by allowing the exception to bubble up
-        Checks::ChangeAccess.new(
+        change_access = Checks::ChangeAccess.new(
           change,
           user_access: user_access,
           project: project,
           skip_lfs_integrity_check: skip_lfs_integrity_check,
           protocol: protocol,
           logger: logger
-        ).validate!
+        )
+
+        change_access.validate_change!(oldrev, newrev, ref)
       end
     rescue Checks::TimedLogger::TimeoutError
       raise TimeoutError, logger.full_message
