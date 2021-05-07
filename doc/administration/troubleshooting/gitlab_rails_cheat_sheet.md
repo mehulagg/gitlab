@@ -308,21 +308,10 @@ pp p.statistics  # compare with earlier values
 ### Identify deploy keys associated with blocked and non-member users 
 
 When the user who created a deploy key is blocked or removed from the project, the key 
-can no longer be used to push to the project. The following script identifies unusable deploy keys:
+can no longer be used to push to protected branches in a private project (see <https://gitlab.com/gitlab-org/gitlab/-/issues/329742>). 
+The following script identifies unusable deploy keys:
 
 ```ruby
-def deploy_key_allowed(deploy_key, project)
-  deploy_key.has_access_to?(project) && deploy_key.can_push_to?(project)
-end
-
-def user_allowed(user, project)
-  user_access = Gitlab::UserAccess.new(user, container: project)
-  user_can_push = user_access.can_do_action?(:push_code) ||
-    project.any_branch_allows_collaboration?(user)
-
-  user_access.allowed? && user_can_push
-end
-
 ghost_user_id = User.ghost.id
 
 DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
@@ -330,12 +319,16 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
   deploy_key = deploy_key_mapping.deploy_key
   user = deploy_key.user
 
-  next if deploy_key_allowed(deploy_key, project) and user_allowed(user, project)
+  access_checker = Gitlab::DeployKeyAccess.new(deploy_key, container: project)
+
+  # can_push_for_ref? tests if deploy_key can push to default branch - by default will fail if user role not Maintainer
+  #
+  next if access_checker.allowed? && access_checker.can_do_action?(:push_code) && access_checker.can_push_for_ref?(project.repository.root_ref)
 
   puts "==="
-  puts "Unusable deploy key for pushing: ID #{deploy_key.id} for project #{project.id}"
+  puts "Unusable deploy key for pushing: key ID: #{deploy_key.id}, title: #{deploy_key.title} for project ID: #{project.id}, path: #{project.full_path}"
 
-  if user.id == ghost_user_id
+  if user.id == ghost_user_id or user.id.nil?
     puts "No user associated"
     next
   end
