@@ -19232,6 +19232,12 @@ msgstr ""
 msgid "LearnGitLab|Use your new GitLab workflow to deploy your application, monitor its health, and keep it secure:"
 msgstr ""
 
+msgid "LearnGitlab|Creating your onboarding experience..."
+msgstr ""
+
+msgid "LearnGitlab|Ok, let's go"
+msgstr ""
+
 msgid "LearnGitlab|Trial only"
 msgstr ""
 
