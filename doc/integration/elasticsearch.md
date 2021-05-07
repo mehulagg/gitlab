@@ -344,12 +344,38 @@ While the reindexing is running, you will be able to follow its progress under t
 
 #### Reindex configuration
 
-The following Reindex settings are available:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/55681) in GitLab 13.12.
 
-| Parameter                                       | Description |
-|-------------------------------------------------|-------------|
-| `Slice multiplier`                              | Used to calculate the [number of slices during reindexing](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html#docs-reindex-slice). GitLab uses [manual slicing](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html#docs-reindex-manual-slice) to control the reindex efficiently, safely and allow us to retry only failed slices. The multiplier will be applied to the number of shards per index. Defaults to 2. For example if this value is 2 and your index has 20 shards then the reindex task will be split into 40 slices. |
-| `Maximum running slices`                        | The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Defaults to 60. Setting this value too high can have adverse performance impacts as your cluster may become heavily saturated with searches and writes. Setting this value too low may mean the reindex takes a very long time to complete. The best value for this will depend on your cluster size, whether you're willing to accept some degraded search performance during reindexing, and how important it is for the reindex to finish quickly and unpause indexing. |
+The following Reindex settings are available in **Admin Area > Settings > Advanced Search > Elasticsearch zero-downtime reindexing**:
+
+- [Slice multiplier](#slice-multiplier)
+- [Maximum running slices](#maximum-running-slices)
+
+##### Slice multiplier
+
+The slice multiplier calculates the [number of slices during reindexing](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html#docs-reindex-slice).
+
+GitLab uses [manual slicing](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html#docs-reindex-manual-slice)
+to control the reindex efficiently and safely, which enables us to retry only
+failed slices.
+
+The multiplier defaults to `2` and applies to the number of shards per index.
+For example, if this value is `2` and your index has 20 shards, then the
+reindex task is split into 40 slices.
+
+##### Maximum running slices
+
+The maximum running slices parameter defaults to `60` and corresponds to the
+maximum number of slices allowed to run concurrently during Elasticsearch
+reindexing.
+
+Setting this value too high can have adverse performance impacts as your cluster
+may become heavily saturated with searches and writes. Setting this value too
+low may lead the reindexing process to take a very long time to complete.
+
+The best value for this will depend on your cluster size, whether you're willing
+to accept some degraded search performance during reindexing, and how important
+it is for the reindex to finish quickly and unpause indexing.
 
 ### Mark the most recent reindex job as failed and resume the indexing
 
