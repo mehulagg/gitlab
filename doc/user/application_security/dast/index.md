@@ -988,6 +988,8 @@ A site profile contains the following:
   - **Username form field**: The name of username field at the sign-in HTML form.
   - **Password form field**: The name of password field at the sign-in HTML form.
 
+When an API site type is selected, a [host override](#host-override) is used to ensure the API being scanned is on the same host as the target. This is done to reduce the risk of running an active scan against the wrong API.
+
 #### Site profile validation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233020) in GitLab 13.8.
