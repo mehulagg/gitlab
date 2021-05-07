@@ -109,7 +109,7 @@ RSpec.describe Groups::EmailCampaignsController do
 
     describe 'series parameter' do
       context 'when valid' do
-        where(series: (0..Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.length - 1).to_a)
+        where(series: (0..Namespaces::InProductMarketingEmailsService::TRACKS[:create][:interval_days].length - 1).to_a)
 
         with_them do
           it_behaves_like 'track and redirect'
@@ -117,7 +117,7 @@ RSpec.describe Groups::EmailCampaignsController do
       end
 
       context 'when invalid' do
-        where(series: [-1, nil, Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.length])
+        where(series: [-1, nil, Namespaces::InProductMarketingEmailsService::TRACKS[:create][:interval_days].length])
 
         with_them do
           it_behaves_like 'no track and 404'

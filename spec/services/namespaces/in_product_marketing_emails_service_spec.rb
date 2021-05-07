@@ -56,7 +56,7 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
     end
 
     with_them do
-      it { is_expected.to send_in_product_marketing_email(user.id, group.id, track, described_class::INTERVAL_DAYS.index(interval)) }
+      it { is_expected.to send_in_product_marketing_email(user.id, group.id, track, described_class::TRACKS[track][:interval_days].index(interval)) }
     end
   end
 
@@ -235,7 +235,7 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
     let(:track) { :foo }
 
     before do
-      stub_const("#{described_class}::TRACKS", { bar: :git_write })
+      stub_const("#{described_class}::TRACKS", { bar: {} })
     end
 
     it { expect { subject }.to raise_error(ArgumentError, 'Track foo not defined') }

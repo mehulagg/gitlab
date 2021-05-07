@@ -58,8 +58,9 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
     @series = params[:series]&.to_i
 
     track_valid = @track.in?(Namespaces::InProductMarketingEmailsService::TRACKS.keys)
-    series_valid = @series.in?(0..Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.size - 1)
+    return render_404 unless track_valid
 
-    render_404 unless track_valid && series_valid
+    series_valid = @series.in?(0..Namespaces::InProductMarketingEmailsService::TRACKS[@track][:interval_days].size - 1)
+    render_404 unless series_valid
   end
 end
