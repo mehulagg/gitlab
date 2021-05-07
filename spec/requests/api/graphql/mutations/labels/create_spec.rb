@@ -11,7 +11,8 @@ RSpec.describe Mutations::Labels::Create do
     {
       'title' => 'foo',
       'description' => 'some description',
-      'color' => '#FF0000'
+      'color' => '#FF0000',
+      'removeOnIssueClose' => true
     }
   end
 
