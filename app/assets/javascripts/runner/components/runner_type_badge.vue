@@ -22,6 +22,7 @@ export default {
   components: {
     GlBadge,
   },
+
   props: {
     type: {
       type: String,
