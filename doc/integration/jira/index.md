@@ -64,7 +64,7 @@ The process for configuring Jira depends on whether you host Jira on your own se
 
 ## Privacy considerations
 
-If you integrate a private GitLab project with Jira using the **Basic Jira Integration**,
+If you integrate a private GitLab project with Jira using the [**Per-project Jira integration**](#per-project-jira-integration),
 actions in GitLab issues and merge requests linked to a Jira issue leak information
 about the private project to non-administrator Jira users. If your installation uses Jira Cloud,
 you can use the [GitLab for Jira app](connect-app.md) to avoid this risk.
