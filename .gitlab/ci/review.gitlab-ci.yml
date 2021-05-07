@@ -211,6 +211,23 @@ parallel-spec-reports:
       junit: qa/gitlab-qa-run-*/**/rspec-*.xml
     expire_in: 31d
 
+allure-report-qa-smoke:
+  extends:
+    - .review:rules:review-qa-smoke
+  image:
+    name: ${GITLAB_DEPENDENCY_PROXY}andrcuns/allure-report-publisher:0.0.5
+    entrypoint: [""]
+  stage: post-qa
+  needs: ["review-qa-smoke"]
+  script:
+    - >
+      allure-report-publisher upload s3
+        --results-glob="qa/reports/allure-results/*"
+        --bucket="gitlab-qa-allure-reports"
+        --prefix="gitlab-review/$CI_COMMIT_REF_SLUG"
+        --copy-latest
+        --color
+
 danger-review:
   extends:
     - .default-retry
