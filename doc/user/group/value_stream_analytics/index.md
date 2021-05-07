@@ -221,6 +221,34 @@ and disable it with the following command:
 Feature.disable(:value_stream_analytics_path_navigation)
 ```
 
+### Overview stage
+
+![Value Stream Analytics Overview Stagee](img/vsa_overview_stage_v13_12.png "VSA overview stage")
+
+The overview stage provides access to key metrics and charts summarizing all the stages in the value stream
+based on the currently selected filters.
+
+This includes:
+
+- [Lead time](#how-time-metrics-are-measured)
+- [Cycle time](#how-time-metrics-are-measured)
+- [Days to completion chart](#days-to-completion-chart)
+- [Tasks by type chart](#tasks-by-type-chart)
+
+### Stage table
+
+![Value Stream Analytics Stage table](img/vsa_stage_table_v13_12.png "VSA stage table")
+
+The stage table provides a list of the related workflow items for the selected stage, this could include:
+
+- Issues
+- Merge requests
+- Pipelines
+- Jobs
+
+The stage table also includes a **time** column, indicating the duration for the specified item to pass
+through the selected value stream stage.
+
 ### Adding a stage
 
 In the following example we're creating a new stage that measures and tracks issues from creation
