@@ -17,7 +17,7 @@ module Types
           description: 'The time spent displayed in seconds.'
 
     field :human_time_spent, GraphQL::STRING_TYPE, null: true,
-          description: 'The time spent displayed in human-readable form.'
+          description: 'The time spent displayed in human-readable form instead of the number of seconds. For example, `1m` or `1h`.'
 
     field :user,
           Types::UserType,
