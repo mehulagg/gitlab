@@ -30,7 +30,7 @@ class Admin::ElasticsearchController < Admin::ApplicationController
         flash[:notice] = _('Elasticsearch reindexing triggered')
       else
         errors = @elasticsearch_reindexing_task.errors.full_messages.join(', ')
-        flash[:alert] = _("Elasticsearch reindexing was not started : %{errors}") % { errors: errors }
+        flash[:alert] = _("Elasticsearch reindexing was not started: %{errors}") % { errors: errors }
       end
     end
 

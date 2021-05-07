@@ -8,9 +8,11 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let(:page) { Capybara::Node::Simple.new(rendered) }
   let(:pause_indexing) { false }
   let(:pending_migrations) { false }
+  let(:elastic_reindexing_task) { build(:elastic_reindexing_task) }
 
   before do
     assign(:application_setting, application_setting)
+    assign(:elasticsearch_reindexing_task, elastic_reindexing_task)
     allow(view).to receive(:current_user) { admin }
     allow(view).to receive(:expanded) { true }
   end
@@ -94,7 +96,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
     let(:application_setting) { build(:application_setting) }
 
     before do
-      assign(:elasticsearch_reindexing_task, task)
+      assign(:last_elasticsearch_reindexing_task, task)
     end
 
     context 'when task is in progress' do

@@ -11903,7 +11903,7 @@ msgstr ""
 msgid "Elasticsearch reindexing triggered"
 msgstr ""
 
-msgid "Elasticsearch reindexing was not started : %{errors}"
+msgid "Elasticsearch reindexing was not started: %{errors}"
 msgstr ""
 
 msgid "Elasticsearch returned status code: %{status_code}"
