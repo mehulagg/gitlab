@@ -13,9 +13,10 @@ export default function mountProjectSettingsApprovals(el) {
   }
 
   const store = createStore();
-  const { statusChecksPath } = el.dataset;
+  const { projectId, statusChecksPath } = el.dataset;
 
-  store.dispatch('fetchStatusChecks', { statusChecksPath }).catch((error) => {
+  store.dispatch('setSettings', { projectId, statusChecksPath });
+  store.dispatch('fetchStatusChecks').catch((error) => {
     createFlash({
       message: s__('StatusCheck|An error occurred fetching the status checks.'),
       captureError: true,

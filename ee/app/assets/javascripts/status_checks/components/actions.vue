@@ -1,13 +1,20 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
+import ModalUpdate from './modal_update.vue';
 
 export default {
   components: {
     GlButton,
+    ModalUpdate,
+  },
+  props: {
+    statusCheck: {
+      type: Object,
+      required: true,
+    },
   },
   i18n: {
-    editButton: __('Edit'),
     removeButton: __('Remove...'),
   },
 };
@@ -15,7 +22,7 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-justify-content-end">
-    <gl-button data-testid="edit-btn">{{ $options.i18n.editButton }}</gl-button>
+    <modal-update :status-check="statusCheck" />
     <gl-button class="gl-ml-3" data-testid="remove-btn">
       {{ $options.i18n.removeButton }}
     </gl-button>
