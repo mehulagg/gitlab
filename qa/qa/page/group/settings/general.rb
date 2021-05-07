@@ -59,37 +59,37 @@ module QA
 
           def set_lfs_enabled
             expand_content(:permission_lfs_2fa_content)
-            check_element(:lfs_checkbox)
+            check_element(:lfs_checkbox, true)
             click_element(:save_permissions_changes_button)
           end
 
           def set_lfs_disabled
             expand_content(:permission_lfs_2fa_content)
-            uncheck_element(:lfs_checkbox)
+            uncheck_element(:lfs_checkbox, true)
             click_element(:save_permissions_changes_button)
           end
 
           def set_request_access_enabled
             expand_content(:permission_lfs_2fa_content)
-            check_element(:request_access_checkbox)
+            check_element(:request_access_checkbox, true)
             click_element(:save_permissions_changes_button)
           end
 
           def set_request_access_disabled
             expand_content(:permission_lfs_2fa_content)
-            uncheck_element(:request_access_checkbox)
+            uncheck_element(:request_access_checkbox, true)
             click_element(:save_permissions_changes_button)
           end
 
           def set_require_2fa_enabled
             expand_content(:permission_lfs_2fa_content)
-            check_element(:require_2fa_checkbox)
+            check_element(:require_2fa_checkbox, true)
             click_element(:save_permissions_changes_button)
           end
 
           def set_require_2fa_disabled
             expand_content(:permission_lfs_2fa_content)
-            uncheck_element(:require_2fa_checkbox)
+            uncheck_element(:require_2fa_checkbox, true)
             click_element(:save_permissions_changes_button)
           end
 
@@ -103,9 +103,9 @@ module QA
             expand_content(:permission_lfs_2fa_content)
 
             if find_element(:request_access_checkbox).checked?
-              uncheck_element(:request_access_checkbox)
+              uncheck_element(:request_access_checkbox, true)
             else
-              check_element(:request_access_checkbox)
+              check_element(:request_access_checkbox, true)
             end
 
             click_element(:save_permissions_changes_button)
