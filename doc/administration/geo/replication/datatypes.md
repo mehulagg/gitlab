@@ -212,13 +212,13 @@ successfully, you must replicate their data using some other means.
 > - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
 > - Disabled on GitLab.com.
 > - Not recommended for production use.
-> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-lfs-object-replication-using-the-self-service-framework).
 
 This in-development feature might not be available for your use. There can be
-[risks when enabling features still in development](../user/feature_flags.md#risks-when-enabling-features-still-in-development).
+[risks when enabling features still in development](../../../user/feature_flags.md#risks-when-enabling-features-still-in-development).
 Refer to this feature's version history for more details.
 
-##### Enable or disable <Feature Name> **(FREE SELF)**
+##### Enable or disable LFS object replication using the self service framework
 
 LFS object replication using the self service framework is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
