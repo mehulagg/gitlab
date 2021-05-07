@@ -122,7 +122,7 @@ class MergeRequestWidgetEntity < Grape::Entity
 
     expose :base_path do |merge_request|
       if use_merge_base_with_merged_results?
-        merge_base_pipeline_downloadable_path_for_report_type(:codequality)
+        merge_target_pipeline_downloadable_path_for_report_type(:codequality)
       else
         base_pipeline_downloadable_path_for_report_type(:codequality)
       end
@@ -170,8 +170,8 @@ class MergeRequestWidgetEntity < Grape::Entity
       &.downloadable_path_for_report_type(file_type)
   end
 
-  def merge_base_pipeline_downloadable_path_for_report_type(file_type)
-    object.merge_base_pipeline&.present(current_user: current_user)
+  def merge_target_pipeline_downloadable_path_for_report_type(file_type)
+    object.merge_target_pipeline&.present(current_user: current_user)
       &.downloadable_path_for_report_type(file_type)
   end
 end

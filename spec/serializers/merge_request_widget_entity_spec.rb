@@ -77,13 +77,13 @@ RSpec.describe MergeRequestWidgetEntity do
   end
 
   describe 'codequality report artifacts', :request_store do
-    let(:merge_base_pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
+    let(:merge_target_pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
 
     before do
       project.add_developer(user)
 
       allow(resource).to receive_messages(
-        merge_base_pipeline: merge_base_pipeline,
+        merge_target_pipeline: merge_target_pipeline,
         base_pipeline: pipeline,
         head_pipeline: pipeline
       )
@@ -92,7 +92,7 @@ RSpec.describe MergeRequestWidgetEntity do
     context 'with report artifacts' do
       let(:pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
       let(:generic_job_id) { pipeline.builds.first.id }
-      let(:merge_base_job_id) { merge_base_pipeline.builds.first.id }
+      let(:merge_base_job_id) { merge_target_pipeline.builds.first.id }
 
       it 'has head_path and base_path entries' do
         expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
@@ -102,7 +102,7 @@ RSpec.describe MergeRequestWidgetEntity do
       context 'on pipelines for merged results' do
         let(:pipeline) { create(:ci_pipeline, :merged_result_pipeline, :with_codequality_reports, project: project) }
 
-        it 'returns URLs from the head_pipeline and merge_base_pipeline' do
+        it 'returns URLs from the head_pipeline and merge_target_pipeline' do
           expect(subject[:codeclimate][:head_path]).to include("/jobs/#{generic_job_id}/artifacts/download?file_type=codequality")
           expect(subject[:codeclimate][:base_path]).to include("/jobs/#{merge_base_job_id}/artifacts/download?file_type=codequality")
         end

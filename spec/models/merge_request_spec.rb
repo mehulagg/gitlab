@@ -3870,11 +3870,11 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
-  describe '#use_merge_base_pipeline_for_comparison?' do
+  describe '#use_merge_target_pipeline_for_comparison?' do
     let(:project) { create(:project, :public, :repository) }
     let(:merge_request) { create(:merge_request, :with_codequality_reports, source_project: project) }
 
-    subject { merge_request.use_merge_base_pipeline_for_comparison?(service_class) }
+    subject { merge_request.use_merge_target_pipeline_for_comparison?(service_class) }
 
     context 'when service class is Ci::CompareCodequalityReportsService' do
       let(:service_class) { 'Ci::CompareCodequalityReportsService' }
@@ -3911,17 +3911,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
           create(:merge_request, :with_merge_request_pipeline)
         end
 
-        let(:merge_base_pipeline) do
+        let(:merge_target_pipeline) do
           create(:ci_pipeline, ref: merge_request.target_branch, sha: merge_request.target_branch_sha)
         end
 
         before do
-          merge_base_pipeline
+          merge_target_pipeline
           merge_request.update_head_pipeline
         end
 
-        it 'returns the merge_base_pipeline' do
-          expect(pipeline).to eq(merge_base_pipeline)
+        it 'returns the merge_target_pipeline' do
+          expect(pipeline).to eq(merge_target_pipeline)
         end
       end
 
@@ -3962,22 +3962,22 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
-  describe '#merge_base_pipeline' do
+  describe '#merge_target_pipeline' do
     let(:merge_request) do
       create(:merge_request, :with_merge_request_pipeline)
     end
 
-    let(:merge_base_pipeline) do
+    let(:merge_target_pipeline) do
       create(:ci_pipeline, ref: merge_request.target_branch, sha: merge_request.target_branch_sha)
     end
 
     before do
-      merge_base_pipeline
+      merge_target_pipeline
       merge_request.update_head_pipeline
     end
 
     it 'returns a pipeline pointing to a commit on the target ref' do
-      expect(merge_request.merge_base_pipeline).to eq(merge_base_pipeline)
+      expect(merge_request.merge_target_pipeline).to eq(merge_target_pipeline)
     end
   end
 

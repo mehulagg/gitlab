@@ -36,7 +36,7 @@ class MergeRequest < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
-  ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON = {
+  ALLOWED_TO_USE_MERGE_TARGET_PIPELINE_FOR_COMPARISON = {
     'Ci::CompareCodequalityReportsService' => ->(project) { true }
   }.freeze
 
@@ -1765,12 +1765,12 @@ class MergeRequest < ApplicationRecord
     end
   end
 
-  def use_merge_base_pipeline_for_comparison?(service_class)
-    ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON[service_class]&.call(project)
+  def use_merge_target_pipeline_for_comparison?(service_class)
+    ALLOWED_TO_USE_MERGE_TARGET_PIPELINE_FOR_COMPARISON[service_class]&.call(project)
   end
 
   def comparison_base_pipeline(service_class)
-    (use_merge_base_pipeline_for_comparison?(service_class) && merge_base_pipeline) || base_pipeline
+    (use_merge_target_pipeline_for_comparison?(service_class) && merge_target_pipeline) || base_pipeline
   end
 
   def base_pipeline
@@ -1779,8 +1779,8 @@ class MergeRequest < ApplicationRecord
       .find_by(sha: diff_base_sha, ref: target_branch)
   end
 
-  def merge_base_pipeline
-    @merge_base_pipeline ||= project.ci_pipelines
+  def merge_target_pipeline
+    @merge_target_pipeline ||= project.ci_pipelines
       .order(id: :desc)
       .find_by(sha: actual_head_pipeline.target_sha, ref: target_branch)
   end
