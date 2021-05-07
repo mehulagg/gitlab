@@ -3,7 +3,7 @@
 require_relative '../qa'
 require 'rspec/retry'
 require 'rspec-parameterized'
-require 'allure-rspec' if ENV['CI']
+require 'allure-rspec'
 
 if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
   require 'knapsack'
