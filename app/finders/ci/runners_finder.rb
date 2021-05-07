@@ -78,7 +78,7 @@ module Ci
     end
 
     def paginate!
-      @runners = @runners.page(@params[:page]).per(NUMBER_OF_RUNNERS_PER_PAGE)
+      @runners = @runners.page(@params[:page]).per(NUMBER_OF_RUNNERS_PER_PAGE) if @params.include?(:page)
     end
 
     def filter_by!(scope_name, available_scopes)
