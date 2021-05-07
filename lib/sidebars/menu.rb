@@ -63,7 +63,7 @@ module Sidebars
 
     # Returns all renderable menu items
     def renderable_items
-      @renderable_items ||= @items.select(&:render)
+      @renderable_items ||= @items.select(&:render?)
     end
 
     # Returns whether the menu has any renderable menu item
