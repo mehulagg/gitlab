@@ -27,10 +27,12 @@ RSpec.describe 'Project issue boards sidebar assignee', :js do
   end
 
   context 'assignee' do
+    let(:assignee_widget) { '[data-testid="issue-boards-sidebar"] [data-testid="assignees-widget"]' }
+
     it 'updates the issues assignee' do
       click_card(card)
 
-      page.within('.assignee') do
+      page.within(assignees_widget) do
         click_button('Edit')
 
         wait_for_requests
@@ -54,7 +56,7 @@ RSpec.describe 'Project issue boards sidebar assignee', :js do
       card_two = find('.board:nth-child(2)').find('.board-card:nth-child(2)')
       click_card(card_two)
 
-      page.within('.assignee') do
+      page.within(assignees_widget) do
         click_button('Edit')
 
         wait_for_requests
@@ -75,7 +77,7 @@ RSpec.describe 'Project issue boards sidebar assignee', :js do
     it 'assignees to current user' do
       click_card(card)
 
-      page.within(find('.assignee')) do
+      page.within(assignees_widget) do
         expect(page).to have_content('None')
 
         click_button 'assign yourself'
@@ -91,7 +93,7 @@ RSpec.describe 'Project issue boards sidebar assignee', :js do
     it 'updates assignee dropdown' do
       click_card(card)
 
-      page.within('.assignee') do
+      page.within(assignees_widget) do
         click_button('Edit')
 
         wait_for_requests

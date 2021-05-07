@@ -41,12 +41,12 @@ RSpec.describe 'Issue Boards', :js do
   end
 
   context 'assignee' do
-    let(:assignee_widget) { '[data-testid="issue-boards-sidebar"] [data-testid="assignees-widget"]' }
+    let(:assignees_widget) { '[data-testid="issue-boards-sidebar"] [data-testid="assignees-widget"]' }
 
     it 'updates the issues assignee' do
       click_card(card2)
 
-      page.within(assignee_widget) do
+      page.within(assignees_widget) do
         click_button('Edit')
         wait_for_requests
 
@@ -68,7 +68,7 @@ RSpec.describe 'Issue Boards', :js do
     it 'adds multiple assignees' do
       click_card(card1)
 
-      page.within(assignee_widget) do
+      page.within(assignees_widget) do
         click_button('Edit')
         wait_for_requests
 
@@ -96,7 +96,7 @@ RSpec.describe 'Issue Boards', :js do
     it 'removes the assignee' do
       click_card(card1)
 
-      page.within(assignee_widget) do
+      page.within(assignees_widget) do
         click_button('Edit')
         wait_for_requests
 
@@ -116,7 +116,7 @@ RSpec.describe 'Issue Boards', :js do
     it 'assignees to current user' do
       click_card(card2)
 
-      page.within(assignee_widget) do
+      page.within(assignees_widget) do
         expect(page).to have_content('None')
 
         click_button 'assign yourself'
@@ -132,7 +132,7 @@ RSpec.describe 'Issue Boards', :js do
     it 'updates assignee dropdown' do
       click_card(card2)
 
-      page.within(assignee_widget) do
+      page.within(assignees_widget) do
         click_button('Edit')
         wait_for_requests
 
@@ -150,10 +150,30 @@ RSpec.describe 'Issue Boards', :js do
 
       click_card(card1)
 
-      page.within(assignee_widget) do
+      page.within(assignees_widget) do
         click_button('Edit')
 
         expect(find('.dropdown-menu')).to have_selector('.gl-new-dropdown-item-check-icon')
+      end
+    end
+
+    context 'when multiple assignees feature is not available' do
+      before do
+        stub_licensed_features(multiple_issue_assignees: false)
+
+        visit_project_board
+      end
+
+      it 'does not allow selecting multiple assignees' do
+        click_card(card1)
+
+        page.within(assignees_widget) do
+          click_button('Edit')
+
+          first('.dropdown-menu-user .gl-avatar-labeled').click
+
+          expect(page).to have_selector('.dropdown-menu', visible: false)
+        end
       end
     end
   end
