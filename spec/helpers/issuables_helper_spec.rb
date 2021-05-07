@@ -130,7 +130,7 @@ RSpec.describe IssuablesHelper do
     subject { helper.issuables_count_for_state(issuable_type, state) }
 
     before do
-      allow(helper).to receive(:is_count_cacheable?).and_return(cacheable)
+      allow(helper).to receive(:request_params_default?).and_return(default)
       allow(helper).to receive(:finder).and_return(finder)
       allow(helper).to receive(:current_user).and_return(double('user'))
       allow(Groups::MergeRequestsCountService).to receive(:new).and_return(cached_count_service)
@@ -140,7 +140,7 @@ RSpec.describe IssuablesHelper do
     context 'call is cacheable' do
       let(:issuable_type) { :merge_requests }
       let(:state) { 'closed' }
-      let(:cacheable) { true }
+      let(:default) { true }
 
       it 'uses Groups::MergeRequestsCountService' do
         assign(:group, double('group'))
@@ -152,7 +152,7 @@ RSpec.describe IssuablesHelper do
     context 'call is not cacheable' do
       let(:issuable_type) { :issues }
       let(:state) { 'closed' }
-      let(:cacheable) { false }
+      let(:default) { false }
 
       it 'uses Gitlab::IssuablesCountForState' do
         subject
