@@ -220,7 +220,7 @@ allure-report-qa-smoke:
   needs: ["review-qa-smoke"]
   script:
     - |
-      allure-report-publisher upload s3 \
+      allure-report-publisher upload gcs \
         --results-glob="qa/gitlab-qa-run-*/**/allure-results/*" \
         --bucket="gitlab-qa-allure-reports" \
         --prefix="gitlab-review/$CI_COMMIT_REF_SLUG" \
