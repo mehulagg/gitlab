@@ -92,6 +92,7 @@ export default {
     :size="size"
     icon="copy-to-clipboard"
     :aria-label="__('Copy this value')"
+    v-bind="$attrs"
     v-on="$listeners"
   >
     <slot></slot>
