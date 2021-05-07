@@ -11,7 +11,9 @@ end
 
 QA::Runtime::Browser.configure!
 
-QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes) if QA::Runtime::Env.runtime_scenario_attributes
+if QA::Runtime::Env.runtime_scenario_attributes
+  QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes)
+end
 
 Dir[::File.join(__dir__, "support/helpers/*.rb")].sort.each { |f| require f }
 Dir[::File.join(__dir__, "support/matchers/*.rb")].sort.each { |f| require f }
