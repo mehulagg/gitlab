@@ -13,12 +13,12 @@ RSpec.describe Gitlab::Checks::LfsCheck do
     end
   end
 
-  describe '#validate!' do
+  describe '#validate_change!' do
     context 'with LFS not enabled' do
       it 'skips integrity check' do
         expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
-        subject.validate!
+        subject.validate_change!(oldrev, newrev, ref)
       end
     end
 
@@ -35,7 +35,7 @@ RSpec.describe Gitlab::Checks::LfsCheck do
         it 'skips integrity check' do
           expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
-          subject.validate!
+          subject.validate_change!(oldrev, newrev, ref)
         end
       end
 
@@ -45,32 +45,32 @@ RSpec.describe Gitlab::Checks::LfsCheck do
             expect(project.repository).not_to receive(:new_objects)
             expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
-            subject.validate!
+            subject.validate_change!(oldrev, newrev, ref)
           end
         end
 
         context 'with missing newrev' do
           it_behaves_like 'a skipped integrity check' do
-            let(:changes) { { oldrev: oldrev, ref: ref } }
+            let(:newrev) { nil }
           end
         end
 
         context 'with blank newrev' do
           it_behaves_like 'a skipped integrity check' do
-            let(:changes) { { oldrev: oldrev, newrev: Gitlab::Git::BLANK_SHA, ref: ref } }
+            let(:newrev) { Gitlab::Git::BLANK_SHA }
           end
         end
       end
 
       it 'fails if any LFS blobs are missing' do
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /LFS objects are missing/)
+        expect { subject.validate_change!(oldrev, newrev, ref) }.to raise_error(Gitlab::GitAccess::ForbiddenError, /LFS objects are missing/)
       end
 
       it 'succeeds if LFS objects have already been uploaded' do
         lfs_object = create(:lfs_object, oid: blob_object.lfs_oid)
         create(:lfs_objects_project, project: project, lfs_object: lfs_object)
 
-        expect { subject.validate! }.not_to raise_error
+        expect { subject.validate_change!(oldrev, newrev, ref) }.not_to raise_error
       end
     end
   end
