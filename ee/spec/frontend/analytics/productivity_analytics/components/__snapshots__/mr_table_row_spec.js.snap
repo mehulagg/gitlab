@@ -20,7 +20,7 @@ exports[`MergeRequestTableRow component on creation matches the snapshot 1`] = `
     </div>
      
     <div
-      class="d-flex flex-column flex-grow mw-90p"
+      class="d-flex flex-column flex-grow overflow-auto gl-mr-1"
     >
       <h5
         class="item-title mr-title my-0 d-block str-truncated"

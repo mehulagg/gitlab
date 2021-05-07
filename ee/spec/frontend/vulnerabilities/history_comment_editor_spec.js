@@ -1,11 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormTextarea } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import HistoryCommentEditor from 'ee/vulnerabilities/components/history_comment_editor.vue';
 
 describe('History Comment Editor', () => {
   let wrapper;
 
-  const createWrapper = props => {
+  const createWrapper = (props) => {
     wrapper = shallowMount(HistoryCommentEditor, {
       propsData: { isSaving: false, ...props },
     });

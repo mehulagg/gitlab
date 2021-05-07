@@ -12,13 +12,15 @@ module EE
     prepended do
       include TokenAuthenticatable
       include InsightsFeature
-      include HasTimelogsReport
       include HasWiki
+      include CanMoveRepositoryStorage
 
       add_authentication_token_field :saml_discovery_token, unique: false, token_generator: -> { Devise.friendly_token(8) }
 
       has_many :epics
-
+      has_many :epic_boards, class_name: 'Boards::EpicBoard', inverse_of: :group
+      has_many :iterations
+      has_many :iterations_cadences, class_name: 'Iterations::Cadence'
       has_one :saml_provider
       has_many :scim_identities
       has_many :ip_restrictions, autosave: true
@@ -28,10 +30,7 @@ module EE
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
       has_many :saml_group_links, foreign_key: 'group_id'
-      has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
-
-      has_one :dependency_proxy_setting, class_name: 'DependencyProxy::GroupSetting'
-      has_many :dependency_proxy_blobs, class_name: 'DependencyProxy::Blob'
+      has_many :hooks, class_name: 'GroupHook'
 
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
@@ -42,18 +41,23 @@ module EE
       has_many :project_templates, through: :projects, foreign_key: 'custom_project_templates_group_id'
 
       has_many :managed_users, class_name: 'User', foreign_key: 'managing_group_id', inverse_of: :managing_group
+      has_many :provisioned_user_details, class_name: 'UserDetail', foreign_key: 'provisioned_by_group_id', inverse_of: :provisioned_by_group
+      has_many :provisioned_users, through: :provisioned_user_details, source: :user
       has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::GroupStage'
       has_many :value_streams, class_name: 'Analytics::CycleAnalytics::GroupValueStream'
+      has_one :group_merge_request_approval_setting, inverse_of: :group
 
       has_one :deletion_schedule, class_name: 'GroupDeletionSchedule'
       delegate :deleting_user, :marked_for_deletion_on, to: :deletion_schedule, allow_nil: true
       delegate :enforced_group_managed_accounts?, :enforced_sso?, to: :saml_provider, allow_nil: true
+      delegate :repository_read_only, :repository_read_only?, to: :namespace_settings, allow_nil: true
 
       has_one :group_wiki_repository
+      has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
 
       belongs_to :file_template_project, class_name: "Project"
 
-      belongs_to :push_rule
+      belongs_to :push_rule, inverse_of: :group
 
       # Use +checked_file_template_project+ instead, which implements important
       # visibility checks
@@ -68,7 +72,7 @@ module EE
 
       validate :custom_project_templates_group_allowed, if: :custom_project_templates_group_id_changed?
 
-      scope :aimed_for_deletion, -> (date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
+      scope :aimed_for_deletion, ->(date) { joins(:deletion_schedule).where('group_deletion_schedules.marked_for_deletion_on <= ?', date) }
       scope :with_deletion_schedule, -> { preload(deletion_schedule: :deleting_user) }
       scope :with_deletion_schedule_only, -> { preload(:deletion_schedule) }
 
@@ -76,14 +80,14 @@ module EE
         joins(:ldap_group_links).where(ldap_group_links: { provider: provider })
       end
 
-      scope :with_managed_accounts_enabled, -> {
+      scope :with_managed_accounts_enabled, -> do
         joins(:saml_provider).where(saml_providers:
           {
             enabled: true,
             enforced_sso: true,
             enforced_group_managed_accounts: true
           })
-      }
+      end
 
       scope :with_no_pat_expiry_policy, -> { where(max_personal_access_token_lifetime: nil) }
 
@@ -101,6 +105,8 @@ module EE
         epics_query = epics.select(:group_id)
         joins("INNER JOIN (#{epics_query.to_sql}) as epics on epics.group_id = namespaces.id")
       end
+
+      scope :user_is_member, -> (user) { id_in(user.authorized_groups(with_minimal_access: false)) }
 
       state_machine :ldap_sync_status, namespace: :ldap_sync, initial: :ready do
         state :ready
@@ -162,13 +168,6 @@ module EE
       def groups_user_can_read_epics(groups, user, same_root: false)
         groups_user_can(groups, user, :read_epic, same_root: same_root)
       end
-
-      def preset_root_ancestor_for(groups)
-        return groups if groups.size < 2
-
-        root = groups.first.root_ancestor
-        groups.drop(1).each { |group| group.root_ancestor = root }
-      end
     end
 
     def ip_restriction_ranges
@@ -229,13 +228,25 @@ module EE
       saml_provider.persisted? && saml_provider.enabled?
     end
 
+    def saml_group_sync_available?
+      feature_available?(:group_saml_group_sync) && root_ancestor.saml_enabled?
+    end
+
     override :multiple_issue_boards_available?
     def multiple_issue_boards_available?
       feature_available?(:multiple_group_issue_boards)
     end
 
+    def multiple_iteration_cadences_available?
+      feature_available?(:multiple_iteration_cadences)
+    end
+
     def group_project_template_available?
       feature_available?(:group_project_templates)
+    end
+
+    def scoped_variables_available?
+      feature_available?(:group_scoped_ci_variables)
     end
 
     def actual_size_limit
@@ -288,31 +299,27 @@ module EE
     end
 
     # For now, we are not billing for members with a Guest role for subscriptions
-    # with a Gold plan. The other plans will treat Guest members as a regular member
+    # with a Gold/Ultimate plan. The other plans will treat Guest members as a regular member
     # for billing purposes.
     #
     # We are plucking the user_ids from the "Members" table in an array and
     # converting the array of user_ids to a Set which will have unique user_ids.
     def billed_user_ids(requested_hosted_plan = nil)
-      if [actual_plan_name, requested_hosted_plan].include?(::Plan::GOLD)
-        strong_memoize(:gold_billed_user_ids) do
+      if ([actual_plan_name, requested_hosted_plan] & [::Plan::GOLD, ::Plan::ULTIMATE]).any?
+        strong_memoize(:billed_user_ids) do
           (billed_group_members.non_guests.distinct.pluck(:user_id) +
           billed_project_members.non_guests.distinct.pluck(:user_id) +
           billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id) +
           billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)).to_set
         end
       else
-        strong_memoize(:non_gold_billed_user_ids) do
+        strong_memoize(:non_billed_user_ids) do
           (billed_group_members.distinct.pluck(:user_id) +
           billed_project_members.distinct.pluck(:user_id) +
           billed_shared_group_members.distinct.pluck(:user_id) +
           billed_invited_group_to_project_members.distinct.pluck(:user_id)).to_set
         end
       end
-    end
-
-    def dependency_proxy_feature_available?
-      ::Gitlab.config.dependency_proxy.enabled && feature_available?(:dependency_proxy)
     end
 
     override :supports_events?
@@ -425,12 +432,82 @@ module EE
 
     override :users_count
     def users_count
-      return all_group_members.count unless minimal_access_role_allowed?
+      return all_group_members.count if minimal_access_role_allowed?
 
       members.count
     end
 
+    def releases_count
+      ::Release.by_namespace_id(self_and_descendants.select(:id)).count
+    end
+
+    def releases_percentage
+      calculate_sql = <<~SQL
+      (
+        COUNT(*) FILTER (WHERE EXISTS (SELECT 1 FROM releases WHERE releases.project_id = projects.id)) * 100.0 / GREATEST(COUNT(*), 1)
+      )::integer AS releases_percentage
+      SQL
+
+      self.class.count_by_sql(
+        ::Project.select(calculate_sql)
+        .where(namespace_id: self_and_descendants.select(:id)).to_sql
+      )
+    end
+
+    override :execute_hooks
+    def execute_hooks(data, hooks_scope)
+      super
+
+      return unless feature_available?(:group_webhooks)
+
+      self_and_ancestor_hooks = GroupHook.where(group_id: self_and_ancestors)
+      self_and_ancestor_hooks.hooks_for(hooks_scope).each do |hook|
+        hook.async_execute(data, hooks_scope.to_s)
+      end
+    end
+
+    override :git_transfer_in_progress?
+    def git_transfer_in_progress?
+      reference_counter(type: ::Gitlab::GlRepository::WIKI).value > 0
+    end
+
+    def repository_storage
+      group_wiki_repository&.shard_name || ::Repository.pick_storage_shard
+    end
+
+    def iteration_cadences_feature_flag_enabled?
+      ::Feature.enabled?(:iteration_cadences, self, default_enabled: :yaml)
+    end
+
     private
+
+    override :post_create_hook
+    def post_create_hook
+      super
+
+      execute_subgroup_hooks(:create)
+    end
+
+    override :post_destroy_hook
+    def post_destroy_hook
+      super
+
+      execute_subgroup_hooks(:destroy)
+    end
+
+    def execute_subgroup_hooks(event)
+      return unless subgroup?
+      return unless feature_available?(:group_webhooks)
+
+      run_after_commit do
+        data = ::Gitlab::HookData::SubgroupBuilder.new(self).build(event)
+        # Imagine a case where a subgroup has a webhook with `subgroup_events` enabled.
+        # When this subgroup is removed, there is no point in this subgroup's webhook itself being notified
+        # that `self` was removed. Rather, we should only care about notifying its ancestors
+        # and hence we need to trigger the hooks starting only from its `parent` group.
+        parent.execute_hooks(data, :subgroup_hooks)
+      end
+    end
 
     def custom_project_templates_group_allowed
       return if custom_project_templates_group_id.blank?
@@ -491,6 +568,18 @@ module EE
 
     def invited_or_shared_group_members(groups)
       ::GroupMember.active_without_invites_and_requests.where(source_id: ::Gitlab::ObjectHierarchy.new(groups).base_and_ancestors)
+    end
+
+    override :_safe_read_repository_read_only_column
+    def _safe_read_repository_read_only_column
+      ::NamespaceSetting.where(namespace: self).pick(:repository_read_only)
+    end
+
+    override :_update_repository_read_only_column
+    def _update_repository_read_only_column(value)
+      settings = namespace_settings || create_namespace_settings
+
+      settings.update_column(:repository_read_only, value)
     end
   end
 end

@@ -10,6 +10,7 @@ class DastSiteValidationWorker
   sidekiq_retry_in { 25 }
 
   feature_category :dynamic_application_security_testing
+  tags :exclude_from_kubernetes
 
   sidekiq_retries_exhausted do |job|
     dast_site_validation = DastSiteValidation.find(job['args'][0])

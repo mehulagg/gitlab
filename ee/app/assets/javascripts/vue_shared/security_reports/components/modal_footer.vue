@@ -5,7 +5,6 @@ import SplitButton from 'ee/vue_shared/security_reports/components/split_button.
 import { s__ } from '~/locale';
 
 export default {
-  name: 'ModalFooter',
   components: {
     DismissButton,
     GlButton,
@@ -58,20 +57,33 @@ export default {
       type: Boolean,
       required: true,
     },
+    vulnerability: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
+    createIssueButtonText() {
+      return this.vulnerability.create_jira_issue_url
+        ? s__('ciReport|Create Jira issue')
+        : s__('ciReport|Create issue');
+    },
+
     actionButtons() {
       const buttons = [];
       const issueButton = {
-        name: s__('ciReport|Create issue'),
+        name: this.createIssueButtonText,
         tagline: s__('ciReport|Investigate this vulnerability by creating an issue'),
-        isLoading: this.isCreatingIssue,
-        action: 'createNewIssue',
+        icon: this.vulnerability.create_jira_issue_url ? 'external-link' : undefined,
+        loading: this.isCreatingIssue,
+        target: this.vulnerability.create_jira_issue_url ? '_blank' : undefined,
+        action: this.vulnerability.create_jira_issue_url ? undefined : 'createNewIssue',
+        href: this.vulnerability.create_jira_issue_url,
       };
       const MRButton = {
         name: s__('ciReport|Resolve with merge request'),
         tagline: s__('ciReport|Automatically apply the patch in a new branch'),
-        isLoading: this.isCreatingMergeRequest,
+        loading: this.isCreatingMergeRequest,
         action: 'createMergeRequest',
       };
       const DownloadButton = {
@@ -100,7 +112,7 @@ export default {
 
 <template>
   <div>
-    <gl-button data-dismiss="modal" :disabled="disabled">
+    <gl-button :disabled="disabled" @click="$emit('cancel')">
       {{ __('Cancel') }}
     </gl-button>
 
@@ -127,11 +139,11 @@ export default {
 
     <gl-button
       v-else-if="actionButtons.length > 0"
-      :loading="actionButtons[0].isLoading"
-      :disabled="actionButtons[0].isLoading || disabled"
-      variant="success"
+      v-bind="actionButtons[0]"
+      :disabled="disabled"
+      variant="confirm"
       category="secondary"
-      class="js-action-button"
+      data-testid="create-issue-button"
       data-qa-selector="create_issue_button"
       @click="$emit(actionButtons[0].action)"
     >

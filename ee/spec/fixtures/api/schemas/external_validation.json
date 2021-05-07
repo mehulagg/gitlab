@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "allOf": [
+    { "$ref": "../../../../../spec/fixtures/api/schemas/external_validation.json" },
+    {
+      "required" : [
+        "namespace"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "object",
+          "required": [
+            "plan",
+            "trial"
+          ],
+          "properties": {
+            "plan": { "type": "string" },
+            "trial": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  ]
+}

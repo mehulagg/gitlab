@@ -10,6 +10,10 @@ module EE
     extend ::Gitlab::Utils::Override
 
     prepended do
+      include IgnorableColumns
+
+      ignore_columns %i[elasticsearch_shards elasticsearch_replicas], remove_with: '14.1', remove_after: '2021-06-22'
+
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
 
@@ -36,17 +40,9 @@ module EE
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
-      validates :elasticsearch_shards,
-                presence: true,
-                numericality: { only_integer: true, greater_than: 0 }
-
       validates :deletion_adjourned_period,
                 presence: true,
                 numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 90 }
-
-      validates :elasticsearch_replicas,
-                presence: true,
-                numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
       validates :elasticsearch_max_bulk_size_mb,
                 presence: true,
@@ -59,6 +55,18 @@ module EE
       validates :elasticsearch_url,
                 presence: { message: "can't be blank when indexing is enabled" },
                 if: ->(setting) { setting.elasticsearch_indexing? }
+
+      validates :secret_detection_revocation_token_types_url,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
+      validates :secret_detection_token_revocation_url,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
+
+      validates :secret_detection_token_revocation_token,
+                presence: { message: "can't be blank when secret detection token revocation is enabled" },
+                if: ->(setting) { setting.secret_detection_token_revocation_enabled? }
 
       validate :check_elasticsearch_url_scheme, if: :elasticsearch_url_changed?
 
@@ -94,6 +102,22 @@ module EE
 
       validate :allowed_frameworks, if: :compliance_frameworks_changed?
 
+      validates :new_user_signups_cap,
+                allow_blank: true,
+                numericality: { only_integer: true, greater_than: 0 }
+      validates :new_user_signups_cap,
+                allow_blank: true,
+                numericality: {
+                  only_integer: true,
+                  greater_than: 0,
+                  less_than_or_equal_to: proc { License.current&.restricted_user_count }
+                },
+                if: proc { License.current&.restricted_user_count? }
+
+      validates :git_two_factor_session_expiry,
+                presence: true,
+                numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 10080 }
+
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
       after_commit :resume_elasticsearch_indexing
     end
@@ -115,15 +139,19 @@ module EE
           elasticsearch_indexed_file_size_limit_kb: 1024, # 1 MiB (units in KiB)
           elasticsearch_max_bulk_concurrency: 10,
           elasticsearch_max_bulk_size_bytes: 10.megabytes,
-          elasticsearch_replicas: 1,
-          elasticsearch_shards: 5,
           elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
           elasticsearch_client_request_timeout: 0,
+          elasticsearch_analyzers_smartcn_enabled: false,
+          elasticsearch_analyzers_smartcn_search: false,
+          elasticsearch_analyzers_kuromoji_enabled: false,
+          elasticsearch_analyzers_kuromoji_search: false,
           email_additional_text: nil,
           enforce_namespace_storage_limit: false,
           enforce_pat_expiration: true,
           geo_node_allowed_ips: '0.0.0.0/0, ::/0',
+          git_two_factor_session_expiry: 15,
           lock_memberships_to_ldap: false,
+          maintenance_mode: false,
           max_personal_access_token_lifetime: nil,
           mirror_capacity_threshold: Settings.gitlab['mirror_capacity_threshold'],
           mirror_max_capacity: Settings.gitlab['mirror_max_capacity'],
@@ -131,6 +159,10 @@ module EE
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
           seat_link_enabled: Settings.gitlab['seat_link_enabled'],
+          secret_detection_token_revocation_enabled: false,
+          secret_detection_token_revocation_url: nil,
+          secret_detection_token_revocation_token: nil,
+          secret_detection_revocation_token_types_url: nil,
           slack_app_enabled: false,
           slack_app_id: nil,
           slack_app_secret: nil,
@@ -145,6 +177,14 @@ module EE
 
     def elasticsearch_project_ids
       ElasticsearchIndexedProject.target_ids
+    end
+
+    def elasticsearch_shards
+      Elastic::IndexSetting.number_of_shards
+    end
+
+    def elasticsearch_replicas
+      Elastic::IndexSetting.number_of_replicas
     end
 
     def elasticsearch_indexes_project?(project)
@@ -168,6 +208,10 @@ module EE
     def invalidate_elasticsearch_indexes_cache!
       ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:project)
       ::Gitlab::Elastic::ElasticsearchEnabledCache.delete(:namespace)
+    end
+
+    def invalidate_elasticsearch_indexes_cache_for_project!(project_id)
+      ::Gitlab::Elastic::ElasticsearchEnabledCache.delete_record(:project, project_id)
     end
 
     def elasticsearch_limited_projects(ignore_namespaces = false)
@@ -316,6 +360,10 @@ module EE
       write_attribute(:compliance_frameworks, cleaned)
     end
 
+    def should_apply_user_signup_cap?
+      ::Gitlab::CurrentSettings.new_user_signups_cap.present?
+    end
+
     private
 
     def elasticsearch_limited_project_exists?(project)
@@ -393,7 +441,7 @@ module EE
     end
 
     def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::ComplianceFramework::FRAMEWORKS.value?(value) }
+      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map(&:id).include?(value) }
         errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
       end
     end

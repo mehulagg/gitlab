@@ -1,9 +1,9 @@
 <script>
-import { escape } from 'lodash';
 import { GlSafeHtmlDirective as SafeHtml, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
+import { escape } from 'lodash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { s__, sprintf } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 
 export default {
   components: {
@@ -84,13 +84,16 @@ Please update your Git repository remotes as soon as possible.`),
 
       return axios
         .put(this.actionUrl, putData)
-        .then(result => {
+        .then((result) => {
           Flash(result.data.message, 'notice');
           this.username = username;
           this.isRequestPending = false;
         })
-        .catch(error => {
-          Flash(error.response.data.message);
+        .catch((error) => {
+          Flash(
+            error?.response?.data?.message ||
+              s__('Profiles|An error occurred while updating your username, please try again.'),
+          );
           this.isRequestPending = false;
           throw error;
         });
@@ -121,7 +124,8 @@ Please update your Git repository remotes as soon as possible.`),
     </div>
     <gl-button
       v-gl-modal-directive="$options.modalId"
-      :disabled="isRequestPending || newUsername === username"
+      :disabled="newUsername === username"
+      :loading="isRequestPending"
       category="primary"
       variant="warning"
       data-testid="username-change-confirmation-modal"

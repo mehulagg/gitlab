@@ -10,7 +10,7 @@ module Gitlab
           def perform!
             return unless project.auto_cancel_pending_pipelines?
 
-            Gitlab::OptimisticLocking.retry_lock(auto_cancelable_pipelines) do |cancelables|
+            Gitlab::OptimisticLocking.retry_lock(auto_cancelable_pipelines, name: 'cancel_pending_pipelines') do |cancelables|
               cancelables.find_each do |cancelable|
                 cancelable.auto_cancel_running(pipeline)
               end
@@ -25,7 +25,7 @@ module Gitlab
 
           # rubocop: disable CodeReuse/ActiveRecord
           def auto_cancelable_pipelines
-            project.ci_pipelines
+            project.all_pipelines.ci_and_parent_sources
               .where(ref: pipeline.ref)
               .where.not(id: pipeline.same_family_pipeline_ids)
               .where.not(sha: project.commit(pipeline.ref).try(:id))

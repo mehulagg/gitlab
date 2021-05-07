@@ -2,6 +2,8 @@
 
 module Clusters
   module Applications
+    # DEPRECATED for removal in %14.0
+    # See https://gitlab.com/groups/gitlab-org/-/epics/4280
     class CertManager < ApplicationRecord
       VERSION = 'v0.10.1'
       CRD_VERSION = '0.10'
@@ -30,7 +32,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: 'certmanager',
           repository: repository,
           version: VERSION,
@@ -43,7 +45,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        helm_command_module::DeleteCommand.new(
           name: 'certmanager',
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,
@@ -65,7 +67,7 @@ module Clusters
       end
 
       def retry_command(command)
-        "for i in $(seq 1 90); do #{command} && s=0 && break || s=$?; sleep 1s; echo \"Retrying ($i)...\"; done; (exit $s)"
+        Gitlab::Kubernetes::PodCmd.retry_command(command, times: 90)
       end
 
       def post_delete_script

@@ -1,21 +1,21 @@
 import Api from 'ee/api';
+import epicChildren from 'shared_queries/epic/epic_children.query.graphql';
+import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { s__, __ } from '~/locale';
 import {
   issuableTypesMap,
   itemAddFailureTypesMap,
   pathIndeterminateErrorMap,
   relatedIssuesRemoveErrorMap,
 } from '~/related_issues/constants';
-import { deprecatedCreateFlash as flash } from '~/flash';
-import { s__, __ } from '~/locale';
-import axios from '~/lib/utils/axios_utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
-import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
 import { ChildType, ChildState, idProp, relativePositions } from '../constants';
 
-import epicChildren from '../queries/epicChildren.query.graphql';
 import epicChildReorder from '../queries/epicChildReorder.mutation.graphql';
+import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
 
 import * as types from './mutation_types';
 
@@ -75,7 +75,9 @@ export const setIssuePageInfo = ({ commit }, data) => commit(types.SET_ISSUE_PAG
 export const requestItems = ({ commit }, data) => commit(types.REQUEST_ITEMS, data);
 export const receiveItemsSuccess = ({ commit }, data) => commit(types.RECEIVE_ITEMS_SUCCESS, data);
 export const receiveItemsFailure = ({ commit }, data) => {
-  flash(s__('Epics|Something went wrong while fetching child epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while fetching child epics.'),
+  });
   commit(types.RECEIVE_ITEMS_FAILURE, data);
 };
 export const fetchItems = ({ dispatch }, { parentItem, isSubItem = false }) => {
@@ -135,7 +137,9 @@ export const fetchItems = ({ dispatch }, { parentItem, isSubItem = false }) => {
 };
 
 export const receiveNextPageItemsFailure = () => {
-  flash(s__('Epics|Something went wrong while fetching child epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while fetching child epics.'),
+  });
 };
 export const fetchNextPageItems = ({ dispatch, state }, { parentItem, isSubItem = false }) => {
   const { iid, fullPath } = parentItem;
@@ -224,11 +228,12 @@ export const receiveRemoveItemSuccess = ({ commit }, data) =>
 export const receiveRemoveItemFailure = ({ commit }, { item, status }) => {
   commit(types.RECEIVE_REMOVE_ITEM_FAILURE, item);
   const issuableType = issuableTypesMap[item.type.toUpperCase()];
-  flash(
-    status === httpStatusCodes.NOT_FOUND
-      ? pathIndeterminateErrorMap[issuableType]
-      : relatedIssuesRemoveErrorMap[issuableType],
-  );
+  createFlash({
+    message:
+      status === httpStatusCodes.NOT_FOUND
+        ? pathIndeterminateErrorMap[issuableType]
+        : relatedIssuesRemoveErrorMap[issuableType],
+  });
 };
 export const removeItem = ({ dispatch }, { parentItem, item }) => {
   dispatch('requestRemoveItem', {
@@ -269,7 +274,7 @@ export const setItemInputValue = ({ commit }, data) => commit(types.SET_ITEM_INP
 
 export const requestAddItem = ({ commit }) => commit(types.REQUEST_ADD_ITEM);
 export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems }) => {
-  const items = rawItems.map(item => {
+  const items = rawItems.map((item) => {
     // This is needed since Rails API to add Epic/Issue
     // doesn't return global ID string.
     // We can remove this change once add epic/issue
@@ -300,7 +305,7 @@ export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems 
     items,
   });
 
-  items.forEach(item => {
+  items.forEach((item) => {
     dispatch('updateChildrenCount', { item });
   });
 
@@ -332,7 +337,7 @@ export const addItem = ({ state, dispatch, getters }) => {
         rawItems: data.issuables.slice(0, state.pendingReferences.length),
       });
     })
-    .catch(data => {
+    .catch((data) => {
       const { response } = data;
       if (response.status === httpStatusCodes.NOT_FOUND) {
         dispatch('receiveAddItemFailure', { itemAddFailureType: itemAddFailureTypesMap.NOT_FOUND });
@@ -383,15 +388,17 @@ export const receiveCreateItemSuccess = ({ state, commit, dispatch, getters }, {
 };
 export const receiveCreateItemFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
-  flash(s__('Epics|Something went wrong while creating child epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while creating child epics.'),
+  });
 };
-export const createItem = ({ state, dispatch }, { itemTitle }) => {
+export const createItem = ({ state, dispatch }, { itemTitle, groupFullPath }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
     confidential: state.parentItem.confidential,
-    groupId: state.parentItem.fullPath,
-    parentEpicIid: state.parentItem.iid,
+    groupId: groupFullPath || state.parentItem.fullPath,
+    parentEpicId: Number(state.parentItem.id.match(/\d.*/)),
     title: itemTitle,
   })
     .then(({ data }) => {
@@ -404,6 +411,9 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
       });
 
       dispatch('receiveCreateItemSuccess', { rawItem: data });
+      dispatch('fetchItems', {
+        parentItem: state.parentItem,
+      });
     })
     .catch(() => {
       dispatch('receiveCreateItemFailure');
@@ -412,7 +422,9 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
 
 export const receiveReorderItemFailure = ({ commit }, data) => {
   commit(types.REORDER_ITEM, data);
-  flash(s__('Epics|Something went wrong while ordering item.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while ordering item.'),
+  });
 };
 export const reorderItem = (
   { dispatch, commit },
@@ -457,7 +469,9 @@ export const reorderItem = (
 
 export const receiveMoveItemFailure = ({ commit }, data) => {
   commit(types.MOVE_ITEM_FAILURE, data);
-  flash(s__('Epics|Something went wrong while moving item.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while moving item.'),
+  });
 };
 
 export const moveItem = (
@@ -537,7 +551,9 @@ export const receiveCreateIssueSuccess = ({ commit }) =>
   commit(types.RECEIVE_CREATE_ITEM_SUCCESS, { insertAt: 0, items: [] });
 export const receiveCreateIssueFailure = ({ commit }) => {
   commit(types.RECEIVE_CREATE_ITEM_FAILURE);
-  flash(s__('Epics|Something went wrong while creating issue.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while creating issue.'),
+  });
 };
 export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) => {
   const { parentItem } = state;
@@ -554,7 +570,7 @@ export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) =
         parentItem,
       });
     })
-    .catch(e => {
+    .catch((e) => {
       dispatch('receiveCreateIssueFailure');
       throw e;
     });
@@ -565,7 +581,9 @@ export const receiveProjectsSuccess = ({ commit }, data) =>
   commit(types.RECIEVE_PROJECTS_SUCCESS, data);
 export const receiveProjectsFailure = ({ commit }) => {
   commit(types.RECIEVE_PROJECTS_FAILURE);
-  flash(__('Something went wrong while fetching projects.'));
+  createFlash({
+    message: __('Something went wrong while fetching projects.'),
+  });
 };
 export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
   const params = {
@@ -589,4 +607,16 @@ export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
       dispatch('receiveProjectsSuccess', data);
     })
     .catch(() => dispatch('receiveProjectsFailure'));
+};
+
+export const fetchDescendantGroups = ({ commit }, { groupId, search = '' }) => {
+  commit(types.REQUEST_DESCENDANT_GROUPS);
+
+  return Api.descendantGroups({ groupId, search })
+    .then(({ data }) => {
+      commit(types.RECEIVE_DESCENDANT_GROUPS_SUCCESS, data);
+    })
+    .catch(() => {
+      commit(types.RECEIVE_DESCENDANT_GROUPS_FAILURE);
+    });
 };

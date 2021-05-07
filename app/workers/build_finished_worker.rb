@@ -2,12 +2,13 @@
 
 class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include PipelineQueue
 
   queue_namespace :pipeline_processing
   urgency :high
   worker_resource_boundary :cpu
-  tags :requires_disk_io
 
   ARCHIVE_TRACES_IN = 2.minutes.freeze
 
@@ -29,19 +30,17 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
   # @param [Ci::Build] build The build to process.
   def process_build(build)
     # We execute these in sync to reduce IO.
-    BuildTraceSectionsWorker.new.perform(build.id)
-    BuildCoverageWorker.new.perform(build.id)
-    Ci::BuildReportResultWorker.new.perform(build.id)
-
-    # TODO: As per https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/194, it may be
-    # best to avoid creating more workers that we have no intention of calling async.
-    # Change the previous worker calls on top to also just call the service directly.
-    Ci::TestCasesService.new.execute(build)
+    build.parse_trace_sections!
+    build.update_coverage
+    Ci::BuildReportResultService.new.execute(build)
 
     # We execute these async as these are independent operations.
     BuildHooksWorker.perform_async(build.id)
-    ExpirePipelineCacheWorker.perform_async(build.pipeline_id) if build.pipeline.cacheable?
     ChatNotificationWorker.perform_async(build.id) if build.pipeline.chat?
+
+    if build.failed?
+      ::Ci::MergeRequests::AddTodoWhenBuildFailsWorker.perform_async(build.id)
+    end
 
     ##
     # We want to delay sending a build trace to object storage operation to

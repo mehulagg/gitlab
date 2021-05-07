@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'New project' do
+RSpec.describe 'New project', :js do
   let(:user) { create(:admin) }
 
   before do
@@ -17,7 +17,7 @@ RSpec.describe 'New project' do
 
       it 'shows mirror repository checkbox enabled', :js do
         visit new_project_path
-        find('#import-project-tab').click
+        find('[data-qa-selector="import_project_link"]').click
         first('.js-import-git-toggle-button').click
 
         expect(page).to have_unchecked_field('Mirror repository', disabled: false)
@@ -31,6 +31,7 @@ RSpec.describe 'New project' do
 
       it 'does not show mirror repository option' do
         visit new_project_path
+        find('[data-qa-selector="import_project_link"]').click
         first('.js-import-git-toggle-button').click
 
         expect(page).not_to have_content('Mirror repository')
@@ -59,16 +60,16 @@ RSpec.describe 'New project' do
       it 'shows CI/CD tab and pane' do
         visit new_project_path
 
-        expect(page).to have_css('#ci-cd-project-tab')
+        expect(page).to have_css('[data-qa-selector="cicd_for_external_repo_link"]')
 
-        find('#ci-cd-project-tab').click
+        find('[data-qa-selector="cicd_for_external_repo_link"]').click
 
         expect(page).to have_css('#ci-cd-project-pane')
       end
 
       it '"Import project" tab creates projects with features enabled' do
         visit new_project_path
-        find('#import-project-tab').click
+        find('[data-qa-selector="import_project_link"]').click
 
         page.within '#import-project-pane' do
           first('.js-import-git-toggle-button').click
@@ -88,7 +89,7 @@ RSpec.describe 'New project' do
 
       it 'creates CI/CD project from repo URL', :sidekiq_might_not_need_inline do
         visit new_project_path
-        find('#ci-cd-project-tab').click
+        find('[data-qa-selector="cicd_for_external_repo_link"]').click
 
         page.within '#ci-cd-project-pane' do
           find('.js-import-git-toggle-button').click
@@ -108,7 +109,7 @@ RSpec.describe 'New project' do
 
       it 'creates CI/CD project from GitHub' do
         visit new_project_path
-        find('#ci-cd-project-tab').click
+        find('[data-qa-selector="cicd_for_external_repo_link"]').click
 
         page.within '#ci-cd-project-pane' do
           find('.js-import-github').click
@@ -135,7 +136,7 @@ RSpec.describe 'New project' do
         click_button 'Connect'
         wait_for_requests
 
-        expect(page).to have_text('Done')
+        expect(page).to have_text('Complete')
 
         created_project = Project.last
         expect(created_project.name).to eq('some-github-repo')
@@ -145,7 +146,7 @@ RSpec.describe 'New project' do
 
       it 'stays on GitHub import page after access token failure' do
         visit new_project_path
-        find('#ci-cd-project-tab').click
+        find('[data-qa-selector="cicd_for_external_repo_link"]').click
 
         page.within '#ci-cd-project-pane' do
           find('.js-import-github').click
@@ -169,7 +170,7 @@ RSpec.describe 'New project' do
       it 'does not show CI/CD only tab' do
         visit new_project_path
 
-        expect(page).not_to have_css('#ci-cd-project-tab')
+        expect(page).not_to have_css('[data-qa-selector="cicd_for_external_repo_link"]')
       end
     end
   end
@@ -213,7 +214,7 @@ RSpec.describe 'New project' do
         it 'the tab shows the list of templates available' do
           page.within('#custom-group-project-templates') do
             # Show templates in case they're collapsed
-            page.all(:xpath, "//div[@class='js-template-group-options template-group-options']", wait: false).each(&:click)
+            page.find_all('div', class: ['js-template-group-options', 'template-group-options', '!expanded'], wait: false).each(&:click)
 
             expect(page).to have_selector('.template-option', count: template_number)
           end
@@ -360,7 +361,7 @@ RSpec.describe 'New project' do
 
               before do
                 allow(Gitlab::CurrentSettings).to receive(:should_check_namespace_plan?) { true }
-                create(:gitlab_subscription, :gold, namespace: group1)
+                create(:gitlab_subscription, :ultimate, namespace: group1)
               end
 
               it 'show Group tab in Templates section' do
@@ -422,7 +423,7 @@ RSpec.describe 'New project' do
   context 'Built-in project templates' do
     let(:enterprise_templates) { Gitlab::ProjectTemplate.localized_ee_templates_table }
 
-    context 'when `enterprise_templates` is licensed' do
+    context 'when `enterprise_templates` is licensed', :js do
       before do
         stub_licensed_features(enterprise_templates: true)
       end
@@ -437,7 +438,7 @@ RSpec.describe 'New project' do
       end
     end
 
-    context 'when `enterprise_templates` is unlicensed' do
+    context 'when `enterprise_templates` is unlicensed', :js do
       before do
         stub_licensed_features(enterprise_templates: false)
       end
@@ -457,9 +458,7 @@ RSpec.describe 'New project' do
     def visit_create_from_built_in_templates_tab
       visit new_project_path
 
-      expect(page).to have_css('#create-from-template-tab')
-
-      find('#create-from-template-tab').click
+      find('[data-qa-selector="create_from_template_link"]').click
     end
   end
 end

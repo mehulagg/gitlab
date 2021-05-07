@@ -1,11 +1,11 @@
 import $ from 'jquery';
-import AccessDropdown from '~/projects/settings/access_dropdown';
-import axios from '~/lib/utils/axios_utils';
-import AccessorUtilities from '~/lib/utils/accessor';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import CreateItemDropdown from '~/create_item_dropdown';
-import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
+import createFlash from '~/flash';
+import AccessorUtilities from '~/lib/utils/accessor';
+import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
+import AccessDropdown from '~/projects/settings/access_dropdown';
+import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 const PROTECTED_ENVIRONMENT_INPUT = 'input[name="protected_environment[name]"]';
 
@@ -59,7 +59,7 @@ export default class ProtectedEnvironmentCreate {
       .get(gon.search_unprotected_environments_url, { params: { query: term } })
       .then(({ data }) => {
         const environments = [].concat(data);
-        const results = environments.map(environment => ({
+        const results = environments.map((environment) => ({
           id: environment,
           text: environment,
           title: environment,
@@ -67,7 +67,9 @@ export default class ProtectedEnvironmentCreate {
         callback(results);
       })
       .catch(() => {
-        Flash(__('An error occurred while fetching environments.'));
+        createFlash({
+          message: __('An error occurred while fetching environments.'),
+        });
         callback([]);
       });
   }
@@ -80,12 +82,12 @@ export default class ProtectedEnvironmentCreate {
       },
     };
 
-    Object.keys(ACCESS_LEVELS).forEach(level => {
+    Object.keys(ACCESS_LEVELS).forEach((level) => {
       const accessLevel = ACCESS_LEVELS[level];
       const selectedItems = this[`${accessLevel}_dropdown`].getSelectedItems();
       const levelAttributes = [];
 
-      selectedItems.forEach(item => {
+      selectedItems.forEach((item) => {
         if (item.type === LEVEL_TYPES.USER) {
           levelAttributes.push({
             user_id: item.user_id,
@@ -115,6 +117,10 @@ export default class ProtectedEnvironmentCreate {
         window.location.hash = 'js-protected-environments-settings';
         window.location.reload();
       })
-      .catch(() => Flash(__('Failed to protect the environment')));
+      .catch(() =>
+        createFlash({
+          message: __('Failed to protect the environment'),
+        }),
+      );
   }
 }

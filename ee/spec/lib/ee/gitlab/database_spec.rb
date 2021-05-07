@@ -34,6 +34,16 @@ RSpec.describe Gitlab::Database do
         expect(described_class.read_only?).to be_falsey
       end
     end
+
+    context 'in maintenance mode' do
+      before do
+        stub_maintenance_mode_setting(true)
+      end
+
+      it 'returns true' do
+        expect(described_class.read_only?).to be_truthy
+      end
+    end
   end
 
   describe '.healthy?' do
@@ -51,19 +61,24 @@ RSpec.describe Gitlab::Database do
   end
 
   describe '.disable_prepared_statements' do
-    it 'disables prepared statements' do
-      config = {}
+    around do |example|
+      original_config = ::Gitlab::Database.config
 
-      expect(ActiveRecord::Base.configurations).to receive(:[])
-        .with(Rails.env)
-        .and_return(config)
+      example.run
+
+      ActiveRecord::Base.establish_connection(original_config)
+    end
+
+    it 'disables prepared statements' do
+      ActiveRecord::Base.establish_connection(::Gitlab::Database.config.merge(prepared_statements: true))
+      expect(ActiveRecord::Base.connection.prepared_statements).to eq(true)
 
       expect(ActiveRecord::Base).to receive(:establish_connection)
-        .with({ 'prepared_statements' => false })
+        .with(a_hash_including({ 'prepared_statements' => false })).and_call_original
 
       described_class.disable_prepared_statements
 
-      expect(config['prepared_statements']).to eq(false)
+      expect(ActiveRecord::Base.connection.prepared_statements).to eq(false)
     end
   end
 

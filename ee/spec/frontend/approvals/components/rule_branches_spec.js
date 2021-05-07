@@ -32,7 +32,7 @@ describe('Rule Branches', () => {
       protectedBranches: [
         {
           id: 1,
-          name: 'master',
+          name: 'main',
         },
         {
           id: 2,
@@ -45,7 +45,7 @@ describe('Rule Branches', () => {
       rule,
     });
 
-    expect(wrapper.text()).toContain('master');
+    expect(wrapper.text()).toContain('main');
     expect(wrapper.text()).not.toContain('hello');
   });
 });

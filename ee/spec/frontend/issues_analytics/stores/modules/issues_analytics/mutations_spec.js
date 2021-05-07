@@ -1,6 +1,6 @@
-import createState from 'ee/issues_analytics/stores/modules/issue_analytics/state';
-import mutations from 'ee/issues_analytics/stores/modules/issue_analytics/mutations';
 import * as types from 'ee/issues_analytics/stores/modules/issue_analytics/mutation_types';
+import mutations from 'ee/issues_analytics/stores/modules/issue_analytics/mutations';
+import createState from 'ee/issues_analytics/stores/modules/issue_analytics/state';
 
 describe('Issue Analytics mutations', () => {
   let state;

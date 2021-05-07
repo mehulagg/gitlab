@@ -10,6 +10,7 @@ RSpec.describe 'epics list', :js do
     stub_licensed_features(epics: true)
     stub_feature_flags(unfiltered_epic_aggregates: false)
     stub_feature_flags(async_filtering: false)
+    stub_feature_flags(vue_epics_list: false)
 
     sign_in(user)
   end
@@ -26,7 +27,7 @@ RSpec.describe 'epics list', :js do
     it 'shows epics tabs for each status type' do
       page.within('.epics-state-filters') do
         expect(page).to have_selector('li > a#state-opened')
-        expect(find('li > a#state-opened')[:title]).to eq('Filter by epics that are currently opened.')
+        expect(find('li > a#state-opened')[:title]).to eq('Filter by epics that are currently open.')
 
         expect(page).to have_selector('li > a#state-closed')
         expect(find('li > a#state-closed')[:title]).to eq('Filter by epics that are currently closed.')
@@ -209,6 +210,47 @@ RSpec.describe 'epics list', :js do
         expect(page).to have_selector('li > a#state-opened')
         expect(page).to have_selector('li > a#state-closed')
         expect(page).to have_selector('li > a#state-all')
+      end
+    end
+  end
+
+  context 'vue epics list' do
+    let!(:epic1) { create(:epic, group: group, start_date: '2020-12-15', end_date: '2021-1-15') }
+    let!(:epic2) { create(:epic, group: group, start_date: '2020-12-15') }
+    let!(:epic3) { create(:epic, group: group, end_date: '2021-1-15') }
+
+    before do
+      stub_feature_flags(vue_epics_list: true)
+      group.add_developer(user)
+
+      visit group_epics_path(group)
+
+      wait_for_requests
+    end
+
+    it 'renders epics list' do
+      page.within('.issuable-list-container') do
+        expect(page).to have_selector('.gl-tabs')
+        expect(page).to have_link('New epic')
+        expect(page).to have_selector('.vue-filtered-search-bar-container')
+        expect(page.find('.issuable-list')).to have_selector('li.issue', count: 3)
+      end
+    end
+
+    it 'renders epics item with metadata' do
+      page.within('.issuable-list-container .issuable-list') do
+        expect(page.all('.issuable-info-container')[0].find('.issue-title')).to have_content(epic2.title)
+        expect(page.all('.issuable-info-container')[0].find('.issuable-reference')).to have_content("&#{epic2.iid}")
+        expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content('created')
+        expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content("by #{epic2.author.name}")
+      end
+    end
+
+    it 'renders epic item timeframe' do
+      page.within('.issuable-list-container .issuable-list') do
+        expect(page.all('.issuable-info-container')[0].find('.issuable-info')).to have_content('Dec 15, 2020 – No due date')
+        expect(page.all('.issuable-info-container')[1].find('.issuable-info')).to have_content('Dec 15, 2020 – Jan 15, 2021')
+        expect(page.all('.issuable-info-container')[2].find('.issuable-info')).to have_content('No start date – Jan 15, 2021')
       end
     end
   end

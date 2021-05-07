@@ -1,15 +1,7 @@
 /* eslint-disable no-param-reassign */
-import List from '~/boards/models/list';
 import ListAssignee from '~/boards/models/assignee';
+import List from '~/boards/models/list';
 import ListMilestone from '~/boards/models/milestone';
-
-const EE_TYPES = {
-  promotion: {
-    isPreset: true,
-    isExpandable: false,
-    isBlank: true,
-  },
-};
 
 class ListEE extends List {
   constructor(...args) {
@@ -17,12 +9,8 @@ class ListEE extends List {
     this.totalWeight = args[0]?.totalWeight || 0;
   }
 
-  getTypeInfo(type) {
-    return EE_TYPES[type] || super.getTypeInfo(type);
-  }
-
   getIssues(...args) {
-    return super.getIssues(...args).then(data => {
+    return super.getIssues(...args).then((data) => {
       this.totalWeight = data.total_weight;
     });
   }
@@ -50,7 +38,7 @@ class ListEE extends List {
   onNewIssueResponse(issue, data) {
     issue.milestone = data.milestone ? new ListMilestone(data.milestone) : data.milestone;
     issue.assignees = Array.isArray(data.assignees)
-      ? data.assignees.map(assignee => new ListAssignee(assignee))
+      ? data.assignees.map((assignee) => new ListAssignee(assignee))
       : data.assignees;
     issue.labels = data.labels;
 

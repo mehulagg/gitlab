@@ -1,11 +1,17 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Testing standards and style guidelines
 
 This document describes various guidelines and best practices for automated
 testing of the GitLab project.
 
-It is meant to be an _extension_ of the [thoughtbot testing
+It is meant to be an _extension_ of the [Thoughtbot testing
 style guide](https://github.com/thoughtbot/guides/tree/master/testing-rspec). If
-this guide defines a rule that contradicts the thoughtbot guide, this guide
+this guide defines a rule that contradicts the Thoughtbot guide, this guide
 takes precedence. Some guidelines may be repeated verbatim to stress their
 importance.
 

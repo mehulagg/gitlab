@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import { debounce } from 'lodash';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import SSHMirror from './ssh_mirror';
+import { __ } from '~/locale';
 import { hide } from '~/tooltips';
+import SSHMirror from './ssh_mirror';
 
 export default class MirrorRepos {
   constructor(container) {
@@ -39,6 +39,7 @@ export default class MirrorRepos {
 
   initMirrorSSH() {
     if (this.$password) {
+      // eslint-disable-next-line @gitlab/no-global-event-off
       this.$password.off('input.updateUrl');
     }
     this.$password = undefined;
@@ -79,7 +80,7 @@ export default class MirrorRepos {
     this.debouncedUpdateUrl = debounce(() => this.updateUrl(), 200);
     this.$urlInput.on('input', () => this.debouncedUpdateUrl());
     this.$protectedBranchesInput.on('change', () => this.updateProtectedBranches());
-    this.$table.on('click', '.js-delete-mirror', event => this.deleteMirror(event));
+    this.$table.on('click', '.js-delete-mirror', (event) => this.deleteMirror(event));
   }
 
   togglePassword() {

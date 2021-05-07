@@ -4,10 +4,11 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Billing', :js do
   include StubRequests
+  include SubscriptionPortalHelpers
 
-  let!(:user)        { create(:user) }
-  let!(:group)       { create(:group) }
-  let!(:bronze_plan) { create(:bronze_plan) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:bronze_plan) { create(:bronze_plan) }
 
   def formatted_date(date)
     date.strftime("%B %-d, %Y")
@@ -18,7 +19,9 @@ RSpec.describe 'Groups > Billing', :js do
   end
 
   before do
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}")
+    stub_eoa_eligibility_request(group.id)
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}&namespace_id=#{group.id}")
+      .with(headers: { 'Accept' => 'application/json' })
       .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
 
     allow(Gitlab).to receive(:com?).and_return(true)
@@ -38,7 +41,7 @@ RSpec.describe 'Groups > Billing', :js do
     it 'shows the proper title and subscription data' do
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Free plan")
+      expect(page).to have_content("#{group.name} is currently using the Free Plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")
@@ -50,21 +53,26 @@ RSpec.describe 'Groups > Billing', :js do
   context 'with a paid plan' do
     let(:plan) { 'bronze' }
 
-    let!(:subscription) do
+    let_it_be(:subscription) do
       create(:gitlab_subscription, namespace: group, hosted_plan: bronze_plan, seats: 15)
     end
 
     it 'shows the proper title and subscription data' do
-      visit group_billings_path(group)
-
+      extra_seats_url = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
+      renew_url = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
       upgrade_url =
         "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/upgrade/bronze-external-id"
 
-      expect(page).to have_content("#{group.name} is currently using the Bronze plan")
+      visit group_billings_path(group)
+
+      expect(page).to have_content("#{group.name} is currently using the Bronze Plan")
       within subscription_table do
         expect(page).to have_content("start date #{formatted_date(subscription.start_date)}")
         expect(page).to have_link("Upgrade", href: upgrade_url)
         expect(page).to have_link("Manage", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")
+        expect(page).to have_link("Add seats", href: extra_seats_url)
+        expect(page).to have_link("Renew", href: renew_url)
+        expect(page).to have_link("See usage", href: group_seat_usage_path(group))
       end
     end
   end
@@ -79,7 +87,7 @@ RSpec.describe 'Groups > Billing', :js do
     it 'shows the proper title and subscription data' do
       visit group_billings_path(group)
 
-      expect(page).to have_content("#{group.name} is currently using the Bronze plan")
+      expect(page).to have_content("#{group.name} is currently using the Bronze Plan")
       within subscription_table do
         expect(page).not_to have_link("Upgrade")
         expect(page).to have_link("Manage", href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions")

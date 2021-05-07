@@ -10,22 +10,20 @@ import {
   GlIcon,
   GlEmptyState,
 } from '@gitlab/ui';
+import { convertToSnakeCase } from '~/lib/utils/text_utility';
+import { visitUrl, mergeUrlParams, joinPaths } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
+import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
+import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import Tracking from '~/tracking';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
 import {
   tdClass,
   thClass,
   bodyTrClass,
   initialPaginationState,
 } from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
-import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import { s__ } from '~/locale';
-import { visitUrl, mergeUrlParams, joinPaths } from '~/lib/utils/url_utility';
-import getIncidents from '../graphql/queries/get_incidents.query.graphql';
-import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
-import SeverityToken from '~/sidebar/components/severity/severity.vue';
-import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
+import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import {
   I18N,
   INCIDENT_STATUS_TABS,
@@ -37,6 +35,8 @@ import {
   trackIncidentCreateNewOptions,
   trackIncidentListViewsOptions,
 } from '../constants';
+import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
+import getIncidents from '../graphql/queries/get_incidents.query.graphql';
 
 export default {
   trackIncidentCreateNewOptions,
@@ -69,9 +69,12 @@ export default {
     {
       key: 'incidentSla',
       label: s__('IncidentManagement|Time to SLA'),
-      thClass: `gl-pointer-events-none gl-text-right gl-w-eighth`,
+      thClass: `gl-text-right gl-w-eighth`,
       tdClass: `${tdClass} gl-text-right`,
       thAttr: TH_INCIDENT_SLA_TEST_ID,
+      sortKey: 'SLA_DUE_AT',
+      sortable: true,
+      sortDirection: 'asc',
     },
     {
       key: 'assignees',
@@ -99,7 +102,7 @@ export default {
     GlIcon,
     PublishedCell: () => import('ee_component/incidents/components/published_cell.vue'),
     ServiceLevelAgreementCell: () =>
-      import('ee_component/incidents/components/service_level_agreement_cell.vue'),
+      import('ee_component/vue_shared/components/incidents/service_level_agreement.vue'),
     GlEmptyState,
     SeverityToken,
     PaginatedTableWithSearchAndTabs,
@@ -253,13 +256,20 @@ export default {
       this.redirecting = true;
     },
     fetchSortedData({ sortBy, sortDesc }) {
+      let sortKey;
+      // In bootstrap-vue v2.17.0, sortKey becomes natively supported and we can eliminate this function
+      const field = this.availableFields.find(({ key }) => key === sortBy);
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
-      const sortingColumn = convertToSnakeCase(sortBy)
-        .replace(/_.*/, '')
-        .toUpperCase();
+
+      // Use `sortKey` if provided, otherwise fall back to existing algorithm
+      if (field?.sortKey) {
+        sortKey = field.sortKey;
+      } else {
+        sortKey = convertToSnakeCase(sortBy).replace(/_.*/, '').toUpperCase();
+      }
 
       this.pagination = initialPaginationState;
-      this.sort = `${sortingColumn}_${sortingDirection}`;
+      this.sort = `${sortKey}_${sortingDirection}`;
     },
     getSeverity(severity) {
       return INCIDENT_SEVERITY[severity];
@@ -407,7 +417,7 @@ export default {
           </template>
         </gl-table>
       </template>
-      <template #emtpy-state>
+      <template #empty-state>
         <gl-empty-state
           :title="emptyStateData.title"
           :svg-path="emptyListSvgPath"

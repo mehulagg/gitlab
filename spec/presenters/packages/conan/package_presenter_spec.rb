@@ -7,6 +7,7 @@ RSpec.describe ::Packages::Conan::PackagePresenter do
   let_it_be(:package) { create(:conan_package) }
   let_it_be(:project) { package.project }
   let_it_be(:conan_package_reference) { '123456789'}
+
   let(:params) { { package_scope: :instance } }
 
   shared_examples 'no existing package' do
@@ -146,7 +147,7 @@ RSpec.describe ::Packages::Conan::PackagePresenter do
         before do
           [info_file, manifest_file, package_file].each do |file|
             file.conan_file_metadatum.conan_package_reference = alternative_reference
-            file.save
+            file.save!
           end
         end
 

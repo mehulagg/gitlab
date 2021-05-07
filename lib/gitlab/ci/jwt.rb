@@ -45,7 +45,7 @@ module Gitlab
       end
 
       def custom_claims
-        {
+        fields = {
           namespace_id: namespace.id.to_s,
           namespace_path: namespace.full_path,
           project_id: project.id.to_s,
@@ -59,20 +59,29 @@ module Gitlab
           ref_type: ref_type,
           ref_protected: build.protected.to_s
         }
+
+        if environment.present?
+          fields.merge!(
+            environment: environment.name,
+            environment_protected: environment_protected?.to_s
+          )
+        end
+
+        fields
       end
 
       def key
         @key ||= begin
-                   key_data = if Feature.enabled?(:ci_jwt_signing_key, build.project)
-                                Gitlab::CurrentSettings.ci_jwt_signing_key
-                              else
-                                Rails.application.secrets.openid_connect_signing_key
-                              end
+          key_data = if Feature.enabled?(:ci_jwt_signing_key, build.project, default_enabled: true)
+                       Gitlab::CurrentSettings.ci_jwt_signing_key
+                     else
+                       Rails.application.secrets.openid_connect_signing_key
+                     end
 
-                   raise NoSigningKeyError unless key_data
+          raise NoSigningKeyError unless key_data
 
-                   OpenSSL::PKey::RSA.new(key_data)
-                 end
+          OpenSSL::PKey::RSA.new(key_data)
+        end
       end
 
       def public_key
@@ -102,6 +111,16 @@ module Gitlab
       def ref_type
         ::Ci::BuildRunnerPresenter.new(build).ref_type
       end
+
+      def environment
+        build.persisted_environment
+      end
+
+      def environment_protected?
+        false # Overridden in EE
+      end
     end
   end
 end
+
+Gitlab::Ci::Jwt.prepend_if_ee('::EE::Gitlab::Ci::Jwt')

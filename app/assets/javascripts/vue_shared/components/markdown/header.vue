@@ -1,8 +1,9 @@
 <script>
-import $ from 'jquery';
 import { GlPopover, GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import $ from 'jquery';
+import { keysFor, BOLD_TEXT, ITALIC_TEXT, LINK_TEXT } from '~/behaviors/shortcuts/keybindings';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
+import { s__ } from '~/locale';
 import { CopyAsGFM } from '../../../behaviors/markdown/copy_as_gfm';
 import ToolbarButton from './toolbar_button.vue';
 
@@ -36,6 +37,11 @@ export default {
       required: false,
       default: false,
     },
+    suggestionStartIndex: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -53,7 +59,9 @@ export default {
       ].join('\n');
     },
     mdSuggestion() {
-      return ['```suggestion:-0+0', `{text}`, '```'].join('\n');
+      return [['```', `suggestion:-${this.suggestionStartIndex}+0`].join(''), `{text}`, '```'].join(
+        '\n',
+      );
     },
     isMac() {
       // Accessing properties using ?. to allow tests to use
@@ -110,11 +118,16 @@ export default {
       const area = this.$el.parentNode.querySelector('textarea');
 
       CopyAsGFM.nodeToGFM(transformed)
-        .then(gfm => {
+        .then((gfm) => {
           CopyAsGFM.insertPastedText(area, documentFragment.textContent, CopyAsGFM.quoted(gfm));
         })
         .catch(() => {});
     },
+  },
+  shortcuts: {
+    bold: keysFor(BOLD_TEXT),
+    italic: keysFor(ITALIC_TEXT),
+    link: keysFor(LINK_TEXT),
   },
 };
 </script>
@@ -143,7 +156,7 @@ export default {
             :button-title="
               sprintf(s__('MarkdownEditor|Add bold text (%{modifierKey}B)'), { modifierKey })
             "
-            shortcuts="mod+b"
+            :shortcuts="$options.shortcuts.bold"
             icon="bold"
           />
           <toolbar-button
@@ -151,7 +164,7 @@ export default {
             :button-title="
               sprintf(s__('MarkdownEditor|Add italic text (%{modifierKey}I)'), { modifierKey })
             "
-            shortcuts="mod+i"
+            :shortcuts="$options.shortcuts.italic"
             icon="italic"
           />
           <toolbar-button
@@ -172,6 +185,7 @@ export default {
               :cursor-offset="4"
               :tag-content="lineContent"
               icon="doc-code"
+              data-qa-selector="suggestion_button"
               class="js-suggestion-btn"
               @click="handleSuggestDismissed"
             />
@@ -207,7 +221,7 @@ export default {
             :button-title="
               sprintf(s__('MarkdownEditor|Add a link (%{modifierKey}K)'), { modifierKey })
             "
-            shortcuts="mod+k"
+            :shortcuts="$options.shortcuts.link"
             icon="link"
           />
         </div>

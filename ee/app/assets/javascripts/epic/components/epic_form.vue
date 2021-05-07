@@ -7,11 +7,11 @@ import {
   GlFormGroup,
   GlFormInput,
 } from '@gitlab/ui';
+import createFlash from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
-import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import LabelsSelectVue from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import createEpic from '../queries/createEpic.mutation.graphql';
 
 export default {
@@ -46,7 +46,7 @@ export default {
   },
   computed: {
     labelIds() {
-      return this.labels.map(label => label.id);
+      return this.labels.map((label) => label.id);
     },
   },
   i18n: {
@@ -80,7 +80,9 @@ export default {
         .then(({ data }) => {
           const { errors, epic } = data.createEpic;
           if (errors?.length > 0) {
-            createFlash(errors[0]);
+            createFlash({
+              message: errors[0],
+            });
             this.loading = false;
             return;
           }
@@ -89,7 +91,9 @@ export default {
         })
         .catch(() => {
           this.loading = false;
-          createFlash(s__('Epics|Unable to save epic. Please try again'));
+          createFlash({
+            message: s__('Epics|Unable to save epic. Please try again'),
+          });
         });
     },
     updateDueDate(val) {
@@ -102,7 +106,7 @@ export default {
       const ids = [];
       const allLabels = [...labels, ...this.labels];
 
-      this.labels = allLabels.filter(label => {
+      this.labels = allLabels.filter((label) => {
         const exists = ids.includes(label.id);
         ids.push(label.id);
 
@@ -124,6 +128,7 @@ export default {
           id="epic-title"
           v-model="title"
           data-testid="epic-title"
+          data-qa-selector="epic_title_field"
           :placeholder="s__('Epics|Enter a title for your epic')"
           autocomplete="off"
           autofocus
@@ -161,6 +166,7 @@ export default {
         <gl-form-checkbox
           id="epic-confidentiality"
           v-model="confidential"
+          data-qa-selector="confidential_epic_checkbox"
           data-testid="epic-confidentiality"
         >
           {{ $options.i18n.confidentialityLabel }}
@@ -222,10 +228,11 @@ export default {
       <div class="footer-block row-content-block gl-display-flex">
         <gl-button
           type="submit"
-          variant="success"
+          variant="confirm"
           :loading="loading"
           :disabled="!title"
           data-testid="save-epic"
+          data-qa-selector="create_epic_button"
         >
           {{ __('Create epic') }}
         </gl-button>

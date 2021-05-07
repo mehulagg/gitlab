@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Issues::CreateService do
   let_it_be(:group) { create(:group) }
+
   let(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
   let(:params) { { title: 'Awesome issue', description: 'please fix', weight: 9 } }

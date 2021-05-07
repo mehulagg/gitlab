@@ -25,6 +25,7 @@ module MergeRequests
       new_merge_request = create(merge_request)
 
       if new_merge_request.valid?
+        merge_request_activity_counter.track_mr_create_from_issue(user: current_user)
         SystemNoteService.new_merge_request(issue, project, current_user, new_merge_request)
 
         success(new_merge_request)
@@ -72,7 +73,7 @@ module MergeRequests
     end
 
     def default_branch
-      target_project.default_branch || 'master'
+      target_project.default_branch_or_main
     end
 
     def merge_request
@@ -85,7 +86,8 @@ module MergeRequests
         source_project_id: target_project.id,
         source_branch: branch_name,
         target_project_id: target_project.id,
-        target_branch: target_branch
+        target_branch: target_branch,
+        assignee_ids: [current_user.id]
       }
     end
 

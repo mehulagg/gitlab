@@ -1,25 +1,33 @@
 import Vue from 'vue';
+import { mapState } from 'vuex';
 import App from './components/app.vue';
 import store from './store';
+import { getVersionDigest, setNotification } from './utils/notification';
 
 let whatsNewApp;
 
-export default () => {
+export default (el) => {
   if (whatsNewApp) {
     store.dispatch('openDrawer');
   } else {
-    const whatsNewElm = document.getElementById('whats-new-app');
-
     whatsNewApp = new Vue({
-      el: whatsNewElm,
+      el,
       store,
       components: {
         App,
       },
+      computed: {
+        ...mapState(['open']),
+      },
+      watch: {
+        open() {
+          setNotification(el);
+        },
+      },
       render(createElement) {
         return createElement('app', {
           props: {
-            storageKey: whatsNewElm.getAttribute('data-storage-key'),
+            versionDigest: getVersionDigest(el),
           },
         });
       },

@@ -1,4 +1,13 @@
 import { s__ } from '~/locale';
+import {
+  FEEDBACK_TYPE_ISSUE,
+  FEEDBACK_TYPE_MERGE_REQUEST,
+} from '~/vue_shared/security_reports/constants';
+
+const falsePositiveMessage = s__('VulnerabilityManagement|Will not fix or a false-positive');
+
+export const gidPrefix = 'gid://gitlab/Vulnerability/';
+export const uidPrefix = 'gid://gitlab/User/';
 
 export const VULNERABILITY_STATE_OBJECTS = {
   detected: {
@@ -12,7 +21,10 @@ export const VULNERABILITY_STATE_OBJECTS = {
     action: 'dismiss',
     state: 'dismissed',
     displayName: s__('Dismiss'),
-    description: s__('VulnerabilityManagement|Will not fix or a false-positive'),
+    description: falsePositiveMessage,
+    payload: {
+      comment: falsePositiveMessage,
+    },
   },
   confirmed: {
     action: 'confirm',
@@ -49,8 +61,8 @@ export const HEADER_ACTION_BUTTONS = {
 };
 
 export const FEEDBACK_TYPES = {
-  ISSUE: 'issue',
-  MERGE_REQUEST: 'merge_request',
+  ISSUE: FEEDBACK_TYPE_ISSUE,
+  MERGE_REQUEST: FEEDBACK_TYPE_MERGE_REQUEST,
 };
 
 export const RELATED_ISSUES_ERRORS = {
@@ -64,4 +76,9 @@ export const RELATED_ISSUES_ERRORS = {
 export const REGEXES = {
   ISSUE_FORMAT: /^#?(\d+)$/, // Matches '123' and '#123'.
   LINK_FORMAT: /\/(.+\/.+)\/-\/issues\/(\d+)/, // Matches '/username/project/-/issues/123'.
+};
+
+export const SUPPORTING_MESSAGE_TYPES = {
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  RECORDED: 'Recorded',
 };

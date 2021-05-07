@@ -400,6 +400,19 @@ eos
       allow(commit).to receive(:safe_message).and_return(message + "\n" + message)
       expect(commit.full_title).to eq(message)
     end
+
+    it 'truncates html representation if more than 1KiB' do
+      # Commit title is over 2KiB on a single line
+      huge_commit_title = ('panic ' * 350) + 'trailing text'
+
+      allow(commit).to receive(:safe_message).and_return(huge_commit_title)
+
+      commit.refresh_markdown_cache
+      full_title_html = commit.full_title_html
+
+      expect(full_title_html.bytesize).to be < 2.kilobytes
+      expect(full_title_html).not_to include('trailing text')
+    end
   end
 
   describe 'description' do
@@ -427,6 +440,19 @@ eos
 
       allow(commit).to receive(:safe_message).and_return(message)
       expect(commit.description).to eq(message)
+    end
+
+    it 'truncates html representation if more than 1Mib' do
+      # Commit message is over 2MiB
+      huge_commit_message = ['panic', ('panic ' * 350000), 'trailing text'].join("\n")
+
+      allow(commit).to receive(:safe_message).and_return(huge_commit_message)
+
+      commit.refresh_markdown_cache
+      description_html = commit.description_html
+
+      expect(description_html.bytesize).to be < 2.megabytes
+      expect(description_html).not_to include('trailing text')
     end
   end
 
@@ -500,7 +526,7 @@ eos
       context 'that is found' do
         before do
           # Artificially mark as completed.
-          merge_request.update(merge_commit_sha: merge_commit.id)
+          merge_request.update!(merge_commit_sha: merge_commit.id)
         end
 
         it do

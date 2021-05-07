@@ -11,6 +11,35 @@ RSpec.describe API::ProjectApprovalRules do
   let_it_be(:approver) { create(:user) }
   let_it_be(:other_approver) { create(:user) }
 
+  describe 'GET /projects/:id/approval_rules/:approval_rule_id' do
+    let_it_be(:private_project) { create(:project, :private, creator: user, namespace: user.namespace) }
+    let!(:approval_rule) { create(:approval_project_rule, project: private_project) }
+    let(:url) { "/projects/#{private_project.id}/approval_rules/#{approval_rule.id}" }
+
+    context 'when the request is correct' do
+      it 'matches the response schema', :aggregate_failures do
+        get api(url, user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/project_approval_rule', dir: 'ee')
+
+        rule = json_response
+
+        expect(rule['approvals_required']).to eq(approval_rule.approvals_required)
+        expect(rule['id']).to eq(approval_rule.id)
+        expect(rule['name']).to eq(approval_rule.name)
+      end
+    end
+
+    context 'when the user is not authorized' do
+      it 'does not display rule information' do
+        get api(url, user2)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
   describe 'GET /projects/:id/approval_rules' do
     let(:url) { "/projects/#{project.id}/approval_rules" }
 
@@ -83,6 +112,31 @@ RSpec.describe API::ProjectApprovalRules do
 
           expect(json.size).to eq(2)
           expect(json.map { |rule| rule['name'] }).to contain_exactly(rule.name, report_approver_rule.name)
+        end
+      end
+    end
+
+    context 'when project is archived' do
+      let_it_be(:archived_project) { create(:project, :archived, creator: user) }
+      let(:url) { "/projects/#{archived_project.id}/approval_rules" }
+
+      context 'when user has normal permissions' do
+        it 'returns 403' do
+          archived_project.add_guest(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'when user has project admin permissions' do
+        it 'allows access' do
+          archived_project.add_maintainer(user2)
+
+          get api(url, user2)
+
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end

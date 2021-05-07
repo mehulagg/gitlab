@@ -55,7 +55,7 @@ class GeoNode < ApplicationRecord
   scope :ordered, -> { order(:id) }
 
   attr_encrypted :secret_access_key,
-                 key: Settings.attr_encrypted_db_key_base_truncated,
+                 key: Settings.attr_encrypted_db_key_base_32,
                  algorithm: 'aes-256-gcm',
                  mode: :per_attribute_iv,
                  encode: true
@@ -102,6 +102,10 @@ class GeoNode < ApplicationRecord
       left_join_status.minimum(:cursor_last_event_id)
     end
 
+    def current?(node)
+      node.present? && current_node_name == node.name
+    end
+
     # Tries to find a GeoNode by oauth_application_id, returning nil if none could be found.
     def find_by_oauth_application_id(oauth_application_id)
       find_by(oauth_application_id: oauth_application_id)
@@ -115,10 +119,6 @@ class GeoNode < ApplicationRecord
 
       joins(join_statement.join_sources)
     end
-  end
-
-  def current?
-    self.class.current_node_name == name
   end
 
   def secondary?
@@ -377,7 +377,12 @@ class GeoNode < ApplicationRecord
   def update_oauth_application!
     return unless uri
 
-    self.build_oauth_application if oauth_application.nil?
+    if oauth_application.nil?
+      self.build_oauth_application
+      self.oauth_application.trusted = true
+      self.oauth_application.confidential = true
+    end
+
     self.oauth_application.name = "Geo node: #{self.url}"
     self.oauth_application.redirect_uri = oauth_callback_url
   end

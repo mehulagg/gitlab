@@ -25,4 +25,20 @@ RSpec.describe IssuePresenter do
       it { is_expected.to eq(nil) }
     end
   end
+
+  describe '#web_url' do
+    subject { described_class.new(issue).present.web_url }
+
+    context 'when issue has default type' do
+      let_it_be(:issue) { create(:issue) }
+
+      it { is_expected.to eq("http://localhost/#{issue.project.namespace.path}/#{issue.project.name}/-/issues/#{issue.iid}") }
+    end
+
+    context 'when issue has test_case type' do
+      let_it_be(:issue) { create(:quality_test_case) }
+
+      it { is_expected.to eq("http://localhost/#{issue.project.namespace.path}/#{issue.project.name}/-/quality/test_cases/#{issue.iid}") }
+    end
+  end
 end

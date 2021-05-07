@@ -1,4 +1,12 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Migration to Vue 3
+
+Preparations for a Vue 3 migration are tracked in epic [&3174](https://gitlab.com/groups/gitlab-org/-/epics/3174)
 
 In order to prepare for the eventual migration to Vue 3.x, we should be wary about adding the following features to the codebase:
 
@@ -20,7 +28,7 @@ Component's computed properties / methods or external helpers.
 
 **What to use instead**
 
-Vue docs recommend using [mitt](https://github.com/developit/mitt) library. It's relatively small (200 bytes gzipped) and has a simple API:
+Vue documentation recommends using the [mitt](https://github.com/developit/mitt) library. It's relatively small (200 bytes, compressed) and has a clear API:
 
 ```javascript
 import mitt from 'mitt'
@@ -45,9 +53,9 @@ emitter.off('foo', onFoo)  // unlisten
 
 **Event hub factory**
 
-To make it easier for you to migrate existing event hubs to the new recommended approach, or simply
-to create new ones, we have created a factory that you can use to instantiate a new mitt-based
-event hub.
+We have created a factory that you can use to instantiate a new mitt-based event hub.
+This makes it easier to migrate existing event hubs to the new recommended approach, or
+to create new ones.
 
 ```javascript
 import createEventHub from '~/helpers/event_hub_factory';
@@ -76,14 +84,13 @@ const FunctionalComp = (props, slots) => {
 }
 ```
 
-NOTE: **Note:**
-It is not recommended to replace stateful components with functional components unless you absolutely need a performance improvement right now. In Vue 3, performance gains for functional components will be negligible.
+It is not recommended to replace stateful components with functional components unless you absolutely need a performance improvement right now. In Vue 3, performance gains for functional components are negligible.
 
 ## Old slots syntax with `slot` attribute
 
 **Why?**
 
-In Vue 2.6 `slot` attribute was already deprecated in favor of `v-slot` directive but its usage is still allowed and sometimes we prefer using them because it simplifies unit tests (with old syntax, slots are rendered on `shallowMount`). However, in Vue 3 we can't use old syntax anymore.
+In Vue 2.6 `slot` attribute was already deprecated in favor of `v-slot` directive. The `slot` attribute usage is still allowed and sometimes we prefer using it because it simplifies unit tests (with old syntax, slots are rendered on `shallowMount`). However, in Vue 3 we can't use old syntax anymore.
 
 **What to use instead**
 

@@ -6,7 +6,7 @@ RSpec.describe Analytics::MergeRequestMetricsRefresh do
   subject { calculator_class.new(merge_request) }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   let(:calculator_class) do

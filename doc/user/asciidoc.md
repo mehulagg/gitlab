@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
-# AsciiDoc
+# AsciiDoc **(FREE)**
 
 GitLab uses the [Asciidoctor](https://asciidoctor.org) gem to convert AsciiDoc content to HTML5.
 Consult the [Asciidoctor User Manual](https://asciidoctor.org/docs/user-manual/) for a complete Asciidoctor reference.
@@ -30,7 +30,7 @@ Line comments, which are lines that start with `//`, are skipped:
 
 A blank line separates paragraphs.
 
-A paragraph with the `[%hardbreaks]` option will preserve line breaks:
+A paragraph with the `[%hardbreaks]` option preserves line breaks:
 
 ```plaintext
 [%hardbreaks]
@@ -40,7 +40,7 @@ Notice how line breaks are now preserved.
 
 An indented (literal) paragraph disables text formatting,
 preserves spaces and line breaks, and is displayed in a
-monospaced font:
+fixed-width font:
 
 ```plaintext
  This literal paragraph is indented with one space.
@@ -48,13 +48,10 @@ monospaced font:
  and lines breaks will be preserved.
 ```
 
-An admonition paragraph grabs the reader's attention:
+Admonition paragraphs grab the reader's attention:
 
-```plaintext
-NOTE: This is a brief reference, please read the full documentation at https://asciidoctor.org/docs/.
-
-TIP: Lists can be indented. Leading whitespace is not significant.
-```
+- `NOTE: This is a brief reference, please read the full documentation at https://asciidoctor.org/docs/.`
+- `TIP: Lists can be indented. Leading whitespace is not significant.`
 
 ### Text Formatting
 
@@ -189,7 +186,11 @@ Attach a block or paragraph to a list item using a list continuation (which you 
 * [ ] not checked
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 #### Callout
+
+<!-- vale gitlab.Spelling = YES -->
 
 ```plaintext
 // enable callout bubbles by adding `:icons: font` to the document header
@@ -373,14 +374,14 @@ comment - content which is not included in the output document
 
 ### Colors
 
-It’s possible to have color written in `HEX`, `RGB`, or `HSL` format rendered with a color indicator.
+It's possible to have color written in `HEX`, `RGB`, or `HSL` format rendered with a color indicator.
 Supported formats (named colors are not supported):
 
 - HEX: `` `#RGB[A]` `` or `` `#RRGGBB[AA]` ``
 - RGB: `` `RGB[A](R, G, B[, A])` ``
 - HSL: `` `HSL[A](H, S, L[, A])` ``
 
-Color written inside backticks will be followed by a color "chip":
+Color written inside backticks is followed by a color "chip":
 
 ```plaintext
 - `#F00`
@@ -398,7 +399,7 @@ Color written inside backticks will be followed by a color "chip":
 
 To activate equation and formula support,
 set the `stem` attribute in the document's header to `latexmath`.
-Equations and formulas will be rendered using [KaTeX](https://katex.org/):
+Equations and formulas are rendered using [KaTeX](https://katex.org/):
 
 ```plaintext
 :stem: latexmath
@@ -439,6 +440,36 @@ graph LR
     C --> D
 ----
 ```
+
+#### Kroki
+
+Kroki supports more than a dozen diagram libraries.
+To make Kroki available in GitLab, a GitLab administrator needs to enable it first.
+Read more in the [Kroki integration](../administration/integration/kroki.md) page.
+
+Once Kroki is enabled, you can create a wide variety of diagrams in AsciiDoc and Markdown documents.
+Here's an example using a GraphViz diagram:
+
+**AsciiDoc**
+
+```plaintext
+[graphviz]
+....
+digraph G {
+  Hello->World
+}
+....
+```
+
+**Markdown**
+
+````markdown
+```graphviz
+digraph G {
+  Hello->World
+}
+```
+````
 
 #### PlantUML
 

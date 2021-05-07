@@ -1,10 +1,10 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import {
   SEVERITY_CLASS_NAME_MAP,
   SEVERITY_TOOLTIP_TITLE_MAP,
 } from 'ee/vue_shared/security_reports/components/constants';
-import { GlIcon } from '@gitlab/ui';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 describe('Severity Badge', () => {
@@ -29,7 +29,7 @@ describe('Severity Badge', () => {
   const findIcon = () => wrapper.find(GlIcon);
   const findTooltip = () => getBinding(findIcon().element, 'tooltip').value;
 
-  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', severity => {
+  describe.each(SEVERITY_LEVELS)('given a valid severity "%s"', (severity) => {
     beforeEach(() => {
       createWrapper({ severity });
     });
@@ -54,7 +54,7 @@ describe('Severity Badge', () => {
     });
   });
 
-  describe.each(['foo', '', ' '])('given an invalid severity "%s"', invalidSeverity => {
+  describe.each(['foo', '', ' '])('given an invalid severity "%s"', (invalidSeverity) => {
     beforeEach(() => {
       createWrapper({ severity: invalidSeverity });
     });

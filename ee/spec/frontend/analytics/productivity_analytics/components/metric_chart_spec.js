@@ -1,6 +1,6 @@
+import { GlLoadingIcon, GlDropdown, GlDropdownItem, GlAlert, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
-import { GlLoadingIcon, GlDropdown, GlDropdownItem, GlAlert, GlIcon } from '@gitlab/ui';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 describe('MetricChart component', () => {
@@ -140,9 +140,7 @@ describe('MetricChart component', () => {
           it('should emit `metricTypeChange` event when dropdown item gets clicked', () => {
             jest.spyOn(wrapper.vm, '$emit');
 
-            findMetricDropdownItems()
-              .at(0)
-              .vm.$emit('click');
+            findMetricDropdownItems().at(0).vm.$emit('click');
 
             expect(wrapper.vm.$emit).toHaveBeenCalledWith('metricTypeChange', 'time_to_merge');
           });
@@ -151,12 +149,7 @@ describe('MetricChart component', () => {
             wrapper.setProps({ selectedMetric: 'time_to_last_commit' });
 
             return wrapper.vm.$nextTick().then(() => {
-              expect(
-                findMetricDropdownItems()
-                  .at(0)
-                  .find(GlIcon)
-                  .classes(),
-              ).toContain('invisible');
+              expect(findMetricDropdownItems().at(0).find(GlIcon).classes()).toContain('invisible');
             });
           });
         });

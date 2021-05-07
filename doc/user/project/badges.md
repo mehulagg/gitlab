@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
-# Badges
+# Badges **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41174) in GitLab 10.7.
 
@@ -15,11 +15,11 @@ points to. Examples for badges can be the [pipeline status](../../ci/pipelines/s
 [test coverage](../../ci/pipelines/settings.md#test-coverage-report-badge), or ways to contact the
 project maintainers.
 
-![Badges on Project overview page](img/project_overview_badges.png)
+![Badges on Project overview page](img/project_overview_badges_v13_10.png)
 
 ## Project badges
 
-Badges can be added to a project by Maintainers or Owners, and will then be visible on the project's overview page.
+Badges can be added to a project by Maintainers or Owners, and are visible on the project's overview page.
 If you find that you have to add the same badges to several projects, you may want to add them at the [group level](#group-badges).
 
 To add a new badge to a project:
@@ -52,7 +52,7 @@ To add this badge to a project:
 
 ## Group badges
 
-Badges can be added to a group and will then be visible on every project's
+Badges can be added to a group and are visible on every project's
 overview page that's under that group. In this case, they cannot be edited or
 deleted on the project level. If you need to have individual badges for each
 project, consider adding them on the [project level](#project-badges) or use
@@ -75,7 +75,7 @@ Badges directly associated with a project can be configured on the
 ## Placeholders
 
 The URL a badge points to, as well as the image URL, can contain placeholders
-which will be evaluated when displaying the badge. The following placeholders
+which are evaluated when displaying the badge. The following placeholders
 are available:
 
 - `%{project_path}`: Path of a project including the parent groups
@@ -84,7 +84,7 @@ are available:
 - `%{commit_sha}`: ID of the most recent commit to the default branch of a
   project's repository
 
-NOTE: **Note:**
+NOTE:
 Placeholders allow badges to expose otherwise-private information, such as the
 default branch or commit SHA when the project is configured to have a private
 repository. This is by design, as badges are intended to be used publicly. Avoid

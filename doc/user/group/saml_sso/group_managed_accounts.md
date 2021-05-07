@@ -2,16 +2,15 @@
 type: reference, howto
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Group Managed Accounts **(PREMIUM)**
 
-CAUTION: **Caution:**
+WARNING:
 This [Closed Beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#sts=Closed%20Beta) feature is being re-evaluated in favor of a different
-[identity model](https://gitlab.com/groups/gitlab-org/-/epics/4345) that does not require separate accounts.
-We recommend that group administrators who haven't yet implemented this feature wait for
-the new solution.
+[approach](https://gitlab.com/groups/gitlab-org/-/epics/4786) that aligns more closely with our [Subscription Agreement](https://about.gitlab.com/handbook/legal/subscription-agreement/).
+We recommend that group owners who haven't yet implemented this feature wait for the new solution.
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/709) in GitLab 12.1.
 > - It's deployed behind a feature flag, disabled by default.
@@ -38,25 +37,17 @@ Since use of the group-managed account requires the use of SSO, users of group-m
 - The user is unable to access the group (their credentials no longer work on the identity provider when prompted to use SSO).
 - Contributions in the group (for example, issues and merge requests) remains intact.
 
-## Assertions
+Please refer to our [SAML SSO for Groups page](../index.md) for information on how to configure SAML.
 
-When using group-managed accounts, the following user details need to be passed to GitLab as SAML
-assertions to be able to create a user.
+## Feature flag **(PREMIUM SELF)**
 
-| Field           | Supported keys |
-|-----------------|----------------|
-| Email (required)| `email`, `mail` |
-| Full Name       | `name` |
-| First Name      | `first_name`, `firstname`, `firstName` |
-| Last Name       | `last_name`, `lastname`, `lastName` |
-
-## Feature flag **(PREMIUM ONLY)**
-
-The group-managed accounts feature is behind a feature flag: `group_managed_accounts`. The flag is disabled by default.
+The group-managed accounts feature is behind these feature flags: `group_managed_accounts`, `sign_up_on_sso` and `convert_user_to_group_managed_accounts`. The flags are disabled by default.
 To activate the feature, ask a GitLab administrator with Rails console access to run:
 
 ```ruby
 Feature.enable(:group_managed_accounts)
+Feature.enable(:sign_up_on_sso)
+Feature.enable(:convert_user_to_group_managed_accounts)
 ```
 
 ## Project restrictions for Group-managed accounts
@@ -92,6 +83,16 @@ Owners who manage user accounts in a group can view the following details of per
 To access the Credentials inventory of a group, navigate to **{shield}** **Security & Compliance > Credentials** in your group's sidebar.
 
 This feature is similar to the [Credentials inventory for self-managed instances](../../admin_area/credentials_inventory.md).
+
+### Revoke a group-managed account's personal access token
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214811) in GitLab 13.5.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267184) in GitLab 13.10.
+
+Group owners can revoke the personal access tokens of accounts in their group. To do so, select
+the Personal Access Tokens tab, and select Revoke.
+
+When a personal access token is revoked, the group-managed account user is notified by email.
 
 ## Limiting lifetime of personal access tokens of users in Group-managed accounts **(ULTIMATE)**
 

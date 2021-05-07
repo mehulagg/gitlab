@@ -12,6 +12,7 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
       'generatorURL' => 'http://8d467bd4607a:9090/graph?g0.expr=vector%281%29&g0.tab=1'
     }
   end
+
   let_it_be(:generic_alert, reload: true) { create(:alert_management_alert, :triggered, project: project, payload: payload) }
   let_it_be(:prometheus_alert, reload: true) { create(:alert_management_alert, :triggered, :prometheus, project: project, payload: payload) }
   let(:alert) { generic_alert }
@@ -117,9 +118,36 @@ RSpec.describe AlertManagement::CreateAlertIssueService do
       context 'when the alert is generic' do
         let(:alert) { generic_alert }
         let(:issue) { subject.payload[:issue] }
+        let(:default_alert_title) { described_class::DEFAULT_ALERT_TITLE }
 
         it_behaves_like 'creating an alert issue'
         it_behaves_like 'setting an issue attributes'
+
+        context 'when alert title matches the default title exactly' do
+          before do
+            generic_alert.update!(title: default_alert_title)
+          end
+
+          it 'updates issue title with the IID' do
+            execute
+
+            expect(created_issue.title).to eq("New: Incident #{created_issue.iid}")
+          end
+        end
+
+        context 'when the alert title contains the default title' do
+          let(:non_default_alert_title) { "Not #{default_alert_title}" }
+
+          before do
+            generic_alert.update!(title: non_default_alert_title)
+          end
+
+          it 'does not change issue title' do
+            execute
+
+            expect(created_issue.title).to eq(non_default_alert_title)
+          end
+        end
       end
 
       context 'when issue cannot be created' do

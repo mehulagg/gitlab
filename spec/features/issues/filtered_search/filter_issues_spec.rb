@@ -79,26 +79,6 @@ RSpec.describe 'Filter issues', :js do
     expect_filtered_search_input(search_term)
   end
 
-  context 'with the NOT queries feature flag disabled' do
-    before do
-      stub_feature_flags(not_issuable_queries: false)
-      visit project_issues_path(project)
-    end
-
-    it 'does not have the != option' do
-      input_filtered_search("label:", submit: false, extra_space: false)
-
-      wait_for_requests
-      within('#js-dropdown-operator') do
-        tokens = all(:css, 'li.filter-dropdown-item')
-        expect(tokens.count).to eq(1)
-        button = tokens[0].find('button')
-        expect(button).to have_content('=')
-        expect(button).not_to have_content('!=')
-      end
-    end
-  end
-
   describe 'filter issues by author' do
     context 'only author' do
       it 'filters issues by searched author' do
@@ -150,6 +130,14 @@ RSpec.describe 'Filter issues', :js do
         expect_issues_list_count(1)
         expect_filtered_search_input_empty
       end
+    end
+  end
+
+  describe 'filter by reviewer' do
+    it 'does not allow filtering by reviewer' do
+      find('.filtered-search').click
+
+      expect(page).not_to have_button('Reviewer')
     end
   end
 

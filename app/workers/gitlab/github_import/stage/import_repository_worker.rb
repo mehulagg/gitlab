@@ -5,6 +5,8 @@ module Gitlab
     module Stage
       class ImportRepositoryWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include StageMethods
 
@@ -21,6 +23,7 @@ module Gitlab
           # expiration time.
           RefreshImportJidWorker.perform_in_the_future(project.id, jid)
 
+          info(project.id, message: "starting importer", importer: 'Importer::RepositoryImporter')
           importer = Importer::RepositoryImporter.new(project, client)
 
           return unless importer.execute

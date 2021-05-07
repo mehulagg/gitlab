@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # GitLab development style guides
 
 See below for the relevant style guides, guidelines, linting, and other information for developing GitLab.
@@ -10,7 +16,7 @@ changes.
 
 ## SCSS style guide
 
-Our [SCSS conventions](scss.md) which are enforced through [`scss-lint`](https://github.com/sds/scss-lint).
+Our [SCSS conventions](scss.md) which are enforced through [`stylelint`](https://stylelint.io).
 
 ## HTML style guide
 

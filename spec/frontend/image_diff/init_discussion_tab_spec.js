@@ -1,5 +1,5 @@
-import initDiscussionTab from '~/image_diff/init_discussion_tab';
 import initImageDiffHelper from '~/image_diff/helpers/init_image_diff';
+import initDiscussionTab from '~/image_diff/init_discussion_tab';
 
 describe('initDiscussionTab', () => {
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('initDiscussionTab', () => {
     `);
   });
 
-  it('should pass canCreateNote as false to initImageDiff', done => {
+  it('should pass canCreateNote as false to initImageDiff', (done) => {
     jest
       .spyOn(initImageDiffHelper, 'initImageDiff')
       .mockImplementation((diffFileEl, canCreateNote) => {
@@ -22,7 +22,7 @@ describe('initDiscussionTab', () => {
     initDiscussionTab();
   });
 
-  it('should pass renderCommentBadge as true to initImageDiff', done => {
+  it('should pass renderCommentBadge as true to initImageDiff', (done) => {
     jest
       .spyOn(initImageDiffHelper, 'initImageDiff')
       .mockImplementation((diffFileEl, canCreateNote, renderCommentBadge) => {

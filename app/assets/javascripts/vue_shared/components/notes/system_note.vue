@@ -18,8 +18,6 @@
  *    }"
  *   />
  */
-import $ from 'jquery';
-import { mapGetters, mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
@@ -27,16 +25,22 @@ import {
   GlIcon,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import $ from 'jquery';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import descriptionVersionHistoryMixin from 'ee_else_ce/notes/mixins/description_version_history';
+import { __ } from '~/locale';
+import initMRPopovers from '~/mr_popover/';
 import noteHeader from '~/notes/components/note_header.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import TimelineEntryItem from './timeline_entry_item.vue';
 import { spriteIcon } from '../../../lib/utils/common_utils';
-import initMRPopovers from '~/mr_popover/';
+import TimelineEntryItem from './timeline_entry_item.vue';
 
 const MAX_VISIBLE_COMMIT_LIST_COUNT = 3;
 
 export default {
+  i18n: {
+    deleteButtonLabel: __('Remove description history'),
+  },
   name: 'SystemNote',
   components: {
     GlIcon,
@@ -78,16 +82,10 @@ export default {
     },
     // following 2 methods taken from code in `collapseLongCommitList` of notes.js:
     actionTextHtml() {
-      return $(this.note.note_html)
-        .unwrap()
-        .html();
+      return $(this.note.note_html).unwrap().html();
     },
     hasMoreCommits() {
-      return (
-        $(this.note.note_html)
-          .filter('ul')
-          .children().length > MAX_VISIBLE_COMMIT_LIST_COUNT
-      );
+      return $(this.note.note_html).filter('ul').children().length > MAX_VISIBLE_COMMIT_LIST_COUNT;
     },
     descriptionVersion() {
       return this.descriptionVersions[this.note.description_version_id];
@@ -145,7 +143,8 @@ export default {
           <gl-button
             v-if="displayDeleteButton"
             v-gl-tooltip
-            :title="__('Remove description history')"
+            :title="$options.i18n.deleteButtonLabel"
+            :aria-label="$options.i18n.deleteButtonLabel"
             variant="default"
             category="tertiary"
             icon="remove"

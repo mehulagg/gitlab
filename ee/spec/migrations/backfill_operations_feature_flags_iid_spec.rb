@@ -13,9 +13,7 @@ RSpec.describe BackfillOperationsFeatureFlagsIid do
 
   def setup
     namespace = namespaces.create!(name: 'foo', path: 'foo')
-    project = projects.create!(namespace_id: namespace.id)
-
-    project
+    projects.create!(namespace_id: namespace.id)
   end
 
   it 'backfills the iid for a flag' do

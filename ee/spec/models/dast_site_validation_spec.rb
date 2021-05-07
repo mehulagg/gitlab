@@ -50,13 +50,25 @@ RSpec.describe DastSiteValidation, type: :model do
 
     describe 'by_url_base' do
       let(:more_dast_site_validations) do
-        create_list(:dast_site_validation, 5, dast_site_token: subject.dast_site_token).prepend(subject)
+        create_list(:dast_site_validation, 5, dast_site_token: subject.dast_site_token)
       end
 
       it 'includes the correct records' do
         result = described_class.by_url_base(subject.url_base)
 
         expect(result).not_to include(another_dast_site_validation)
+      end
+    end
+
+    describe 'by_most_recent' do
+      let(:more_dast_site_validations) do
+        create_list(:dast_site_validation, 5, dast_site_token: subject.dast_site_token)
+      end
+
+      it 'includes the correct records' do
+        result = described_class.by_most_recent
+
+        expect(result).to contain_exactly(another_dast_site_validation, more_dast_site_validations.last)
       end
     end
   end
@@ -72,6 +84,12 @@ RSpec.describe DastSiteValidation, type: :model do
   describe '#project' do
     it 'returns project through dast_site_token' do
       expect(subject.project).to eq(subject.dast_site_token.project)
+    end
+  end
+
+  describe '#dast_site' do
+    it 'returns dast_site through dast_site_token' do
+      expect(subject.dast_site).to eq(subject.dast_site_token.dast_site)
     end
   end
 

@@ -1,3 +1,6 @@
+- add_page_specific_style 'page_bundles/ci_status'
+- add_page_specific_style 'page_bundles/admin/jobs_index'
+
 - breadcrumb_title _("Jobs")
 - page_title _("Jobs")
 
@@ -6,11 +9,9 @@
   = render "shared/builds/tabs", build_path_proc: build_path_proc, all_builds: @all_builds, scope: @scope
 
   - if @all_builds.running_or_pending.any?
-    #stop-jobs-modal
+    #js-stop-jobs-modal
     .nav-controls
-      %button#stop-jobs-button.btn.gl-button.btn-danger{ data: { toggle: 'modal',
-        target: '#stop-jobs-modal',
-        url: cancel_all_admin_jobs_path } }
+      %button#js-stop-jobs-button.btn.gl-button.btn-danger{ data: { url: cancel_all_admin_jobs_path } }
         = s_('AdminArea|Stop all jobs')
 
 .row-content-block.second-block

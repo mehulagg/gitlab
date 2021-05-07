@@ -1,7 +1,13 @@
-# Approval Rules **(STARTER)**
+---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
+# Approval Rules development guide **(FREE)**
 
 This document explains the backend design and flow of all related functionality
-about [merge request approval rules](../user/project/merge_requests/merge_request_approvals.md).
+about [merge request approval rules](../user/project/merge_requests/approvals/index.md).
 
 This should help contributors to understand the code design easier and to also
 help see if there are parts to improve as the feature and its implementation
@@ -12,9 +18,9 @@ can change often. The code should explain those things better. The components
 mentioned here are the major parts of the application for the approval rules
 feature to work.
 
-NOTE: **Note:**
+NOTE:
 This is a living document and should be updated accordingly when parts
-of the codebase touched in this document changed/removed or when new components
+of the codebase touched in this document are changed or removed, or when new components
 are added.
 
 ## Data Model
@@ -38,8 +44,8 @@ erDiagram
 ### `Project` and `MergeRequest`
 
 `Project` and `MergeRequest` models are defined in `ee/app/models/ee/project.rb`
-and `ee/app/models/ee/merge_request.rb`. They extend the non-EE versions since
-approval rules is an EE only feature. Associations and other related stuff to
+and `ee/app/models/ee/merge_request.rb`. They extend the non-EE versions, because
+approval rules are an EE-only feature. Associations and other related stuff to
 merge request approvals are defined here.
 
 ### `ApprovalState`
@@ -81,7 +87,7 @@ The `ApprovalState` model get these records when approval rules are not
 overwritten.
 
 The `protected_branches` attribute is set and used when a rule is scoped to
-protected branches. See [Scoped to Protected Branch doc](../user/project/merge_requests/merge_request_approvals.md#scoped-to-protected-branch)
+protected branches. See [Approvals for protected branches](../user/project/merge_requests/approvals/rules.md#approvals-for-protected-branches)
 for more information about the feature.
 
 ### `ApprovalMergeRequestRule`
@@ -141,7 +147,7 @@ Whenever an approval is given/revoked, a record is created/deleted.
 
 ## Controllers and Services
 
-The following controllers and services below are being utilized for the approval
+The following controllers and services below are being used for the approval
 rules feature to work.
 
 ### `API::ProjectApprovalSettings`
@@ -259,8 +265,8 @@ graph LR
   ApprovalWrappedRule --> Approval
 ```
 
-This flow gets initiated by the frontend component. The data returned will
-then be used to display information on the MR widget.
+This flow gets initiated by the frontend component. The data returned is
+used to display information on the MR widget.
 
 ### Approving a merge request
 
@@ -276,5 +282,5 @@ is executed instead.
 
 ## TODO
 
-1. Add information related to other rule types (e.g. `code_owner` and `report_approver`).
+1. Add information related to other rule types, such as `code_owner` and `report_approver`.
 1. Add information about side effects of approving/unapproving merge request.

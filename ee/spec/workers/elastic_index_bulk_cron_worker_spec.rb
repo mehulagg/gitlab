@@ -47,4 +47,9 @@ RSpec.describe ElasticIndexBulkCronWorker do
       )
     end
   end
+
+  it_behaves_like 'worker with data consistency',
+                  described_class,
+                  feature_flag: :load_balancing_for_bulk_cron_workers,
+                  data_consistency: :delayed
 end

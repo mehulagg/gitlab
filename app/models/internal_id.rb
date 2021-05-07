@@ -47,27 +47,19 @@ class InternalId < ApplicationRecord
   def update_and_save(&block)
     lock!
     yield
-    update_and_save_counter.increment(usage: usage, changed: last_value_changed?)
     save!
     last_value
   end
 
-  # Instrumentation to track for-update locks
-  def update_and_save_counter
-    strong_memoize(:update_and_save_counter) do
-      Gitlab::Metrics.counter(:gitlab_internal_id_for_update_lock, 'Number of ROW SHARE (FOR UPDATE) locks on individual records from internal_ids')
-    end
-  end
-
   class << self
     def track_greatest(subject, scope, usage, new_value, init)
-      InternalIdGenerator.new(subject, scope, usage)
-        .track_greatest(init, new_value)
+      InternalIdGenerator.new(subject, scope, usage, init)
+        .track_greatest(new_value)
     end
 
     def generate_next(subject, scope, usage, init)
-      InternalIdGenerator.new(subject, scope, usage)
-        .generate(init)
+      InternalIdGenerator.new(subject, scope, usage, init)
+        .generate
     end
 
     def reset(subject, scope, usage, value)
@@ -88,6 +80,8 @@ class InternalId < ApplicationRecord
   end
 
   class InternalIdGenerator
+    extend Gitlab::Utils::StrongMemoize
+
     # Generate next internal id for a given scope and usage.
     #
     # For currently supported usages, see #usage enum.
@@ -99,15 +93,18 @@ class InternalId < ApplicationRecord
     # 4) In the absence of a record in the internal_ids table, one will be created
     #    and last_value will be calculated on the fly.
     #
-    # subject: The instance we're generating an internal id for. Gets passed to init if called.
+    # subject: The instance or class we're generating an internal id for.
     # scope: Attributes that define the scope for id generation.
+    #        Valid keys are `project/project_id` and `namespace/namespace_id`.
     # usage: Symbol to define the usage of the internal id, see InternalId.usages
-    attr_reader :subject, :scope, :scope_attrs, :usage
+    # init: Proc that accepts the subject and the scope and returns Integer|NilClass
+    attr_reader :subject, :scope, :scope_attrs, :usage, :init
 
-    def initialize(subject, scope, usage)
+    def initialize(subject, scope, usage, init = nil)
       @subject = subject
       @scope = scope
       @usage = usage
+      @init = init
 
       raise ArgumentError, 'Scope is not well-defined, need at least one column for scope (given: 0)' if scope.empty?
 
@@ -119,13 +116,15 @@ class InternalId < ApplicationRecord
     # Generates next internal id and returns it
     # init: Block that gets called to initialize InternalId record if not present
     #       Make sure to not throw exceptions in the absence of records (if this is expected).
-    def generate(init)
+    def generate
+      self.class.internal_id_transactions_increment(operation: :generate, usage: usage)
+
       subject.transaction do
         # Create a record in internal_ids if one does not yet exist
         # and increment its last value
         #
         # Note this will acquire a ROW SHARE lock on the InternalId record
-        (lookup || create_record(init)).increment_and_save!
+        record.increment_and_save!
       end
     end
 
@@ -134,6 +133,8 @@ class InternalId < ApplicationRecord
     # value: The expected last_value to decrement
     def reset(value)
       return false unless value
+
+      self.class.internal_id_transactions_increment(operation: :reset, usage: usage)
 
       updated =
         InternalId
@@ -148,10 +149,22 @@ class InternalId < ApplicationRecord
     # and set its new_value if it is higher than the current last_value
     #
     # Note this will acquire a ROW SHARE lock on the InternalId record
-    def track_greatest(init, new_value)
+    def track_greatest(new_value)
+      self.class.internal_id_transactions_increment(operation: :track_greatest, usage: usage)
+
       subject.transaction do
-        (lookup || create_record(init)).track_greatest_and_save!(new_value)
+        record.track_greatest_and_save!(new_value)
       end
+    end
+
+    def record
+      @record ||= (lookup || create_record)
+    end
+
+    def with_lock(&block)
+      self.class.internal_id_transactions_increment(operation: :with_lock, usage: usage)
+
+      record.with_lock(&block)
     end
 
     private
@@ -171,16 +184,37 @@ class InternalId < ApplicationRecord
     # was faster in doing this, we'll realize once we hit the unique key constraint
     # violation. We can safely roll-back the nested transaction and perform
     # a lookup instead to retrieve the record.
-    def create_record(init)
+    def create_record
+      raise ArgumentError, 'Cannot initialize without init!' unless init
+
+      instance = subject.is_a?(::Class) ? nil : subject
+
       subject.transaction(requires_new: true) do
         InternalId.create!(
           **scope,
           usage: usage_value,
-          last_value: init.call(subject) || 0
+          last_value: init.call(instance, scope) || 0
         )
       end
     rescue ActiveRecord::RecordNotUnique
       lookup
+    end
+
+    def self.internal_id_transactions_increment(operation:, usage:)
+      self.internal_id_transactions_total.increment(
+        operation: operation,
+        usage: usage.to_s,
+        in_transaction: ActiveRecord::Base.connection.transaction_open?.to_s
+      )
+    end
+
+    def self.internal_id_transactions_total
+      strong_memoize(:internal_id_transactions_total) do
+        name = :gitlab_internal_id_transactions_total
+        comment = 'Counts all the internal ids happening within transaction'
+
+        Gitlab::Metrics.counter(name, comment)
+      end
     end
   end
 end

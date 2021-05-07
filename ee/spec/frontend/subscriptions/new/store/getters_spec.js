@@ -1,10 +1,7 @@
-import * as getters from 'ee/subscriptions/new/store/getters';
 import * as constants from 'ee/subscriptions/new/constants';
-
-constants.STEPS = ['firstStep', 'secondStep'];
+import * as getters from 'ee/subscriptions/new/store/getters';
 
 const state = {
-  currentStep: 'secondStep',
   isSetupForCompany: true,
   isNewUser: true,
   availablePlans: [
@@ -26,35 +23,6 @@ const state = {
 };
 
 describe('Subscriptions Getters', () => {
-  describe('currentStep', () => {
-    it('returns the states currentStep', () => {
-      expect(getters.currentStep(state)).toBe('secondStep');
-    });
-  });
-
-  describe('stepIndex', () => {
-    it('returns a function', () => {
-      expect(getters.stepIndex()).toBeInstanceOf(Function);
-    });
-
-    it('returns a function that returns the index of the given step', () => {
-      expect(getters.stepIndex()('secondStep')).toBe(1);
-    });
-  });
-
-  describe('currentStepIndex', () => {
-    it('returns a function', () => {
-      expect(getters.currentStepIndex(state, getters)).toBeInstanceOf(Function);
-    });
-
-    it('calls the stepIndex function with the current step name', () => {
-      const stepIndexSpy = jest.spyOn(getters, 'stepIndex');
-      getters.currentStepIndex(state, getters);
-
-      expect(stepIndexSpy).toHaveBeenCalledWith('secondStep');
-    });
-  });
-
   describe('selectedPlanText', () => {
     it('returns the text for selectedPlan', () => {
       expect(
@@ -105,11 +73,28 @@ describe('Subscriptions Getters', () => {
       ).toBe('My organization');
     });
 
+    it('returns the organization name when a group is selected but does not exist', () => {
+      expect(
+        getters.name(
+          { isSetupForCompany: true },
+          {
+            isGroupSelected: true,
+            isSelectedGroupPresent: false,
+            selectedGroupName: 'Selected group',
+          },
+        ),
+      ).toBe('Your organization');
+    });
+
     it('returns the selected group name a group is selected', () => {
       expect(
         getters.name(
           { isSetupForCompany: true },
-          { isGroupSelected: true, selectedGroupName: 'Selected group' },
+          {
+            isGroupSelected: true,
+            isSelectedGroupPresent: true,
+            selectedGroupName: 'Selected group',
+          },
         ),
       ).toBe('Selected group');
     });
@@ -161,13 +146,51 @@ describe('Subscriptions Getters', () => {
       ).toBe(1);
     });
 
+    it('returns `null` when a group is selected, but not present', () => {
+      expect(
+        getters.selectedGroupUsers(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 123 },
+          { isGroupSelected: true, isSelectedGroupPresent: false },
+        ),
+      ).toBe(null);
+    });
+
     it('returns the number of users of the selected group when a group is selected', () => {
       expect(
         getters.selectedGroupUsers(
           { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 123 },
-          { isGroupSelected: true },
+          { isGroupSelected: true, isSelectedGroupPresent: true },
         ),
       ).toBe(3);
+    });
+  });
+
+  describe('isSelectedGroupPresent', () => {
+    it('returns false when group is not selected', () => {
+      expect(
+        getters.isSelectedGroupPresent(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: null },
+          { isGroupSelected: false },
+        ),
+      ).toBe(false);
+    });
+
+    it('returns false when group is selected, but not present', () => {
+      expect(
+        getters.isSelectedGroupPresent(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 321 },
+          { isGroupSelected: true },
+        ),
+      ).toBe(false);
+    });
+
+    it('returns true when group is selected and is present', () => {
+      expect(
+        getters.isSelectedGroupPresent(
+          { groupData: [{ numberOfUsers: 3, value: 123 }], selectedGroup: 123 },
+          { isGroupSelected: true },
+        ),
+      ).toBe(true);
     });
   });
 

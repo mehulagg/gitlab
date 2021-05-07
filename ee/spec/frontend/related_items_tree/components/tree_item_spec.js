@@ -1,14 +1,14 @@
+import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 
 import TreeItem from 'ee/related_items_tree/components/tree_item.vue';
 import TreeItemBody from 'ee/related_items_tree/components/tree_item_body.vue';
 import TreeRoot from 'ee/related_items_tree/components/tree_root.vue';
 
+import { ChildType, treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { ChildType, treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
 import { PathIdSeparator } from '~/related_issues/constants';
 
 import { mockParentItem, mockQueryResponse, mockEpic1 } from '../mock_data';

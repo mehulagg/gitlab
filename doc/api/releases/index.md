@@ -1,13 +1,13 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Releases API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766) in GitLab 11.7.
-> - Using this API you can manipulate GitLab's [Release](../../user/project/releases/index.md) entries.
+> - Using this API you can manipulate GitLab [Release](../../user/project/releases/index.md) entries.
 > - For manipulating links as a release asset, see [Release Links API](links.md).
 > - Release Evidences were [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.5.
 
@@ -28,7 +28,7 @@ GET /projects/:id/releases
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" "https://gitlab.example.com/api/v4/projects/24/releases"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases"
 ```
 
 Example response:
@@ -144,9 +144,9 @@ Example response:
       },
       "evidences":[
         {
-          sha: "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
-          filepath: "https://gitlab.example.com/root/awesome-app/-/releases/v0.2/evidence.json",
-          collected_at: "2019-01-03T01:56:19.539Z"
+          "sha": "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
+          "filepath": "https://gitlab.example.com/root/awesome-app/-/releases/v0.2/evidence.json",
+          "collected_at": "2019-01-03T01:56:19.539Z"
         }
      ]
    },
@@ -208,9 +208,9 @@ Example response:
       },
       "evidences":[
         {
-          sha: "c3ffedec13af470e760d6cdfb08790f71cf52c6cde4d",
-          filepath: "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
-          collected_at: "2019-01-03T01:55:18.203Z"
+          "sha": "c3ffedec13af470e760d6cdfb08790f71cf52c6cde4d",
+          "filepath": "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
+          "collected_at": "2019-01-03T01:55:18.203Z"
         }
      ]
    }
@@ -228,12 +228,12 @@ GET /projects/:id/releases/:tag_name
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
-| `tag_name`    | string         | yes      | The tag where the release will be created from.                                     |
+| `tag_name`    | string         | yes      | The Git tag the release is associated with.                                         |
 
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
 ```
 
 Example response:
@@ -340,9 +340,9 @@ Example response:
    },
    "evidences":[
      {
-       sha: "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
-       filepath: "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
-       collected_at: "2019-07-16T14:00:12.256Z"
+       "sha": "760d6cdfb0879c3ffedec13af470e0f71cf52c6cde4d",
+       "filepath": "https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json",
+       "collected_at": "2019-07-16T14:00:12.256Z"
      }
   ]
 }
@@ -350,7 +350,7 @@ Example response:
 
 ## Create a release
 
-Create a Release. You need push access to the repository to create a Release.
+Create a release. Developer level access to the project is required to create a release.
 
 ```plaintext
 POST /projects/:id/releases
@@ -360,23 +360,23 @@ POST /projects/:id/releases
 | -------------------| --------------- | --------                    | -------------------------------------------------------------------------------------------------------------------------------- |
 | `id`               | integer/string  | yes                         | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding).                                              |
 | `name`             | string          | no                          | The release name.                                                                                                                |
-| `tag_name`         | string          | yes                         | The tag where the release will be created from.                                                                                  |
+| `tag_name`         | string          | yes                         | The tag where the release is created from.                                                                                  |
 | `description`      | string          | no                          | The description of the release. You can use [Markdown](../../user/markdown.md).                                                  |
-| `ref`              | string          | yes, if `tag_name` doesn't exist | If a tag specified in `tag_name` doesn't exist, the release will be created from `ref` and tagged with `tag_name`. It can be a commit SHA, another tag name, or a branch name. |
+| `ref`              | string          | yes, if `tag_name` doesn't exist | If a tag specified in `tag_name` doesn't exist, the release is created from `ref` and tagged with `tag_name`. It can be a commit SHA, another tag name, or a branch name. |
 | `milestones`       | array of string | no                          | The title of each milestone the release is associated with. [GitLab Premium](https://about.gitlab.com/pricing/) customers can specify group milestones.                                                                      |
 | `assets:links`     | array of hash   | no                          | An array of assets links.                                                                                                        |
-| `assets:links:name`| string          | required by: `assets:links` | The name of the link.                                                                                                            |
-| `assets:links:url` | string          | required by: `assets:links` | The URL of the link.                                                                                                             |
-| `assets:links:filepath` | string     | no | Optional path for a [Direct Asset link](../../user/project/releases/index.md).
+| `assets:links:name`| string          | required by: `assets:links` | The name of the link. Link names must be unique within the release.                                                              |
+| `assets:links:url` | string          | required by: `assets:links` | The URL of the link. Link URLs must be unique within the release.                                                                |
+| `assets:links:filepath` | string     | no | Optional path for a [Direct Asset link](../../user/project/releases/index.md#permanent-links-to-release-assets).
 | `assets:links:link_type` | string     | no | The type of the link: `other`, `runbook`, `image`, `package`. Defaults to `other`.
-| `released_at`      | datetime        | no                          | The date when the release will be/was ready. Defaults to the current time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `released_at`      | datetime        | no                          | The date when the release is/was ready. Defaults to the current time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
 
 Example request:
 
 ```shell
-curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" \
+curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: <your_access_token>" \
      --data '{ "name": "New release", "tag_name": "v0.3", "description": "Super nice release", "milestones": ["v1.0", "v1.0-rc"], "assets": { "links": [{ "name": "hoge", "url": "https://google.com", "filepath": "/binaries/linux-amd64", "link_type":"other" }] } }' \
-     --request POST https://gitlab.example.com/api/v4/projects/24/releases
+     --request POST "https://gitlab.example.com/api/v4/projects/24/releases"
 ```
 
 Example response:
@@ -482,20 +482,20 @@ Example response:
          }
       ],
       "evidence_file_path":"https://gitlab.example.com/root/awesome-app/-/releases/v0.3/evidence.json"
-   },
+   }
 }
 ```
 
-### Group milestones **(PREMIUM ONLY)**
+### Group milestones **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235391) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
 
 Group milestones associated with the project may be specified in the `milestones`
 array for [Create a release](#create-a-release) and [Update a release](#update-a-release)
 API calls. Only milestones associated with the project's group may be specified, and
-adding milestones for ancestor groups will raise an error.
+adding milestones for ancestor groups raises an error.
 
-## Collect release evidence **(PREMIUM ONLY)**
+## Collect release evidence **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/199065) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
@@ -508,12 +508,12 @@ POST /projects/:id/releases/:tag_name/evidence
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
-| `tag_name`    | string         | yes      | The tag where the release will be created from.                                     |
+| `tag_name`    | string         | yes      | The Git tag the release is associated with.                                         |
 
 Example request:
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1/evidence"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1/evidence"
 ```
 
 Example response:
@@ -524,7 +524,7 @@ Example response:
 
 ## Update a release
 
-Update a Release.
+Update a release. Developer level access to the project is required to update a release.
 
 ```plaintext
 PUT /projects/:id/releases/:tag_name
@@ -533,16 +533,16 @@ PUT /projects/:id/releases/:tag_name
 | Attribute     | Type            | Required | Description                                                                                                 |
 | ------------- | --------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
 | `id`          | integer/string  | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding).                         |
-| `tag_name`    | string          | yes      | The tag where the release will be created from.                                                             |
+| `tag_name`    | string          | yes      | The Git tag the release is associated with.                                                                 |
 | `name`        | string          | no       | The release name.                                                                                           |
 | `description` | string          | no       | The description of the release. You can use [Markdown](../../user/markdown.md).                             |
 | `milestones`  | array of string | no       | The title of each milestone to associate with the release. [GitLab Premium](https://about.gitlab.com/pricing/) customers can specify group milestones. To remove all milestones from the release, specify `[]`. |
-| `released_at` | datetime        | no       | The date when the release will be/was ready. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).          |
+| `released_at` | datetime        | no       | The date when the release is/was ready. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).          |
 
 Example request:
 
 ```shell
-curl --header 'Content-Type: application/json' --request PUT --data '{"name": "new name", "milestones": ["v1.2"]}' --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
+curl --header 'Content-Type: application/json' --request PUT --data '{"name": "new name", "milestones": ["v1.2"]}' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
 ```
 
 Example response:
@@ -584,7 +584,7 @@ Example response:
          "id":53,
          "iid":3,
          "project_id":24,
-         "title":"v1.0",
+         "title":"v1.2",
          "description":"Voluptate fugiat possimus quis quod aliquam expedita.",
          "state":"active",
          "created_at":"2019-09-01T13:00:00.256Z",
@@ -625,13 +625,13 @@ Example response:
 
       ],
       "evidence_file_path":"https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json"
-   },
+   }
 }
 ```
 
 ## Delete a Release
 
-Delete a Release. Deleting a Release will not delete the associated tag.
+Delete a release. Deleting a release doesn't delete the associated tag. Maintainer level access to the project is required to delete a release.
 
 ```plaintext
 DELETE /projects/:id/releases/:tag_name
@@ -640,12 +640,12 @@ DELETE /projects/:id/releases/:tag_name
 | Attribute     | Type           | Required | Description                                                                         |
 | ------------- | -------------- | -------- | ----------------------------------------------------------------------------------- |
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](../README.md#namespaced-path-encoding). |
-| `tag_name`    | string         | yes      | The tag where the release will be created from.                                     |
+| `tag_name`    | string         | yes      | The Git tag the release is associated with.                                         |
 
 Example request:
 
 ```shell
-curl --request DELETE --header "PRIVATE-TOKEN: gDybLx3yrUK_HLp3qPjS" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/24/releases/v0.1"
 ```
 
 Example response:
@@ -709,7 +709,7 @@ Example response:
 
       ],
       "evidence_file_path":"https://gitlab.example.com/root/awesome-app/-/releases/v0.1/evidence.json"
-   },
+   }
 }
 ```
 
@@ -717,6 +717,5 @@ Example response:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38105) in GitLab 12.1.
 
-A release with a `released_at` attribute set to a future date will be labeled an **Upcoming Release** in the UI:
-
-![Upcoming release](img/upcoming_release_v12_1.png)
+A release with a `released_at` attribute set to a future date is labeled
+as an **Upcoming Release** [in the UI](../../user/project/releases/index.md#upcoming-releases).

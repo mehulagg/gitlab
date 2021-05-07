@@ -1,10 +1,8 @@
-import { isNumber } from 'lodash';
 import dateFormat from 'dateformat';
-import { s__, sprintf } from '~/locale';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import httpStatus from '~/lib/utils/http_status';
-import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
-import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
+import { unescape, isNumber } from 'lodash';
+import createFlash, { hideFlash } from '~/flash';
+import { sanitize } from '~/lib/dompurify';
+import { convertObjectPropsToCamelCase, roundToNearestHalf } from '~/lib/utils/common_utils';
 import {
   newDate,
   dayAfter,
@@ -12,8 +10,12 @@ import {
   getDatesInRange,
   parseSeconds,
 } from '~/lib/utils/datetime_utility';
+import httpStatus from '~/lib/utils/http_status';
+import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
+import { s__, sprintf } from '~/locale';
 import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
+import { OVERVIEW_STAGE_ID } from './constants';
 
 const EVENT_TYPE_LABEL = 'label';
 const ERROR_NAME_RESERVED = 'is reserved';
@@ -28,11 +30,12 @@ export const removeFlash = (type = 'alert') => {
 export const toggleSelectedLabel = ({ selectedLabelIds = [], value = null }) => {
   if (!value) return selectedLabelIds;
   return selectedLabelIds.includes(value)
-    ? selectedLabelIds.filter(v => v !== value)
+    ? selectedLabelIds.filter((v) => v !== value)
     : [...selectedLabelIds, value];
 };
 
-export const isStartEvent = ev => Boolean(ev) && Boolean(ev.canBeStartEvent) && ev.canBeStartEvent;
+export const isStartEvent = (ev) =>
+  Boolean(ev) && Boolean(ev.canBeStartEvent) && ev.canBeStartEvent;
 
 export const eventToOption = (obj = null) => {
   if (!obj || (!obj.text && !obj.identifier)) return null;
@@ -55,7 +58,7 @@ export const isLabelEvent = (labelEvents = [], ev = null) =>
   Boolean(ev) && labelEvents.length && labelEvents.includes(ev);
 
 export const getLabelEventsIdentifiers = (events = []) =>
-  events.filter(ev => ev.type && ev.type === EVENT_TYPE_LABEL).map(i => i.identifier);
+  events.filter((ev) => ev.type && ev.type === EVENT_TYPE_LABEL).map((i) => i.identifier);
 
 /**
  * Checks if the specified stage is in memory or persisted to storage based on the id
@@ -101,8 +104,21 @@ export const transformRawStages = (stages = []) =>
 
 export const transformRawTasksByTypeData = (data = []) => {
   if (!data.length) return [];
-  return data.map(d => convertObjectPropsToCamelCase(d, { deep: true }));
+  return data.map((d) => convertObjectPropsToCamelCase(d, { deep: true }));
 };
+
+/**
+ * Prepares the stage errors for use in the create value stream form
+ *
+ * The JSON error response returns a key value pair, the key corresponds to the
+ * index of the stage with errors and the value is the returned error(s)
+ *
+ * @param {Array} stages - Array of value stream stages
+ * @param {Object} errors - Key value pair of stage errors
+ * @returns {Array} Returns and array of stage error objects
+ */
+export const prepareStageErrors = (stages, errors) =>
+  stages.length ? stages.map((_, index) => convertObjectPropsToCamelCase(errors[index]) || {}) : [];
 
 /**
  * Takes the duration data for selected stages, transforms the date values and returns
@@ -116,8 +132,8 @@ export const transformRawTasksByTypeData = (data = []) => {
  *    selected: true,
  *    data: [
  *      {
- *        'duration_in_seconds': 1234,
- *        'finished_at': '2019-09-02T18:25:43.511Z'
+ *        'average_duration_in_seconds': 1234,
+ *        'date': '2019-09-02T18:25:43.511Z'
  *      },
  *      ...
  *    ]
@@ -128,31 +144,31 @@ export const transformRawTasksByTypeData = (data = []) => {
  * The data is then transformed and flattened into the following format;
  * [
  *  {
- *    'duration_in_seconds': 1234,
- *    'finished_at': '2019-09-02'
+ *    'average_duration_in_seconds': 1234,
+ *    'date': '2019-09-02'
  *  },
  *  ...
  * ]
  *
  * @param {Array} data - The duration data for selected stages
- * @returns {Array} An array with each item being an object containing the duration_in_seconds and finished_at values for an event
+ * @returns {Array} An array with each item being an object containing the average_duration_in_seconds and date values for an event
  */
-export const flattenDurationChartData = data =>
+export const flattenDurationChartData = (data) =>
   data
-    .map(stage =>
-      stage.data.map(event => {
-        const date = new Date(event.finished_at);
+    .map((stage) =>
+      stage.data.map((event) => {
+        const date = new Date(event.date);
         return {
           ...event,
-          finished_at: dateFormat(date, dateFormats.isoDate),
+          date: dateFormat(date, dateFormats.isoDate),
         };
       }),
     )
     .flat();
 
 /**
- * Takes the duration data for selected stages, groups the data by day and calculates the total duration
- * per day.
+ * Takes the duration data for selected stages, groups the data by day and calculates the average duration
+ * per day, for stages with values on that specific day.
  *
  * The received data is expected to be the following format; One top level object in the array per stage,
  * each potentially having multiple data entries.
@@ -162,8 +178,8 @@ export const flattenDurationChartData = data =>
  *    selected: true,
  *    data: [
  *      {
- *        'duration_in_seconds': 1234,
- *        'finished_at': '2019-09-02T18:25:43.511Z'
+ *        'average_duration_in_seconds': 1234,
+ *        'date': '2019-09-02T18:25:43.511Z'
  *      },
  *      ...
  *    ]
@@ -185,31 +201,35 @@ export const flattenDurationChartData = data =>
  * i[2] = date, used in the tooltip
  *
  * @param {Array} data - The duration data for selected stages
- * @param {Date} startDate - The globally selected cycle analytics start date
- * @param {Date} endDate - The globally selected cycle analytics end date
- * @returns {Array} An array with each item being another arry of three items (plottable date, computed total, tooltip display date)
+ * @param {Date} startDate - The globally selected Value Stream Analytics start date
+ * @param {Date} endDate - The globally selected Value Stream Analytics end date
+ * @returns {Array} An array with each item being another arry of three items (plottable date, computed average, tooltip display date)
  */
 export const getDurationChartData = (data, startDate, endDate) => {
   const flattenedData = flattenDurationChartData(data);
   const eventData = [];
+  const endOfDay = newDate(endDate);
+  endOfDay.setHours(23, 59, 59); // make sure we're at the end of the day
 
   for (
     let currentDate = newDate(startDate);
-    currentDate <= endDate;
+    currentDate <= endOfDay;
     currentDate = dayAfter(currentDate)
   ) {
     const currentISODate = dateFormat(newDate(currentDate), dateFormats.isoDate);
-    const valuesForDay = flattenedData.filter(object => object.finished_at === currentISODate);
-    const summedData = valuesForDay.reduce((total, value) => total + value.duration_in_seconds, 0);
-    const summedDataInDays = secondsToDays(summedData);
+    const valuesForDay = flattenedData.filter((object) => object.date === currentISODate);
+    const averagedData =
+      valuesForDay.reduce((total, value) => total + value.average_duration_in_seconds, 0) /
+      valuesForDay.length;
+    const averagedDataInDays = secondsToDays(averagedData);
 
-    if (summedDataInDays) eventData.push([currentISODate, summedDataInDays, currentISODate]);
+    if (averagedDataInDays) eventData.push([currentISODate, averagedDataInDays, currentISODate]);
   }
 
   return eventData;
 };
 
-export const orderByDate = (a, b, dateFmt = datetime => new Date(datetime).getTime()) =>
+export const orderByDate = (a, b, dateFmt = (datetime) => new Date(datetime).getTime()) =>
   dateFmt(a) - dateFmt(b);
 
 /**
@@ -221,7 +241,7 @@ export const orderByDate = (a, b, dateFmt = datetime => new Date(datetime).getTi
 export const flattenTaskByTypeSeries = (series = {}) =>
   Object.entries(series)
     .sort((a, b) => orderByDate(a[0], b[0]))
-    .map(dataSet => dataSet[1]);
+    .map((dataSet) => dataSet[1]);
 
 /**
  * @typedef {Object} RawTasksByTypeData
@@ -253,7 +273,6 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
     return {
       groupBy: [],
       data: [],
-      seriesNames: [],
     };
   }
 
@@ -269,14 +288,19 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
   const transformed = data.reduce(
     (acc, curr) => {
       const {
-        label: { title },
+        label: { title: name },
         series,
       } = curr;
-      acc.seriesNames = [...acc.seriesNames, title];
       acc.data = [
         ...acc.data,
-        // adds 0 values for each data point and overrides with data from the series
-        flattenTaskByTypeSeries({ ...zeroValuesForEachDataPoint, ...Object.fromEntries(series) }),
+        {
+          name,
+          // adds 0 values for each data point and overrides with data from the series
+          data: flattenTaskByTypeSeries({
+            ...zeroValuesForEachDataPoint,
+            ...Object.fromEntries(series),
+          }),
+        },
       ];
       return acc;
     },
@@ -306,7 +330,9 @@ const buildDataError = ({ status = httpStatus.INTERNAL_SERVER_ERROR, error }) =>
  */
 export const flashErrorIfStatusNotOk = ({ error, message }) => {
   if (error?.errorCode !== httpStatus.OK) {
-    createFlash(message);
+    createFlash({
+      message,
+    });
   }
 };
 
@@ -318,7 +344,7 @@ export const flashErrorIfStatusNotOk = ({ error, message }) => {
  * @param {Object} Response - Axios ajax response
  * @returns {Object} Returns the axios ajax response
  */
-export const checkForDataError = response => {
+export const checkForDataError = (response) => {
   const { data, status } = response;
   if (data?.error) {
     throw buildDataError({ status, error: data.error });
@@ -326,7 +352,7 @@ export const checkForDataError = response => {
   return response;
 };
 
-export const throwIfUserForbidden = error => {
+export const throwIfUserForbidden = (error) => {
   if (error?.response?.status === httpStatus.FORBIDDEN) {
     throw error;
   }
@@ -334,6 +360,71 @@ export const throwIfUserForbidden = error => {
 
 export const isStageNameExistsError = ({ status, errors }) =>
   status === httpStatus.UNPROCESSABLE_ENTITY && errors?.name?.includes(ERROR_NAME_RESERVED);
+
+export const timeSummaryForPathNavigation = ({ seconds, hours, days, minutes, weeks, months }) => {
+  if (months) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}M'), {
+      value: roundToNearestHalf(months),
+    });
+  } else if (weeks) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}w'), {
+      value: roundToNearestHalf(weeks),
+    });
+  } else if (days) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}d'), {
+      value: roundToNearestHalf(days),
+    });
+  } else if (hours) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}h'), { value: hours });
+  } else if (minutes) {
+    return sprintf(s__('ValueStreamAnalytics|%{value}m'), { value: minutes });
+  } else if (seconds) {
+    return unescape(sanitize(s__('ValueStreamAnalytics|&lt;1m'), { ALLOWED_TAGS: [] }));
+  }
+  return '-';
+};
+
+/**
+ * Takes a raw median value in seconds and converts it to a string representation
+ * ie. converts 172800 => 2d (2 days)
+ *
+ * @param {Number} Median - The number of seconds for the median calculation
+ * @returns {String} String representation ie 2w
+ */
+export const medianTimeToParsedSeconds = (value) =>
+  timeSummaryForPathNavigation({
+    ...parseSeconds(value, { daysPerWeek: 7, hoursPerDay: 24 }),
+    seconds: value,
+  });
+
+/**
+ * Takes the raw median value arrays and converts them into a useful object
+ * containing the string for display in the path navigation, additionally
+ * the overview is calculated as a sum of all the stages.
+ * ie. converts [{ id: 'test', value: 172800 }] => { 'test': '2d' }
+ *
+ * @param {Array} Medians - Array of stage median objects, each contains a `id`, `value` and `error`
+ * @returns {Object} Returns key value pair with the stage name and its display median value
+ */
+export const formatMedianValuesWithOverview = (medians = []) => {
+  const calculatedMedians = medians.reduce(
+    (acc, { id, value = 0 }) => {
+      return {
+        ...acc,
+        [id]: value ? medianTimeToParsedSeconds(value) : '-',
+        [OVERVIEW_STAGE_ID]: acc[OVERVIEW_STAGE_ID] + value,
+      };
+    },
+    {
+      [OVERVIEW_STAGE_ID]: 0,
+    },
+  );
+  const overviewMedian = calculatedMedians[OVERVIEW_STAGE_ID];
+  return {
+    ...calculatedMedians,
+    [OVERVIEW_STAGE_ID]: overviewMedian ? medianTimeToParsedSeconds(overviewMedian) : '-',
+  };
+};
 
 /**
  * Takes the stages and median data, combined with the selected stage, to build an
@@ -345,19 +436,12 @@ export const isStageNameExistsError = ({ status, errors }) =>
  * @returns {Array} An array of stages formatted with data required for the path navigation
  */
 export const transformStagesForPathNavigation = ({ stages, medians, selectedStage }) => {
-  const formattedStages = stages.map(stage => {
-    const { days } = parseSeconds(medians[stage.id], {
-      daysPerWeek: 7,
-      hoursPerDay: 24,
-      limitToDays: true,
-    });
-
+  const formattedStages = stages.map((stage) => {
     return {
-      ...stage,
-      metric: days ? sprintf(s__('ValueStreamAnalytics|%{days}d'), { days }) : null,
-      selected: stage.title === selectedStage.title,
-      title: stage.title,
+      metric: medians[stage?.id],
+      selected: stage.id === selectedStage.id,
       icon: null,
+      ...stage,
     };
   });
 
@@ -374,25 +458,25 @@ export const transformStagesForPathNavigation = ({ stages, medians, selectedStag
  * @property {String} label - Title of the metric measured
  * @property {String} value - String representing the decimal point value, e.g '1.5'
  * @property {String} key - Slugified string based on the 'title'
- * @property {String} [tooltipText] - String to display for aa tooltip
- * @property {String} [unit] - String representing the decimal point value, e.g '1.5'
+ * @property {String} description - String to display for a description
+ * @property {String} unit - String representing the decimal point value, e.g '1.5'
  */
 
 /**
  * Prepares metric data to be rendered in the metric_card component
  *
  * @param {MetricData[]} data - The metric data to be rendered
- * @param {Object} [tooltipText] - Key value pair of strings to display in the tooltip
+ * @param {Object} popoverContent - Key value pair of data to display in the popover
  * @returns {TransformedMetricData[]} An array of metrics ready to render in the metric_card
  */
 
-export const prepareTimeMetricsData = (data = [], tooltipText = {}) =>
+export const prepareTimeMetricsData = (data = [], popoverContent = {}) =>
   data.map(({ title: label, ...rest }) => {
     const key = slugify(label);
     return {
       ...rest,
       label,
       key,
-      tooltipText: tooltipText[key] || '',
+      description: popoverContent[key]?.description || '',
     };
   });

@@ -2,10 +2,10 @@
 type: reference
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Troubleshooting Redis
+# Troubleshooting Redis **(FREE SELF)**
 
 There are a lot of moving parts that needs to be taken care carefully
 in order for the HA setup to work as expected.

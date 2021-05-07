@@ -1,0 +1,3 @@
+mutation updateActiveStep($id: String) {
+  updateActiveStep(id: $id) @client
+}

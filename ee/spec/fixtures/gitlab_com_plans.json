@@ -37,7 +37,7 @@
             }
         ],
         "free": true,
-        "name": "Free",
+        "name": "Free Plan",
         "price_per_month": 0.0,
         "price_per_year": 0.0,
         "purchase_link": {
@@ -84,18 +84,19 @@
             }
         ],
         "free": false,
-        "name": "Bronze",
+        "name": "Bronze Plan",
         "price_per_month": 4.0,
         "price_per_year": 48.0,
         "purchase_link": {
             "action": "upgrade",
             "href": "http://customers.gitlab.com/subscriptions/new?plan_id=2c92a0ff5a840412015aa3cde86f2ba6"
-        }
+        },
+        "deprecated": true
     },
     {
-        "id": "silver-external-id",
+        "id": "premium-external-id",
         "about_page_href": "https://about.gitlab.com/gitlab-com/",
-        "code": "silver",
+        "code": "premium",
         "features": [
             {
                 "highlight": false,
@@ -119,7 +120,7 @@
             }
         ],
         "free": false,
-        "name": "Silver",
+        "name": "Premium Plan",
         "price_per_month": 19.0,
         "price_per_year": 228.0,
         "purchase_link": {
@@ -128,9 +129,9 @@
         }
     },
     {
-        "id": "gold-external-id",
+        "id": "ultimate-external-id",
         "about_page_href": "https://about.gitlab.com/gitlab-com/",
-        "code": "gold",
+        "code": "ultimate",
         "features": [
             {
                 "highlight": false,
@@ -146,7 +147,7 @@
             },
             {
                 "highlight": true,
-                "title": "All Silver features"
+                "title": "All Premium features"
             },
             {
                 "highlight": false,
@@ -158,12 +159,12 @@
             }
         ],
         "free": false,
-        "name": "Gold",
+        "name": "Ultimate Plan",
         "price_per_month": 99.0,
         "price_per_year": 1188.0,
         "purchase_link": {
             "action": "upgrade",
-            "href": "http://customers.gitlab.com/subscriptions/new?plan_id=2c92a0fc5a83f01d015aa6db83c45aac"
+            "href": "http://customers.gitlab.com/subscriptions/new?plan_id=2c92a0ff76f0d5250176f2f8c86f305a"
         }
     }
 ]

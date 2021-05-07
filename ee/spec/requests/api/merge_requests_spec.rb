@@ -145,7 +145,7 @@ RSpec.describe API::MergeRequests do
       context 'the approvals_before_merge param' do
         context 'when the target project has disable_overriding_approvers_per_merge_request set to true' do
           before do
-            project.update(disable_overriding_approvers_per_merge_request: true)
+            project.update!(disable_overriding_approvers_per_merge_request: true)
             create_merge_request(approvals_before_merge: 1)
           end
 
@@ -156,7 +156,7 @@ RSpec.describe API::MergeRequests do
 
         context 'when the target project has disable_overriding_approvers_per_merge_request set to false' do
           before do
-            project.update(approvals_before_merge: 0)
+            project.update!(approvals_before_merge: 0)
             create_merge_request(approvals_before_merge: 1)
           end
 
@@ -173,7 +173,7 @@ RSpec.describe API::MergeRequests do
   describe "PUT /projects/:id/merge_requests/:merge_request_iid/merge" do
     it 'returns 405 if merge request was not approved' do
       project.add_developer(create(:user))
-      project.update(approvals_before_merge: 1)
+      project.update!(approvals_before_merge: 1)
 
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
 
@@ -184,8 +184,8 @@ RSpec.describe API::MergeRequests do
     it 'returns 200 if merge request was approved' do
       approver = create(:user)
       project.add_developer(approver)
-      project.update(approvals_before_merge: 1)
-      merge_request.approvals.create(user: approver)
+      project.update!(approvals_before_merge: 1)
+      merge_request.approvals.create!(user: approver)
 
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/merge", user)
 
@@ -267,9 +267,17 @@ RSpec.describe API::MergeRequests do
     end
 
     context 'filter merge requests by approval IDs' do
-      let!(:merge_request_with_approval) do
+      let_it_be(:user3) { create(:user) }
+      let_it_be(:merge_request_with_approval) do
         create(:merge_request, author: user, source_project: project, target_project: project, source_branch: 'other-branch').tap do |mr|
           create(:approval, merge_request: mr, user: user2)
+        end
+      end
+
+      let_it_be(:merge_request_with_multiple_approvals) do
+        create(:merge_request, author: user, source_project: project, target_project: project, source_branch: 'another-branch').tap do |mr|
+          create(:approval, merge_request: mr, user: user2)
+          create(:approval, merge_request: mr, user: user3)
         end
       end
 
@@ -281,7 +289,25 @@ RSpec.describe API::MergeRequests do
         let(:approvals_param) { [user2.id] }
 
         it 'returns an array of merge requests which have specified the user as an approver' do
-          expect_response_contain_exactly(merge_request_with_approval.id)
+          expect_response_contain_exactly(merge_request_with_approval.id, merge_request_with_multiple_approvals.id)
+        end
+      end
+
+      context 'with multiple specified approved_by ids' do
+        context 'when approved by all users' do
+          let(:approvals_param) { [user2.id, user3.id] }
+
+          it 'returns an array of merge requests which have specified the user as an approver' do
+            expect_response_contain_exactly(merge_request_with_multiple_approvals.id)
+          end
+        end
+
+        context 'when not approved by all users' do
+          let(:approvals_param) { [user.id, user2.id] }
+
+          it 'does not return any merge request' do
+            expect_empty_array_response
+          end
         end
       end
 
@@ -297,7 +323,7 @@ RSpec.describe API::MergeRequests do
         let(:approvals_param) { 'Any' }
 
         it 'returns an array of merge requests with any approver' do
-          expect_response_contain_exactly(merge_request_with_approval.id)
+          expect_response_contain_exactly(merge_request_with_approval.id, merge_request_with_multiple_approvals.id)
         end
       end
 

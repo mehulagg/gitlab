@@ -10,17 +10,14 @@ module Elastic
           if query =~ /#(\d+)\z/
             iid_query_hash(Regexp.last_match(1))
           else
-            fields = %w(title^2 description)
-
-            # We can only allow searching the iid field if the query is
-            # just a number, otherwise Elasticsearch will error since this
-            # field is type integer.
-            fields << "iid^3" if query =~ /\A\d+\z/
-
-            basic_query_hash(fields, query)
+            # iid field can be added here as lenient option will
+            # pardon format errors, like integer out of range.
+            fields = %w[iid^3 title^2 description]
+            basic_query_hash(fields, query, count_only: options[:count_only])
           end
 
         options[:features] = 'issues'
+        options[:no_join_project] = Elastic::DataMigrationService.migration_has_finished?(:add_new_data_to_issues_documents)
         context.name(:issue) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
@@ -31,7 +28,36 @@ module Elastic
         search(query_hash, options)
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(:issue_assignees, project: [:project_feature])
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       private
+
+      # Builds an elasticsearch query that will select documents from a
+      # set of projects for Group and Project searches, taking user access
+      # rules for issues into account. Relies upon super for Global searches
+      def project_ids_filter(query_hash, options)
+        return super if options[:public_and_internal_projects]
+
+        current_user = options[:current_user]
+        scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        return super if scoped_project_ids == :any
+
+        context.name(:project) do
+          query_hash[:query][:bool][:filter] ||= []
+          query_hash[:query][:bool][:filter] << {
+            terms: {
+              _name: context.name,
+              project_id: filter_ids_by_feature(scoped_project_ids, current_user, 'issues')
+            }
+          }
+        end
+
+        query_hash
+      end
 
       def confidentiality_filter(query_hash, options)
         current_user = options[:current_user]

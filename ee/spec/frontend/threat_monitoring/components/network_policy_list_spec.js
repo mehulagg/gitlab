@@ -1,18 +1,15 @@
+import { GlTable, GlToggle } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import { GlTable } from '@gitlab/ui';
-import createStore from 'ee/threat_monitoring/store';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
 import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
-import { useFakeDate } from 'helpers/fake_date';
+import createStore from 'ee/threat_monitoring/store';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { mockPoliciesResponse } from '../mock_data';
+import { mockPoliciesResponse } from '../mocks/mock_data';
 
-const mockData = mockPoliciesResponse.map(policy => convertObjectPropsToCamelCase(policy));
+const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 
 describe('NetworkPolicyList component', () => {
-  useFakeDate();
-
   let store;
   let wrapper;
 
@@ -35,6 +32,7 @@ describe('NetworkPolicyList component', () => {
       data,
       store,
       provide,
+      stubs: { NetworkPolicyEditor: true },
     });
   };
 
@@ -43,7 +41,7 @@ describe('NetworkPolicyList component', () => {
   const findTableEmptyState = () => wrapper.find({ ref: 'tableEmptyState' });
   const findEditorDrawer = () => wrapper.find({ ref: 'editorDrawer' });
   const findPolicyEditor = () => wrapper.find({ ref: 'policyEditor' });
-  const findPolicyToggle = () => wrapper.find('[data-testid="policyToggle"]');
+  const findPolicyToggle = () => wrapper.find(GlToggle);
   const findApplyButton = () => wrapper.find({ ref: 'applyButton' });
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findAutodevopsAlert = () => wrapper.find('[data-testid="autodevopsAlert"]');
@@ -129,9 +127,7 @@ spec:
     });
 
     it('renders policies table', () => {
-      const namespaceHeader = findPoliciesTable()
-        .findAll('[role="columnheader"]')
-        .at(1);
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
       expect(namespaceHeader.text()).toBe('Namespace');
     });
   });
@@ -143,9 +139,7 @@ spec:
   });
 
   it('renders opened editor drawer on row selection', () => {
-    findPoliciesTable()
-      .find('td')
-      .trigger('click');
+    findPoliciesTable().find('td').trigger('click');
 
     return wrapper.vm.$nextTick().then(() => {
       const editorDrawer = findEditorDrawer();
@@ -178,13 +172,16 @@ spec:
     it('renders network policy editor with manifest', () => {
       const policyEditor = findPolicyEditor();
       expect(policyEditor.exists()).toBe(true);
-      expect(policyEditor.props('value')).toBe(mockData[0].manifest);
+      expect(policyEditor.attributes('value')).toBe(mockData[0].manifest);
     });
 
     it('renders network policy toggle', () => {
       const policyToggle = findPolicyToggle();
       expect(policyToggle.exists()).toBe(true);
-      expect(policyToggle.props('value')).toBe(mockData[0].isEnabled);
+      expect(policyToggle.props()).toMatchObject({
+        label: NetworkPolicyList.i18n.enforcementStatus,
+        value: mockData[0].isEnabled,
+      });
     });
 
     it('renders disabled apply button', () => {

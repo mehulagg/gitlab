@@ -44,7 +44,7 @@ RSpec.describe Geo::RegistrySyncWorker, :geo, :use_sql_query_cache_for_tracking_
     package_file_2 = create(:geo_package_file_registry)
 
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 5)
-    secondary.update!(files_max_capacity: 8)
+    secondary.update!(files_max_capacity: 4)
     allow(Gitlab::SidekiqStatus).to receive(:job_status).with([]).and_return([]).twice
     allow(Gitlab::SidekiqStatus).to receive(:job_status).with(array_including('123', '456')).and_return([true, true], [true, true], [false, false])
 
@@ -69,12 +69,12 @@ RSpec.describe Geo::RegistrySyncWorker, :geo, :use_sql_query_cache_for_tracking_
     # We retrieve all the items in a single batch
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 2)
     # 8 / 4 = 2 We use one quarter of common files_max_capacity in the Geo::RegistrySyncWorker
-    secondary.update!(files_max_capacity: 8)
+    secondary.update!(files_max_capacity: 4)
 
     expect(Geo::EventWorker).to receive(:perform_async).with('package_file', :created, { model_record_id: package_file_1.package_file.id }).once do
       Thread.new do
         # Rails will invalidate the query cache if the update happens in the same thread
-        Geo::PackageFileRegistry.update(state: Geo::PackageFileRegistry::STATE_VALUES[:synced])
+        Geo::PackageFileRegistry.update(state: Geo::PackageFileRegistry::STATE_VALUES[:synced]) # rubocop:disable Rails/SaveBang
       end
     end
 
@@ -92,7 +92,7 @@ RSpec.describe Geo::RegistrySyncWorker, :geo, :use_sql_query_cache_for_tracking_
   it 'attempts to load a new batch without pending downloads' do
     stub_const('Geo::Scheduler::SchedulerWorker::DB_RETRIEVE_BATCH_SIZE', 5)
     # 8 / 4 = 2 We use one quarter of common files_max_capacity in the Geo::RegistrySyncWorker
-    secondary.update!(files_max_capacity: 8)
+    secondary.update!(files_max_capacity: 4)
 
     result_object = double(
       :result,

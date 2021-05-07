@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Polling with ETag caching
 
 Polling for changes (repeatedly asking server if there are any new changes)
@@ -41,7 +47,7 @@ Cache Hit:
    resource.
 1. If the `If-None-Match` header matches the current value in Redis we know
    that the resource did not change so we can send 304 response immediately,
-   without querying the database at all. The client's browser will use the
+   without querying the database at all. The client's browser uses the
    cached response.
 1. If the `If-None-Match` header does not match the current value in Redis
    we have to generate a new response, because the resource changed.
@@ -54,6 +60,6 @@ route matching easier.
 
 For more information see:
 
-- [`Poll-Interval` header](fe_guide/performance.md#realtime-components)
+- [`Poll-Interval` header](fe_guide/performance.md#real-time-components)
 - [RFC 7232](https://tools.ietf.org/html/rfc7232)
 - [ETag proposal](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26926)

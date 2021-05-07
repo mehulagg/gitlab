@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Settings::IntegrationsController do
-  let(:project) { create(:project, :public) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:user) { create(:user) }
 
   before do
     project.add_maintainer(user)
@@ -27,9 +27,9 @@ RSpec.describe Projects::Settings::IntegrationsController do
     end
   end
 
-  context 'Sets correct services list' do
+  context 'sets correct services list' do
     let(:active_services) { assigns(:services).map(&:type) }
-    let(:disabled_services) { %w(JenkinsService) }
+    let(:disabled_services) { %w[GithubService] }
 
     it 'enables SlackSlashCommandsService and disables GitlabSlackApplication' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
@@ -49,37 +49,28 @@ RSpec.describe Projects::Settings::IntegrationsController do
     end
 
     context 'without a license key' do
-      before do
-        License.destroy_all # rubocop: disable Cop/DestroyAll
-      end
-
       it_behaves_like 'endpoint with some disabled services'
     end
 
     context 'with a license key' do
-      let(:namespace) { create(:group, :private) }
-      let(:project) { create(:project, :private, namespace: namespace) }
+      let_it_be(:namespace) { create(:group, :private) }
+      let_it_be(:project) { create(:project, :private, namespace: namespace) }
 
-      context 'when checking of namespace plan is enabled' do
-        before do
-          allow(Gitlab::CurrentSettings.current_application_settings).to receive(:should_check_namespace_plan?) { true }
-        end
-
-        context 'and namespace does not have a plan' do
-          it_behaves_like 'endpoint with some disabled services'
-        end
-
-        context 'and namespace has a plan' do
-          let(:namespace) { create(:group, :private) }
-          let!(:gitlab_subscription) { create(:gitlab_subscription, :bronze, namespace: namespace) }
-
-          it_behaves_like 'endpoint without disabled services'
-        end
+      before do
+        create(:license, plan: ::License::PREMIUM_PLAN)
       end
 
-      context 'when checking of namespace plan is not enabled' do
+      context 'when checking if namespace plan is enabled' do
         before do
-          allow(Gitlab::CurrentSettings.current_application_settings).to receive(:should_check_namespace_plan?) { false }
+          stub_application_setting(check_namespace_plan: true)
+        end
+
+        it_behaves_like 'endpoint with some disabled services'
+      end
+
+      context 'when checking if namespace plan is not enabled' do
+        before do
+          stub_application_setting(check_namespace_plan: false)
         end
 
         it_behaves_like 'endpoint without disabled services'

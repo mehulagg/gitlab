@@ -6,7 +6,9 @@ module API
     include APIGuard
     helpers ::API::Helpers::EventsHelpers
 
-    allow_access_with_scope :read_user, if: -> (request) { request.get? }
+    allow_access_with_scope :read_user, if: -> (request) { request.get? || request.head? }
+
+    feature_category :users
 
     resource :events do
       desc "List currently authenticated user's events" do

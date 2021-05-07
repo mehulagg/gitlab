@@ -3,11 +3,11 @@
 module Projects
   module Settings
     class RepositoryController < Projects::ApplicationController
+      layout 'project_settings'
       before_action :authorize_admin_project!
       before_action :define_variables, only: [:create_deploy_token]
       before_action do
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
-        push_frontend_feature_flag(:deploy_keys_on_protected_branches, @project)
       end
 
       feature_category :source_code_management, [:show, :cleanup]
@@ -18,14 +18,13 @@ module Projects
       end
 
       def cleanup
-        cleanup_params = params.require(:project).permit(:bfg_object_map)
-        result = Projects::UpdateService.new(project, current_user, cleanup_params).execute
+        bfg_object_map = params.require(:project).require(:bfg_object_map)
+        result = Projects::CleanupService.enqueue(project, current_user, bfg_object_map)
 
         if result[:status] == :success
-          RepositoryCleanupWorker.perform_async(project.id, current_user.id) # rubocop:disable CodeReuse/Worker
           flash[:notice] = _('Repository cleanup has started. You will receive an email once the cleanup operation is complete.')
         else
-          flash[:alert] = _('Failed to upload object map file')
+          flash[:alert] = status.fetch(:message, _('Failed to upload object map file'))
         end
 
         redirect_to project_settings_repository_path(project)

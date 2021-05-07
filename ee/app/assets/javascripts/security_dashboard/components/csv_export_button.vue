@@ -1,11 +1,12 @@
 <script>
 import { GlPopover, GlIcon, GlLink, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
+import AccessorUtils from '~/lib/utils/accessor';
 import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import download from '~/lib/utils/downloader';
+import pollUntilComplete from '~/lib/utils/poll_until_complete';
+import { __, s__ } from '~/locale';
 
 export const STORAGE_KEY = 'vulnerability_csv_export_popover_dismissed';
 
@@ -19,16 +20,13 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  props: {
-    vulnerabilitiesExportEndpoint: {
-      type: String,
-      required: true,
-    },
+  inject: ['vulnerabilitiesExportEndpoint'],
+  data() {
+    return {
+      isPreparingCsvExport: false,
+      showPopover: localStorage.getItem(STORAGE_KEY) !== 'true',
+    };
   },
-  data: () => ({
-    isPreparingCsvExport: false,
-    showPopover: localStorage.getItem(STORAGE_KEY) !== 'true',
-  }),
   computed: {
     buttonProps() {
       const { isPreparingCsvExport } = this;
@@ -43,10 +41,8 @@ export default {
     closePopover() {
       this.showPopover = false;
 
-      try {
+      if (AccessorUtils.isLocalStorageAccessSafe()) {
         localStorage.setItem(STORAGE_KEY, 'true');
-      } catch (e) {
-        // Ignore the error - this is just a safety measure.
       }
     },
     initiateCsvExport() {
@@ -66,7 +62,9 @@ export default {
           });
         })
         .catch(() => {
-          createFlash(s__('SecurityReports|There was an error while generating the report.'));
+          createFlash({
+            message: s__('SecurityReports|There was an error while generating the report.'),
+          });
         })
         .finally(() => {
           this.isPreparingCsvExport = false;
@@ -85,9 +83,10 @@ export default {
   >
     {{ __('Export') }}
     <gl-popover
+      v-if="showPopover"
       ref="popover"
       :target="() => $refs.csvExportButton.$el"
-      :show="showPopover"
+      show
       placement="left"
       triggers="manual"
     >

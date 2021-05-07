@@ -6,9 +6,9 @@ RSpec.describe 'Container-Scanning.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Container-Scanning') }
 
   describe 'the created pipeline' do
-    let(:user) { create(:admin) }
     let(:default_branch) { 'master' }
     let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
+    let(:user) { project.owner }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
@@ -35,6 +35,16 @@ RSpec.describe 'Container-Scanning.gitlab-ci.yml' do
       context 'by default' do
         it 'includes job' do
           expect(build_names).to match_array(%w[container_scanning])
+        end
+      end
+
+      context 'with CS_MAJOR_VERSION greater than 3' do
+        before do
+          create(:ci_variable, project: project, key: 'CS_MAJOR_VERSION', value: '4')
+        end
+
+        it 'includes job' do
+          expect(build_names).to match_array(%w[container_scanning_new])
         end
       end
 

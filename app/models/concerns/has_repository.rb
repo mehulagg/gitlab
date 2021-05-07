@@ -15,18 +15,9 @@ module HasRepository
 
   delegate :base_dir, :disk_path, to: :storage
 
-  class_methods do
-    def pick_repository_storage
-      # We need to ensure application settings are fresh when we pick
-      # a repository storage to use.
-      Gitlab::CurrentSettings.expire_current_application_settings
-      Gitlab::CurrentSettings.pick_repository_storage
-    end
-  end
-
   def valid_repo?
     repository.exists?
-  rescue
+  rescue StandardError
     errors.add(:base, _('Invalid repository path'))
     false
   end
@@ -34,7 +25,7 @@ module HasRepository
   def repo_exists?
     strong_memoize(:repo_exists) do
       repository.exists?
-    rescue
+    rescue StandardError
       false
     end
   end
@@ -86,9 +77,14 @@ module HasRepository
   def default_branch_from_preferences
     return unless empty_repo?
 
-    group_branch_default_name = group&.default_branch_name if respond_to?(:group)
+    (default_branch_from_group_preferences || Gitlab::CurrentSettings.default_branch_name).presence
+  end
 
-    group_branch_default_name || Gitlab::CurrentSettings.default_branch_name
+  def default_branch_from_group_preferences
+    return unless respond_to?(:group)
+    return unless group
+
+    group.default_branch_name || group.root_ancestor.default_branch_name
   end
 
   def reload_default_branch
@@ -107,6 +103,11 @@ module HasRepository
 
   def http_url_to_repo
     Gitlab::RepositoryUrlBuilder.build(repository.full_path, protocol: :http)
+  end
+
+  # Is overridden in EE::Project for Geo support
+  def lfs_http_url_to_repo(_operation = nil)
+    http_url_to_repo
   end
 
   def web_url(only_path: nil)

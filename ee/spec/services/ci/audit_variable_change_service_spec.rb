@@ -6,6 +6,7 @@ RSpec.describe Ci::AuditVariableChangeService do
   subject(:execute) { service.execute }
 
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let(:variable) { create(:ci_group_variable) }
 

@@ -1,24 +1,32 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import VueApollo, { ApolloMutation } from 'vue-apollo';
-import VueDraggable from 'vuedraggable';
-import VueRouter from 'vue-router';
 import { GlEmptyState } from '@gitlab/ui';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import VueApollo, { ApolloMutation } from 'vue-apollo';
+import VueRouter from 'vue-router';
+import VueDraggable from 'vuedraggable';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
-import Index from '~/design_management/pages/index.vue';
-import uploadDesignQuery from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
-import DesignDestroyer from '~/design_management/components/design_destroyer.vue';
-import DesignDropzone from '~/design_management/components/upload/design_dropzone.vue';
+import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
+import getDesignListQuery from 'shared_queries/design_management/get_design_list.query.graphql';
 import DeleteButton from '~/design_management/components/delete_button.vue';
+import DesignDestroyer from '~/design_management/components/design_destroyer.vue';
 import Design from '~/design_management/components/list/item.vue';
+import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
+import uploadDesignMutation from '~/design_management/graphql/mutations/upload_design.mutation.graphql';
+import Index from '~/design_management/pages/index.vue';
+import createRouter from '~/design_management/router';
 import { DESIGNS_ROUTE_NAME } from '~/design_management/router/constants';
+import * as utils from '~/design_management/utils/design_management_utils';
 import {
   EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE,
   EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE,
 } from '~/design_management/utils/error_messages';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import createRouter from '~/design_management/router';
-import * as utils from '~/design_management/utils/design_management_utils';
+import {
+  DESIGN_TRACKING_PAGE_NAME,
+  DESIGN_SNOWPLOW_EVENT_TYPES,
+} from '~/design_management/utils/tracking';
+import createFlash from '~/flash';
+import DesignDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import {
   designListQueryResponse,
   designUploadMutationCreatedResponse,
@@ -28,10 +36,6 @@ import {
   reorderedDesigns,
   moveDesignMutationResponseWithErrors,
 } from '../mock_data/apollo_mock';
-import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
-import permissionsQuery from '~/design_management/graphql/queries/design_permissions.query.graphql';
-import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
-import { DESIGN_TRACKING_PAGE_NAME } from '~/design_management/utils/tracking';
 
 jest.mock('~/flash.js');
 const mockPageEl = {
@@ -93,7 +97,7 @@ describe('Design management index page', () => {
   let moveDesignHandler;
 
   const findDesignCheckboxes = () => wrapper.findAll('.design-checkbox');
-  const findSelectAllButton = () => wrapper.find('.js-select-all');
+  const findSelectAllButton = () => wrapper.find('[data-testid="select-all-designs-button"');
   const findToolbar = () => wrapper.find('.qa-selector-toolbar');
   const findDesignCollectionIsCopying = () =>
     wrapper.find('[data-testid="design-collection-is-copying"');
@@ -105,10 +109,12 @@ describe('Design management index page', () => {
   const findDesignsWrapper = () => wrapper.find('[data-testid="designs-root"]');
   const findDesigns = () => wrapper.findAll(Design);
   const draggableAttributes = () => wrapper.find(VueDraggable).vm.$attrs;
+  const findDesignUploadButton = () => wrapper.find('[data-testid="design-upload-button"]');
+  const findDesignToolbarWrapper = () => wrapper.find('[data-testid="design-toolbar-wrapper"]');
 
   async function moveDesigns(localWrapper) {
     await jest.runOnlyPendingTimers();
-    await localWrapper.vm.$nextTick();
+    await nextTick();
 
     localWrapper.find(VueDraggable).vm.$emit('input', reorderedDesigns);
     localWrapper.find(VueDraggable).vm.$emit('change', {
@@ -154,7 +160,7 @@ describe('Design management index page', () => {
       localVue,
       router,
       stubs: { DesignDestroyer, ApolloMutation, VueDraggable, ...stubs },
-      attachToDocument: true,
+      attachTo: document.body,
       provide: {
         projectPath: 'project-path',
         issueIid: '1',
@@ -195,14 +201,13 @@ describe('Design management index page', () => {
       expect(wrapper.element).toMatchSnapshot();
     });
 
-    it('renders error', () => {
+    it('renders error', async () => {
       createComponent();
 
       wrapper.setData({ error: true });
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.element).toMatchSnapshot();
-      });
+      await nextTick();
+      expect(wrapper.element).toMatchSnapshot();
     });
 
     it('renders a toolbar with buttons when there are designs', () => {
@@ -214,13 +219,17 @@ describe('Design management index page', () => {
     it('renders designs list and header with upload button', () => {
       createComponent({ allVersions: [mockVersion] });
 
-      expect(wrapper.element).toMatchSnapshot();
+      expect(findDesignsWrapper().exists()).toBe(true);
+      expect(findDesigns().length).toBe(3);
+      expect(findDesignToolbarWrapper().exists()).toBe(true);
+      expect(findDesignUploadButton().exists()).toBe(true);
     });
 
     it('does not render toolbar when there is no permission', () => {
       createComponent({ designs: mockDesigns, allVersions: [mockVersion], createDesign: false });
 
-      expect(wrapper.element).toMatchSnapshot();
+      expect(findDesignToolbarWrapper().exists()).toBe(false);
+      expect(findDesignUploadButton().exists()).toBe(false);
     });
 
     it('has correct classes applied to design dropzone', () => {
@@ -245,10 +254,10 @@ describe('Design management index page', () => {
       createComponent({ designCollection: { designs: [], copyState: 'READY' } });
     });
 
-    it('renders design dropzone', () =>
-      wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.element).toMatchSnapshot();
-      }));
+    it('renders design dropzone', async () => {
+      await nextTick();
+      expect(findDropzone().exists()).toBe(true);
+    });
 
     it('has correct classes applied to design dropzone', () => {
       expect(dropzoneClasses()).not.toContain('design-list-item');
@@ -259,10 +268,10 @@ describe('Design management index page', () => {
       expect(findDropzoneWrapper().classes()).toEqual(['col-12']);
     });
 
-    it('does not render a toolbar with buttons', () =>
-      wrapper.vm.$nextTick().then(() => {
-        expect(findToolbar().exists()).toBe(false);
-      }));
+    it('does not render a toolbar with buttons', async () => {
+      await nextTick();
+      expect(findToolbar().exists()).toBe(false);
+    });
   });
 
   describe('handling design collection copy state', () => {
@@ -281,7 +290,7 @@ describe('Design management index page', () => {
   });
 
   describe('uploading designs', () => {
-    it('calls mutation on upload', () => {
+    it('calls mutation on upload', async () => {
       createComponent({ stubs: { GlEmptyState } });
 
       const mutationVariables = {
@@ -289,7 +298,7 @@ describe('Design management index page', () => {
         context: {
           hasUpload: true,
         },
-        mutation: uploadDesignQuery,
+        mutation: uploadDesignMutation,
         variables: {
           files: [{ name: 'test' }],
           projectPath: 'project-path',
@@ -339,21 +348,16 @@ describe('Design management index page', () => {
         },
       };
 
-      return wrapper.vm
-        .$nextTick()
-        .then(() => {
-          findDropzone().vm.$emit('change', [{ name: 'test' }]);
-          expect(mutate).toHaveBeenCalledWith(mutationVariables);
-          expect(wrapper.vm.filesToBeSaved).toEqual([{ name: 'test' }]);
-          expect(wrapper.vm.isSaving).toBeTruthy();
-        })
-        .then(() => {
-          expect(dropzoneClasses()).toContain('design-list-item');
-          expect(dropzoneClasses()).toContain('design-list-item-new');
-        });
+      await nextTick();
+      findDropzone().vm.$emit('change', [{ name: 'test' }]);
+      expect(mutate).toHaveBeenCalledWith(mutationVariables);
+      expect(wrapper.vm.filesToBeSaved).toEqual([{ name: 'test' }]);
+      expect(wrapper.vm.isSaving).toBeTruthy();
+      expect(dropzoneClasses()).toContain('design-list-item');
+      expect(dropzoneClasses()).toContain('design-list-item-new');
     });
 
-    it('sets isSaving', () => {
+    it('sets isSaving', async () => {
       createComponent();
 
       const uploadDesign = wrapper.vm.onUploadDesign([
@@ -364,35 +368,31 @@ describe('Design management index page', () => {
 
       expect(wrapper.vm.isSaving).toBe(true);
 
-      return uploadDesign.then(() => {
-        expect(wrapper.vm.isSaving).toBe(false);
-      });
+      await uploadDesign;
+      expect(wrapper.vm.isSaving).toBe(false);
     });
 
-    it('updates state appropriately after upload complete', () => {
+    it('updates state appropriately after upload complete', async () => {
       createComponent({ stubs: { GlEmptyState } });
       wrapper.setData({ filesToBeSaved: [{ name: 'test' }] });
 
       wrapper.vm.onUploadDesignDone(designUploadMutationCreatedResponse);
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.vm.filesToBeSaved).toEqual([]);
-        expect(wrapper.vm.isSaving).toBeFalsy();
-        expect(wrapper.vm.isLatestVersion).toBe(true);
-      });
+      await nextTick();
+
+      expect(wrapper.vm.filesToBeSaved).toEqual([]);
+      expect(wrapper.vm.isSaving).toBeFalsy();
+      expect(wrapper.vm.isLatestVersion).toBe(true);
     });
 
-    it('updates state appropriately after upload error', () => {
+    it('updates state appropriately after upload error', async () => {
       createComponent({ stubs: { GlEmptyState } });
       wrapper.setData({ filesToBeSaved: [{ name: 'test' }] });
 
       wrapper.vm.onUploadDesignError();
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.vm.filesToBeSaved).toEqual([]);
-        expect(wrapper.vm.isSaving).toBeFalsy();
-        expect(createFlash).toHaveBeenCalled();
-
-        createFlash.mockReset();
-      });
+      await nextTick();
+      expect(wrapper.vm.filesToBeSaved).toEqual([]);
+      expect(wrapper.vm.isSaving).toBeFalsy();
+      expect(createFlash).toHaveBeenCalled();
     });
 
     it('does not call mutation if createDesign is false', () => {
@@ -405,10 +405,6 @@ describe('Design management index page', () => {
 
     describe('upload count limit', () => {
       const MAXIMUM_FILE_UPLOAD_LIMIT = 10;
-
-      afterEach(() => {
-        createFlash.mockReset();
-      });
 
       it('does not warn when the max files are uploaded', () => {
         createComponent();
@@ -427,7 +423,7 @@ describe('Design management index page', () => {
       });
     });
 
-    it('flashes warning if designs are skipped', () => {
+    it('flashes warning if designs are skipped', async () => {
       createComponent({
         mockMutate: () =>
           Promise.resolve({
@@ -441,25 +437,22 @@ describe('Design management index page', () => {
         },
       ]);
 
-      return uploadDesign.then(() => {
-        expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Upload skipped. test.jpg did not change.',
-          'warning',
-        );
+      await uploadDesign;
+      expect(createFlash).toHaveBeenCalledTimes(1);
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Upload skipped. test.jpg did not change.',
+        types: 'warning',
       });
     });
 
     describe('dragging onto an existing design', () => {
+      let mockMutate;
       beforeEach(() => {
-        createComponent({ designs: mockDesigns, allVersions: [mockVersion] });
+        mockMutate = jest.fn().mockResolvedValue();
+        createComponent({ designs: mockDesigns, allVersions: [mockVersion], mockMutate });
       });
 
-      it('calls onUploadDesign with valid upload', () => {
-        wrapper.setMethods({
-          onUploadDesign: jest.fn(),
-        });
-
+      it('uploads designs with valid upload', () => {
         const mockUploadPayload = [
           {
             name: mockDesigns[0].filename,
@@ -469,8 +462,13 @@ describe('Design management index page', () => {
         const designDropzone = findFirstDropzoneWithDesign();
         designDropzone.vm.$emit('change', mockUploadPayload);
 
-        expect(wrapper.vm.onUploadDesign).toHaveBeenCalledTimes(1);
-        expect(wrapper.vm.onUploadDesign).toHaveBeenCalledWith(mockUploadPayload);
+        const [{ mutation, variables }] = mockMutate.mock.calls[0];
+        expect(mutation).toBe(uploadDesignMutation);
+        expect(variables).toStrictEqual({
+          files: mockUploadPayload,
+          iid: '1',
+          projectPath: 'project-path',
+        });
       });
 
       it.each`
@@ -482,7 +480,7 @@ describe('Design management index page', () => {
         designDropzone.vm.$emit('change', eventPayload);
 
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(message);
+        expect(createFlash).toHaveBeenCalledWith({ message });
       });
     });
 
@@ -503,14 +501,20 @@ describe('Design management index page', () => {
         wrapper.vm.onUploadDesignDone(designUploadMutationCreatedResponse);
 
         expect(trackingSpy).toHaveBeenCalledTimes(1);
-        expect(trackingSpy).toHaveBeenCalledWith(DESIGN_TRACKING_PAGE_NAME, 'create_design');
+        expect(trackingSpy).toHaveBeenCalledWith(
+          DESIGN_TRACKING_PAGE_NAME,
+          DESIGN_SNOWPLOW_EVENT_TYPES.CREATE_DESIGN,
+        );
       });
 
       it('tracks design modification', () => {
         wrapper.vm.onUploadDesignDone(designUploadMutationUpdatedResponse);
 
         expect(trackingSpy).toHaveBeenCalledTimes(1);
-        expect(trackingSpy).toHaveBeenCalledWith(DESIGN_TRACKING_PAGE_NAME, 'update_design');
+        expect(trackingSpy).toHaveBeenCalledWith(
+          DESIGN_TRACKING_PAGE_NAME,
+          DESIGN_SNOWPLOW_EVENT_TYPES.UPDATE_DESIGN,
+        );
       });
     });
   });
@@ -529,57 +533,41 @@ describe('Design management index page', () => {
       expect(findToolbar().isVisible()).toBe(true);
     });
 
-    it('adds two designs to selected designs when their checkboxes are checked', () => {
-      findDesignCheckboxes()
-        .at(0)
-        .trigger('click');
+    it('adds two designs to selected designs when their checkboxes are checked', async () => {
+      findDesignCheckboxes().at(0).trigger('click');
 
-      return wrapper.vm
-        .$nextTick()
-        .then(() => {
-          findDesignCheckboxes()
-            .at(1)
-            .trigger('click');
+      await nextTick();
+      findDesignCheckboxes().at(1).trigger('click');
 
-          return wrapper.vm.$nextTick();
-        })
-        .then(() => {
-          expect(findDeleteButton().exists()).toBe(true);
-          expect(findSelectAllButton().text()).toBe('Deselect all');
-          findDeleteButton().vm.$emit('deleteSelectedDesigns');
-          const [{ variables }] = mutate.mock.calls[0];
-          expect(variables.filenames).toStrictEqual([
-            mockDesigns[0].filename,
-            mockDesigns[1].filename,
-          ]);
-        });
+      await nextTick();
+      expect(findDeleteButton().exists()).toBe(true);
+      expect(findSelectAllButton().text()).toBe('Deselect all');
+
+      findDeleteButton().vm.$emit('delete-selected-designs');
+
+      const [{ variables }] = mutate.mock.calls[0];
+      expect(variables.filenames).toStrictEqual([mockDesigns[0].filename, mockDesigns[1].filename]);
     });
 
-    it('adds all designs to selected designs when Select All button is clicked', () => {
+    it('adds all designs to selected designs when Select All button is clicked', async () => {
       findSelectAllButton().vm.$emit('click');
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(findDeleteButton().props().hasSelectedDesigns).toBe(true);
-        expect(findSelectAllButton().text()).toBe('Deselect all');
-        expect(wrapper.vm.selectedDesigns).toEqual(mockDesigns.map(design => design.filename));
-      });
+      await nextTick();
+      expect(findDeleteButton().props().hasSelectedDesigns).toBe(true);
+      expect(findSelectAllButton().text()).toBe('Deselect all');
+      expect(wrapper.vm.selectedDesigns).toEqual(mockDesigns.map((design) => design.filename));
     });
 
-    it('removes all designs from selected designs when at least one design was selected', () => {
-      findDesignCheckboxes()
-        .at(0)
-        .trigger('click');
+    it('removes all designs from selected designs when at least one design was selected', async () => {
+      findDesignCheckboxes().at(0).trigger('click');
+      await nextTick();
 
-      return wrapper.vm
-        .$nextTick()
-        .then(() => {
-          findSelectAllButton().vm.$emit('click');
-        })
-        .then(() => {
-          expect(findDeleteButton().props().hasSelectedDesigns).toBe(false);
-          expect(findSelectAllButton().text()).toBe('Select all');
-          expect(wrapper.vm.selectedDesigns).toEqual([]);
-        });
+      findSelectAllButton().vm.$emit('click');
+      await nextTick();
+
+      expect(findDeleteButton().props().hasSelectedDesigns).toBe(false);
+      expect(findSelectAllButton().text()).toBe('Select all');
+      expect(wrapper.vm.selectedDesigns).toEqual([]);
     });
   });
 
@@ -617,12 +605,10 @@ describe('Design management index page', () => {
 
   describe('pasting a design', () => {
     let event;
+    let mockMutate;
     beforeEach(() => {
-      createComponent({ designs: mockDesigns, allVersions: [mockVersion] });
-
-      wrapper.setMethods({
-        onUploadDesign: jest.fn(),
-      });
+      mockMutate = jest.fn().mockResolvedValue({});
+      createComponent({ designs: mockDesigns, allVersions: [mockVersion], mockMutate });
 
       event = new Event('paste');
       event.clipboardData = {
@@ -631,36 +617,56 @@ describe('Design management index page', () => {
       };
     });
 
-    it('does not call paste event if designs wrapper is not hovered', () => {
+    it('does not upload designs if designs wrapper is not hovered', () => {
       document.dispatchEvent(event);
 
-      expect(wrapper.vm.onUploadDesign).not.toHaveBeenCalled();
+      expect(mockMutate).not.toHaveBeenCalled();
     });
 
     describe('when designs wrapper is hovered', () => {
+      let realDateNow;
+      const today = () => new Date('2020-12-25');
+      beforeAll(() => {
+        realDateNow = Date.now;
+        global.Date.now = today;
+      });
+
+      afterAll(() => {
+        global.Date.now = realDateNow;
+      });
+
       beforeEach(() => {
         findDesignsWrapper().trigger('mouseenter');
       });
 
-      it('calls onUploadDesign with valid paste', () => {
+      it('uploads design with valid paste', () => {
         document.dispatchEvent(event);
 
-        expect(wrapper.vm.onUploadDesign).toHaveBeenCalledTimes(1);
-        expect(wrapper.vm.onUploadDesign).toHaveBeenCalledWith([
-          new File([{ name: 'image.png' }], 'test.png'),
-        ]);
+        const [{ mutation, variables }] = mockMutate.mock.calls[0];
+        expect(mutation).toBe(uploadDesignMutation);
+        expect(variables).toStrictEqual({
+          files: expect.any(Array),
+          iid: '1',
+          projectPath: 'project-path',
+        });
+        expect(variables.files).toEqual(event.clipboardData.files.map((f) => new File([f], '')));
       });
 
       it('renames a design if it has an image.png filename', () => {
+        event.clipboardData.getData = () => 'image.png';
         document.dispatchEvent(event);
 
-        expect(wrapper.vm.onUploadDesign).toHaveBeenCalledTimes(1);
-        expect(wrapper.vm.onUploadDesign).toHaveBeenCalledWith([
-          new File([{ name: 'image.png' }], `design_${Date.now()}.png`),
-        ]);
+        const [{ mutation, variables }] = mockMutate.mock.calls[0];
+        expect(mutation).toBe(uploadDesignMutation);
+        expect(variables).toStrictEqual({
+          files: expect.any(Array),
+          iid: '1',
+          projectPath: 'project-path',
+        });
+        expect(variables.files[0].name).toEqual(`design_${Date.now()}.png`);
       });
 
-      it('does not call onUploadDesign with invalid paste', () => {
+      it('does not call upload with invalid paste', () => {
         event.clipboardData = {
           items: [{ type: 'text/plain' }, { type: 'text' }],
           files: [],
@@ -668,28 +674,27 @@ describe('Design management index page', () => {
 
         document.dispatchEvent(event);
 
-        expect(wrapper.vm.onUploadDesign).not.toHaveBeenCalled();
+        expect(mockMutate).not.toHaveBeenCalled();
       });
 
       it('removes onPaste listener after mouseleave event', async () => {
         findDesignsWrapper().trigger('mouseleave');
         document.dispatchEvent(event);
 
-        expect(wrapper.vm.onUploadDesign).not.toHaveBeenCalled();
+        expect(mockMutate).not.toHaveBeenCalled();
       });
     });
   });
 
   describe('when navigating', () => {
-    it('should trigger a scrollIntoView method if designs route is detected', () => {
+    it('should trigger a scrollIntoView method if designs route is detected', async () => {
       router.replace({
         path: '/designs',
       });
       createComponent({ loading: true });
 
-      return wrapper.vm.$nextTick().then(() => {
-        expect(scrollIntoViewMock).toHaveBeenCalled();
-      });
+      await nextTick();
+      expect(scrollIntoViewMock).toHaveBeenCalled();
     });
   });
 
@@ -698,14 +703,10 @@ describe('Design management index page', () => {
       createComponentWithApollo({});
 
       await jest.runOnlyPendingTimers();
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
       expect(findDesigns()).toHaveLength(3);
-      expect(
-        findDesigns()
-          .at(0)
-          .props('id'),
-      ).toBe('1');
+      expect(findDesigns().at(0).props('id')).toBe('1');
     });
 
     it('calls a mutation with correct parameters and reorders designs', async () => {
@@ -715,13 +716,9 @@ describe('Design management index page', () => {
 
       expect(moveDesignHandler).toHaveBeenCalled();
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
-      expect(
-        findDesigns()
-          .at(0)
-          .props('id'),
-      ).toBe('2');
+      expect(findDesigns().at(0).props('id')).toBe('2');
     });
 
     it('prevents reordering when reorderDesigns mutation is in progress', async () => {
@@ -732,8 +729,8 @@ describe('Design management index page', () => {
       expect(draggableAttributes().disabled).toBe(true);
 
       await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-      await wrapper.vm.$nextTick(); // kick off the DOM update
-      await wrapper.vm.$nextTick(); // kick off the DOM update for finally block
+      await nextTick(); // kick off the DOM update
+      await nextTick(); // kick off the DOM update for finally block
 
       expect(draggableAttributes().disabled).toBe(false);
     });
@@ -745,9 +742,9 @@ describe('Design management index page', () => {
 
       await moveDesigns(wrapper);
 
-      await wrapper.vm.$nextTick();
+      await nextTick();
 
-      expect(createFlash).toHaveBeenCalledWith('Houston, we have a problem');
+      expect(createFlash).toHaveBeenCalledWith({ message: 'Houston, we have a problem' });
     });
 
     it('displays flash if mutation had a non-recoverable error', async () => {
@@ -757,13 +754,13 @@ describe('Design management index page', () => {
 
       await moveDesigns(wrapper);
 
-      await wrapper.vm.$nextTick(); // kick off the DOM update
+      await nextTick(); // kick off the DOM update
       await jest.runOnlyPendingTimers(); // kick off the mocked GQL stuff (promises)
-      await wrapper.vm.$nextTick(); // kick off the DOM update for flash
+      await nextTick(); // kick off the DOM update for flash
 
-      expect(createFlash).toHaveBeenCalledWith(
-        'Something went wrong when reordering designs. Please try again',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Something went wrong when reordering designs. Please try again',
+      });
     });
   });
 });

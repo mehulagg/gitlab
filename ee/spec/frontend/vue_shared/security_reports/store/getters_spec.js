@@ -1,35 +1,38 @@
-import createState from 'ee/vue_shared/security_reports/store/state';
-import createSastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
-import {
-  groupedContainerScanningText,
-  groupedDastText,
-  groupedDependencyText,
-  groupedSecretScanningText,
-  groupedCoverageFuzzingText,
-  groupedSummaryText,
-  allReportsHaveError,
-  noBaseInAllReports,
-  areReportsLoading,
-  containerScanningStatusIcon,
-  dastStatusIcon,
-  dependencyScanningStatusIcon,
-  anyReportHasError,
-  summaryCounts,
-  isBaseSecurityReportOutOfDate,
-  canCreateIssue,
-  canCreateMergeRequest,
-  canDismissVulnerability,
-} from 'ee/vue_shared/security_reports/store/getters';
 import {
   CRITICAL,
   HIGH,
   MEDIUM,
   LOW,
 } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
+import {
+  groupedContainerScanningText,
+  groupedDastText,
+  groupedDependencyText,
+  groupedCoverageFuzzingText,
+  groupedSummaryText,
+  allReportsHaveError,
+  areReportsLoading,
+  areAllReportsLoading,
+  containerScanningStatusIcon,
+  dastStatusIcon,
+  dependencyScanningStatusIcon,
+  anyReportHasError,
+  anyReportHasIssues,
+  summaryCounts,
+  isBaseSecurityReportOutOfDate,
+  canCreateIssue,
+  canCreateMergeRequest,
+  canDismissVulnerability,
+} from 'ee/vue_shared/security_reports/store/getters';
+import createApiFuzzingState from 'ee/vue_shared/security_reports/store/modules/api_fuzzing/state';
+import createSastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
+import createSecretScanningState from 'ee/vue_shared/security_reports/store/modules/secret_detection/state';
+import createState from 'ee/vue_shared/security_reports/store/state';
+import { groupedTextBuilder } from 'ee/vue_shared/security_reports/store/utils';
 
 const MOCK_PATH = 'fake/path.json';
 
-const generateVuln = severity => ({ severity });
+const generateVuln = (severity) => ({ severity });
 
 describe('Security reports getters', () => {
   let state = {};
@@ -37,30 +40,25 @@ describe('Security reports getters', () => {
   beforeEach(() => {
     state = createState();
     state.sast = createSastState();
+    state.secretDetection = createSecretScanningState();
+    state.apiFuzzing = createApiFuzzingState();
   });
 
   describe.each`
     name                     | scanner                 | getter
-    ${'Secret scanning'}     | ${'secretScanning'}     | ${groupedSecretScanningText}
     ${'Dependency scanning'} | ${'dependencyScanning'} | ${groupedDependencyText}
     ${'Container scanning'}  | ${'containerScanning'}  | ${groupedContainerScanningText}
     ${'DAST'}                | ${'dast'}               | ${groupedDastText}
     ${'Coverage fuzzing'}    | ${'coverageFuzzing'}    | ${groupedCoverageFuzzingText}
   `('grouped text for $name', ({ name, scanner, getter }) => {
-    describe('with no issues', () => {
-      it('returns no issues text', () => {
-        expect(getter(state)).toEqual(`${name} detected no vulnerabilities.`);
-      });
-    });
-
     it.each`
       vulnerabilities                                     | message
-      ${[]}                                               | ${`${name} detected no vulnerabilities.`}
-      ${[generateVuln(CRITICAL), generateVuln(CRITICAL)]} | ${`${name} detected %{criticalStart}2 critical%{criticalEnd} severity vulnerabilities.`}
-      ${[generateVuln(HIGH), generateVuln(HIGH)]}         | ${`${name} detected %{highStart}2 high%{highEnd} severity vulnerabilities.`}
-      ${[generateVuln(LOW), generateVuln(MEDIUM)]}        | ${`${name} detected 2 vulnerabilities.`}
-      ${[generateVuln(CRITICAL), generateVuln(HIGH)]}     | ${`${name} detected %{criticalStart}1 critical%{criticalEnd} and %{highStart}1 high%{highEnd} severity vulnerabilities.`}
-      ${[generateVuln(CRITICAL), generateVuln(LOW)]}      | ${`${name} detected %{criticalStart}1 critical%{criticalEnd} severity vulnerabilities out of 2.`}
+      ${[]}                                               | ${groupedTextBuilder({ reportType: name, critical: 0, high: 0, other: 0 })}
+      ${[generateVuln(CRITICAL), generateVuln(CRITICAL)]} | ${groupedTextBuilder({ reportType: name, critical: 2, high: 0, other: 0 })}
+      ${[generateVuln(HIGH), generateVuln(HIGH)]}         | ${groupedTextBuilder({ reportType: name, critical: 0, high: 2, other: 0 })}
+      ${[generateVuln(LOW), generateVuln(MEDIUM)]}        | ${groupedTextBuilder({ reportType: name, critical: 0, high: 0, other: 2 })}
+      ${[generateVuln(CRITICAL), generateVuln(HIGH)]}     | ${groupedTextBuilder({ reportType: name, critical: 1, high: 1, other: 0 })}
+      ${[generateVuln(CRITICAL), generateVuln(LOW)]}      | ${groupedTextBuilder({ reportType: name, critical: 1, high: 0, other: 1 })}
     `('should build the message as "$message"', ({ vulnerabilities, message }) => {
       state[scanner].newIssues = vulnerabilities;
       expect(getter(state)).toEqual(message);
@@ -113,7 +111,7 @@ describe('Security reports getters', () => {
           areReportsLoading: false,
           summaryCounts: {},
         }),
-      ).toEqual('Security scanning failed loading any results');
+      ).toEqual({ message: 'Security scanning failed loading any results' });
     });
 
     it('returns is loading text', () => {
@@ -123,21 +121,14 @@ describe('Security reports getters', () => {
           areReportsLoading: true,
           summaryCounts: {},
         }),
-      ).toContain('(is loading)');
-    });
-
-    it('returns vulnerabilities while loading text', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          areReportsLoading: true,
-          summaryCounts: {
-            critical: 2,
-            high: 4,
-          },
-        }),
       ).toEqual(
-        'Security scanning (is loading) detected %{criticalStart}2 critical%{criticalEnd} and %{highStart}4 high%{highEnd} severity vulnerabilities.',
+        groupedTextBuilder({
+          reportType: 'Security scanning',
+          critical: 0,
+          high: 0,
+          other: 0,
+          status: 'is loading',
+        }),
       );
     });
 
@@ -148,7 +139,15 @@ describe('Security reports getters', () => {
           areReportsLoading: false,
           summaryCounts: {},
         }),
-      ).toEqual('Security scanning detected no vulnerabilities.');
+      ).toEqual(
+        groupedTextBuilder({
+          reportType: 'Security scanning',
+          critical: 0,
+          high: 0,
+          other: 0,
+          status: '',
+        }),
+      );
     });
   });
 
@@ -218,14 +217,39 @@ describe('Security reports getters', () => {
     });
   });
 
+  describe('areAllReportsLoading', () => {
+    it('returns true when all reports are loading', () => {
+      state.sast.isLoading = true;
+      state.dast.isLoading = true;
+      state.containerScanning.isLoading = true;
+      state.dependencyScanning.isLoading = true;
+      state.secretDetection.isLoading = true;
+      state.coverageFuzzing.isLoading = true;
+      state.apiFuzzing.isLoading = true;
+
+      expect(areAllReportsLoading(state)).toEqual(true);
+    });
+
+    it('returns false when some of the reports are loading', () => {
+      state.sast.isLoading = true;
+
+      expect(areAllReportsLoading(state)).toEqual(false);
+    });
+
+    it('returns false when none of the reports are loading', () => {
+      expect(areAllReportsLoading(state)).toEqual(false);
+    });
+  });
+
   describe('allReportsHaveError', () => {
     it('returns true when all reports have error', () => {
       state.sast.hasError = true;
       state.dast.hasError = true;
       state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
-      state.secretScanning.hasError = true;
+      state.secretDetection.hasError = true;
       state.coverageFuzzing.hasError = true;
+      state.apiFuzzing.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(true);
     });
@@ -238,7 +262,7 @@ describe('Security reports getters', () => {
       state.dast.hasError = false;
       state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
-      state.secretScanning.hasError = true;
+      state.secretDetection.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(false);
     });
@@ -256,15 +280,15 @@ describe('Security reports getters', () => {
     });
   });
 
-  describe('noBaseInAllReports', () => {
-    it('returns true when none reports have base', () => {
-      expect(noBaseInAllReports(state)).toEqual(true);
+  describe('anyReportHasIssues', () => {
+    it('returns true when any of the reports has new issues', () => {
+      state.dast.newIssues.push(generateVuln(LOW));
+
+      expect(anyReportHasIssues(state)).toEqual(true);
     });
 
-    it('returns false when any of the reports has a base', () => {
-      state.dast.hasBaseReport = true;
-
-      expect(noBaseInAllReports(state)).toEqual(false);
+    it('returns false when none of the reports has error', () => {
+      expect(anyReportHasIssues(state)).toEqual(false);
     });
   });
 

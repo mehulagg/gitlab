@@ -40,6 +40,48 @@ RSpec.describe Projects::CreateService, '#execute' do
     end
   end
 
+  describe 'setting name and path' do
+    subject(:project) { create_project(user, opts) }
+
+    context 'when both are set' do
+      let(:opts) { { name: 'one', path: 'two' } }
+
+      it 'keeps them as specified' do
+        expect(project.name).to eq('one')
+        expect(project.path).to eq('two')
+      end
+    end
+
+    context 'when path is set' do
+      let(:opts) { { path: 'one.two_three-four' } }
+
+      it 'sets name == path' do
+        expect(project.path).to eq('one.two_three-four')
+        expect(project.name).to eq(project.path)
+      end
+    end
+
+    context 'when name is a valid path' do
+      let(:opts) { { name: 'one.two_three-four' } }
+
+      it 'sets path == name' do
+        expect(project.name).to eq('one.two_three-four')
+        expect(project.path).to eq(project.name)
+      end
+    end
+
+    context 'when name is not a valid path' do
+      let(:opts) { { name: 'one.two_three-four and five' } }
+
+      # TODO: Retained for backwards compatibility. Remove in API v5.
+      #       See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/52725
+      it 'parameterizes the name' do
+        expect(project.name).to eq('one.two_three-four and five')
+        expect(project.path).to eq('one-two_three-four-and-five')
+      end
+    end
+  end
+
   context 'user namespace' do
     it do
       project = create_project(user, opts)
@@ -72,14 +114,25 @@ RSpec.describe Projects::CreateService, '#execute' do
   end
 
   context "admin creates project with other user's namespace_id" do
-    it 'sets the correct permissions' do
-      admin = create(:admin)
-      project = create_project(admin, opts)
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it 'sets the correct permissions' do
+        admin = create(:admin)
+        project = create_project(admin, opts)
 
-      expect(project).to be_persisted
-      expect(project.owner).to eq(user)
-      expect(project.team.maintainers).to contain_exactly(user)
-      expect(project.namespace).to eq(user.namespace)
+        expect(project).to be_persisted
+        expect(project.owner).to eq(user)
+        expect(project.team.maintainers).to contain_exactly(user)
+        expect(project.namespace).to eq(user.namespace)
+      end
+    end
+
+    context 'when admin mode is disabled' do
+      it 'is not allowed' do
+        admin = create(:admin)
+        project = create_project(admin, opts)
+
+        expect(project).not_to be_persisted
+      end
     end
   end
 
@@ -220,16 +273,6 @@ RSpec.describe Projects::CreateService, '#execute' do
       opts[:default_branch] = 'master'
       expect(create_project(user, opts)).to eq(nil)
     end
-
-    it 'sets invalid service as inactive' do
-      create(:service, type: 'JiraService', project: nil, template: true, active: true)
-
-      project = create_project(user, opts)
-      service = project.services.first
-
-      expect(project).to be_persisted
-      expect(service.active).to be false
-    end
   end
 
   context 'wiki_enabled creates repository directory' do
@@ -296,27 +339,38 @@ RSpec.describe Projects::CreateService, '#execute' do
   context 'default visibility level' do
     let(:group) { create(:group, :private) }
 
-    before do
-      stub_application_setting(default_project_visibility: Gitlab::VisibilityLevel::INTERNAL)
-      group.add_developer(user)
+    using RSpec::Parameterized::TableSyntax
 
-      opts.merge!(
-        visibility: 'private',
-        name: 'test',
-        namespace: group,
-        path: 'foo'
-      )
+    where(:case_name, :group_level, :project_level) do
+      [
+        ['in public group',   Gitlab::VisibilityLevel::PUBLIC,   Gitlab::VisibilityLevel::INTERNAL],
+        ['in internal group', Gitlab::VisibilityLevel::INTERNAL, Gitlab::VisibilityLevel::INTERNAL],
+        ['in private group',  Gitlab::VisibilityLevel::PRIVATE,  Gitlab::VisibilityLevel::PRIVATE]
+      ]
     end
 
-    it 'creates a private project' do
-      project = create_project(user, opts)
+    with_them do
+      before do
+        stub_application_setting(default_project_visibility: Gitlab::VisibilityLevel::INTERNAL)
+        group.add_developer(user)
+        group.update!(visibility_level: group_level)
 
-      expect(project).to respond_to(:errors)
+        opts.merge!(
+          name: 'test',
+          namespace: group,
+          path: 'foo'
+        )
+      end
 
-      expect(project.errors.any?).to be(false)
-      expect(project.visibility_level).to eq(Gitlab::VisibilityLevel::PRIVATE)
-      expect(project.saved?).to be(true)
-      expect(project.valid?).to be(true)
+      it 'creates project with correct visibility level', :aggregate_failures do
+        project = create_project(user, opts)
+
+        expect(project).to respond_to(:errors)
+        expect(project.errors).to be_blank
+        expect(project.visibility_level).to eq(project_level)
+        expect(project).to be_saved
+        expect(project).to be_valid
+      end
     end
   end
 
@@ -336,7 +390,15 @@ RSpec.describe Projects::CreateService, '#execute' do
         )
       end
 
-      it 'allows a restricted visibility level for admins' do
+      it 'does not allow a restricted visibility level for admins when admin mode is disabled' do
+        admin = create(:admin)
+        project = create_project(admin, opts)
+
+        expect(project.errors.any?).to be(true)
+        expect(project.saved?).to be_falsey
+      end
+
+      it 'allows a restricted visibility level for admins when admin mode is enabled', :enable_admin_mode do
         admin = create(:admin)
         project = create_project(admin, opts)
 
@@ -400,7 +462,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     context 'when another repository already exists on disk' do
       let(:opts) do
         {
-          name: 'Existing',
+          name: 'existing',
           namespace_id: user.namespace.id
         }
       end
@@ -561,17 +623,6 @@ RSpec.describe Projects::CreateService, '#execute' do
         end
       end
     end
-
-    context 'when there is an invalid integration' do
-      before do
-        create(:service, :template, type: 'DroneCiService', active: true)
-      end
-
-      it 'creates an inactive service' do
-        expect(project).to be_persisted
-        expect(project.services.first.active).to be false
-      end
-    end
   end
 
   context 'when skip_disk_validation is used' do
@@ -601,7 +652,17 @@ RSpec.describe Projects::CreateService, '#execute' do
     expect(rugged.config['gitlab.fullpath']).to eq project.full_path
   end
 
+  it 'triggers PostCreationWorker' do
+    expect(Projects::PostCreationWorker).to receive(:perform_async).with(a_kind_of(Integer))
+
+    create_project(user, opts)
+  end
+
   context 'when project has access to shared service' do
+    before do
+      stub_feature_flags(projects_post_creation_worker: false)
+    end
+
     context 'Prometheus application is shared via group cluster' do
       let(:cluster) { create(:cluster, :group, groups: [group]) }
       let(:group) do
@@ -642,9 +703,7 @@ RSpec.describe Projects::CreateService, '#execute' do
 
       it 'cleans invalid record and logs warning', :aggregate_failures do
         invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
-        allow_next_instance_of(Project) do |instance|
-          allow(instance).to receive(:build_prometheus_service).and_return(invalid_service_record)
-        end
+        allow(PrometheusService).to receive(:new).and_return(invalid_service_record)
 
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) }))
         project = create_project(user, opts)

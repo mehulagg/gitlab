@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Maintainer manages access requests' do
+  include Spec::Support::Helpers::Features::MembersHelpers
+
   let(:user) { create(:user) }
   let(:maintainer) { create(:user) }
 
@@ -10,9 +12,7 @@ RSpec.shared_examples 'Maintainer manages access requests' do
     sign_in(maintainer)
     visit members_page_path
 
-    if has_tabs
-      click_on 'Access requests'
-    end
+    click_on 'Access requests'
   end
 
   it 'maintainer can see access requests', :js do
@@ -26,7 +26,7 @@ RSpec.shared_examples 'Maintainer manages access requests' do
 
     expect_no_visible_access_request(entity, user)
 
-    page.within('[data-qa-selector="members_list"]') do
+    page.within(members_table) do
       expect(page).to have_content user.name
     end
   end
@@ -35,7 +35,7 @@ RSpec.shared_examples 'Maintainer manages access requests' do
     expect_visible_access_request(entity, user)
 
     # Open modal
-    click_on 'Deny access request'
+    click_on 'Deny access'
 
     expect(page).not_to have_field "Also unassign this user from related issues and merge requests"
 
@@ -46,12 +46,7 @@ RSpec.shared_examples 'Maintainer manages access requests' do
   end
 
   def expect_visible_access_request(entity, user)
-    if has_tabs
-      expect(page).to have_content "Access requests 1"
-      expect(page).to have_content "Users requesting access to #{entity.name}"
-    else
-      expect(page).to have_content "Users requesting access to #{entity.name} 1"
-    end
+    expect(page).to have_content "Access requests 1"
 
     expect(page).to have_content user.name
   end

@@ -11,7 +11,7 @@ describe('Security Dashboard Layout component', () => {
     template: '<p>dummy component</p>',
   };
 
-  const createWrapper = slots => {
+  const createWrapper = (slots) => {
     wrapper = shallowMount(SecurityDashboardLayout, { slots });
   };
 

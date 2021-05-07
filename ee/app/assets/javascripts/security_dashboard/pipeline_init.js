@@ -1,9 +1,9 @@
 import Vue from 'vue';
-import createDashboardStore from './store';
 import PipelineSecurityDashboard from './components/pipeline_security_dashboard.vue';
+import apolloProvider from './graphql/provider';
+import createDashboardStore from './store';
 import { DASHBOARD_TYPES } from './store/constants';
 import { LOADING_VULNERABILITIES_ERROR_CODES } from './store/modules/vulnerabilities/constants';
-import apolloProvider from './graphql/provider';
 
 export default () => {
   const el = document.getElementById('js-security-report-app');
@@ -37,6 +37,9 @@ export default () => {
     store: createDashboardStore({
       dashboardType: DASHBOARD_TYPES.PIPELINE,
     }),
+    provide: {
+      dashboardType: DASHBOARD_TYPES.PIPELINE,
+    },
     render(createElement) {
       return createElement(PipelineSecurityDashboard, {
         props: {

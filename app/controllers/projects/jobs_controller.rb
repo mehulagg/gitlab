@@ -6,6 +6,7 @@ class Projects::JobsController < Projects::ApplicationController
 
   before_action :find_job_as_build, except: [:index, :play]
   before_action :find_job_as_processable, only: [:play]
+  before_action :authorize_read_build_trace!, only: [:trace, :raw]
   before_action :authorize_read_build!
   before_action :authorize_update_build!,
     except: [:index, :show, :status, :raw, :trace, :erase]
@@ -14,6 +15,7 @@ class Projects::JobsController < Projects::ApplicationController
   before_action :verify_api_request!, only: :terminal_websocket_authorize
   before_action :authorize_create_proxy_build!, only: :proxy_websocket_authorize
   before_action :verify_proxy_request!, only: :proxy_websocket_authorize
+  before_action :push_jobs_table_vue, only: [:index]
 
   layout 'project'
 
@@ -45,21 +47,25 @@ class Projects::JobsController < Projects::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def trace
-    @build.trace.read do |stream|
-      respond_to do |format|
-        format.json do
-          @build.trace.being_watched!
+    @build.trace.being_watched! if @build.running?
 
-          build_trace = Ci::BuildTrace.new(
-            build: @build,
-            stream: stream,
-            state: params[:state])
+    if @build.has_trace?
+      @build.trace.read do |stream|
+        respond_to do |format|
+          format.json do
+            build_trace = Ci::BuildTrace.new(
+              build: @build,
+              stream: stream,
+              state: params[:state])
 
-          render json: BuildTraceSerializer
-            .new(project: @project, current_user: @current_user)
-            .represent(build_trace)
+            render json: BuildTraceSerializer
+              .new(project: @project, current_user: @current_user)
+              .represent(build_trace)
+          end
         end
       end
+    else
+      head :no_content
     end
   end
 
@@ -154,6 +160,18 @@ class Projects::JobsController < Projects::ApplicationController
 
   private
 
+  def authorize_read_build_trace!
+    return if can?(current_user, :read_build_trace, @build)
+
+    msg = _(
+      "You must have developer or higher permissions in the associated project to view job logs when debug trace is enabled. To disable debug trace, set the 'CI_DEBUG_TRACE' variable to 'false' in your pipeline configuration or CI/CD settings. " \
+      "If you need to view this job log, a project maintainer must add you to the project with developer permissions or higher."
+    )
+    return access_denied!(msg) if @build.debug_mode?
+
+    access_denied!(_('The current user is not authorized to access the job log.'))
+  end
+
   def authorize_update_build!
     return access_denied! unless can?(current_user, :update_build, @build)
   end
@@ -201,11 +219,7 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   def find_job_as_processable
-    if ::Gitlab::Ci::Features.manual_bridges_enabled?(project)
-      @build = project.processables.find(params[:id])
-    else
-      find_job_as_build
-    end
+    @build = project.processables.find(params[:id])
   end
 
   def build_path(build)
@@ -213,10 +227,10 @@ class Projects::JobsController < Projects::ApplicationController
   end
 
   def raw_trace_content_disposition(raw_data)
-    mime_type = MimeMagic.by_magic(raw_data)
+    mime_type = Gitlab::Utils::MimeType.from_string(raw_data)
 
     # if mime_type is nil can also represent 'text/plain'
-    return 'inline' if mime_type.nil? || mime_type.type == 'text/plain'
+    return 'inline' if mime_type.nil? || mime_type == 'text/plain'
 
     'attachment'
   end
@@ -242,5 +256,9 @@ class Projects::JobsController < Projects::ApplicationController
     service[:url] = ::Gitlab::UrlHelpers.as_wss(service[:url])
 
     ::Gitlab::Workhorse.channel_websocket(service)
+  end
+
+  def push_jobs_table_vue
+    push_frontend_feature_flag(:jobs_table_vue, @project, default_enabled: :yaml)
   end
 end

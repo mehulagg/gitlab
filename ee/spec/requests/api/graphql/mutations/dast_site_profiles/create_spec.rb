@@ -15,7 +15,18 @@ RSpec.describe 'Creating a DAST Site Profile' do
       mutation_name,
       full_path: full_path,
       profile_name: profile_name,
-      target_url: target_url
+      target_url: target_url,
+      target_type: 'API',
+      excluded_urls: ["#{target_url}/logout"],
+      request_headers: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0',
+      auth: {
+        enabled: true,
+        url: "#{target_url}/login",
+        username_field: 'session[username]',
+        password_field: 'session[password]',
+        username: generate(:email),
+        password: SecureRandom.hex
+      }
     )
   end
 
@@ -24,15 +35,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
     it 'returns the dast_site_profile id' do
       subject
 
-      expect(mutation_response["id"]).to eq(dast_site_profile.to_global_id.to_s)
-    end
-
-    context 'when an unknown error occurs' do
-      before do
-        allow(DastSiteProfile).to receive(:create!).and_raise(StandardError)
-      end
-
-      it_behaves_like 'a mutation that returns top-level errors', errors: ['Internal server error']
+      expect(mutation_response).to include('id' => global_id_of(dast_site_profile))
     end
   end
 end

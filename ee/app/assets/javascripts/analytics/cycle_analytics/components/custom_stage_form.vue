@@ -1,85 +1,31 @@
 <script>
-import { mapGetters, mapState } from 'vuex';
-import { isEqual } from 'lodash';
 import {
-  GlFormGroup,
-  GlFormInput,
-  GlFormSelect,
   GlLoadingIcon,
   GlDropdown,
   GlDropdownSectionHeader,
   GlDropdownItem,
   GlSprintf,
+  GlButton,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { isEqual } from 'lodash';
+import Vue from 'vue';
+import { mapGetters, mapState } from 'vuex';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
-import LabelsSelector from './labels_selector.vue';
-import { STAGE_ACTIONS, DEFAULT_STAGE_NAMES } from '../constants';
-import {
-  isStartEvent,
-  isLabelEvent,
-  getAllowedEndEvents,
-  eventToOption,
-  eventsByIdentifier,
-  getLabelEventsIdentifiers,
-} from '../utils';
-
-const defaultFields = {
-  id: null,
-  name: null,
-  startEventIdentifier: null,
-  startEventLabelId: null,
-  endEventIdentifier: null,
-  endEventLabelId: null,
-};
-
-const defaultErrors = {
-  id: [],
-  name: [],
-  startEventIdentifier: [],
-  startEventLabelId: [],
-  endEventIdentifier: [],
-  endEventLabelId: [],
-};
-
-const ERRORS = {
-  START_EVENT_REQUIRED: s__('CustomCycleAnalytics|Please select a start event first'),
-  STAGE_NAME_EXISTS: s__('CustomCycleAnalytics|Stage name already exists'),
-  INVALID_EVENT_PAIRS: s__(
-    'CustomCycleAnalytics|Start event changed, please select a valid stop event',
-  ),
-};
-
-export const initializeFormData = ({ emptyFieldState = defaultFields, fields, errors }) => {
-  const initErrors = fields?.endEventIdentifier
-    ? defaultErrors
-    : {
-        ...defaultErrors,
-        endEventIdentifier: !fields?.startEventIdentifier ? [ERRORS.START_EVENT_REQUIRED] : [],
-      };
-  return {
-    fields: {
-      ...emptyFieldState,
-      ...fields,
-    },
-    errors: {
-      ...initErrors,
-      ...errors,
-    },
-  };
-};
+import { STAGE_ACTIONS } from '../constants';
+import { getAllowedEndEvents, getLabelEventsIdentifiers, isLabelEvent } from '../utils';
+import { defaultFields, ERRORS, i18n } from './create_value_stream_form/constants';
+import CustomStageFormFields from './create_value_stream_form/custom_stage_fields.vue';
+import { validateStage, initializeFormData } from './create_value_stream_form/utils';
 
 export default {
   components: {
-    GlFormGroup,
-    GlFormInput,
-    GlFormSelect,
     GlLoadingIcon,
-    LabelsSelector,
     GlDropdown,
     GlDropdownSectionHeader,
     GlDropdownItem,
     GlSprintf,
+    GlButton,
+    CustomStageFormFields,
   },
   props: {
     events: {
@@ -91,7 +37,7 @@ export default {
     return {
       labelEvents: getLabelEventsIdentifiers(this.events),
       fields: {},
-      errors: [],
+      errors: {},
     };
   },
   computed: {
@@ -103,32 +49,17 @@ export default {
       'formInitialData',
       'formErrors',
     ]),
-    startEventOptions() {
-      return [
-        { value: null, text: s__('CustomCycleAnalytics|Select start event') },
-        ...this.events.filter(isStartEvent).map(eventToOption),
-      ];
-    },
-    endEventOptions() {
-      const endEvents = getAllowedEndEvents(this.events, this.fields.startEventIdentifier);
-      return [
-        { value: null, text: s__('CustomCycleAnalytics|Select stop event') },
-        ...eventsByIdentifier(this.events, endEvents).map(eventToOption),
-      ];
-    },
-    hasStartEvent() {
-      return this.fields.startEventIdentifier;
+
+    hasErrors() {
+      return (
+        this.eventMismatchError || Object.values(this.errors).some((errArray) => errArray?.length)
+      );
     },
     startEventRequiresLabel() {
       return isLabelEvent(this.labelEvents, this.fields.startEventIdentifier);
     },
     endEventRequiresLabel() {
       return isLabelEvent(this.labelEvents, this.fields.endEventIdentifier);
-    },
-    hasErrors() {
-      return (
-        this.eventMismatchError || Object.values(this.errors).some(errArray => errArray?.length)
-      );
     },
     isComplete() {
       if (this.hasErrors) {
@@ -152,7 +83,7 @@ export default {
         requiredFields.push(endEventLabelId);
       }
       return requiredFields.every(
-        fieldValue => fieldValue && (fieldValue.length > 0 || fieldValue > 0),
+        (fieldValue) => fieldValue && (fieldValue.length > 0 || fieldValue > 0),
       );
     },
     isDirty() {
@@ -168,14 +99,10 @@ export default {
       return !endEvents.length || !endEvents.includes(endEventIdentifier);
     },
     saveStageText() {
-      return this.isEditingCustomStage
-        ? s__('CustomCycleAnalytics|Update stage')
-        : s__('CustomCycleAnalytics|Add stage');
+      return this.isEditingCustomStage ? i18n.BTN_UPDATE_STAGE : i18n.BTN_ADD_STAGE;
     },
     formTitle() {
-      return this.isEditingCustomStage
-        ? s__('CustomCycleAnalytics|Editing stage')
-        : s__('CustomCycleAnalytics|New stage');
+      return this.isEditingCustomStage ? i18n.TITLE_EDIT_STAGE : i18n.TITLE_ADD_STAGE;
     },
     hasHiddenStages() {
       return this.hiddenStages.length;
@@ -220,49 +147,44 @@ export default {
         this.$emit(STAGE_ACTIONS.CREATE, data);
       }
     },
-    handleSelectLabel(key, labelId) {
-      this.fields[key] = labelId;
-    },
-    handleClearLabel(key) {
-      this.fields[key] = null;
-    },
     hasFieldErrors(key) {
       return this.errors[key]?.length > 0;
     },
     fieldErrorMessage(key) {
       return this.errors[key]?.join('\n');
     },
-    onUpdateNameField() {
-      this.errors.name = DEFAULT_STAGE_NAMES.includes(this.fields.name.toLowerCase())
-        ? [ERRORS.STAGE_NAME_EXISTS]
-        : [];
-    },
-    onUpdateStartEventField() {
-      this.fields.endEventIdentifier = null;
-      this.errors.endEventIdentifier = [ERRORS.INVALID_EVENT_PAIRS];
-    },
-    onUpdateEndEventField() {
-      this.errors.endEventIdentifier = [];
-    },
     handleRecoverStage(id) {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
     },
+    handleUpdateFields({ field, value }) {
+      this.fields = { ...this.fields, [field]: value };
+
+      const newErrors = validateStage({ ...this.fields, custom: true });
+      newErrors.endEventIdentifier =
+        this.fields.startEventIdentifier && this.eventMismatchError
+          ? [ERRORS.INVALID_EVENT_PAIRS]
+          : newErrors.endEventIdentifier;
+      Vue.set(this, 'errors', newErrors);
+    },
   },
+  i18n,
 };
 </script>
 <template>
   <div v-if="isLoading">
     <gl-loading-icon class="mt-4" size="md" />
   </div>
-  <form v-else class="custom-stage-form m-4 mt-0">
+  <form v-else class="custom-stage-form m-4 gl-mt-0">
     <div class="gl-mb-1 gl-display-flex gl-justify-content-space-between gl-align-items-center">
       <h4>{{ formTitle }}</h4>
       <gl-dropdown
-        :text="__('Recover hidden stage')"
-        class="js-recover-hidden-stage-dropdown"
+        :text="$options.i18n.RECOVER_HIDDEN_STAGE"
+        data-testid="recover-hidden-stage-dropdown"
         right
       >
-        <gl-dropdown-section-header>{{ __('Default stages') }}</gl-dropdown-section-header>
+        <gl-dropdown-section-header>{{
+          $options.i18n.RECOVER_STAGE_TITLE
+        }}</gl-dropdown-section-header>
         <template v-if="hasHiddenStages">
           <gl-dropdown-item
             v-for="stage in hiddenStages"
@@ -271,117 +193,39 @@ export default {
             >{{ stage.title }}</gl-dropdown-item
           >
         </template>
-        <p v-else class="mx-3 my-2">{{ __('All default stages are currently visible') }}</p>
+        <p v-else class="gl-mx-5 gl-my-3">{{ $options.i18n.RECOVER_STAGES_VISIBLE }}</p>
       </gl-dropdown>
     </div>
-    <gl-form-group
-      ref="name"
-      :label="s__('CustomCycleAnalytics|Name')"
-      label-for="custom-stage-name"
-      :state="!hasFieldErrors('name')"
-      :invalid-feedback="fieldErrorMessage('name')"
-    >
-      <gl-form-input
-        v-model="fields.name"
-        class="form-control"
-        type="text"
-        name="custom-stage-name"
-        :placeholder="s__('CustomCycleAnalytics|Enter a name for the stage')"
-        required
-        @change.native="onUpdateNameField"
-      />
-    </gl-form-group>
-    <div class="d-flex" :class="{ 'justify-content-between': startEventRequiresLabel }">
-      <div :class="[startEventRequiresLabel ? 'w-50 mr-1' : 'w-100']">
-        <gl-form-group
-          ref="startEventIdentifier"
-          :label="s__('CustomCycleAnalytics|Start event')"
-          label-for="custom-stage-start-event"
-          :state="!hasFieldErrors('startEventIdentifier')"
-          :invalid-feedback="fieldErrorMessage('startEventIdentifier')"
-        >
-          <gl-form-select
-            v-model="fields.startEventIdentifier"
-            name="custom-stage-start-event"
-            :required="true"
-            :options="startEventOptions"
-            @change.native="onUpdateStartEventField"
-          />
-        </gl-form-group>
-      </div>
-      <div v-if="startEventRequiresLabel" class="w-50 ml-1">
-        <gl-form-group
-          ref="startEventLabelId"
-          :label="s__('CustomCycleAnalytics|Start event label')"
-          label-for="custom-stage-start-event-label"
-          :state="!hasFieldErrors('startEventLabelId')"
-          :invalid-feedback="fieldErrorMessage('startEventLabelId')"
-        >
-          <labels-selector
-            :selected-label-id="[fields.startEventLabelId]"
-            name="custom-stage-start-event-label"
-            @selectLabel="handleSelectLabel('startEventLabelId', $event)"
-            @clearLabel="handleClearLabel('startEventLabelId')"
-          />
-        </gl-form-group>
-      </div>
-    </div>
-    <div class="d-flex" :class="{ 'justify-content-between': endEventRequiresLabel }">
-      <div :class="[endEventRequiresLabel ? 'w-50 mr-1' : 'w-100']">
-        <gl-form-group
-          ref="endEventIdentifier"
-          :label="s__('CustomCycleAnalytics|Stop event')"
-          label-for="custom-stage-stop-event"
-          :state="!hasFieldErrors('endEventIdentifier')"
-          :invalid-feedback="fieldErrorMessage('endEventIdentifier')"
-        >
-          <gl-form-select
-            v-model="fields.endEventIdentifier"
-            name="custom-stage-stop-event"
-            :options="endEventOptions"
-            :required="true"
-            :disabled="!hasStartEvent"
-            @change.native="onUpdateEndEventField"
-          />
-        </gl-form-group>
-      </div>
-      <div v-if="endEventRequiresLabel" class="w-50 ml-1">
-        <gl-form-group
-          ref="endEventLabelId"
-          :label="s__('CustomCycleAnalytics|Stop event label')"
-          label-for="custom-stage-stop-event-label"
-          :state="!hasFieldErrors('endEventLabelId')"
-          :invalid-feedback="fieldErrorMessage('endEventLabelId')"
-        >
-          <labels-selector
-            :selected-label-id="[fields.endEventLabelId]"
-            name="custom-stage-stop-event-label"
-            @selectLabel="handleSelectLabel('endEventLabelId', $event)"
-            @clearLabel="handleClearLabel('endEventLabelId')"
-          />
-        </gl-form-group>
-      </div>
-    </div>
-    <div class="custom-stage-form-actions">
-      <button
+    <custom-stage-form-fields
+      :index="0"
+      :total-stages="1"
+      :stage="fields"
+      :errors="errors"
+      :stage-events="events"
+      @input="handleUpdateFields"
+      @select-label="({ field, value }) => handleUpdateFields({ field, value })"
+    />
+    <div>
+      <gl-button
         :disabled="!isDirty"
-        class="btn btn-cancel js-save-stage-cancel"
-        type="button"
+        category="primary"
+        data-testid="cancel-custom-stage"
         @click="handleCancel"
       >
-        {{ __('Cancel') }}
-      </button>
-      <button
+        {{ $options.i18n.BTN_CANCEL }}
+      </gl-button>
+      <gl-button
         :disabled="!isComplete || !isDirty"
-        type="button"
-        class="js-save-stage btn btn-success"
+        variant="success"
+        category="primary"
+        data-testid="save-custom-stage"
         @click="handleSave"
       >
         <gl-loading-icon v-if="isSavingCustomStage" size="sm" inline />
         {{ saveStageText }}
-      </button>
+      </gl-button>
     </div>
-    <div class="mt-2">
+    <div class="gl-mt-3">
       <gl-sprintf
         :message="
           __(

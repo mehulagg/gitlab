@@ -1,5 +1,5 @@
+import { GlButton, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlButton } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import SelfMonitor from '~/self_monitor/components/self_monitor_form.vue';
 import { createStore } from '~/self_monitor/store';
@@ -79,11 +79,16 @@ describe('self monitor component', () => {
         wrapper = shallowMount(SelfMonitor, { store });
 
         expect(
-          wrapper
-            .find({ ref: 'selfMonitoringFormText' })
-            .find('a')
-            .attributes('href'),
+          wrapper.find({ ref: 'selfMonitoringFormText' }).find('a').attributes('href'),
         ).toEqual(`${TEST_HOST}/instance-administrators-random/gitlab-self-monitoring`);
+      });
+
+      it('renders toggle', () => {
+        wrapper = shallowMount(SelfMonitor, { store });
+
+        expect(wrapper.findComponent(GlToggle).props('label')).toBe(
+          SelfMonitor.formLabels.createProject,
+        );
       });
     });
   });

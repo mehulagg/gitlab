@@ -1,10 +1,10 @@
-import * as Sentry from '~/sentry/wrapper';
+import * as Sentry from '@sentry/browser';
 import SentryConfig from '~/sentry/sentry_config';
 
 describe('SentryConfig', () => {
   describe('IGNORE_ERRORS', () => {
     it('should be an array of strings', () => {
-      const areStrings = SentryConfig.IGNORE_ERRORS.every(error => typeof error === 'string');
+      const areStrings = SentryConfig.IGNORE_ERRORS.every((error) => typeof error === 'string');
 
       expect(areStrings).toBe(true);
     });
@@ -12,7 +12,7 @@ describe('SentryConfig', () => {
 
   describe('BLACKLIST_URLS', () => {
     it('should be an array of regexps', () => {
-      const areRegExps = SentryConfig.BLACKLIST_URLS.every(url => url instanceof RegExp);
+      const areRegExps = SentryConfig.BLACKLIST_URLS.every((url) => url instanceof RegExp);
 
       expect(areRegExps).toBe(true);
     });

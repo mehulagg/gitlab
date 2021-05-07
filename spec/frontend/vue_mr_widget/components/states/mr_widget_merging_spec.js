@@ -1,43 +1,49 @@
-import Vue from 'vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
-import mergingComponent from '~/vue_merge_request_widget/components/states/mr_widget_merging.vue';
+import { shallowMount } from '@vue/test-utils';
+import MrWidgetMerging from '~/vue_merge_request_widget/components/states/mr_widget_merging.vue';
 
 describe('MRWidgetMerging', () => {
-  let vm;
-  beforeEach(() => {
-    const Component = Vue.extend(mergingComponent);
+  let wrapper;
 
-    vm = mountComponent(Component, {
-      mr: {
-        targetBranchPath: '/branch-path',
-        targetBranch: 'branch',
+  const GlEmoji = { template: '<img />' };
+  beforeEach(() => {
+    wrapper = shallowMount(MrWidgetMerging, {
+      propsData: {
+        mr: {
+          targetBranchPath: '/branch-path',
+          targetBranch: 'branch',
+        },
+      },
+      stubs: {
+        GlEmoji,
       },
     });
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
   });
 
   it('renders information about merge request being merged', () => {
     expect(
-      vm.$el
-        .querySelector('.media-body')
-        .textContent.trim()
+      wrapper
+        .find('.media-body')
+        .text()
+        .trim()
         .replace(/\s\s+/g, ' ')
         .replace(/[\r\n]+/g, ' '),
-    ).toContain('This merge request is in the process of being merged');
+    ).toContain('Merging!');
   });
 
   it('renders branch information', () => {
     expect(
-      vm.$el
-        .querySelector('.mr-info-list')
-        .textContent.trim()
+      wrapper
+        .find('.mr-info-list')
+        .text()
+        .trim()
         .replace(/\s\s+/g, ' ')
         .replace(/[\r\n]+/g, ' '),
     ).toEqual('The changes will be merged into branch');
 
-    expect(vm.$el.querySelector('a').getAttribute('href')).toEqual('/branch-path');
+    expect(wrapper.find('a').attributes('href')).toBe('/branch-path');
   });
 });

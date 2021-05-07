@@ -7,17 +7,25 @@ RSpec.describe Projects::Security::DashboardController do
   let_it_be(:project) { create(:project, :repository, :public, namespace: group) }
   let_it_be(:user)    { create(:user) }
 
+  before do
+    group.add_developer(user)
+    stub_licensed_features(security_dashboard: true)
+  end
+
+  include_context '"Security & Compliance" permissions' do
+    let(:valid_request) { get :index, params: { namespace_id: project.namespace, project_id: project } }
+
+    before_request do
+      sign_in(user)
+    end
+  end
+
   it_behaves_like SecurityDashboardsPermissions do
     let(:vulnerable) { project }
 
     let(:security_dashboard_action) do
       get :index, params: { namespace_id: project.namespace, project_id: project }
     end
-  end
-
-  before do
-    group.add_developer(user)
-    stub_licensed_features(security_dashboard: true)
   end
 
   describe 'GET #index' do
@@ -36,7 +44,7 @@ RSpec.describe Projects::Security::DashboardController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:index)
-        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="false"]')
+        expect(response.body).to have_css('div#js-project-security-dashboard[data-has-vulnerabilities="false"]')
       end
     end
 
@@ -50,7 +58,7 @@ RSpec.describe Projects::Security::DashboardController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:index)
-        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="true"]')
+        expect(response.body).to have_css('div#js-project-security-dashboard[data-has-vulnerabilities="true"]')
       end
     end
   end

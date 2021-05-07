@@ -123,7 +123,7 @@ RSpec.describe Repository do
           options = { message: 'test tag message\n',
                       tagger: { name: 'John Smith', email: 'john@gmail.com' } }
 
-          rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', options)
+          rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', **options)
 
           double_first = double(committed_date: Time.current - 1.second)
           double_last = double(committed_date: Time.current)
@@ -167,6 +167,22 @@ RSpec.describe Repository do
       it 'returns false' do
         expect(repository.ref_exists?('refs/heads/invalid:master')).to be false
       end
+    end
+  end
+
+  describe '#search_branch_names' do
+    subject(:search_branch_names) { repository.search_branch_names('conflict-*') }
+
+    it 'returns matching branch names' do
+      expect(search_branch_names).to contain_exactly(
+        'conflict-binary-file',
+        'conflict-resolvable',
+        'conflict-contains-conflict-markers',
+        'conflict-missing-side',
+        'conflict-start',
+        'conflict-non-utf8',
+        'conflict-too-large'
+      )
     end
   end
 
@@ -481,12 +497,6 @@ RSpec.describe Repository do
       subject { repository.blob_at(repository.head_commit.sha, '.gitignore') }
 
       it { is_expected.to be_an_instance_of(::Blob) }
-    end
-
-    context 'readme blob on HEAD' do
-      subject { repository.blob_at(repository.head_commit.sha, 'README.md') }
-
-      it { is_expected.to be_an_instance_of(::ReadmeBlob) }
     end
 
     context 'readme blob not on HEAD' do
@@ -983,6 +993,104 @@ RSpec.describe Repository do
     end
   end
 
+  describe '#search_files_by_wildcard_path' do
+    let(:ref) { 'master' }
+
+    subject(:result) { repository.search_files_by_wildcard_path(path, ref) }
+
+    context 'when specifying a normal path' do
+      let(:path) { 'files/images/logo-black.png' }
+
+      it 'returns the path' do
+        expect(result).to eq(['files/images/logo-black.png'])
+      end
+    end
+
+    context 'when specifying a wildcard path' do
+      let(:path) { '*.md' }
+
+      it 'returns files matching the path in the root folder' do
+        expect(result).to contain_exactly('CONTRIBUTING.md',
+                                          'MAINTENANCE.md',
+                                          'PROCESS.md',
+                                          'README.md')
+      end
+    end
+
+    context 'when specifying a wildcard path for all' do
+      let(:path) { '**.md' }
+
+      it 'returns all matching files in all folders' do
+        expect(result).to contain_exactly('CONTRIBUTING.md',
+                                          'MAINTENANCE.md',
+                                          'PROCESS.md',
+                                          'README.md',
+                                          'files/markdown/ruby-style-guide.md',
+                                          'with space/README.md')
+      end
+    end
+
+    context 'when specifying a path to subfolders using two asterisks and a slash' do
+      let(:path) { 'files/**/*.md' }
+
+      it 'returns all files matching the path' do
+        expect(result).to contain_exactly('files/markdown/ruby-style-guide.md')
+      end
+    end
+
+    context 'when specifying a wildcard path to subfolder with just two asterisks' do
+      let(:path) { 'files/**.md' }
+
+      it 'returns all files in the matching path' do
+        expect(result).to contain_exactly('files/markdown/ruby-style-guide.md')
+      end
+    end
+
+    context 'when specifying a wildcard path to subfolder with one asterisk' do
+      let(:path) { 'files/*/*.md' }
+
+      it 'returns all files in the matching path' do
+        expect(result).to contain_exactly('files/markdown/ruby-style-guide.md')
+      end
+    end
+
+    context 'when specifying a wildcard path for an unknown number of subfolder levels' do
+      let(:path) { '**/*.rb' }
+
+      it 'returns all matched files in all subfolders' do
+        expect(result).to contain_exactly('encoding/russian.rb',
+                                          'files/ruby/popen.rb',
+                                          'files/ruby/regex.rb',
+                                          'files/ruby/version_info.rb')
+      end
+    end
+
+    context 'when specifying a wildcard path to one level of subfolders' do
+      let(:path) { '*/*.rb' }
+
+      it 'returns all matched files in one subfolder' do
+        expect(result).to contain_exactly('encoding/russian.rb')
+      end
+    end
+
+    context 'when sending regexp' do
+      let(:path) { '.*\.rb' }
+
+      it 'ignores the regexp and returns an empty array' do
+        expect(result).to eq([])
+      end
+    end
+
+    context 'when sending another ref' do
+      let(:path) { 'files' }
+      let(:ref) { 'other-branch' }
+
+      it 'returns an empty array' do
+        expect(result).to eq([])
+      end
+    end
+  end
+
   describe '#async_remove_remote' do
     before do
       masterrev = repository.find_branch('master').dereferenced_target
@@ -1042,7 +1150,8 @@ RSpec.describe Repository do
 
   describe '#create_ref' do
     it 'redirects the call to write_ref' do
-      ref, ref_path = '1', '2'
+      ref = '1'
+      ref_path = '2'
 
       expect(repository.raw_repository).to receive(:write_ref).with(ref_path, ref)
 
@@ -1142,11 +1251,11 @@ RSpec.describe Repository do
       expect(repository.license_key).to be_nil
     end
 
-    it 'returns nil when the content is not recognizable' do
+    it 'returns other when the content is not recognizable' do
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
         message: 'Add LICENSE', branch_name: 'master')
 
-      expect(repository.license_key).to be_nil
+      expect(repository.license_key).to eq('other')
     end
 
     it 'returns nil when the commit SHA does not exist' do
@@ -1186,11 +1295,12 @@ RSpec.describe Repository do
       expect(repository.license).to be_nil
     end
 
-    it 'returns nil when the content is not recognizable' do
+    it 'returns other when the content is not recognizable' do
+      license = Licensee::License.new('other')
       repository.create_file(user, 'LICENSE', 'Gitlab B.V.',
         message: 'Add LICENSE', branch_name: 'master')
 
-      expect(repository.license).to be_nil
+      expect(repository.license).to eq(license)
     end
 
     it 'returns the license' do
@@ -1652,12 +1762,13 @@ RSpec.describe Repository do
     end
 
     it 'writes merge of source SHA and first parent ref to MR merge_ref_path' do
-      merge_commit_id = repository.merge_to_ref(user,
-                                                merge_request.diff_head_sha,
-                                                merge_request,
-                                                merge_request.merge_ref_path,
-                                                'Custom message',
-                                                merge_request.target_branch_ref)
+      merge_commit_id =
+        repository.merge_to_ref(user,
+          source_sha: merge_request.diff_head_sha,
+          branch: merge_request.target_branch,
+          target_ref: merge_request.merge_ref_path,
+          message: 'Custom message',
+          first_parent_ref: merge_request.target_branch_ref)
 
       merge_commit = repository.commit(merge_commit_id)
 
@@ -1938,7 +2049,6 @@ RSpec.describe Repository do
       expect(repository).to receive(:expire_method_caches).with([
         :size,
         :commit_count,
-        :rendered_readme,
         :readme_path,
         :contribution_guide,
         :changelog,
@@ -1955,8 +2065,8 @@ RSpec.describe Repository do
         :root_ref,
         :merged_branch_names,
         :has_visible_content?,
-        :issue_template_names,
-        :merge_request_template_names,
+        :issue_template_names_hash,
+        :merge_request_template_names_hash,
         :user_defined_metrics_dashboard_paths,
         :xcode_project?,
         :has_ambiguous_refs?
@@ -2025,6 +2135,22 @@ RSpec.describe Repository do
       expect(repository).not_to receive(:expire_branches_cache)
 
       repository.after_remove_branch(expire_cache: false)
+    end
+  end
+
+  describe '#lookup' do
+    before do
+      allow(repository.raw_repository).to receive(:lookup).and_return('interesting_blob')
+    end
+
+    it 'uses the lookup cache' do
+      2.times.each { repository.lookup('sha1') }
+
+      expect(repository.raw_repository).to have_received(:lookup).once
+    end
+
+    it 'returns the correct value' do
+      expect(repository.lookup('sha1')).to eq('interesting_blob')
     end
   end
 
@@ -2298,14 +2424,6 @@ RSpec.describe Repository do
           expect(repository.readme).to be_nil
         end
       end
-
-      context 'when a README exists' do
-        let(:project) { create(:project, :repository) }
-
-        it 'returns the README' do
-          expect(repository.readme).to be_an_instance_of(ReadmeBlob)
-        end
-      end
     end
   end
 
@@ -2335,7 +2453,7 @@ RSpec.describe Repository do
         end
 
         it 'caches the response' do
-          expect(repository).to receive(:readme).and_call_original.once
+          expect(repository.head_tree).to receive(:readme_path).and_call_original.once
 
           2.times do
             expect(repository.readme_path).to eq("README.md")
@@ -2511,9 +2629,8 @@ RSpec.describe Repository do
   describe '#refresh_method_caches' do
     it 'refreshes the caches of the given types' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(rendered_readme readme_path license_blob license_key license))
+        .with(%i(readme_path license_blob license_key license))
 
-      expect(repository).to receive(:rendered_readme)
       expect(repository).to receive(:readme_path)
       expect(repository).to receive(:license_blob)
       expect(repository).to receive(:license_key)
@@ -3031,6 +3148,53 @@ RSpec.describe Repository do
 
         is_expected.to be_falsy
       end
+    end
+  end
+
+  describe '.pick_storage_shard', :request_store do
+    before do
+      storages = {
+        'default' => Gitlab::GitalyClient::StorageSettings.new('path' => 'tmp/tests/repositories'),
+        'picked'  => Gitlab::GitalyClient::StorageSettings.new('path' => 'tmp/tests/repositories')
+      }
+
+      allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
+      stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
+      Gitlab::CurrentSettings.current_application_settings
+
+      update_storages({ 'picked' => 0, 'default' => 100 })
+    end
+
+    context 'when expire is false' do
+      it 'does not expire existing repository storage value' do
+        previous_storage = described_class.pick_storage_shard
+        expect(previous_storage).to eq('default')
+        expect(Gitlab::CurrentSettings).not_to receive(:expire_current_application_settings)
+
+        update_storages({ 'picked' => 100, 'default' => 0 })
+
+        new_storage = described_class.pick_storage_shard(expire: false)
+        expect(new_storage).to eq(previous_storage)
+      end
+    end
+
+    context 'when expire is true' do
+      it 'expires existing repository storage value' do
+        previous_storage = described_class.pick_storage_shard
+        expect(previous_storage).to eq('default')
+        expect(Gitlab::CurrentSettings).to receive(:expire_current_application_settings).and_call_original
+
+        update_storages({ 'picked' => 100, 'default' => 0 })
+
+        new_storage = described_class.pick_storage_shard(expire: true)
+        expect(new_storage).to eq('picked')
+      end
+    end
+
+    def update_storages(storage_hash)
+      settings = ApplicationSetting.last
+      settings.repository_storages_weighted = storage_hash
+      settings.save!
     end
   end
 end

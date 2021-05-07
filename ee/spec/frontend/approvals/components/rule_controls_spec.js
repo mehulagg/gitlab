@@ -1,19 +1,16 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
-import { GlButton, GlIcon } from '@gitlab/ui';
-import MREditModule from 'ee/approvals/stores/modules/mr_edit';
-import { createStoreOptions } from 'ee/approvals/stores';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
+import { createStoreOptions } from 'ee/approvals/stores';
+import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const TEST_RULE = { id: 10 };
 
-const findButtonLabel = button => {
-  const icon = button.find(GlIcon);
-  return icon.exists() ? icon.attributes('aria-label') : button.text();
-};
+const findButtonLabel = (button) => button.attributes('aria-label') || button.text();
 const hasLabel = (button, label) => findButtonLabel(button) === label;
 
 describe('EE Approvals RuleControls', () => {
@@ -22,23 +19,25 @@ describe('EE Approvals RuleControls', () => {
   let actions;
 
   const factory = () => {
-    wrapper = shallowMount(localVue.extend(RuleControls), {
+    wrapper = shallowMount(RuleControls, {
       propsData: {
         rule: TEST_RULE,
       },
-      localVue,
       store: new Vuex.Store(store),
     });
   };
   const findButtons = () => wrapper.findAll(GlButton);
-  const findButton = label => findButtons().filter(button => hasLabel(button, label)).wrappers[0];
+  const findButton = (label) =>
+    findButtons().filter((button) => hasLabel(button, label)).wrappers[0];
   const findEditButton = () => findButton('Edit');
   const findRemoveButton = () => findButton('Remove');
 
   beforeEach(() => {
     store = createStoreOptions(MREditModule());
     ({ actions } = store.modules.approvals);
-    ['requestEditRule', 'requestDeleteRule'].forEach(actionName => jest.spyOn(actions, actionName));
+    ['requestEditRule', 'requestDeleteRule'].forEach((actionName) =>
+      jest.spyOn(actions, actionName),
+    );
   });
 
   afterEach(() => {

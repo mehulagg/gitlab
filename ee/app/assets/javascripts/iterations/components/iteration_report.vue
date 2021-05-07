@@ -3,21 +3,21 @@
 import {
   GlAlert,
   GlBadge,
-  GlLoadingIcon,
-  GlEmptyState,
-  GlIcon,
   GlDropdown,
   GlDropdownItem,
+  GlEmptyState,
+  GlIcon,
+  GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
-import IterationReportSummary from './iteration_report_summary.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { Namespace } from '../constants';
+import query from '../queries/iteration.query.graphql';
 import IterationForm from './iteration_form.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
-import query from '../queries/iteration.query.graphql';
-import { Namespace } from '../constants';
 
 const iterationStates = {
   closed: 'closed',
@@ -35,29 +35,28 @@ export default {
     BurnCharts,
     GlAlert,
     GlBadge,
-    GlLoadingIcon,
-    GlEmptyState,
     GlIcon,
     GlDropdown,
     GlDropdownItem,
+    GlEmptyState,
+    GlLoadingIcon,
     IterationForm,
-    IterationReportSummary,
     IterationReportTabs,
   },
   apollo: {
     iteration: {
       query,
+      /* eslint-disable @gitlab/require-i18n-strings */
       variables() {
         return {
           fullPath: this.fullPath,
-          id: `gid://gitlab/Iteration/${this.iterationId}`,
-          iid: this.iterationIid,
-          hasId: Boolean(this.iterationId),
-          hasIid: Boolean(this.iterationIid),
+          id: convertToGraphQLId('Iteration', this.iterationId),
+          isGroup: this.namespaceType === Namespace.Group,
         };
       },
+      /* eslint-enable @gitlab/require-i18n-strings */
       update(data) {
-        return data.group?.iterations?.nodes[0] || data.iteration || {};
+        return data[this.namespaceType]?.iterations?.nodes[0] || {};
       },
       error(err) {
         this.error = err.message;
@@ -70,12 +69,12 @@ export default {
       type: String,
       required: true,
     },
-    iterationId: {
-      type: String,
+    hasScopedLabelsFeature: {
+      type: Boolean,
       required: false,
-      default: undefined,
+      default: false,
     },
-    iterationIid: {
+    iterationId: {
       type: String,
       required: false,
       default: undefined,
@@ -90,13 +89,23 @@ export default {
       required: false,
       default: false,
     },
+    labelsFetchPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     namespaceType: {
       type: String,
       required: false,
       default: Namespace.Group,
-      validator: value => Object.values(Namespace).includes(value),
+      validator: (value) => Object.values(Namespace).includes(value),
     },
     previewMarkdownPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    svgPath: {
       type: String,
       required: false,
       default: '',
@@ -113,8 +122,11 @@ export default {
     canEditIteration() {
       return this.canEdit && this.namespaceType === Namespace.Group;
     },
-    hasIteration() {
-      return !this.$apollo.queries.iteration.loading && this.iteration?.title;
+    loading() {
+      return this.$apollo.queries.iteration.loading;
+    },
+    showEmptyState() {
+      return !this.loading && this.iteration && !this.iteration.title;
     },
     status() {
       switch (this.iteration.state) {
@@ -171,9 +183,9 @@ export default {
     <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
       {{ error }}
     </gl-alert>
-    <gl-loading-icon v-if="$apollo.queries.iteration.loading" class="gl-py-5" size="lg" />
+    <gl-loading-icon v-else-if="loading" class="gl-py-5" size="lg" />
     <gl-empty-state
-      v-else-if="!hasIteration"
+      v-else-if="showEmptyState"
       :title="__('Could not find iteration')"
       :compact="false"
     />
@@ -214,21 +226,21 @@ export default {
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
-      <iteration-report-summary
-        :full-path="fullPath"
-        :iteration-id="iteration.id"
-        :namespace-type="namespaceType"
-      />
       <burn-charts
-        v-if="glFeatures.iterationCharts && glFeatures.burnupCharts"
         :start-date="iteration.startDate"
         :due-date="iteration.dueDate"
         :iteration-id="iteration.id"
+        :iteration-state="iteration.state"
+        :full-path="fullPath"
+        :namespace-type="namespaceType"
       />
       <iteration-report-tabs
         :full-path="fullPath"
+        :has-scoped-labels-feature="hasScopedLabelsFeature"
         :iteration-id="iteration.id"
+        :labels-fetch-path="labelsFetchPath"
         :namespace-type="namespaceType"
+        :svg-path="svgPath"
       />
     </template>
   </div>

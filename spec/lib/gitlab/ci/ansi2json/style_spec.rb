@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Ansi2json::Style do
   describe '#set?' do
-    subject { described_class.new(params).set? }
+    subject { described_class.new(**params).set? }
 
     context 'when fg color is set' do
       let(:params) { { fg: 'term-fg-black' } }
@@ -44,7 +44,7 @@ RSpec.describe Gitlab::Ci::Ansi2json::Style do
   end
 
   describe 'update formats to mimic terminals' do
-    subject { described_class.new(params) }
+    subject { described_class.new(**params) }
 
     context 'when fg color present' do
       let(:params) { { fg: 'term-fg-black', mask: mask } }
@@ -160,9 +160,9 @@ RSpec.describe Gitlab::Ci::Ansi2json::Style do
     with_them do
       it 'change the style' do
         style = described_class.new
-        style.update(initial_state)
+        style.update(initial_state) # rubocop:disable Rails/SaveBang
 
-        style.update(ansi_commands)
+        style.update(ansi_commands) # rubocop:disable Rails/SaveBang
 
         expect(style.to_s).to eq(result)
       end

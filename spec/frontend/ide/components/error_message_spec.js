@@ -1,6 +1,6 @@
+import { GlLoadingIcon } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
 import ErrorMessage from '~/ide/components/error_message.vue';
 
 const localVue = createLocalVue();
@@ -10,7 +10,7 @@ describe('IDE error message component', () => {
   let wrapper;
 
   const setErrorMessageMock = jest.fn();
-  const createComponent = messageProps => {
+  const createComponent = (messageProps) => {
     const fakeStore = new Vuex.Store({
       actions: { setErrorMessage: setErrorMessageMock },
     });
@@ -103,7 +103,7 @@ describe('IDE error message component', () => {
       let resolveAction;
       actionMock.mockImplementation(
         () =>
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolveAction = resolve;
           }),
       );

@@ -11,9 +11,9 @@ import { DropdownVariant } from '../constants';
  *
  * @param {object} state
  */
-export const groupEpics = state => {
+export const groupEpics = (state) => {
   if (state.searchQuery) {
-    return state.epics.filter(epic => {
+    return state.epics.filter((epic) => {
       const { title, reference, url, iid } = epic;
 
       // In case user has just pasted ID
@@ -37,11 +37,11 @@ export const groupEpics = state => {
  * is `sidebar`
  * @param {object} state
  */
-export const isDropdownVariantSidebar = state => state.variant === DropdownVariant.Sidebar;
+export const isDropdownVariantSidebar = (state) => state.variant === DropdownVariant.Sidebar;
 
 /**
  * Returns boolean representing whether dropdown variant
  * is `standalone`
  * @param {object} state
  */
-export const isDropdownVariantStandalone = state => state.variant === DropdownVariant.Standalone;
+export const isDropdownVariantStandalone = (state) => state.variant === DropdownVariant.Standalone;

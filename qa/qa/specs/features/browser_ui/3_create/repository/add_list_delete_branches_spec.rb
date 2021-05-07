@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Create' do
     describe 'Create, list, and delete branches via web' do
-      master_branch = 'master'
+      master_branch = nil
       second_branch = 'second-branch'
       third_branch = 'third-branch'
       file_1_master = 'file.txt'
@@ -21,12 +21,16 @@ module QA
         project = Resource::Project.fabricate_via_api! do |proj|
           proj.name = 'project-qa-test'
           proj.description = 'project for qa test'
+          proj.initialize_with_readme = true
         end
+
+        master_branch = project.default_branch
 
         Git::Repository.perform do |repository|
           repository.uri = project.repository_http_location.uri
           repository.use_default_credentials
           repository.try_add_credentials_to_netrc
+          repository.default_branch = master_branch
 
           repository.act do
             clone
@@ -55,7 +59,7 @@ module QA
         project.visit!
       end
 
-      it 'lists branches correctly after CRUD operations', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/413' do
+      it 'lists branches correctly after CRUD operations', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1688' do
         Page::Project::Menu.perform(&:go_to_repository_branches)
 
         expect(page).to have_content(master_branch)

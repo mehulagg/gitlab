@@ -34,7 +34,7 @@ module Gitlab
         delegate :project, to: :repository
 
         def supported_extensions
-          %w[.md].freeze
+          %w[.md .md.erb].freeze
         end
 
         def commit_id
@@ -42,16 +42,14 @@ module Gitlab
         end
 
         def supported_content?
-          master_branch? && extension_supported? && file_exists?
+          branch_supported? && extension_supported? && file_exists?
         end
 
-        def master_branch?
-          ref == 'master'
+        def branch_supported?
+          ref.in?(%w[master main])
         end
 
         def extension_supported?
-          return true if path.end_with?('.md.erb') && Feature.enabled?(:sse_erb_support, project)
-
           supported_extensions.any? { |ext| path.end_with?(ext) }
         end
 

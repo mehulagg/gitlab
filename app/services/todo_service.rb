@@ -43,11 +43,11 @@ class TodoService
   # updates the todo counts for those users.
   #
   def destroy_target(target)
-    todo_users = UsersWithPendingTodosFinder.new(target).execute.to_a
+    todo_user_ids = target.todos.distinct_user_ids
 
     yield target
 
-    todo_users.each(&:update_todos_count_cache)
+    Users::UpdateTodoCountCacheService.new(todo_user_ids).execute if todo_user_ids.present?
   end
 
   # When we reassign an assignable object (issuable, alert) we should:
@@ -177,7 +177,7 @@ class TodoService
   def resolve_todos_for_target(target, current_user)
     attributes = attributes_for_target(target)
 
-    resolve_todos(pending_todos(current_user, attributes), current_user)
+    resolve_todos(pending_todos([current_user], attributes), current_user)
   end
 
   def resolve_todos(todos, current_user, resolution: :done, resolved_by_action: :system_done)
@@ -212,19 +212,31 @@ class TodoService
     current_user.update_todos_count_cache
   end
 
+  def create_request_review_todo(target, author, reviewers)
+    attributes = attributes_for_todo(target.project, target, author, Todo::REVIEW_REQUESTED)
+    create_todos(reviewers, attributes)
+  end
+
   private
 
   def create_todos(users, attributes)
-    Array(users).map do |user|
-      next if pending_todos(user, attributes).exists?
+    users = Array(users)
 
+    return if users.empty?
+
+    users_with_pending_todos = pending_todos(users, attributes).distinct_user_ids
+    users.reject! { |user| users_with_pending_todos.include?(user.id) && Feature.disabled?(:multiple_todos, user) }
+
+    todos = users.map do |user|
       issue_type = attributes.delete(:issue_type)
       track_todo_creation(user, issue_type)
 
-      todo = Todo.create(attributes.merge(user_id: user.id))
-      user.update_todos_count_cache
-      todo
+      Todo.create(attributes.merge(user_id: user.id))
     end
+
+    Users::UpdateTodoCountCacheService.new(users.map(&:id)).execute
+
+    todos
   end
 
   def new_issuable(issuable, author)
@@ -266,8 +278,7 @@ class TodoService
   def create_reviewer_todo(target, author, old_reviewers = [])
     if target.reviewers.any?
       reviewers = target.reviewers - old_reviewers
-      attributes = attributes_for_todo(target.project, target, author, Todo::REVIEW_REQUESTED)
-      create_todos(reviewers, attributes)
+      create_request_review_todo(target, author, reviewers)
     end
   end
 
@@ -278,7 +289,7 @@ class TodoService
     create_todos(directly_addressed_users, attributes)
 
     # Create Todos for mentioned users
-    mentioned_users = filter_mentioned_users(parent, note || target, author, skip_users)
+    mentioned_users = filter_mentioned_users(parent, note || target, author, skip_users + directly_addressed_users)
     attributes = attributes_for_todo(parent, target, author, Todo::MENTIONED, note)
     create_todos(mentioned_users, attributes)
   end
@@ -349,8 +360,8 @@ class TodoService
     end
   end
 
-  def pending_todos(user, criteria = {})
-    PendingTodosFinder.new(user, criteria).execute
+  def pending_todos(users, criteria = {})
+    PendingTodosFinder.new(users, criteria).execute
   end
 
   def track_todo_creation(user, issue_type)

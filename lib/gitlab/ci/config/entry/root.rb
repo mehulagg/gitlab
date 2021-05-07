@@ -50,6 +50,7 @@ module Gitlab
 
           entry :variables, Entry::Variables,
             description: 'Environment variables that will be used.',
+            metadata: { use_value_data: true },
             reserved: true
 
           entry :stages, Entry::Stages,
@@ -60,7 +61,7 @@ module Gitlab
             description: 'Deprecated: stages for this pipeline.',
             reserved: true
 
-          entry :cache, Entry::Cache,
+          entry :cache, Entry::Caches,
             description: 'Configure caching between build jobs.',
             reserved: true
 

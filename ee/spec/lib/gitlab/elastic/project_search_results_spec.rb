@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:query) { 'hello world' }
   let(:repository_ref) { nil }
   let(:filters) { {} }
@@ -58,6 +59,7 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
 
     context 'visibility checks' do
       let_it_be(:project) { create(:project, :public, :wiki_repo) }
+
       let(:query) { 'term' }
 
       before do
@@ -180,6 +182,7 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
       create(:wiki_page, wiki: project.wiki)
     end
 
-    include_examples 'does not hit Elasticsearch twice for objects and counts', %w|notes blobs wiki_blobs commits issues merge_requests milestones|
+    include_examples 'does not hit Elasticsearch twice for objects and counts', %w[notes blobs wiki_blobs commits issues merge_requests milestones]
+    include_examples 'does not load results for count only queries', %w[notes blobs wiki_blobs commits issues merge_requests milestones]
   end
 end

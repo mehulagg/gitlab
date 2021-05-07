@@ -15,7 +15,7 @@ RSpec.describe 'Set up Mattermost slash commands', :js do
       let(:mattermost_enabled) { true }
 
       it 'shows a help message' do
-        expect(page).to have_content("This service allows users to perform common")
+        expect(page).to have_content("Use this service to perform common")
       end
 
       it 'shows a token placeholder' do
@@ -113,7 +113,7 @@ RSpec.describe 'Set up Mattermost slash commands', :js do
 
         click_link 'Add to Mattermost'
 
-        expect(page).to have_selector('.alert')
+        expect(page).to have_selector('.gl-alert')
         expect(page).to have_content('test mattermost error message')
       end
 

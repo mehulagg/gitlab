@@ -23,8 +23,8 @@ module Elastic
 
       settings \
         index: {
-          number_of_shards: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_shards },
-          number_of_replicas: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_replicas },
+          number_of_shards: Elastic::AsJSON.new { Elastic::IndexSetting.default.number_of_shards },
+          number_of_replicas: Elastic::AsJSON.new { Elastic::IndexSetting.default.number_of_replicas },
           highlight: {
             # `highlight.max_analyzed_offset` is technically not measured in
             # bytes, but rather in characters. Since this is an uppper bound on
@@ -39,7 +39,7 @@ module Elastic
             analyzer: {
               default: {
                 tokenizer: 'standard',
-                filter: %w(lowercase my_stemmer)
+                filter: %w(lowercase stemmer)
               },
               my_ngram_analyzer: {
                 tokenizer: 'my_ngram_tokenizer',
@@ -62,10 +62,6 @@ module Elastic
               }
             },
             filter: {
-              my_stemmer: {
-                type: 'stemmer',
-                name: 'light_english'
-              },
               code: {
                 type: "pattern_capture",
                 preserve_original: true,
@@ -132,7 +128,7 @@ module Elastic
           index_options: 'positions'
         indexes :description, type: :text,
           index_options: 'positions'
-        indexes :state, type: :text
+        indexes :state, type: :keyword
         indexes :project_id, type: :integer
         indexes :author_id, type: :integer
 
@@ -150,11 +146,9 @@ module Elastic
         indexes :assignee_id, type: :integer
 
         ### MERGE REQUESTS
-        indexes :target_branch, type: :text,
-          index_options: 'docs'
-        indexes :source_branch, type: :text,
-          index_options: 'docs'
-        indexes :merge_status, type: :text
+        indexes :target_branch, type: :keyword
+        indexes :source_branch, type: :keyword
+        indexes :merge_status, type: :keyword
         indexes :source_project_id, type: :integer
         indexes :target_project_id, type: :integer
 
@@ -234,13 +228,13 @@ module Elastic
 
           indexes :author do
             indexes :name, type: :text, index_options: 'positions'
-            indexes :email, type: :text, index_options: 'positions'
+            indexes :email, type: :keyword
             indexes :time, type: :date, format: :basic_date_time_no_millis
           end
 
           indexes :committer do
             indexes :name, type: :text, index_options: 'positions'
-            indexes :email, type: :text, index_options: 'positions'
+            indexes :email, type: :keyword
             indexes :time, type: :date, format: :basic_date_time_no_millis
           end
 

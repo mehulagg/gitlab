@@ -15,9 +15,10 @@ module Gitlab
         private
 
         def deployments_count
-          query = @project.deployments.success.where("created_at >= ?", @from)
-          query = query.where("created_at <= ?", @to) if @to
-          query.count
+          DeploymentsFinder
+            .new(project: @project, finished_after: @from, finished_before: @to, status: :success, order_by: :finished_at)
+            .execute
+            .count
         end
       end
     end

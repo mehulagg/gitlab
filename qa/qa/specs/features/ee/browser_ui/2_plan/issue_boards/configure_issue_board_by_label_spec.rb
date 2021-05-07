@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Configure issue board by label' do
       let(:label_board_list) do
         EE::Resource::Board::BoardList::Project::LabelBoardList.fabricate_via_api!
@@ -23,7 +23,7 @@ module QA
         Page::Project::Menu.perform(&:go_to_boards)
       end
 
-      it 'shows only issues that match the configured label', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/646' do
+      it 'shows only issues that match the configured label', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1144' do
         Page::Component::IssueBoard::Show.perform do |show|
           show.configure_by_label(testing)
 

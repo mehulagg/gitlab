@@ -17,11 +17,14 @@ export default {
   computed: {
     ...mapState(['settings']),
     ...mapState({
-      resetToDefault: state => state.approvals.resetToDefault,
-      rules: state => state.approvals.rules,
-      rulesToDelete: state => state.approvals.rulesToDelete,
-      fallbackApprovalsRequired: state => state.approvals.fallbackApprovalsRequired,
+      resetToDefault: (state) => state.approvals.resetToDefault,
+      rules: (state) => state.approvals.rules,
+      rulesToDelete: (state) => state.approvals.rulesToDelete,
+      fallbackApprovalsRequired: (state) => state.approvals.fallbackApprovalsRequired,
     }),
+  },
+  mounted() {
+    this.$root.$emit('hidden-inputs-mounted');
   },
   INPUT_ID,
   INPUT_SOURCE_ID,

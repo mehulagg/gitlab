@@ -1,12 +1,14 @@
-import { mount } from '@vue/test-utils';
 import { GlTable, GlAlert, GlLoadingIcon, GlDropdown, GlIcon, GlAvatar } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { visitUrl } from '~/lib/utils/url_utility';
-import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import mockAlerts from 'jest/vue_shared/alert_details/mocks/alerts.json';
 import AlertManagementTable from '~/alert_management/components/alert_management_table.vue';
+import { visitUrl } from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import mockAlerts from '../mocks/alerts.json';
+import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import defaultProvideValues from '../mocks/alerts_provide_config.json';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -18,19 +20,18 @@ describe('AlertManagementTable', () => {
   let wrapper;
   let mock;
 
-  const findAlertsTable = () => wrapper.find(GlTable);
+  const findAlertsTable = () => wrapper.findComponent(GlTable);
   const findAlerts = () => wrapper.findAll('table tbody tr');
-  const findAlert = () => wrapper.find(GlAlert);
-  const findLoader = () => wrapper.find(GlLoadingIcon);
-  const findStatusDropdown = () => wrapper.find(GlDropdown);
-  const findDateFields = () => wrapper.findAll(TimeAgo);
-  const findSearch = () => wrapper.find(FilteredSearchBar);
-  const findSeverityColumnHeader = () =>
-    wrapper.find('[data-testid="alert-management-severity-sort"]');
-  const findFirstIDField = () => wrapper.findAll('[data-testid="idField"]').at(0);
-  const findAssignees = () => wrapper.findAll('[data-testid="assigneesField"]');
-  const findSeverityFields = () => wrapper.findAll('[data-testid="severityField"]');
-  const findIssueFields = () => wrapper.findAll('[data-testid="issueField"]');
+  const findAlert = () => wrapper.findComponent(GlAlert);
+  const findLoader = () => wrapper.findComponent(GlLoadingIcon);
+  const findStatusDropdown = () => wrapper.findComponent(GlDropdown);
+  const findDateFields = () => wrapper.findAllComponents(TimeAgo);
+  const findSearch = () => wrapper.findComponent(FilteredSearchBar);
+  const findSeverityColumnHeader = () => wrapper.findByTestId('alert-management-severity-sort');
+  const findFirstIDField = () => wrapper.findAllByTestId('idField').at(0);
+  const findAssignees = () => wrapper.findAllByTestId('assigneesField');
+  const findSeverityFields = () => wrapper.findAllByTestId('severityField');
+  const findIssueFields = () => wrapper.findAllByTestId('issueField');
   const alertsCount = {
     open: 24,
     triggered: 20,
@@ -40,29 +41,34 @@ describe('AlertManagementTable', () => {
   };
 
   function mountComponent({ provide = {}, data = {}, loading = false, stubs = {} } = {}) {
-    wrapper = mount(AlertManagementTable, {
-      provide: {
-        ...defaultProvideValues,
-        alertManagementEnabled: true,
-        userCanEnableAlertManagement: true,
-        ...provide,
-      },
-      data() {
-        return data;
-      },
-      mocks: {
-        $apollo: {
-          mutate: jest.fn(),
-          query: jest.fn(),
-          queries: {
-            alerts: {
-              loading,
+    wrapper = extendedWrapper(
+      mount(AlertManagementTable, {
+        provide: {
+          ...defaultProvideValues,
+          alertManagementEnabled: true,
+          userCanEnableAlertManagement: true,
+          ...provide,
+        },
+        data() {
+          return data;
+        },
+        mocks: {
+          $apollo: {
+            mutate: jest.fn(),
+            query: jest.fn(),
+            queries: {
+              alerts: {
+                loading,
+              },
             },
           },
         },
-      },
-      stubs,
-    });
+        stubs,
+        directives: {
+          GlTooltip: createMockDirective(),
+        },
+      }),
+    );
   }
 
   beforeEach(() => {
@@ -72,7 +78,6 @@ describe('AlertManagementTable', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
-      wrapper = null;
     }
     mock.restore();
   });
@@ -85,11 +90,7 @@ describe('AlertManagementTable', () => {
       });
       expect(findAlertsTable().exists()).toBe(true);
       expect(findLoader().exists()).toBe(true);
-      expect(
-        findAlerts()
-          .at(0)
-          .classes(),
-      ).not.toContain('gl-hover-bg-blue-50');
+      expect(findAlerts().at(0).classes()).not.toContain('gl-hover-bg-blue-50');
     });
 
     it('error state', () => {
@@ -101,11 +102,7 @@ describe('AlertManagementTable', () => {
       expect(findAlertsTable().text()).toContain('No alerts to display');
       expect(findLoader().exists()).toBe(false);
       expect(findAlert().props().variant).toBe('danger');
-      expect(
-        findAlerts()
-          .at(0)
-          .classes(),
-      ).not.toContain('gl-hover-bg-blue-50');
+      expect(findAlerts().at(0).classes()).not.toContain('gl-hover-bg-blue-50');
     });
 
     it('empty state', () => {
@@ -125,11 +122,7 @@ describe('AlertManagementTable', () => {
       expect(findAlertsTable().text()).toContain('No alerts to display');
       expect(findLoader().exists()).toBe(false);
       expect(findAlert().props().variant).toBe('info');
-      expect(
-        findAlerts()
-          .at(0)
-          .classes(),
-      ).not.toContain('gl-hover-bg-blue-50');
+      expect(findAlerts().at(0).classes()).not.toContain('gl-hover-bg-blue-50');
     });
 
     it('has data state', () => {
@@ -140,11 +133,7 @@ describe('AlertManagementTable', () => {
       expect(findLoader().exists()).toBe(false);
       expect(findAlertsTable().exists()).toBe(true);
       expect(findAlerts()).toHaveLength(mockAlerts.length);
-      expect(
-        findAlerts()
-          .at(0)
-          .classes(),
-      ).toContain('gl-hover-bg-blue-50');
+      expect(findAlerts().at(0).classes()).toContain('gl-hover-bg-blue-50');
     });
 
     it('displays the alert ID and title formatted correctly', () => {
@@ -170,11 +159,7 @@ describe('AlertManagementTable', () => {
         data: { alerts: { list: mockAlerts }, alertsCount, errored: false },
         loading: false,
       });
-      expect(
-        findStatusDropdown()
-          .find('.dropdown-title')
-          .exists(),
-      ).toBe(false);
+      expect(findStatusDropdown().find('.dropdown-title').exists()).toBe(false);
     });
 
     it('shows correct severity icons', async () => {
@@ -186,11 +171,7 @@ describe('AlertManagementTable', () => {
       await wrapper.vm.$nextTick();
 
       expect(wrapper.find(GlTable).exists()).toBe(true);
-      expect(
-        findAlertsTable()
-          .find(GlIcon)
-          .classes('icon-critical'),
-      ).toBe(true);
+      expect(findAlertsTable().find(GlIcon).classes('icon-critical')).toBe(true);
     });
 
     it('renders severity text', () => {
@@ -199,11 +180,7 @@ describe('AlertManagementTable', () => {
         loading: false,
       });
 
-      expect(
-        findSeverityFields()
-          .at(0)
-          .text(),
-      ).toBe('Critical');
+      expect(findSeverityFields().at(0).text()).toBe('Critical');
     });
 
     it('renders Unassigned when no assignee(s) present', () => {
@@ -212,11 +189,7 @@ describe('AlertManagementTable', () => {
         loading: false,
       });
 
-      expect(
-        findAssignees()
-          .at(0)
-          .text(),
-      ).toBe('Unassigned');
+      expect(findAssignees().at(0).text()).toBe('Unassigned');
     });
 
     it('renders user avatar when assignee present', () => {
@@ -225,9 +198,7 @@ describe('AlertManagementTable', () => {
         loading: false,
       });
 
-      const avatar = findAssignees()
-        .at(1)
-        .find(GlAvatar);
+      const avatar = findAssignees().at(1).find(GlAvatar);
       const { src, label } = avatar.attributes();
       const { name, avatarUrl } = mockAlerts[1].assignees.nodes[0];
 
@@ -244,9 +215,7 @@ describe('AlertManagementTable', () => {
 
       expect(visitUrl).not.toHaveBeenCalled();
 
-      findAlerts()
-        .at(0)
-        .trigger('click');
+      findAlerts().at(0).trigger('click');
       expect(visitUrl).toHaveBeenCalledWith('/1527542/details', false);
     });
 
@@ -258,11 +227,9 @@ describe('AlertManagementTable', () => {
 
       expect(visitUrl).not.toHaveBeenCalled();
 
-      findAlerts()
-        .at(0)
-        .trigger('click', {
-          metaKey: true,
-        });
+      findAlerts().at(0).trigger('click', {
+        metaKey: true,
+      });
 
       expect(visitUrl).toHaveBeenCalledWith('/1527542/details', true);
     });
@@ -276,24 +243,17 @@ describe('AlertManagementTable', () => {
       });
 
       it('shows "None" when no link exists', () => {
-        expect(
-          findIssueFields()
-            .at(0)
-            .text(),
-        ).toBe('None');
+        expect(findIssueFields().at(0).text()).toBe('None');
       });
 
-      it('renders a link when one exists', () => {
-        expect(
-          findIssueFields()
-            .at(1)
-            .text(),
-        ).toBe('#1');
-        expect(
-          findIssueFields()
-            .at(1)
-            .attributes('href'),
-        ).toBe('/gitlab-org/gitlab/-/issues/1');
+      it('renders a link when one exists with the issue state and title tooltip', () => {
+        const issueField = findIssueFields().at(1);
+        const tooltip = getBinding(issueField.element, 'gl-tooltip');
+
+        expect(issueField.text()).toBe(`#1 (closed)`);
+        expect(issueField.attributes('href')).toBe('/gitlab-org/gitlab/-/issues/incident/1');
+        expect(issueField.attributes('title')).toBe('My test issue');
+        expect(tooltip).not.toBe(undefined);
       });
     });
 
@@ -350,11 +310,7 @@ describe('AlertManagementTable', () => {
             loading: false,
           });
 
-          expect(
-            findAlerts()
-              .at(0)
-              .classes(),
-          ).toContain('new-alert');
+          expect(findAlerts().at(0).classes()).toContain('new-alert');
         });
 
         it('should not highlight the row when alert is not new', () => {
@@ -363,11 +319,7 @@ describe('AlertManagementTable', () => {
             loading: false,
           });
 
-          expect(
-            findAlerts()
-              .at(0)
-              .classes(),
-          ).not.toContain('new-alert');
+          expect(findAlerts().at(0).classes()).not.toContain('new-alert');
         });
       });
     });

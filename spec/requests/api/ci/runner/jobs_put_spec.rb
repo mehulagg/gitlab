@@ -17,9 +17,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
   end
 
   describe '/api/v4/jobs' do
-    let(:root_namespace) { create(:namespace) }
-    let(:namespace) { create(:namespace, parent: root_namespace) }
-    let(:project) { create(:project, namespace: namespace, shared_runners_enabled: false) }
+    let(:group) { create(:group, :nested) }
+    let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master') }
     let(:runner) { create(:ci_runner, :project, projects: [project]) }
     let(:user) { create(:user) }
@@ -37,7 +36,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
         job.run!
       end
 
-      it_behaves_like 'API::CI::Runner application context metadata', '/api/:version/jobs/:id' do
+      it_behaves_like 'API::CI::Runner application context metadata', 'PUT /api/:version/jobs/:id' do
         let(:send_request) { update_job(state: 'success') }
       end
 
@@ -59,6 +58,50 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
           expect(job.reload).to be_failed
           expect(job).to be_unknown_failure
           expect(response.header).not_to have_key('X-GitLab-Trace-Update-Interval')
+        end
+
+        context 'when runner sends an unrecognized field in a payload' do
+          ##
+          # This test case is here to ensure that the API used to communicate
+          # runner with GitLab can evolve.
+          #
+          # In case of adding new features on the Runner side we do not want
+          # GitLab-side to reject requests containing unrecognizable fields in
+          # a payload, because runners can be updated before a new version of
+          # GitLab is installed.
+          #
+          it 'ignores unrecognized fields' do
+            update_job(state: 'success', 'unknown': 'something')
+
+            expect(job.reload).to be_success
+          end
+        end
+
+        context 'when an exit_code is provided' do
+          context 'when the exit_codes are acceptable' do
+            before do
+              job.options[:allow_failure_criteria] = { exit_codes: [1] }
+              job.save!
+            end
+
+            it 'accepts an exit code' do
+              update_job(state: 'failed', exit_code: 1)
+
+              expect(job.reload).to be_failed
+              expect(job.allow_failure).to be_truthy
+              expect(job).to be_unknown_failure
+            end
+          end
+
+          context 'when the exit_codes are not defined' do
+            it 'ignore the exit code' do
+              update_job(state: 'failed', exit_code: 1)
+
+              expect(job.reload).to be_failed
+              expect(job.allow_failure).to be_falsy
+              expect(job).to be_unknown_failure
+            end
+          end
         end
 
         context 'when failure_reason is script_failure' do
@@ -235,14 +278,22 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
         end
       end
 
-      def update_job(token = job.token, **params)
+      context 'when job does not exist anymore' do
+        it 'returns 403 Forbidden' do
+          update_job(non_existing_record_id, state: 'success', trace: 'BUILD TRACE UPDATED')
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      def update_job(job_id = job.id, token = job.token, **params)
         new_params = params.merge(token: token)
-        put api("/jobs/#{job.id}"), params: new_params
+        put api("/jobs/#{job_id}"), params: new_params
       end
 
       def update_job_after_time(update_interval = 20.minutes, state = 'running')
         travel_to(job.updated_at + update_interval) do
-          update_job(job.token, state: state)
+          update_job(job.id, job.token, state: state)
         end
       end
     end

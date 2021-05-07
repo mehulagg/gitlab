@@ -9,8 +9,8 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import produce from 'immer';
-import { __, n__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { __, n__ } from '~/locale';
 import getGroupProjects from '../graphql/queries/get_group_projects.query.graphql';
 
 export default {
@@ -40,11 +40,13 @@ export default {
         };
       },
       update(data) {
-        return data.group.projects.nodes.map(project => ({
-          ...project,
-          parsedId: getIdFromGraphQLId(project.id),
-          isSelected: false,
-        }));
+        return (
+          data.group?.projects?.nodes?.map((project) => ({
+            ...project,
+            parsedId: getIdFromGraphQLId(project.id),
+            isSelected: false,
+          })) || []
+        );
       },
       result({ data }) {
         this.projectsPageInfo = data?.group?.projects?.pageInfo || {};
@@ -64,7 +66,7 @@ export default {
   },
   computed: {
     filteredProjects() {
-      return this.groupProjects.filter(project =>
+      return this.groupProjects.filter((project) =>
         project.name.toLowerCase().includes(this.projectSearchTerm.toLowerCase()),
       );
     },
@@ -78,19 +80,21 @@ export default {
       return __('Select projects');
     },
     selectedProjectIds() {
-      return this.groupProjects.filter(project => project.isSelected).map(project => project.id);
+      return this.groupProjects
+        .filter((project) => project.isSelected)
+        .map((project) => project.id);
     },
   },
   methods: {
     clickDropdownProject(id) {
-      const index = this.groupProjects.map(project => project.id).indexOf(id);
+      const index = this.groupProjects.map((project) => project.id).indexOf(id);
       this.groupProjects[index].isSelected = !this.groupProjects[index].isSelected;
       this.selectAllProjects = false;
       this.$emit('select-project', this.groupProjects[index]);
     },
     clickSelectAllProjects() {
       this.selectAllProjects = true;
-      this.groupProjects = this.groupProjects.map(project => ({
+      this.groupProjects = this.groupProjects.map((project) => ({
         ...project,
         isSelected: false,
       }));
@@ -107,8 +111,7 @@ export default {
             after: this.projectsPageInfo.endCursor,
           },
           updateQuery(previousResult, { fetchMoreResult }) {
-            const results = produce(fetchMoreResult, draftData => {
-              // eslint-disable-next-line no-param-reassign
+            const results = produce(fetchMoreResult, (draftData) => {
               draftData.group.projects.nodes = [
                 ...previousResult.group.projects.nodes,
                 ...draftData.group.projects.nodes,

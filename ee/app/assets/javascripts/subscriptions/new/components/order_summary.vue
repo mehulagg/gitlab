@@ -1,6 +1,6 @@
 <script>
-import { mapGetters } from 'vuex';
 import { GlIcon } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 import { sprintf, s__ } from '~/locale';
 import formattingMixins from '../formatting_mixins';
 import SummaryDetails from './order_summary/summary_details.vue';
@@ -17,7 +17,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['totalAmount', 'name', 'usersPresent']),
+    ...mapGetters([
+      'totalAmount',
+      'name',
+      'usersPresent',
+      'isGroupSelected',
+      'isSelectedGroupPresent',
+    ]),
     titleWithName() {
       return sprintf(this.$options.i18n.title, { name: this.name });
     },
@@ -33,13 +39,16 @@ export default {
 };
 </script>
 <template>
-  <div class="order-summary d-flex flex-column flex-grow-1 gl-mt-2 mt-lg-5">
+  <div
+    v-if="!isGroupSelected || isSelectedGroupPresent"
+    class="order-summary gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-mt-2 mt-lg-5"
+  >
     <div class="d-lg-none">
       <div @click="toggleCollapse">
         <h4 class="d-flex justify-content-between gl-font-lg" :class="{ 'gl-mb-7': !collapsed }">
           <div class="d-flex">
-            <gl-icon v-if="collapsed" name="chevron-right" :size="18" />
-            <gl-icon v-else name="chevron-down" :size="18" />
+            <gl-icon v-if="collapsed" name="chevron-right" :size="18" use-deprecated-sizes />
+            <gl-icon v-else name="chevron-down" :size="18" use-deprecated-sizes />
             <div>{{ titleWithName }}</div>
           </div>
           <div class="gl-ml-3">{{ formatAmount(totalAmount, usersPresent) }}</div>

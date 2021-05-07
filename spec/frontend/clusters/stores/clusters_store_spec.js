@@ -1,5 +1,5 @@
-import ClustersStore from '~/clusters/stores/clusters_store';
 import { APPLICATION_INSTALLED_STATUSES, APPLICATION_STATUS, RUNNER } from '~/clusters/constants';
+import ClustersStore from '~/clusters/stores/clusters_store';
 import { CLUSTERS_MOCK_DATA } from '../services/mock_data';
 
 describe('Clusters Store', () => {
@@ -50,6 +50,7 @@ describe('Clusters Store', () => {
 
       expect(store.state).toEqual({
         helpPath: null,
+        helmHelpPath: null,
         ingressHelpPath: null,
         environmentsHelpPath: null,
         clustersHelpPath: null,
@@ -62,7 +63,7 @@ describe('Clusters Store', () => {
         rbac: false,
         applications: {
           helm: {
-            title: 'Helm Tiller',
+            title: 'Legacy Helm Tiller server',
             status: mockResponseData.applications[0].status,
             statusReason: mockResponseData.applications[0].status_reason,
             requestReason: null,
@@ -236,19 +237,22 @@ describe('Clusters Store', () => {
       });
     });
 
-    describe.each(APPLICATION_INSTALLED_STATUSES)('given the current app status is %s', status => {
-      it('marks application as installed', () => {
-        const mockResponseData =
-          CLUSTERS_MOCK_DATA.GET['/gitlab-org/gitlab-shell/clusters/2/status.json'].data;
-        const runnerAppIndex = 2;
+    describe.each(APPLICATION_INSTALLED_STATUSES)(
+      'given the current app status is %s',
+      (status) => {
+        it('marks application as installed', () => {
+          const mockResponseData =
+            CLUSTERS_MOCK_DATA.GET['/gitlab-org/gitlab-shell/clusters/2/status.json'].data;
+          const runnerAppIndex = 2;
 
-        mockResponseData.applications[runnerAppIndex].status = status;
+          mockResponseData.applications[runnerAppIndex].status = status;
 
-        store.updateStateFromServer(mockResponseData);
+          store.updateStateFromServer(mockResponseData);
 
-        expect(store.state.applications[RUNNER].installed).toBe(true);
-      });
-    });
+          expect(store.state.applications[RUNNER].installed).toBe(true);
+        });
+      },
+    );
 
     it('sets default hostname for jupyter when ingress has a ip address', () => {
       const mockResponseData =

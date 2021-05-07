@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Issuable do
   include ProjectForksHelper
+  using RSpec::Parameterized::TableSyntax
 
   let(:issuable_class) { Issue }
   let(:issue) { create(:issue, title: 'An issue', description: 'A description') }
@@ -15,7 +16,7 @@ RSpec.describe Issuable do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:author) }
     it { is_expected.to have_many(:notes).dependent(:destroy) }
-    it { is_expected.to have_many(:todos).dependent(:destroy) }
+    it { is_expected.to have_many(:todos) }
     it { is_expected.to have_many(:labels) }
     it { is_expected.to have_many(:note_authors).through(:notes) }
 
@@ -45,13 +46,17 @@ RSpec.describe Issuable do
       end
 
       it { is_expected.to validate_presence_of(:project) }
-      it { is_expected.to validate_presence_of(:iid) }
       it { is_expected.to validate_presence_of(:author) }
       it { is_expected.to validate_presence_of(:title) }
       it { is_expected.to validate_length_of(:title).is_at_most(described_class::TITLE_LENGTH_MAX) }
       it { is_expected.to validate_length_of(:description).is_at_most(described_class::DESCRIPTION_LENGTH_MAX).on(:create) }
 
-      it_behaves_like 'validates description length with custom validation'
+      it_behaves_like 'validates description length with custom validation' do
+        before do
+          allow(InternalId).to receive(:generate_next).and_call_original
+        end
+      end
+
       it_behaves_like 'truncates the description to its allowed maximum length on import'
     end
   end
@@ -60,6 +65,23 @@ RSpec.describe Issuable do
     it { expect(issuable_class).to respond_to(:opened) }
     it { expect(issuable_class).to respond_to(:closed) }
     it { expect(issuable_class).to respond_to(:assigned) }
+
+    describe '.includes_for_bulk_update' do
+      before do
+        stub_const('Example', Class.new(ActiveRecord::Base))
+
+        Example.class_eval do
+          include Issuable # adds :labels and :metrics, among others
+
+          belongs_to :author
+          has_many :assignees
+        end
+      end
+
+      it 'includes available associations' do
+        expect(Example.includes_for_bulk_update.includes_values).to eq([:author, :assignees, :labels, :metrics])
+      end
+    end
   end
 
   describe 'author_name' do
@@ -375,7 +397,7 @@ RSpec.describe Issuable do
 
     context 'user is a participant in the issue' do
       before do
-        allow(issue).to receive(:participants).with(user).and_return([user])
+        allow(issue).to receive(:participant?).with(user).and_return(true)
       end
 
       it 'returns false when no subcription exists' do
@@ -820,8 +842,6 @@ RSpec.describe Issuable do
   end
 
   describe '#supports_time_tracking?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:issuable_type, :supports_time_tracking) do
       :issue         | true
       :incident      | true
@@ -838,8 +858,6 @@ RSpec.describe Issuable do
   end
 
   describe '#supports_severity?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:issuable_type, :supports_severity) do
       :issue         | false
       :incident      | true
@@ -856,8 +874,6 @@ RSpec.describe Issuable do
   end
 
   describe '#incident?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:issuable_type, :incident) do
       :issue         | false
       :incident      | true
@@ -874,8 +890,6 @@ RSpec.describe Issuable do
   end
 
   describe '#supports_issue_type?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:issuable_type, :supports_issue_type) do
       :issue         | true
       :merge_request | false
@@ -894,8 +908,6 @@ RSpec.describe Issuable do
     subject { issuable.severity }
 
     context 'when issuable is not an incident' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:issuable_type, :severity) do
         :issue         | 'unknown'
         :merge_request | 'unknown'

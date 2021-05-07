@@ -3,6 +3,9 @@
 class PostReceive # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+  include Gitlab::Experiment::Dsl
+
   feature_category :source_code_management
   urgency :high
   worker_resource_boundary :cpu
@@ -20,7 +23,7 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
     changes = Base64.decode64(changes) unless changes.include?(' ')
     # Use Sidekiq.logger so arguments can be correlated with execution
     # time and thread ID's.
-    Sidekiq.logger.info "changes: #{changes.inspect}" if ENV['SIDEKIQ_LOG_ARGUMENTS']
+    Sidekiq.logger.info "changes: #{changes.inspect}" if SidekiqLogArguments.enabled?
     post_received = Gitlab::GitPostReceive.new(container, identifier, changes, push_options)
 
     if repo_type.wiki?
@@ -121,6 +124,8 @@ class PostReceive # rubocop:disable Scalability/IdempotentWorker
   end
 
   def after_project_changes_hooks(project, user, refs, changes)
+    experiment(:new_project_readme, actor: user).track_initial_writes(project)
+    experiment(:empty_repo_upload, project: project).track_initial_write
     repository_update_hook_data = Gitlab::DataBuilder::Repository.update(project, user, changes, refs)
     SystemHooksService.new.execute_hooks(repository_update_hook_data, :repository_update_hooks)
     Gitlab::UsageDataCounters::SourceCodeCounter.count(:pushes)

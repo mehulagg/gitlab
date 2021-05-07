@@ -16,6 +16,8 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
+  specify { expect(described_class).to require_graphql_authorizations(:create_on_demand_dast_scan) }
+
   describe '#resolve' do
     subject do
       mutation.resolve(
@@ -35,12 +37,6 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
       end
     end
 
-    context 'when the user is not associated with the project' do
-      it 'raises an exception' do
-        expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-      end
-    end
-
     context 'when the user can run a dast scan' do
       before do
         group.add_owner(user)
@@ -54,7 +50,7 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
         service = double(described_class)
         result = double('result', success?: false, errors: [])
 
-        expect(DastScannerProfiles::CreateService).to receive(:new).and_return(service)
+        expect(::AppSec::Dast::ScannerProfiles::CreateService).to receive(:new).and_return(service)
         expected_args = {
           name: profile_name,
           spider_timeout: nil,
@@ -81,24 +77,6 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
           )
 
           expect(response[:errors]).to include('Name has already been taken')
-        end
-      end
-
-      context 'when security_on_demand_scans_feature_flag is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
-      context 'when on demand scan licensed feature is not available' do
-        it 'raises an exception' do
-          stub_licensed_features(security_on_demand_scans: false)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
     end

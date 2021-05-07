@@ -37,7 +37,7 @@ module EE
 
     override :alerts_settings_data
     def alerts_settings_data(disabled: false)
-      super.merge(opsgenie_mvc_data)
+      super.merge(alert_management_multiple_integrations_data, alert_fields)
     end
 
     override :operations_settings_data
@@ -61,14 +61,17 @@ module EE
       ::IncidentManagement::IncidentSla.available_for?(@project)
     end
 
-    def opsgenie_mvc_data
-      return {} unless alerts_service.opsgenie_mvc_available?
+    def alert_management_multiple_integrations_data
+      {
+        'multi_integrations' => @project.feature_available?(:multiple_alert_http_integrations).to_s
+      }
+    end
+
+    def alert_fields
+      return {} unless ::Gitlab::AlertManagement.custom_mapping_available?(@project)
 
       {
-        'opsgenie_mvc_available' => 'true',
-        'opsgenie_mvc_form_path' => scoped_integration_path(alerts_service),
-        'opsgenie_mvc_enabled' => alerts_service.opsgenie_mvc_enabled?.to_s,
-        'opsgenie_mvc_target_url' => alerts_service.opsgenie_mvc_target_url.to_s
+        'alert_fields' => ::Gitlab::AlertManagement.alert_fields.map { |f| f.slice(:name, :label, :types) }.to_json
       }
     end
   end

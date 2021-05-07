@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Service do
+  using RSpec::Parameterized::TableSyntax
+
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
 
@@ -15,8 +17,6 @@ RSpec.describe Service do
   end
 
   describe 'validations' do
-    using RSpec::Parameterized::TableSyntax
-
     it { is_expected.to validate_presence_of(:type) }
 
     where(:project_id, :group_id, :template, :instance, :valid) do
@@ -39,35 +39,29 @@ RSpec.describe Service do
       end
     end
 
-    context 'with an existing service template' do
-      before do
+    context 'with existing services' do
+      before_all do
         create(:service, :template)
+        create(:service, :instance)
+        create(:service, project: project)
+        create(:service, group: group, project: nil)
       end
 
-      it 'validates only one service template per type' do
+      it 'allows only one service template per type' do
         expect(build(:service, :template)).to be_invalid
       end
-    end
 
-    context 'with an existing instance service' do
-      before do
-        create(:service, :instance)
-      end
-
-      it 'validates only one service instance per type' do
+      it 'allows only one instance service per type' do
         expect(build(:service, :instance)).to be_invalid
       end
-    end
 
-    it 'validates uniqueness of type and project_id on create' do
-      expect(create(:service, project: project, type: 'Service')).to be_valid
-      expect(build(:service, project: project, type: 'Service').valid?(:create)).to eq(false)
-      expect(build(:service, project: project, type: 'Service').valid?(:update)).to eq(true)
-    end
+      it 'allows only one project service per type' do
+        expect(build(:service, project: project)).to be_invalid
+      end
 
-    it 'validates uniqueness of type and group_id' do
-      expect(create(:service, group_id: group.id, project_id: nil, type: 'Service')).to be_valid
-      expect(build(:service, group_id: group.id, project_id: nil, type: 'Service')).to be_invalid
+      it 'allows only one group service per type' do
+        expect(build(:service, group: group, project: nil)).to be_invalid
+      end
     end
   end
 
@@ -208,27 +202,57 @@ RSpec.describe Service do
     end
   end
 
-  describe '.find_or_initialize_integration' do
+  describe '#project_level?' do
+    it 'is true when service has a project' do
+      expect(build(:service, project: project)).to be_project_level
+    end
+
+    it 'is false when service has no project' do
+      expect(build(:service, project: nil)).not_to be_project_level
+    end
+  end
+
+  describe '#group_level?' do
+    it 'is true when service has a group' do
+      expect(build(:service, group: group)).to be_group_level
+    end
+
+    it 'is false when service has no group' do
+      expect(build(:service, group: nil)).not_to be_group_level
+    end
+  end
+
+  describe '#instance_level?' do
+    it 'is true when service has instance-level integration' do
+      expect(build(:service, :instance)).to be_instance_level
+    end
+
+    it 'is false when service does not have instance-level integration' do
+      expect(build(:service, instance: false)).not_to be_instance_level
+    end
+  end
+
+  describe '.find_or_initialize_non_project_specific_integration' do
     let!(:service1) { create(:jira_service, project_id: nil, group_id: group.id) }
     let!(:service2) { create(:jira_service) }
 
     it 'returns the right service' do
-      expect(Service.find_or_initialize_integration('jira', group_id: group)).to eq(service1)
+      expect(Service.find_or_initialize_non_project_specific_integration('jira', group_id: group)).to eq(service1)
     end
 
     it 'does not create a new service' do
-      expect { Service.find_or_initialize_integration('redmine', group_id: group) }.not_to change { Service.count }
+      expect { Service.find_or_initialize_non_project_specific_integration('redmine', group_id: group) }.not_to change { Service.count }
     end
   end
 
-  describe '.find_or_initialize_all' do
+  describe '.find_or_initialize_all_non_project_specific' do
     shared_examples 'service instances' do
       it 'returns the available service instances' do
-        expect(Service.find_or_initialize_all(Service.for_instance).pluck(:type)).to match_array(Service.available_services_types)
+        expect(Service.find_or_initialize_all_non_project_specific(Service.for_instance).pluck(:type)).to match_array(Service.available_services_types(include_project_specific: false))
       end
 
       it 'does not create service instances' do
-        expect { Service.find_or_initialize_all(Service.for_instance) }.not_to change { Service.count }
+        expect { Service.find_or_initialize_all_non_project_specific(Service.for_instance) }.not_to change { Service.count }
       end
     end
 
@@ -237,7 +261,7 @@ RSpec.describe Service do
     context 'with all existing instances' do
       before do
         Service.insert_all(
-          Service.available_services_types.map { |type| { instance: true, type: type } }
+          Service.available_services_types(include_project_specific: false).map { |type| { instance: true, type: type } }
         )
       end
 
@@ -245,7 +269,7 @@ RSpec.describe Service do
 
       context 'with a previous existing service (MockCiService) and a new service (Asana)' do
         before do
-          Service.insert(type: 'MockCiService', instance: true)
+          Service.insert({ type: 'MockCiService', instance: true })
           Service.delete_by(type: 'AsanaService', instance: true)
         end
 
@@ -265,13 +289,13 @@ RSpec.describe Service do
   describe 'template' do
     shared_examples 'retrieves service templates' do
       it 'returns the available service templates' do
-        expect(Service.find_or_create_templates.pluck(:type)).to match_array(Service.available_services_types)
+        expect(Service.find_or_create_templates.pluck(:type)).to match_array(Service.available_services_types(include_project_specific: false))
       end
     end
 
     describe '.find_or_create_templates' do
       it 'creates service templates' do
-        expect { Service.find_or_create_templates }.to change { Service.count }.from(0).to(Service.available_services_names.size)
+        expect { Service.find_or_create_templates }.to change { Service.count }.from(0).to(Service.available_services_names(include_project_specific: false).size)
       end
 
       it_behaves_like 'retrieves service templates'
@@ -279,7 +303,7 @@ RSpec.describe Service do
       context 'with all existing templates' do
         before do
           Service.insert_all(
-            Service.available_services_types.map { |type| { template: true, type: type } }
+            Service.available_services_types(include_project_specific: false).map { |type| { template: true, type: type } }
           )
         end
 
@@ -291,7 +315,7 @@ RSpec.describe Service do
 
         context 'with a previous existing service (Previous) and a new service (Asana)' do
           before do
-            Service.insert(type: 'PreviousService', template: true)
+            Service.insert({ type: 'PreviousService', template: true })
             Service.delete_by(type: 'AsanaService', template: true)
           end
 
@@ -305,7 +329,7 @@ RSpec.describe Service do
         end
 
         it 'creates the rest of the service templates' do
-          expect { Service.find_or_create_templates }.to change { Service.count }.from(1).to(Service.available_services_names.size)
+          expect { Service.find_or_create_templates }.to change { Service.count }.from(1).to(Service.available_services_names(include_project_specific: false).size)
         end
 
         it_behaves_like 'retrieves service templates'
@@ -573,23 +597,49 @@ RSpec.describe Service do
             context 'passing a group' do
               let!(:sub_subgroup) { create(:group, parent: subgroup) }
 
-              it 'creates a service from the subgroup-level integration' do
-                described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+              context 'traversal queries' do
+                shared_examples 'correct ancestor order' do
+                  it 'creates a service from the subgroup-level integration' do
+                    described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
 
-                expect(sub_subgroup.reload.services.size).to eq(1)
-                expect(sub_subgroup.reload.services.first.api_url).to eq(subgroup_integration.api_url)
-                expect(sub_subgroup.reload.services.first.inherit_from_id).to eq(subgroup_integration.id)
-              end
+                    sub_subgroup.reload
 
-              context 'having a service inheriting settings' do
-                let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
+                    expect(sub_subgroup.services.size).to eq(1)
+                    expect(sub_subgroup.services.first.api_url).to eq(subgroup_integration.api_url)
+                    expect(sub_subgroup.services.first.inherit_from_id).to eq(subgroup_integration.id)
+                  end
 
-                it 'creates a service from the group-level integration' do
-                  described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+                  context 'having a service inheriting settings' do
+                    let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
 
-                  expect(sub_subgroup.reload.services.size).to eq(1)
-                  expect(sub_subgroup.reload.services.first.api_url).to eq(group_integration.api_url)
-                  expect(sub_subgroup.reload.services.first.inherit_from_id).to eq(group_integration.id)
+                    it 'creates a service from the group-level integration' do
+                      described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+
+                      sub_subgroup.reload
+
+                      expect(sub_subgroup.services.size).to eq(1)
+                      expect(sub_subgroup.services.first.api_url).to eq(group_integration.api_url)
+                      expect(sub_subgroup.services.first.inherit_from_id).to eq(group_integration.id)
+                    end
+                  end
+                end
+
+                context 'recursive' do
+                  before do
+                    stub_feature_flags(use_traversal_ids: false)
+                  end
+
+                  include_examples 'correct ancestor order'
+                end
+
+                context 'linear' do
+                  before do
+                    stub_feature_flags(use_traversal_ids: true)
+
+                    sub_subgroup.reload # make sure traversal_ids are reloaded
+                  end
+
+                  include_examples 'correct ancestor order'
                 end
               end
             end
@@ -753,38 +803,6 @@ RSpec.describe Service do
     end
   end
 
-  describe "callbacks" do
-    let!(:service) do
-      RedmineService.new(
-        project: project,
-        active: true,
-        properties: {
-          project_url: 'http://redmine/projects/project_name_in_redmine',
-          issues_url: "http://redmine/#{project.id}/project_name_in_redmine/:id",
-          new_issue_url: 'http://redmine/projects/project_name_in_redmine/issues/new'
-        }
-      )
-    end
-
-    describe "on create" do
-      it "updates the has_external_issue_tracker boolean" do
-        expect do
-          service.save!
-        end.to change { service.project.has_external_issue_tracker }.from(false).to(true)
-      end
-    end
-
-    describe "on update" do
-      it "updates the has_external_issue_tracker boolean" do
-        service.save!
-
-        expect do
-          service.update(active: false)
-        end.to change { service.project.has_external_issue_tracker }.from(true).to(false)
-      end
-    end
-  end
-
   describe '#api_field_names' do
     let(:fake_service) do
       Class.new(Service) do
@@ -842,6 +860,74 @@ RSpec.describe Service do
       expect(Gitlab::JsonLogger).to receive(:error).with(arguments)
 
       service.log_error(test_message, additional_argument: 'some argument')
+    end
+
+    context 'when project is nil' do
+      let(:project) { nil }
+      let(:arguments) do
+        {
+          service_class: service.class.name,
+          project_path: nil,
+          project_id: nil,
+          message: test_message,
+          additional_argument: 'some argument'
+        }
+      end
+
+      it 'logs info messages using json logger' do
+        expect(Gitlab::JsonLogger).to receive(:info).with(arguments)
+
+        service.log_info(test_message, additional_argument: 'some argument')
+      end
+    end
+  end
+
+  describe '#external_wiki?' do
+    where(:type, :active, :result) do
+      'ExternalWikiService' | true  | true
+      'ExternalWikiService' | false | false
+      'SlackService'        | true  | false
+    end
+
+    with_them do
+      it 'returns the right result' do
+        expect(build(:service, type: type, active: active).external_wiki?).to eq(result)
+      end
+    end
+  end
+
+  describe '.available_services_names' do
+    it 'calls the right methods' do
+      expect(described_class).to receive(:services_names).and_call_original
+      expect(described_class).to receive(:dev_services_names).and_call_original
+      expect(described_class).to receive(:project_specific_services_names).and_call_original
+
+      described_class.available_services_names
+    end
+
+    it 'does not call project_specific_services_names with include_project_specific false' do
+      expect(described_class).to receive(:services_names).and_call_original
+      expect(described_class).to receive(:dev_services_names).and_call_original
+      expect(described_class).not_to receive(:project_specific_services_names)
+
+      described_class.available_services_names(include_project_specific: false)
+    end
+
+    it 'does not call dev_services_names with include_dev false' do
+      expect(described_class).to receive(:services_names).and_call_original
+      expect(described_class).not_to receive(:dev_services_names)
+      expect(described_class).to receive(:project_specific_services_names).and_call_original
+
+      described_class.available_services_names(include_dev: false)
+    end
+
+    it { expect(described_class.available_services_names).to include('jenkins') }
+  end
+
+  describe '.project_specific_services_names' do
+    it do
+      expect(described_class.project_specific_services_names)
+        .to include(*described_class::PROJECT_SPECIFIC_SERVICE_NAMES)
     end
   end
 end

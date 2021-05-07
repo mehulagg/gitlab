@@ -71,6 +71,7 @@ RSpec.describe MergeRequest, :elastic do
 
   it "returns json with all needed elements" do
     merge_request = create :merge_request
+    merge_request.project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
 
     expected_hash = merge_request.attributes.extract!(
       'id',
@@ -89,13 +90,20 @@ RSpec.describe MergeRequest, :elastic do
     ).merge({
       'state' => merge_request.state,
       'type' => merge_request.es_type,
-      'join_field' => {
-        'name' => merge_request.es_type,
-        'parent' => merge_request.es_parent
-      }
+      'merge_requests_access_level' => ProjectFeature::ENABLED,
+      'visibility_level' => Gitlab::VisibilityLevel::INTERNAL,
+      'project_id' => merge_request.target_project.id
     })
 
     expect(merge_request.__elasticsearch__.as_indexed_json).to eq(expected_hash)
+  end
+
+  it 'handles when a project is missing project_feature' do
+    merge_request = create :merge_request
+    allow(merge_request.project).to receive(:project_feature).and_return(nil)
+
+    expect { merge_request.__elasticsearch__.as_indexed_json }.not_to raise_error
+    expect(merge_request.__elasticsearch__.as_indexed_json['merge_requests_access_level']).to eq(ProjectFeature::PRIVATE)
   end
 
   it_behaves_like 'no results when the user cannot read cross project' do

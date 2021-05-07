@@ -23,5 +23,9 @@ module ApprovalRules
     def success(*args, &blk)
       super.tap { |hsh| hsh[:rule] = rule }
     end
+
+    def merge_request_activity_counter
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+    end
   end
 end

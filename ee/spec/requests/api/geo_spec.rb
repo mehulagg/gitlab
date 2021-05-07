@@ -189,7 +189,7 @@ RSpec.describe API::Geo do
 
       context 'when attachment has mount_point nil' do
         it 'responds with 200 with X-Sendfile' do
-          resource.update(mount_point: nil)
+          resource.update!(mount_point: nil)
 
           get api("/geo/transfers/attachment/#{resource.id}"), headers: req_header
 
@@ -224,7 +224,7 @@ RSpec.describe API::Geo do
 
       context 'avatar has mount_point nil' do
         it 'responds with 200 with X-Sendfile' do
-          resource.update(mount_point: nil)
+          resource.update!(mount_point: nil)
 
           get api("/geo/transfers/avatar/#{resource.id}"), headers: req_header
 
@@ -432,7 +432,7 @@ RSpec.describe API::Geo do
       end
 
       it 'ignores invalid attributes upon update' do
-        GeoNodeStatus.create(data)
+        GeoNodeStatus.create!(data)
         data.merge!(
           {
             'id' => nil,

@@ -2,16 +2,16 @@
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Tracking from '~/tracking';
 
-import SkeletonLoader from '../components/skeleton_loader.vue';
 import EditArea from '../components/edit_area.vue';
 import EditMetaModal from '../components/edit_meta_modal.vue';
 import InvalidContentMessage from '../components/invalid_content_message.vue';
+import SkeletonLoader from '../components/skeleton_loader.vue';
 import SubmitChangesError from '../components/submit_changes_error.vue';
-import appDataQuery from '../graphql/queries/app_data.query.graphql';
-import sourceContentQuery from '../graphql/queries/source_content.query.graphql';
+import { LOAD_CONTENT_ERROR, TRACKING_ACTION_INITIALIZE_EDITOR } from '../constants';
 import hasSubmittedChangesMutation from '../graphql/mutations/has_submitted_changes.mutation.graphql';
 import submitContentChangesMutation from '../graphql/mutations/submit_content_changes.mutation.graphql';
-import { LOAD_CONTENT_ERROR, TRACKING_ACTION_INITIALIZE_EDITOR } from '../constants';
+import appDataQuery from '../graphql/queries/app_data.query.graphql';
+import sourceContentQuery from '../graphql/queries/source_content.query.graphql';
 import { SUCCESS_ROUTE } from '../router/constants';
 
 export default {
@@ -53,6 +53,7 @@ export default {
     return {
       content: null,
       images: null,
+      formattedMarkdown: null,
       submitChangesError: null,
       isSavingChanges: false,
     };
@@ -63,6 +64,9 @@ export default {
     },
     isContentLoaded() {
       return Boolean(this.sourceContent);
+    },
+    projectSplit() {
+      return this.appData.project.split('/'); // TODO: refactor so `namespace` and `project` remain distinct
     },
   },
   mounted() {
@@ -76,9 +80,10 @@ export default {
     onDismissError() {
       this.submitChangesError = null;
     },
-    onPrepareSubmit({ content, images }) {
+    onPrepareSubmit({ formattedMarkdown, content, images }) {
       this.content = content;
       this.images = images;
+      this.formattedMarkdown = formattedMarkdown;
 
       this.isSavingChanges = true;
       this.$refs.editMetaModal.show();
@@ -106,13 +111,15 @@ export default {
               project: this.appData.project,
               username: this.appData.username,
               sourcePath: this.appData.sourcePath,
+              targetBranch: this.appData.branch,
               content: this.content,
+              formattedMarkdown: this.formattedMarkdown,
               images: this.images,
               mergeRequestMeta,
             },
           },
         })
-        .catch(e => {
+        .catch((e) => {
           this.submitChangesError = e.message;
         })
         .finally(() => {
@@ -139,11 +146,17 @@ export default {
         :saving-changes="isSavingChanges"
         :return-url="appData.returnUrl"
         :mounts="appData.mounts"
+        :branch="appData.branch"
+        :base-url="appData.baseUrl"
+        :project="appData.project"
+        :image-root="appData.imageUploadPath"
         @submit="onPrepareSubmit"
       />
       <edit-meta-modal
         ref="editMetaModal"
         :source-path="appData.sourcePath"
+        :namespace="projectSplit[0]"
+        :project="projectSplit[1]"
         @primary="onSubmit"
         @hide="onHideModal"
       />

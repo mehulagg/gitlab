@@ -3,6 +3,8 @@
 module Projects
   module Security
     class NetworkPoliciesController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       POLLING_INTERVAL = 5_000
 
       before_action :authorize_read_threat_monitoring!
@@ -74,7 +76,7 @@ module Projects
 
       def parse_time(params, fallback)
         Time.zone.parse(params) || fallback
-      rescue
+      rescue StandardError
         fallback
       end
 

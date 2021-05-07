@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Gitaly
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
-# Gitaly timeouts **(CORE ONLY)**
+# Gitaly timeouts **(FREE SELF)**
 
 [Gitaly](../../../administration/gitaly/index.md) timeouts are configurable. The timeouts can be
 configured to make sure that long running Gitaly calls don't needlessly take up resources.

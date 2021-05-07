@@ -1,16 +1,23 @@
 import Vue from 'vue';
+import initJobsTable from '~/jobs/components/table';
 import GlCountdown from '~/vue_shared/components/gl_countdown.vue';
 
-document.addEventListener('DOMContentLoaded', () => {
+if (gon.features?.jobsTableVue) {
+  initJobsTable();
+} else {
   const remainingTimeElements = document.querySelectorAll('.js-remaining-time');
+
   remainingTimeElements.forEach(
-    el =>
+    (el) =>
       new Vue({
-        ...GlCountdown,
         el,
-        propsData: {
-          endDateString: el.dateTime,
+        render(h) {
+          return h(GlCountdown, {
+            props: {
+              endDateString: el.dateTime,
+            },
+          });
         },
       }),
   );
-});
+}

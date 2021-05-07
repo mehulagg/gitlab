@@ -6,6 +6,8 @@ module ReactiveCacheableWorker
   included do
     include ApplicationWorker
 
+    sidekiq_options retry: 3
+
     feature_category_not_owned!
     loggable_arguments 0
 
@@ -17,10 +19,10 @@ module ReactiveCacheableWorker
 
   def perform(class_name, id, *args)
     klass = begin
-              class_name.constantize
-            rescue NameError
-              nil
-            end
+      class_name.constantize
+    rescue NameError
+      nil
+    end
 
     return unless klass
 

@@ -15,7 +15,7 @@ const shas = {
   ],
 };
 
-const setWindowLocation = value => {
+const setWindowLocation = (value) => {
   Object.defineProperty(window, 'location', {
     writable: true,
     value,
@@ -337,7 +337,7 @@ describe('URL utility', () => {
 
   describe('urlContainsSha', () => {
     it('returns true when there is a valid 40-character SHA1 hash in the URL', () => {
-      shas.valid.forEach(sha => {
+      shas.valid.forEach((sha) => {
         expect(
           urlUtils.urlContainsSha({ url: `http://urlstuff/${sha}/moreurlstuff` }),
         ).toBeTruthy();
@@ -345,7 +345,7 @@ describe('URL utility', () => {
     });
 
     it('returns false when there is not a valid 40-character SHA1 hash in the URL', () => {
-      shas.invalid.forEach(str => {
+      shas.invalid.forEach((str) => {
         expect(urlUtils.urlContainsSha({ url: `http://urlstuff/${str}/moreurlstuff` })).toBeFalsy();
       });
     });
@@ -356,8 +356,8 @@ describe('URL utility', () => {
     let invalidUrls = [];
 
     beforeAll(() => {
-      validUrls = shas.valid.map(sha => `http://urlstuff/${sha}/moreurlstuff`);
-      invalidUrls = shas.invalid.map(str => `http://urlstuff/${str}/moreurlstuff`);
+      validUrls = shas.valid.map((sha) => `http://urlstuff/${sha}/moreurlstuff`);
+      invalidUrls = shas.invalid.map((str) => `http://urlstuff/${str}/moreurlstuff`);
     });
 
     it('returns the valid 40-character SHA1 hash from the URL', () => {
@@ -367,7 +367,7 @@ describe('URL utility', () => {
     });
 
     it('returns null from a URL with no valid 40-character SHA1 hash', () => {
-      invalidUrls.forEach(url => {
+      invalidUrls.forEach((url) => {
         expect(urlUtils.getShaFromUrl({ url })).toBeNull();
       });
     });
@@ -492,6 +492,28 @@ describe('URL utility', () => {
     });
   });
 
+  describe('isExternal', () => {
+    const gitlabUrl = 'https://gitlab.com/';
+
+    beforeEach(() => {
+      gon.gitlab_url = gitlabUrl;
+    });
+
+    afterEach(() => {
+      gon.gitlab_url = '';
+    });
+
+    it.each`
+      url                                        | urlType                    | external
+      ${'/gitlab-org/gitlab-test/-/issues/2'}    | ${'relative'}              | ${false}
+      ${gitlabUrl}                               | ${'absolute and internal'} | ${false}
+      ${`${gitlabUrl}/gitlab-org/gitlab-test`}   | ${'absolute and internal'} | ${false}
+      ${'http://jira.atlassian.net/browse/IG-1'} | ${'absolute and external'} | ${true}
+    `('returns $external for $url ($urlType)', ({ url, external }) => {
+      expect(urlUtils.isExternal(url)).toBe(external);
+    });
+  });
+
   describe('isBase64DataUrl', () => {
     it.each`
       url                                                      | valid
@@ -589,11 +611,11 @@ describe('URL utility', () => {
     ];
 
     describe('with URL constructor support', () => {
-      it.each(safeUrls)('returns true for %s', url => {
+      it.each(safeUrls)('returns true for %s', (url) => {
         expect(urlUtils.isSafeURL(url)).toBe(true);
       });
 
-      it.each(unsafeUrls)('returns false for %s', url => {
+      it.each(unsafeUrls)('returns false for %s', (url) => {
         expect(urlUtils.isSafeURL(url)).toBe(false);
       });
     });
@@ -792,6 +814,14 @@ describe('URL utility', () => {
       );
     });
 
+    it('decodes URI when decodeURI=true', () => {
+      const url = 'https://gitlab.com/test';
+
+      expect(urlUtils.setUrlParams({ labels: ['foo', 'bar'] }, url, false, true, true)).toEqual(
+        'https://gitlab.com/test?labels[]=foo&labels[]=bar',
+      );
+    });
+
     it('removes all existing URL params and sets a new param when cleanParams=true', () => {
       const url = 'https://gitlab.com/test?group_id=gitlab-org&project_id=my-project';
 
@@ -807,7 +837,7 @@ describe('URL utility', () => {
 
     it.each([[httpProtocol], [httpsProtocol]])(
       'when no url passed, returns correct protocol for %i from window location',
-      protocol => {
+      (protocol) => {
         setWindowLocation({
           protocol,
         });
@@ -856,6 +886,39 @@ describe('URL utility', () => {
       ${'https://foo.bar/foo/bar'} | ${'https://foo.bar'}
     `('returns correct origin for $url', ({ url, expectation }) => {
       expect(urlUtils.getURLOrigin(url)).toBe(expectation);
+    });
+  });
+
+  describe('encodeSaferUrl', () => {
+    it.each`
+      character | input                 | output
+      ${' '}    | ${'/url/hello 1.jpg'} | ${'/url/hello%201.jpg'}
+      ${'#'}    | ${'/url/hello#1.jpg'} | ${'/url/hello%231.jpg'}
+      ${'!'}    | ${'/url/hello!.jpg'}  | ${'/url/hello%21.jpg'}
+      ${'~'}    | ${'/url/hello~.jpg'}  | ${'/url/hello%7E.jpg'}
+      ${'*'}    | ${'/url/hello*.jpg'}  | ${'/url/hello%2A.jpg'}
+      ${"'"}    | ${"/url/hello'.jpg"}  | ${'/url/hello%27.jpg'}
+      ${'('}    | ${'/url/hello(.jpg'}  | ${'/url/hello%28.jpg'}
+      ${')'}    | ${'/url/hello).jpg'}  | ${'/url/hello%29.jpg'}
+      ${'?'}    | ${'/url/hello?.jpg'}  | ${'/url/hello%3F.jpg'}
+      ${'='}    | ${'/url/hello=.jpg'}  | ${'/url/hello%3D.jpg'}
+      ${'+'}    | ${'/url/hello+.jpg'}  | ${'/url/hello%2B.jpg'}
+      ${'&'}    | ${'/url/hello&.jpg'}  | ${'/url/hello%26.jpg'}
+    `(
+      'properly escapes `$character` characters while retaining the integrity of the URL',
+      ({ input, output }) => {
+        expect(urlUtils.encodeSaferUrl(input)).toBe(output);
+      },
+    );
+
+    it.each`
+      character | input
+      ${'/, .'} | ${'/url/hello.png'}
+      ${'\\d'}  | ${'/url/hello123.png'}
+      ${'-'}    | ${'/url/hello-123.png'}
+      ${'_'}    | ${'/url/hello_123.png'}
+    `('makes no changes to unproblematic characters ($character)', ({ input }) => {
+      expect(urlUtils.encodeSaferUrl(input)).toBe(input);
     });
   });
 });

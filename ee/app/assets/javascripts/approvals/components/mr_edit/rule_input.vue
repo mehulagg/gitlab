@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { debounce } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 import { RULE_TYPE_ANY_APPROVER } from '../../constants';
 
 const ANY_RULE_NAME = 'All Members';
@@ -20,9 +20,14 @@ export default {
   computed: {
     ...mapState(['settings']),
   },
+  created() {
+    this.onInputChangeDebounced = debounce((event) => {
+      this.onInputChange(event);
+    }, 1000);
+  },
   methods: {
     ...mapActions(['putRule', 'postRule']),
-    onInputChange: debounce(function debounceSearch(event) {
+    onInputChange(event) {
       const { value } = event.target;
       const approvalsRequired = parseInt(value, 10);
 
@@ -35,7 +40,7 @@ export default {
           approvalsRequired,
         });
       }
-    }, 1000),
+    },
   },
 };
 </script>
@@ -48,6 +53,6 @@ export default {
     type="number"
     :min="rule.minApprovalsRequired || 0"
     data-qa-selector="approvals_number_field"
-    @input="onInputChange"
+    @input="onInputChangeDebounced"
   />
 </template>

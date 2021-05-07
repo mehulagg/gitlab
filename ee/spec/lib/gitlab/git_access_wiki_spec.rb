@@ -23,7 +23,7 @@ RSpec.describe Gitlab::GitAccessWiki do
   end
 
   describe 'group wiki access' do
-    let_it_be(:group) { create(:group, :private, :wiki_repo) }
+    let_it_be_with_refind(:group) { create(:group, :private, :wiki_repo) }
     let(:wiki) { create(:group_wiki, group: group) }
 
     describe '#push_access_check' do
@@ -42,7 +42,16 @@ RSpec.describe Gitlab::GitAccessWiki do
           end
 
           it 'does not give access to upload wiki code' do
-            expect { subject }.to raise_error(Gitlab::GitAccess::ForbiddenError, "You can't push code to a read-only GitLab instance.")
+            expect { subject }.to raise_forbidden("You can't push code to a read-only GitLab instance.")
+          end
+        end
+
+        context 'when group is read-only' do
+          it 'does not allow push and allows pull access' do
+            allow(group).to receive(:repository_read_only?).and_return(true)
+
+            expect { push_changes(changes) }.to raise_forbidden('The repository is temporarily read-only. Please try again later.')
+            expect { pull_changes(changes) }.not_to raise_error
           end
         end
       end
@@ -99,6 +108,14 @@ RSpec.describe Gitlab::GitAccessWiki do
         end
       end
 
+      context 'when actor is geo' do
+        let(:user) { :geo }
+
+        it 'gives access to download wiki code' do
+          expect { subject }.not_to raise_error
+        end
+      end
+
       context 'the group is public' do
         let(:group) { create(:group, :public, :wiki_repo) }
 
@@ -130,7 +147,7 @@ RSpec.describe Gitlab::GitAccessWiki do
     let(:primary_repo_url) { geo_primary_http_url_to_repo(project.wiki) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project.wiki) }
 
-    it_behaves_like 'a read-only GitLab instance'
+    it_behaves_like 'git access for a read-only GitLab instance'
   end
 
   context 'when wiki is disabled' do

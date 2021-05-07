@@ -1,12 +1,18 @@
-import $ from 'jquery';
 import _ from 'lodash';
-import download from '~/lib/utils/downloader';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import download from '~/lib/utils/downloader';
 import { s__, n__, sprintf } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
+import {
+  FEEDBACK_TYPE_DISMISSAL,
+  FEEDBACK_TYPE_ISSUE,
+  FEEDBACK_TYPE_MERGE_REQUEST,
+} from '~/vue_shared/security_reports/constants';
 import * as types from './mutation_types';
+
+let vulnerabilitiesSource;
 
 /**
  * A lot of this file has duplicate actions in
@@ -17,50 +23,12 @@ import * as types from './mutation_types';
  * https://gitlab.com/gitlab-org/gitlab/issues/8519
  */
 
-const hideModal = () => $('#modal-mrwidget-security-issue').modal('hide');
-
 export const setPipelineId = ({ commit }, id) => commit(types.SET_PIPELINE_ID, id);
 
 export const setSourceBranch = ({ commit }, ref) => commit(types.SET_SOURCE_BRANCH, ref);
 
 export const setVulnerabilitiesEndpoint = ({ commit }, endpoint) => {
   commit(types.SET_VULNERABILITIES_ENDPOINT, endpoint);
-};
-
-export const setVulnerabilitiesCountEndpoint = ({ commit }, endpoint) => {
-  commit(types.SET_VULNERABILITIES_COUNT_ENDPOINT, endpoint);
-};
-
-export const fetchVulnerabilitiesCount = ({ state, dispatch }, params = {}) => {
-  if (!state.vulnerabilitiesCountEndpoint) {
-    return;
-  }
-  dispatch('requestVulnerabilitiesCount');
-
-  axios({
-    method: 'GET',
-    url: state.vulnerabilitiesCountEndpoint,
-    params,
-  })
-    .then(response => {
-      const { data } = response;
-      dispatch('receiveVulnerabilitiesCountSuccess', { data });
-    })
-    .catch(() => {
-      dispatch('receiveVulnerabilitiesCountError');
-    });
-};
-
-export const requestVulnerabilitiesCount = ({ commit }) => {
-  commit(types.REQUEST_VULNERABILITIES_COUNT);
-};
-
-export const receiveVulnerabilitiesCountSuccess = ({ commit }, { data }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_SUCCESS, data);
-};
-
-export const receiveVulnerabilitiesCountError = ({ commit }) => {
-  commit(types.RECEIVE_VULNERABILITIES_COUNT_ERROR);
 };
 
 export const setVulnerabilitiesPage = ({ commit }, page) => {
@@ -72,18 +40,28 @@ export const fetchVulnerabilities = ({ state, dispatch }, params = {}) => {
     return;
   }
   dispatch('requestVulnerabilities');
+  // Cancel a pending request if there is one.
+  if (vulnerabilitiesSource) {
+    vulnerabilitiesSource.cancel();
+  }
+
+  vulnerabilitiesSource = axios.CancelToken.source();
 
   axios({
     method: 'GET',
     url: state.vulnerabilitiesEndpoint,
+    cancelToken: vulnerabilitiesSource.token,
     params,
   })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       dispatch('receiveVulnerabilitiesSuccess', { headers, data });
     })
-    .catch(error => {
-      dispatch('receiveVulnerabilitiesError', error?.response?.status);
+    .catch((error) => {
+      // Don't show an error message if the request was cancelled through the cancel token.
+      if (!axios.isCancel(error)) {
+        dispatch('receiveVulnerabilitiesError', error?.response?.status);
+      }
     });
 };
 
@@ -96,7 +74,7 @@ export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => 
   const pageInfo = parseIntPagination(normalizedHeaders);
   // Vulnerabilities on pipelines don't have IDs.
   // We need to add dummy IDs here to avoid rendering issues.
-  const vulnerabilities = data.map(vulnerability => ({
+  const vulnerabilities = data.map((vulnerability) => ({
     ...vulnerability,
     id: vulnerability.id || _.uniqueId('client_'),
   }));
@@ -108,9 +86,7 @@ export const receiveVulnerabilitiesError = ({ commit }, errorCode) => {
   commit(types.RECEIVE_VULNERABILITIES_ERROR, errorCode);
 };
 
-export const openModal = ({ commit }, payload = {}) => {
-  $('#modal-mrwidget-security-issue').modal('show');
-
+export const setModalData = ({ commit }, payload = {}) => {
   commit(types.SET_MODAL_DATA, payload);
 };
 
@@ -119,9 +95,10 @@ export const createIssue = ({ dispatch }, { vulnerability, flashError }) => {
   axios
     .post(vulnerability.create_vulnerability_feedback_issue_path, {
       vulnerability_feedback: {
-        feedback_type: 'issue',
+        feedback_type: FEEDBACK_TYPE_ISSUE,
         category: vulnerability.report_type,
         project_fingerprint: vulnerability.project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           ...vulnerability,
           category: vulnerability.report_type,
@@ -148,11 +125,11 @@ export const receiveCreateIssueError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_CREATE_ISSUE_ERROR);
 
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error creating the issue.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error creating the issue.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -178,13 +155,14 @@ export const dismissSelectedVulnerabilities = ({ dispatch, state }, { comment } 
 
   dispatch('requestDismissSelectedVulnerabilities');
 
-  const promises = dismissableVulnerabilties.map(vulnerability =>
+  const promises = dismissableVulnerabilties.map((vulnerability) =>
     axios.post(vulnerability.create_vulnerability_feedback_dismissal_path, {
       vulnerability_feedback: {
         category: vulnerability.report_type,
         comment,
-        feedback_type: 'dismissal',
+        feedback_type: FEEDBACK_TYPE_DISMISSAL,
         project_fingerprint: vulnerability.project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           id: vulnerability.id,
         },
@@ -219,11 +197,11 @@ export const receiveDismissSelectedVulnerabilitiesSuccess = ({ commit, getters }
 export const receiveDismissSelectedVulnerabilitiesError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_ERROR);
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -253,7 +231,7 @@ export const dismissVulnerability = (
           text: s__('SecurityReports|Undo dismiss'),
           onClick: (e, toastObject) => {
             if (vulnerability.dismissal_feedback) {
-              dispatch('undoDismiss', { vulnerability })
+              dispatch('revertDismissVulnerability', { vulnerability })
                 .then(() => dispatch('fetchVulnerabilities', { page }))
                 .catch(() => {});
               toastObject.goAway(0);
@@ -263,14 +241,15 @@ export const dismissVulnerability = (
       }
     : {};
 
-  axios
+  return axios
     .post(vulnerability.create_vulnerability_feedback_dismissal_path, {
       vulnerability_feedback: {
         category: vulnerability.report_type,
         comment,
-        feedback_type: 'dismissal',
+        feedback_type: FEEDBACK_TYPE_DISMISSAL,
         pipeline_id: state.pipelineId,
         project_fingerprint: vulnerability.project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           ...vulnerability,
           category: vulnerability.report_type,
@@ -300,17 +279,16 @@ export const requestDismissVulnerability = ({ commit }) => {
 
 export const receiveDismissVulnerabilitySuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveDismissVulnerabilityError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_DISMISS_VULNERABILITY_ERROR);
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error dismissing the vulnerability.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error dismissing the vulnerability.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -330,7 +308,7 @@ export const addDismissalComment = ({ dispatch }, { vulnerability, comment }) =>
         vulnerabilityName: vulnerability.name,
       });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissal_feedback.project_id,
       id: dismissal_feedback.id,
@@ -355,7 +333,7 @@ export const deleteDismissalComment = ({ dispatch }, { vulnerability }) => {
     vulnerabilityName: vulnerability.name,
   });
 
-  axios
+  return axios
     .patch(url, {
       project_id: dismissal_feedback.project_id,
       comment: '',
@@ -377,7 +355,6 @@ export const requestAddDismissalComment = ({ commit }) => {
 
 export const receiveAddDismissalCommentSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveAddDismissalCommentError = ({ commit }) => {
@@ -390,7 +367,6 @@ export const requestDeleteDismissalComment = ({ commit }) => {
 
 export const receiveDeleteDismissalCommentSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveDeleteDismissalCommentError = ({ commit }) => {
@@ -405,7 +381,7 @@ export const hideDismissalDeleteButtons = ({ commit }) => {
   commit(types.HIDE_DISMISSAL_DELETE_BUTTONS);
 };
 
-export const undoDismiss = ({ dispatch }, { vulnerability, flashError }) => {
+export const revertDismissVulnerability = ({ dispatch }, { vulnerability, flashError }) => {
   const { destroy_vulnerability_feedback_dismissal_path } = vulnerability.dismissal_feedback;
 
   dispatch('requestUndoDismiss');
@@ -426,17 +402,16 @@ export const requestUndoDismiss = ({ commit }) => {
 
 export const receiveUndoDismissSuccess = ({ commit }, payload) => {
   commit(types.RECEIVE_REVERT_DISMISSAL_SUCCESS, payload);
-  hideModal();
 };
 
 export const receiveUndoDismissError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_REVERT_DISMISSAL_ERROR);
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error reverting this dismissal.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
+    createFlash({
+      message: s__('SecurityReports|There was an error reverting this dismissal.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
+    });
   }
 };
 
@@ -451,7 +426,6 @@ export const downloadPatch = ({ state }) => {
   */
   const { vulnerability } = state.modal;
   download({ fileData: vulnerability.remediations[0].diff, fileName: `remediation.patch` });
-  $('#modal-mrwidget-security-issue').modal('hide');
 };
 
 export const createMergeRequest = ({ state, dispatch }, { vulnerability, flashError }) => {
@@ -470,9 +444,10 @@ export const createMergeRequest = ({ state, dispatch }, { vulnerability, flashEr
   axios
     .post(create_vulnerability_feedback_merge_request_path, {
       vulnerability_feedback: {
-        feedback_type: 'merge_request',
+        feedback_type: FEEDBACK_TYPE_MERGE_REQUEST,
         category: report_type,
         project_fingerprint,
+        finding_uuid: vulnerability.uuid,
         vulnerability_data: {
           ...vulnerability,
           target_branch: targetBranch,
@@ -500,52 +475,12 @@ export const receiveCreateMergeRequestError = ({ commit }, { flashError }) => {
   commit(types.RECEIVE_CREATE_MERGE_REQUEST_ERROR);
 
   if (flashError) {
-    createFlash(
-      s__('SecurityReports|There was an error creating the merge request.'),
-      'alert',
-      document.querySelector('.ci-table'),
-    );
-  }
-};
-
-export const setVulnerabilitiesHistoryEndpoint = ({ commit }, endpoint) => {
-  commit(types.SET_VULNERABILITIES_HISTORY_ENDPOINT, endpoint);
-};
-
-export const fetchVulnerabilitiesHistory = ({ state, dispatch }, params = {}) => {
-  if (!state.vulnerabilitiesHistoryEndpoint) {
-    return;
-  }
-  dispatch('requestVulnerabilitiesHistory');
-
-  axios({
-    method: 'GET',
-    url: state.vulnerabilitiesHistoryEndpoint,
-    params,
-  })
-    .then(response => {
-      const { data } = response;
-      dispatch('receiveVulnerabilitiesHistorySuccess', { data });
-    })
-    .catch(() => {
-      dispatch('receiveVulnerabilitiesHistoryError');
+    createFlash({
+      message: s__('SecurityReports|There was an error creating the merge request.'),
+      type: 'alert',
+      parent: document.querySelector('.ci-table'),
     });
-};
-
-export const setVulnerabilitiesHistoryDayRange = ({ commit }, days) => {
-  commit(types.SET_VULNERABILITIES_HISTORY_DAY_RANGE, days);
-};
-
-export const requestVulnerabilitiesHistory = ({ commit }) => {
-  commit(types.REQUEST_VULNERABILITIES_HISTORY);
-};
-
-export const receiveVulnerabilitiesHistorySuccess = ({ commit }, { data }) => {
-  commit(types.RECEIVE_VULNERABILITIES_HISTORY_SUCCESS, data);
-};
-
-export const receiveVulnerabilitiesHistoryError = ({ commit }) => {
-  commit(types.RECEIVE_VULNERABILITIES_HISTORY_ERROR);
+  }
 };
 
 export const openDismissalCommentBox = ({ commit }) => {

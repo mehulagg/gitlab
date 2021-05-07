@@ -3,13 +3,13 @@
   .settings-header
     %h4
       = _('Amazon EKS')
-    %button.btn.js-settings-toggle{ type: 'button' }
-      = expanded ? 'Collapse' : 'Expand'
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
+      = expanded ? _('Collapse') : _('Expand')
     %p
       = _('Amazon EKS integration allows you to provision EKS clusters from GitLab.')
 
   .settings-content
-    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-eks-settings'), html: { class: 'fieldset-form' } do |f|
+    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-eks-settings'), html: { class: 'fieldset-form', id: 'eks-settings' } do |f|
       = form_errors(@application_setting)
 
       %fieldset
@@ -20,12 +20,17 @@
               Enable Amazon EKS integration
         .form-group
           = f.label :eks_account_id, 'Account ID', class: 'label-bold'
-          = f.text_field :eks_account_id, class: 'form-control'
+          = f.text_field :eks_account_id, class: 'form-control gl-form-input'
         .form-group
           = f.label :eks_access_key_id, 'Access key ID', class: 'label-bold'
-          = f.text_field :eks_access_key_id, class: 'form-control'
+          = f.text_field :eks_access_key_id, class: 'form-control gl-form-input'
+          .form-text.text-muted
+            = _('AWS Access Key. Only required if not using role instance credentials')
+
         .form-group
           = f.label :eks_secret_access_key, 'Secret access key', class: 'label-bold'
-          = f.password_field :eks_secret_access_key, autocomplete: 'off', class: 'form-control'
+          = f.password_field :eks_secret_access_key, autocomplete: 'off', class: 'form-control gl-form-input'
+          .form-text.text-muted
+            = _('AWS Secret Access Key. Only required if not using role instance credentials')
 
-      = f.submit 'Save changes', class: "gl-button btn btn-success"
+      = f.submit 'Save changes', class: "gl-button btn btn-confirm"

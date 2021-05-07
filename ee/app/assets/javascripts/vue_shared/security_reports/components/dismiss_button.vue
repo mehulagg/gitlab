@@ -65,7 +65,7 @@ export default {
       variant="warning"
       category="secondary"
       data-qa-selector="dismiss_with_comment_button"
-      class="js-dismiss-with-comment "
+      class="js-dismiss-with-comment"
       :aria-label="s__('vulnerability|Add comment and dismiss')"
       icon="comment"
       @click="$emit('openDismissalCommentBox')"

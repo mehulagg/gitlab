@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_dependency 'declarative_policy'
-
 module API
   class ProjectMirror < ::API::Base
+    feature_category :continuous_integration
+
     helpers do
       def github_webhook_signature
         @github_webhook_signature ||= headers['X-Hub-Signature']

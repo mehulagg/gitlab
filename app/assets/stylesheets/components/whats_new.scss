@@ -1,6 +1,37 @@
 .whats-new-drawer {
   margin-top: $header-height;
   @include gl-shadow-none;
+  overflow-y: hidden;
+
+  .gl-infinite-scroll-legend {
+    @include gl-display-none;
+  }
+
+  .gl-tabs {
+    @include gl-overflow-y-auto;
+  }
+
+  .gl-tabs-nav {
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    align-items: stretch;
+
+    .nav-item {
+      @include gl-flex-shrink-0;
+
+      a {
+        @include gl-h-full;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  .gl-spinner-container {
+    @include gl-w-full;
+    @include gl-absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 }
 
 .with-performance-bar .whats-new-drawer {
@@ -13,20 +44,19 @@
   @include gl-font-weight-bold;
 }
 
+.whats-new-item-title-link {
+  &:hover,
+  &:focus,
+  &:active {
+    @include gl-text-gray-900;
+  }
+}
+
 .whats-new-item-image {
   border-color: $gray-50;
+  height: 250px;
 }
 
 .whats-new-modal-backdrop {
-  z-index: 9;
-}
-
-.whats-new-notification-count {
-  @include gl-bg-gray-900;
-  @include gl-font-sm;
-  @include gl-line-height-normal;
-  @include gl-text-white;
-  @include gl-vertical-align-top;
-  border-radius: 20px;
-  padding: 3px 10px;
+  z-index: 699;
 }

@@ -36,8 +36,8 @@ class Commit
   LINK_EXTENSION_PATTERN = /(patch)/.freeze
 
   cache_markdown_field :title, pipeline: :single_line
-  cache_markdown_field :full_title, pipeline: :single_line
-  cache_markdown_field :description, pipeline: :commit_description
+  cache_markdown_field :full_title, pipeline: :single_line, limit: 1.kilobyte
+  cache_markdown_field :description, pipeline: :commit_description, limit: 1.megabyte
 
   class << self
     def decorate(commits, container)
@@ -62,7 +62,8 @@ class Commit
       collection.sort do |a, b|
         operands = [a, b].tap { |o| o.reverse! if sort == 'desc' }
 
-        attr1, attr2 = operands.first.public_send(order_by), operands.second.public_send(order_by) # rubocop:disable PublicSend
+        attr1 = operands.first.public_send(order_by) # rubocop:disable GitlabSecurity/PublicSend
+        attr2 = operands.second.public_send(order_by) # rubocop:disable GitlabSecurity/PublicSend
 
         # use case insensitive comparison for string values
         order_by.in?(%w[email name]) ? attr1.casecmp(attr2) : attr1 <=> attr2
@@ -80,7 +81,7 @@ class Commit
 
     def diff_hard_limit_files(project: nil)
       if Feature.enabled?(:increased_diff_limits, project)
-        2000
+        3000
       else
         1000
       end
@@ -88,7 +89,7 @@ class Commit
 
     def diff_hard_limit_lines(project: nil)
       if Feature.enabled?(:increased_diff_limits, project)
-        75000
+        100000
       else
         50000
       end
@@ -141,6 +142,7 @@ class Commit
   delegate \
     :pipelines,
     :last_pipeline,
+    :lazy_latest_pipeline,
     :latest_pipeline,
     :latest_pipeline_for_project,
     :set_latest_pipeline_for_ref,
@@ -148,7 +150,7 @@ class Commit
     to: :with_pipeline
 
   def with_pipeline
-    @with_pipeline ||= CommitWithPipeline.new(self)
+    @with_pipeline ||= Ci::CommitWithPipeline.new(self)
   end
 
   def id
@@ -220,6 +222,14 @@ class Commit
       else
         safe_message.split(/[\r\n]/, 2).first
       end
+  end
+
+  def author_full_text
+    return unless author_name && author_email
+
+    strong_memoize(:author_full_text) do
+      "#{author_name} <#{author_email}>"
+    end
   end
 
   # Returns full commit message if title is truncated (greater than 99 characters)
@@ -335,7 +345,11 @@ class Commit
     strong_memoize(:raw_signature_type) do
       next unless @raw.instance_of?(Gitlab::Git::Commit)
 
-      @raw.raw_commit.signature_type if defined? @raw.raw_commit.signature_type
+      if raw_commit_from_rugged? && gpg_commit.signature_text.present?
+        :PGP
+      elsif defined? @raw.raw_commit.signature_type
+        @raw.raw_commit.signature_type
+      end
     end
   end
 
@@ -347,13 +361,21 @@ class Commit
     strong_memoize(:signature) do
       case signature_type
       when :PGP
-        Gitlab::Gpg::Commit.new(self).signature
+        gpg_commit.signature
       when :X509
         Gitlab::X509::Commit.new(self).signature
       else
         nil
       end
     end
+  end
+
+  def raw_commit_from_rugged?
+    @raw.raw_commit.is_a?(Rugged::Commit)
+  end
+
+  def gpg_commit
+    @gpg_commit ||= Gitlab::Gpg::Commit.new(self)
   end
 
   def revert_branch_name

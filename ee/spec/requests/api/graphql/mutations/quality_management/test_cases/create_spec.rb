@@ -80,14 +80,6 @@ RSpec.describe 'Create test case' do
 
           it_behaves_like 'an invalid argument to the mutation', argument_name: :not_valid
         end
-
-        context 'when quality_test_cases flag is disabled' do
-          before do
-            stub_feature_flags(quality_test_cases: false)
-          end
-
-          it_behaves_like 'a mutation that returns errors in the response', errors: ["Test cases are not available for this project"]
-        end
       end
 
       context 'when user cannot create test cases' do

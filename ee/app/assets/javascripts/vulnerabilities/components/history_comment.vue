@@ -1,14 +1,15 @@
 <script>
-import { GlButton, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlButton, GlSafeHtmlDirective as SafeHtml, GlLoadingIcon } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, s__ } from '~/locale';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { __, s__ } from '~/locale';
 import HistoryCommentEditor from './history_comment_editor.vue';
 
 export default {
   components: {
     GlButton,
+    GlLoadingIcon,
     EventItem,
     HistoryCommentEditor,
   },
@@ -61,6 +62,20 @@ export default {
     initialComment() {
       return this.comment && this.comment.note;
     },
+    canEditComment() {
+      return this.comment.currentUser?.canEdit;
+    },
+    noteHtml() {
+      return this.isSavingComment ? undefined : this.comment.noteHtml;
+    },
+  },
+
+  watch: {
+    'comment.updatedAt': {
+      handler() {
+        this.isSavingComment = false;
+      },
+    },
   },
 
   methods: {
@@ -85,20 +100,19 @@ export default {
       this.isSavingComment = true;
       const { method, url, data, emitName } = this.getSaveConfig(note);
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios({ method, url, data })
         .then(({ data: responseData }) => {
           this.isEditingComment = false;
           this.$emit(emitName, responseData, this.comment);
         })
         .catch(() => {
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to save the comment. Please try again later.',
             ),
-          );
-        })
-        .finally(() => {
-          this.isSavingComment = false;
+          });
         });
     },
     deleteComment() {
@@ -111,11 +125,11 @@ export default {
           this.$emit('onCommentDeleted', this.comment);
         })
         .catch(() =>
-          createFlash(
-            s__(
+          createFlash({
+            message: s__(
               'VulnerabilityManagement|Something went wrong while trying to delete the comment. Please try again later.',
             ),
-          ),
+          }),
         )
         .finally(() => {
           this.isDeletingComment = false;
@@ -148,15 +162,17 @@ export default {
     v-else-if="comment"
     :id="comment.id"
     :author="comment.author"
-    :created-at="comment.updated_at"
-    :show-action-buttons="comment.current_user.can_edit"
+    :created-at="comment.updatedAt"
+    :show-action-buttons="canEditComment"
     :show-right-slot="isConfirmingDeletion"
     :action-buttons="actionButtons"
     icon-name="comment"
     icon-class="timeline-icon m-0"
     class="m-3"
   >
-    <div v-safe-html="comment.note_html" class="md"></div>
+    <div v-safe-html="noteHtml" class="md">
+      <gl-loading-icon />
+    </div>
 
     <template #right-content>
       <gl-button

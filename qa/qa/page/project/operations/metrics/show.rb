@@ -70,7 +70,7 @@ module QA
               end
             end
 
-            def duplicate_dashboard(save_as = 'test_duplication.yml', commit_option = 'Commit to master branch')
+            def duplicate_dashboard(save_as = 'test_duplication.yml', commit_option = 'Commit to default branch')
               click_element :actions_menu_dropdown
               click_on 'Duplicate current dashboard'
               fill_element :duplicate_dashboard_filename_field, "#{SecureRandom.hex(8)}-#{save_as}"
@@ -134,4 +134,4 @@ module QA
   end
 end
 
-QA::Page::Project::Operations::Metrics::Show.prepend_if_ee('QA::EE::Page::Project::Operations::Metrics::Show')
+QA::Page::Project::Operations::Metrics::Show.prepend_if_ee('Page::Project::Operations::Metrics::Show', namespace: QA)

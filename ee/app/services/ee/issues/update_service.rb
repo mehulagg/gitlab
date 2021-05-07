@@ -8,7 +8,10 @@ module EE
 
       override :filter_params
       def filter_params(issue)
+        params.delete(:sprint_id) unless can_admin_issuable?(issue)
+
         handle_epic(issue)
+        filter_iteration
 
         super
       end
@@ -33,6 +36,7 @@ module EE
         super
 
         handle_iteration_change(issue)
+        handle_issue_type_change(issue)
       end
 
       private
@@ -49,6 +53,12 @@ module EE
         else
           notification_service.async.changed_iteration_issue(issue, issue.iteration, current_user)
         end
+      end
+
+      def handle_issue_type_change(issue)
+        return unless issue.previous_changes.include?('issue_type')
+
+        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
       end
 
       def handle_promotion(issue)

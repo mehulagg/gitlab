@@ -19,7 +19,7 @@ RSpec.describe 'Project', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab
 
     it "defaults to correct namespace" do
       visit new_project_path
-      find('#create-from-template-tab').click
+      find('[data-qa-selector="create_from_template_link"]').click
       find('.custom-group-project-templates-tab').click
       find("label[for=#{template.name}]").click
 
@@ -28,7 +28,7 @@ RSpec.describe 'Project', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab
 
     it "uses supplied namespace" do
       visit new_project_path(namespace_id: other_subgroup.id)
-      find('#create-from-template-tab').click
+      find('[data-qa-selector="create_from_template_link"]').click
       find('.custom-group-project-templates-tab').click
       find("label[for=#{template.name}]").click
 

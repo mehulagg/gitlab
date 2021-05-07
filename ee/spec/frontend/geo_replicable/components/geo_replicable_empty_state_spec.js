@@ -1,8 +1,8 @@
+import { getByRole } from '@testing-library/dom';
+import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlEmptyState } from '@gitlab/ui';
-import createStore from 'ee/geo_replicable/store';
 import GeoReplicableEmptyState from 'ee/geo_replicable/components/geo_replicable_empty_state.vue';
+import createStore from 'ee/geo_replicable/store';
 import {
   MOCK_GEO_REPLICATION_SVG_PATH,
   MOCK_GEO_TROUBLESHOOTING_LINK,
@@ -21,7 +21,7 @@ describe('GeoReplicableEmptyState', () => {
   };
 
   const createComponent = () => {
-    wrapper = shallowMount(GeoReplicableEmptyState, {
+    wrapper = mount(GeoReplicableEmptyState, {
       localVue,
       store: createStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null }),
       propsData,
@@ -30,23 +30,24 @@ describe('GeoReplicableEmptyState', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
-
-  const findGlEmptyState = () => wrapper.find(GlEmptyState);
 
   describe('template', () => {
     beforeEach(() => {
       createComponent();
     });
 
-    describe('GlEmptyState', () => {
-      it('renders always', () => {
-        expect(findGlEmptyState().exists()).toBe(true);
-      });
+    it('renders correct link', () => {
+      expect(
+        getByRole(wrapper.element, 'link', { name: 'Geo Troubleshooting' }).getAttribute('href'),
+      ).toBe(MOCK_GEO_TROUBLESHOOTING_LINK);
+    });
 
-      it('sets correct svg', () => {
-        expect(findGlEmptyState().attributes('svgpath')).toBe(MOCK_GEO_REPLICATION_SVG_PATH);
-      });
+    it('sets correct svg', () => {
+      expect(getByRole(wrapper.element, 'img').getAttribute('src')).toBe(
+        MOCK_GEO_REPLICATION_SVG_PATH,
+      );
     });
   });
 });

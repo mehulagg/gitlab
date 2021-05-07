@@ -3,15 +3,23 @@
 class Profiles::PersonalAccessTokensController < Profiles::ApplicationController
   feature_category :authentication_and_authorization
 
+  before_action do
+    push_frontend_feature_flag(:personal_access_tokens_scoped_to_projects, current_user)
+  end
+
   def index
     set_index_vars
     @personal_access_token = finder.build
   end
 
   def create
-    @personal_access_token = finder.build(personal_access_token_params)
+    result = ::PersonalAccessTokens::CreateService.new(
+      current_user: current_user, target_user: current_user, params: personal_access_token_params
+    ).execute
 
-    if @personal_access_token.save
+    @personal_access_token = result.payload[:personal_access_token]
+
+    if result.success?
       PersonalAccessToken.redis_store!(current_user.id, @personal_access_token.token)
       redirect_to profile_personal_access_tokens_path, notice: _("Your new personal access token has been created.")
     else

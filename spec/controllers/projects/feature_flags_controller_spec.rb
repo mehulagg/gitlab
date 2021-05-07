@@ -9,6 +9,7 @@ RSpec.describe Projects::FeatureFlagsController do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:reporter) { create(:user) }
+
   let(:user) { developer }
 
   before_all do
@@ -217,15 +218,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
         expect(json_response['feature_flags'].count).to eq(3)
       end
-
-      it 'returns only version 1 flags when new version flags are disabled' do
-        stub_feature_flags(feature_flags_new_version: false)
-
-        subject
-
-        expected = [feature_flag_active.name, feature_flag_inactive.name].sort
-        expect(json_response['feature_flags'].map { |f| f['name'] }.sort).to eq(expected)
-      end
     end
   end
 
@@ -267,24 +259,6 @@ RSpec.describe Projects::FeatureFlagsController do
     end
 
     it 'routes based on iid' do
-      other_project = create(:project)
-      other_project.add_developer(user)
-      other_feature_flag = create(:operations_feature_flag, project: other_project,
-                                  name: 'other_flag')
-      params = {
-        namespace_id: other_project.namespace,
-        project_id: other_project,
-        iid: other_feature_flag.iid
-      }
-
-      get(:show, params: params, format: :json)
-
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response['name']).to eq(other_feature_flag.name)
-    end
-
-    it 'routes based on iid when new version flags are disabled' do
-      stub_feature_flags(feature_flags_new_version: false)
       other_project = create(:project)
       other_project.add_developer(user)
       other_feature_flag = create(:operations_feature_flag, project: other_project,
@@ -384,14 +358,6 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(json_response['name']).to eq(new_version_feature_flag.name)
         expect(json_response['active']).to eq(new_version_feature_flag.active)
         expect(json_response['version']).to eq('new_version_flag')
-      end
-
-      it 'returns a 404 when new version flags are disabled' do
-        stub_feature_flags(feature_flags_new_version: false)
-
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'returns strategies ordered by id' do
@@ -791,54 +757,6 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(Operations::FeatureFlag.count).to eq(0)
       end
     end
-
-    context 'when version 2 flags are disabled' do
-      context 'and attempting to create a version 2 flag' do
-        let(:params) do
-          {
-            namespace_id: project.namespace,
-            project_id: project,
-            operations_feature_flag: {
-              name: 'my_feature_flag',
-              active: true,
-              version: 'new_version_flag'
-            }
-          }
-        end
-
-        it 'returns a 400' do
-          stub_feature_flags(feature_flags_new_version: false)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(Operations::FeatureFlag.count).to eq(0)
-        end
-      end
-
-      context 'and attempting to create a version 1 flag' do
-        let(:params) do
-          {
-            namespace_id: project.namespace,
-            project_id: project,
-            operations_feature_flag: {
-              name: 'my_feature_flag',
-              active: true
-            }
-          }
-        end
-
-        it 'creates the flag' do
-          stub_feature_flags(feature_flags_new_version: false)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(Operations::FeatureFlag.count).to eq(1)
-          expect(json_response['version']).to eq('legacy_flag')
-        end
-      end
-    end
   end
 
   describe 'DELETE destroy.json' do
@@ -913,15 +831,6 @@ RSpec.describe Projects::FeatureFlagsController do
       it 'deletes the flag' do
         expect { subject }.to change { Operations::FeatureFlag.count }.by(-1)
       end
-
-      context 'when new version flags are disabled' do
-        it 'returns a 404' do
-          stub_feature_flags(feature_flags_new_version: false)
-
-          expect { subject }.not_to change { Operations::FeatureFlag.count }
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
     end
   end
 
@@ -937,412 +846,63 @@ RSpec.describe Projects::FeatureFlagsController do
       put(:update, params: params, format: :json, as: :json)
     end
 
-    before do
-      stub_feature_flags(
-        feature_flags_legacy_read_only: false,
-        feature_flags_legacy_read_only_override: false
-      )
-    end
+    context 'with a legacy feature flag' do
+      subject { put(:update, params: params, format: :json) }
 
-    subject { put(:update, params: params, format: :json) }
+      let!(:feature_flag) do
+        create(:operations_feature_flag,
+               :legacy_flag,
+               name: 'ci_live_trace',
+               active: true,
+               project: project)
+      end
 
-    let!(:feature_flag) do
-      create(:operations_feature_flag,
-             :legacy_flag,
-             name: 'ci_live_trace',
-             active: true,
-             project: project)
-    end
-
-    let(:params) do
-      {
-        namespace_id: project.namespace,
-        project_id: project,
-        iid: feature_flag.iid,
-        operations_feature_flag: {
-          name: 'ci_new_live_trace'
-        }
-      }
-    end
-
-    it 'returns 200' do
-      is_expected.to have_gitlab_http_status(:ok)
-    end
-
-    it 'updates the name of the feature flag name' do
-      subject
-
-      expect(json_response['name']).to eq('ci_new_live_trace')
-    end
-
-    it 'matches json schema' do
-      is_expected.to match_response_schema('feature_flag')
-    end
-
-    context 'when updates active' do
       let(:params) do
         {
           namespace_id: project.namespace,
           project_id: project,
           iid: feature_flag.iid,
           operations_feature_flag: {
-            active: false
+            name: 'ci_new_live_trace'
           }
         }
       end
 
-      it 'updates active from true to false' do
-        expect { subject }
-          .to change { feature_flag.reload.active }.from(true).to(false)
-      end
+      context 'when user is reporter' do
+        let(:user) { reporter }
 
-      it "does not change default scope's active" do
-        expect { subject }
-          .not_to change { feature_flag.default_scope.reload.active }.from(true)
-      end
-
-      it 'updates active from false to true when an inactive feature flag has an active scope' do
-        feature_flag = create(:operations_feature_flag, project: project, name: 'my_flag', active: false)
-        create(:operations_feature_flag_scope, feature_flag: feature_flag, environment_scope: 'production', active: true)
-
-        put_request(feature_flag, { active: true })
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to match_response_schema('feature_flag')
-        expect(json_response['active']).to eq(true)
-        expect(feature_flag.reload.active).to eq(true)
-        expect(feature_flag.default_scope.reload.active).to eq(false)
-      end
-    end
-
-    context 'when user is reporter' do
-      let(:user) { reporter }
-
-      it 'returns 404' do
-        is_expected.to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context "when creates an additional scope for production environment" do
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          iid: feature_flag.iid,
-          operations_feature_flag: {
-            scopes_attributes: [{ environment_scope: 'production', active: false }]
-          }
-        }
-      end
-
-      it 'creates a production scope' do
-        expect { subject }.to change { feature_flag.reload.scopes.count }.by(1)
-
-        expect(json_response['scopes'].last['environment_scope']).to eq('production')
-        expect(json_response['scopes'].last['active']).to be_falsy
-      end
-    end
-
-    context "when creates a default scope" do
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          iid: feature_flag.iid,
-          operations_feature_flag: {
-            scopes_attributes: [{ environment_scope: '*', active: false }]
-          }
-        }
-      end
-
-      it 'returns 400' do
-        is_expected.to have_gitlab_http_status(:bad_request)
-      end
-    end
-
-    context "when updates a default scope's active value" do
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          iid: feature_flag.iid,
-          operations_feature_flag: {
-            scopes_attributes: [
-              {
-                id: feature_flag.default_scope.id,
-                environment_scope: '*',
-                active: false
-              }
-            ]
-          }
-        }
-      end
-
-      it "updates successfully" do
-        subject
-
-        expect(json_response['scopes'].first['environment_scope']).to eq('*')
-        expect(json_response['scopes'].first['active']).to be_falsy
-      end
-    end
-
-    context "when changes default scope's spec" do
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          iid: feature_flag.iid,
-          operations_feature_flag: {
-            scopes_attributes: [
-              {
-                id: feature_flag.default_scope.id,
-                environment_scope: 'review/*'
-              }
-            ]
-          }
-        }
-      end
-
-      it 'returns 400' do
-        is_expected.to have_gitlab_http_status(:bad_request)
-      end
-    end
-
-    context "when destroys the default scope" do
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          iid: feature_flag.iid,
-          operations_feature_flag: {
-            scopes_attributes: [
-              {
-                id: feature_flag.default_scope.id,
-                _destroy: 1
-              }
-            ]
-          }
-        }
-      end
-
-      it 'raises an error' do
-        expect { subject }.to raise_error(ActiveRecord::ReadOnlyRecord)
-      end
-    end
-
-    context "when destroys a production scope" do
-      let!(:production_scope) { create_scope(feature_flag, 'production', true) }
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          iid: feature_flag.iid,
-          operations_feature_flag: {
-            scopes_attributes: [
-              {
-                id: production_scope.id,
-                _destroy: 1
-              }
-            ]
-          }
-        }
-      end
-
-      it 'destroys successfully' do
-        subject
-
-        scopes = json_response['scopes']
-        expect(scopes.any? { |scope| scope['environment_scope'] == 'production' })
-          .to be_falsy
-      end
-    end
-
-    describe "updating the strategy" do
-      it 'creates a default strategy' do
-        scope = create_scope(feature_flag, 'production', true, [])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: [{ name: 'default', parameters: {} }]
-        }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
+        it 'returns 404' do
+          is_expected.to have_gitlab_http_status(:not_found)
         end
-        expect(scope_json['strategies']).to eq([{
-          "name" => "default",
-          "parameters" => {}
-        }])
       end
 
-      it 'creates a gradualRolloutUserId strategy' do
-        scope = create_scope(feature_flag, 'production', true, [])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: [{ name: 'gradualRolloutUserId',
-                         parameters: { groupId: 'default', percentage: "70" } }]
-        }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
-        end
-        expect(scope_json['strategies']).to eq([{
-          "name" => "gradualRolloutUserId",
-          "parameters" => {
-            "groupId" => "default",
-            "percentage" => "70"
+      context "when changing default scope's spec" do
+        let(:params) do
+          {
+            namespace_id: project.namespace,
+            project_id: project,
+            iid: feature_flag.iid,
+            operations_feature_flag: {
+              scopes_attributes: [
+                {
+                  id: feature_flag.default_scope.id,
+                  environment_scope: 'review/*'
+                }
+              ]
+            }
           }
-        }])
-      end
-
-      it 'creates a userWithId strategy' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'default', parameters: {} }])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: [{ name: 'userWithId', parameters: { userIds: 'sam,fred' } }]
-        }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
         end
-        expect(scope_json['strategies']).to eq([{
-          "name" => "userWithId",
-          "parameters" => { "userIds" => "sam,fred" }
-        }])
-      end
 
-      it 'updates an existing strategy' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'default', parameters: {} }])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: [{ name: 'gradualRolloutUserId',
-                         parameters: { groupId: 'default', percentage: "50" } }]
-        }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
+        it 'returns 400' do
+          is_expected.to have_gitlab_http_status(:bad_request)
         end
-        expect(scope_json['strategies']).to eq([{
-          "name" => "gradualRolloutUserId",
-          "parameters" => {
-            "groupId" => "default",
-            "percentage" => "50"
-          }
-        }])
       end
 
-      it 'clears an existing strategy' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'default', parameters: {} }])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: []
-        }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
-        end
-        expect(scope_json['strategies']).to eq([])
-      end
-
-      it 'accepts multiple strategies' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'default', parameters: {} }])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: [
-            { name: 'gradualRolloutUserId', parameters: { groupId: 'mygroup', percentage: '55' } },
-            { name: 'userWithId', parameters: { userIds: 'joe' } }
-          ]
-        }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
-        end
-        expect(scope_json['strategies'].length).to eq(2)
-        expect(scope_json['strategies']).to include({
-          "name" => "gradualRolloutUserId",
-          "parameters" => { "groupId" => "mygroup", "percentage" => "55" }
-        })
-        expect(scope_json['strategies']).to include({
-          "name" => "userWithId",
-          "parameters" => { "userIds" => "joe" }
-        })
-      end
-
-      it 'does not modify strategies when there is no strategies key in the params' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'default', parameters: {} }])
-
-        put_request(feature_flag, scopes_attributes: [{ id: scope.id }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
-        end
-        expect(scope_json['strategies']).to eq([{
-          "name" => "default",
-          "parameters" => {}
-        }])
-      end
-
-      it 'leaves an existing strategy when there are no strategies in the params' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'gradualRolloutUserId',
-                                                                  parameters: { groupId: 'default', percentage: '10' } }])
-
-        put_request(feature_flag, scopes_attributes: [{ id: scope.id }])
-
-        expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].find do |s|
-          s['environment_scope'] == 'production'
-        end
-        expect(scope_json['strategies']).to eq([{
-          "name" => "gradualRolloutUserId",
-          "parameters" => { "groupId" => "default", "percentage" => "10" }
-        }])
-      end
-
-      it 'does not accept extra parameters in the strategy params' do
-        scope = create_scope(feature_flag, 'production', true, [{ name: 'default', parameters: {} }])
-
-        put_request(feature_flag, scopes_attributes: [{
-          id: scope.id,
-          strategies: [{ name: 'userWithId', parameters: { userIds: 'joe', groupId: 'default' } }]
-        }])
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['message']).to eq(["Scopes strategies parameters are invalid"])
-      end
-    end
-
-    context 'when legacy feature flags are set to be read only' do
-      it 'does not update the flag' do
-        stub_feature_flags(feature_flags_legacy_read_only: true)
-
+      it 'does not update a legacy feature flag' do
         put_request(feature_flag, name: 'ci_new_live_trace')
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['message']).to eq(["Legacy feature flags are read-only"])
-      end
-
-      it 'updates the flag if the legacy read-only override is enabled for a particular project' do
-        stub_feature_flags(
-          feature_flags_legacy_read_only: true,
-          feature_flags_legacy_read_only_override: project
-        )
-
-        put_request(feature_flag, name: 'ci_new_live_trace')
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['name']).to eq('ci_new_live_trace')
       end
     end
 
@@ -1511,6 +1071,40 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(response).to have_gitlab_http_status(:not_found)
       end
 
+      it 'returns not found when trying to update a gitlabUserList strategy with a user list from another project' do
+        user_list = create(:operations_feature_flag_user_list, project: project, name: 'My List', user_xids: 'user1,user2')
+        strategy = create(:operations_strategy, feature_flag: new_version_flag, name: 'gitlabUserList', parameters: {}, user_list: user_list)
+        other_project = create(:project)
+        other_user_list = create(:operations_feature_flag_user_list, project: other_project, name: 'Other List', user_xids: 'some,one')
+
+        put_request(new_version_flag, strategies_attributes: [{
+          id: strategy.id,
+          user_list_id: other_user_list.id
+        }])
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(strategy.reload.user_list).to eq(user_list)
+      end
+
+      it 'allows setting multiple gitlabUserList strategies to the same user list' do
+        user_list_a = create(:operations_feature_flag_user_list, project: project, name: 'My List A', user_xids: 'user1,user2')
+        user_list_b = create(:operations_feature_flag_user_list, project: project, name: 'My List B', user_xids: 'user3,user4')
+        strategy_a = create(:operations_strategy, feature_flag: new_version_flag, name: 'gitlabUserList', parameters: {}, user_list: user_list_a)
+        strategy_b = create(:operations_strategy, feature_flag: new_version_flag, name: 'gitlabUserList', parameters: {}, user_list: user_list_a)
+
+        put_request(new_version_flag, strategies_attributes: [{
+          id: strategy_a.id,
+          user_list_id: user_list_b.id
+        }, {
+          id: strategy_b.id,
+          user_list_id: user_list_b.id
+        }])
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(strategy_a.reload.user_list).to eq(user_list_b)
+        expect(strategy_b.reload.user_list).to eq(user_list_b)
+      end
+
       it 'updates an existing strategy' do
         strategy = create(:operations_strategy, feature_flag: new_version_flag, name: 'default', parameters: {})
 
@@ -1574,24 +1168,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['strategies'].first['scopes']).to eq([])
-      end
-
-      it 'does not update the flag if version 2 flags are disabled' do
-        stub_feature_flags(feature_flags_new_version: false)
-
-        put_request(new_version_flag, { name: 'some-other-name' })
-
-        expect(response).to have_gitlab_http_status(:not_found)
-        expect(new_version_flag.reload.name).to eq('new-feature')
-      end
-
-      it 'updates the flag when legacy feature flags are set to be read only' do
-        stub_feature_flags(feature_flags_legacy_read_only: true)
-
-        put_request(new_version_flag, name: 'some-other-name')
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(new_version_flag.reload.name).to eq('some-other-name')
       end
     end
   end

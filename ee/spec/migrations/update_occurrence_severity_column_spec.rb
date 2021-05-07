@@ -8,8 +8,7 @@ RSpec.describe UpdateOccurrenceSeverityColumn do
   let(:identifiers) { table(:vulnerability_identifiers) }
   let(:scanners) { table(:vulnerability_scanners) }
   let(:projects) { table(:projects) }
-  let(:vul1) { attributes_for(:vulnerabilities_occurrence, id: 1, report_type: 2, confidence: 5) }
-  let(:vul2) { attributes_for(:vulnerabilities_occurrence, id: 2, report_type: 2, confidence: 5) }
+  let(:location_fingerprint) { '4e5b6966dd100170b4b1ad599c7058cce91b57b4' }
 
   before do
     stub_const("#{described_class}::BATCH_SIZE", 2)
@@ -36,33 +35,31 @@ RSpec.describe UpdateOccurrenceSeverityColumn do
 
     scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
 
-    vulnerabilities.create!(id: vul1[:id],
-                            severity: 0,
+    vulnerabilities.create!(severity: 0,
                             confidence: 5,
                             report_type: 2,
                             project_id: 123,
                             scanner_id: 6,
                             primary_identifier_id: 1,
-                            project_fingerprint: vul1[:project_fingerprint],
-                            location_fingerprint: vul1[:location_fingerprint],
-                            uuid: vul1[:uuid],
-                            name: vul1[:name],
+                            project_fingerprint: Digest::SHA1.hexdigest(SecureRandom.uuid),
+                            location_fingerprint: location_fingerprint,
+                            uuid: SecureRandom.uuid,
+                            name: 'Cipher with no integrity',
                             metadata_version: '1.3',
-                            raw_metadata: vul1[:raw_metadata])
+                            raw_metadata: '{}')
 
-    vulnerabilities.create!(id: vul2[:id],
-                            severity: 2,
+    vulnerabilities.create!(severity: 2,
                             confidence: 5,
                             report_type: 2,
                             project_id: 123,
                             scanner_id: 6,
                             primary_identifier_id: 2,
-                            project_fingerprint: vul2[:project_fingerprint],
-                            location_fingerprint: vul2[:location_fingerprint],
-                            uuid: vul2[:uuid],
-                            name: vul2[:name],
+                            project_fingerprint: Digest::SHA1.hexdigest(SecureRandom.uuid),
+                            location_fingerprint: location_fingerprint,
+                            uuid: SecureRandom.uuid,
+                            name: 'Cipher with no integrity',
                             metadata_version: '1.3',
-                            raw_metadata: vul2[:raw_metadata])
+                            raw_metadata: '{}')
 
     expect(vulnerabilities.where(severity: 0).count). to eq(1)
 
@@ -85,19 +82,18 @@ RSpec.describe UpdateOccurrenceSeverityColumn do
 
     scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
 
-    vulnerabilities.create!(id: vul1[:id],
-                            severity: 0,
+    vulnerabilities.create!(severity: 0,
                             confidence: 5,
                             report_type: 2,
                             project_id: 123,
                             scanner_id: 6,
                             primary_identifier_id: 1,
-                            project_fingerprint: vul1[:project_fingerprint],
-                            location_fingerprint: vul1[:location_fingerprint],
-                            uuid: vul1[:uuid],
-                            name: vul1[:name],
+                            project_fingerprint: generate(:project_fingerprint),
+                            location_fingerprint: location_fingerprint,
+                            uuid: SecureRandom.uuid,
+                            name: 'Cipher with no integrity',
                             metadata_version: '1.3',
-                            raw_metadata: vul1[:raw_metadata])
+                            raw_metadata: '{}')
 
     expect(vulnerabilities.where(severity: 0).count). to eq(1)
 

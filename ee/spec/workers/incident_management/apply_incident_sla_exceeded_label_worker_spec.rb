@@ -16,6 +16,10 @@ RSpec.describe IncidentManagement::ApplyIncidentSlaExceededLabelWorker do
 
   subject(:perform) { worker.perform(incident.id) }
 
+  before do
+    stub_licensed_features(incident_sla: true)
+  end
+
   context 'label exists already' do
     before do
       incident.labels << label
@@ -38,5 +42,27 @@ RSpec.describe IncidentManagement::ApplyIncidentSlaExceededLabelWorker do
     event = incident.resource_label_events.first
     expect(event.action).to eq('add')
     expect(event.label).to eq(label)
+  end
+
+  context 'for plain issues' do
+    before_all do
+      incident.update!(issue_type: 'issue')
+    end
+
+    it 'does not add a label', :aggregate_failures do
+      expect { subject }.not_to change { incident.labels.reload.count }
+      expect(incident.labels.reload).to be_empty
+    end
+  end
+
+  context 'without license' do
+    before do
+      stub_licensed_features(incident_sla: false)
+    end
+
+    it 'does not add a label', :aggregate_failures do
+      expect { subject }.not_to change { incident.labels.reload.count }
+      expect(incident.labels.reload).to be_empty
+    end
   end
 end

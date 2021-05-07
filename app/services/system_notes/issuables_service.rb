@@ -125,8 +125,8 @@ module SystemNotes
 
       old_diffs, new_diffs = Gitlab::Diff::InlineDiff.new(old_title, new_title).inline_diffs
 
-      marked_old_title = Gitlab::Diff::InlineDiffMarkdownMarker.new(old_title).mark(old_diffs, mode: :deletion)
-      marked_new_title = Gitlab::Diff::InlineDiffMarkdownMarker.new(new_title).mark(new_diffs, mode: :addition)
+      marked_old_title = Gitlab::Diff::InlineDiffMarkdownMarker.new(old_title).mark(old_diffs)
+      marked_new_title = Gitlab::Diff::InlineDiffMarkdownMarker.new(new_title).mark(new_diffs)
 
       body = "changed title from **#{marked_old_title}** to **#{marked_new_title}**"
 
@@ -178,8 +178,7 @@ module SystemNotes
       if noteable.is_a?(ExternalIssue)
         noteable.project.external_issue_tracker.create_cross_reference_note(noteable, mentioner, author)
       else
-        issue_activity_counter.track_issue_cross_referenced_action(author: author) if noteable.is_a?(Issue)
-
+        track_cross_reference_action
         create_note(NoteSummary.new(noteable, noteable.project, author, body, action: 'cross_reference'))
       end
     end
@@ -240,6 +239,29 @@ module SystemNotes
       issue_activity_counter.track_issue_moved_action(author: author) if noteable.is_a?(Issue)
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'moved'))
+    end
+
+    # Called when noteable has been cloned
+    #
+    # noteable_ref - Referenced noteable
+    # direction    - symbol, :to or :from
+    #
+    # Example Note text:
+    #
+    #   "cloned to some_namespace/project_new#11"
+    #
+    # Returns the created Note object
+    def noteable_cloned(noteable_ref, direction)
+      unless [:to, :from].include?(direction)
+        raise ArgumentError, "Invalid direction `#{direction}`"
+      end
+
+      cross_reference = noteable_ref.to_reference(project)
+      body = "cloned #{direction} #{cross_reference}"
+
+      issue_activity_counter.track_issue_cloned_action(author: author) if noteable.is_a?(Issue) && direction == :to
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'cloned'))
     end
 
     # Called when the confidentiality changes
@@ -331,6 +353,10 @@ module SystemNotes
       create_note(NoteSummary.new(noteable, project, author, body, action: 'duplicate'))
     end
 
+    def add_email_participants(body)
+      create_note(NoteSummary.new(noteable, project, author, body))
+    end
+
     def discussion_lock
       action = noteable.discussion_locked? ? 'locked' : 'unlocked'
       body = "#{action} this #{noteable.class.to_s.titleize.downcase}"
@@ -386,6 +412,10 @@ module SystemNotes
 
     def issue_activity_counter
       Gitlab::UsageDataCounters::IssueActivityUniqueCounter
+    end
+
+    def track_cross_reference_action
+      issue_activity_counter.track_issue_cross_referenced_action(author: author) if noteable.is_a?(Issue)
     end
   end
 end

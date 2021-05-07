@@ -1,32 +1,36 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlLoadingIcon, GlBadge } from '@gitlab/ui';
-import { visitUrl } from '../../lib/utils/url_utility';
-import tooltip from '../../vue_shared/directives/tooltip';
-import identicon from '../../vue_shared/components/identicon.vue';
-import eventHub from '../event_hub';
+import {
+  GlLoadingIcon,
+  GlBadge,
+  GlIcon,
+  GlTooltipDirective,
+  GlSafeHtmlDirective,
+} from '@gitlab/ui';
+import { visitUrl } from '~/lib/utils/url_utility';
+import identicon from '~/vue_shared/components/identicon.vue';
+import UserAccessRoleBadge from '~/vue_shared/components/user_access_role_badge.vue';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '../constants';
+import eventHub from '../event_hub';
 
-import itemCaret from './item_caret.vue';
-import itemTypeIcon from './item_type_icon.vue';
-import itemStats from './item_stats.vue';
-import itemStatsValue from './item_stats_value.vue';
 import itemActions from './item_actions.vue';
-
-import { showLearnGitLabGroupItemPopover } from '~/onboarding_issues';
+import itemCaret from './item_caret.vue';
+import itemStats from './item_stats.vue';
+import itemTypeIcon from './item_type_icon.vue';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
+    SafeHtml: GlSafeHtmlDirective,
   },
   components: {
     GlBadge,
     GlLoadingIcon,
+    GlIcon,
+    UserAccessRoleBadge,
     identicon,
     itemCaret,
     itemTypeIcon,
     itemStats,
-    itemStatsValue,
     itemActions,
   },
   props: {
@@ -75,11 +79,9 @@ export default {
     visibilityTooltip() {
       return GROUP_VISIBILITY_TYPE[this.group.visibility];
     },
-  },
-  mounted() {
-    if (this.group.name === 'Learn GitLab') {
-      showLearnGitLabGroupItemPopover(this.group.id);
-    }
+    microdata() {
+      return this.group.microdata || {};
+    },
   },
   methods: {
     onClickRowGroup(e) {
@@ -96,11 +98,20 @@ export default {
       }
     },
   },
+  safeHtmlConfig: { ADD_TAGS: ['gl-emoji'] },
 };
 </script>
 
 <template>
-  <li :id="groupDomId" :class="rowClass" class="group-row" @click.stop="onClickRowGroup">
+  <li
+    :id="groupDomId"
+    :class="rowClass"
+    class="group-row"
+    :itemprop="microdata.itemprop"
+    :itemtype="microdata.itemtype"
+    :itemscope="microdata.itemscope"
+    @click.stop="onClickRowGroup"
+  >
     <div
       :class="{ 'project-row-contents': !isGroup }"
       class="group-row-contents d-flex align-items-center py-2 pr-3"
@@ -116,10 +127,16 @@ export default {
       />
       <div
         :class="{ 'd-sm-flex': !group.isChildrenLoading }"
-        class="avatar-container rect-avatar s32 d-none flex-grow-0 flex-shrink-0 "
+        class="avatar-container rect-avatar s32 d-none flex-grow-0 flex-shrink-0"
       >
         <a :href="group.relativePath" class="no-expand">
-          <img v-if="hasAvatar" :src="group.avatarUrl" class="avatar s40" />
+          <img
+            v-if="hasAvatar"
+            :src="group.avatarUrl"
+            data-testid="group-avatar"
+            class="avatar s40"
+            :itemprop="microdata.imageItemprop"
+          />
           <identicon v-else :entity-id="group.id" :entity-name="group.name" size-class="s40" />
         </a>
       </div>
@@ -127,38 +144,48 @@ export default {
         <div class="group-text flex-grow-1 flex-shrink-1">
           <div class="d-flex align-items-center flex-wrap title namespace-title gl-mr-3">
             <a
-              v-tooltip
+              v-gl-tooltip.bottom
+              data-testid="group-name"
               :href="group.relativePath"
               :title="group.fullName"
-              class="no-expand gl-mt-3 gl-mr-3 gl-text-gray-900!"
-              data-placement="bottom"
-              >{{
+              class="no-expand gl-mr-3 gl-mt-3 gl-text-gray-900!"
+              :itemprop="microdata.nameItemprop"
+            >
+              {{
                 // ending bracket must be by closing tag to prevent
                 // link hover text-decoration from over-extending
                 group.name
-              }}</a
-            >
-            <item-stats-value
-              :icon-name="visibilityIcon"
+              }}
+            </a>
+            <gl-icon
+              v-gl-tooltip.hover.bottom
+              class="gl-display-inline-flex gl-align-items-center gl-mr-3 gl-mt-3 gl-text-gray-500"
+              :name="visibilityIcon"
               :title="visibilityTooltip"
-              css-class="item-visibility d-inline-flex align-items-center gl-mt-3 gl-mr-2 text-secondary"
+              data-testid="group-visibility-icon"
             />
-            <span v-if="group.permission" class="user-access-role gl-mt-3">
+            <user-access-role-badge v-if="group.permission" class="gl-mt-3">
               {{ group.permission }}
-            </span>
+            </user-access-role-badge>
           </div>
           <div v-if="group.description" class="description">
-            <span v-html="group.description"> </span>
+            <span
+              v-safe-html:[$options.safeHtmlConfig]="group.description"
+              :itemprop="microdata.descriptionItemprop"
+              data-testid="group-description"
+            >
+            </span>
           </div>
         </div>
         <div v-if="isGroupPendingRemoval">
           <gl-badge variant="warning">{{ __('pending removal') }}</gl-badge>
         </div>
-        <div
-          class="metadata align-items-md-center d-flex flex-grow-1 flex-shrink-0 flex-wrap justify-content-md-between"
-        >
+        <div class="metadata d-flex flex-grow-1 flex-shrink-0 flex-wrap justify-content-md-between">
           <item-actions v-if="isGroup" :group="group" :parent-group="parentGroup" />
-          <item-stats :item="group" class="group-stats gl-mt-2 d-none d-md-flex" />
+          <item-stats
+            :item="group"
+            class="group-stats gl-mt-2 d-none d-md-flex gl-align-items-center"
+          />
         </div>
       </div>
     </div>

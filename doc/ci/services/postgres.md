@@ -1,13 +1,13 @@
 ---
 stage: Verify
 group: Runner
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
 # Using PostgreSQL
 
-As many applications depend on PostgreSQL as their database, you will
+As many applications depend on PostgreSQL as their database, you
 eventually need it in order for your tests to run. Below you are guided how to
 do this with the Docker and Shell executors of GitLab Runner.
 
@@ -31,7 +31,7 @@ variables:
 
 To set values for the `POSTGRES_DB`, `POSTGRES_USER`,
 `POSTGRES_PASSWORD` and `POSTGRES_HOST_AUTH_METHOD`,
-[assign them to a variable in the user interface](../variables/README.md#create-a-custom-variable-in-the-ui),
+[assign them to a CI/CD variable in the user interface](../variables/README.md#custom-cicd-variables),
 then assign that variable to the corresponding variable in your
 `.gitlab-ci.yml` file.
 
@@ -45,7 +45,7 @@ Database: nice_marmot
 ```
 
 If you're wondering why we used `postgres` for the `Host`, read more at
-[How services are linked to the job](../docker/using_docker_images.md#how-services-are-linked-to-the-job).
+[How services are linked to the job](../services/index.md#how-services-are-linked-to-the-job).
 
 You can also use any other Docker image available on [Docker Hub](https://hub.docker.com/_/postgres).
 For example, to use PostgreSQL 9.3, the service becomes `postgres:9.3`.
@@ -70,10 +70,10 @@ The next step is to create a user, so sign in to PostgreSQL:
 sudo -u postgres psql -d template1
 ```
 
-Then create a user (in our case `runner`) which will be used by your
+Then create a user (in our case `runner`) which is used by your
 application. Change `$password` in the command below to a real strong password.
 
-NOTE: **Note:**
+NOTE:
 Be sure to not enter `template1=#` in the following commands, as that's part of
 the PostgreSQL prompt.
 
@@ -106,7 +106,7 @@ psql -U runner -h localhost -d nice_marmot -W
 ```
 
 This command explicitly directs `psql` to connect to localhost to use the md5
-authentication. If you omit this step, you'll be denied access.
+authentication. If you omit this step, you are denied access.
 
 Finally, configure your application to use the database, for example:
 
@@ -124,4 +124,4 @@ convenience that runs on [GitLab.com](https://gitlab.com) using our publicly
 available [shared runners](../runners/README.md).
 
 Want to hack on it? Fork it, commit, and push your changes. Within a few
-moments the changes will be picked by a public runner and the job will begin.
+moments the changes are picked by a public runner and the job begins.

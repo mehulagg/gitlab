@@ -4,7 +4,7 @@ module Gitlab
   module Auth
     module GroupSaml
       class ResponseStore
-        STORAGE_KEY = 'last_saml_debug_response'.freeze
+        STORAGE_KEY = 'last_saml_debug_response'
         REDIS_EXPIRY_TIME = 5.minutes
 
         attr_reader :session_id

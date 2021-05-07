@@ -6,7 +6,7 @@ RSpec.describe Geo::ContainerRepositoryRegistry, :geo do
   include ::EE::GeoHelpers
 
   it_behaves_like 'a BulkInsertSafe model', Geo::ContainerRepositoryRegistry do
-    let(:valid_items_for_bulk_insertion) { build_list(:container_repository_registry, 10, container_repository: create(:container_repository), created_at: Time.zone.now) }
+    let(:valid_items_for_bulk_insertion) { build_list(:container_repository_registry, 10, :with_repository_id, created_at: Time.zone.now) }
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
 

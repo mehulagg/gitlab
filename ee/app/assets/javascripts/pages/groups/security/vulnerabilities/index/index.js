@@ -1,9 +1,4 @@
-import initFirstClassSecurityDashboard from 'ee/security_dashboard/first_class_init';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
+import vulnerabilityReportInit from 'ee/security_dashboard/vulnerability_report_init';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initFirstClassSecurityDashboard(
-    document.getElementById('js-group-vulnerabilities'),
-    DASHBOARD_TYPES.GROUP,
-  );
-});
+vulnerabilityReportInit(document.getElementById('js-group-vulnerabilities'), DASHBOARD_TYPES.GROUP);

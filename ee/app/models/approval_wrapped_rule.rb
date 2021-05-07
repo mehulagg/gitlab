@@ -24,7 +24,7 @@ class ApprovalWrappedRule
   def_delegators(:@approval_rule,
                  :regular?, :any_approver?, :code_owner?, :report_approver?,
                  :overridden?, :id, :name, :users, :groups, :code_owner,
-                 :source_rule, :rule_type, :approvals_required, :section)
+                 :source_rule, :rule_type, :approvals_required, :section, :to_global_id)
 
   def self.wrap(merge_request, rule)
     if rule.any_approver?
@@ -49,6 +49,10 @@ class ApprovalWrappedRule
     strong_memoize(:approvers) do
       filter_approvers(@approval_rule.approvers)
     end
+  end
+
+  def declarative_policy_delegate
+    @approval_rule
   end
 
   # @return [Array<User>] of users who have approved the merge request

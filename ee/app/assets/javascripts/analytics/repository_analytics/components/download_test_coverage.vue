@@ -9,8 +9,9 @@ import {
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { pikadayToString } from '~/lib/utils/datetime_utility';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { __, s__ } from '~/locale';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {
@@ -53,17 +54,19 @@ export default {
       today.setDate(today.getDate() - this.selectedDateRange.value);
       const startDate = pikadayToString(today);
 
-      const queryParams = new URLSearchParams({
+      const queryParams = {
         start_date: startDate,
         end_date: endDate,
-      });
+      };
 
       // not including a project_ids param is the same as selecting all the projects
-      if (!this.allProjectsSelected) {
-        this.selectedProjectIds.forEach(id => queryParams.append('project_ids[]', id));
+      if (!this.allProjectsSelected && this.selectedProjectIds.length) {
+        queryParams.project_ids = this.selectedProjectIds;
       }
 
-      return `${this.groupAnalyticsCoverageReportsPath}&${queryParams.toString()}`;
+      return mergeUrlParams(queryParams, this.groupAnalyticsCoverageReportsPath, {
+        spreadArrays: true,
+      });
     },
     downloadCSVModalButton() {
       return {
@@ -110,11 +113,10 @@ export default {
     },
   },
   text: {
-    downloadTestCoverageHeader: s__('RepositoriesAnalytics|Download Historic Test Coverage Data'),
+    downloadTestCoverageHeader: s__('RepositoriesAnalytics|Download historic test coverage data'),
     downloadCSVButton: s__('RepositoriesAnalytics|Download historic test coverage data (.csv)'),
     dateRangeHeader: __('Date range'),
     downloadCSVModalButton: s__('RepositoriesAnalytics|Download test coverage data (.csv)'),
-    downloadCSVModalTitle: s__('RepositoriesAnalytics|Download Historic Test Coverage Data'),
     downloadCSVModalDescription: s__(
       'RepositoriesAnalytics|Historic Test Coverage Data is available in raw format (.csv) for further analysis.',
     ),
@@ -148,7 +150,7 @@ export default {
 
     <gl-modal
       modal-id="download-csv-modal"
-      :title="$options.text.downloadCSVModalTitle"
+      :title="$options.text.downloadTestCoverageHeader"
       no-fade
       :action-primary="downloadCSVModalButton"
       :action-cancel="cancelModalButton"

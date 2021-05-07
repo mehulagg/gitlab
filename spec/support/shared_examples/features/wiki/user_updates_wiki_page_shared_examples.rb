@@ -11,7 +11,7 @@ RSpec.shared_examples 'User updates wiki page' do
     sign_in(user)
   end
 
-  context 'when wiki is empty' do
+  context 'when wiki is empty', :js do
     before do |example|
       visit(wiki_path(wiki))
 
@@ -57,7 +57,7 @@ RSpec.shared_examples 'User updates wiki page' do
     it_behaves_like 'wiki file attachments'
   end
 
-  context 'when wiki is not empty' do
+  context 'when wiki is not empty', :js do
     let!(:wiki_page) { create(:wiki_page, wiki: wiki, title: 'home', content: 'Home page') }
 
     before do
@@ -90,15 +90,24 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(page).to have_field('wiki[message]', with: 'Update Wiki title')
     end
 
-    it 'shows a validation error message' do
+    it 'shows a validation error message if the form is force submitted', :js do
       fill_in(:wiki_content, with: '')
-      click_button('Save changes')
+
+      page.execute_script("document.querySelector('.wiki-form').submit()")
+      page.accept_alert # manually force form submit
 
       expect(page).to have_selector('.wiki-form')
       expect(page).to have_content('Edit Page')
       expect(page).to have_content('The form contains the following error:')
       expect(page).to have_content("Content can't be blank")
       expect(find('textarea#wiki_content').value).to eq('')
+    end
+
+    it "disables the submit button", :js do
+      page.within(".wiki-form") do
+        fill_in(:wiki_content, with: "")
+        expect(page).to have_button('Save changes', disabled: true)
+      end
     end
 
     it 'shows the emoji autocompletion dropdown', :js do
@@ -108,7 +117,7 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(page).to have_selector('.atwho-view')
     end
 
-    it 'shows the error message' do
+    it 'shows the error message', :js do
       wiki_page.update(content: 'Update') # rubocop:disable Rails/SaveBang
 
       click_button('Save changes')
@@ -116,11 +125,15 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(page).to have_content('Someone edited the page the same time you did.')
     end
 
-    it 'updates a page' do
+    it 'updates a page', :js do
       fill_in('Content', with: 'Updated Wiki Content')
       click_on('Save changes')
 
       expect(page).to have_content('Updated Wiki Content')
+    end
+
+    it 'focuses on the content field', :js do
+      expect(page).to have_selector '.note-textarea:focus'
     end
 
     it 'cancels editing of a page' do
@@ -134,7 +147,7 @@ RSpec.shared_examples 'User updates wiki page' do
     it_behaves_like 'wiki file attachments'
   end
 
-  context 'when the page is in a subdir' do
+  context 'when the page is in a subdir', :js do
     let(:page_name) { 'page_name' }
     let(:page_dir) { "foo/bar/#{page_name}" }
     let!(:wiki_page) { create(:wiki_page, wiki: wiki, title: page_dir, content: 'Home page') }
@@ -143,7 +156,7 @@ RSpec.shared_examples 'User updates wiki page' do
       visit wiki_page_path(wiki, wiki_page, action: :edit)
     end
 
-    it 'moves the page to the root folder' do
+    it 'moves the page to the root folder', :js do
       fill_in(:wiki_title, with: "/#{page_name}")
 
       click_button('Save changes')
@@ -151,7 +164,7 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(current_path).to eq(wiki_page_path(wiki, page_name))
     end
 
-    it 'moves the page to other dir' do
+    it 'moves the page to other dir', :js do
       new_page_dir = "foo1/bar1/#{page_name}"
 
       fill_in(:wiki_title, with: new_page_dir)
@@ -161,7 +174,7 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(current_path).to eq(wiki_page_path(wiki, new_page_dir))
     end
 
-    it 'remains in the same place if title has not changed' do
+    it 'remains in the same place if title has not changed', :js do
       original_path = wiki_page_path(wiki, wiki_page)
 
       fill_in(:wiki_title, with: page_name)
@@ -171,7 +184,7 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(current_path).to eq(original_path)
     end
 
-    it 'can be moved to a different dir with a different name' do
+    it 'can be moved to a different dir with a different name', :js do
       new_page_dir = "foo1/bar1/new_page_name"
 
       fill_in(:wiki_title, with: new_page_dir)
@@ -181,7 +194,7 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(current_path).to eq(wiki_page_path(wiki, new_page_dir))
     end
 
-    it 'can be renamed and moved to the root folder' do
+    it 'can be renamed and moved to the root folder', :js do
       new_name = 'new_page_name'
 
       fill_in(:wiki_title, with: "/#{new_name}")
@@ -191,7 +204,7 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(current_path).to eq(wiki_page_path(wiki, new_name))
     end
 
-    it 'squishes the title before creating the page' do
+    it 'squishes the title before creating the page', :js do
       new_page_dir = "  foo1 /  bar1  /  #{page_name}  "
 
       fill_in(:wiki_title, with: new_page_dir)
@@ -213,14 +226,14 @@ RSpec.shared_examples 'User updates wiki page' do
       visit wiki_page_path(wiki_page.wiki, wiki_page, action: :edit)
     end
 
-    it 'allows changing the title if the content does not change' do
+    it 'allows changing the title if the content does not change', :js do
       fill_in 'Title', with: 'new title'
       click_on 'Save changes'
 
-      expect(page).to have_content('Wiki was successfully updated.')
+      expect(page).to have_content('Wiki page was successfully updated.')
     end
 
-    it 'shows a validation error when trying to change the content' do
+    it 'shows a validation error when trying to change the content', :js do
       fill_in 'Content', with: 'new content'
       click_on 'Save changes'
 

@@ -1,13 +1,12 @@
 <script>
 import { GlLink, GlModalDirective, GlSprintf, GlButton, GlAlert } from '@gitlab/ui';
 import { s__, __, sprintf } from '~/locale';
-import eventHub from '../event_hub';
 import identicon from '../../vue_shared/components/identicon.vue';
+import { APPLICATION_STATUS, ELASTIC_STACK } from '../constants';
+import eventHub from '../event_hub';
 import UninstallApplicationButton from './uninstall_application_button.vue';
 import UninstallApplicationConfirmationModal from './uninstall_application_confirmation_modal.vue';
 import UpdateApplicationConfirmationModal from './update_application_confirmation_modal.vue';
-
-import { APPLICATION_STATUS, ELASTIC_STACK } from '../constants';
 
 export default {
   components: {
@@ -142,6 +141,9 @@ export default {
     isInstalling() {
       return this.status === APPLICATION_STATUS.INSTALLING;
     },
+    isExternallyInstalled() {
+      return this.status === APPLICATION_STATUS.EXTERNALLY_INSTALLED;
+    },
     canInstall() {
       return (
         this.status === APPLICATION_STATUS.NOT_INSTALLABLE ||
@@ -194,9 +196,16 @@ export default {
         label = __('Installing');
       } else if (this.installed) {
         label = __('Installed');
+      } else if (this.isExternallyInstalled) {
+        label = __('Externally installed');
       }
 
       return label;
+    },
+    buttonGridCellClass() {
+      return this.showManageButton || this.status === APPLICATION_STATUS.EXTERNALLY_INSTALLED
+        ? 'section-25'
+        : 'section-15';
     },
     showManageButton() {
       return this.manageLink && this.status === APPLICATION_STATUS.INSTALLED;
@@ -343,7 +352,7 @@ export default {
           >
           <span v-else class="js-cluster-application-title">{{ title }}</span>
         </strong>
-        <slot name="installedVia"></slot>
+        <slot name="installed-via"></slot>
         <div>
           <slot name="description"></slot>
         </div>
@@ -428,8 +437,7 @@ export default {
         </div>
       </div>
       <div
-        :class="{ 'section-25': showManageButton, 'section-15': !showManageButton }"
-        class="table-section table-button-footer section-align-top"
+        :class="[buttonGridCellClass, 'table-section', 'table-button-footer', 'section-align-top']"
         role="gridcell"
       >
         <div v-if="showManageButton" class="btn-group table-action-buttons">

@@ -1,18 +1,18 @@
 <script>
-import TitleArea from '~/vue_shared/components/registry/title_area.vue';
-import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
-import { n__, sprintf } from '~/locale';
 import { approximateDuration, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
+import { n__, sprintf } from '~/locale';
+import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
+import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 
 import {
   CONTAINER_REGISTRY_TITLE,
   LIST_INTRO_TEXT,
   EXPIRATION_POLICY_WILL_RUN_IN,
   EXPIRATION_POLICY_DISABLED_TEXT,
-  EXPIRATION_POLICY_DISABLED_MESSAGE,
 } from '../../constants/index';
 
 export default {
+  name: 'ListHeader',
   components: {
     TitleArea,
     MetadataItem,
@@ -33,12 +33,12 @@ export default {
       default: '',
       required: false,
     },
-    expirationPolicyHelpPagePath: {
-      type: String,
-      default: '',
-      required: false,
-    },
     hideExpirationPolicyData: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    metadataLoading: {
       type: Boolean,
       required: false,
       default: false,
@@ -73,26 +73,19 @@ export default {
         ? sprintf(EXPIRATION_POLICY_WILL_RUN_IN, { time: this.timeTillRun })
         : EXPIRATION_POLICY_DISABLED_TEXT;
     },
-    showExpirationPolicyTip() {
-      return (
-        !this.expirationPolicyEnabled && this.imagesCount > 0 && !this.hideExpirationPolicyData
-      );
-    },
     infoMessages() {
-      const base = [{ text: LIST_INTRO_TEXT, link: this.helpPagePath }];
-      return this.showExpirationPolicyTip
-        ? [
-            ...base,
-            { text: EXPIRATION_POLICY_DISABLED_MESSAGE, link: this.expirationPolicyHelpPagePath },
-          ]
-        : base;
+      return [{ text: LIST_INTRO_TEXT, link: this.helpPagePath }];
     },
   },
 };
 </script>
 
 <template>
-  <title-area :title="$options.i18n.CONTAINER_REGISTRY_TITLE" :info-messages="infoMessages">
+  <title-area
+    :title="$options.i18n.CONTAINER_REGISTRY_TITLE"
+    :info-messages="infoMessages"
+    :metadata-loading="metadataLoading"
+  >
     <template #right-actions>
       <slot name="commands"></slot>
     </template>

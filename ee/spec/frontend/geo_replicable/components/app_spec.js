@@ -1,11 +1,11 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import GeoReplicableApp from 'ee/geo_replicable/components/app.vue';
-import initStore from 'ee/geo_replicable/store';
 import GeoReplicable from 'ee/geo_replicable/components/geo_replicable.vue';
 import GeoReplicableEmptyState from 'ee/geo_replicable/components/geo_replicable_empty_state.vue';
 import GeoReplicableFilterBar from 'ee/geo_replicable/components/geo_replicable_filter_bar.vue';
+import initStore from 'ee/geo_replicable/store';
 import {
   MOCK_GEO_REPLICATION_SVG_PATH,
   MOCK_GEO_TROUBLESHOOTING_LINK,
@@ -26,7 +26,7 @@ describe('GeoReplicableApp', () => {
     geoReplicableEmptySvgPath: MOCK_GEO_REPLICATION_SVG_PATH,
   };
 
-  const createStore = options => {
+  const createStore = (options) => {
     store = initStore({ replicableType: MOCK_REPLICABLE_TYPE, graphqlFieldName: null, ...options });
     jest.spyOn(store, 'dispatch').mockImplementation();
   };

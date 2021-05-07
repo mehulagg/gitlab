@@ -4,7 +4,7 @@ module Gitlab
   module Geo
     module LogCursor
       class Daemon
-        VERSION = '0.2.0'.freeze
+        VERSION = '0.2.0'
         BATCH_SIZE = 250
         SECONDARY_CHECK_INTERVAL = 60
         MAX_ERROR_DURATION = 1800

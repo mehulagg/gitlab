@@ -16,7 +16,7 @@ RSpec.describe 'Project' do
 
     shared_examples 'creates from template' do |template, sub_template_tab = nil|
       it "is created from template", :js do
-        find('#create-from-template-tab').click
+        find('[data-qa-selector="create_from_template_link"]').click
         find(".project-template #{sub_template_tab}").click if sub_template_tab
         find("label[for=#{template.name}]").click
         fill_in("project_name", with: template.name)
@@ -34,7 +34,7 @@ RSpec.describe 'Project' do
     end
 
     context 'create with sample data template' do
-      it_behaves_like 'creates from template', Gitlab::SampleDataTemplate.find(:basic), '.sample-data-templates-tab'
+      it_behaves_like 'creates from template', Gitlab::SampleDataTemplate.find(:sample)
     end
   end
 
@@ -47,11 +47,9 @@ RSpec.describe 'Project' do
     end
 
     it 'shows the command in a popover', :js do
-      page.within '.profile-settings-sidebar' do
-        click_link 'Show command'
-      end
+      click_link 'Show command'
 
-      expect(page).to have_css('.popover .push-to-create-popover #push_to_create_tip')
+      expect(page).to have_css('.popover #push-to-create-tip')
       expect(page).to have_content 'Private projects can be created in your personal namespace with:'
     end
   end
@@ -61,7 +59,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
     end
 
     it 'parses Markdown' do
@@ -125,7 +123,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
       visit path
     end
 
@@ -156,7 +154,7 @@ RSpec.describe 'Project' do
     let(:path)    { project_path(project) }
 
     before do
-      sign_in(create(:admin))
+      sign_in(project.owner)
       visit path
     end
 
@@ -173,26 +171,6 @@ RSpec.describe 'Project' do
         expect(find('.mobile-git-clone')).to be_visible
         expect(find('.git-clone-holder', visible: false)).not_to be_visible
       end
-    end
-  end
-
-  describe 'remove forked relationship', :js do
-    let(:user)    { create(:user) }
-    let(:project) { fork_project(create(:project, :public), user, namespace: user.namespace) }
-
-    before do
-      sign_in user
-      visit edit_project_path(project)
-    end
-
-    it 'removes fork' do
-      expect(page).to have_content 'Remove fork relationship'
-
-      remove_with_confirm('Remove fork relationship', project.path)
-
-      expect(page).to have_content 'The fork relationship has been removed.'
-      expect(project.reload.forked?).to be_falsey
-      expect(page).not_to have_content 'Remove fork relationship'
     end
   end
 
@@ -279,7 +257,7 @@ RSpec.describe 'Project' do
     end
 
     it 'deletes a project', :sidekiq_might_not_need_inline do
-      expect { remove_with_confirm('Delete project', "Delete #{project.full_name}", 'Yes, delete project') }.to change { Project.count }.by(-1)
+      expect { remove_with_confirm('Delete project', project.path, 'Yes, delete project') }.to change { Project.count }.by(-1)
       expect(page).to have_content "Project '#{project.full_name}' is in the process of being deleted."
       expect(Project.all.count).to be_zero
       expect(project.issues).to be_empty

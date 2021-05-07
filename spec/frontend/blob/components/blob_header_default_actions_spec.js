@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlButtonGroup, GlButton } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import BlobHeaderActions from '~/blob/components/blob_header_default_actions.vue';
 import {
   BTN_COPY_CONTENTS_TITLE,
@@ -14,8 +14,13 @@ describe('Blob Header Default Actions', () => {
   let btnGroup;
   let buttons;
 
+  const blobHash = 'foo-bar';
+
   function createComponent(propsData = {}) {
     wrapper = mount(BlobHeaderActions, {
+      provide: {
+        blobHash,
+      },
       propsData: {
         rawPath: Blob.rawPath,
         ...propsData,

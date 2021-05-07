@@ -1,6 +1,14 @@
-export const mockRefs = ['master', 'branch-1', 'tag-1'];
+export const mockRefs = {
+  Branches: ['main', 'branch-1', 'branch-2'],
+  Tags: ['1.0.0', '1.1.0', '1.2.0'],
+};
 
-export const mockParams = {
+export const mockFilteredRefs = {
+  Branches: ['branch-1'],
+  Tags: ['1.0.0', '1.1.0'],
+};
+
+export const mockQueryParams = {
   refParam: 'tag-1',
   variableParams: {
     test_var: 'test_var_val',
@@ -31,3 +39,23 @@ export const mockError = {
   ],
   total_warnings: 7,
 };
+
+export const mockBranchRefs = ['main', 'dev', 'release'];
+
+export const mockTagRefs = ['1.0.0', '1.1.0', '1.2.0'];
+
+export const mockVariables = [
+  {
+    uniqueId: 'var-refs/heads/main2',
+    variable_type: 'env_var',
+    key: 'var_without_value',
+    value: '',
+  },
+  {
+    uniqueId: 'var-refs/heads/main3',
+    variable_type: 'env_var',
+    key: 'var_with_value',
+    value: 'test_value',
+  },
+  { uniqueId: 'var-refs/heads/main4', variable_type: 'env_var', key: '', value: '' },
+];

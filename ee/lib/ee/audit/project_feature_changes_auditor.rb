@@ -13,7 +13,12 @@ module EE
                  :builds_access_level,
                  :repository_access_level,
                  :pages_access_level,
-                 :metrics_dashboard_access_level].freeze
+                 :metrics_dashboard_access_level,
+                 :analytics_access_level,
+                 :operations_access_level,
+                 :requirements_access_level,
+                 :security_and_compliance_access_level,
+                 :container_registry_access_level].freeze
 
       def initialize(current_user, model, project)
         @project = project

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Global search' do
+  include AfterNextHelpers
+
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
 
@@ -22,9 +24,7 @@ RSpec.describe 'Global search' do
 
   describe 'I search through the issues and I see pagination' do
     before do
-      allow_next_instance_of(SearchService) do |instance|
-        allow(instance).to receive(:per_page).and_return(1)
-      end
+      allow_next(SearchService).to receive(:per_page).and_return(1)
       create_list(:issue, 2, project: project, title: 'initial')
     end
 
@@ -36,15 +36,15 @@ RSpec.describe 'Global search' do
     end
   end
 
-  it 'closes the dropdown on blur', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/201841' do
+  it 'closes the dropdown on blur', :js do
+    find('#search').click
     fill_in 'search', with: "a"
-    dropdown = find('.js-dashboard-search-options')
 
-    expect(dropdown[:class]).to include 'show'
+    expect(page).to have_selector("div[data-testid='dashboard-search-options'].show")
 
     find('#search').send_keys(:backspace)
     find('body').click
 
-    expect(dropdown[:class]).not_to include 'show'
+    expect(page).to have_no_selector("div[data-testid='dashboard-search-options'].show")
   end
 end

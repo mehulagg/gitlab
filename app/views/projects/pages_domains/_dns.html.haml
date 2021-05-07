@@ -23,11 +23,11 @@
           - text, status = domain_presenter.unverified? ? [_('Unverified'), 'badge-danger'] : [_('Verified'), 'badge-success']
           .badge{ class: status }
             = text
-          = link_to sprite_icon("redo"), verify_project_pages_domain_path(@project, domain_presenter), method: :post, class: "btn has-tooltip", title: _("Retry verification")
+          = link_to sprite_icon("redo"), verify_project_pages_domain_path(@project, domain_presenter), method: :post, class: "gl-button btn btn-default has-tooltip", title: _("Retry verification")
         .input-group
           = text_field_tag :domain_verification, verification_record, class: "monospace js-select-on-focus form-control", readonly: true
           .input-group-append
             = clipboard_button(target: '#domain_verification', class: 'btn-default d-none d-sm-block')
         %p.form-text.text-muted
           - link_to_help = link_to(_('verify ownership'), help_page_path('user/project/pages/custom_domains_ssl_tls_certification/index.md', anchor: '4-verify-the-domains-ownership'))
-          = _("To %{link_to_help} of your domain, add the above key to a TXT record within to your DNS configuration.").html_safe % { link_to_help: link_to_help }
+          = _("To %{link_to_help} of your domain, add the above key to a TXT record within your DNS configuration.").html_safe % { link_to_help: link_to_help }

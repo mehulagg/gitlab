@@ -28,4 +28,20 @@ RSpec.describe DastSiteToken, type: :model do
       end
     end
   end
+
+  describe '#dast_site' do
+    context 'when dast_site exists' do
+      it 'finds the associated dast_site' do
+        dast_site = create(:dast_site, project_id: subject.project_id, url: subject.url)
+
+        expect(subject.dast_site).to eq(dast_site)
+      end
+    end
+
+    context 'when dast_site does not exist' do
+      it 'returns nil' do
+        expect(subject.dast_site).to be_nil
+      end
+    end
+  end
 end

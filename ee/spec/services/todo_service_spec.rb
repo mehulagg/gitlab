@@ -3,13 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe TodoService do
-  let(:author) { create(:user, username: 'author') }
-  let(:non_member) { create(:user, username: 'non_member') }
-  let(:member) { create(:user, username: 'member') }
-  let(:guest) { create(:user, username: 'guest') }
-  let(:admin) { create(:admin, username: 'administrator') }
-  let(:john_doe) { create(:user, username: 'john_doe') }
-  let(:skipped) { create(:user, username: 'skipped') }
+  let_it_be(:author) { create(:user, username: 'author') }
+  let_it_be(:non_member) { create(:user, username: 'non_member') }
+  let_it_be(:member) { create(:user, username: 'member') }
+  let_it_be(:guest) { create(:user, username: 'guest') }
+  let_it_be(:admin) { create(:admin, username: 'administrator') }
+  let_it_be(:john_doe) { create(:user, username: 'john_doe') }
+  let_it_be(:skipped) { create(:user, username: 'skipped') }
+
   let(:skip_users) { [skipped] }
   let(:service) { described_class.new }
 
@@ -21,19 +22,22 @@ RSpec.describe TodoService do
     let(:description_mentions) { "- [ ] Task 1\n- [ ] Task 2 FYI: #{mentions}" }
     let(:description_directly_addressed) { "#{mentions}\n- [ ] Task 1\n- [ ] Task 2" }
 
-    let(:group) { create(:group) }
+    let_it_be(:group, reload: true) { create(:group) }
+
     let(:epic) { create(:epic, group: group, author: author, description: description_mentions) }
 
     let(:todos_for) { [] }
     let(:todos_not_for) { [] }
     let(:target) { epic }
 
-    before do
-      stub_licensed_features(epics: true)
-
+    before_all do
       group.add_guest(guest)
       group.add_developer(author)
       group.add_developer(member)
+    end
+
+    before do
+      stub_licensed_features(epics: true)
     end
 
     shared_examples_for 'todos creation' do
@@ -112,7 +116,7 @@ RSpec.describe TodoService do
 
           context 'for mentioned users' do
             let(:todo_params) { { action: Todo::MENTIONED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'
@@ -124,7 +128,7 @@ RSpec.describe TodoService do
             end
 
             let(:todo_params) { { action: Todo::DIRECTLY_ADDRESSED } }
-            let(:todos_for) { [member, author, guest, admin] }
+            let(:todos_for) { [member, author, guest] }
             let(:todos_not_for) { [non_member, john_doe, skipped] }
 
             include_examples 'todos creation'
@@ -166,22 +170,32 @@ RSpec.describe TodoService do
 
           include_examples 'todos creation'
         end
+
+        context 'when toggling task list items' do
+          before do
+            epic.update(description: "- [x] Task 1\n- [x] Task 2 FYI: #{mentions}")
+          end
+
+          it 'does not create todos' do
+            expect { execute }.not_to change { Todo.count }
+          end
+        end
       end
 
       describe '#new_note' do
-        let!(:first_todo) do
-          create(:todo, :assigned,
-            user: john_doe, project: nil, group: group, target: epic, author: author)
-        end
-
-        let!(:second_todo) do
-          create(:todo, :assigned,
-            user: john_doe, project: nil, group: group, target: epic, author: author)
-        end
-
         let(:note) { create(:note, noteable: epic, project: nil, author: john_doe, note: mentions) }
 
         context 'when a note is created for an epic' do
+          let!(:first_todo) do
+            create(:todo, :assigned,
+              user: john_doe, project: nil, group: group, target: epic, author: author)
+          end
+
+          let!(:second_todo) do
+            create(:todo, :assigned,
+              user: john_doe, project: nil, group: group, target: epic, author: author)
+          end
+
           it 'marks pending epic todos for the note author as done' do
             service.new_note(note, john_doe)
 
@@ -189,7 +203,7 @@ RSpec.describe TodoService do
             expect(second_todo.reload).to be_done
           end
 
-          it 'does not marka pending epic todos for the note author as done for system notes' do
+          it 'does not mark pending epic todos for the note author as done for system notes' do
             system_note = create(:system_note, noteable: epic)
 
             service.new_note(system_note, john_doe)
@@ -208,8 +222,8 @@ RSpec.describe TodoService do
             end
 
             let(:todo_params) { { action: Todo::MENTIONED } }
-            let(:todos_for) { [author, non_member, member, guest, admin, skipped] }
-            let(:todos_not_for) { [john_doe] }
+            let(:todos_for) { users }
+            let(:todos_not_for) { [] }
 
             include_examples 'todos creation'
           end
@@ -220,8 +234,8 @@ RSpec.describe TodoService do
             end
 
             let(:todo_params) { { action: Todo::DIRECTLY_ADDRESSED } }
-            let(:todos_for) { [author, non_member, member, guest, admin, skipped] }
-            let(:todos_not_for) { [john_doe] }
+            let(:todos_for) { users }
+            let(:todos_not_for) { [] }
 
             include_examples 'todos creation'
           end
@@ -290,7 +304,6 @@ RSpec.describe TodoService do
 
           # for each valid mentioned user
           should_create_todo(user: john_doe, target: merge_request, action: Todo::MENTIONED)
-          should_not_create_todo(user: approver_1, target: merge_request, action: Todo::MENTIONED)
 
           # skip for code owner
           should_not_create_todo(user: code_owner, target: merge_request, action: Todo::APPROVAL_REQUIRED)

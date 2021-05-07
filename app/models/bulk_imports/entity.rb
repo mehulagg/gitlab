@@ -26,13 +26,25 @@ class BulkImports::Entity < ApplicationRecord
   belongs_to :project, optional: true
   belongs_to :group, foreign_key: :namespace_id, optional: true
 
+  has_many :trackers,
+    class_name: 'BulkImports::Tracker',
+    foreign_key: :bulk_import_entity_id
+
+  has_many :failures,
+    class_name: 'BulkImports::Failure',
+    inverse_of: :entity,
+    foreign_key: :bulk_import_entity_id
+
   validates :project, absence: true, if: :group
   validates :group, absence: true, if: :project
-  validates :source_type, :source_full_path, :destination_name,
-            :destination_namespace, presence: true
+  validates :source_type, :source_full_path, :destination_name, presence: true
+  validates :destination_namespace, exclusion: [nil], if: :group
+  validates :destination_namespace, presence: true, if: :project
 
   validate :validate_parent_is_a_group, if: :parent
   validate :validate_imported_entity_type
+
+  validate :validate_destination_namespace_ascendency, if: :group_entity?
 
   enum source_type: { group_entity: 0, project_entity: 1 }
 
@@ -48,6 +60,7 @@ class BulkImports::Entity < ApplicationRecord
 
     event :finish do
       transition started: :finished
+      transition failed: :failed
     end
 
     event :fail_op do
@@ -75,6 +88,19 @@ class BulkImports::Entity < ApplicationRecord
       errors.add(
         :project,
         s_('BulkImport|expected an associated Group but has an associated Project')
+      )
+    end
+  end
+
+  def validate_destination_namespace_ascendency
+    source = Group.find_by_full_path(source_full_path)
+
+    return unless source
+
+    if source.self_and_descendants.any? { |namespace| namespace.full_path == destination_namespace }
+      errors.add(
+        :base,
+        s_('BulkImport|Import failed: Destination cannot be a subgroup of the source group. Change the destination and try again.')
       )
     end
   end

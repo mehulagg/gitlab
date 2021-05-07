@@ -102,9 +102,9 @@ module Gitlab
 
     def expiring_features_message
       case plan_name
-      when 'Gold'
+      when 'Gold', 'Ultimate'
         _('After that, you will not be able to use merge approvals or epics as well as many security features.')
-      when 'Silver'
+      when 'Premium', 'Silver'
         _('After that, you will not be able to use merge approvals or epics as well as many other features.')
       else
         _('After that, you will not be able to use merge approvals or code quality as well as many other features.')
@@ -119,10 +119,16 @@ module Gitlab
       subscribable && ((is_admin && subscribable.notify_admins?) || subscribable.notify_users?)
     end
 
-    def require_notification?
-      return false if expiring_auto_renew?
+    def subscription_future_renewal?
+      return if self_managed? || namespace.nil?
 
-      auto_renew_choice_exists? && expired_subscribable_within_notification_window?
+      ::GitlabSubscriptions::CheckFutureRenewalService.new(namespace: namespace).execute
+    end
+
+    def require_notification?
+      return false if expiring_auto_renew? || ::License.future_dated.present?
+
+      auto_renew_choice_exists? && expired_subscribable_within_notification_window? && !subscription_future_renewal?
     end
 
     def auto_renew_choice_exists?

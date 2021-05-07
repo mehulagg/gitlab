@@ -2,7 +2,7 @@
 type: reference, dev
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Issues workflow
@@ -90,28 +90,9 @@ explain what falls under each type label.
 
 The GitLab handbook documents [when something is a bug](https://about.gitlab.com/handbook/product/product-processes/#bug-issues) and [when it is a feature request](https://about.gitlab.com/handbook/product/product-processes/#feature-issues).
 
-### Facet labels
-
-Sometimes it's useful to refine the type of an issue. In those cases, you can
-add facet labels.
-
-Following is a non-exhaustive list of facet labels:
-
-- ~enhancement: This label can refine an issue that has the ~feature label.
-- ~"master:broken": This label can refine an issue that has the ~bug label.
-- ~"failure::flaky-test": This label can refine an issue that has the ~bug label.
-- ~"technical debt": This label can refine an issue that has the ~tooling label.
-- ~"static analysis": This label can refine an issue that has the ~tooling label.
-- ~"ci-build": This label can refine an issue that has the ~tooling label.
-- ~performance: A performance issue could describe a ~bug or a ~feature.
-- ~security: A security issue could describe a ~bug or a ~feature.
-- ~database: A database issue could describe a ~bug or a ~feature.
-- ~customer: This relates to an issue that was created by a customer, or that is of interest for a customer.
-- ~"UI text": Issues that add or modify any text within the UI such as user-assistance microcopy, button/menu labels, or error messages.
-
 ### Stage labels
 
-Stage labels specify which [stage](https://about.gitlab.com/handbook/product/product-categories/#hierarchy) the issue belongs to.
+Stage labels specify which [stage](https://about.gitlab.com/handbook/product/categories/#hierarchy) the issue belongs to.
 
 #### Naming and color convention
 
@@ -155,7 +136,7 @@ The current group labels can be found by [searching the labels list for `group::
 These labels are [scoped labels](../../user/project/labels.md#scoped-labels)
 and thus are mutually exclusive.
 
-You can find the groups listed in the [Product Stages, Groups, and Categories](https://about.gitlab.com/handbook/product/product-categories/) page.
+You can find the groups listed in the [Product Stages, Groups, and Categories](https://about.gitlab.com/handbook/product/categories/) page.
 
 We use the term group to map down product requirements from our product stages.
 As a team needs some way to collect the work their members are planning to be assigned to, we use the `~group::` labels to do so.
@@ -168,13 +149,13 @@ and `~"group::knowledge"` is picked up by someone in the Access group of the Pla
 the issue should be relabeled as `~"group::access"` while keeping the original
 `~"devops::create"` unchanged.
 
-We also use stage and group labels to help quantify our [throughput](https://about.gitlab.com/handbook/engineering/management/throughput/).
-Please read [Stage and Group labels in Throughput](https://about.gitlab.com/handbook/engineering/management/throughput/#stage-and-group-labels-in-throughput) for more information on how the labels are used in this context.
+We also use stage and group labels to help measure our [merge request rates](https://about.gitlab.com/handbook/engineering/merge-request-rate/).
+Please read [Stage and Group labels](https://about.gitlab.com/handbook/engineering/metrics/#stage-and-group-labels) for more information on how the labels are used in this context.
 
 ### Category labels
 
 From the handbook's
-[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/product-categories/#hierarchy)
+[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/categories/#hierarchy)
 page:
 
 > Categories are high-level capabilities that may be a standalone product at
@@ -200,13 +181,13 @@ For instance, the "DevOps Report" category is represented by the
 `devops_reports.name` value is "DevOps Reports".
 
 If a category's label doesn't respect this naming convention, it should be specified
-with [the `label` attribute](https://about.gitlab.com/handbook/marketing/website/#category-attributes)
+with [the `label` attribute](https://about.gitlab.com/handbook/marketing/inbound-marketing/digital-experience/website/#category-attributes)
 in <https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/categories.yml>.
 
 ### Feature labels
 
 From the handbook's
-[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/product-categories/#hierarchy)
+[Product stages, groups, and categories](https://about.gitlab.com/handbook/product/categories/#hierarchy)
 page:
 
 > Features: Small, discrete functionalities. e.g. Issue weights. Some common
@@ -225,6 +206,13 @@ Examples of feature labels are `~wiki`, `~ldap`, `~api`, `~issues`, `~"merge req
 #### Naming and color convention
 
 Feature labels are all-lowercase.
+
+### Facet labels
+
+To track additional information or context about created issues, developers may
+add _facet labels_. Facet labels are also sometimes used for issue prioritization
+or for measurements (such as time to close). An example of a facet label is the
+~customer label, which indicates customer interest.
 
 ### Department labels
 
@@ -323,7 +311,7 @@ We automatically add the ~"Accepting merge requests" label to issues
 that match the [triage policy](https://about.gitlab.com/handbook/engineering/quality/triage-operations/#accepting-merge-requests).
 
 We recommend people that have never contributed to any open source project to
-look for issues labeled `~"Accepting merge requests"` with a [weight of 1](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None&sort=weight&weight=1) or the `~"Good for 1st time contributors"` [label](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=Good%20for%201st%20time%20contributors&assignee_id=None) attached to it.
+look for issues labeled `~"Accepting merge requests"` with a [weight of 1](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None&sort=weight&weight=1) or the `~"Good for new contributors"` [label](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=good%20for%20new%20contributors&assignee_id=None) attached to it.
 More experienced contributors are very welcome to tackle
 [any of them](https://gitlab.com/groups/gitlab-org/-/issues?state=opened&label_name[]=Accepting+merge+requests&assignee_id=None).
 
@@ -422,9 +410,9 @@ in the regression issue as fixes are addressed.
 
 ## Technical and UX debt
 
-In order to track things that can be improved in GitLab's codebase,
-we use the ~"technical debt" label in [GitLab's issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues).
-For missed user experience requirements, we use the ~"UX debt" label.
+In order to track things that can be improved in the GitLab codebase,
+we use the ~"technical debt" label in the [GitLab issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues).
+We use the ~"UX debt" label when we choose to deviate from the MVC, in a way that harms the user experience.
 
 These labels should be added to issues that describe things that can be improved,
 shortcuts that have been taken, features that need additional attention, and all

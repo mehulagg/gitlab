@@ -76,6 +76,9 @@ export const npmFiles = [
     id: 2,
     size: 200,
     download_path: '/-/package_files/2/download',
+    pipelines: [
+      { id: 1, project: { commit_url: 'http://foo.bar' }, git_commit_message: 'foo bar baz?' },
+    ],
   },
 ];
 
@@ -128,6 +131,23 @@ export const nugetPackage = {
     icon_url: 'fake-icon',
     project_url: 'project-foo-url',
     license_url: 'license-foo-url',
+  },
+};
+
+export const rubygemsPackage = {
+  created_at: '2015-12-10',
+  id: 4,
+  name: 'RubyGem1',
+  package_files: [],
+  package_type: 'rubygems',
+  project_id: 1,
+  tags: [],
+  updated_at: '2015-12-10',
+  version: '1.0.0',
+  rubygems_metadatum: {
+    author: 'Fake Name',
+    summary: 'My gem',
+    email: 'tanuki@fake.com',
   },
 };
 

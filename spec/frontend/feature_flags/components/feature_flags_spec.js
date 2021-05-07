@@ -1,18 +1,18 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
-import MockAdapter from 'axios-mock-adapter';
 import { GlAlert, GlEmptyState, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import { TEST_HOST } from 'spec/test_constants';
 import Api from '~/api';
-import createStore from '~/feature_flags/store/index';
-import FeatureFlagsTab from '~/feature_flags/components/feature_flags_tab.vue';
+import ConfigureFeatureFlagsModal from '~/feature_flags/components/configure_feature_flags_modal.vue';
 import FeatureFlagsComponent from '~/feature_flags/components/feature_flags.vue';
+import FeatureFlagsTab from '~/feature_flags/components/feature_flags_tab.vue';
 import FeatureFlagsTable from '~/feature_flags/components/feature_flags_table.vue';
 import UserListsTable from '~/feature_flags/components/user_lists_table.vue';
-import ConfigureFeatureFlagsModal from '~/feature_flags/components/configure_feature_flags_modal.vue';
 import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '~/feature_flags/constants';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import createStore from '~/feature_flags/store/index';
 import axios from '~/lib/utils/axios_utils';
+import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import { getRequestData, userList } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -85,7 +85,7 @@ describe('Feature flags', () => {
   describe('when limit exceeded', () => {
     const provideData = { ...mockData, featureFlagsLimitExceeded: true };
 
-    beforeEach(done => {
+    beforeEach((done) => {
       mock
         .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
         .reply(200, getRequestData, {});
@@ -101,11 +101,9 @@ describe('Feature flags', () => {
 
     it('shows a feature flags limit reached alert', () => {
       expect(limitAlert().exists()).toBe(true);
-      expect(
-        limitAlert()
-          .find(GlSprintf)
-          .attributes('message'),
-      ).toContain('Feature flags limit reached');
+      expect(limitAlert().find(GlSprintf).attributes('message')).toContain(
+        'Feature flags limit reached',
+      );
     });
 
     describe('when the alert is dismissed', () => {
@@ -134,7 +132,7 @@ describe('Feature flags', () => {
       newUserListPath: null,
     };
 
-    beforeEach(done => {
+    beforeEach((done) => {
       mock
         .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
         .reply(200, getRequestData, {});
@@ -219,7 +217,7 @@ describe('Feature flags', () => {
     });
 
     describe('with paginated feature flags', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         mock
           .onGet(mockState.endpoint, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
           .replyOnce(200, getRequestData, {
@@ -299,7 +297,7 @@ describe('Feature flags', () => {
     });
 
     describe('in user lists tab', () => {
-      beforeEach(done => {
+      beforeEach((done) => {
         factory();
         setImmediate(done);
       });
@@ -319,7 +317,7 @@ describe('Feature flags', () => {
   });
 
   describe('unsuccessful request', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       mock
         .onGet(mockState.endpoint, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
         .replyOnce(500, {});
@@ -352,7 +350,7 @@ describe('Feature flags', () => {
   });
 
   describe('rotate instance id', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       mock
         .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
         .reply(200, getRequestData, {});

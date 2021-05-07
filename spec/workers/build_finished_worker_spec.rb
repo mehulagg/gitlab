@@ -6,36 +6,50 @@ RSpec.describe BuildFinishedWorker do
   subject { described_class.new.perform(build.id) }
 
   describe '#perform' do
-    let(:build) { create(:ci_build, :success, pipeline: create(:ci_pipeline)) }
-
     context 'when build exists' do
-      let!(:build) { create(:ci_build) }
+      let_it_be(:build) { create(:ci_build, :success, pipeline: create(:ci_pipeline)) }
+
+      before do
+        expect(Ci::Build).to receive(:find_by).with(id: build.id).and_return(build)
+      end
 
       it 'calculates coverage and calls hooks', :aggregate_failures do
-        trace_worker = double('trace worker')
-        coverage_worker = double('coverage worker')
+        expect(build).to receive(:parse_trace_sections!).ordered
+        expect(build).to receive(:update_coverage).ordered
 
-        allow(BuildTraceSectionsWorker).to receive(:new).and_return(trace_worker)
-        allow(BuildCoverageWorker).to receive(:new).and_return(coverage_worker)
-
-        # Unfortunately, `ordered` does not seem to work when called within `allow_next_instance_of`
-        # so we're doing this the long and dirty way
-        expect(trace_worker).to receive(:perform).ordered
-        expect(coverage_worker).to receive(:perform).ordered
-
-        expect_next_instance_of(Ci::BuildReportResultWorker) do |instance|
-          expect(instance).to receive(:perform)
-        end
-        expect_next_instance_of(Ci::TestCasesService) do |instance|
-          expect(instance).to receive(:execute)
+        expect_next_instance_of(Ci::BuildReportResultService) do |build_report_result_service|
+          expect(build_report_result_service).to receive(:execute).with(build)
         end
 
         expect(BuildHooksWorker).to receive(:perform_async)
-        expect(ExpirePipelineCacheWorker).to receive(:perform_async)
         expect(ChatNotificationWorker).not_to receive(:perform_async)
         expect(ArchiveTraceWorker).to receive(:perform_in)
 
         subject
+      end
+
+      context 'when build is failed' do
+        before do
+          build.update!(status: :failed)
+        end
+
+        it 'adds a todo' do
+          expect(::Ci::MergeRequests::AddTodoWhenBuildFailsWorker).to receive(:perform_async)
+
+          subject
+        end
+      end
+
+      context 'when build has a chat' do
+        before do
+          build.pipeline.update!(source: :chat)
+        end
+
+        it 'schedules a ChatNotification job' do
+          expect(ChatNotificationWorker).to receive(:perform_async).with(build.id)
+
+          subject
+        end
       end
     end
 
@@ -43,16 +57,6 @@ RSpec.describe BuildFinishedWorker do
       it 'does not raise exception' do
         expect { described_class.new.perform(non_existing_record_id) }
           .not_to raise_error
-      end
-    end
-
-    context 'when build has a chat' do
-      let(:build) { create(:ci_build, :success, pipeline: create(:ci_pipeline, source: :chat)) }
-
-      it 'schedules a ChatNotification job' do
-        expect(ChatNotificationWorker).to receive(:perform_async).with(build.id)
-
-        subject
       end
     end
   end

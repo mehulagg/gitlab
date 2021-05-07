@@ -55,7 +55,7 @@ export default {
         retryUrl: this.retryUrl,
         isLastDeployment: this.isLastDeployment,
       });
-      eventHub.$on('rollbackEnvironment', environment => {
+      eventHub.$on('rollbackEnvironment', (environment) => {
         if (environment.id === this.environment.id) {
           this.isLoading = true;
         }
@@ -68,9 +68,10 @@ export default {
   <gl-button
     v-gl-tooltip
     v-gl-modal.confirm-rollback-modal
-    class="gl-display-none gl-display-md-block text-secondary"
+    class="gl-display-none gl-md-display-block text-secondary"
     :loading="isLoading"
     :title="title"
+    :aria-label="title"
     :icon="isLastDeployment ? 'repeat' : 'redo'"
     @click="onClick"
   />

@@ -1,13 +1,12 @@
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlTooltip, GlIcon } from '@gitlab/ui';
 
+import EpicHealthStatus from 'ee/related_items_tree/components/epic_health_status.vue';
+import EpicActionsSplitButton from 'ee/related_items_tree/components/epic_issue_actions_split_button.vue';
 import RelatedItemsTreeHeader from 'ee/related_items_tree/components/related_items_tree_header.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-
-import EpicActionsSplitButton from 'ee/related_items_tree/components/epic_issue_actions_split_button.vue';
-import EpicHealthStatus from 'ee/related_items_tree/components/epic_health_status.vue';
 
 import { issuableTypesMap } from '~/related_issues/constants';
 import { mockInitialConfig, mockParentItem, mockQueryResponse } from '../mock_data';

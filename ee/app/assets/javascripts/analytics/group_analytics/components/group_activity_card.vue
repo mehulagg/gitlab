@@ -1,8 +1,8 @@
 <script>
 import Api from 'ee/api';
-import { __, s__ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import MetricCard from '~/analytics/shared/components/metric_card.vue';
+import createFlash from '~/flash';
+import { __, s__ } from '~/locale';
 
 export default {
   name: 'GroupActivityCard',
@@ -54,7 +54,9 @@ export default {
           this.isLoading = false;
         })
         .catch(() => {
-          createFlash(__('Failed to load group activity metrics. Please try again.'));
+          createFlash({
+            message: __('Failed to load group activity metrics. Please try again.'),
+          });
           this.isLoading = false;
         });
     },

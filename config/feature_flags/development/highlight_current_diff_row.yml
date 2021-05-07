@@ -1,7 +1,0 @@
----
-name: highlight_current_diff_row
-introduced_by_url: 
-rollout_issue_url: 
-group: 
-type: development
-default_enabled: false

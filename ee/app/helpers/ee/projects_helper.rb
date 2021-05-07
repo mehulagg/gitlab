@@ -4,24 +4,17 @@ module EE
   module ProjectsHelper
     extend ::Gitlab::Utils::Override
 
-    override :sidebar_settings_paths
-    def sidebar_settings_paths
+    override :sidebar_operations_paths
+    def sidebar_operations_paths
       super + %w[
-        audit_events#index
-        operations#show
+        cluster_agents
+        oncall_schedules
       ]
-    end
-
-    override :sidebar_repository_paths
-    def sidebar_repository_paths
-      super + %w(path_locks)
     end
 
     override :get_project_nav_tabs
     def get_project_nav_tabs(project, current_user)
       nav_tabs = super
-
-      nav_tabs += get_project_security_nav_tabs(project, current_user)
 
       if can?(current_user, :read_code_review_analytics, project)
         nav_tabs << :code_review
@@ -39,7 +32,42 @@ module EE
         nav_tabs << :project_insights
       end
 
+      if can?(current_user, :read_requirement, project)
+        nav_tabs << :requirements
+      end
+
+      if can?(current_user, :read_incident_management_oncall_schedule, project)
+        nav_tabs << :oncall_schedule
+      end
+
       nav_tabs
+    end
+
+    override :project_permissions_settings
+    def project_permissions_settings(project)
+      settings = super.merge(
+        requirementsAccessLevel: project.requirements_access_level
+      )
+
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        settings[:cveIdRequestEnabled] = project.public? && project.project_setting.cve_id_request_enabled?
+      end
+
+      settings
+    end
+
+    override :project_permissions_panel_data
+    def project_permissions_panel_data(project)
+      panel_data = super.merge(
+        requirementsAvailable: project.feature_available?(:requirements)
+      )
+
+      if ::Feature.enabled?(:cve_id_request_button, project)
+        panel_data[:requestCveAvailable] = ::Gitlab.com?
+        panel_data[:cveIdRequestHelpPath] = help_page_path('user/application_security/cve_id_request')
+      end
+
+      panel_data
     end
 
     override :default_url_to_repo
@@ -71,7 +99,7 @@ module EE
     end
 
     def approvals_app_data(project = @project)
-      { data: { 'project_id': project.id,
+      data = { 'project_id': project.id,
       'can_edit': can_modify_approvers.to_s,
       'project_path': expose_path(api_v4_projects_path(id: project.id)),
       'settings_path': expose_path(api_v4_projects_approval_settings_path(id: project.id)),
@@ -81,7 +109,13 @@ module EE
       'security_approvals_help_page_path': help_page_path('user/application_security/index.md', anchor: 'security-approvals-in-merge-requests'),
       'security_configuration_path': project_security_configuration_path(project),
       'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-security-approvals-within-a-project'),
-      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') } }
+      'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') }
+
+      if ::Feature.enabled?(:ff_compliance_approval_gates, project, default_enabled: :yaml)
+        data[:external_approval_rules_path] = expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+      end
+
+      { data: data }
     end
 
     def can_modify_approvers(project = @project)
@@ -89,13 +123,13 @@ module EE
     end
 
     def permanent_delete_message(project)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all content: issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}immediately%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
       html_escape(message) % remove_message_data(project)
     end
 
     def marked_for_removal_message(project)
       date = permanent_deletion_date(Time.now.utc)
-      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all content: issues, merge requests, etc.')
+      message = _('This action will %{strongOpen}permanently delete%{strongClose} %{codeOpen}%{project}%{codeClose} %{strongOpen}on %{date}%{strongClose}, including its repositories and all related resources, including issues, merge requests, etc.')
       html_escape(message) % remove_message_data(project).merge(date: date)
     end
 
@@ -130,47 +164,10 @@ module EE
       @project.feature_available?(:merge_trains)
     end
 
-    def sidebar_security_paths
-      %w[
-        projects/security/configuration#show
-        projects/security/sast_configuration#show
-        projects/security/vulnerabilities#show
-        projects/security/dashboard#index
-        projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
-        projects/dependencies#index
-        projects/licenses#index
-        projects/threat_monitoring#show
-        projects/threat_monitoring#new
-        projects/threat_monitoring#edit
-      ]
-    end
-
-    def sidebar_external_tracker_paths
-      %w[
-        projects/integrations/jira/issues#index
-      ]
-    end
-
-    def sidebar_on_demand_scans_paths
-      %w[
-        projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
-      ]
-    end
-
     def size_limit_message(project)
-      show_lfs = project.lfs_enabled? ? 'including files in LFS' : ''
+      show_lfs = project.lfs_enabled? ? 'including LFS files' : ''
 
-      "The total size of this project's repository #{show_lfs} will be limited to this size. 0 for unlimited. Leave empty to inherit the group/global value."
+      "Max size of this project's repository, #{show_lfs}. For no limit, enter 0. To inherit the group/global value, leave blank."
     end
 
     override :membership_locked?
@@ -192,23 +189,31 @@ module EE
       if project.vulnerabilities.none?
         {
           has_vulnerabilities: 'false',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           empty_state_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+          survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
+          project_full_path: project.full_path,
+          security_configuration_path: project_security_configuration_path(@project)
+        }.merge!(security_dashboard_pipeline_data(project))
       else
         {
           has_vulnerabilities: 'true',
+          has_jira_vulnerabilities_integration_enabled: project.configured_to_create_issues_from_vulnerabilities?.to_s,
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: api_v4_security_projects_vulnerability_exports_path(id: project.id),
-          vulnerability_feedback_help_path: help_page_path("user/application_security/index", anchor: "interacting-with-the-vulnerabilities"),
           empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+          survey_request_svg_path: image_path('illustrations/security-dashboard_empty.svg'),
           no_vulnerabilities_svg_path: image_path('illustrations/issues.svg'),
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
-          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix'),
+          scanners: VulnerabilityScanners::ListService.new(project).execute.to_json
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end
@@ -253,7 +258,7 @@ module EE
     end
 
     def show_compliance_framework_badge?(project)
-      project&.compliance_framework_setting&.present?
+      project&.compliance_framework_setting&.compliance_management_framework.present?
     end
 
     def scheduled_for_deletion?(project)
@@ -261,33 +266,6 @@ module EE
     end
 
     private
-
-    def get_project_security_nav_tabs(project, current_user)
-      nav_tabs = []
-
-      if can?(current_user, :read_project_security_dashboard, project)
-        nav_tabs << :security
-        nav_tabs << :security_configuration
-      end
-
-      if can?(current_user, :read_on_demand_scans, @project)
-        nav_tabs << :on_demand_scans
-      end
-
-      if can?(current_user, :read_dependencies, project)
-        nav_tabs << :dependencies
-      end
-
-      if can?(current_user, :read_licenses, project)
-        nav_tabs << :licenses
-      end
-
-      if can?(current_user, :read_threat_monitoring, project)
-        nav_tabs << :threat_monitoring
-      end
-
-      nav_tabs
-    end
 
     def remove_message_data(project)
       {

@@ -17,10 +17,6 @@ module Packages
       def create_npm_package!
         package = create_package!(:npm, name: name, version: version)
 
-        if build.present?
-          package.create_build_info!(pipeline: build.pipeline)
-        end
-
         ::Packages::CreatePackageFileService.new(package, file_params).execute
         ::Packages::CreateDependencyService.new(package, package_dependencies).execute
         ::Packages::Npm::CreateTagService.new(package, dist_tag).execute
@@ -50,10 +46,6 @@ module Packages
         params[:versions][version]
       end
 
-      def build
-        params[:build]
-      end
-
       def dist_tag
         params['dist-tags'].each_key.first
       end
@@ -75,7 +67,8 @@ module Packages
           file:      CarrierWaveStringFile.new(Base64.decode64(attachment['data'])),
           size:      attachment['length'],
           file_sha1: version_data[:dist][:shasum],
-          file_name: package_file_name
+          file_name: package_file_name,
+          build:     params[:build]
         }
       end
 

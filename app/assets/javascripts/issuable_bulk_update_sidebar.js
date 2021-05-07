@@ -3,11 +3,11 @@
 import $ from 'jquery';
 import { property } from 'lodash';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
-import MilestoneSelect from './milestone_select';
 import issueStatusSelect from './issue_status_select';
-import subscriptionSelect from './subscription_select';
-import LabelsSelect from './labels_select';
 import issueableEventHub from './issues_list/eventhub';
+import LabelsSelect from './labels_select';
+import MilestoneSelect from './milestone_select';
+import subscriptionSelect from './subscription_select';
 
 const HIDDEN_CLASS = 'hidden';
 const DISABLED_CONTENT_CLASS = 'disabled-content';
@@ -34,28 +34,23 @@ export default class IssuableBulkUpdateSidebar {
     this.$otherFilters = $('.issues-other-filters');
     this.$checkAllContainer = $('.check-all-holder');
     this.$issueChecks = $('.issue-check');
-    this.$issuesList = $('.selected-issuable');
+    this.$issuesList = $('.issuable-list input[type="checkbox"]');
     this.$issuableIdsInput = $('#update_issuable_ids');
   }
 
   bindEvents() {
-    this.$bulkUpdateEnableBtn.on('click', e => this.toggleBulkEdit(e, true));
-    this.$bulkEditCancelBtn.on('click', e => this.toggleBulkEdit(e, false));
-    this.$checkAllContainer.on('click', e => this.selectAll(e));
+    this.$bulkUpdateEnableBtn.on('click', (e) => this.toggleBulkEdit(e, true));
+    this.$bulkEditCancelBtn.on('click', (e) => this.toggleBulkEdit(e, false));
+    this.$checkAllContainer.on('click', (e) => this.selectAll(e));
     this.$issuesList.on('change', () => this.updateFormState());
     this.$bulkEditSubmitBtn.on('click', () => this.prepForSubmit());
     this.$checkAllContainer.on('click', () => this.updateFormState());
 
-    if (this.vueIssuablesListFeature) {
-      issueableEventHub.$on('issuables:updateBulkEdit', () => {
-        // Danger! Strong coupling ahead!
-        // The bulk update sidebar and its dropdowns look for .selected-issuable checkboxes, and get data on which issue
-        // is selected by inspecting the DOM. Ideally, we would pass the selected issuable IDs and their properties
-        // explicitly, but this component is used in too many places right now to refactor straight away.
-
-        this.updateFormState();
-      });
-    }
+    // The event hub connects this bulk update logic with `issues_list_app.vue`.
+    // We can remove it once we've refactored the issues list page bulk edit sidebar to Vue.
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/325874
+    issueableEventHub.$on('issuables:enableBulkEdit', () => this.toggleBulkEdit(null, true));
+    issueableEventHub.$on('issuables:updateBulkEdit', () => this.updateFormState());
   }
 
   initDropdowns() {
@@ -79,6 +74,16 @@ export default class IssuableBulkUpdateSidebar {
         })
         .catch(() => {});
     }
+
+    if (IS_EE) {
+      import('ee/vue_shared/components/sidebar/iterations_dropdown_bundle')
+        .then(({ default: iterationsDropdown }) => {
+          iterationsDropdown();
+        })
+        .catch((e) => {
+          throw e;
+        });
+    }
   }
 
   setupBulkUpdateActions() {
@@ -86,7 +91,7 @@ export default class IssuableBulkUpdateSidebar {
   }
 
   updateFormState() {
-    const noCheckedIssues = !$('.selected-issuable:checked').length;
+    const noCheckedIssues = !$('.issuable-list input[type="checkbox"]:checked').length;
 
     this.toggleSubmitButtonDisabled(noCheckedIssues);
     this.updateSelectedIssuableIds();
@@ -102,7 +107,7 @@ export default class IssuableBulkUpdateSidebar {
   }
 
   toggleBulkEdit(e, enable) {
-    e.preventDefault();
+    e?.preventDefault();
 
     issueableEventHub.$emit('issuables:toggleBulkEdit', enable);
 
@@ -156,10 +161,10 @@ export default class IssuableBulkUpdateSidebar {
   }
 
   static getCheckedIssueIds() {
-    const $checkedIssues = $('.selected-issuable:checked');
+    const $checkedIssues = $('.issuable-list input[type="checkbox"]:checked');
 
     if ($checkedIssues.length > 0) {
-      return $.map($checkedIssues, value => $(value).data('id'));
+      return $.map($checkedIssues, (value) => $(value).data('id'));
     }
 
     return [];

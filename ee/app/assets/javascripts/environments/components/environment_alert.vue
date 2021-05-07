@@ -15,15 +15,15 @@ export default {
     GlTooltip,
   },
   mixins: [TimeagoMixin],
+  inject: {
+    projectPath: {
+      default: '',
+    },
+  },
   props: {
     environment: {
       required: true,
       type: Object,
-    },
-  },
-  inject: {
-    projectPath: {
-      default: '',
     },
   },
   data() {
@@ -53,7 +53,7 @@ export default {
       return this.alert?.prometheusAlert?.humanizedText;
     },
     severity() {
-      return this.alert?.severity || '';
+      return this.alert?.severity;
     },
   },
   classes: [
@@ -71,7 +71,7 @@ export default {
   <div v-if="alert" :class="$options.classes" data-testid="alert">
     <gl-sprintf :message="$options.translations.alertText">
       <template #severity>
-        <severity-badge :severity="severity" class="gl-display-inline" />
+        <severity-badge v-if="severity" :severity="severity" class="gl-display-inline" />
       </template>
       <template #startedAt>
         <span v-gl-tooltip :title="tooltipTitle(alert.startedAt)">

@@ -15,6 +15,7 @@ const {
   UNINSTALL_ERRORED,
   PRE_INSTALLED,
   UNINSTALLED,
+  EXTERNALLY_INSTALLED,
 } = APPLICATION_STATUS;
 
 const applicationStateMachine = {
@@ -70,6 +71,9 @@ const applicationStateMachine = {
       },
       [UNINSTALLED]: {
         target: UNINSTALLED,
+      },
+      [EXTERNALLY_INSTALLED]: {
+        target: EXTERNALLY_INSTALLED,
       },
     },
   },
@@ -189,6 +193,12 @@ const applicationStateMachine = {
     on: {
       [INSTALLABLE]: {
         target: INSTALLABLE,
+        effects: {
+          uninstallSuccessful: true,
+        },
+      },
+      [NOT_INSTALLABLE]: {
+        target: NOT_INSTALLABLE,
         effects: {
           uninstallSuccessful: true,
         },

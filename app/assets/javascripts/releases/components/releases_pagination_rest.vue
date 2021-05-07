@@ -1,16 +1,16 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import { historyPushState, buildUrlWithCurrentLocation } from '~/lib/utils/common_utils';
+import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 
 export default {
   name: 'ReleasesPaginationRest',
   components: { TablePagination },
   computed: {
-    ...mapState('list', ['restPageInfo']),
+    ...mapState('index', ['restPageInfo']),
   },
   methods: {
-    ...mapActions('list', ['fetchReleases']),
+    ...mapActions('index', ['fetchReleases']),
     onChangePage(page) {
       historyPushState(buildUrlWithCurrentLocation(`?page=${page}`));
       this.fetchReleases({ page });

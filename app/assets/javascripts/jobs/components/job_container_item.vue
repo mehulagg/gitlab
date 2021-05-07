@@ -1,8 +1,8 @@
 <script>
 import { GlLink, GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
 import { sprintf } from '~/locale';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
 export default {
   components: {
@@ -48,10 +48,10 @@ export default {
     }"
   >
     <gl-link
-      v-gl-tooltip
+      v-gl-tooltip:tooltip-container.left
       :href="job.status.details_path"
       :title="tooltipText"
-      class="js-job-link d-flex"
+      class="js-job-link gl-display-flex gl-align-items-center"
     >
       <gl-icon
         v-if="isActive"
@@ -63,7 +63,7 @@ export default {
 
       <span class="text-truncate w-100">{{ job.name ? job.name : job.id }}</span>
 
-      <gl-icon v-if="job.retried" name="retry" class="js-retry-icon" />
+      <gl-icon v-if="job.retried" name="retry" />
     </gl-link>
   </div>
 </template>

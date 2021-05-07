@@ -67,13 +67,22 @@ RSpec.describe ApplicationRecord do
       end
 
       it 'raises a validation error if the record was not persisted' do
-        expect { Suggestion.find_or_create_by!(note: nil) }.to raise_error(ActiveRecord::RecordInvalid)
+        expect { Suggestion.safe_find_or_create_by!(note: nil) }
+          .to raise_error(ActiveRecord::RecordInvalid)
       end
 
       it 'passes a block to find_or_create_by' do
         expect do |block|
           Suggestion.safe_find_or_create_by!(suggestion_attributes, &block)
         end.to yield_with_args(an_object_having_attributes(suggestion_attributes))
+      end
+
+      it 'raises a record not found error in case of attributes mismatch' do
+        suggestion = Suggestion.safe_find_or_create_by!(suggestion_attributes)
+        attributes = suggestion_attributes.merge(outdated: !suggestion.outdated)
+
+        expect { Suggestion.safe_find_or_create_by!(attributes) }
+          .to raise_error(ActiveRecord::RecordNotFound)
       end
     end
   end
@@ -84,18 +93,40 @@ RSpec.describe ApplicationRecord do
     end
   end
 
-  describe '.at_most' do
-    it 'limits the number of records returned' do
-      create_list(:user, 3)
-      expect(User.at_most(2).count).to eq(2)
-    end
-  end
-
   describe '.where_exists' do
     it 'produces a WHERE EXISTS query' do
       user = create(:user)
 
       expect(User.where_exists(User.limit(1))).to eq([user])
+    end
+  end
+
+  describe '.with_fast_read_statement_timeout' do
+    context 'when the query runs faster than configured timeout' do
+      it 'executes the query without error' do
+        result = nil
+
+        expect do
+          described_class.with_fast_read_statement_timeout(100) do
+            result = described_class.connection.exec_query('SELECT 1')
+          end
+        end.not_to raise_error
+
+        expect(result).not_to be_nil
+      end
+    end
+
+    # This query hangs for 10ms and then gets cancelled.  As there is no
+    # other way to test the timeout for sure, 10ms of waiting seems to be
+    # reasonable!
+    context 'when the query runs longer than configured timeout' do
+      it 'cancels the query and raises an exception' do
+        expect do
+          described_class.with_fast_read_statement_timeout(10) do
+            described_class.connection.exec_query('SELECT pg_sleep(0.1)')
+          end
+        end.to raise_error(ActiveRecord::QueryCanceled)
+      end
     end
   end
 end

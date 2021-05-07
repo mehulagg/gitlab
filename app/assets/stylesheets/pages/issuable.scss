@@ -1,19 +1,16 @@
 .issuable-warning-icon {
   background-color: $orange-50;
   border-radius: $border-radius-default;
+  color: $orange-600;
   width: $issuable-warning-size;
   height: $issuable-warning-size;
   text-align: center;
   margin-right: $issuable-warning-icon-margin;
   line-height: $gl-line-height-24;
-
-  .icon {
-    fill: $orange-600;
-    vertical-align: text-bottom;
-  }
 }
 
 .limit-container-width {
+  .flash-container,
   .detail-page-header,
   .page-content-header,
   .commit-box,
@@ -116,8 +113,13 @@
     position: absolute;
     bottom: 0;
     right: 0;
-    text-shadow: -1px -1px 2px $white, 1px -1px 2px $white, -1px 1px 2px $white, 1px 1px 2px $white;
+    filter: drop-shadow(0 0 0.5px $white) drop-shadow(0 0 1px $white) drop-shadow(0 0 2px $white);
   }
+}
+
+.reviewer .merge-icon {
+  bottom: -3px;
+  right: -3px;
 }
 
 .right-sidebar {
@@ -159,14 +161,6 @@
     color: inherit;
   }
 
-  // TODO remove this class once we can generate a correct hover utility from `gitlab/ui`,
-  // see here: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39286#note_396767000
-  .btn-link-hover:hover {
-    * {
-      @include gl-text-blue-800;
-    }
-  }
-
   .issuable-header-text {
     margin-top: 7px;
   }
@@ -203,10 +197,6 @@
       border: 0;
     }
 
-    .select2-container span {
-      margin-top: 0;
-    }
-
     &.assignee {
       .author-link {
         display: block;
@@ -227,7 +217,6 @@
 
   .title {
     color: $gl-text-color;
-    margin-bottom: $gl-padding-4;
     line-height: $gl-line-height-20;
 
     .avatar {
@@ -235,8 +224,7 @@
     }
   }
 
-  .cross-project-reference,
-  .sidebar-mr-source-branch {
+  .cross-project-reference {
     color: inherit;
 
     span {
@@ -246,10 +234,6 @@
       position: relative;
       display: inline-block;
       text-overflow: ellipsis;
-    }
-
-    cite {
-      font-style: normal;
     }
 
     button {
@@ -302,7 +286,7 @@
       padding-top: 10px;
     }
 
-    &:not(.issue-boards-sidebar):not([data-signed-in]):not([data-always-show-toggle]) {
+    &:not(.boards-sidebar):not([data-signed-in]):not([data-always-show-toggle]) {
       .issuable-sidebar-header {
         display: none;
       }
@@ -399,6 +383,13 @@
       text-align: center;
     }
 
+    .merge-icon {
+      height: 12px;
+      width: 12px;
+      bottom: -5px;
+      right: 4px;
+    }
+
     .sidebar-collapsed-icon {
       display: flex;
       flex-direction: column;
@@ -409,7 +400,7 @@
       text-align: center;
       color: $gl-text-color-secondary;
 
-      svg {
+      > svg {
         fill: $gl-text-color-secondary;
       }
 
@@ -417,7 +408,7 @@
       &:hover .todo-undone {
         color: $gl-text-color;
 
-        svg {
+        > svg {
           fill: $gl-text-color;
         }
       }
@@ -487,10 +478,6 @@
 
     .issuable-header-btn {
       display: none;
-    }
-
-    .merge-icon {
-      font-size: 10px;
     }
 
     .multiple-users {
@@ -645,7 +632,7 @@
   }
 
   .btn-link:hover {
-    @extend a:hover;
+    color: $blue-800;
     text-decoration: none;
   }
 
@@ -701,10 +688,6 @@
 
 .issuable-list {
   li {
-    .issue-box {
-      display: flex;
-    }
-
     .issuable-info-container {
       flex: 1;
       display: flex;
@@ -808,11 +791,41 @@
   }
 }
 
-.time_tracker {
-  padding-bottom: 0;
-  border-bottom: 0;
+.add-issuable-form-input-token-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  list-style: none;
+  margin-bottom: 0;
+  padding-left: 0;
+}
 
+.add-issuable-form-token-list-item {
+  max-width: 100%;
+  margin-bottom: $gl-vert-padding;
+  margin-right: 5px;
+}
 
+.add-issuable-form-input-list-item {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: $gl-vert-padding;
+}
+
+.add-issuable-form-input {
+  width: 100%;
+  border: 0;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.add-issuable-form-actions {
+  margin-top: $gl-padding;
+}
+
+.time-tracker {
   .sidebar-collapsed-icon {
     > .stopwatch-svg {
       display: inline-block;
@@ -902,26 +915,22 @@
   }
 }
 
-.issuable-close-button,
-.issuable-close-toggle {
-  @include transition(border-color, color);
-}
-
-.issuable-close-dropdown {
-  .dropdown-menu {
-    min-width: 270px;
-    left: auto;
-    right: 0;
+/*
+ * Following overrides are done to prevent
+ * legacy dropdown styles from influencing
+ * GitLab UI components used within GlDropdown
+ */
+.issuable-move-dropdown {
+  .b-dropdown-form {
+    @include gl-p-0;
   }
 
-  .description {
-    .text {
-      margin: 0;
-    }
+  .gl-search-box-by-type button.gl-clear-icon-button:hover {
+    @include gl-bg-transparent;
   }
 
-  .dropdown-toggle > .icon {
-    margin: 0 3px;
+  .issuable-move-button:not(.disabled):hover {
+    @include gl-text-white;
   }
 }
 

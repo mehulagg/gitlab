@@ -1,6 +1,6 @@
+import { GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import EmptyRuleName from 'ee/approvals/components/empty_rule_name.vue';
-import { GlLink } from '@gitlab/ui';
 
 describe('Empty Rule Name', () => {
   let wrapper;

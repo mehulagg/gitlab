@@ -24,7 +24,7 @@ RSpec.describe 'User creates a merge request with blocking MRs', :js do
       visit(project_new_merge_request_path(project, merge_request: mr_params))
 
       fill_in 'Merge request dependencies', with: other_mr.to_reference(full: true)
-      click_button('Submit merge request')
+      click_button 'Create merge request'
 
       expect(page).to have_content('Depends on 1 merge request')
     end

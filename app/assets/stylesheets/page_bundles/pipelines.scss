@@ -22,7 +22,7 @@
     min-width: 170px; //Guarantees buttons don't break in several lines.
 
     .btn-default {
-      color: $gl-text-color-secondary;
+      color: var(--gray-500, $gray-500);
     }
 
     .btn.btn-retry:hover,
@@ -32,7 +32,7 @@
     }
 
     svg path {
-      fill: $gl-text-color-secondary;
+      fill: var(--gray-500, $gray-500);
     }
 
     .dropdown-menu {
@@ -42,12 +42,7 @@
 
     .dropdown-toggle,
     .dropdown-menu {
-      color: $gl-text-color-secondary;
-
-      .fa {
-        color: $gl-text-color-secondary;
-        font-size: 14px;
-      }
+      color: var(--gray-500, $gray-500);
     }
 
     .btn-group.open .btn-default {
@@ -142,8 +137,16 @@
   }
 }
 
-// Dropdown button in mini pipeline graph
-button.mini-pipeline-graph-dropdown-toggle {
+// Commit mini pipeline (HAML)
+button.mini-pipeline-graph-dropdown-toggle,
+// GlDropdown mini pipeline (Vue)
+//   As the `mini-pipeline-item` mixin specificity is lower
+//   than the toggle of dropdown with 'variant="link"' we add
+//   classes ".gl-button.btn-link" to make it more specific
+//   and avoid having the size overriden
+//
+//   See https://gitlab.com/gitlab-org/gitlab/-/issues/320737
+button.gl-button.btn-link.mini-pipeline-graph-dropdown-toggle {
   @include mini-pipeline-item();
 }
 
@@ -177,11 +180,6 @@ button.mini-pipeline-graph-dropdown-toggle {
   &::before {
     border-width: 0 5px 5px;
     border-bottom-color: $border-color;
-  }
-
-  &::after {
-    margin-top: 1px;
-    border-bottom-color: $white;
   }
 
   /**

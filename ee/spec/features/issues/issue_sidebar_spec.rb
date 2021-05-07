@@ -17,6 +17,21 @@ RSpec.describe 'Issue Sidebar' do
     sign_in(user)
   end
 
+  context 'Assignees', :js do
+    let(:user2) { create(:user) }
+    let(:issue2) { create(:issue, project: project, author: user2) }
+
+    it 'shows label text as "Apply" when assignees are changed' do
+      project.add_developer(user)
+      visit_issue(project, issue2)
+
+      open_assignees_dropdown
+      click_on 'Unassigned'
+
+      expect(page).to have_content('Apply')
+    end
+  end
+
   context 'updating weight', :js do
     before do
       project.add_maintainer(user)
@@ -96,7 +111,9 @@ RSpec.describe 'Issue Sidebar' do
 
       context 'when user closes an issue' do
         it 'disables the edit button' do
-          page.find('[data-testid="close-issue-button"]').click
+          page.within('.detail-page-header') do
+            click_button 'Close issue'
+          end
 
           page.within('.health-status') do
             expect(page).to have_button('Edit', disabled: true)
@@ -114,22 +131,12 @@ RSpec.describe 'Issue Sidebar' do
         expect(page).not_to have_selector('.block.health-status')
       end
     end
-
-    context 'when health status feature flag is disabled' do
-      it 'does not show health status on sidebar' do
-        stub_licensed_features(issuable_health_status: true)
-        stub_feature_flags(save_issuable_health_status: false)
-
-        visit_issue(project, issue)
-
-        expect(page).not_to have_selector('.block.health-status')
-      end
-    end
   end
 
   context 'Iterations', :js do
     context 'when iterations feature available' do
       let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now, title: 'Iteration 1') }
+      let_it_be(:iteration2) { create(:iteration, group: group, start_date: 2.days.ago, due_date: 1.day.ago, title: 'Iteration 2', state: 'closed', skip_future_date_validation: true) }
 
       before do
         iteration
@@ -153,7 +160,15 @@ RSpec.describe 'Issue Sidebar' do
 
         select_iteration('No iteration')
 
-        expect(page.find('[data-testid="select-iteration"]')).to have_content('No iteration')
+        expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+      end
+
+      it 'does not show closed iterations' do
+        find_and_click_edit_iteration
+
+        page.within '.milestone' do
+          expect(page).not_to have_content iteration2.title
+        end
       end
     end
 
@@ -191,7 +206,9 @@ RSpec.describe 'Issue Sidebar' do
   end
 
   def find_and_click_edit_iteration
-    page.find('[data-testid="iteration-edit-link"]').click
+    page.find('[data-testid="iteration-edit-link"] [data-testid="edit-button"]').click
+
+    wait_for_all_requests
   end
 
   def select_iteration(iteration_name)
@@ -207,5 +224,12 @@ RSpec.describe 'Issue Sidebar' do
   def open_issue_sidebar
     find('aside.right-sidebar.right-sidebar-collapsed .js-sidebar-toggle').click
     find('aside.right-sidebar.right-sidebar-expanded')
+  end
+
+  def open_assignees_dropdown
+    page.within('.assignee') do
+      click_button('Edit')
+      wait_for_requests
+    end
   end
 end

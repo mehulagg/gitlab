@@ -10,15 +10,63 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
   let(:context) { GraphQL::Query::Context.new(query: OpenStruct.new(schema: schema), values: nil, object: nil) }
 
   subject(:connection) do
-    described_class.new(nodes, { context: context, max_page_size: 3 }.merge(arguments))
+    described_class.new(nodes, **{ context: context, max_page_size: 3 }.merge(arguments))
   end
 
   def encoded_cursor(node)
-    described_class.new(nodes, { context: context }).cursor_for(node)
+    described_class.new(nodes, context: context).cursor_for(node)
   end
 
   def decoded_cursor(cursor)
     Gitlab::Json.parse(Base64Bp.urlsafe_decode64(cursor))
+  end
+
+  # see: https://gitlab.com/gitlab-org/gitlab/-/issues/297358
+  context 'the relation has been preloaded' do
+    let(:projects) { Project.all.preload(:issues) }
+    let(:nodes) { projects.first.issues }
+
+    before do
+      project = create(:project)
+      create_list(:issue, 3, project: project)
+    end
+
+    it 'is loaded' do
+      expect(nodes).to be_loaded
+    end
+
+    it 'does not error when accessing pagination information' do
+      connection.first = 2
+
+      expect(connection).to have_attributes(
+        has_previous_page: false,
+        has_next_page: true
+      )
+    end
+
+    it 'can generate cursors' do
+      connection.send(:ordered_items) # necessary to generate the order-list
+
+      expect(connection.cursor_for(nodes.first)).to be_a(String)
+    end
+
+    it 'can read the next page' do
+      connection.send(:ordered_items) # necessary to generate the order-list
+      ordered = nodes.reorder(id: :desc)
+      next_page = described_class.new(nodes,
+                                      context: context,
+                                      max_page_size: 3,
+                                      after: connection.cursor_for(ordered.second))
+
+      expect(next_page.sliced_nodes).to contain_exactly(ordered.third)
+    end
+  end
+
+  it_behaves_like 'a connection with collection methods'
+
+  it_behaves_like 'a redactable connection' do
+    let_it_be(:projects) { create_list(:project, 2) }
+    let(:unwanted) { projects.second }
   end
 
   describe '#cursor_for' do
@@ -289,6 +337,7 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
 
   describe '#nodes' do
     let_it_be(:all_nodes) { create_list(:project, 5) }
+
     let(:paged_nodes) { subject.nodes }
 
     it_behaves_like 'connection with paged nodes' do
@@ -308,9 +357,10 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
 
       it 'is added to end' do
         sliced = subject.sliced_nodes
-        last_order_name = sliced.order_values.last.expr.name
 
-        expect(last_order_name).to eq sliced.primary_key
+        order_sql = sliced.order_values.last.to_sql
+
+        expect(order_sql).to end_with(Project.arel_table[:id].desc.to_sql)
       end
     end
 

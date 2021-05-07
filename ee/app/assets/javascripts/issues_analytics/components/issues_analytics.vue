@@ -1,15 +1,15 @@
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex';
-import { engineeringNotation, sum, average } from '@gitlab/ui/src/utils/number_utils';
 import { GlLoadingIcon, GlEmptyState } from '@gitlab/ui';
 import { GlColumnChart, GlChartLegend } from '@gitlab/ui/dist/charts';
-import { s__ } from '~/locale';
+import { engineeringNotation, sum, average } from '@gitlab/ui/src/utils/number_utils';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import { getMonthNames } from '~/lib/utils/datetime_utility';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
-import IssuesAnalyticsTable from './issues_analytics_table.vue';
+import { s__ } from '~/locale';
 import FilteredSearchIssueAnalytics from '../filtered_search_issues_analytics';
 import { transformFilters } from '../utils';
+import IssuesAnalyticsTable from './issues_analytics_table.vue';
 
 export default {
   components: {
@@ -66,7 +66,7 @@ export default {
       const data = [];
 
       if (chartHasData()) {
-        Object.keys(chartData).forEach(key => {
+        Object.keys(chartData).forEach((key) => {
           const date = new Date(key);
           const label = `${getMonthNames(true)[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
           const val = chartData[key];
@@ -78,7 +78,7 @@ export default {
       return data;
     },
     chartLabels() {
-      return this.data.map(val => val[0]);
+      return this.data.map((val) => val[0]);
     },
     chartDateRange() {
       return `${this.chartLabels[0]} - ${this.chartLabels[this.chartLabels.length - 1]}`;
@@ -110,7 +110,7 @@ export default {
       };
     },
     series() {
-      return this.data.map(val => val[1]);
+      return this.data.map((val) => val[1]);
     },
     seriesAverage() {
       return engineeringNotation(average(...this.series), 0);
@@ -159,11 +159,11 @@ export default {
         return false;
       }
 
-      return Object.values(this.chartData).some(val => val > 0);
+      return Object.values(this.chartData).some((val) => val > 0);
     },
     setSvg(name) {
       getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
@@ -182,7 +182,7 @@ export default {
 
       <gl-column-chart
         data-qa-selector="issues_analytics_graph"
-        :data="{ Full: data }"
+        :bars="[{ name: 'Full', data }]"
         :option="chartOptions"
         :y-axis-title="s__('IssuesAnalytics|Issues opened')"
         :x-axis-title="s__('IssuesAnalytics|Last 12 months') + ' (' + chartDateRange + ')'"

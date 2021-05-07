@@ -1,11 +1,11 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index
 ---
 
-# Install GitLab with Docker
+# Install GitLab with Docker **(FREE SELF)**
 
 [Docker](https://www.docker.com) and container technology have been revolutionizing the software world for the past few years. They combine the performance and efficiency of native execution with the abstraction, security, and immutability of virtualization.
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :indexer do
     desc "GitLab | Indexer | Install or upgrade gitlab-elasticsearch-indexer"

@@ -4,10 +4,10 @@ import { GlTooltipDirective, GlLink, GlButton, GlButtonGroup, GlLoadingIcon } fr
 import defaultAvatarUrl from 'images/no_avatar.png';
 import pathLastCommitQuery from 'shared_queries/repository/path_last_commit.query.graphql';
 import { sprintf, s__ } from '~/locale';
-import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
-import TimeagoTooltip from '../../vue_shared/components/time_ago_tooltip.vue';
 import CiIcon from '../../vue_shared/components/ci_icon.vue';
 import ClipboardButton from '../../vue_shared/components/clipboard_button.vue';
+import TimeagoTooltip from '../../vue_shared/components/time_ago_tooltip.vue';
+import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import getRefMixin from '../mixins/get_ref';
 import projectPathQuery from '../queries/project_path.query.graphql';
 
@@ -39,7 +39,7 @@ export default {
           path: this.currentPath.replace(/^\//, ''),
         };
       },
-      update: data => {
+      update: (data) => {
         const pipelines = data.project?.repository?.tree?.lastCommit?.pipelines?.edges;
 
         return {
@@ -80,6 +80,10 @@ export default {
     },
     showCommitId() {
       return this.commit?.sha?.substr(0, 8);
+    },
+    commitDescription() {
+      // Strip the newline at the beginning
+      return this.commit?.descriptionHtml?.replace(/^&#x000A;/, '');
     },
   },
   watch: {
@@ -137,8 +141,8 @@ export default {
               :href="commit.author.webPath"
               class="commit-author-link js-user-link"
             >
-              {{ commit.author.name }}
-            </gl-link>
+              {{ commit.author.name }}</gl-link
+            >
             <template v-else>
               {{ commit.authorName }}
             </template>
@@ -146,10 +150,10 @@ export default {
             <timeago-tooltip :time="commit.authoredDate" tooltip-placement="bottom" />
           </div>
           <pre
-            v-if="commit.descriptionHtml"
+            v-if="commitDescription"
             :class="{ 'd-block': showDescription }"
             class="commit-row-description gl-mb-3"
-            v-html="commit.descriptionHtml"
+            v-html="commitDescription"
           ></pre>
         </div>
         <div class="commit-actions flex-row">

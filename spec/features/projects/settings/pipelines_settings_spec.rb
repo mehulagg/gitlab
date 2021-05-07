@@ -46,7 +46,7 @@ RSpec.describe "Projects > Settings > Pipelines settings" do
     it 'updates auto_cancel_pending_pipelines' do
       visit project_settings_ci_cd_path(project)
 
-      page.check('Auto-cancel redundant, pending pipelines')
+      page.check('Auto-cancel redundant pipelines')
       page.within '#js-general-pipeline-settings' do
         click_on 'Save changes'
       end
@@ -183,7 +183,7 @@ RSpec.describe "Projects > Settings > Pipelines settings" do
         let(:page_token) { find('#registration_token').text }
 
         before do
-          click_button 'Reset runners registration token'
+          click_button 'Reset registration token'
         end
 
         it 'changes registration token' do

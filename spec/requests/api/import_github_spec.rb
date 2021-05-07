@@ -44,13 +44,29 @@ RSpec.describe API::ImportGithub do
 
     it 'returns 201 response when the project is imported successfully' do
       allow(Gitlab::LegacyGithubImport::ProjectCreator)
-        .to receive(:new).with(provider_repo, provider_repo.name, user.namespace, user, access_params, type: provider)
+        .to receive(:new).with(provider_repo, provider_repo.name, user.namespace, user, type: provider, **access_params)
           .and_return(double(execute: project))
 
       post api("/import/github", user), params: {
         target_namespace: user.namespace_path,
         personal_access_token: token,
         repo_id: non_existing_record_id
+      }
+      expect(response).to have_gitlab_http_status(:created)
+      expect(json_response).to be_a Hash
+      expect(json_response['name']).to eq(project.name)
+    end
+
+    it 'returns 201 response when the project is imported successfully from GHE' do
+      allow(Gitlab::LegacyGithubImport::ProjectCreator)
+        .to receive(:new).with(provider_repo, provider_repo.name, user.namespace, user, type: provider, **access_params)
+          .and_return(double(execute: project))
+
+      post api("/import/github", user), params: {
+        target_namespace: user.namespace_path,
+        personal_access_token: token,
+        repo_id: non_existing_record_id,
+        github_hostname: "https://github.somecompany.com/"
       }
       expect(response).to have_gitlab_http_status(:created)
       expect(json_response).to be_a Hash

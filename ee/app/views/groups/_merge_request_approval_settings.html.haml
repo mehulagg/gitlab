@@ -1,0 +1,8 @@
+- expanded = local_assigns.fetch(:expanded)
+- user = local_assigns.fetch(:user)
+- group = local_assigns.fetch(:group)
+
+- return unless show_merge_request_approval_settings?(user, group)
+
+- group_merge_request_approval_setting_api_path = expose_path(api_v4_groups_merge_request_approval_setting_path(id: group.id))
+%section#js-merge-request-approval-settings{ data: { default_expanded: expanded, approval_settings_path: group_merge_request_approval_setting_api_path } }

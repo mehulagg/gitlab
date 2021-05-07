@@ -1,7 +1,7 @@
+import { GlAlert, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Iterations from 'ee/iterations/components/iterations.vue';
 import IterationsList from 'ee/iterations/components/iterations_list.vue';
-import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { Namespace } from 'ee/iterations/constants';
 
 describe('Iterations', () => {
@@ -65,7 +65,7 @@ describe('Iterations', () => {
 
   describe('pagination', () => {
     const findPagination = () => wrapper.find(GlPagination);
-    const setPage = page => {
+    const setPage = (page) => {
       findPagination().vm.$emit('input', page);
       return findPagination().vm.$nextTick();
     };

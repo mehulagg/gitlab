@@ -1,12 +1,12 @@
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
-import axios from '~/lib/utils/axios_utils';
-import boardsStore, { gqlClient } from '~/boards/stores/boards_store';
 import eventHub from '~/boards/eventhub';
-import { listObj, listObjDuplicate } from './mock_data';
 
 import ListIssue from '~/boards/models/issue';
 import List from '~/boards/models/list';
+import boardsStore from '~/boards/stores/boards_store';
+import axios from '~/lib/utils/axios_utils';
+import { listObj, listObjDuplicate } from './mock_data';
 
 jest.mock('js-cookie');
 
@@ -66,23 +66,6 @@ describe('boardsStore', () => {
     });
   });
 
-  describe('generateDefaultLists', () => {
-    const listsEndpointGenerate = `${endpoints.listsEndpoint}/generate.json`;
-
-    it('makes a request to generate default lists', () => {
-      axiosMock.onPost(listsEndpointGenerate).replyOnce(200, dummyResponse);
-      const expectedResponse = expect.objectContaining({ data: dummyResponse });
-
-      return expect(boardsStore.generateDefaultLists()).resolves.toEqual(expectedResponse);
-    });
-
-    it('fails for error response', () => {
-      axiosMock.onPost(listsEndpointGenerate).replyOnce(500);
-
-      return expect(boardsStore.generateDefaultLists()).rejects.toThrow();
-    });
-  });
-
   describe('createList', () => {
     const entityType = 'moorhen';
     const entityId = 'quack';
@@ -94,7 +77,7 @@ describe('boardsStore', () => {
 
     beforeEach(() => {
       requestSpy = jest.fn();
-      axiosMock.onPost(endpoints.listsEndpoint).replyOnce(config => requestSpy(config));
+      axiosMock.onPost(endpoints.listsEndpoint).replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to create a list', () => {
@@ -131,7 +114,7 @@ describe('boardsStore', () => {
 
     beforeEach(() => {
       requestSpy = jest.fn();
-      axiosMock.onPut(`${endpoints.listsEndpoint}/${id}`).replyOnce(config => requestSpy(config));
+      axiosMock.onPut(`${endpoints.listsEndpoint}/${id}`).replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to update a list position', () => {
@@ -165,7 +148,7 @@ describe('boardsStore', () => {
       requestSpy = jest.fn();
       axiosMock
         .onDelete(`${endpoints.listsEndpoint}/${id}`)
-        .replyOnce(config => requestSpy(config));
+        .replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to delete a list', () => {
@@ -286,7 +269,7 @@ describe('boardsStore', () => {
       requestSpy = jest.fn();
       axiosMock
         .onPut(`${urlRoot}/-/boards/${boardId}/issues/${id}`)
-        .replyOnce(config => requestSpy(config));
+        .replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to move an issue between lists', () => {
@@ -325,7 +308,7 @@ describe('boardsStore', () => {
 
     beforeEach(() => {
       requestSpy = jest.fn();
-      axiosMock.onPost(url).replyOnce(config => requestSpy(config));
+      axiosMock.onPost(url).replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to create a new issue', () => {
@@ -395,7 +378,7 @@ describe('boardsStore', () => {
 
     beforeEach(() => {
       requestSpy = jest.fn();
-      axiosMock.onPost(endpoints.bulkUpdatePath).replyOnce(config => requestSpy(config));
+      axiosMock.onPost(endpoints.bulkUpdatePath).replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to create a list', () => {
@@ -470,136 +453,6 @@ describe('boardsStore', () => {
       axiosMock.onGet(url).replyOnce(500);
 
       return expect(boardsStore.recentBoards()).rejects.toThrow();
-    });
-  });
-
-  describe('createBoard', () => {
-    const labelIds = ['first label', 'second label'];
-    const assigneeId = 'as sign ee';
-    const milestoneId = 'vegetable soup';
-    const board = {
-      labels: labelIds.map(id => ({ id })),
-      assignee: { id: assigneeId },
-      milestone: { id: milestoneId },
-    };
-
-    describe('for existing board', () => {
-      const id = 'skate-board';
-      const url = `${endpoints.boardsEndpoint}/${id}.json`;
-      const expectedRequest = expect.objectContaining({
-        data: JSON.stringify({
-          board: {
-            ...board,
-            id,
-            label_ids: labelIds,
-            assignee_id: assigneeId,
-            milestone_id: milestoneId,
-          },
-        }),
-      });
-
-      let requestSpy;
-
-      beforeEach(() => {
-        requestSpy = jest.fn();
-        axiosMock.onPut(url).replyOnce(config => requestSpy(config));
-        jest.spyOn(gqlClient, 'mutate').mockReturnValue(Promise.resolve({}));
-      });
-
-      it('makes a request to update the board', () => {
-        requestSpy.mockReturnValue([200, dummyResponse]);
-        const expectedResponse = [
-          expect.objectContaining({ data: dummyResponse }),
-          expect.objectContaining({}),
-        ];
-
-        return expect(
-          boardsStore.createBoard({
-            ...board,
-            id,
-          }),
-        )
-          .resolves.toEqual(expectedResponse)
-          .then(() => {
-            expect(requestSpy).toHaveBeenCalledWith(expectedRequest);
-          });
-      });
-
-      it('fails for error response', () => {
-        requestSpy.mockReturnValue([500]);
-
-        return expect(
-          boardsStore.createBoard({
-            ...board,
-            id,
-          }),
-        )
-          .rejects.toThrow()
-          .then(() => {
-            expect(requestSpy).toHaveBeenCalledWith(expectedRequest);
-          });
-      });
-    });
-
-    describe('for new board', () => {
-      const url = `${endpoints.boardsEndpoint}.json`;
-      const expectedRequest = expect.objectContaining({
-        data: JSON.stringify({
-          board: {
-            ...board,
-            label_ids: labelIds,
-            assignee_id: assigneeId,
-            milestone_id: milestoneId,
-          },
-        }),
-      });
-
-      let requestSpy;
-
-      beforeEach(() => {
-        requestSpy = jest.fn();
-        axiosMock.onPost(url).replyOnce(config => requestSpy(config));
-        jest.spyOn(gqlClient, 'mutate').mockReturnValue(Promise.resolve({}));
-      });
-
-      it('makes a request to create a new board', () => {
-        requestSpy.mockReturnValue([200, dummyResponse]);
-        const expectedResponse = dummyResponse;
-
-        return expect(boardsStore.createBoard(board))
-          .resolves.toEqual(expectedResponse)
-          .then(() => {
-            expect(requestSpy).toHaveBeenCalledWith(expectedRequest);
-          });
-      });
-
-      it('fails for error response', () => {
-        requestSpy.mockReturnValue([500]);
-
-        return expect(boardsStore.createBoard(board))
-          .rejects.toThrow()
-          .then(() => {
-            expect(requestSpy).toHaveBeenCalledWith(expectedRequest);
-          });
-      });
-    });
-  });
-
-  describe('deleteBoard', () => {
-    const id = 'capsized';
-    const url = `${endpoints.boardsEndpoint}/${id}.json`;
-
-    it('makes a request to delete a boards', () => {
-      axiosMock.onDelete(url).replyOnce(200, dummyResponse);
-      const expectedResponse = expect.objectContaining({ data: dummyResponse });
-
-      return expect(boardsStore.deleteBoard({ id })).resolves.toEqual(expectedResponse);
-    });
-
-    it('fails for error response', () => {
-      axiosMock.onDelete(url).replyOnce(500);
-
-      return expect(boardsStore.deleteBoard({ id })).rejects.toThrow();
     });
   });
 
@@ -727,30 +580,12 @@ describe('boardsStore', () => {
         });
       });
 
-      it('check for blank state adding', () => {
-        expect(boardsStore.shouldAddBlankState()).toBe(true);
-      });
-
-      it('check for blank state not adding', () => {
-        boardsStore.addList(listObj);
-
-        expect(boardsStore.shouldAddBlankState()).toBe(false);
-      });
-
-      it('check for blank state adding when closed list exist', () => {
-        boardsStore.addList({
-          list_type: 'closed',
-        });
-
-        expect(boardsStore.shouldAddBlankState()).toBe(true);
-      });
-
       it('removes list from state', () => {
         boardsStore.addList(listObj);
 
         expect(boardsStore.state.lists.length).toBe(1);
 
-        boardsStore.removeList(listObj.id, 'label');
+        boardsStore.removeList(listObj.id);
 
         expect(boardsStore.state.lists.length).toBe(0);
       });

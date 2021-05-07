@@ -1,10 +1,12 @@
-import { mount, shallowMount } from '@vue/test-utils';
-import { within } from '@testing-library/dom';
-import { merge } from 'lodash';
 import { GlDropdown, GlTabs } from '@gitlab/ui';
-import setWindowLocation from 'helpers/set_window_location_helper';
+import { within } from '@testing-library/dom';
+import { mount, shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
+import DastFailedSiteValidations from 'ee/security_configuration/dast_profiles/components/dast_failed_site_validations.vue';
 import DastProfiles from 'ee/security_configuration/dast_profiles/components/dast_profiles.vue';
+import setWindowLocation from 'helpers/set_window_location_helper';
 
+const TEST_NEW_DAST_SAVED_SCAN_PATH = '/-/on_demand_scans/new';
 const TEST_NEW_DAST_SCANNER_PROFILE_PATH = '/-/on_demand_scans/scanner_profiles/new';
 const TEST_NEW_DAST_SITE_PROFILE_PATH = '/-/on_demand_scans/site_profiles/new';
 const TEST_PROJECT_FULL_PATH = '/namespace/project';
@@ -15,6 +17,7 @@ describe('EE - DastProfiles', () => {
   const createComponentFactory = (mountFn = shallowMount) => (options = {}) => {
     const defaultProps = {
       createNewProfilePaths: {
+        savedScan: TEST_NEW_DAST_SAVED_SCAN_PATH,
         scannerProfile: TEST_NEW_DAST_SCANNER_PROFILE_PATH,
         siteProfile: TEST_NEW_DAST_SITE_PROFILE_PATH,
       },
@@ -24,6 +27,9 @@ describe('EE - DastProfiles', () => {
     const defaultMocks = {
       $apollo: {
         queries: {
+          dastProfiles: {
+            fetchMore: jest.fn().mockResolvedValue(),
+          },
           siteProfiles: {
             fetchMore: jest.fn().mockResolvedValue(),
           },
@@ -43,6 +49,11 @@ describe('EE - DastProfiles', () => {
         {
           propsData: defaultProps,
           mocks: defaultMocks,
+          provide: {
+            glFeatures: {
+              dastFailedSiteValidations: true,
+            },
+          },
         },
         options,
       ),
@@ -53,9 +64,9 @@ describe('EE - DastProfiles', () => {
   const createFullComponent = createComponentFactory(mount);
 
   const withinComponent = () => within(wrapper.element);
-  const getProfilesComponent = profileType => wrapper.find(`[data-testid="${profileType}List"]`);
+  const getProfilesComponent = (profileType) => wrapper.find(`[data-testid="${profileType}List"]`);
   const getDropdownComponent = () => wrapper.find(GlDropdown);
-  const getSiteProfilesDropdownItem = text =>
+  const getSiteProfilesDropdownItem = (text) =>
     within(getDropdownComponent().element).queryByText(text);
   const getTabsComponent = () => wrapper.find(GlTabs);
   const getTab = ({ tabName, selected }) =>
@@ -68,33 +79,38 @@ describe('EE - DastProfiles', () => {
     wrapper.destroy();
   });
 
+  describe('failed validations', () => {
+    it('renders the failed site validations summary', () => {
+      createComponent();
+
+      expect(wrapper.findComponent(DastFailedSiteValidations).exists()).toBe(true);
+    });
+  });
+
   describe('header', () => {
     it('shows a heading that describes the purpose of the page', () => {
       createFullComponent();
 
-      const heading = withinComponent().getByRole('heading', { name: /manage profiles/i });
+      const heading = withinComponent().getByRole('heading', { name: /manage dast scans/i });
 
       expect(heading).not.toBe(null);
     });
 
-    it('has a "New Profile" dropdown menu', () => {
+    it('has a "New" dropdown menu', () => {
       createComponent();
 
-      expect(getDropdownComponent().props('text')).toBe('New Profile');
+      expect(getDropdownComponent().props('text')).toBe('New');
     });
 
-    it(`shows a "Site Profile" dropdown item that links to ${TEST_NEW_DAST_SITE_PROFILE_PATH}`, () => {
+    it.each`
+      itemName             | href
+      ${'DAST Scan'}       | ${TEST_NEW_DAST_SAVED_SCAN_PATH}
+      ${'Site Profile'}    | ${TEST_NEW_DAST_SITE_PROFILE_PATH}
+      ${'Scanner Profile'} | ${TEST_NEW_DAST_SCANNER_PROFILE_PATH}
+    `('shows a "$itemName" dropdown item that links to $href', ({ itemName, href }) => {
       createComponent();
 
-      expect(getSiteProfilesDropdownItem('Site Profile').getAttribute('href')).toBe(
-        TEST_NEW_DAST_SITE_PROFILE_PATH,
-      );
-    });
-
-    it(`shows a "Scanner Profile" dropdown item that links to ${TEST_NEW_DAST_SCANNER_PROFILE_PATH}`, () => {
-      expect(getSiteProfilesDropdownItem('Scanner Profile').getAttribute('href')).toBe(
-        TEST_NEW_DAST_SCANNER_PROFILE_PATH,
-      );
+      expect(getSiteProfilesDropdownItem(itemName).getAttribute('href')).toBe(href);
     });
   });
 
@@ -114,7 +130,8 @@ describe('EE - DastProfiles', () => {
 
       it.each`
         tabName               | shouldBeSelectedByDefault
-        ${'Site Profiles'}    | ${true}
+        ${'Saved Scans'}      | ${true}
+        ${'Site Profiles'}    | ${false}
         ${'Scanner Profiles'} | ${false}
       `(
         'shows a "$tabName" tab which has "selected" set to "$shouldBeSelectedByDefault"',
@@ -131,8 +148,9 @@ describe('EE - DastProfiles', () => {
 
     describe.each`
       tabName               | index | givenLocationHash
-      ${'Site Profiles'}    | ${0}  | ${'site-profiles'}
-      ${'Scanner Profiles'} | ${1}  | ${'scanner-profiles'}
+      ${'Saved Scans'}      | ${0}  | ${'saved-scans'}
+      ${'Site Profiles'}    | ${1}  | ${'site-profiles'}
+      ${'Scanner Profiles'} | ${2}  | ${'scanner-profiles'}
     `('with location hash set to "$givenLocationHash"', ({ tabName, index, givenLocationHash }) => {
       beforeEach(() => {
         setWindowLocation(`http://foo.com/index#${givenLocationHash}`);
@@ -162,8 +180,34 @@ describe('EE - DastProfiles', () => {
     });
   });
 
+  it.each`
+    profileType          | key                            | givenData                              | expectedValue | exposedAsProp
+    ${'dastProfiles'}    | ${'errorMessage'}              | ${{ errorMessage: 'foo' }}             | ${'foo'}      | ${true}
+    ${'dastProfiles'}    | ${'errorDetails'}              | ${{ errorDetails: ['foo'] }}           | ${['foo']}    | ${true}
+    ${'dastProfiles'}    | ${'has-more-profiles-to-load'} | ${{ pageInfo: { hasNextPage: true } }} | ${'true'}     | ${false}
+    ${'siteProfiles'}    | ${'error-message'}             | ${{ errorMessage: 'foo' }}             | ${'foo'}      | ${false}
+    ${'siteProfiles'}    | ${'error-details'}             | ${{ errorDetails: ['foo'] }}           | ${'foo'}      | ${false}
+    ${'siteProfiles'}    | ${'has-more-profiles-to-load'} | ${{ pageInfo: { hasNextPage: true } }} | ${'true'}     | ${false}
+    ${'scannerProfiles'} | ${'error-message'}             | ${{ errorMessage: 'foo' }}             | ${'foo'}      | ${false}
+    ${'scannerProfiles'} | ${'error-details'}             | ${{ errorDetails: ['foo'] }}           | ${'foo'}      | ${false}
+    ${'scannerProfiles'} | ${'has-more-profiles-to-load'} | ${{ pageInfo: { hasNextPage: true } }} | ${'true'}     | ${false}
+  `(
+    'passes down $key properly for $profileType',
+    async ({ profileType, key, givenData, expectedValue, exposedAsProp }) => {
+      const propGetter = exposedAsProp ? 'props' : 'attributes';
+      createComponent();
+      wrapper.setData({
+        profileTypes: { [profileType]: givenData },
+      });
+      await wrapper.vm.$nextTick();
+
+      expect(getProfilesComponent(profileType)[propGetter](key)).toEqual(expectedValue);
+    },
+  );
+
   describe.each`
     description                | profileType
+    ${'Saved Scans List'}      | ${'dastProfiles'}
     ${'Site Profiles List'}    | ${'siteProfiles'}
     ${'Scanner Profiles List'} | ${'scannerProfiles'}
   `('$description', ({ profileType }) => {
@@ -171,36 +215,10 @@ describe('EE - DastProfiles', () => {
       createComponent();
     });
 
-    it('passes down the correct default props', () => {
-      expect(getProfilesComponent(profileType).props()).toEqual({
-        errorMessage: '',
-        errorDetails: [],
-        hasMoreProfilesToLoad: false,
-        isLoading: false,
-        profilesPerPage: expect.any(Number),
-        profiles: [],
-        fields: expect.any(Array),
-      });
-    });
+    it('passes down the loading state when loading is true', () => {
+      createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading: true } } } } });
 
-    it.each([true, false])('passes down the loading state when loading is "%s"', loading => {
-      createComponent({ mocks: { $apollo: { queries: { [profileType]: { loading } } } } });
-
-      expect(getProfilesComponent(profileType).props('isLoading')).toBe(loading);
-    });
-
-    it.each`
-      givenData                                                                   | propName                   | expectedPropValue
-      ${{ profileTypes: { [profileType]: { errorMessage: 'foo' } } }}             | ${'errorMessage'}          | ${'foo'}
-      ${{ profileTypes: { [profileType]: { errorDetails: ['foo'] } } }}           | ${'errorDetails'}          | ${['foo']}
-      ${{ profileTypes: { [profileType]: { pageInfo: { hasNextPage: true } } } }} | ${'hasMoreProfilesToLoad'} | ${true}
-      ${{ profileTypes: { [profileType]: { profiles: [{ foo: 'bar' }] } } }}      | ${'profiles'}              | ${[{ foo: 'bar' }]}
-    `('passes down $propName correctly', async ({ givenData, propName, expectedPropValue }) => {
-      wrapper.setData(givenData);
-
-      await wrapper.vm.$nextTick();
-
-      expect(getProfilesComponent(profileType).props(propName)).toEqual(expectedPropValue);
+      expect(getProfilesComponent(profileType).attributes('is-loading')).toBe('true');
     });
 
     it('fetches more results when "@load-more-profiles" is emitted', () => {
@@ -229,6 +247,20 @@ describe('EE - DastProfiles', () => {
       getProfilesComponent(profileType).vm.$emit('delete-profile');
 
       expect(mutate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('dastFailedSiteValidations feature flag disabled', () => {
+    it('does not render the failed site validations summary', () => {
+      createComponent({
+        provide: {
+          glFeatures: {
+            dastFailedSiteValidations: false,
+          },
+        },
+      });
+
+      expect(wrapper.findComponent(DastFailedSiteValidations).exists()).toBe(false);
     });
   });
 });

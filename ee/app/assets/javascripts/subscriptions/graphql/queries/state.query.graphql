@@ -1,0 +1,31 @@
+query state {
+  namespaces @client {
+    id
+    name
+    users
+  }
+  isNewUser @client
+  fullName @client
+  isSetupForCompany @client
+  customer @client {
+    country
+    address1
+    address2
+    city
+    state
+    zipCode
+    company
+  }
+  subscription @client {
+    planId
+    paymentMethodId
+    quantity
+    namespaceId
+  }
+  activeStep @client {
+    id
+  }
+  stepList @client {
+    id
+  }
+}

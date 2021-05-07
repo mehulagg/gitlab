@@ -87,16 +87,17 @@ module EE
       def find_project!(id)
         project = find_project(id)
 
+        return forbidden! unless authorized_project_scope?(project)
+
         # CI job token authentication:
         # this method grants limited privileged for admin users
         # admin users can only access project if they are direct member
         ability = job_token_authentication? ? :build_read_project : :read_project
 
-        if can?(current_user, ability, project)
-          project
-        else
-          not_found!('Project')
-        end
+        return project if can?(current_user, ability, project)
+        return unauthorized! if authenticate_non_public?
+
+        not_found!('Project')
       end
 
       override :find_group!

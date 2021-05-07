@@ -6,6 +6,8 @@ module API
 
     before { authenticate! }
 
+    feature_category :issue_tracking
+
     ISSUABLE_TYPES = {
       'merge_requests' => ->(iid) { find_merge_request_with_access(iid) },
       'issues' => ->(iid) { find_project_issue(iid) }
@@ -26,6 +28,11 @@ module API
         end
         post ":id/#{type}/:#{type_id_str}/todo" do
           issuable = instance_exec(params[type_id_str], &finder)
+
+          unless can?(current_user, :read_merge_request, issuable.project)
+            not_found!(type.split("_").map(&:capitalize).join(" "))
+          end
+
           todo = TodoService.new.mark_todo(issuable, current_user).first
 
           if todo
@@ -72,7 +79,7 @@ module API
             next unless collection
 
             targets = collection.map(&:target)
-            options[type] = { issuable_metadata: Gitlab::IssuableMetadata.new(current_user, targets).data }
+            options[type] = { issuable_metadata: Gitlab::IssuableMetadata.new(current_user, targets).data, include_subscribed: false }
           end
         end
       end

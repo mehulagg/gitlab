@@ -18,6 +18,7 @@
 #     personal: boolean
 #     search: string
 #     search_namespaces: boolean
+#     minimum_search_length: int
 #     non_archived: boolean
 #     archived: 'only' or boolean
 #     min_access_level: integer
@@ -51,7 +52,7 @@ class ProjectsFinder < UnionFinder
     collection = Project.wrap_with_cte(collection) if use_cte
     collection = filter_projects(collection)
 
-    if params[:sort] == 'similarity' && params[:search] && Feature.enabled?(:project_finder_similarity_sort)
+    if params[:sort] == 'similarity' && params[:search] && Feature.enabled?(:project_finder_similarity_sort, current_user)
       collection.sorted_by_similarity_desc(params[:search])
     else
       sort(collection)
@@ -82,8 +83,7 @@ class ProjectsFinder < UnionFinder
     collection = by_deleted_status(collection)
     collection = by_last_activity_after(collection)
     collection = by_last_activity_before(collection)
-    collection = by_repository_storage(collection)
-    collection
+    by_repository_storage(collection)
   end
 
   def collection_with_user
@@ -130,7 +130,7 @@ class ProjectsFinder < UnionFinder
 
     public_visibility_levels = Gitlab::VisibilityLevel.levels_for_user(current_user)
 
-    !public_visibility_levels.include?(params[:visibility_level])
+    !public_visibility_levels.include?(params[:visibility_level].to_i)
   end
 
   def owned_projects?
@@ -182,6 +182,9 @@ class ProjectsFinder < UnionFinder
 
   def by_search(items)
     params[:search] ||= params[:name]
+
+    return items.none if params[:search].present? && params[:minimum_search_length].present? && params[:search].length < params[:minimum_search_length].to_i
+
     items.optionally_search(params[:search], include_namespace: params[:search_namespaces].present?)
   end
 

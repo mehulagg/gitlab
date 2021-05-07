@@ -1,6 +1,5 @@
 <script>
 import { GlLink, GlSprintf, GlButton } from '@gitlab/ui';
-import MrWidgetIcon from './mr_widget_icon.vue';
 import Tracking from '~/tracking';
 import DismissibleContainer from '~/vue_shared/components/dismissible_container.vue';
 import {
@@ -13,6 +12,7 @@ import {
   SP_HELP_URL,
   SP_ICON_NAME,
 } from '../constants';
+import MrWidgetIcon from './mr_widget_icon.vue';
 
 const trackingMixin = Tracking.mixin();
 
@@ -86,12 +86,12 @@ export default {
           to create one.`)
           "
         >
-          <template #prefixToLink="{content}">
+          <template #prefixToLink="{ content }">
             <strong>
               {{ content }}
             </strong>
           </template>
-          <template #addPipelineLink="{content}">
+          <template #addPipelineLink="{ content }">
             <gl-link
               :href="pipelinePath"
               class="gl-ml-1"

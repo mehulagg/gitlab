@@ -70,6 +70,16 @@ RSpec.describe SearchController, type: :request do
 
         it_behaves_like 'an efficient database result'
       end
+
+      context 'for notes scope' do
+        let(:creation_traits) { [:on_commit] }
+        let(:object) { :note }
+        let(:creation_args) { { project: project } }
+        let(:params) { { search: '*', scope: 'notes' } }
+        let(:threshold) { 0 }
+
+        it_behaves_like 'an efficient database result'
+      end
     end
   end
 end

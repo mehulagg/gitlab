@@ -1,4 +1,4 @@
-= form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-visibility-settings'), html: { class: 'fieldset-form' } do |f|
+= form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-visibility-settings'), html: { class: 'fieldset-form', id: 'visibility-settings' } do |f|
   = form_errors(@application_setting)
 
   %fieldset
@@ -35,11 +35,11 @@
         .form-check= source
       %span.form-text.text-muted#import-sources-help
         = _('Enabled sources for code import during project creation. OmniAuth must be configured for GitHub')
-        = link_to "(?)", help_page_path("integration/github")
+        = link_to sprite_icon('question-o'), help_page_path("integration/github")
         , Bitbucket
-        = link_to "(?)", help_page_path("integration/bitbucket")
+        = link_to sprite_icon('question-o'), help_page_path("integration/bitbucket")
         and GitLab.com
-        = link_to "(?)", help_page_path("integration/gitlab")
+        = link_to sprite_icon('question-o'), help_page_path("integration/gitlab")
 
     = render_if_exists 'admin/application_settings/ldap_access_setting', form: f
 
@@ -57,7 +57,7 @@
 
     .form-group
       = f.label :custom_http_clone_url_root, _('Custom Git clone URL for HTTP(S)'), class: 'label-bold'
-      = f.text_field :custom_http_clone_url_root, class: 'form-control', placeholder: 'https://git.example.com', :'aria-describedby' => 'custom_http_clone_url_root_help_block'
+      = f.text_field :custom_http_clone_url_root, class: 'form-control gl-form-input', placeholder: 'https://git.example.com', :'aria-describedby' => 'custom_http_clone_url_root_help_block'
       %span.form-text.text-muted#custom_http_clone_url_root_help_block
         = _('Replaces the clone URL root.')
 
@@ -66,4 +66,12 @@
       .form-group
         = f.label field_name, "#{type.upcase} SSH keys", class: 'label-bold'
         = f.select field_name, key_restriction_options_for_select(type), {}, class: 'form-control'
-  = f.submit _('Save changes'), class: "gl-button btn btn-success"
+
+    .form-group
+      %label.label-bold= s_('AdminSettings|Feed token')
+      .form-check
+        = f.check_box :disable_feed_token, class: 'form-check-input'
+        = f.label :disable_feed_token, class: 'form-check-label' do
+          = s_('AdminSettings|Disable feed token')
+
+  = f.submit _('Save changes'), class: "gl-button btn btn-confirm"

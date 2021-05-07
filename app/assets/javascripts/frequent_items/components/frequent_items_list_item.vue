@@ -1,13 +1,19 @@
 <script>
 /* eslint-disable vue/require-default-prop, vue/no-v-html */
-import Identicon from '~/vue_shared/components/identicon.vue';
 import highlight from '~/lib/utils/highlight';
 import { truncateNamespace } from '~/lib/utils/text_utility';
+import { mapVuexModuleState } from '~/lib/utils/vuex_module_mappers';
+import Tracking from '~/tracking';
+import Identicon from '~/vue_shared/components/identicon.vue';
+
+const trackingMixin = Tracking.mixin();
 
 export default {
   components: {
     Identicon,
   },
+  mixins: [trackingMixin],
+  inject: ['vuexModule'],
   props: {
     matcher: {
       type: String,
@@ -37,6 +43,7 @@ export default {
     },
   },
   computed: {
+    ...mapVuexModuleState((vm) => vm.vuexModule, ['dropdownType']),
     truncatedNamespace() {
       return truncateNamespace(this.namespace);
     },
@@ -49,7 +56,11 @@ export default {
 
 <template>
   <li class="frequent-items-list-item-container">
-    <a :href="webUrl" class="clearfix">
+    <a
+      :href="webUrl"
+      class="clearfix"
+      @click="track('click_link', { label: `${dropdownType}_dropdown_frequent_items_list_item` })"
+    >
       <div
         ref="frequentItemsItemAvatarContainer"
         class="frequent-items-item-avatar-container avatar-container rect-avatar s32"

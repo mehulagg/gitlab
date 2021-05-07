@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import { removeParams } from '~/lib/utils/url_utility';
 import createGroupTree from '~/groups';
 import {
   ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
@@ -9,8 +8,9 @@ import {
   GROUPS_LIST_HOLDER_CLASS,
   GROUPS_FILTER_FORM_CLASS,
 } from '~/groups/constants';
-import UserTabs from '~/pages/users/user_tabs';
 import GroupFilterableList from '~/groups/groups_filterable_list';
+import { removeParams } from '~/lib/utils/url_utility';
+import UserTabs from '~/pages/users/user_tabs';
 
 export default class GroupTabs extends UserTabs {
   constructor({ defaultAction = 'subgroups_and_projects', action, parentEl }) {
@@ -20,7 +20,7 @@ export default class GroupTabs extends UserTabs {
   bindEvents() {
     this.$parentEl
       .off('shown.bs.tab', '.nav-links a[data-toggle="tab"]')
-      .on('shown.bs.tab', '.nav-links a[data-toggle="tab"]', event => this.tabShown(event));
+      .on('shown.bs.tab', '.nav-links a[data-toggle="tab"]', (event) => this.tabShown(event));
   }
 
   tabShown(event) {
@@ -117,7 +117,7 @@ export default class GroupTabs extends UserTabs {
 
   cleanFilterState() {
     const values = Object.values(this.loaded);
-    const loadedTabs = values.filter(e => e === true);
+    const loadedTabs = values.filter((e) => e === true);
 
     if (!loadedTabs.length) {
       return;

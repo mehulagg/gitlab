@@ -1,6 +1,4 @@
 <script>
-import { mapState } from 'vuex';
-import { mapValues, pickBy } from 'lodash';
 import {
   GlResizeObserverDirective,
   GlIcon,
@@ -15,26 +13,28 @@ import {
   GlTooltip,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import invalidUrl from '~/lib/utils/invalid_url';
+import { mapValues, pickBy } from 'lodash';
+import { mapState } from 'vuex';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import { convertToFixedRange } from '~/lib/utils/datetime_range';
+import invalidUrl from '~/lib/utils/invalid_url';
 import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import { __, n__ } from '~/locale';
+import TrackEventDirective from '~/vue_shared/directives/track_event';
 import { panelTypes } from '../constants';
 
-import MonitorEmptyChart from './charts/empty_chart.vue';
-import MonitorTimeSeriesChart from './charts/time_series.vue';
+import { graphDataToCsv } from '../csv_export';
+import { timeRangeToUrl, downloadCSVOptions, generateLinkToChartOptions } from '../utils';
+import AlertWidget from './alert_widget.vue';
 import MonitorAnomalyChart from './charts/anomaly.vue';
-import MonitorSingleStatChart from './charts/single_stat.vue';
+import MonitorBarChart from './charts/bar.vue';
+import MonitorColumnChart from './charts/column.vue';
+import MonitorEmptyChart from './charts/empty_chart.vue';
 import MonitorGaugeChart from './charts/gauge.vue';
 import MonitorHeatmapChart from './charts/heatmap.vue';
-import MonitorColumnChart from './charts/column.vue';
-import MonitorBarChart from './charts/bar.vue';
+import MonitorSingleStatChart from './charts/single_stat.vue';
 import MonitorStackedColumnChart from './charts/stacked_column.vue';
-
-import TrackEventDirective from '~/vue_shared/directives/track_event';
-import AlertWidget from './alert_widget.vue';
-import { timeRangeToUrl, downloadCSVOptions, generateLinkToChartOptions } from '../utils';
-import { graphDataToCsv } from '../csv_export';
+import MonitorTimeSeriesChart from './charts/time_series.vue';
 
 const events = {
   timeRangeZoom: 'timerangezoom',
@@ -271,8 +271,8 @@ export default {
   methods: {
     getGraphAlerts(queries) {
       if (!this.allAlerts) return {};
-      const metricIdsForChart = queries.map(q => q.metricId);
-      return pickBy(this.allAlerts, alert => metricIdsForChart.includes(alert.metricId));
+      const metricIdsForChart = queries.map((q) => q.metricId);
+      return pickBy(this.allAlerts, (alert) => metricIdsForChart.includes(alert.metricId));
     },
     getGraphAlertValues(queries) {
       return Object.values(this.getGraphAlerts(queries));
@@ -318,7 +318,7 @@ export default {
       return isSafeURL(url) ? url : '#';
     },
     showAlertModal() {
-      this.$root.$emit('bv::show::modal', this.alertModalId);
+      this.$root.$emit(BV_SHOW_MODAL, this.alertModalId);
     },
     showAlertModalFromKeyboardShortcut() {
       if (this.isContextualMenuShown) {
@@ -346,10 +346,10 @@ export default {
       }
     },
     getAlertRunbooks(queries) {
-      const hasRunbook = alert => Boolean(alert.runbookUrl);
+      const hasRunbook = (alert) => Boolean(alert.runbookUrl);
       const graphAlertsWithRunbooks = pickBy(this.getGraphAlerts(queries), hasRunbook);
-      const alertToRunbookTransform = alert => {
-        const alertQuery = queries.find(query => query.metricId === alert.metricId);
+      const alertToRunbookTransform = (alert) => {
+        const alertQuery = queries.find((query) => query.metricId === alert.metricId);
         return {
           key: alert.metricId,
           href: alert.runbookUrl,
@@ -365,7 +365,7 @@ export default {
 <template>
   <div v-gl-resize-observer="onResize" class="prometheus-graph">
     <div class="d-flex align-items-center">
-      <slot name="topLeft"></slot>
+      <slot name="top-left"></slot>
       <h5
         ref="graphTitle"
         class="prometheus-graph-title gl-font-lg font-weight-bold text-truncate gl-mr-3"
@@ -394,10 +394,10 @@ export default {
         data-qa-selector="prometheus_graph_widgets"
       >
         <div data-testid="dropdown-wrapper" class="d-flex align-items-center">
-          <!-- 
+          <!--
             This component should be replaced with a variant developed
             as part of https://gitlab.com/gitlab-org/gitlab-ui/-/issues/936
-            The variant will create a dropdown with an icon, no text and no caret    
+            The variant will create a dropdown with an icon, no text and no caret
            -->
           <gl-dropdown
             v-gl-tooltip

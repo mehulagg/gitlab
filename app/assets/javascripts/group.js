@@ -1,7 +1,7 @@
-import { slugify } from './lib/utils/text_utility';
-import fetchGroupPathAvailability from '~/pages/groups/new/fetch_group_path_availability';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
+import fetchGroupPathAvailability from '~/pages/groups/new/fetch_group_path_availability';
+import { slugify } from './lib/utils/text_utility';
 
 export default class Group {
   constructor() {
@@ -12,17 +12,15 @@ export default class Group {
     this.resetHandler = this.reset.bind(this);
     this.updateGroupPathSlugHandler = this.updateGroupPathSlug.bind(this);
 
-    this.groupNames.forEach(groupName => {
+    this.groupNames.forEach((groupName) => {
       if (groupName.value === '') {
         groupName.addEventListener('keyup', this.updateHandler);
 
-        if (!this.parentId.value) {
-          groupName.addEventListener('blur', this.updateGroupPathSlugHandler);
-        }
+        groupName.addEventListener('blur', this.updateGroupPathSlugHandler);
       }
     });
 
-    this.groupPaths.forEach(groupPath => {
+    this.groupPaths.forEach((groupPath) => {
       groupPath.addEventListener('keydown', this.resetHandler);
     });
   }
@@ -30,21 +28,21 @@ export default class Group {
   update({ currentTarget: { value: updatedValue } }) {
     const slug = slugify(updatedValue);
 
-    this.groupNames.forEach(element => {
+    this.groupNames.forEach((element) => {
       element.value = updatedValue;
     });
-    this.groupPaths.forEach(element => {
+    this.groupPaths.forEach((element) => {
       element.value = slug;
     });
   }
 
   reset() {
-    this.groupNames.forEach(groupName => {
+    this.groupNames.forEach((groupName) => {
       groupName.removeEventListener('keyup', this.updateHandler);
       groupName.removeEventListener('blur', this.checkPathHandler);
     });
 
-    this.groupPaths.forEach(groupPath => {
+    this.groupPaths.forEach((groupPath) => {
       groupPath.removeEventListener('keydown', this.resetHandler);
     });
   }
@@ -53,13 +51,13 @@ export default class Group {
     const slug = this.groupPaths[0]?.value || slugify(value);
     if (!slug) return;
 
-    fetchGroupPathAvailability(slug)
+    fetchGroupPathAvailability(slug, this.parentId?.value)
       .then(({ data }) => data)
       .then(({ exists, suggests }) => {
         if (exists && suggests.length) {
           const [suggestedSlug] = suggests;
 
-          this.groupPaths.forEach(element => {
+          this.groupPaths.forEach((element) => {
             element.value = suggestedSlug;
           });
         } else if (exists && !suggests.length) {

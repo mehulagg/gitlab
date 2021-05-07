@@ -8,6 +8,7 @@ RSpec.describe Projects::DesignManagement::Designs::RawImagesController do
   let_it_be(:project) { create(:project, :private) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:viewer) { issue.author }
+
   let(:design_id) { design.id }
   let(:sha) { design.versions.first.sha }
   let(:filename) { design.filename }
@@ -37,10 +38,10 @@ RSpec.describe Projects::DesignManagement::Designs::RawImagesController do
       # For security, .svg images should only ever be served with Content-Disposition: attachment.
       # If this specs ever fails we must assess whether we should be serving svg images.
       # See https://gitlab.com/gitlab-org/gitlab/issues/12771
-      it 'serves files with `Content-Disposition: attachment`' do
+      it 'serves files with `Content-Disposition` header set to attachment plus the filename' do
         subject
 
-        expect(response.header['Content-Disposition']).to eq('attachment')
+        expect(response.header['Content-Disposition']).to match "attachment; filename=\"#{design.filename}\""
         expect(response).to have_gitlab_http_status(:ok)
       end
 

@@ -29,18 +29,24 @@ export default class CreateLabelDropdown {
   }
 
   cleanBinding() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$colorSuggestions.off('click');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$newLabelField.off('keyup change');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$newColorField.off('keyup change');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$dropdownBack.off('click');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$cancelButton.off('click');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.$newLabelCreateButton.off('click');
   }
 
   addBinding() {
     const self = this;
 
-    this.$colorSuggestions.on('click', function(e) {
+    this.$colorSuggestions.on('click', function (e) {
       const $this = $(this);
       self.addColorValue(e, $this);
     });
@@ -50,7 +56,7 @@ export default class CreateLabelDropdown {
 
     this.$dropdownBack.on('click', this.resetForm.bind(this));
 
-    this.$cancelButton.on('click', e => {
+    this.$cancelButton.on('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -66,10 +72,7 @@ export default class CreateLabelDropdown {
     e.stopPropagation();
 
     this.$newColorField.val($this.data('color')).trigger('change');
-    this.$colorPreview
-      .css('background-color', $this.data('color'))
-      .parent()
-      .addClass('is-active');
+    this.$colorPreview.css('background-color', $this.data('color')).parent().addClass('is-active');
   }
 
   enableLabelCreateButton() {
@@ -88,10 +91,7 @@ export default class CreateLabelDropdown {
 
     this.$addList.prop('checked', this.addListDefault);
 
-    this.$colorPreview
-      .css('background-color', '')
-      .parent()
-      .removeClass('is-active');
+    this.$colorPreview.css('background-color', '').parent().removeClass('is-active');
   }
 
   saveLabel(e) {
@@ -105,7 +105,7 @@ export default class CreateLabelDropdown {
         title: this.$newLabelField.val(),
         color: this.$newColorField.val(),
       },
-      label => {
+      (label) => {
         this.$newLabelCreateButton.enable();
 
         if (label.message) {
@@ -115,7 +115,7 @@ export default class CreateLabelDropdown {
             errors = label.message;
           } else {
             errors = Object.keys(label.message)
-              .map(key => `${humanize(key)} ${label.message[key].join(', ')}`)
+              .map((key) => `${humanize(key)} ${label.message[key].join(', ')}`)
               .join('<br/>');
           }
 

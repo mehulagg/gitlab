@@ -76,7 +76,7 @@ RSpec.describe Admin::UsersController do
         subject
 
         expect(response).to redirect_to(admin_user_path(user))
-        expect(response).to set_flash[:notice]
+        expect(controller).to set_flash[:notice]
       end
     end
 
@@ -87,7 +87,7 @@ RSpec.describe Admin::UsersController do
         subject
 
         expect(response).to render_template(:edit)
-        expect(response).to set_flash.now[:error]
+        expect(controller).to set_flash.now[:error]
       end
     end
   end
@@ -97,7 +97,7 @@ RSpec.describe Admin::UsersController do
       stub_licensed_features(extended_audit_events: true)
     end
 
-    it 'creates an audit log record' do
+    it 'creates an AuditEvent record' do
       expect { post :impersonate, params: { id: user.username } }.to change { AuditEvent.count }.by(1)
     end
   end

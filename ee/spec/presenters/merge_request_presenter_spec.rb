@@ -131,4 +131,53 @@ RSpec.describe MergeRequestPresenter do
       it { is_expected.to eq(attribute_value) }
     end
   end
+
+  describe '#discover_project_security_path' do
+    let(:presenter) { described_class.new(merge_request, current_user: user) }
+    let(:can_discover_project_security) { true }
+
+    subject { presenter.discover_project_security_path }
+
+    before do
+      allow(presenter).to receive(:show_discover_project_security?) { can_discover_project_security }
+    end
+
+    context 'when project security is discoverable' do
+      it 'returns path' do
+        is_expected.to eq(presenter.project_security_discover_path(project))
+      end
+    end
+
+    context 'when project security is not discoverable' do
+      let(:can_discover_project_security) { false }
+
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
+    end
+  end
+
+  describe '#issue_keys' do
+    let(:presenter) { described_class.new(merge_request, current_user: user) }
+
+    subject { presenter.issue_keys }
+
+    context 'when Jira issue is provided in MR title / description' do
+      let(:issue_key) { 'SIGNUP-1234' }
+
+      before do
+        merge_request.update!(title: "Fixes sign up issue #{issue_key}", description: "Related to #{issue_key}")
+      end
+
+      it { is_expected.to contain_exactly(issue_key) }
+    end
+
+    context 'when Jira issue is NOT provided in MR title / description' do
+      before do
+        merge_request.update!(title: "Fixes sign up issue", description: "Prevent spam sign ups by adding a rate limiter")
+      end
+
+      it { is_expected.to be_empty }
+    end
+  end
 end

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Config::Required::Processor do
   subject { described_class.new(config).perform }
 
-  let(:config) { { image: 'ruby:2.5.3' } }
+  let(:config) { { image: 'ruby:3.0.1' } }
 
   context 'when feature is available' do
     before do

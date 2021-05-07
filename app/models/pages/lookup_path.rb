@@ -2,6 +2,10 @@
 
 module Pages
   class LookupPath
+    include Gitlab::Utils::StrongMemoize
+
+    LegacyStorageDisabledError = Class.new(::StandardError)
+
     def initialize(project, trim_prefix: nil, domain: nil)
       @project = project
       @domain = domain
@@ -22,11 +26,7 @@ module Pages
     end
 
     def source
-      if artifacts_archive && !artifacts_archive.file_storage?
-        zip_source
-      else
-        file_source
-      end
+      zip_source || legacy_source
     end
 
     def prefix
@@ -41,27 +41,38 @@ module Pages
 
     attr_reader :project, :trim_prefix, :domain
 
-    def artifacts_archive
-      return unless Feature.enabled?(:pages_artifacts_archive, project)
-
-      # Using build artifacts is temporary solution for quick test
-      # in production environment, we'll replace this with proper
-      # `pages_deployments` later
-      project.pages_metadatum.artifacts_archive&.file
+    def deployment
+      strong_memoize(:deployment) do
+        project.pages_metadatum.pages_deployment
+      end
     end
 
     def zip_source
+      return unless deployment&.file
+
+      global_id = ::Gitlab::GlobalId.build(deployment, id: deployment.id).to_s
+
       {
         type: 'zip',
-        path: artifacts_archive.url(expire_at: 1.day.from_now)
+        path: deployment.file.url_or_file_path(expire_at: 1.day.from_now),
+        global_id: global_id,
+        sha256: deployment.file_sha256,
+        file_size: deployment.size,
+        file_count: deployment.file_count
       }
     end
 
-    def file_source
+    def legacy_source
+      raise LegacyStorageDisabledError unless Feature.enabled?(:pages_serve_from_legacy_storage, default_enabled: true)
+
       {
         type: 'file',
         path: File.join(project.full_path, 'public/')
       }
+    rescue LegacyStorageDisabledError => e
+      Gitlab::ErrorTracking.track_exception(e, project_id: project.id)
+
+      nil
     end
   end
 end

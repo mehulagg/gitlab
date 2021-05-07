@@ -4,21 +4,20 @@ require 'spec_helper'
 
 RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
   describe 'GET index' do
-    let(:project) { create(:project, :public, :repository) }
-    let(:ref_path) { 'refs/heads/master' }
-    let(:param_type) { 'coverage' }
-    let(:start_date) { '2019-12-10' }
-    let(:end_date) { '2020-03-09' }
-    let(:allowed_to_read) { true }
-    let(:user) { create(:user) }
+    let_it_be(:project) { create(:project, :public, :repository) }
+    let_it_be(:ref_path) { 'refs/heads/master' }
+    let_it_be(:param_type) { 'coverage' }
+    let_it_be(:start_date) { '2019-12-10' }
+    let_it_be(:end_date) { '2020-03-09' }
+    let_it_be(:allowed_to_read) { true }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:rspec_coverage_1) { create_daily_coverage('rspec', 79.0, '2020-03-09') }
+    let_it_be(:rspec_coverage_2) { create_daily_coverage('rspec', 77.0, '2020-03-08') }
+    let_it_be(:karma_coverage) { create_daily_coverage('karma', 81.0, '2019-12-10') }
+    let_it_be(:minitest_coverage) { create_daily_coverage('minitest', 67.0, '2019-12-09') }
+    let_it_be(:mocha_coverage) { create_daily_coverage('mocha', 71.0, '2019-12-09') }
 
     before do
-      create_daily_coverage('rspec', 79.0, '2020-03-09')
-      create_daily_coverage('rspec', 77.0, '2020-03-08')
-      create_daily_coverage('karma', 81.0, '2019-12-10')
-      create_daily_coverage('minitest', 67.0, '2019-12-09')
-      create_daily_coverage('mocha', 71.0, '2019-12-09')
-
       sign_in(user)
 
       allow(Ability).to receive(:allowed?).and_call_original
@@ -55,9 +54,7 @@ RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
       end
     end
 
-    context 'when format is CSV' do
-      let(:format) { :csv }
-
+    shared_examples 'CSV results' do
       it 'serves the results in CSV' do
         expect(response).to have_gitlab_http_status(:ok)
         expect(response.headers['Content-Type']).to eq('text/csv; charset=utf-8')
@@ -88,9 +85,7 @@ RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
       it_behaves_like 'ensuring policy'
     end
 
-    context 'when format is JSON' do
-      let(:format) { :json }
-
+    shared_examples 'JSON results' do
       it 'serves the results in JSON' do
         expect(response).to have_gitlab_http_status(:ok)
 
@@ -136,6 +131,18 @@ RSpec.describe Projects::Ci::DailyBuildGroupReportResultsController do
 
       it_behaves_like 'validating param_type'
       it_behaves_like 'ensuring policy'
+    end
+
+    context 'when format is JSON' do
+      let(:format) { :json }
+
+      it_behaves_like 'JSON results'
+    end
+
+    context 'when format is CSV' do
+      let(:format) { :csv }
+
+      it_behaves_like 'CSV results'
     end
   end
 

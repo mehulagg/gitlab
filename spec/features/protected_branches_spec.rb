@@ -9,10 +9,6 @@ RSpec.describe 'Protected Branches', :js do
   let(:admin) { create(:admin) }
   let(:project) { create(:project, :repository) }
 
-  before do
-    stub_feature_flags(deploy_keys_on_protected_branches: false)
-  end
-
   context 'logged in as developer' do
     before do
       project.add_developer(user)
@@ -28,8 +24,8 @@ RSpec.describe 'Protected Branches', :js do
       it 'does not allow developer to removes protected branch' do
         visit project_branches_path(project)
 
-        fill_in 'branch-search', with: 'fix'
-        find('#branch-search').native.send_keys(:enter)
+        find('input[data-testid="branch-search"]').set('fix')
+        find('input[data-testid="branch-search"]').native.send_keys(:enter)
 
         expect(page).to have_css('.btn-danger.disabled')
       end
@@ -51,8 +47,8 @@ RSpec.describe 'Protected Branches', :js do
       it 'removes branch after modal confirmation' do
         visit project_branches_path(project)
 
-        fill_in 'branch-search', with: 'fix'
-        find('#branch-search').native.send_keys(:enter)
+        find('input[data-testid="branch-search"]').set('fix')
+        find('input[data-testid="branch-search"]').native.send_keys(:enter)
 
         expect(page).to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 1)
@@ -62,8 +58,8 @@ RSpec.describe 'Protected Branches', :js do
         fill_in 'delete_branch_input', with: 'fix'
         click_link 'Delete protected branch'
 
-        fill_in 'branch-search', with: 'fix'
-        find('#branch-search').native.send_keys(:enter)
+        find('input[data-testid="branch-search"]').set('fix')
+        find('input[data-testid="branch-search"]').native.send_keys(:enter)
 
         expect(page).to have_content('No branches to show')
       end
@@ -73,6 +69,7 @@ RSpec.describe 'Protected Branches', :js do
   context 'logged in as admin' do
     before do
       sign_in(admin)
+      gitlab_enable_admin_mode_sign_in(admin)
     end
 
     describe "explicit protected branches" do
@@ -173,7 +170,7 @@ RSpec.describe 'Protected Branches', :js do
       stub_licensed_features(protected_refs_for_users: false)
     end
 
-    include_examples 'when the deploy_keys_on_protected_branches FF is turned on' do
+    include_examples 'Deploy keys with protected branches' do
       let(:all_dropdown_sections) { %w(Roles Deploy\ Keys) }
     end
   end

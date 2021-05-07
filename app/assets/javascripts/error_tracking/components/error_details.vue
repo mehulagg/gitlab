@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import {
   GlButton,
   GlFormInput,
@@ -8,26 +7,27 @@ import {
   GlBadge,
   GlAlert,
   GlSprintf,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlDeprecatedDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlIcon,
 } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, sprintf, n__ } from '~/locale';
-import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
-import Stacktrace from './stacktrace.vue';
-import TrackEventDirective from '~/vue_shared/directives/track_event';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { severityLevel, severityLevelVariant, errorStatus } from './constants';
 import Tracking from '~/tracking';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
+import TrackEventDirective from '~/vue_shared/directives/track_event';
+import query from '../queries/details.query.graphql';
 import {
   trackClickErrorLinkToSentryOptions,
   trackErrorDetailsViewsOptions,
   trackErrorStatusUpdateOptions,
 } from '../utils';
 
-import query from '../queries/details.query.graphql';
+import { severityLevel, severityLevelVariant, errorStatus } from './constants';
+import Stacktrace from './stacktrace.vue';
 
 const SENTRY_TIMEOUT = 10000;
 
@@ -43,9 +43,9 @@ export default {
     GlBadge,
     GlAlert,
     GlSprintf,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
-    GlDeprecatedDropdownDivider,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownDivider,
     TimeAgoTooltip,
   },
   directives: {
@@ -87,7 +87,7 @@ export default {
         };
       },
       pollInterval: 2000,
-      update: data => data.project.sentryErrors.detailedError,
+      update: (data) => data.project.sentryErrors.detailedError,
       error: () => createFlash(__('Failed to load error details from Sentry.')),
       result(res) {
         if (res.data.project?.sentryErrors?.detailedError) {
@@ -213,7 +213,7 @@ export default {
         this.errorStatus === errorStatus.RESOLVED ? errorStatus.UNRESOLVED : errorStatus.RESOLVED;
 
       // eslint-disable-next-line promise/catch-or-return
-      this.updateResolveStatus({ endpoint: this.issueUpdatePath, status }).then(res => {
+      this.updateResolveStatus({ endpoint: this.issueUpdatePath, status }).then((res) => {
         this.closedIssueId = res.closed_issue_iid;
         if (this.closedIssueId) {
           this.isAlertVisible = true;
@@ -322,7 +322,7 @@ export default {
               <gl-button
                 v-if="!error.gitlabIssuePath"
                 category="primary"
-                variant="success"
+                variant="confirm"
                 :loading="issueCreationInProgress"
                 data-qa-selector="create_issue_button"
                 @click="createIssue"
@@ -331,38 +331,38 @@ export default {
               </gl-button>
             </form>
           </div>
-          <gl-deprecated-dropdown
+          <gl-dropdown
             text="Options"
             class="error-details-options d-md-none"
             right
             :disabled="issueUpdateInProgress"
           >
-            <gl-deprecated-dropdown-item
+            <gl-dropdown-item
               data-qa-selector="update_ignore_status_button"
               @click="onIgnoreStatusUpdate"
-              >{{ ignoreBtnLabel }}</gl-deprecated-dropdown-item
+              >{{ ignoreBtnLabel }}</gl-dropdown-item
             >
-            <gl-deprecated-dropdown-item
+            <gl-dropdown-item
               data-qa-selector="update_resolve_status_button"
               @click="onResolveStatusUpdate"
-              >{{ resolveBtnLabel }}</gl-deprecated-dropdown-item
+              >{{ resolveBtnLabel }}</gl-dropdown-item
             >
-            <gl-deprecated-dropdown-divider />
-            <gl-deprecated-dropdown-item
+            <gl-dropdown-divider />
+            <gl-dropdown-item
               v-if="error.gitlabIssuePath"
               data-qa-selector="view_issue_button"
               :href="error.gitlabIssuePath"
               variant="success"
-              >{{ __('View issue') }}</gl-deprecated-dropdown-item
+              >{{ __('View issue') }}</gl-dropdown-item
             >
-            <gl-deprecated-dropdown-item
+            <gl-dropdown-item
               v-if="!error.gitlabIssuePath"
               :loading="issueCreationInProgress"
               data-qa-selector="create_issue_button"
               @click="createIssue"
-              >{{ __('Create issue') }}</gl-deprecated-dropdown-item
+              >{{ __('Create issue') }}</gl-dropdown-item
             >
-          </gl-deprecated-dropdown>
+          </gl-dropdown>
         </div>
       </div>
       <div>

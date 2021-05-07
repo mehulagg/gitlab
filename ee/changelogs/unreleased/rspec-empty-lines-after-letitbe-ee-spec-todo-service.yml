@@ -1,0 +1,5 @@
+---
+title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in todo_service_spec.rb
+merge_request: 58310
+author: Abdul Wadood @abdulwd
+type: fixed

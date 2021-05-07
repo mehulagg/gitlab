@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
-import { trimText } from 'helpers/text_helper';
-import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import { shallowMount } from '@vue/test-utils';
 import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import { trimText } from 'helpers/text_helper';
 import AccessorUtilities from '~/lib/utils/accessor';
 
 describe('Security reports summary component', () => {
@@ -11,7 +11,7 @@ describe('Security reports summary component', () => {
 
   let wrapper;
 
-  const createWrapper = options => {
+  const createWrapper = (options) => {
     wrapper = shallowMount(SecurityReportsSummary, {
       propsData: {
         summary: {},
@@ -28,6 +28,7 @@ describe('Security reports summary component', () => {
 
   const findToggleButton = () => wrapper.find('[data-testid="collapse-button"]');
   const findModalButton = () => wrapper.find('[data-testid="modal-button"]');
+  const findDownloadLink = () => wrapper.find('[data-testid="download-link"]');
 
   beforeEach(() => {
     jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
@@ -206,6 +207,25 @@ describe('Security reports summary component', () => {
 
     it('should link it to the given modal', () => {
       expect(glModalDirective).toHaveBeenCalledWith({ dastUrl: true });
+    });
+  });
+
+  describe('with scanned resources download path', () => {
+    const dastProps = {
+      vulnerabilitiesCount: 10,
+      scannedResourcesCsvPath: '/download/path',
+    };
+
+    beforeEach(() => {
+      createWrapper({
+        propsData: {
+          summary: { dast: dastProps },
+        },
+      });
+    });
+
+    it('should contain a download link', () => {
+      expect(findDownloadLink().attributes('href')).toBe('/download/path');
     });
   });
 });

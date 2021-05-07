@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlIcon, GlDropdown } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import GeoNodeFormShards from 'ee/geo_node_form/components/geo_node_form_shards.vue';
 import { MOCK_SYNC_SHARDS } from '../mock_data';
 

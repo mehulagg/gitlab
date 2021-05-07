@@ -4,24 +4,23 @@ import '~/performance_bar/components/performance_bar_app.vue';
 import performanceBar from '~/performance_bar';
 import PerformanceBarService from '~/performance_bar/services/performance_bar_service';
 
+jest.mock('~/performance_bar/performance_bar_log');
+
 describe('performance bar wrapper', () => {
   let mock;
   let vm;
 
   beforeEach(() => {
+    setFixtures('<div id="js-peek"></div>');
+    const peekWrapper = document.getElementById('js-peek');
     performance.getEntriesByType = jest.fn().mockReturnValue([]);
-
-    // clear html so that elements from previous tests don't mess with this test
-    document.body.innerHTML = '';
-    const peekWrapper = document.createElement('div');
 
     peekWrapper.setAttribute('id', 'js-peek');
     peekWrapper.setAttribute('data-env', 'development');
     peekWrapper.setAttribute('data-request-id', '123');
     peekWrapper.setAttribute('data-peek-url', '/-/peek/results');
+    peekWrapper.setAttribute('data-stats-url', 'https://log.gprd.gitlab.net/app/dashboards#/view/');
     peekWrapper.setAttribute('data-profile-url', '?lineprofiler=true');
-
-    document.body.appendChild(peekWrapper);
 
     mock = new MockAdapter(axios);
 
@@ -48,6 +47,7 @@ describe('performance bar wrapper', () => {
 
   afterEach(() => {
     vm.$destroy();
+    document.getElementById('js-peek').remove();
     mock.restore();
   });
 

@@ -4,16 +4,15 @@
 
 import $ from 'jquery';
 import { template, escape } from 'lodash';
-import { __, sprintf } from '~/locale';
-import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 import Api from '~/api';
-import axios from './lib/utils/axios_utils';
-import { timeFor, parsePikadayDate, dateInWords } from './lib/utils/datetime_utility';
-import ModalStore from './boards/stores/modal_store';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { __, sprintf } from '~/locale';
 import boardsStore, {
   boardStoreIssueSet,
   boardStoreIssueDelete,
 } from './boards/stores/boards_store';
+import axios from './lib/utils/axios_utils';
+import { timeFor, parsePikadayDate, dateInWords } from './lib/utils/datetime_utility';
 
 export default class MilestoneSelect {
   constructor(currentProject, els, options = {}) {
@@ -53,8 +52,7 @@ export default class MilestoneSelect {
       const $block = $selectBox.closest('.block');
       const $sidebarCollapsedValue = $block.find('.sidebar-collapsed-icon');
       const $value = $block.find('.value');
-      // eslint-disable-next-line no-jquery/no-fade
-      const $loading = $block.find('.block-loading').fadeOut();
+      const $loading = $block.find('.block-loading').addClass('gl-display-none');
       selectedMilestoneDefault = showAny ? '' : null;
       selectedMilestoneDefault =
         showNo && defaultNo ? __('No milestone') : selectedMilestoneDefault;
@@ -90,23 +88,28 @@ export default class MilestoneSelect {
           return getMilestones(contextId, reqParams)
             .then(({ data }) =>
               data
-                .map(m => ({
+                .map((m) => ({
                   ...m,
                   // Public API includes `title` instead of `name`.
                   name: m.title,
                 }))
                 .sort((mA, mB) => {
+                  const dueDateA = mA.due_date ? parsePikadayDate(mA.due_date) : null;
+                  const dueDateB = mB.due_date ? parsePikadayDate(mB.due_date) : null;
+
                   // Move all expired milestones to the bottom.
-                  if (mA.expired) {
-                    return 1;
-                  }
-                  if (mB.expired) {
-                    return -1;
-                  }
-                  return 0;
+                  if (mA.expired) return 1;
+                  if (mB.expired) return -1;
+
+                  // Move milestones without due dates just above expired milestones.
+                  if (!dueDateA) return 1;
+                  if (!dueDateB) return -1;
+
+                  // Sort by due date in ascending order.
+                  return dueDateA - dueDateB;
                 }),
             )
-            .then(data => {
+            .then((data) => {
               const extraOptions = [];
               if (showAny) {
                 extraOptions.push({
@@ -115,7 +118,7 @@ export default class MilestoneSelect {
                   title: __('Any milestone'),
                 });
               }
-              if (showNo) {
+              if (showNo && term.trim() === '') {
                 extraOptions.push({
                   id: -1,
                   name: __('No milestone'),
@@ -147,7 +150,7 @@ export default class MilestoneSelect {
               $(`[data-milestone-id="${selectedMilestone}"] > a`).addClass('is-active');
             });
         },
-        renderRow: milestone => {
+        renderRow: (milestone) => {
           const milestoneName = milestone.title || milestone.name;
           let milestoneDisplayName = escape(milestoneName);
 
@@ -179,8 +182,8 @@ export default class MilestoneSelect {
         },
         defaultLabel,
         fieldName: $dropdown.data('fieldName'),
-        text: milestone => escape(milestone.title),
-        id: milestone => {
+        text: (milestone) => escape(milestone.title),
+        id: (milestone) => {
           if (milestone !== undefined) {
             if (!useId && !$dropdown.is('.js-issuable-form-dropdown')) {
               return milestone.name;
@@ -194,7 +197,7 @@ export default class MilestoneSelect {
           // display:block overrides the hide-collapse rule
           return $value.css('display', '');
         },
-        opened: e => {
+        opened: (e) => {
           const $el = $(e.currentTarget);
           if ($dropdown.hasClass('js-issue-board-sidebar') || options.handleClick) {
             selectedMilestone = $dropdown[0].dataset.selected || selectedMilestoneDefault;
@@ -203,11 +206,11 @@ export default class MilestoneSelect {
           $(`[data-milestone-id="${selectedMilestone}"] > a`, $el).addClass('is-active');
         },
         vue: $dropdown.hasClass('js-issue-board-sidebar'),
-        clicked: clickEvent => {
+        clicked: (clickEvent) => {
           const { e } = clickEvent;
           let selected = clickEvent.selectedObj;
 
-          let data, modalStoreFilter;
+          let data;
           if (!selected) return;
 
           if (options.handleClick) {
@@ -230,14 +233,7 @@ export default class MilestoneSelect {
             return;
           }
 
-          if ($dropdown.closest('.add-issues-modal').length) {
-            modalStoreFilter = ModalStore.store.filter;
-          }
-
-          if (modalStoreFilter) {
-            modalStoreFilter[$dropdown.data('fieldName')] = selected.name;
-            e.preventDefault();
-          } else if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
+          if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
             return Issuable.filterResults($dropdown.closest('form'));
           } else if ($dropdown.hasClass('js-filter-submit')) {
             return $dropdown.closest('form').submit();
@@ -255,34 +251,29 @@ export default class MilestoneSelect {
             }
 
             $dropdown.trigger('loading.gl.dropdown');
-            // eslint-disable-next-line no-jquery/no-fade
-            $loading.removeClass('hidden').fadeIn();
+            $loading.removeClass('gl-display-none');
 
             boardsStore.detail.issue
               .update($dropdown.attr('data-issue-update'))
               .then(() => {
                 $dropdown.trigger('loaded.gl.dropdown');
-                // eslint-disable-next-line no-jquery/no-fade
-                $loading.fadeOut();
+                $loading.addClass('gl-display-none');
               })
               .catch(() => {
-                // eslint-disable-next-line no-jquery/no-fade
-                $loading.fadeOut();
+                $loading.addClass('gl-display-none');
               });
           } else {
             selected = $selectBox.find('input[type="hidden"]').val();
             data = {};
             data[abilityName] = {};
             data[abilityName].milestone_id = selected != null ? selected : null;
-            // eslint-disable-next-line no-jquery/no-fade
-            $loading.removeClass('hidden').fadeIn();
+            $loading.removeClass('gl-display-none');
             $dropdown.trigger('loading.gl.dropdown');
             return axios
               .put(issueUpdateURL, data)
               .then(({ data }) => {
                 $dropdown.trigger('loaded.gl.dropdown');
-                // eslint-disable-next-line no-jquery/no-fade
-                $loading.fadeOut();
+                $loading.addClass('gl-display-none');
                 $selectBox.hide();
                 $value.css('display', '');
                 if (data.milestone != null) {
@@ -313,8 +304,7 @@ export default class MilestoneSelect {
                   .text(__('None'));
               })
               .catch(() => {
-                // eslint-disable-next-line no-jquery/no-fade
-                $loading.fadeOut();
+                $loading.addClass('gl-display-none');
               });
           }
         },

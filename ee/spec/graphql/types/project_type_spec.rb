@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Project'] do
+  include GraphqlHelpers
+
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:vulnerability) { create(:vulnerability, project: project, severity: :high) }
@@ -15,101 +17,13 @@ RSpec.describe GitlabSchema.types['Project'] do
 
   it 'includes the ee specific fields' do
     expected_fields = %w[
-      vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
+      vulnerabilities vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
-      security_dashboard_path iterations cluster_agents repository_size_excess actual_repository_size_limit
-      code_coverage_summary
+      security_dashboard_path iterations iteration_cadences cluster_agents repository_size_excess actual_repository_size_limit
+      code_coverage_summary api_fuzzing_ci_configuration
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
-  end
-
-  describe 'sast_ci_configuration' do
-    include_context 'read ci configuration for sast enabled project'
-
-    let_it_be(:query) do
-      %(
-        query {
-            project(fullPath: "#{project.full_path}") {
-                sastCiConfiguration {
-                  global {
-                    nodes {
-                      type
-                      options {
-                        nodes {
-                          label
-                          value
-                        }
-                      }
-                      field
-                      label
-                      defaultValue
-                      value
-                      size
-                    }
-                  }
-                  pipeline {
-                    nodes {
-                      type
-                      options {
-                        nodes {
-                          label
-                          value
-                        }
-                      }
-                      field
-                      label
-                      defaultValue
-                      value
-                      size
-                    }
-                  }
-                  analyzers {
-                    nodes {
-                      name
-                      label
-                      enabled
-                    }
-                  }
-                }
-              }
-        }
-      )
-    end
-
-    before do
-      allow(project.repository).to receive(:blob_data_at).and_return(gitlab_ci_yml_content)
-    end
-
-    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
-
-    it "returns the project's sast configuration for global variables" do
-      secure_analyzers_prefix = subject.dig('data', 'project', 'sastCiConfiguration', 'global', 'nodes').first
-      expect(secure_analyzers_prefix['type']).to eq('string')
-      expect(secure_analyzers_prefix['field']).to eq('SECURE_ANALYZERS_PREFIX')
-      expect(secure_analyzers_prefix['label']).to eq('Image prefix')
-      expect(secure_analyzers_prefix['defaultValue']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['value']).to eq('registry.gitlab.com/gitlab-org/security-products/analyzers')
-      expect(secure_analyzers_prefix['size']).to eq('LARGE')
-      expect(secure_analyzers_prefix['options']).to be_nil
-    end
-
-    it "returns the project's sast configuration for pipeline variables" do
-      pipeline_stage = subject.dig('data', 'project', 'sastCiConfiguration', 'pipeline', 'nodes').first
-      expect(pipeline_stage['type']).to eq('string')
-      expect(pipeline_stage['field']).to eq('stage')
-      expect(pipeline_stage['label']).to eq('Stage')
-      expect(pipeline_stage['defaultValue']).to eq('test')
-      expect(pipeline_stage['value']).to eq('test')
-      expect(pipeline_stage['size']).to eq('MEDIUM')
-    end
-
-    it "returns the project's sast configuration for analyzer variables" do
-      analyzer = subject.dig('data', 'project', 'sastCiConfiguration', 'analyzers', 'nodes').first
-      expect(analyzer['name']).to eq('brakeman')
-      expect(analyzer['label']).to eq('Brakeman')
-      expect(analyzer['enabled']).to eq(true)
-    end
   end
 
   describe 'security_scanners' do
@@ -143,12 +57,12 @@ RSpec.describe GitlabSchema.types['Project'] do
 
     it 'returns a list of analyzers enabled for the project' do
       query_result = subject.dig('data', 'project', 'securityScanners', 'enabled')
-      expect(query_result).to match_array(%w(SAST DAST SECRET_DETECTION))
+      expect(query_result).to match_array(%w[SAST DAST SECRET_DETECTION])
     end
 
     it 'returns a list of analyzers which were run in the last pipeline for the project' do
       query_result = subject.dig('data', 'project', 'securityScanners', 'pipelineRun')
-      expect(query_result).to match_array(%w(DAST SAST))
+      expect(query_result).to match_array(%w[DAST SAST])
     end
   end
 
@@ -289,5 +203,40 @@ RSpec.describe GitlabSchema.types['Project'] do
     subject { described_class.fields['codeCoverageSummary'] }
 
     it { is_expected.to have_graphql_type(Types::Ci::CodeCoverageSummaryType) }
+  end
+
+  describe 'compliance_frameworks' do
+    it 'queries in batches', :request_store, :use_clean_rails_memory_store_caching do
+      projects = create_list(:project, 2, :with_compliance_framework)
+
+      projects.each do |p|
+        p.add_maintainer(user)
+        # Cache warm up: runs authorization for each user.
+        resolve_field(:id, p, current_user: user)
+      end
+
+      results = batch_sync(max_queries: 1) do
+        projects.flat_map do |p|
+          resolve_field(:compliance_frameworks, p, current_user: user)
+        end
+      end
+      frameworks = results.flat_map(&:to_a)
+
+      expect(frameworks).to match_array(projects.flat_map(&:compliance_management_framework))
+    end
+  end
+
+  describe 'push rules field' do
+    subject { described_class.fields['pushRules'] }
+
+    it { is_expected.to have_graphql_type(Types::PushRulesType) }
+  end
+
+  private
+
+  def query_for_project(project)
+    graphql_query_for(
+      :projects, { ids: [global_id_of(project)] }, "nodes { #{query_nodes(:compliance_frameworks)} }"
+    )
   end
 end

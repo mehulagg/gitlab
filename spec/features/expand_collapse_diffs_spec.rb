@@ -8,12 +8,15 @@ RSpec.describe 'Expand and collapse diffs', :js do
 
   before do
     stub_feature_flags(increased_diff_limits: false)
-    sign_in(create(:admin))
+    allow(Gitlab::CurrentSettings).to receive(:diff_max_patch_bytes).and_return(100.kilobytes)
+
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
 
     # Ensure that undiffable.md is in .gitattributes
     project.repository.copy_gitattributes(branch)
     visit project_commit_path(project, project.commit(branch))
-    execute_script('window.ajaxUris = []; $(document).ajaxSend(function(event, xhr, settings) { ajaxUris.push(settings.url) });')
   end
 
   def file_container(filename)
@@ -187,10 +190,6 @@ RSpec.describe 'Expand and collapse diffs', :js do
           expect(small_diff).to have_selector('.code')
           expect(small_diff).not_to have_selector('.nothing-here-block')
         end
-
-        it 'does not make a new HTTP request' do
-          expect(evaluate_script('ajaxUris')).not_to include(a_string_matching('small_diff.md'))
-        end
       end
     end
 
@@ -260,7 +259,6 @@ RSpec.describe 'Expand and collapse diffs', :js do
       find('.note-textarea')
 
       wait_for_requests
-      execute_script('window.ajaxUris = []; $(document).ajaxSend(function(event, xhr, settings) { ajaxUris.push(settings.url) });')
     end
 
     it 'reloads the page with all diffs expanded' do
@@ -295,10 +293,6 @@ RSpec.describe 'Expand and collapse diffs', :js do
         it 'shows the diff content' do
           expect(small_diff).to have_selector('.code')
           expect(small_diff).not_to have_selector('.nothing-here-block')
-        end
-
-        it 'does not make a new HTTP request' do
-          expect(evaluate_script('ajaxUris')).not_to include(a_string_matching('small_diff.md'))
         end
       end
     end

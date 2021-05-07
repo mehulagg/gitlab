@@ -43,18 +43,27 @@ RSpec.describe BulkImportService do
       expect { subject.execute }.to change { BulkImports::Configuration.count }.by(1)
     end
 
-    it 'updates bulk import state' do
-      expect_next_instance_of(BulkImport) do |bulk_import|
-        expect(bulk_import).to receive(:start!)
-      end
-
-      subject.execute
-    end
-
     it 'enqueues BulkImportWorker' do
       expect(BulkImportWorker).to receive(:perform_async)
 
       subject.execute
+    end
+
+    it 'returns success ServiceResponse' do
+      result = subject.execute
+
+      expect(result).to be_a(ServiceResponse)
+      expect(result).to be_success
+    end
+
+    it 'returns ServiceResponse with error if validation fails' do
+      params[0][:source_full_path] = nil
+
+      result = subject.execute
+
+      expect(result).to be_a(ServiceResponse)
+      expect(result).to be_error
+      expect(result.message).to eq("Validation failed: Source full path can't be blank")
     end
   end
 end

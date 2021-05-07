@@ -1,10 +1,10 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Geo (development) **(PREMIUM ONLY)**
+# Geo (development) **(PREMIUM SELF)**
 
 Geo connects GitLab instances together. One GitLab instance is
 designated as a **primary** node and can be run with multiple
@@ -102,7 +102,7 @@ projects that need updating. Those projects can be:
 When we fail to fetch a repository on the secondary `RETRIES_BEFORE_REDOWNLOAD`
 times, Geo does a so-called _re-download_. It will do a clean clone
 into the `@geo-temporary` directory in the root of the storage. When
-it's successful, we replace the main repo with the newly cloned one.
+it's successful, we replace the main repository with the newly cloned one.
 
 ### Uploads replication
 
@@ -161,7 +161,7 @@ If the requested file matches the requested SHA256 sum, then the Geo
 feature, which allows NGINX to handle the file transfer without tying
 up Rails or Workhorse.
 
-NOTE: **Note:**
+NOTE:
 JWT requires synchronized clocks between the machines
 involved, otherwise it may fail with an encryption error.
 
@@ -305,7 +305,7 @@ events include:
 - Repositories Changed event
 - Repository Created event
 - Hashed Storage Migrated event
-- Lfs Object Deleted event
+- LFS Object Deleted event
 - Hashed Storage Attachments event
 - Job Artifact Deleted event
 - Upload Deleted event

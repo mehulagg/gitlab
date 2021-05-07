@@ -8,7 +8,7 @@ module API
       expose :name
       expose :tag, as: :tag_name, if: ->(_, _) { can_download_code? }
       expose :description
-      expose :description_html do |entity|
+      expose :description_html, unless: ->(_, _) { remove_description_html? } do |entity|
         MarkupHelper.markdown_field(entity, :description, current_user: options[:current_user])
       end
       expose :created_at
@@ -16,22 +16,23 @@ module API
       expose :author, using: Entities::UserBasic, if: -> (release, _) { release.author.present? }
       expose :commit, using: Entities::Commit, if: ->(_, _) { can_download_code? }
       expose :upcoming_release?, as: :upcoming_release
-      expose :milestones, using: Entities::MilestoneWithStats, if: -> (release, _) { release.milestones.present? && can_read_milestone? }
+      expose :milestones,
+             using: Entities::MilestoneWithStats,
+             if: -> (release, _) { release.milestones.present? && can_read_milestone? } do |release, _|
+               release.milestones.order_by_dates_and_title
+             end
+
       expose :commit_path, expose_nil: false
       expose :tag_path, expose_nil: false
 
       expose :assets do
         expose :assets_count, as: :count
         expose :sources, using: Entities::Releases::Source, if: ->(_, _) { can_download_code? }
-        expose :links, using: Entities::Releases::Link do |release, options|
-          release.links.sorted
-        end
+        expose :sorted_links, as: :links, using: Entities::Releases::Link
       end
       expose :evidences, using: Entities::Releases::Evidence, expose_nil: false, if: ->(_, _) { can_download_code? }
       expose :_links do
         expose :self_url, as: :self, expose_nil: false
-        expose :merge_requests_url, expose_nil: false
-        expose :issues_url, expose_nil: false
         expose :edit_url, expose_nil: false
       end
 
@@ -43,6 +44,11 @@ module API
 
       def can_read_milestone?
         Ability.allowed?(options[:current_user], :read_milestone, object.project)
+      end
+
+      def remove_description_html?
+        ::Feature.enabled?(:remove_description_html_in_release_api, object.project, default_enabled: :yaml) &&
+          ::Feature.disabled?(:remove_description_html_in_release_api_override, object.project)
       end
     end
   end

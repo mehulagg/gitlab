@@ -6,7 +6,7 @@
   left: 0;
   top: 0;
   width: 100%;
-  z-index: #{$zindex-modal-backdrop + 1};
+  z-index: #{$zindex-modal-backdrop - 1};
 
   height: $performance-bar-height;
   background: $black;
@@ -14,7 +14,7 @@
   color: $gray-300;
 
   select {
-    color: $gray-300;
+    color: $white;
     width: 200px;
   }
 

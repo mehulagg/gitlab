@@ -22,5 +22,12 @@ module ApprovalRules
         params[:groups] += GroupFinder.new(rule, current_user).hidden_groups
       end
     end
+
+    def success
+      merge_request_activity_counter
+        .track_approval_rule_edited_action(user: current_user)
+
+      super
+    end
   end
 end

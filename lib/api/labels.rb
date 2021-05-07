@@ -7,10 +7,16 @@ module API
 
     before { authenticate! }
 
+    feature_category :issue_tracking
+
+    LABEL_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(
+      name: API::NO_SLASH_URL_PART_REGEX,
+      label_id: API::NO_SLASH_URL_PART_REGEX)
+
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
-    resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+    resource :projects, requirements: LABEL_ENDPOINT_REQUIREMENTS do
       desc 'Get all labels of the project' do
         success Entities::ProjectLabel
       end
@@ -55,7 +61,7 @@ module API
         success Entities::ProjectLabel
       end
       params do
-        optional :label_id, type: Integer, desc: 'The id of the label to be updated'
+        optional :label_id, type: Integer, desc: 'The ID of the label to be updated'
         optional :name, type: String, desc: 'The name of the label to be updated'
         use :project_label_update_params
         exactly_one_of :label_id, :name
@@ -69,7 +75,7 @@ module API
         success Entities::ProjectLabel
       end
       params do
-        optional :label_id, type: Integer, desc: 'The id of the label to be deleted'
+        optional :label_id, type: Integer, desc: 'The ID of the label to be deleted'
         optional :name, type: String, desc: 'The name of the label to be deleted'
         exactly_one_of :label_id, :name
       end

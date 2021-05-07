@@ -9,7 +9,6 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
 
   shared_context 'on-demand scans feature available' do
     before do
-      stub_feature_flags(security_on_demand_scans_feature_flag: true)
       stub_licensed_features(security_on_demand_scans: true)
     end
   end
@@ -25,6 +24,15 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
   end
 
   shared_examples 'a GET request' do
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { get path }
+
+      before_request do
+        project.add_developer(user)
+        login_as(user)
+      end
+    end
+
     context 'feature available' do
       include_context 'on-demand scans feature available'
 
@@ -54,30 +62,20 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
     end
 
     context 'feature not available' do
-      using RSpec::Parameterized::TableSyntax
-
       include_context 'user authorized'
 
-      where(:feature_flag_enabled, :license_support) do
-        false | true
-        true  | false
-      end
+      it 'sees a 404 error' do
+        stub_licensed_features(security_on_demand_scans: false)
+        get path
 
-      with_them do
-        it 'sees a 404 error' do
-          stub_feature_flags(security_on_demand_scans_feature_flag: feature_flag_enabled)
-          stub_licensed_features(security_on_demand_scans: license_support)
-          get path
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
 
   describe 'GET #new' do
     it_behaves_like 'a GET request' do
-      let(:path) { new_project_security_configuration_dast_profiles_dast_scanner_profile_path(project) }
+      let(:path) { new_project_security_configuration_dast_scans_dast_scanner_profile_path(project) }
     end
   end
 
@@ -85,7 +83,7 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
     include_context 'user authorized'
     include_context 'on-demand scans feature available'
 
-    let(:edit_path) { edit_project_security_configuration_dast_profiles_dast_scanner_profile_path(project, dast_scanner_profile) }
+    let(:edit_path) { edit_project_security_configuration_dast_scans_dast_scanner_profile_path(project, dast_scanner_profile) }
 
     it_behaves_like 'a GET request' do
       let(:path) { edit_path }
@@ -94,6 +92,16 @@ RSpec.describe Projects::Security::DastScannerProfilesController, type: :request
     it 'sets scanner_profile' do
       get edit_path
       expect(assigns(:scanner_profile)).to eq(dast_scanner_profile)
+    end
+
+    context 'record does not exist' do
+      let(:dast_scanner_profile) { 0 }
+
+      it 'sees a 404 error' do
+        get edit_path
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
     end
   end
 end

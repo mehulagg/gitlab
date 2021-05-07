@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Snippet'] do
+  include GraphqlHelpers
+
   let_it_be(:user) { create(:user) }
 
   it 'has the correct fields' do
@@ -22,6 +24,14 @@ RSpec.describe GitlabSchema.types['Snippet'] do
     it 'returns blobs' do
       is_expected.to have_graphql_type(Types::Snippets::BlobType.connection_type)
       is_expected.to have_graphql_resolver(Resolvers::Snippets::BlobsResolver)
+    end
+  end
+
+  describe '#user_permissions' do
+    let_it_be(:snippet) { create(:personal_snippet, :repository, :public, author: user) }
+
+    it 'can resolve the snippet permissions' do
+      expect(resolve_field(:user_permissions, snippet)).to eq(snippet)
     end
   end
 
@@ -151,6 +161,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
 
   describe '#blobs' do
     let_it_be(:snippet) { create(:personal_snippet, :public, author: user) }
+
     let(:query_blobs) { subject.dig('data', 'snippets', 'nodes')[0].dig('blobs', 'nodes') }
     let(:paths) { [] }
     let(:query) do
@@ -191,6 +202,7 @@ RSpec.describe GitlabSchema.types['Snippet'] do
 
     context 'when snippet has repository' do
       let_it_be(:snippet) { create(:personal_snippet, :repository, :public, author: user) }
+
       let(:blobs) { snippet.blobs }
 
       it_behaves_like 'an array'

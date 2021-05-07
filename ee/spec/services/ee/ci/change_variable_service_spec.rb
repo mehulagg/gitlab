@@ -6,6 +6,7 @@ RSpec.describe Ci::ChangeVariableService do
   subject(:execute) { service.execute }
 
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let(:audit_service_spy) { class_spy(::Ci::AuditVariableChangeService, new: spy) }
 

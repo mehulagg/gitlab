@@ -1,11 +1,10 @@
 <script>
-import { GlButton, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { VALID_DESIGN_FILE_MIMETYPE } from '../../constants';
 
 export default {
   components: {
     GlButton,
-    GlLoadingIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -38,12 +37,13 @@ export default {
         )
       "
       :disabled="isSaving"
-      variant="default"
+      :loading="isSaving"
+      category="secondary"
+      variant="confirm"
       size="small"
       @click="openFileUpload"
     >
       {{ s__('DesignManagement|Upload designs') }}
-      <gl-loading-icon v-if="isSaving" inline class="ml-1" />
     </gl-button>
 
     <input
@@ -51,7 +51,7 @@ export default {
       type="file"
       name="design_file"
       :accept="$options.VALID_DESIGN_FILE_MIMETYPE.mimetype"
-      class="hide"
+      class="gl-display-none"
       multiple
       @change="onFileUploadChange"
     />

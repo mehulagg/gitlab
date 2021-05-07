@@ -1,22 +1,19 @@
-import Vue from 'vue';
-import { cloneDeep } from 'lodash';
-import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { getByText } from '@testing-library/dom';
-import { createStore } from '~/mr_notes/stores';
+import { mount } from '@vue/test-utils';
+import { cloneDeep } from 'lodash';
 import DiffExpansionCell from '~/diffs/components/diff_expansion_cell.vue';
+import { INLINE_DIFF_VIEW_TYPE } from '~/diffs/constants';
 import { getPreviousLineIndex } from '~/diffs/store/utils';
-import { INLINE_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE } from '~/diffs/constants';
+import { createStore } from '~/mr_notes/stores';
 import diffFileMockData from '../mock_data/diff_file';
 
 const EXPAND_UP_CLASS = '.js-unfold';
 const EXPAND_DOWN_CLASS = '.js-unfold-down';
 const lineSources = {
   [INLINE_DIFF_VIEW_TYPE]: 'highlighted_diff_lines',
-  [PARALLEL_DIFF_VIEW_TYPE]: 'parallel_diff_lines',
 };
 const lineHandlers = {
-  [INLINE_DIFF_VIEW_TYPE]: line => line,
-  [PARALLEL_DIFF_VIEW_TYPE]: line => line.right || line.left,
+  [INLINE_DIFF_VIEW_TYPE]: (line) => line,
 };
 
 function makeLoadMoreLinesPayload({
@@ -61,7 +58,6 @@ describe('DiffExpansionCell', () => {
   let mockFile;
   let mockLine;
   let store;
-  let vm;
 
   beforeEach(() => {
     mockFile = cloneDeep(diffFileMockData);
@@ -72,7 +68,6 @@ describe('DiffExpansionCell', () => {
   });
 
   const createComponent = (options = {}) => {
-    const cmp = Vue.extend(DiffExpansionCell);
     const defaults = {
       fileHash: mockFile.file_hash,
       contextLinesPath: 'contextLinesPath',
@@ -80,53 +75,52 @@ describe('DiffExpansionCell', () => {
       isTop: false,
       isBottom: false,
     };
-    const props = { ...defaults, ...options };
+    const propsData = { ...defaults, ...options };
 
-    vm = createComponentWithStore(cmp, store, props).$mount();
+    return mount(DiffExpansionCell, { store, propsData });
   };
 
-  const findExpandUp = () => vm.$el.querySelector(EXPAND_UP_CLASS);
-  const findExpandDown = () => vm.$el.querySelector(EXPAND_DOWN_CLASS);
-  const findExpandAll = () => getByText(vm.$el, 'Show all unchanged lines');
+  const findExpandUp = (wrapper) => wrapper.find(EXPAND_UP_CLASS);
+  const findExpandDown = (wrapper) => wrapper.find(EXPAND_DOWN_CLASS);
+  const findExpandAll = ({ element }) => getByText(element, 'Show all unchanged lines');
 
   describe('top row', () => {
     it('should have "expand up" and "show all" option', () => {
-      createComponent({
+      const wrapper = createComponent({
         isTop: true,
       });
 
-      expect(findExpandUp()).not.toBe(null);
-      expect(findExpandDown()).toBe(null);
-      expect(findExpandAll()).not.toBe(null);
+      expect(findExpandUp(wrapper).exists()).toBe(true);
+      expect(findExpandDown(wrapper).exists()).toBe(false);
+      expect(findExpandAll(wrapper)).not.toBe(null);
     });
   });
 
   describe('middle row', () => {
     it('should have "expand down", "show all", "expand up" option', () => {
-      createComponent();
+      const wrapper = createComponent();
 
-      expect(findExpandUp()).not.toBe(null);
-      expect(findExpandDown()).not.toBe(null);
-      expect(findExpandAll()).not.toBe(null);
+      expect(findExpandUp(wrapper).exists()).toBe(true);
+      expect(findExpandDown(wrapper).exists()).toBe(true);
+      expect(findExpandAll(wrapper)).not.toBe(null);
     });
   });
 
   describe('bottom row', () => {
     it('should have "expand down" and "show all" option', () => {
-      createComponent({
+      const wrapper = createComponent({
         isBottom: true,
       });
 
-      expect(findExpandUp()).toBe(null);
-      expect(findExpandDown()).not.toBe(null);
-      expect(findExpandAll()).not.toBe(null);
+      expect(findExpandUp(wrapper).exists()).toBe(false);
+      expect(findExpandDown(wrapper).exists()).toBe(true);
+      expect(findExpandAll(wrapper)).not.toBe(null);
     });
   });
 
   describe('any row', () => {
     [
       { diffViewType: INLINE_DIFF_VIEW_TYPE, lineIndex: 8, file: { parallel_diff_lines: [] } },
-      { diffViewType: PARALLEL_DIFF_VIEW_TYPE, lineIndex: 7, file: { highlighted_diff_lines: [] } },
     ].forEach(({ diffViewType, file, lineIndex }) => {
       describe(`with diffViewType (${diffViewType})`, () => {
         beforeEach(() => {
@@ -147,9 +141,9 @@ describe('DiffExpansionCell', () => {
             newLineNumber,
           });
 
-          createComponent();
+          const wrapper = createComponent();
 
-          findExpandAll().click();
+          findExpandAll(wrapper).click();
 
           expect(store.dispatch).toHaveBeenCalledWith(
             'diffs/loadMoreLines',
@@ -170,9 +164,9 @@ describe('DiffExpansionCell', () => {
           const oldLineNumber = mockLine.meta_data.old_pos;
           const newLineNumber = mockLine.meta_data.new_pos;
 
-          createComponent();
+          const wrapper = createComponent();
 
-          findExpandUp().click();
+          findExpandUp(wrapper).trigger('click');
 
           expect(store.dispatch).toHaveBeenCalledWith(
             'diffs/loadMoreLines',
@@ -198,9 +192,9 @@ describe('DiffExpansionCell', () => {
           mockLine.meta_data.old_pos = 200;
           mockLine.meta_data.new_pos = 200;
 
-          createComponent();
+          const wrapper = createComponent();
 
-          findExpandDown().click();
+          findExpandDown(wrapper).trigger('click');
 
           expect(store.dispatch).toHaveBeenCalledWith('diffs/loadMoreLines', {
             endpoint: 'contextLinesPath',

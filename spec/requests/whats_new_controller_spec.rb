@@ -2,27 +2,43 @@
 
 require 'spec_helper'
 
-RSpec.describe WhatsNewController do
-  describe 'whats_new_path' do
-    before do
-      allow_any_instance_of(WhatsNewController).to receive(:whats_new_most_recent_release_items).and_return('items')
-    end
+RSpec.describe WhatsNewController, :clean_gitlab_redis_cache do
+  after do
+    ReleaseHighlight.instance_variable_set(:@file_paths, nil)
+  end
 
-    context 'with whats_new_drawer feature enabled' do
-      before do
-        stub_feature_flags(whats_new_drawer: true)
-      end
+  describe 'GET #index' do
+    let(:item) { double(:item) }
+    let(:highlights) { double(:highlight, items: [item], map: [item].map, next_page: 2) }
 
-      it 'is successful' do
+    context 'with no page param' do
+      it 'responds with paginated data and headers' do
+        allow(ReleaseHighlight).to receive(:paginated).with(page: 1).and_return(highlights)
+
         get whats_new_path, xhr: true
 
-        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.body).to eq(highlights.items.to_json)
+        expect(response.headers['X-Next-Page']).to eq(2)
       end
     end
 
-    context 'with whats_new_drawer feature disabled' do
+    context 'with page param' do
+      it 'passes the page parameter' do
+        expect(ReleaseHighlight).to receive(:paginated).with(page: 2).and_call_original
+
+        get whats_new_path(page: 2), xhr: true
+      end
+
+      it 'returns a 404 if page param is negative' do
+        get whats_new_path(page: -1), xhr: true
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'with whats_new_variant = disabled' do
       before do
-        stub_feature_flags(whats_new_drawer: false)
+        Gitlab::CurrentSettings.current_application_settings.whats_new_variant_disabled!
       end
 
       it 'returns a 404' do

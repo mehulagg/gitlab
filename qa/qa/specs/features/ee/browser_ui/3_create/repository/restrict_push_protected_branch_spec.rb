@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Restricted protected branch push and merge' do
       let(:user_developer) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
       let(:user_maintainer) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2) }
@@ -47,7 +47,7 @@ module QA
 
           login
 
-          Resource::ProtectedBranch.fabricate! do |protected_branch|
+          Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
             protected_branch.branch_name = branch_name
             protected_branch.project = project
             protected_branch.allowed_to_merge = {
@@ -80,11 +80,11 @@ module QA
           login
 
           group.add_member(user_developer, Resource::Members::AccessLevel::DEVELOPER)
-          project.share_with_group(group, Resource::Members::AccessLevel::DEVELOPER)
+          project.invite_group(group, Resource::Members::AccessLevel::DEVELOPER)
 
           project.add_member(user_maintainer, Resource::Members::AccessLevel::MAINTAINER)
 
-          Resource::ProtectedBranch.fabricate! do |protected_branch|
+          Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
             protected_branch.branch_name = branch_name
             protected_branch.project = project
             protected_branch.allowed_to_merge = {

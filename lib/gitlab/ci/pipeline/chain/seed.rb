@@ -11,6 +11,10 @@ module Gitlab
           def perform!
             raise ArgumentError, 'missing YAML processor result' unless @command.yaml_processor_result
 
+            if ::Feature.enabled?(:ci_workflow_rules_variables, pipeline.project, default_enabled: :yaml)
+              raise ArgumentError, 'missing workflow rules result' unless @command.workflow_rules_result
+            end
+
             # Allocate next IID. This operation must be outside of transactions of pipeline creations.
             pipeline.ensure_project_iid!
             pipeline.ensure_ci_ref!
@@ -20,18 +24,13 @@ module Gitlab
             pipeline.protected = @command.protected_ref?
 
             ##
-            # Populate pipeline with block argument of CreatePipelineService#execute.
-            #
-            @command.seeds_block&.call(pipeline)
-
-            ##
             # Gather all runtime build/stage errors
             #
-            if stage_seeds_errors
-              return error(stage_seeds_errors.join("\n"), config_error: true)
+            if pipeline_seed.errors
+              return error(pipeline_seed.errors.join("\n"), config_error: true)
             end
 
-            @command.stage_seeds = stage_seeds
+            @command.pipeline_seed = pipeline_seed
           end
 
           def break?
@@ -40,23 +39,25 @@ module Gitlab
 
           private
 
-          def stage_seeds_errors
-            stage_seeds.flat_map(&:errors).compact.presence
-          end
-
-          def stage_seeds
-            strong_memoize(:stage_seeds) do
-              seeds = stages_attributes.inject([]) do |previous_stages, attributes|
-                seed = Gitlab::Ci::Pipeline::Seed::Stage.new(pipeline, attributes, previous_stages)
-                previous_stages + [seed]
-              end
-
-              seeds.select(&:included?)
+          def pipeline_seed
+            strong_memoize(:pipeline_seed) do
+              stages_attributes = @command.yaml_processor_result.stages_attributes
+              Gitlab::Ci::Pipeline::Seed::Pipeline.new(context, stages_attributes)
             end
           end
 
-          def stages_attributes
-            @command.yaml_processor_result.stages_attributes
+          def context
+            Gitlab::Ci::Pipeline::Seed::Context.new(pipeline, root_variables: root_variables)
+          end
+
+          def root_variables
+            if ::Feature.enabled?(:ci_workflow_rules_variables, pipeline.project, default_enabled: :yaml)
+              ::Gitlab::Ci::Variables::Helpers.merge_variables(
+                @command.yaml_processor_result.root_variables, @command.workflow_rules_result.variables
+              )
+            else
+              @command.yaml_processor_result.root_variables
+            end
           end
         end
       end

@@ -7,7 +7,7 @@
 # @param known_keys [Set] the set of known finding keys stored by previous invocations of this service class.
 # @param deduplicate [Boolean] attribute to force running deduplication logic.
 module Security
-  class StoreScanService < ::BaseService
+  class StoreScanService
     def self.execute(artifact, known_keys, deduplicate)
       new(artifact, known_keys, deduplicate).execute
     end
@@ -19,6 +19,8 @@ module Security
     end
 
     def execute
+      return deduplicate if security_scan.has_errors?
+
       StoreFindingsMetadataService.execute(security_scan, security_report)
       deduplicate_findings? ? update_deduplicated_findings : register_finding_keys
 
@@ -28,10 +30,12 @@ module Security
     private
 
     attr_reader :artifact, :known_keys, :deduplicate
-    delegate :security_report, to: :artifact, private: true
+    delegate :security_report, :project, to: :artifact, private: true
 
     def security_scan
-      @security_scan ||= Security::Scan.safe_find_or_create_by!(build: artifact.job, scan_type: artifact.file_type)
+      @security_scan ||= Security::Scan.safe_find_or_create_by!(build: artifact.job, scan_type: artifact.file_type) do |scan|
+        scan.info['errors'] = security_report.errors.map(&:stringify_keys) if security_report.errored?
+      end
     end
 
     def deduplicate_findings?
@@ -43,19 +47,21 @@ module Security
         security_scan.findings.update_all(deduplicated: false)
 
         security_scan.findings
-                     .by_position(register_finding_keys)
+                     .by_uuid(register_finding_keys)
                      .update_all(deduplicated: true)
       end
     end
 
     # This method registers all finding keys and
-    # returns the positions of unique findings
+    # returns the UUIDs of the unique findings
     def register_finding_keys
-      @register_finding_keys ||= security_report.findings.map.with_index { |finding, index| register_keys(finding.keys) && index }.compact
+      @register_finding_keys ||= security_report.findings.map { |finding| register_keys(finding.keys) && finding.uuid }.compact
     end
 
     def register_keys(keys)
-      keys.all? { |key| known_keys.add?(key) }
+      return if known_keys.intersect?(keys.to_set)
+
+      known_keys.merge(keys)
     end
   end
 end

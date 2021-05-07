@@ -1,7 +1,11 @@
+import { GlAlert, GlBadge, GlEmptyState, GlFormSelect, GlLabel } from '@gitlab/ui';
+import { getByText } from '@testing-library/dom';
+import { mount, shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import IterationReportIssues from 'ee/iterations/components/iteration_report_issues.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
-import { mount } from '@vue/test-utils';
-import { GlAlert, GlAvatar, GlLoadingIcon, GlPagination, GlTable, GlTab } from '@gitlab/ui';
-import { Namespace } from 'ee/iterations/constants';
+import { GroupBy, Namespace } from 'ee/iterations/constants';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 describe('Iterations report tabs', () => {
   let wrapper;
@@ -10,10 +14,26 @@ describe('Iterations report tabs', () => {
   const defaultProps = {
     fullPath,
     iterationId: `gid://gitlab/Iteration/${id}`,
+    namespaceType: Namespace.Group,
   };
 
-  const mountComponent = ({ props = defaultProps, loading = false, data = {} } = {}) => {
-    wrapper = mount(IterationReportTabs, {
+  const findGlFormSelectOptionAt = (index) =>
+    wrapper.findComponent(GlFormSelect).findAll('option').at(index);
+  const findNoIssuesAlert = () => wrapper.findComponent(GlAlert);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findIterationReportIssues = () => wrapper.findComponent(IterationReportIssues);
+  const findAllIterationReportIssues = () => wrapper.findAllComponents(IterationReportIssues);
+  const findIterationReportIssuesAt = (index) =>
+    wrapper.findAllComponents(IterationReportIssues).at(index);
+  const findLabelsSelect = () => wrapper.findComponent(LabelsSelect);
+
+  const mountComponent = ({
+    props = defaultProps,
+    loading = false,
+    data = {},
+    mountFunction = shallowMount,
+  } = {}) => {
+    wrapper = mountFunction(IterationReportTabs, {
       propsData: props,
       data() {
         return data;
@@ -23,11 +43,6 @@ describe('Iterations report tabs', () => {
           queries: { issues: { loading } },
         },
       },
-      stubs: {
-        GlAvatar,
-        GlTab,
-        GlTable,
-      },
     });
   };
 
@@ -36,175 +51,230 @@ describe('Iterations report tabs', () => {
     wrapper = null;
   });
 
-  it('shows spinner while loading', () => {
-    mountComponent({
-      loading: true,
-    });
-
-    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
-    expect(wrapper.find(GlTable).exists()).toBe(false);
-  });
-
-  it('shows iterations list when not loading', () => {
-    mountComponent({
-      loading: false,
-    });
-
-    expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-    expect(wrapper.find(GlTable).exists()).toBe(true);
-    expect(wrapper.text()).toContain('No issues found');
-  });
-
-  it('shows error in a gl-alert', () => {
-    const error = 'Oh no!';
-
-    mountComponent({
-      data: {
-        error,
-      },
-    });
-
-    expect(wrapper.find(GlAlert).text()).toContain(error);
-  });
-
-  describe('with issues', () => {
-    const pageSize = 20;
-    const totalIssues = pageSize + 1;
-
-    const assignees = Array(totalIssues)
-      .fill(null)
-      .map((_, i) => ({
-        id: i,
-        name: `User ${i}`,
-        username: `user${i}`,
-        state: 'active',
-        avatarUrl: 'http://invalid/avatar.png',
-        webUrl: `https://localhost:3000/user${i}`,
-      }));
-
-    const issues = Array(totalIssues)
-      .fill(null)
-      .map((_, i) => ({
-        id: i,
-        title: `Issue ${i}`,
-        assignees: assignees.slice(0, i),
-      }));
-
-    const findIssues = () => wrapper.findAll('table tbody tr');
-    const findAssigneesForIssue = index =>
-      findIssues()
-        .at(index)
-        .findAll(GlAvatar);
-
-    beforeEach(() => {
+  describe('IterationReportIssues component', () => {
+    it('is rendered', () => {
       mountComponent();
 
-      wrapper.setData({
-        issues: {
-          list: issues,
-          pageInfo: {
-            hasNextPage: true,
-            hasPreviousPage: false,
-            startCursor: 'first-item',
-            endCursor: 'last-item',
-          },
-          count: issues.length,
-        },
+      expect(findIterationReportIssues().isVisible()).toBe(true);
+    });
+
+    it('updates the issue count when issuesUpdate is emitted', async () => {
+      mountComponent({ mountFunction: mount });
+
+      const issueCount = 7;
+
+      findIterationReportIssues().vm.$emit('issuesUpdate', { count: issueCount });
+
+      await nextTick();
+
+      expect(wrapper.findComponent(GlBadge).text()).toBe(issueCount.toString());
+    });
+  });
+
+  describe('group by section', () => {
+    describe('select dropdown', () => {
+      beforeEach(() => {
+        mountComponent({ mountFunction: mount });
+      });
+
+      it('shows label', () => {
+        expect(getByText(wrapper.element, 'Group by')).not.toBeNull();
+      });
+
+      it('has `None` option', () => {
+        expect(findGlFormSelectOptionAt(0).text()).toBe('None');
+      });
+
+      it('has `Label` option', () => {
+        expect(findGlFormSelectOptionAt(1).text()).toBe('Label');
       });
     });
 
-    it('shows issue list in table', () => {
-      expect(wrapper.find(GlTable).exists()).toBe(true);
-      expect(findIssues()).toHaveLength(issues.length);
-    });
+    describe('label picker', () => {
+      describe('when group by `None` option is selected', () => {
+        beforeEach(() => {
+          mountComponent();
+        });
 
-    it('shows assignees', () => {
-      expect(findAssigneesForIssue(0)).toHaveLength(0);
-      expect(findAssigneesForIssue(1)).toHaveLength(1);
-      expect(findAssigneesForIssue(10)).toHaveLength(10);
-    });
-
-    describe('pagination', () => {
-      const findPagination = () => wrapper.find(GlPagination);
-      const setPage = page => {
-        findPagination().vm.$emit('input', page);
-        return findPagination().vm.$nextTick();
-      };
-
-      it('passes prev, next, and current page props', () => {
-        expect(findPagination().exists()).toBe(true);
-        expect(findPagination().props()).toEqual(
-          expect.objectContaining({
-            value: wrapper.vm.pagination.currentPage,
-            prevPage: wrapper.vm.prevPage,
-            nextPage: wrapper.vm.nextPage,
-          }),
-        );
-      });
-
-      it('updates query variables when going to previous page', () => {
-        return setPage(1).then(() => {
-          expect(wrapper.vm.queryVariables).toEqual({
-            beforeCursor: 'first-item',
-            fullPath,
-            id,
-            lastPageSize: 20,
-            isGroup: true,
-          });
+        it('is not shown', () => {
+          expect(findLabelsSelect().exists()).toBe(false);
         });
       });
 
-      it('updates query variables when going to next page', () => {
-        return setPage(2).then(() => {
-          expect(wrapper.vm.queryVariables).toEqual({
-            afterCursor: 'last-item',
-            fullPath,
-            id,
-            firstPageSize: 20,
-            isGroup: true,
-          });
+      describe('when group by `Label` option is selected', () => {
+        beforeEach(() => {
+          mountComponent({ data: { groupBySelection: GroupBy.Label } });
+        });
+
+        it('is shown', () => {
+          expect(getByText(wrapper.element, 'Filter by label')).not.toBeNull();
+          expect(findLabelsSelect().exists()).toBe(true);
         });
       });
     });
   });
 
-  describe('IterationReportTabs query variables', () => {
-    const expected = {
-      afterCursor: undefined,
-      firstPageSize: 20,
-      fullPath: defaultProps.fullPath,
-      id,
-    };
+  describe('issues grouped by labels', () => {
+    const selectedLabels = [
+      {
+        id: 40,
+        title: 'Security',
+        color: '#aaa',
+        description: 'Security description',
+        text_color: '#fff',
+        set: true,
+      },
+      {
+        id: 55,
+        title: 'Tooling',
+        color: '#bbb',
+        description: 'Tooling description',
+        text_color: '#eee',
+        set: true,
+      },
+    ];
 
-    describe('when group', () => {
-      it('has expected query variable values', () => {
-        mountComponent({
-          props: {
-            ...defaultProps,
-            namespaceType: Namespace.Group,
-          },
-        });
+    beforeEach(() => {
+      mountComponent({ data: { groupBySelection: GroupBy.Label } });
+    });
 
-        expect(wrapper.vm.queryVariables).toEqual({
-          ...expected,
-          isGroup: true,
+    describe('when labels with issues are selected', () => {
+      beforeEach(() => {
+        // User groups issues by 2 labels
+        findLabelsSelect().vm.$emit('updateSelectedLabels', selectedLabels);
+
+        // API call updates for the 2 labels are emitted
+        findIterationReportIssues().vm.$emit('issuesUpdate', {
+          count: 3,
+          labelId: selectedLabels[0].id,
         });
+        findIterationReportIssues().vm.$emit('issuesUpdate', {
+          count: 2,
+          labelId: selectedLabels[1].id,
+        });
+      });
+
+      it('does not show an alert', () => {
+        expect(findNoIssuesAlert().exists()).toBe(false);
+      });
+
+      it('does not show empty state', () => {
+        expect(findEmptyState().exists()).toBe(false);
+      });
+
+      it('shows 3 IterationReportIssues blocks (one for `Security`, one for `Tooling`, and one for the hidden ungrouped list)', () => {
+        expect(findAllIterationReportIssues()).toHaveLength(3);
+      });
+
+      it('shows issues for `Security` label', () => {
+        expect(findIterationReportIssuesAt(0).props()).toMatchObject({ label: selectedLabels[0] });
+      });
+
+      it('shows issues for `Tooling` label', () => {
+        expect(findIterationReportIssuesAt(1).props()).toMatchObject({ label: selectedLabels[1] });
+      });
+
+      it('hides issues for the ungrouped issues list', () => {
+        expect(findIterationReportIssuesAt(2).isVisible()).toBe(false);
+      });
+
+      it('hides label issues when the label is removed', async () => {
+        expect(findAllIterationReportIssues()).toHaveLength(3);
+
+        await findIterationReportIssues().vm.$emit('removeLabel', selectedLabels[0].id);
+
+        expect(findAllIterationReportIssues()).toHaveLength(2);
+        expect(findIterationReportIssuesAt(0).props()).toMatchObject({ label: selectedLabels[1] });
+        expect(findIterationReportIssuesAt(1).isVisible()).toBe(false);
       });
     });
 
-    describe('when project', () => {
-      it('has expected query variable values', () => {
-        mountComponent({
-          props: {
-            ...defaultProps,
-            namespaceType: Namespace.Project,
-          },
-        });
+    describe('when labels with issues and no issues are selected', () => {
+      beforeEach(() => {
+        // User groups issues by 2 labels
+        findLabelsSelect().vm.$emit('updateSelectedLabels', selectedLabels);
 
-        expect(wrapper.vm.queryVariables).toEqual({
-          ...expected,
-          isGroup: false,
+        // API call updates for the 2 labels are emitted
+        findIterationReportIssues().vm.$emit('issuesUpdate', {
+          count: 3,
+          labelId: selectedLabels[0].id,
         });
+        findIterationReportIssues().vm.$emit('issuesUpdate', {
+          count: 0,
+          labelId: selectedLabels[1].id,
+        });
+      });
+
+      it('shows an alert to tell the user that labels have no issues', () => {
+        expect(findNoIssuesAlert().text()).toBe('Labels with no issues in this iteration:');
+      });
+
+      it('shows the label with no issue, `Tooling`, in the alert', () => {
+        expect(findNoIssuesAlert().findComponent(GlLabel).props()).toMatchObject({
+          backgroundColor: selectedLabels[1].color,
+          description: selectedLabels[1].description,
+          target: null,
+          title: selectedLabels[1].title,
+        });
+      });
+
+      it('does not show empty state', () => {
+        expect(findEmptyState().exists()).toBe(false);
+      });
+
+      it('shows 2 IterationReportIssues blocks (one for `Security`, and one for the hidden ungrouped list)', () => {
+        expect(findAllIterationReportIssues()).toHaveLength(2);
+      });
+
+      it('shows issues for `Security` label', () => {
+        expect(findIterationReportIssuesAt(0).props()).toMatchObject({ label: selectedLabels[0] });
+      });
+
+      it('hides issues for the ungrouped issues list', () => {
+        expect(findIterationReportIssuesAt(1).isVisible()).toBe(false);
+      });
+    });
+
+    describe('when labels with no issues are selected', () => {
+      beforeEach(() => {
+        // User groups issues by 2 labels
+        findLabelsSelect().vm.$emit('updateSelectedLabels', selectedLabels);
+
+        // API call updates for the 2 labels are emitted
+        findIterationReportIssues().vm.$emit('issuesUpdate', {
+          count: 0,
+          labelId: selectedLabels[0].id,
+        });
+        findIterationReportIssues().vm.$emit('issuesUpdate', {
+          count: 0,
+          labelId: selectedLabels[1].id,
+        });
+      });
+
+      it('shows an alert to tell the user that labels have no issues', () => {
+        expect(findNoIssuesAlert().text()).toBe('Labels with no issues in this iteration:');
+      });
+
+      it('shows the labels with no issue, `Security` and `Tooling`, in the alert', () => {
+        const labels = findNoIssuesAlert().findAllComponents(GlLabel);
+
+        expect(labels.at(0).props('title')).toBe(selectedLabels[0].title);
+        expect(labels.at(1).props('title')).toBe(selectedLabels[1].title);
+      });
+
+      it('shows empty state', () => {
+        expect(findEmptyState().props()).toMatchObject({
+          description: 'Try grouping with different labels',
+          title: 'There are no issues with the selected labels',
+        });
+      });
+
+      it('shows 1 IterationReportIssues block (one for the hidden ungrouped list)', () => {
+        expect(findAllIterationReportIssues()).toHaveLength(1);
+      });
+
+      it('hides issues for the ungrouped issues list', () => {
+        expect(findIterationReportIssuesAt(0).isVisible()).toBe(false);
       });
     });
   });

@@ -2,10 +2,10 @@
 type: reference, howto
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 ---
 
-# Snippets settings **(CORE ONLY)**
+# Snippets settings **(FREE SELF)**
 
 Adjust the snippets' settings of your GitLab instance.
 
@@ -18,7 +18,7 @@ abuse of the feature. The default value is **52428800 Bytes** (50 MB).
 
 ### How does it work?
 
-The content size limit will be applied when a snippet is created or updated.
+The content size limit is applied when a snippet is created or updated.
 
 This limit doesn't affect existing snippets until they're updated and their
 content changes.
@@ -29,7 +29,7 @@ This setting is not available through the [Admin Area settings](../../user/admin
 In order to configure this setting, use either the Rails console
 or the [Application settings API](../../api/settings.md).
 
-NOTE: **IMPORTANT:**
+NOTE:
 The value of the limit **must** be in bytes.
 
 #### Through the Rails console
@@ -60,15 +60,15 @@ To retrieve the current value, start the Rails console and run:
 
 #### Through the API
 
-The process to set the snippets size limit through the Application Settings API is
-exactly the same as you would do to [update any other setting](../../api/settings.md#change-application-settings).
+To set the snippets size limit through the Application Settings API (similar to
+[updating any other setting](../../api/settings.md#change-application-settings)), use this command:
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/application/settings?snippet_size_limit=52428800
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/application/settings?snippet_size_limit=52428800"
 ```
 
 You can also use the API to [retrieve the current value](../../api/settings.md#get-current-application-settings).
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/application/settings
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/application/settings"
 ```

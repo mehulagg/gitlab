@@ -10,6 +10,8 @@ class Feature
     # rollout_issue: defines if `bin/feature-flag` asks for rollout issue
     # default_enabled: defines a default state of a feature flag when created by `bin/feature-flag`
     # ee_only: defines that a feature flag can only be created in a context of EE
+    # deprecated: defines if a feature flag type that is deprecated and to be removed,
+    #             the deprecated types are hidden from all interfaces
     # example: usage being shown when exception is raised
     TYPES = {
       development: {
@@ -21,7 +23,7 @@ class Feature
         example: <<-EOS
           Feature.enabled?(:my_feature_flag, project)
           Feature.enabled?(:my_feature_flag, project, type: :development)
-          push_frontend_feature_flag?(:my_feature_flag, project)
+          push_frontend_feature_flag(:my_feature_flag, project)
         EOS
       },
       ops: {
@@ -31,19 +33,20 @@ class Feature
         ee_only: false,
         default_enabled: false,
         example: <<-EOS
-          Feature.enabled?(:my_ops_flag, type: ops)
-          push_frontend_feature_flag?(:my_ops_flag, project, type: :ops)
+          Feature.enabled?(:my_ops_flag, type: :ops)
+          push_frontend_feature_flag(:my_ops_flag, project, type: :ops)
         EOS
       },
-      licensed: {
-        description: 'Permanent feature flags used to temporarily disable licensed features.',
+      experiment: {
+        description: 'Short lived, used specifically to run A/B/n experiments.',
         optional: true,
-        rollout_issue: false,
-        ee_only: true,
-        default_enabled: true,
+        rollout_issue: true,
+        ee_only: false,
+        default_enabled: false,
         example: <<-EOS
-          project.feature_available?(:my_licensed_feature)
-          namespace.feature_available?(:my_licensed_feature)
+          experiment(:my_experiment, project: project, actor: current_user) { ...variant code... }
+          # or
+          Gitlab::Experimentation.in_experiment_group?(:my_experiment, subject: current_user)
         EOS
       }
     }.freeze
@@ -54,6 +57,7 @@ class Feature
       name
       introduced_by_url
       rollout_issue_url
+      milestone
       type
       group
       default_enabled

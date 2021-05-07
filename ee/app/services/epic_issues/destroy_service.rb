@@ -2,14 +2,21 @@
 
 module EpicIssues
   class DestroyService < IssuableLinks::DestroyService
-    def execute
-      result = super
-      Epics::UpdateDatesService.new([link.epic]).execute
-
-      result
-    end
+    extend ::Gitlab::Utils::Override
 
     private
+
+    override :after_destroy
+    def after_destroy
+      super
+
+      Epics::UpdateDatesService.new([link.epic]).execute
+      track_usage_ping_event
+    end
+
+    def track_usage_ping_event
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_issue_removed(author: current_user)
+    end
 
     def source
       @source ||= link.epic

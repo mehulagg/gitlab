@@ -1,15 +1,15 @@
 import validateIpAddress from 'ee/validators/ip_address';
 import { s__ } from '~/locale';
 
-const validateIP = data => {
+const validateIP = (data) => {
   let addresses = data.replace(/\s/g, '').split(',');
 
-  addresses = addresses.map(address => validateIpAddress(address));
+  addresses = addresses.map((address) => validateIpAddress(address));
 
-  return !addresses.some(a => !a);
+  return !addresses.some((a) => !a);
 };
 
-export const validateTimeout = data => {
+export const validateTimeout = (data) => {
   if (!data && data !== 0) {
     return s__("Geo|Connection timeout can't be blank");
   } else if (data && Number.isNaN(Number(data))) {
@@ -21,7 +21,7 @@ export const validateTimeout = data => {
   return '';
 };
 
-export const validateAllowedIp = data => {
+export const validateAllowedIp = (data) => {
   if (!data) {
     return s__("Geo|Allowed Geo IP can't be blank");
   } else if (data.length > 255) {

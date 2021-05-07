@@ -1,18 +1,18 @@
+import { GlButton, GlLink, GlIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton, GlLink, GlIcon } from '@gitlab/ui';
 
 import ItemWeight from 'ee/boards/components/issue_card_weight.vue';
 
-import TreeItemBody from 'ee/related_items_tree/components/tree_item_body.vue';
 import StateTooltip from 'ee/related_items_tree/components/state_tooltip.vue';
+import TreeItemBody from 'ee/related_items_tree/components/tree_item_body.vue';
 
+import { ChildType, ChildState } from 'ee/related_items_tree/constants';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { ChildType, ChildState } from 'ee/related_items_tree/constants';
+import ItemDueDate from '~/boards/components/issue_due_date.vue';
 import { PathIdSeparator } from '~/related_issues/constants';
 import ItemAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
-import ItemDueDate from '~/boards/components/issue_due_date.vue';
 import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
 
 import {
@@ -242,10 +242,10 @@ describe('RelatedItemsTree', () => {
       });
 
       describe.each`
-        createItem         | itemType   | isEpic   | stateIconName
-        ${createEpicItem}  | ${'epic'}  | ${true}  | ${'epic'}
-        ${createIssueItem} | ${'issue'} | ${false} | ${'issues'}
-      `(`when dependent on item type`, ({ createItem, isEpic, stateIconName, itemType }) => {
+        createItem         | itemType   | isEpic
+        ${createEpicItem}  | ${'epic'}  | ${true}
+        ${createIssueItem} | ${'issue'} | ${false}
+      `(`when dependent on item type`, ({ createItem, isEpic, itemType }) => {
         beforeEach(() => {
           mockItem = createItem();
           wrapper = createComponent();
@@ -256,9 +256,25 @@ describe('RelatedItemsTree', () => {
             expect(wrapper.vm.isEpic).toBe(isEpic);
           });
         });
+      });
+
+      describe.each`
+        createItem                          | testDesc               | stateIconName
+        ${createEpicItem(mockOpenEpic)}     | ${'epic is `open`'}    | ${'epic'}
+        ${createEpicItem(mockClosedEpic)}   | ${'epic is `closed`'}  | ${'epic-closed'}
+        ${createIssueItem(mockIssue1)}      | ${'issue is `open`'}   | ${'issues'}
+        ${createIssueItem(mockClosedIssue)} | ${'issue is `closed`'} | ${'issue-closed'}
+      `(`when dependent on item type and state`, ({ createItem, testDesc, stateIconName }) => {
+        beforeEach(() => {
+          mockItem = createItem;
+        });
 
         describe('stateIconName', () => {
-          it(`returns string ${stateIconName}`, async () => {
+          it(`returns string \`${stateIconName}\` when ${testDesc}`, async () => {
+            wrapper.setProps({
+              item: mockItem,
+            });
+
             await wrapper.vm.$nextTick();
 
             expect(wrapper.vm.stateIconName).toBe(stateIconName);

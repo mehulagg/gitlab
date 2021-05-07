@@ -1,14 +1,34 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Container Registry API
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55978) in GitLab 11.8.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55978) in GitLab 11.8.
+> - The use of `CI_JOB_TOKEN` scoped to the current project was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49750) in GitLab 13.12.
 
-This is the API docs of the [GitLab Container Registry](../user/packages/container_registry/index.md).
+This is the API documentation of the [GitLab Container Registry](../user/packages/container_registry/index.md).
+
+When the `ci_job_token_scope` feature flag is enabled (it is **disabled by default**), you can use the below endpoints
+from a CI/CD job, by passing the `$CI_JOB_TOKEN` variable as the `JOB-TOKEN` header.
+The job token will only have access to its own project.
+
+[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
+can opt to enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_job_token_scope)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_job_token_scope)
+```
 
 ## List registry repositories
 
@@ -122,6 +142,48 @@ Example response:
     ]
   }
 ]
+```
+
+## Get details of a single repository
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/209916) in GitLab 13.6.
+
+Get details of a registry repository.
+
+```plaintext
+GET /registry/repositories/:id
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id`      | integer/string | yes | The ID of the registry repository accessible by the authenticated user. |
+| `tags`      | boolean | no | If the parameter is included as `true`, the response includes an array of `"tags"`. |
+| `tags_count` | boolean | no | If the parameter is included as `true`, the response includes `"tags_count"`. |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/registry/repositories/2?tags=true&tags_count=true"
+```
+
+Example response:
+
+```json
+{
+  "id": 2,
+  "name": "",
+  "path": "group/project",
+  "project_id": 9,
+  "location": "gitlab.example.com:5000/group/project",
+  "created_at": "2019-01-10T13:38:57.391Z",
+  "cleanup_policy_started_at": "2020-08-17T03:12:35.489Z",
+  "tags_count": 1,
+  "tags": [
+    {
+      "name": "0.0.1",
+      "path": "group/project:0.0.1",
+      "location": "gitlab.example.com:5000/group/project:0.0.1"
+    }
+  ]
+}
 ```
 
 ## Delete registry repository
@@ -238,7 +300,7 @@ This action doesn't delete blobs. To delete them and recycle disk space,
 Delete registry repository tags in bulk based on given criteria.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, see [Utilize the Container Registry API to delete all tags except *](https://youtu.be/Hi19bKe_xsg).
+For an overview, see [Use the Container Registry API to delete all tags except *](https://youtu.be/Hi19bKe_xsg).
 
 ```plaintext
 DELETE /projects/:id/registry/repositories/:repository_id/tags
@@ -271,7 +333,14 @@ You can run this at most once an hour for a given container repository. This
 action doesn't delete blobs. To delete them and recycle disk space,
 [run the garbage collection](https://docs.gitlab.com/omnibus/maintenance/README.html#removing-unused-layers-not-referenced-by-manifests).
 
-NOTE: **Note:**
+WARNING:
+The number of tags deleted by this API is limited on GitLab.com
+because of the scale of the Container Registry there.
+If your Container Registry has a large number of tags to delete,
+only some of them will be deleted, and you might need to call this API multiple times.
+To schedule tags for automatic deletion, use a [cleanup policy](../user/packages/container_registry/index.md#cleanup-policy) instead.
+
+NOTE:
 In GitLab 12.4 and later, individual tags are deleted.
 For more details, see the [discussion](https://gitlab.com/gitlab-org/gitlab/-/issues/15737).
 

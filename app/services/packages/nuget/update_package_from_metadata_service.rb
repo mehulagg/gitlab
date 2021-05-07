@@ -16,7 +16,7 @@ module Packages
       end
 
       def execute
-        raise InvalidMetadataError.new('package name and/or package version not found in metadata') unless valid_metadata?
+        raise InvalidMetadataError, 'package name and/or package version not found in metadata' unless valid_metadata?
 
         try_obtain_lease do
           @package_file.transaction do
@@ -32,6 +32,8 @@ module Packages
             )
           end
         end
+      rescue ActiveRecord::RecordInvalid => e
+        raise InvalidMetadataError, e.message
       end
 
       private
@@ -43,7 +45,7 @@ module Packages
         ::Packages::UpdateTagsService
           .new(package, package_tags)
           .execute
-      rescue => e
+      rescue StandardError => e
         raise InvalidMetadataError, e.message
       end
 
@@ -66,7 +68,8 @@ module Packages
       def update_linked_package
         @package_file.package.update!(
           name: package_name,
-          version: package_version
+          version: package_version,
+          status: :default
         )
 
         ::Packages::Nuget::CreateDependencyService.new(@package_file.package, package_dependencies)

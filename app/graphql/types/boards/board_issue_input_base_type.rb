@@ -3,32 +3,23 @@
 module Types
   module Boards
     # rubocop: disable Graphql/AuthorizeTypes
-    class BoardIssueInputBaseType < BaseInputObject
-      argument :label_name, GraphQL::STRING_TYPE.to_list_type,
+    class BoardIssueInputBaseType < BoardIssuableInputBaseType
+      argument :iids, [GraphQL::STRING_TYPE],
                required: false,
-               description: 'Filter by label name'
+               description: 'List of IIDs of issues. For example ["1", "2"].'
 
       argument :milestone_title, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Filter by milestone title'
+               description: 'Filter by milestone title.'
 
-      argument :assignee_username, GraphQL::STRING_TYPE.to_list_type,
+      argument :assignee_username, [GraphQL::STRING_TYPE, null: true],
                required: false,
-               description: 'Filter by assignee username'
-
-      argument :author_username, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Filter by author username'
+               description: 'Filter by assignee username.'
 
       argument :release_tag, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Filter by release tag'
-
-      argument :my_reaction_emoji, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Filter by reaction emoji'
+               description: 'Filter by release tag.'
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end
 

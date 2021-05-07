@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Git LFS API and storage' do
   include WorkhorseHelpers
+  include EE::GeoHelpers
 
   let(:user) { create(:user) }
   let!(:lfs_object) { create(:lfs_object, :with_file) }
@@ -21,15 +22,32 @@ RSpec.describe 'Git LFS API and storage' do
   let(:sample_oid) { lfs_object.oid }
   let(:sample_size) { lfs_object.size }
 
+  context 'with group wikis' do
+    let_it_be(:group) { create(:group) }
+
+    # LFS is not supported on group wikis, so we override the shared examples
+    # to expect 404 responses instead.
+    [
+      'LFS http 200 response',
+      'LFS http 200 blob response',
+      'LFS http 403 response'
+    ].each do |examples|
+      shared_examples_for(examples) { it_behaves_like 'LFS http 404 response' }
+    end
+
+    it_behaves_like 'LFS http requests' do
+      let(:container) { create(:group_wiki, :empty_repo, group: group) }
+      let(:authorize_guest) { group.add_guest(user) }
+      let(:authorize_download) { group.add_reporter(user) }
+      let(:authorize_upload) { group.add_developer(user) }
+    end
+  end
+
   describe 'when handling lfs batch request' do
-    let(:update_lfs_permissions) { }
-    let(:update_user_permissions) { }
+    subject(:batch_request) { post_lfs_json "#{project.http_url_to_repo}/info/lfs/objects/batch", body, headers }
 
     before do
       enable_lfs
-      update_lfs_permissions
-      update_user_permissions
-      post_lfs_json "#{project.http_url_to_repo}/info/lfs/objects/batch", body, headers
     end
 
     describe 'upload' do
@@ -49,7 +67,7 @@ RSpec.describe 'Git LFS API and storage' do
         let(:sample_oid) { '91eff75a492a3ed0dfcb544d7f31326bc4014c8551849c192fd1e48d4dd2c897' }
 
         context 'and project is above the limit' do
-          let(:update_lfs_permissions) do
+          before do
             allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
               allow(checker).to receive_messages(
                 enabled?: true,
@@ -60,13 +78,15 @@ RSpec.describe 'Git LFS API and storage' do
           end
 
           it 'responds with status 406' do
+            batch_request
+
             expect(response).to have_gitlab_http_status(:not_acceptable)
             expect(json_response['message']).to eql('Your push has been rejected, because this repository has exceeded its size limit of 100 MB by 160 MB. Please contact your GitLab administrator for more information.')
           end
         end
 
         context 'and project will go over the limit' do
-          let(:update_lfs_permissions) do
+          before do
             allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
               allow(checker).to receive_messages(
                 enabled?: true,
@@ -77,6 +97,8 @@ RSpec.describe 'Git LFS API and storage' do
           end
 
           it 'responds with status 406' do
+            batch_request
+
             expect(response).to have_gitlab_http_status(:not_acceptable)
             expect(json_response['documentation_url']).to include('/help')
             expect(json_response['message']).to eql('Your push has been rejected, because this repository has exceeded its size limit of 300 MB by 50 MB. Please contact your GitLab administrator for more information.')
@@ -87,10 +109,67 @@ RSpec.describe 'Git LFS API and storage' do
       describe 'when request is authenticated' do
         context 'when user has project push access' do
           let(:authorization) { authorize_user }
-          let(:update_user_permissions) { project.add_developer(user) }
+
+          before do
+            project.add_developer(user)
+          end
 
           context 'when pushing a lfs object that does not exist' do
             it_behaves_like 'pushes new LFS objects'
+          end
+
+          context 'when Geo is not enabled' do
+            context 'when custom_http_clone_url_root is not configured' do
+              it 'returns hrefs based on external_url' do
+                batch_request
+
+                expect(response).to have_gitlab_http_status(:ok)
+                expect(json_response['objects'].first['actions']['upload']['href']).to start_with(Gitlab::Routing.url_helpers.root_url)
+              end
+            end
+
+            context 'when custom_http_clone_url_root is configured' do
+              before do
+                stub_application_setting(custom_http_clone_url_root: 'http://customized')
+              end
+
+              it 'returns hrefs based on custom_http_clone_url_root' do
+                batch_request
+
+                expect(response).to have_gitlab_http_status(:ok)
+                expect(json_response['objects'].first['actions']['upload']['href']).to start_with('http://customized')
+              end
+            end
+          end
+
+          context 'when this site is a Geo primary site' do
+            let(:primary) { create(:geo_node, :primary) }
+
+            before do
+              stub_current_geo_node(primary)
+            end
+
+            context 'when custom_http_clone_url_root is not configured' do
+              it 'returns hrefs based on the Geo primary site URL' do
+                batch_request
+
+                expect(response).to have_gitlab_http_status(:ok)
+                expect(json_response['objects'].first['actions']['upload']['href']).to start_with(primary.url)
+              end
+            end
+
+            context 'when custom_http_clone_url_root is configured' do
+              before do
+                stub_application_setting(custom_http_clone_url_root: 'http://customized')
+              end
+
+              it 'returns hrefs based on the Geo primary site URL' do
+                batch_request
+
+                expect(response).to have_gitlab_http_status(:ok)
+                expect(json_response['objects'].first['actions']['upload']['href']).to start_with(primary.url)
+              end
+            end
           end
         end
 
@@ -98,8 +177,8 @@ RSpec.describe 'Git LFS API and storage' do
           let(:key) { create(:deploy_key) }
           let(:authorization) { authorize_deploy_key }
 
-          let(:update_user_permissions) do
-            project.deploy_keys_projects.create(deploy_key: key, can_push: true)
+          before do
+            project.deploy_keys_projects.create!(deploy_key: key, can_push: true)
           end
 
           it_behaves_like 'pushes new LFS objects'

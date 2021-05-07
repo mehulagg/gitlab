@@ -12,9 +12,15 @@ module Timebox
   include FromUnion
 
   TimeboxStruct = Struct.new(:title, :name, :id) do
+    include GlobalID::Identification
+
     # Ensure these models match the interface required for exporting
     def serializable_hash(_opts = {})
       { title: title, name: name, id: id }
+    end
+
+    def self.declarative_policy_class
+      "TimeboxPolicy"
     end
   end
 
@@ -66,11 +72,7 @@ module Timebox
       groups = groups.compact if groups.is_a? Array
       groups = [] if groups.nil?
 
-      if Feature.enabled?(:optimized_timebox_queries, default_enabled: true)
-        from_union([where(project_id: projects), where(group_id: groups)], remove_duplicates: false)
-      else
-        where(project_id: projects).or(where(group_id: groups))
-      end
+      from_union([where(project_id: projects), where(group_id: groups)], remove_duplicates: false)
     end
 
     # A timebox is within the timeframe (start_date, end_date) if it overlaps

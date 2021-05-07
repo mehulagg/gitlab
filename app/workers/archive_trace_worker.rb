@@ -2,9 +2,9 @@
 
 class ArchiveTraceWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
-  include PipelineBackgroundQueue
 
-  tags :requires_disk_io
+  sidekiq_options retry: 3
+  include PipelineBackgroundQueue
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(job_id)

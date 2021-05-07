@@ -6,20 +6,23 @@ RSpec.describe Projects::DependenciesController do
   describe 'GET #index' do
     let_it_be(:developer) { create(:user) }
     let_it_be(:guest) { create(:user) }
+    let_it_be(:project) { create(:project, :repository, :private) }
+
     let(:params) { { namespace_id: project.namespace, project_id: project } }
 
     before do
+      project.add_developer(developer)
+      project.add_guest(guest)
+
       sign_in(user)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:user) { developer }
+      let(:valid_request) { get :index, params: params }
+    end
+
     context 'with authorized user' do
-      let_it_be(:project) { create(:project, :repository, :public) }
-
-      before do
-        project.add_developer(developer)
-        project.add_guest(guest)
-      end
-
       context 'when feature is available' do
         before do
           stub_licensed_features(dependency_scanning: true, license_scanning: true, security_dashboard: true)
@@ -51,7 +54,7 @@ RSpec.describe Projects::DependenciesController do
         end
 
         context 'with existing report' do
-          let!(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report, project: project) }
+          let_it_be(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report, project: project) }
 
           before do
             get :index, params: params, format: :json
@@ -81,6 +84,11 @@ RSpec.describe Projects::DependenciesController do
           end
 
           context 'with params' do
+            let_it_be(:finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, :with_pipeline) }
+            let_it_be(:finding_pipeline) { create(:vulnerabilities_finding_pipeline, finding: finding, pipeline: pipeline) }
+            let_it_be(:other_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'debug', file: 'yarn/yarn.lock', version: '1.0.5', raw_severity: 'Unknown') }
+            let_it_be(:other_pipeline) { create(:vulnerabilities_finding_pipeline, finding: other_finding, pipeline: pipeline) }
+
             context 'with sorting params' do
               let(:user) { developer }
 
@@ -135,15 +143,17 @@ RSpec.describe Projects::DependenciesController do
                 let(:user) { developer }
 
                 it 'return vulnerable dependencies' do
-                  expect(json_response['dependencies'].length).to eq(3)
+                  expect(json_response['dependencies'].length).to eq(2)
                 end
-              end
 
-              context 'without authorized user to see vulnerabilities' do
-                let(:user) { guest }
+                it 'returns vulnerability params' do
+                  dependency = json_response['dependencies'].select { |dep| dep['name'] == 'nokogiri' }.first
+                  vulnerability = dependency['vulnerabilities'].first
+                  path = "/security/vulnerabilities/#{finding.vulnerability_id}"
 
-                it 'return vulnerable dependencies' do
-                  expect(json_response['dependencies']).to be_empty
+                  expect(vulnerability['name']).to eq('Vulnerabilities in libxml2 in nokogiri')
+                  expect(vulnerability['id']).to eq(finding.vulnerability_id)
+                  expect(vulnerability['url']).to end_with(path)
                 end
               end
             end
@@ -197,17 +207,20 @@ RSpec.describe Projects::DependenciesController do
 
         context 'when report doesn\'t have dependency list field' do
           let(:user) { developer }
-          let!(:pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
+
+          let_it_be(:pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
+          let_it_be(:finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, :with_pipeline) }
+          let_it_be(:finding_pipeline) { create(:vulnerabilities_finding_pipeline, finding: finding, pipeline: pipeline) }
 
           before do
             get :index, params: params, format: :json
           end
 
           it 'returns dependencies with vulnerabilities' do
-            expect(json_response['dependencies'].count).to eq(4)
-            django = json_response['dependencies'].find { |d| d['name'] == 'Django' }
-            expect(django).not_to be_nil
-            expect(django['vulnerabilities']).to eq([{ "name" => "Possible XSS in traceback section of technical 500 debug page", "severity" => "unknown" }])
+            expect(json_response['dependencies'].count).to eq(1)
+            nokogiri = json_response['dependencies'].first
+            expect(nokogiri).not_to be_nil
+            expect(nokogiri['vulnerabilities'].first).to include({ "id" => finding.vulnerability_id, "name" => "Vulnerabilities in libxml2 in nokogiri", "severity" => "high" })
             expect(json_response['report']['status']).to eq('ok')
           end
         end
@@ -247,7 +260,6 @@ RSpec.describe Projects::DependenciesController do
     end
 
     context 'with unauthorized user' do
-      let(:project) { create(:project, :repository, :private) }
       let(:user) { guest }
 
       before do

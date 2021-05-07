@@ -1,5 +1,5 @@
-import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
 import '~/commons/bootstrap';
 import axios from '~/lib/utils/axios_utils';
 import Sidebar from '~/right_sidebar';
@@ -12,7 +12,7 @@ let $collapseIcon = null;
 let $page = null;
 let $labelsIcon = null;
 
-const assertSidebarState = state => {
+const assertSidebarState = (state) => {
   const shouldBeExpanded = state === 'expanded';
   const shouldBeCollapsed = state === 'collapsed';
   expect($aside.hasClass('right-sidebar-expanded')).toBe(shouldBeExpanded);
@@ -27,7 +27,6 @@ const assertSidebarState = state => {
 describe('RightSidebar', () => {
   describe('fixture tests', () => {
     const fixtureName = 'issues/open-issue.html';
-    preloadFixtures(fixtureName);
     let mock;
 
     beforeEach(() => {
@@ -67,7 +66,7 @@ describe('RightSidebar', () => {
       assertSidebarState('collapsed');
     });
 
-    it('should broadcast todo:toggle event when add todo clicked', done => {
+    it('should broadcast todo:toggle event when add todo clicked', (done) => {
       const todos = getJSONFixture('todos/todos.json');
       mock.onPost(/(.*)\/todos$/).reply(200, todos);
 
@@ -84,7 +83,7 @@ describe('RightSidebar', () => {
     });
 
     it('should not hide collapsed icons', () => {
-      [].forEach.call(document.querySelectorAll('.sidebar-collapsed-icon'), el => {
+      [].forEach.call(document.querySelectorAll('.sidebar-collapsed-icon'), (el) => {
         expect(el.querySelector('.fa, svg').classList.contains('hidden')).toBeFalsy();
       });
     });

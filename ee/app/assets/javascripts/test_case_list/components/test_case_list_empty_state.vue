@@ -11,6 +11,7 @@ export default {
     GlSprintf,
     GlLink,
   },
+  inject: ['canCreateTestCase', 'testCaseNewPath', 'emptyStatePath'],
   props: {
     currentState: {
       type: String,
@@ -21,7 +22,6 @@ export default {
       required: true,
     },
   },
-  inject: ['canCreateTestCase', 'testCaseNewPath', 'emptyStatePath'],
   computed: {
     emptyStateTitle() {
       return this.testCasesCount[TestCaseStates.All]

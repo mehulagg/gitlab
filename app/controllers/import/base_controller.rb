@@ -48,18 +48,14 @@ class Import::BaseController < ApplicationController
 
   private
 
-  def filter_attribute
-    :name
-  end
-
   def sanitized_filter_param
-    @filter ||= sanitize(params[:filter])
+    @filter ||= sanitize(params[:filter])&.downcase
   end
 
   def filtered(collection)
     return collection unless sanitized_filter_param
 
-    collection.select { |item| item[filter_attribute].include?(sanitized_filter_param) }
+    collection.select { |item| item[:name].to_s.downcase.include?(sanitized_filter_param) }
   end
 
   def serialized_provider_repos
@@ -101,7 +97,7 @@ class Import::BaseController < ApplicationController
     group = Groups::NestedCreateService.new(current_user, group_path: names).execute
 
     group.errors.any? ? current_user.namespace : group
-  rescue => e
+  rescue StandardError => e
     Gitlab::AppLogger.error(e)
 
     current_user.namespace

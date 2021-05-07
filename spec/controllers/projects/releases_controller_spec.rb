@@ -9,13 +9,16 @@ RSpec.describe Projects::ReleasesController do
   let_it_be(:private_project) { create(:project, :repository, :private) }
   let_it_be(:developer)  { create(:user) }
   let_it_be(:reporter)   { create(:user) }
+  let_it_be(:guest)      { create(:user) }
   let_it_be(:user)       { developer }
+
   let!(:release_1)       { create(:release, project: project, released_at: Time.zone.parse('2018-10-18')) }
   let!(:release_2)       { create(:release, project: project, released_at: Time.zone.parse('2019-10-19')) }
 
   before do
     project.add_developer(developer)
     project.add_reporter(reporter)
+    project.add_guest(guest)
   end
 
   shared_examples_for 'successful request' do
@@ -83,7 +86,7 @@ RSpec.describe Projects::ReleasesController do
       let(:format) { :html }
 
       it 'returns a text/html content_type' do
-        expect(response.content_type).to eq 'text/html'
+        expect(response.media_type).to eq 'text/html'
       end
 
       it_behaves_like 'common access controls'
@@ -101,7 +104,7 @@ RSpec.describe Projects::ReleasesController do
       let(:format) { :json }
 
       it 'returns an application/json content_type' do
-        expect(response.content_type).to eq 'application/json'
+        expect(response.media_type).to eq 'application/json'
       end
 
       it "returns the project's releases as JSON, ordered by released_at" do
@@ -199,104 +202,16 @@ RSpec.describe Projects::ReleasesController do
 
       it_behaves_like 'not found'
     end
-  end
 
-  context 'GET #downloads' do
-    subject do
-      get :downloads, params: { namespace_id: project.namespace, project_id: project, tag: tag, filepath: filepath }
-    end
+    context 'when user is a guest' do
+      let(:project) { private_project }
+      let(:user) { guest }
 
-    before do
-      sign_in(user)
-    end
-
-    let(:release) { create(:release, project: project, tag: tag ) }
-    let!(:link) { create(:release_link, release: release, name: 'linux-amd64 binaries', filepath: '/binaries/linux-amd64', url: 'https://downloads.example.com/bin/gitlab-linux-amd64') }
-    let(:tag) { 'v11.9.0-rc2' }
-
-    context 'valid filepath' do
-      let(:filepath) { CGI.escape('/binaries/linux-amd64') }
-
-      it 'redirects to the asset direct link' do
-        subject
-
-        expect(response).to redirect_to('https://downloads.example.com/bin/gitlab-linux-amd64')
-      end
-
-      it 'redirects with a status of 302' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:redirect)
-      end
-    end
-
-    context 'invalid filepath' do
-      let(:filepath) { CGI.escape('/binaries/win32') }
-
-      it 'is not found' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+      it_behaves_like 'not found'
     end
   end
 
-  context 'GET #downloads' do
-    subject do
-      get :downloads, params: {
-        namespace_id: project.namespace,
-        project_id: project,
-        tag: tag,
-        filepath: filepath
-       }
-    end
-
-    before do
-      sign_in(user)
-    end
-
-    let(:release) { create(:release, project: project, tag: tag ) }
-    let(:tag) { 'v11.9.0-rc2' }
-    let(:db_filepath) { '/binaries/linux-amd64' }
-    let!(:link) do
-      create :release_link,
-        release: release,
-        name: 'linux-amd64 binaries',
-        filepath: db_filepath,
-        url: 'https://downloads.example.com/bin/gitlab-linux-amd64'
-    end
-
-    context 'valid filepath' do
-      let(:filepath) { CGI.escape('/binaries/linux-amd64') }
-
-      it 'redirects to the asset direct link' do
-        subject
-
-        expect(response).to redirect_to(link.url)
-      end
-    end
-
-    context 'invalid filepath' do
-      let(:filepath) { CGI.escape('/binaries/win32') }
-
-      it 'is not found' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context 'ignores filepath extension' do
-      let(:db_filepath) { '/binaries/linux-amd64.json' }
-      let(:filepath) { CGI.escape(db_filepath) }
-
-      it 'redirects to the asset direct link' do
-        subject
-
-        expect(response).to redirect_to(link.url)
-      end
-    end
-  end
+  # `GET #downloads` is addressed in spec/requests/projects/releases_controller_spec.rb
 
   private
 

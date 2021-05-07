@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlSearchBoxByType, GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import { __, sprintf } from '~/locale';
 import { DEFAULT_SEARCH_DELAY, ACTION_TYPES, FILTER_STATES } from '../constants';
 

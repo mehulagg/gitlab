@@ -64,11 +64,11 @@ RSpec.describe 'lograge', type: :request do
         )
 
       expect(Lograge.formatter).to receive(:call)
-        .with(a_hash_including(cpu_s: 0.11))
+        .with(a_hash_including(cpu_s: 0.111112))
         .and_call_original
 
       expect(Lograge.logger).to receive(:send)
-        .with(anything, include('"cpu_s":0.11'))
+        .with(anything, include('"cpu_s":0.111112'))
         .and_call_original
 
       subject
@@ -87,6 +87,26 @@ RSpec.describe 'lograge', type: :request do
         .and_call_original
 
       subject
+    end
+
+    context 'when logging memory allocations' do
+      include MemoryInstrumentationHelper
+
+      before do
+        skip_memory_instrumentation!
+      end
+
+      it 'logs memory usage metrics' do
+        expect(Lograge.formatter).to receive(:call)
+          .with(a_hash_including(:mem_objects))
+          .and_call_original
+
+        expect(Lograge.logger).to receive(:send)
+          .with(anything, include('"mem_objects":'))
+          .and_call_original
+
+        subject
+      end
     end
 
     it 'limits param size' do
@@ -153,32 +173,22 @@ RSpec.describe 'lograge', type: :request do
       end
     end
 
-    context 'with transaction' do
-      let(:transaction) { Gitlab::Metrics::WebTransaction.new({}) }
-
-      before do
-        allow(Gitlab::Metrics::Transaction).to receive(:current).and_return(transaction)
-      end
-
+    context 'with db payload' do
       context 'when RequestStore is enabled', :request_store do
-        context 'with db payload' do
-          it 'includes db counters', :request_store do
-            ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
-            subscriber.process_action(event)
+        it 'includes db counters' do
+          ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+          subscriber.process_action(event)
 
-            expect(log_data).to include("db_count" => 1, "db_write_count" => 0, "db_cached_count" => 0)
-          end
+          expect(log_data).to include("db_count" => a_value >= 1, "db_write_count" => 0, "db_cached_count" => 0)
         end
       end
 
       context 'when RequestStore is disabled' do
-        context 'with db payload' do
-          it 'does not include db counters' do
-            ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
-            subscriber.process_action(event)
+        it 'does not include db counters' do
+          ActiveRecord::Base.connection.execute('SELECT pg_sleep(0.1);')
+          subscriber.process_action(event)
 
-            expect(log_data).not_to include("db_count" => 1, "db_write_count" => 0, "db_cached_count" => 0)
-          end
+          expect(log_data).not_to include("db_count", "db_write_count", "db_cached_count")
         end
       end
     end

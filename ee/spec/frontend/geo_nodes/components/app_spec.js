@@ -1,13 +1,14 @@
+import MockAdapter from 'axios-mock-adapter';
 import Vue from 'vue';
 
-import MockAdapter from 'axios-mock-adapter';
 import appComponent from 'ee/geo_nodes/components/app.vue';
-import eventHub from 'ee/geo_nodes/event_hub';
-import GeoNodesStore from 'ee/geo_nodes/store/geo_nodes_store';
-import GeoNodesService from 'ee/geo_nodes/service/geo_nodes_service';
-import mountComponent from 'helpers/vue_mount_component_helper';
 import { NODE_ACTIONS } from 'ee/geo_nodes/constants';
+import eventHub from 'ee/geo_nodes/event_hub';
+import GeoNodesService from 'ee/geo_nodes/service/geo_nodes_service';
+import GeoNodesStore from 'ee/geo_nodes/store/geo_nodes_store';
+import mountComponent from 'helpers/vue_mount_component_helper';
 import axios from '~/lib/utils/axios_utils';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import '~/vue_shared/plugins/global_toast';
 
 import {
@@ -110,7 +111,7 @@ describe('AppComponent', () => {
     });
 
     describe('fetchGeoNodes', () => {
-      it('calls service.getGeoNodes and sets response to the store on success', done => {
+      it('calls service.getGeoNodes and sets response to the store on success', (done) => {
         jest.spyOn(vm.store, 'setNodes');
 
         vm.fetchGeoNodes()
@@ -122,7 +123,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('sets error flag and message on failure', done => {
+      it('sets error flag and message on failure', (done) => {
         response = 'Something went wrong';
         statusCode = 500;
 
@@ -139,7 +140,7 @@ describe('AppComponent', () => {
     });
 
     describe('fetchNodeDetails', () => {
-      it('calls service.getGeoNodeDetails and sets response to the store on success', done => {
+      it('calls service.getGeoNodeDetails and sets response to the store on success', (done) => {
         mock.onGet(mockNode.statusPath).reply(200, rawMockNodeDetails);
 
         vm.fetchNodeDetails(mockNode)
@@ -151,7 +152,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('emits `nodeDetailsLoaded` event with fake nodeDetails object on 404 failure', done => {
+      it('emits `nodeDetailsLoaded` event with fake nodeDetails object on 404 failure', (done) => {
         mock.onGet(mockNode.statusPath).reply(404, {});
         jest.spyOn(vm.service, 'getGeoNodeDetails');
 
@@ -168,7 +169,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a network error occurs', done => {
+      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a network error occurs', (done) => {
         mock.onGet(mockNode.statusPath).networkError();
         jest.spyOn(vm.service, 'getGeoNodeDetails');
 
@@ -185,7 +186,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a timeout occurs', done => {
+      it('emits `nodeDetailsLoaded` event with fake nodeDetails object when a timeout occurs', (done) => {
         mock.onGet(mockNode.statusPath).timeout();
         jest.spyOn(vm.service, 'getGeoNodeDetails');
 
@@ -204,7 +205,7 @@ describe('AppComponent', () => {
     });
 
     describe('repairNode', () => {
-      it('calls service.repairNode and shows success Toast message on request success', done => {
+      it('calls service.repairNode and shows success Toast message on request success', (done) => {
         const node = { ...mockNode };
         mock.onPost(node.repairPath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -224,7 +225,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('calls service.repairNode and shows failure Flash message on request failure', done => {
+      it('calls service.repairNode and shows failure Flash message on request failure', (done) => {
         const node = { ...mockNode };
         mock.onPost(node.repairPath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -247,7 +248,7 @@ describe('AppComponent', () => {
     });
 
     describe('toggleNode', () => {
-      it('calls service.toggleNode for enabling node and updates toggle button on request success', done => {
+      it('calls service.toggleNode for enabling node and updates toggle button on request success', (done) => {
         const node = { ...mockNode };
         mock.onPut(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -271,7 +272,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('calls service.toggleNode and shows Flash error on request failure', done => {
+      it('calls service.toggleNode and shows Flash error on request failure', (done) => {
         const node = { ...mockNode };
         mock.onPut(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -295,7 +296,7 @@ describe('AppComponent', () => {
     });
 
     describe('removeNode', () => {
-      it('calls service.removeNode for removing node and shows Toast message on request success', done => {
+      it('calls service.removeNode for removing node and shows Toast message on request success', (done) => {
         const node = { ...mockNode };
         mock.onDelete(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -315,7 +316,7 @@ describe('AppComponent', () => {
           .catch(done.fail);
       });
 
-      it('calls service.removeNode and shows Flash message on request failure', done => {
+      it('calls service.removeNode and shows Flash message on request failure', (done) => {
         const node = { ...mockNode };
         mock.onDelete(node.basePath).reply(() => {
           expect(node.nodeActionActive).toBe(true);
@@ -398,7 +399,7 @@ describe('AppComponent', () => {
         expect(vm.modalTitle).toBe(modalTitle);
       });
 
-      it('emits `bv::show::modal` when actionType is `toggle` and node is enabled', () => {
+      it(`emits ${BV_SHOW_MODAL} when actionType is "toggle" and node is enabled`, () => {
         node.enabled = true;
         vm.showNodeActionModal({
           actionType: NODE_ACTIONS.TOGGLE,
@@ -409,7 +410,7 @@ describe('AppComponent', () => {
           modalTitle,
         });
 
-        expect(rootEmit).toHaveBeenCalledWith('bv::show::modal', vm.modalId);
+        expect(rootEmit).toHaveBeenCalledWith(BV_SHOW_MODAL, vm.modalId);
       });
 
       it('calls toggleNode when actionType is `toggle` and node.enabled is `false`', () => {
@@ -428,7 +429,7 @@ describe('AppComponent', () => {
         expect(vm.toggleNode).toHaveBeenCalledWith(vm.targetNode);
       });
 
-      it('emits `bv::show::modal` when actionType is not `toggle`', () => {
+      it(`emits ${BV_SHOW_MODAL} when actionType is not "toggle"`, () => {
         node.enabled = true;
         vm.showNodeActionModal({
           actionType: NODE_ACTIONS.REMOVE,
@@ -438,16 +439,16 @@ describe('AppComponent', () => {
           modalActionLabel,
         });
 
-        expect(rootEmit).toHaveBeenCalledWith('bv::show::modal', vm.modalId);
+        expect(rootEmit).toHaveBeenCalledWith(BV_SHOW_MODAL, vm.modalId);
       });
     });
 
     describe('hideNodeActionModal', () => {
-      it('emits `bv::hide::modal`', () => {
+      it(`emits ${BV_HIDE_MODAL}`, () => {
         const rootEmit = jest.spyOn(vm.$root, '$emit');
         vm.hideNodeActionModal();
 
-        expect(rootEmit).toHaveBeenCalledWith('bv::hide::modal', vm.modalId);
+        expect(rootEmit).toHaveBeenCalledWith(BV_HIDE_MODAL, vm.modalId);
       });
     });
 

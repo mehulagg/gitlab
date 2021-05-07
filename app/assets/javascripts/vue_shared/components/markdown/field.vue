@@ -1,23 +1,23 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlIcon } from '@gitlab/ui';
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
 import { unescape } from 'lodash';
-import { GlIcon } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import { stripHtml } from '~/lib/utils/text_utility';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import GLForm from '~/gl_form';
-import MarkdownHeader from './header.vue';
-import MarkdownToolbar from './toolbar.vue';
-import GlMentions from '~/vue_shared/components/gl_mentions.vue';
+import axios from '~/lib/utils/axios_utils';
+import { stripHtml } from '~/lib/utils/text_utility';
+import { __, sprintf } from '~/locale';
+import GfmAutocomplete from '~/vue_shared/components/gfm_autocomplete/gfm_autocomplete.vue';
 import Suggestions from '~/vue_shared/components/markdown/suggestions.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import axios from '~/lib/utils/axios_utils';
+import MarkdownHeader from './header.vue';
+import MarkdownToolbar from './toolbar.vue';
 
 export default {
   components: {
-    GlMentions,
+    GfmAutocomplete,
     MarkdownHeader,
     MarkdownToolbar,
     GlIcon,
@@ -62,6 +62,11 @@ export default {
       required: false,
       default: true,
     },
+    uploadsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
     enableAutocomplete: {
       type: Boolean,
       required: false,
@@ -71,6 +76,11 @@ export default {
       type: Object,
       required: false,
       default: null,
+    },
+    lines: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
     note: {
       type: Object,
@@ -110,9 +120,18 @@ export default {
       return this.referencedUsers.length >= referencedUsersThreshold;
     },
     lineContent() {
-      const [firstSuggestion] = this.suggestions;
-      if (firstSuggestion) {
-        return firstSuggestion.from_content;
+      if (this.lines.length) {
+        return this.lines
+          .map((line) => {
+            const { rich_text: richText, text } = line;
+
+            if (text) {
+              return text;
+            }
+
+            return unescape(stripHtml(richText).replace(/\n/g, ''));
+          })
+          .join('\\n');
       }
 
       if (this.line) {
@@ -141,14 +160,16 @@ export default {
     addMultipleToDiscussionWarning() {
       return sprintf(
         __(
-          '%{icon}You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
+          'You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
         ),
         {
-          icon: '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>',
           usersTag: `<strong><span class="js-referenced-users-count">${this.referencedUsers.length}</span></strong>`,
         },
         false,
       );
+    },
+    suggestionsStartIndex() {
+      return Math.max(this.lines.length - 1, 0);
     },
   },
   watch: {
@@ -159,7 +180,7 @@ export default {
       const mediaInPreview = this.$refs['markdown-preview'].querySelectorAll('video, audio');
 
       if (mediaInPreview) {
-        mediaInPreview.forEach(media => {
+        mediaInPreview.forEach((media) => {
           media.pause();
         });
       }
@@ -170,14 +191,15 @@ export default {
     return new GLForm(
       $(this.$refs['gl-form']),
       {
-        emojis: this.enableAutocomplete,
+        emojis: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         members: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         issues: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         mergeRequests: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-        epics: this.enableAutocomplete,
+        epics: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         milestones: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
         labels: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
-        snippets: this.enableAutocomplete,
+        snippets: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+        vulnerabilities: this.enableAutocomplete,
       },
       true,
     );
@@ -199,7 +221,7 @@ export default {
         this.markdownPreview = __('Loading…');
         axios
           .post(this.markdownPreviewPath, { text: this.textareaValue })
-          .then(response => this.renderMarkdown(response.data))
+          .then((response) => this.renderMarkdown(response.data))
           .catch(() => new Flash(__('Error loading markdown preview')));
       } else {
         this.renderMarkdown();
@@ -234,21 +256,23 @@ export default {
     ref="gl-form"
     :class="{ 'gl-mt-3 gl-mb-3': addSpacingClasses }"
     class="js-vue-markdown-field md-area position-relative gfm-form"
+    :data-uploads-path="uploadsPath"
   >
     <markdown-header
       :preview-markdown="previewMarkdown"
       :line-content="lineContent"
       :can-suggest="canSuggest"
       :show-suggest-popover="showSuggestPopover"
+      :suggestion-start-index="suggestionsStartIndex"
       @preview-markdown="showPreviewTab"
       @write-markdown="showWriteTab"
       @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
     />
     <div v-show="!previewMarkdown" class="md-write-holder">
       <div class="zen-backdrop">
-        <gl-mentions v-if="glFeatures.tributeAutocomplete">
+        <gfm-autocomplete v-if="glFeatures.tributeAutocomplete">
           <slot name="textarea"></slot>
-        </gl-mentions>
+        </gfm-autocomplete>
         <slot v-else name="textarea"></slot>
         <a
           class="zen-control zen-control-leave js-zen-leave gl-text-gray-500"
@@ -293,6 +317,7 @@ export default {
     <template v-if="previewMarkdown && !markdownPreviewLoading">
       <div v-if="referencedCommands" class="referenced-commands" v-html="referencedCommands"></div>
       <div v-if="shouldShowReferencedUsers" class="referenced-users">
+        <gl-icon name="warning-solid" />
         <span v-html="addMultipleToDiscussionWarning"></span>
       </div>
     </template>

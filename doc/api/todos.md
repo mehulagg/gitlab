@@ -1,7 +1,7 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # To dos API
@@ -10,8 +10,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Get a list of to dos
 
-Returns a list of to dos. When no filter is applied, it returns all pending to dos
-for the current user. Different filters allow the user to precise the request.
+Returns a list of [to-do items](../user/todos.md). When no filter is applied, it
+returns all pending to-do items for the current user. Different filters allow the
+user to refine the request.
 
 ```plaintext
 GET /todos
@@ -26,7 +27,7 @@ Parameters:
 | `project_id` | integer | no | The ID of a project |
 | `group_id` | integer | no | The ID of a group |
 | `state` | string | no | The state of the to do. Can be either `pending` or `done` |
-| `type` | string | no | The type of a to do. Can be either `Issue`, `MergeRequest`, `DesignManagement::Design` or `AlertManagement::Alert` |
+| `type` | string | no | The type of to-do item. Can be either `Issue`, `MergeRequest`, `DesignManagement::Design` or `AlertManagement::Alert` |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/todos"
@@ -101,7 +102,6 @@ Example Response:
       },
       "merge_when_pipeline_succeeds": false,
       "merge_status": "cannot_be_merged",
-      "subscribed": true,
       "user_notes_count": 7
     },
     "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/-/merge_requests/7",
@@ -175,7 +175,6 @@ Example Response:
       },
       "merge_when_pipeline_succeeds": false,
       "merge_status": "cannot_be_merged",
-      "subscribed": true,
       "user_notes_count": 7
     },
     "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/-/merge_requests/7",
@@ -187,7 +186,7 @@ Example Response:
 ]
 ```
 
-## Mark a to do as done
+## Mark a to-do item as done
 
 Marks a single pending to do given by its ID for the current user as done. The
 to do marked as done is returned in the response.
@@ -200,7 +199,7 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer | yes | The ID of a to do |
+| `id` | integer | yes | The ID of to-do item |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/todos/130/mark_as_done"

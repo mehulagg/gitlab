@@ -1,7 +1,10 @@
+import { GlSprintf } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Vuex from 'vuex';
 import NoteHeader from '~/notes/components/note_header.vue';
+import { AVAILABILITY_STATUS } from '~/set_status_modal/utils';
+import UserNameWithStatus from '~/sidebar/components/assignees/user_name_with_status.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -20,6 +23,10 @@ describe('NoteHeader component', () => {
   const findTimestamp = () => wrapper.find({ ref: 'noteTimestamp' });
   const findConfidentialIndicator = () => wrapper.find('[data-testid="confidentialIndicator"]');
   const findSpinner = () => wrapper.find({ ref: 'spinner' });
+  const findAuthorStatus = () => wrapper.find({ ref: 'authorStatus' });
+
+  const statusHtml =
+    '"<span class="user-status-emoji has-tooltip" title="foo bar" data-html="true" data-placement="top"><gl-emoji title="basketball and hoop" data-name="basketball" data-unicode-version="6.0">🏀</gl-emoji></span>"';
 
   const author = {
     avatar_url: null,
@@ -28,15 +35,19 @@ describe('NoteHeader component', () => {
     path: '/root',
     state: 'active',
     username: 'root',
+    show_status: true,
+    status_tooltip_html: statusHtml,
+    availability: '',
   };
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(NoteHeader, {
       localVue,
       store: new Vuex.Store({
         actions,
       }),
       propsData: { ...props },
+      stubs: { GlSprintf, UserNameWithStatus },
     });
   };
 
@@ -78,7 +89,7 @@ describe('NoteHeader component', () => {
         expanded: true,
       });
 
-      expect(findChevronIcon().classes()).toContain('fa-chevron-up');
+      expect(findChevronIcon().props('name')).toBe('chevron-up');
     });
 
     it('has chevron-down icon if expanded prop is false', () => {
@@ -87,7 +98,7 @@ describe('NoteHeader component', () => {
         expanded: false,
       });
 
-      expect(findChevronIcon().classes()).toContain('fa-chevron-down');
+      expect(findChevronIcon().props('name')).toBe('chevron-down');
     });
   });
 
@@ -95,6 +106,38 @@ describe('NoteHeader component', () => {
     createComponent({ author });
 
     expect(wrapper.find('.js-user-link').exists()).toBe(true);
+  });
+
+  it('renders busy status if author availability is set', () => {
+    createComponent({ author: { ...author, availability: AVAILABILITY_STATUS.BUSY } });
+
+    expect(wrapper.find('.js-user-link').text()).toContain('(Busy)');
+  });
+
+  it('renders author status', () => {
+    createComponent({ author });
+
+    expect(findAuthorStatus().exists()).toBe(true);
+  });
+
+  it('does not render author status if show_status=false', () => {
+    createComponent({
+      author: { ...author, status: { availability: AVAILABILITY_STATUS.BUSY }, show_status: false },
+    });
+
+    expect(findAuthorStatus().exists()).toBe(false);
+  });
+
+  it('does not render author status if status_tooltip_html=null', () => {
+    createComponent({
+      author: {
+        ...author,
+        status: { availability: AVAILABILITY_STATUS.BUSY },
+        status_tooltip_html: null,
+      },
+    });
+
+    expect(findAuthorStatus().exists()).toBe(false);
   });
 
   it('renders deleted user text if author is not passed as a prop', () => {
@@ -194,13 +237,12 @@ describe('NoteHeader component', () => {
       createComponent({
         author: {
           ...author,
-          status_tooltip_html:
-            '"<span class="user-status-emoji has-tooltip" title="foo bar" data-html="true" data-placement="top"><gl-emoji title="basketball and hoop" data-name="basketball" data-unicode-version="6.0">🏀</gl-emoji></span>"',
+          status_tooltip_html: statusHtml,
         },
       });
 
       return nextTick().then(() => {
-        const authorStatus = wrapper.find({ ref: 'authorStatus' });
+        const authorStatus = findAuthorStatus();
         authorStatus.trigger('mouseenter');
 
         expect(authorStatus.find('gl-emoji').attributes('title')).toBeUndefined();
@@ -209,7 +251,7 @@ describe('NoteHeader component', () => {
   });
 
   describe('when author username link is hovered', () => {
-    it('toggles hover specific CSS classes on author name link', done => {
+    it('toggles hover specific CSS classes on author name link', (done) => {
       createComponent({ author });
 
       const authorUsernameLink = wrapper.find({ ref: 'authorUsernameLink' });

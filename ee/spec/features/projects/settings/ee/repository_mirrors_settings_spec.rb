@@ -26,7 +26,6 @@ RSpec.describe 'Project settings > [EE] repository' do
         expect(page).to have_no_selector('#mirror_user_id_select', visible: false)
         expect(page).to have_no_selector('#project_mirror_overwrites_diverged_branches')
         expect(page).to have_no_selector('#project_mirror_trigger_builds')
-        expect(page).to have_no_selector('#project_pull_mirror_branch_prefix')
       end
     end
   end
@@ -46,30 +45,16 @@ RSpec.describe 'Project settings > [EE] repository' do
         expect(page).to have_selector('#mirror_user_id_select', visible: false)
         expect(page).to have_selector('#project_mirror_overwrites_diverged_branches')
         expect(page).to have_selector('#project_mirror_trigger_builds')
-        expect(page).to have_selector('#project_pull_mirror_branch_prefix')
-      end
-    end
-
-    context 'pull_mirror_branch_prefix feature flag disabled' do
-      before do
-        stub_feature_flags(pull_mirror_branch_prefix: false)
-      end
-
-      it 'shows pull mirror settings', :js do
-        visit project_settings_repository_path(project)
-
-        page.within('.project-mirror-settings') do
-          expect(page).to have_no_selector('#project_pull_mirror_branch_prefix')
-        end
       end
     end
 
     context 'mirrored external repo', :js do
       let(:personal_access_token) { '461171575b95eeb61fba5face8ab838853d0121f' }
+      let(:password) { 'my-secret-pass' }
       let(:external_project) do
         create(:project_empty_repo,
                :mirror,
-               import_url: "https://#{personal_access_token}@github.com/testngalog2/newrepository.git")
+               import_url: "https://#{personal_access_token}:#{password}@github.com/testngalog2/newrepository.git")
       end
 
       before do
@@ -81,7 +66,14 @@ RSpec.describe 'Project settings > [EE] repository' do
         mirror_url = find('.mirror-url').text
 
         expect(mirror_url).not_to include(personal_access_token)
-        expect(mirror_url).to include('https://*****@github.com/')
+        expect(mirror_url).to include('https://*****:*****@github.com/')
+      end
+
+      it 'does not show password and personal access token on the page' do
+        page_content = page.body
+
+        expect(page_content).not_to include(password)
+        expect(page_content).not_to include(personal_access_token)
       end
     end
 

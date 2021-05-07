@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -20,7 +20,7 @@ to use pipeline features that improve efficiency right away, and get a faster so
 development lifecycle earlier.
 
 First ensure you are familiar with [GitLab CI/CD fundamentals](../introduction/index.md)
-and understand the [quick start guide](../quick_start/README.md).
+and understand the [quick start guide](../quick_start/index.md).
 
 ## Identify bottlenecks and common failures
 
@@ -105,10 +105,10 @@ External monitoring tools can poll the API and verify pipeline health or collect
 metrics for long term SLA analytics.
 
 For example, the [GitLab CI Pipelines Exporter](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter)
-for Prometheus fetches metrics from the API. It can check branches in projects automatically
+for Prometheus fetches metrics from the API and pipeline events. It can check branches in projects automatically
 and get the pipeline status and duration. In combination with a Grafana dashboard,
 this helps build an actionable view for your operations team. Metric graphs can also
-be embedded into incidents making problem resolving easier.
+be embedded into incidents making problem resolving easier. Additionally, it can also export metrics about jobs and environments.
 
 ![Grafana Dashboard for GitLab CI Pipelines Prometheus Exporter](img/ci_efficiency_pipeline_health_grafana_dashboard.png)
 
@@ -161,7 +161,7 @@ Try to find which jobs don't need to run in all situations, and use pipeline con
 to stop them from running:
 
 - Use the [`interruptible`](../yaml/README.md#interruptible) keyword to stop old pipelines
-  when they are superceded by a newer pipeline.
+  when they are superseded by a newer pipeline.
 - Use [`rules`](../yaml/README.md#rules) to skip tests that aren't needed. For example,
   skip backend tests when only the frontend code is changed.
 - Run non-essential [scheduled pipelines](schedules.md) less frequently.
@@ -189,8 +189,12 @@ be more efficient, but can also make pipelines harder to understand and analyze.
 
 ### Caching
 
-Another optimization method is to use [caching](../caching/index.md) between jobs and stages,
-for example [`/node_modules` for NodeJS](../caching/index.md#caching-nodejs-dependencies).
+Another optimization method is to [cache](../caching/index.md) dependencies. If your
+dependencies change rarely, like [NodeJS `/node_modules`](../caching/index.md#cache-nodejs-dependencies),
+caching can make pipeline execution much faster.
+
+You can use [`cache:when`](../yaml/README.md#cachewhen) to cache downloaded dependencies
+even when a job fails.
 
 ### Docker Images
 
@@ -222,6 +226,8 @@ Methods to reduce Docker image size:
 - Create a dedicated development image.
 - Disable man pages and docs installed by packages to save space.
 - Reduce the `RUN` layers and combine software installation steps.
+- Use [multi-stage builds](https://blog.alexellis.io/mutli-stage-docker-builds/)
+  to merge multiple Dockerfiles that use the builder pattern into one Dockerfile, which can reduce image size.
 - If using `apt`, add `--no-install-recommends` to avoid unnecessary packages.
 - Clean up caches and files that are no longer needed at the end. For example
   `rm -rf /var/lib/apt/lists/*` for Debian and Ubuntu, or `yum clean all` for RHEL and CentOS.
@@ -229,7 +235,7 @@ Methods to reduce Docker image size:
   to analyze and shrink images.
 
 To simplify Docker image management, you can create a dedicated group for managing
-[Docker images](../docker/README.md) and test, build and publish them with CI/CD pipelines.
+[Docker images](../docker/index.md) and test, build and publish them with CI/CD pipelines.
 
 ## Test, document, and learn
 

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Cron
 
 Cron syntax is used to schedule when jobs should run.
@@ -58,6 +64,6 @@ More examples of how to write a cron schedule can be found at
 
 ## How GitLab parses cron syntax strings
 
-GitLab uses [fugit](https://github.com/floraison/fugit) to parse cron syntax
+GitLab uses [`fugit`](https://github.com/floraison/fugit) to parse cron syntax
 strings on the server and [cron-validate](https://github.com/Airfooox/cron-validate)
 to validate cron syntax in the browser.

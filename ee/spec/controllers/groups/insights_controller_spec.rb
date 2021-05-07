@@ -8,6 +8,7 @@ RSpec.describe Groups::InsightsController do
   let_it_be(:project) { create(:project, :private) }
   let_it_be(:insight) { create(:insight, group: parent_group, project: project) }
   let_it_be(:user) { create(:user) }
+
   let(:query_params) { { type: 'bar', query: { issuable_type: 'issue', collection_labels: ['bug'] }, projects: projects_params } }
   let(:projects_params) { { only: [project.id, project.full_path] } }
   let(:params) { { trailing_slash: true } }
@@ -143,48 +144,6 @@ RSpec.describe Groups::InsightsController do
         subject { post :query, params: params.merge(query_params.merge(group_id: nested_group.to_param)), format: :json }
 
         it_behaves_like '200 status'
-      end
-    end
-
-    describe 'GET #embedded' do
-      subject { get :embedded, params: params.merge(group_id: parent_group.to_param) }
-
-      shared_examples 'has iframe options set' do
-        it 'sets SAMEORIGIN frame option' do
-          subject
-
-          expect(response.headers['X-Frame-Options']).to eq 'SAMEORIGIN'
-        end
-      end
-
-      context 'when feature is disabled' do
-        before do
-          stub_feature_flags(embed_analytics_report: false)
-        end
-
-        it_behaves_like '404 status'
-        include_examples 'has iframe options set'
-      end
-
-      context 'when project is public' do
-        let_it_be(:parent_group) { create(:group, :public) }
-        let_it_be(:project) { create(:project, :public) }
-
-        it_behaves_like '200 status'
-        include_examples 'has iframe options set'
-      end
-
-      context 'when project is internal' do
-        let_it_be(:parent_group) { create(:group, :internal) }
-        let_it_be(:project) { create(:project, :internal) }
-
-        it_behaves_like '404 status'
-        include_examples 'has iframe options set'
-      end
-
-      context 'when project is private' do
-        it_behaves_like '404 status'
-        include_examples 'has iframe options set'
       end
     end
   end

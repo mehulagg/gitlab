@@ -1,9 +1,9 @@
-import { deprecatedCreateFlash as createFlash } from '../flash';
-import AjaxFilter from '../droplab/plugins/ajax_filter';
-import FilteredSearchDropdown from './filtered_search_dropdown';
-import DropdownUtils from './dropdown_utils';
-import FilteredSearchTokenizer from './filtered_search_tokenizer';
 import { __ } from '~/locale';
+import AjaxFilter from '../droplab/plugins/ajax_filter';
+import { deprecatedCreateFlash as createFlash } from '../flash';
+import DropdownUtils from './dropdown_utils';
+import FilteredSearchDropdown from './filtered_search_dropdown';
+import FilteredSearchTokenizer from './filtered_search_tokenizer';
 
 export default class DropdownAjaxFilter extends FilteredSearchDropdown {
   constructor(options = {}) {
@@ -22,7 +22,7 @@ export default class DropdownAjaxFilter extends FilteredSearchDropdown {
 
   ajaxFilterConfig() {
     return {
-      endpoint: `${gon.relative_url_root || ''}${this.endpoint}`,
+      endpoint: this.endpoint,
       searchKey: 'search',
       searchValueFunction: this.getSearchInput.bind(this),
       loadingTemplate: this.loadingTemplate,
@@ -33,9 +33,11 @@ export default class DropdownAjaxFilter extends FilteredSearchDropdown {
   }
 
   itemClicked(e) {
-    super.itemClicked(e, selected =>
-      selected.querySelector('.dropdown-light-content').innerText.trim(),
-    );
+    super.itemClicked(e, (selected) => {
+      const title = selected.querySelector('.dropdown-light-content').innerText.trim();
+
+      return DropdownUtils.getEscapedText(title);
+    });
   }
 
   renderContent(forceShowList = false) {

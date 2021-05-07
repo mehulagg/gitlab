@@ -6,13 +6,13 @@ RSpec.describe Gitlab::Ci::Status::Composite do
   let_it_be(:pipeline) { create(:ci_pipeline) }
 
   before_all do
-    @statuses = Ci::HasStatus::STATUSES_ENUM.map do |status, idx|
+    @statuses = Ci::HasStatus::STATUSES_ENUM.to_h do |status, idx|
       [status, create(:ci_build, pipeline: pipeline, status: status, importing: true)]
-    end.to_h
+    end
 
-    @statuses_with_allow_failure = Ci::HasStatus::STATUSES_ENUM.map do |status, idx|
+    @statuses_with_allow_failure = Ci::HasStatus::STATUSES_ENUM.to_h do |status, idx|
       [status, create(:ci_build, pipeline: pipeline, status: status, allow_failure: true, importing: true)]
-    end.to_h
+    end
   end
 
   describe '#status' do
@@ -69,6 +69,8 @@ RSpec.describe Gitlab::Ci::Status::Composite do
         %i(manual)           | false | 'skipped'   | false
         %i(skipped failed)   | false | 'success'   | true
         %i(skipped failed)   | true  | 'skipped'   | true
+        %i(success manual)   | true  | 'skipped'   | false
+        %i(success manual)   | false | 'success'   | false
         %i(created failed)   | false | 'created'   | true
         %i(preparing manual) | false | 'preparing' | false
       end
@@ -79,6 +81,25 @@ RSpec.describe Gitlab::Ci::Status::Composite do
         end
 
         it_behaves_like 'compares status and warnings'
+      end
+
+      context 'when FF ci_fix_pipeline_status_for_dag_needs_manual is disabled' do
+        before do
+          stub_feature_flags(ci_fix_pipeline_status_for_dag_needs_manual: false)
+        end
+
+        where(:build_statuses, :dag, :result, :has_warnings) do
+          %i(success manual) | true  | 'pending' | false
+          %i(success manual) | false | 'success' | false
+        end
+
+        with_them do
+          let(:all_statuses) do
+            build_statuses.map { |status| @statuses_with_allow_failure[status] }
+          end
+
+          it_behaves_like 'compares status and warnings'
+        end
       end
     end
   end

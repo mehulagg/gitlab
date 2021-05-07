@@ -53,7 +53,7 @@ describe('MergeRequestsGrid component', () => {
       const mergeRequest = createMergeRequests({ count: 1 });
       wrapper = createComponent(mergeRequest);
 
-      findStatuses().wrappers.forEach(status => {
+      findStatuses().wrappers.forEach((status) => {
         const { type, data } = status.props('status');
 
         switch (type) {
@@ -80,7 +80,7 @@ describe('MergeRequestsGrid component', () => {
         wrapper = createComponent(
           createMergeRequests({
             count: 2,
-            props: { target_branch: 'master', source_branch: 'feature' },
+            props: { target_branch: 'main', source_branch: 'feature' },
           }),
         );
         expect(findBranchDetails().exists()).toBe(true);

@@ -1,6 +1,6 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
-import { GlIcon } from '@gitlab/ui';
 
 const EXPECTED_SIZE = 16;
 

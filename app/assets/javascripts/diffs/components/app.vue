@@ -1,25 +1,25 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlLoadingIcon, GlPagination, GlSprintf } from '@gitlab/ui';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Mousetrap from 'mousetrap';
-import { __ } from '~/locale';
-import { getParameterByName, parseBoolean } from '~/lib/utils/common_utils';
+import { mapState, mapGetters, mapActions } from 'vuex';
+import api from '~/api';
+import {
+  keysFor,
+  MR_PREVIOUS_FILE_IN_DIFF,
+  MR_NEXT_FILE_IN_DIFF,
+  MR_COMMITS_NEXT_COMMIT,
+  MR_COMMITS_PREVIOUS_COMMIT,
+} from '~/behaviors/shortcuts/keybindings';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { isSingleViewStyle } from '~/helpers/diffs_helper';
+import { getParameterByName, parseBoolean } from '~/lib/utils/common_utils';
+import { updateHistory } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 import PanelResizer from '~/vue_shared/components/panel_resizer.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { isSingleViewStyle } from '~/helpers/diffs_helper';
-import { updateHistory } from '~/lib/utils/url_utility';
-import eventHub from '../../notes/event_hub';
-import CompareVersions from './compare_versions.vue';
-import DiffFile from './diff_file.vue';
-import NoChanges from './no_changes.vue';
-import CommitWidget from './commit_widget.vue';
-import TreeList from './tree_list.vue';
 
-import HiddenFilesWarning from './hidden_files_warning.vue';
-import MergeConflictWarning from './merge_conflict_warning.vue';
-import CollapsedFilesWarning from './collapsed_files_warning.vue';
-
+import notesEventHub from '../../notes/event_hub';
 import {
   TREE_LIST_WIDTH_STORAGE_KEY,
   INITIAL_TREE_WIDTH,
@@ -31,7 +31,28 @@ import {
   ALERT_OVERFLOW_HIDDEN,
   ALERT_MERGE_CONFLICT,
   ALERT_COLLAPSED_FILES,
+  INLINE_DIFF_VIEW_TYPE,
+  TRACKING_DIFF_VIEW_INLINE,
+  TRACKING_DIFF_VIEW_PARALLEL,
+  TRACKING_FILE_BROWSER_TREE,
+  TRACKING_FILE_BROWSER_LIST,
+  TRACKING_WHITESPACE_SHOW,
+  TRACKING_WHITESPACE_HIDE,
+  TRACKING_SINGLE_FILE_MODE,
+  TRACKING_MULTIPLE_FILES_MODE,
 } from '../constants';
+
+import { reviewStatuses } from '../utils/file_reviews';
+import { diffsApp } from '../utils/performance';
+import { fileByFile } from '../utils/preferences';
+import CollapsedFilesWarning from './collapsed_files_warning.vue';
+import CommitWidget from './commit_widget.vue';
+import CompareVersions from './compare_versions.vue';
+import DiffFile from './diff_file.vue';
+import HiddenFilesWarning from './hidden_files_warning.vue';
+import MergeConflictWarning from './merge_conflict_warning.vue';
+import NoChanges from './no_changes.vue';
+import TreeList from './tree_list.vue';
 
 export default {
   name: 'DiffsApp',
@@ -69,6 +90,16 @@ export default {
       required: true,
     },
     endpointCoverage: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    endpointCodequality: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    endpointUpdateUser: {
       type: String,
       required: false,
       default: '',
@@ -111,10 +142,20 @@ export default {
       required: false,
       default: false,
     },
-    viewDiffsFileByFile: {
+    fileByFileUserPreference: {
       type: Boolean,
       required: false,
       default: false,
+    },
+    defaultSuggestionCommitMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    rehydratedMrReviews: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
   data() {
@@ -128,19 +169,18 @@ export default {
   },
   computed: {
     ...mapState({
-      isLoading: state => state.diffs.isLoading,
-      isBatchLoading: state => state.diffs.isBatchLoading,
-      diffFiles: state => state.diffs.diffFiles,
-      diffViewType: state => state.diffs.diffViewType,
-      mergeRequestDiffs: state => state.diffs.mergeRequestDiffs,
-      mergeRequestDiff: state => state.diffs.mergeRequestDiff,
-      commit: state => state.diffs.commit,
-      renderOverflowWarning: state => state.diffs.renderOverflowWarning,
-      numTotalFiles: state => state.diffs.realSize,
-      numVisibleFiles: state => state.diffs.size,
-      plainDiffPath: state => state.diffs.plainDiffPath,
-      emailPatchPath: state => state.diffs.emailPatchPath,
-      retrievingBatches: state => state.diffs.retrievingBatches,
+      isLoading: (state) => state.diffs.isLoading,
+      isBatchLoading: (state) => state.diffs.isBatchLoading,
+      diffFiles: (state) => state.diffs.diffFiles,
+      diffViewType: (state) => state.diffs.diffViewType,
+      commit: (state) => state.diffs.commit,
+      renderOverflowWarning: (state) => state.diffs.renderOverflowWarning,
+      numTotalFiles: (state) => state.diffs.realSize,
+      numVisibleFiles: (state) => state.diffs.size,
+      plainDiffPath: (state) => state.diffs.plainDiffPath,
+      emailPatchPath: (state) => state.diffs.emailPatchPath,
+      retrievingBatches: (state) => state.diffs.retrievingBatches,
+      codequalityDiff: (state) => state.diffs.codequalityDiff,
     }),
     ...mapState('diffs', [
       'showTreeList',
@@ -151,8 +191,13 @@ export default {
       'conflictResolutionPath',
       'canMerge',
       'hasConflicts',
+      'viewDiffsFileByFile',
+      'mrReviews',
+      'renderTreeList',
+      'showWhitespace',
     ]),
     ...mapGetters('diffs', ['whichCollapsedTypes', 'isParallelView', 'currentDiffIndex']),
+    ...mapGetters('batchComments', ['draftsCount']),
     ...mapGetters(['isNotesFetched', 'getNoteableData']),
     diffs() {
       if (!this.viewDiffsFileByFile) {
@@ -167,17 +212,16 @@ export default {
       return this.currentUser.can_fork === true && this.currentUser.can_create_merge_request;
     },
     renderDiffFiles() {
-      return (
-        this.diffFiles.length > 0 ||
-        (this.startVersion &&
-          this.startVersion.version_index === this.mergeRequestDiff.version_index)
-      );
+      return this.diffFiles.length > 0;
+    },
+    renderFileTree() {
+      return this.renderDiffFiles && this.showTreeList;
     },
     hideFileStats() {
       return this.treeWidth <= TREE_HIDE_STATS_WIDTH;
     },
     isLimitedContainer() {
-      return !this.showTreeList && !this.isParallelView && !this.isFluidLayout;
+      return !this.renderFileTree && !this.isParallelView && !this.isFluidLayout;
     },
     isDiffHead() {
       return parseBoolean(getParameterByName('diff_head'));
@@ -211,6 +255,9 @@ export default {
 
       return visible;
     },
+    fileReviews() {
+      return reviewStatuses(this.diffFiles, this.mrReviews);
+    },
   },
   watch: {
     commit(newCommit, oldCommit) {
@@ -228,9 +275,6 @@ export default {
       }
     },
     diffViewType() {
-      if (!this.glFeatures.unifiedDiffLines && (this.needsReload() || this.needsFirstLoad())) {
-        this.refetchDiffData();
-      }
       this.adjustView();
     },
     shouldShow() {
@@ -243,7 +287,7 @@ export default {
       this.adjustView();
     },
     isLoading: 'adjustView',
-    showTreeList: 'adjustView',
+    renderFileTree: 'adjustView',
   },
   mounted() {
     this.setBaseConfig({
@@ -251,11 +295,18 @@ export default {
       endpointMetadata: this.endpointMetadata,
       endpointBatch: this.endpointBatch,
       endpointCoverage: this.endpointCoverage,
+      endpointUpdateUser: this.endpointUpdateUser,
       projectPath: this.projectPath,
       dismissEndpoint: this.dismissEndpoint,
       showSuggestPopover: this.showSuggestPopover,
-      viewDiffsFileByFile: this.viewDiffsFileByFile,
+      viewDiffsFileByFile: fileByFile(this.fileByFileUserPreference),
+      defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
+      mrReviews: this.rehydratedMrReviews,
     });
+
+    if (this.endpointCodequality) {
+      this.setCodequalityEndpoint(this.endpointCodequality);
+    }
 
     if (this.shouldShow) {
       this.fetchData();
@@ -264,18 +315,42 @@ export default {
     const id = window?.location?.hash;
 
     if (id && id.indexOf('#note') !== 0) {
-      this.setHighlightedRow(
-        id
-          .split('diff-content')
-          .pop()
-          .slice(1),
-      );
+      this.setHighlightedRow(id.split('diff-content').pop().slice(1));
     }
+
+    if (window.gon?.features?.diffSettingsUsageData) {
+      if (this.renderTreeList) {
+        api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_TREE);
+      } else {
+        api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_LIST);
+      }
+
+      if (this.diffViewType === INLINE_DIFF_VIEW_TYPE) {
+        api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_INLINE);
+      } else {
+        api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_PARALLEL);
+      }
+
+      if (this.showWhitespace) {
+        api.trackRedisHllUserEvent(TRACKING_WHITESPACE_SHOW);
+      } else {
+        api.trackRedisHllUserEvent(TRACKING_WHITESPACE_HIDE);
+      }
+
+      if (this.viewDiffsFileByFile) {
+        api.trackRedisHllUserEvent(TRACKING_SINGLE_FILE_MODE);
+      } else {
+        api.trackRedisHllUserEvent(TRACKING_MULTIPLE_FILES_MODE);
+      }
+    }
+  },
+  beforeCreate() {
+    diffsApp.instrument();
   },
   created() {
     this.adjustView();
-    eventHub.$once('fetchDiffData', this.fetchData);
-    eventHub.$on('refetchDiffData', this.refetchDiffData);
+    this.subscribeToEvents();
+
     this.CENTERED_LIMITED_CONTAINER_CLASSES = CENTERED_LIMITED_CONTAINER_CLASSES;
 
     this.unwatchDiscussions = this.$watch(
@@ -294,8 +369,8 @@ export default {
     );
   },
   beforeDestroy() {
-    eventHub.$off('fetchDiffData', this.fetchData);
-    eventHub.$off('refetchDiffData', this.refetchDiffData);
+    diffsApp.deinstrument();
+    this.unsubscribeFromEvents();
     this.removeEventListeners();
   },
   methods: {
@@ -303,30 +378,33 @@ export default {
     ...mapActions('diffs', [
       'moveToNeighboringCommit',
       'setBaseConfig',
+      'setCodequalityEndpoint',
       'fetchDiffFilesMeta',
       'fetchDiffFilesBatch',
       'fetchCoverageFiles',
+      'fetchCodequality',
       'startRenderDiffsQueue',
       'assignDiscussionsToDiff',
       'setHighlightedRow',
       'cacheTreeListWidth',
       'scrollToFile',
-      'toggleShowTreeList',
+      'setShowTreeList',
       'navigateToDiffFileIndex',
+      'setFileByFile',
     ]),
+    subscribeToEvents() {
+      notesEventHub.$once('fetchDiffData', this.fetchData);
+      notesEventHub.$on('refetchDiffData', this.refetchDiffData);
+    },
+    unsubscribeFromEvents() {
+      notesEventHub.$off('refetchDiffData', this.refetchDiffData);
+      notesEventHub.$off('fetchDiffData', this.fetchData);
+    },
     navigateToDiffFileNumber(number) {
       this.navigateToDiffFileIndex(number - 1);
     },
     refetchDiffData() {
       this.fetchData(false);
-    },
-    startDiffRendering() {
-      requestIdleCallback(
-        () => {
-          this.startRenderDiffsQueue();
-        },
-        { timeout: 1000 },
-      );
     },
     needsReload() {
       return this.diffFiles.length && isSingleViewStyle(this.diffFiles[0]);
@@ -338,9 +416,7 @@ export default {
       this.fetchDiffFilesMeta()
         .then(({ real_size }) => {
           this.diffFilesLength = parseInt(real_size, 10);
-          if (toggleTree) this.hideTreeListIfJustOneFile();
-
-          this.startDiffRendering();
+          if (toggleTree) this.setTreeDisplay();
         })
         .catch(() => {
           createFlash(__('Something went wrong on our end. Please try again!'));
@@ -348,13 +424,13 @@ export default {
 
       this.fetchDiffFilesBatch()
         .then(() => {
+          if (toggleTree) this.setTreeDisplay();
           // Guarantee the discussions are assigned after the batch finishes.
           // Just watching the length of the discussions or the diff files
           // isn't enough, because with split diff loading, neither will
           // change when loading the other half of the diff files.
           this.setDiscussions();
         })
-        .then(() => this.startDiffRendering())
         .catch(() => {
           createFlash(__('Something went wrong on our end. Please try again!'));
         });
@@ -363,16 +439,17 @@ export default {
         this.fetchCoverageFiles();
       }
 
+      if (this.endpointCodequality) {
+        this.fetchCodequality();
+      }
+
       if (!this.isNotesFetched) {
-        eventHub.$emit('fetchNotesData');
+        notesEventHub.$emit('fetchNotesData');
       }
     },
     setDiscussions() {
       requestIdleCallback(
-        () =>
-          this.assignDiscussionsToDiff()
-            .then(this.$nextTick)
-            .then(this.startTaskList),
+        () => this.assignDiscussionsToDiff().then(this.$nextTick).then(this.startTaskList),
         { timeout: 1000 },
       );
     },
@@ -386,30 +463,23 @@ export default {
       }
     },
     setEventListeners() {
-      Mousetrap.bind(['[', 'k', ']', 'j'], (e, combo) => {
-        switch (combo) {
-          case '[':
-          case 'k':
-            this.jumpToFile(-1);
-            break;
-          case ']':
-          case 'j':
-            this.jumpToFile(+1);
-            break;
-          default:
-            break;
-        }
-      });
+      Mousetrap.bind(keysFor(MR_PREVIOUS_FILE_IN_DIFF), () => this.jumpToFile(-1));
+      Mousetrap.bind(keysFor(MR_NEXT_FILE_IN_DIFF), () => this.jumpToFile(+1));
 
-      if (this.commit && this.glFeatures.mrCommitNeighborNav) {
-        Mousetrap.bind('c', () => this.moveToNeighboringCommit({ direction: 'next' }));
-        Mousetrap.bind('x', () => this.moveToNeighboringCommit({ direction: 'previous' }));
+      if (this.commit) {
+        Mousetrap.bind(keysFor(MR_COMMITS_NEXT_COMMIT), () =>
+          this.moveToNeighboringCommit({ direction: 'next' }),
+        );
+        Mousetrap.bind(keysFor(MR_COMMITS_PREVIOUS_COMMIT), () =>
+          this.moveToNeighboringCommit({ direction: 'previous' }),
+        );
       }
     },
     removeEventListeners() {
-      Mousetrap.unbind(['[', 'k', ']', 'j']);
-      Mousetrap.unbind('c');
-      Mousetrap.unbind('x');
+      Mousetrap.unbind(keysFor(MR_PREVIOUS_FILE_IN_DIFF));
+      Mousetrap.unbind(keysFor(MR_NEXT_FILE_IN_DIFF));
+      Mousetrap.unbind(keysFor(MR_COMMITS_NEXT_COMMIT));
+      Mousetrap.unbind(keysFor(MR_COMMITS_PREVIOUS_COMMIT));
     },
     jumpToFile(step) {
       const targetIndex = this.currentDiffIndex + step;
@@ -417,12 +487,17 @@ export default {
         this.scrollToFile(this.diffFiles[targetIndex].file_path);
       }
     },
-    hideTreeListIfJustOneFile() {
+    setTreeDisplay() {
       const storedTreeShow = localStorage.getItem(MR_TREE_SHOW_KEY);
+      let showTreeList = true;
 
-      if ((storedTreeShow === null && this.diffFiles.length <= 1) || storedTreeShow === 'false') {
-        this.toggleShowTreeList(false);
+      if (storedTreeShow !== null) {
+        showTreeList = parseBoolean(storedTreeShow);
+      } else if (!bp.isDesktop() || (!this.isBatchLoading && this.diffFiles.length <= 1)) {
+        showTreeList = false;
       }
+
+      return this.setShowTreeList({ showTreeList, saving: false });
     },
   },
   minTreeWidth: MIN_TREE_WIDTH,
@@ -435,7 +510,6 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
-        :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"
       />
@@ -463,8 +537,9 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList"
+          v-if="renderFileTree"
           :style="{ width: `${treeWidth}px` }"
+          :class="{ 'review-bar-visible': draftsCount > 0 }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
           <panel-resizer
@@ -487,9 +562,12 @@ export default {
           <div v-if="isBatchLoading" class="loading"><gl-loading-icon size="lg" /></div>
           <template v-else-if="renderDiffFiles">
             <diff-file
-              v-for="file in diffs"
+              v-for="(file, index) in diffs"
               :key="file.newPath"
               :file="file"
+              :reviewed="fileReviews[file.id]"
+              :is-first-file="index === 0"
+              :is-last-file="index === diffFilesLength - 1"
               :help-page-path="helpPagePath"
               :can-current-user-fork="canCurrentUserFork"
               :view-diffs-file-by-file="viewDiffsFileByFile"
@@ -511,6 +589,7 @@ export default {
                 <template #total>{{ diffFiles.length }}</template>
               </gl-sprintf>
             </div>
+            <gl-loading-icon v-else-if="retrievingBatches" size="lg" />
           </template>
           <no-changes v-else :changes-empty-state-illustration="changesEmptyStateIllustration" />
         </div>

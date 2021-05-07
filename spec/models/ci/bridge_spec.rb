@@ -41,7 +41,7 @@ RSpec.describe Ci::Bridge do
     end
   end
 
-  describe '#scoped_variables_hash' do
+  describe '#scoped_variables' do
     it 'returns a hash representing variables' do
       variables = %w[
         CI_JOB_NAME CI_JOB_STAGE CI_COMMIT_SHA CI_COMMIT_SHORT_SHA
@@ -50,10 +50,21 @@ RSpec.describe Ci::Bridge do
         CI_PROJECT_PATH_SLUG CI_PROJECT_NAMESPACE CI_PROJECT_ROOT_NAMESPACE
         CI_PIPELINE_IID CI_CONFIG_PATH CI_PIPELINE_SOURCE CI_COMMIT_MESSAGE
         CI_COMMIT_TITLE CI_COMMIT_DESCRIPTION CI_COMMIT_REF_PROTECTED
-        CI_COMMIT_TIMESTAMP
+        CI_COMMIT_TIMESTAMP CI_COMMIT_AUTHOR
       ]
 
-      expect(bridge.scoped_variables_hash.keys).to include(*variables)
+      expect(bridge.scoped_variables.map { |v| v[:key] }).to include(*variables)
+    end
+
+    context 'when bridge has dependency which has dotenv variable' do
+      let(:test) { create(:ci_build, pipeline: pipeline, stage_idx: 0) }
+      let(:bridge) { create(:ci_bridge, pipeline: pipeline, stage_idx: 1, options: { dependencies: [test.name] }) }
+
+      let!(:job_variable) { create(:ci_job_variable, :dotenv_source, job: test) }
+
+      it 'includes inherited variable' do
+        expect(bridge.scoped_variables.to_hash).to include(job_variable.key => job_variable.value)
+      end
     end
   end
 
@@ -67,6 +78,14 @@ RSpec.describe Ci::Bridge do
 
           bridge.enqueue!
         end
+      end
+
+      it "schedules downstream pipeline creation when the status is waiting for resource" do
+        bridge.status = :waiting_for_resource
+
+        expect(bridge).to receive(:schedule_downstream_pipeline!)
+
+        bridge.enqueue_waiting_for_resource!
       end
 
       it 'raises error when the status is failed' do
@@ -319,14 +338,6 @@ RSpec.describe Ci::Bridge do
       subject { build_stubbed(:ci_bridge, :manual).playable? }
 
       it { is_expected.to be_truthy }
-
-      context 'when FF ci_manual_bridges is disabled' do
-        before do
-          stub_feature_flags(ci_manual_bridges: false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
     end
 
     context 'when build is not a manual action' do
@@ -341,20 +352,49 @@ RSpec.describe Ci::Bridge do
       subject { build_stubbed(:ci_bridge, :manual).action? }
 
       it { is_expected.to be_truthy }
-
-      context 'when FF ci_manual_bridges is disabled' do
-        before do
-          stub_feature_flags(ci_manual_bridges: false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
     end
 
     context 'when build is not a manual action' do
       subject { build_stubbed(:ci_bridge, :created).action? }
 
       it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#dependency_variables' do
+    subject { bridge.dependency_variables }
+
+    context 'when downloading from previous stages' do
+      let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
+      let!(:bridge) { create(:ci_bridge, pipeline: pipeline, stage_idx: 1) }
+
+      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
+      let!(:job_variable_2) { create(:ci_job_variable, job: prepare1) }
+
+      it 'inherits only dependent variables' do
+        expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value)
+      end
+    end
+
+    context 'when using needs' do
+      let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
+      let!(:prepare2) { create(:ci_build, name: 'prepare2', pipeline: pipeline, stage_idx: 0) }
+      let!(:prepare3) { create(:ci_build, name: 'prepare3', pipeline: pipeline, stage_idx: 0) }
+      let!(:bridge) do
+        create(:ci_bridge, pipeline: pipeline,
+                           stage_idx: 1,
+                           scheduling_type: 'dag',
+                           needs_attributes: [{ name: 'prepare1', artifacts: true },
+                                              { name: 'prepare2', artifacts: false }])
+      end
+
+      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
+      let!(:job_variable_2) { create(:ci_job_variable, :dotenv_source, job: prepare2) }
+      let!(:job_variable_3) { create(:ci_job_variable, :dotenv_source, job: prepare3) }
+
+      it 'inherits only needs with artifacts variables' do
+        expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value)
+      end
     end
   end
 end

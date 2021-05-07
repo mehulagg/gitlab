@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use.
   # Currently supported options are :active_record, :mongoid2, :mongoid3, :mongo_mapper
@@ -104,4 +106,10 @@ Doorkeeper.configure do
   # realm "Doorkeeper"
 
   base_controller '::Gitlab::BaseDoorkeeperController'
+
+  # Allow Resource Owner Password Credentials Grant without client credentials,
+  # this was disabled by default in Doorkeeper 5.5.
+  #
+  # We might want to disable this in the future, see https://gitlab.com/gitlab-org/gitlab/-/issues/323615
+  skip_client_authentication_for_password_grant true
 end

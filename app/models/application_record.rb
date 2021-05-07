@@ -42,21 +42,19 @@ class ApplicationRecord < ActiveRecord::Base
     false
   end
 
-  def self.at_most(count)
-    limit(count)
-  end
-
   def self.safe_find_or_create_by!(*args, &block)
     safe_find_or_create_by(*args, &block).tap do |record|
+      raise ActiveRecord::RecordNotFound unless record.present?
+
       record.validate! unless record.persisted?
     end
   end
 
   # Start a new transaction with a shorter-than-usual statement timeout. This is
   # currently one third of the default 15-second timeout
-  def self.with_fast_statement_timeout
+  def self.with_fast_read_statement_timeout(timeout_ms = 5000)
     transaction(requires_new: true) do
-      connection.exec_query("SET LOCAL statement_timeout = 5000")
+      connection.exec_query("SET LOCAL statement_timeout = #{timeout_ms}")
 
       yield
     end
@@ -68,6 +66,12 @@ class ApplicationRecord < ActiveRecord::Base
     end
   end
 
+  def create_or_load_association(association_name)
+    association(association_name).create unless association(association_name).loaded?
+  rescue ActiveRecord::RecordNotUnique, PG::UniqueViolation
+    association(association_name).reader
+  end
+
   def self.underscore
     Gitlab::SafeRequestStore.fetch("model:#{self}:underscore") { self.to_s.underscore }
   end
@@ -75,4 +79,11 @@ class ApplicationRecord < ActiveRecord::Base
   def self.where_exists(query)
     where('EXISTS (?)', query.select(1))
   end
+
+  def self.declarative_enum(enum_mod)
+    values = enum_mod.definition.transform_values { |v| v[:value] }
+    enum(enum_mod.key => values)
+  end
 end
+
+ApplicationRecord.prepend_if_ee('EE::ApplicationRecordHelpers')

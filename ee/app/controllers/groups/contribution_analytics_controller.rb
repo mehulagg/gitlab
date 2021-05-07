@@ -40,7 +40,7 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
   end
 
   def authorize_read_contribution_analytics!
-    render_403 unless user_has_access_to_feature?
+    render_promotion unless user_has_access_to_feature?
   end
 
   def render_promotion
@@ -52,7 +52,7 @@ class Groups::ContributionAnalyticsController < Groups::ApplicationController
   end
 
   def group_has_access_to_feature?
-    @group.feature_available?(:contribution_analytics)
+    @group.licensed_feature_available?(:contribution_analytics)
   end
 
   def user_has_access_to_feature?

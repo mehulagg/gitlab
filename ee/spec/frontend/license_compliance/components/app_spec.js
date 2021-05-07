@@ -1,26 +1,24 @@
+import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { GlEmptyState, GlLoadingIcon, GlTab, GlTabs, GlAlert, GlBadge } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
-import setWindowLocation from 'helpers/set_window_location_helper';
-
-import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
-
 import LicenseComplianceApp from 'ee/license_compliance/components/app.vue';
 import DetectedLicensesTable from 'ee/license_compliance/components/detected_licenses_table.vue';
 import PipelineInfo from 'ee/license_compliance/components/pipeline_info.vue';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
 
 import * as getters from 'ee/license_compliance/store/modules/list/getters';
 
+import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import {
   approvedLicense,
   blacklistedLicense,
 } from 'ee_jest/vue_shared/license_compliance/mock_data';
-
-import { LICENSE_APPROVAL_CLASSIFICATION } from 'ee/vue_shared/license_compliance/constants';
+import setWindowLocation from 'helpers/set_window_location_helper';
+import { stubTransition } from 'helpers/stub_transition';
+import { TEST_HOST } from 'helpers/test_constants';
 
 Vue.use(Vuex);
 
@@ -33,13 +31,6 @@ const emptyStateSvgPath = '/';
 const documentationPath = '/';
 
 const noop = () => {};
-
-const transitionStub = () => ({
-  render() {
-    // eslint-disable-next-line no-underscore-dangle
-    return this.$options._renderChildren;
-  },
-});
 
 const createComponent = ({ state, props, options }) => {
   const fakeStore = new Vuex.Store({
@@ -88,11 +79,11 @@ const createComponent = ({ state, props, options }) => {
     },
     ...options,
     store: fakeStore,
-    stubs: { transition: transitionStub() },
+    stubs: { transition: stubTransition() },
   });
 };
 
-const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
 describe('Project Licenses', () => {
   afterEach(() => {
@@ -186,7 +177,7 @@ describe('Project Licenses', () => {
     it('renders a "Detected in project" tab and a "Policies" tab', () => {
       expect(wrapper.find(GlTabs).exists()).toBe(true);
       expect(wrapper.find(GlTab).exists()).toBe(true);
-      expect(wrapper.findAll(GlTab)).toHaveLength(2);
+      expect(wrapper.findAllComponents(GlTab)).toHaveLength(2);
     });
 
     it('it renders the "Detected in project" table', () => {
@@ -288,21 +279,21 @@ describe('Project Licenses', () => {
       );
 
       it('it renders the correct count in "Detected in project" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(0)
-            .text(),
-        ).toBe(pageInfo.total.toString());
+        expect(wrapper.findAllComponents(GlBadge).at(0).text()).toBe(pageInfo.total.toString());
       });
 
       it('it renders the correct count in "Policies" tab', () => {
-        expect(
-          wrapper
-            .findAll(GlBadge)
-            .at(1)
-            .text(),
-        ).toBe(managedLicenses.length.toString());
+        expect(wrapper.findAllComponents(GlBadge).at(1).text()).toBe(
+          managedLicenses.length.toString(),
+        );
+      });
+
+      it('it renders the correct type of badge styling', () => {
+        const badges = [
+          wrapper.findAllComponents(GlBadge).at(0),
+          wrapper.findAllComponents(GlBadge).at(1),
+        ];
+        badges.forEach((badge) => expect(badge.classes()).toContain('gl-tab-counter-badge'));
       });
     });
 

@@ -15,18 +15,19 @@ module AutoMerge
     def process(merge_request)
       return unless merge_request.on_train?
 
-      ::MergeTrains::RefreshMergeRequestsService.new(project, nil).execute(merge_request)
+      ::MergeTrains::RefreshWorker
+        .perform_async(merge_request.target_project_id, merge_request.target_branch)
     end
 
     def cancel(merge_request)
       # Before dropping a merge request from a merge train, get the next
       # merge request in order to refresh it later.
-      next_merge_request = merge_request.merge_train&.next
+      next_car = merge_request.merge_train&.next
 
       super do
         if merge_request.merge_train&.destroy
           SystemNoteService.cancel_merge_train(merge_request, project, current_user)
-          next_merge_request.merge_train.outdate_pipeline if next_merge_request
+          next_car.outdate_pipeline if next_car
         end
       end
     end
@@ -34,12 +35,12 @@ module AutoMerge
     def abort(merge_request, reason, process_next: true)
       # Before dropping a merge request from a merge train, get the next
       # merge request in order to refresh it later.
-      next_merge_request = merge_request.merge_train&.next
+      next_car = merge_request.merge_train&.next
 
       super(merge_request, reason) do
         if merge_request.merge_train&.destroy
           SystemNoteService.abort_merge_train(merge_request, project, current_user, reason)
-          next_merge_request.merge_train.outdate_pipeline if next_merge_request && process_next
+          next_car.outdate_pipeline if next_car && process_next
         end
       end
     end

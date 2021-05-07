@@ -6,6 +6,7 @@ import BlobContentError from './blob_content_error.vue';
 import { BLOB_RENDER_EVENT_LOAD, BLOB_RENDER_EVENT_SHOW_SOURCE } from './constants';
 
 export default {
+  name: 'BlobContent',
   components: {
     GlLoadingIcon,
     BlobContentError,
@@ -19,6 +20,11 @@ export default {
     content: {
       type: String,
       default: '',
+      required: false,
+    },
+    isRawContent: {
+      type: Boolean,
+      default: false,
       required: false,
     },
     loading: {
@@ -65,6 +71,8 @@ export default {
         v-else
         ref="contentViewer"
         :content="content"
+        :is-raw-content="isRawContent"
+        :file-name="blob.name"
         :type="activeViewer.fileType"
         data-qa-selector="file_content"
       />

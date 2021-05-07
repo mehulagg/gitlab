@@ -213,15 +213,16 @@ RSpec.describe SystemNoteService do
 
   describe '.change_branch' do
     it 'calls MergeRequestsService' do
-      old_branch = double
-      new_branch = double
-      branch_type = double
+      old_branch = double('old_branch')
+      new_branch = double('new_branch')
+      branch_type = double('branch_type')
+      event_type = double('event_type')
 
       expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
-        expect(service).to receive(:change_branch).with(branch_type, old_branch, new_branch)
+        expect(service).to receive(:change_branch).with(branch_type, event_type, old_branch, new_branch)
       end
 
-      described_class.change_branch(noteable, project, author, branch_type, old_branch, new_branch)
+      described_class.change_branch(noteable, project, author, branch_type, event_type, old_branch, new_branch)
     end
   end
 
@@ -330,6 +331,19 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.noteable_moved(double, double, noteable_ref, double, direction: direction)
+    end
+  end
+
+  describe '.noteable_cloned' do
+    let(:noteable_ref) { double }
+    let(:direction) { double }
+
+    it 'calls IssuableService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:noteable_cloned).with(noteable_ref, direction)
+      end
+
+      described_class.noteable_cloned(double, double, noteable_ref, double, direction: direction)
     end
   end
 
@@ -763,6 +777,19 @@ RSpec.describe SystemNoteService do
       end
 
       described_class.change_incident_severity(incident, author)
+    end
+  end
+
+  describe '.log_resolving_alert' do
+    let(:alert) { build(:alert_management_alert) }
+    let(:monitoring_tool) { 'Prometheus' }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:log_resolving_alert).with(monitoring_tool)
+      end
+
+      described_class.log_resolving_alert(alert, monitoring_tool)
     end
   end
 end

@@ -1,8 +1,9 @@
-import Vuex from 'vuex';
+import { GlButton, GlFormInput } from '@gitlab/ui';
 import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
-import { GlButton } from '@gitlab/ui';
-import { AWS_ACCESS_KEY_ID } from '~/ci_variable_list/constants';
+import Vuex from 'vuex';
+import CiEnvironmentsDropdown from '~/ci_variable_list/components/ci_environments_dropdown.vue';
 import CiVariableModal from '~/ci_variable_list/components/ci_variable_modal.vue';
+import { AWS_ACCESS_KEY_ID } from '~/ci_variable_list/constants';
 import createStore from '~/ci_variable_list/store';
 import mockData from '../services/mock_data';
 import ModalStub from '../stubs';
@@ -15,9 +16,9 @@ describe('Ci variable modal', () => {
   let store;
 
   const createComponent = (method, options = {}) => {
-    store = createStore();
+    store = createStore({ isGroup: options.isGroup });
     wrapper = method(CiVariableModal, {
-      attachToDocument: true,
+      attachTo: document.body,
       stubs: {
         GlModal: ModalStub,
       },
@@ -27,15 +28,16 @@ describe('Ci variable modal', () => {
     });
   };
 
+  const findCiEnvironmentsDropdown = () => wrapper.find(CiEnvironmentsDropdown);
   const findModal = () => wrapper.find(ModalStub);
   const findAddorUpdateButton = () =>
     findModal()
       .findAll(GlButton)
-      .wrappers.find(button => button.props('variant') === 'success');
+      .wrappers.find((button) => button.props('variant') === 'success');
   const deleteVariableButton = () =>
     findModal()
       .findAll(GlButton)
-      .wrappers.find(button => button.props('variant') === 'danger');
+      .wrappers.find((button) => button.props('variant') === 'danger');
 
   afterEach(() => {
     wrapper.destroy();
@@ -146,6 +148,43 @@ describe('Ci variable modal', () => {
     it('dispatches deleteVariable with correct variable to delete', () => {
       deleteVariableButton().vm.$emit('click');
       expect(store.dispatch).toHaveBeenCalledWith('deleteVariable');
+    });
+  });
+
+  describe('Environment scope', () => {
+    describe('group level variables', () => {
+      it('renders the environment dropdown', () => {
+        createComponent(shallowMount, {
+          isGroup: true,
+          provide: {
+            glFeatures: {
+              groupScopedCiVariables: true,
+            },
+          },
+        });
+
+        expect(findCiEnvironmentsDropdown().exists()).toBe(true);
+        expect(findCiEnvironmentsDropdown().isVisible()).toBe(true);
+      });
+
+      describe('licensed feature is not available', () => {
+        it('disables the dropdown', () => {
+          createComponent(mount, {
+            isGroup: true,
+            provide: {
+              glFeatures: {
+                groupScopedCiVariables: false,
+              },
+            },
+          });
+
+          const environmentScopeInput = wrapper
+            .find('[data-testid="environment-scope"]')
+            .find(GlFormInput);
+          expect(findCiEnvironmentsDropdown().exists()).toBe(false);
+          expect(environmentScopeInput.attributes('readonly')).toBe('readonly');
+        });
+      });
     });
   });
 

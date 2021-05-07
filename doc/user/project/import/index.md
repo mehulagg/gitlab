@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Migrating projects to a GitLab instance
@@ -20,7 +20,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 1. [From TFVC](tfvc.md)
 1. [From repository by URL](repo_by_url.md)
 1. [By uploading a manifest file (AOSP)](manifest.md)
-1. [From Gemnasium](gemnasium.md)
 1. [From Phabricator](phabricator.md)
 1. [From Jira (issues only)](jira.md)
 
@@ -29,6 +28,11 @@ Git repository via HTTP from the New Project page. Be aware that if the
 repository is too large the import can timeout.
 
 There is also the option of [connecting your external repository to get CI/CD benefits](../../../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
+
+## LFS authentication
+
+When importing a project that contains LFS objects, if the project has an [`.lfsconfig`](https://github.com/git-lfs/git-lfs/blob/master/docs/man/git-lfs-config.5.ronn)
+file with a URL host (`lfs.url`) different from the repository URL host, LFS files are not downloaded.
 
 ## Migrating from self-managed GitLab to GitLab.com
 
@@ -42,7 +46,7 @@ All GitLab user associations (such as comment author) will be changed to the use
 If you need to migrate all data over, you can leverage our [API](../../../api/README.md) to migrate from self-managed to GitLab.com.
 The order of assets to migrate from a self-managed instance to GitLab.com is the following:
 
-NOTE: **Note:**
+NOTE:
 When migrating to GitLab.com, users would need to be manually created unless [SCIM](../../../user/group/saml_sso/scim_setup.md) is going to be used. Creating users with the API is limited to self-managed instances as it requires administrator access.
 
 1. [Groups](../../../api/groups.md)
@@ -56,7 +60,7 @@ Docker pulls and pushes and re-run any CI pipelines to retrieve any build artifa
 
 ## Migrating from GitLab.com to self-managed GitLab
 
-The process is essentially the same as for [migrating from self-managed GitLab to GitLab.com](#migrating-from-self-managed-gitlab-to-gitlabcom). The main difference is that users can be created on the self-managed GitLab instance by an admin through the UI or the [users API](../../../api/users.md#user-creation).
+The process is essentially the same as for [migrating from self-managed GitLab to GitLab.com](#migrating-from-self-managed-gitlab-to-gitlabcom). The main difference is that users can be created on the self-managed GitLab instance by an administrator through the UI or the [users API](../../../api/users.md#user-creation).
 
 ## Migrating between two self-managed GitLab instances
 
@@ -68,4 +72,26 @@ then restore it on the new server.
 In the event of merging two GitLab instances together (for example, both instances have existing data on them and one can't be wiped),
 refer to the instructions in [Migrating from self-managed GitLab to GitLab.com](#migrating-from-self-managed-gitlab-to-gitlabcom).
 
-Additionally, you can migrate users using the [Users API](../../../api/users.md) with an admin user.
+Additionally, you can migrate users using the [Users API](../../../api/users.md) with an administrator user.
+
+## Project aliases **(PREMIUM SELF)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3264) in GitLab Premium 12.1.
+
+When migrating repositories to GitLab and they are being accessed by other systems,
+it's very useful to be able to access them using the same name especially when
+they are a lot. It reduces the risk of changing significant number of Git URLs in
+a large number of systems.
+
+GitLab provides a functionality to help with this. In GitLab, repositories are
+usually accessed with a namespace and project name. It is also possible to access
+them via a project alias. This feature is only available on Git over SSH.
+
+A project alias can be only created via API and only by GitLab administrators.
+Follow the [Project Aliases API documentation](../../../api/project_aliases.md) for
+more details.
+
+After an alias has been created for a project (such as an alias `gitlab` for the
+project `https://gitlab.com/gitlab-org/gitlab`), you can clone the repository
+with the alias (e.g `git clone git@gitlab.com:gitlab.git` instead of
+`git clone git@gitlab.com:gitlab-org/gitlab.git`).

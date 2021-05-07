@@ -302,6 +302,8 @@ RSpec.describe API::Todos do
     end
 
     it 'returns 304 there already exist a todo on that issuable' do
+      stub_feature_flags(multiple_todos: false)
+
       create(:todo, project: project_1, author: author_1, user: john_doe, target: issuable)
 
       post api("/projects/#{project_1.id}/#{issuable_type}/#{issuable.iid}/todo", john_doe)
@@ -328,6 +330,14 @@ RSpec.describe API::Todos do
       else
         expect(response).to have_gitlab_http_status(:not_found)
       end
+    end
+
+    it 'returns an error if the issuable author does not have access' do
+      project_1.add_guest(issuable.author)
+
+      post api("/projects/#{project_1.id}/#{issuable_type}/#{issuable.iid}/todo", issuable.author)
+
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 

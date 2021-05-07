@@ -1,13 +1,13 @@
 ---
 type: reference, howto
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Create a Pages website from a forked sample
 
-GitLab provides [sample projects for the most popular Static Site Generators](https://gitlab.com/pages).
+GitLab provides [sample projects for the most popular Static Site Generators (SSG)](https://gitlab.com/pages).
 You can fork one of the sample projects and run the CI/CD pipeline to generate a Pages website.
 
 Fork a sample project when you want to test GitLab Pages or start a new project that's already
@@ -17,8 +17,8 @@ configured to generate a Pages site.
 
 To fork a sample project and create a Pages website:
 
-1. View the sample projects by going to the [GitLab Pages examples](https://gitlab.com/pages) group.
-1. Click the name of the project you want to [fork](../../../../gitlab-basics/fork-project.md).
+1. View the sample projects by navigating to the [GitLab Pages examples](https://gitlab.com/pages) group.
+1. Click the name of the project you want to [fork](../../../../user/project/working_with_projects.md#fork-a-project).
 1. In the top right, click the **Fork** button, and then choose a namespace to fork to.
 1. Go to your project's **CI/CD > Pipelines** and click **Run pipeline**.
    GitLab CI/CD builds and deploys your site.
@@ -50,7 +50,7 @@ You can take some **optional** further steps:
     If you set the repository path to `gitlab-tests.gitlab.io`,
     the resulting URL for your Pages website is `https://gitlab-tests.gitlab.io`.
 
-    ![Change repo's path](../img/change_path_v12_10.png)
+    ![Change repository's path](../img/change_path_v12_10.png)
 
-  - Now go to your SSG's configuration file and change the [base URL](../getting_started_part_one.md#urls-and-baseurls)
+  - Now go to your SSG's configuration file and change the [base URL](../getting_started_part_one.md#urls-and-base-urls)
     from `"project-name"` to `""`. The project name setting varies by SSG and may not be in the configuration file.

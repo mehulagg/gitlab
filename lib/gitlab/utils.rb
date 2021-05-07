@@ -10,11 +10,13 @@ module Gitlab
     # Also see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24223#note_284122580
     # It also checks for ALT_SEPARATOR aka '\' (forward slash)
     def check_path_traversal!(path)
+      return unless path.is_a?(String)
+
       path = decode_path(path)
       path_regex = /(\A(\.{1,2})\z|\A\.\.[\/\\]|[\/\\]\.\.\z|[\/\\]\.\.[\/\\]|\n)/
 
       if path.match?(path_regex)
-        raise PathTraversalAttackError.new('Invalid path')
+        raise PathTraversalAttackError, 'Invalid path'
       end
 
       path
@@ -97,6 +99,8 @@ module Gitlab
     end
 
     def to_boolean(value, default: nil)
+      value = value.to_s if [0, 1].include?(value)
+
       return value if [true, false].include?(value)
       return true if value =~ /^(true|t|yes|y|1|on)$/i
       return false if value =~ /^(false|f|no|n|0|off)$/i
@@ -172,6 +176,18 @@ module Gitlab
     rescue IPAddr::InvalidAddressError
     end
 
+    # A safe alternative to String#downcase!
+    #
+    # This will make copies of frozen strings but downcase unfrozen
+    # strings in place, reducing allocations.
+    def safe_downcase!(str)
+      if str.frozen?
+        str.downcase
+      else
+        str.downcase! || str
+      end
+    end
+
     # Converts a string to an Addressable::URI object.
     # If the string is not a valid URI, it returns nil.
     # Param uri_string should be a String object.
@@ -207,6 +223,34 @@ module Gitlab
     # This method uses a list item's original index position to break ties.
     def stable_sort_by(list)
       list.sort_by.with_index { |x, idx| [yield(x), idx] }
+    end
+
+    # Check for valid brackets (`[` and `]`) in a string using this aspects:
+    # * open brackets count == closed brackets count
+    # * (optionally) reject nested brackets via `allow_nested: false`
+    # * open / close brackets coherence, eg. ][[] -> invalid
+    def valid_brackets?(string = '', allow_nested: true)
+      # remove everything except brackets
+      brackets = string.remove(/[^\[\]]/)
+
+      return true if brackets.empty?
+      # balanced counts check
+      return false if brackets.size.odd?
+
+      unless allow_nested
+        # nested brackets check
+        return false if brackets.include?('[[') || brackets.include?(']]')
+      end
+
+      # open / close brackets coherence check
+      untrimmed = brackets
+      loop do
+        trimmed = untrimmed.gsub('[]', '')
+        return true if trimmed.empty?
+        return false if trimmed == untrimmed
+
+        untrimmed = trimmed
+      end
     end
   end
 end

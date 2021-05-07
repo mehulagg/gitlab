@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/geo_settings/store/actions';
 import * as types from 'ee/geo_settings/store/mutation_types';
 import state from 'ee/geo_settings/store/state';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as flash } from '~/flash';
 import { MOCK_BASIC_SETTINGS_DATA, MOCK_APPLICATION_SETTINGS_FETCH_RESPONSE } from '../mock_data';
 
 jest.mock('~/flash');
@@ -14,8 +14,8 @@ describe('GeoSettings Store Actions', () => {
 
   const noCallback = () => {};
   const flashCallback = () => {
-    expect(flash).toHaveBeenCalledTimes(1);
-    flash.mockClear();
+    expect(createFlash).toHaveBeenCalledTimes(1);
+    createFlash.mockClear();
   };
 
   beforeEach(() => {

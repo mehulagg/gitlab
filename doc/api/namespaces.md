@@ -1,6 +1,12 @@
+---
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Namespaces API
 
-Usernames and groupnames fall under a special category called namespaces.
+Usernames and group names fall under a special category called namespaces.
 
 For users and groups supported API calls see the [users](users.md) and
 [groups](groups.md) documentation respectively.
@@ -87,12 +93,12 @@ the `plan` parameter associated with a namespace:
 ]
 ```
 
-Users on GitLab.com will also see `max_seats_used` and `seats_in_use` parameters.
+Users on GitLab.com also see `max_seats_used` and `seats_in_use` parameters.
 `max_seats_used` is the highest number of users the group had. `seats_in_use` is
 the number of license seats currently being used. Both values are updated
 once a day.
 
-`max_seats_used` and `seats_in_use` will be non-zero only for namespaces on paid plans.
+`max_seats_used` and `seats_in_use` are non-zero only for namespaces on paid plans.
 
 ```json
 [
@@ -107,7 +113,7 @@ once a day.
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
 
 ## Search for namespace
@@ -217,5 +223,35 @@ Example response:
   "plan": "default",
   "trial_ends_on": null,
   "trial": false
+}
+```
+
+## Get existence of a namespace
+
+Get existence of a namespace by path. Suggests a new namespace path that does not already exist.
+
+```plaintext
+GET /namespaces/:namespace/exists
+```
+
+| Attribute   | Type    | Required | Description |
+| ----------- | ------- | -------- | ----------- |
+| `namespace` | string  | yes      | Namespace's path. |
+| `parent_id` | integer | no       | The ID of the parent namespace. If no ID is specified, only top-level namespaces are considered. |
+
+Example request:
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces/my-group/exists?parent_id=1"
+```
+
+Example response:
+
+```json
+{
+    "exists": true,
+    "suggests": [
+        "my-group1"
+    ]
 }
 ```

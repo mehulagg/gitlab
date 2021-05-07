@@ -1,15 +1,17 @@
 ---
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
-# Snippets API
+# Snippets API **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/6373) in GitLab 8.15.
 
-Snippets API operates on [snippets](../user/snippets.md).
+Snippets API operates on [snippets](../user/snippets.md). Related APIs exist for
+[project snippets](project_snippets.md) and
+[moving snippets between storages](snippet_repository_storage_moves.md).
 
 ## Snippet visibility level
 
@@ -21,7 +23,7 @@ Valid values for snippet visibility levels are:
 | Visibility | Description                                         |
 |:-----------|:----------------------------------------------------|
 | `private`  | Snippet is visible only to the snippet creator.     |
-| `internal` | Snippet is visible for any logged in user.          |
+| `internal` | Snippet is visible for any logged in user except [external users](../user/permissions.md#external-users).          |
 | `public`   | Snippet can be accessed without any authentication. |
 
 ## List all snippets for a user
@@ -189,7 +191,7 @@ Hello World snippet
 
 Create a new snippet.
 
-NOTE: **Note:**
+NOTE:
 The user must have permission to create new snippets.
 
 ```plaintext
@@ -230,7 +232,7 @@ curl --request POST "https://gitlab.example.com/api/v4/snippets" \
       "content": "Hello world",
       "file_path": "test.txt"
     }
-  ]  
+  ]
 }
 ```
 
@@ -272,7 +274,7 @@ Example response:
 
 Update an existing snippet.
 
-NOTE: **Note:**
+NOTE:
 The user must have permission to change an existing snippet.
 
 ```plaintext
@@ -289,13 +291,11 @@ Parameters:
 | `content`             | string          | no       | Deprecated: Use `files` instead. Content of a snippet                               |
 | `description`         | string          | no       | Description of a snippet                                                            |
 | `visibility`          | string          | no       | Snippet's [visibility](#snippet-visibility-level)                                   |
-| `files`               | array of hashes | no       | An array of snippet files                                                           |
-| `files:action`        | string          | yes      | Type of action to perform on the file, one of: 'create', 'update', 'delete', 'move' |
+| `files`               | array of hashes | sometimes | An array of snippet files. Required when updating snippets with multiple files. |
+| `files:action`        | string          | yes      | Type of action to perform on the file, one of: `create`, `update`, `delete`, `move` |
 | `files:file_path`     | string          | no       | File path of the snippet file                                                       |
 | `files:previous_path` | string          | no       | Previous path of the snippet file                                                   |
 | `files:content`       | string          | no       | Content of the snippet file                                                         |
-
-Updates to snippets with multiple files *must* use the `files` attribute.
 
 Example request:
 
@@ -451,7 +451,7 @@ Example response:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12655) in GitLab 9.4.
 
-NOTE: **Note:**
+NOTE:
 Available only for administrators.
 
 ```plaintext

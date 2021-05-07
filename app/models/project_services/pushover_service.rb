@@ -11,7 +11,7 @@ class PushoverService < Service
   end
 
   def description
-    s_('PushoverService|Pushover makes it easy to get real-time notifications on your Android device, iPhone, iPad, and Desktop.')
+    s_('PushoverService|Get real-time notifications on your device.')
   end
 
   def self.to_param
@@ -20,7 +20,7 @@ class PushoverService < Service
 
   def fields
     [
-      { type: 'text', name: 'api_key', placeholder: s_('PushoverService|Your application key'), required: true },
+      { type: 'text', name: 'api_key', title: _('API key'), placeholder: s_('PushoverService|Your application key'), required: true },
       { type: 'text', name: 'user_key', placeholder: s_('PushoverService|Your user key'), required: true },
       { type: 'text', name: 'device', placeholder: s_('PushoverService|Leave blank for all active devices') },
       { type: 'select', name: 'priority', required: true, choices:

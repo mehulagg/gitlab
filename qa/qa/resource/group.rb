@@ -36,7 +36,6 @@ module QA
 
             Page::Group::New.perform do |group_new|
               group_new.set_path(path)
-              group_new.set_description(description)
               group_new.set_visibility('Public')
               group_new.create
             end
@@ -44,7 +43,7 @@ module QA
             # Ensure that the group was actually created
             group_show.wait_until(sleep_interval: 1) do
               group_show.has_text?(path) &&
-                group_show.has_new_project_or_subgroup_dropdown?
+                group_show.has_new_project_and_new_subgroup_buttons?
             end
           end
         end
@@ -89,6 +88,19 @@ module QA
         unless response.code == HTTP_STATUS_OK
           raise ResourceUpdateFailedError, "Could not update require_two_factor_authentication to #{value}. Request returned (#{response.code}): `#{response}`."
         end
+      end
+
+      def change_repository_storage(new_storage)
+        post_body = { destination_storage_name: new_storage }
+        response = post Runtime::API::Request.new(api_client, "/groups/#{id}/repository_storage_moves").url, post_body
+
+        unless response.code.between?(200, 300)
+          raise ResourceUpdateFailedError, "Could not change repository storage to #{new_storage}. Request returned (#{response.code}): `#{response}`."
+        end
+
+        wait_until(sleep_interval: 1) { Runtime::API::RepositoryStorageMoves.has_status?(self, 'finished', new_storage) }
+      rescue Support::Repeater::RepeaterConditionExceededError
+        raise Runtime::API::RepositoryStorageMoves::RepositoryStorageMovesError, 'Timed out while waiting for the group repository storage move to finish'
       end
     end
   end

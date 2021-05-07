@@ -1,6 +1,6 @@
 import Store from 'ee/sidebar/stores/sidebar_store';
-import CESidebarMediator from '~/sidebar/sidebar_mediator';
 import updateStatusMutation from '~/sidebar/queries/updateStatus.mutation.graphql';
+import CESidebarMediator from '~/sidebar/sidebar_mediator';
 
 export default class SidebarMediator extends CESidebarMediator {
   initSingleton(options) {
@@ -9,7 +9,7 @@ export default class SidebarMediator extends CESidebarMediator {
   }
 
   processFetchedData(restData, graphQlData) {
-    super.processFetchedData(restData);
+    super.processFetchedData(restData, graphQlData);
     this.store.setWeightData(restData);
     this.store.setEpicData(restData);
     this.store.setStatusData(graphQlData);
@@ -23,7 +23,7 @@ export default class SidebarMediator extends CESidebarMediator {
         this.store.setWeight(data.weight);
         this.store.setLoadingState('weight', false);
       })
-      .catch(err => {
+      .catch((err) => {
         this.store.setLoadingState('weight', false);
         throw err;
       });
@@ -39,7 +39,7 @@ export default class SidebarMediator extends CESidebarMediator {
         }
         this.store.setStatus(data?.updateIssue?.issue?.healthStatus);
       })
-      .catch(error => {
+      .catch((error) => {
         throw error;
       })
       .finally(() => this.store.setFetchingState('status', false));

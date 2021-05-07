@@ -42,8 +42,8 @@ RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_n
 
   describe '#highlight_map' do
     it 'returns the expected highlight map' do
-      expect(results).to receive(:snippet_titles).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }])
-      expect(results.highlight_map('snippet_titles')).to eq({ 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' })
+      expect(results).to receive(:snippet_titles).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' }])
+      expect(results.highlight_map('snippet_titles')).to eq({ 1 => 'test <span class="gl-text-gray-900 gl-font-weight-bold">highlight</span>' })
     end
   end
 
@@ -71,7 +71,7 @@ RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_n
     end
   end
 
-  context 'when user has read_all_resources', :do_not_mock_admin_mode do
+  context 'when user has read_all_resources' do
     include_context 'custom session'
 
     let(:user) { create(:admin) }

@@ -1,10 +1,10 @@
 ---
 stage: Enablement
 group: Global Search
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Elasticsearch knowledge **(STARTER ONLY)**
+# Elasticsearch knowledge **(PREMIUM SELF)**
 
 This area is to maintain a compendium of useful information when working with Elasticsearch.
 
@@ -13,9 +13,9 @@ the [Elasticsearch integration documentation](../integration/elasticsearch.md#en
 
 ## Deep Dive
 
-In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
+In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on the GitLab [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the codebase in the future. You can find the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
 
-In August 2020, a second Deep Dive was hosted, focusing on [GitLab's specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab-specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
 ## Supported Versions
 
@@ -25,7 +25,7 @@ Developers making significant changes to Elasticsearch queries should test their
 
 ## Setting up development environment
 
-See the [Elasticsearch GDK setup instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/elasticsearch.md)
+See the [Elasticsearch GDK setup instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/elasticsearch.md)
 
 ## Helpful Rake tasks
 
@@ -68,8 +68,8 @@ The `whitespace` tokenizer was selected in order to have more control over how t
 
 Please see the `code` filter for an explanation on how tokens are split.
 
-NOTE: **Note:**
-Currently the [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#known-issues).
+NOTE:
+The [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#elasticsearch-code_analyzer-doesnt-account-for-all-code-cases).
 
 #### `code_search_analyzer`
 
@@ -119,7 +119,7 @@ Patterns:
 - `'"((?:\\"|[^"]|\\")*)"'`: captures terms inside quotes, removing the quotes
 - `"'((?:\\'|[^']|\\')*)'"`: same as above, for single-quotes
 - `'\.([^.]+)(?=\.|\s|\Z)'`: separate terms with periods in-between
-- `'([\p{L}_.-]+)'`: some common chars in file names to keep the whole filename intact (eg. `my_file-ñame.txt`)
+- `'([\p{L}_.-]+)'`: some common chars in file names to keep the whole filename intact (for example `my_file-ñame.txt`)
 - `'([\p{L}\d_]+)'`: letters, numbers and underscores are the most common tokens in programming. Always capture them greedily regardless of context.
 
 ## Gotchas
@@ -129,7 +129,7 @@ Patterns:
 
 ## Zero downtime reindexing with multiple indices
 
-NOTE: **Note:**
+NOTE:
 This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Currently GitLab can only handle a single version of setting. Any setting/schema changes would require reindexing everything from scratch. Since reindexing can take a long time, this can cause search functionality downtime.
@@ -168,12 +168,12 @@ The global configurations per version are now in the `Elastic::(Version)::Config
 
 ### Creating new version of schema
 
-NOTE: **Note:**
+NOTE:
 This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (e.g. `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (e.g. `V12p3`).
 
-The version name basically follows GitLab's release version. If setting is changed in 12.3, we will create a new namespace called `V12p3` (p stands for "point"). Raise an issue if there is a need to name a version differently.
+The version name basically follows the GitLab release version. If setting is changed in 12.3, we will create a new namespace called `V12p3` (p stands for "point"). Raise an issue if there is a need to name a version differently.
 
 If the current version is `v12p1`, and we need to create a new version for `v12p3`, the steps are as follows:
 
@@ -183,6 +183,177 @@ If the current version is `v12p1`, and we need to create a new version for `v12p
 1. Copy the entire folder of `latest` as `v12p1`
 1. Change the namespace for files under `v12p1` folder from `Latest` to `V12p1`
 1. Make changes to files under the `latest` folder as needed
+
+## Creating a new Advanced Search migration
+
+> This functionality was introduced by [#234046](https://gitlab.com/gitlab-org/gitlab/-/issues/234046).
+
+NOTE:
+This only supported for indices created with GitLab 13.0 or greater.
+
+Migrations are stored in the [`ee/elastic/migrate/`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/elastic/migrate) folder with `YYYYMMDDHHMMSS_migration_name.rb`
+filename format, which is similar to Rails database migrations:
+
+```ruby
+# frozen_string_literal: true
+
+class MigrationName < Elastic::Migration
+  # Important: Any updates to the Elastic index mappings must be replicated in the respective
+  # configuration files:
+  #   - `Elastic::Latest::Config`, for the main index.
+  #   - `Elastic::Latest::<Type>Config`, for standalone indices.
+
+  def migrate
+  end
+
+  # Check if the migration has completed
+  # Return true if completed, otherwise return false
+  def completed?
+  end
+end
+```
+
+Applied migrations are stored in `gitlab-#{RAILS_ENV}-migrations` index. All migrations not executed
+are applied by the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
+cron worker sequentially.
+
+To update Elastic index mappings, apply the configuration to the respective files:
+
+- For the main index: [`Elastic::Latest::Config`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/elastic/latest/config.rb).
+- For standalone indices: `Elastic::Latest::<Type>Config`.
+
+Migrations can be built with a retry limit and have the ability to be [failed and marked as halted](https://gitlab.com/gitlab-org/gitlab/-/blob/66e899b6637372a4faf61cfd2f254cbdd2fb9f6d/ee/lib/elastic/migration.rb#L40).
+Any data or index cleanup needed to support migration retries should be handled within the migration.
+
+### Migration options supported by the `Elastic::MigrationWorker`
+
+[`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb) supports the following migration options:
+
+- `batched!` - Allow the migration to run in batches. If set, the [`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
+will re-enqueue itself with a delay which is set using the `throttle_delay` option described below. The batching
+must be handled within the `migrate` method, this setting controls the re-enqueuing only.
+
+- `throttle_delay` - Sets the wait time in between batch runs. This time should be set high enough to allow each migration batch
+enough time to finish. Additionally, the time should be less than 30 minutes since that is how often the
+[`Elastic::MigrationWorker`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/workers/elastic/migration_worker.rb)
+cron worker runs. Default value is 5 minutes.
+
+- `pause_indexing!` - Pause indexing while the migration runs. This setting will record the indexing setting before
+the migration runs and set it back to that value when the migration is completed.
+
+- `space_requirements!` - Verify that enough free space is available in the cluster when the migration runs. This setting
+  will halt the migration if the storage required is not available when the migration runs. The migration must provide
+  the space required in bytes by defining a `space_required_bytes` method.
+
+```ruby
+# frozen_string_literal: true
+
+class BatchedMigrationName < Elastic::Migration
+  # Declares a migration should be run in batches
+  batched!
+  throttle_delay 10.minutes
+  pause_indexing!
+  space_requirements!
+  
+  # ...
+end
+```
+
+### Multi-version compatibility
+
+These Advanced Search migrations, like any other GitLab changes, need to support the case where
+[multiple versions of the application are running at the same time](multi_version_compatibility.md).
+
+Depending on the order of deployment, it's possible that the migration
+has started or finished and there's still a server running the application code from before the
+migration. We need to take this into consideration until we can [ensure all Advanced Search migrations
+start after the deployment has finished](https://gitlab.com/gitlab-org/gitlab/-/issues/321619).
+
+### Reverting a migration
+
+Because Elasticsearch does not support transactions, we always need to design our
+migrations to accommodate a situation where the application
+code is reverted after the migration has started or after it is finished.
+
+For this reason we generally defer destructive actions (for example, deletions after
+some data is moved) to a later merge request after the migrations have
+completed successfully. To be safe, for self-managed customers we should also
+defer it to another release if there is risk of important data loss.
+
+### Best practices for Advanced Search migrations
+
+Follow these best practices for best results:
+
+- When working in batches, keep the batch size under 9,000 documents
+  and `throttle_delay` for at least 3 minutes. The bulk indexer is set to run
+  every 1 minute and process a batch of 10,000 documents. These limits
+  allow the bulk indexer time to process records before another migration
+  batch is attempted.
+- To ensure that document counts are up to date, it is recommended to refresh
+  the index before checking if a migration is completed.
+- Add logging statements to each migration when the migration starts, when a
+  completion check occurs, and when the migration is completed. These logs
+  are helpful when debugging issues with migrations.
+- Pause indexing if you're using any Elasticsearch Reindex API operations.
+- Consider adding a retry limit if there is potential for the migration to fail.
+  This ensures that migrations can be halted if an issue occurs.
+
+## Deleting Advanced Search migrations in a major version upgrade
+
+Since our Advanced Search migrations usually require us to support multiple
+code paths for a long period of time, it's important to clean those up when we
+safely can.
+
+We choose to use GitLab major version upgrades as a safe time to remove
+backwards compatibility for indices that have not been fully migrated. We
+[document this in our upgrade
+documentation](../update/index.md#upgrading-to-a-new-major-version). We also
+choose to remove the migration code and tests so that:
+
+- We don't need to maintain any code that is called from our Advanced Search
+  migrations.
+- We don't waste CI time running tests for migrations that we don't support
+  anymore.
+
+To be extra safe, we will not delete migrations that were created in the last
+minor version before the major upgrade. So, if the we are upgrading to `%14.0`,
+we should not delete migrations that were only added in `%13.11`. This is an
+extra safety net as we expect there are migrations that get merged that may
+take multiple weeks to finish on GitLab.com. It would be bad if we upgraded
+GitLab.com to `%14.0` before the migrations in `%13.11` were finished. Since
+our deployments to GitLab.com are automated and we currently don't have
+automated checks to prevent this, the extra precaution is warranted.
+Additionally, even if we did have automated checks to prevent it, we wouldn't
+actually want to hold up GitLab.com deployments on Advanced Search migrations,
+as they may still have another week to go, and that's too long to block
+deployments.
+
+### Process for removing migrations
+
+For every migration that was created 2 minor versions before the major version
+being upgraded to, we do the following:
+
+1. Confirm the migration has actually completed successfully for GitLab.com.
+1. Replace the content of `migrate` and `completed?` methods as follows:
+
+   ```ruby
+   def migrate
+     log_raise "Migration has been deleted in the last major version upgrade." \
+       "Migrations are supposed to be finished before upgrading major version https://docs.gitlab.com/ee/update/#upgrading-to-a-new-major-version ." \
+       "In order to correct this issue you will need to reacreate your index from scratch https://docs.gitlab.com/ee/integration/elasticsearch.html#last-resort-to-recreate-an-index ."
+   end
+
+   def completed?
+     false
+   end
+   ```
+
+1. Delete any spec files to support this migration.
+1. Remove any logic handling backwards compatibility for this migration. You
+   can find this by looking for
+   `Elastic::DataMigrationService.migration_has_finished?(:migration_name_in_lowercase)`.
+1. Create a merge request with these changes. Noting that we should not
+   accidentally merge this before the major release is started.
 
 ## Performance Monitoring
 
@@ -234,7 +405,7 @@ which is useful to diagnose why a search might be slow.
 ### Correlation ID and `X-Opaque-Id`
 
 Our [correlation
-ID](./distributed_tracing.md#developer-guidelines-for-working-with-correlation-ids)
+ID](distributed_tracing.md#developer-guidelines-for-working-with-correlation-ids)
 is forwarded by all requests from Rails to Elasticsearch as the
 [`X-Opaque-Id`](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html#_identifying_running_tasks)
 header which allows us to track any
@@ -279,6 +450,51 @@ cluster.routing.allocation.disk.watermark.low: 15gb
 cluster.routing.allocation.disk.watermark.high: 10gb
 ```
 
-Restart Elasticsearch, and the `read_only_allow_delete` will clear on it's own.
+Restart Elasticsearch, and the `read_only_allow_delete` will clear on its own.
 
 _from "Disk-based Shard Allocation | Elasticsearch Reference" [5.6](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/disk-allocator.html#disk-allocator) and [6.x](https://www.elastic.co/guide/en/elasticsearch/reference/6.7/disk-allocator.html)_
+
+### Disaster recovery/data loss/backups
+
+The use of Elasticsearch in GitLab is only ever as a secondary data store.
+This means that all of the data stored in Elasticsearch can always be derived
+again from other data sources, specifically PostgreSQL and Gitaly. Therefore if
+the Elasticsearch data store is ever corrupted for whatever reason you can
+simply reindex everything from scratch.
+
+If your Elasticsearch index is incredibly large it may be too time consuming or
+cause too much downtime to reindex from scratch. There aren't any built in
+mechanisms for automatically finding discrepancies and resyncing an
+Elasticsearch index if it gets out of sync but one tool that may be useful is
+looking at the logs for all the updates that occurred in a time range you
+believe may have been missed. This information is very low level and only
+useful for operators that are familiar with the GitLab codebase. It is
+documented here in case it is useful for others. The relevant logs that could
+theoretically be used to figure out what needs to be replayed are:
+
+1. All non-repository updates that were synced can be found in
+   [`elasticsearch.log`](../administration/logs.md#elasticsearchlog) by
+   searching for
+   [`track_items`](https://gitlab.com/gitlab-org/gitlab/-/blob/1e60ea99bd8110a97d8fc481e2f41cab14e63d31/ee/app/services/elastic/process_bookkeeping_service.rb#L25)
+   and these can be replayed by sending these items again through
+   `::Elastic::ProcessBookkeepingService.track!`
+1. All repository updates that occurred can be found in
+   [`elasticsearch.log`](../administration/logs.md#elasticsearchlog) by
+   searching for
+   [`indexing_commit_range`](https://gitlab.com/gitlab-org/gitlab/-/blob/6f9d75dd3898536b9ec2fb206e0bd677ab59bd6d/ee/lib/gitlab/elastic/indexer.rb#L41).
+   Replaying these requires resetting the
+   [`IndexStatus#last_commit/last_wiki_commit`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/index_status.rb)
+   to the oldest `from_sha` in the logs and then triggering another index of
+   the project using
+   [`ElasticCommitIndexerWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_commit_indexer_worker.rb)
+1. All project deletes that occurred can be found in
+   [`sidekiq.log`](../administration/logs.md#sidekiqlog) by searching for
+   [`ElasticDeleteProjectWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_delete_project_worker.rb).
+   These updates can be replayed by triggering another
+   `ElasticDeleteProjectWorker`.
+
+With the above methods and taking regular [Elasticsearch
+snapshots](https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html)
+we should be able to recover from different kinds of data loss issues in a
+relatively short period of time compared to indexing everything from
+scratch.

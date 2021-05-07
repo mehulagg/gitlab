@@ -2,11 +2,14 @@
 
 require 'spec_helper'
 
+require 'googleauth'
+
 RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowplow do
   include PrometheusHelpers
   include ReactiveCachingHelpers
 
-  let(:project) { create(:prometheus_project) }
+  let_it_be_with_reload(:project) { create(:prometheus_project) }
+
   let(:service) { project.prometheus_service }
 
   describe "Associations" do
@@ -95,7 +98,7 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
           service.api_url = 'http://localhost:9090'
 
           stub_application_setting(self_monitoring_project_id: project.id)
-          stub_config(prometheus: { enable: true, listen_address: 'localhost:9090' })
+          stub_config(prometheus: { enable: true, server_address: 'localhost:9090' })
         end
 
         it 'allows self-monitoring project to connect to internal Prometheus' do
@@ -242,7 +245,7 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
 
           stub_config(prometheus: {
             enable: true,
-            listen_address: api_url
+            server_address: api_url
           })
         end
 
@@ -256,18 +259,65 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
     context 'behind IAP' do
       let(:manual_configuration) { true }
 
-      before do
-        # dummy private key generated only for this test to pass openssl validation
-        service.google_iap_service_account_json = '{"type":"service_account","private_key":"-----BEGIN RSA PRIVATE KEY-----\nMIIBOAIBAAJAU85LgUY5o6j6j/07GMLCNUcWJOBA1buZnNgKELayA6mSsHrIv31J\nY8kS+9WzGPQninea7DcM4hHA7smMgQD1BwIDAQABAkAqKxMy6PL3tn7dFL43p0ex\nJyOtSmlVIiAZG1t1LXhE/uoLpYi5DnbYqGgu0oih+7nzLY/dXpNpXUmiRMOUEKmB\nAiEAoTi2rBXbrLSi2C+H7M/nTOjMQQDuZ8Wr4uWpKcjYJTMCIQCFEskL565oFl/7\nRRQVH+cARrAsAAoJSbrOBAvYZ0PI3QIgIEFwis10vgEF86rOzxppdIG/G+JL0IdD\n9IluZuXAGPECIGUo7qSaLr75o2VEEgwtAFH5aptIPFjrL5LFCKwtdB4RAiAYZgFV\nHCMmaooAw/eELuMoMWNYmujZ7VaAnOewGDW0uw==\n-----END RSA PRIVATE KEY-----\n"}'
-        service.google_iap_audience_client_id = "IAP_CLIENT_ID.apps.googleusercontent.com"
+      let(:google_iap_service_account) do
+        {
+          type: "service_account",
+          # dummy private key generated only for this test to pass openssl validation
+          private_key: <<~KEY
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIBOAIBAAJAU85LgUY5o6j6j/07GMLCNUcWJOBA1buZnNgKELayA6mSsHrIv31J
+            Y8kS+9WzGPQninea7DcM4hHA7smMgQD1BwIDAQABAkAqKxMy6PL3tn7dFL43p0ex
+            JyOtSmlVIiAZG1t1LXhE/uoLpYi5DnbYqGgu0oih+7nzLY/dXpNpXUmiRMOUEKmB
+            AiEAoTi2rBXbrLSi2C+H7M/nTOjMQQDuZ8Wr4uWpKcjYJTMCIQCFEskL565oFl/7
+            RRQVH+cARrAsAAoJSbrOBAvYZ0PI3QIgIEFwis10vgEF86rOzxppdIG/G+JL0IdD
+            9IluZuXAGPECIGUo7qSaLr75o2VEEgwtAFH5aptIPFjrL5LFCKwtdB4RAiAYZgFV
+            HCMmaooAw/eELuMoMWNYmujZ7VaAnOewGDW0uw==
+            -----END RSA PRIVATE KEY-----
+          KEY
+        }
+      end
 
-        stub_request(:post, "https://oauth2.googleapis.com/token").to_return(status: 200, body: '{"id_token": "FOO"}', headers: { 'Content-Type': 'application/json; charset=UTF-8' })
+      def stub_iap_request
+        service.google_iap_service_account_json = Gitlab::Json.generate(google_iap_service_account)
+        service.google_iap_audience_client_id = 'IAP_CLIENT_ID.apps.googleusercontent.com'
+
+        stub_request(:post, 'https://oauth2.googleapis.com/token')
+          .to_return(
+            status: 200,
+            body: '{"id_token": "FOO"}',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8' }
+          )
       end
 
       it 'includes the authorization header' do
+        stub_iap_request
+
         expect(service.prometheus_client).not_to be_nil
         expect(service.prometheus_client.send(:options)).to have_key(:headers)
         expect(service.prometheus_client.send(:options)[:headers]).to eq(authorization: "Bearer FOO")
+      end
+
+      context 'when passed with token_credential_uri', issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/284819' do
+        let(:malicious_host) { 'http://example.com' }
+
+        where(:param_name) do
+          [
+            :token_credential_uri,
+            :tokencredentialuri,
+            :Token_credential_uri,
+            :tokenCredentialUri
+          ]
+        end
+
+        with_them do
+          it 'does not make any unexpected HTTP requests' do
+            google_iap_service_account[param_name] = malicious_host
+            stub_iap_request
+            stub_request(:any, malicious_host).to_raise('Making additional HTTP requests is forbidden!')
+
+            expect(service.prometheus_client).not_to be_nil
+          end
+        end
       end
     end
   end
@@ -288,6 +338,7 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
 
       context 'cluster belongs to projects group' do
         let_it_be(:group) { create(:group) }
+
         let(:project) { create(:prometheus_project, group: group) }
         let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
 
@@ -462,20 +513,23 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
           type: 'checkbox',
           name: 'manual_configuration',
           title: s_('PrometheusService|Active'),
+          help: s_('PrometheusService|Select this checkbox to override the auto configuration settings with your own settings.'),
           required: true
         },
         {
           type: 'text',
           name: 'api_url',
           title: 'API URL',
-          placeholder: s_('PrometheusService|Prometheus API Base URL, like http://prometheus.example.com/'),
+          placeholder: s_('PrometheusService|https://prometheus.example.com/'),
+          help: s_('PrometheusService|The Prometheus API base URL.'),
           required: true
         },
         {
           type: 'text',
           name: 'google_iap_audience_client_id',
           title: 'Google IAP Audience Client ID',
-          placeholder: s_('PrometheusService|Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'),
+          placeholder: s_('PrometheusService|IAP_CLIENT_ID.apps.googleusercontent.com'),
+          help: s_('PrometheusService|PrometheusService|The ID of the IAP-secured resource.'),
           autocomplete: 'off',
           required: false
         },
@@ -483,7 +537,8 @@ RSpec.describe PrometheusService, :use_clean_rails_memory_store_caching, :snowpl
           type: 'textarea',
           name: 'google_iap_service_account_json',
           title: 'Google IAP Service Account JSON',
-          placeholder: s_('PrometheusService|Contents of the credentials.json file of your service account, like: { "type": "service_account", "project_id": ... }'),
+          placeholder: s_('PrometheusService|{ "type": "service_account", "project_id": ... }'),
+          help: s_('PrometheusService|The contents of the credentials.json file of your service account.'),
           required: false
         }
       ]

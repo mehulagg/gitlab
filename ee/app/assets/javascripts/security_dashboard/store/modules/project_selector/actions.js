@@ -1,9 +1,9 @@
 import Api from '~/api';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
-import addPageInfo from './utils/add_page_info';
 import * as types from './mutation_types';
+import addPageInfo from './utils/add_page_info';
 
 const API_MINIMUM_QUERY_LENGTH = 3;
 
@@ -37,9 +37,9 @@ export const addProjects = ({ state, dispatch }) => {
 
   return axios
     .post(state.projectEndpoints.add, {
-      project_ids: state.selectedProjects.map(p => p.id),
+      project_ids: state.selectedProjects.map((p) => p.id),
     })
-    .then(response => dispatch('receiveAddProjectsSuccess', response.data))
+    .then((response) => dispatch('receiveAddProjectsSuccess', response.data))
     .catch(() => dispatch('receiveAddProjectsError'))
     .finally(() => dispatch('clearSearchResults'));
 };
@@ -55,8 +55,8 @@ export const receiveAddProjectsSuccess = ({ commit, dispatch, state }, data) => 
 
   if (invalid.length) {
     const [firstProject, secondProject, ...rest] = state.selectedProjects
-      .filter(project => invalid.includes(project.id))
-      .map(project => project.name);
+      .filter((project) => invalid.includes(project.id))
+      .map((project) => project.name);
     const translationValues = {
       firstProject,
       secondProject,
@@ -76,11 +76,11 @@ export const receiveAddProjectsSuccess = ({ commit, dispatch, state }, data) => 
     } else {
       invalidProjects = firstProject;
     }
-    createFlash(
-      sprintf(s__('SecurityReports|Unable to add %{invalidProjects}'), {
+    createFlash({
+      message: sprintf(s__('SecurityReports|Unable to add %{invalidProjects}'), {
         invalidProjects,
       }),
-    );
+    });
   }
 
   if (added.length) {
@@ -91,7 +91,9 @@ export const receiveAddProjectsSuccess = ({ commit, dispatch, state }, data) => 
 export const receiveAddProjectsError = ({ commit }) => {
   commit(types.RECEIVE_ADD_PROJECTS_ERROR);
 
-  createFlash(__('Something went wrong, unable to add projects to dashboard'));
+  createFlash({
+    message: __('Something went wrong, unable to add projects to dashboard'),
+  });
 };
 
 export const fetchProjects = ({ state, dispatch }) => {
@@ -116,7 +118,9 @@ export const receiveProjectsSuccess = ({ commit }, { projects }) => {
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
 
-  createFlash(__('Something went wrong, unable to get projects'));
+  createFlash({
+    message: __('Something went wrong, unable to get projects'),
+  });
 };
 
 export const removeProject = ({ dispatch }, removePath) => {
@@ -142,7 +146,9 @@ export const receiveRemoveProjectSuccess = ({ commit, dispatch }) => {
 export const receiveRemoveProjectError = ({ commit }) => {
   commit(types.RECEIVE_REMOVE_PROJECT_ERROR);
 
-  createFlash(__('Something went wrong, unable to delete project'));
+  createFlash({
+    message: __('Something went wrong, unable to delete project'),
+  });
 };
 
 export const fetchSearchResults = ({ state, dispatch, commit }) => {
@@ -154,7 +160,7 @@ export const fetchSearchResults = ({ state, dispatch, commit }) => {
   }
 
   return searchProjects(searchQuery)
-    .then(payload => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
+    .then((payload) => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 

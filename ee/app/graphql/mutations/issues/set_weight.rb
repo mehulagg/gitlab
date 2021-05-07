@@ -8,7 +8,7 @@ module Mutations
       argument :weight,
                GraphQL::INT_TYPE,
                required: true,
-               description: 'The desired weight for the issue'
+               description: 'The desired weight for the issue.'
 
       def resolve(project_path:, iid:, weight:)
         issue = authorized_find!(project_path: project_path, iid: iid)

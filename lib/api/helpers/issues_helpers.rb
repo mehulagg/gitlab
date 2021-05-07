@@ -5,13 +5,13 @@ module API
     module IssuesHelpers
       extend Grape::API::Helpers
 
+      params :negatable_issue_filter_params_ee do
+      end
+
       params :optional_issue_params_ee do
       end
 
-      params :optional_issues_params_ee do
-      end
-
-      params :optional_issue_not_params_ee do
+      params :issues_stats_params_ee do
       end
 
       def self.update_params_at_least_one_of
@@ -28,7 +28,8 @@ module API
           :remove_labels,
           :milestone_id,
           :state_event,
-          :title
+          :title,
+          :issue_type
         ]
       end
 
@@ -47,6 +48,7 @@ module API
         args[:not][:label_name] ||= args[:not]&.delete(:labels)
         args[:scope] = args[:scope].underscore if args[:scope]
         args[:sort] = "#{args[:order_by]}_#{args[:sort]}"
+        args[:issue_types] ||= args.delete(:issue_type)
 
         IssuesFinder.new(current_user, args)
       end

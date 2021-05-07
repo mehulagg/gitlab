@@ -1,13 +1,13 @@
-import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
+import Vue from 'vue';
+import eventHub from '~/ide/eventhub';
+import { createRouter } from '~/ide/ide_router';
+import service from '~/ide/services';
 import { createStore } from '~/ide/stores';
 import * as actions from '~/ide/stores/actions/file';
 import * as types from '~/ide/stores/mutation_types';
-import service from '~/ide/services';
-import { createRouter } from '~/ide/ide_router';
-import eventHub from '~/ide/eventhub';
-import { file } from '../../helpers';
+import axios from '~/lib/utils/axios_utils';
+import { file, createTriggerRenameAction, createTriggerUpdatePayload } from '../../helpers';
 
 const ORIGINAL_CONTENT = 'original content';
 const RELATIVE_URL_ROOT = '/gitlab';
@@ -75,7 +75,7 @@ describe('IDE store file actions', () => {
         });
     });
 
-    it('closes file & opens next available file', () => {
+    it('switches to the next available file before closing the current one ', () => {
       const f = file('newOpenFile');
 
       store.state.openFiles.push(f);
@@ -90,10 +90,12 @@ describe('IDE store file actions', () => {
     });
 
     it('removes file if it pending', () => {
-      store.state.openFiles.push({
-        ...localFile,
-        pending: true,
-      });
+      store.state.openFiles = [
+        {
+          ...localFile,
+          pending: true,
+        },
+      ];
 
       return store.dispatch('closeFile', localFile).then(() => {
         expect(store.state.openFiles.length).toBe(0);
@@ -189,7 +191,7 @@ describe('IDE store file actions', () => {
     });
 
     describe('call to service', () => {
-      const callExpectation = serviceCalled => {
+      const callExpectation = (serviceCalled) => {
         store.dispatch('getFileData', { path: localFile.path });
 
         if (serviceCalled) {
@@ -422,11 +424,11 @@ describe('IDE store file actions', () => {
           loadingWhenGettingRawData = undefined;
           loadingWhenGettingBaseRawData = undefined;
 
-          jest.spyOn(service, 'getRawFileData').mockImplementation(f => {
+          jest.spyOn(service, 'getRawFileData').mockImplementation((f) => {
             loadingWhenGettingRawData = f.loading;
             return Promise.resolve('raw');
           });
-          jest.spyOn(service, 'getBaseRawFileData').mockImplementation(f => {
+          jest.spyOn(service, 'getBaseRawFileData').mockImplementation((f) => {
             loadingWhenGettingBaseRawData = f.loading;
             return Promise.resolve('rawBase');
           });
@@ -510,20 +512,33 @@ describe('IDE store file actions', () => {
 
   describe('changeFileContent', () => {
     let tmpFile;
-    const callAction = (content = 'content\n') =>
-      store.dispatch('changeFileContent', { path: tmpFile.path, content });
+    let onFilesChange;
 
     beforeEach(() => {
       tmpFile = file('tmpFile');
       tmpFile.content = '\n';
       tmpFile.raw = '\n';
       store.state.entries[tmpFile.path] = tmpFile;
+      onFilesChange = jest.fn();
+      eventHub.$on('ide.files.change', onFilesChange);
     });
 
     it('updates file content', () => {
-      return callAction().then(() => {
+      const content = 'content\n';
+
+      return store.dispatch('changeFileContent', { path: tmpFile.path, content }).then(() => {
         expect(tmpFile.content).toBe('content\n');
       });
+    });
+
+    it('does nothing if path does not exist', () => {
+      const content = 'content\n';
+
+      return store
+        .dispatch('changeFileContent', { path: 'not/a/real_file.txt', content })
+        .then(() => {
+          expect(tmpFile.content).toBe('\n');
+        });
     });
 
     it('adds file into stagedFiles array', () => {
@@ -569,6 +584,17 @@ describe('IDE store file actions', () => {
         .then(() => {
           expect(store.state.changedFiles.length).toBe(0);
         });
+    });
+
+    it('triggers ide.files.change', async () => {
+      expect(onFilesChange).not.toHaveBeenCalled();
+
+      await store.dispatch('changeFileContent', {
+        path: tmpFile.path,
+        content: 'content\n',
+      });
+
+      expect(onFilesChange).toHaveBeenCalledWith(createTriggerUpdatePayload(tmpFile.path));
     });
   });
 
@@ -733,7 +759,7 @@ describe('IDE store file actions', () => {
     });
 
     it('returns true when opened', () => {
-      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then(added => {
+      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then((added) => {
         expect(added).toBe(true);
       });
     });
@@ -745,7 +771,7 @@ describe('IDE store file actions', () => {
         key: `pending-${f.key}`,
       });
 
-      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then(added => {
+      return store.dispatch('openPendingTab', { file: f, keyPrefix: 'pending' }).then((added) => {
         expect(added).toBe(false);
       });
     });
@@ -785,13 +811,19 @@ describe('IDE store file actions', () => {
   });
 
   describe('triggerFilesChange', () => {
+    const { payload: renamePayload } = createTriggerRenameAction('test', '123');
+
     beforeEach(() => {
       jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
     });
 
-    it('emits event that files have changed', () => {
-      return store.dispatch('triggerFilesChange').then(() => {
-        expect(eventHub.$emit).toHaveBeenCalledWith('ide.files.change');
+    it.each`
+      args               | payload
+      ${[]}              | ${{}}
+      ${[renamePayload]} | ${renamePayload}
+    `('emits event that files have changed (args=$args)', ({ args, payload }) => {
+      return store.dispatch('triggerFilesChange', ...args).then(() => {
+        expect(eventHub.$emit).toHaveBeenCalledWith('ide.files.change', payload);
       });
     });
   });

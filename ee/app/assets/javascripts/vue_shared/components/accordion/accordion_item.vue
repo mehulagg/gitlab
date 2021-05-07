@@ -1,10 +1,10 @@
 <script>
-import { uniqueId } from 'lodash';
 import { GlSkeletonLoader, GlIcon } from '@gitlab/ui';
+import { uniqueId } from 'lodash';
 
 import accordionEventBus from './accordion_event_bus';
 
-const accordionItemUniqueId = name => uniqueId(`gl-accordion-item-${name}-`);
+const accordionItemUniqueId = (name) => uniqueId(`gl-accordion-item-${name}-`);
 
 export default {
   components: {
@@ -60,6 +60,7 @@ export default {
     accordionEventBus.$on(this.closeOtherItemsEvent, this.onCloseOtherAccordionItems);
   },
   destroyed() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     accordionEventBus.$off(this.closeOtherItemsEvent);
   },
   methods: {
@@ -113,16 +114,15 @@ export default {
           </div>
         </button>
       </div>
-      <div
+      <section
         v-show="isExpanded"
         :id="contentContainerId"
         ref="contentContainer"
         :aria-labelledby="buttonId"
-        role="region"
       >
-        <slot name="subTitle"></slot>
+        <slot name="sub-title"></slot>
         <div ref="content" :style="contentStyles"><slot name="default"></slot></div>
-      </div>
+      </section>
     </template>
     <div v-else ref="loadingIndicator" class="d-flex p-2">
       <div class="h-32-px">

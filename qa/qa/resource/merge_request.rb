@@ -19,7 +19,8 @@ module QA
                     :file_name,
                     :file_content
       attr_writer :no_preparation,
-                  :wait_for_merge
+                  :wait_for_merge,
+                  :template
 
       attribute :merge_when_pipeline_succeeds
       attribute :merge_status
@@ -34,7 +35,7 @@ module QA
       attribute :target do
         Repository::ProjectPush.fabricate! do |resource|
           resource.project = project
-          resource.branch_name = 'master'
+          resource.branch_name = target_branch
           resource.new_branch = @target_new_branch
           resource.remote_branch = target_branch
         end
@@ -56,25 +57,26 @@ module QA
         @title = 'QA test - merge request'
         @description = 'This is a test merge request'
         @source_branch = "qa-test-feature-#{SecureRandom.hex(8)}"
-        @target_branch = "master"
         @assignee = nil
         @milestone = nil
         @labels = []
         @file_name = "added_file-#{SecureRandom.hex(8)}.txt"
         @file_content = "File Added"
+        @target_branch = project.default_branch
         @target_new_branch = true
         @no_preparation = false
         @wait_for_merge = true
       end
 
       def fabricate!
-        populate(:target, :source)
+        populate_target_and_source_if_required
 
         project.visit!
         Page::Project::Show.perform(&:new_merge_request)
         Page::MergeRequest::New.perform do |new_page|
           new_page.fill_title(@title)
-          new_page.fill_description(@description)
+          new_page.choose_template(@template) if @template
+          new_page.fill_description(@description) if @description && !@template
           new_page.choose_milestone(@milestone) if @milestone
           new_page.assign_to_me if @assignee == 'me'
           labels.each do |label|
@@ -87,9 +89,11 @@ module QA
       end
 
       def fabricate_via_api!
+        raise ResourceNotFoundError unless id
+
         resource_web_url(api_get)
       rescue ResourceNotFoundError
-        populate(:target, :source) unless @no_preparation
+        populate_target_and_source_if_required
 
         super
       end
@@ -137,12 +141,26 @@ module QA
         end
       end
 
+      def reload!
+        # Refabricate so that we can return a new object with updated attributes
+        self.class.fabricate_via_api! do |resource|
+          resource.project = project
+          resource.id = api_resource[:iid]
+        end
+      end
+
       private
 
       def transform_api_resource(api_resource)
         raise ResourceNotFoundError if api_resource.blank?
 
         super(api_resource)
+      end
+
+      def populate_target_and_source_if_required
+        @target_branch ||= project.default_branch
+
+        populate(:target, :source) unless @no_preparation
       end
     end
   end

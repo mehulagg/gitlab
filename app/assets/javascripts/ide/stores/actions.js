@@ -1,20 +1,26 @@
-import Vue from 'vue';
 import { escape } from 'lodash';
-import { __, sprintf } from '~/locale';
-import { visitUrl } from '~/lib/utils/url_utility';
+import Vue from 'vue';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import * as types from './mutation_types';
-import { decorateFiles } from '../lib/files';
-import { stageKeys } from '../constants';
-import service from '../services';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __, sprintf } from '~/locale';
+import {
+  WEBIDE_MARK_FETCH_BRANCH_DATA_START,
+  WEBIDE_MARK_FETCH_BRANCH_DATA_FINISH,
+  WEBIDE_MEASURE_FETCH_BRANCH_DATA,
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
+import { stageKeys, commitActionTypes } from '../constants';
 import eventHub from '../eventhub';
+import { decorateFiles } from '../lib/files';
+import service from '../services';
+import * as types from './mutation_types';
 
 export const redirectToUrl = (self, url) => visitUrl(url);
 
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
 
 export const discardAllChanges = ({ state, commit, dispatch }) => {
-  state.changedFiles.forEach(file => dispatch('restoreOriginalFile', file.path));
+  state.changedFiles.forEach((file) => dispatch('restoreOriginalFile', file.path));
 
   commit(types.REMOVE_ALL_CHANGES_FILES);
 };
@@ -25,7 +31,7 @@ export const setResizingStatus = ({ commit }, resizing) => {
 
 export const createTempEntry = (
   { state, commit, dispatch, getters },
-  { name, type, content = '', rawPath = '', openFile = true, makeFileActive = true },
+  { name, type, content = '', rawPath = '', openFile = true, makeFileActive = true, mimeType = '' },
 ) => {
   const fullName = name.slice(-1) !== '/' && type === 'tree' ? `${name}/` : name;
 
@@ -50,6 +56,9 @@ export const createTempEntry = (
     tempFile: true,
     content,
     rawPath,
+    blobData: {
+      mimeType,
+    },
   });
   const { file, parentPath } = data;
 
@@ -97,7 +106,7 @@ export const stageAllChanges = ({ state, commit, dispatch, getters }) => {
 
   commit(types.SET_LAST_COMMIT_MSG, '');
 
-  state.changedFiles.forEach(file =>
+  state.changedFiles.forEach((file) =>
     commit(types.STAGE_CHANGE, { path: file.path, diffInfo: getters.getDiffInfo(file.path) }),
   );
 
@@ -114,7 +123,7 @@ export const stageAllChanges = ({ state, commit, dispatch, getters }) => {
 export const unstageAllChanges = ({ state, commit, dispatch, getters }) => {
   const openFile = state.openFiles[0];
 
-  state.stagedFiles.forEach(file =>
+  state.stagedFiles.forEach((file) =>
     commit(types.UNSTAGE_CHANGE, { path: file.path, diffInfo: getters.getDiffInfo(file.path) }),
   );
 
@@ -185,7 +194,7 @@ export const deleteEntry = ({ commit, dispatch, state }, path) => {
   if (entry.opened) dispatch('closeFile', entry);
 
   if (isTree) {
-    entry.tree.forEach(f => dispatch('deleteEntry', f.path));
+    entry.tree.forEach((f) => dispatch('deleteEntry', f.path));
   }
 
   commit(types.DELETE_ENTRY, path);
@@ -212,7 +221,7 @@ export const renameEntry = ({ dispatch, commit, state, getters }, { path, name, 
   commit(types.RENAME_ENTRY, { path, name, parentPath });
 
   if (entry.type === 'tree') {
-    state.entries[newPath].tree.forEach(f => {
+    state.entries[newPath].tree.forEach((f) => {
       dispatch('renameEntry', {
         path: f.path,
         name: f.name,
@@ -242,16 +251,26 @@ export const renameEntry = ({ dispatch, commit, state, getters }, { path, name, 
     }
   }
 
-  dispatch('triggerFilesChange');
+  dispatch('triggerFilesChange', { type: commitActionTypes.move, path, newPath });
 };
 
-export const getBranchData = ({ commit, state }, { projectId, branchId, force = false } = {}) =>
-  new Promise((resolve, reject) => {
+export const getBranchData = ({ commit, state }, { projectId, branchId, force = false } = {}) => {
+  return new Promise((resolve, reject) => {
+    performanceMarkAndMeasure({ mark: WEBIDE_MARK_FETCH_BRANCH_DATA_START });
     const currentProject = state.projects[projectId];
     if (!currentProject || !currentProject.branches[branchId] || force) {
       service
         .getBranchData(projectId, branchId)
         .then(({ data }) => {
+          performanceMarkAndMeasure({
+            mark: WEBIDE_MARK_FETCH_BRANCH_DATA_FINISH,
+            measures: [
+              {
+                name: WEBIDE_MEASURE_FETCH_BRANCH_DATA,
+                start: WEBIDE_MARK_FETCH_BRANCH_DATA_START,
+              },
+            ],
+          });
           const { id } = data.commit;
           commit(types.SET_BRANCH, {
             projectPath: projectId,
@@ -261,7 +280,7 @@ export const getBranchData = ({ commit, state }, { projectId, branchId, force = 
           commit(types.SET_BRANCH_WORKING_REFERENCE, { projectId, branchId, reference: id });
           resolve(data);
         })
-        .catch(e => {
+        .catch((e) => {
           if (e.response.status === 404) {
             reject(e);
           } else {
@@ -291,6 +310,7 @@ export const getBranchData = ({ commit, state }, { projectId, branchId, force = 
       resolve(currentProject.branches[branchId]);
     }
   });
+};
 
 export * from './actions/tree';
 export * from './actions/file';

@@ -83,7 +83,7 @@ RSpec.describe API::MergeRequestApprovalRules do
 
       before do
         group.add_developer(approver)
-        merge_request.approvals.create(user: approver)
+        merge_request.approvals.create!(user: approver)
 
         get api(url, current_user)
       end

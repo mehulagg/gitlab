@@ -1,11 +1,16 @@
 <script>
 import { GlBadge, GlButton, GlTooltipDirective, GlModal, GlToggle, GlIcon } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { ROLLOUT_STRATEGY_PERCENT_ROLLOUT, NEW_VERSION_FLAG, LEGACY_FLAG } from '../constants';
 import { labelForStrategy } from '../utils';
 
 export default {
+  i18n: {
+    deleteLabel: __('Delete'),
+    editLabel: __('Edit'),
+    toggleLabel: __('Feature flag status'),
+  },
   components: {
     GlBadge,
     GlButton,
@@ -17,13 +22,13 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagMixin()],
+  inject: ['csrfToken'],
   props: {
     featureFlags: {
       type: Array,
       required: true,
     },
   },
-  inject: ['csrfToken'],
   data() {
     return {
       deleteFeatureFlagUrl: null,
@@ -31,21 +36,11 @@ export default {
     };
   },
   translations: {
-    legacyFlagAlert: s__('FeatureFlags|Flag becomes read only soon'),
     legacyFlagReadOnlyAlert: s__('FeatureFlags|Flag is read-only'),
   },
   computed: {
     permissions() {
       return this.glFeatures.featureFlagPermissions;
-    },
-    isNewVersionFlagsEnabled() {
-      return this.glFeatures.featureFlagsNewVersion;
-    },
-    isLegacyReadOnlyFlagsEnabled() {
-      return (
-        this.glFeatures.featureFlagsLegacyReadOnly &&
-        !this.glFeatures.featureFlagsLegacyReadOnlyOverride
-      );
     },
     modalTitle() {
       return sprintf(s__('FeatureFlags|Delete %{name}?'), {
@@ -60,18 +55,13 @@ export default {
     modalId() {
       return 'delete-feature-flag';
     },
-    legacyFlagToolTipText() {
-      const { legacyFlagReadOnlyAlert, legacyFlagAlert } = this.$options.translations;
-
-      return this.isLegacyReadOnlyFlagsEnabled ? legacyFlagReadOnlyAlert : legacyFlagAlert;
-    },
   },
   methods: {
     isLegacyFlag(flag) {
-      return !this.isNewVersionFlagsEnabled || flag.version !== NEW_VERSION_FLAG;
+      return flag.version !== NEW_VERSION_FLAG;
     },
     statusToggleDisabled(flag) {
-      return this.isLegacyReadOnlyFlagsEnabled && flag.version === LEGACY_FLAG;
+      return flag.version === LEGACY_FLAG;
     },
     scopeTooltipText(scope) {
       return !scope.active
@@ -103,7 +93,7 @@ export default {
       return featureFlag.iid ? `^${featureFlag.iid}` : '';
     },
     canDeleteFlag(flag) {
-      return !this.permissions || (flag.scopes || []).every(scope => scope.can_update);
+      return !this.permissions || (flag.scopes || []).every((scope) => scope.can_update);
     },
     setDeleteModalData(featureFlag) {
       this.deleteFeatureFlagUrl = featureFlag.destroy_path;
@@ -126,9 +116,7 @@ export default {
 <template>
   <div class="table-holder js-feature-flag-table">
     <div class="gl-responsive-table-row table-row-header" role="row">
-      <div class="table-section section-10">
-        {{ s__('FeatureFlags|ID') }}
-      </div>
+      <div class="table-section section-10">{{ s__('FeatureFlags|ID') }}</div>
       <div class="table-section section-10" role="columnheader">
         {{ s__('FeatureFlags|Status') }}
       </div>
@@ -155,6 +143,8 @@ export default {
               v-if="featureFlag.update_path"
               :value="featureFlag.active"
               :disabled="statusToggleDisabled(featureFlag)"
+              :label="$options.i18n.toggleLabel"
+              label-position="hidden"
               data-testid="feature-flag-status-toggle"
               data-track-event="click_button"
               data-track-label="feature_flag_toggle"
@@ -164,9 +154,8 @@ export default {
               v-else-if="featureFlag.active"
               variant="success"
               data-testid="feature-flag-status-badge"
+              >{{ s__('FeatureFlags|Active') }}</gl-badge
             >
-              {{ s__('FeatureFlags|Active') }}
-            </gl-badge>
             <gl-badge v-else variant="danger">{{ s__('FeatureFlags|Inactive') }}</gl-badge>
           </div>
         </div>
@@ -182,7 +171,7 @@ export default {
               </div>
               <gl-icon
                 v-if="isLegacyFlag(featureFlag)"
-                v-gl-tooltip.hover="legacyFlagToolTipText"
+                v-gl-tooltip.hover="$options.translations.legacyFlagReadOnlyAlert"
                 class="gl-ml-3"
                 name="information-o"
               />
@@ -208,9 +197,8 @@ export default {
                 :variant="badgeVariant(scope)"
                 :data-qa-selector="`feature-flag-scope-${badgeVariant(scope)}-badge`"
                 class="gl-mr-3 gl-mt-2"
+                >{{ badgeText(scope) }}</gl-badge
               >
-                {{ badgeText(scope) }}
-              </gl-badge>
             </template>
             <template v-else>
               <gl-badge
@@ -218,10 +206,9 @@ export default {
                 :key="strategy.id"
                 data-testid="strategy-badge"
                 variant="info"
-                class="gl-mr-3 gl-mt-2"
+                class="gl-mr-3 gl-mt-2 gl-white-space-normal gl-text-left gl-px-5"
+                >{{ strategyBadgeText(strategy) }}</gl-badge
               >
-                {{ strategyBadgeText(strategy) }}
-              </gl-badge>
             </template>
           </div>
         </div>
@@ -230,19 +217,21 @@ export default {
           <div class="table-action-buttons btn-group">
             <template v-if="featureFlag.edit_path">
               <gl-button
-                v-gl-tooltip.hover.bottom="__('Edit')"
+                v-gl-tooltip.hover.bottom="$options.i18n.editLabel"
                 class="js-feature-flag-edit-button"
                 icon="pencil"
+                :aria-label="$options.i18n.editLabel"
                 :href="featureFlag.edit_path"
               />
             </template>
             <template v-if="featureFlag.destroy_path">
               <gl-button
-                v-gl-tooltip.hover.bottom="__('Delete')"
+                v-gl-tooltip.hover.bottom="$options.i18n.deleteLabel"
                 class="js-feature-flag-delete-button"
                 variant="danger"
                 icon="remove"
                 :disabled="!canDeleteFlag(featureFlag)"
+                :aria-label="$options.i18n.deleteLabel"
                 @click="setDeleteModalData(featureFlag)"
               />
             </template>

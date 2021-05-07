@@ -22,7 +22,7 @@ RSpec.describe 'Projects > Show > User sees setup shortcut buttons' do
         visit project_path(project)
       end
 
-      it 'Project buttons are not visible' do
+      it 'project buttons are not visible' do
         visit project_path(project)
 
         page.within('.project-buttons') do
@@ -165,7 +165,7 @@ RSpec.describe 'Projects > Show > User sees setup shortcut buttons' do
 
         context 'when the project does not have a README' do
           it 'shows the single file editor "Add README" button' do
-            allow(project.repository).to receive(:readme).and_return(nil)
+            allow(project.repository).to receive(:readme_path).and_return(nil)
 
             visit project_path(project)
 
@@ -226,11 +226,11 @@ RSpec.describe 'Projects > Show > User sees setup shortcut buttons' do
             expect(project.repository.gitlab_ci_yml).to be_nil
 
             page.within('.project-buttons') do
-              expect(page).to have_link('Set up CI/CD', href: presenter.add_ci_yml_path)
+              expect(page).to have_link('Set up CI/CD', href: project_ci_pipeline_editor_path(project))
             end
           end
 
-          it 'no "Set up CI/CD" button if the project already has a .gitlab-ci.yml' do
+          it '"Set up CI/CD" button is renamed if the project already has a .gitlab-ci.yml' do
             Files::CreateService.new(
               project,
               project.creator,
@@ -247,6 +247,7 @@ RSpec.describe 'Projects > Show > User sees setup shortcut buttons' do
 
             page.within('.project-buttons') do
               expect(page).not_to have_link('Set up CI/CD')
+              expect(page).to have_link('CI/CD configuration')
             end
           end
         end

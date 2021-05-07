@@ -16,12 +16,12 @@ module QA
               prepend Page::Component::LicenseManagement
 
               view 'app/assets/javascripts/vue_merge_request_widget/components/states/sha_mismatch.vue' do
-                element :head_mismatch, "The source branch HEAD has recently changed." # rubocop:disable QA/ElementWithPattern
+                element :head_mismatch_content
               end
 
               view 'ee/app/views/projects/merge_requests/_code_owner_approval_rules.html.haml' do
-                element :approver
-                element :approver_list
+                element :approver_content
+                element :approver_list_content
               end
 
               view 'ee/app/assets/javascripts/vue_shared/security_reports/grouped_security_reports_app.vue' do
@@ -30,6 +30,8 @@ module QA
                 element :dependency_scan_report
                 element :container_scan_report
                 element :dast_scan_report
+                element :coverage_fuzzing_report
+                element :api_fuzzing_report
               end
 
               view 'app/assets/javascripts/reports/components/report_section.vue' do
@@ -91,8 +93,8 @@ module QA
           end
 
           def approvers
-            within_element :approver_list do
-              all_elements(:approver, minimum: 1).map { |item| item.find('img')['title'] }
+            within_element :approver_list_content do
+              all_elements(:approver_content, minimum: 1).map { |item| item.find('img')['title'] }
             end
           end
 
@@ -114,16 +116,6 @@ module QA
             end
           end
 
-          def approve_license_with_mr(name)
-            expand_license_report unless license_report_expanded?
-            approve_license(name)
-          end
-
-          def deny_license_with_mr(name)
-            expand_license_report unless license_report_expanded?
-            deny_license(name)
-          end
-
           def expand_vulnerability_report
             within_element :vulnerability_report_grouped do
               click_element :expand_report_button unless has_content? 'Collapse'
@@ -136,7 +128,7 @@ module QA
             end
 
             wait_until(reload: false) do
-              find_element(:vulnerability_modal_content)[:class].include? 'show'
+              find_element(:vulnerability_modal_content)
             end
           end
 
@@ -189,19 +181,19 @@ module QA
           end
 
           def has_sast_vulnerability_count_of?(expected)
-            find_element(:sast_scan_report).has_content?(/SAST detected #{expected}( new)? vulnerabilit/)
+            find_element(:sast_scan_report).has_content?(/SAST detected #{expected}( new)?( potential)? vulnerabilit/)
           end
 
           def has_dependency_vulnerability_count_of?(expected)
-            find_element(:dependency_scan_report).has_content?(/Dependency scanning detected #{expected}( new)? vulnerabilit|Dependency scanning detected .* vulnerabilities out of #{expected}/)
+            find_element(:dependency_scan_report).has_content?(/Dependency scanning detected #{expected}( new)?( potential)? vulnerabilit|Dependency scanning detected .* vulnerabilities out of #{expected}/)
           end
 
           def has_container_vulnerability_count_of?(expected)
-            find_element(:container_scan_report).has_content?(/Container scanning detected #{expected}( new)? vulnerabilit|Container scanning detected .* vulnerabilities out of #{expected}/)
+            find_element(:container_scan_report).has_content?(/Container scanning detected #{expected}( new)?( potential)? vulnerabilit|Container scanning detected .* vulnerabilities out of #{expected}/)
           end
 
           def has_dast_vulnerability_count?
-            find_element(:dast_scan_report).has_content?(/DAST detected \d*( new)? vulnerabilit/)
+            find_element(:dast_scan_report).has_content?(/DAST detected \d*( new)?( potential)? vulnerabilit/)
           end
 
           def has_opened_dismissed_vulnerability?(reason = nil)
@@ -222,7 +214,7 @@ module QA
 
           def skip_merge_train_and_merge_immediately
             click_element :merge_moment_dropdown
-            click_element :merge_immediately_option
+            click_element :merge_immediately_menu_item
 
             # Wait for the warning modal dialog to appear
             wait_for_animated_element :merge_immediately_button
@@ -233,9 +225,12 @@ module QA
           end
 
           def merge_via_merge_train
+            # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+            # To remove page refresh logic if possible
             wait_until_ready_to_merge
+            wait_until { !find_element(:merge_button).has_text?("when pipeline succeeds") }
 
-            click_element(:merge_button, text: "Start merge train")
+            click_element(:merge_button)
 
             finished_loading?
           end

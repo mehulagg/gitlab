@@ -6,6 +6,7 @@ RSpec.describe Issues::BuildService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:guest) { create(:user) }
+
   let(:user) { developer }
 
   before do
@@ -62,10 +63,12 @@ RSpec.describe Issues::BuildService do
       let(:user) { guest }
 
       context 'setting issue type' do
-        it 'cannot set test_case' do
-          issue = build_issue(issue_type: 'test_case')
+        Issues::BuildService::DISABLED_ISSUE_TYPES.each do |type|
+          it "cannot set #{type}" do
+            issue = build_issue(issue_type: type)
 
-          expect(issue).to be_issue
+            expect(issue).to be_issue
+          end
         end
       end
     end

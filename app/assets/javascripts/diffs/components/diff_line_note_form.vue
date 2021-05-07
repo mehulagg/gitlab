@@ -1,22 +1,25 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { s__ } from '~/locale';
 import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { s__ } from '~/locale';
-import noteForm from '../../notes/components/note_form.vue';
 import MultilineCommentForm from '../../notes/components/multiline_comment_form.vue';
-import autosave from '../../notes/mixins/autosave';
-import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
-import { DIFF_NOTE_TYPE } from '../constants';
 import {
   commentLineOptions,
   formatLineRange,
 } from '../../notes/components/multiline_comment_utils';
+import noteForm from '../../notes/components/note_form.vue';
+import autosave from '../../notes/mixins/autosave';
+import {
+  DIFF_NOTE_TYPE,
+  INLINE_DIFF_LINES_KEY,
+  PARALLEL_DIFF_VIEW_TYPE,
+  OLD_LINE_TYPE,
+} from '../constants';
 
 export default {
   components: {
     noteForm,
-    userAvatarLink,
     MultilineCommentForm,
   },
   mixins: [autosave, diffLineNoteFormMixin, glFeatureFlagsMixin()],
@@ -56,11 +59,12 @@ export default {
   },
   computed: {
     ...mapState({
-      noteableData: state => state.notes.noteableData,
-      diffViewType: state => state.diffs.diffViewType,
+      diffViewType: ({ diffs }) => diffs.diffViewType,
+      showSuggestPopover: ({ diffs }) => diffs.showSuggestPopover,
+      noteableData: ({ notes }) => notes.noteableData,
+      selectedCommentPosition: ({ notes }) => notes.selectedCommentPosition,
     }),
-    ...mapState('diffs', ['showSuggestPopover']),
-    ...mapGetters('diffs', ['getDiffFileByHash']),
+    ...mapGetters('diffs', ['getDiffFileByHash', 'diffLines']),
     ...mapGetters([
       'isLoggedIn',
       'noteableType',
@@ -88,17 +92,59 @@ export default {
     commentLineOptions() {
       const combineSides = (acc, { left, right }) => {
         // ignore null values match lines
-        if (left && left.type !== 'match') acc.push(left);
+        if (left) acc.push(left);
         // if the line_codes are identically, return to avoid duplicates
-        if (left?.line_code === right?.line_code) return acc;
+        if (
+          left?.line_code === right?.line_code ||
+          left?.type === 'old-nonewline' ||
+          right?.type === 'new-nonewline'
+        ) {
+          return acc;
+        }
         if (right && right.type !== 'match') acc.push(right);
         return acc;
       };
+      const getDiffLines = () => {
+        if (this.diffViewType === PARALLEL_DIFF_VIEW_TYPE) {
+          return this.diffLines(this.diffFile, this.glFeatures.unifiedDiffComponents).reduce(
+            combineSides,
+            [],
+          );
+        }
+
+        return this.diffFile[INLINE_DIFF_LINES_KEY];
+      };
       const side = this.line.type === 'new' ? 'right' : 'left';
-      const lines = this.diffFile.highlighted_diff_lines.length
-        ? this.diffFile.highlighted_diff_lines
-        : this.diffFile.parallel_diff_lines.reduce(combineSides, []);
+      const lines = getDiffLines();
       return commentLineOptions(lines, this.line, this.line.line_code, side);
+    },
+    commentLines() {
+      if (!this.selectedCommentPosition) return [];
+
+      const lines = [];
+      const { start, end } = this.selectedCommentPosition;
+      const diffLines = this.diffFile[INLINE_DIFF_LINES_KEY];
+      let isAdding = false;
+
+      for (let i = 0, diffLinesLength = diffLines.length - 1; i <= diffLinesLength; i += 1) {
+        const line = diffLines[i];
+
+        if (start.line_code === line.line_code) {
+          isAdding = true;
+        }
+
+        if (isAdding) {
+          if (line.type !== OLD_LINE_TYPE) {
+            lines.push(line);
+          }
+
+          if (end.line_code === line.line_code) {
+            break;
+          }
+        }
+      }
+
+      return lines;
     },
   },
   mounted() {
@@ -111,6 +157,10 @@ export default {
       ];
 
       this.initAutoSave(this.noteableData, keys);
+    }
+
+    if (this.selectedCommentPosition) {
+      this.commentLineStart = this.selectedCommentPosition.start;
     }
   },
   methods: {
@@ -148,26 +198,19 @@ export default {
 
 <template>
   <div class="content discussion-form discussion-form-container discussion-notes">
-    <div v-if="glFeatures.multilineComments" class="gl-mb-3 gl-text-gray-500 gl-pb-3">
+    <div class="gl-mb-3 gl-text-gray-500 gl-pb-3">
       <multiline-comment-form
         v-model="commentLineStart"
         :line="line"
         :comment-line-options="commentLineOptions"
       />
     </div>
-    <user-avatar-link
-      v-if="author"
-      :link-href="author.path"
-      :img-src="author.avatar_url"
-      :img-alt="author.name"
-      :img-size="40"
-      class="d-none d-sm-block"
-    />
     <note-form
       ref="noteForm"
       :is-editing="true"
       :line-code="line.line_code"
       :line="line"
+      :lines="commentLines"
       :help-page-path="helpPagePath"
       :diff-file="diffFile"
       :show-suggest-popover="showSuggestPopover"

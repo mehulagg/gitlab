@@ -4,8 +4,6 @@ require 'digest/md5'
 require 'uri'
 
 module ApplicationHelper
-  include StartupCssHelper
-
   # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-appviews
   # rubocop: disable CodeReuse/ActiveRecord
   # We allow partial to be nil so that collection views can be passed in
@@ -46,7 +44,7 @@ module ApplicationHelper
   #   current_controller?('gitlab/application') # => false
   def current_controller?(*args)
     args.any? do |v|
-      v.to_s.downcase == controller.controller_name || v.to_s.downcase == controller.controller_path
+      Gitlab::Utils.safe_downcase!(v.to_s) == controller.controller_name || Gitlab::Utils.safe_downcase!(v.to_s) == controller.controller_path
     end
   end
 
@@ -61,7 +59,7 @@ module ApplicationHelper
   #   current_action?(:create)        # => false
   #   current_action?(:new, :create)  # => true
   def current_action?(*args)
-    args.any? { |v| v.to_s.downcase == action_name }
+    args.any? { |v| Gitlab::Utils.safe_downcase!(v.to_s) == action_name }
   end
 
   def admin_section?
@@ -74,7 +72,7 @@ module ApplicationHelper
     else
       'Never'
     end
-  rescue
+  rescue StandardError
     'Never'
   end
 
@@ -167,7 +165,7 @@ module ApplicationHelper
     css_classes = [short_format ? 'js-short-timeago' : 'js-timeago']
     css_classes << html_class unless html_class.blank?
 
-    element = content_tag :time, l(time, format: "%b %d, %Y"),
+    content_tag :time, l(time, format: "%b %d, %Y"),
       class: css_classes.join(' '),
       title: l(time.to_time.in_time_zone, format: :timeago_tooltip),
       datetime: time.to_time.getutc.iso8601,
@@ -176,8 +174,6 @@ module ApplicationHelper
         placement: placement,
         container: 'body'
       }
-
-    element
   end
 
   def edited_time_ago_with_tooltip(object, placement: 'top', html_class: 'time_ago', exclude_author: false)
@@ -196,8 +192,14 @@ module ApplicationHelper
     end
   end
 
-  def promo_host
+  # This needs to be used outside of Rails
+  def self.promo_host
     'about.gitlab.com'
+  end
+
+  # Convenient method for Rails helper
+  def promo_host
+    ApplicationHelper.promo_host
   end
 
   def promo_url
@@ -250,11 +252,7 @@ module ApplicationHelper
   end
 
   def stylesheet_link_tag_defer(path)
-    if use_startup_css?
-      stylesheet_link_tag(path, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
-    else
-      stylesheet_link_tag(path, media: "all")
-    end
+    stylesheet_link_tag(path, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
   end
 
   def outdated_browser?
@@ -286,7 +284,8 @@ module ApplicationHelper
 
   def page_class
     class_names = []
-    class_names << 'issue-boards-page' if current_controller?(:boards)
+    class_names << 'issue-boards-page gl-overflow-auto' if current_controller?(:boards)
+    class_names << 'epic-boards-page' if current_controller?(:epic_boards)
     class_names << 'environment-logs-page' if current_controller?(:logs)
     class_names << 'with-performance-bar' if performance_bar_enabled?
     class_names << system_message_class
@@ -361,9 +360,13 @@ module ApplicationHelper
     }
   end
 
-  def add_page_specific_style(path)
+  def add_page_specific_style(path, defer: true)
     content_for :page_specific_styles do
-      stylesheet_link_tag_defer path
+      if defer
+        stylesheet_link_tag_defer path
+      else
+        stylesheet_link_tag path
+      end
     end
   end
 
@@ -379,15 +382,26 @@ module ApplicationHelper
   def autocomplete_data_sources(object, noteable_type)
     return {} unless object && noteable_type
 
-    {
-      members: members_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
-      issues: issues_project_autocomplete_sources_path(object),
-      mergeRequests: merge_requests_project_autocomplete_sources_path(object),
-      labels: labels_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
-      milestones: milestones_project_autocomplete_sources_path(object),
-      commands: commands_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
-      snippets: snippets_project_autocomplete_sources_path(object)
-    }
+    if object.is_a?(Group)
+      {
+        members: members_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
+        issues: issues_group_autocomplete_sources_path(object),
+        mergeRequests: merge_requests_group_autocomplete_sources_path(object),
+        labels: labels_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
+        milestones: milestones_group_autocomplete_sources_path(object),
+        commands: commands_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id])
+      }
+    else
+      {
+        members: members_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
+        issues: issues_project_autocomplete_sources_path(object),
+        mergeRequests: merge_requests_project_autocomplete_sources_path(object),
+        labels: labels_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
+        milestones: milestones_project_autocomplete_sources_path(object),
+        commands: commands_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
+        snippets: snippets_project_autocomplete_sources_path(object)
+      }
+    end
   end
 
   def asset_to_string(name)
@@ -406,4 +420,4 @@ module ApplicationHelper
   end
 end
 
-ApplicationHelper.prepend_if_ee('EE::ApplicationHelper')
+ApplicationHelper.prepend_mod

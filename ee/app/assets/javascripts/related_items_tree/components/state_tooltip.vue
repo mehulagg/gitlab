@@ -1,8 +1,8 @@
 <script>
 import { GlTooltip } from '@gitlab/ui';
 
-import { __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 export default {
@@ -38,7 +38,7 @@ export default {
   },
   computed: {
     stateText() {
-      return this.isOpen ? __('Opened') : __('Closed');
+      return this.isOpen ? __('Created') : __('Closed');
     },
     createdAtInWords() {
       return this.getTimestampInWords(this.createdAt);

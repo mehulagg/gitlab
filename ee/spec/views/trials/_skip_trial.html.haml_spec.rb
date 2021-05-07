@@ -15,7 +15,7 @@ RSpec.describe 'trials/_skip_trial.html.haml' do
   subject { rendered }
 
   shared_examples 'has Skip Trial verbiage' do
-    it { is_expected.to have_content("Skip Trial (Continue with Free Account)") }
+    it { is_expected.to have_content("Skip Trial") }
   end
 
   context 'without glm_source' do

@@ -178,8 +178,8 @@ module EventsHelper
   def event_note_target_url(event)
     if event.commit_note?
       project_commit_url(event.project, event.note_target, anchor: dom_id(event.target))
-    elsif event.project_snippet_note?
-      project_snippet_url(event.project, event.note_target, anchor: dom_id(event.target))
+    elsif event.snippet_note?
+      gitlab_snippet_url(event.note_target, anchor: dom_id(event.target))
     elsif event.issue_note?
       project_issue_url(event.project, id: event.note_target, anchor: dom_id(event.target))
     elsif event.merge_request_note?
@@ -228,7 +228,7 @@ module EventsHelper
   def event_commit_title(message)
     message ||= ''
     (message.split("\n").first || "").truncate(70)
-  rescue
+  rescue StandardError
     "--broken encoding"
   end
 
@@ -256,7 +256,7 @@ module EventsHelper
       end
     else
       content_tag :div, class: 'system-note-image user-avatar' do
-        author_avatar(event, size: 40)
+        author_avatar(event, size: 32)
       end
     end
   end
@@ -273,7 +273,7 @@ module EventsHelper
 
   def event_user_info(event)
     content_tag(:div, class: "event-user-info") do
-      concat content_tag(:span, link_to_author(event), class: "author_name")
+      concat content_tag(:span, link_to_author(event), class: "author-name")
       concat "&nbsp;".html_safe
       concat content_tag(:span, event.author.to_reference, class: "username")
     end

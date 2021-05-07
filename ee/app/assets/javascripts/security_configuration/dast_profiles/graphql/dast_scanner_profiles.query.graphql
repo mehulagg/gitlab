@@ -20,7 +20,7 @@ query DastScannerProfiles(
       edges {
         cursor
         node {
-          id: globalId
+          id
           profileName
           spiderTimeout
           targetTimeout
@@ -28,6 +28,7 @@ query DastScannerProfiles(
           useAjaxSpider
           showDebugMessages
           editPath
+          referencedInSecurityPolicies
         }
       }
     }

@@ -1,0 +1,5 @@
+mutation dastProfileDelete($input: DastProfileDeleteInput!) {
+  dastProfileDelete(input: $input) {
+    errors
+  }
+}

@@ -1,9 +1,14 @@
 <script>
 import { GlTooltipDirective, GlLink } from '@gitlab/ui';
-import ActionComponent from './action_component.vue';
-import JobNameComponent from './job_name_component.vue';
-import { sprintf } from '~/locale';
 import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import { sprintf } from '~/locale';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
+import { reportToSentry } from '../../utils';
+import ActionComponent from '../jobs_shared/action_component.vue';
+import JobNameComponent from '../jobs_shared/job_name_component.vue';
+import { accessValue } from './accessors';
+import { REST, SINGLE_JOB } from './constants';
 
 /**
  * Renders the badge for the pipeline graph and the job's dropdown.
@@ -34,6 +39,7 @@ export default {
   hoverClass: 'gl-shadow-x0-y0-b3-s1-blue-500',
   components: {
     ActionComponent,
+    CiIcon,
     JobNameComponent,
     GlLink,
   },
@@ -41,6 +47,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [delayedJobMixin],
+  inject: {
+    dataMethod: {
+      default: REST,
+    },
+  },
   props: {
     job: {
       type: Object,
@@ -56,6 +67,11 @@ export default {
       required: false,
       default: Infinity,
     },
+    groupTooltip: {
+      type: String,
+      required: false,
+      default: '',
+    },
     jobHovered: {
       type: String,
       required: false,
@@ -66,16 +82,60 @@ export default {
       required: false,
       default: () => ({}),
     },
+    pipelineId: {
+      type: Number,
+      required: false,
+      default: -1,
+    },
+    sourceJobHovered: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    stageName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    type: {
+      type: String,
+      required: false,
+      default: SINGLE_JOB,
+    },
   },
   computed: {
     boundary() {
       return this.dropdownLength === 1 ? 'viewport' : 'scrollParent';
     },
+    computedJobId() {
+      return this.pipelineId > -1 ? `${this.job.name}-${this.pipelineId}` : '';
+    },
+    detailsPath() {
+      return accessValue(this.dataMethod, 'detailsPath', this.status);
+    },
+    hasDetails() {
+      return accessValue(this.dataMethod, 'hasDetails', this.status);
+    },
+    isSingleItem() {
+      return this.type === SINGLE_JOB;
+    },
+    nameComponent() {
+      return this.hasDetails ? 'gl-link' : 'div';
+    },
+    showStageName() {
+      return Boolean(this.stageName);
+    },
     status() {
       return this.job && this.job.status ? this.job.status : {};
     },
-
+    testId() {
+      return this.hasDetails ? 'job-with-link' : 'job-without-link';
+    },
     tooltipText() {
+      if (this.groupTooltip) {
+        return this.groupTooltip;
+      }
+
       const textBuilder = [];
       const { name: jobName } = this.job;
 
@@ -107,7 +167,7 @@ export default {
       return this.job.status && this.job.status.action && this.job.status.action.path;
     },
     relatedDownstreamHovered() {
-      return this.job.name === this.jobHovered;
+      return this.job.name === this.sourceJobHovered;
     },
     relatedDownstreamExpanded() {
       return this.job.name === this.pipelineExpanded.jobName && this.pipelineExpanded.expanded;
@@ -118,7 +178,24 @@ export default {
         : this.cssClassJobName;
     },
   },
+  errorCaptured(err, _vm, info) {
+    reportToSentry('job_item', `error: ${err}, info: ${info}`);
+  },
   methods: {
+    hideTooltips() {
+      this.$root.$emit(BV_HIDE_TOOLTIP);
+    },
+    jobItemClick(evt) {
+      if (this.isSingleItem) {
+        /*
+          This is so the jobDropdown still toggles. Issue to refactor:
+          https://gitlab.com/gitlab-org/gitlab/-/issues/267117 
+        */
+        evt.stopPropagation();
+      }
+
+      this.hideTooltips();
+    },
     pipelineActionRequestComplete() {
       this.$emit('pipelineActionRequestComplete');
     },
@@ -126,36 +203,47 @@ export default {
 };
 </script>
 <template>
-  <div class="ci-job-component" data-qa-selector="job_item_container">
-    <gl-link
-      v-if="status.has_details"
-      v-gl-tooltip="{ boundary, placement: 'bottom' }"
-      :href="status.details_path"
+  <div
+    :id="computedJobId"
+    class="ci-job-component gl-display-flex gl-align-items-center gl-justify-content-space-between gl-w-full"
+    data-qa-selector="job_item_container"
+  >
+    <component
+      :is="nameComponent"
+      v-gl-tooltip="{
+        boundary: 'viewport',
+        placement: 'bottom',
+        customClass: 'gl-pointer-events-none',
+      }"
       :title="tooltipText"
       :class="jobClasses"
-      class="js-pipeline-graph-job-link qa-job-link menu-item"
-      data-testid="job-with-link"
-      @click.stop
+      :href="detailsPath"
+      class="js-pipeline-graph-job-link qa-job-link menu-item gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none gl-w-full"
+      :data-testid="testId"
+      @click="jobItemClick"
+      @mouseout="hideTooltips"
     >
-      <job-name-component :name="job.name" :status="job.status" />
-    </gl-link>
-
-    <div
-      v-else
-      v-gl-tooltip="{ boundary, placement: 'bottom' }"
-      :title="tooltipText"
-      :class="jobClasses"
-      class="js-job-component-tooltip non-details-job-component"
-      data-testid="job-without-link"
-    >
-      <job-name-component :name="job.name" :status="job.status" />
-    </div>
+      <div class="ci-job-name-component gl-display-flex gl-align-items-center">
+        <ci-icon :size="24" :status="job.status" class="gl-line-height-0" />
+        <div class="gl-pl-3 gl-display-flex gl-flex-direction-column gl-w-full">
+          <div class="gl-text-truncate mw-70p gl-line-height-normal">{{ job.name }}</div>
+          <div
+            v-if="showStageName"
+            data-testid="stage-name-in-job"
+            class="gl-text-truncate mw-70p gl-font-sm gl-text-gray-500 gl-line-height-normal"
+          >
+            {{ stageName }}
+          </div>
+        </div>
+      </div>
+    </component>
 
     <action-component
       v-if="hasAction"
       :tooltip-text="status.action.title"
       :link="status.action.path"
       :action-icon="status.action.icon"
+      class="gl-mr-1"
       data-qa-selector="action_button"
       @pipelineActionRequestComplete="pipelineActionRequestComplete"
     />

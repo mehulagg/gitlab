@@ -6,7 +6,7 @@ module Resolvers
 
     argument :tag_name, GraphQL::STRING_TYPE,
             required: true,
-            description: 'The name of the tag associated to the release'
+            description: 'The name of the tag associated to the release.'
 
     alias_method :project, :object
 
@@ -15,8 +15,6 @@ module Resolvers
     end
 
     def resolve(tag_name:)
-      return unless Feature.enabled?(:graphql_release_data, project, default_enabled: true)
-
       ReleasesFinder.new(
         project,
         current_user,

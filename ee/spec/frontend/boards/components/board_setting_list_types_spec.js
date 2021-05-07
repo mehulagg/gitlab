@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAvatarLink, GlAvatarLabeled } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import BoardSettingsListTypes from 'ee_component/boards/components/board_settings_list_types.vue';
 
 describe('BoardSettingsListType', () => {
@@ -9,9 +9,13 @@ describe('BoardSettingsListType', () => {
       webUrl: 'https://gitlab.com/h5bp/html5-boilerplate/-/milestones/1',
       title: 'Backlog',
     },
+    iteration: {
+      webUrl: 'https://gitlab.com/h5bp/-/iterations/1',
+      title: 'Sprint 1',
+    },
     assignee: { webUrl: 'https://gitlab.com/root', name: 'root', username: 'root' },
   };
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(BoardSettingsListTypes, {
       propsData: { ...props, activeList },
     });
@@ -25,13 +29,27 @@ describe('BoardSettingsListType', () => {
     it('renders the correct milestone text', () => {
       createComponent({ activeId: 1, boardListType: 'milestone' });
 
-      expect(wrapper.find('.js-milestone').text()).toBe('Backlog');
+      expect(wrapper.find('.js-list-title').text()).toBe('Backlog');
     });
 
     it('renders the correct list type text', () => {
       createComponent({ activeId: 1, boardListType: 'milestone' });
 
       expect(wrapper.find('.js-list-label').text()).toBe('Milestone');
+    });
+  });
+
+  describe('when list type is "iteration"', () => {
+    it('renders the correct milestone text', () => {
+      createComponent({ activeId: 1, boardListType: 'iteration' });
+
+      expect(wrapper.find('.js-list-title').text()).toBe('Sprint 1');
+    });
+
+    it('renders the correct list type text', () => {
+      createComponent({ activeId: 1, boardListType: 'iteration' });
+
+      expect(wrapper.find('.js-list-label').text()).toBe('Iteration');
     });
   });
 

@@ -158,7 +158,7 @@ module Gitlab
 
         if Service.available_services_names.include?(underscored_service)
           # We treat underscored_service as a trusted input because it is included
-          # in the Service.available_services_names whitelist.
+          # in the Service.available_services_names allowlist.
           service = project.public_send("#{underscored_service}_service") # rubocop:disable GitlabSecurity/PublicSend
 
           if service && service.activated? && service.valid_token?(password)
@@ -196,11 +196,11 @@ module Gitlab
 
         return unless token
 
-        return if project && token.user.project_bot? && !project.bots.include?(token.user)
-
         return unless valid_scoped_token?(token, all_available_scopes)
 
-        if token.user.project_bot? || token.user.can?(:log_in)
+        return if project && token.user.project_bot? && !project.bots.include?(token.user)
+
+        if token.user.can?(:log_in) || token.user.project_bot?
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
@@ -285,7 +285,7 @@ module Gitlab
         return unless build.project.builds_enabled?
 
         if build.user
-          return unless build.user.can?(:log_in)
+          return unless build.user.can?(:log_in) || (build.user.project_bot? && build.project.bots&.include?(build.user))
 
           # If user is assigned to build, use restricted credentials of user
           Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)

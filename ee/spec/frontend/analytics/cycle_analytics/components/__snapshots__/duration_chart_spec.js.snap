@@ -13,7 +13,7 @@ exports[`DurationChart renders the duration chart 1`] = `
    
   <p>
     
-    The total time spent in the selected stage for the items that were completed on each date. Data limited to the last 500 items.
+    The average time spent in the selected stage for the items that were completed on each date. Data limited to the last 500 items.
   
   </p>
    
@@ -25,10 +25,10 @@ exports[`DurationChart renders the duration chart 1`] = `
    
   <scatterplot-stub
     medianlinedata=""
-    scatterdata="2019-01-01,29,2019-01-01,2019-01-02,100,2019-01-02"
+    scatterdata="2019-01-01,14,2019-01-01,2019-01-02,50,2019-01-02"
     tooltipdateformat="mmm d, yyyy"
     xaxistitle="Date"
-    yaxistitle="Total days to completion"
+    yaxistitle="Average days to completion"
   />
 </div>
 `;

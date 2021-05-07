@@ -1,0 +1,11 @@
+query instanceProjects {
+  instanceSecurityDashboard {
+    projects {
+      nodes {
+        id
+        name
+        nameWithNamespace
+      }
+    }
+  }
+}

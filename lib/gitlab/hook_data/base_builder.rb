@@ -21,6 +21,19 @@ module Gitlab
 
       private
 
+      def event_data(event)
+        event_name =  "#{object.class.name.downcase}_#{event}"
+
+        { event_name: event_name }
+      end
+
+      def timestamps_data
+        {
+          created_at: object.created_at&.xmlschema,
+          updated_at: object.updated_at&.xmlschema
+        }
+      end
+
       def absolute_image_urls(markdown_text)
         return markdown_text unless markdown_text.present?
 

@@ -5,12 +5,9 @@ class Projects::ReleasesController < Projects::ApplicationController
   before_action :require_non_empty_project, except: [:index]
   before_action :release, only: %i[edit show update downloads]
   before_action :authorize_read_release!
-  before_action do
-    push_frontend_feature_flag(:graphql_release_data, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_milestone_stats, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_releases_page, project, default_enabled: true)
-    push_frontend_feature_flag(:graphql_individual_release_page, project, default_enabled: true)
-  end
+  # We have to check `download_code` permission because detail URL path
+  # contains git-tag name.
+  before_action :authorize_download_code!, except: [:index]
   before_action :authorize_update_release!, only: %i[edit update]
   before_action :authorize_create_release!, only: :new
 
@@ -54,7 +51,7 @@ class Projects::ReleasesController < Projects::ApplicationController
   end
 
   def sanitized_filepath
-    CGI.unescape(params[:filepath])
+    "/#{CGI.unescape(params[:filepath])}"
   end
 
   def sanitized_tag_name

@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
-require 'rubocop/rspec/support'
 require_relative '../../../../rubocop/cop/api/base'
 
-RSpec.describe RuboCop::Cop::API::Base, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::API::Base do
   subject(:cop) { described_class.new }
 
   let(:corrected) do
@@ -17,7 +13,7 @@ RSpec.describe RuboCop::Cop::API::Base, type: :rubocop do
     CORRECTED
   end
 
-  ['Grape::API', '::Grape::API', 'Grape::API::Instance', '::Grape::API::Instance'].each do |offense|
+  %w[Grape::API ::Grape::API Grape::API::Instance ::Grape::API::Instance].each do |offense|
     it "adds an offense when inheriting from #{offense}" do
       expect_offense(<<~CODE)
         class SomeAPI < #{offense}

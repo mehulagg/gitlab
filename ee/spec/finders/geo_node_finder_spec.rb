@@ -8,6 +8,7 @@ RSpec.describe GeoNodeFinder do
   let_it_be(:geo_node1) { create(:geo_node) }
   let_it_be(:geo_node2) { create(:geo_node) }
   let_it_be(:geo_node3) { create(:geo_node) }
+
   let(:params) { {} }
 
   subject(:geo_nodes) { described_class.new(user, params).execute }

@@ -1,9 +1,11 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
+import 'select2/select2';
 import Api from 'ee/api';
 import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
 import { TYPE_USER, TYPE_GROUP } from 'ee/approvals/constants';
 import { TEST_HOST } from 'helpers/test_constants';
+import waitForPromises from 'helpers/wait_for_promises';
 
 const TEST_PROJECT_ID = '17';
 const TEST_GROUP_AVATAR = `${TEST_HOST}/group-avatar.png`;
@@ -24,13 +26,13 @@ const TEST_USERS = [
 
 const localVue = createLocalVue();
 
-const waitForEvent = ($input, event) => new Promise(resolve => $input.one(event, resolve));
-const parseAvatar = element =>
+const waitForEvent = ($input, event) => new Promise((resolve) => $input.one(event, resolve));
+const parseAvatar = (element) =>
   element.classList.contains('identicon') ? null : element.getAttribute('src');
 const select2Container = () => document.querySelector('.select2-container');
 const select2DropdownOptions = () => document.querySelectorAll('#select2-drop .user-result');
 const select2DropdownItems = () =>
-  Array.prototype.map.call(select2DropdownOptions(), element => {
+  Array.prototype.map.call(select2DropdownOptions(), (element) => {
     const isGroup = element.classList.contains('group-result');
     const avatar = parseAvatar(element.querySelector('.avatar'));
 
@@ -51,18 +53,20 @@ describe('Approvals ApproversSelect', () => {
   let wrapper;
   let $input;
 
-  const factory = (options = {}) => {
+  const factory = async (options = {}) => {
     const propsData = {
       projectId: TEST_PROJECT_ID,
       ...options.propsData,
     };
 
-    wrapper = shallowMount(ApproversSelect, {
+    wrapper = await shallowMount(ApproversSelect, {
       ...options,
       propsData,
       localVue,
-      attachToDocument: true,
+      attachTo: document.body,
     });
+
+    await waitForPromises();
 
     $input = $(wrapper.vm.$refs.input);
   };
@@ -80,16 +84,16 @@ describe('Approvals ApproversSelect', () => {
     wrapper.destroy();
   });
 
-  it('renders select2 input', () => {
+  it('renders select2 input', async () => {
     expect(select2Container()).toBe(null);
 
-    factory();
+    await factory();
 
     expect(select2Container()).not.toBe(null);
   });
 
-  it('queries and displays groups and users', done => {
-    factory();
+  it('queries and displays groups and users', async (done) => {
+    await factory();
 
     const expected = TEST_GROUPS.concat(TEST_USERS)
       .map(({ id, ...obj }) => obj)
@@ -110,8 +114,8 @@ describe('Approvals ApproversSelect', () => {
   describe('with search term', () => {
     const term = 'lorem';
 
-    beforeEach(done => {
-      factory();
+    beforeEach(async (done) => {
+      await factory();
 
       waitForEvent($input, 'select2-loaded')
         .then(jest.runOnlyPendingTimers)
@@ -136,8 +140,8 @@ describe('Approvals ApproversSelect', () => {
     const skipGroupIds = [7, 8];
     const skipUserIds = [9, 10];
 
-    beforeEach(done => {
-      factory({
+    beforeEach(async (done) => {
+      await factory({
         propsData: {
           skipGroupIds,
           skipUserIds,
@@ -166,8 +170,8 @@ describe('Approvals ApproversSelect', () => {
     });
   });
 
-  it('emits input when data changes', done => {
-    factory();
+  it('emits input when data changes', async (done) => {
+    await factory();
 
     const expectedFinal = [
       { ...TEST_USERS[0], type: TYPE_USER },

@@ -1,20 +1,25 @@
+import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import UserCallout from '~/user_callout';
 import Translate from '../vue_shared/translate';
-import GroupFilterableList from './groups_filterable_list';
-import GroupsStore from './store/groups_store';
-import GroupsService from './service/groups_service';
 
 import groupsApp from './components/app.vue';
 import groupFolderComponent from './components/group_folder.vue';
 import groupItemComponent from './components/group_item.vue';
 import { GROUPS_LIST_HOLDER_CLASS, CONTENT_LIST_CLASS } from './constants';
+import GroupFilterableList from './groups_filterable_list';
+import GroupsService from './service/groups_service';
+import GroupsStore from './store/groups_store';
 
 Vue.use(Translate);
 
 export default (containerId = 'js-groups-tree', endpoint, action = '') => {
   const containerEl = document.getElementById(containerId);
   let dataEl;
+
+  // eslint-disable-next-line no-new
+  new UserCallout();
 
   // Don't do anything if element doesn't exist (No groups)
   // This is for when the user enters directly to the page via URL
@@ -28,8 +33,10 @@ export default (containerId = 'js-groups-tree', endpoint, action = '') => {
     dataEl = containerEl.querySelector(CONTENT_LIST_CLASS);
   }
 
-  Vue.component('group-folder', groupFolderComponent);
-  Vue.component('group-item', groupItemComponent);
+  Vue.component('GroupFolder', groupFolderComponent);
+  Vue.component('GroupItem', groupItemComponent);
+
+  Vue.use(GlToast);
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -40,8 +47,9 @@ export default (containerId = 'js-groups-tree', endpoint, action = '') => {
     data() {
       const { dataset } = dataEl || this.$options.el;
       const hideProjects = parseBoolean(dataset.hideProjects);
+      const showSchemaMarkup = parseBoolean(dataset.showSchemaMarkup);
       const service = new GroupsService(endpoint || dataset.endpoint);
-      const store = new GroupsStore(hideProjects);
+      const store = new GroupsStore({ hideProjects, showSchemaMarkup });
 
       return {
         action,

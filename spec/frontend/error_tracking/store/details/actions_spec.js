@@ -1,9 +1,9 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import * as actions from '~/error_tracking/store/details/actions';
 import * as types from '~/error_tracking/store/details/mutation_types';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
 
 let mockedAdapter;
@@ -28,7 +28,7 @@ describe('Sentry error details store actions', () => {
 
   describe('startPollingStacktrace', () => {
     const endpoint = '123/stacktrace';
-    it('should commit SET_ERROR with received response', done => {
+    it('should commit SET_ERROR with received response', (done) => {
       const payload = { error: [1, 2, 3] };
       mockedAdapter.onGet().reply(200, payload);
       testAction(
@@ -46,7 +46,7 @@ describe('Sentry error details store actions', () => {
       );
     });
 
-    it('should show flash on API error', done => {
+    it('should show flash on API error', (done) => {
       mockedAdapter.onGet().reply(400);
 
       testAction(
@@ -62,7 +62,7 @@ describe('Sentry error details store actions', () => {
       );
     });
 
-    it('should not restart polling when receiving an empty 204 response', done => {
+    it('should not restart polling when receiving an empty 204 response', (done) => {
       mockedRestart = jest.spyOn(Poll.prototype, 'restart');
       mockedAdapter.onGet().reply(204);
 

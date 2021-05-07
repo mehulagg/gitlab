@@ -24,7 +24,7 @@ module Geo
     def execute
       destroy_project
       destroy_registry_entries
-    rescue => e
+    rescue StandardError => e
       log_error('Could not destroy repository', e, project_id: id, shard: repository_storage, disk_path: disk_path)
       destroy_registry_entries
       raise

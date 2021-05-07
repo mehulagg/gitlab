@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import Vue from 'vue';
-import Translate from '~/vue_shared/translate';
 import { highCountTrim } from '~/lib/utils/text_utility';
 import Tracking from '~/tracking';
+import Translate from '~/vue_shared/translate';
 
 /**
  * Updates todo counter when todos are toggled.
@@ -40,20 +40,38 @@ function initStatusTriggers() {
           new Vue({
             el: statusModalElement,
             data() {
-              const { currentEmoji, currentMessage } = setStatusModalWrapperEl.dataset;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                currentClearStatusAfter,
+              } = setStatusModalWrapperEl.dataset;
 
               return {
                 currentEmoji,
+                defaultEmoji,
                 currentMessage,
+                currentAvailability,
+                currentClearStatusAfter,
               };
             },
             render(createElement) {
-              const { currentEmoji, currentMessage } = this;
+              const {
+                currentEmoji,
+                defaultEmoji,
+                currentMessage,
+                currentAvailability,
+                currentClearStatusAfter,
+              } = this;
 
               return createElement(SetStatusModalWrapper, {
                 props: {
                   currentEmoji,
+                  defaultEmoji,
                   currentMessage,
+                  currentAvailability,
+                  currentClearStatusAfter,
                 },
               });
             },
@@ -88,7 +106,5 @@ export function initNavUserDropdownTracking() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  requestIdleCallback(initStatusTriggers);
-  requestIdleCallback(initNavUserDropdownTracking);
-});
+requestIdleCallback(initStatusTriggers);
+requestIdleCallback(initNavUserDropdownTracking);

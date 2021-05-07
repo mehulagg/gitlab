@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitaly/-/issues/3143', type: :bug } do
+  RSpec.describe 'Create' do
     describe 'Version control for personal snippets' do
       let(:new_file) { 'new_snippet_file' }
       let(:changed_content) { 'changes' }
       let(:commit_message) { 'Changes to snippets' }
       let(:added_content) { 'updated ' }
-      let(:branch_name) { 'master' }
 
       let(:snippet) do
         Resource::Snippet.fabricate! do |snippet|
@@ -40,8 +39,8 @@ module QA
         ssh_key.remove_via_api!
       end
 
-      it 'clones, pushes, and pulls a snippet over HTTP, edits via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/826' do
-        Resource::Repository::Push.fabricate! do |push|
+      it 'clones, pushes, and pulls a snippet over HTTP, edits via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1748' do
+        push = Resource::Repository::Push.fabricate! do |push|
           push.repository_http_uri = repository_uri_http
           push.file_name = new_file
           push.file_content = changed_content
@@ -61,16 +60,18 @@ module QA
 
         Git::Repository.perform do |repository|
           repository.init_repository
-          repository.pull(repository_uri_http, branch_name)
+          repository.pull(repository_uri_http, push.branch_name)
 
           expect(repository.commits.size).to eq(3)
           expect(repository.commits.first).to include('Update snippet')
           expect(repository.file_content(new_file)).to include("#{added_content}#{changed_content}")
         end
+
+        snippet.remove_via_api!
       end
 
-      it 'clones, pushes, and pulls a snippet over SSH, deletes via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/825' do
-        Resource::Repository::Push.fabricate! do |push|
+      it 'clones, pushes, and pulls a snippet over SSH, deletes via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1747' do
+        push = Resource::Repository::Push.fabricate! do |push|
           push.repository_ssh_uri = repository_uri_ssh
           push.ssh_key = ssh_key
           push.file_name = new_file
@@ -90,7 +91,7 @@ module QA
           repository.use_ssh_key(ssh_key)
           repository.init_repository
 
-          expect { repository.pull(repository_uri_ssh, branch_name) }
+          expect { repository.pull(repository_uri_ssh, push.branch_name) }
             .to raise_error(QA::Support::Run::CommandError, /fatal: Could not read from remote repository\./)
         end
       end

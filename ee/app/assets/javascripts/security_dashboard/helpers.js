@@ -1,51 +1,78 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { ALL, BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
+import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
+import { DEFAULT_SCANNER } from './constants';
 
-const parseOptions = obj =>
+const parseOptions = (obj) =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
 
-export const mapProjects = projects =>
-  projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
+export const mapProjects = (projects) =>
+  projects.map((p) => ({ id: p.id.split('/').pop(), name: p.name }));
 
-export const initFirstClassVulnerabilityFilters = projects => {
-  const filters = [
-    {
-      name: s__('SecurityReports|Status'),
-      id: 'state',
-      options: [
-        { id: ALL, name: s__('VulnerabilityStatusTypes|All') },
-        ...parseOptions(VULNERABILITY_STATES),
-      ],
-      selection: new Set([ALL]),
-    },
-    {
-      name: s__('SecurityReports|Severity'),
-      id: 'severity',
-      options: [BASE_FILTERS.severity, ...parseOptions(SEVERITY_LEVELS)],
-      selection: new Set([ALL]),
-    },
-    {
-      name: s__('Reports|Scanner'),
-      id: 'reportType',
-      options: [BASE_FILTERS.report_type, ...parseOptions(REPORT_TYPES)],
-      selection: new Set([ALL]),
-    },
-  ];
+const stateOptions = parseOptions(VULNERABILITY_STATES);
+const defaultStateOptions = stateOptions.filter((x) => ['DETECTED', 'CONFIRMED'].includes(x.id));
 
-  if (Array.isArray(projects)) {
-    filters.push({
-      name: s__('SecurityReports|Project'),
-      id: 'projectId',
-      options: [BASE_FILTERS.project_id, ...mapProjects(projects)],
-      selection: new Set([ALL]),
-    });
-  }
+export const stateFilter = {
+  name: s__('SecurityReports|Status'),
+  id: 'state',
+  options: stateOptions,
+  allOption: BASE_FILTERS.state,
+  defaultOptions: defaultStateOptions,
+};
 
-  return filters;
+export const severityFilter = {
+  name: s__('SecurityReports|Severity'),
+  id: 'severity',
+  options: parseOptions(SEVERITY_LEVELS),
+  allOption: BASE_FILTERS.severity,
+  defaultOptions: [],
+};
+
+export const createScannerOption = (vendor, reportType) => {
+  const type = reportType.toUpperCase();
+
+  return {
+    id: gon.features?.customSecurityScanners ? `${vendor}.${type}` : type,
+    reportType: reportType.toUpperCase(),
+    name: convertReportType(reportType),
+    scannerIds: [],
+  };
+};
+
+export const scannerFilter = {
+  name: s__('SecurityReports|Scanner'),
+  id: gon.features?.customSecurityScanners ? 'scanner' : 'reportType',
+  options: Object.keys(REPORT_TYPES).map((x) => createScannerOption(DEFAULT_SCANNER, x)),
+  allOption: BASE_FILTERS.report_type,
+  defaultOptions: [],
+};
+
+export const activityOptions = {
+  NO_ACTIVITY: { id: 'NO_ACTIVITY', name: s__('SecurityReports|No activity') },
+  WITH_ISSUES: { id: 'WITH_ISSUES', name: s__('SecurityReports|With issues') },
+  NO_LONGER_DETECTED: { id: 'NO_LONGER_DETECTED', name: s__('SecurityReports|No longer detected') },
+};
+
+export const activityFilter = {
+  name: s__('Reports|Activity'),
+  id: 'activity',
+  options: Object.values(activityOptions),
+  allOption: BASE_FILTERS.activity,
+  defaultOptions: [],
+};
+
+export const getProjectFilter = (projects) => {
+  return {
+    name: s__('SecurityReports|Project'),
+    id: 'projectId',
+    options: mapProjects(projects),
+    allOption: BASE_FILTERS.project_id,
+    defaultOptions: [],
+  };
 };
 
 /**
@@ -92,7 +119,7 @@ export const getFormattedSummary = (rawSummary = {}) => {
     return name ? [name, scanSummary] : null;
   });
   // Filter out keys that could not be matched with any translation and are thus considered invalid
-  return formattedEntries.filter(entry => entry !== null);
+  return formattedEntries.filter((entry) => entry !== null);
 };
 
 /**
@@ -103,10 +130,10 @@ export const getFormattedSummary = (rawSummary = {}) => {
  * @param {Object} pageInfo
  * @returns {Object}
  */
-export const preparePageInfo = pageInfo => {
+export const preparePageInfo = (pageInfo) => {
   return { ...pageInfo, hasNextPage: Boolean(pageInfo?.endCursor) };
 };
 
-export const createProjectLoadingError = () => __('An error occurred while retrieving projects.');
+export const PROJECT_LOADING_ERROR_MESSAGE = __('An error occurred while retrieving projects.');
 
 export default () => ({});

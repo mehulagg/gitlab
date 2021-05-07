@@ -1,14 +1,14 @@
 /* eslint-disable func-names, no-underscore-dangle, consistent-return */
 
 import $ from 'jquery';
-import axios from './lib/utils/axios_utils';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import eventHub from '~/vue_merge_request_widget/event_hub';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import TaskList from './task_list';
-import MergeRequestTabs from './merge_request_tabs';
+import axios from './lib/utils/axios_utils';
 import { addDelimiter } from './lib/utils/text_utility';
 import { getParameterValues, setUrlParams } from './lib/utils/url_utility';
+import MergeRequestTabs from './merge_request_tabs';
+import TaskList from './task_list';
 
 function MergeRequest(opts) {
   // Initialize MergeRequest behavior
@@ -31,7 +31,7 @@ function MergeRequest(opts) {
       fieldName: 'description',
       selector: '.detail-page-description',
       lockVersion: this.$el.data('lockVersion'),
-      onSuccess: result => {
+      onSuccess: (result) => {
         document.querySelector('#task_status').innerText = result.task_status;
         document.querySelector('#task_status_short').innerText = result.task_status_short;
       },
@@ -47,11 +47,11 @@ function MergeRequest(opts) {
 }
 
 // Local jQuery finder
-MergeRequest.prototype.$ = function(selector) {
+MergeRequest.prototype.$ = function (selector) {
   return this.$el.find(selector);
 };
 
-MergeRequest.prototype.initTabs = function() {
+MergeRequest.prototype.initTabs = function () {
   if (window.mrTabs) {
     window.mrTabs.unbindEvents();
   }
@@ -59,18 +59,18 @@ MergeRequest.prototype.initTabs = function() {
   window.mrTabs = new MergeRequestTabs(this.opts);
 };
 
-MergeRequest.prototype.showAllCommits = function() {
+MergeRequest.prototype.showAllCommits = function () {
   this.$('.first-commits').remove();
   return this.$('.all-commits').removeClass('hide');
 };
 
-MergeRequest.prototype.initMRBtnListeners = function() {
+MergeRequest.prototype.initMRBtnListeners = function () {
   const _this = this;
   const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
 
   if (draftToggles.length) {
-    draftToggles.forEach(draftToggle => {
-      draftToggle.addEventListener('click', e => {
+    draftToggles.forEach((draftToggle) => {
+      draftToggle.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
 
@@ -99,17 +99,9 @@ MergeRequest.prototype.initMRBtnListeners = function() {
     });
   }
 
-  return $('.btn-close, .btn-reopen').on('click', function(e) {
+  return $('.btn-close, .btn-reopen').on('click', function (e) {
     const $this = $(this);
     const shouldSubmit = $this.hasClass('btn-comment');
-    if ($this.hasClass('js-btn-issue-action')) {
-      const url = $this.data('endpoint');
-      return axios
-        .put(url)
-        .then(() => window.location.reload())
-        .catch(() => createFlash(__('Something went wrong.')));
-    }
-
     if (shouldSubmit && $this.data('submitted')) {
       return;
     }
@@ -125,7 +117,7 @@ MergeRequest.prototype.initMRBtnListeners = function() {
   });
 };
 
-MergeRequest.prototype.submitNoteForm = function(form, $button) {
+MergeRequest.prototype.submitNoteForm = function (form, $button) {
   const noteText = form.find('textarea.js-note-text').val();
   if (noteText.trim().length > 0) {
     form.submit();
@@ -134,8 +126,8 @@ MergeRequest.prototype.submitNoteForm = function(form, $button) {
   }
 };
 
-MergeRequest.prototype.initCommitMessageListeners = function() {
-  $(document).on('click', 'a.js-with-description-link', e => {
+MergeRequest.prototype.initCommitMessageListeners = function () {
+  $(document).on('click', 'a.js-with-description-link', (e) => {
     const textarea = $('textarea.js-commit-message');
     e.preventDefault();
 
@@ -144,7 +136,7 @@ MergeRequest.prototype.initCommitMessageListeners = function() {
     $('.js-without-description-hint').show();
   });
 
-  $(document).on('click', 'a.js-without-description-link', e => {
+  $(document).on('click', 'a.js-without-description-link', (e) => {
     const textarea = $('textarea.js-commit-message');
     e.preventDefault();
 
@@ -154,7 +146,7 @@ MergeRequest.prototype.initCommitMessageListeners = function() {
   });
 };
 
-MergeRequest.setStatusBoxToMerged = function() {
+MergeRequest.setStatusBoxToMerged = function () {
   $('.detail-page-header .status-box')
     .removeClass('status-box-open')
     .addClass('status-box-mr-merged')
@@ -162,24 +154,20 @@ MergeRequest.setStatusBoxToMerged = function() {
     .text(__('Merged'));
 };
 
-MergeRequest.decreaseCounter = function(by = 1) {
+MergeRequest.decreaseCounter = function (by = 1) {
   const $el = $('.js-merge-counter');
   const count = Math.max(parseInt($el.text().replace(/[^\d]/, ''), 10) - by, 0);
 
   $el.text(addDelimiter(count));
 };
 
-MergeRequest.hideCloseButton = function() {
+MergeRequest.hideCloseButton = function () {
   const el = document.querySelector('.merge-request .js-issuable-actions');
-  const closeDropdownItem = el.querySelector('li.close-item');
-  if (closeDropdownItem) {
-    closeDropdownItem.classList.add('hidden');
-  }
   // Dropdown for mobile screen
   el.querySelector('li.js-close-item').classList.add('hidden');
 };
 
-MergeRequest.toggleDraftStatus = function(title, isReady) {
+MergeRequest.toggleDraftStatus = function (title, isReady) {
   if (isReady) {
     createFlash(__('The merge request can now be merged.'), 'notice');
   }
@@ -192,7 +180,7 @@ MergeRequest.toggleDraftStatus = function(title, isReady) {
   const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
 
   if (draftToggles.length) {
-    draftToggles.forEach(el => {
+    draftToggles.forEach((el) => {
       const draftToggle = el;
       const url = setUrlParams(
         { 'merge_request[wip_event]': isReady ? 'wip' : 'unwip' },

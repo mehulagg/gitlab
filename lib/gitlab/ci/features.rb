@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.instance_variables_ui_enabled?
-        ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
-      end
-
       def self.pipeline_latest?
         ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
       end
@@ -32,18 +28,10 @@ module Gitlab
       end
 
       # NOTE: The feature flag `disallow_to_create_merge_request_pipelines_in_target_project`
-      # is a safe switch to disable the feature for a parituclar project when something went wrong,
+      # is a safe switch to disable the feature for a particular project when something went wrong,
       # therefore it's not supposed to be enabled by default.
       def self.disallow_to_create_merge_request_pipelines_in_target_project?(target_project)
         ::Feature.enabled?(:ci_disallow_to_create_merge_request_pipelines_in_target_project, target_project)
-      end
-
-      def self.lint_creates_pipeline_with_dry_run?(project)
-        ::Feature.enabled?(:ci_lint_creates_pipeline_with_dry_run, project, default_enabled: true)
-      end
-
-      def self.project_transactionless_destroy?(project)
-        Feature.enabled?(:project_transactionless_destroy, project, default_enabled: false)
       end
 
       def self.trace_overwrite?
@@ -59,8 +47,17 @@ module Gitlab
         ::Feature.enabled?(:ci_trace_log_invalid_chunks, project, type: :ops, default_enabled: false)
       end
 
-      def self.manual_bridges_enabled?(project)
-        ::Feature.enabled?(:ci_manual_bridges, project, default_enabled: true)
+      def self.validate_build_dependencies?(project)
+        ::Feature.enabled?(:ci_validate_build_dependencies, project, default_enabled: :yaml) &&
+          ::Feature.disabled?(:ci_validate_build_dependencies_override, project)
+      end
+
+      def self.display_quality_on_mr_diff?(project)
+        ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: false)
+      end
+
+      def self.gldropdown_tags_enabled?
+        ::Feature.enabled?(:gldropdown_tags, default_enabled: :yaml)
       end
     end
   end

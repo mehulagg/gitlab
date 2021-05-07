@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
-# Repository submodules API
+# Repository submodules API **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41213) in GitLab 11.5
 
@@ -26,7 +26,7 @@ PUT /projects/:id/repository/submodules/:submodule
 | `submodule` | string | yes | URL-encoded full path to the submodule. For example, `lib%2Fclass%2Erb` |
 | `branch` | string | yes | Name of the branch to commit into |
 | `commit_sha` | string | yes | Full commit SHA to update the submodule to |
-| `commit_message` | string | no | Commit message. If no message is provided, a default one will be set |
+| `commit_message` | string | no | Commit message. If no message is provided, a default is set |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/submodules/lib%2Fmodules%2Fexample" \

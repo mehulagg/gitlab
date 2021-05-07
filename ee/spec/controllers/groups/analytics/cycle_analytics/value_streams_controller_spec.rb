@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { { group_id: group } }
 
   before do
@@ -46,7 +47,7 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
           post :create, params: { group_id: group, value_stream: { name: "busy value stream" } }
         end.to change { Analytics::CycleAnalytics::GroupValueStream.count }.by(1)
 
-        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to have_gitlab_http_status(:created)
       end
     end
 
@@ -58,6 +59,116 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response["message"]).to eq('Invalid parameters')
+      end
+    end
+
+    context 'with stages' do
+      let(:value_stream_params) do
+        {
+          name: 'test',
+          stages: [
+            {
+              name: 'My Stage',
+              start_event_identifier: 'issue_created',
+              end_event_identifier: 'issue_closed',
+              custom: true
+            }
+          ]
+        }
+      end
+
+      it 'persists the value stream with stages' do
+        post :create, params: { group_id: group, value_stream: value_stream_params }
+
+        expect(response).to have_gitlab_http_status(:created)
+        stage_response = json_response['stages'].first
+        expect(stage_response['title']).to eq('My Stage')
+      end
+
+      context 'when invalid stage is given' do
+        before do
+          value_stream_params[:stages].first[:name] = ''
+        end
+
+        it 'renders errors with unprocessable entity, 422 response' do
+          post :create, params: { group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+          stage_errors = json_response['payload']['errors']['stages']['0']
+          expect(stage_errors).to be_present
+        end
+      end
+    end
+  end
+
+  describe 'PUT #update' do
+    context 'with valid params' do
+      let!(:value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'value stream') }
+
+      it 'returns a successful 200 response' do
+        put :update, params: { id: value_stream.id, group_id: group, value_stream: { name: 'new name' } }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['name']).to eq('new name')
+      end
+
+      context 'when updating value stream with in-memory stages' do
+        let(:value_stream_params) do
+          {
+            name: 'updated name',
+            stages: [
+              {
+                id: 'issue', # in memory stage
+                name: 'issue',
+                custom: false
+              }
+            ]
+          }
+        end
+
+        it 'returns a successful 200 response' do
+          put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['name']).to eq('updated name')
+        end
+      end
+
+      context 'with stages' do
+        let!(:stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream, name: 'stage 1', custom: true) }
+
+        let(:value_stream_params) do
+          {
+            name: 'updated name',
+            stages: [
+              {
+                id: stage.id,
+                name: 'updated stage name',
+                custom: true
+              }
+            ]
+          }
+        end
+
+        it 'returns a successful 200 response' do
+          put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['name']).to eq('updated name')
+          expect(json_response['id']).to eq(value_stream.id)
+          expect(json_response['stages'].first['title']).to eq('updated stage name')
+        end
+
+        context 'when deleting the stage by excluding it from the stages array' do
+          let(:value_stream_params) { { name: 'no stages', stages: [] } }
+
+          it 'returns a successful 200 response' do
+            put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['stages']).to be_empty
+          end
+        end
       end
     end
   end

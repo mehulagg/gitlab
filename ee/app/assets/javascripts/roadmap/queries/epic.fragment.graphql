@@ -9,6 +9,7 @@ fragment BaseEpic on Epic {
   dueDate
   hasChildren
   hasParent
+  confidential
   descendantWeightSum {
     closedIssues
     openedIssues
@@ -18,6 +19,7 @@ fragment BaseEpic on Epic {
     closedEpics
   }
   group {
+    id
     name
     fullName
     fullPath

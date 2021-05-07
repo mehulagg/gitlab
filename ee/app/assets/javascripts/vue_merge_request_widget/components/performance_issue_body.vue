@@ -51,9 +51,7 @@ export default {
       <template v-else>
         {{ issue.name }}
       </template>
-      <template v-if="issueDelta">
-        ({{ issueDelta }})
-      </template>
+      <template v-if="issueDelta"> ({{ issueDelta }}) </template>
     </div>
 
     <report-link v-if="issue.path" :issue="issue" />

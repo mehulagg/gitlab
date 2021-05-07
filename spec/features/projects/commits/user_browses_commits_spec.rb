@@ -20,9 +20,14 @@ RSpec.describe 'User browses commits' do
       .and have_content('Side-by-side')
   end
 
-  it 'fill commit sha when click new tag from commit page' do
+  it 'fill commit sha when click new tag from commit page', :js do
+    dropdown_selector = '[data-testid="commit-options-dropdown"]'
     visit project_commit_path(project, sample_commit.id)
-    click_link 'Tag'
+    find(dropdown_selector).click
+
+    page.within(dropdown_selector) do
+      click_link 'Tag'
+    end
 
     expect(page).to have_selector("input[value='#{sample_commit.id}']", visible: false)
   end
@@ -203,10 +208,11 @@ RSpec.describe 'User browses commits' do
 
       context 'when click the compare tab' do
         before do
+          wait_for_requests
           click_link('Compare')
         end
 
-        it 'does not render create merge request button' do
+        it 'does not render create merge request button', :js do
           expect(page).not_to have_link 'Create merge request'
         end
       end
@@ -236,10 +242,11 @@ RSpec.describe 'User browses commits' do
 
         context 'when click the compare tab' do
           before do
+            wait_for_requests
             click_link('Compare')
           end
 
-          it 'renders create merge request button' do
+          it 'renders create merge request button', :js do
             expect(page).to have_link 'Create merge request'
           end
         end
@@ -276,10 +283,11 @@ RSpec.describe 'User browses commits' do
 
         context 'when click the compare tab' do
           before do
+            wait_for_requests
             click_link('Compare')
           end
 
-          it 'renders button to the merge request' do
+          it 'renders button to the merge request', :js do
             expect(page).not_to have_link 'Create merge request'
             expect(page).to have_link 'View open merge request', href: project_merge_request_path(project, merge_request)
           end

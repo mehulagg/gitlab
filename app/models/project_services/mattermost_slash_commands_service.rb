@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MattermostSlashCommandsService < SlashCommandsService
-  include TriggersHelper
+  include Ci::TriggersHelper
 
   prop_accessor :token
 
@@ -14,7 +14,7 @@ class MattermostSlashCommandsService < SlashCommandsService
   end
 
   def description
-    "Perform common operations in Mattermost"
+    "Perform common tasks with slash commands."
   end
 
   def self.to_param

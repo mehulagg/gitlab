@@ -1,9 +1,9 @@
 import API from 'ee/api';
-import * as types from './mutation_types';
-import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import * as types from './mutation_types';
 
 export const setProjectId = ({ commit }, projectId) => commit(types.SET_PROJECT_ID, projectId);
 
@@ -29,7 +29,7 @@ export const fetchMergeRequests = ({ commit, state, rootState }) => {
   };
 
   return API.codeReviewAnalytics(params)
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       const normalizedHeaders = normalizeHeaders(headers);
       commit(types.RECEIVE_MERGE_REQUESTS_SUCCESS, {
@@ -40,7 +40,9 @@ export const fetchMergeRequests = ({ commit, state, rootState }) => {
     .catch(({ response }) => {
       const { status } = response;
       commit(types.RECEIVE_MERGE_REQUESTS_ERROR, status);
-      createFlash(__('An error occurred while loading merge requests.'));
+      createFlash({
+        message: __('An error occurred while loading merge requests.'),
+      });
     });
 };
 

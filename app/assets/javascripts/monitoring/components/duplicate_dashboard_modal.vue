@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
 import { GlAlert, GlLoadingIcon, GlModal } from '@gitlab/ui';
+import { mapActions, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
 import DuplicateDashboardForm from './duplicate_dashboard_form.vue';
 
@@ -42,7 +42,7 @@ export default {
       this.loading = true;
       this.alert = null;
       this.duplicateSystemDashboard(this.form)
-        .then(createdDashboard => {
+        .then((createdDashboard) => {
           this.loading = false;
           this.alert = null;
 
@@ -55,7 +55,7 @@ export default {
             this.form.branch === this.defaultBranch ? createdDashboard : this.selectedDashboard;
           this.$emit(events.dashboardDuplicated, dashboard);
         })
-        .catch(error => {
+        .catch((error) => {
           this.loading = false;
           this.alert = error;
         });

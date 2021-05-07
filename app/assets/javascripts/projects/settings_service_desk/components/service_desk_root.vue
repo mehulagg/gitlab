@@ -1,102 +1,65 @@
 <script>
 import { GlAlert } from '@gitlab/ui';
+import axios from '~/lib/utils/axios_utils';
 import { __, sprintf } from '~/locale';
 import ServiceDeskSetting from './service_desk_setting.vue';
-import ServiceDeskService from '../services/service_desk_service';
-import eventHub from '../event_hub';
 
 export default {
-  name: 'ServiceDeskRoot',
   components: {
     GlAlert,
     ServiceDeskSetting,
   },
-  props: {
+  inject: {
     initialIsEnabled: {
-      type: Boolean,
-      required: true,
+      default: false,
     },
     endpoint: {
-      type: String,
-      required: true,
-    },
-    initialIncomingEmail: {
-      type: String,
-      required: false,
       default: '',
     },
+    initialIncomingEmail: {
+      default: '',
+    },
+    customEmail: {
+      default: '',
+    },
+    customEmailEnabled: {
+      default: false,
+    },
     selectedTemplate: {
-      type: String,
-      required: false,
       default: '',
     },
     outgoingName: {
-      type: String,
-      required: false,
       default: '',
     },
     projectKey: {
-      type: String,
-      required: false,
       default: '',
     },
     templates: {
-      type: Array,
-      required: false,
-      default: () => [],
+      default: [],
     },
   },
-
   data() {
     return {
       isEnabled: this.initialIsEnabled,
-      incomingEmail: this.initialIncomingEmail,
       isTemplateSaving: false,
       isAlertShowing: false,
       alertVariant: 'danger',
       alertMessage: '',
+      incomingEmail: this.initialIncomingEmail,
+      updatedCustomEmail: this.customEmail,
     };
   },
-
-  created() {
-    eventHub.$on('serviceDeskEnabledCheckboxToggled', this.onEnableToggled);
-    eventHub.$on('serviceDeskTemplateSave', this.onSaveTemplate);
-
-    this.service = new ServiceDeskService(this.endpoint);
-
-    if (this.isEnabled && !this.incomingEmail) {
-      this.fetchIncomingEmail();
-    }
-  },
-
-  beforeDestroy() {
-    eventHub.$off('serviceDeskEnabledCheckboxToggled', this.onEnableToggled);
-    eventHub.$off('serviceDeskTemplateSave', this.onSaveTemplate);
-  },
-
   methods: {
-    fetchIncomingEmail() {
-      this.service
-        .fetchIncomingEmail()
-        .then(({ data }) => {
-          const email = data.service_desk_address;
-          if (!email) {
-            throw new Error(__("Response didn't include `service_desk_address`"));
-          }
-
-          this.incomingEmail = email;
-        })
-        .catch(() =>
-          this.showAlert(__('An error occurred while fetching the Service Desk address.')),
-        );
-    },
-
     onEnableToggled(isChecked) {
       this.isEnabled = isChecked;
       this.incomingEmail = '';
 
-      this.service
-        .toggleServiceDesk(isChecked)
+      const body = {
+        service_desk_enabled: isChecked,
+      };
+
+      return axios
+        .put(this.endpoint, body)
         .then(({ data }) => {
           const email = data.service_desk_address;
           if (isChecked && !email) {
@@ -116,15 +79,23 @@ export default {
 
     onSaveTemplate({ selectedTemplate, outgoingName, projectKey }) {
       this.isTemplateSaving = true;
-      this.service
-        .updateTemplate({ selectedTemplate, outgoingName, projectKey }, this.isEnabled)
+
+      const body = {
+        issue_template_key: selectedTemplate,
+        outgoing_name: outgoingName,
+        project_key: projectKey,
+        service_desk_enabled: this.isEnabled,
+      };
+
+      return axios
+        .put(this.endpoint, body)
         .then(({ data }) => {
-          this.incomingEmail = data?.service_desk_address;
-          this.showAlert(__('Changes were successfully made.'), 'success');
+          this.updatedCustomEmail = data?.service_desk_address;
+          this.showAlert(__('Changes saved.'), 'success');
         })
-        .catch(err => {
+        .catch((err) => {
           this.showAlert(
-            sprintf(__('An error occured while making the changes: %{error}'), {
+            sprintf(__('An error occurred while saving changes: %{error}'), {
               error: err?.response?.data?.message,
             }),
           );
@@ -155,11 +126,15 @@ export default {
     <service-desk-setting
       :is-enabled="isEnabled"
       :incoming-email="incomingEmail"
+      :custom-email="updatedCustomEmail"
+      :custom-email-enabled="customEmailEnabled"
       :initial-selected-template="selectedTemplate"
       :initial-outgoing-name="outgoingName"
       :initial-project-key="projectKey"
       :templates="templates"
       :is-template-saving="isTemplateSaving"
+      @save="onSaveTemplate"
+      @toggle="onEnableToggled"
     />
   </div>
 </template>

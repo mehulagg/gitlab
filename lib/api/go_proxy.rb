@@ -4,6 +4,8 @@ module API
     helpers Gitlab::Golang
     helpers ::API::Helpers::PackagesHelpers
 
+    feature_category :package_registry
+
     # basic semver, except case encoded (A => !a)
     MODULE_VERSION_REGEX = /v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([-.!a-z0-9]+))?(?:\+([-.!a-z0-9]+))?/.freeze
 
@@ -28,25 +30,11 @@ module API
         str.gsub(/![[:alpha:]]/) { |s| s[1..].upcase }
       end
 
-      def find_project!(id)
-        # based on API::Helpers::Packages::BasicAuthHelpers#authorized_project_find!
-
-        project = find_project(id)
-
-        return project if project && can?(current_user, :read_project, project)
-
-        if current_user
-          not_found!('Project')
-        else
-          unauthorized!
-        end
-      end
-
       def find_module
         not_found! unless Feature.enabled?(:go_proxy, user_project)
 
         module_name = case_decode params[:module_name]
-        bad_request!('Module Name') if module_name.blank?
+        bad_request_missing_attribute!('Module Name') if module_name.blank?
 
         mod = ::Packages::Go::ModuleFinder.new(user_project, module_name).execute
 
@@ -72,7 +60,7 @@ module API
       requires :id, type: String, desc: 'The ID of a project'
       requires :module_name, type: String, desc: 'Module name', coerce_with: ->(val) { CGI.unescape(val) }
     end
-    route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true
+    route_setting :authentication, job_token_allowed: true, basic_auth_personal_access_token: true, authenticate_non_public: true
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       before do
         authorize_read_package!

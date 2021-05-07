@@ -62,5 +62,19 @@ RSpec.describe BuildFinishedWorker do
 
       subject
     end
+
+    context 'when token revocation is disabled' do
+      before do
+        allow_next_instance_of(described_class) do |build_finished_worker|
+          allow(build_finished_worker).to receive(:revoke_secret_detection_token?) { false }
+        end
+      end
+
+      it 'does not scan security reports for token revocation' do
+        expect(ScanSecurityReportSecretsWorker).not_to receive(:perform_async)
+
+        subject
+      end
+    end
   end
 end

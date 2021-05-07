@@ -1,15 +1,15 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-CAUTION: **Caution:**
+WARNING:
 This runbook is in **alpha**. For complete, production-ready documentation, see the
 [disaster recovery documentation](../index.md).
 
-# Disaster Recovery (Geo) promotion runbooks **(PREMIUM ONLY)**
+# Disaster Recovery (Geo) promotion runbooks **(PREMIUM SELF)**
 
 ## Geo planned failover for a single-node configuration
 
@@ -46,7 +46,7 @@ What is not covered:
 
 ### Preparation
 
-NOTE: **Note:**
+NOTE:
 Before following any of those steps, make sure you have `root` access to the
 **secondary** to promote it, since there isn't provided an automated way to
 promote a Geo replica and perform a failover.
@@ -122,7 +122,7 @@ follow these steps to avoid unnecessary data loss:
 
 1. Finish replicating and verifying all data:
 
-   CAUTION: **Caution:**
+   WARNING:
    Not all data is automatically replicated. Read more about
    [what is excluded](../planned_failover.md#not-all-data-is-automatically-replicated).
 
@@ -151,12 +151,12 @@ follow these steps to avoid unnecessary data loss:
 
 1. In this final step, you need to permanently disable the **primary** node.
 
-   CAUTION: **Caution:**
+   WARNING:
    When the **primary** node goes offline, there may be data saved on the **primary** node
    that has not been replicated to the **secondary** node. This data should be treated
    as lost if you proceed.
 
-   TIP: **Tip:**
+   NOTE:
    If you plan to [update the **primary** domain DNS record](../index.md#step-4-optional-updating-the-primary-domain-dns-record),
    you may wish to lower the TTL now to speed up propagation.
 
@@ -176,12 +176,12 @@ follow these steps to avoid unnecessary data loss:
      sudo systemctl disable gitlab-runsvdir
      ```
 
-     NOTE: **Note:**
+     NOTE:
      (**CentOS only**) In CentOS 6 or older, there is no easy way to prevent GitLab from being
      started if the machine reboots isn't available (see [Omnibus GitLab issue #3058](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3058)).
      It may be safest to uninstall the GitLab package completely with `sudo yum remove gitlab-ee`.
 
-     NOTE: **Note:**
+     NOTE:
      (**Ubuntu 14.04 LTS**) If you are using an older version of Ubuntu
      or any other distribution based on the Upstart init system, you can prevent GitLab
      from starting if the machine reboots as `root` with
@@ -233,11 +233,24 @@ To promote the secondary node:
    check if replication and verification are complete before scheduling a planned
    failover to ensure the process will go smoothly:
 
+   NOTE:
+   In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+   this command reports `ERROR - Replication is not up-to-date` even if
+   replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
+   later.
+
    ```shell
    gitlab-ctl promotion-preflight-checks
    ```
 
 1. Promote the **secondary**:
+
+   NOTE:
+   In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+   this command reports `ERROR - Replication is not up-to-date` even if
+   replication is actually up-to-date. If replication and verification output
+   shows that it is complete, you can add `--skip-preflight-checks` to make the
+   command complete promotion. This bug was fixed in GitLab 13.8 and later.
 
    ```shell
    gitlab-ctl promote-to-primary-node

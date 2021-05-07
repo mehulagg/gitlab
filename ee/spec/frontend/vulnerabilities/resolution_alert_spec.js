@@ -1,11 +1,11 @@
-import Cookies from 'js-cookie';
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Cookies from 'js-cookie';
 import ResolutionAlert, { COOKIE_NAME } from 'ee/vulnerabilities/components/resolution_alert.vue';
 
 describe('Vulnerability list component', () => {
   let wrapper;
-  const defaultBranchName = 'not-always-master';
+  const defaultBranchName = 'not-always-main';
   const vulnerabilityId = 61;
 
   const createWrapper = (options = {}) => {

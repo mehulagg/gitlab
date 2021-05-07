@@ -1,8 +1,8 @@
 <script>
 /* eslint-disable vue/no-v-html */
+import { GlLoadingIcon, GlFormInput, GlFormGroup, GlButton } from '@gitlab/ui';
 import { escape, debounce } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { GlLoadingIcon, GlFormInput, GlFormGroup, GlButton } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
 import createEmptyBadge from '../empty_badge';
@@ -48,10 +48,10 @@ export default {
     },
     helpText() {
       const placeholders = ['project_path', 'project_id', 'default_branch', 'commit_sha']
-        .map(placeholder => `<code>%{${placeholder}}</code>`)
+        .map((placeholder) => `<code>%{${placeholder}}</code>`)
         .join(', ');
       return sprintf(
-        s__('Badges|The %{docsLinkStart}variables%{docsLinkEnd} GitLab supports: %{placeholders}'),
+        s__('Badges|Supported %{docsLinkStart}variables%{docsLinkEnd}: %{placeholders}'),
         {
           docsLinkEnd: '</a>',
           docsLinkStart: `<a href="${escape(this.docsUrl)}">`,
@@ -105,13 +105,13 @@ export default {
     badgeImageUrlExample() {
       const exampleUrl =
         'https://example.gitlab.com/%{project_path}/badges/%{default_branch}/pipeline.svg';
-      return sprintf(s__('Badges|e.g. %{exampleUrl}'), {
+      return sprintf(s__('Badges|Example: %{exampleUrl}'), {
         exampleUrl,
       });
     },
     badgeLinkUrlExample() {
       const exampleUrl = 'https://example.gitlab.com/%{project_path}';
-      return sprintf(s__('Badges|e.g. %{exampleUrl}'), {
+      return sprintf(s__('Badges|Example: %{exampleUrl}'), {
         exampleUrl,
       });
     },
@@ -134,10 +134,10 @@ export default {
       if (this.isEditing) {
         return this.saveBadge()
           .then(() => {
-            createFlash(s__('Badges|The badge was saved.'), 'notice');
+            createFlash(s__('Badges|Badge saved.'), 'notice');
             this.wasValidated = false;
           })
-          .catch(error => {
+          .catch((error) => {
             createFlash(
               s__('Badges|Saving the badge failed, please check the entered URLs and try again.'),
             );
@@ -147,10 +147,10 @@ export default {
 
       return this.addBadge()
         .then(() => {
-          createFlash(s__('Badges|A new badge was added.'), 'notice');
+          createFlash(s__('Badges|New badge added.'), 'notice');
           this.wasValidated = false;
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash(
             s__('Badges|Adding the badge failed, please check the entered URLs and try again.'),
           );
@@ -179,11 +179,11 @@ export default {
         id="badge-link-url"
         v-model="linkUrl"
         type="URL"
-        class="form-control"
+        class="form-control gl-form-input"
         required
         @input="debouncedPreview"
       />
-      <div class="invalid-feedback">{{ s__('Badges|Please fill in a valid URL') }}</div>
+      <div class="invalid-feedback">{{ s__('Badges|Enter a valid URL') }}</div>
       <span class="form-text text-muted">{{ badgeLinkUrlExample }}</span>
     </div>
 
@@ -194,11 +194,11 @@ export default {
         id="badge-image-url"
         v-model="imageUrl"
         type="URL"
-        class="form-control"
+        class="form-control gl-form-input"
         required
         @input="debouncedPreview"
       />
-      <div class="invalid-feedback">{{ s__('Badges|Please fill in a valid URL') }}</div>
+      <div class="invalid-feedback">{{ s__('Badges|Enter a valid URL') }}</div>
       <span class="form-text text-muted">{{ badgeImageUrlExample }}</span>
     </div>
 
@@ -225,7 +225,7 @@ export default {
       <gl-button
         :loading="isSaving"
         type="submit"
-        variant="success"
+        variant="confirm"
         category="primary"
         data-testid="saveEditing"
       >
@@ -233,7 +233,7 @@ export default {
       </gl-button>
     </div>
     <div v-else class="form-group">
-      <gl-button :loading="isSaving" type="submit" variant="success" category="primary">
+      <gl-button :loading="isSaving" type="submit" variant="confirm" category="primary">
         {{ s__('Badges|Add badge') }}
       </gl-button>
     </div>

@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
 import { GlButton, GlFormSelect } from '@gitlab/ui';
+import { mapActions, mapGetters } from 'vuex';
 import { __, n__ } from '~/locale';
 
 const REASON_NONE = __('[No reason]');
@@ -13,9 +13,11 @@ export default {
     GlButton,
     GlFormSelect,
   },
-  data: () => ({
-    dismissalReason: null,
-  }),
+  data() {
+    return {
+      dismissalReason: null,
+    };
+  },
   computed: {
     ...mapGetters('vulnerabilities', ['selectedVulnerabilitiesCount']),
     canDismissVulnerability() {

@@ -33,7 +33,7 @@
     }
 
     .stage {
-      color: $gl-text-color-secondary;
+      color: var(--gray-500, $gray-500);
       font-weight: $gl-font-weight-normal;
       vertical-align: middle;
     }
@@ -62,7 +62,7 @@
 
     a {
       font-weight: $gl-font-weight-bold;
-      color: $gl-text-color;
+      color: var(--gl-text-color, $gl-text-color);
       text-decoration: none;
 
       &:focus,
@@ -124,9 +124,60 @@
   display: flex;
   width: 100%;
   min-height: $dropdown-max-height-lg;
-  background-color: $gray-light;
+  background-color: var(--gray-50, $gray-50);
   padding: $gl-padding 0;
   overflow: auto;
+}
+
+// These are single-value classes to use with utility-class style CSS
+// but to still access this variable. Do not add other styles.
+.gl-pipeline-min-h {
+  min-height: $dropdown-max-height-lg;
+}
+
+.gl-pipeline-job-width {
+  width: 186px;
+}
+
+.gl-pipeline-job-width\! {
+  width: 186px !important;
+}
+
+.gl-linked-pipeline-padding {
+  padding-right: 120px;
+}
+
+.gl-build-content {
+  display: inline-block;
+  padding: 8px 10px 9px;
+  width: 100%;
+  border: 1px solid var(--border-color, $border-color);
+  border-radius: 30px;
+  background-color: var(--white, $white);
+
+  &:hover,
+  &:focus {
+    background-color: var(--gray-50, $gray-50);
+    border: 1px solid $dropdown-toggle-active-border-color;
+    color: var(--gl-text-color, $gl-text-color);
+  }
+}
+
+.gl-ci-action-icon-container {
+  position: absolute;
+  right: 5px;
+  top: 50% !important;
+  transform: translateY(-50%);
+
+  // Action Icons in big pipeline-graph nodes
+  &.ci-action-icon-wrapper {
+    height: 30px;
+    width: 30px;
+    border-radius: 100%;
+    display: block;
+    padding: 0;
+    line-height: 0;
+  }
 }
 
 // Pipeline graph, used at
@@ -142,7 +193,7 @@
 
   a {
     text-decoration: none;
-    color: $gl-text-color;
+    color: var(--gl-text-color, $gl-text-color);
   }
 
   svg {
@@ -214,18 +265,18 @@
         height: 25px;
         position: absolute;
         top: -31px;
-        border-top: 2px solid $border-color;
+        border-top: 2px solid var(--border-color, $border-color);
       }
 
       &::after {
         left: -44px;
-        border-right: 2px solid $border-color;
+        border-right: 2px solid var(--border-color, $border-color);
         border-radius: 0 20px;
       }
 
       &::before {
         right: -44px;
-        border-left: 2px solid $border-color;
+        border-left: 2px solid var(--border-color, $border-color);
         border-radius: 20px 0 0;
       }
     }
@@ -281,7 +332,7 @@
 
     a.build-content:hover,
     button.build-content:hover {
-      background-color: $gray-darker;
+      background-color: var(--gray-100, $gray-100);
       border: 1px solid $dropdown-toggle-active-border-color;
     }
 
@@ -292,7 +343,7 @@
         position: absolute;
         top: 48%;
         right: -48px;
-        border-top: 2px solid $border-color;
+        border-top: 2px solid var(--border-color, $border-color);
         width: 48px;
         height: 1px;
       }
@@ -305,7 +356,7 @@
         content: '';
         top: -49px;
         position: absolute;
-        border-bottom: 2px solid $border-color;
+        border-bottom: 2px solid var(--border-color, $border-color);
         width: 25px;
         height: 69px;
       }
@@ -313,14 +364,14 @@
       // Right connecting curves
       &::after {
         right: -25px;
-        border-right: 2px solid $border-color;
+        border-right: 2px solid var(--border-color, $border-color);
         border-radius: 0 0 20px;
       }
 
       // Left connecting curves
       &::before {
         left: -25px;
-        border-left: 2px solid $border-color;
+        border-left: 2px solid var(--border-color, $border-color);
         border-radius: 0 0 0 20px;
       }
     }
@@ -355,10 +406,10 @@
       line-height: 0;
 
       svg {
-        fill: $gl-text-color-secondary;
+        fill: var(--gray-500, $gray-500);
       }
 
-      .spinner {
+      .gl-spinner {
         top: 2px;
       }
 
@@ -453,13 +504,13 @@
     left: -6px;
     margin-top: 3px;
     border-width: 7px 5px 7px 0;
-    border-right-color: $border-color;
+    border-right-color: var(--border-color, $border-color);
   }
 
   &::after {
     left: -5px;
     border-width: 10px 7px 10px 0;
-    border-right-color: $white;
+    border-right-color: var(--white, $white);
   }
 }
 
@@ -484,25 +535,5 @@
 }
 
 .progress-bar.bg-primary {
-  background-color: $blue-500 !important;
-}
-
-.pipeline-stage-pill {
-  width: 10rem;
-}
-
-.pipeline-job-pill {
-  width: 8rem;
-}
-
-.stage-rounded {
-  border-radius: 2rem;
-}
-
-.stage-left-rounded {
-  border-radius: 2rem 0 0 2rem;
-}
-
-.stage-right-rounded {
-  border-radius: 0 2rem 2rem 0;
+  background-color: var(--blue-500, $blue-500) !important;
 }

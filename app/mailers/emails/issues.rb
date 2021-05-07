@@ -80,6 +80,16 @@ module Emails
       mail_answer_thread(issue, issue_thread_options(updated_by_user.id, recipient.id, reason))
     end
 
+    def issue_cloned_email(recipient, issue, new_issue, updated_by_user, reason = nil)
+      setup_issue_mail(issue.id, recipient.id)
+
+      @author = updated_by_user
+      @issue = issue
+      @new_issue = new_issue
+      @can_access_project = recipient.can?(:read_project, @new_issue.project)
+      mail_answer_thread(issue, issue_thread_options(updated_by_user.id, recipient.id, reason))
+    end
+
     def import_issues_csv_email(user_id, project_id, results)
       @user = User.find(user_id)
       @project = Project.find(project_id)
@@ -96,6 +106,8 @@ module Emails
       @count = export_status.fetch(:rows_expected)
       @written_count = export_status.fetch(:rows_written)
       @truncated = export_status.fetch(:truncated)
+      @size_limit = ActiveSupport::NumberHelper
+        .number_to_human_size(Issuable::ExportCsv::BaseService::TARGET_FILESIZE)
 
       filename = "#{project.full_path.parameterize}_issues_#{Date.today.iso8601}.csv"
       attachments[filename] = { content: csv_data, mime_type: 'text/csv' }

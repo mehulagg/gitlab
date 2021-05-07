@@ -8,7 +8,7 @@ const hasMatter = (firstThreeChars, fourthChar) => {
   return isYamlDelimiter && isFourthCharNewline;
 };
 
-export const frontMatterify = source => {
+export const frontMatterify = (source) => {
   let index = 3;
   let offset;
   const delimiter = source.slice(0, index);
@@ -16,6 +16,7 @@ export const frontMatterify = source => {
   const NO_FRONTMATTER = {
     source,
     matter: null,
+    hasMatter: false,
     spacing: null,
     content: source,
     delimiter: null,
@@ -53,6 +54,7 @@ export const frontMatterify = source => {
   return {
     source,
     matter,
+    hasMatter: true,
     spacing,
     content,
     delimiter,

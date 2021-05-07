@@ -9,7 +9,7 @@
         = link_to s_('UsageQuota|Buy additional minutes'),
         EE::SUBSCRIPTIONS_MORE_MINUTES_URL,
         target: '_blank',
-        class: 'btn btn-success float-right',
+        class: 'gl-button btn btn-confirm float-right',
         data: { track_event: 'click_buy_ci_minutes', track_label: namespace.actual_plan_name, track_property: 'pipeline_quota_page' }
 
   .row
@@ -27,7 +27,7 @@
         = link_to sprite_icon('question-o'), help_page_path('user/admin_area/settings/continuous_integration', anchor: 'shared-runners-pipeline-minutes-quota'), target: '_blank', 'aria-label': _('Shared runners help link')
 
     .col-sm-6.right
-      - if namespace.shared_runners_minutes_limit_enabled?
+      - if minutes_quota.enabled?
         #{minutes_quota.monthly_percent_used}% used
       - elsif !namespace.any_project_with_shared_runners_enabled?
         0% used

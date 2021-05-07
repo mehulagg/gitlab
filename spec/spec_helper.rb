@@ -1,13 +1,34 @@
 # frozen_string_literal: true
 
+#  $" is $LOADED_FEATURES, but RuboCop didn't like it
+if $".include?(File.expand_path('fast_spec_helper.rb', __dir__))
+  warn 'Detected fast_spec_helper is loaded first than spec_helper.'
+  warn 'If running test files using both spec_helper and fast_spec_helper,'
+  warn 'make sure test file with spec_helper is loaded first.'
+  abort 'Aborting...'
+end
+
+# Enable deprecation warnings by default and make them more visible
+# to developers to ease upgrading to newer Ruby versions.
+Warning[:deprecated] = true unless ENV.key?('SILENCE_DEPRECATIONS')
+
+require './spec/deprecation_toolkit_env'
+DeprecationToolkitEnv.configure!
+
+require './spec/knapsack_env'
+KnapsackEnv.configure!
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
+
+require './spec/crystalball_env'
+CrystalballEnv.start!
 
 ENV["RAILS_ENV"] = 'test'
 ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'
 
-require File.expand_path('../config/environment', __dir__)
+require_relative '../config/environment'
 
 require 'rspec/mocks'
 require 'rspec/rails'
@@ -16,6 +37,7 @@ require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
 require 'test_prof/factory_default'
+require 'parslet/rig/rspec'
 
 rspec_profiling_is_configured =
   ENV['RSPEC_PROFILING_POSTGRES_URL'].present? ||
@@ -28,16 +50,12 @@ if rspec_profiling_is_configured && (!ENV.key?('CI') || branch_can_be_profiled)
   require 'rspec_profiling/rspec'
 end
 
-if ENV['CI'] && ENV['KNAPSACK_GENERATE_REPORT'] && !ENV['NO_KNAPSACK']
-  require 'knapsack'
-  Knapsack::Adapters::RSpecAdapter.bind
-end
-
 # require rainbow gem String monkeypatch, so we can test SystemChecks
 require 'rainbow/ext/string'
 Rainbow.enabled = false
 
 require_relative('../ee/spec/spec_helper') if Gitlab.ee?
+require_relative('../jh/spec/spec_helper') if Gitlab.jh?
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
@@ -45,12 +63,15 @@ require_relative('../ee/spec/spec_helper') if Gitlab.ee?
 
 # Load these first since they may be required by other helpers
 require Rails.root.join("spec/support/helpers/git_helpers.rb")
+require Rails.root.join("spec/support/helpers/stub_requests.rb")
 
 # Then the rest
 Dir[Rails.root.join("spec/support/helpers/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
+
+require_relative '../tooling/quality/test_level'
 
 quality_level = Quality::TestLevel.new
 
@@ -59,7 +80,7 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 
   config.use_transactional_fixtures = true
-  config.use_instantiated_fixtures  = false
+  config.use_instantiated_fixtures = false
   config.fixture_path = Rails.root
 
   config.verbose_retry = true
@@ -70,6 +91,25 @@ RSpec.configure do |config|
   # Add :full_backtrace tag to an example if full_backtrace output is desired
   config.before(:each, full_backtrace: true) do |example|
     config.full_backtrace = true
+  end
+
+  # Attempt to troubleshoot https://gitlab.com/gitlab-org/gitlab/-/issues/297359
+  if ENV['CI']
+    config.after do |example|
+      if example.exception.is_a?(GRPC::Unavailable)
+        warn "=== gRPC unavailable detected, process list:"
+        processes = `ps -ef | grep toml`
+        warn processes
+        warn "=== free memory"
+        warn `free -m`
+        warn "=== uptime"
+        warn `uptime`
+        warn "=== Prometheus metrics:"
+        warn `curl -s -o log/gitaly-metrics.log http://localhost:9236/metrics`
+        warn "=== Taking goroutine dump in log/goroutines.log..."
+        warn `curl -s -o log/goroutines.log http://localhost:9236/debug/pprof/goroutine?debug=2`
+      end
+    end
   end
 
   unless ENV['CI']
@@ -119,12 +159,14 @@ RSpec.configure do |config|
   config.include StubExperiments
   config.include StubGitlabCalls
   config.include StubGitlabData
-  config.include SnowplowHelpers
   config.include NextFoundInstanceOf
   config.include NextInstanceOf
   config.include TestEnv
+  config.include FileReadHelpers
   config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::ControllerHelpers, type: :view
   config.include Devise::Test::IntegrationHelpers, type: :feature
+  config.include Devise::Test::IntegrationHelpers, type: :request
   config.include LoginHelpers, type: :feature
   config.include SearchHelpers, type: :feature
   config.include WaitHelpers, type: :feature
@@ -132,7 +174,6 @@ RSpec.configure do |config|
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
   config.include Gitlab::Routing, type: :routing
-  config.include Devise::Test::ControllerHelpers, type: :view
   config.include ApiHelpers, :api
   config.include CookieHelper, :js
   config.include InputHelper, :js
@@ -155,9 +196,12 @@ RSpec.configure do |config|
   if ENV['CI'] || ENV['RETRIES']
     # This includes the first try, i.e. tests will be run 4 times before failing.
     config.default_retry_count = ENV.fetch('RETRIES', 3).to_i + 1
+    config.exceptions_to_hard_fail = [DeprecationToolkitEnv::DeprecationBehaviors::SelectiveRaise::RaiseDisallowedDeprecation]
   end
 
   if ENV['FLAKY_RSPEC_GENERATE_REPORT']
+    require_relative '../tooling/rspec_flaky/listener'
+
     config.reporter.register_listener(
       RspecFlaky::Listener.new,
       :example_passed,
@@ -197,24 +241,20 @@ RSpec.configure do |config|
       # (ie. ApplicationSetting#auto_devops_enabled)
       stub_feature_flags(force_autodevops_on_by_default: false)
 
-      # The following can be removed once Vue Issuable Sidebar
-      # is feature-complete and can be made default in place
-      # of older sidebar.
-      # See https://gitlab.com/groups/gitlab-org/-/epics/1863
-      stub_feature_flags(vue_issuable_sidebar: false)
-      stub_feature_flags(vue_issuable_epic_sidebar: false)
-
-      # The following can be removed once we are confident the
-      # unified diff lines works as expected
-      stub_feature_flags(unified_diff_lines: false)
-
       # Merge request widget GraphQL requests are disabled in the tests
       # for now whilst we migrate as much as we can over the GraphQL
-      stub_feature_flags(merge_request_widget_graphql: false)
+      # stub_feature_flags(merge_request_widget_graphql: false)
 
       # Using FortiAuthenticator as OTP provider is disabled by default in
       # tests, until we introduce it in user settings
       stub_feature_flags(forti_authenticator: false)
+
+      # Using FortiToken Cloud as OTP provider is disabled by default in
+      # tests, until we introduce it in user settings
+      stub_feature_flags(forti_token_cloud: false)
+
+      # This feature flag is by default disabled and used in disaster recovery mode
+      stub_feature_flags(ci_queueing_disaster_recovery: false)
 
       enable_rugged = example.metadata[:enable_rugged].present?
 
@@ -227,13 +267,30 @@ RSpec.configure do |config|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/33867
       stub_feature_flags(file_identifier_hash: false)
 
+      stub_feature_flags(unified_diff_components: false)
+
+      # The following `vue_issues_list` stub can be removed once the
+      # Vue issues page has feature parity with the current Haml page
+      stub_feature_flags(vue_issues_list: false)
+
+      # Disable `refactor_blob_viewer` as we refactor
+      # the blob viewer. See the follwing epic for more:
+      # https://gitlab.com/groups/gitlab-org/-/epics/5531
+      stub_feature_flags(refactor_blob_viewer: false)
+
+      # Disable `main_branch_over_master` as we migrate
+      # from `master` to `main` accross our codebase.
+      # It's done in order to preserve the concistency in tests
+      # As we're ready to change `master` usages to `main`, let's enable it
+      stub_feature_flags(main_branch_over_master: false)
+
+      # Selectively disable by actor https://docs.gitlab.com/ee/development/feature_flags/#selectively-disable-by-actor
+      stub_feature_flags(remove_description_html_in_release_api_override: false)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
     else
       unstub_all_feature_flags
     end
-
-    # Enable Marginalia feature for all specs in the test suite.
-    Gitlab::Marginalia.enabled = true
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:
@@ -251,62 +308,16 @@ RSpec.configure do |config|
 
     Sidekiq::Worker.clear_all
 
-    # Temporary patch to force admin mode to be active by default in tests when
-    # using the feature flag :user_mode_in_session, since this will require
-    # modifying a significant number of specs to test both states for admin
-    # mode enabled / disabled.
-    #
-    # This will only be applied to specs below dirs in `admin_mode_mock_dirs`
-    #
-    # See ongoing migration: https://gitlab.com/gitlab-org/gitlab/-/issues/31511
-    #
-    # Until the migration is finished, if it is required to have the real
-    # behaviour in any of the mocked dirs specs that an admin is signed in
-    # with normal user mode and needs to switch to admin mode, it is possible to
-    # mark such tests with the `do_not_mock_admin_mode` metadata tag, e.g:
-    #
-    # context 'some test in mocked dir', :do_not_mock_admin_mode do ... end
-    admin_mode_mock_dirs = %w(
-      ./ee/spec/elastic_integration
-      ./ee/spec/features
-      ./ee/spec/finders
-      ./ee/spec/lib
-      ./ee/spec/requests/admin
-      ./ee/spec/serializers
-      ./ee/spec/services
-      ./ee/spec/support/protected_tags
-      ./ee/spec/support/shared_examples/features
-      ./ee/spec/support/shared_examples/finders/geo
-      ./ee/spec/support/shared_examples/graphql/geo
-      ./ee/spec/support/shared_examples/services
-      ./spec/features
-      ./spec/finders
-      ./spec/frontend
-      ./spec/helpers
-      ./spec/lib
-      ./spec/requests
-      ./spec/serializers
-      ./spec/services
-      ./spec/support/protected_tags
-      ./spec/support/shared_examples/features
-      ./spec/support/shared_examples/requests
-      ./spec/support/shared_examples/lib/gitlab
-      ./spec/views
-      ./spec/workers
-    )
-
-    if !example.metadata[:do_not_mock_admin_mode] && example.metadata[:file_path].start_with?(*admin_mode_mock_dirs)
-      allow_any_instance_of(Gitlab::Auth::CurrentUserMode).to receive(:admin_mode?) do |current_user_mode|
-        current_user_mode.send(:user)&.admin?
-      end
-    end
-
     # Administrators have to re-authenticate in order to access administrative
-    # functionality when feature flag :user_mode_in_session is active. Any spec
+    # functionality when application setting admin_mode is active. Any spec
     # that requires administrative access can use the tag :enable_admin_mode
     # to avoid the second auth step (provided the user is already an admin):
     #
     # context 'some test that requires admin mode', :enable_admin_mode do ... end
+    #
+    # Some specs do get admin mode enabled automatically (e.g. `spec/controllers/admin`).
+    # In this case, specs that need to test both admin mode states can use the
+    # :do_not_mock_admin_mode tag to disable auto admin mode.
     #
     # See also spec/support/helpers/admin_mode_helpers.rb
     if example.metadata[:enable_admin_mode] && !example.metadata[:do_not_mock_admin_mode]
@@ -314,6 +325,11 @@ RSpec.configure do |config|
         current_user_mode.send(:user)&.admin?
       end
     end
+
+    # Make sure specs test by default admin mode setting on, unless forced to the opposite
+    stub_application_setting(admin_mode: true) unless example.metadata[:do_not_mock_admin_mode_setting]
+
+    allow(Gitlab::CurrentSettings).to receive(:current_application_settings?).and_return(false)
   end
 
   config.around(:example, :quarantine) do |example|
@@ -325,10 +341,17 @@ RSpec.configure do |config|
     Gitlab::WithRequestStore.with_request_store { example.run }
   end
 
+  config.before(:example, :request_store) do
+    # Clear request store before actually starting the spec (the
+    # `around` above will have the request store enabled for all
+    # `before` blocks)
+    RequestStore.clear!
+  end
+
   config.around do |example|
     # Wrap each example in it's own context to make sure the contexts don't
     # leak
-    Labkit::Context.with_context { example.run }
+    Gitlab::ApplicationContext.with_raw_context { example.run }
   end
 
   config.around do |example|
@@ -351,6 +374,9 @@ RSpec.configure do |config|
 
     # Reset all feature flag stubs to default for testing
     stub_all_feature_flags
+
+    # Re-enable query limiting in case it was disabled
+    Gitlab::QueryLimiting.enable!
   end
 
   config.before(:example, :mailer) do
@@ -358,7 +384,7 @@ RSpec.configure do |config|
   end
 
   config.before(:example, :prometheus) do
-    matching_files = File.join(::Prometheus::Client.configuration.multiprocess_files_dir, "*.db")
+    matching_files = File.join(::Prometheus::Client.configuration.multiprocess_files_dir, "**/*.db")
     Dir[matching_files].map { |filename| File.delete(filename) if File.file?(filename) }
 
     Gitlab::Metrics.reset_registry!
@@ -386,9 +412,6 @@ end
 
 # Prevent Rugged from picking up local developer gitconfig.
 Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
-
-# Disable timestamp checks for invisible_captcha
-InvisibleCaptcha.timestamp_enabled = false
 
 # Initialize FactoryDefault to use create_default helper
 TestProf::FactoryDefault.init

@@ -4,27 +4,47 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Members > Manage groups', :js do
   include Select2Helper
-  include Spec::Support::Helpers::Features::ListRowsHelpers
+  include Spec::Support::Helpers::Features::MembersHelpers
 
   let_it_be(:user) { create(:user) }
 
   before do
-    stub_feature_flags(vue_group_members_list: false)
-
     sign_in(user)
   end
 
-  context 'when group link does not exist' do
-    let_it_be(:group) { create(:group) }
-    let_it_be(:group_to_add) { create(:group) }
+  context 'with invite_members_group_modal disabled' do
+    context 'when group link does not exist' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:group_to_add) { create(:group) }
 
-    before do
-      group.add_owner(user)
-      visit group_group_members_path(group)
+      before do
+        stub_feature_flags(invite_members_group_modal: false)
+        group.add_owner(user)
+        visit group_group_members_path(group)
+      end
+
+      it 'add group to group' do
+        add_group(group_to_add.id, 'Reporter')
+
+        click_groups_tab
+
+        page.within(first_row) do
+          expect(page).to have_content(group_to_add.name)
+          expect(page).to have_content('Reporter')
+        end
+      end
     end
+  end
 
-    it 'add group to group' do
-      add_group(group_to_add.id, 'Reporter')
+  context 'when group link does not exist' do
+    it 'can share a group with group' do
+      group = create(:group)
+      group_to_add = create(:group)
+      group.add_owner(user)
+      group_to_add.add_owner(user)
+
+      visit group_group_members_path(group)
+      invite_group(group_to_add.name, 'Reporter')
 
       click_groups_tab
 
@@ -51,7 +71,6 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     end
 
     before do
-      travel_to Time.now.utc.beginning_of_day
       group_link.update!(additional_link_attrs)
 
       shared_group.add_owner(user)
@@ -63,8 +82,12 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
 
       expect(page).to have_content(shared_with_group.name)
 
-      accept_confirm do
-        find(:css, '#tab-groups li', text: shared_with_group.name).find(:css, 'a.btn-danger').click
+      page.within(first_row) do
+        click_button 'Remove group'
+      end
+
+      page.within('[role="dialog"]') do
+        click_button('Remove group')
       end
 
       expect(page).not_to have_content(shared_with_group.name)
@@ -75,7 +98,7 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
 
       page.within(first_row) do
         click_button('Developer')
-        click_link('Maintainer')
+        click_button('Maintainer')
 
         wait_for_requests
 
@@ -86,33 +109,30 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     it 'updates expiry date' do
       click_groups_tab
 
-      expires_at_field = "member_expires_at_#{shared_with_group.id}"
-      fill_in "member_expires_at_#{shared_with_group.id}", with: 3.days.from_now.to_date
+      page.within first_row do
+        fill_in 'Expiration date', with: 5.days.from_now.to_date
+        find_field('Expiration date').native.send_keys :enter
 
-      find_field(expires_at_field).native.send_keys :enter
-      wait_for_requests
+        wait_for_requests
 
-      page.within(find('li.group_member')) do
-        expect(page).to have_content('Expires in 3 days')
+        expect(page).to have_content(/in \d days/)
       end
     end
 
     context 'when expiry date is set' do
-      let(:additional_link_attrs) { { expires_at: 3.days.from_now.to_date } }
+      let(:additional_link_attrs) { { expires_at: 5.days.from_now.to_date } }
 
       it 'clears expiry date' do
         click_groups_tab
 
-        page.within(find('li.group_member')) do
-          expect(page).to have_content('Expires in 3 days')
+        page.within first_row do
+          expect(page).to have_content(/in \d days/)
 
-          page.within(find('.js-edit-member-form')) do
-            find('.js-clear-input').click
-          end
+          find('[data-testid="clear-button"]').click
 
           wait_for_requests
 
-          expect(page).not_to have_content('Expires in')
+          expect(page).to have_content('No expiration set')
         end
       end
     end
@@ -127,7 +147,23 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     end
   end
 
+  def invite_group(name, role)
+    click_on 'Invite a group'
+
+    click_on 'Select a group'
+    wait_for_requests
+    click_button name
+
+    click_button 'Guest'
+    wait_for_requests
+    click_button role
+
+    click_button 'Invite'
+    page.refresh
+  end
+
   def click_groups_tab
+    expect(page).to have_link 'Groups'
     click_link "Groups"
   end
 end

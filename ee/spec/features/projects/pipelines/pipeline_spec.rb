@@ -7,12 +7,13 @@ RSpec.describe 'Pipeline', :js do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
+    stub_feature_flags(graphql_pipeline_details_users: false)
     sign_in(user)
 
     project.add_developer(user)
   end
 
-  describe 'GET /:project/pipelines/:id' do
+  describe 'GET /:project/-/pipelines/:id' do
     let(:pipeline) { create(:ci_pipeline, :with_job, project: project, ref: 'master', sha: project.commit.id, user: user) }
 
     subject { visit project_pipeline_path(project, pipeline) }
@@ -29,73 +30,130 @@ RSpec.describe 'Pipeline', :js do
         create_link(pipeline, downstream_pipeline)
       end
 
-      it 'renders upstream pipeline' do
-        subject
+      context 'when :graphql_pipeline_details flag is on' do
+        context 'expands the upstream pipeline on click' do
+          it 'renders upstream pipeline' do
+            subject
 
-        expect(page).to have_content(upstream_pipeline.id)
-        expect(page).to have_content(upstream_pipeline.project.name)
-      end
+            expect(page).to have_content(upstream_pipeline.id)
+            expect(page).to have_content(upstream_pipeline.project.name)
+          end
 
-      context 'expands the upstream pipeline on click' do
-        it 'expands the upstream on click' do
-          subject
+          it 'expands the upstream on click' do
+            subject
 
-          page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
-          wait_for_requests
-          expect(page).to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
+            page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+            wait_for_requests
+            expect(page).to have_selector("#pipeline-links-container-#{upstream_pipeline.id}")
+          end
+
+          it 'closes the expanded upstream on click' do
+            subject
+
+            # open
+            page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+            wait_for_requests
+
+            # close
+            page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+
+            expect(page).not_to have_selector("#pipeline-links-container-#{upstream_pipeline.id}")
+          end
         end
 
-        it 'closes the expanded upstream on click' do
+        it 'renders downstream pipeline' do
           subject
 
-          # open
-          page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
-          wait_for_requests
+          expect(page).to have_content(downstream_pipeline.id)
+          expect(page).to have_content(downstream_pipeline.project.name)
+        end
 
-          # close
-          page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+        context 'expands the downstream pipeline on click' do
+          it 'expands the downstream on click' do
+            subject
 
-          expect(page).not_to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
+            page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+            wait_for_requests
+            expect(page).to have_selector("#pipeline-links-container-#{downstream_pipeline.id}")
+          end
+
+          it 'closes the expanded downstream on click' do
+            subject
+
+            # open
+            page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+            wait_for_requests
+
+            # close
+            page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+
+            expect(page).not_to have_selector("#pipeline-links-container-#{downstream_pipeline.id}")
+          end
         end
       end
 
-      it 'renders downstream pipeline' do
-        subject
-
-        expect(page).to have_content(downstream_pipeline.id)
-        expect(page).to have_content(downstream_pipeline.project.name)
-      end
-
-      context 'expands the downstream pipeline on click' do
-        it 'expands the downstream on click' do
-          subject
-
-          page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
-          wait_for_requests
-          expect(page).to have_selector(".js-downstream-pipeline-#{downstream_pipeline.id}")
+      # remove when :graphql_pipeline_details flag is removed
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/299112
+      context 'when :graphql_pipeline_details flag is off' do
+        before do
+          stub_feature_flags(graphql_pipeline_details: false)
+          stub_feature_flags(graphql_pipeline_details_users: false)
         end
 
-        it 'closes the expanded downstream on click' do
-          subject
+        context 'expands the upstream pipeline on click' do
+          it 'expands the upstream on click' do
+            subject
+            page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+            wait_for_requests
+            expect(page).to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
+          end
 
-          # open
-          page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
-          wait_for_requests
+          it 'closes the expanded upstream on click' do
+            subject
 
-          # close
-          page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+            # open
+            page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+            wait_for_requests
 
-          expect(page).not_to have_selector(".js-downstream-pipeline-#{downstream_pipeline.id}")
+            # close
+            page.find(".js-pipeline-expand-#{upstream_pipeline.id}").click
+
+            expect(page).not_to have_selector(".js-upstream-pipeline-#{upstream_pipeline.id}")
+          end
+        end
+
+        context 'expands the downstream pipeline on click' do
+          it 'expands the downstream on click' do
+            subject
+
+            page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+            wait_for_requests
+            expect(page).to have_selector(".js-downstream-pipeline-#{downstream_pipeline.id}")
+          end
+
+          it 'closes the expanded downstream on click' do
+            subject
+
+            # open
+            page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+            wait_for_requests
+
+            # close
+            page.find(".js-pipeline-expand-#{downstream_pipeline.id}").click
+
+            expect(page).not_to have_selector(".js-downstream-pipeline-#{downstream_pipeline.id}")
+          end
         end
       end
     end
   end
 
-  describe 'GET /:project/pipelines/:id/security' do
+  describe 'GET /:project/-/pipelines/:id/security' do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
       stub_licensed_features(sast: true, security_dashboard: true)
+      stub_feature_flags(pipeline_security_dashboard_graphql: false)
     end
 
     context 'with a sast artifact' do
@@ -122,12 +180,12 @@ RSpec.describe 'Pipeline', :js do
       it 'displays the pipeline graph' do
         expect(current_path).to eq(pipeline_path(pipeline))
         expect(page).not_to have_css('#js-tab-security')
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
       end
     end
   end
 
-  describe 'GET /:project/pipelines/:id/licenses' do
+  describe 'GET /:project/-/pipelines/:id/licenses' do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -160,50 +218,60 @@ RSpec.describe 'Pipeline', :js do
       it 'displays the pipeline graph' do
         expect(current_path).to eq(pipeline_path(pipeline))
         expect(page).not_to have_content('Licenses')
-        expect(page).to have_selector('.pipeline-visualization')
+        expect(page).to have_selector('.js-pipeline-graph')
       end
     end
   end
 
-  describe 'GET /:project/pipelines/:id/codequality_report' do
+  describe 'GET /:project/-/pipelines/:id/codequality_report', :aggregate_failures do
     shared_examples_for 'full codequality report' do
-      context 'with no code quality artifact' do
+      context 'when licensed' do
         before do
-          create(:ee_ci_build, pipeline: pipeline)
+          stub_licensed_features(full_codequality_report: true)
+        end
+
+        context 'with code quality artifact' do
+          before do
+            create(:ee_ci_build, :codequality, pipeline: pipeline)
+            visit codequality_report_project_pipeline_path(project, pipeline)
+          end
+
+          it 'shows code quality tab pane as active, quality issue with link to file, and events for data tracking' do
+            expect(page).to have_content('Code Quality')
+            expect(page).to have_css('#js-tab-codequality')
+
+            expect(page).to have_content('Method `new_array` has 12 arguments (exceeds 4 allowed). Consider refactoring.')
+            expect(find_link('foo.rb:10')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'foo.rb')) + '#L10')
+
+            expect(page).to have_selector('[data-track-event="click_button"]')
+            expect(page).to have_selector('[data-track-label="get_codequality_report"]')
+          end
+        end
+
+        context 'with no code quality artifact' do
+          before do
+            create(:ee_ci_build, pipeline: pipeline)
+            visit project_pipeline_path(project, pipeline)
+          end
+
+          it 'does not show code quality tab' do
+            expect(page).not_to have_content('Code Quality')
+            expect(page).not_to have_css('#js-tab-codequality')
+          end
+        end
+      end
+
+      context 'when unlicensed' do
+        before do
+          stub_licensed_features(full_codequality_report: false)
+
+          create(:ee_ci_build, :codequality, pipeline: pipeline)
           visit project_pipeline_path(project, pipeline)
         end
 
         it 'does not show code quality tab' do
           expect(page).not_to have_content('Code Quality')
           expect(page).not_to have_css('#js-tab-codequality')
-        end
-      end
-
-      context 'with code quality artifact' do
-        before do
-          create(:ee_ci_build, :codequality, pipeline: pipeline)
-          visit codequality_report_project_pipeline_path(project, pipeline)
-        end
-
-        it 'shows code quality tab pane as active' do
-          expect(page).to have_content('Code Quality')
-          expect(page).to have_css('#js-tab-codequality')
-        end
-
-        it 'shows code quality report section' do
-          expect(page).to have_content('Loading codeclimate report')
-        end
-
-        it 'shows code quality issue with link to file' do
-          wait_for_requests
-
-          expect(page).to have_content('Function `simulateEvent` has 28 lines of code (exceeds 25 allowed). Consider refactoring.')
-          expect(find_link('app/assets/javascripts/test_utils/simulate_drag.js:1')[:href]).to end_with(project_blob_path(project, File.join(pipeline.commit.id, 'app/assets/javascripts/test_utils/simulate_drag.js')) + '#L1')
-        end
-
-        it 'contains events for data tracking', :aggregate_failures do
-          expect(page).to have_selector('[data-track-event="click_button"]')
-          expect(page).to have_selector('[data-track-label="get_codequality_report"]')
         end
       end
     end

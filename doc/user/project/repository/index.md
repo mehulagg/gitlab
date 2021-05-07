@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
-# Repository
+# Repository **(FREE)**
 
 A [repository](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository)
 is what you use to store your codebase in GitLab and change it with version control.
@@ -14,13 +14,13 @@ A repository is part of a [project](../index.md), which has a lot of other featu
 ## Create a repository
 
 To create a new repository, all you need to do is
-[create a new project](../../../gitlab-basics/create-project.md) or
+[create a new project](../../../user/project/working_with_projects.md#create-a-project) or
 [fork an existing project](forking_workflow.md).
 
 Once you create a new project, you can add new files via UI
 (read the section below) or via command line.
-To add files from the command line, follow the instructions that will
-be presented on the screen when you create a new project, or read
+To add files from the command line, follow the instructions
+presented on the screen when you create a new project, or read
 through them in the [command line basics](../../../gitlab-basics/start-using-git.md)
 documentation.
 
@@ -31,8 +31,7 @@ that you [connect with GitLab via SSH](../../../ssh/README.md).
 ## Files
 
 Use a repository to store your files in GitLab. In [GitLab 12.10 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/33806),
-you'll see on the repository's file tree an icon next to the file name
-according to its extension:
+an icon identifying the extension is shown next to the filename:
 
 ![Repository file icons](img/file_ext_icons_repo_v12_10.png)
 
@@ -43,12 +42,12 @@ You can either use the user interface (UI), or connect your local computer
 with GitLab [through the command line](../../../gitlab-basics/command-line-commands.md#start-working-on-your-project).
 
 To configure [GitLab CI/CD](../../../ci/README.md) to build, test, and deploy
-your code, add a file called [`.gitlab-ci.yml`](../../../ci/quick_start/README.md)
+your code, add a file called [`.gitlab-ci.yml`](../../../ci/quick_start/index.md)
 to your repository's root.
 
 **From the user interface:**
 
-GitLab's UI allows you to perform lots of Git commands without having to
+The GitLab UI allows you to perform lots of Git commands without having to
 touch the command line. Even if you use the command line regularly, sometimes
 it's easier to do so [via GitLab UI](web_editor.md):
 
@@ -67,7 +66,7 @@ To get started with the command line, please read through the
 
 ### Find files
 
-Use GitLab's [file finder](file_finder.md) to search for files in a repository.
+Use the GitLab [file finder](file_finder.md) to search for files in a repository.
 
 ### Supported markup languages and extensions
 
@@ -76,7 +75,7 @@ markup languages](https://en.wikipedia.org/wiki/Lightweight_markup_language))
 that you can use for the content of your files in a repository. They are mostly
 used for documentation purposes.
 
-Just pick the right extension for your files and GitLab will render them
+Just pick the right extension for your files and GitLab renders them
 according to the markup language.
 
 | Markup language | Extensions |
@@ -93,7 +92,7 @@ according to the markup language.
 
 ### Repository README and index files
 
-When a `README` or `index` file is present in a repository, its contents will be
+When a `README` or `index` file is present in a repository, its contents are
 automatically pre-rendered by GitLab without opening it.
 
 They can either be plain text or have an extension of a
@@ -101,12 +100,12 @@ They can either be plain text or have an extension of a
 
 Some things to note about precedence:
 
-1. When both a `README` and an `index` file are present, the `README` will always
-   take precedence.
+1. When both a `README` and an `index` file are present, the `README` always
+   takes precedence.
 1. When more than one file is present with different extensions, they are
-   ordered alphabetically, with the exception of a file without an extension
-   which will always be last in precedence. For example, `README.adoc` will take
-   precedence over `README.md`, and `README.rst` will take precedence over
+   ordered alphabetically, with the exception of a file without an extension,
+   which is always last in precedence. For example, `README.adoc` takes
+   precedence over `README.md`, and `README.rst` takes precedence over
    `README`.
 
 ### Jupyter Notebook files
@@ -141,7 +140,7 @@ their filenames include `openapi` or `swagger` and their extension is `yaml`,
 
 Then, to render them:
 
-1. Navigate to the OpenAPI file in your repository in GitLab's UI.
+1. Navigate to the OpenAPI file in your repository in the GitLab UI.
 1. Click the "Display OpenAPI" button which is located between the "Display source"
    and "Edit" buttons (when an OpenAPI file is found, it replaces the
    "Display rendered file" button).
@@ -159,18 +158,18 @@ Via command line, you can commit multiple times before pushing.
 - **Commit message:**
   A commit message is important to identity what is being changed and,
   more importantly, why. In GitLab, you can add keywords to the commit
-  message that will perform one of the actions below:
+  message that performs one of the actions below:
   - **Trigger a GitLab CI/CD pipeline:**
   If you have your project configured with [GitLab CI/CD](../../../ci/README.md),
-  you will trigger a pipeline per push, not per commit.
+  you trigger a pipeline per push, not per commit.
   - **Skip pipelines:**
-  You can add to you commit message the keyword
-  [`[ci skip]`](../../../ci/yaml/README.md#skip-pipeline)
-  and GitLab CI/CD will skip that pipeline.
+  You can add to your commit message the keyword
+  [`[ci skip]`](../../../ci/yaml/README.md#skip-pipeline),
+  and GitLab CI/CD skips that pipeline.
   - **Cross-link issues and merge requests:**
   [Cross-linking](../issues/crosslinking_issues.md#from-commit-messages)
   is great to keep track of what's is somehow related in your workflow.
-  If you mention an issue or a merge request in a commit message, they will be shown
+  If you mention an issue or a merge request in a commit message, they are shown
   on their respective thread.
 - **Cherry-pick a commit:**
   In GitLab, you can
@@ -189,7 +188,7 @@ updated every 15 minutes at most, so may not reflect recent activity. The displa
 
 The project size may differ slightly from one instance to another due to compression, housekeeping, and other factors.
 
-[Repository size limit](../../admin_area/settings/account_and_limit_settings.md) may be set by admins.
+[Repository size limit](../../admin_area/settings/account_and_limit_settings.md) may be set by administrators.
 GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#account-and-limit-settings).
 
 ## Contributors
@@ -211,9 +210,9 @@ Find it under your project's **Repository > Graph**.
 
 ## Repository Languages
 
-For the default branch of each repository, GitLab will determine what programming languages
-were used and display this on the projects pages. If this information is missing, it will
-be added after updating the default branch on the project. This process can take up to 5
+For the default branch of each repository, GitLab determines what programming languages
+were used and displays this on the project's pages. If this information is missing, it's
+added after updating the default branch for the project. This process can take up to five
 minutes.
 
 ![Repository Languages bar](img/repository_languages_v12_2.gif)
@@ -236,21 +235,46 @@ lock your files to prevent any conflicting changes.
 
 You can access your repositories via [repository API](../../../api/repositories.md).
 
-## Clone in Apple Xcode
+## Clone a repository
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45820) in GitLab 11.0
+Learn how to [clone a repository through the command line](../../../gitlab-basics/start-using-git.md#clone-a-repository).
+
+Alternatively, clone directly into a code editor as documented below.
+
+### Clone and open in Apple Xcode
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45820) in GitLab 11.0.
 
 Projects that contain a `.xcodeproj` or `.xcworkspace` directory can now be cloned
-in Xcode using the new **Open in Xcode** button, located next to the Git URL
-used for cloning your project. The button is only shown on macOS.
+into Xcode on macOS. To do that:
+
+1. From the GitLab UI, go to the project's overview page.
+1. Click **Clone**.
+1. Select **Xcode**.
+
+The project is cloned onto your computer in a folder of your choice and you are
+prompted to open XCode.
+
+### Clone and open in Visual Studio Code
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220957) in GitLab 13.10.
+
+All projects can be cloned into Visual Studio Code. To do that:
+
+1. From the GitLab UI, go to the project's overview page.
+1. Click **Clone**.
+1. Select **VS Code**.
+1. Select a folder to clone the project into.
+
+When VS Code has successfully cloned your project, it opens the folder.
 
 ## Download Source Code
 
-> Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/24704) in GitLab 11.11.
-> Support for [including Git LFS blobs](../../../topics/git/lfs#lfs-objects-in-project-archives) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
+> - Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/24704) in GitLab 11.11.
+> - Support for [including Git LFS blobs](../../../topics/git/lfs#lfs-objects-in-project-archives) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
 
 The source code stored in a repository can be downloaded from the UI.
-By clicking the download icon, a dropdown will open with links to download the following:
+By clicking the download icon, a dropdown opens with links to download the following:
 
 ![Download source code](img/download_source_code.png)
 
@@ -263,6 +287,28 @@ By clicking the download icon, a dropdown will open with links to download the f
   `tar`, `tar.gz`, and `tar.bz2`.
 - **Artifacts:**
   allows users to download the artifacts of the latest CI build.
+
+## Redirects when changing repository paths
+
+When a repository path changes, it is essential to smoothly transition from the
+old location to the new one. GitLab provides two kinds of redirects: the web UI
+and Git push/pull redirects.
+
+Depending on the situation, different things apply.
+
+When [renaming a user](../../profile/index.md#change-your-username),
+[changing a group path](../../group/index.md#change-a-groups-path) or [renaming a repository](../settings/index.md#renaming-a-repository):
+
+- Existing web URLs for the namespace and anything under it (such as projects) will
+  redirect to the new URLs.
+- Starting with GitLab 10.3, existing Git remote URLs for projects under the
+  namespace redirect to the new remote URL. Every time you push/pull to a
+  repository that has changed its location, a warning message to update
+  your remote is displayed instead of rejecting your action.
+  This means that any automation scripts, or Git clients continue to
+  work after a rename, making any transition a lot smoother.
+- The redirects are available as long as the original path is not claimed by
+  another group, user or project.
 
 <!-- ## Troubleshooting
 

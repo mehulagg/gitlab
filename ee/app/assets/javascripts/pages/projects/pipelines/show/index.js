@@ -1,13 +1,11 @@
 import initPipelineSecurityDashboard from 'ee/security_dashboard/pipeline_init';
-import initPipelineDetails from '~/pipelines/pipeline_details_bundle';
 import initPipelines from '~/pages/projects/pipelines/init_pipelines';
-import initLicenseReport from './license_report';
+import initPipelineDetails from '~/pipelines/pipeline_details_bundle';
 import initCodequalityReport from './codequality_report';
+import initLicenseReport from './license_report';
 
-document.addEventListener('DOMContentLoaded', () => {
-  initPipelines();
-  initPipelineDetails();
-  initPipelineSecurityDashboard();
-  initLicenseReport();
-  initCodequalityReport();
-});
+initPipelines();
+initPipelineDetails();
+initPipelineSecurityDashboard();
+initLicenseReport();
+initCodequalityReport();

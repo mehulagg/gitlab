@@ -10,16 +10,16 @@ module Mutations
       argument :ids,
                [::Types::GlobalIDType[::Todo]],
                required: true,
-               description: 'The global ids of the todos to restore (a maximum of 50 is supported at once)'
+               description: 'The global IDs of the to-do items to restore (a maximum of 50 is supported at once).'
 
-      field :updated_ids, [GraphQL::ID_TYPE],
+      field :updated_ids, [::Types::GlobalIDType[Todo]],
             null: false,
-            description: 'The ids of the updated todo items',
-            deprecated: { reason: 'Use todos', milestone: '13.2' }
+            description: 'The IDs of the updated to-do items.',
+            deprecated: { reason: 'Use to-do items', milestone: '13.2' }
 
       field :todos, [::Types::TodoType],
             null: false,
-            description: 'Updated todos'
+            description: 'Updated to-do items.'
 
       def resolve(ids:)
         check_update_amount_limit!(ids)
@@ -28,17 +28,13 @@ module Mutations
         updated_ids = restore(todos)
 
         {
-            updated_ids: gids_of(updated_ids),
+            updated_ids: updated_ids,
             todos: Todo.id_in(updated_ids),
             errors: errors_on_objects(todos)
         }
       end
 
       private
-
-      def gids_of(ids)
-        ids.map { |id| Gitlab::GlobalId.as_global_id(id, model_name: Todo.name).to_s }
-      end
 
       def model_ids_of(ids)
         ids.map do |gid|
@@ -50,7 +46,7 @@ module Mutations
       end
 
       def raise_too_many_todos_requested_error
-        raise Gitlab::Graphql::Errors::ArgumentError, 'Too many todos requested.'
+        raise Gitlab::Graphql::Errors::ArgumentError, 'Too many to-do items requested.'
       end
 
       def check_update_amount_limit!(ids)
@@ -64,7 +60,7 @@ module Mutations
       def authorized_find_all_pending_by_current_user(ids)
         return Todo.none if ids.blank? || current_user.nil?
 
-        Todo.for_ids(ids).for_user(current_user).done
+        Todo.id_in(ids).for_user(current_user).done
       end
 
       def restore(todos)

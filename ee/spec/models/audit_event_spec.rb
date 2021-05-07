@@ -18,6 +18,7 @@ RSpec.describe AuditEvent, type: :model do
       let_it_be(:details) do
         { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X', target_type: 'User' }
       end
+
       let_it_be(:event) { create(:project_audit_event, details: details, entity_path: nil, target_details: nil) }
 
       it 'sets author_name' do
@@ -274,6 +275,34 @@ RSpec.describe AuditEvent, type: :model do
     it 'converts value of `to` and `from` in `details` to string' do
       expect(event.formatted_details[:to]).to eq('true')
       expect(event.formatted_details[:from]).to eq('false')
+    end
+  end
+
+  describe 'author' do
+    subject { event.author }
+
+    context 'when author exists' do
+      let_it_be(:event) { create(:project_audit_event) }
+
+      it 'returns the author object' do
+        expect(subject).to eq(User.find(event.author_id))
+      end
+    end
+
+    context 'when author is unauthenticated' do
+      let_it_be(:event) { create(:project_audit_event, :unauthenticated) }
+
+      it 'is an unauthenticated user' do
+        expect(subject).to be_a(Gitlab::Audit::UnauthenticatedAuthor)
+      end
+    end
+
+    context 'when author no longer exists' do
+      let_it_be(:event) { create(:project_audit_event, author_id: non_existing_record_id) }
+
+      it 'is a deleted user' do
+        expect(subject).to be_a(Gitlab::Audit::DeletedAuthor)
+      end
     end
   end
 end

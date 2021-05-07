@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlPopover, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
+import GeoNodeDetailItem from 'ee/geo_nodes/components/geo_node_detail_item.vue';
 import NodeDetailsSectionVerificationComponent from 'ee/geo_nodes/components/node_detail_sections/node_details_section_verification.vue';
 import SectionRevealButton from 'ee/geo_nodes/components/node_detail_sections/section_reveal_button.vue';
-import GeoNodeDetailItem from 'ee/geo_nodes/components/geo_node_detail_item.vue';
 
 import { mockNodeDetails } from '../../mock_data';
 
@@ -134,11 +134,9 @@ describe('NodeDetailsSectionVerification', () => {
       });
 
       it('contains text about Replicated data', () => {
-        expect(
-          findGlPopover()
-            .find(GlSprintf)
-            .attributes('message'),
-        ).toContain('Replicated data is verified');
+        expect(findGlPopover().find(GlSprintf).attributes('message')).toContain(
+          'Replicated data is verified',
+        );
       });
     });
 

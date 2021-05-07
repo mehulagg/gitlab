@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import TerminalControls from '~/ide/components/terminal/terminal_controls.vue';
 import ScrollButton from '~/ide/components/jobs/detail/scroll_button.vue';
+import TerminalControls from '~/ide/components/terminal/terminal_controls.vue';
 
 describe('IDE TerminalControls', () => {
   let wrapper;
@@ -17,7 +17,7 @@ describe('IDE TerminalControls', () => {
   it('shows an up and down scroll button', () => {
     factory();
 
-    expect(buttons.wrappers.map(x => x.props())).toEqual([
+    expect(buttons.wrappers.map((x) => x.props())).toEqual([
       expect.objectContaining({ direction: 'up', disabled: true }),
       expect.objectContaining({ direction: 'down', disabled: true }),
     ]);

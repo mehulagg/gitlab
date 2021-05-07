@@ -2,7 +2,7 @@
 
 module Groups
   module GroupLinks
-    class CreateService < BaseService
+    class CreateService < Groups::BaseService
       def execute(shared_group)
         unless group && shared_group &&
                can?(current_user, :admin_group_member, shared_group) &&
@@ -18,7 +18,7 @@ module Groups
         )
 
         if link.save
-          group.refresh_members_authorized_projects
+          group.refresh_members_authorized_projects(direct_members_only: true)
           success(link: link)
         else
           error(link.errors.full_messages.to_sentence, 409)

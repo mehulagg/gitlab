@@ -2,17 +2,17 @@ import MockAdapter from 'axios-mock-adapter';
 import $ from 'jquery';
 import { TEST_HOST } from 'helpers/test_constants';
 import { sanitize } from '~/lib/dompurify';
-import ProjectFindFile from '~/project_find_file';
 import axios from '~/lib/utils/axios_utils';
+import ProjectFindFile from '~/project_find_file';
 
 jest.mock('~/lib/dompurify', () => ({
   addHook: jest.fn(),
-  sanitize: jest.fn(val => val),
+  sanitize: jest.fn((val) => val),
 }));
 
-const BLOB_URL_TEMPLATE = `${TEST_HOST}/namespace/project/blob/master`;
-const FILE_FIND_URL = `${TEST_HOST}/namespace/project/files/master?format=json`;
-const FIND_TREE_URL = `${TEST_HOST}/namespace/project/tree/master`;
+const BLOB_URL_TEMPLATE = `${TEST_HOST}/namespace/project/blob/main`;
+const FILE_FIND_URL = `${TEST_HOST}/namespace/project/files/main?format=json`;
+const FIND_TREE_URL = `${TEST_HOST}/namespace/project/tree/main`;
 const TEMPLATE = `<div class="file-finder-holder tree-holder js-file-finder" data-blob-url-template="${BLOB_URL_TEMPLATE}" data-file-find-url="${FILE_FIND_URL}"  data-find-tree-url="${FIND_TREE_URL}">
   <input class="file-finder-input" id="file_find" />
   <div class="tree-content-holder">
@@ -39,7 +39,7 @@ describe('ProjectFindFile', () => {
     element
       .find('.tree-table tr')
       .toArray()
-      .map(el => ({
+      .map((el) => ({
         text: el.textContent,
         href: el.querySelector('a').href,
       }));
@@ -53,12 +53,15 @@ describe('ProjectFindFile', () => {
     { path: 'folde?rC/fil#F.txt', escaped: 'folde%3FrC/fil%23F.txt' },
   ];
 
-  beforeEach(done => {
+  beforeEach((done) => {
     // Create a mock adapter for stubbing axios API requests
     mock = new MockAdapter(axios);
 
     element = $(TEMPLATE);
-    mock.onGet(FILE_FIND_URL).replyOnce(200, files.map(x => x.path));
+    mock.onGet(FILE_FIND_URL).replyOnce(
+      200,
+      files.map((x) => x.path),
+    );
     getProjectFindFileInstance(); // This triggers a load / axios call + subsequent render in the constructor
 
     setImmediate(done);

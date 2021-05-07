@@ -6,7 +6,7 @@ module QA
       class Menu < Page::Base
         view 'app/views/layouts/header/_current_user_dropdown.html.haml' do
           element :sign_out_link
-          element :settings_link
+          element :edit_profile_link
         end
 
         view 'app/views/layouts/header/_default.html.haml' do
@@ -93,6 +93,10 @@ module QA
           has_personal_area?(wait: 0)
         end
 
+        def not_signed_in?
+          has_no_personal_area?
+        end
+
         def sign_out
           retry_until do
             wait_if_retry_later
@@ -111,13 +115,19 @@ module QA
           sign_out if signed_in?
         end
 
-        def click_settings_link
+        def click_edit_profile_link
           retry_until(reload: false) do
             within_user_menu do
-              click_link 'Settings'
+              click_element(:edit_profile_link)
             end
 
             has_text?('User Settings')
+          end
+        end
+
+        def click_user_profile_link
+          within_user_menu do
+            click_element(:user_profile_link)
           end
         end
 
@@ -127,6 +137,10 @@ module QA
 
         def has_personal_area?(wait: Capybara.default_max_wait_time)
           has_element?(:user_avatar, wait: wait)
+        end
+
+        def has_no_personal_area?(wait: Capybara.default_max_wait_time)
+          has_no_element?(:user_avatar, wait: wait)
         end
 
         def has_admin_area_link?(wait: Capybara.default_max_wait_time)
@@ -167,4 +181,4 @@ module QA
   end
 end
 
-QA::Page::Main::Menu.prepend_if_ee('QA::EE::Page::Main::Menu')
+QA::Page::Main::Menu.prepend_if_ee('Page::Main::Menu', namespace: QA)

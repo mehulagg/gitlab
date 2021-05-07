@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -28,7 +28,7 @@ GET calls to a popular API endpoint in your application to see how it performs.
 ## How Load Performance Testing works
 
 First, define a job in your `.gitlab-ci.yml` file that generates the
-[Load Performance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsload_performance).
+[Load Performance report artifact](../../../ci/yaml/README.md#artifactsreportsload_performance).
 GitLab checks this report, compares key load performance metrics
 between the source and target branches, and then shows the information in a merge request widget:
 
@@ -43,7 +43,7 @@ The key performance metrics that the merge request widget shows after the test c
 - TTFB P95: The 95th percentile for TTFB.
 - RPS: The average requests per second (RPS) rate the test was able to achieve.
 
-NOTE: **Note:**
+NOTE:
 If the Load Performance report has no data to compare, such as when you add the
 Load Performance job in your `.gitlab-ci.yml` for the very first time,
 the Load Performance report widget won't show. It must have run at least
@@ -90,7 +90,7 @@ testing job in GitLab CI/CD. The easiest way to do this is to use the
 [`Verify/Load-Performance-Testing.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Verify/Load-Performance-Testing.gitlab-ci.yml)
 template that is included with GitLab.
 
-NOTE: **Note:**
+NOTE:
 For large scale k6 tests you need to ensure the GitLab Runner instance performing the actual
 test is able to handle running the test. Refer to [k6's guidance](https://k6.io/docs/testing-guides/running-large-tests#hardware-considerations)
 for spec details. The [default shared GitLab.com runners](../../gitlab_com/#linux-shared-runners)
@@ -103,9 +103,9 @@ job.
 An example configuration workflow:
 
 1. Set up GitLab Runner to run Docker containers, like the
-   [Docker-in-Docker workflow](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor).
-1. Configure the default Load Performance Testing CI job in your `.gitlab-ci.yml` file.
-   You need to include the template and configure it with variables:
+   [Docker-in-Docker workflow](../../../ci/docker/using_docker_build.md#use-the-docker-executor-with-the-docker-image-docker-in-docker).
+1. Configure the default Load Performance Testing CI/CD job in your `.gitlab-ci.yml` file.
+   You need to include the template and configure it with CI/CD variables:
 
    ```yaml
    include:
@@ -119,7 +119,7 @@ An example configuration workflow:
 The above example creates a `load_performance` job in your CI/CD pipeline that runs
 the k6 test.
 
-NOTE: **Note:**
+NOTE:
 For Kubernetes setups a different template should be used: [`Jobs/Load-Performance-Testing.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Load-Performance-Testing.gitlab-ci.yml).
 
 k6 has [various options](https://k6.io/docs/using-k6/options) to configure how it will run tests, such as what throughput (RPS) to run with,
@@ -140,7 +140,7 @@ For example, you can override the duration of the test with a CLI option:
 
 GitLab only displays the key performance metrics in the MR widget if k6's results are saved
 via [summary export](https://k6.io/docs/results-visualization/json#summary-export)
-as a [Load Performance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportsload_performance).
+as a [Load Performance report artifact](../../../ci/yaml/README.md#artifactsreportsload_performance).
 The latest Load Performance artifact available is always used, using the
 summary values from the test.
 
@@ -153,7 +153,7 @@ but it can be extended to work with [review apps](../../../ci/review_apps) or
 [dynamic environments](../../../ci/environments) with a few extra steps.
 
 The best approach is to capture the dynamic URL in a [`.env` file](https://docs.docker.com/compose/env-file/)
-as a job artifact to be shared, then use a custom environment variable we've provided named `K6_DOCKER_OPTIONS`
+as a job artifact to be shared, then use a custom CI/CD variable we've provided named `K6_DOCKER_OPTIONS`
 to configure the k6 Docker container to use the file. With this, k6 can then use any
 environment variables from the `.env` file in scripts using standard JavaScript,
 such as: ``http.get(`${__ENV.ENVIRONMENT_URL}`)``.

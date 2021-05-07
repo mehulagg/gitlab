@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import { trimText } from 'helpers/text_helper';
+import { shallowMount } from '@vue/test-utils';
 import MergeTrainHelperText from 'ee/vue_merge_request_widget/components/merge_train_helper_text.vue';
+import { trimText } from 'helpers/text_helper';
 
 describe('MergeTrainHelperText', () => {
   let wrapper;
@@ -16,7 +16,7 @@ describe('MergeTrainHelperText', () => {
   const findDocumentationLink = () => wrapper.find('[data-testid="documentation-link"]');
   const findPipelineLink = () => wrapper.find('[data-testid="pipeline-link"]');
 
-  const createWrapper = propsData => {
+  const createWrapper = (propsData) => {
     wrapper = shallowMount(MergeTrainHelperText, {
       propsData: {
         ...defaultProps,

@@ -1,26 +1,31 @@
 <script>
-import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
+import { GlSafeHtmlDirective } from '@gitlab/ui';
+import GroupedBrowserPerformanceReportsApp from 'ee/reports/browser_performance_report/grouped_browser_performance_reports_app.vue';
+import { componentNames } from 'ee/reports/components/issue_body';
+import GroupedLoadPerformanceReportsApp from 'ee/reports/load_performance_report/grouped_load_performance_reports_app.vue';
+import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
-import { componentNames } from 'ee/reports/components/issue_body';
-import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import { GlSafeHtmlDirective } from '@gitlab/ui';
-import ReportSection from '~/reports/components/report_section.vue';
-import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
-
 import { s__, __, sprintf } from '~/locale';
+import ReportSection from '~/reports/components/report_section.vue';
 import CEWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
-import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
+import BlockingMergeRequestsReport from './components/blocking_merge_requests/blocking_merge_requests_report.vue';
+import MrWidgetJiraAssociationMissing from './components/states/mr_widget_jira_association_missing.vue';
 import MrWidgetPolicyViolation from './components/states/mr_widget_policy_violation.vue';
+import MrWidgetGeoSecondaryNode from './components/states/mr_widget_secondary_geo_node.vue';
 
 export default {
   components: {
     MrWidgetLicenses,
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
+    MrWidgetJiraAssociationMissing,
     BlockingMergeRequestsReport,
-    GroupedSecurityReportsApp,
+    GroupedSecurityReportsApp: () =>
+      import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
     GroupedMetricsReportsApp,
+    GroupedBrowserPerformanceReportsApp,
+    GroupedLoadPerformanceReportsApp,
     ReportSection,
   },
   directives: {
@@ -56,7 +61,7 @@ export default {
     },
     degradedBrowserPerformanceTotalScore() {
       return this.mr?.browserPerformanceMetrics?.degraded.find(
-        metric => metric.name === __('Total Score'),
+        (metric) => metric.name === __('Total Score'),
       );
     },
     hasBrowserPerformanceDegradation() {
@@ -85,11 +90,15 @@ export default {
 
       return Boolean(loadPerformance.head_path && loadPerformance.base_path);
     },
-    shouldRenderSecurityReport() {
+    shouldRenderBaseSecurityReport() {
+      return !this.mr.canReadVulnerabilities && this.shouldRenderSecurityReport;
+    },
+    shouldRenderExtendedSecurityReport() {
       const { enabledReports } = this.mr;
       return (
+        this.mr.canReadVulnerabilities &&
         enabledReports &&
-        this.$options.securityReportTypes.some(reportType => enabledReports[reportType])
+        this.$options.securityReportTypes.some((reportType) => enabledReports[reportType])
       );
     },
 
@@ -156,6 +165,7 @@ export default {
         this.loadingLoadPerformanceFailed,
       );
     },
+
     licensesApiPath() {
       return gl?.mrWidgetData?.license_scanning_comparison_path || null;
     },
@@ -188,7 +198,7 @@ export default {
       this.isLoadingBrowserPerformance = true;
 
       Promise.all([this.service.fetchReport(head_path), this.service.fetchReport(base_path)])
-        .then(values => {
+        .then((values) => {
           this.mr.compareBrowserPerformanceMetrics(values[0], values[1]);
         })
         .catch(() => {
@@ -205,7 +215,7 @@ export default {
       this.isLoadingLoadPerformance = true;
 
       Promise.all([this.service.fetchReport(head_path), this.service.fetchReport(base_path)])
-        .then(values => {
+        .then((values) => {
           this.mr.compareLoadPerformanceMetrics(values[0], values[1]);
         })
         .catch(() => {
@@ -227,12 +237,15 @@ export default {
       };
     },
   },
+  // TODO: Use the snake_case report types rather than the camelCased versions
+  // of them. See https://gitlab.com/gitlab-org/gitlab/-/issues/282430
   securityReportTypes: [
     'dast',
     'sast',
     'dependencyScanning',
     'containerScanning',
     'coverageFuzzing',
+    'apiFuzzing',
     'secretDetection',
   ],
 };
@@ -245,7 +258,7 @@ export default {
       class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
-      :human-access="mr.humanAccess.toLowerCase()"
+      :human-access="formattedHumanAccess"
       :user-callouts-path="mr.userCalloutsPath"
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
@@ -266,12 +279,10 @@ export default {
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
         :base-path="mr.codeclimate.base_path"
-        :head-path="mr.codeclimate.head_path"
-        :head-blob-path="mr.headBlobPath"
-        :base-blob-path="mr.baseBlobPath"
+        :codequality-reports-path="mr.codequalityReportsPath"
         :codequality-help-path="mr.codequalityHelpPath"
       />
-      <report-section
+      <grouped-browser-performance-reports-app
         v-if="shouldRenderBrowserPerformance"
         :status="browserPerformanceStatus"
         :loading-text="translateText('browser-performance').loading"
@@ -281,10 +292,8 @@ export default {
         :resolved-issues="mr.browserPerformanceMetrics.improved"
         :neutral-issues="mr.browserPerformanceMetrics.same"
         :has-issues="hasBrowserPerformanceMetrics"
-        :component="$options.componentNames.PerformanceIssueBody"
-        class="js-browser-performance-widget mr-widget-border-top mr-report"
       />
-      <report-section
+      <grouped-load-performance-reports-app
         v-if="hasLoadPerformancePaths"
         :status="loadPerformanceStatus"
         :loading-text="translateText('load-performance').loading"
@@ -294,16 +303,26 @@ export default {
         :resolved-issues="mr.loadPerformanceMetrics.improved"
         :neutral-issues="mr.loadPerformanceMetrics.same"
         :has-issues="hasLoadPerformanceMetrics"
-        :component="$options.componentNames.PerformanceIssueBody"
-        class="js-load-performance-widget mr-widget-border-top mr-report"
       />
       <grouped-metrics-reports-app
         v-if="mr.metricsReportsPath"
         :endpoint="mr.metricsReportsPath"
         class="js-metrics-reports-container"
       />
+
+      <security-reports-app
+        v-if="shouldRenderBaseSecurityReport"
+        :pipeline-id="mr.pipeline.id"
+        :project-id="mr.sourceProjectId"
+        :security-reports-docs-path="mr.securityReportsDocsPath"
+        :sast-comparison-path="mr.sastComparisonPath"
+        :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
+        :discover-project-security-path="mr.discoverProjectSecurityPath"
+      />
       <grouped-security-reports-app
-        v-if="shouldRenderSecurityReport"
+        v-else-if="shouldRenderExtendedSecurityReport"
         :head-blob-path="mr.headBlobPath"
         :source-branch="mr.sourceBranch"
         :target-branch="mr.targetBranch"
@@ -311,13 +330,13 @@ export default {
         :enabled-reports="mr.enabledReports"
         :sast-help-path="mr.sastHelp"
         :dast-help-path="mr.dastHelp"
+        :api-fuzzing-help-path="mr.apiFuzzingHelp"
         :coverage-fuzzing-help-path="mr.coverageFuzzingHelp"
         :container-scanning-help-path="mr.containerScanningHelp"
         :dependency-scanning-help-path="mr.dependencyScanningHelp"
         :secret-scanning-help-path="mr.secretScanningHelp"
         :can-read-vulnerability-feedback="mr.canReadVulnerabilityFeedback"
         :vulnerability-feedback-path="mr.vulnerabilityFeedbackPath"
-        :vulnerability-feedback-help-path="mr.vulnerabilityFeedbackHelpPath"
         :create-vulnerability-feedback-issue-path="mr.createVulnerabilityFeedbackIssuePath"
         :create-vulnerability-feedback-merge-request-path="
           mr.createVulnerabilityFeedbackMergeRequestPath
@@ -332,6 +351,15 @@ export default {
         :mr-state="mr.state"
         :target-branch-tree-path="mr.targetBranchTreePath"
         :new-pipeline-path="mr.newPipelinePath"
+        :container-scanning-comparison-path="mr.containerScanningComparisonPath"
+        :api-fuzzing-comparison-path="mr.apiFuzzingComparisonPath"
+        :coverage-fuzzing-comparison-path="mr.coverageFuzzingComparisonPath"
+        :dast-comparison-path="mr.dastComparisonPath"
+        :dependency-scanning-comparison-path="mr.dependencyScanningComparisonPath"
+        :sast-comparison-path="mr.sastComparisonPath"
+        :secret-scanning-comparison-path="mr.secretScanningComparisonPath"
+        :target-project-full-path="mr.targetProjectFullPath"
+        :mr-iid="mr.iid"
         class="js-security-widget"
       />
       <mr-widget-licenses
@@ -343,7 +371,7 @@ export default {
         :can-manage-licenses="mr.licenseScanning.can_manage_licenses"
         :full-report-path="mr.licenseScanning.full_report_path"
         :license-management-settings-path="mr.licenseScanning.settings_path"
-        :security-approvals-help-page-path="mr.securityApprovalsHelpPagePath"
+        :license-compliance-docs-path="mr.licenseComplianceDocsPath"
         report-section-class="mr-widget-border-top"
       />
 
@@ -351,6 +379,7 @@ export default {
         v-if="mr.testResultsPath"
         class="js-reports-container"
         :endpoint="mr.testResultsPath"
+        :head-blob-path="mr.headBlobPath"
         :pipeline-path="mr.pipeline.path"
       />
 
@@ -364,7 +393,7 @@ export default {
       <div class="mr-widget-section">
         <component :is="componentName" :mr="mr" :service="service" />
         <div class="mr-widget-info">
-          <section v-if="mr.allowCollaboration" class="mr-info-list mr-links">
+          <section v-if="mr.allowCollaboration" class="mr-info-list gl-ml-7">
             <p>
               {{ s__('mrWidget|Allows commits from members who can merge to the target branch') }}
             </p>
@@ -395,7 +424,6 @@ export default {
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
         </div>
       </div>
-      <div v-if="shouldRenderMergeHelp" class="mr-widget-footer"><mr-widget-merge-help /></div>
     </div>
     <mr-widget-pipeline-container
       v-if="shouldRenderMergedPipeline"

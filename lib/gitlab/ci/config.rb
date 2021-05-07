@@ -13,14 +13,18 @@ module Gitlab
       RESCUE_ERRORS = [
         Gitlab::Config::Loader::FormatError,
         Extendable::ExtensionError,
-        External::Processor::IncludeError
+        External::Processor::IncludeError,
+        Config::Yaml::Tags::TagError
       ].freeze
 
-      attr_reader :root
+      attr_reader :root, :context, :ref, :source
 
-      def initialize(config, project: nil, sha: nil, user: nil, parent_pipeline: nil)
+      def initialize(config, project: nil, sha: nil, user: nil, parent_pipeline: nil, ref: nil, source: nil)
         @context = build_context(project: project, sha: sha, user: user, parent_pipeline: parent_pipeline)
         @context.set_deadline(TIMEOUT_SECONDS)
+
+        @ref = ref
+        @source = source
 
         @config = expand_config(config)
 
@@ -70,6 +74,10 @@ module Gitlab
         @normalized_jobs ||= Ci::Config::Normalizer.new(jobs).normalize_jobs
       end
 
+      def included_templates
+        @context.expandset.filter_map { |i| i[:template] }
+      end
+
       private
 
       def expand_config(config)
@@ -85,20 +93,28 @@ module Gitlab
       end
 
       def build_config(config)
-        initial_config = Gitlab::Config::Loader::Yaml.new(config).load!
+        initial_config = Config::Yaml.load!(config)
         initial_config = Config::External::Processor.new(initial_config, @context).perform
         initial_config = Config::Extendable.new(initial_config).to_hash
-        initial_config = Config::EdgeStagesInjector.new(initial_config).to_hash
+        initial_config = Config::Yaml::Tags::Resolver.new(initial_config).to_hash
+        Config::EdgeStagesInjector.new(initial_config).to_hash
+      end
 
-        initial_config
+      def find_sha(project)
+        branches = project&.repository&.branches || []
+
+        unless branches.empty?
+          project.repository.root_ref_sha
+        end
       end
 
       def build_context(project:, sha:, user:, parent_pipeline:)
         Config::External::Context.new(
           project: project,
-          sha: sha || project&.repository&.root_ref_sha,
+          sha: sha || find_sha(project),
           user: user,
-          parent_pipeline: parent_pipeline)
+          parent_pipeline: parent_pipeline,
+          variables: project&.predefined_variables&.to_runner_variables)
       end
 
       def track_and_raise_for_dev_exception(error)

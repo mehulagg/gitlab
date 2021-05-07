@@ -1,13 +1,13 @@
 <script>
-import axios from '~/lib/utils/axios_utils';
+import { GlModal } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import axios from '~/lib/utils/axios_utils';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export default {
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
   },
   props: {
     url: {
@@ -26,27 +26,34 @@ export default {
     onSubmit() {
       return axios
         .post(this.url)
-        .then(response => {
+        .then((response) => {
           // follow the rediect to refresh the page
           redirectTo(response.request.responseURL);
         })
-        .catch(error => {
+        .catch((error) => {
           createFlash(s__('AdminArea|Stopping jobs failed'));
           throw error;
         });
     },
+  },
+  primaryAction: {
+    text: s__('AdminArea|Stop jobs'),
+    attributes: [{ variant: 'danger' }],
+  },
+  cancelAction: {
+    text: __('Cancel'),
   },
 };
 </script>
 
 <template>
   <gl-modal
-    id="stop-jobs-modal"
-    :header-title-text="s__('AdminArea|Stop all jobs?')"
-    :footer-primary-button-text="s__('AdminArea|Stop jobs')"
-    footer-primary-button-variant="danger"
-    @submit="onSubmit"
+    modal-id="stop-jobs-modal"
+    :action-primary="$options.primaryAction"
+    :action-cancel="$options.cancelAction"
+    @primary="onSubmit"
   >
+    <template #modal-title>{{ s__('AdminArea|Stop all jobs?') }}</template>
     {{ text }}
   </gl-modal>
 </template>

@@ -11,6 +11,8 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
 
   around_action :allow_gitaly_ref_name_caching
 
+  after_action :track_viewed_diffs_events, only: [:diffs_batch]
+
   def show
     render_diffs
   end
@@ -20,7 +22,10 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   end
 
   def diffs_batch
-    diffs = @compare.diffs_in_batch(params[:page], params[:per_page], diff_options: diff_options)
+    diff_options_hash = diff_options
+    diff_options_hash[:paths] = params[:paths] if params[:paths]
+
+    diffs = @compare.diffs_in_batch(params[:page], params[:per_page], diff_options: diff_options_hash)
     positions = @merge_request.note_positions_for_paths(diffs.diff_file_paths, current_user)
     environment = @merge_request.environments_for(current_user, latest: true).last
 
@@ -31,6 +36,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       environment: environment,
       merge_request: @merge_request,
       diff_view: diff_view,
+      merge_ref_head_diff: render_merge_ref_head_diff?,
       pagination_data: diffs.pagination_data
     }
 
@@ -41,7 +47,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
     diffs = @compare.diffs(diff_options)
 
     render json: DiffsMetadataSerializer.new(project: @merge_request.project, current_user: current_user)
-                   .represent(diffs, additional_attributes)
+                   .represent(diffs, additional_attributes.merge(only_context_commits: show_only_context_commits?))
   end
 
   private
@@ -64,7 +70,10 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       render: ->(partial, locals) { view_to_html_string(partial, locals) }
     }
 
-    options = additional_attributes.merge(diff_view: Feature.enabled?(:unified_diff_lines, @merge_request.project, default_enabled: true) ? "inline" : diff_view)
+    options = additional_attributes.merge(
+      diff_view: "inline",
+      merge_ref_head_diff: render_merge_ref_head_diff?
+    )
 
     if @merge_request.project.context_commits_enabled?
       options[:context_commits] = @merge_request.recent_context_commits
@@ -83,7 +92,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   # rubocop: disable CodeReuse/ActiveRecord
   def commit
     return unless commit_id = params[:commit_id].presence
-    return unless @merge_request.all_commits.exists?(sha: commit_id)
+    return unless @merge_request.all_commits.exists?(sha: commit_id) || @merge_request.recent_context_commits.map(&:id).include?(commit_id)
 
     @commit ||= @project.commit(commit_id)
   end
@@ -113,10 +122,8 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       end
     end
 
-    if Gitlab::Utils.to_boolean(params[:diff_head]) && @merge_request.diffable_merge_ref?
-      return CompareService.new(@project, @merge_request.merge_ref_head.sha)
-        .execute(@project, @merge_request.target_branch)
-    end
+    return @merge_request.context_commits_diff if show_only_context_commits? && !@merge_request.context_commits_diff.empty?
+    return @merge_request.merge_head_diff if render_merge_ref_head_diff?
 
     if @start_sha
       @merge_request_diff.compare_with(@start_sha)
@@ -155,6 +162,10 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
     @notes = prepare_notes_for_rendering(@grouped_diff_discussions.values.flatten.flat_map(&:notes), @merge_request)
   end
 
+  def render_merge_ref_head_diff?
+    Gitlab::Utils.to_boolean(params[:diff_head]) && @merge_request.diffable_merge_ref? && @start_sha.nil?
+  end
+
   def note_positions
     @note_positions ||= Gitlab::Diff::PositionCollection.new(renderable_notes.map(&:position))
   end
@@ -173,9 +184,20 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   end
 
   def update_diff_discussion_positions!
-    return unless Feature.enabled?(:merge_red_head_comments_position_on_demand, @merge_request.target_project, default_enabled: true)
     return if @merge_request.has_any_diff_note_positions?
 
     Discussions::CaptureDiffNotePositionsService.new(@merge_request).execute
+  end
+
+  def track_viewed_diffs_events
+    return if request.headers['DNT'] == '1'
+
+    Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+      .track_mr_diffs_action(merge_request: @merge_request)
+
+    return unless current_user&.view_diffs_file_by_file
+
+    Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+      .track_mr_diffs_single_file_action(merge_request: @merge_request, user: current_user)
   end
 end

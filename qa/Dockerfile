@@ -3,26 +3,16 @@ LABEL maintainer="GitLab Quality Department <quality@gitlab.com>"
 
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV DOCKER_VERSION="17.09.0-ce"
-ENV CHROME_VERSION="84.0.4147.89-1"
-ENV CHROME_DRIVER_VERSION="84.0.4147.30"
+ENV CHROME_VERSION="87.0.4280.141-1"
+ENV CHROME_DRIVER_VERSION="87.0.4280.88"
 ENV CHROME_DEB="google-chrome-stable_${CHROME_VERSION}_amd64.deb"
 ENV CHROME_URL="https://s3.amazonaws.com/gitlab-google-chrome-stable/${CHROME_DEB}"
 
 ##
-# Add support for stretch-backports
-#
-RUN echo "deb http://ftp.debian.org/debian stretch-backports main" >> /etc/apt/sources.list
-
-##
-# Update APT sources and install some dependencies
+# Update APT sources and install dependencies
 #
 RUN sed -i "s/httpredir.debian.org/ftp.us.debian.org/" /etc/apt/sources.list
-RUN apt-get update && apt-get install -y wget unzip xvfb lsb-release
-
-##
-# Install some packages from backports
-#
-RUN apt-get -y -t stretch-backports install git git-lfs
+RUN apt-get update && apt-get install -y wget unzip xvfb lsb-release git git-lfs
 
 ##
 # Install Docker
@@ -48,6 +38,14 @@ RUN unzip chromedriver_linux64.zip -d /usr/local/bin
 RUN rm -f chromedriver_linux64.zip
 
 ##
+# Install root certificate
+#
+RUN mkdir -p /usr/share/ca-certificates/gitlab
+ADD ./qa/tls_certificates/authority/ca.crt /usr/share/ca-certificates/gitlab/
+RUN echo 'gitlab/ca.crt' >> /etc/ca-certificates.conf
+RUN chmod -R 644 /usr/share/ca-certificates/gitlab && update-ca-certificates
+
+##
 # Install gcloud and kubectl CLI used in Auto DevOps test to create K8s
 # clusters
 #
@@ -65,7 +63,7 @@ COPY VERSION ./ee/app/models/license.r[b] /home/gitlab/ee/app/models/
 COPY ./lib/gitlab.rb /home/gitlab/lib/
 COPY ./lib/gitlab/utils.rb /home/gitlab/lib/gitlab/
 COPY ./INSTALLATION_TYPE ./VERSION /home/gitlab/
-RUN cd /home/gitlab/qa/ && gem install bundler:1.17.3 && bundle install --jobs=$(nproc) --retry=3 --without=development --quiet
+RUN cd /home/gitlab/qa/ && bundle install --jobs=$(nproc) --retry=3 --without=development --quiet
 COPY ./qa /home/gitlab/qa
 
 ENTRYPOINT ["bin/test"]

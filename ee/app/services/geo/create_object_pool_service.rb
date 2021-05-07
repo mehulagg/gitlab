@@ -6,7 +6,7 @@ module Geo
     include Gitlab::Geo::LogHelpers
 
     LEASE_TIMEOUT    = 1.hour.freeze
-    LEASE_KEY_PREFIX = 'object_pool:create'.freeze
+    LEASE_KEY_PREFIX = 'object_pool:create'
 
     attr_reader :pool_repository
 

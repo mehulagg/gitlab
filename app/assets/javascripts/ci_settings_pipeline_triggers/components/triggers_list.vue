@@ -2,11 +2,15 @@
 import { GlTable, GlButton, GlBadge, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
+  i18n: {
+    editButton: s__('Pipelines|Edit'),
+    revokeButton: s__('Pipelines|Revoke'),
+  },
   components: {
     GlTable,
     GlButton,
@@ -61,7 +65,7 @@ export default {
       class="triggers-list"
       responsive
     >
-      <template #cell(token)="{item}">
+      <template #cell(token)="{ item }">
         {{ item.token }}
         <clipboard-button
           v-if="item.hasTokenExposed"
@@ -82,7 +86,7 @@ export default {
           </gl-badge>
         </div>
       </template>
-      <template #cell(description)="{item}">
+      <template #cell(description)="{ item }">
         <tooltip-on-truncate
           :title="item.description"
           truncate-target="child"
@@ -92,7 +96,7 @@ export default {
           <div class="gl-flex-fill-1 gl-text-truncate">{{ item.description }}</div>
         </tooltip-on-truncate>
       </template>
-      <template #cell(owner)="{item}">
+      <template #cell(owner)="{ item }">
         <span class="trigger-owner sr-only">{{ item.owner.name }}</span>
         <user-avatar-link
           v-if="item.owner"
@@ -102,19 +106,21 @@ export default {
           :img-alt="item.owner.name"
         />
       </template>
-      <template #cell(lastUsed)="{item}">
+      <template #cell(lastUsed)="{ item }">
         <time-ago-tooltip v-if="item.lastUsed" :time="item.lastUsed" />
         <span v-else>{{ __('Never') }}</span>
       </template>
-      <template #cell(actions)="{item}">
+      <template #cell(actions)="{ item }">
         <gl-button
-          :title="s__('Pipelines|Edit')"
+          :title="$options.i18n.editButton"
+          :aria-label="$options.i18n.editButton"
           icon="pencil"
           data-testid="edit-btn"
           :href="item.editProjectTriggerPath"
         />
         <gl-button
-          :title="s__('Pipelines|Revoke')"
+          :title="$options.i18n.revokeButton"
+          :aria-label="$options.i18n.revokeButton"
           icon="remove"
           variant="warning"
           :data-confirm="

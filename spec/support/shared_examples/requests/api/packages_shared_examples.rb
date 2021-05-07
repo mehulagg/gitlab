@@ -24,7 +24,7 @@ end
 
 RSpec.shared_examples 'deploy token for package uploads' do
   context 'with deploy token headers' do
-    let(:headers) { basic_auth_header(deploy_token.username, deploy_token.token).merge(workhorse_header) }
+    let(:headers) { basic_auth_header(deploy_token.username, deploy_token.token).merge(workhorse_headers) }
 
     before do
       project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
@@ -35,7 +35,7 @@ RSpec.shared_examples 'deploy token for package uploads' do
     end
 
     context 'invalid token' do
-      let(:headers) { basic_auth_header(deploy_token.username, 'bar').merge(workhorse_header) }
+      let(:headers) { basic_auth_header(deploy_token.username, 'bar').merge(workhorse_headers) }
 
       it_behaves_like 'returning response status', :unauthorized
     end
@@ -100,9 +100,9 @@ RSpec.shared_examples 'job token for package GET requests' do
   end
 end
 
-RSpec.shared_examples 'job token for package uploads' do
+RSpec.shared_examples 'job token for package uploads' do |authorize_endpoint: false|
   context 'with job token headers' do
-    let(:headers) { basic_auth_header(::Gitlab::Auth::CI_JOB_USER, job.token).merge(workhorse_header) }
+    let(:headers) { basic_auth_header(::Gitlab::Auth::CI_JOB_USER, job.token).merge(workhorse_headers) }
 
     before do
       project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
@@ -111,16 +111,27 @@ RSpec.shared_examples 'job token for package uploads' do
 
     context 'valid token' do
       it_behaves_like 'returning response status', :success
+
+      unless authorize_endpoint
+        it 'creates a package with build info' do
+          expect { subject }.to change { Packages::Package.count }.by(1)
+
+          pkg = ::Packages::Package.order_created
+                                   .last
+
+          expect(pkg.build_infos).to be
+        end
+      end
     end
 
     context 'invalid token' do
-      let(:headers) { basic_auth_header(::Gitlab::Auth::CI_JOB_USER, 'bar').merge(workhorse_header) }
+      let(:headers) { basic_auth_header(::Gitlab::Auth::CI_JOB_USER, 'bar').merge(workhorse_headers) }
 
       it_behaves_like 'returning response status', :unauthorized
     end
 
     context 'invalid user' do
-      let(:headers) { basic_auth_header('foo', job.token).merge(workhorse_header) }
+      let(:headers) { basic_auth_header('foo', job.token).merge(workhorse_headers) }
 
       it_behaves_like 'returning response status', :unauthorized
     end
@@ -128,9 +139,13 @@ RSpec.shared_examples 'job token for package uploads' do
 end
 
 RSpec.shared_examples 'a package tracking event' do |category, action|
-  it "creates a gitlab tracking event #{action}" do
-    expect(Gitlab::Tracking).to receive(:event).with(category, action)
+  before do
+    stub_feature_flags(collect_package_events: true)
+  end
 
+  it "creates a gitlab tracking event #{action}", :snowplow do
     expect { subject }.to change { Packages::Event.count }.by(1)
+
+    expect_snowplow_event(category: category, action: action)
   end
 end

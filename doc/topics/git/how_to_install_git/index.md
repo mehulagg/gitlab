@@ -1,17 +1,17 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'This article describes how to install Git on macOS, Ubuntu Linux and Windows.'
 type: howto
 ---
 
-# Installing Git
+# Installing Git **(FREE)**
 
 To begin contributing to GitLab projects,
-you will need to install the Git client on your computer.
+you must install the Git client on your computer.
 
-This article will show you how to install Git on macOS, Ubuntu Linux and Windows.
+This article shows you how to install Git on macOS, Ubuntu Linux and Windows.
 
 Information on [installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 is also available at the official Git website.

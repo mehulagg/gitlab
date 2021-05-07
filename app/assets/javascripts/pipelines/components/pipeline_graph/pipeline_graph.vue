@@ -1,22 +1,21 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { DRAW_FAILURE, DEFAULT } from '../../constants';
+import LinksLayer from '../graph_shared/links_layer.vue';
 import JobPill from './job_pill.vue';
 import StagePill from './stage_pill.vue';
-import { generateLinksData } from './drawing_utils';
-import { parseData } from '../parsing_utils';
-import { DRAW_FAILURE, DEFAULT } from '../../constants';
-import { generateJobNeedsDict } from '../../utils';
 
 export default {
   components: {
     GlAlert,
     JobPill,
+    LinksLayer,
     StagePill,
   },
   CONTAINER_REF: 'PIPELINE_GRAPH_CONTAINER_REF',
-  CONTAINER_ID: 'pipeline-graph-container',
+  BASE_CONTAINER_ID: 'pipeline-graph-container',
+  PIPELINE_ID: 0,
   STROKE_WIDTH: 2,
   errorTexts: {
     [DRAW_FAILURE]: __('Could not draw the lines for job relationships'),
@@ -32,15 +31,32 @@ export default {
     return {
       failureType: null,
       highlightedJob: null,
-      links: [],
-      needsObject: null,
-      height: 0,
-      width: 0,
+      highlightedJobs: [],
+      measurements: {
+        height: 0,
+        width: 0,
+      },
     };
   },
   computed: {
-    isPipelineDataEmpty() {
-      return isEmpty(this.pipelineData);
+    containerId() {
+      return `${this.$options.BASE_CONTAINER_ID}-${this.$options.PIPELINE_ID}`;
+    },
+    failure() {
+      switch (this.failureType) {
+        case DRAW_FAILURE:
+          return {
+            text: this.$options.errorTexts[DRAW_FAILURE],
+            variant: 'danger',
+            dismissible: true,
+          };
+        default:
+          return {
+            text: this.$options.errorTexts[DEFAULT],
+            variant: 'danger',
+            dismissible: true,
+          };
+      }
     },
     hasError() {
       return this.failureType;
@@ -48,92 +64,53 @@ export default {
     hasHighlightedJob() {
       return Boolean(this.highlightedJob);
     },
-    failure() {
-      const text = this.$options.errorTexts[this.failureType] || this.$options.errorTexts[DEFAULT];
-
-      return { text, variant: 'danger' };
-    },
-    viewBox() {
-      return [0, 0, this.width, this.height];
-    },
-    highlightedJobs() {
-      // If you are hovering on a job, then the jobs we want to highlight are:
-      // The job you are currently hovering + all of its needs.
-      return this.hasHighlightedJob
-        ? [this.highlightedJob, ...this.needsObject[this.highlightedJob]]
-        : [];
-    },
-    highlightedLinks() {
-      // If you are hovering on a job, then the links we want to highlight are:
-      // All the links whose `source` and `target` are highlighted jobs.
-      if (this.hasHighlightedJob) {
-        const filteredLinks = this.links.filter(link => {
-          return (
-            this.highlightedJobs.includes(link.source) && this.highlightedJobs.includes(link.target)
-          );
-        });
-
-        return filteredLinks.map(link => link.ref);
-      }
-
-      return [];
+    pipelineStages() {
+      return this.pipelineData?.stages || [];
     },
   },
-  mounted() {
-    if (!this.isPipelineDataEmpty) {
-      this.getGraphDimensions();
-      this.drawJobLinks();
-    }
+  watch: {
+    pipelineData: {
+      immediate: true,
+      handler() {
+        this.$nextTick(() => {
+          this.computeGraphDimensions();
+        });
+      },
+    },
   },
   methods: {
-    drawJobLinks() {
-      const { stages, jobs } = this.pipelineData;
-      const unwrappedGroups = this.unwrapPipelineData(stages);
-
-      try {
-        const parsedData = parseData(unwrappedGroups);
-        this.links = generateLinksData(parsedData, jobs, this.$options.CONTAINER_ID);
-      } catch {
-        this.reportFailure(DRAW_FAILURE);
-      }
+    computeGraphDimensions() {
+      this.measurements = {
+        width: this.$refs[this.$options.CONTAINER_REF].scrollWidth,
+        height: this.$refs[this.$options.CONTAINER_REF].scrollHeight,
+      };
     },
-    getStageBackgroundClass(index) {
-      const { length } = this.pipelineData.stages;
-
+    getStageBackgroundClasses(index) {
+      const { length } = this.pipelineStages;
+      // It's possible for a graph to have only one stage, in which
+      // case we concatenate both the left and right rounding classes
       if (length === 1) {
-        return 'stage-rounded';
-      } else if (index === 0) {
-        return 'stage-left-rounded';
-      } else if (index === length - 1) {
-        return 'stage-right-rounded';
+        return 'gl-rounded-bottom-left-6 gl-rounded-top-left-6 gl-rounded-bottom-right-6 gl-rounded-top-right-6';
+      }
+
+      if (index === 0) {
+        return 'gl-rounded-bottom-left-6 gl-rounded-top-left-6';
+      }
+
+      if (index === length - 1) {
+        return 'gl-rounded-bottom-right-6 gl-rounded-top-right-6';
       }
 
       return '';
     },
-    highlightNeeds(uniqueJobId) {
-      // The first time we hover, we create the object where
-      // we store all the data to properly highlight the needs.
-      if (!this.needsObject) {
-        this.needsObject = generateJobNeedsDict(this.pipelineData) ?? {};
-      }
-
-      this.highlightedJob = uniqueJobId;
+    isJobHighlighted(jobName) {
+      return this.highlightedJobs.includes(jobName);
     },
-    removeHighlightNeeds() {
+    onError(error) {
+      this.reportFailure(error.type);
+    },
+    removeHoveredJob() {
       this.highlightedJob = null;
-    },
-    unwrapPipelineData(stages) {
-      return stages
-        .map(({ name, groups }) => {
-          return groups.map(group => {
-            return { category: name, ...group };
-          });
-        })
-        .flat(2);
-    },
-    getGraphDimensions() {
-      this.width = `${this.$refs[this.$options.CONTAINER_REF].scrollWidth}px`;
-      this.height = `${this.$refs[this.$options.CONTAINER_REF].scrollHeight}px`;
     },
     reportFailure(errorType) {
       this.failureType = errorType;
@@ -141,74 +118,63 @@ export default {
     resetFailure() {
       this.failureType = null;
     },
-    isJobHighlighted(jobName) {
-      return this.highlightedJobs.includes(jobName);
+    setHoveredJob(jobName) {
+      this.highlightedJob = jobName;
     },
-    isLinkHighlighted(linkRef) {
-      return this.highlightedLinks.includes(linkRef);
-    },
-    getLinkClasses(link) {
-      return [
-        this.isLinkHighlighted(link.ref) ? 'gl-stroke-blue-400' : 'gl-stroke-gray-200',
-        { 'gl-opacity-3': this.hasHighlightedJob && !this.isLinkHighlighted(link.ref) },
-      ];
+    updateHighlightedJobs(jobs) {
+      this.highlightedJobs = jobs;
     },
   },
 };
 </script>
 <template>
   <div>
-    <gl-alert v-if="hasError" :variant="failure.variant" @dismiss="resetFailure">
+    <gl-alert
+      v-if="hasError"
+      :variant="failure.variant"
+      :dismissible="failure.dismissible"
+      @dismiss="resetFailure"
+    >
       {{ failure.text }}
     </gl-alert>
-    <gl-alert v-if="isPipelineDataEmpty" variant="tip" :dismissible="false">
-      {{ __('No content to show') }}
-    </gl-alert>
-    <div
-      v-else
-      :id="$options.CONTAINER_ID"
-      :ref="$options.CONTAINER_REF"
-      class="gl-display-flex gl-bg-gray-50 gl-px-4 gl-overflow-auto gl-relative gl-py-7"
-    >
-      <svg :viewBox="viewBox" :width="width" :height="height" class="gl-absolute">
-        <template>
-          <path
-            v-for="link in links"
-            :key="link.path"
-            :ref="link.ref"
-            :d="link.path"
-            class="gl-fill-transparent gl-transition-duration-slow gl-transition-timing-function-ease"
-            :class="getLinkClasses(link)"
-            :stroke-width="$options.STROKE_WIDTH"
-          />
-        </template>
-      </svg>
-      <div
-        v-for="(stage, index) in pipelineData.stages"
-        :key="`${stage.name}-${index}`"
-        class="gl-flex-direction-column"
+    <div :id="containerId" :ref="$options.CONTAINER_REF" data-testid="graph-container">
+      <links-layer
+        :pipeline-data="pipelineStages"
+        :pipeline-id="$options.PIPELINE_ID"
+        :container-id="containerId"
+        :container-measurements="measurements"
+        :highlighted-job="highlightedJob"
+        @highlightedJobsChange="updateHighlightedJobs"
+        @error="onError"
       >
         <div
-          class="gl-display-flex gl-align-items-center gl-bg-white gl-w-full gl-px-8 gl-py-4 gl-mb-5"
-          :class="getStageBackgroundClass(index)"
+          v-for="(stage, index) in pipelineStages"
+          :key="`${stage.name}-${index}`"
+          class="gl-flex-direction-column"
         >
-          <stage-pill :stage-name="stage.name" :is-empty="stage.groups.length === 0" />
+          <div
+            class="gl-display-flex gl-align-items-center gl-bg-white gl-w-full gl-px-8 gl-py-4 gl-mb-5"
+            :class="getStageBackgroundClasses(index)"
+            data-testid="stage-background"
+          >
+            <stage-pill :stage-name="stage.name" :is-empty="stage.groups.length === 0" />
+          </div>
+          <div
+            class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full gl-px-8"
+          >
+            <job-pill
+              v-for="group in stage.groups"
+              :key="group.name"
+              :job-name="group.name"
+              :pipeline-id="$options.PIPELINE_ID"
+              :is-highlighted="hasHighlightedJob && isJobHighlighted(group.name)"
+              :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.name)"
+              @on-mouse-enter="setHoveredJob"
+              @on-mouse-leave="removeHoveredJob"
+            />
+          </div>
         </div>
-        <div
-          class="gl-display-flex gl-flex-direction-column gl-align-items-center gl-w-full gl-px-8"
-        >
-          <job-pill
-            v-for="group in stage.groups"
-            :key="group.name"
-            :job-id="group.id"
-            :job-name="group.name"
-            :is-highlighted="hasHighlightedJob && isJobHighlighted(group.id)"
-            :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
-            @on-mouse-enter="highlightNeeds"
-            @on-mouse-leave="removeHighlightNeeds"
-          />
-        </div>
-      </div>
+      </links-layer>
     </div>
   </div>
 </template>

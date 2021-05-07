@@ -14,12 +14,11 @@ module EE
     override :filter_projects
     def filter_projects(collection)
       collection = super(collection)
-      collection = by_security_reports_presence(collection)
-      collection
+      by_security_reports_presence(collection)
     end
 
     def by_security_reports_presence(collection)
-      if params[:with_security_reports] && group.feature_available?(:security_dashboard)
+      if params[:with_security_reports] && group.licensed_feature_available?(:security_dashboard)
         collection.with_security_reports
       else
         collection

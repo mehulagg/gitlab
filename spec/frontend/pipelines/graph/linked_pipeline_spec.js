@@ -1,12 +1,12 @@
-import { mount } from '@vue/test-utils';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import { UPSTREAM, DOWNSTREAM } from '~/pipelines/components/graph/constants';
 import LinkedPipelineComponent from '~/pipelines/components/graph/linked_pipeline.vue';
 import CiStatus from '~/vue_shared/components/ci_icon.vue';
-
 import mockData from './linked_pipelines_mock_data';
 
 const mockPipeline = mockData.triggered[0];
-
 const validTriggeredPipelineId = mockPipeline.project.id;
 const invalidTriggeredPipelineId = mockPipeline.project.id + 5;
 
@@ -18,7 +18,7 @@ describe('Linked pipeline', () => {
   const findLinkedPipeline = () => wrapper.find({ ref: 'linkedPipeline' });
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findPipelineLink = () => wrapper.find('[data-testid="pipelineLink"]');
-  const findExpandButton = () => wrapper.find('[data-testid="expandPipelineButton"]');
+  const findExpandButton = () => wrapper.find('[data-testid="expand-pipeline-button"]');
 
   const createWrapper = (propsData, data = []) => {
     wrapper = mount(LinkedPipelineComponent, {
@@ -40,18 +40,12 @@ describe('Linked pipeline', () => {
       pipeline: mockPipeline,
       projectId: invalidTriggeredPipelineId,
       columnTitle: 'Downstream',
+      type: DOWNSTREAM,
+      expanded: false,
     };
 
     beforeEach(() => {
       createWrapper(props);
-    });
-
-    it('should render a list item as the containing element', () => {
-      expect(wrapper.element.tagName).toBe('LI');
-    });
-
-    it('should render a button', () => {
-      expect(findButton().exists()).toBe(true);
     });
 
     it('should render the project name', () => {
@@ -104,11 +98,15 @@ describe('Linked pipeline', () => {
       pipeline: mockPipeline,
       projectId: validTriggeredPipelineId,
       columnTitle: 'Downstream',
+      type: DOWNSTREAM,
+      expanded: false,
     };
 
     const upstreamProps = {
       ...downstreamProps,
       columnTitle: 'Upstream',
+      type: UPSTREAM,
+      expanded: false,
     };
 
     it('parent/child label container should exist', () => {
@@ -171,7 +169,7 @@ describe('Linked pipeline', () => {
     `(
       '$pipelineType.columnTitle pipeline button icon should be $anglePosition if expanded state is $expanded',
       ({ pipelineType, anglePosition, expanded }) => {
-        createWrapper(pipelineType, { expanded });
+        createWrapper({ ...pipelineType, expanded });
         expect(findExpandButton().props('icon')).toBe(anglePosition);
       },
     );
@@ -182,6 +180,8 @@ describe('Linked pipeline', () => {
       pipeline: { ...mockPipeline, isLoading: true },
       projectId: invalidTriggeredPipelineId,
       columnTitle: 'Downstream',
+      type: DOWNSTREAM,
+      expanded: false,
     };
 
     beforeEach(() => {
@@ -198,6 +198,8 @@ describe('Linked pipeline', () => {
       pipeline: mockPipeline,
       projectId: validTriggeredPipelineId,
       columnTitle: 'Downstream',
+      type: DOWNSTREAM,
+      expanded: false,
     };
 
     beforeEach(() => {
@@ -211,14 +213,11 @@ describe('Linked pipeline', () => {
       expect(wrapper.emitted().pipelineClicked).toBeTruthy();
     });
 
-    it('should emit `bv::hide::tooltip` to close the tooltip', () => {
+    it(`should emit ${BV_HIDE_TOOLTIP} to close the tooltip`, () => {
       jest.spyOn(wrapper.vm.$root, '$emit');
       findButton().trigger('click');
 
-      expect(wrapper.vm.$root.$emit.mock.calls[0]).toEqual([
-        'bv::hide::tooltip',
-        'js-linked-pipeline-34993051',
-      ]);
+      expect(wrapper.vm.$root.$emit.mock.calls[0]).toEqual([BV_HIDE_TOOLTIP]);
     });
 
     it('should emit downstreamHovered with job name on mouseover', () => {

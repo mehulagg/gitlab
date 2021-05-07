@@ -46,7 +46,7 @@ RSpec.describe MigrateCiJobArtifactsToSeparateRegistry, :geo do
       expect(job_artifact_registry.all.count).to eq(3)
 
       entry = file_registry.find_by(file_id: 1)
-      entry.update(success: false, bytes: 10240, sha256: '10' * 64)
+      entry.update!(success: false, bytes: 10240, sha256: '10' * 64)
 
       expect(job_artifact_registry.where(artifact_id: 1, success: false, bytes: 10240, sha256: '10' * 64).count).to eq(1)
       # Ensure that *only* the correct job artifact is updated

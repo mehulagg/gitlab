@@ -50,41 +50,6 @@ RSpec.describe API::Internal::Base do
     end
   end
 
-  shared_examples 'actor key validations' do
-    context 'key id is not provided' do
-      let(:key_id) { nil }
-
-      it 'returns an error message' do
-        subject
-
-        expect(json_response['success']).to be_falsey
-        expect(json_response['message']).to eq('Could not find a user without a key')
-      end
-    end
-
-    context 'key does not exist' do
-      let(:key_id) { non_existing_record_id }
-
-      it 'returns an error message' do
-        subject
-
-        expect(json_response['success']).to be_falsey
-        expect(json_response['message']).to eq('Could not find the given key')
-      end
-    end
-
-    context 'key without user' do
-      let(:key_id) { create(:key, user: nil).id }
-
-      it 'returns an error message' do
-        subject
-
-        expect(json_response['success']).to be_falsey
-        expect(json_response['message']).to eq('Could not find a user for the given key')
-      end
-    end
-  end
-
   describe 'GET /internal/two_factor_recovery_codes' do
     let(:key_id) { key.id }
 
@@ -220,6 +185,8 @@ RSpec.describe API::Internal::Base do
     end
 
     it 'returns a token without expiry when the expires_at parameter is missing' do
+      token_size = (PersonalAccessToken.token_prefix || '').size + 20
+
       post api('/internal/personal_access_token'),
            params: {
              secret_token: secret_token,
@@ -229,12 +196,14 @@ RSpec.describe API::Internal::Base do
            }
 
       expect(json_response['success']).to be_truthy
-      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['token']).to match(/\A\S{#{token_size}}\z/)
       expect(json_response['scopes']).to match_array(%w(read_api read_repository))
       expect(json_response['expires_at']).to be_nil
     end
 
     it 'returns a token with expiry when it receives a valid expires_at parameter' do
+      token_size = (PersonalAccessToken.token_prefix || '').size + 20
+
       post api('/internal/personal_access_token'),
            params: {
              secret_token: secret_token,
@@ -245,7 +214,7 @@ RSpec.describe API::Internal::Base do
            }
 
       expect(json_response['success']).to be_truthy
-      expect(json_response['token']).to match(/\A\S{20}\z/)
+      expect(json_response['token']).to match(/\A\S{#{token_size}}\z/)
       expect(json_response['scopes']).to match_array(%w(read_api read_repository))
       expect(json_response['expires_at']).to eq('9001-11-17')
     end
@@ -253,6 +222,7 @@ RSpec.describe API::Internal::Base do
 
   describe "POST /internal/lfs_authenticate" do
     before do
+      stub_lfs_setting(enabled: true)
       project.add_developer(user)
     end
 
@@ -292,6 +262,33 @@ RSpec.describe API::Internal::Base do
         lfs_auth_user(non_existing_record_id, project)
 
         expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      it 'returns a 404 when LFS is disabled on the project' do
+        project.update!(lfs_enabled: false)
+        lfs_auth_user(user.id, project)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      context 'other repository types' do
+        it 'returns the correct information for a project wiki' do
+          wiki = create(:project_wiki, project: project)
+          lfs_auth_user(user.id, wiki)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['username']).to eq(user.username)
+          expect(json_response['repository_http_path']).to eq(wiki.http_url_to_repo)
+          expect(json_response['expires_in']).to eq(Gitlab::LfsToken::DEFAULT_EXPIRE_TIME)
+          expect(Gitlab::LfsToken.new(user).token_valid?(json_response['lfs_token'])).to be_truthy
+        end
+
+        it 'returns a 404 when the container does not support LFS' do
+          snippet = create(:project_snippet)
+          lfs_auth_user(user.id, snippet)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
       end
     end
 
@@ -546,25 +543,51 @@ RSpec.describe API::Internal::Base do
       end
 
       context "git pull" do
-        before do
-          stub_feature_flags(gitaly_mep_mep: true)
+        context "with a feature flag enabled globally" do
+          before do
+            stub_feature_flags(gitaly_mep_mep: true)
+          end
+
+          it "has the correct payload" do
+            pull(key, project)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["status"]).to be_truthy
+            expect(json_response["gl_repository"]).to eq("project-#{project.id}")
+            expect(json_response["gl_project_path"]).to eq(project.full_path)
+            expect(json_response["gitaly"]).not_to be_nil
+            expect(json_response["gitaly"]["repository"]).not_to be_nil
+            expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
+            expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
+            expect(json_response["gitaly"]["address"]).to eq(Gitlab::GitalyClient.address(project.repository_storage))
+            expect(json_response["gitaly"]["token"]).to eq(Gitlab::GitalyClient.token(project.repository_storage))
+            expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'true')
+            expect(user.reload.last_activity_on).to eql(Date.today)
+          end
         end
 
-        it "has the correct payload" do
-          pull(key, project)
+        context "with a feature flag enabled for a project" do
+          before do
+            stub_feature_flags(gitaly_mep_mep: project)
+          end
 
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["status"]).to be_truthy
-          expect(json_response["gl_repository"]).to eq("project-#{project.id}")
-          expect(json_response["gl_project_path"]).to eq(project.full_path)
-          expect(json_response["gitaly"]).not_to be_nil
-          expect(json_response["gitaly"]["repository"]).not_to be_nil
-          expect(json_response["gitaly"]["repository"]["storage_name"]).to eq(project.repository.gitaly_repository.storage_name)
-          expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
-          expect(json_response["gitaly"]["address"]).to eq(Gitlab::GitalyClient.address(project.repository_storage))
-          expect(json_response["gitaly"]["token"]).to eq(Gitlab::GitalyClient.token(project.repository_storage))
-          expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'true')
-          expect(user.reload.last_activity_on).to eql(Date.today)
+          it "has the flag set to true for that project" do
+            pull(key, project)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["gl_repository"]).to eq("project-#{project.id}")
+            expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'true')
+          end
+
+          it "has the flag set to false for other projects" do
+            other_project = create(:project, :public, :repository)
+
+            pull(key, other_project)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["gl_repository"]).to eq("project-#{other_project.id}")
+            expect(json_response["gitaly"]["features"]).to eq('gitaly-feature-mep-mep' => 'false')
+          end
         end
       end
 
@@ -621,7 +644,7 @@ RSpec.describe API::Internal::Base do
 
       context 'with Project' do
         it_behaves_like 'storing arguments in the application context' do
-          let(:expected_params) { { user: key.user.username, project: project.full_path } }
+          let(:expected_params) { { user: key.user.username, project: project.full_path, caller_id: "POST /api/:version/internal/allowed" } }
 
           subject { push(key, project) }
         end
@@ -629,7 +652,7 @@ RSpec.describe API::Internal::Base do
 
       context 'with PersonalSnippet' do
         it_behaves_like 'storing arguments in the application context' do
-          let(:expected_params) { { user: key.user.username } }
+          let(:expected_params) { { user: key.user.username, caller_id: "POST /api/:version/internal/allowed" } }
 
           subject { push(key, personal_snippet) }
         end
@@ -637,7 +660,7 @@ RSpec.describe API::Internal::Base do
 
       context 'with ProjectSnippet' do
         it_behaves_like 'storing arguments in the application context' do
-          let(:expected_params) { { user: key.user.username, project: project_snippet.project.full_path } }
+          let(:expected_params) { { user: key.user.username, project: project_snippet.project.full_path, caller_id: "POST /api/:version/internal/allowed" } }
 
           subject { push(key, project_snippet) }
         end
@@ -694,8 +717,7 @@ RSpec.describe API::Internal::Base do
           'ssh',
           {
             authentication_abilities: [:read_project, :download_code, :push_code],
-            namespace_path: project.namespace.path,
-            repository_path: project.path,
+            repository_path: "#{project.full_path}.git",
             redirected_path: nil
           }
         ).and_return(access_checker)
@@ -865,7 +887,7 @@ RSpec.describe API::Internal::Base do
     context 'project does not exist' do
       context 'git pull' do
         it 'returns a 200 response with status: false' do
-          project.destroy
+          project.destroy!
 
           pull(key, project)
 
@@ -1061,6 +1083,104 @@ RSpec.describe API::Internal::Base do
              })
 
         expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'admin mode' do
+      shared_examples 'pushes succeed for ssh and http' do
+        it 'accepts the SSH push' do
+          push(key, project)
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        it 'accepts the HTTP push' do
+          push(key, project, 'http')
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      shared_examples 'pushes fail for ssh and http' do
+        it 'rejects the SSH push' do
+          push(key, project)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+
+        it 'rejects the HTTP push' do
+          push(key, project, 'http')
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'application setting :admin_mode is enabled' do
+        context 'with an admin user' do
+          let(:user) { create(:admin) }
+
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+        end
+
+        context 'with a regular user' do
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes fail for ssh and http'
+          end
+        end
+      end
+
+      context 'application setting :admin_mode is disabled' do
+        before do
+          stub_application_setting(admin_mode: false)
+        end
+
+        context 'with an admin user' do
+          let(:user) { create(:admin) }
+
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+        end
+
+        context 'with a regular user' do
+          context 'is member of the project' do
+            before do
+              project.add_developer(user)
+            end
+
+            it_behaves_like 'pushes succeed for ssh and http'
+          end
+
+          context 'is not member of the project' do
+            it_behaves_like 'pushes fail for ssh and http'
+          end
+        end
       end
     end
   end
@@ -1277,10 +1397,6 @@ RSpec.describe API::Internal::Base do
     let(:key_id) { key.id }
     let(:otp) { '123456'}
 
-    before do
-      stub_feature_flags(two_factor_for_cli: true)
-    end
-
     subject do
       post api('/internal/two_factor_otp_check'),
            params: {
@@ -1290,71 +1406,32 @@ RSpec.describe API::Internal::Base do
            }
     end
 
-    it_behaves_like 'actor key validations'
+    it 'is not available' do
+      subject
 
-    context 'when the key is a deploy key' do
-      let(:key_id) { create(:deploy_key).id }
+      expect(json_response['success']).to be_falsey
+    end
+  end
 
-      it 'returns an error message' do
+  describe 'GET /internal/geo_proxy' do
+    subject { get api('/internal/geo_proxy'), params: { secret_token: secret_token } }
+
+    context 'with valid auth' do
+      it 'returns empty data' do
         subject
 
-        expect(json_response['success']).to be_falsey
-        expect(json_response['message']).to eq('Deploy keys cannot be used for Two Factor')
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_empty
       end
     end
 
-    context 'when the two factor is enabled' do
-      before do
-        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true)
-      end
+    context 'with invalid auth' do
+      let(:secret_token) { 'invalid_token' }
 
-      context 'when the OTP is valid' do
-        it 'returns success' do
-          allow_any_instance_of(Users::ValidateOtpService).to receive(:execute).with(otp).and_return(status: :success)
-
-          subject
-
-          expect(json_response['success']).to be_truthy
-        end
-      end
-
-      context 'when the OTP is invalid' do
-        it 'is not success' do
-          allow_any_instance_of(Users::ValidateOtpService).to receive(:execute).with(otp).and_return(status: :error)
-
-          subject
-
-          expect(json_response['success']).to be_falsey
-        end
-      end
-    end
-
-    context 'when the two factor is disabled' do
-      before do
-        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(false)
-      end
-
-      it 'returns an error message' do
+      it 'returns unauthorized' do
         subject
 
-        expect(json_response['success']).to be_falsey
-        expect(json_response['message']).to eq 'Two-factor authentication is not enabled for this user'
-      end
-    end
-
-    context 'two_factor_for_cli feature is disabled' do
-      before do
-        stub_feature_flags(two_factor_for_cli: false)
-      end
-
-      context 'when two-factor is enabled for the user' do
-        it 'returns user two factor config' do
-          allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true)
-
-          subject
-
-          expect(json_response['success']).to be_falsey
-        end
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
   end

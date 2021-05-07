@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # Based on spec/requests/api/groups_spec.rb
 # Should follow closely in order to ensure all situations are covered
-RSpec.describe 'getting group information', :do_not_mock_admin_mode do
+RSpec.describe 'getting group information' do
   include GraphqlHelpers
   include UploadHelpers
 
@@ -17,7 +17,15 @@ RSpec.describe 'getting group information', :do_not_mock_admin_mode do
   # similar to the API "GET /groups/:id"
   describe "Query group(fullPath)" do
     def group_query(group)
-      graphql_query_for('group', 'fullPath' => group.full_path)
+      fields = all_graphql_fields_for('Group')
+      # TODO: Set required timelogs args elsewhere https://gitlab.com/gitlab-org/gitlab/-/issues/325499
+      fields.selection['timelogs(startDate: "2021-03-01" endDate: "2021-03-30")'] = fields.selection.delete('timelogs')
+
+      graphql_query_for(
+        'group',
+        { fullPath: group.full_path },
+        fields
+      )
     end
 
     it_behaves_like 'a working graphql query' do

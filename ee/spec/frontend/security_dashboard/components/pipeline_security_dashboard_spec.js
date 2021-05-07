@@ -1,9 +1,10 @@
-import Vuex from 'vuex';
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline_security_dashboard.vue';
-import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
+import VulnerabilityReport from 'ee/security_dashboard/components/vulnerability_report.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -24,7 +25,10 @@ describe('Pipeline Security Dashboard component', () => {
   let store;
   let wrapper;
 
-  const factory = options => {
+  const findSecurityDashboard = () => wrapper.findComponent(SecurityDashboard);
+  const findVulnerabilityReport = () => wrapper.findComponent(VulnerabilityReport);
+
+  const factory = (options) => {
     store = new Vuex.Store({
       modules: {
         vulnerabilities: {
@@ -85,13 +89,32 @@ describe('Pipeline Security Dashboard component', () => {
     });
 
     it('renders the security dashboard', () => {
-      const dashboard = wrapper.find(SecurityDashboard);
-      expect(dashboard.exists()).toBe(true);
-      expect(dashboard.props()).toMatchObject({
-        lockToProject: { id: projectId },
+      expect(findSecurityDashboard().props()).toMatchObject({
         pipelineId,
         vulnerabilitiesEndpoint,
       });
+    });
+  });
+
+  describe(':pipeline_security_dashboard_graphql feature flag', () => {
+    const factoryWithFeatureFlag = (value) =>
+      factory({
+        provide: {
+          glFeatures: {
+            pipelineSecurityDashboardGraphql: value,
+          },
+        },
+      });
+
+    it('does not show the security layout when the feature flag is on but the vulnerability report', () => {
+      factoryWithFeatureFlag(true);
+      expect(findSecurityDashboard().exists()).toBe(false);
+      expect(findVulnerabilityReport().exists()).toBe(true);
+    });
+
+    it('shows the security layout when the feature flag is off', () => {
+      factoryWithFeatureFlag(false);
+      expect(findSecurityDashboard().exists()).toBe(true);
     });
   });
 
@@ -99,7 +122,7 @@ describe('Pipeline Security Dashboard component', () => {
     beforeEach(() => {
       factory({
         stubs: {
-          'security-dashboard': { template: '<div><slot name="emptyState"></slot></div>' },
+          'security-dashboard': { template: '<div><slot name="empty-state"></slot></div>' },
         },
       });
     });

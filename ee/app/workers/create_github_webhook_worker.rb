@@ -2,6 +2,8 @@
 
 class CreateGithubWebhookWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include GrapePathHelpers::NamedRouteMatcher
 
   feature_category :integrations

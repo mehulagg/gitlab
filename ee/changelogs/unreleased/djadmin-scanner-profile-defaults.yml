@@ -1,0 +1,5 @@
+---
+title: Add defaults for DAST Scanner Profile timeout fields
+merge_request: 59999
+author:
+type: changed

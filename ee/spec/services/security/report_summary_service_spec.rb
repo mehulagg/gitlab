@@ -3,22 +3,54 @@
 require 'spec_helper'
 
 RSpec.describe Security::ReportSummaryService, '#execute' do
-  let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:pipeline) { create(:ci_pipeline, :success, project: project) }
+  let_it_be(:pipeline) { create(:ci_pipeline, :success) }
 
-  before_all do
-    create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) do |job|
-      create(:ee_ci_job_artifact, :dast_large_scanned_resources_field, job: job, project: project)
-    end
-    create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) do |job|
-      create(:ee_ci_job_artifact, :sast, job: job, project: project)
-    end
+  let_it_be(:build_ds) { create(:ci_build, :success, name: 'dependency_scanning', pipeline: pipeline) }
+  let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds) }
+  let_it_be(:report_ds) { create(:ci_reports_security_report, type: :dependency_scanning) }
+  let_it_be(:scan_ds) { create(:security_scan, scan_type: :dependency_scanning, build: build_ds) }
 
-    create(:ci_build, :success, name: 'cs_job', pipeline: pipeline, project: project) do |job|
-      create(:ee_ci_job_artifact, :container_scanning, job: job, project: project)
-    end
-    create(:ci_build, :success, name: 'ds_job', pipeline: pipeline, project: project) do |job|
-      create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: project)
+  let_it_be(:build_sast) { create(:ci_build, :success, name: 'sast', pipeline: pipeline) }
+  let_it_be(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast) }
+  let_it_be(:report_sast) { create(:ci_reports_security_report, type: :sast) }
+  let_it_be(:scan_sast) { create(:security_scan, scan_type: :sast, build: build_sast) }
+
+  let_it_be(:build_dast) { create(:ci_build, :success, name: 'dast', pipeline: pipeline) }
+  let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast_large_scanned_resources_field, job: build_dast) }
+  let_it_be(:report_dast) { create(:ci_reports_security_report, type: :dast) }
+  let_it_be(:scan_dast) { create(:security_scan, scan_type: :dast, build: build_dast) }
+
+  let_it_be(:build_cs) { create(:ci_build, :success, name: 'container_scanning', pipeline: pipeline) }
+  let_it_be(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs) }
+  let_it_be(:report_cs) { create(:ci_reports_security_report, type: :container_scanning) }
+  let_it_be(:scan_cs) { create(:security_scan, scan_type: :container_scanning, build: build_cs) }
+
+  before(:all) do
+    ds_content = File.read(artifact_ds.file.path)
+    Gitlab::Ci::Parsers::Security::DependencyScanning.parse!(ds_content, report_ds)
+    report_ds.merge!(report_ds)
+
+    sast_content = File.read(artifact_sast.file.path)
+    Gitlab::Ci::Parsers::Security::Sast.parse!(sast_content, report_sast)
+    report_sast.merge!(report_sast)
+
+    dast_content = File.read(artifact_dast.file.path)
+    Gitlab::Ci::Parsers::Security::Dast.parse!(dast_content, report_dast)
+    report_dast.merge!(report_dast)
+
+    cs_content = File.read(artifact_cs.file.path)
+    Gitlab::Ci::Parsers::Security::ContainerScanning.parse!(cs_content, report_cs)
+    report_cs.merge!(report_cs)
+
+    { artifact_cs => report_cs, artifact_dast => report_dast, artifact_ds => report_ds, artifact_sast => report_sast }.each do |artifact, report|
+      report.findings.each do |finding|
+        create(:security_finding,
+              severity: finding.severity,
+              confidence: finding.confidence,
+              project_fingerprint: finding.project_fingerprint,
+              deduplicated: true,
+              scan: artifact.job.security_scans.first)
+      end
     end
   end
 
@@ -67,6 +99,14 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     end
   end
 
+  context 'when the scans is requested' do
+    let(:selection_information) { { dast: [:scans] } }
+
+    it 'responds with the scan information' do
+      expect(result).to include(dast: { scans: [scan_dast] })
+    end
+  end
+
   context 'All fields are requested' do
     let(:selection_information) do
       {
@@ -89,7 +129,7 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     it 'returns the vulnerability count' do
       expect(result).to match(a_hash_including(
                                 dast: a_hash_including(vulnerabilities_count: 20),
-                                sast: a_hash_including(vulnerabilities_count: 33),
+                                sast: a_hash_including(vulnerabilities_count: 5),
                                 container_scanning: a_hash_including(vulnerabilities_count: 8),
                                 dependency_scanning: a_hash_including(vulnerabilities_count: 4)
                               ))
@@ -101,7 +141,7 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
 
     it 'returns the scanned_resources_csv_path' do
       expected_path = Gitlab::Routing.url_helpers.project_security_scanned_resources_path(
-        project,
+        pipeline.project,
         format: :csv,
         pipeline_id: pipeline.id
       )

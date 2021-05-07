@@ -6,6 +6,8 @@ module Gitlab
       module Security
         module Locations
           class Sast < Base
+            include Security::Concerns::FingerprintPathFromFile
+
             attr_reader :class_name
             attr_reader :end_line
             attr_reader :file_path
@@ -19,8 +21,6 @@ module Gitlab
               @method_name = method_name
               @start_line = start_line
             end
-
-            private
 
             def fingerprint_data
               "#{file_path}:#{start_line}:#{end_line}"

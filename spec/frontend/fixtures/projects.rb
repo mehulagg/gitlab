@@ -3,15 +3,16 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects (JavaScript fixtures)', type: :controller do
+  include ApiHelpers
   include JavaScriptFixturesHelpers
 
   runners_token = 'runnerstoken:intabulasreferre'
 
-  let(:admin) { create(:admin) }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
-  let(:project) { create(:project, namespace: namespace, path: 'builds-project', runners_token: runners_token) }
-  let(:project_with_repo) { create(:project, :repository, description: 'Code and stuff') }
+  let(:project) { create(:project, namespace: namespace, path: 'builds-project', runners_token: runners_token, avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png')) }
+  let(:project_with_repo) { create(:project, :repository, description: 'Code and stuff', avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png')) }
   let(:project_variable_populated) { create(:project, namespace: namespace, path: 'builds-project2', runners_token: runners_token) }
+  let(:user) { project.owner }
 
   render_views
 
@@ -20,10 +21,8 @@ RSpec.describe 'Projects (JavaScript fixtures)', type: :controller do
   end
 
   before do
-    stub_feature_flags(new_variables_ui: false)
-    project.add_maintainer(admin)
-    sign_in(admin)
-    allow(SecureRandom).to receive(:hex).and_return('securerandomhex:thereisnospoon')
+    project_with_repo.add_maintainer(user)
+    sign_in(user)
   end
 
   after do
@@ -31,15 +30,6 @@ RSpec.describe 'Projects (JavaScript fixtures)', type: :controller do
   end
 
   describe ProjectsController, '(JavaScript fixtures)', type: :controller do
-    it 'projects/dashboard.html' do
-      get :show, params: {
-        namespace_id: project.namespace.to_param,
-        id: project
-      }
-
-      expect(response).to be_successful
-    end
-
     it 'projects/overview.html' do
       get :show, params: {
         namespace_id: project_with_repo.namespace.to_param,
@@ -59,26 +49,30 @@ RSpec.describe 'Projects (JavaScript fixtures)', type: :controller do
     end
   end
 
-  describe Projects::Settings::CiCdController, '(JavaScript fixtures)', type: :controller do
-    it 'projects/ci_cd_settings.html' do
-      get :show, params: {
-        namespace_id: project.namespace.to_param,
-        project_id: project
-      }
+  describe GraphQL::Query, type: :request do
+    include GraphqlHelpers
 
-      expect(response).to be_successful
-    end
+    context 'access token projects query' do
+      before do
+        project_variable_populated.add_maintainer(user)
+      end
 
-    it 'projects/ci_cd_settings_with_variables.html' do
-      create(:ci_variable, project: project_variable_populated)
-      create(:ci_variable, project: project_variable_populated)
+      before(:all) do
+        clean_frontend_fixtures('graphql/projects/access_tokens')
+      end
 
-      get :show, params: {
-        namespace_id: project_variable_populated.namespace.to_param,
-        project_id: project_variable_populated
-      }
+      fragment_paths = ['graphql_shared/fragments/pageInfo.fragment.graphql']
+      base_input_path = 'access_tokens/graphql/queries/'
+      base_output_path = 'graphql/projects/access_tokens/'
+      query_name = 'get_projects.query.graphql'
 
-      expect(response).to be_successful
+      it "#{base_output_path}#{query_name}.json" do
+        query = get_graphql_query_as_string("#{base_input_path}#{query_name}", fragment_paths)
+
+        post_graphql(query, current_user: user, variables: { search: '', first: 2 })
+
+        expect_graphql_errors_to_be_empty
+      end
     end
   end
 end

@@ -1,10 +1,14 @@
 <script>
-import { mapActions, mapState } from 'vuex';
 import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { mapActions, mapState } from 'vuex';
+import { __ } from '~/locale';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
 import { SORT_FIELDS, SORT_ORDER } from '../store/modules/list/constants';
 
 export default {
+  i18n: {
+    sortDirectionLabel: __('Sort direction'),
+  },
   name: 'DependenciesActions',
   components: {
     GlButton,
@@ -19,7 +23,7 @@ export default {
     namespace: {
       type: String,
       required: true,
-      validator: value =>
+      validator: (value) =>
         Object.values(DEPENDENCY_LIST_TYPES).some(({ namespace }) => value === namespace),
     },
   },
@@ -80,7 +84,8 @@ export default {
       </gl-dropdown>
       <gl-button
         v-gl-tooltip
-        :title="__('Sort direction')"
+        :title="$options.i18n.sortDirectionLabel"
+        :aria-label="$options.i18n.sortDirectionLabel"
         class="flex-grow-0 js-sort-order"
         @click="toggleSortOrder"
       >

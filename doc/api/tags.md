@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
-# Tags API
+# Tags API **(FREE)**
 
 ## List project repository tags
 
@@ -123,7 +123,7 @@ Parameters:
 | `tag_name`            | string         | yes      | The name of a tag                                                                                               |
 | `ref`                 | string         | yes      | Create tag using commit SHA, another tag name, or branch name                                                   |
 | `message`             | string         | no       | Creates annotated tag                                                                                           |
-| `release_description` | string         | no       | Add release notes to the Git tag and store it in the GitLab database                                            |
+| `release_description` | string         | no       | This parameter is [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766) for use in GitLab 11.7, and is planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/290311) in GitLab 14.0. Use the [Releases API](../api/releases/index.md) instead. |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/tags?tag_name=test&ref=master"
@@ -160,11 +160,10 @@ Example response:
 }
 ```
 
-The message will be `null` when creating a lightweight tag otherwise
-it will contain the annotation.
+The message is `null` when creating a lightweight tag. Otherwise, it contains the annotation.
 
-The target will contain the tag objects ID when creating annotated tags,
-otherwise it will contain the commit ID when creating lightweight tags.
+The target contains the tag objects ID when creating annotated tags,
+otherwise it contains the commit ID when creating lightweight tags.
 
 In case of an error,
 status code `405` with an explaining error message is returned.
@@ -185,6 +184,11 @@ Parameters:
 | `tag_name` | string         | yes      | The name of a tag                                                                                               |
 
 ## Create a new release
+
+WARNING:
+This feature is in its end-of-life process. It is [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766)
+for use in GitLab 11.7, and is planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/290311)
+in GitLab 14.0. Use the [Releases API](../api/releases/index.md) instead.
 
 Add release notes to the existing Git tag. If there
 already exists a release for the given tag, status code `409` is returned.
@@ -220,6 +224,11 @@ Response:
 ```
 
 ## Update a release
+
+WARNING:
+This feature is in its end-of-life process. It is [deprecated](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766)
+for use in GitLab 11.7, and is planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/290311)
+in GitLab 14.0. Use the [Releases API](../api/releases/index.md) instead.
 
 Updates the release notes of a given release.
 

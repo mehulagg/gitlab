@@ -4,12 +4,13 @@ module API
   class Settings < ::API::Base
     before { authenticated_as_admin! }
 
+    feature_category :not_owned
+
     helpers Helpers::SettingsHelpers
 
     helpers do
       def current_settings
-        @current_setting ||=
-          (ApplicationSetting.current_without_cache || ApplicationSetting.create_from_defaults)
+        @current_setting ||= ApplicationSetting.find_or_create_without_cache
       end
 
       def filter_attributes_using_license(attrs)
@@ -29,6 +30,7 @@ module API
       success Entities::ApplicationSetting
     end
     params do
+      optional :admin_mode, type: Boolean, desc: 'Require admin users to re-authenticate for administrative (i.e. potentially dangerous) operations'
       optional :admin_notification_email, type: String, desc: 'Deprecated: Use :abuse_notification_email instead. Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :abuse_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :after_sign_up_text, type: String, desc: 'Text shown after sign up'
@@ -40,7 +42,8 @@ module API
       optional :asset_proxy_enabled, type: Boolean, desc: 'Enable proxying of assets'
       optional :asset_proxy_url, type: String, desc: 'URL of the asset proxy server'
       optional :asset_proxy_secret_key, type: String, desc: 'Shared secret with the asset proxy server'
-      optional :asset_proxy_whitelist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically whitelisted.'
+      optional :asset_proxy_whitelist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Deprecated: Use :asset_proxy_allowlist instead. Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically whitelisted.'
+      optional :asset_proxy_allowlist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically allowed.'
       optional :container_registry_token_expire_delay, type: Integer, desc: 'Authorization token duration (minutes)'
       optional :default_artifacts_expire_in, type: String, desc: "Set the default expiration time for each job's artifacts"
       optional :default_ci_config_path, type: String, desc: 'The instance default CI configuration path for new projects'
@@ -50,10 +53,11 @@ module API
       optional :default_project_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default project visibility'
       optional :default_projects_limit, type: Integer, desc: 'The maximum number of personal projects'
       optional :default_snippet_visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'The default snippet visibility'
+      optional :disable_feed_token, type: Boolean, desc: 'Disable display of RSS/Atom and Calendar `feed_tokens`'
       optional :disabled_oauth_sign_in_sources, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Disable certain OAuth sign-in sources'
-      optional :domain_blacklist_enabled, type: Boolean, desc: 'Enable domain blacklist for sign ups'
-      optional :domain_blacklist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
-      optional :domain_whitelist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'ONLY users with e-mail addresses that match these domain(s) will be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
+      optional :domain_denylist_enabled, type: Boolean, desc: 'Enable domain denylist for sign ups'
+      optional :domain_denylist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
+      optional :domain_allowlist, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'ONLY users with e-mail addresses that match these domain(s) will be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com'
       optional :eks_integration_enabled, type: Boolean, desc: 'Enable integration with Amazon EKS'
       given eks_integration_enabled: -> (val) { val } do
         requires :eks_account_id, type: String, desc: 'Amazon account ID for EKS integration'
@@ -88,6 +92,8 @@ module API
       optional :import_sources, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce,
                                 values: %w[github bitbucket bitbucket_server gitlab google_code fogbugz git gitlab_project gitea manifest phabricator],
                                 desc: 'Enabled sources for code import during project creation. OmniAuth must be configured for GitHub, Bitbucket, and GitLab.com'
+      optional :in_product_marketing_emails_enabled, type: Boolean, desc: 'By default, in-product marketing emails are enabled. To disable these emails, disable this option.'
+      optional :invisible_captcha_enabled, type: Boolean, desc: 'Enable Invisible Captcha spam detection during signup.'
       optional :max_artifacts_size, type: Integer, desc: "Set the maximum file size for each job's artifacts"
       optional :max_attachment_size, type: Integer, desc: 'Maximum attachment size in MB'
       optional :max_import_size, type: Integer, desc: 'Maximum import size in MB'
@@ -100,6 +106,11 @@ module API
       optional :performance_bar_allowed_group_id, type: String, desc: 'Deprecated: Use :performance_bar_allowed_group_path instead. Path of the group that is allowed to toggle the performance bar.' # support legacy names, can be removed in v6
       optional :performance_bar_allowed_group_path, type: String, desc: 'Path of the group that is allowed to toggle the performance bar.'
       optional :performance_bar_enabled, type: String, desc: 'Deprecated: Pass `performance_bar_allowed_group_path: nil` instead. Allow enabling the performance.' # support legacy names, can be removed in v6
+      optional :personal_access_token_prefix, type: String, desc: 'Prefix to prepend to all personal access tokens'
+      optional :kroki_enabled, type: Boolean, desc: 'Enable Kroki'
+      given kroki_enabled: ->(val) { val } do
+        requires :kroki_url, type: String, desc: 'The Kroki server URL'
+      end
       optional :plantuml_enabled, type: Boolean, desc: 'Enable PlantUML'
       given plantuml_enabled: ->(val) { val } do
         requires :plantuml_url, type: String, desc: 'The PlantUML server URL'
@@ -143,6 +154,7 @@ module API
       optional :spam_check_endpoint_enabled, type: Boolean, desc: 'Enable Spam Check via external API endpoint'
       given spam_check_endpoint_enabled: ->(val) { val } do
         requires :spam_check_endpoint_url, type: String, desc: 'The URL of the external Spam Check service endpoint'
+        requires :spam_check_api_key, type: String, desc: 'The API key used by GitLab for accessing the Spam Check service endpoint'
       end
       optional :terminal_max_session_time, type: Integer, desc: 'Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time.'
       optional :usage_ping_enabled, type: Boolean, desc: 'Every week GitLab will report license usage back to GitLab, Inc.'
@@ -157,6 +169,9 @@ module API
       optional :issues_create_limit, type: Integer, desc: "Maximum number of issue creation requests allowed per minute per user. Set to 0 for unlimited requests per minute."
       optional :raw_blob_request_limit, type: Integer, desc: "Maximum number of requests per minute for each raw path. Set to 0 for unlimited requests per minute."
       optional :wiki_page_max_content_bytes, type: Integer, desc: "Maximum wiki page content size in bytes"
+      optional :require_admin_approval_after_user_signup, type: Boolean, desc: 'Require explicit admin approval for new signups'
+      optional :whats_new_variant, type: String, values: ApplicationSetting.whats_new_variants.keys, desc: "What's new variant, possible values: `all_tiers`, `current_tier`, and `disabled`."
+      optional :floc_enabled, type: Grape::API::Boolean, desc: 'Enable FloC (Federated Learning of Cohorts)'
 
       ApplicationSetting::SUPPORTED_KEY_TYPES.each do |type|
         optional :"#{type}_key_restriction",
@@ -199,6 +214,11 @@ module API
       # support legacy names, can be removed in v5
       if attrs.has_key?(:admin_notification_email)
         attrs[:abuse_notification_email] = attrs.delete(:admin_notification_email)
+      end
+
+      # support legacy names, can be removed in v5
+      if attrs.has_key?(:asset_proxy_whitelist)
+        attrs[:asset_proxy_allowlist] = attrs.delete(:asset_proxy_whitelist)
       end
 
       # since 13.0 it's not possible to disable hashed storage - support can be removed in 14.0

@@ -27,7 +27,6 @@ RSpec.describe IssuablesHelper do
           canDestroy: true,
           canAdmin: true,
           issuableRef: "&#{epic.iid}",
-          issuableStatus: "opened",
           markdownPreviewPath: "/groups/#{@group.full_path}/preview_markdown",
           markdownDocsPath: '/help/user/markdown',
           issuableTemplateNamesPath: '',
@@ -67,6 +66,32 @@ RSpec.describe IssuablesHelper do
           expect(helper.issuable_initial_data(issue)).to include(
             publishedIncidentUrl: 'http://status.com'
           )
+        end
+      end
+    end
+
+    context 'for an incident' do
+      context 'default state' do
+        let_it_be(:issue) { create(:issue, author: user, description: 'issue text', issue_type: :incident) }
+
+        it 'returns the correct data' do
+          @project = issue.project
+
+          expect(helper.issuable_initial_data(issue)).to include(uploadMetricsFeatureAvailable: "false")
+        end
+      end
+
+      context 'when incident metric upload is available' do
+        before do
+          stub_licensed_features(incident_metric_upload: true)
+        end
+
+        let_it_be(:issue) { create(:issue, author: user, description: 'issue text', issue_type: :incident) }
+
+        it 'correctly returns uploadMetricsFeatureAvailable as true' do
+          @project = issue.project
+
+          expect(helper.issuable_initial_data(issue)).to include(uploadMetricsFeatureAvailable: "true")
         end
       end
     end

@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Projections
 
 Projections are a way to define relations between files. Every file can have a
@@ -21,7 +27,7 @@ You can find a basic list of projection options in
 - VSCode
   - [Alternate File](https://marketplace.visualstudio.com/items?itemName=will-wow.vscode-alternate-file)
   - [projectionist](https://github.com/jarsen/projectionist)
-  - [jumpto](https://github.com/gmdayley/jumpto)
+  - [`jumpto`](https://github.com/gmdayley/jumpto)
 - Atom
   - [projectionist-atom](https://atom.io/packages/projectionist-atom)
 - Command-line
@@ -29,6 +35,8 @@ You can find a basic list of projection options in
 
 ## History
 
+<!-- vale gitlab.Spelling = NO -->
 This started as a
 [plugin for vim by tpope](https://github.com/tpope/vim-projectionist)
 It has since become editor-agnostic and ported to most modern editors.
+<!-- vale gitlab.Spelling = YES -->

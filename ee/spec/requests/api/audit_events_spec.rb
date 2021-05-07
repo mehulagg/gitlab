@@ -14,7 +14,6 @@ RSpec.describe API::AuditEvents do
 
     context 'after calling all audit_events APIs as a single licensed user' do
       before do
-        stub_feature_flags(usage_data_a_compliance_audit_events_api: true)
         stub_licensed_features(admin_audit_log: true)
       end
 
@@ -28,7 +27,7 @@ RSpec.describe API::AuditEvents do
 
       it 'tracks 3 separate events' do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).exactly(3).times
-                                                                  .with(current_user.id, 'a_compliance_audit_events_api')
+                                                                  .with('a_compliance_audit_events_api', values: current_user.id)
 
         subject
       end

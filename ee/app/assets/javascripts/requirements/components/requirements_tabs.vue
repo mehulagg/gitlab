@@ -1,14 +1,23 @@
 <script>
-import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
-
+import { GlBadge, GlButton, GlButtonGroup, GlTabs, GlTab, GlTooltipDirective } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { FilterState } from '../constants';
 
 export default {
+  i18n: {
+    exportAsCsvLabel: __('Export as CSV'),
+    importRequirementsLabel: __('Import requirements'),
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   FilterState,
   components: {
-    GlLink,
     GlBadge,
     GlButton,
+    GlTabs,
+    GlTab,
+    GlButtonGroup,
   },
   props: {
     filterBy: {
@@ -43,43 +52,64 @@ export default {
 </script>
 
 <template>
-  <div class="top-area">
-    <ul class="nav-links mobile-separator requirements-state-filters js-requirements-state-filters">
-      <li :class="{ active: isOpenTab }">
-        <gl-link
-          id="state-opened"
-          data-state="opened"
-          :title="__('Filter by requirements that are currently opened.')"
-          @click="$emit('click-tab', { filterBy: $options.FilterState.opened })"
-        >
-          {{ __('Open') }}
-          <gl-badge>{{ requirementsCount.OPENED }}</gl-badge>
-        </gl-link>
-      </li>
-      <li :class="{ active: isArchivedTab }">
-        <gl-link
-          id="state-archived"
-          data-state="archived"
-          :title="__('Filter by requirements that are currently archived.')"
-          @click="$emit('click-tab', { filterBy: $options.FilterState.archived })"
-        >
-          {{ __('Archived') }}
-          <gl-badge>{{ requirementsCount.ARCHIVED }}</gl-badge>
-        </gl-link>
-      </li>
-      <li :class="{ active: isAllTab }">
-        <gl-link
-          id="state-all"
-          data-state="all"
-          :title="__('Show all requirements.')"
-          @click="$emit('click-tab', { filterBy: $options.FilterState.all })"
-        >
-          {{ __('All') }}
-          <gl-badge>{{ requirementsCount.ALL }}</gl-badge>
-        </gl-link>
-      </li>
-    </ul>
+  <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
+    <gl-tabs content-class="gl-p-0">
+      <gl-tab
+        :title-link-attributes="{ 'data-testid': 'state-opened' }"
+        :active="isOpenTab"
+        @click="$emit('click-tab', { filterBy: $options.FilterState.opened })"
+      >
+        <template #title>
+          <span>{{ __('Open') }}</span>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.OPENED }}</gl-badge>
+        </template>
+      </gl-tab>
+      <gl-tab
+        :title-link-attributes="{ 'data-testid': 'state-archived' }"
+        :active="isArchivedTab"
+        @click="$emit('click-tab', { filterBy: $options.FilterState.archived })"
+      >
+        <template #title>
+          <span>{{ __('Archived') }}</span>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{
+            requirementsCount.ARCHIVED
+          }}</gl-badge>
+        </template>
+      </gl-tab>
+      <gl-tab
+        :title-link-attributes="{ 'data-testid': 'state-all' }"
+        :active="isAllTab"
+        @click="$emit('click-tab', { filterBy: $options.FilterState.all })"
+      >
+        <template #title>
+          <span>{{ __('All') }}</span>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ requirementsCount.ALL }}</gl-badge>
+        </template>
+      </gl-tab>
+    </gl-tabs>
     <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
+      <gl-button-group>
+        <gl-button
+          v-gl-tooltip
+          :title="$options.i18n.exportAsCsvLabel"
+          :aria-label="$options.i18n.exportAsCsvLabel"
+          category="secondary"
+          :disabled="showCreateForm"
+          icon="export"
+          @click="$emit('click-export-requirements')"
+        />
+        <gl-button
+          v-gl-tooltip
+          :title="$options.i18n.importRequirementsLabel"
+          :aria-label="$options.i18n.importRequirementsLabel"
+          category="secondary"
+          class="js-import-requirements qa-import-requirements-button"
+          :disabled="showCreateForm"
+          icon="import"
+          @click="$emit('click-import-requirements')"
+        />
+      </gl-button-group>
+
       <gl-button
         category="primary"
         variant="success"

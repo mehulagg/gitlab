@@ -1,13 +1,13 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Automatic background verification **(PREMIUM ONLY)**
+# Automatic background verification **(PREMIUM SELF)**
 
-NOTE: **Note:**
+NOTE:
 Automatic background verification of repositories and wikis was added in
 GitLab EE 10.6 but is enabled by default only on GitLab EE 11.1. You can
 disable or enable this feature manually by following
@@ -58,14 +58,14 @@ Feature.enable('geo_repository_verification')
 
 ## Repository verification
 
-Navigate to the **Admin Area > Geo** dashboard on the **primary** node and expand
+Go to the **Admin Area > Geo** dashboard on the **primary** node and expand
 the **Verification information** tab for that node to view automatic checksumming
 status for repositories and wikis. Successes are shown in green, pending work
 in gray, and failures in red.
 
 ![Verification status](img/verification-status-primary.png)
 
-Navigate to the **Admin Area > Geo** dashboard on the **secondary** node and expand
+Go to the **Admin Area > Geo** dashboard on the **secondary** node and expand
 the **Verification information** tab for that node to view automatic verification
 status for repositories and wikis. As with checksumming, successes are shown in
 green, pending work in gray, and failures in red.
@@ -92,7 +92,7 @@ data. The default and recommended re-verification interval is 7 days, though
 an interval as short as 1 day can be set. Shorter intervals reduce risk but
 increase load and vice versa.
 
-Navigate to the **Admin Area > Geo** dashboard on the **primary** node, and
+Go to the **Admin Area > Geo** dashboard on the **primary** node, and
 click the **Edit** button for the **primary** node to customize the minimum
 re-verification interval:
 
@@ -141,15 +141,15 @@ sudo gitlab-rake geo:verification:wiki:reset
 
 If the **primary** and **secondary** nodes have a checksum verification mismatch, the cause may not be apparent. To find the cause of a checksum mismatch:
 
-1. Navigate to the **Admin Area > Overview > Projects** dashboard on the **primary** node, find the
+1. Go to the **Admin Area > Overview > Projects** dashboard on the **primary** node, find the
    project that you want to check the checksum differences and click on the
    **Edit** button:
    ![Projects dashboard](img/checksum-differences-admin-projects.png)
 
-1. On the project admin page get the **Gitaly storage name**, and **Gitaly relative path**:
-   ![Project admin page](img/checksum-differences-admin-project-page.png)
+1. On the project administration page get the **Gitaly storage name**, and **Gitaly relative path**:
+   ![Project administration page](img/checksum-differences-admin-project-page.png)
 
-1. Navigate to the project's repository directory on both **primary** and **secondary** nodes
+1. Go to the project's repository directory on both **primary** and **secondary** nodes
    (the path is usually `/var/opt/gitlab/git-data/repositories`). Note that if `git_data_dirs`
    is customized, check the directory layout on your server to be sure.
 

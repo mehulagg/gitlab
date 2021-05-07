@@ -8,7 +8,7 @@ FactoryBot.define do
 
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
-          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
+          Rails.root.join('spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
       end
     end
 
@@ -28,7 +28,7 @@ FactoryBot.define do
 
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
-          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-secret-detection-report.json'), 'application/json')
+          Rails.root.join('spec/fixtures/security_reports/master/gl-secret-detection-report.json'), 'application/json')
       end
     end
 
@@ -318,6 +318,16 @@ FactoryBot.define do
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report.json'), 'application/json')
+      end
+    end
+
+    trait :common_security_report_with_blank_names do
+      file_format { :raw }
+      file_type { :dependency_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report-names.json'), 'application/json')
       end
     end
 

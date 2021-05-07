@@ -2,6 +2,8 @@
 
 class ScheduleMigrateExternalDiffsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   # rubocop:disable Scalability/CronWorkerContext:
   # This schedules the `MigrateExternalDiffsWorker`
   # issue for adding context: https://gitlab.com/gitlab-org/gitlab/issues/202100
@@ -10,7 +12,7 @@ class ScheduleMigrateExternalDiffsWorker # rubocop:disable Scalability/Idempoten
 
   include Gitlab::ExclusiveLeaseHelpers
 
-  feature_category :source_code_management
+  feature_category :code_review
 
   def perform
     in_lock(self.class.name.underscore, ttl: 2.hours, retries: 0) do

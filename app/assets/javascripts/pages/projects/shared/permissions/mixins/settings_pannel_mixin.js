@@ -2,6 +2,8 @@ export default {
   data() {
     return {
       packagesEnabled: false,
+      requirementsEnabled: false,
+      securityAndComplianceEnabled: false,
     };
   },
   watch: {

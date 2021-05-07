@@ -49,6 +49,8 @@ module Gitlab
       MAX_ALLOWED_LOOPS = 10_000
       SLEEP_TIME_IN_SECONDS = 0.01 # 10 msec sleep
       ALLOWED_MODES = [:itself, :distinct].freeze
+      FALLBACK_FINISH = 0
+      OFFSET_BY_ONE = 1
 
       # Each query should take < 500ms https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22705
       DEFAULT_DISTINCT_BATCH_SIZE = 10_000
@@ -65,7 +67,7 @@ module Gitlab
         (@operation == :count && batch_size <= MIN_REQUIRED_BATCH_SIZE) ||
           (@operation == :sum && batch_size < DEFAULT_SUM_BATCH_SIZE) ||
           (finish - start) / batch_size >= MAX_ALLOWED_LOOPS ||
-          start > finish
+          start >= finish
       end
 
       def count(batch_size: nil, mode: :itself, start: nil, finish: nil)
@@ -85,11 +87,18 @@ module Gitlab
         results = nil
         batch_start = start
 
-        while batch_start <= finish
-          batch_relation = build_relation_batch(batch_start, batch_start + batch_size, mode)
+        while batch_start < finish
           begin
-            results = merge_results(results, batch_relation.send(@operation, *@operation_args)) # rubocop:disable GitlabSecurity/PublicSend
-            batch_start += batch_size
+            batch_end = [batch_start + batch_size, finish].min
+            batch_relation = build_relation_batch(batch_start, batch_end, mode)
+
+            op_args = @operation_args
+            if @operation == :count && @operation_args.blank? && use_loose_index_scan_for_distinct_values?(mode)
+              op_args = [Gitlab::Database::LooseIndexScanDistinctCount::COLUMN_ALIAS]
+            end
+
+            results = merge_results(results, batch_relation.send(@operation, *op_args)) # rubocop:disable GitlabSecurity/PublicSend
+            batch_start = batch_end
           rescue ActiveRecord::QueryCanceled => error
             # retry with a safe batch size & warmer cache
             if batch_size >= 2 * MIN_REQUIRED_BATCH_SIZE
@@ -98,7 +107,20 @@ module Gitlab
               log_canceled_batch_fetch(batch_start, mode, batch_relation.to_sql, error)
               return FALLBACK
             end
+          rescue Gitlab::Database::LooseIndexScanDistinctCount::ColumnConfigurationError => error
+            Gitlab::AppJsonLogger
+              .error(
+                event: 'batch_count',
+                relation: @relation.table_name,
+                operation: @operation,
+                operation_args: @operation_args,
+                mode: mode,
+                message: "LooseIndexScanDistinctCount column error: #{error.message}"
+              )
+
+            return FALLBACK
           end
+
           sleep(SLEEP_TIME_IN_SECONDS)
         end
 
@@ -118,7 +140,11 @@ module Gitlab
       private
 
       def build_relation_batch(start, finish, mode)
-        @relation.select(@column).public_send(mode).where(between_condition(start, finish)) # rubocop:disable GitlabSecurity/PublicSend
+        if use_loose_index_scan_for_distinct_values?(mode)
+          Gitlab::Database::LooseIndexScanDistinctCount.new(@relation, @column).build_query(from: start, to: finish)
+        else
+          @relation.select(@column).public_send(mode).where(between_condition(start, finish)) # rubocop:disable GitlabSecurity/PublicSend
+        end
       end
 
       def batch_size_for_mode_and_operation(mode, operation)
@@ -138,7 +164,7 @@ module Gitlab
       end
 
       def actual_finish(finish)
-        finish || @relation.unscope(:group, :having).maximum(@column) || 0
+        (finish || @relation.unscope(:group, :having).maximum(@column) || FALLBACK_FINISH) + OFFSET_BY_ONE
       end
 
       def check_mode!(mode)
@@ -159,6 +185,14 @@ module Gitlab
             query: query,
             message: "Query has been canceled with message: #{error.message}"
           )
+      end
+
+      def use_loose_index_scan_for_distinct_values?(mode)
+        Feature.enabled?(:loose_index_scan_for_distinct_values) && not_group_by_query? && mode == :distinct
+      end
+
+      def not_group_by_query?
+        !@relation.is_a?(ActiveRecord::Relation) || @relation.group_values.blank?
       end
     end
   end

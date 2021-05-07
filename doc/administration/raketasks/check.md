@@ -1,10 +1,10 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Integrity check Rake task **(CORE ONLY)**
+# Integrity check Rake task **(FREE SELF)**
 
 GitLab provides Rake tasks to check the integrity of various components.
 
@@ -51,12 +51,68 @@ sudo gitlab-rake gitlab:git:fsck
 sudo -u git -H bundle exec rake gitlab:git:fsck RAILS_ENV=production
 ```
 
+## Checksum of repository refs
+
+One Git repository can be compared to another by checksumming all refs of each
+repository. If both repositories have the same refs, and if both repositories
+pass an integrity check, then we can be confident that both repositories are the
+same.
+
+For example, this can be used to compare a backup of a repository against the
+source repository.
+
+### Check all GitLab repositories
+
+This task loops through all repositories on the GitLab server and outputs
+checksums in the format `<PROJECT ID>,<CHECKSUM>`.
+
+- If a repository doesn't exist, the project ID will have a blank checksum.
+- If a repository exists but is empty, the output checksum is `0000000000000000000000000000000000000000`.
+- Projects which don't exist are skipped.
+
+**Omnibus Installation**
+
+```shell
+sudo gitlab-rake gitlab:git:checksum_projects
+```
+
+**Source Installation**
+
+```shell
+sudo -u git -H bundle exec rake gitlab:git:checksum_projects RAILS_ENV=production
+```
+
+For example, if:
+
+- Project with ID#2 doesn't exist, it will be skipped.
+- Project with ID#4 doesn't have a repository, its checksum will be blank.
+- Project with ID#5 has an empty repository, its checksum will be `0000000000000000000000000000000000000000`.
+
+The output would then look something like:
+
+```plaintext
+1,cfa3f06ba235c13df0bb28e079bcea62c5848af2
+3,3f3fb58a8106230e3a6c6b48adc2712fb3b6ef87
+4,
+5,0000000000000000000000000000000000000000
+6,6c6b48adc2712fb3b6ef87cfa3f06ba235c13df0
+```
+
+### Check specific GitLab repositories
+
+Optionally, specific project IDs can be checksummed by setting an environment
+variable `CHECKSUM_PROJECT_IDS` with a list of comma-separated integers, for example:
+
+```shell
+CHECKSUM_PROJECT_IDS="1,3" sudo gitlab-rake gitlab:git:checksum_projects
+```
+
 ## Uploaded files integrity
 
 Various types of files can be uploaded to a GitLab installation by users.
 These integrity checks can detect missing files. Additionally, for locally
 stored files, checksums are generated and stored in the database upon upload,
-and these checks will verify them against current files.
+and these checks verify them against current files.
 
 Currently, integrity checks are supported for the following types of file:
 
@@ -137,8 +193,8 @@ Done!
 
 ## LDAP check
 
-The LDAP check Rake task will test the bind DN and password credentials
-(if configured) and will list a sample of LDAP users. This task is also
+The LDAP check Rake task tests the bind DN and password credentials
+(if configured) and lists a sample of LDAP users. This task is also
 executed as part of the `gitlab:check` task, but can run independently.
 See [LDAP Rake Tasks - LDAP Check](ldap.md#check) for details.
 
@@ -158,7 +214,7 @@ If the issue persists, try triggering `gc` via the
 
 ```ruby
 p = Project.find_by_path("project-name")
-Projects::HousekeepingService.new(p, :gc).execute
+Repositories::HousekeepingService.new(p, :gc).execute
 ```
 
 ### Delete references to missing remote uploads
@@ -189,3 +245,9 @@ Upload.find_each do |upload|
 end
 p "#{uploads_deleted} remote objects were destroyed."
 ```
+
+### Delete references to missing LFS objects
+
+If `gitlab-rake gitlab:lfs:check VERBOSE=1` detects LFS objects that exist in the database
+but not on disk, [follow the procedure in the LFS documentation](../../topics/git/lfs/index.md#missing-lfs-objects)
+to remove the database entries.

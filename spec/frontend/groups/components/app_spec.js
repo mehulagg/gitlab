@@ -1,15 +1,16 @@
 import '~/flash';
-import $ from 'jquery';
-import Vue from 'vue';
+import { GlModal, GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
 import appComponent from '~/groups/components/app.vue';
 import groupFolderComponent from '~/groups/components/group_folder.vue';
 import groupItemComponent from '~/groups/components/group_item.vue';
 import eventHub from '~/groups/event_hub';
-import GroupsStore from '~/groups/store/groups_store';
 import GroupsService from '~/groups/service/groups_service';
+import GroupsStore from '~/groups/store/groups_store';
+import axios from '~/lib/utils/axios_utils';
 import * as urlUtilities from '~/lib/utils/url_utility';
 
 import {
@@ -23,47 +24,51 @@ import {
   mockPageInfo,
 } from '../mock_data';
 
-const createComponent = (hideProjects = false) => {
-  const Component = Vue.extend(appComponent);
-  const store = new GroupsStore(false);
-  const service = new GroupsService(mockEndpoint);
-
-  store.state.pageInfo = mockPageInfo;
-
-  return new Component({
-    propsData: {
-      store,
-      service,
-      hideProjects,
-    },
-  });
+const $toast = {
+  show: jest.fn(),
 };
 
 describe('AppComponent', () => {
+  let wrapper;
   let vm;
   let mock;
   let getGroupsSpy;
 
+  const store = new GroupsStore({ hideProjects: false });
+  const service = new GroupsService(mockEndpoint);
+
+  const createShallowComponent = (hideProjects = false) => {
+    store.state.pageInfo = mockPageInfo;
+    wrapper = shallowMount(appComponent, {
+      propsData: {
+        store,
+        service,
+        hideProjects,
+      },
+      mocks: {
+        $toast,
+      },
+    });
+    vm = wrapper.vm;
+  };
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
   beforeEach(() => {
     mock = new AxiosMockAdapter(axios);
     mock.onGet('/dashboard/groups.json').reply(200, mockGroups);
-    Vue.component('group-folder', groupFolderComponent);
-    Vue.component('group-item', groupItemComponent);
+    Vue.component('GroupFolder', groupFolderComponent);
+    Vue.component('GroupItem', groupItemComponent);
 
-    vm = createComponent();
+    createShallowComponent();
     getGroupsSpy = jest.spyOn(vm.service, 'getGroups');
     return vm.$nextTick();
   });
 
   describe('computed', () => {
-    beforeEach(() => {
-      vm.$mount();
-    });
-
-    afterEach(() => {
-      vm.$destroy();
-    });
-
     describe('groups', () => {
       it('should return list of groups from store', () => {
         jest.spyOn(vm.store, 'getGroups').mockImplementation(() => {});
@@ -88,14 +93,6 @@ describe('AppComponent', () => {
   });
 
   describe('methods', () => {
-    beforeEach(() => {
-      vm.$mount();
-    });
-
-    afterEach(() => {
-      vm.$destroy();
-    });
-
     describe('fetchGroups', () => {
       it('should call `getGroups` with all the params provided', () => {
         return vm
@@ -125,12 +122,12 @@ describe('AppComponent', () => {
       it('should show flash error when request fails', () => {
         mock.onGet('/dashboard/groups.json').reply(400);
 
-        jest.spyOn($, 'scrollTo').mockImplementation(() => {});
+        jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
         jest.spyOn(window, 'Flash').mockImplementation(() => {});
 
         return vm.fetchGroups({}).then(() => {
           expect(vm.isLoading).toBe(false);
-          expect($.scrollTo).toHaveBeenCalledWith(0);
+          expect(window.scrollTo).toHaveBeenCalledWith({ behavior: 'smooth', top: 0 });
           expect(window.Flash).toHaveBeenCalledWith('An error occurred. Please try again.');
         });
       });
@@ -182,7 +179,7 @@ describe('AppComponent', () => {
       it('should fetch groups for provided page details and update window state', () => {
         jest.spyOn(urlUtilities, 'mergeUrlParams');
         jest.spyOn(window.history, 'replaceState').mockImplementation(() => {});
-        jest.spyOn($, 'scrollTo').mockImplementation(() => {});
+        jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
         const fetchPagePromise = vm.fetchPage(2, null, null, true);
 
@@ -197,7 +194,7 @@ describe('AppComponent', () => {
 
         return fetchPagePromise.then(() => {
           expect(vm.isLoading).toBe(false);
-          expect($.scrollTo).toHaveBeenCalledWith(0);
+          expect(window.scrollTo).toHaveBeenCalledWith({ behavior: 'smooth', top: 0 });
           expect(urlUtilities.mergeUrlParams).toHaveBeenCalledWith({ page: 2 }, expect.any(String));
           expect(window.history.replaceState).toHaveBeenCalledWith(
             {
@@ -284,26 +281,12 @@ describe('AppComponent', () => {
       it('updates props which show modal confirmation dialog', () => {
         const group = { ...mockParentGroupItem };
 
-        expect(vm.showModal).toBe(false);
         expect(vm.groupLeaveConfirmationMessage).toBe('');
         vm.showLeaveGroupModal(group, mockParentGroupItem);
 
-        expect(vm.showModal).toBe(true);
         expect(vm.groupLeaveConfirmationMessage).toBe(
           `Are you sure you want to leave the "${group.fullName}" group?`,
         );
-      });
-    });
-
-    describe('hideLeaveGroupModal', () => {
-      it('hides modal confirmation which is shown before leaving the group', () => {
-        const group = { ...mockParentGroupItem };
-        vm.showLeaveGroupModal(group, mockParentGroupItem);
-
-        expect(vm.showModal).toBe(true);
-        vm.hideLeaveGroupModal();
-
-        expect(vm.showModal).toBe(false);
       });
     });
 
@@ -324,18 +307,16 @@ describe('AppComponent', () => {
         const notice = `You left the "${childGroupItem.fullName}" group.`;
         jest.spyOn(vm.service, 'leaveGroup').mockResolvedValue({ data: { notice } });
         jest.spyOn(vm.store, 'removeGroup');
-        jest.spyOn(window, 'Flash').mockImplementation(() => {});
-        jest.spyOn($, 'scrollTo').mockImplementation(() => {});
+        jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
         vm.leaveGroup();
 
-        expect(vm.showModal).toBe(false);
         expect(vm.targetGroup.isBeingRemoved).toBe(true);
         expect(vm.service.leaveGroup).toHaveBeenCalledWith(vm.targetGroup.leavePath);
         return waitForPromises().then(() => {
-          expect($.scrollTo).toHaveBeenCalledWith(0);
+          expect(window.scrollTo).toHaveBeenCalledWith({ behavior: 'smooth', top: 0 });
           expect(vm.store.removeGroup).toHaveBeenCalledWith(vm.targetGroup, vm.targetParentGroup);
-          expect(window.Flash).toHaveBeenCalledWith(notice, 'notice');
+          expect($toast.show).toHaveBeenCalledWith(notice);
         });
       });
 
@@ -417,8 +398,7 @@ describe('AppComponent', () => {
     it('should bind event listeners on eventHub', () => {
       jest.spyOn(eventHub, '$on').mockImplementation(() => {});
 
-      const newVm = createComponent();
-      newVm.$mount();
+      createShallowComponent();
 
       return vm.$nextTick().then(() => {
         expect(eventHub.$on).toHaveBeenCalledWith('fetchPage', expect.any(Function));
@@ -426,25 +406,20 @@ describe('AppComponent', () => {
         expect(eventHub.$on).toHaveBeenCalledWith('showLeaveGroupModal', expect.any(Function));
         expect(eventHub.$on).toHaveBeenCalledWith('updatePagination', expect.any(Function));
         expect(eventHub.$on).toHaveBeenCalledWith('updateGroups', expect.any(Function));
-        newVm.$destroy();
       });
     });
 
     it('should initialize `searchEmptyMessage` prop with correct string when `hideProjects` is `false`', () => {
-      const newVm = createComponent();
-      newVm.$mount();
+      createShallowComponent();
       return vm.$nextTick().then(() => {
-        expect(newVm.searchEmptyMessage).toBe('No groups or projects matched your search');
-        newVm.$destroy();
+        expect(vm.searchEmptyMessage).toBe('No groups or projects matched your search');
       });
     });
 
     it('should initialize `searchEmptyMessage` prop with correct string when `hideProjects` is `true`', () => {
-      const newVm = createComponent(true);
-      newVm.$mount();
+      createShallowComponent(true);
       return vm.$nextTick().then(() => {
-        expect(newVm.searchEmptyMessage).toBe('No groups matched your search');
-        newVm.$destroy();
+        expect(vm.searchEmptyMessage).toBe('No groups matched your search');
       });
     });
   });
@@ -453,9 +428,8 @@ describe('AppComponent', () => {
     it('should unbind event listeners on eventHub', () => {
       jest.spyOn(eventHub, '$off').mockImplementation(() => {});
 
-      const newVm = createComponent();
-      newVm.$mount();
-      newVm.$destroy();
+      createShallowComponent();
+      wrapper.destroy();
 
       return vm.$nextTick().then(() => {
         expect(eventHub.$off).toHaveBeenCalledWith('fetchPage', expect.any(Function));
@@ -468,19 +442,10 @@ describe('AppComponent', () => {
   });
 
   describe('template', () => {
-    beforeEach(() => {
-      vm.$mount();
-    });
-
-    afterEach(() => {
-      vm.$destroy();
-    });
-
     it('should render loading icon', () => {
       vm.isLoading = true;
       return vm.$nextTick().then(() => {
-        expect(vm.$el.querySelector('.loading-animation')).toBeDefined();
-        expect(vm.$el.querySelector('span').getAttribute('aria-label')).toBe('Loading groups');
+        expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
       });
     });
 
@@ -493,15 +458,13 @@ describe('AppComponent', () => {
     });
 
     it('renders modal confirmation dialog', () => {
-      vm.groupLeaveConfirmationMessage = 'Are you sure you want to leave the "foo" group?';
-      vm.showModal = true;
-      return vm.$nextTick().then(() => {
-        const modalDialogEl = vm.$el.querySelector('.modal');
+      createShallowComponent();
 
-        expect(modalDialogEl).not.toBe(null);
-        expect(modalDialogEl.querySelector('.modal-title').innerText.trim()).toBe('Are you sure?');
-        expect(modalDialogEl.querySelector('.btn.btn-warning').innerText.trim()).toBe('Leave');
-      });
+      const findGlModal = wrapper.find(GlModal);
+
+      expect(findGlModal.exists()).toBe(true);
+      expect(findGlModal.attributes('title')).toBe('Are you sure?');
+      expect(findGlModal.props('actionPrimary').text).toBe('Leave group');
     });
   });
 });

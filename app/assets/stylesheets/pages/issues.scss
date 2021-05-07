@@ -92,6 +92,11 @@ ul.related-merge-requests > li {
   }
 }
 
+.issues-footer {
+  padding-top: $gl-padding;
+  padding-bottom: 37px;
+}
+
 .issues-nav-controls,
 .new-branch-col {
   font-size: 0;
@@ -100,18 +105,6 @@ ul.related-merge-requests > li {
 .issues-nav-controls {
   .btn-group:empty {
     display: none;
-  }
-}
-
-.issuable-email-modal-btn {
-  padding: 0;
-  color: $blue-600;
-  background-color: transparent;
-  border: 0;
-  outline: 0;
-
-  &:hover {
-    text-decoration: underline;
   }
 }
 
@@ -180,35 +173,26 @@ ul.related-merge-requests > li {
     margin-top: 4px;
 
     // override dropdown item styles
-    .btn.btn-success {
+    .btn.btn-confirm {
       @include btn-default;
-      @include btn-green;
+      @include btn-blue;
 
-      border-style: solid;
       border-width: 1px;
       line-height: $line-height-base;
       width: auto;
-    }
-  }
 
-  .create-merge-request-dropdown-toggle {
-    .fa-caret-down {
-      pointer-events: none;
-      color: inherit;
-      margin-left: 0;
+      &.disabled {
+        background-color: $gray-light;
+        border-color: $gray-100;
+        color: $gl-text-color-disabled;
+      }
     }
   }
 }
 
-.discussion-reply-holder {
-  .avatar-note-form-holder .note-edit-form {
-    display: block;
-    margin-left: $note-icon-gutter-width;
-
-    @include media-breakpoint-down(xs) {
-      margin-left: 0;
-    }
-  }
+.discussion-reply-holder,
+.note-edit-form {
+  display: block;
 }
 
 .issue-sort-dropdown {
@@ -218,6 +202,10 @@ ul.related-merge-requests > li {
 
   .reverse-sort-btn {
     color: $gl-text-color-secondary;
+
+    &.disabled {
+      color: $gl-text-color-disabled;
+    }
   }
 }
 

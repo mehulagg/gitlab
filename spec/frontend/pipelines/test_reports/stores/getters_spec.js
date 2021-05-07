@@ -1,6 +1,10 @@
 import { getJSONFixture } from 'helpers/fixtures';
 import * as getters from '~/pipelines/stores/test_reports/getters';
-import { iconForTestStatus, formattedTime } from '~/pipelines/stores/test_reports/utils';
+import {
+  iconForTestStatus,
+  formatFilePath,
+  formattedTime,
+} from '~/pipelines/stores/test_reports/utils';
 
 describe('Getters TestReports Store', () => {
   let state;
@@ -8,13 +12,23 @@ describe('Getters TestReports Store', () => {
   const testReports = getJSONFixture('pipelines/test_report.json');
 
   const defaultState = {
+    blobPath: '/test/blob/path',
     testReports,
     selectedSuiteIndex: 0,
+    pageInfo: {
+      page: 1,
+      perPage: 2,
+    },
   };
 
   const emptyState = {
+    blobPath: '',
     testReports: {},
     selectedSuite: null,
+    pageInfo: {
+      page: 1,
+      perPage: 2,
+    },
   };
 
   beforeEach(() => {
@@ -32,7 +46,7 @@ describe('Getters TestReports Store', () => {
       setupState();
 
       const suites = getters.getTestSuites(state);
-      const expected = testReports.test_suites.map(x => ({
+      const expected = testReports.test_suites.map((x) => ({
         ...x,
         formattedTime: formattedTime(x.total_time),
       }));
@@ -59,15 +73,18 @@ describe('Getters TestReports Store', () => {
   });
 
   describe('getSuiteTests', () => {
-    it('should return the test cases inside the suite', () => {
+    it('should return the current page of test cases inside the suite', () => {
       setupState();
 
       const cases = getters.getSuiteTests(state);
-      const expected = testReports.test_suites[0].test_cases.map(x => ({
-        ...x,
-        formattedTime: formattedTime(x.execution_time),
-        icon: iconForTestStatus(x.status),
-      }));
+      const expected = testReports.test_suites[0].test_cases
+        .map((x) => ({
+          ...x,
+          filePath: `${state.blobPath}/${formatFilePath(x.file)}`,
+          formattedTime: formattedTime(x.execution_time),
+          icon: iconForTestStatus(x.status),
+        }))
+        .slice(0, state.pageInfo.perPage);
 
       expect(cases).toEqual(expected);
     });
@@ -76,6 +93,81 @@ describe('Getters TestReports Store', () => {
       setupState(emptyState);
 
       expect(getters.getSuiteTests(state)).toEqual([]);
+    });
+
+    describe('when a test case classname property is null', () => {
+      it('should return an empty string value for the classname property', () => {
+        const testCases = testReports.test_suites[0].test_cases;
+        setupState({
+          ...defaultState,
+          testReports: {
+            ...testReports,
+            test_suites: [
+              {
+                test_cases: testCases.map((testCase) => ({
+                  ...testCase,
+                  classname: null,
+                })),
+              },
+            ],
+          },
+        });
+
+        const expected = testCases
+          .map((x) => ({
+            ...x,
+            classname: '',
+            filePath: `${state.blobPath}/${formatFilePath(x.file)}`,
+            formattedTime: formattedTime(x.execution_time),
+            icon: iconForTestStatus(x.status),
+          }))
+          .slice(0, state.pageInfo.perPage);
+
+        expect(getters.getSuiteTests(state)).toEqual(expected);
+      });
+    });
+
+    describe('when a test case name property is null', () => {
+      it('should return an empty string value for the name property', () => {
+        const testCases = testReports.test_suites[0].test_cases;
+        setupState({
+          ...defaultState,
+          testReports: {
+            ...testReports,
+            test_suites: [
+              {
+                test_cases: testCases.map((testCase) => ({
+                  ...testCase,
+                  name: null,
+                })),
+              },
+            ],
+          },
+        });
+
+        const expected = testCases
+          .map((x) => ({
+            ...x,
+            name: '',
+            filePath: `${state.blobPath}/${formatFilePath(x.file)}`,
+            formattedTime: formattedTime(x.execution_time),
+            icon: iconForTestStatus(x.status),
+          }))
+          .slice(0, state.pageInfo.perPage);
+
+        expect(getters.getSuiteTests(state)).toEqual(expected);
+      });
+    });
+  });
+
+  describe('getSuiteTestCount', () => {
+    it('should return the total number of test cases', () => {
+      setupState();
+
+      const testCount = getters.getSuiteTestCount(state);
+      const expected = testReports.test_suites[0].test_cases.length;
+
+      expect(testCount).toEqual(expected);
     });
   });
 });

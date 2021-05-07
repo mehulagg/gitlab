@@ -1,18 +1,25 @@
 <script>
 import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
-import Api from 'ee/api';
-import { CancelToken } from 'axios';
+import fetchHeaderVulnerabilityQuery from 'ee/security_dashboard/graphql/header_vulnerability.graphql';
+import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { s__ } from '~/locale';
 import UsersCache from '~/lib/utils/users_cache';
+import { s__ } from '~/locale';
+import {
+  VULNERABILITY_STATE_OBJECTS,
+  FEEDBACK_TYPES,
+  HEADER_ACTION_BUTTONS,
+  gidPrefix,
+} from '../constants';
+import { normalizeGraphQLVulnerability } from '../helpers';
 import ResolutionAlert from './resolution_alert.vue';
-import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
-import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
+import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -43,7 +50,7 @@ export default {
       // prop leading to an error in the footer component.
       vulnerability: { ...this.initialVulnerability },
       user: undefined,
-      refreshVulnerabilitySource: undefined,
+      shouldRefreshVulnerability: false,
     };
   },
 
@@ -51,6 +58,38 @@ export default {
     confirmed: 'danger',
     resolved: 'success',
     detected: 'warning',
+  },
+
+  apollo: {
+    vulnerability: {
+      query: fetchHeaderVulnerabilityQuery,
+      manual: true,
+      fetchPolicy: 'no-cache',
+      variables() {
+        return {
+          id: `${gidPrefix}${this.vulnerability.id}`,
+        };
+      },
+      result({ data: { vulnerability } }) {
+        this.shouldRefreshVulnerability = false;
+        this.isLoadingVulnerability = false;
+
+        this.vulnerability = {
+          ...this.vulnerability,
+          ...normalizeGraphQLVulnerability(vulnerability),
+        };
+      },
+      error() {
+        createFlash({
+          message: s__(
+            'VulnerabilityManagement|Something went wrong while trying to refresh the vulnerability. Please try again later.',
+          ),
+        });
+      },
+      skip() {
+        return !this.shouldRefreshVulnerability;
+      },
+    },
   },
 
   computed: {
@@ -78,7 +117,7 @@ export default {
       );
     },
     hasIssue() {
-      return Boolean(this.vulnerability.issue_feedback?.issue_iid);
+      return Boolean(this.vulnerability.issueFeedback?.issueIid);
     },
     hasRemediation() {
       const { remediations } = this.vulnerability;
@@ -86,14 +125,14 @@ export default {
     },
     canCreateMergeRequest() {
       return (
-        !this.vulnerability.merge_request_feedback?.merge_request_path &&
-        Boolean(this.vulnerability.create_mr_url) &&
+        !this.vulnerability.mergeRequestFeedback?.mergeRequestPath &&
+        Boolean(this.vulnerability.createMrUrl) &&
         this.hasRemediation
       );
     },
     showResolutionAlert() {
       return (
-        this.vulnerability.resolved_on_default_branch &&
+        this.vulnerability.resolvedOnDefaultBranch &&
         this.vulnerability.state !== VULNERABILITY_STATE_OBJECTS.resolved.state
       );
     },
@@ -103,18 +142,22 @@ export default {
     'vulnerability.state': {
       immediate: true,
       handler(state) {
-        const id = this.vulnerability[`${state}_by_id`];
+        const id = this.vulnerability[`${state}ById`];
 
-        if (id === undefined) return; // Don't do anything if there's no ID.
+        if (!id) {
+          return;
+        }
 
         this.isLoadingUser = true;
 
         UsersCache.retrieveById(id)
-          .then(userData => {
+          .then((userData) => {
             this.user = userData;
           })
           .catch(() => {
-            createFlash(s__('VulnerabilityManagement|Something went wrong, could not get user.'));
+            createFlash({
+              message: s__('VulnerabilityManagement|Something went wrong, could not get user.'),
+            });
           })
           .finally(() => {
             this.isLoadingUser = false;
@@ -128,55 +171,72 @@ export default {
       const fn = this[action];
       if (typeof fn === 'function') fn();
     },
-    changeVulnerabilityState(newState) {
+
+    async changeVulnerabilityState({ action, payload }) {
       this.isLoadingVulnerability = true;
 
-      Api.changeVulnerabilityState(this.vulnerability.id, newState)
-        .then(({ data }) => {
-          Object.assign(this.vulnerability, data);
-          this.$emit('vulnerability-state-change');
-        })
-        .catch(() => {
-          createFlash(
-            s__(
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: vulnerabilityStateMutations[action],
+          variables: { id: `${gidPrefix}${this.vulnerability.id}`, ...payload },
+        });
+        const [queryName] = Object.keys(data);
+
+        this.vulnerability = {
+          ...this.vulnerability,
+          ...normalizeGraphQLVulnerability(data[queryName].vulnerability),
+        };
+
+        this.$emit('vulnerability-state-change');
+      } catch (error) {
+        createFlash({
+          message: {
+            error,
+            captureError: true,
+            message: s__(
               'VulnerabilityManagement|Something went wrong, could not update vulnerability state.',
             ),
-          );
-        })
-        .finally(() => {
-          this.isLoadingVulnerability = false;
+          },
         });
+      } finally {
+        this.isLoadingVulnerability = false;
+      }
     },
+
     createMergeRequest() {
       this.isProcessingAction = true;
 
       const {
-        report_type: category,
+        reportType: category,
         pipeline: { sourceBranch },
-        project_fingerprint: projectFingerprint,
+        projectFingerprint,
       } = this.vulnerability;
 
+      // note: this direct API call will be replaced when migrating the vulnerability details page to GraphQL
+      // related epic: https://gitlab.com/groups/gitlab-org/-/epics/3657
       axios
-        .post(this.vulnerability.create_mr_url, {
+        .post(this.vulnerability.createMrUrl, {
           vulnerability_feedback: {
             feedback_type: FEEDBACK_TYPES.MERGE_REQUEST,
             category,
             project_fingerprint: projectFingerprint,
             vulnerability_data: {
-              ...this.vulnerability,
+              ...convertObjectPropsToSnakeCase(this.vulnerability),
               category,
               target_branch: sourceBranch,
             },
           },
         })
-        .then(({ data: { merge_request_path } }) => {
-          redirectTo(merge_request_path);
+        .then(({ data: { merge_request_path: mergeRequestPath } }) => {
+          redirectTo(mergeRequestPath);
         })
         .catch(() => {
           this.isProcessingAction = false;
-          createFlash(
-            s__('ciReport|There was an error creating the merge request. Please try again.'),
-          );
+          createFlash({
+            message: s__(
+              'ciReport|There was an error creating the merge request. Please try again.',
+            ),
+          });
         });
     },
     downloadPatch() {
@@ -187,34 +247,7 @@ export default {
     },
     refreshVulnerability() {
       this.isLoadingVulnerability = true;
-
-      // Cancel any pending API requests.
-      if (this.refreshVulnerabilitySource) {
-        this.refreshVulnerabilitySource.cancel();
-      }
-
-      this.refreshVulnerabilitySource = CancelToken.source();
-
-      Api.fetchVulnerability(this.vulnerability.id, {
-        cancelToken: this.refreshVulnerabilitySource.token,
-      })
-        .then(({ data }) => {
-          Object.assign(this.vulnerability, data);
-        })
-        .catch(e => {
-          // Don't show an error message if the request was cancelled through the cancel token.
-          if (!axios.isCancel(e)) {
-            createFlash(
-              s__(
-                'VulnerabilityManagement|Something went wrong while trying to refresh the vulnerability. Please try again later.',
-              ),
-            );
-          }
-        })
-        .finally(() => {
-          this.isLoadingVulnerability = false;
-          this.refreshVulnerabilitySource = undefined;
-        });
+      this.shouldRefreshVulnerability = true;
     },
   },
 };
@@ -225,10 +258,13 @@ export default {
     <resolution-alert
       v-if="showResolutionAlert"
       :vulnerability-id="vulnerability.id"
-      :default-branch-name="vulnerability.project_default_branch"
+      :default-branch-name="vulnerability.projectDefaultBranch"
     />
     <div class="detail-page-header">
-      <div class="detail-page-header-body align-items-center">
+      <div
+        class="detail-page-header-body align-items-center"
+        data-testid="vulnerability-detail-body"
+      >
         <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
         <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}

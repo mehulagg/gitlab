@@ -4,7 +4,10 @@ require 'spec_helper'
 
 RSpec.describe 'admin/application_settings/_elasticsearch_form' do
   let_it_be(:admin) { create(:admin) }
+
   let(:page) { Capybara::Node::Simple.new(rendered) }
+  let(:pause_indexing) { false }
+  let(:pending_migrations) { false }
 
   before do
     assign(:application_setting, application_setting)
@@ -18,7 +21,8 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
 
     before do
       allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_indexing?)).and_return(es_indexing)
-      allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_pause_indexing?)).and_return(true)
+      allow(Gitlab::CurrentSettings).to(receive(:elasticsearch_pause_indexing?)).and_return(pause_indexing)
+      allow(Elastic::DataMigrationService).to(receive(:pending_migrations?)).and_return(pending_migrations)
     end
 
     context 'indexing is enabled' do
@@ -27,7 +31,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'hides index button when indexing is disabled' do
         render
 
-        expect(rendered).to have_css('a.btn-success', text: button_text)
+        expect(rendered).to have_css('a.btn-confirm', text: button_text)
       end
 
       it 'renders an enabled pause checkbox' do
@@ -35,6 +39,17 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
 
         expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing]')
         expect(rendered).not_to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+      end
+
+      context 'pending migrations' do
+        let(:pending_migrations) { true }
+        let(:pause_indexing) { true }
+
+        it 'renders a disabled pause checkbox' do
+          render
+
+          expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+        end
       end
     end
 
@@ -44,7 +59,7 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'shows index button when indexing is enabled' do
         render
 
-        expect(rendered).not_to have_css('a.btn-success', text: button_text)
+        expect(rendered).not_to have_css('a.btn-confirm', text: button_text)
       end
 
       it 'renders a disabled pause checkbox' do
@@ -82,13 +97,29 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       assign(:elasticsearch_reindexing_task, task)
     end
 
+    context 'when task is in progress' do
+      let(:task) { build(:elastic_reindexing_task, state: :reindexing) }
+
+      it 'renders a disabled pause checkbox' do
+        render
+
+        expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+      end
+
+      it 'renders a disabled trigger cluster reindexing link' do
+        render
+
+        expect(rendered).to have_css('a.gl-button[disabled="disabled"]', text: 'Trigger cluster reindexing')
+      end
+    end
+
     context 'without extended details' do
       let(:task) { build(:elastic_reindexing_task) }
 
       it 'renders the task' do
         render
 
-        expect(rendered).to include("State: #{task.state}")
+        expect(rendered).to include("Reindexing Status: #{task.state}")
         expect(rendered).not_to include("Task ID:")
         expect(rendered).not_to include("Error:")
         expect(rendered).not_to include("Expected documents:")
@@ -97,28 +128,28 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
     end
 
     context 'with extended details' do
-      let(:task) { build(:elastic_reindexing_task, state: :reindexing, elastic_task: 'elastic-task-id', error_message: 'error-message', documents_count_target: 5, documents_count: 10) }
+      let!(:task) { create(:elastic_reindexing_task, state: :reindexing, error_message: 'error-message') }
+      let!(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count_target: 5, documents_count: 10) }
 
-      it 'renders the task' do
+      it 'renders the task information' do
         render
 
-        expect(rendered).to include("State: #{task.state}")
-        expect(rendered).to include("Task ID: #{task.elastic_task}")
+        expect(rendered).to include("Reindexing Status: #{task.state}")
         expect(rendered).to include("Error: #{task.error_message}")
-        expect(rendered).to include("Expected documents: #{task.documents_count}")
-        expect(rendered).to include("Documents reindexed: #{task.documents_count_target} (50.0%)")
+        expect(rendered).to include("Expected documents: #{subtask.documents_count}")
+        expect(rendered).to include("Documents reindexed: #{subtask.documents_count_target} (50.0%)")
       end
     end
 
     context 'with extended details, but without documents_count_target' do
-      let(:task) { build(:elastic_reindexing_task, state: :reindexing, elastic_task: 'elastic-task-id', documents_count: 10) }
+      let!(:task) { create(:elastic_reindexing_task, state: :reindexing) }
+      let!(:subtask) { create(:elastic_reindexing_subtask, elastic_reindexing_task: task, documents_count: 10) }
 
-      it 'renders the task' do
+      it 'renders the task information' do
         render
 
-        expect(rendered).to include("State: #{task.state}")
-        expect(rendered).to include("Task ID: #{task.elastic_task}")
-        expect(rendered).to include("Expected documents: #{task.documents_count}")
+        expect(rendered).to include("Reindexing Status: #{task.state}")
+        expect(rendered).to include("Expected documents: #{subtask.documents_count}")
         expect(rendered).not_to include("Error:")
         expect(rendered).not_to include("Documents reindexed:")
       end
@@ -173,6 +204,46 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       it 'hides the input' do
         render
         expect(rendered).not_to have_field('application_setting[elasticsearch_project_ids]')
+      end
+    end
+  end
+
+  context 'elasticsearch migrations' do
+    let(:application_setting) { build(:application_setting) }
+
+    it 'does not show the retry migration card' do
+      render
+
+      expect(rendered).not_to include('There is a halted Elasticsearch migration')
+      expect(rendered).not_to include('Retry migration')
+    end
+
+    context 'when there is a halted migration' do
+      let(:migration) { Elastic::DataMigrationService.migrations.last }
+
+      before do
+        allow(Elastic::DataMigrationService).to receive(:halted_migrations?).and_return(true)
+        allow(Elastic::DataMigrationService).to receive(:halted_migration).and_return(migration)
+      end
+
+      it 'shows the retry migration card' do
+        render
+
+        expect(rendered).to include('There is a halted Elasticsearch migration')
+        expect(rendered).to include('Retry migration')
+      end
+    end
+
+    context 'when elasticsearch is unreachable' do
+      before do
+        allow(Gitlab::Elastic::Helper.default).to receive(:ping?).and_return(false)
+      end
+
+      it 'does not show the retry migration card' do
+        render
+
+        expect(rendered).not_to include('There is a halted Elasticsearch migration')
+        expect(rendered).not_to include('Retry migration')
       end
     end
   end

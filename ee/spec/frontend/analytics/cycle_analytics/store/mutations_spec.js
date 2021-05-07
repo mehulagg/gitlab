@@ -1,5 +1,9 @@
-import mutations from 'ee/analytics/cycle_analytics/store/mutations';
+import {
+  PAGINATION_SORT_DIRECTION_DESC,
+  PAGINATION_SORT_FIELD_END_EVENT,
+} from 'ee/analytics/cycle_analytics/constants';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 
 import {
   issueStage,
@@ -15,8 +19,9 @@ import {
 } from '../mock_data';
 
 let state = null;
+const { stages } = customizableStagesAndEvents;
 
-describe('Cycle analytics mutations', () => {
+describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
     state = {};
   });
@@ -34,7 +39,7 @@ describe('Cycle analytics mutations', () => {
     ${types.REQUEST_STAGE_DATA}                  | ${'isLoadingStage'}          | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isEmptyStage'}            | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isLoadingStage'}          | ${false}
-    ${types.REQUEST_CYCLE_ANALYTICS_DATA}        | ${'isLoading'}               | ${true}
+    ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}
     ${types.REQUEST_UPDATE_STAGE}                | ${'isLoading'}               | ${true}
@@ -48,27 +53,52 @@ describe('Cycle analytics mutations', () => {
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${'isCreatingValueStream'}   | ${false}
     ${types.REQUEST_CREATE_VALUE_STREAM}         | ${'createValueStreamErrors'} | ${{}}
     ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${'createValueStreamErrors'} | ${{}}
+    ${types.REQUEST_UPDATE_VALUE_STREAM}         | ${'isEditingValueStream'}    | ${true}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${'isEditingValueStream'}    | ${false}
+    ${types.REQUEST_UPDATE_VALUE_STREAM}         | ${'createValueStreamErrors'} | ${{}}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${'createValueStreamErrors'} | ${{}}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'isDeletingValueStream'}   | ${true}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'isDeletingValueStream'}   | ${false}
     ${types.REQUEST_DELETE_VALUE_STREAM}         | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'deleteValueStreamError'}  | ${null}
-    ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS}  | ${'isLoading'}               | ${false}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'selectedValueStream'}     | ${null}
+    ${types.INITIALIZE_VALUE_STREAM_SUCCESS}     | ${'isLoading'}               | ${false}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
 
     expect(state[stateKey]).toEqual(value);
   });
 
+  const valueStreamErrors = {
+    data: { stages },
+    errors: {
+      name: ['is required'],
+      stages: { 1: { name: "Can't be blank" } },
+    },
+  };
+
+  const expectedValueStreamErrors = {
+    name: ['is required'],
+    stages: [{}, { name: "Can't be blank" }, {}, {}, {}, {}, {}, {}],
+  };
+
+  const pagination = { page: 10, hasNextPage: true, sort: null, direction: null };
+
   it.each`
-    mutation                                   | payload                                  | expectedState
-    ${types.SET_FEATURE_FLAGS}                 | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_PROJECTS}             | ${selectedProjects}                      | ${{ selectedProjects }}
-    ${types.SET_DATE_RANGE}                    | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
-    ${types.SET_SELECTED_STAGE}                | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR} | ${{ errors: { name: ['is required'] } }} | ${{ createValueStreamErrors: { name: ['is required'] }, isCreatingValueStream: false }}
-    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR} | ${'Some error occurred'}                 | ${{ deleteValueStreamError: 'Some error occurred' }}
-    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}     | ${valueStreams}                          | ${{ valueStreams, isLoadingValueStreams: false }}
-    ${types.SET_SELECTED_VALUE_STREAM}         | ${valueStreams[1].id}                    | ${{ selectedValueStream: {} }}
+    mutation                                     | payload                                                  | expectedState
+    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}                            | ${{ featureFlags: { hasDurationChart: true } }}
+    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                                      | ${{ selectedProjects }}
+    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                                | ${{ startDate, endDate }}
+    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                                 | ${{ selectedStage: { id: 'first-stage' } }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}                                     | ${{ createValueStreamErrors: expectedValueStreamErrors, isCreatingValueStream: false }}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}                                     | ${{ createValueStreamErrors: expectedValueStreamErrors, isEditingValueStream: false }}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}                                 | ${{ deleteValueStreamError: 'Some error occurred' }}
+    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}                                          | ${{ valueStreams, isLoadingValueStreams: false }}
+    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}                                    | ${{ selectedValueStream: {} }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                       | ${{ selectedValueStream: valueStreams[1] }}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                       | ${{ selectedValueStream: valueStreams[1] }}
+    ${types.SET_PAGINATION}                      | ${pagination}                                            | ${{ pagination: { ...pagination, sort: PAGINATION_SORT_FIELD_END_EVENT, direction: PAGINATION_SORT_DIRECTION_DESC } }}
+    ${types.SET_PAGINATION}                      | ${{ ...pagination, sort: 'duration', direction: 'asc' }} | ${{ pagination: { ...pagination, sort: 'duration', direction: 'asc' } }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {
@@ -109,9 +139,9 @@ describe('Cycle analytics mutations', () => {
     );
   });
 
-  describe(`${types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS}`, () => {
+  describe(`${types.RECEIVE_VALUE_STREAM_DATA_SUCCESS}`, () => {
     it('will set isLoading=false and errorCode=null', () => {
-      mutations[types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, {
+      mutations[types.RECEIVE_VALUE_STREAM_DATA_SUCCESS](state, {
         stats: [],
         stages: [],
       });
@@ -124,22 +154,22 @@ describe('Cycle analytics mutations', () => {
   describe(`${types.RECEIVE_GROUP_STAGES_SUCCESS}`, () => {
     describe('with data', () => {
       beforeEach(() => {
-        mutations[types.RECEIVE_GROUP_STAGES_SUCCESS](state, customizableStagesAndEvents.stages);
+        mutations[types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages);
       });
 
       it('will convert the stats object to stages', () => {
-        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach(stage => {
+        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach((stage) => {
           expect(state.stages).toContainEqual(stage);
         });
       });
     });
   });
 
-  describe(`${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR}`, () => {
+  describe(`${types.RECEIVE_VALUE_STREAM_DATA_ERROR}`, () => {
     it('sets errorCode correctly', () => {
       const errorCode = 403;
 
-      mutations[types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state, errorCode);
+      mutations[types.RECEIVE_VALUE_STREAM_DATA_ERROR](state, errorCode);
 
       expect(state.isLoading).toBe(false);
       expect(state.errorCode).toBe(errorCode);
@@ -158,18 +188,45 @@ describe('Cycle analytics mutations', () => {
       ]);
 
       expect(stateWithData.medians).toEqual({
-        '1': { value: 20, error: null },
-        '2': { value: 10, error: null },
+        1: { value: 20, error: null },
+        2: { value: 10, error: null },
+      });
+    });
+
+    describe('with hasPathNavigation set to true', () => {
+      beforeEach(() => {
+        state = {
+          featureFlags: { hasPathNavigation: true },
+          medians: {},
+        };
+
+        mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
+          { id: 1, value: 7580 },
+          { id: 2, value: 434340 },
+        ]);
+      });
+
+      it('formats each stage median for display in the path navigation', () => {
+        expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
+      });
+
+      it('calculates the overview median', () => {
+        expect(state.medians).toMatchObject({ overview: '5d' });
       });
     });
   });
 
-  describe(`${types.INITIALIZE_CYCLE_ANALYTICS}`, () => {
+  describe(`${types.INITIALIZE_VSA}`, () => {
     const initialData = {
       group: { fullPath: 'cool-group' },
       selectedProjects,
       createdAfter: '2019-12-31',
       createdBefore: '2020-01-01',
+      pagination: {
+        page: 1,
+        sort: PAGINATION_SORT_FIELD_END_EVENT,
+        direction: PAGINATION_SORT_DIRECTION_DESC,
+      },
     };
 
     it.each`
@@ -178,14 +235,23 @@ describe('Cycle analytics mutations', () => {
       ${'selectedProjects'} | ${initialData.selectedProjects}
       ${'startDate'}        | ${initialData.createdAfter}
       ${'endDate'}          | ${initialData.createdBefore}
-    `(
-      '$mutation with payload $payload will update state with $expectedState',
-      ({ stateKey, expectedState }) => {
-        state = {};
-        mutations[types.INITIALIZE_CYCLE_ANALYTICS](state, initialData);
+    `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
+      state = {};
+      mutations[types.INITIALIZE_VSA](state, initialData);
 
-        expect(state[stateKey]).toEqual(expectedState);
-      },
-    );
+      expect(state[stateKey]).toBe(expectedState);
+    });
+
+    it.each`
+      stateKey       | expectedState
+      ${'page'}      | ${1}
+      ${'sort'}      | ${PAGINATION_SORT_FIELD_END_EVENT}
+      ${'direction'} | ${PAGINATION_SORT_DIRECTION_DESC}
+    `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
+      state = {};
+      mutations[types.INITIALIZE_VSA](state, initialData);
+
+      expect(state.pagination[stateKey]).toBe(expectedState);
+    });
   });
 });

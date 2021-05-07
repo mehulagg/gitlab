@@ -6,6 +6,7 @@ RSpec.describe Snippets::CreateService do
   describe '#execute' do
     let_it_be(:user) { create(:user) }
     let_it_be(:admin) { create(:user, :admin) }
+    let(:action) { :create }
     let(:opts) { base_opts.merge(extra_opts) }
     let(:base_opts) do
       {
@@ -147,9 +148,11 @@ RSpec.describe Snippets::CreateService do
       end
 
       context 'when the commit action fails' do
+        let(:error) { SnippetRepository::CommitError.new('foobar') }
+
         before do
           allow_next_instance_of(SnippetRepository) do |instance|
-            allow(instance).to receive(:multi_files_action).and_raise(SnippetRepository::CommitError.new('foobar'))
+            allow(instance).to receive(:multi_files_action).and_raise(error)
           end
         end
 
@@ -172,7 +175,7 @@ RSpec.describe Snippets::CreateService do
         end
 
         it 'logs the error' do
-          expect(Gitlab::AppLogger).to receive(:error).with('foobar')
+          expect(Gitlab::ErrorTracking).to receive(:log_exception).with(error, service: 'Snippets::CreateService')
 
           subject
         end
@@ -307,7 +310,7 @@ RSpec.describe Snippets::CreateService do
 
       it_behaves_like 'a service that creates a snippet'
       it_behaves_like 'public visibility level restrictions apply'
-      it_behaves_like 'snippets spam check is performed'
+      it_behaves_like 'checking spam'
       it_behaves_like 'snippet create data is tracked'
       it_behaves_like 'an error service response when save fails'
       it_behaves_like 'creates repository and files'
@@ -335,7 +338,7 @@ RSpec.describe Snippets::CreateService do
 
       it_behaves_like 'a service that creates a snippet'
       it_behaves_like 'public visibility level restrictions apply'
-      it_behaves_like 'snippets spam check is performed'
+      it_behaves_like 'checking spam'
       it_behaves_like 'snippet create data is tracked'
       it_behaves_like 'an error service response when save fails'
       it_behaves_like 'creates repository and files'

@@ -12,7 +12,7 @@ RSpec.describe API::Scim do
 
   before do
     stub_licensed_features(group_allowed_email_domains: true, group_saml: true)
-    group.add_owner(user)
+    group.add_developer(user)
     create(:saml_provider, group: group, default_membership_role: Gitlab::Access::DEVELOPER)
   end
 
@@ -208,12 +208,16 @@ RSpec.describe API::Scim do
         it 'created the identity' do
           expect(group.scim_identities.with_extern_uid('test_uid').first).not_to be_nil
         end
+
+        it 'marks the user as provisioned by the group' do
+          expect(new_user.provisioned_by_group).to eq(group)
+        end
       end
 
       context 'existing user' do
-        before do
-          old_user = create(:user, email: 'work@example.com')
+        let(:old_user) { create(:user, email: 'work@example.com') }
 
+        before do
           create(:scim_identity, user: old_user, group: group, extern_uid: 'test_uid')
           group.add_guest(old_user)
 
@@ -226,6 +230,10 @@ RSpec.describe API::Scim do
 
         it 'has the user external ID' do
           expect(json_response['id']).to eq('test_uid')
+        end
+
+        it 'does not mark the user as provisioned' do
+          expect(old_user.reload.provisioned_by_group).to be_nil
         end
       end
 
@@ -329,11 +337,32 @@ RSpec.describe API::Scim do
         expect(identity.reload.active).to be false
       end
 
+      context 'with owner' do
+        params = { Operations: [{ 'op': 'Replace', 'path': 'active', 'value': 'False' }] }.to_query
+
+        before do
+          group.add_owner(user)
+          call_patch_api(params)
+        end
+
+        it 'responds with 412' do
+          expect(response).to have_gitlab_http_status(:precondition_failed)
+        end
+
+        it 'returns the last group owner error' do
+          expect(response.body).to include("Error updating #{user.name}")
+        end
+
+        it 'does not deactivate the identity' do
+          expect(identity.reload.active).to be true
+        end
+      end
+
       context 'Reprovision user' do
         let_it_be(:params) { { Operations: [{ 'op': 'Replace', 'path': 'active', 'value': 'true' }] }.to_query }
 
         it 'activates the scim_identity' do
-          identity.update(active: false)
+          identity.update!(active: false)
 
           call_patch_api(params)
 
@@ -439,6 +468,25 @@ RSpec.describe API::Scim do
 
         it 'deactivates the identity' do
           expect(identity.reload.active).to be false
+        end
+      end
+
+      context 'with owner' do
+        before do
+          group.add_owner(user)
+          delete scim_api("scim/v2/groups/#{group.full_path}/Users/#{identity.extern_uid}")
+        end
+
+        it 'responds with 412' do
+          expect(response).to have_gitlab_http_status(:precondition_failed)
+        end
+
+        it 'returns the last group owner error' do
+          expect(response.body).to include("Could not remove #{user.name} from #{group.name}. Cannot remove last group owner.")
+        end
+
+        it 'does not deactivate the identity' do
+          expect(identity.reload.active).to be true
         end
       end
 

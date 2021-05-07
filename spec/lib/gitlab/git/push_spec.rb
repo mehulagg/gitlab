@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Git::Push do
   let_it_be(:project) { create(:project, :repository) }
+
   let(:oldrev) { project.commit('HEAD~2').id }
   let(:newrev) { project.commit.id }
   let(:ref) { 'refs/heads/some-branch' }
@@ -85,6 +86,16 @@ RSpec.describe Gitlab::Git::Push do
       let(:newrev) { '123456' }
 
       it { is_expected.to be_force_push }
+    end
+
+    context 'when called mulitiple times' do
+      it 'does not make make multiple calls to the force push check' do
+        expect(Gitlab::Checks::ForcePush).to receive(:force_push?).once
+
+        2.times do
+          subject.force_push?
+        end
+      end
     end
   end
 

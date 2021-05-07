@@ -1,21 +1,25 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
-import { deprecatedCreateFlash as Flash } from '../../flash';
-import * as constants from '../constants';
-import eventHub from '../event_hub';
-import noteableNote from './noteable_note.vue';
-import noteableDiscussion from './noteable_discussion.vue';
-import discussionFilterNote from './discussion_filter_note.vue';
-import systemNote from '../../vue_shared/components/notes/system_note.vue';
-import commentForm from './comment_form.vue';
-import placeholderNote from '../../vue_shared/components/notes/placeholder_note.vue';
-import placeholderSystemNote from '../../vue_shared/components/notes/placeholder_system_note.vue';
-import skeletonLoadingContainer from '../../vue_shared/components/notes/skeleton_note.vue';
-import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
 import { __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
+import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
+import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import draftNote from '../../batch_comments/components/draft_note.vue';
+import { deprecatedCreateFlash as Flash } from '../../flash';
+import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
+import placeholderNote from '../../vue_shared/components/notes/placeholder_note.vue';
+import placeholderSystemNote from '../../vue_shared/components/notes/placeholder_system_note.vue';
+import skeletonLoadingContainer from '../../vue_shared/components/notes/skeleton_note.vue';
+import systemNote from '../../vue_shared/components/notes/system_note.vue';
+import * as constants from '../constants';
+import eventHub from '../event_hub';
+import commentForm from './comment_form.vue';
+import discussionFilterNote from './discussion_filter_note.vue';
+import noteableDiscussion from './noteable_discussion.vue';
+import noteableNote from './noteable_note.vue';
+import SidebarSubscription from './sidebar_subscription.vue';
 
 export default {
   name: 'NotesApp',
@@ -29,7 +33,11 @@ export default {
     skeletonLoadingContainer,
     discussionFilterNote,
     OrderedLayout,
+    SidebarSubscription,
+    draftNote,
+    TimelineEntryItem,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     noteableData: {
       type: Object,
@@ -57,7 +65,6 @@ export default {
   },
   data() {
     return {
-      isFetching: false,
       currentFilter: null,
     };
   },
@@ -68,6 +75,7 @@ export default {
       'convertedDisscussionIds',
       'getNotesDataByProp',
       'isLoading',
+      'isFetching',
       'commentsDisabled',
       'getNoteableData',
       'userCanReply',
@@ -103,6 +111,13 @@ export default {
     },
   },
   watch: {
+    async isFetching() {
+      if (!this.isFetching) {
+        await this.$nextTick();
+        await this.startTaskList();
+        await this.checkLocationHash();
+      }
+    },
     shouldShow() {
       if (!this.isNotesFetched) {
         this.fetchNotes();
@@ -130,7 +145,7 @@ export default {
 
     const { parentElement } = this.$el;
     if (parentElement && parentElement.classList.contains('js-vue-notes-event')) {
-      parentElement.addEventListener('toggleAward', event => {
+      parentElement.addEventListener('toggleAward', (event) => {
         const { awardName, noteId } = event.detail;
         this.toggleAward({ awardName, noteId });
       });
@@ -153,6 +168,7 @@ export default {
   },
   methods: {
     ...mapActions([
+      'setFetchingState',
       'setLoadingState',
       'fetchDiscussions',
       'poll',
@@ -183,7 +199,11 @@ export default {
     fetchNotes() {
       if (this.isFetching) return null;
 
-      this.isFetching = true;
+      this.setFetchingState(true);
+
+      if (this.glFeatures.paginatedNotes) {
+        return this.initPolling();
+      }
 
       return this.fetchDiscussions(this.getFetchDiscussionsConfig())
         .then(this.initPolling)
@@ -191,11 +211,8 @@ export default {
           this.setLoadingState(false);
           this.setNotesFetchedState(true);
           eventHub.$emit('fetchedNotesData');
-          this.isFetching = false;
+          this.setFetchingState(false);
         })
-        .then(this.$nextTick)
-        .then(this.startTaskList)
-        .then(this.checkLocationHash)
         .catch(() => {
           this.setLoadingState(false);
           this.setNotesFetchedState(true);
@@ -217,7 +234,7 @@ export default {
       const noteId = hash && hash.replace(/^note_/, '');
 
       if (noteId) {
-        const discussion = this.discussions.find(d => d.notes.some(({ id }) => id === noteId));
+        const discussion = this.discussions.find((d) => d.notes.some(({ id }) => id === noteId));
 
         if (discussion) {
           this.expandDiscussion({ discussionId: discussion.id });
@@ -250,6 +267,7 @@ export default {
 
 <template>
   <div v-show="shouldShow" id="notes">
+    <sidebar-subscription :iid="noteableData.iid" :noteable-data="noteableData" />
     <ordered-layout :slot-keys="slotKeys">
       <template #form>
         <comment-form
@@ -262,6 +280,9 @@ export default {
         <ul id="notes-list" class="notes main-notes-list timeline">
           <template v-for="discussion in allDiscussions">
             <skeleton-loading-container v-if="discussion.isSkeletonNote" :key="discussion.id" />
+            <timeline-entry-item v-else-if="discussion.isDraft" :key="discussion.id">
+              <draft-note :draft="discussion" />
+            </timeline-entry-item>
             <template v-else-if="discussion.isPlaceholderNote">
               <placeholder-system-note
                 v-if="discussion.placeholderType === $options.systemNote"

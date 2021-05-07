@@ -30,7 +30,7 @@ RSpec.describe API::EpicLinks do
     end
 
     it 'returns 404 not found error for a user without permissions to see the group' do
-      group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
       subject
 

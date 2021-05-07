@@ -1,15 +1,15 @@
-import { mount } from '@vue/test-utils';
 import {
   GlFilteredSearchToken,
   GlFilteredSearchSuggestion,
   GlFilteredSearchTokenSegment,
   GlDropdownDivider,
 } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
-import createFlash from '~/flash';
 import { DEFAULT_MILESTONES } from '~/vue_shared/components/filtered_search_bar/constants';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
@@ -48,6 +48,7 @@ function createComponent(options = {}) {
     provide: {
       portalName: 'fake target',
       alignSuggestions: function fakeAlignSuggestions() {},
+      suggestionsListClass: 'custom-class',
     },
     stubs,
   });
@@ -120,7 +121,9 @@ describe('MilestoneToken', () => {
         wrapper.vm.fetchMilestoneBySearchTerm('foo');
 
         return waitForPromises().then(() => {
-          expect(createFlash).toHaveBeenCalledWith('There was a problem fetching milestones.');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was a problem fetching milestones.',
+          });
         });
       });
 
@@ -137,7 +140,10 @@ describe('MilestoneToken', () => {
   });
 
   describe('template', () => {
-    const defaultMilestones = [{ text: 'foo', value: 'foo' }, { text: 'bar', value: 'baz' }];
+    const defaultMilestones = [
+      { text: 'foo', value: 'foo' },
+      { text: 'bar', value: 'baz' },
+    ];
 
     beforeEach(async () => {
       wrapper = createComponent({ value: { data: `"${mockRegularMilestone.title}"` } });
@@ -190,8 +196,8 @@ describe('MilestoneToken', () => {
       suggestionsSegment.vm.$emit('activate');
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.contains(GlFilteredSearchSuggestion)).toBe(false);
-      expect(wrapper.contains(GlDropdownDivider)).toBe(false);
+      expect(wrapper.find(GlFilteredSearchSuggestion).exists()).toBe(false);
+      expect(wrapper.find(GlDropdownDivider).exists()).toBe(false);
     });
 
     it('renders `DEFAULT_MILESTONES` as default suggestions', async () => {

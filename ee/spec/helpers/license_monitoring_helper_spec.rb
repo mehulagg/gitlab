@@ -3,15 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe LicenseMonitoringHelper do
-  let_it_be(:admin) { create(:admin) }
-  let_it_be(:user) { create(:user) }
-  let_it_be(:license_seats_limit) { 10 }
-
-  let_it_be(:license) do
-    create(:license, data: build(:gitlab_license, restrictions: { active_user_count: license_seats_limit }).export)
-  end
-
   describe '#show_active_user_count_threshold_banner?' do
+    let_it_be(:admin) { create(:admin) }
+    let_it_be(:user) { create(:user) }
+    let_it_be(:license_seats_limit) { 10 }
+    let_it_be(:license) do
+      create(:license, data: build(:gitlab_license, restrictions: { active_user_count: license_seats_limit }).export)
+    end
+
     subject { helper.show_active_user_count_threshold_banner? }
 
     shared_examples 'banner hidden when below the threshold' do
@@ -65,7 +64,7 @@ RSpec.describe LicenseMonitoringHelper do
       context 'when current active user count greater than total user count' do
         before do
           allow(license).to receive(:restricted_user_count).and_return(license_seats_limit)
-          allow(license).to receive(:current_active_users_count).and_return(license_seats_limit + 1)
+          allow(license).to receive(:daily_billable_users_count).and_return(license_seats_limit + 1)
           allow(License).to receive(:current).and_return(license)
         end
 
@@ -105,6 +104,49 @@ RSpec.describe LicenseMonitoringHelper do
 
         it_behaves_like 'banner hidden when below the threshold'
       end
+    end
+  end
+
+  describe '#users_over_license' do
+    let(:now) { Date.current }
+
+    def setup_license(starts_at:, expires_at:, max_users:)
+      license = build(:license,
+                      starts_at: starts_at,
+                      expires_at: expires_at,
+                      restrictions: { active_user_count: max_users })
+      allow(License).to receive(:current).and_return(license)
+
+      license
+    end
+
+    it 'shows overage as a number when there is an overage' do
+      license = setup_license(starts_at: now - 3.months, expires_at: now + 9.months, max_users: 10)
+      create(:historical_data, recorded_at: license.starts_at + 1.month, active_user_count: 15)
+
+      expect(helper.users_over_license).to eq(5)
+    end
+
+    it 'shows overage as a number when there is not an overage' do
+      setup_license(starts_at: now - 3.months, expires_at: now + 9.months, max_users: 10)
+
+      expect(helper.users_over_license).to eq(0)
+    end
+
+    it 'reports overage for a license of 6 months in duration' do
+      license = setup_license(starts_at: now - 3.months, expires_at: now + 3.months, max_users: 15)
+      create(:historical_data, recorded_at: license.starts_at - 2.months, active_user_count: 45)
+      create(:historical_data, recorded_at: license.starts_at + 1.month, active_user_count: 25)
+
+      expect(helper.users_over_license).to eq(10)
+    end
+
+    it 'reports overage when the most recent billable user count is higher than the historical max active users' do
+      license = setup_license(starts_at: now - 3.months, expires_at: now + 9.months, max_users: 40)
+      create(:historical_data, recorded_at: license.expires_at - 2.months, active_user_count: 45)
+      create(:usage_trends_measurement, recorded_at: now - 1.day, identifier: :billable_users, count: 70)
+
+      expect(helper.users_over_license).to eq(30)
     end
   end
 end

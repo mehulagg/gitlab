@@ -31,12 +31,7 @@ export default {
       class="dropdown-input-field"
       @keyup="handleInputChange"
     />
-    <gl-icon name="search" class="dropdown-input-search" aria-hidden="true" data-hidden="true" />
-    <gl-icon
-      name="close"
-      class="dropdown-input-clear"
-      aria-hidden="true"
-      @click="handleInputClear"
-    />
+    <gl-icon name="search" class="dropdown-input-search" data-hidden="true" />
+    <gl-icon name="close" class="dropdown-input-clear" @click="handleInputClear" />
   </div>
 </template>

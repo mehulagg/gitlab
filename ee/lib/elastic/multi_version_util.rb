@@ -5,7 +5,7 @@ module Elastic
     extend ActiveSupport::Concern
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :data_class, :data_target
+    attr_reader :data_class, :data_target, :use_separate_indices
 
     # TODO: remove once multi-version is functional https://gitlab.com/gitlab-org/gitlab/issues/10156
     TARGET_VERSION = 'V12p1'
@@ -13,7 +13,8 @@ module Elastic
     # @params version [String, Module] can be a string "V12p1" or module (Elastic::V12p1)
     def version(version)
       version = Elastic.const_get(version, false) if version.is_a?(String)
-      version.const_get(proxy_class_name, false).new(data_target)
+
+      version.const_get(proxy_class_name, false).new(data_target, use_separate_indices: use_separate_indices)
     end
 
     # TODO: load from db table https://gitlab.com/gitlab-org/gitlab/issues/12555

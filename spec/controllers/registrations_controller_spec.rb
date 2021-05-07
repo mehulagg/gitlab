@@ -6,142 +6,123 @@ RSpec.describe RegistrationsController do
   include TermsHelper
 
   before do
-    stub_feature_flags(invisible_captcha: false)
+    stub_application_setting(require_admin_approval_after_user_signup: false)
   end
 
   describe '#new' do
     subject { get :new }
 
-    context 'with the experimental signup flow enabled and the user is part of the experimental group' do
-      before do
-        stub_experiment(signup_flow: true)
-        stub_experiment_for_user(signup_flow: true)
-      end
-
-      it 'renders new template and sets the resource variable' do
-        expect(subject).to render_template(:new)
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(assigns(:resource)).to be_a(User)
-      end
-    end
-
-    context 'with the experimental signup flow enabled and the user is part of the control group' do
-      before do
-        stub_experiment(signup_flow: true)
-        stub_experiment_for_user(signup_flow: false)
-      end
-
-      it 'renders new template and sets the resource variable' do
-        subject
-        expect(response).to have_gitlab_http_status(:found)
-        expect(response).to redirect_to(new_user_session_path(anchor: 'register-pane'))
-      end
+    it 'renders new template and sets the resource variable' do
+      expect(subject).to render_template(:new)
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(assigns(:resource)).to be_a(User)
     end
   end
 
   describe '#create' do
-    let(:base_user_params) { { first_name: 'first', last_name: 'last', username: 'new_username', email: 'new@user.com', password: 'Any_password' } }
-    let(:user_params) { { user: base_user_params } }
+    let_it_be(:base_user_params) do
+      { first_name: 'first', last_name: 'last', username: 'new_username', email: 'new@user.com', password: 'Any_password' }
+    end
 
-    subject { post(:create, params: user_params) }
+    let_it_be(:user_params) { { user: base_user_params } }
+
+    let(:session_params) { {} }
+
+    subject { post(:create, params: user_params, session: session_params) }
 
     context '`blocked_pending_approval` state' do
-      context 'when the feature is enabled' do
+      context 'when the `require_admin_approval_after_user_signup` setting is turned on' do
         before do
-          stub_feature_flags(admin_approval_for_new_user_signups: true)
+          stub_application_setting(require_admin_approval_after_user_signup: true)
         end
 
-        context 'when the `require_admin_approval_after_user_signup` setting is turned on' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: true)
+        it 'signs up the user in `blocked_pending_approval` state' do
+          subject
+          created_user = User.find_by(email: 'new@user.com')
+
+          expect(created_user).to be_present
+          expect(created_user.blocked_pending_approval?).to eq(true)
+        end
+
+        it 'does not log in the user after sign up' do
+          subject
+
+          expect(controller.current_user).to be_nil
+        end
+
+        it 'shows flash message after signing up' do
+          subject
+
+          expect(response).to redirect_to(new_user_session_path(anchor: 'login-pane'))
+          expect(flash[:notice])
+            .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator.')
+        end
+
+        it 'emails the access request to approvers' do
+          expect_next_instance_of(NotificationService) do |notification|
+            allow(notification).to receive(:new_instance_access_request).with(User.find_by(email: 'new@user.com'))
           end
 
-          it 'signs up the user in `blocked_pending_approval` state' do
-            subject
-            created_user = User.find_by(email: 'new@user.com')
+          subject
+        end
 
-            expect(created_user).to be_present
-            expect(created_user.blocked_pending_approval?).to eq(true)
-          end
+        context 'email confirmation' do
+          context 'when `send_user_confirmation_email` is true' do
+            before do
+              stub_application_setting(send_user_confirmation_email: true)
+            end
 
-          it 'does not log in the user after sign up' do
-            subject
-
-            expect(controller.current_user).to be_nil
-          end
-
-          it 'shows flash message after signing up' do
-            subject
-
-            expect(response).to redirect_to(new_user_session_path(anchor: 'login-pane'))
-            expect(flash[:notice])
-              .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your GitLab administrator.')
-          end
-
-          context 'email confirmation' do
-            context 'when `send_user_confirmation_email` is true' do
-              before do
-                stub_application_setting(send_user_confirmation_email: true)
-              end
-
-              it 'does not send a confirmation email' do
-                expect { subject }
-                  .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
-              end
+            it 'does not send a confirmation email' do
+              expect { subject }
+                .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
             end
           end
         end
 
-        context 'when the `require_admin_approval_after_user_signup` setting is turned off' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: false)
-          end
+        context 'audit events' do
+          context 'when not licensed' do
+            before do
+              stub_licensed_features(admin_audit_log: false)
+            end
 
-          it 'signs up the user in `active` state' do
-            subject
-            created_user = User.find_by(email: 'new@user.com')
-
-            expect(created_user).to be_present
-            expect(created_user.active?).to eq(true)
-          end
-
-          it 'does not show any flash message after signing up' do
-            subject
-
-            expect(flash[:notice]).to be_nil
-          end
-
-          context 'email confirmation' do
-            context 'when `send_user_confirmation_email` is true' do
-              before do
-                stub_application_setting(send_user_confirmation_email: true)
-              end
-
-              it 'sends a confirmation email' do
-                expect { subject }
-                  .to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
-              end
+            it 'does not log any audit event' do
+              expect { subject }.not_to change(AuditEvent, :count)
             end
           end
         end
       end
 
-      context 'when the feature is disabled' do
-        before do
-          stub_feature_flags(admin_approval_for_new_user_signups: false)
+      context 'when the `require_admin_approval_after_user_signup` setting is turned off' do
+        it 'signs up the user in `active` state' do
+          subject
+          created_user = User.find_by(email: 'new@user.com')
+
+          expect(created_user).to be_present
+          expect(created_user.active?).to eq(true)
         end
 
-        context 'when the `require_admin_approval_after_user_signup` setting is turned on' do
-          before do
-            stub_application_setting(require_admin_approval_after_user_signup: true)
-          end
+        it 'does not show any flash message after signing up' do
+          subject
 
-          it 'signs up the user in `active` state' do
-            subject
+          expect(flash[:notice]).to be_nil
+        end
 
-            created_user = User.find_by(email: 'new@user.com')
-            expect(created_user).to be_present
-            expect(created_user.active?).to eq(true)
+        it 'does not email the approvers' do
+          expect(NotificationService).not_to receive(:new)
+
+          subject
+        end
+
+        context 'email confirmation' do
+          context 'when `send_user_confirmation_email` is true' do
+            before do
+              stub_application_setting(send_user_confirmation_email: true)
+            end
+
+            it 'sends a confirmation email' do
+              expect { subject }
+                .to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            end
           end
         end
       end
@@ -172,6 +153,58 @@ RSpec.describe RegistrationsController do
             expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
             expect(controller.current_user).to be_nil
           end
+
+          context 'when registration is triggered from an accepted invite' do
+            context 'when it is part of our invite email experiment', :experiment do
+              let_it_be(:member) { create(:project_member, :invited, invite_email: user_params.dig(:user, :email)) }
+
+              let(:originating_member_id) { member.id }
+              let(:session_params) do
+                {
+                  invite_email: user_params.dig(:user, :email),
+                  originating_member_id: originating_member_id
+                }
+              end
+
+              context 'when member exists from the session key value' do
+                it 'tracks the experiment' do
+                  expect(experiment('members/invite_email')).to track(:accepted)
+                                                                  .with_context(actor: member)
+                                                                  .on_next_instance
+
+                  subject
+                end
+              end
+
+              context 'when member does not exist from the session key value' do
+                let(:originating_member_id) { -1 }
+
+                it 'tracks the experiment' do
+                  expect(experiment('members/invite_email')).not_to track(:accepted)
+
+                  subject
+                end
+              end
+            end
+
+            context 'when invite email matches email used on registration' do
+              let(:session_params) { { invite_email: user_params.dig(:user, :email) } }
+
+              it 'signs the user in without sending a confirmation email', :aggregate_failures do
+                expect { subject }.not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                expect(controller.current_user).to be_confirmed
+              end
+            end
+
+            context 'when invite email does not match the email used on registration' do
+              let(:session_params) { { invite_email: 'bogus@email.com' } }
+
+              it 'does not authenticate the user and sends a confirmation email', :aggregate_failures do
+                expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                expect(controller.current_user).to be_nil
+              end
+            end
+          end
         end
 
         context 'when soft email confirmation is enabled' do
@@ -184,6 +217,24 @@ RSpec.describe RegistrationsController do
             expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
             expect(controller.current_user).to be_present
             expect(response).to redirect_to(users_sign_up_welcome_path)
+          end
+
+          context 'when invite email matches email used on registration' do
+            let(:session_params) { { invite_email: user_params.dig(:user, :email) } }
+
+            it 'signs the user in without sending a confirmation email', :aggregate_failures do
+              expect { subject }.not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+              expect(controller.current_user).to be_confirmed
+            end
+          end
+
+          context 'when invite email does not match the email used on registration' do
+            let(:session_params) { { invite_email: 'bogus@email.com' } }
+
+            it 'authenticates the user and sends a confirmation email without confirming', :aggregate_failures do
+              expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+              expect(controller.current_user).not_to be_confirmed
+            end
           end
         end
       end
@@ -228,13 +279,8 @@ RSpec.describe RegistrationsController do
 
     context 'when invisible captcha is enabled' do
       before do
-        stub_feature_flags(invisible_captcha: true)
-        InvisibleCaptcha.timestamp_enabled = true
+        stub_application_setting(invisible_captcha_enabled: true)
         InvisibleCaptcha.timestamp_threshold = treshold
-      end
-
-      after do
-        InvisibleCaptcha.timestamp_enabled = false
       end
 
       let(:treshold) { 4 }
@@ -446,47 +492,6 @@ RSpec.describe RegistrationsController do
           end
         end
       end
-    end
-  end
-
-  describe '#welcome' do
-    subject { get :welcome }
-
-    it 'renders the devise_experimental_separate_sign_up_flow layout' do
-      sign_in(create(:user))
-
-      expected_layout = Gitlab.ee? ? :checkout : :devise_experimental_separate_sign_up_flow
-
-      expect(subject).to render_template(expected_layout)
-    end
-
-    context '2FA is required from group' do
-      before do
-        user = create(:user, require_two_factor_authentication_from_group: true)
-        sign_in(user)
-      end
-
-      it 'does not perform a redirect' do
-        expect(subject).not_to redirect_to(profile_two_factor_auth_path)
-      end
-    end
-  end
-
-  describe '#update_registration' do
-    subject(:update_registration) do
-      patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
-    end
-
-    context 'without a signed in user' do
-      it { is_expected.to redirect_to new_user_registration_path }
-    end
-
-    context 'with a signed in user' do
-      before do
-        sign_in(create(:user))
-      end
-
-      it { is_expected.to redirect_to(dashboard_projects_path)}
     end
   end
 end

@@ -1,4 +1,4 @@
-import getDesignListQuery from '../graphql/queries/get_design_list.query.graphql';
+import getDesignListQuery from 'shared_queries/design_management/get_design_list.query.graphql';
 import { findVersionId } from '../utils/design_management_utils';
 
 export default {
@@ -12,7 +12,7 @@ export default {
           atVersion: null,
         };
       },
-      update: data => data.project.issue.designCollection.versions.nodes,
+      update: (data) => data.project.issue.designCollection.versions.nodes,
     },
   },
   inject: {
@@ -28,7 +28,7 @@ export default {
       return (
         this.$route.query.version &&
         this.allVersions &&
-        this.allVersions.some(version => version.id.endsWith(this.$route.query.version))
+        this.allVersions.some((version) => version.id.endsWith(this.$route.query.version))
       );
     },
     designsVersion() {

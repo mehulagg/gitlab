@@ -49,11 +49,9 @@ module MergeRequests
 
     def duplicates
       existing_oids = merge_request.merge_request_context_commits.map { |commit| commit.sha.to_s }
-      duplicate_oids = existing_oids.select do |existing_oid|
-        commit_ids.select { |commit_id| existing_oid.start_with?(commit_id) }.count > 0
+      existing_oids.select do |existing_oid|
+        commit_ids.count { |commit_id| existing_oid.start_with?(commit_id) } > 0
       end
-
-      duplicate_oids
     end
 
     def build_context_commit_rows(merge_request_id, commits)
@@ -66,7 +64,8 @@ module MergeRequests
           relative_order: index,
           sha: sha,
           authored_date: Gitlab::Database.sanitize_timestamp(commit_hash[:authored_date]),
-          committed_date: Gitlab::Database.sanitize_timestamp(commit_hash[:committed_date])
+          committed_date: Gitlab::Database.sanitize_timestamp(commit_hash[:committed_date]),
+          trailers: commit_hash.fetch(:trailers, {}).to_json
         )
       end
     end

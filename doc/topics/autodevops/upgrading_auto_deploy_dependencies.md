@@ -1,11 +1,11 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Upgrading deployments for newer Auto Deploy dependencies (Auto Deploy template, auto-deploy-image and auto-deploy-app chart)
+# Upgrading deployments for newer Auto Deploy dependencies
 
 [Auto Deploy](stages.md#auto-deploy) is a feature that deploys your application to a Kubernetes cluster.
 It consists of several dependencies:
@@ -71,6 +71,12 @@ The v2 auto-deploy-image contains multiple dependency and architectural changes.
 If your Auto DevOps project has an active environment deployed with the v1 `auto-deploy-image`,
 please proceed with the following upgrade guide. Otherwise, you can skip this process.
 
+#### Kubernetes 1.16+
+
+The v2 auto-deploy-image drops support for Kubernetes 1.15 and lower. If you need to upgrade your
+Kubernetes cluster, follow your cloud provider's instructions. Here's
+[an example on GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/upgrading-a-cluster).
+
 #### Helm 3
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228609) in GitLab 13.4.
@@ -108,7 +114,13 @@ If your Auto DevOps project has an active environment that was deployed with the
    job saves a backup for 1 week in a job artifact called `helm-2-release-backups`.
    The backup is in a Kubernetes manifest file that can be restored using
    `kubectl apply -f $backup`.
-1. Remove the `MIGRATE_HELM_2TO3` variable.
+1. Remove the `MIGRATE_HELM_2TO3` CI/CD variable.
+
+#### In-Cluster PostgreSQL Channel 2
+
+The v2 auto-deploy-image drops support for [legacy in-cluster PostgreSQL](upgrading_postgresql.md).
+If your Kubernetes cluster still depends on it, [upgrade and migrate your data](upgrading_postgresql.md)
+with the [v1 auto-deploy-image](#use-a-specific-version-of-auto-deploy-dependencies).
 
 #### Traffic routing change for canary deployments and incremental rollouts
 
@@ -133,15 +145,15 @@ steps to upgrade to v2:
    them to `production` first to delete the unstable tracks.
 1. Verify your project is [using the v2 `auto-deploy-image`](#verify-dependency-versions).
    If not, [specify the version](#use-a-specific-version-of-auto-deploy-dependencies).
-1. Add an `AUTO_DEVOPS_FORCE_DEPLOY_V2` environment variable with a value of `true`
+1. Add an `AUTO_DEVOPS_FORCE_DEPLOY_V2` CI/CD variable with a value of `true`
    in the GitLab CI/CD settings.
 1. Create a new pipeline and run the `production` job to renew the resource architecture
    with the v2 `auto-deploy-app chart`.
-1. Remove the `AUTO_DEVOPS_FORCE_DEPLOY_V2` environment variable.
+1. Remove the `AUTO_DEVOPS_FORCE_DEPLOY_V2` variable.
 
 ### Use a specific version of Auto Deploy dependencies
 
-To use a specifc version of Auto Deploy dependencies, specify the previous Auto Deploy
+To use a specific version of Auto Deploy dependencies, specify the previous Auto Deploy
 stable template that contains the [desired version of `auto-deploy-image` and `auto-deploy-app`](#verify-dependency-versions).
 
 For example, if the template is bundled in GitLab v13.3, change your `.gitlab-ci.yml` to:
@@ -149,13 +161,13 @@ For example, if the template is bundled in GitLab v13.3, change your `.gitlab-ci
 ```yaml
 include:
   - template: Auto-DevOps.gitlab-ci.yml
-  - remote: https://gitlab.com/gitlab-org/gitlab/-/blob/v13.3.0-ee/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml
+  - remote: https://gitlab.com/gitlab-org/gitlab/-/raw/v13.3.0-ee/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml
 ```
 
 ### Ignore warnings and continue deploying
 
 If you are certain that the new chart version is safe to be deployed, you can add
-the `AUTO_DEVOPS_FORCE_DEPLOY_V<major-version-number>` [environment variable](customize.md#build-and-deployment)
+the `AUTO_DEVOPS_FORCE_DEPLOY_V<major-version-number>` [CI/CD variable](customize.md#build-and-deployment)
 to force the deployment to continue.
 
 For example, if you want to deploy the `v2.0.0` chart on a deployment that previously
@@ -169,10 +181,10 @@ the latest Auto Deploy template into your `.gitlab-ci.yml`:
 ```yaml
 include:
   - template: Auto-DevOps.gitlab-ci.yml
-  - remote: https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.latest.gitlab-ci.yml
+  - template: Jobs/Deploy.latest.gitlab-ci.yml
 ```
 
-CAUTION: **Warning:**
+WARNING:
 Using a beta or unstable `auto-deploy-image` could cause unrecoverable damage to
 your environments. Do not test it with important projects or environments.
 

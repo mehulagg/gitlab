@@ -2,6 +2,11 @@
 
 class GitlabSubscription < ApplicationRecord
   include EachBatch
+  include Gitlab::Utils::StrongMemoize
+
+  EOA_ROLLOUT_DATE = '2021-01-26'
+
+  enum trial_extension_type: { extended: 1, reactivated: 2 }
 
   default_value_for(:start_date) { Date.today }
   before_update :log_previous_state_for_update
@@ -12,7 +17,7 @@ class GitlabSubscription < ApplicationRecord
   belongs_to :hosted_plan, class_name: 'Plan'
 
   validates :seats, :start_date, presence: true
-  validates :namespace_id, uniqueness: true, allow_blank: true
+  validates :namespace_id, uniqueness: true, presence: true
 
   delegate :name, :title, to: :hosted_plan, prefix: :plan, allow_nil: true
 
@@ -44,6 +49,10 @@ class GitlabSubscription < ApplicationRecord
     end
   end
 
+  def legacy?
+    start_date < EOA_ROLLOUT_DATE.to_date
+  end
+
   def calculate_seats_in_use
     namespace.billable_members_count
   end
@@ -67,7 +76,6 @@ class GitlabSubscription < ApplicationRecord
 
   def has_a_paid_hosted_plan?(include_trials: false)
     (include_trials || !trial?) &&
-      hosted? &&
       seats > 0 &&
       Plan::PAID_HOSTED_PLANS.include?(plan_name)
   end
@@ -75,10 +83,12 @@ class GitlabSubscription < ApplicationRecord
   def expired?
     return false unless end_date
 
-    end_date < Date.today
+    end_date < Date.current
   end
 
   def upgradable?
+    return false if [::Plan::GOLD, ::Plan::ULTIMATE].include?(plan_name)
+
     has_a_paid_hosted_plan? &&
       !expired? &&
       plan_name != Plan::PAID_HOSTED_PLANS[-1]
@@ -90,7 +100,42 @@ class GitlabSubscription < ApplicationRecord
     self.hosted_plan = Plan.find_by(name: code)
   end
 
+  # We need to show seats in use for free or trial subscriptions
+  # in order to make it easy for customers to get this information.
+  def seats_in_use
+    return super unless Feature.enabled?(:seats_in_use_for_free_or_trial)
+    return super if has_a_paid_hosted_plan?
+
+    seats_in_use_now
+  end
+
+  def trial_extended_or_reactivated?
+    trial_extension_type.present?
+  end
+
+  def trial_days_remaining
+    (trial_ends_on - Date.current).to_i
+  end
+
+  def trial_duration
+    (trial_ends_on - trial_starts_on).to_i
+  end
+
+  def trial_days_used
+    trial_duration - trial_days_remaining
+  end
+
+  def trial_percentage_complete(decimal_places = 2)
+    (trial_days_used / trial_duration.to_f * 100).round(decimal_places)
+  end
+
   private
+
+  def seats_in_use_now
+    strong_memoize(:seats_in_use_now) do
+      calculate_seats_in_use
+    end
+  end
 
   def log_previous_state_for_update
     attrs = self.attributes.merge(self.attributes_in_database)
@@ -111,10 +156,6 @@ class GitlabSubscription < ApplicationRecord
     omitted_attrs = %w(id created_at updated_at seats_in_use seats_owed)
 
     GitlabSubscriptionHistory.create(attrs.except(*omitted_attrs))
-  end
-
-  def hosted?
-    namespace_id.present?
   end
 
   def automatically_index_in_elasticsearch?

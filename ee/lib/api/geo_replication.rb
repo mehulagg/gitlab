@@ -6,6 +6,8 @@ module API
     include APIGuard
     include ::Gitlab::Utils::StrongMemoize
 
+    feature_category :geo_replication
+
     before do
       authenticated_as_admin!
       not_found!('Geo node not found') unless Gitlab::Geo.current_node

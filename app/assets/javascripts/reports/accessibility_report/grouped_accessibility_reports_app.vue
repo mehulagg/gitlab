@@ -1,8 +1,8 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { componentNames } from '~/reports/components/issue_body';
-import ReportSection from '~/reports/components/report_section.vue';
 import IssuesList from '~/reports/components/issues_list.vue';
+import ReportSection from '~/reports/components/report_section.vue';
 import createStore from './store';
 
 export default {
@@ -46,6 +46,7 @@ export default {
     :loading-text="groupedSummaryText"
     :error-text="groupedSummaryText"
     :has-issues="shouldRenderIssuesList"
+    track-action="users_expanding_testing_accessibility_report"
     class="mr-widget-section grouped-security-reports mr-report"
   >
     <template #body>

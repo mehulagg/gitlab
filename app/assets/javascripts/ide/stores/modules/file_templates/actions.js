@@ -1,8 +1,8 @@
 import Api from '~/api';
-import { __ } from '~/locale';
 import { normalizeHeaders } from '~/lib/utils/common_utils';
-import * as types from './mutation_types';
+import { __ } from '~/locale';
 import eventHub from '../../../eventhub';
+import * as types from './mutation_types';
 
 export const requestTemplateTypes = ({ commit }) => commit(types.REQUEST_TEMPLATE_TYPES);
 export const receiveTemplateTypesError = ({ commit, dispatch }) => {
@@ -68,7 +68,7 @@ export const receiveTemplateError = ({ dispatch }, template) => {
     'setErrorMessage',
     {
       text: __('Error loading template.'),
-      action: payload =>
+      action: (payload) =>
         dispatch('fetchTemplateTypes', payload).then(() =>
           dispatch('setErrorMessage', null, { root: true }),
         ),

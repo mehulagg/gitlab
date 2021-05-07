@@ -1,19 +1,19 @@
-import Vuex from 'vuex';
+import { GlDropdownSectionHeader } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { GlDropdownSectionHeader } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import Vuex from 'vuex';
+import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
-import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
+import waitForPromises from 'helpers/wait_for_promises';
 import { groupLabels } from '../mock_data';
 
 const selectedLabel = groupLabels[groupLabels.length - 1];
-const findActiveItem = wrapper =>
+const findActiveItem = (wrapper) =>
   wrapper
     .findAll('gl-dropdown-item-stub')
-    .filter(d => d.attributes('active'))
+    .filter((d) => d.attributes('active'))
     .at(0);
 
 const findFlashError = () => document.querySelector('.flash-container .flash-text');
@@ -66,7 +66,7 @@ describe('Value Stream Analytics LabelsSelector', () => {
       expect(wrapper.html()).toMatchSnapshot();
     });
 
-    it.each(labelNames)('generate a label item for the label %s', name => {
+    it.each(labelNames)('generate a label item for the label %s', (name) => {
       expect(wrapper.text()).toContain(name);
     });
 
@@ -100,15 +100,15 @@ describe('Value Stream Analytics LabelsSelector', () => {
         return waitForPromises();
       });
 
-      it('will emit the "selectLabel" event', () => {
-        expect(wrapper.emitted('selectLabel')).toBeUndefined();
+      it('will emit the "select-label" event', () => {
+        expect(wrapper.emitted('select-label')).toBeUndefined();
 
         const elem = wrapper.findAll('.dropdown-item').at(1);
         elem.trigger('click');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emitted('selectLabel').length > 0).toBe(true);
-          expect(wrapper.emitted('selectLabel')[0]).toContain(groupLabels[1].id);
+          expect(wrapper.emitted('select-label').length > 0).toBe(true);
+          expect(wrapper.emitted('select-label')[0]).toContain(groupLabels[1].id);
         });
       });
     });

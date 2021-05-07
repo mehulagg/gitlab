@@ -1,7 +1,0 @@
-query project($fullPath: ID!, $targetUrl: String!) {
-  project(fullPath: $fullPath) {
-    dastSiteValidation(targetUrl: $targetUrl) {
-      status
-    }
-  }
-}

@@ -1,6 +1,5 @@
-import mutations from '~/ide/stores/mutations/file';
 import { createStore } from '~/ide/stores';
-import { FILE_VIEW_MODE_PREVIEW } from '~/ide/constants';
+import mutations from '~/ide/stores/mutations/file';
 import { file } from '../../helpers';
 
 describe('IDE store file mutations', () => {
@@ -129,7 +128,7 @@ describe('IDE store file mutations', () => {
         localState.changedFiles[0],
         localState.openFiles[0],
         localFile,
-      ].forEach(f => {
+      ].forEach((f) => {
         expect(f).toEqual(
           expect.objectContaining({
             path,
@@ -143,7 +142,7 @@ describe('IDE store file mutations', () => {
   });
 
   describe('SET_FILE_RAW_DATA', () => {
-    const callMutationForFile = f => {
+    const callMutationForFile = (f) => {
       mutations.SET_FILE_RAW_DATA(localState, {
         file: f,
         raw: 'testing',
@@ -529,17 +528,6 @@ describe('IDE store file mutations', () => {
       });
 
       expect(localFile.changed).toBeTruthy();
-    });
-  });
-
-  describe('SET_FILE_VIEWMODE', () => {
-    it('updates file view mode', () => {
-      mutations.SET_FILE_VIEWMODE(localState, {
-        file: localFile,
-        viewMode: FILE_VIEW_MODE_PREVIEW,
-      });
-
-      expect(localFile.viewMode).toBe(FILE_VIEW_MODE_PREVIEW);
     });
   });
 

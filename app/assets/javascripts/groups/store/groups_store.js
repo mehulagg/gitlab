@@ -1,24 +1,26 @@
 import { normalizeHeaders, parseIntPagination } from '../../lib/utils/common_utils';
+import { getGroupItemMicrodata } from './utils';
 
 export default class GroupsStore {
-  constructor(hideProjects) {
+  constructor({ hideProjects = false, showSchemaMarkup = false } = {}) {
     this.state = {};
     this.state.groups = [];
     this.state.pageInfo = {};
     this.hideProjects = hideProjects;
+    this.showSchemaMarkup = showSchemaMarkup;
   }
 
   setGroups(rawGroups) {
     if (rawGroups && rawGroups.length) {
-      this.state.groups = rawGroups.map(rawGroup => this.formatGroupItem(rawGroup));
+      this.state.groups = rawGroups.map((rawGroup) => this.formatGroupItem(rawGroup));
     } else {
       this.state.groups = [];
     }
   }
 
   setSearchedGroups(rawGroups) {
-    const formatGroups = groups =>
-      groups.map(group => {
+    const formatGroups = (groups) =>
+      groups.map((group) => {
         const formattedGroup = this.formatGroupItem(group);
         if (formattedGroup.children && formattedGroup.children.length) {
           formattedGroup.children = formatGroups(formattedGroup.children);
@@ -35,7 +37,7 @@ export default class GroupsStore {
 
   setGroupChildren(parentGroup, children) {
     const updatedParentGroup = parentGroup;
-    updatedParentGroup.children = children.map(rawChild => this.formatGroupItem(rawChild));
+    updatedParentGroup.children = children.map((rawChild) => this.formatGroupItem(rawChild));
     updatedParentGroup.isOpen = true;
     updatedParentGroup.isChildrenLoading = false;
   }
@@ -94,15 +96,16 @@ export default class GroupsStore {
       starCount: rawGroupItem.star_count,
       updatedAt: rawGroupItem.updated_at,
       pendingRemoval: rawGroupItem.marked_for_deletion,
+      microdata: this.showSchemaMarkup ? getGroupItemMicrodata(rawGroupItem) : {},
     };
   }
 
   removeGroup(group, parentGroup) {
     const updatedParentGroup = parentGroup;
     if (updatedParentGroup.children && updatedParentGroup.children.length) {
-      updatedParentGroup.children = parentGroup.children.filter(child => group.id !== child.id);
+      updatedParentGroup.children = parentGroup.children.filter((child) => group.id !== child.id);
     } else {
-      this.state.groups = this.state.groups.filter(child => group.id !== child.id);
+      this.state.groups = this.state.groups.filter((child) => group.id !== child.id);
     }
   }
 }

@@ -10,6 +10,8 @@ module API
 
       before { authorize! :read_release, user_project }
 
+      feature_category :release_orchestration
+
       params do
         requires :id, type: String, desc: 'The ID of a project'
       end
@@ -55,7 +57,7 @@ module API
             end
 
             params do
-              requires :link_id, type: String, desc: 'The id of the link'
+              requires :link_id, type: String, desc: 'The ID of the link'
             end
             resource 'links/:link_id' do
               desc 'Get a link detail of a release' do

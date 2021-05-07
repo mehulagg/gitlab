@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Database
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Database guides
@@ -18,11 +18,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 - [Understanding EXPLAIN plans](../understanding_explain_plans.md)
 - [explain.depesz.com](https://explain.depesz.com/) or [explain.dalibo.com](https://explain.dalibo.com/) for visualizing the output of `EXPLAIN`
-- [pgFormatter](http://sqlformat.darold.net/) a PostgreSQL SQL syntax beautifier
+- [pgFormatter](https://sqlformat.darold.net/) a PostgreSQL SQL syntax beautifier
 
 ## Migrations
 
-- [What requires downtime?](../what_requires_downtime.md)
+- [Avoiding downtime in migrations](../avoiding_downtime_in_migrations.md)
 - [SQL guidelines](../sql.md) for working with SQL queries
 - [Migrations style guide](../migration_style_guide.md) for creating safe SQL migrations
 - [Testing Rails migrations](../testing_guide/testing_migrations_guide.md) guide
@@ -57,9 +57,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 - [Query Count Limits](../query_count_limits.md)
 - [Creating enums](../creating_enums.md)
 - [Client-side connection-pool](client_side_connection_pool.md)
-- [Updating multiple values](./setting_multiple_values.md)
+- [Updating multiple values](setting_multiple_values.md)
+- [Constraints naming conventions](constraint_naming_convention.md)
+- [Query performance guidelines](../query_performance.md)
+- [Pagination guidelines](pagination_guidelines.md)
+  - [Pagination performance guidelines](pagination_performance_guidelines.md)
 
 ## Case studies
 
 - [Database case study: Filtering by label](../filtering_by_label.md)
 - [Database case study: Namespaces storage statistics](../namespaces_storage_statistics.md)
+
+## Miscellaneous
+
+- [Maintenance operations](maintenance_operations.md)
+- [Update multiple database objects](setting_multiple_values.md)

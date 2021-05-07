@@ -4,9 +4,8 @@ module IntegrationsActions
   extend ActiveSupport::Concern
 
   included do
-    include ServiceParams
+    include Integrations::Params
 
-    before_action :not_found, unless: :integrations_enabled?
     before_action :integration, only: [:edit, :update, :test]
   end
 
@@ -15,7 +14,7 @@ module IntegrationsActions
   end
 
   def update
-    saved = integration.update(service_params[:service])
+    saved = integration.update(integration_params[:integration])
 
     respond_to do |format|
       format.html do
@@ -35,24 +34,22 @@ module IntegrationsActions
     end
   end
 
-  def custom_integration_projects
-    Project.with_custom_integration_compared_to(integration).page(params[:page]).per(20)
+  def test
+    render json: {}, status: :ok
   end
 
-  def test
+  def reset
+    integration.destroy!
+
+    flash[:notice] = s_('Integrations|This integration, and inheriting projects were reset.')
+
     render json: {}, status: :ok
   end
 
   private
 
-  def integrations_enabled?
-    false
-  end
-
   def integration
-    # Using instance variable `@service` still required as it's used in ServiceParams.
-    # Should be removed once that is refactored to use `@integration`.
-    @integration = @service ||= find_or_initialize_integration(params[:id]) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    @integration ||= find_or_initialize_non_project_specific_integration(params[:id])
   end
 
   def success_message

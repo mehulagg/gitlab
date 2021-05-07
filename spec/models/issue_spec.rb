@@ -85,18 +85,14 @@ RSpec.describe Issue do
   describe 'callbacks' do
     describe '#ensure_metrics' do
       it 'creates metrics after saving' do
-        issue = create(:issue, project: reusable_project)
-
-        expect(issue.metrics).to be_persisted
+        expect(subject.metrics).to be_persisted
         expect(Issue::Metrics.count).to eq(1)
       end
 
       it 'does not create duplicate metrics for an issue' do
-        issue = create(:issue, project: reusable_project)
+        subject.close!
 
-        issue.close!
-
-        expect(issue.metrics).to be_persisted
+        expect(subject.metrics).to be_persisted
         expect(Issue::Metrics.count).to eq(1)
       end
 
@@ -104,6 +100,20 @@ RSpec.describe Issue do
         expect_any_instance_of(Issue::Metrics).to receive(:record!)
 
         create(:issue, project: reusable_project)
+      end
+
+      context 'when metrics record is missing' do
+        before do
+          subject.metrics.delete
+          subject.reload
+          subject.metrics # make sure metrics association is cached (currently nil)
+        end
+
+        it 'creates the metrics record' do
+          subject.update!(title: 'title')
+
+          expect(subject.metrics).to be_present
+        end
       end
     end
 
@@ -141,7 +151,6 @@ RSpec.describe Issue do
   describe '.with_issue_type' do
     let_it_be(:issue) { create(:issue, project: reusable_project) }
     let_it_be(:incident) { create(:incident, project: reusable_project) }
-    let_it_be(:test_case) { create(:quality_test_case, project: reusable_project) }
 
     it 'gives issues with the given issue type' do
       expect(described_class.with_issue_type('issue'))
@@ -149,8 +158,8 @@ RSpec.describe Issue do
     end
 
     it 'gives issues with the given issue type' do
-      expect(described_class.with_issue_type(%w(issue incident test_case)))
-        .to contain_exactly(issue, incident, test_case)
+      expect(described_class.with_issue_type(%w(issue incident)))
+        .to contain_exactly(issue, incident)
     end
   end
 
@@ -288,7 +297,7 @@ RSpec.describe Issue do
       end
 
       context 'when cross-project in different namespace' do
-        let(:another_namespace) { build(:namespace, path: 'another-namespace') }
+        let(:another_namespace) { build(:namespace, id: non_existing_record_id, path: 'another-namespace') }
         let(:another_namespace_project) { build(:project, path: 'another-project', namespace: another_namespace) }
 
         it 'returns complete path to the issue' do
@@ -328,7 +337,7 @@ RSpec.describe Issue do
     end
 
     it 'returns true for a user that is the author of an issue' do
-      issue.update(author: user)
+      issue.update!(author: user)
 
       expect(issue.assignee_or_author?(user)).to be_truthy
     end
@@ -368,6 +377,20 @@ RSpec.describe Issue do
 
       expect(link_types).not_to be_empty
       expect(link_types).not_to include(nil)
+    end
+
+    it 'returns issues including the link creation time' do
+      dates = authorized_issue_a.related_issues(user).map(&:issue_link_created_at)
+
+      expect(dates).not_to be_empty
+      expect(dates).not_to include(nil)
+    end
+
+    it 'returns issues including the link update time' do
+      dates = authorized_issue_a.related_issues(user).map(&:issue_link_updated_at)
+
+      expect(dates).not_to be_empty
+      expect(dates).not_to include(nil)
     end
 
     describe 'when a user cannot read cross project' do
@@ -652,7 +675,7 @@ RSpec.describe Issue do
       expect(user2.assigned_open_issues_count).to eq(0)
 
       issue.assignees = [user2]
-      issue.save
+      issue.save!
 
       expect(user1.assigned_open_issues_count).to eq(0)
       expect(user2.assigned_open_issues_count).to eq(1)
@@ -884,7 +907,7 @@ RSpec.describe Issue do
         let(:private_project) { build(:project, :private)}
 
         before do
-          issue.update(project: private_project) # move issue to private project
+          issue.update!(project: private_project) # move issue to private project
         end
 
         shared_examples 'issue visible if user has guest access' do
@@ -1021,7 +1044,7 @@ RSpec.describe Issue do
     with_them do
       it 'checks for spam on issues that can be seen anonymously' do
         project = reusable_project
-        project.update(visibility_level: visibility_level)
+        project.update!(visibility_level: visibility_level)
         issue = create(:issue, project: project, confidential: confidential, description: 'original description')
 
         issue.assign_attributes(new_attributes)
@@ -1035,7 +1058,7 @@ RSpec.describe Issue do
     it 'refreshes the number of open issues of the project' do
       project = subject.project
 
-      expect { subject.destroy }
+      expect { subject.destroy! }
         .to change { project.open_issues_count }.from(1).to(0)
     end
   end
@@ -1231,9 +1254,7 @@ RSpec.describe Issue do
   end
 
   describe '#allows_reviewers?' do
-    it 'returns false as issues do not support reviewers feature' do
-      stub_feature_flags(merge_request_reviewers: true)
-
+    it 'returns false as we do not support reviewers on issues yet' do
       issue = build_stubbed(:issue)
 
       expect(issue.allows_reviewers?).to be(false)
@@ -1245,6 +1266,25 @@ RSpec.describe Issue do
 
     it 'raises error when feature is invalid' do
       expect { issue.issue_type_supports?(:unkown_feature) }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe '#email_participants_emails' do
+    let_it_be(:issue) { create(:issue) }
+
+    it 'returns a list of emails' do
+      participant1 = issue.issue_email_participants.create!(email: 'a@gitlab.com')
+      participant2 = issue.issue_email_participants.create!(email: 'b@gitlab.com')
+
+      expect(issue.email_participants_emails).to contain_exactly(participant1.email, participant2.email)
+    end
+  end
+
+  describe '#email_participants_downcase' do
+    it 'returns a list of emails with all uppercase letters replaced with their lowercase counterparts' do
+      participant = create(:issue_email_participant, email: 'SomEoNe@ExamPLe.com')
+
+      expect(participant.issue.email_participants_emails_downcase).to match([participant.email.downcase])
     end
   end
 end

@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlEmptyState,
   GlLoadingIcon,
@@ -10,16 +9,17 @@ import {
   GlIcon,
   GlAlert,
 } from '@gitlab/ui';
-import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
-import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import dateFormat from 'dateformat';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
-import MetricChart from './metric_chart.vue';
+import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Scatterplot from '../../shared/components/scatterplot.vue';
-import MergeRequestTable from './mr_table.vue';
-import { chartKeys } from '../constants';
 import { dateFormats } from '../../shared/constants';
 import urlSyncMixin from '../../shared/mixins/url_sync_mixin';
+import { chartKeys } from '../constants';
+import MetricChart from './metric_chart.vue';
+import MergeRequestTable from './mr_table.vue';
 
 export default {
   components: {
@@ -141,7 +141,7 @@ export default {
       return {
         yAxis: {
           axisLabel: {
-            formatter: value => value,
+            formatter: (value) => value,
           },
           minInterval: 1,
         },
@@ -177,7 +177,7 @@ export default {
       :svg-path="noAccessSvgPath"
       :description="
         __(
-          'Only ‘Reporter’ roles and above on tiers Premium / Silver and above can see Productivity Analytics.',
+          'Only ‘Reporter’ roles and above on tiers Premium and above can see Productivity Analytics.',
         )
       "
     />
@@ -206,7 +206,7 @@ export default {
         :chart-data="getColumnChartData(chartKeys.main)"
       >
         <gl-column-chart
-          :data="{ full: getColumnChartData(chartKeys.main) }"
+          :bars="[{ name: 'full', data: getColumnChartData(chartKeys.main) }]"
           :option="getColumnChartOption(chartKeys.main)"
           :y-axis-title="__('Merge requests')"
           :x-axis-title="__('Days')"
@@ -227,7 +227,7 @@ export default {
             :chart-data="getScatterPlotMainData"
             :selected-metric="getSelectedMetric(chartKeys.scatterplot)"
             @metricTypeChange="
-              metric => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
+              (metric) => setMetricType({ metricType: metric, chartKey: chartKeys.scatterplot })
             "
           >
             <scatterplot
@@ -252,12 +252,12 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.timeBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.timeBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.timeBasedHistogram })
               "
             >
               <gl-column-chart
-                :data="{ full: getColumnChartData(chartKeys.timeBasedHistogram) }"
+                :bars="[{ name: 'full', data: getColumnChartData(chartKeys.timeBasedHistogram) }]"
                 :option="getColumnChartOption(chartKeys.timeBasedHistogram)"
                 :y-axis-title="s__('ProductivityAnalytics|Merge requests')"
                 :x-axis-title="s__('ProductivityAnalytics|Hours')"
@@ -278,12 +278,12 @@ export default {
               :selected-metric="getSelectedMetric(chartKeys.commitBasedHistogram)"
               :chart-data="getColumnChartData(chartKeys.commitBasedHistogram)"
               @metricTypeChange="
-                metric =>
+                (metric) =>
                   setMetricType({ metricType: metric, chartKey: chartKeys.commitBasedHistogram })
               "
             >
               <gl-column-chart
-                :data="{ full: getColumnChartData(chartKeys.commitBasedHistogram) }"
+                :bars="[{ name: 'full', data: getColumnChartData(chartKeys.commitBasedHistogram) }]"
                 :option="getColumnChartOption(chartKeys.commitBasedHistogram)"
                 :y-axis-title="s__('ProductivityAanalytics|Merge requests')"
                 :x-axis-title="getMetricLabel(chartKeys.commitBasedHistogram)"
@@ -326,7 +326,12 @@ export default {
                     </span>
                   </gl-dropdown-item>
                 </gl-dropdown>
-                <gl-button v-gl-tooltip.hover :title="sortTooltipTitle" @click="toggleSortOrder">
+                <gl-button
+                  v-gl-tooltip.hover
+                  :title="sortTooltipTitle"
+                  :aria-label="sortTooltipTitle"
+                  @click="toggleSortOrder"
+                >
                   <gl-icon :name="sortIcon" />
                 </gl-button>
               </div>
@@ -346,7 +351,7 @@ export default {
             @columnMetricChange="setColumnMetric"
             @pageChange="setPage"
           />
-          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissable="false">
+          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissible="false">
             {{ __('There is no data available. Please change your selection.') }}
           </gl-alert>
         </div>

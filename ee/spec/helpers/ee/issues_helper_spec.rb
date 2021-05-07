@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe EE::IssuesHelper do
-  let(:project) { create(:project) }
+  let(:group) { create :group }
+  let(:project) { create :project, group: group }
   let(:issue) { create :issue, project: project }
 
   describe '#issue_closed_link' do
@@ -46,6 +47,7 @@ RSpec.describe EE::IssuesHelper do
   describe '#issue_in_subepic?' do
     let_it_be(:epic) { create(:epic) }
     let_it_be(:epic_issue) { create(:epic_issue, epic: epic) }
+
     let(:issue) { build_stubbed(:issue, epic_issue: epic_issue) }
     let(:new_issue) { build_stubbed(:issue) }
 
@@ -86,6 +88,85 @@ RSpec.describe EE::IssuesHelper do
         end
 
         it { is_expected.to be_truthy }
+      end
+    end
+  end
+
+  describe '#scoped_labels_available?' do
+    shared_examples 'without license' do
+      before do
+        stub_licensed_features(scoped_labels: false)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
+    shared_examples 'with license' do
+      before do
+        stub_licensed_features(scoped_labels: true)
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'project' do
+      subject { helper.scoped_labels_available?(project) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
+    end
+
+    context 'group' do
+      subject { helper.scoped_labels_available?(group) }
+
+      it_behaves_like 'without license'
+      it_behaves_like 'with license'
+    end
+  end
+
+  describe '#issues_list_data' do
+    let(:current_user) { double.as_null_object }
+    let(:finder) { double.as_null_object }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:can?).and_return(true)
+      allow(helper).to receive(:url_for).and_return('#')
+      allow(helper).to receive(:import_csv_namespace_project_issues_path).and_return('#')
+    end
+
+    context 'when features are enabled' do
+      before do
+        stub_licensed_features(iterations: true, issue_weights: true, issuable_health_status: true, blocked_issues: true)
+      end
+
+      it 'returns data with licensed features enabled' do
+        expected = {
+          has_blocked_issues_feature: 'true',
+          has_issuable_health_status_feature: 'true',
+          has_issue_weights_feature: 'true',
+          project_iterations_path: api_v4_projects_iterations_path(id: project.id)
+        }
+
+        expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
+      end
+    end
+
+    context 'when features are disabled' do
+      before do
+        stub_licensed_features(iterations: false, issue_weights: false, issuable_health_status: false, blocked_issues: false)
+      end
+
+      it 'returns data with licensed features disabled' do
+        expected = {
+          has_blocked_issues_feature: 'false',
+          has_issuable_health_status_feature: 'false',
+          has_issue_weights_feature: 'false'
+        }
+
+        result = helper.issues_list_data(project, current_user, finder)
+        expect(result).to include(expected)
+        expect(result).not_to include(:project_iterations_path)
       end
     end
   end

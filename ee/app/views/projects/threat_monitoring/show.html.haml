@@ -4,7 +4,6 @@
 - default_environment_id = @project.default_environment&.id || -1
 
 #js-threat-monitoring-app{ data: { documentation_path: 'https://docs.gitlab.com/ee/user/application_security/threat_monitoring/',
-  chart_empty_state_svg_path: image_path('illustrations/chart-empty-state.svg'),
   empty_state_svg_path: image_path('illustrations/monitoring/unable_to_connect.svg'),
   waf_no_data_svg_path: image_path('illustrations/firewall-not-detected-sm.svg'),
   network_policy_no_data_svg_path: image_path('illustrations/network-policies-not-detected-sm.svg'),
@@ -14,7 +13,5 @@
   network_policies_endpoint: project_security_network_policies_path(@project),
   new_policy_path: new_project_threat_monitoring_policy_path(@project),
   default_environment_id: default_environment_id,
-  user_callouts_path: user_callouts_path,
-  user_callout_id: UserCalloutsHelper::THREAT_MONITORING_INFO,
-  show_user_callout: false,
+  project_path: @project.full_path,
 } }

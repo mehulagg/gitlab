@@ -8,6 +8,10 @@ exports[`User Operation confirmation modal renders modal with form included 1`] 
     />
   </p>
    
+  <oncall-schedules-list-stub
+    schedules="schedule1,schedule2"
+  />
+   
   <p>
     <gl-sprintf-stub
       message="To confirm, type %{username}"
@@ -50,11 +54,11 @@ exports[`User Operation confirmation modal renders modal with form included 1`] 
    
   <gl-button-stub
     buttontextclasses=""
-    category="primary"
+    category="secondary"
     disabled="true"
     icon=""
     size="medium"
-    variant="warning"
+    variant="danger"
   >
     
       secondaryAction

@@ -1,160 +1,25 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
-# PlantUML & GitLab
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8537) in GitLab 8.16.
+# PlantUML and GitLab **(FREE)**
 
 When [PlantUML](https://plantuml.com) integration is enabled and configured in
-GitLab we are able to create simple diagrams in AsciiDoc and Markdown documents
-created in snippets, wikis, and repositories.
+GitLab, you can create diagrams in snippets, wikis, and repositories. To set up
+the integration, you must:
 
-## PlantUML Server
+1. [Configure your PlantUML server](#configure-your-plantuml-server).
+1. [Configure local PlantUML access](#configure-local-plantuml-access).
+1. [Configure PlantUML security](#configure-plantuml-security).
+1. [Enable the integration](#enable-plantuml-integration).
 
-Before you can enable PlantUML in GitLab; you need to set up your own PlantUML
-server that will generate the diagrams.
-
-### Docker
-
-With Docker, you can just run a container like this:
-
-```shell
-docker run -d --name plantuml -p 8080:8080 plantuml/plantuml-server:tomcat
-```
-
-The **PlantUML URL** will be the hostname of the server running the container.
-
-When running GitLab in Docker, it will need to have access to the PlantUML container.
-The easiest way to achieve that is by using [Docker Compose](https://docs.docker.com/compose/).
-
-A simple `docker-compose.yml` file would be:
-
-```yaml
-version: "3"
-services:
-  gitlab:
-    image: 'gitlab/gitlab-ce:12.2.5-ce.0'
-    environment:
-      GITLAB_OMNIBUS_CONFIG: |
-        nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
-
-  plantuml:
-    image: 'plantuml/plantuml-server:tomcat'
-    container_name: plantuml
-```
-
-In this scenario, PlantUML will be accessible for GitLab at the URL
-`http://plantuml:8080/`.
-
-### Debian/Ubuntu
-
-Installing and configuring your
-own PlantUML server is easy in Debian/Ubuntu distributions using Tomcat.
-
-First you need to create a `plantuml.war` file from the source code:
-
-```shell
-sudo apt-get install graphviz openjdk-8-jdk git-core maven
-git clone https://github.com/plantuml/plantuml-server.git
-cd plantuml-server
-mvn package
-```
-
-The above sequence of commands will generate a WAR file that can be deployed
-using Tomcat:
-
-```shell
-sudo apt-get install tomcat8
-sudo cp target/plantuml.war /var/lib/tomcat8/webapps/plantuml.war
-sudo chown tomcat8:tomcat8 /var/lib/tomcat8/webapps/plantuml.war
-sudo service tomcat8 restart
-```
-
-Once the Tomcat service restarts the PlantUML service will be ready and
-listening for requests on port 8080:
-
-```plaintext
-http://localhost:8080/plantuml
-```
-
-you can change these defaults by editing the `/etc/tomcat8/server.xml` file.
-
-Note that the default URL is different than when using the Docker-based image,
-where the service is available at the root of URL with no relative path. Adjust
-the configuration below accordingly.
-
-### Making local PlantUML accessible using custom GitLab setup
-
-The PlantUML server runs locally on your server, so it is not accessible
-externally. As such, it is necessary to catch external PlantUML calls and
-redirect them to the local server.
-
-The idea is to redirect each call to `https://gitlab.example.com/-/plantuml/`
-to the local PlantUML server `http://plantuml:8080/` or `http://localhost:8080/plantuml/`, depending on your setup.
-
-To enable the redirection, add the following line in `/etc/gitlab/gitlab.rb`:
-
-```ruby
-# Docker deployment
-nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
-
-# Built from source
-nginx['custom_gitlab_server_config'] = "location /-/plantuml { \n rewrite ^/-/(plantuml.*) /$1 break;\n proxy_cache off; \n proxy_pass http://localhost:8080/plantuml; \n}\n"
-```
-
-To activate the changes, run the following command:
-
-```shell
-sudo gitlab-ctl reconfigure
-```
-
-### Security
-
-PlantUML has features that allows fetching network resources.
-
-```plaintext
-@startuml
-start
-    ' ...
-    !include http://localhost/
-stop;
-@enduml
-```
-
-**If you self-host the PlantUML server, network controls should be put in place to isolate it.**
-
-## GitLab
-
-You need to enable PlantUML integration from Settings under Admin Area. To do
-that, login with an Admin account and do following:
-
-- In GitLab, go to **Admin Area > Settings > General**.
-- Expand the **PlantUML** section.
-- Check **Enable PlantUML** checkbox.
-- Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`.
-
-NOTE: **Note:**
-If you are using a PlantUML server running v1.2020.9 and
-above (for example, [plantuml.com](https://plantuml.com)), set the `PLANTUML_ENCODING`
-environment variable to enable the `deflate` compression. On Omnibus,
-this can be done set in `/etc/gitlab.rb`:
-
-```ruby
-gitlab_rails['env'] = { 'PLANTUML_ENCODING' => 'deflate' }
-```
-
-From GitLab 13.1 and later, PlantUML integration now
-[requires a header prefix in the URL](https://github.com/plantuml/plantuml/issues/117#issuecomment-6235450160)
-to distinguish different encoding types.
-
-## Creating Diagrams
-
-With PlantUML integration enabled and configured, we can start adding diagrams to
-our AsciiDoc snippets, wikis, and repositories using delimited blocks:
+After completing the integration, PlantUML converts `plantuml`
+blocks to an HTML image tag, with the source pointing to the PlantUML instance. The PlantUML
+diagram delimiters `@startuml`/`@enduml` aren't required, as these are replaced
+by the `plantuml` block:
 
 - **Markdown**
 
@@ -185,30 +50,180 @@ our AsciiDoc snippets, wikis, and repositories using delimited blocks:
      Alice -> Bob: hi
   ```
 
-   You can also use the `uml::` directive for compatibility with [`sphinxcontrib-plantuml`](https://pypi.org/project/sphinxcontrib-plantuml/), but please note that we currently only support the `caption` option.
+   Although you can use the `uml::` directive for compatibility with
+   [`sphinxcontrib-plantuml`](https://pypi.org/project/sphinxcontrib-plantuml/),
+   GitLab supports only the `caption` option.
 
-The above blocks will be converted to an HTML image tag with source pointing to the
-PlantUML instance. If the PlantUML server is correctly configured, this should
-render a nice diagram instead of the block:
+If the PlantUML server is correctly configured, these examples should render a
+diagram instead of the code block:
 
 ```plantuml
 Bob -> Alice : hello
 Alice -> Bob : hi
 ```
 
-Inside the block you can add any of the supported diagrams by PlantUML such as
-[Sequence](https://plantuml.com/sequence-diagram), [Use Case](https://plantuml.com/use-case-diagram),
-[Class](https://plantuml.com/class-diagram), [Activity](https://plantuml.com/activity-diagram-legacy),
-[Component](https://plantuml.com/component-diagram), [State](https://plantuml.com/state-diagram),
-and [Object](https://plantuml.com/object-diagram) diagrams. You do not need to use the PlantUML
-diagram delimiters `@startuml`/`@enduml` as these are replaced by the AsciiDoc `plantuml` block.
+Inside the block you can add any of the diagrams PlantUML supports, such as:
 
-Some parameters can be added to the AsciiDoc block definition:
+- [Activity](https://plantuml.com/activity-diagram-legacy)
+- [Class](https://plantuml.com/class-diagram)
+- [Component](https://plantuml.com/component-diagram)
+- [Object](https://plantuml.com/object-diagram)
+- [Sequence](https://plantuml.com/sequence-diagram)
+- [State](https://plantuml.com/state-diagram)
+- [Use Case](https://plantuml.com/use-case-diagram)
 
-- `format`: Can be either `png` or `svg`. Note that `svg` is not supported by
-  all browsers so use with care. The default is `png`.
+You can add parameters to block definitions:
+
+- `format`: Can be either `png` (default) or `svg`. Use `svg` with care, as it's
+  not supported by all browsers, and isn't supported by Markdown.
 - `id`: A CSS ID added to the diagram HTML tag.
 - `width`: Width attribute added to the image tag.
 - `height`: Height attribute added to the image tag.
 
-Markdown does not support any parameters and will always use PNG format.
+Markdown does not support any parameters, and always uses PNG format.
+
+## Configure your PlantUML server
+
+Before you can enable PlantUML in GitLab, set up your own PlantUML
+server to generate the diagrams:
+
+- [In Docker](#docker).
+- [In Debian/Ubuntu](#debianubuntu).
+
+### Docker
+
+To run a PlantUML container in Docker, run this command:
+
+```shell
+docker run -d --name plantuml -p 8080:8080 plantuml/plantuml-server:tomcat
+```
+
+The **PlantUML URL** is the hostname of the server running the container.
+
+When running GitLab in Docker, it must have access to the PlantUML container.
+To achieve that, use [Docker Compose](https://docs.docker.com/compose/).
+In this basic `docker-compose.yml` file, PlantUML is accessible to GitLab at the URL
+`http://plantuml:8080/`:
+
+```yaml
+version: "3"
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ee:12.2.5-ee.0'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
+
+  plantuml:
+    image: 'plantuml/plantuml-server:tomcat'
+    container_name: plantuml
+```
+
+### Debian/Ubuntu
+
+You can install and configure a PlantUML server in Debian/Ubuntu distributions
+using Tomcat:
+
+1. Run these commands to create a `plantuml.war` file from the source code:
+
+   ```shell
+   sudo apt-get install graphviz openjdk-8-jdk git-core maven
+   git clone https://github.com/plantuml/plantuml-server.git
+   cd plantuml-server
+   mvn package
+   ```
+
+1. Deploy the `.war` file from the previous step with these commands:
+
+   ```shell
+   sudo apt-get install tomcat8
+   sudo cp target/plantuml.war /var/lib/tomcat8/webapps/plantuml.war
+   sudo chown tomcat8:tomcat8 /var/lib/tomcat8/webapps/plantuml.war
+   sudo service tomcat8 restart
+   ```
+
+The Tomcat service should restart. After the restart is complete, the
+PlantUML service is ready and listening for requests on port 8080:
+`http://localhost:8080/plantuml`
+
+To change these defaults, edit the `/etc/tomcat8/server.xml` file.
+
+NOTE:
+The default URL is different when using this approach. The Docker-based image
+makes the service available at the root URL, with no relative path. Adjust
+the configuration below accordingly.
+
+## Configure local PlantUML access
+
+The PlantUML server runs locally on your server, so it can't be accessed
+externally by default. Your server must catch external PlantUML
+calls to `https://gitlab.example.com/-/plantuml/` and redirect them to the
+local PlantUML server. Depending on your setup, the URL is either of the
+following:
+
+- `http://plantuml:8080/`
+- `http://localhost:8080/plantuml/`
+
+If you're running [GitLab with TLS](https://docs.gitlab.com/omnibus/settings/ssl.html)
+you must configure this redirection, because PlantUML uses the insecure HTTP protocol.
+Newer browsers such as [Google Chrome 86+](https://www.chromestatus.com/feature/4926989725073408)
+don't load insecure HTTP resources on pages served over HTTPS.
+
+To enable this redirection:
+
+1. Add the following line in `/etc/gitlab/gitlab.rb`, depending on your setup method:
+
+   ```ruby
+   # Docker deployment
+   nginx['custom_gitlab_server_config'] = "location /-/plantuml/ { \n    proxy_cache off; \n    proxy_pass  http://plantuml:8080/; \n}\n"
+
+   # Built from source
+   nginx['custom_gitlab_server_config'] = "location /-/plantuml { \n rewrite ^/-/(plantuml.*) /$1 break;\n proxy_cache off; \n proxy_pass http://localhost:8080/plantuml; \n}\n"
+   ```
+
+1. To activate the changes, run the following command:
+
+   ```shell
+   sudo gitlab-ctl reconfigure
+   ```
+
+### Configure PlantUML security
+
+PlantUML has features that allow fetching network resources. If you self-host the
+PlantUML server, put network controls in place to isolate it.
+
+```plaintext
+@startuml
+start
+    ' ...
+    !include http://localhost/
+stop;
+@enduml
+```
+
+## Enable PlantUML integration
+
+After configuring your local PlantUML server, you're ready to enable the PlantUML integration:
+
+1. Sign in to GitLab as an [Administrator](../../user/permissions.md) user.
+1. In the top menu, click **{admin}** **Admin Area**.
+1. In the left sidebar, go to **Settings > General** and expand the **PlantUML** section.
+1. Select the **Enable PlantUML** check box.
+1. Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`,
+   and click **Save changes**.
+
+Depending on your PlantUML and GitLab version numbers, you may also need to take
+these steps:
+
+- For PlantUML servers running v1.2020.9 and above, such as [plantuml.com](https://plantuml.com),
+  you must set the `PLANTUML_ENCODING` environment variable to enable the `deflate`
+  compression. In Omnibus GitLab, you can set this value in `/etc/gitlab.rb` with
+  this command:
+
+  ```ruby
+   gitlab_rails['env'] = { 'PLANTUML_ENCODING' => 'deflate' }
+   ```
+
+- For GitLab versions 13.1 and later, PlantUML integration now
+  [requires a header prefix in the URL](https://github.com/plantuml/plantuml/issues/117#issuecomment-6235450160)
+  to distinguish different encoding types.

@@ -24,7 +24,7 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         let(:statistics) { project.statistics }
 
         before do
-          statistics.update(shared_runners_seconds: 100)
+          statistics.update!(shared_runners_seconds: 100)
         end
 
         it 'clears counters' do
@@ -146,12 +146,13 @@ RSpec.describe ClearSharedRunnersMinutesWorker do
         stub_const("#{described_class}::BATCH_SIZE", 3)
       end
 
-      it 'runs a worker per batch' do
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(2, 4)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(5, 7)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(8, 10)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(11, 13)
-        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(14, 16)
+      it 'runs a worker per batch', :aggregate_failures do
+        # Spread evenly accross 8 hours (28,800 seconds)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(0.seconds, 2, 4)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(7200.seconds, 5, 7)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(14400.seconds, 8, 10)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(21600.seconds, 11, 13)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_in).with(28800.seconds, 14, 16)
 
         subject
       end

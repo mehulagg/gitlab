@@ -1,9 +1,10 @@
-import { merge } from 'lodash';
-import { mount, shallowMount, createWrapper } from '@vue/test-utils';
-import { within } from '@testing-library/dom';
 import { GlModal } from '@gitlab/ui';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { within } from '@testing-library/dom';
+import { mount, shallowMount, createWrapper } from '@vue/test-utils';
+import { merge } from 'lodash';
 import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { siteProfiles as profiles, policySiteProfile } from '../mocks/mock_data';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
 
@@ -13,11 +14,14 @@ describe('EE - DastProfilesList', () => {
   const createComponentFactory = (mountFn = shallowMount) => (options = {}) => {
     const defaultProps = {
       profiles: [],
-      fields: ['profileName', 'targetUrl', 'validationStatus'],
+      tableLabel: 'Profiles Table',
+      fields: [{ key: 'profileName' }, { key: 'targetUrl' }, { key: 'validationStatus' }],
+      noProfilesMessage: 'no profiles created yet',
       hasMorePages: false,
       profilesPerPage: 10,
       errorMessage: '',
       errorDetails: [],
+      fullPath: '/namespace/project',
     };
 
     wrapper = mountFn(
@@ -41,7 +45,7 @@ describe('EE - DastProfilesList', () => {
   const createFullComponent = createComponentFactory(mount);
 
   const withinComponent = () => within(wrapper.element);
-  const getTable = () => withinComponent().getByRole('table', { name: /site profiles/i });
+  const getTable = () => withinComponent().getByRole('table', { name: /profiles table/i });
   const getAllRowGroups = () => within(getTable()).getAllByRole('rowgroup');
   const getTableBody = () => {
     // first item is the table head
@@ -53,9 +57,10 @@ describe('EE - DastProfilesList', () => {
   const getAllLoadingIndicators = () => withinComponent().queryAllByTestId('loadingIndicator');
   const getErrorMessage = () => withinComponent().queryByText(TEST_ERROR_MESSAGE);
   const getErrorDetails = () => withinComponent().queryByRole('list', { name: /error details/i });
-  const getDeleteButtonWithin = element =>
-    createWrapper(within(element).queryByRole('button', { name: /delete/i }));
+  const getDeleteButtonWithin = (element) =>
+    createWrapper(within(element).queryByTestId('dast-profile-delete-button'));
   const getModal = () => wrapper.find(GlModal);
+  const getDeleteTooltip = () => wrapper.find('[data-testid="dast-profile-delete-tooltip"');
 
   afterEach(() => {
     wrapper.destroy();
@@ -108,31 +113,7 @@ describe('EE - DastProfilesList', () => {
   });
 
   describe('with existing profiles', () => {
-    const profiles = [
-      {
-        id: 1,
-        profileName: 'Profile 1',
-        targetUrl: 'http://example-1.com',
-        editPath: '/1/edit',
-        validationStatus: 'Pending',
-      },
-      {
-        id: 2,
-        profileName: 'Profile 2',
-        targetUrl: 'http://example-2.com',
-        editPath: '/2/edit',
-        validationStatus: 'Pending',
-      },
-      {
-        id: 3,
-        profileName: 'Profile 2',
-        targetUrl: 'http://example-2.com',
-        editPath: '/3/edit',
-        validationStatus: 'Pending',
-      },
-    ];
-
-    const getTableRowForProfile = profile => getAllTableRows()[profiles.indexOf(profile)];
+    const getTableRowForProfile = (profile) => getAllTableRows()[profiles.indexOf(profile)];
 
     describe('profiles list', () => {
       beforeEach(() => {
@@ -148,22 +129,34 @@ describe('EE - DastProfilesList', () => {
         expect(getAllTableRows()).toHaveLength(profiles.length);
       });
 
-      it.each(profiles)('renders list item %# correctly', profile => {
-        const [
-          profileCell,
-          targetUrlCell,
-          validationStatusCell,
-          actionsCell,
-        ] = getTableRowForProfile(profile).cells;
+      it.each(profiles)('renders list item %# correctly', (profile) => {
+        const [profileCell, targetUrlCell, , actionsCell] = getTableRowForProfile(profile).cells;
 
         expect(profileCell.innerText).toContain(profile.profileName);
         expect(targetUrlCell.innerText).toContain(profile.targetUrl);
-        expect(validationStatusCell.innerText).toContain(profile.validationStatus);
-        expect(within(actionsCell).getByRole('button', { name: /delete/i })).not.toBe(null);
+        expect(within(actionsCell).queryByTestId('dast-profile-delete-button')).not.toBe(null);
 
         const editLink = within(actionsCell).getByRole('link', { name: /edit/i });
         expect(editLink).not.toBe(null);
         expect(editLink.getAttribute('href')).toBe(profile.editPath);
+      });
+    });
+
+    describe('profile list with scoped slots', () => {
+      beforeEach(() => {
+        createFullComponent({
+          propsData: { profiles },
+          scopedSlots: {
+            'cell(profileName)': '<b>{{props.item.profileName}}</b>',
+            actions: '<button>hello</button>',
+          },
+        });
+      });
+      it.each(profiles)('renders list item %# correctly', (profile) => {
+        const [profileCell, , , actionsCell] = getTableRowForProfile(profile).cells;
+
+        expect(profileCell.innerHTML).toContain(`<b>${profile.profileName}</b>`);
+        expect(within(actionsCell).getByRole('button', { name: /hello/i })).not.toBe(null);
       });
     });
 
@@ -193,7 +186,7 @@ describe('EE - DastProfilesList', () => {
       });
     });
 
-    describe.each(profiles)('delete profile', profile => {
+    describe.each(profiles)('delete profile', (profile) => {
       beforeEach(() => {
         createFullComponent({ propsData: { profiles } });
       });
@@ -202,10 +195,8 @@ describe('EE - DastProfilesList', () => {
         getDeleteButtonWithin(getTableRowForProfile(profile));
 
       it('shows a tooltip on the delete button', () => {
-        expect(getBinding(getCurrentProfileDeleteButton().element, 'gl-tooltip')).not.toBe(
-          undefined,
-        );
-        expect(getCurrentProfileDeleteButton().attributes().title).toBe('Delete profile');
+        expect(getBinding(getDeleteTooltip().element, 'gl-tooltip')).not.toBe(undefined);
+        expect(getDeleteTooltip().attributes('title')).toBe('Delete profile');
       });
 
       it('opens a modal with the correct title when a delete button is clicked', async () => {
@@ -252,6 +243,35 @@ describe('EE - DastProfilesList', () => {
       expect(getErrorDetails()).not.toBe(null);
       expect(within(getErrorDetails()).getByText(errorDetails[0])).not.toBe(null);
       expect(within(getErrorDetails()).getByText(errorDetails[1])).not.toBe(null);
+    });
+
+    it('properly renders errors containing markup', () => {
+      const errorDetails = ['an error <a href="#">with a link</a>'];
+      createFullComponent({
+        propsData: { errorMessage: TEST_ERROR_MESSAGE, errorDetails },
+      });
+
+      expect(getErrorMessage()).not.toBe(null);
+      expect(getErrorDetails()).not.toBe(null);
+      expect(within(getErrorDetails()).getByRole('link', { name: 'with a link' })).not.toBe(null);
+    });
+  });
+
+  describe('profile referenced in a security policy', () => {
+    it('disables the delete button', () => {
+      createFullComponent({ propsData: { profiles: policySiteProfile } });
+      const disabledRow = getAllTableRows()[0];
+      const deleteButton = getDeleteButtonWithin(disabledRow);
+      expect(deleteButton.attributes('disabled')).toBe('disabled');
+      expect(deleteButton.attributes('aria-disabled')).toBe('true');
+    });
+
+    it('shows the correct tooltip text', () => {
+      createFullComponent({ propsData: { profiles: policySiteProfile } });
+      expect(getBinding(getDeleteTooltip().element, 'gl-tooltip')).not.toBe(undefined);
+      expect(getDeleteTooltip().attributes('title')).toBe(
+        'This profile is currently being used in a policy.',
+      );
     });
   });
 });

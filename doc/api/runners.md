@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Runner
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Runners API
@@ -126,7 +126,7 @@ Example response:
         "ip_address": "127.0.0.1",
         "is_shared": true,
         "name": null,
-        "online": false
+        "online": false,
         "status": "offline"
     },
     {
@@ -136,7 +136,7 @@ Example response:
         "ip_address": "127.0.0.1",
         "is_shared": false,
         "name": null,
-        "online": true
+        "online": true,
         "status": "paused"
     },
     {
@@ -156,6 +156,10 @@ Example response:
 
 Get details of a runner.
 
+[Maintainer access or higher](../user/permissions.md) is required to get runner details at the project and group level.
+
+Instance-level runner details via this endpoint are available to all signed in users.
+
 ```plaintext
 GET /runners/:id
 ```
@@ -168,7 +172,7 @@ GET /runners/:id
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6"
 ```
 
-NOTE: **Note:**
+NOTE:
 The `token` attribute in the response was deprecated [in GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/issues/214320).
 and removed in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/214322).
 
@@ -224,13 +228,13 @@ PUT /runners/:id
 | `run_untagged`| boolean | no       | Flag indicating the runner can execute untagged jobs |
 | `locked`      | boolean | no       | Flag indicating the runner is locked |
 | `access_level` | string | no       | The access_level of the runner; `not_protected` or `ref_protected` |
-| `maximum_timeout` | integer | no   | Maximum timeout set when this runner will handle the job |
+| `maximum_timeout` | integer | no   | Maximum timeout set when this runner handles the job |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6" --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
 ```
 
-NOTE: **Note:**
+NOTE:
 The `token` attribute in the response was deprecated [in GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/issues/214320).
 and removed in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/214322).
 
@@ -424,7 +428,7 @@ Example response:
         "ip_address": "127.0.0.1",
         "is_shared": true,
         "name": null,
-        "online": true
+        "online": true,
         "status": "paused"
     }
 ]
@@ -559,7 +563,7 @@ POST /runners
 | `run_untagged` | boolean | no     | Whether the runner should handle untagged jobs |
 | `tag_list`   | string array | no  | List of runner's tags |
 | `access_level`    | string | no   | The access_level of the runner; `not_protected` or `ref_protected` |
-| `maximum_timeout` | integer | no  | Maximum timeout set when this runner will handle the job |
+| `maximum_timeout` | integer | no  | Maximum timeout set when this runner handles the job |
 
 ```shell
 curl --request POST "https://gitlab.example.com/api/v4/runners" --form "token=<registration_token>" --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
@@ -575,7 +579,7 @@ Example response:
 
 ```json
 {
-    "id": "12345",
+    "id": 12345,
     "token": "6337ff461c94fd3fa32ba3b1ff4125"
 }
 ```

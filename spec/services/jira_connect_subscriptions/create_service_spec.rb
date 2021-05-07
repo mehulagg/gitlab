@@ -32,6 +32,24 @@ RSpec.describe JiraConnectSubscriptions::CreateService do
     it 'returns success' do
       expect(subject[:status]).to eq(:success)
     end
+
+    context 'namespace has projects' do
+      let!(:project_1) { create(:project, group: group) }
+      let!(:project_2) { create(:project, group: group) }
+
+      before do
+        stub_const("#{described_class}::MERGE_REQUEST_SYNC_BATCH_SIZE", 1)
+      end
+
+      it 'starts workers to sync projects in batches with delay' do
+        allow(Atlassian::JiraConnect::Client).to receive(:generate_update_sequence_id).and_return(123)
+
+        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(1.minute, [[project_1.id, 123]])
+        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(2.minutes, [[project_2.id, 123]])
+
+        subject
+      end
+    end
   end
 
   context 'when path is invalid' do

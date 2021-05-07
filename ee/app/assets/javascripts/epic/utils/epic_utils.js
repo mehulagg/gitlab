@@ -1,11 +1,12 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 
-import { __, s__, sprintf } from '~/locale';
-
+import { sanitize } from '~/lib/dompurify';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
+
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { dateInWords, parsePikadayDate } from '~/lib/utils/datetime_utility';
+import { __, s__, sprintf } from '~/locale';
 
 import { dateTypes } from '../constants';
 
@@ -24,7 +25,7 @@ const bindDocumentEvent = (eventName, callback) => {
   $(document).on(eventName, callback);
 };
 
-const toggleContainerClass = className => {
+const toggleContainerClass = (className) => {
   const containerEl = document.querySelector('.page-with-contextual-sidebar');
 
   if (containerEl) {
@@ -34,7 +35,7 @@ const toggleContainerClass = className => {
 
 const getCollapsedGutter = () => parseBoolean(Cookies.get('collapsed_gutter'));
 
-const setCollapsedGutter = value => Cookies.set('collapsed_gutter', value);
+const setCollapsedGutter = (value) => Cookies.set('collapsed_gutter', value);
 
 const getDateValidity = (startDateTime, dueDateTime) => {
   // If both dates are defined
@@ -54,8 +55,9 @@ const getDateFromMilestonesTooltip = ({
   dueDateSourcingMilestoneDates,
   dueDateTimeFromMilestones,
 }) => {
-  const dateSourcingMilestoneTitle =
-    dateType === dateTypes.start ? startDateSourcingMilestoneTitle : dueDateSourcingMilestoneTitle;
+  const dateSourcingMilestoneTitle = sanitize(
+    dateType === dateTypes.start ? startDateSourcingMilestoneTitle : dueDateSourcingMilestoneTitle,
+  );
   const sourcingMilestoneDates =
     dateType === dateTypes.start ? startDateSourcingMilestoneDates : dueDateSourcingMilestoneDates;
 

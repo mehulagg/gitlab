@@ -9,8 +9,11 @@ module QA
             element :pipeline_url_link
           end
 
-          view 'app/assets/javascripts/pipelines/components/pipelines_list/pipelines_table_row.vue' do
+          view 'app/assets/javascripts/pipelines/components/pipelines_list/pipelines_status_badge.vue' do
             element :pipeline_commit_status
+          end
+
+          view 'app/assets/javascripts/pipelines/components/pipelines_list/pipeline_operations.vue' do
             element :pipeline_retry_button
           end
 
@@ -22,15 +25,17 @@ module QA
             all_elements(:pipeline_url_link, minimum: 1, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME).first.click
           end
 
-          def wait_for_latest_pipeline_success
+          def wait_for_latest_pipeline_succeeded
             wait_for_latest_pipeline_status { has_text?('passed') }
           end
 
-          def wait_for_latest_pipeline_completion
+          def wait_for_latest_pipeline_completed
             wait_for_latest_pipeline_status { has_text?('passed') || has_text?('failed') }
           end
 
           def wait_for_latest_pipeline_status
+            wait_until(max_duration: 90, reload: true, sleep_interval: 5) { has_pipeline? }
+
             wait_until(reload: false, max_duration: 360) do
               within_element_by_index(:pipeline_commit_status, 0) { yield }
             end
@@ -49,6 +54,10 @@ module QA
             has_element? :pipeline_url_link
           end
 
+          def has_no_pipeline?
+            has_no_element? :pipeline_url_link
+          end
+
           def click_run_pipeline_button
             click_element :run_pipeline_button, Page::Project::Pipeline::New
           end
@@ -58,4 +67,4 @@ module QA
   end
 end
 
-QA::Page::Project::Pipeline::Index.prepend_if_ee('QA::EE::Page::Project::Pipeline::Index')
+QA::Page::Project::Pipeline::Index.prepend_if_ee('Page::Project::Pipeline::Index', namespace: QA)

@@ -5,6 +5,10 @@ require 'spec_helper'
 RSpec.describe 'User interacts with awards' do
   let(:user) { create(:user) }
 
+  before do
+    stub_feature_flags(improved_emoji_picker: false)
+  end
+
   describe 'User interacts with awards in an issue', :js do
     let(:issue) { create(:issue, project: project)}
     let(:project) { create(:project) }
@@ -68,7 +72,7 @@ RSpec.describe 'User interacts with awards' do
       page.within('.awards') do
         expect(page).to have_selector('.js-emoji-btn')
         expect(page.find('.js-emoji-btn.active .js-counter')).to have_content('1')
-        expect(page).to have_css(".js-emoji-btn.active[data-original-title='You']")
+        expect(page).to have_css(".js-emoji-btn.active[title='You']")
 
         expect do
           page.find('.js-emoji-btn.active').click
@@ -135,11 +139,9 @@ RSpec.describe 'User interacts with awards' do
 
       it 'allows adding a new emoji' do
         page.within('.note-actions') do
-          find('a.js-add-award').click
+          find('.note-emoji-button').click
         end
-        page.within('.emoji-menu-content') do
-          find('gl-emoji[data-name="8ball"]').click
-        end
+        find('gl-emoji[data-name="8ball"]').click
         wait_for_requests
 
         page.within('.note-awards') do
@@ -157,7 +159,7 @@ RSpec.describe 'User interacts with awards' do
           end
 
           page.within('.note-actions') do
-            expect(page).not_to have_css('a.js-add-award')
+            expect(page).not_to have_css('.btn.js-add-award')
           end
         end
 
@@ -294,7 +296,7 @@ RSpec.describe 'User interacts with awards' do
           end
         end
 
-        it 'toggles the smiley emoji on a note', :js do
+        it 'toggles the smiley emoji on a note', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/267525' do
           toggle_smiley_emoji(true)
 
           within('.note-body') do

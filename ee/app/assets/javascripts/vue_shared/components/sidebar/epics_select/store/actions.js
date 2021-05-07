@@ -1,14 +1,13 @@
 import Api from 'ee/api';
 import { noneEpic } from 'ee/vue_shared/constants';
-import { deprecatedCreateFlash as flash } from '~/flash';
-import { s__, __ } from '~/locale';
+import boardsStore from '~/boards/stores/boards_store';
+import createFlash from '~/flash';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { formatDate, timeFor } from '~/lib/utils/datetime_utility';
+import { s__, __ } from '~/locale';
 
 import * as types from './mutation_types';
-
-import boardsStore from '~/boards/stores/boards_store';
 
 export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
 export const setIssueId = ({ commit }, issueId) => commit(types.SET_ISSUE_ID, issueId);
@@ -24,7 +23,7 @@ export const setSelectedEpicIssueId = ({ commit }, selectedEpicIssueId) =>
 
 export const requestEpics = ({ commit }) => commit(types.REQUEST_EPICS);
 export const receiveEpicsSuccess = ({ commit }, data) => {
-  const epics = data.map(rawEpic =>
+  const epics = data.map((rawEpic) =>
     convertObjectPropsToCamelCase(
       { ...rawEpic, url: rawEpic.web_edit_url },
       {
@@ -36,7 +35,9 @@ export const receiveEpicsSuccess = ({ commit }, data) => {
   commit(types.RECEIVE_EPICS_SUCCESS, { epics });
 };
 export const receiveEpicsFailure = ({ commit }) => {
-  flash(s__('Epics|Something went wrong while fetching group epics.'));
+  createFlash({
+    message: s__('Epics|Something went wrong while fetching group epics.'),
+  });
   commit(types.RECEIVE_EPICS_FAILURE);
 };
 export const fetchEpics = ({ state, dispatch }, search = '') => {
@@ -109,7 +110,9 @@ export const receiveIssueUpdateSuccess = ({ state, commit }, { data, epic, isRem
  * @param {string} errorMessage
  */
 export const receiveIssueUpdateFailure = ({ commit }, errorMessage) => {
-  flash(errorMessage);
+  createFlash({
+    message: errorMessage,
+  });
   commit(types.RECEIVE_ISSUE_UPDATE_FAILURE);
 };
 
@@ -126,6 +129,11 @@ export const assignIssueToEpic = ({ state, dispatch }, epic) => {
         data,
         epic,
       });
+    })
+    .catch((error) => {
+      // Handle specific format "#ID cannot be added: reason"
+      const message = error.response.data.message.split(':')[1].trim();
+      dispatch('receiveIssueUpdateFailure', message);
     })
     .catch(() => {
       // Shows flash error for Epic change failure

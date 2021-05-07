@@ -15,7 +15,8 @@ module Vulnerabilities
     attr_accessor :vulnerability_data
 
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
-    enum category: ::Vulnerabilities::Finding::REPORT_TYPES
+    enum category: ::Enums::Vulnerability.report_types
+    declarative_enum DismissalReasonEnum
 
     validates :project, presence: true
     validates :author, presence: true
@@ -57,11 +58,11 @@ module Vulnerabilities
     def self.validate_enums(feedback_params)
       unless feedback_types.include?(feedback_params[:feedback_type])
 
-        raise ArgumentError.new("'#{feedback_params[:feedback_type]}' is not a valid feedback_type")
+        raise ArgumentError, "'#{feedback_params[:feedback_type]}' is not a valid feedback_type"
       end
 
       unless categories.include?(feedback_params[:category])
-        raise ArgumentError.new("'#{feedback_params[:category]}' is not a valid category")
+        raise ArgumentError, "'#{feedback_params[:category]}' is not a valid category"
       end
     end
 
@@ -88,7 +89,18 @@ module Vulnerabilities
     end
 
     def touch_pipeline
-      pipeline&.touch
+      pipeline&.touch if pipeline&.needs_touch?
+    rescue ActiveRecord::StaleObjectError
+      # Often the pipeline has already been updated by creating vulnerability feedback
+      # in batches. In this case, we can ignore the exception as it's already been touched.
+    end
+
+    def finding
+      Finding.find_by(
+        project_id: project_id,
+        report_type: category,
+        project_fingerprint: project_fingerprint
+      )
     end
   end
 end

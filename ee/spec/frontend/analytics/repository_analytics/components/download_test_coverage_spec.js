@@ -1,13 +1,11 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert, GlDropdown, GlDropdownItem, GlModal } from '@gitlab/ui';
-import { useFakeDate } from 'helpers/fake_date';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import DownloadTestCoverage from 'ee/analytics/repository_analytics/components/download_test_coverage.vue';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
 
 const localVue = createLocalVue();
 
 describe('Download test coverage component', () => {
-  useFakeDate();
   let wrapper;
 
   const findCodeCoverageModalButton = () =>
@@ -24,7 +22,7 @@ describe('Download test coverage component', () => {
   const findAlert = () => wrapper.find(GlAlert);
 
   const injectedProperties = {
-    groupAnalyticsCoverageReportsPath: '/coverage.csv?ref_path=refs/heads/master',
+    groupAnalyticsCoverageReportsPath: '/coverage.csv',
   };
 
   const createComponent = () => {
@@ -73,9 +71,7 @@ describe('Download test coverage component', () => {
     });
 
     describe('when selecting a project', () => {
-      // Due to the fake_date helper, we can always expect today's date to be 2020-07-06
-      // and the default date 30 days ago to be 2020-06-06
-      const groupAnalyticsCoverageReportsPathWithDates = `${injectedProperties.groupAnalyticsCoverageReportsPath}&start_date=2020-06-06&end_date=2020-07-06`;
+      const groupAnalyticsCoverageReportsPathWithDates = `${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-06-06&end_date=2020-07-06`;
 
       describe('with all projects selected', () => {
         it('renders primary action as a link with no project_ids param', () => {
@@ -92,7 +88,7 @@ describe('Download test coverage component', () => {
       describe('with two or more projects selected without selecting all projects', () => {
         it('renders primary action as a link with two project IDs as parameters', () => {
           wrapper.setData({ allProjectsSelected: false, selectedProjectIds: [1, 2] });
-          const projectIdsQueryParam = `project_ids%5B%5D=1&project_ids%5B%5D=2`;
+          const projectIdsQueryParam = `project_ids[]=1&project_ids[]=2`;
           const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&${projectIdsQueryParam}`;
 
           return wrapper.vm.$nextTick().then(() => {
@@ -104,7 +100,7 @@ describe('Download test coverage component', () => {
       describe('with one project selected', () => {
         it('renders primary action as a link with one project ID as a parameter', () => {
           wrapper.setData({ allProjectsSelected: false, selectedProjectIds: [1] });
-          const projectIdsQueryParam = `project_ids%5B%5D=1`;
+          const projectIdsQueryParam = `project_ids[]=1`;
           const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&${projectIdsQueryParam}`;
 
           return wrapper.vm.$nextTick().then(() => {
@@ -137,11 +133,11 @@ describe('Download test coverage component', () => {
     describe('when selecting a date range', () => {
       it.each`
         date  | expected
-        ${7}  | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}&start_date=2020-06-29&end_date=2020-07-06`}
-        ${14} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}&start_date=2020-06-22&end_date=2020-07-06`}
-        ${30} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}&start_date=2020-06-06&end_date=2020-07-06`}
-        ${60} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}&start_date=2020-05-07&end_date=2020-07-06`}
-        ${90} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}&start_date=2020-04-07&end_date=2020-07-06`}
+        ${7}  | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-06-29&end_date=2020-07-06`}
+        ${14} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-06-22&end_date=2020-07-06`}
+        ${30} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-06-06&end_date=2020-07-06`}
+        ${60} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-05-07&end_date=2020-07-06`}
+        ${90} | ${`${injectedProperties.groupAnalyticsCoverageReportsPath}?start_date=2020-04-07&end_date=2020-07-06`}
       `(
         'updates CSV path to have the start date be $date days before today',
         ({ date, expected }) => {

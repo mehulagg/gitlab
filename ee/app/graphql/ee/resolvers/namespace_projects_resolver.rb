@@ -4,18 +4,28 @@ module EE
   module Resolvers
     module NamespaceProjectsResolver
       extend ActiveSupport::Concern
+      extend ::Gitlab::Utils::Override
 
       prepended do
+        argument :has_code_coverage, GraphQL::BOOLEAN_TYPE,
+                 required: false,
+                 default_value: false,
+                 description: 'Returns only the projects which have code coverage.'
+
         argument :has_vulnerabilities, GraphQL::BOOLEAN_TYPE,
                  required: false,
                  default_value: false,
-                 description: 'Returns only the projects which have vulnerabilities'
+                 description: 'Returns only the projects which have vulnerabilities.'
       end
 
-      def resolve(include_subgroups:, search:, sort:, has_vulnerabilities: false)
-        projects = super(include_subgroups: include_subgroups, search: search, sort: sort)
+      private
 
-        has_vulnerabilities ? projects.has_vulnerabilities : projects
+      override :finder_params
+      def finder_params(args)
+        super(args).merge(
+          has_vulnerabilities: args.dig(:has_vulnerabilities),
+          has_code_coverage: args.dig(:has_code_coverage)
+        )
       end
     end
   end

@@ -90,7 +90,7 @@ RSpec.describe SessionsController, :geo do
     end
 
     context 'when using two-factor authentication' do
-      def authenticate_2fa(user_params, otp_user_id: user.id)
+      def authenticate_2fa(otp_user_id: user.id, **user_params)
         post(:create, params: { user: user_params }, session: { otp_user_id: otp_user_id })
       end
 

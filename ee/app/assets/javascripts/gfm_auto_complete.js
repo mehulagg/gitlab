@@ -16,6 +16,10 @@ class GfmAutoCompleteEE extends GfmAutoComplete {
       this.setupAutoCompleteEpics($input, this.getDefaultCallbacks());
     }
 
+    if (this.enableMap.vulnerabilities) {
+      this.setupAutoCompleteVulnerabilities($input, this.getDefaultCallbacks());
+    }
+
     super.setupAtWho($input);
   }
 
@@ -32,19 +36,55 @@ class GfmAutoCompleteEE extends GfmAutoComplete {
         return tmpl;
       },
       data: GfmAutoComplete.defaultLoadingData,
-      // eslint-disable-next-line no-template-curly-in-string
-      insertTpl: '${atwho-at}${id}',
+      insertTpl: GfmAutoComplete.Issues.insertTemplateFunction,
+      skipSpecialCharacterTest: true,
       callbacks: {
         ...defaultCallbacks,
         beforeSave(merges) {
-          return $.map(merges, m => {
+          return $.map(merges, (m) => {
             if (m.title == null) {
               return m;
             }
             return {
               id: m.iid,
+              reference: m.reference,
               title: m.title.replace(/<(?:.|\n)*?>/gm, ''),
               search: `${m.iid} ${m.title}`,
+            };
+          });
+        },
+      },
+    });
+  };
+
+  setupAutoCompleteVulnerabilities = ($input, defaultCallbacks) => {
+    $input.atwho({
+      at: '[vulnerability:',
+      suffix: ']',
+      alias: 'vulnerabilities',
+      searchKey: 'search',
+      displayTpl(value) {
+        let tmpl = GfmAutoComplete.Loading.template;
+        if (value.title != null) {
+          tmpl = GfmAutoComplete.Issues.templateFunction(value);
+        }
+        return tmpl;
+      },
+      data: GfmAutoComplete.defaultLoadingData,
+      insertTpl: GfmAutoComplete.Issues.insertTemplateFunction,
+      skipSpecialCharacterTest: true,
+      callbacks: {
+        ...defaultCallbacks,
+        beforeSave(merges) {
+          return merges.map((m) => {
+            if (m.title == null) {
+              return m;
+            }
+            return {
+              id: m.id,
+              title: m.title.replace(/<(?:.|\n)*?>/gm, ''),
+              reference: m.reference,
+              search: `${m.id} ${m.title}`,
             };
           });
         },

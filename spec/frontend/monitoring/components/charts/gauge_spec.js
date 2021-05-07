@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlGaugeChart } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import GaugeChart from '~/monitoring/components/charts/gauge.vue';
 import { gaugeChartGraphData } from '../../graph_data';
 
@@ -49,7 +49,7 @@ describe('Gauge Chart component', () => {
 
     it.each(invalidCases)(
       'if min has invalid value, defaults are used for both min and max',
-      invalidValue => {
+      (invalidValue) => {
         createWrapper({ minValue: invalidValue });
 
         expect(findGaugeChart().props('min')).toBe(MIN_DEFAULT);
@@ -59,7 +59,7 @@ describe('Gauge Chart component', () => {
 
     it.each(invalidCases)(
       'if max has invalid value, defaults are used for both min and max',
-      invalidValue => {
+      (invalidValue) => {
         createWrapper({ minValue: invalidValue });
 
         expect(findGaugeChart().props('min')).toBe(MIN_DEFAULT);

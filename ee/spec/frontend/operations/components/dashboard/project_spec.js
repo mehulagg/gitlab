@@ -54,7 +54,7 @@ describe('project component', () => {
 
       it('shows upgrade license text', () => {
         expect(wrapper.find('.dashboard-card-body').html()).toContain(wrapper.vm.unlicensedMessage);
-        expect(wrapper.vm.unlicensedMessage).toContain('upgrade its group plan to Silver');
+        expect(wrapper.vm.unlicensedMessage).toContain('upgrade its group plan to Premium');
       });
 
       it('hides commit info', () => {
@@ -75,7 +75,7 @@ describe('project component', () => {
 
       it('shows upgrade license text', () => {
         expect(wrapper.find('.dashboard-card-body').html()).toContain(wrapper.vm.unlicensedMessage);
-        expect(wrapper.vm.unlicensedMessage).not.toContain('upgrade its group plan to Silver');
+        expect(wrapper.vm.unlicensedMessage).not.toContain('upgrade its group plan to Premium');
         expect(wrapper.vm.unlicensedMessage).toContain(
           `contact an owner of group ${project.namespace.name}`,
         );

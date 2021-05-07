@@ -3,7 +3,7 @@
 class SyncSeatLinkRequestWorker
   include ApplicationWorker
 
-  feature_category :provision
+  feature_category :license
 
   # Retry for up to approximately 6 days
   sidekiq_options retry: 20
@@ -15,22 +15,32 @@ class SyncSeatLinkRequestWorker
 
   RequestError = Class.new(StandardError)
 
-  def perform(date, license_key, max_historical_user_count, active_users)
+  def perform(timestamp, license_key, max_historical_user_count, active_users)
     response = Gitlab::HTTP.post(
       URI_PATH,
       base_uri: EE::SUBSCRIPTIONS_URL,
       headers: request_headers,
-      body: request_body(date, license_key, max_historical_user_count, active_users)
+      body: request_body(timestamp, license_key, max_historical_user_count, active_users)
     )
 
-    raise RequestError, request_error_message(response) unless response.success?
+    if response.success?
+      create_license(response['license']) if response['license']
+    else
+      raise RequestError, request_error_message(response)
+    end
   end
 
   private
 
-  def request_body(date, license_key, max_historical_user_count, active_users)
+  def create_license(license_data)
+    License.create!(data: license_data, cloud: true)
+  rescue StandardError => e
+    Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
+  end
+
+  def request_body(timestamp, license_key, max_historical_user_count, active_users)
     Gitlab::SeatLinkData.new(
-      date: date,
+      timestamp: Time.zone.parse(timestamp),
       key: license_key,
       max_users: max_historical_user_count,
       active_users: active_users

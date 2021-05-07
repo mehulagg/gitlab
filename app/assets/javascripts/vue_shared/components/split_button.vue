@@ -1,8 +1,8 @@
 <script>
-import { isString } from 'lodash';
 import { GlDropdown, GlDropdownDivider, GlDropdownItem } from '@gitlab/ui';
+import { isString } from 'lodash';
 
-const isValidItem = item =>
+const isValidItem = (item) =>
   isString(item.eventName) && isString(item.title) && isString(item.description);
 
 export default {

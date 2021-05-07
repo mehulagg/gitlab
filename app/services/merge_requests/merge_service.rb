@@ -8,6 +8,11 @@ module MergeRequests
   # Executed when you do merge via GitLab UI
   #
   class MergeService < MergeRequests::MergeBaseService
+    include Gitlab::Utils::StrongMemoize
+
+    GENERIC_ERROR_MESSAGE = 'An error occurred while merging'
+    LEASE_TIMEOUT = 15.minutes.to_i
+
     delegate :merge_jid, :state, to: :@merge_request
 
     def execute(merge_request, options = {})
@@ -15,6 +20,9 @@ module MergeRequests
         FfMergeService.new(project, current_user, params).execute(merge_request)
         return
       end
+
+      return if merge_request.merged?
+      return unless exclusive_lease(merge_request.id).try_obtain
 
       @merge_request = merge_request
       @options = options
@@ -32,6 +40,8 @@ module MergeRequests
       log_info("Merge process finished on JID #{merge_jid} with state #{state}")
     rescue MergeError => e
       handle_merge_error(log_message: e.message, save_message_on_model: true)
+    ensure
+      exclusive_lease(merge_request.id).cancel
     end
 
     private
@@ -79,7 +89,7 @@ module MergeRequests
       if commit_id
         log_info("Git merge finished on JID #{merge_jid} commit #{commit_id}")
       else
-        raise_error('Conflicts detected during merge')
+        raise_error(GENERIC_ERROR_MESSAGE)
       end
 
       merge_request.update!(merge_commit_sha: commit_id)
@@ -88,13 +98,15 @@ module MergeRequests
     end
 
     def try_merge
-      repository.merge(current_user, source, merge_request, commit_message)
+      repository.merge(current_user, source, merge_request, commit_message).tap do
+        merge_request.update_column(:squash_commit_sha, source) if merge_request.squash_on_merge?
+      end
     rescue Gitlab::Git::PreReceiveError => e
       raise MergeError,
             "Something went wrong during merge pre-receive hook. #{e.message}".strip
-    rescue => e
+    rescue StandardError => e
       handle_merge_error(log_message: e.message)
-      raise_error('Something went wrong during merge')
+      raise_error(GENERIC_ERROR_MESSAGE)
     end
 
     def after_merge
@@ -103,8 +115,7 @@ module MergeRequests
       log_info("Post merge finished on JID #{merge_jid} with state #{state}")
 
       if delete_source_branch?
-        ::Branches::DeleteService.new(@merge_request.source_project, branch_deletion_user)
-          .execute(merge_request.source_branch)
+        MergeRequests::DeleteSourceBranchWorker.perform_async(@merge_request.id, @merge_request.source_branch_sha, branch_deletion_user.id)
       end
     end
 
@@ -142,6 +153,14 @@ module MergeRequests
       # params-keys are symbols coming from the controller, but when they get
       # loaded from the database they're strings
       params.with_indifferent_access[:sha] == merge_request.diff_head_sha
+    end
+
+    def exclusive_lease(merge_request_id)
+      strong_memoize(:"exclusive_lease_#{merge_request_id}") do
+        lease_key = ['merge_requests_merge_service', merge_request_id].join(':')
+
+        Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT)
+      end
     end
   end
 end

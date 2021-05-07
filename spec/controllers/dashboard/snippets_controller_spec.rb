@@ -28,5 +28,7 @@ RSpec.describe Dashboard::SnippetsController do
     end
 
     it_behaves_like 'snippets sort order'
+
+    it_behaves_like 'snippets views'
   end
 end

@@ -203,7 +203,7 @@ module Gitlab
     def self.authorization_token(storage)
       token = token(storage).to_s
       issued_at = real_time.to_i.to_s
-      hmac = OpenSSL::HMAC.hexdigest(OpenSSL::Digest::SHA256.new, token, issued_at)
+      hmac = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('SHA256'), token, issued_at)
 
       "v2.#{hmac}.#{issued_at}"
     end
@@ -215,19 +215,42 @@ module Gitlab
         'client_name' => CLIENT_NAME
       }
 
+      context_data = Gitlab::ApplicationContext.current
+
       feature_stack = Thread.current[:gitaly_feature_stack]
       feature = feature_stack && feature_stack[0]
       metadata['call_site'] = feature.to_s if feature
       metadata['gitaly-servers'] = address_metadata(remote_storage) if remote_storage
       metadata['x-gitlab-correlation-id'] = Labkit::Correlation::CorrelationId.current_id if Labkit::Correlation::CorrelationId.current_id
       metadata['gitaly-session-id'] = session_id
+      metadata['username'] = context_data['meta.user'] if context_data&.fetch('meta.user', nil)
+      metadata['remote_ip'] = context_data['meta.remote_ip'] if context_data&.fetch('meta.remote_ip', nil)
       metadata.merge!(Feature::Gitaly.server_feature_flags)
+      metadata.merge!(route_to_primary)
 
       deadline_info = request_deadline(timeout)
       metadata.merge!(deadline_info.slice(:deadline_type))
 
       { metadata: metadata, deadline: deadline_info[:deadline] }
     end
+
+    # Gitlab::Git::HookEnv will set the :gitlab_git_env variable in case we're
+    # running in the context of a Gitaly hook call, which may make use of
+    # quarantined object directories. We thus need to pass along the path of
+    # the quarantined object directory to Gitaly, otherwise it won't be able to
+    # find these quarantined objects. Given that the quarantine directory is
+    # generated with a random name, they'll have different names when multiple
+    # Gitaly nodes take part in a single transaction. As a result, we are
+    # forced to route all requests to the primary node which has injected the
+    # quarantine object directory to us.
+    def self.route_to_primary
+      return {} unless Gitlab::SafeRequestStore.active?
+
+      return {} if Gitlab::SafeRequestStore[:gitlab_git_env].blank?
+
+      { 'gitaly-route-repository-accessor-policy' => 'primary-only' }
+    end
+    private_class_method :route_to_primary
 
     def self.request_deadline(timeout)
       # timeout being 0 means the request is allowed to run indefinitely.

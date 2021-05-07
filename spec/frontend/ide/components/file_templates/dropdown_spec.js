@@ -1,7 +1,7 @@
-import Vuex from 'vuex';
-import $ from 'jquery';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import $ from 'jquery';
+import Vuex from 'vuex';
 import Dropdown from '~/ide/components/file_templates/dropdown.vue';
 
 const localVue = createLocalVue();
@@ -109,7 +109,7 @@ describe('IDE file templates dropdown component', () => {
       });
       const items = findItemButtons();
 
-      expect(items.wrappers.map(x => x.text())).toEqual(templates.map(x => x.name));
+      expect(items.wrappers.map((x) => x.text())).toEqual(templates.map((x) => x.name));
     });
 
     it('searches template data', () => {
@@ -124,7 +124,7 @@ describe('IDE file templates dropdown component', () => {
         const items = findItemButtons();
 
         expect(items.length).toBe(matches.length);
-        expect(items.wrappers.map(x => x.text())).toEqual(matches);
+        expect(items.wrappers.map((x) => x.text())).toEqual(matches);
       });
     });
 
@@ -151,7 +151,7 @@ describe('IDE file templates dropdown component', () => {
       const items = findItemButtons();
 
       expect(items.length).toBe(data.length);
-      expect(items.wrappers.map(x => x.text())).toEqual(data.map(x => x.name));
+      expect(items.wrappers.map((x) => x.text())).toEqual(data.map((x) => x.name));
     });
 
     it('renders input when `searchable` is true', () => {
@@ -169,7 +169,7 @@ describe('IDE file templates dropdown component', () => {
         const items = findItemButtons();
 
         expect(items.length).toBe(matches.length);
-        expect(items.wrappers.map(x => x.text())).toEqual(matches);
+        expect(items.wrappers.map((x) => x.text())).toEqual(matches);
       });
     });
   });

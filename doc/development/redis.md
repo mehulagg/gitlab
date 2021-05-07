@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Redis guidelines
 
 GitLab uses [Redis](https://redis.io) for the following distinct purposes:
@@ -37,9 +43,9 @@ a single Redis server. This means that keys should **always** be
 globally unique across all categories.
 
 It is usually better to use immutable identifiers - project ID rather than
-full path, for instance - in Redis key names. If full path is used, the key will
-stop being consulted if the project is renamed. If the contents of the key are
-invalidated by a name change, it is better to include a hook that will expire
+full path, for instance - in Redis key names. If full path is used, the key
+stops being consulted if the project is renamed. If the contents of the key are
+invalidated by a name change, it is better to include a hook that expires
 the entry, instead of relying on the key changing.
 
 ### Multi-key commands
@@ -68,8 +74,10 @@ which is enabled for the `cache` and `shared_state`
 
 ## Redis in structured logging
 
-For GitLab Team Members: There are [basic](https://www.youtube.com/watch?v=Uhdj19Dc6vU) and
-[advanced](https://youtu.be/jw1Wv2IJxzs) videos that show how you can work with the Redis
+For GitLab Team Members: There are <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+[basic](https://www.youtube.com/watch?v=Uhdj19Dc6vU) and
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [advanced](https://youtu.be/jw1Wv2IJxzs)
+videos that show how you can work with the Redis
 structured logging fields on GitLab.com.
 
 Our [structured logging](logging.md#use-structured-json-logging) for web
@@ -100,7 +108,7 @@ requests that read the most data from the cache, we can just sort by
 
 ### The slow log
 
-TIP: **Tip:**
+NOTE:
 There is a [video showing how to see the slow log](https://youtu.be/BBI68QuYRH8) (GitLab internal)
 on GitLab.com
 
@@ -112,14 +120,13 @@ This shows commands that have taken a long time and may be a performance
 concern.
 
 The
-[fluent-plugin-redis-slowlog](https://gitlab.com/gitlab-org/fluent-plugin-redis-slowlog)
-project is responsible for taking the slowlog entries from Redis and
-passing to fluentd (and ultimately Elasticsearch).
+[`fluent-plugin-redis-slowlog`](https://gitlab.com/gitlab-org/fluent-plugin-redis-slowlog)
+project is responsible for taking the `slowlog` entries from Redis and
+passing to Fluentd (and ultimately Elasticsearch).
 
 ## Analyzing the entire keyspace
 
-The [Redis Keyspace
-Analyzer](https://gitlab.com/gitlab-com/gl-infra/redis-keyspace-analyzer)
+The [Redis Keyspace Analyzer](https://gitlab.com/gitlab-com/gl-infra/redis-keyspace-analyzer)
 project contains tools for dumping the full key list and memory usage of a Redis
 instance, and then analyzing those lists while eliminating potentially sensitive
 data from the results. It can be used to find the most frequent key patterns, or
@@ -177,9 +184,8 @@ The Redis [`PFCOUNT`](https://redis.io/commands/pfcount),
 [`PFMERGE`](https://redis.io/commands/pfmergge) commands operate on
 HyperLogLogs, a data structure that allows estimating the number of unique
 elements with low memory usage. (In addition to the `PFCOUNT` documentation,
-Thoughtbot's article on [HyperLogLogs in
-Redis](https://thoughtbot.com/blog/hyperloglogs-in-redis) provides a good
-background here.)
+Thoughtbot's article on [HyperLogLogs in Redis](https://thoughtbot.com/blog/hyperloglogs-in-redis)
+provides a good background here.)
 
 [`Gitlab::Redis::HLL`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/redis/hll.rb)
 provides a convenient interface for adding and counting values in HyperLogLogs.
@@ -189,7 +195,7 @@ provides a convenient interface for adding and counting values in HyperLogLogs.
 For cases where we need to efficiently check the whether an item is in a group
 of items, we can use a Redis set.
 [`Gitlab::SetCache`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/set_cache.rb)
-provides an `#include?` method that will use the
+provides an `#include?` method that uses the
 [`SISMEMBER`](https://redis.io/commands/sismember) command, as well as `#read`
 to fetch all entries in the set.
 

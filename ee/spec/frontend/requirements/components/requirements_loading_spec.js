@@ -1,6 +1,6 @@
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
-import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlLoadingIcon } from '@gitlab/ui';
 import RequirementsLoading from 'ee/requirements/components/requirements_loading.vue';
 
 import { FilterState, mockRequirementsCount } from '../mock_data';

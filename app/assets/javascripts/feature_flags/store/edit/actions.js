@@ -1,10 +1,10 @@
-import * as types from './mutation_types';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import { NEW_VERSION_FLAG } from '../../constants';
 import { mapFromScopesViewModel, mapStrategiesToRails } from '../helpers';
+import * as types from './mutation_types';
 
 /**
  * Handles the edition of a feature flag.
@@ -29,7 +29,7 @@ export const updateFeatureFlag = ({ state, dispatch }, params) => {
       dispatch('receiveUpdateFeatureFlagSuccess');
       visitUrl(state.path);
     })
-    .catch(error => dispatch('receiveUpdateFeatureFlagError', error.response.data));
+    .catch((error) => dispatch('receiveUpdateFeatureFlagError', error.response.data));
 };
 
 export const requestUpdateFeatureFlag = ({ commit }) => commit(types.REQUEST_UPDATE_FEATURE_FLAG);

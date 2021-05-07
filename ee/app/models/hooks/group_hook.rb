@@ -19,7 +19,10 @@ class GroupHook < WebHook
     :job_hooks,
     :pipeline_hooks,
     :wiki_page_hooks,
-    :deployment_hooks
+    :deployment_hooks,
+    :release_hooks,
+    :member_hooks,
+    :subgroup_hooks
   ]
 
   belongs_to :group
@@ -28,5 +31,9 @@ class GroupHook < WebHook
 
   def pluralized_name
     _('Group Hooks')
+  end
+
+  def web_hooks_disable_failed?
+    Feature.enabled?(:web_hooks_disable_failed, group)
   end
 end

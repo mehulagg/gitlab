@@ -1,23 +1,26 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import AccessorUtilities from '~/lib/utils/accessor';
-import eventHub from '../event_hub';
-import store from '../store';
+import {
+  mapVuexModuleState,
+  mapVuexModuleActions,
+  mapVuexModuleGetters,
+} from '~/lib/utils/vuex_module_mappers';
 import { FREQUENT_ITEMS, STORAGE_KEY } from '../constants';
+import eventHub from '../event_hub';
 import { isMobile, updateExistingFrequentItem, sanitizeItem } from '../utils';
-import FrequentItemsSearchInput from './frequent_items_search_input.vue';
 import FrequentItemsList from './frequent_items_list.vue';
 import frequentItemsMixin from './frequent_items_mixin';
+import FrequentItemsSearchInput from './frequent_items_search_input.vue';
 
 export default {
-  store,
   components: {
     FrequentItemsSearchInput,
     FrequentItemsList,
     GlLoadingIcon,
   },
   mixins: [frequentItemsMixin],
+  inject: ['vuexModule'],
   props: {
     currentUserName: {
       type: String,
@@ -29,8 +32,13 @@ export default {
     },
   },
   computed: {
-    ...mapState(['searchQuery', 'isLoadingItems', 'isFetchFailed', 'items']),
-    ...mapGetters(['hasSearchQuery']),
+    ...mapVuexModuleState((vm) => vm.vuexModule, [
+      'searchQuery',
+      'isLoadingItems',
+      'isFetchFailed',
+      'items',
+    ]),
+    ...mapVuexModuleGetters((vm) => vm.vuexModule, ['hasSearchQuery']),
     translations() {
       return this.getTranslations(['loadingMessage', 'header']);
     },
@@ -58,7 +66,11 @@ export default {
     eventHub.$off(`${this.namespace}-dropdownOpen`, this.dropdownOpenHandler);
   },
   methods: {
-    ...mapActions(['setNamespace', 'setStorageKey', 'fetchFrequentItems']),
+    ...mapVuexModuleActions((vm) => vm.vuexModule, [
+      'setNamespace',
+      'setStorageKey',
+      'fetchFrequentItems',
+    ]),
     dropdownOpenHandler() {
       if (this.searchQuery === '' || isMobile()) {
         this.fetchFrequentItems();
@@ -79,7 +91,7 @@ export default {
 
       // Check if item already exists in list
       const itemMatchIndex = storedFrequentItems.findIndex(
-        frequentItem => frequentItem.id === item.id,
+        (frequentItem) => frequentItem.id === item.id,
       );
 
       if (itemMatchIndex > -1) {
@@ -102,15 +114,16 @@ export default {
 </script>
 
 <template>
-  <div>
-    <frequent-items-search-input :namespace="namespace" />
+  <div class="gl-display-flex gl-flex-direction-column gl-flex-align-items-stretch gl-h-full">
+    <frequent-items-search-input :namespace="namespace" data-testid="frequent-items-search-input" />
     <gl-loading-icon
       v-if="isLoadingItems"
       :label="translations.loadingMessage"
       size="lg"
       class="loading-animation prepend-top-20"
+      data-testid="loading"
     />
-    <div v-if="!isLoadingItems && !hasSearchQuery" class="section-header">
+    <div v-if="!isLoadingItems && !hasSearchQuery" class="section-header" data-testid="header">
       {{ translations.header }}
     </div>
     <frequent-items-list

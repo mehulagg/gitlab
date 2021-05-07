@@ -1,12 +1,12 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Packages API
 
-This is the API docs of [GitLab Packages](../administration/packages/index.md).
+This is the API documentation of [GitLab Packages](../administration/packages/index.md).
 
 ## List packages
 
@@ -28,6 +28,8 @@ GET /projects/:id/packages
 | `sort`    | string | no | The direction of the order, either `asc` (default) for ascending order or `desc` for descending order. |
 | `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, or `golang`. (_Introduced in GitLab 12.9_)
 | `package_name` | string | no | Filter the project packages with a fuzzy search by name. (_Introduced in GitLab 12.9_)
+| `include_versionless` | boolean | no | When set to true, versionless packages are included in the response. (_Introduced in GitLab 13.8_)
+| `status` | string | no | Filter the returned packages by status. One of `default` (default), `hidden`, or `processing`. (_Introduced in GitLab 13.9_)
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages"
@@ -67,7 +69,10 @@ Example response:
 ]
 ```
 
-By default, the `GET` request will return 20 results, since the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, because the API is [paginated](README.md#pagination).
+
+Although you can filter packages by status, working with packages that have a `processing` status
+can result in malformed data or broken packages.
 
 ### Within a group
 
@@ -88,14 +93,17 @@ GET /groups/:id/packages
 | `sort`    | string | no | The direction of the order, either `asc` (default) for ascending order or `desc` for descending order. |
 | `package_type` | string | no | Filter the returned packages by type. One of `conan`, `maven`, `npm`, `pypi`, `composer`, `nuget`, or `golang`. (_Introduced in GitLab 12.9_) |
 | `package_name` | string | no | Filter the project packages with a fuzzy search by name. (_[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30980) in GitLab 13.0_)
+| `include_versionless` | boolean | no | When set to true, versionless packages are included in the response. (_Introduced in GitLab 13.8_)
+| `status` | string | no | Filter the returned packages by status. One of `default` (default), `hidden`, or `processing`. (_Introduced in GitLab 13.9_)
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/packages?exclude_subgroups=true"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/packages?exclude_subgroups=false"
 ```
 
-CAUTION: **Deprecation:**
-> The `build_info` attribute in the response is deprecated in favour of `pipeline`.
-> Introduced [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040).
+> **Deprecation:**
+>
+> The `pipeline` attribute in the response is deprecated in favor of `pipelines`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44348) in GitLab 13.6. Both are available until 13.7.
+> The `build_info` attribute in the response is deprecated in favor of `pipeline`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040) in GitLab 12.10.
 
 Example response:
 
@@ -111,19 +119,21 @@ Example response:
       "delete_api_path": "/namespace1/project1/-/packages/1"
     },
     "created_at": "2019-11-27T03:37:38.711Z",
-    "pipeline": {
-      "id": 123,
-      "status": "pending",
-      "ref": "new-pipeline",
-      "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-      "web_url": "https://example.com/foo/bar/pipelines/47",
-      "created_at": "2016-08-11T11:28:34.085Z",
-      "updated_at": "2016-08-11T11:32:35.169Z",
-      "user": {
-        "name": "Administrator",
-        "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+    "pipelines": [
+      {
+        "id": 123,
+        "status": "pending",
+        "ref": "new-pipeline",
+        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+        "web_url": "https://example.com/foo/bar/pipelines/47",
+        "created_at": "2016-08-11T11:28:34.085Z",
+        "updated_at": "2016-08-11T11:32:35.169Z",
+        "user": {
+          "name": "Administrator",
+          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+        }
       }
-    }
+    ]
   },
   {
     "id": 2,
@@ -135,29 +145,34 @@ Example response:
       "delete_api_path": "/namespace1/project1/-/packages/1"
     },
     "created_at": "2019-11-27T03:37:38.711Z",
-    "pipeline": {
-      "id": 123,
-      "status": "pending",
-      "ref": "new-pipeline",
-      "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-      "web_url": "https://example.com/foo/bar/pipelines/47",
-      "created_at": "2016-08-11T11:28:34.085Z",
-      "updated_at": "2016-08-11T11:32:35.169Z",
-      "user": {
-        "name": "Administrator",
-        "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+    "pipelines": [
+      {
+        "id": 123,
+        "status": "pending",
+        "ref": "new-pipeline",
+        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+        "web_url": "https://example.com/foo/bar/pipelines/47",
+        "created_at": "2016-08-11T11:28:34.085Z",
+        "updated_at": "2016-08-11T11:32:35.169Z",
+        "user": {
+          "name": "Administrator",
+          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+        }
       }
-    }
+    ]
   }
 ]
 ```
 
-By default, the `GET` request will return 20 results, since the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, because the API is [paginated](README.md#pagination).
 
 The `_links` object contains the following properties:
 
 - `web_path`: The path which you can visit in GitLab and see the details of the package.
 - `delete_api_path`: The API path to delete the package. Only available if the request user has permission to do so.
+
+Although you can filter packages by status, working with packages that have a `processing` status
+can result in malformed data or broken packages.
 
 ## Get a project package
 
@@ -178,9 +193,10 @@ GET /projects/:id/packages/:package_id
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages/:package_id"
 ```
 
-CAUTION: **Deprecation:**
-> The `build_info` attribute in the response is deprecated in favour of `pipeline`.
-> Introduced [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040).
+> **Deprecation:**
+>
+> The `pipeline` attribute in the response is deprecated in favor of `pipelines`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/44348) in GitLab 13.6. Both are available until 13.7.
+> The `build_info` attribute in the response is deprecated in favor of `pipeline`, which was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28040) in GitLab 12.10.
 
 Example response:
 
@@ -195,37 +211,41 @@ Example response:
     "delete_api_path": "/namespace1/project1/-/packages/1"
   },
   "created_at": "2019-11-27T03:37:38.711Z",
-  "pipeline": {
-    "id": 123,
-    "status": "pending",
-    "ref": "new-pipeline",
-    "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-    "web_url": "https://example.com/foo/bar/pipelines/47",
-    "created_at": "2016-08-11T11:28:34.085Z",
-    "updated_at": "2016-08-11T11:32:35.169Z",
-    "user": {
-      "name": "Administrator",
-      "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+  "pipelines": [
+    {
+      "id": 123,
+      "status": "pending",
+      "ref": "new-pipeline",
+      "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+      "web_url": "https://example.com/foo/bar/pipelines/47",
+      "created_at": "2016-08-11T11:28:34.085Z",
+      "updated_at": "2016-08-11T11:32:35.169Z",
+      "user": {
+        "name": "Administrator",
+        "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+      }
     }
-  },
+  ],
   "versions": [
     {
       "id":2,
       "version":"2.0-SNAPSHOT",
       "created_at":"2020-04-28T04:42:11.573Z",
-      "pipeline": {
-        "id": 234,
-        "status": "pending",
-        "ref": "new-pipeline",
-        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
-        "web_url": "https://example.com/foo/bar/pipelines/58",
-        "created_at": "2016-08-11T11:28:34.085Z",
-        "updated_at": "2016-08-11T11:32:35.169Z",
-        "user": {
-          "name": "Administrator",
-          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+      "pipelines": [
+        {
+          "id": 234,
+          "status": "pending",
+          "ref": "new-pipeline",
+          "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+          "web_url": "https://example.com/foo/bar/pipelines/58",
+          "created_at": "2016-08-11T11:28:34.085Z",
+          "updated_at": "2016-08-11T11:32:35.169Z",
+          "user": {
+            "name": "Administrator",
+            "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+          }
         }
-      }
+      ]
     }
   ]
 }
@@ -252,7 +272,7 @@ GET /projects/:id/packages/:package_id/package_files
 | `package_id`      | integer | yes | ID of a package. |
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/packages/4/package_files"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages/4/package_files"
 ```
 
 Example response:
@@ -266,7 +286,23 @@ Example response:
     "file_name": "my-app-1.5-20181107.152550-1.jar",
     "size": 2421,
     "file_md5": "58e6a45a629910c6ff99145a688971ac",
-    "file_sha1": "ebd193463d3915d7e22219f52740056dfd26cbfe"
+    "file_sha1": "ebd193463d3915d7e22219f52740056dfd26cbfe",
+    "file_sha256": "a903393463d3915d7e22219f52740056dfd26cbfeff321b",
+    "pipelines": [
+      {
+        "id": 123,
+        "status": "pending",
+        "ref": "new-pipeline",
+        "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
+        "web_url": "https://example.com/foo/bar/pipelines/47",
+        "created_at": "2016-08-11T11:28:34.085Z",
+        "updated_at": "2016-08-11T11:32:35.169Z",
+        "user": {
+          "name": "Administrator",
+          "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+        }
+      }
+    ]
   },
   {
     "id": 26,
@@ -275,7 +311,8 @@ Example response:
     "file_name": "my-app-1.5-20181107.152550-1.pom",
     "size": 1122,
     "file_md5": "d90f11d851e17c5513586b4a7e98f1b2",
-    "file_sha1": "9608d068fe88aff85781811a42f32d97feb440b5"
+    "file_sha1": "9608d068fe88aff85781811a42f32d97feb440b5",
+    "file_sha256": "2987d068fe88aff85781811a42f32d97feb4f092a399"
   },
   {
     "id": 27,
@@ -284,12 +321,13 @@ Example response:
     "file_name": "maven-metadata.xml",
     "size": 767,
     "file_md5": "6dfd0cce1203145a927fef5e3a1c650c",
-    "file_sha1": "d25932de56052d320a8ac156f745ece73f6a8cd2"
+    "file_sha1": "d25932de56052d320a8ac156f745ece73f6a8cd2",
+    "file_sha256": "ac849d002e56052d320a8ac156f745ece73f6a8cd2f3e82"
   }
 ]
 ```
 
-By default, the `GET` request will return 20 results, since the API is [paginated](README.md#pagination).
+By default, the `GET` request returns 20 results, because the API is [paginated](README.md#pagination).
 
 ## Delete a project package
 
@@ -314,3 +352,33 @@ Can return the following status codes:
 
 - `204 No Content`, if the package was deleted successfully.
 - `404 Not Found`, if the package was not found.
+
+## Delete a package file
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32107) in GitLab 13.12.
+
+WARNING:
+Deleting a package file may corrupt your package making it unusable or unpullable from your package
+manager client. When deleting a package file, be sure that you understand what you're doing.
+
+Delete a package file:
+
+```plaintext
+DELETE /projects/:id/packages/:package_id/package_files/:package_file_id
+```
+
+| Attribute         | Type           | Required | Description |
+| ----------------- | -------------- | -------- | ----------- |
+| `id`              | integer/string | yes | ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
+| `package_id`      | integer        | yes | ID of a package. |
+| `package_file_id` | integer        | yes | ID of a package file. |
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/packages/:package_id/package_files/:package_file_id"
+```
+
+Can return the following status codes:
+
+- `204 No Content`: The package was deleted successfully.
+- `403 Forbidden`: The user does not have permission to delete the file.
+- `404 Not Found`: The package or package file was not found.

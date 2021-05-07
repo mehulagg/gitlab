@@ -1,12 +1,12 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlAlert } from '@gitlab/ui';
-import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
-import TasksByTypeChart from './tasks_by_type/tasks_by_type_chart.vue';
-import TasksByTypeFilters from './tasks_by_type/tasks_by_type_filters.vue';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { s__, sprintf, __ } from '~/locale';
+import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { formattedDate } from '../../shared/utils';
 import { TASKS_BY_TYPE_SUBJECT_ISSUE } from '../constants';
+import TasksByTypeChart from './tasks_by_type/tasks_by_type_chart.vue';
+import TasksByTypeFilters from './tasks_by_type/tasks_by_type_filters.vue';
 
 export default {
   name: 'TypeOfWorkCharts',
@@ -81,13 +81,12 @@ export default {
         :has-data="hasData"
         :selected-label-ids="selectedLabelIdsFilter"
         :subject-filter="selectedSubjectFilter"
-        @updateFilter="onUpdateFilter"
+        @update-filter="onUpdateFilter"
       />
       <tasks-by-type-chart
         v-if="hasData"
         :data="tasksByTypeChartData.data"
         :group-by="tasksByTypeChartData.groupBy"
-        :series-names="tasksByTypeChartData.seriesNames"
       />
       <gl-alert v-else variant="info" :dismissible="false" class="gl-mt-3">
         {{ error }}

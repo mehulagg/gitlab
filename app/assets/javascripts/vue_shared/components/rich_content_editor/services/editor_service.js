@@ -1,12 +1,12 @@
-import Vue from 'vue';
 import { defaults } from 'lodash';
-import ToolbarItem from '../toolbar_item.vue';
-import buildHtmlToMarkdownRenderer from './build_html_to_markdown_renderer';
-import buildCustomHTMLRenderer from './build_custom_renderer';
+import Vue from 'vue';
 import { TOOLBAR_ITEM_CONFIGS, VIDEO_ATTRIBUTES } from '../constants';
+import ToolbarItem from '../toolbar_item.vue';
+import buildCustomHTMLRenderer from './build_custom_renderer';
+import buildHtmlToMarkdownRenderer from './build_html_to_markdown_renderer';
 import sanitizeHTML from './sanitize_html';
 
-const buildWrapper = propsData => {
+const buildWrapper = (propsData) => {
   const instance = new Vue({
     render(createElement) {
       return createElement(ToolbarItem, propsData);
@@ -17,7 +17,7 @@ const buildWrapper = propsData => {
   return instance.$el;
 };
 
-const buildVideoIframe = src => {
+const buildVideoIframe = (src) => {
   const wrapper = document.createElement('figure');
   const iframe = document.createElement('iframe');
   const videoAttributes = { ...VIDEO_ATTRIBUTES, src };
@@ -34,7 +34,21 @@ const buildVideoIframe = src => {
   return wrapper;
 };
 
-export const generateToolbarItem = config => {
+const buildImg = (alt, originalSrc, file) => {
+  const img = document.createElement('img');
+  const src = file ? URL.createObjectURL(file) : originalSrc;
+  const attributes = { alt, src };
+
+  if (file) {
+    img.dataset.originalSrc = originalSrc;
+  }
+
+  Object.assign(img, attributes);
+
+  return img;
+};
+
+export const generateToolbarItem = (config) => {
   const { icon, classes, event, command, tooltip, isDivider } = config;
 
   if (isDivider) {
@@ -59,7 +73,14 @@ export const addCustomEventListener = (editorApi, event, handler) => {
 export const removeCustomEventListener = (editorApi, event, handler) =>
   editorApi.eventManager.removeEventHandler(event, handler);
 
-export const addImage = ({ editor }, image) => editor.exec('AddImage', image);
+export const addImage = ({ editor }, { altText, imageUrl }, file) => {
+  if (editor.isWysiwygMode()) {
+    const img = buildImg(altText, imageUrl, file);
+    editor.getSquire().insertElement(img);
+  } else {
+    editor.insertText(`![${altText}](${imageUrl})`);
+  }
+};
 
 export const insertVideo = ({ editor }, url) => {
   const videoIframe = buildVideoIframe(url);
@@ -71,14 +92,14 @@ export const insertVideo = ({ editor }, url) => {
   }
 };
 
-export const getMarkdown = editorInstance => editorInstance.invoke('getMarkdown');
+export const getMarkdown = (editorInstance) => editorInstance.invoke('getMarkdown');
 
 /**
  * This function allow us to extend Toast UI HTML to Markdown renderer. It is
  * a temporary measure because Toast UI does not provide an API
  * to achieve this goal.
  */
-export const registerHTMLToMarkdownRenderer = editorApi => {
+export const registerHTMLToMarkdownRenderer = (editorApi) => {
   const { renderer } = editorApi.toMarkOptions;
 
   Object.assign(editorApi.toMarkOptions, {
@@ -86,10 +107,10 @@ export const registerHTMLToMarkdownRenderer = editorApi => {
   });
 };
 
-export const getEditorOptions = externalOptions => {
+export const getEditorOptions = (externalOptions) => {
   return defaults({
     customHTMLRenderer: buildCustomHTMLRenderer(externalOptions?.customRenderers),
-    toolbarItems: TOOLBAR_ITEM_CONFIGS.map(toolbarItem => generateToolbarItem(toolbarItem)),
-    customHTMLSanitizer: html => sanitizeHTML(html),
+    toolbarItems: TOOLBAR_ITEM_CONFIGS.map((toolbarItem) => generateToolbarItem(toolbarItem)),
+    customHTMLSanitizer: (html) => sanitizeHTML(html),
   });
 };

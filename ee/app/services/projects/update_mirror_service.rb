@@ -33,7 +33,7 @@ module Projects
       checksum_before = project.repository.checksum
 
       update_tags do
-        project.fetch_mirror(forced: true)
+        project.fetch_mirror(forced: true, check_tags_changed: true)
       end
 
       update_branches
@@ -41,6 +41,11 @@ module Projects
       # Updating LFS objects is expensive since it requires scanning for blobs with pointers.
       # Let's skip this if the repository hasn't changed.
       update_lfs_objects if project.repository.checksum != checksum_before
+
+      # Running git fetch in the repository creates loose objects in the same
+      # way running git push *to* the repository does, so ensure we run regular
+      # garbage collection
+      run_housekeeping
 
       success
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, UpdateError => e
@@ -61,7 +66,7 @@ module Projects
       errors = []
 
       repository.upstream_branches.each do |upstream_branch|
-        name = target_branch_name(upstream_branch.name)
+        name = upstream_branch.name
 
         next if skip_branch?(name)
 
@@ -94,7 +99,7 @@ module Projects
       old_tags = repository_tags_with_target.each_with_object({}) { |tag, tags| tags[tag.name] = tag }
 
       fetch_result = yield
-      return fetch_result unless fetch_result
+      return fetch_result unless fetch_result&.tags_changed
 
       repository.expire_tags_cache
 
@@ -137,16 +142,25 @@ module Projects
         newrev = upstream.dereferenced_target.sha
         oldrev = local.dereferenced_target.sha
 
-        # Gitaly migration: https://gitlab.com/gitlab-org/gitaly/issues/1246
-        ::Gitlab::GitalyClient::StorageSettings.allow_disk_access do
-          repository.update_branch(branch_name, user: current_user, newrev: newrev, oldrev: oldrev)
-        end
+        # If the user doesn't have permission to update the diverged branch
+        # (e.g. it's protected and the user can't force-push to protected
+        # branches), this will fail.
+        repository.update_branch(branch_name, user: current_user, newrev: newrev, oldrev: oldrev)
       elsif branch_name == project.default_branch
         # Cannot be updated
         errors << "The default branch (#{project.default_branch}) has diverged from its upstream counterpart and could not be updated automatically."
       else
         # We ignore diverged branches other than the default branch
       end
+    end
+
+    def run_housekeeping
+      service = Repositories::HousekeepingService.new(project)
+
+      service.increment!
+      service.execute if service.needed?
+    rescue Repositories::HousekeepingService::LeaseTaken
+      # best-effort
     end
 
     # In Git is possible to tag blob objects, and those blob objects don't point to a Git commit so those tags
@@ -173,12 +187,6 @@ module Projects
 
     def log_error(error_message)
       service_logger.error(base_payload.merge(error_message: error_message))
-    end
-
-    def target_branch_name(upstream_branch_name)
-      return upstream_branch_name unless Feature.enabled?(:pull_mirror_branch_prefix, project)
-
-      "#{project.pull_mirror_branch_prefix}#{upstream_branch_name}"
     end
   end
 end

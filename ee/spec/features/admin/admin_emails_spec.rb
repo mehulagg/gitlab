@@ -6,7 +6,9 @@ RSpec.describe 'Admin::Emails', :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
   before do
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   context 'when `send_emails_from_admin_area` feature is not licensed' do

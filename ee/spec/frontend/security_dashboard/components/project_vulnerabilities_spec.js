@@ -1,10 +1,24 @@
 import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { Portal } from 'portal-vue';
+import VueApollo from 'vue-apollo';
 import ProjectVulnerabilitiesApp from 'ee/security_dashboard/components/project_vulnerabilities.vue';
+import SecurityScannerAlert from 'ee/security_dashboard/components/security_scanner_alert.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
+import securityScannersQuery from 'ee/security_dashboard/graphql/queries/project_security_scanners.query.graphql';
+import vulnerabilitiesQuery from 'ee/security_dashboard/graphql/queries/project_vulnerabilities.query.graphql';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { generateVulnerabilities } from './mock_data';
 
+const localVue = createLocalVue();
+localVue.use(VueApollo);
+
 describe('Vulnerabilities app component', () => {
+  useLocalStorageSpy();
+
   let wrapper;
   const apolloMock = {
     queries: { vulnerabilities: { loading: true } },
@@ -12,10 +26,13 @@ describe('Vulnerabilities app component', () => {
 
   const createWrapper = ({ props = {}, $apollo = apolloMock } = {}, options = {}) => {
     wrapper = shallowMount(ProjectVulnerabilitiesApp, {
+      provide: {
+        projectFullPath: '#',
+        hasJiraVulnerabilitiesIntegrationEnabled: false,
+      },
       propsData: {
         dashboardDocumentation: '#',
         emptyStateSvgPath: '#',
-        projectFullPath: '#',
         ...props,
       },
       mocks: {
@@ -26,14 +43,28 @@ describe('Vulnerabilities app component', () => {
     });
   };
 
+  const securityScannersHandler = async ({
+    available = [],
+    enabled = [],
+    pipelineRun = [],
+  } = {}) => ({
+    data: {
+      project: {
+        securityScanners: { available, enabled, pipelineRun },
+      },
+    },
+  });
+
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findAlert = () => wrapper.find(GlAlert);
+  const findSecurityScannerAlert = (root = wrapper) => root.findComponent(SecurityScannerAlert);
   const findVulnerabilityList = () => wrapper.find(VulnerabilityList);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
-  beforeEach(() => {
-    createWrapper();
-  });
+  const expectLoadingState = ({ initial = false, nextPage = false }) => {
+    expect(findVulnerabilityList().props('isLoading')).toBe(initial);
+    expect(findLoadingIcon().exists()).toBe(nextPage);
+  };
 
   afterEach(() => {
     wrapper.destroy();
@@ -45,12 +76,8 @@ describe('Vulnerabilities app component', () => {
       createWrapper();
     });
 
-    it('should be in the loading state', () => {
-      expect(findVulnerabilityList().props().isLoading).toBe(true);
-    });
-
-    it('should not render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
+    it('should show the initial loading state', () => {
+      expectLoadingState({ initial: true });
     });
   });
 
@@ -61,13 +88,11 @@ describe('Vulnerabilities app component', () => {
       createWrapper();
 
       vulnerabilities = generateVulnerabilities();
-      wrapper.setData({
-        vulnerabilities,
-      });
+      wrapper.setData({ vulnerabilities });
     });
 
-    it('should not be in the loading state', () => {
-      expect(findVulnerabilityList().props().isLoading).toBe(false);
+    it('should not show any loading state', () => {
+      expectLoadingState({ initial: false, nextPage: false });
     });
 
     it('should pass the vulnerabilities to the vulnerabilities list', () => {
@@ -91,16 +116,13 @@ describe('Vulnerabilities app component', () => {
     });
 
     it('handles sorting', () => {
-      findVulnerabilityList().vm.$listeners['sort-changed']({
+      findVulnerabilityList().vm.$emit('sort-changed', {
         sortBy: 'description',
         sortDesc: false,
       });
+
       expect(wrapper.vm.sortBy).toBe('description');
       expect(wrapper.vm.sortDirection).toBe('asc');
-    });
-
-    it('should render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(false);
     });
   });
 
@@ -123,12 +145,12 @@ describe('Vulnerabilities app component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
     });
 
-    it('should render the loading spinner', () => {
-      expect(findLoadingIcon().exists()).toBe(true);
+    it('should render the next page loading spinner', () => {
+      expectLoadingState({ nextPage: true });
     });
   });
 
-  describe("when there's an error loading vulnerabilities", () => {
+  describe(`when there's an error loading vulnerabilities`, () => {
     beforeEach(() => {
       createWrapper();
       wrapper.setData({ errorLoadingVulnerabilities: true });
@@ -139,22 +161,158 @@ describe('Vulnerabilities app component', () => {
     });
   });
 
-  describe('security scanners', () => {
-    const notEnabledScannersHelpPath = '#not-enabled';
-    const noPipelineRunScannersHelpPath = '#no-pipeline';
-
+  describe('when filter or sort is changed', () => {
     beforeEach(() => {
-      createWrapper({
-        props: { notEnabledScannersHelpPath, noPipelineRunScannersHelpPath },
+      createWrapper();
+    });
+
+    it('should show the initial loading state when the filter is changed', () => {
+      wrapper.setProps({ filter: {} });
+
+      expectLoadingState({ initial: true });
+    });
+
+    it('should show the initial loading state when the sort is changed', () => {
+      findVulnerabilityList().vm.$emit('sort-changed', {
+        sortBy: 'description',
+        sortDesc: false,
+      });
+
+      expectLoadingState({ initial: true });
+    });
+  });
+
+  describe('filters prop', () => {
+    const vulnerabilitiesHandler = jest.fn().mockResolvedValue({
+      data: {
+        project: {
+          vulnerabilities: {
+            nodes: [],
+            pageInfo: { startCursor: '', endCursor: '' },
+          },
+        },
+      },
+    });
+
+    const createWrapperWithApollo = ({ filters }) => {
+      wrapper = shallowMount(ProjectVulnerabilitiesApp, {
+        localVue,
+        apolloProvider: createMockApollo([
+          [vulnerabilitiesQuery, vulnerabilitiesHandler],
+          [securityScannersQuery, securityScannersHandler],
+        ]),
+        propsData: { filters },
+        provide: { groupFullPath: 'path' },
+      });
+    };
+
+    it('does not run the query when filters is null', () => {
+      createWrapperWithApollo({ filters: null });
+
+      expect(vulnerabilitiesHandler).not.toHaveBeenCalled();
+    });
+
+    it('runs query when filters is an object', () => {
+      createWrapperWithApollo({ filters: {} });
+
+      expect(vulnerabilitiesHandler).toHaveBeenCalled();
+    });
+  });
+
+  describe('security scanner alerts', () => {
+    const vulnerabilityReportAlertsPortal = 'test-alerts-portal';
+
+    const createWrapperForScannerAlerts = async ({ securityScanners }) => {
+      wrapper = shallowMount(ProjectVulnerabilitiesApp, {
+        localVue,
+        apolloProvider: createMockApollo([
+          [securityScannersQuery, () => securityScannersHandler(securityScanners)],
+        ]),
+        provide: {
+          vulnerabilityReportAlertsPortal,
+          projectFullPath: 'path',
+        },
+        stubs: {
+          LocalStorageSync,
+        },
+      });
+
+      await waitForPromises();
+    };
+
+    describe.each`
+      available   | enabled     | pipelineRun | expectAlertShown
+      ${['DAST']} | ${[]}       | ${[]}       | ${true}
+      ${['DAST']} | ${['DAST']} | ${[]}       | ${true}
+      ${['DAST']} | ${[]}       | ${['DAST']} | ${true}
+      ${['DAST']} | ${['DAST']} | ${['DAST']} | ${false}
+      ${[]}       | ${[]}       | ${[]}       | ${false}
+    `('visibility', ({ available, enabled, pipelineRun, expectAlertShown }) => {
+      beforeEach(() => {});
+
+      it(`should${expectAlertShown ? '' : ' not'} show the alert`, async () => {
+        await createWrapperForScannerAlerts({
+          securityScanners: { available, enabled, pipelineRun },
+        });
+
+        expect(findSecurityScannerAlert().exists()).toBe(expectAlertShown);
+      });
+
+      if (expectAlertShown) {
+        it('should portal the alert to the provided vulnerabilityReportAlertsPortal', async () => {
+          await createWrapperForScannerAlerts({
+            securityScanners: { available, enabled, pipelineRun },
+          });
+
+          const portal = wrapper.findComponent(Portal);
+          expect(portal.props('to')).toBe(vulnerabilityReportAlertsPortal);
+
+          expect(findSecurityScannerAlert(portal).exists()).toBe(true);
+        });
+      }
+
+      it('should never show the alert once it has been dismissed', async () => {
+        window.localStorage.setItem(
+          ProjectVulnerabilitiesApp.SCANNER_ALERT_DISMISSED_LOCAL_STORAGE_KEY,
+          'true',
+        );
+
+        await createWrapperForScannerAlerts({
+          securityScanners: { available, enabled, pipelineRun },
+        });
+
+        expect(findSecurityScannerAlert().exists()).toBe(false);
       });
     });
 
-    it('should pass the security scanners to the vulnerability list', () => {
-      const securityScanners = { enabled: ['SAST', 'DAST'], pipelineRun: ['SAST', 'DAST'] };
+    describe('dismissal', () => {
+      beforeEach(() => {
+        return createWrapperForScannerAlerts({
+          securityScanners: { available: ['DAST'], enabled: [], pipelineRun: [] },
+        });
+      });
 
-      wrapper.setData({ securityScanners });
+      it('should hide the alert when it is dismissed', async () => {
+        const scannerAlert = findSecurityScannerAlert();
+        expect(scannerAlert.exists()).toBe(true);
 
-      expect(findVulnerabilityList().props().securityScanners).toEqual(securityScanners);
+        scannerAlert.vm.$emit('dismiss');
+
+        await wrapper.vm.$nextTick();
+
+        expect(scannerAlert.exists()).toBe(false);
+      });
+
+      it('should remember the dismissal state', async () => {
+        findSecurityScannerAlert().vm.$emit('dismiss');
+
+        await wrapper.vm.$nextTick();
+
+        expect(window.localStorage.setItem.mock.calls).toContainEqual([
+          ProjectVulnerabilitiesApp.SCANNER_ALERT_DISMISSED_LOCAL_STORAGE_KEY,
+          'true',
+        ]);
+      });
     });
   });
 });

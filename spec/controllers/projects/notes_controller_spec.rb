@@ -113,6 +113,8 @@ RSpec.describe Projects::NotesController do
         end
 
         it 'returns the first page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).to receive(:skip!)
+
           get :index, params: request_params
 
           expect(json_response['notes'].count).to eq(page_1.count)
@@ -122,6 +124,8 @@ RSpec.describe Projects::NotesController do
         end
 
         it 'returns the second page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).to receive(:skip!)
+
           request.headers['X-Last-Fetched-At'] = page_1_boundary
 
           get :index, params: request_params
@@ -133,11 +137,26 @@ RSpec.describe Projects::NotesController do
         end
 
         it 'returns the final page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).to receive(:skip!)
+
           request.headers['X-Last-Fetched-At'] = page_2_boundary
 
           get :index, params: request_params
 
           expect(json_response['notes'].count).to eq(page_3.count)
+          expect(json_response['more']).to be_falsy
+          expect(json_response['last_fetched_at']).to eq(microseconds(Time.zone.now))
+          expect(response.headers['Poll-Interval'].to_i).to be > 1
+        end
+
+        it 'returns an empty page of notes' do
+          expect(Gitlab::EtagCaching::Middleware).not_to receive(:skip!)
+
+          request.headers['X-Last-Fetched-At'] = microseconds(Time.zone.now)
+
+          get :index, params: request_params
+
+          expect(json_response['notes']).to be_empty
           expect(json_response['more']).to be_falsy
           expect(json_response['last_fetched_at']).to eq(microseconds(Time.zone.now))
           expect(response.headers['Poll-Interval'].to_i).to be > 1
@@ -294,7 +313,7 @@ RSpec.describe Projects::NotesController do
     let(:note_text) { 'some note' }
     let(:request_params) do
       {
-        note: { note: note_text, noteable_id: merge_request.id, noteable_type: 'MergeRequest' },
+        note: { note: note_text, noteable_id: merge_request.id, noteable_type: 'MergeRequest' }.merge(extra_note_params),
         namespace_id: project.namespace,
         project_id: project,
         merge_request_diff_head_sha: 'sha',
@@ -304,6 +323,7 @@ RSpec.describe Projects::NotesController do
     end
 
     let(:extra_request_params) { {} }
+    let(:extra_note_params) { {} }
 
     let(:project_visibility) { Gitlab::VisibilityLevel::PUBLIC }
     let(:merge_requests_access_level) { ProjectFeature::ENABLED }
@@ -314,7 +334,7 @@ RSpec.describe Projects::NotesController do
 
     before do
       project.update_attribute(:visibility_level, project_visibility)
-      project.project_feature.update(merge_requests_access_level: merge_requests_access_level)
+      project.project_feature.update!(merge_requests_access_level: merge_requests_access_level)
       sign_in(user)
     end
 
@@ -402,12 +422,47 @@ RSpec.describe Projects::NotesController do
         end
       end
 
+      context 'when creating a confidential note' do
+        let(:extra_request_params) { { format: :json } }
+
+        context 'when `confidential` parameter is not provided' do
+          it 'sets `confidential` to `false` in JSON response' do
+            create!
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['confidential']).to be false
+          end
+        end
+
+        context 'when `confidential` parameter is `false`' do
+          let(:extra_note_params) { { confidential: false } }
+
+          it 'sets `confidential` to `false` in JSON response' do
+            create!
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['confidential']).to be false
+          end
+        end
+
+        context 'when `confidential` parameter is `true`' do
+          let(:extra_note_params) { { confidential: true } }
+
+          it 'sets `confidential` to `true` in JSON response' do
+            create!
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['confidential']).to be true
+          end
+        end
+      end
+
       context 'when creating a note with quick actions' do
         context 'with commands that return changes' do
           let(:note_text) { "/award :thumbsup:\n/estimate 1d\n/spend 3h" }
           let(:extra_request_params) { { format: :json } }
 
-          it 'includes changes in commands_changes ' do
+          it 'includes changes in commands_changes' do
             create!
 
             expect(response).to have_gitlab_http_status(:ok)
@@ -706,6 +761,11 @@ RSpec.describe Projects::NotesController do
         end
       end
     end
+
+    it_behaves_like 'request exceeding rate limit', :clean_gitlab_redis_cache do
+      let(:params) { request_params.except(:format) }
+      let(:request_full_path) { project_notes_path(project) }
+    end
   end
 
   describe 'PUT update' do
@@ -857,7 +917,7 @@ RSpec.describe Projects::NotesController do
 
         context "when the note is not resolvable" do
           before do
-            note.update(system: true)
+            note.update!(system: true)
           end
 
           it "returns status 404" do
@@ -920,7 +980,7 @@ RSpec.describe Projects::NotesController do
 
         context "when the note is not resolvable" do
           before do
-            note.update(system: true)
+            note.update!(system: true)
           end
 
           it "returns status 404" do

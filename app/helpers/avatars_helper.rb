@@ -22,11 +22,10 @@ module AvatarsHelper
   end
 
   def avatar_icon_for_email(email = nil, size = nil, scale = 2, only_path: true)
-    user = User.find_by_any_email(email)
-    if user
-      avatar_icon_for_user(user, size, scale, only_path: only_path)
-    else
-      gravatar_icon(email, size, scale)
+    return gravatar_icon(email, size, scale) if email.nil?
+
+    Gitlab::AvatarCache.by_email(email, size, scale, only_path) do
+      avatar_icon_by_user_email_or_gravatar(email, size, scale, only_path: only_path)
     end
   end
 
@@ -99,19 +98,31 @@ module AvatarsHelper
     end
   end
 
+  def avatar_without_link(resource, options = {})
+    if resource.is_a?(User)
+      user_avatar_without_link(options.merge(user: resource))
+    elsif resource.is_a?(Group)
+      group_icon(resource, options.merge(class: 'avatar'))
+    end
+  end
+
   private
+
+  def avatar_icon_by_user_email_or_gravatar(email, size, scale, only_path:)
+    user = User.find_by_any_email(email)
+
+    if user
+      avatar_icon_for_user(user, size, scale, only_path: only_path)
+    else
+      gravatar_icon(email, size, scale)
+    end
+  end
 
   def user_avatar_url_for(only_path: true, **options)
     return options[:url] if options[:url]
+    return avatar_icon_for_user(options[:user], options[:size], only_path: only_path) if options[:user]
 
-    email = options[:user_email]
-    user = options.key?(:user) ? options[:user] : User.find_by_any_email(email)
-
-    if user
-      avatar_icon_for_user(user, options[:size], only_path: only_path)
-    else
-      gravatar_icon(email, options[:size])
-    end
+    avatar_icon_for_email(options[:user_email], options[:size], only_path: only_path)
   end
 
   def source_icon(source, options = {})
@@ -133,11 +144,12 @@ module AvatarsHelper
 
   def source_identicon(source, options = {})
     bg_key = (source.id % 7) + 1
+    size_class = "s#{options[:size]}" if options[:size]
 
     options[:class] =
-      [*options[:class], "identicon bg#{bg_key}"].join(' ')
+      [*options[:class], "identicon bg#{bg_key}", size_class].compact.join(' ')
 
-    content_tag(:div, class: options[:class].strip) do
+    content_tag(:span, class: options[:class].strip) do
       source.name[0, 1].upcase
     end
   end

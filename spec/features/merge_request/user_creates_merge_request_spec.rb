@@ -7,6 +7,7 @@ RSpec.describe "User creates a merge request", :js do
 
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:title) { "Some feature" }
 
   before do
@@ -31,7 +32,7 @@ RSpec.describe "User creates a merge request", :js do
     end
 
     fill_in("Title", with: title)
-    click_button("Submit merge request")
+    click_button("Create merge request")
 
     page.within(".merge-request") do
       expect(page).to have_content(title)
@@ -87,7 +88,7 @@ RSpec.describe "User creates a merge request", :js do
 
       click_button("Compare branches and continue")
 
-      expect(page).to have_css("h3.page-title", text: "New Merge Request")
+      expect(page).to have_css("h3.page-title", text: "New merge request")
 
       page.within("form#new_merge_request") do
         fill_in("Title", with: title)
@@ -103,7 +104,7 @@ RSpec.describe "User creates a merge request", :js do
       end
       find('.js-assignee-search').click
 
-      click_button("Submit merge request")
+      click_button("Create merge request")
 
       expect(page).to have_content(title).and have_content("Request to merge #{user.namespace.path}:#{source_branch} into master")
     end

@@ -22,7 +22,7 @@ RSpec.shared_context 'conan api setup' do
 
   let(:jwt_secret) do
     OpenSSL::HMAC.hexdigest(
-      OpenSSL::Digest::SHA256.new,
+      OpenSSL::Digest.new('SHA256'),
       base_secret,
       Gitlab::ConanToken::HMAC_KEY
     )
@@ -41,13 +41,6 @@ RSpec.shared_context 'conan recipe endpoints' do
   let(:jwt) { build_jwt(personal_access_token) }
   let(:headers) { build_token_auth_header(jwt.encoded) }
   let(:conan_package_reference) { '123456789' }
-  let(:presenter) { double('::Packages::Conan::PackagePresenter') }
-
-  before do
-    allow(::Packages::Conan::PackagePresenter).to receive(:new)
-      .with(package, user, package.project, any_args)
-      .and_return(presenter)
-  end
 end
 
 RSpec.shared_context 'conan file download endpoints' do
@@ -67,9 +60,9 @@ RSpec.shared_context 'conan file upload endpoints' do
   include WorkhorseHelpers
   include HttpBasicAuthHelpers
 
+  include_context 'workhorse headers'
+
   let(:jwt) { build_jwt(personal_access_token) }
-  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
-  let(:workhorse_header) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
-  let(:headers_with_token) { build_token_auth_header(jwt.encoded).merge(workhorse_header) }
+  let(:headers_with_token) { build_token_auth_header(jwt.encoded).merge(workhorse_headers) }
   let(:recipe_path) { "foo/bar/#{project.full_path.tr('/', '+')}/baz"}
 end

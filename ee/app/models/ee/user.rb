@@ -11,8 +11,8 @@ module EE
 
     include AuditorUserHelper
 
-    DEFAULT_ROADMAP_LAYOUT = 'months'.freeze
-    DEFAULT_GROUP_VIEW = 'details'.freeze
+    DEFAULT_ROADMAP_LAYOUT = 'months'
+    DEFAULT_GROUP_VIEW = 'details'
     MAX_USERNAME_SUGGESTION_ATTEMPTS = 15
 
     prepended do
@@ -28,9 +28,14 @@ module EE
       validate :auditor_requires_license_add_on, if: :auditor
       validate :cannot_be_admin_and_auditor
 
+      after_create :perform_user_cap_check
+
       delegate :shared_runners_minutes_limit, :shared_runners_minutes_limit=,
                :extra_shared_runners_minutes_limit, :extra_shared_runners_minutes_limit=,
                to: :namespace
+      delegate :provisioned_by_group, :provisioned_by_group=,
+               :provisioned_by_group_id, :provisioned_by_group_id=,
+               to: :user_detail, allow_nil: true
 
       has_many :epics,                    foreign_key: :author_id
       has_many :requirements,             foreign_key: :author_id, inverse_of: :author, class_name: 'RequirementsManagement::Requirement'
@@ -44,7 +49,7 @@ module EE
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
 
-      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, class_name: 'GroupMember'
       has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
       has_many :users_ops_dashboard_projects
@@ -52,7 +57,7 @@ module EE
       has_many :users_security_dashboard_projects
       has_many :security_dashboard_projects, through: :users_security_dashboard_projects, source: :project
 
-      has_many :group_saml_identities, -> { where.not(saml_provider_id: nil) }, source: :identities, class_name: "::Identity"
+      has_many :group_saml_identities, -> { where.not(saml_provider_id: nil) }, class_name: "::Identity"
 
       # Protected Branch Access
       has_many :protected_branch_merge_access_levels, dependent: :destroy, class_name: "::ProtectedBranch::MergeAccessLevel" # rubocop:disable Cop/ActiveRecordDependent
@@ -66,6 +71,12 @@ module EE
 
       belongs_to :managing_group, class_name: 'Group', optional: true, inverse_of: :managed_users
 
+      has_many :user_permission_export_uploads
+
+      has_many :oncall_participants, class_name: 'IncidentManagement::OncallParticipant', inverse_of: :user
+      has_many :oncall_rotations, class_name: 'IncidentManagement::OncallRotation', through: :oncall_participants, source: :rotation
+      has_many :oncall_schedules, class_name: 'IncidentManagement::OncallSchedule', through: :oncall_rotations, source: :schedule
+
       scope :not_managed, ->(group: nil) {
         scope = where(managing_group_id: nil)
         scope = scope.or(where.not(managing_group_id: group.id)) if group
@@ -74,7 +85,14 @@ module EE
 
       scope :managed_by, ->(group) { where(managing_group: group) }
 
-      scope :excluding_guests, -> { joins(:members).merge(::Member.non_guests).distinct }
+      scope :excluding_guests, -> do
+        subquery = ::Member
+          .select(1)
+          .where(::Member.arel_table[:user_id].eq(::User.arel_table[:id]))
+          .merge(::Member.non_guests)
+
+        where('EXISTS (?)', subquery)
+      end
 
       scope :subscribed_for_admin_email, -> { where(admin_email_unsubscribed_at: nil) }
       scope :ldap, -> { joins(:identities).where('identities.provider LIKE ?', 'ldap%') }
@@ -139,6 +157,13 @@ module EE
         else
           all
         end
+      end
+
+      def billable
+        scope = active.without_bots
+        scope = scope.excluding_guests if License.current&.exclude_guests_from_active_count?
+
+        scope
       end
     end
 
@@ -234,14 +259,6 @@ module EE
         .any?
     end
 
-    def manageable_groups_eligible_for_subscription
-      manageable_groups
-        .where(parent_id: nil)
-        .left_joins(:gitlab_subscription)
-        .merge(GitlabSubscription.left_joins(:hosted_plan).where(plans: { name: [nil, *::Plan.default_plans] }))
-        .order(:name)
-    end
-
     def manageable_groups_eligible_for_trial
       manageable_groups.eligible_for_trial.order(:name)
     end
@@ -297,6 +314,7 @@ module EE
     override :allow_password_authentication_for_web?
     def allow_password_authentication_for_web?(*)
       return false if group_managed_account?
+      return false if user_authorized_by_provisioning_group?
 
       super
     end
@@ -304,8 +322,17 @@ module EE
     override :allow_password_authentication_for_git?
     def allow_password_authentication_for_git?(*)
       return false if group_managed_account?
+      return false if user_authorized_by_provisioning_group?
 
       super
+    end
+
+    def user_authorized_by_provisioning_group?
+      user_detail.provisioned_by_group? && ::Feature.enabled?(:block_password_auth_for_saml_users, user_detail.provisioned_by_group, type: :ops)
+    end
+
+    def authorized_by_provisioning_group?(group)
+      user_authorized_by_provisioning_group? && provisioned_by_group == group
     end
 
     def gitlab_employee?
@@ -337,18 +364,19 @@ module EE
     end
 
     def owns_upgradeable_namespace?
-      !owns_paid_namespace?(plans: [::Plan::GOLD]) &&
-        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
+      !owns_paid_namespace?(plans: [::Plan::GOLD, ::Plan::ULTIMATE]) &&
+        owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER, ::Plan::PREMIUM])
     end
 
     # Returns the groups a user has access to, either through a membership or a project authorization
     override :authorized_groups
-    def authorized_groups
+    def authorized_groups(with_minimal_access: true)
+      return super() unless with_minimal_access
+
       ::Group.unscoped do
         ::Group.from_union([
-          groups,
-          available_minimal_access_groups,
-          authorized_projects.joins(:namespace).select('namespaces.*')
+          super(),
+          available_minimal_access_groups
         ])
       end
     end
@@ -356,6 +384,16 @@ module EE
     def find_or_init_board_epic_preference(board_id:, epic_id:)
       boards_epic_user_preferences.find_or_initialize_by(
         board_id: board_id, epic_id: epic_id)
+    end
+
+    # GitLab.com users should not be able to remove themselves
+    # when they cannot verify their local password, because it
+    # isn't set (using third party authentication).
+    override :can_remove_self?
+    def can_remove_self?
+      return true unless ::Gitlab.com?
+
+      !password_automatically_set?
     end
 
     protected
@@ -394,6 +432,14 @@ module EE
       return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
 
       minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
+    end
+
+    def perform_user_cap_check
+      return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+
+      run_after_commit do
+        SetUserStatusBasedOnUserCapSettingWorker.perform_async(id)
+      end
     end
   end
 end

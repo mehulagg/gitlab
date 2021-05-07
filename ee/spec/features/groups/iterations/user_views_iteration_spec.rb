@@ -13,11 +13,12 @@ RSpec.describe 'User views iteration' do
   let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, iid: 1, id: 2, group: group, title: 'Correct Iteration', description: 'iteration description', start_date: now - 1.day, due_date: now) }
   let_it_be(:other_iteration) { create(:iteration, :skip_future_date_validation, iid: 2, id: 1, group: group, title: 'Wrong Iteration', start_date: now - 4.days, due_date: now - 3.days) }
   let_it_be(:sub_group_iteration) { create(:iteration, id: 3, group: sub_group) }
-  let_it_be(:issue) { create(:issue, project: project, iteration: iteration) }
-  let_it_be(:assigned_issue) { create(:issue, project: project, iteration: iteration, assignees: [user]) }
+  let_it_be(:label1) { create(:label, project: project) }
+  let_it_be(:issue) { create(:issue, project: project, iteration: iteration, labels: [label1]) }
+  let_it_be(:assigned_issue) { create(:issue, project: project, iteration: iteration, assignees: [user], labels: [label1]) }
   let_it_be(:closed_issue) { create(:closed_issue, project: project, iteration: iteration) }
   let_it_be(:sub_group_issue) { create(:issue, project: sub_project, iteration: iteration) }
-  let_it_be(:other_issue) { create(:issue, project: project, iteration: other_iteration) }
+  let_it_be(:other_iteration_issue) { create(:issue, project: project, iteration: other_iteration) }
 
   context 'with license', :js do
     before do
@@ -28,10 +29,16 @@ RSpec.describe 'User views iteration' do
       before do
         sign_in(current_user)
 
-        visit group_iteration_path(iteration.group, iteration.iid)
+        visit group_iteration_path(iteration.group, iteration.id)
       end
 
       it 'shows iteration info' do
+        aggregate_failures 'expect Iterations highlighted on left sidebar' do
+          page.within '.qa-group-sidebar' do
+            expect(page).to have_css('li.active > a', text: 'Iterations')
+          end
+        end
+
         aggregate_failures 'expect title, description, and dates' do
           expect(page).to have_content(iteration.title)
           expect(page).to have_content(iteration.description)
@@ -40,10 +47,9 @@ RSpec.describe 'User views iteration' do
         end
 
         aggregate_failures 'expect summary information' do
-          expect(page).to have_content("Complete 25%")
-          expect(page).to have_content("Open 2")
-          expect(page).to have_content("In progress 1")
-          expect(page).to have_content("Completed 1")
+          expect(page).to have_content("Completed")
+          expect(page).to have_content("Incomplete")
+          expect(page).to have_content("Unstarted")
         end
 
         aggregate_failures 'expect burnup and burndown charts' do
@@ -56,7 +62,7 @@ RSpec.describe 'User views iteration' do
           expect(page).to have_content(assigned_issue.title)
           expect(page).to have_content(closed_issue.title)
           expect(page).to have_content(sub_group_issue.title)
-          expect(page).not_to have_content(other_issue.title)
+          expect(page).not_to have_content(other_iteration_issue.title)
         end
 
         if shows_actions
@@ -80,6 +86,17 @@ RSpec.describe 'User views iteration' do
         let(:shows_actions) { false }
       end
     end
+
+    context 'when grouping by label' do
+      before do
+        sign_in(user)
+
+        visit group_iteration_path(iteration.group, iteration.id)
+        wait_for_requests
+      end
+
+      it_behaves_like 'iteration report group by label'
+    end
   end
 
   context 'without license' do
@@ -89,7 +106,7 @@ RSpec.describe 'User views iteration' do
     end
 
     it 'shows page not found' do
-      visit group_iteration_path(iteration.group, iteration.iid)
+      visit group_iteration_path(iteration.group, iteration.id)
 
       expect(page).to have_title('Not Found')
       expect(page).to have_content('Page Not Found')

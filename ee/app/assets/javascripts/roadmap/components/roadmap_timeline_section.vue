@@ -1,11 +1,11 @@
 <script>
+import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH } from '../constants';
 import eventHub from '../event_hub';
 
 import CommonMixin from '../mixins/common_mixin';
-import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH } from '../constants';
 
-import QuartersHeaderItem from './preset_quarters/quarters_header_item.vue';
 import MonthsHeaderItem from './preset_months/months_header_item.vue';
+import QuartersHeaderItem from './preset_quarters/quarters_header_item.vue';
 import WeeksHeaderItem from './preset_weeks/weeks_header_item.vue';
 
 export default {

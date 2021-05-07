@@ -1,13 +1,13 @@
-import Vuex from 'vuex';
+import { GlToggle, GlAlert } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { GlToggle, GlAlert } from '@gitlab/ui';
-import { TEST_HOST } from 'spec/test_constants';
+import Vuex from 'vuex';
 import { mockTracking } from 'helpers/tracking_helper';
-import { LEGACY_FLAG, NEW_VERSION_FLAG, NEW_FLAG_ALERT } from '~/feature_flags/constants';
-import Form from '~/feature_flags/components/form.vue';
-import createStore from '~/feature_flags/store/edit';
+import { TEST_HOST } from 'spec/test_constants';
 import EditFeatureFlag from '~/feature_flags/components/edit_feature_flag.vue';
+import Form from '~/feature_flags/components/form.vue';
+import { LEGACY_FLAG, NEW_VERSION_FLAG } from '~/feature_flags/constants';
+import createStore from '~/feature_flags/store/edit';
 import axios from '~/lib/utils/axios_utils';
 
 const localVue = createLocalVue();
@@ -37,15 +37,12 @@ describe('Edit feature flag form', () => {
         showUserCallout: true,
         userCalloutId,
         userCalloutsPath,
-        glFeatures: {
-          featureFlagsNewVersion: true,
-        },
         ...opts,
       },
     });
   };
 
-  beforeEach(done => {
+  beforeEach((done) => {
     mock = new MockAdapter(axios);
     mock.onGet(`${TEST_HOST}/feature_flags.json`).replyOnce(200, {
       id: 21,
@@ -78,6 +75,8 @@ describe('Edit feature flag form', () => {
   });
 
   const findAlert = () => wrapper.find(GlAlert);
+  const findWarningGlAlert = () =>
+    wrapper.findAll(GlAlert).filter((c) => c.props('variant') === 'warning');
 
   it('should display the iid', () => {
     expect(wrapper.find('h3').text()).toContain('^5');
@@ -91,7 +90,7 @@ describe('Edit feature flag form', () => {
     expect(wrapper.find(GlToggle).props('value')).toBe(true);
   });
 
-  it('should not alert users that feature flags are changing soon', () => {
+  it('should alert users the flag is read-only', () => {
     expect(findAlert().text()).toContain('GitLab is moving to a new way of managing feature flags');
   });
 
@@ -99,8 +98,9 @@ describe('Edit feature flag form', () => {
     it('should render the error', () => {
       store.dispatch('receiveUpdateFeatureFlagError', { message: ['The name is required'] });
       return wrapper.vm.$nextTick(() => {
-        expect(wrapper.find('.alert-danger').exists()).toEqual(true);
-        expect(wrapper.find('.alert-danger').text()).toContain('The name is required');
+        const warningGlAlert = findWarningGlAlert();
+        expect(warningGlAlert.at(1).exists()).toEqual(true);
+        expect(warningGlAlert.at(1).text()).toContain('The name is required');
       });
     });
   });
@@ -150,34 +150,12 @@ describe('Edit feature flag form', () => {
         label: 'feature_flag_toggle',
       });
     });
-  });
 
-  describe('without new version flags', () => {
-    beforeEach(() => factory({ glFeatures: { featureFlagsNewVersion: false } }));
-
-    it('should alert users that feature flags are changing soon', () => {
-      expect(findAlert().text()).toBe(NEW_FLAG_ALERT);
-    });
-  });
-
-  describe('dismissing new version alert', () => {
-    beforeEach(() => {
-      factory({ glFeatures: { featureFlagsNewVersion: false } });
-      mock.onPost(userCalloutsPath, { feature_name: userCalloutId }).reply(200);
-      findAlert().vm.$emit('dismiss');
-      return wrapper.vm.$nextTick();
-    });
-
-    afterEach(() => {
-      mock.restore();
-    });
-
-    it('should hide the alert', () => {
-      expect(findAlert().exists()).toBe(false);
-    });
-
-    it('should send the dismissal event', () => {
-      expect(mock.history.post.length).toBe(1);
+    it('should render the toggle with a visually hidden label', () => {
+      expect(wrapper.find(GlToggle).props()).toMatchObject({
+        label: 'Feature flag status',
+        labelPosition: 'hidden',
+      });
     });
   });
 });

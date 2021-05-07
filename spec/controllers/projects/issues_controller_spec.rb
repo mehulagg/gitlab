@@ -8,7 +8,9 @@ RSpec.describe Projects::IssuesController do
 
   let_it_be(:project, reload: true) { create(:project) }
   let_it_be(:user, reload: true) { create(:user) }
+
   let(:issue) { create(:issue, project: project) }
+  let(:spam_action_response_fields) { { 'stub_spam_action_response_fields' => true } }
 
   describe "GET #index" do
     context 'external issue tracker' do
@@ -43,7 +45,7 @@ RSpec.describe Projects::IssuesController do
         let_it_be(:issue) { create(:issue, project: new_project) }
 
         before do
-          project.route.destroy
+          project.route.destroy!
           new_project.redirect_routes.create!(path: project.full_path)
           new_project.add_developer(user)
         end
@@ -173,6 +175,48 @@ RSpec.describe Projects::IssuesController do
 
       it_behaves_like 'unauthorized when external service denies access' do
         subject { get :index, params: { namespace_id: project.namespace, project_id: project } }
+      end
+    end
+  end
+
+  describe "GET #show" do
+    before do
+      sign_in(user)
+      project.add_developer(user)
+    end
+
+    it "returns issue_email_participants" do
+      participants = create_list(:issue_email_participant, 2, issue: issue)
+
+      get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }, format: :json
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['issue_email_participants']).to contain_exactly({ "email" => participants[0].email }, { "email" => participants[1].email })
+    end
+
+    context 'with the invite_members_in_comment experiment', :experiment do
+      context 'when user can invite' do
+        before do
+          stub_experiments(invite_members_in_comment: :invite_member_link)
+          project.add_maintainer(user)
+        end
+
+        it 'assigns the candidate experience and tracks the event' do
+          expect(experiment(:invite_members_in_comment)).to track(:view, property: project.root_ancestor.id.to_s)
+            .for(:invite_member_link)
+            .with_context(namespace: project.root_ancestor)
+            .on_next_instance
+
+          get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
+        end
+      end
+
+      context 'when user can not invite' do
+        it 'does not track the event' do
+          expect(experiment(:invite_members_in_comment)).not_to track(:view)
+
+          get :show, params: { namespace_id: project.namespace, project_id: project, id: issue.iid }
+        end
       end
     end
   end
@@ -308,6 +352,7 @@ RSpec.describe Projects::IssuesController do
     end
 
     let_it_be(:issue) { create(:issue, project: project) }
+
     let(:developer) { user }
     let(:params) do
       {
@@ -541,13 +586,15 @@ RSpec.describe Projects::IssuesController do
   end
 
   describe 'PUT #update' do
+    let(:issue_params) { { title: 'New title' } }
+
     subject do
       put :update,
         params: {
           namespace_id: project.namespace,
           project_id: project,
           id: issue.to_param,
-          issue: { title: 'New title' }
+          issue: issue_params
         },
         format: :json
     end
@@ -569,6 +616,17 @@ RSpec.describe Projects::IssuesController do
         expect(issue.reload.title).to eq('New title')
       end
 
+      context 'with issue_type param' do
+        let(:issue_params) { { issue_type: 'incident' } }
+
+        it 'permits the parameter' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(issue.reload.issue_type).to eql('incident')
+        end
+      end
+
       context 'when the SpamVerdictService disallows' do
         before do
           stub_application_setting(recaptcha_enabled: true)
@@ -580,12 +638,15 @@ RSpec.describe Projects::IssuesController do
         context 'when allow_possible_spam feature flag is false' do
           before do
             stub_feature_flags(allow_possible_spam: false)
+            expect(controller).to(receive(:spam_action_response_fields).with(issue)) do
+              spam_action_response_fields
+            end
           end
 
-          it 'renders json with recaptcha_html' do
+          it 'renders json with spam_action_response_fields' do
             subject
 
-            expect(json_response).to have_key('recaptcha_html')
+            expect(json_response).to eq(spam_action_response_fields)
           end
         end
 
@@ -648,7 +709,7 @@ RSpec.describe Projects::IssuesController do
 
         issue.update!(last_edited_by: deleted_user, last_edited_at: Time.current)
 
-        deleted_user.destroy
+        deleted_user.destroy!
         sign_in(user)
       end
 
@@ -915,12 +976,17 @@ RSpec.describe Projects::IssuesController do
               context 'renders properly' do
                 render_views
 
-                it 'renders recaptcha_html json response' do
+                before do
+                  expect(controller).to(receive(:spam_action_response_fields).with(issue)) do
+                    spam_action_response_fields
+                  end
+                end
+
+                it 'renders spam_action_response_fields json response' do
                   update_issue
 
-                  expect(response).to have_gitlab_http_status(:ok)
-                  expect(json_response).to have_key('recaptcha_html')
-                  expect(json_response['recaptcha_html']).not_to be_empty
+                  expect(response).to have_gitlab_http_status(:conflict)
+                  expect(json_response).to eq(spam_action_response_fields)
                 end
               end
             end
@@ -953,7 +1019,7 @@ RSpec.describe Projects::IssuesController do
             def update_verified_issue
               update_issue(
                 issue_params: { title: spammy_title },
-                additional_params: { spam_log_id: spam_logs.last.id, recaptcha_verification: true })
+                additional_params: { spam_log_id: spam_logs.last.id, 'g-recaptcha-response': true })
             end
 
             it 'returns 200 status' do
@@ -971,7 +1037,7 @@ RSpec.describe Projects::IssuesController do
             it 'does not mark spam log as recaptcha_verified when it does not belong to current_user' do
               spam_log = create(:spam_log)
 
-              expect { update_issue(issue_params: { spam_log_id: spam_log.id, recaptcha_verification: true }) }
+              expect { update_issue(issue_params: { spam_log_id: spam_log.id, 'g-recaptcha-response': true }) }
                 .not_to change { SpamLog.last.recaptcha_verified }
             end
           end
@@ -996,10 +1062,10 @@ RSpec.describe Projects::IssuesController do
         labels = create_list(:label, 10, project: project).map(&:to_reference)
         issue = create(:issue, project: project, description: 'Test issue')
 
-        control_count = ActiveRecord::QueryRecorder.new { issue.update(description: [issue.description, label].join(' ')) }.count
+        control_count = ActiveRecord::QueryRecorder.new { issue.update!(description: [issue.description, label].join(' ')) }.count
 
         # Follow-up to get rid of this `2 * label.count` requirement: https://gitlab.com/gitlab-org/gitlab-foss/issues/52230
-        expect { issue.update(description: [issue.description, labels].join(' ')) }
+        expect { issue.update!(description: [issue.description, labels].join(' ')) }
           .not_to exceed_query_limit(control_count + 2 * labels.count)
       end
 
@@ -1116,6 +1182,7 @@ RSpec.describe Projects::IssuesController do
 
     context 'resolving discussions in MergeRequest' do
       let_it_be(:discussion) { create(:diff_note_on_merge_request).to_discussion }
+
       let(:merge_request) { discussion.noteable }
       let(:project) { merge_request.source_project }
 
@@ -1128,12 +1195,12 @@ RSpec.describe Projects::IssuesController do
         { merge_request_to_resolve_discussions_of: merge_request.iid }
       end
 
-      def post_issue(issue_params, other_params: {})
+      def post_issue(other_params: {}, **issue_params)
         post :create, params: { namespace_id: project.namespace.to_param, project_id: project, issue: issue_params, merge_request_to_resolve_discussions_of: merge_request.iid }.merge(other_params)
       end
 
       it 'creates an issue for the project' do
-        expect { post_issue({ title: 'Hello' }) }.to change { project.issues.reload.size }.by(1)
+        expect { post_issue(title: 'Hello') }.to change { project.issues.reload.size }.by(1)
       end
 
       it "doesn't overwrite given params" do
@@ -1157,7 +1224,7 @@ RSpec.describe Projects::IssuesController do
 
       describe "resolving a single discussion" do
         before do
-          post_issue({ title: 'Hello' }, other_params: { discussion_to_resolve: discussion.id })
+          post_issue(title: 'Hello', other_params: { discussion_to_resolve: discussion.id })
         end
         it 'resolves a single discussion' do
           discussion.first_note.reload
@@ -1248,11 +1315,13 @@ RSpec.describe Projects::IssuesController do
           let!(:last_spam_log) { spam_logs.last }
 
           def post_verified_issue
-            post_new_issue({}, { spam_log_id: last_spam_log.id, recaptcha_verification: true } )
+            post_new_issue({}, { spam_log_id: last_spam_log.id, 'g-recaptcha-response': 'abc123' } )
           end
 
           before do
-            expect(controller).to receive_messages(verify_recaptcha: true)
+            expect_next_instance_of(Captcha::CaptchaVerificationService) do |instance|
+              expect(instance).to receive(:execute) { true }
+            end
           end
 
           it 'accepts an issue after reCAPTCHA is verified' do
@@ -1266,7 +1335,7 @@ RSpec.describe Projects::IssuesController do
           it 'does not mark spam log as recaptcha_verified when it does not belong to current_user' do
             spam_log = create(:spam_log)
 
-            expect { post_new_issue({}, { spam_log_id: spam_log.id, recaptcha_verification: true } ) }
+            expect { post_new_issue({}, { spam_log_id: spam_log.id, 'g-recaptcha-response': true } ) }
               .not_to change { last_spam_log.recaptcha_verified }
           end
         end
@@ -1376,9 +1445,7 @@ RSpec.describe Projects::IssuesController do
         expect_next_instance_of(Spam::AkismetService) do |akismet_service|
           expect(akismet_service).to receive_messages(submit_spam: true)
         end
-        expect_next_instance_of(ApplicationSetting) do |setting|
-          expect(setting).to receive_messages(akismet_enabled: true)
-        end
+        stub_application_setting(akismet_enabled: true)
       end
 
       def post_spam
@@ -1445,12 +1512,6 @@ RSpec.describe Projects::IssuesController do
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response).to eq({ 'errors' => 'Destroy confirmation not provided for issue' })
-      end
-
-      it 'delegates the update of the todos count cache to TodoService' do
-        expect_any_instance_of(TodoService).to receive(:destroy_target).with(issue).once
-
-        delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: issue.iid, destroy_confirm: true }
       end
     end
   end
@@ -1579,6 +1640,7 @@ RSpec.describe Projects::IssuesController do
 
   describe 'POST #import_csv' do
     let_it_be(:project) { create(:project, :public) }
+
     let(:file) { fixture_file_upload('spec/fixtures/csv_comma.csv') }
 
     context 'unauthorized' do
@@ -1655,7 +1717,7 @@ RSpec.describe Projects::IssuesController do
         request_csv
 
         expect(response).to redirect_to(project_issues_path(project))
-        expect(response.flash[:notice]).to match(/\AYour CSV export has started/i)
+        expect(controller).to set_flash[:notice].to match(/\AYour CSV export has started/i)
       end
     end
 
@@ -1778,6 +1840,7 @@ RSpec.describe Projects::IssuesController do
 
       context 'with cross-reference system note', :request_store do
         let_it_be(:new_issue) { create(:issue) }
+
         let(:cross_reference) { "mentioned in #{new_issue.to_reference(issue.project)}" }
 
         before do
@@ -1855,7 +1918,7 @@ RSpec.describe Projects::IssuesController do
       before do
         sign_in(user)
 
-        project.route.destroy
+        project.route.destroy!
         new_project.redirect_routes.create!(path: project.full_path)
         new_project.add_developer(user)
       end

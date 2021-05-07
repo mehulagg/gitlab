@@ -131,4 +131,23 @@ RSpec.describe Banzai::Pipeline::FullPipeline do
       expect(output).to include("test [[<em>TOC</em>]]")
     end
   end
+
+  describe 'backslash escapes' do
+    let_it_be(:project) { create(:project, :public) }
+    let_it_be(:issue)   { create(:issue, project: project) }
+
+    it 'does not convert an escaped reference' do
+      markdown = "\\#{issue.to_reference}"
+      output = described_class.to_html(markdown, project: project)
+
+      expect(output).to include("<span>#</span>#{issue.iid}")
+    end
+
+    it 'converts user reference with escaped underscore because of italics' do
+      markdown = '_@test\__'
+      output = described_class.to_html(markdown, project: project)
+
+      expect(output).to include('<em>@test_</em>')
+    end
+  end
 end

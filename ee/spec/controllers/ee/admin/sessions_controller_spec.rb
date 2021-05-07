@@ -7,7 +7,7 @@ RSpec.describe Admin::SessionsController, :do_not_mock_admin_mode do
 
   describe '#create' do
     context 'when using two-factor authentication' do
-      def authenticate_2fa(user_params, otp_user_id: user.id)
+      def authenticate_2fa(otp_user_id: user.id, **user_params)
         post(:create, params: { user: user_params }, session: { otp_user_id: otp_user_id })
       end
 

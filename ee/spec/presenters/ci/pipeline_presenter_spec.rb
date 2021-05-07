@@ -14,7 +14,7 @@ RSpec.describe Ci::PipelinePresenter do
         pipeline.failure_reason = :activity_limit_exceeded
 
         expect(presenter.failure_reason)
-          .to eq 'Pipeline activity limit exceeded!'
+          .to eq 'The pipeline activity limit was exceeded.'
       end
     end
 
@@ -148,6 +148,7 @@ RSpec.describe Ci::PipelinePresenter do
 
   describe '#degradation_threshold' do
     let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
+
     let(:current_user) { create(:user) }
 
     before do
@@ -186,6 +187,23 @@ RSpec.describe Ci::PipelinePresenter do
       it 'doesn\'t return the degradation threshold' do
         expect(presenter.degradation_threshold(:browser_performance)).to eq(nil)
       end
+    end
+  end
+
+  describe '#retryable?' do
+    subject { presenter.retryable? }
+
+    let!(:build) { create(:ci_build, :canceled, pipeline: pipeline) }
+
+    context 'with pipeline for merge train' do
+      let(:pipeline) { merge_request.all_pipelines.last }
+      let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
+
+      it { is_expected.to be false }
+    end
+
+    context 'with branch pipeline' do
+      it { is_expected.to be true }
     end
   end
 end

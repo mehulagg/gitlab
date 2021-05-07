@@ -32,14 +32,6 @@ module IssuesHelper
     end
   end
 
-  def issue_button_visibility(issue, closed)
-    return 'hidden' if issue_button_hidden?(issue, closed)
-  end
-
-  def issue_button_hidden?(issue, closed)
-    issue.closed? == closed || (!closed && issue.discussion_locked)
-  end
-
   def confidential_icon(issue)
     sprite_icon('eye-slash', css_class: 'gl-vertical-align-text-bottom') if issue.confidential?
   end
@@ -151,6 +143,69 @@ module IssuesHelper
       order_by: 'created_at',
       sort: 'desc'
     }
+  end
+
+  def issue_header_actions_data(project, issuable, current_user)
+    new_issuable_params = ({ issuable_template: 'incident', issue: { issue_type: 'incident' } } if issuable.incident?)
+
+    {
+      can_create_issue: show_new_issue_link?(project).to_s,
+      can_reopen_issue: can?(current_user, :reopen_issue, issuable).to_s,
+      can_report_spam: issuable.submittable_as_spam_by?(current_user).to_s,
+      can_update_issue: can?(current_user, :update_issue, issuable).to_s,
+      iid: issuable.iid,
+      is_issue_author: (issuable.author == current_user).to_s,
+      issue_type: issuable_display_type(issuable),
+      new_issue_path: new_project_issue_path(project, new_issuable_params),
+      project_path: project.full_path,
+      report_abuse_path: new_abuse_report_path(user_id: issuable.author.id, ref_url: issue_url(issuable)),
+      submit_as_spam_path: mark_as_spam_project_issue_path(project, issuable)
+    }
+  end
+
+  def issues_list_data(project, current_user, finder)
+    {
+      autocomplete_users_path: autocomplete_users_path(active: true, current_user: true, project_id: project.id, format: :json),
+      autocomplete_award_emojis_path: autocomplete_award_emojis_path,
+      calendar_path: url_for(safe_params.merge(calendar_url_options)),
+      can_bulk_update: can?(current_user, :admin_issue, project).to_s,
+      can_edit: can?(current_user, :admin_project, project).to_s,
+      can_import_issues: can?(current_user, :import_issues, @project).to_s,
+      email: current_user&.notification_email,
+      emails_help_page_path: help_page_path('development/emails', anchor: 'email-namespace'),
+      empty_state_svg_path: image_path('illustrations/issues.svg'),
+      endpoint: expose_path(api_v4_projects_issues_path(id: project.id)),
+      export_csv_path: export_csv_project_issues_path(project),
+      has_issues: project_issues(project).exists?.to_s,
+      import_csv_issues_path: import_csv_namespace_project_issues_path,
+      initial_email: project.new_issuable_address(current_user, 'issue'),
+      is_signed_in: current_user.present?.to_s,
+      issues_path: project_issues_path(project),
+      jira_integration_path: help_page_url('user/project/integrations/jira', anchor: 'view-jira-issues'),
+      markdown_help_path: help_page_path('user/markdown'),
+      max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
+      new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.try(:id), milestone_id: finder.milestones.first.try(:id) }),
+      project_import_jira_path: project_import_jira_path(project),
+      project_labels_path: project_labels_path(project, include_ancestor_groups: true, format: :json),
+      project_milestones_path: project_milestones_path(project, format: :json),
+      project_path: project.full_path,
+      quick_actions_help_path: help_page_path('user/project/quick_actions'),
+      reset_path: new_issuable_address_project_path(project, issuable_type: 'issue'),
+      rss_path: url_for(safe_params.merge(rss_url_options)),
+      show_new_issue_link: show_new_issue_link?(project).to_s,
+      sign_in_path: new_user_session_path
+    }
+  end
+
+  # Overridden in EE
+  def scoped_labels_available?(parent)
+    false
+  end
+
+  def award_emoji_issue_api_path(issue)
+    if Feature.enabled?(:improved_emoji_picker, issue.project, default_enabled: :yaml)
+      api_v4_projects_issues_award_emoji_path(id: issue.project.id, issue_iid: issue.iid)
+    end
   end
 end
 

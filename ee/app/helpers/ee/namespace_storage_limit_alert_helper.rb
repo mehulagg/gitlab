@@ -10,11 +10,13 @@ module EE
     end
 
     def display_namespace_storage_limit_alert?(namespace)
-      @display_namespace_storage_limit_alert && !usage_quota_page?(namespace)
+      @display_namespace_storage_limit_alert &&
+        !usage_quota_page?(namespace) &&
+        can?(current_user, :admin_namespace, namespace.root_ancestor)
     end
 
     def namespace_storage_alert(namespace)
-      return {} if current_user.nil?
+      return {} unless can?(current_user, :admin_namespace, namespace.root_ancestor)
 
       payload = check_storage_size_service(namespace).execute.payload
 
@@ -46,29 +48,16 @@ module EE
       end
     end
 
-    def can_purchase_storage_for_namespace?(namespace)
-      ::Gitlab.dev_env_or_com? &&
-        ::Gitlab::CurrentSettings.automatic_purchased_storage_allocation? &&
-        ::Feature.enabled?(:buy_storage_link) &&
-        ::Feature.enabled?(:additional_repo_storage_by_namespace, namespace)
-    end
-
-    def namespace_storage_usage_link(namespace)
-      if namespace.group?
-        group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')
-      else
-        profile_usage_quotas_path(anchor: 'storage-quota-tab')
-      end
-    end
-
-    def can_purchase_storage?
-      ::Gitlab.dev_env_or_com? &&
-        ::Gitlab::CurrentSettings.enforce_namespace_storage_limit? &&
-        ::Feature.enabled?(:buy_storage_link)
+    def purchase_storage_link_enabled?(namespace)
+      namespace.additional_repo_storage_by_namespace_enabled?
     end
 
     def purchase_storage_url
       EE::SUBSCRIPTIONS_MORE_STORAGE_URL
+    end
+
+    def number_of_hidden_storage_alert_banners
+      cookies.count { |key, value| key.starts_with?("hide_storage_limit_alert") && value == "true" }
     end
 
     private

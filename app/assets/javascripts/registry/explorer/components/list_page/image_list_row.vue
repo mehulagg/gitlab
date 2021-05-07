@@ -1,26 +1,31 @@
 <script>
-import { GlTooltipDirective, GlIcon, GlSprintf } from '@gitlab/ui';
+import { GlTooltipDirective, GlIcon, GlSprintf, GlSkeletonLoader } from '@gitlab/ui';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { n__ } from '~/locale';
+
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
-import DeleteButton from '../delete_button.vue';
-
 import {
   ASYNC_DELETE_IMAGE_ERROR_MESSAGE,
   LIST_DELETE_BUTTON_DISABLED,
   REMOVE_REPOSITORY_LABEL,
   ROW_SCHEDULED_FOR_DELETION,
   CLEANUP_TIMED_OUT_ERROR_MESSAGE,
+  IMAGE_DELETE_SCHEDULED_STATUS,
+  IMAGE_FAILED_DELETED_STATUS,
+  ROOT_IMAGE_TEXT,
 } from '../../constants/index';
+import DeleteButton from '../delete_button.vue';
 
 export default {
-  name: 'ImageListrow',
+  name: 'ImageListRow',
   components: {
     ClipboardButton,
     DeleteButton,
     GlSprintf,
     GlIcon,
     ListItem,
+    GlSkeletonLoader,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -30,6 +35,11 @@ export default {
       type: Object,
       required: true,
     },
+    metadataLoading: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
   },
   i18n: {
     LIST_DELETE_BUTTON_DISABLED,
@@ -37,32 +47,36 @@ export default {
     ROW_SCHEDULED_FOR_DELETION,
   },
   computed: {
-    encodedItem() {
-      const params = JSON.stringify({
-        name: this.item.path,
-        tags_path: this.item.tags_path,
-        id: this.item.id,
-        cleanup_policy_started_at: this.item.cleanup_policy_started_at,
-      });
-      return window.btoa(params);
-    },
     disabledDelete() {
-      return !this.item.destroy_path || this.item.deleting;
+      return !this.item.canDelete || this.deleting;
+    },
+    id() {
+      return getIdFromGraphQLId(this.item.id);
+    },
+    deleting() {
+      return this.item.status === IMAGE_DELETE_SCHEDULED_STATUS;
+    },
+    failedDelete() {
+      return this.item.status === IMAGE_FAILED_DELETED_STATUS;
     },
     tagsCountText() {
       return n__(
         'ContainerRegistry|%{count} Tag',
         'ContainerRegistry|%{count} Tags',
-        this.item.tags_count,
+        this.item.tagsCount,
       );
     },
     warningIconText() {
-      if (this.item.failedDelete) {
+      if (this.failedDelete) {
         return ASYNC_DELETE_IMAGE_ERROR_MESSAGE;
-      } else if (this.item.cleanup_policy_started_at) {
+      }
+      if (this.item.expirationPolicyStartedAt) {
         return CLEANUP_TIMED_OUT_ERROR_MESSAGE;
       }
       return null;
+    },
+    imageName() {
+      return this.item.name ? this.item.path : `${this.item.path}/ ${ROOT_IMAGE_TEXT}`;
     },
   },
 };
@@ -72,23 +86,24 @@ export default {
   <list-item
     v-gl-tooltip="{
       placement: 'left',
-      disabled: !item.deleting,
+      disabled: !deleting,
       title: $options.i18n.ROW_SCHEDULED_FOR_DELETION,
     }"
     v-bind="$attrs"
-    :disabled="item.deleting"
+    :disabled="deleting"
   >
     <template #left-primary>
       <router-link
         class="gl-text-body gl-font-weight-bold"
-        data-testid="detailsLink"
-        :to="{ name: 'details', params: { id: encodedItem } }"
+        data-testid="details-link"
+        data-qa-selector="registry_image_content"
+        :to="{ name: 'details', params: { id } }"
       >
-        {{ item.path }}
+        {{ imageName }}
       </router-link>
       <clipboard-button
         v-if="item.location"
-        :disabled="item.deleting"
+        :disabled="deleting"
         :text="item.location"
         :title="item.location"
         category="tertiary"
@@ -102,20 +117,31 @@ export default {
       />
     </template>
     <template #left-secondary>
-      <span class="gl-display-flex gl-align-items-center" data-testid="tagsCount">
+      <span
+        v-if="!metadataLoading"
+        class="gl-display-flex gl-align-items-center"
+        data-testid="tags-count"
+      >
         <gl-icon name="tag" class="gl-mr-2" />
         <gl-sprintf :message="tagsCountText">
           <template #count>
-            {{ item.tags_count }}
+            {{ item.tagsCount }}
           </template>
         </gl-sprintf>
       </span>
+
+      <div v-else class="gl-w-full">
+        <gl-skeleton-loader :width="900" :height="16" preserve-aspect-ratio="xMinYMax meet">
+          <circle cx="6" cy="8" r="6" />
+          <rect x="16" y="4" width="100" height="8" rx="4" />
+        </gl-skeleton-loader>
+      </div>
     </template>
     <template #right-action>
       <delete-button
         :title="$options.i18n.REMOVE_REPOSITORY_LABEL"
         :disabled="disabledDelete"
-        :tooltip-disabled="Boolean(item.destroy_path)"
+        :tooltip-disabled="item.canDelete"
         :tooltip-title="$options.i18n.LIST_DELETE_BUTTON_DISABLED"
         @delete="$emit('delete', item)"
       />

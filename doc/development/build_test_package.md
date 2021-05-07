@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Building a package for testing
@@ -13,7 +13,7 @@ pipeline that can be used to trigger a pipeline in the Omnibus GitLab repository
 that will create:
 
 - A deb package for Ubuntu 16.04, available as a build artifact, and
-- A Docker image, which is pushed to [Omnibus GitLab's container
+- A Docker image, which is pushed to the [Omnibus GitLab container
   registry](https://gitlab.com/gitlab-org/omnibus-gitlab/container_registry)
   (images titled `gitlab-ce` and `gitlab-ee` respectively and image tag is the
   commit which triggered the pipeline).
@@ -40,7 +40,7 @@ used to trigger the build.
 
 In scenarios where a configuration change is to be introduced and Omnibus GitLab
 repository already has the necessary changes in a specific branch, you can build
-a package against that branch through an environment variable named
-`OMNIBUS_BRANCH`. To do this, specify that environment variable with the name of
+a package against that branch through a CI/CD variable named
+`OMNIBUS_BRANCH`. To do this, specify that variable with the name of
 the branch as value in `.gitlab-ci.yml` and push a commit. This will create a
 manual job that can be used to trigger the build.

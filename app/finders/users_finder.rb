@@ -14,6 +14,7 @@
 #     active: boolean
 #     blocked: boolean
 #     external: boolean
+#     non_external: boolean
 #     without_projects: boolean
 #     sort: string
 #     id: integer
@@ -34,11 +35,13 @@ class UsersFinder
     users = User.all.order_id_desc
     users = by_username(users)
     users = by_id(users)
+    users = by_admins(users)
     users = by_search(users)
     users = by_blocked(users)
     users = by_active(users)
     users = by_external_identity(users)
     users = by_external(users)
+    users = by_non_external(users)
     users = by_2fa(users)
     users = by_created_at(users)
     users = by_without_projects(users)
@@ -60,6 +63,12 @@ class UsersFinder
     return users unless params[:id]
 
     users.id_in(params[:id])
+  end
+
+  def by_admins(users)
+    return users unless params[:admins] && current_user&.can_read_all_resources?
+
+    users.admins
   end
 
   def by_search(users)
@@ -90,12 +99,17 @@ class UsersFinder
 
   # rubocop: disable CodeReuse/ActiveRecord
   def by_external(users)
-    return users = users.where.not(external: true) unless current_user&.admin?
     return users unless params[:external]
 
     users.external
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def by_non_external(users)
+    return users unless params[:non_external]
+
+    users.non_external
+  end
 
   def by_2fa(users)
     case params[:two_factor]

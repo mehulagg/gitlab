@@ -37,6 +37,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
+        namespace :security do
+          resource :configuration, only: [:show], controller: :configuration
+        end
+
         resources :artifacts, only: [:index, :destroy]
 
         resources :packages, only: [:index, :show, :destroy], module: :packages
@@ -45,6 +49,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             get :download
           end
         end
+
+        resources :infrastructure_registry, only: [:index], module: :packages
 
         resources :jobs, only: [:index, :show], constraints: { id: /\d+/ } do
           collection do
@@ -83,9 +89,15 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
+        get :learn_gitlab, action: :index, controller: 'learn_gitlab'
+
         namespace :ci do
           resource :lint, only: [:show, :create]
+          resource :pipeline_editor, only: [:show], controller: :pipeline_editor, path: 'editor'
           resources :daily_build_group_report_results, only: [:index], constraints: { format: /(csv|json)/ }
+          namespace :prometheus_metrics do
+            resources :histograms, only: [:create], constraints: { format: 'json' }
+          end
         end
 
         namespace :settings do
@@ -117,6 +129,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
               put :revoke
             end
           end
+
+          resource :packages_and_registries, only: [:show]
         end
 
         resources :autocomplete_sources, only: [] do
@@ -131,7 +145,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
-        resources :project_members, except: [:show, :new, :edit], constraints: { id: %r{[a-zA-Z./0-9_\-#%+]+} }, concerns: :access_requestable do
+        resources :project_members, except: [:show, :new, :edit], constraints: { id: %r{[a-zA-Z./0-9_\-#%+:]+} }, concerns: :access_requestable do
           collection do
             delete :leave
 
@@ -218,7 +232,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resources :starrers, only: [:index]
         resources :forks, only: [:index, :new, :create]
-        resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+/ }
+        resources :group_links, only: [:create, :update, :destroy], constraints: { id: /\d+|:id/ }
 
         resource :import, only: [:new, :create, :show]
         resource :avatar, only: [:show, :destroy]
@@ -263,6 +277,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
           resources :functions, only: [:index]
         end
+
+        resources :terraform, only: [:index]
 
         resources :environments, except: [:destroy] do
           member do
@@ -385,6 +401,18 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           to: 'web_ide_schemas#show',
           format: false,
           as: :schema
+
+        resources :hooks, only: [:index, :create, :edit, :update, :destroy], constraints: { id: /\d+/ } do
+          member do
+            post :test
+          end
+
+          resources :hook_logs, only: [:show] do
+            member do
+              post :retry
+            end
+          end
+        end
       end
       # End of the /-/ scope.
 
@@ -400,6 +428,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       #
       # Templates
       #
+      get '/templates/:template_type' => 'templates#index', # rubocop:todo Cop/PutProjectRoutesUnderScope
+          as: :templates,
+          defaults: { format: 'json' },
+          constraints: { template_type: %r{issue|merge_request}, format: 'json' }
+
       get '/templates/:template_type/:key' => 'templates#show', # rubocop:todo Cop/PutProjectRoutesUnderScope
           as: :template,
           defaults: { format: 'json' },
@@ -442,18 +475,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             constraints: { endpoint_identifier: /[A-Za-z0-9]+/ }
 
       draw :legacy_builds
-
-      resources :hooks, only: [:index, :create, :edit, :update, :destroy], constraints: { id: /\d+/ } do # rubocop: disable Cop/PutProjectRoutesUnderScope
-        member do
-          post :test # rubocop:todo Cop/PutProjectRoutesUnderScope
-        end
-
-        resources :hook_logs, only: [:show] do # rubocop: disable Cop/PutProjectRoutesUnderScope
-          member do
-            post :retry # rubocop:todo Cop/PutProjectRoutesUnderScope
-          end
-        end
-      end
 
       resources :container_registry, only: [:index, :destroy, :show], # rubocop: disable Cop/PutProjectRoutesUnderScope
                                      controller: 'registry/repositories'
@@ -536,7 +557,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Deprecated unscoped routing.
       scope as: 'deprecated' do
         # Issue https://gitlab.com/gitlab-org/gitlab/issues/118849
-        draw :pipelines
         draw :repository
 
         # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/29572
@@ -554,12 +574,13 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Legacy routes.
       # Introduced in 12.0.
       # Should be removed with https://gitlab.com/gitlab-org/gitlab/issues/28848.
-      Gitlab::Routing.redirect_legacy_paths(self, :mirror, :tags,
+      Gitlab::Routing.redirect_legacy_paths(self, :mirror, :tags, :hooks,
                                             :cycle_analytics, :mattermost, :variables, :triggers,
                                             :environments, :protected_environments, :error_tracking, :alert_management,
                                             :tracing,
                                             :serverless, :clusters, :audit_events, :wikis, :merge_requests,
-                                            :vulnerability_feedback, :security, :dependencies, :issues)
+                                            :vulnerability_feedback, :security, :dependencies, :issues,
+                                            :pipelines, :pipeline_schedules)
     end
 
     # rubocop: disable Cop/PutProjectRoutesUnderScope

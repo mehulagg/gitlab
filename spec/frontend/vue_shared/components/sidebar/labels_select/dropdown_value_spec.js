@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlLabel } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import DropdownValueComponent from '~/vue_shared/components/sidebar/labels_select/dropdown_value.vue';
 
 import { mockConfig, mockLabels } from './mock_data';
@@ -71,12 +71,7 @@ describe('DropdownValueComponent', () => {
     it('render slot content inside component when `labels` prop is empty', () => {
       const vmEmptyLabels = createComponent([]);
 
-      expect(
-        vmEmptyLabels
-          .find('.text-secondary')
-          .text()
-          .trim(),
-      ).toBe(mockConfig.emptyValueText);
+      expect(vmEmptyLabels.find('.text-secondary').text().trim()).toBe(mockConfig.emptyValueText);
       vmEmptyLabels.destroy();
     });
 

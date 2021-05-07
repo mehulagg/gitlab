@@ -12,7 +12,7 @@ RSpec.describe GitlabSchema.types['Mutation'] do
 
     with_them do
       let(:field) { get_field(field_name) }
-      let(:deprecation_reason) { "#{reason}. Deprecated in #{milestone}" }
+      let(:deprecation_reason) { "#{reason}. Deprecated in #{milestone}." }
 
       it { expect(field).to be_present }
       it { expect(field.deprecation_reason).to eq(deprecation_reason) }
@@ -24,6 +24,7 @@ RSpec.describe GitlabSchema.types['Mutation'] do
 
     where(:alias_name, :canonical_name) do
       'DismissVulnerability' | 'VulnerabilityDismiss'
+      'RevertVulnerabilityToDetected' | 'VulnerabilityRevertToDetected'
     end
 
     with_them do

@@ -2,16 +2,15 @@
 /* global ListAssignee */
 /* global ListIssue */
 /* global ListLabel */
-
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
 import '~/boards/models/label';
 import '~/boards/models/assignee';
 import '~/boards/models/issue';
 import '~/boards/models/list';
 import { ListType } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
+import axios from '~/lib/utils/axios_utils';
 import { listObj, listObjDuplicate, boardsMockInterceptor } from './mock_data';
 
 describe('List model', () => {
@@ -37,7 +36,7 @@ describe('List model', () => {
   describe('list type', () => {
     const notExpandableList = ['blank'];
 
-    const table = Object.keys(ListType).map(k => {
+    const table = Object.keys(ListType).map((k) => {
       const value = ListType[k];
       return [value, !notExpandableList.includes(value)];
     });
@@ -184,10 +183,9 @@ describe('List model', () => {
         }),
       );
       list.issues = [];
-      global.gon.features = { boardsWithSwimlanes: false };
     });
 
-    it('adds new issue to top of list', done => {
+    it('adds new issue to top of list', (done) => {
       const user = new ListAssignee({
         id: 1,
         name: 'testing 123',

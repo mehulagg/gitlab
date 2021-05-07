@@ -1,9 +1,9 @@
 import { find } from 'lodash';
-import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
-import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
-import { deprecatedCreateFlash as flash } from '../flash';
 import { __ } from '~/locale';
+import AccessDropdown from '~/projects/settings/access_dropdown';
+import { deprecatedCreateFlash as flash } from '../flash';
+import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedBranchEdit {
   constructor(options) {
@@ -14,6 +14,7 @@ export default class ProtectedBranchEdit {
     this.$wrap = options.$wrap;
     this.$allowedToMergeDropdown = this.$wrap.find('.js-allowed-to-merge');
     this.$allowedToPushDropdown = this.$wrap.find('.js-allowed-to-push');
+    this.$forcePushToggle = this.$wrap.find('.js-force-push-toggle');
     this.$codeOwnerToggle = this.$wrap.find('.js-code-owner-toggle');
 
     this.$wraps[ACCESS_LEVELS.MERGE] = this.$allowedToMergeDropdown.closest(
@@ -28,9 +29,21 @@ export default class ProtectedBranchEdit {
   }
 
   bindEvents() {
+    this.$forcePushToggle.on('click', this.onForcePushToggleClick.bind(this));
     if (this.hasLicense) {
       this.$codeOwnerToggle.on('click', this.onCodeOwnerToggleClick.bind(this));
     }
+  }
+
+  onForcePushToggleClick() {
+    this.$forcePushToggle.toggleClass('is-checked');
+    this.$forcePushToggle.prop('disabled', true);
+
+    const formData = {
+      allow_force_push: this.$forcePushToggle.hasClass('is-checked'),
+    };
+
+    this.updateProtectedBranch(formData, () => this.$forcePushToggle.prop('disabled', false));
   }
 
   onCodeOwnerToggleClick() {
@@ -41,17 +54,15 @@ export default class ProtectedBranchEdit {
       code_owner_approval_required: this.$codeOwnerToggle.hasClass('is-checked'),
     };
 
-    this.updateCodeOwnerApproval(formData);
+    this.updateProtectedBranch(formData, () => this.$codeOwnerToggle.prop('disabled', false));
   }
 
-  updateCodeOwnerApproval(formData) {
+  updateProtectedBranch(formData, callback) {
     axios
       .patch(this.$wrap.data('url'), {
         protected_branch: formData,
       })
-      .then(() => {
-        this.$codeOwnerToggle.prop('disabled', false);
-      })
+      .then(callback)
       .catch(() => {
         flash(__('Failed to update branch!'));
       });
@@ -108,7 +119,7 @@ export default class ProtectedBranchEdit {
       .then(({ data }) => {
         this.hasChanges = false;
 
-        Object.keys(ACCESS_LEVELS).forEach(level => {
+        Object.keys(ACCESS_LEVELS).forEach((level) => {
           const accessLevelName = ACCESS_LEVELS[level];
 
           // The data coming from server will be the new persisted *state* for each dropdown
@@ -125,7 +136,7 @@ export default class ProtectedBranchEdit {
   }
 
   setSelectedItemsToDropdown(items = [], dropdownName) {
-    const itemsToAdd = items.map(currentItem => {
+    const itemsToAdd = items.map((currentItem) => {
       if (currentItem.user_id) {
         // Do this only for users for now
         // get the current data for selected items

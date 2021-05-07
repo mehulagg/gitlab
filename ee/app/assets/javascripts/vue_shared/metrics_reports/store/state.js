@@ -12,9 +12,10 @@ export default () => ({
    *    previous_value: {String}
    * }
    */
+  changedMetrics: [],
   newMetrics: [],
-  existingMetrics: [],
   removedMetrics: [],
+  unchangedMetrics: [],
 
   numberOfChanges: 0,
 });

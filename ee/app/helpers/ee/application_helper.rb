@@ -11,8 +11,24 @@ module EE
 
     override :read_only_message
     def read_only_message
-      return super unless ::Gitlab::Geo.secondary?
+      message = ::Gitlab::Geo.secondary? ? geo_secondary_read_only_message : super
 
+      return message unless ::Gitlab.maintenance_mode?
+      return maintenance_mode_message.concat(message) if message
+
+      maintenance_mode_message
+    end
+
+    def maintenance_mode_message
+      tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(custom_maintenance_mode_message)
+        end
+      end
+    end
+
+    def geo_secondary_read_only_message
       message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
 
       message = "#{message} #{lag_message}".html_safe if lag_message
@@ -78,20 +94,18 @@ module EE
     def autocomplete_data_sources(object, noteable_type)
       return {} unless object && noteable_type
 
+      enabled_for_vulnerabilities = object.feature_available?(:security_dashboard)
+
       if object.is_a?(Group)
         {
-          members: members_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
-          labels: labels_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
-          issues: issues_group_autocomplete_sources_path(object),
-          mergeRequests: merge_requests_group_autocomplete_sources_path(object),
           epics: epics_group_autocomplete_sources_path(object),
-          commands: commands_group_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
-          milestones: milestones_group_autocomplete_sources_path(object)
-        }
-      elsif object.group&.feature_available?(:epics)
-        { epics: epics_project_autocomplete_sources_path(object) }.merge(super)
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_group_autocomplete_sources_path(object) : nil
+        }.compact.merge(super)
       else
-        super
+        {
+          epics: object.group&.feature_available?(:epics) ? epics_project_autocomplete_sources_path(object) : nil,
+          vulnerabilities: enabled_for_vulnerabilities ? vulnerabilities_project_autocomplete_sources_path(object) : nil
+        }.compact.merge(super)
       end
     end
 
@@ -108,8 +122,9 @@ module EE
 
     private
 
-    def appearance
-      ::Appearance.current
+    def custom_maintenance_mode_message
+      ::Gitlab::CurrentSettings.maintenance_mode_message&.html_safe ||
+        s_('This GitLab instance is undergoing maintenance and is operating in read-only mode.')
     end
 
     def db_lag

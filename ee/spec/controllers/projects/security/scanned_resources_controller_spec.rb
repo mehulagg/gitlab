@@ -16,11 +16,16 @@ RSpec.describe Projects::Security::ScannedResourcesController do
   end
 
   describe 'GET index' do
-    let(:subject) { get :index, params: action_params, format: :csv }
     let(:parsed_csv_data) { CSV.parse(subject.body, headers: true) }
+
+    subject(:request) { get :index, params: action_params, format: :csv }
 
     before do
       project.add_developer(user)
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
     end
 
     context 'when DAST security scan is found' do

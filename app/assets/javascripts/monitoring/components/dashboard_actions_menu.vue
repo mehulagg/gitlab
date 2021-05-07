@@ -1,7 +1,6 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlDropdown,
   GlDropdownDivider,
   GlDropdownItem,
@@ -10,19 +9,20 @@ import {
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import CustomMetricsFormFields from '~/custom_metrics/components/custom_metrics_form_fields.vue';
-import { PANEL_NEW_PAGE } from '../router/constants';
-import DuplicateDashboardModal from './duplicate_dashboard_modal.vue';
-import CreateDashboardModal from './create_dashboard_modal.vue';
-import { s__ } from '~/locale';
 import invalidUrl from '~/lib/utils/invalid_url';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
+import { PANEL_NEW_PAGE } from '../router/constants';
 import { getAddMetricTrackingOptions } from '../utils';
+import CreateDashboardModal from './create_dashboard_modal.vue';
+import DuplicateDashboardModal from './duplicate_dashboard_modal.vue';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlDropdown,
     GlDropdownDivider,
     GlDropdownItem,
@@ -178,10 +178,10 @@ export default {
           />
         </form>
         <div slot="modal-footer">
-          <gl-deprecated-button @click="hideAddMetricModal">
+          <gl-button @click="hideAddMetricModal">
             {{ __('Cancel') }}
-          </gl-deprecated-button>
-          <gl-deprecated-button
+          </gl-button>
+          <gl-button
             v-track-event="getAddMetricTrackingOptions()"
             data-testid="add-metric-modal-submit-button"
             :disabled="!customMetricsFormIsValid"
@@ -189,7 +189,7 @@ export default {
             @click="submitCustomMetricsForm"
           >
             {{ __('Save changes') }}
-          </gl-deprecated-button>
+          </gl-button>
         </div>
       </gl-modal>
     </template>

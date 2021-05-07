@@ -20,21 +20,6 @@ module EE
           end
         end
       end
-
-      override :after_create
-      def after_create(issue)
-        super
-
-        add_issue_sla(issue)
-      end
-
-      private
-
-      def add_issue_sla(issue)
-        return unless issue.sla_available?
-
-        ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
-      end
     end
   end
 end

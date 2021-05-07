@@ -23,11 +23,11 @@ module Gitlab
               'Cache invalidation',
               cache_key: event.key,
               cache_expired: expired,
-              skippable: skippable?
+              skippable: registry_exists?
             )
           end
 
-          def skippable?
+          def registry_exists?
             false
           end
         end

@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import Api from '~/api';
@@ -47,9 +47,9 @@ describe('GroupsDropdownFilter component', () => {
   const findDropdownItems = () =>
     findDropdown()
       .findAll(GlDropdownItem)
-      .filter(w => w.text() !== 'No matching results');
+      .filter((w) => w.text() !== 'No matching results');
 
-  const findDropdownAtIndex = index => findDropdownItems().at(index);
+  const findDropdownAtIndex = (index) => findDropdownItems().at(index);
   const findDropdownButton = () => findDropdown().find('.dropdown-toggle');
   const findDropdownButtonAvatar = () => findDropdown().find('.gl-avatar');
 
@@ -58,10 +58,8 @@ describe('GroupsDropdownFilter component', () => {
     expect(dropdown.find('div.gl-avatar-identicon').exists()).toBe(hasIdenticon);
   };
 
-  const selectDropdownAtIndex = index =>
-    findDropdownAtIndex(index)
-      .find('button')
-      .trigger('click');
+  const selectDropdownAtIndex = (index) =>
+    findDropdownAtIndex(index).find('button').trigger('click');
 
   describe('when passed a defaultGroup as prop', () => {
     beforeEach(() => {
@@ -130,16 +128,8 @@ describe('GroupsDropdownFilter component', () => {
       selectDropdownAtIndex(1);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findDropdownButton()
-            .find('img.gl-avatar')
-            .exists(),
-        ).toBe(false);
-        expect(
-          findDropdownButton()
-            .find('.gl-avatar-identicon')
-            .exists(),
-        ).toBe(true);
+        expect(findDropdownButton().find('img.gl-avatar').exists()).toBe(false);
+        expect(findDropdownButton().find('.gl-avatar-identicon').exists()).toBe(true);
       });
     });
   });

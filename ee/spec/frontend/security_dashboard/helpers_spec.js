@@ -36,7 +36,7 @@ describe('getFormattedSummary', () => {
 
   it.each([undefined, [], [1], 'hello world', 123])(
     'returns an empty array when summary is %s',
-    summary => {
+    (summary) => {
       expect(getFormattedSummary(summary)).toEqual([]);
     },
   );

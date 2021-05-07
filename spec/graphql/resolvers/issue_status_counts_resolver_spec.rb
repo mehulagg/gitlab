@@ -62,20 +62,19 @@ RSpec.describe Resolvers::IssueStatusCountsResolver do
     end
 
     it 'filters by issue type', :aggregate_failures do
-      result = resolve_issue_status_counts(issue_types: ['incident'])
+      result = resolve_issue_status_counts(types: ['incident'])
 
       expect(result.all).to eq 1
       expect(result.opened).to eq 0
       expect(result.closed).to eq 1
     end
 
-    # The state param is ignored in IssuableFinder#count_by_state
-    it 'ignores state filter', :aggregate_failures do
-      result = resolve_issue_status_counts(state: 'closed')
-
-      expect(result.all).to eq 2
-      expect(result.opened).to eq 1
-      expect(result.closed).to eq 1
+    context 'when both assignee_username and assignee_usernames are provided' do
+      it 'raises a mutually exclusive filter error' do
+        expect do
+          resolve_issue_status_counts(assignee_usernames: [current_user.username], assignee_username: current_user.username)
+        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'only one of [assigneeUsernames, assigneeUsername] arguments is allowed at the same time.')
+      end
     end
 
     private

@@ -1,7 +1,7 @@
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import COLUMNS from '../constants';
 
 export default class GroupMemberStore {
@@ -37,7 +37,7 @@ export default class GroupMemberStore {
   }
 
   setMembers(rawMembers) {
-    this.state.members = rawMembers.map(rawMember => GroupMemberStore.formatMember(rawMember));
+    this.state.members = rawMembers.map((rawMember) => GroupMemberStore.formatMember(rawMember));
   }
 
   sortMembers(sortByColumn) {
@@ -67,15 +67,17 @@ export default class GroupMemberStore {
   fetchContributedMembers() {
     return axios
       .get(this.memberContributionsPath)
-      .then(res => res.data)
-      .then(members => {
+      .then((res) => res.data)
+      .then((members) => {
         this.setColumns(COLUMNS);
         this.setMembers(members);
         this.state.isLoading = false;
       })
-      .catch(e => {
+      .catch((e) => {
         this.state.isLoading = false;
-        Flash(__('Something went wrong while fetching group member contributions'));
+        createFlash({
+          message: __('Something went wrong while fetching group member contributions'),
+        });
         throw e;
       });
   }

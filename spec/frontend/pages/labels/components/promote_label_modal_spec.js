@@ -1,9 +1,9 @@
 import Vue from 'vue';
+import { TEST_HOST } from 'helpers/test_constants';
 import mountComponent from 'helpers/vue_mount_component_helper';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import axios from '~/lib/utils/axios_utils';
 import promoteLabelModal from '~/pages/projects/labels/components/promote_label_modal.vue';
 import eventHub from '~/pages/projects/labels/event_hub';
-import axios from '~/lib/utils/axios_utils';
 
 describe('Promote label modal', () => {
   let vm;
@@ -32,10 +32,9 @@ describe('Promote label modal', () => {
     });
 
     it('contains a label span with the color', () => {
-      const labelFromTitle = vm.$el.querySelector('.modal-header .label.color-label');
-
-      expect(labelFromTitle.style.backgroundColor).not.toBe(null);
-      expect(labelFromTitle.textContent).toContain(vm.labelTitle);
+      expect(vm.labelColor).not.toBe(null);
+      expect(vm.labelColor).toBe(labelMockData.labelColor);
+      expect(vm.labelTitle).toBe(labelMockData.labelTitle);
     });
   });
 
@@ -51,9 +50,9 @@ describe('Promote label modal', () => {
       vm.$destroy();
     });
 
-    it('redirects when a label is promoted', done => {
+    it('redirects when a label is promoted', (done) => {
       const responseURL = `${TEST_HOST}/dummy/endpoint`;
-      jest.spyOn(axios, 'post').mockImplementation(url => {
+      jest.spyOn(axios, 'post').mockImplementation((url) => {
         expect(url).toBe(labelMockData.url);
         expect(eventHub.$emit).toHaveBeenCalledWith(
           'promoteLabelModal.requestStarted',
@@ -77,10 +76,10 @@ describe('Promote label modal', () => {
         .catch(done.fail);
     });
 
-    it('displays an error if promoting a label failed', done => {
+    it('displays an error if promoting a label failed', (done) => {
       const dummyError = new Error('promoting label failed');
       dummyError.response = { status: 500 };
-      jest.spyOn(axios, 'post').mockImplementation(url => {
+      jest.spyOn(axios, 'post').mockImplementation((url) => {
         expect(url).toBe(labelMockData.url);
         expect(eventHub.$emit).toHaveBeenCalledWith(
           'promoteLabelModal.requestStarted',
@@ -90,7 +89,7 @@ describe('Promote label modal', () => {
       });
 
       vm.onSubmit()
-        .catch(error => {
+        .catch((error) => {
           expect(error).toBe(dummyError);
           expect(eventHub.$emit).toHaveBeenCalledWith('promoteLabelModal.requestFinished', {
             labelUrl: labelMockData.url,

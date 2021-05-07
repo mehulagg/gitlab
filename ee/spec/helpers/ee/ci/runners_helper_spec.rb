@@ -3,7 +3,7 @@
 require "spec_helper"
 
 RSpec.describe EE::Ci::RunnersHelper do
-  let_it_be(:user) { create(:user) }
+  let_it_be(:user, refind: true) { create(:user) }
   let_it_be(:namespace) { create(:namespace, owner: user) }
   let_it_be(:project) { create(:project, namespace: namespace) }
 
@@ -21,13 +21,13 @@ RSpec.describe EE::Ci::RunnersHelper do
     end
 
     context 'with a project and namespace' do
-      context 'when experiment is disabled' do
-        let(:experiment_status) { false }
+      context 'when not on dot com' do
+        let(:dev_env_or_com) { false }
 
         it { is_expected.to be_falsey }
       end
 
-      context 'when experiment is enabled' do
+      context 'when on dot com' do
         it { is_expected.to be_truthy }
 
         context 'without a persisted project passed' do
@@ -82,15 +82,15 @@ RSpec.describe EE::Ci::RunnersHelper do
   end
 
   context 'with notifications' do
-    let(:experiment_status) { true }
+    let(:dev_env_or_com) { true }
 
     describe '.show_buy_pipeline_minutes?' do
       subject { helper.show_buy_pipeline_minutes?(project, namespace) }
 
-      context 'when experiment is "ci_notification_dot"' do
+      context 'when on dot com' do
         it_behaves_like 'minutes notification' do
           before do
-            allow(helper).to receive(:experiment_enabled?).with(:ci_notification_dot).and_return(experiment_status)
+            allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
           end
         end
       end
@@ -100,7 +100,7 @@ RSpec.describe EE::Ci::RunnersHelper do
       subject { helper.show_pipeline_minutes_notification_dot?(project, namespace) }
 
       before do
-        allow(helper).to receive(:experiment_enabled?).with(:ci_notification_dot).and_return(experiment_status)
+        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
       end
 
       it_behaves_like 'minutes notification'
@@ -127,7 +127,7 @@ RSpec.describe EE::Ci::RunnersHelper do
       subject { helper.show_buy_pipeline_with_subtext?(project, namespace) }
 
       before do
-        allow(helper).to receive(:experiment_enabled?).with(:ci_notification_dot).and_return(experiment_status)
+        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
       end
 
       context 'when the notification dot has not been acknowledged' do
@@ -145,6 +145,24 @@ RSpec.describe EE::Ci::RunnersHelper do
         end
 
         it { is_expected.to be_truthy }
+      end
+    end
+
+    describe '.root_ancestor_namespace' do
+      subject(:root_ancestor) { helper.root_ancestor_namespace(project, namespace) }
+
+      context 'with a project' do
+        it 'returns the project root ancestor' do
+          expect(root_ancestor).to eq project.root_ancestor
+        end
+      end
+
+      context 'with only a namespace' do
+        let(:project) { nil }
+
+        it 'returns the namespace root ancestor' do
+          expect(root_ancestor).to eq namespace.root_ancestor
+        end
       end
     end
   end

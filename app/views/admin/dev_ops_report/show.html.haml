@@ -3,4 +3,8 @@
 
 .container
   .gl-mt-3
-    = render 'report'
+    - if show_adoption?
+      = render_if_exists 'admin/dev_ops_report/devops_tabs'
+    - else
+      = render 'report'
+

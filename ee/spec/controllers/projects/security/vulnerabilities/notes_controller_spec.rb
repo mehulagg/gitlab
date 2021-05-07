@@ -9,14 +9,6 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
 
   let!(:note) { create(:note, noteable: vulnerability, project: project) }
 
-  it_behaves_like SecurityDashboardsPermissions do
-    let(:vulnerable) { project }
-
-    let(:security_dashboard_action) do
-      get :index, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability }
-    end
-  end
-
   before do
     stub_licensed_features(security_dashboard: true)
   end
@@ -29,6 +21,15 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
     before do
       project.add_developer(user)
       sign_in(user)
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { view_all_notes }
+    end
+
+    it_behaves_like SecurityDashboardsPermissions do
+      let(:vulnerable) { project }
+      let(:security_dashboard_action) { view_all_notes }
     end
 
     it 'responds with array of notes' do
@@ -61,6 +62,10 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
     before do
       project.add_developer(user)
       sign_in(user)
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { create_note }
     end
 
     context 'when note is empty' do
@@ -133,6 +138,11 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
         end
       end
     end
+
+    it_behaves_like 'request exceeding rate limit', :clean_gitlab_redis_cache do
+      let(:params) { request_params.except(:format) }
+      let(:request_full_path) { project_security_vulnerability_notes_path(project, vulnerability) }
+    end
   end
 
   describe 'PUT update' do
@@ -154,6 +164,10 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
     before do
       project.add_developer(user)
       sign_in(user)
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { update_note }
     end
 
     context 'when user is not an author of the note' do
@@ -201,6 +215,10 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
       sign_in(user)
     end
 
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { delete_note }
+    end
+
     context 'when user is not an author of the note' do
       it 'does not delete the note' do
         expect { delete_note }.not_to change { Note.count }
@@ -229,6 +247,7 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
   end
 
   describe 'POST toggle_award_emoji' do
+    let(:emoji_name) { 'thumbsup' }
     let(:request_params) do
       {
         id: note,
@@ -246,7 +265,9 @@ RSpec.describe Projects::Security::Vulnerabilities::NotesController do
       project.add_developer(user)
     end
 
-    let(:emoji_name) { 'thumbsup' }
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { toggle_award_emoji }
+    end
 
     it 'creates the award emoji' do
       expect { toggle_award_emoji }.to change { note.award_emoji.count }.by(1)

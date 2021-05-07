@@ -9,3 +9,9 @@ FactoryBot.modify do
     end
   end
 end
+
+FactoryBot.define do
+  factory :quality_test_case, parent: :issue do
+    issue_type { :test_case }
+  end
+end

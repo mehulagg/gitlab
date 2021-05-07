@@ -1,11 +1,11 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Disaster recovery for planned failover **(PREMIUM ONLY)**
+# Disaster recovery for planned failover **(PREMIUM SELF)**
 
 The primary use-case of Disaster Recovery is to ensure business continuity in
 the event of unplanned outage, but it can be used in conjunction with a planned
@@ -27,7 +27,7 @@ have a high degree of confidence in being able to perform them accurately.
 
 ## Not all data is automatically replicated
 
-If you are using any GitLab features that Geo [doesn't support](../index.md#limitations),
+If you are using any GitLab features that Geo [doesn't support](../replication/datatypes.md#limitations-on-replicationverification),
 you must make separate provisions to ensure that the **secondary** node has an
 up-to-date copy of any data associated with that feature. This may extend the
 required scheduled maintenance period significantly.
@@ -40,10 +40,15 @@ final transfer inside the maintenance window) will then transfer only the
 
 Repository-centric strategies for using `rsync` effectively can be found in the
 [moving repositories](../../operations/moving_repositories.md) documentation; these strategies can
-be adapted for use with any other file-based data, such as GitLab Pages (to
-be found in `/var/opt/gitlab/gitlab-rails/shared/pages` if using Omnibus).
+be adapted for use with any other file-based data, such as [GitLab Pages](../../pages/index.md#change-storage-path).
 
 ## Preflight checks
+
+NOTE:
+In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+this command reports `ERROR - Replication is not up-to-date` even if
+replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
+later.
 
 Run this command to list out all preflight checks and automatically check if replication and verification are complete before scheduling a planned failover to ensure the process will go smoothly:
 
@@ -104,7 +109,7 @@ The maintenance window won't end until Geo replication and verification is
 completely finished. To keep the window as short as possible, you should
 ensure these processes are close to 100% as possible during active use.
 
-Navigate to the **Admin Area > Geo** dashboard on the **secondary** node to
+Go to the **Admin Area > Geo** dashboard on the **secondary** node to
 review status. Replicated objects (shown in green) should be close to 100%,
 and there should be no failures (shown in red). If a large proportion of
 objects aren't yet replicated (shown in gray), consider giving the node more
@@ -138,41 +143,10 @@ will take to finish syncing. An example message would be:
 
 ## Prevent updates to the **primary** node
 
-Until a [read-only mode](https://gitlab.com/gitlab-org/gitlab/-/issues/14609) is implemented, updates must be prevented
-from happening manually. Note that your **secondary** node still needs read-only
-access to the **primary** node during the maintenance window.
+To ensure that all data is replicated to a secondary site, updates (write requests) need to
+be disabled on the primary site:
 
-1. At the scheduled time, using your cloud provider or your node's firewall, block
-   all HTTP, HTTPS and SSH traffic to/from the **primary** node, **except** for your IP and
-   the **secondary** node's IP.
-
-   For instance, you might run the following commands on the server(s) making up your **primary** node:
-
-   ```shell
-   sudo iptables -A INPUT -p tcp -s <secondary_node_ip> --destination-port 22 -j ACCEPT
-   sudo iptables -A INPUT -p tcp -s <your_ip> --destination-port 22 -j ACCEPT
-   sudo iptables -A INPUT --destination-port 22 -j REJECT
-
-   sudo iptables -A INPUT -p tcp -s <secondary_node_ip> --destination-port 80 -j ACCEPT
-   sudo iptables -A INPUT -p tcp -s <your_ip> --destination-port 80 -j ACCEPT
-   sudo iptables -A INPUT --tcp-dport 80 -j REJECT
-
-   sudo iptables -A INPUT -p tcp -s <secondary_node_ip> --destination-port 443 -j ACCEPT
-   sudo iptables -A INPUT -p tcp -s <your_ip> --destination-port 443 -j ACCEPT
-   sudo iptables -A INPUT --tcp-dport 443 -j REJECT
-   ```
-
-   From this point, users will be unable to view their data or make changes on the
-   **primary** node. They will also be unable to log in to the **secondary** node.
-   However, existing sessions will work for the remainder of the maintenance period, and
-   public data will be accessible throughout.
-
-1. Verify the **primary** node is blocked to HTTP traffic by visiting it in browser via
-   another IP. The server should refuse connection.
-
-1. Verify the **primary** node is blocked to Git over SSH traffic by attempting to pull an
-   existing Git repository with an SSH remote URL. The server should refuse
-   connection.
+1. Enable [maintenance mode](../../maintenance_mode/index.md).
 
 1. Disable non-Geo periodic background jobs on the **primary** node by navigating
    to **Admin Area > Monitoring > Background Jobs > Cron**, pressing `Disable All`,

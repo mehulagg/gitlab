@@ -53,11 +53,13 @@ RSpec.describe API::Issues do
   let_it_be(:label) do
     create(:label, title: 'label', color: '#FFAABB', project: project)
   end
+
   let!(:label_link) { create(:label_link, label: label, target: issue) }
   let(:milestone) { create(:milestone, title: '1.0.0', project: project) }
   let_it_be(:empty_milestone) do
     create(:milestone, title: '2.0.0', project: project)
   end
+
   let!(:note) { create(:note_on_issue, author: user, project: project, noteable: issue) }
 
   let(:no_milestone_title) { 'None' }
@@ -109,7 +111,7 @@ RSpec.describe API::Issues do
       let(:not_member) { create(:user) }
 
       before do
-        project.project_feature.update(issues_access_level: ProjectFeature::PRIVATE)
+        project.project_feature.update!(issues_access_level: ProjectFeature::PRIVATE)
       end
 
       it 'renders 403' do
@@ -328,8 +330,13 @@ RSpec.describe API::Issues do
     end
 
     context 'setting created_at' do
+      let(:fixed_time) { Time.new(2001, 1, 1) }
       let(:creation_time) { 2.weeks.ago }
       let(:params) { { title: 'new issue', labels: 'label, label2', created_at: creation_time } }
+
+      before do
+        travel_to fixed_time
+      end
 
       context 'by an admin' do
         it 'sets the creation time on the new issue' do
@@ -337,6 +344,7 @@ RSpec.describe API::Issues do
 
           expect(response).to have_gitlab_http_status(:created)
           expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
+          expect(ResourceLabelEvent.last.created_at).to be_like_time(creation_time)
         end
       end
 
@@ -346,6 +354,7 @@ RSpec.describe API::Issues do
 
           expect(response).to have_gitlab_http_status(:created)
           expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
+          expect(ResourceLabelEvent.last.created_at).to be_like_time(creation_time)
         end
       end
 
@@ -354,19 +363,24 @@ RSpec.describe API::Issues do
           group = create(:group)
           group_project = create(:project, :public, namespace: group)
           group.add_owner(user2)
+
           post api("/projects/#{group_project.id}/issues", user2), params: params
 
           expect(response).to have_gitlab_http_status(:created)
           expect(Time.parse(json_response['created_at'])).to be_like_time(creation_time)
+          expect(ResourceLabelEvent.last.created_at).to be_like_time(creation_time)
         end
       end
 
       context 'by another user' do
         it 'ignores the given creation time' do
+          project.add_developer(user2)
+
           post api("/projects/#{project.id}/issues", user2), params: params
 
           expect(response).to have_gitlab_http_status(:created)
-          expect(Time.parse(json_response['created_at'])).not_to be_like_time(creation_time)
+          expect(Time.parse(json_response['created_at'])).to be_like_time(fixed_time)
+          expect(ResourceLabelEvent.last.created_at).to be_like_time(fixed_time)
         end
       end
     end

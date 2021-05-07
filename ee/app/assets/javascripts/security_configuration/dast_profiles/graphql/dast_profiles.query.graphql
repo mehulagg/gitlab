@@ -1,0 +1,30 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query DastProfiles($fullPath: ID!, $after: String, $before: String, $first: Int, $last: Int) {
+  project(fullPath: $fullPath) {
+    dastProfiles(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          name
+          dastSiteProfile {
+            id
+            targetUrl
+          }
+          dastScannerProfile {
+            id
+            scanType
+          }
+          branch {
+            name
+            exists
+          }
+          editPath
+        }
+      }
+    }
+  }
+}

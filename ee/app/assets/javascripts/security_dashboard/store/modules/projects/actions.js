@@ -35,7 +35,7 @@ export const fetchProjects = ({ state, dispatch }) => {
   dispatch('requestProjects');
 
   getAllProjects(state.projectsEndpoint)
-    .then(projects => {
+    .then((projects) => {
       dispatch('receiveProjectsSuccess', { projects });
     })
     .catch(() => {

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
+RSpec.describe 'Gcp Cluster', :js do
   include GoogleApi::CloudPlatformHelpers
 
   let(:project) { create(:project) }
@@ -119,7 +119,7 @@ RSpec.describe 'Gcp Cluster', :js, :do_not_mock_admin_mode do
       context 'when user disables the cluster' do
         before do
           page.find(:css, '.js-cluster-enable-toggle-area .js-project-feature-toggle').click
-          page.within('.js-cluster-integration-form') { click_button 'Save changes' }
+          page.within('.js-cluster-details-form') { click_button 'Save changes' }
         end
 
         it 'user sees the successful message' do

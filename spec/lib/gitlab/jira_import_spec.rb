@@ -9,9 +9,10 @@ RSpec.describe Gitlab::JiraImport do
     include JiraServiceHelper
 
     let_it_be(:project, reload: true) { create(:project) }
+
     let(:additional_params) { {} }
 
-    subject { described_class.validate_project_settings!(project, additional_params) }
+    subject { described_class.validate_project_settings!(project, **additional_params) }
 
     shared_examples 'raise Jira import error' do |message|
       it 'returns error' do

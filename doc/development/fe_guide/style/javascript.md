@@ -1,22 +1,25 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/development/fe_guide/style_guide_js.html'
 ---
 
 # JavaScript style guide
 
-We use [Airbnb's JavaScript Style Guide](https://github.com/airbnb/javascript) and it's accompanying
+We use [Airbnb's JavaScript Style Guide](https://github.com/airbnb/javascript) and its accompanying
 linter to manage most of our JavaScript style guidelines.
 
 In addition to the style guidelines set by Airbnb, we also have a few specific rules
 listed below.
 
-TIP: **Tip:**
-You can run eslint locally by running `yarn eslint`
+NOTE:
+You can run ESLint locally by running `yarn run lint:eslint:all` or `yarn run lint:eslint $PATH_TO_FILE`.
 
 ## Avoid forEach
 
 Avoid forEach when mutating data. Use `map`, `reduce` or `filter` instead of `forEach`
-when mutating data. This will minimize mutations in functions,
+when mutating data. This minimizes mutations in functions,
 which aligns with [Airbnb's style guide](https://github.com/airbnb/javascript#testing--for-real).
 
 ```javascript
@@ -95,16 +98,27 @@ class a {
 }
 ```
 
-## Use ParseInt
+## Converting Strings to Integers
 
-Use `ParseInt` when converting a numeric string into a number.
+When converting strings to integers, `parseInt` has a slight performance advantage over `Number`, but `Number` is semantic and can be more readable. Prefer `parseInt`, but do not discourage `Number` if it significantly helps readability.
+
+**WARNING:** `parseInt` **must** include the [radix argument](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt).
 
 ```javascript
 // bad
-Number('10')
+parseInt('10');
+
+// bad
+things.map(parseInt)
+
+// ok
+Number("106")
 
 // good
-parseInt('10', 10);
+things.map(Number)
+
+// good
+parseInt("106", 10)
 ```
 
 ## CSS Selectors - Use `js-` prefix
@@ -138,7 +152,7 @@ module.exports = SomeClass;
 export default SomeClass;
 ```
 
-_Note:_ We still use `require` in `scripts/` and `config/` files.
+We still use `require` in `scripts/` and `config/` files.
 
 ## Absolute vs relative paths for modules
 
@@ -234,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 ### Avoid side effects in constructors
 
 Avoid making asynchronous calls, API requests or DOM manipulations in the `constructor`.
-Move them into separate functions instead. This will make tests easier to write and
+Move them into separate functions instead. This makes tests easier to write and
 avoids violating the [Single Responsibility Principle](https://en.wikipedia.org/wiki/Single_responsibility_principle).
 
 ```javascript
@@ -290,4 +304,25 @@ Strive to write many small pure functions and minimize where mutations occur
   }
 
   var c = pureFunction(values.foo);
+  ```
+
+## Export constants as primitives
+
+Prefer exporting constant primitives with a common namespace over exporting objects. This allows for better compile-time reference checks and helps to avoid accidental `undefined`s at runtime. In addition, it helps in reducing bundle sizes.
+
+Only export the constants as a collection (array, or object) when there is a need to iterate over them, for instance, for a prop validator.
+
+  ```javascript
+  // bad
+  export const VARIANT = {
+    WARNING: 'warning',
+    ERROR: 'error',
+  };
+
+  // good
+  export const VARIANT_WARNING = 'warning';
+  export const VARIANT_ERROR = 'error';
+
+  // good, if the constants need to be iterated over
+  export const VARIANTS = [VARIANT_WARNING, VARIANT_ERROR];
   ```

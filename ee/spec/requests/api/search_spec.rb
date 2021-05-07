@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe API::Search, factory_default: :keep do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:namespace) { create_default(:namespace) }
+  let_it_be(:namespace) { create_default(:namespace).freeze }
 
   let(:project) { create(:project, :public, :repository, :wiki_repo, name: 'awesome project', group: group) }
 
@@ -22,6 +22,7 @@ RSpec.describe API::Search, factory_default: :keep do
     it 'returns a different result for each page' do
       get api(endpoint, user), params: { scope: scope, search: search, page: 1, per_page: 1 }
 
+      expect(response).to have_gitlab_http_status(:success)
       expect(json_response.count).to eq(1)
 
       first = json_response.first
@@ -34,6 +35,30 @@ RSpec.describe API::Search, factory_default: :keep do
       get api(endpoint, user), params: { scope: scope, search: search, per_page: 2 }
 
       expect(Gitlab::Json.parse(response.body).count).to eq(2)
+    end
+  end
+
+  shared_examples 'orderable by created_at' do |scope:|
+    it 'allows ordering results by created_at asc' do
+      get api(endpoint, user), params: { scope: scope, search: '*', order_by: 'created_at', sort: 'asc' }
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response.count).to be > 1
+
+      created_ats = json_response.map { |r| Time.parse(r['created_at']) }
+
+      expect(created_ats).to eq(created_ats.sort)
+    end
+
+    it 'allows ordering results by created_at desc' do
+      get api(endpoint, user), params: { scope: scope, search: '*', order_by: 'created_at', sort: 'desc' }
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response.count).to be > 1
+
+      created_ats = json_response.map { |r| Time.parse(r['created_at']) }
+
+      expect(created_ats).to eq(created_ats.sort.reverse)
     end
   end
 
@@ -61,6 +86,7 @@ RSpec.describe API::Search, factory_default: :keep do
       end
 
       it_behaves_like 'pagination', scope: 'merge_requests'
+      it_behaves_like 'orderable by created_at', scope: 'merge_requests'
 
       it 'avoids N+1 queries' do
         control = ActiveRecord::QueryRecorder.new { get api(endpoint, user), params: { scope: 'merge_requests', search: '*' } }
@@ -108,26 +134,51 @@ RSpec.describe API::Search, factory_default: :keep do
         it 'avoids N+1 queries' do
           control = ActiveRecord::QueryRecorder.new { get api(endpoint, user), params: { scope: 'commits', search: 'folder' } }
 
-          project_2 = create(:project, :public, :repository, :wiki_repo, name: 'awesome project 2')
-          project_3 = create(:project, :public, :repository, :wiki_repo, name: 'awesome project 3')
+          project_2 = create(:project, :public, :repository, :wiki_repo, group: group, name: 'awesome project 2')
           project_2.repository.index_commits_and_blobs
-          project_3.repository.index_commits_and_blobs
+          3.times do |i|
+            commit_sha = project.repository.create_file(user, "#{i}", "folder #{i}", message: "committing folder #{i}", branch_name: 'master')
+            project.repository.commit(commit_sha)
+          end
+          project.repository.index_commits_and_blobs
 
           ensure_elasticsearch_index!
 
-          # Some N+1 queries still exist
-          expect { get api(endpoint, user), params: { scope: 'commits', search: 'folder' } }.not_to exceed_query_limit(control).with_threshold(9)
+          # N+1 queries still exist (ci_pipelines)
+          expect { get api(endpoint, user), params: { scope: 'commits', search: 'folder' } }.not_to exceed_query_limit(control).with_threshold(5)
+          # support global, group, and project search results expected counts
+          expected_count = level == :project ? 5 : 7
+          expect(json_response.count).to be expected_count
         end
       end
 
       context 'for blobs scope' do
         it_behaves_like 'response is correct', schema: 'public_api/v4/blobs' do
           before do
-            get api(endpoint, user), params: { scope: 'blobs', search: 'monitors' }
+            get api(endpoint, user), params: { scope: 'blobs', search: 'folder' }
           end
         end
 
         it_behaves_like 'pagination', scope: 'blobs'
+
+        it 'avoids N+1 queries' do
+          control = ActiveRecord::QueryRecorder.new { get api(endpoint, user), params: { scope: 'blobs', search: 'Issue team' } }
+
+          project_2 = create(:project, :public, :repository, :wiki_repo, group: group, name: 'awesome project 2')
+          project_2.repository.index_commits_and_blobs
+          3.times do |i|
+            commit_sha = project.repository.create_file(user, "#{i}", "Issue team #{i}", message: "#{i}", branch_name: 'master')
+            project.repository.commit(commit_sha)
+          end
+
+          project.repository.index_commits_and_blobs
+          ensure_elasticsearch_index!
+
+          expect { get api(endpoint, user), params: { scope: 'blobs', search: 'Issue team' } }.not_to exceed_query_limit(control)
+          # support global, group, and project search results expected counts
+          expected_count = level == :project ? 6 : 9
+          expect(json_response.count).to be expected_count
+        end
 
         context 'filters' do
           def results_filenames
@@ -213,6 +264,7 @@ RSpec.describe API::Search, factory_default: :keep do
       end
 
       it_behaves_like 'pagination', scope: 'issues'
+      it_behaves_like 'orderable by created_at', scope: 'issues'
     end
 
     unless level == :project

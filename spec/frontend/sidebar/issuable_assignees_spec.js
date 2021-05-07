@@ -5,15 +5,17 @@ import UncollapsedAssigneeList from '~/sidebar/components/assignees/uncollapsed_
 describe('IssuableAssignees', () => {
   let wrapper;
 
-  const createComponent = (props = { users: [] }) => {
+  const createComponent = (props = {}) => {
     wrapper = shallowMount(IssuableAssignees, {
       provide: {
         rootPath: '',
       },
-      propsData: { ...props },
+      propsData: {
+        users: [],
+        ...props,
+      },
     });
   };
-  const findLabel = () => wrapper.find('[data-testid="assigneeLabel"');
   const findUncollapsedAssigneeList = () => wrapper.find(UncollapsedAssigneeList);
   const findEmptyAssignee = () => wrapper.find('[data-testid="none"]');
 
@@ -23,16 +25,14 @@ describe('IssuableAssignees', () => {
   });
 
   describe('when no assignees are present', () => {
-    beforeEach(() => {
+    it('renders "None - assign yourself" when user is logged in', () => {
+      createComponent({ signedIn: true });
+      expect(findEmptyAssignee().text()).toBe('None - assign yourself');
+    });
+
+    it('renders "None" when user is not logged in', () => {
       createComponent();
-    });
-
-    it('renders "None"', () => {
       expect(findEmptyAssignee().text()).toBe('None');
-    });
-
-    it('renders "0 assignees"', () => {
-      expect(findLabel().text()).toBe('0 Assignees');
     });
   });
 
@@ -42,18 +42,13 @@ describe('IssuableAssignees', () => {
 
       expect(findUncollapsedAssigneeList().exists()).toBe(true);
     });
+  });
 
-    it.each`
-      assignees                 | expected
-      ${[{ id: 1 }]}            | ${'Assignee'}
-      ${[{ id: 1 }, { id: 2 }]} | ${'2 Assignees'}
-    `(
-      'when assignees have a length of $assignees.length, it renders $expected',
-      ({ assignees, expected }) => {
-        createComponent({ users: assignees });
-
-        expect(findLabel().text()).toBe(expected);
-      },
-    );
+  describe('when clicking "assign yourself"', () => {
+    it('emits "assign-self"', () => {
+      createComponent({ signedIn: true });
+      wrapper.find('[data-testid="assign-yourself"]').vm.$emit('click');
+      expect(wrapper.emitted('assign-self')).toHaveLength(1);
+    });
   });
 });

@@ -8,10 +8,11 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
     class="btn-group flex-grow-1 mr-2"
   >
     <gl-dropdown-stub
-      category="tertiary"
+      category="primary"
       class="flex-grow-1 text-center"
       headertext=""
-      right=""
+      hideheaderborder="true"
+      right="true"
       size="medium"
       text="Severity"
       variant="default"
@@ -20,6 +21,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
         avatarurl=""
         iconcolor=""
         iconname=""
+        iconrightarialabel=""
         iconrightname=""
         secondarytext=""
       >
@@ -40,6 +42,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
         avatarurl=""
         iconcolor=""
         iconname=""
+        iconrightarialabel=""
         iconrightname=""
         secondarytext=""
       >
@@ -60,6 +63,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
         avatarurl=""
         iconcolor=""
         iconname=""
+        iconrightarialabel=""
         iconrightname=""
         secondarytext=""
       >
@@ -79,6 +83,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
     </gl-dropdown-stub>
      
     <gl-button-stub
+      aria-label="Sort direction"
       buttontextclasses=""
       category="primary"
       class="flex-grow-0 js-sort-order"

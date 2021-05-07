@@ -41,16 +41,16 @@ module Ci
         PERCENTAGES[stage]
       end
 
-      private
-
-      attr_reader :context, :stage
-
       def eligible_for_notifications?
         context.shared_runners_minutes_limit_enabled?
       end
 
+      private
+
+      attr_reader :context, :stage
+
       def calculate_notification_stage
-        percentage = context.shared_runners_remaining_minutes_percent.to_i
+        percentage = context.percent_total_minutes_remaining.to_i
 
         if percentage <= PERCENTAGES[:exceeded]
           :exceeded

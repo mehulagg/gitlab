@@ -7,6 +7,7 @@ import {
   GlFormCombobox,
   GlFormGroup,
   GlFormSelect,
+  GlFormInput,
   GlFormTextarea,
   GlIcon,
   GlLink,
@@ -15,17 +16,17 @@ import {
 } from '@gitlab/ui';
 import Cookies from 'js-cookie';
 import { mapActions, mapState } from 'vuex';
-import { mapComputed } from '~/vuex_shared/bindings';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { mapComputed } from '~/vuex_shared/bindings';
 import {
   AWS_TOKEN_CONSTANTS,
   ADD_CI_VARIABLE_MODAL_ID,
   AWS_TIP_DISMISSED_COOKIE_NAME,
   AWS_TIP_MESSAGE,
 } from '../constants';
-import { awsTokens, awsTokenList } from './ci_variable_autocomplete_tokens';
 import CiEnvironmentsDropdown from './ci_environments_dropdown.vue';
+import { awsTokens, awsTokenList } from './ci_variable_autocomplete_tokens';
 
 export default {
   modalId: ADD_CI_VARIABLE_MODAL_ID,
@@ -41,6 +42,7 @@ export default {
     GlFormCombobox,
     GlFormGroup,
     GlFormSelect,
+    GlFormInput,
     GlFormTextarea,
     GlIcon,
     GlLink,
@@ -127,6 +129,9 @@ export default {
       }
 
       return true;
+    },
+    scopedVariablesAvailable() {
+      return !this.isGroup || this.glFeatures.groupScopedCiVariables;
     },
     variableValidationFeedback() {
       return `${this.tokenValidationFeedback} ${this.maskedFeedback}`;
@@ -222,32 +227,34 @@ export default {
       </gl-form-group>
 
       <div class="d-flex">
-        <gl-form-group
-          :label="__('Type')"
-          label-for="ci-variable-type"
-          class="w-50 gl-mr-5"
-          :class="{ 'w-100': isGroup }"
-        >
+        <gl-form-group :label="__('Type')" label-for="ci-variable-type" class="w-50 gl-mr-5">
           <gl-form-select id="ci-variable-type" v-model="variable_type" :options="typeOptions" />
         </gl-form-group>
 
         <gl-form-group
-          v-if="!isGroup"
           :label="__('Environment scope')"
           label-for="ci-variable-env"
           class="w-50"
+          data-testid="environment-scope"
         >
           <ci-environments-dropdown
+            v-if="scopedVariablesAvailable"
             class="w-100"
             :value="environment_scope"
             @selectEnvironment="setEnvironmentScope"
             @createClicked="addWildCardScope"
           />
+
+          <gl-form-input v-else v-model="environment_scope" class="w-100" readonly />
         </gl-form-group>
       </div>
 
       <gl-form-group :label="__('Flags')" label-for="ci-variable-flags">
-        <gl-form-checkbox v-model="protected_variable" class="mb-0">
+        <gl-form-checkbox
+          v-model="protected_variable"
+          class="mb-0"
+          data-testid="ci-variable-protected-checkbox"
+        >
           {{ __('Protect variable') }}
           <gl-link target="_blank" :href="protectedEnvironmentVariablesLink">
             <gl-icon name="question" :size="12" />
@@ -260,7 +267,7 @@ export default {
         <gl-form-checkbox
           ref="masked-ci-variable"
           v-model="masked"
-          data-qa-selector="ci_variable_masked_checkbox"
+          data-testid="ci-variable-masked-checkbox"
         >
           {{ __('Mask variable') }}
           <gl-link target="_blank" :href="maskedEnvironmentVariablesLink">

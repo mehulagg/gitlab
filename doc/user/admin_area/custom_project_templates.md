@@ -1,11 +1,11 @@
 ---
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Custom instance-level project templates **(PREMIUM ONLY)**
+# Custom instance-level project templates **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6860) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
 
@@ -16,14 +16,14 @@ Every project directly under the group namespace will be
 available to the user if they have access to them. For example:
 
 - Public projects, in the group will be available to every signed-in user, if all enabled [project features](../project/settings/index.md#sharing-and-permissions)
-  are set to **Everyone With Access**.
+  except for GitLab Pages are set to **Everyone With Access**.
 - Private projects will be available only if the user is a member of the project.
 
 Repository and database information that are copied over to each new project are
-identical to the data exported with
-[GitLab's Project Import/Export](../project/settings/import_export.md).
+identical to the data exported with the
+[GitLab Project Import/Export](../project/settings/import_export.md).
 
-NOTE: **Note:**
+NOTE:
 To set project templates at a group level,
 see [Custom group-level project templates](../group/custom_project_templates.md).
 
@@ -37,7 +37,7 @@ source for an entire GitLab instance by:
 1. Selecting a group to use.
 1. Pressing **Save changes**.
 
-NOTE: **Note:**
+NOTE:
 Projects below subgroups of the template group are **not** supported.
 
 <!-- ## Troubleshooting

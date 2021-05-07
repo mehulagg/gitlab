@@ -1,5 +1,5 @@
-import * as types from './mutation_types';
 import { DEFAULT_TIMEOUT, DEFAULT_ALLOWED_IP } from '../constants';
+import * as types from './mutation_types';
 
 export default {
   [types.REQUEST_GEO_SETTINGS](state) {

@@ -15,7 +15,7 @@ module Gitlab
       ImportSource.new('bitbucket',        'Bitbucket Cloud',  Gitlab::BitbucketImport::Importer),
       ImportSource.new('bitbucket_server', 'Bitbucket Server', Gitlab::BitbucketServerImport::Importer),
       ImportSource.new('gitlab',           'GitLab.com',       Gitlab::GitlabImport::Importer),
-      ImportSource.new('google_code',      'Google Code',      Gitlab::GoogleCodeImport::Importer),
+      ImportSource.new('google_code',      'Google Code',      nil),
       ImportSource.new('fogbugz',          'FogBugz',          Gitlab::FogbugzImport::Importer),
       ImportSource.new('git',              'Repo by URL',      nil),
       ImportSource.new('gitlab_project',   'GitLab export',    Gitlab::ImportExport::Importer),
@@ -28,7 +28,7 @@ module Gitlab
       prepend_if_ee('EE::Gitlab::ImportSources') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
       def options
-        Hash[import_table.map { |importer| [importer.title, importer.name] }]
+        import_table.to_h { |importer| [importer.title, importer.name] }
       end
 
       def values

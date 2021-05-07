@@ -82,7 +82,7 @@ $darken-border-dashed-factor: 25% !default;
 $white: #fff !default;
 $white-normal: #f0f0f0 !default;
 $white-dark: #eaeaea !default;
-$white-transparent: rgba(255, 255, 255, 0.8) !default;
+$white-transparent: rgba($white, 0.8) !default;
 
 $gray-lightest: #fdfdfd !default;
 $gray-light: #fafafa !default;
@@ -352,8 +352,8 @@ $border-gray-normal-dashed: darken($gray-normal, $darken-border-dashed-factor);
  */
 $border-color: $gray-100;
 $shadow-color: $t-gray-a-08;
-$well-expand-item: #e8f2f7;
-$well-inner-border: #eef0f2;
+$well-expand-item: #e8f2f7 !default;
+$well-inner-border: #eef0f2 !default;
 $well-light-border: #f1f1f1;
 $well-light-text-color: #5b6169;
 
@@ -433,6 +433,7 @@ $browser-scrollbar-size: 10px;
  */
 $header-height: 40px;
 $header-zindex: 1000;
+$zindex-dropdown-menu: 300;
 $suggestion-header-height: 46px;
 $ide-statusbar-height: 25px;
 $fixed-layout-width: 1280px;
@@ -442,7 +443,7 @@ $gl-avatar-size: 40px;
 $border-radius-default: 4px;
 $border-radius-small: 2px;
 $border-radius-large: 8px;
-$default-icon-size: 18px;
+$default-icon-size: 16px;
 $layout-link-gray: #7e7c7c;
 $btn-side-margin: 10px;
 $btn-sm-side-margin: 7px;
@@ -468,7 +469,6 @@ $gl-line-height-20: 20px;
 $gl-line-height-24: 24px;
 $gl-line-height-14: 14px;
 
-$issue-box-upcoming-bg: #8f8f8f;
 $pages-group-name-color: #4c4e54;
 
 /*
@@ -517,9 +517,12 @@ $line-removed-dark-transparent: rgba(246, 53, 85, 0.2);
 $line-number-old: #f9d7dc;
 $line-number-new: #ddfbe6;
 $line-number-select: #fbf2da;
+$line-number-commented: #dae5fb;
 $line-target-blue: $blue-50;
 $line-select-yellow: #fcf8e7;
 $line-select-yellow-dark: #f0e2bd;
+$line-commented-blue: #e8effc;
+$line-commented-blue-dark: #bccef0;
 $dark-diff-match-bg: rgba($white, 0.3);
 $dark-diff-match-color: rgba($white, 0.1);
 $diff-image-info-color: #808080;
@@ -547,7 +550,6 @@ $dropdown-vertical-offset: 4px;
 $dropdown-empty-row-bg: rgba(#000, 0.04);
 $dropdown-shadow-color: rgba(#000, 0.1);
 $dropdown-title-btn-color: #bfbfbf;
-$dropdown-input-fa-color: #c7c7c7;
 $dropdown-input-focus-shadow: rgba($blue-300, 0.4);
 $dropdown-loading-bg: rgba($white, 0.6);
 $dropdown-chevron-size: 10px;
@@ -588,7 +590,7 @@ $gl-btn-xs-line-height: 13px;
 /*
 * Badges
 */
-$badge-bg: rgba(0, 0, 0, 0.07);
+$badge-bg: rgba($black, 0.07);
 
 /*
 * Pagination
@@ -625,17 +627,18 @@ $search-input-xl-width: 320px;
 $note-disabled-comment-color: #b2b2b2;
 $note-targe3-outside: #fffff0;
 $note-targe3-inside: #ffffd3;
-$note-icon-gutter-width: 55px;
 
 /*
 * Identicon
 */
+$identicon-text-color: #525252 !default;
 $identicon-red: #ffebee !default;
 $identicon-purple: #f3e5f5 !default;
 $identicon-indigo: #e8eaf6 !default;
 $identicon-blue: #e3f2fd !default;
 $identicon-teal: #e0f2f1 !default;
 $identicon-orange: #fbe9e7 !default;
+$identicon-gray: #eee !default;
 
 /*
 * Calendar
@@ -827,8 +830,8 @@ $ci-variable-remove-button-width: calc(1em + #{2 * $gl-padding});
 /*
 GitLab Plans
 */
-$gl-gold-plan: #d4af37;
-$gl-silver-plan: #91a1ab;
+$gl-ultimate-plan: #d4af37;
+$gl-premium-plan: #91a1ab;
 $gl-bronze-plan: #cd7f32;
 
 /*
@@ -839,10 +842,10 @@ $linked-project-column-margin: 60px;
 /*
 Performance Bar
 */
-$perf-bar-production: #222;
-$perf-bar-staging: #291430;
-$perf-bar-development: #4c1210;
-$perf-bar-bucket-bg: #111;
+$perf-bar-production: $gray-950;
+$perf-bar-staging: $indigo-950;
+$perf-bar-development: $red-950;
+$perf-bar-bucket-bg: $black;
 $perf-bar-bucket-box-shadow-from: rgba($white, 0.2);
 $perf-bar-bucket-box-shadow-to: rgba($black, 0.25);
 $perf-bar-canary-text: $orange-400;
@@ -866,6 +869,27 @@ $add-to-slack-popup-max-width: 400px;
 $add-to-slack-gif-max-width: 850px;
 $add-to-slack-well-max-width: 750px;
 $add-to-slack-logo-size: 100px;
+
+/*
+Security & Compliance Carousel
+*/
+$security-and-compliance-carousel-image-carousel-width: 1000px;
+$security-and-compliance-carousel-image-discover-button-width: 45%;
+$security-and-compliance-carousel-image-discover-buttons-max-width: 280px;
+$security-and-compliance-carousel-image-discover-footer-max-width: 500px;
+$security-and-compliance-carousel-image-discover-feedback-width: 30%;
+$security-and-compliance-carousel-image-discover-text-carousel-max-width: 650px;
+$security-and-compliance-carousel-image-discover-text-carousel-caption-height: 100%;
+$security-and-compliance-carousel-image-discover-text-carousel-caption-max-width: 500px;
+$security-and-compliance-carousel-control-icon-width: 10px;
+$security-and-compliance-carousel-control-position: -5%;
+$security-and-compliance-carousel-inner-width: 90%;
+$security-and-compliance-carousel-indicators-bottom: -20px;
+$security-and-compliance-carousel-indicators-bottom-lg: -15px;
+$security-and-compliance-carousel-indicators-dimension: 6px;
+$security-and-compliance-carousel-indicators-border-radius: 100%;
+$security-and-compliance-carousel-prev-icon-background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666666' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E");
+$security-and-compliance-carousel-next-icon-background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666666' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E");
 
 /*
 Popup
@@ -900,11 +924,12 @@ Issue Analytics
 $issues-analytics-popover-boarder-color: rgba(0, 0, 0, 0.15);
 
 /*
-Merge Requests
+Merge requests
 */
 $mr-tabs-height: 48px;
 $mr-version-controls-height: 56px;
 $mr-widget-margin-left: 40px;
+$mr-review-bar-height: calc(2rem + 13px);
 
 /*
 Compare Branches

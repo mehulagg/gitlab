@@ -20,16 +20,17 @@ module EE
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
-        def preload_users
+        def applicable_to_branch(branch)
           ActiveRecord::Associations::Preloader.new.preload(
             self,
             [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
           )
 
           self.select do |rule|
+            next true unless rule.approval_project_rule.present?
             next true if rule.overridden?
 
-            rule
+            rule.approval_project_rule.applies_to_branch?(branch)
           end
         end
       end
@@ -51,8 +52,6 @@ module EE
 
       delegate :sha, to: :head_pipeline, prefix: :head_pipeline, allow_nil: true
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
-      delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
-      delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -70,15 +69,23 @@ module EE
       scope :including_merge_train, -> do
         includes(:merge_train)
       end
+
+      def merge_requests_author_approval?
+        !!target_project&.merge_requests_author_approval?
+      end
+
+      def merge_requests_disable_committers_approval?
+        !!target_project&.merge_requests_disable_committers_approval?
+      end
     end
 
     class_methods do
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
-        super.preload(:blocking_merge_requests)
+        super.preload(:blocking_merge_requests, target_project: [group: :saml_provider])
       end
 
-      def sort_by_attribute(method, *args)
+      def sort_by_attribute(method, *args, **kwargs)
         if method.to_s == 'review_time_desc'
           order_review_time_desc
         else
@@ -94,6 +101,11 @@ module EE
         grouping_columns = super
         grouping_columns << ::MergeRequest::Metrics.review_time_field if sort.to_s == 'review_time_desc'
         grouping_columns
+      end
+
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
       end
     end
 
@@ -168,6 +180,10 @@ module EE
       }
     end
 
+    def has_security_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.security_reports)
+    end
+
     def has_dependency_scanning_reports?
       !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dependency_list_reports)
     end
@@ -190,26 +206,6 @@ module EE
       return missing_report_error("container scanning") unless has_container_scanning_reports?
 
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'container_scanning')
-    end
-
-    def has_sast_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.sast_reports)
-    end
-
-    def has_secret_detection_reports?
-      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.secret_detection_reports)
-    end
-
-    def compare_sast_reports(current_user)
-      return missing_report_error("SAST") unless has_sast_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'sast')
-    end
-
-    def compare_secret_detection_reports(current_user)
-      return missing_report_error("secret detection") unless has_secret_detection_reports?
-
-      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'secret_detection')
     end
 
     def has_dast_reports?
@@ -248,6 +244,10 @@ module EE
       compare_reports(::Ci::CompareSecurityReportsService, current_user, 'coverage_fuzzing')
     end
 
+    def has_api_fuzzing_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.api_fuzzing_reports)
+    end
+
     def compare_api_fuzzing_reports(current_user)
       return missing_report_error('api fuzzing') unless has_api_fuzzing_reports?
 
@@ -269,20 +269,22 @@ module EE
       (base_pipeline.security_scans.pluck(:scan_type) - actual_head_pipeline.security_scans.pluck(:scan_type)).uniq
     end
 
+    def applicable_approval_rules_for_user(user_id)
+      wrapped_approval_rules.select do |rule|
+        rule.approvers.pluck(:id).include?(user_id)
+      end
+    end
+
+    def security_reports_up_to_date?
+      project.security_reports_up_to_date_for_ref?(target_branch)
+    end
+
     private
 
     def has_approved_license_check?
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
       end
-    end
-
-    def missing_report_error(report_type)
-      { status: :error, status_reason: "This merge request does not have #{report_type} reports" }
-    end
-
-    def report_type_enabled?(report_type)
-      !!actual_head_pipeline&.batch_lookup_report_artifact_for_file_type(report_type)
     end
   end
 end

@@ -46,8 +46,25 @@ RSpec.shared_examples 'issue analytics controller' do
       context 'as JSON' do
         subject { get :show, params: params, format: :json }
 
-        it 'renders chart data as JSON' do
-          expected_result = { issue1.created_at.strftime(IssuablesAnalytics::DATE_FORMAT) => 2 }
+        context 'when new issue analytics data format is disabled' do
+          before do
+            stub_feature_flags(new_issues_analytics_chart_data: false)
+          end
+
+          it 'renders chart data as JSON' do
+            expected_result = { issue1.created_at.strftime(IssuablesAnalytics::DATE_FORMAT) => 2 }
+
+            subject
+
+            expect(json_response).to include(expected_result)
+          end
+        end
+
+        it 'renders new chart data as JSON' do
+          month = issue1.created_at.strftime(Analytics::IssuesAnalytics::DATE_FORMAT)
+          expected_result = {
+            month => { 'created' => 2, 'closed' => 1, 'accumulated_open' => 1 }
+          }
 
           subject
 
@@ -63,7 +80,10 @@ RSpec.shared_examples 'issue analytics controller' do
           end
 
           it 'does not count issues which user cannot view' do
-            expected_result = { issue1.created_at.strftime(IssuablesAnalytics::DATE_FORMAT) => 1 }
+            month = issue2.created_at.strftime(Analytics::IssuesAnalytics::DATE_FORMAT)
+            expected_result = {
+              month => { 'created' => 1, 'closed' => 1, 'accumulated_open' => 0 }
+            }
 
             subject
 

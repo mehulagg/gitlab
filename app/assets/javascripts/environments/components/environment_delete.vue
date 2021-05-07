@@ -4,7 +4,8 @@
  * Used in the environments table.
  */
 
-import { GlTooltipDirective, GlButton } from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlModalDirective } from '@gitlab/ui';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { s__ } from '~/locale';
 import eventHub from '../event_hub';
 
@@ -14,6 +15,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModalDirective,
   },
   props: {
     environment: {
@@ -39,7 +41,7 @@ export default {
   },
   methods: {
     onClick() {
-      this.$root.$emit('bv::hide::tooltip', this.$options.deleteEnvironmentTooltipId);
+      this.$root.$emit(BV_HIDE_TOOLTIP, this.$options.deleteEnvironmentTooltipId);
       eventHub.$emit('requestDeleteEnvironment', this.environment);
     },
     onDeleteEnvironment(environment) {
@@ -54,15 +56,14 @@ export default {
 <template>
   <gl-button
     v-gl-tooltip="{ id: $options.deleteEnvironmentTooltipId }"
+    v-gl-modal-directive="'delete-environment-modal'"
     :loading="isLoading"
     :title="title"
     :aria-label="title"
-    class="gl-display-none gl-display-md-block"
+    class="gl-display-none gl-md-display-block"
     variant="danger"
     category="primary"
     icon="remove"
-    data-toggle="modal"
-    data-target="#delete-environment-modal"
     @click="onClick"
   />
 </template>

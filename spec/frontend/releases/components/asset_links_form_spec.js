@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { getJSONFixture } from 'helpers/fixtures';
-import AssetLinksForm from '~/releases/components/asset_links_form.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { ENTER_KEY } from '~/lib/utils/keys';
+import AssetLinksForm from '~/releases/components/asset_links_form.vue';
 import { ASSET_LINK_TYPE, DEFAULT_ASSET_LINK_TYPE } from '~/releases/constants';
 
 const localVue = createLocalVue();
@@ -30,7 +30,7 @@ describe('Release edit component', () => {
       updateAssetLinkName: jest.fn(),
       updateAssetLinkType: jest.fn(),
       removeAssetLink: jest.fn().mockImplementation((_context, linkId) => {
-        state.release.assets.links = state.release.assets.links.filter(l => l.id !== linkId);
+        state.release.assets.links = state.release.assets.links.filter((l) => l.id !== linkId);
       }),
     };
 
@@ -44,7 +44,7 @@ describe('Release edit component', () => {
 
     const store = new Vuex.Store({
       modules: {
-        detail: {
+        editNew: {
           namespaced: true,
           actions,
           state,
@@ -104,7 +104,7 @@ describe('Release edit component', () => {
         expect(actions.updateAssetLinkUrl).not.toHaveBeenCalled();
       };
 
-      const dispatchKeydowEvent = eventParams => {
+      const dispatchKeydowEvent = (eventParams) => {
         const event = new KeyboardEvent('keydown', eventParams);
 
         input.dispatchEvent(event);
@@ -162,7 +162,7 @@ describe('Release edit component', () => {
         expect(actions.updateAssetLinkUrl).not.toHaveBeenCalled();
       };
 
-      const dispatchKeydowEvent = eventParams => {
+      const dispatchKeydowEvent = (eventParams) => {
         const event = new KeyboardEvent('keydown', eventParams);
 
         input.dispatchEvent(event);

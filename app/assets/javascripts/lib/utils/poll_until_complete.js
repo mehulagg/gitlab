@@ -1,6 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
-import Poll from './poll';
 import httpStatusCodes from './http_status';
+import Poll from './poll';
 
 /**
  * Polls an endpoint until it returns either a 200 OK or a error status.
@@ -29,7 +29,7 @@ export default (url, config = {}) =>
       },
       data: { url, config },
       method: 'axiosGet',
-      successCallback: response => {
+      successCallback: (response) => {
         if (response.status === httpStatusCodes.OK) {
           resolve(response);
           eTagPoll.stop();

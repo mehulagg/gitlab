@@ -169,6 +169,7 @@ excluded_attributes:
     - :compliance_framework_setting
     - :show_default_award_emojis
     - :services
+    - :exported_protected_branches
   namespaces:
     - :runners_token
     - :runners_token_encrypted
@@ -219,6 +220,7 @@ excluded_attributes:
     - :duplicated_to_id
     - :promoted_to_epic_id
     - :blocking_issues_count
+    - :service_desk_reply_to
   merge_request:
     - :milestone_id
     - :sprint_id
@@ -259,10 +261,13 @@ excluded_attributes:
     - :resource_group_id
     - :waiting_for_resource_at
     - :processed
+    - :id_convert_to_bigint
+    - :stage_id_convert_to_bigint
   sentry_issue:
     - :issue_id
   push_event_payload:
     - :event_id
+    - :event_id_convert_to_bigint
   project_badges:
     - :group_id
   resource_label_events:
@@ -285,6 +290,7 @@ excluded_attributes:
     - :label_id
   events:
     - :target_id
+    - :id_convert_to_bigint
   timelogs:
     - :issue_id
     - :merge_request_id
@@ -340,10 +346,12 @@ excluded_attributes:
     - :protected_environment_id
   boards:
     - :milestone_id
+    - :iteration_id
   lists:
     - :board_id
     - :label_id
     - :milestone_id
+    - :iteration_id
   epic:
     - :start_date_sourcing_milestone_id
     - :due_date_sourcing_milestone_id
@@ -387,6 +395,8 @@ methods:
     - :state
 
 preloads:
+  issues:
+    project: :route
   statuses:
     # TODO: We cannot preload tags, as they are not part of `GenericCommitStatus`
     # tags: # needed by tag_list
@@ -395,6 +405,29 @@ preloads:
     source_project: # needed by source_branch_sha and diff_head_sha
     target_project: # needed by target_branch_sha
     assignees: # needed by assigne_id that is implemented by DeprecatedAssignee
+
+# Specify a custom export reordering for a given relationship
+# For example for issues we use a custom export reordering by relative_position, so that on import, we can reset the
+# relative position value, but still keep the issues order to the order in which issues were in the exported project.
+# By default the ordering of relations is done by PK.
+# column - specify the column by which to reorder, by default it is relation's PK
+# direction - specify the ordering direction :asc or :desc, default :asc
+# nulls_position - specify where would null values be positioned. Because custom ordering column can contain nulls we
+#                  need to also specify where would the nulls be placed. It can be :nulls_last or :nulls_first, defaults
+#                  to :nulls_last
+# Example:
+# export_reorders:
+#   project:
+#     issues:
+#       column: :relative_position
+#       direction: :asc
+#       nulls_position: :nulls_last
+export_reorders:
+  project:
+    issues:
+      column: :relative_position
+      direction: :asc
+      nulls_position: :nulls_last
 
 # EE specific relationships and settings to include. All of this will be merged
 # into the previous structures if EE is used.
@@ -411,8 +444,25 @@ ee:
         - :deploy_access_levels
       - :service_desk_setting
       - :security_setting
+      - :push_rule
 
   included_attributes:
     issuable_sla:
       - :issue
       - :due_at
+    push_rule:
+      - :force_push_regex
+      - :delete_branch_regex
+      - :commit_message_regex
+      - :author_email_regex
+      - :file_name_regex
+      - :branch_name_regex
+      - :commit_message_negative_regex
+      - :max_file_size
+      - :deny_delete_tag
+      - :member_check
+      - :is_sample
+      - :prevent_secrets
+      - :reject_unsigned_commits
+      - :commit_committer_check
+      - :regexp_uses_re2

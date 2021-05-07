@@ -1,0 +1,22 @@
+mutation($namespaceIds: [NamespaceID!]!) {
+  bulkFindOrCreateDevopsAdoptionSegments(input: { namespaceIds: $namespaceIds }) {
+    segments {
+      id
+      latestSnapshot {
+        issueOpened
+        mergeRequestOpened
+        mergeRequestApproved
+        runnerConfigured
+        pipelineSucceeded
+        deploySucceeded
+        securityScanSucceeded
+        recordedAt
+      }
+      namespace {
+        fullName
+        id
+      }
+    }
+    errors
+  }
+}

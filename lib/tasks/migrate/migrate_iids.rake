@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 desc "GitLab | Build internal ids for issues and merge requests"
 task migrate_iids: :environment do
   puts 'Issues'.color(:yellow)
@@ -9,7 +11,7 @@ task migrate_iids: :environment do
     else
       print 'F'
     end
-  rescue
+  rescue StandardError
     print 'F'
   end
 
@@ -23,7 +25,7 @@ task migrate_iids: :environment do
     else
       print 'F'
     end
-  rescue
+  rescue StandardError
     print 'F'
   end
 
@@ -37,7 +39,7 @@ task migrate_iids: :environment do
     else
       print 'F'
     end
-  rescue
+  rescue StandardError
     print 'F'
   end
 

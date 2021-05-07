@@ -64,6 +64,18 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
         expect(build('spinach 1')).to be_created
         expect(pipeline.reload).to be_running
       end
+
+      it 'changes ownership of subsequent builds' do
+        expect(build('rspec 2').user).not_to eq(user)
+        expect(build('rspec 3').user).not_to eq(user)
+        expect(build('spinach 1').user).not_to eq(user)
+
+        service.execute(pipeline)
+
+        expect(build('rspec 2').user).to eq(user)
+        expect(build('rspec 3').user).to eq(user)
+        expect(build('spinach 1').user).to eq(user)
+      end
     end
 
     context 'when there is failed build present which was run on failure' do
@@ -161,6 +173,16 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
             expect(build('rspec 2')).to be_created
             expect(pipeline.reload).to be_running
           end
+
+          it 'changes ownership of subsequent builds' do
+            expect(build('staging').user).not_to eq(user)
+            expect(build('rspec 2').user).not_to eq(user)
+
+            service.execute(pipeline)
+
+            expect(build('staging').user).to eq(user)
+            expect(build('rspec 2').user).to eq(user)
+          end
         end
       end
 
@@ -250,7 +272,7 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
     end
 
     it 'closes all todos about failed jobs for pipeline' do
-      expect(MergeRequests::AddTodoWhenBuildFailsService)
+      expect(::MergeRequests::AddTodoWhenBuildFailsService)
         .to receive_message_chain(:new, :close_all)
 
       service.execute(pipeline)

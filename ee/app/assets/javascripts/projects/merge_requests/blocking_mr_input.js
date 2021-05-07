@@ -2,7 +2,7 @@ import Vue from 'vue';
 import BlockingMrInput from 'ee/projects/merge_requests/blocking_mr_input_root.vue';
 import { n__ } from '~/locale';
 
-export default el => {
+export default (el) => {
   if (!el) {
     return null;
   }

@@ -4,24 +4,34 @@ module Resolvers
   class UsersResolver < BaseResolver
     include Gitlab::Graphql::Authorize::AuthorizeResource
 
+    type Types::UserType.connection_type, null: true
     description 'Find Users'
 
     argument :ids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'List of user Global IDs'
+             description: 'List of user Global IDs.'
 
     argument :usernames, [GraphQL::STRING_TYPE], required: false,
-              description: 'List of usernames'
+              description: 'List of usernames.'
 
     argument :sort, Types::SortEnum,
-             description: 'Sort users by this criteria',
+             description: 'Sort users by this criteria.',
              required: false,
-             default_value: 'created_desc'
+             default_value: :created_desc
 
-    def resolve(ids: nil, usernames: nil, sort: nil)
+    argument :search, GraphQL::STRING_TYPE,
+             required: false,
+             description: "Query to search users by name, username, or primary email."
+
+    argument :admins, GraphQL::BOOLEAN_TYPE,
+              required: false,
+              default_value: false,
+              description: 'Return only admin users.'
+
+    def resolve(ids: nil, usernames: nil, sort: nil, search: nil, admins: nil)
       authorize!
 
-      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort)).execute
+      ::UsersFinder.new(context[:current_user], finder_params(ids, usernames, sort, search, admins)).execute
     end
 
     def ready?(**args)
@@ -29,7 +39,7 @@ module Resolvers
 
       return super if args.values.compact.blank?
 
-      if args.values.all?
+      if args[:usernames]&.present? && args[:ids]&.present?
         raise Gitlab::Graphql::Errors::ArgumentError, 'Provide either a list of usernames or ids'
       end
 
@@ -42,11 +52,13 @@ module Resolvers
 
     private
 
-    def finder_params(ids, usernames, sort)
+    def finder_params(ids, usernames, sort, search, admins)
       params = {}
       params[:sort] = sort if sort
       params[:username] = usernames if usernames
       params[:id] = parse_gids(ids) if ids
+      params[:search] = search if search
+      params[:admins] = admins if admins
       params
     end
 

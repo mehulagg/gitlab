@@ -19,13 +19,13 @@ RSpec.describe 'Database schema' do
     approver_groups: %w[target_id],
     approvers: %w[target_id user_id],
     audit_events: %w[author_id entity_id target_id],
-    audit_events_part_5fc467ac26: %w[author_id entity_id target_id],
     award_emoji: %w[awardable_id user_id],
     aws_roles: %w[role_external_id],
-    boards: %w[milestone_id],
+    boards: %w[milestone_id iteration_id],
     chat_names: %w[chat_id team_id user_id],
     chat_teams: %w[team_id],
     ci_builds: %w[erased_by_id runner_id trigger_request_id user_id],
+    ci_namespace_monthly_usages: %w[namespace_id],
     ci_pipelines: %w[user_id],
     ci_runner_projects: %w[runner_id],
     ci_trigger_requests: %w[commit_id],
@@ -85,8 +85,7 @@ RSpec.describe 'Database schema' do
     users: %w[color_scheme_id created_by_id theme_id email_opted_in_source_id],
     users_star_projects: %w[user_id],
     vulnerability_identifiers: %w[external_id],
-    vulnerability_scanners: %w[external_id],
-    web_hooks: %w[service_id group_id]
+    vulnerability_scanners: %w[external_id]
   }.with_indifferent_access.freeze
 
   context 'for table' do
@@ -101,14 +100,19 @@ RSpec.describe 'Database schema' do
         context 'all foreign keys' do
           # for index to be effective, the FK constraint has to be at first place
           it 'are indexed' do
-            first_indexed_column = indexes.map(&:columns).map(&:first)
+            first_indexed_column = indexes.map(&:columns).map do |columns|
+              # In cases of complex composite indexes, a string is returned eg:
+              # "lower((extern_uid)::text), group_id"
+              columns = columns.split(',') if columns.is_a?(String)
+              columns.first.chomp
+            end
             foreign_keys_columns = foreign_keys.map(&:column)
 
             # Add the primary key column to the list of indexed columns because
             # postgres and mysql both automatically create an index on the primary
             # key. Also, the rails connection.indexes() method does not return
             # automatically generated indexes (like the primary key index).
-            first_indexed_column = first_indexed_column.push(primary_key_column)
+            first_indexed_column.push(primary_key_column)
 
             expect(first_indexed_column.uniq).to include(*foreign_keys_columns)
           end
@@ -184,6 +188,8 @@ RSpec.describe 'Database schema' do
     "ApplicationSetting" => %w[repository_storages_weighted],
     "AlertManagement::Alert" => %w[payload],
     "Ci::BuildMetadata" => %w[config_options config_variables],
+    "ExperimentSubject" => %w[context],
+    "ExperimentUser" => %w[context],
     "Geo::Event" => %w[payload],
     "GeoNodeStatus" => %w[status],
     "Operations::FeatureFlagScope" => %w[strategies],

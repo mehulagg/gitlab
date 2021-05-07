@@ -154,6 +154,15 @@ RSpec.shared_examples 'wiki model' do
       it 'returns true' do
         expect(subject.empty?).to be(true)
       end
+
+      context 'when the repository does not exist' do
+        let(:wiki_container) { wiki_container_without_repo }
+
+        it 'returns true and does not create the repo' do
+          expect(subject.empty?).to be(true)
+          expect(wiki.repository_exists?).to be false
+        end
+      end
     end
 
     context 'when the wiki has pages' do
@@ -367,6 +376,14 @@ RSpec.shared_examples 'wiki model' do
 
       expect(file.raw_data.b).to eq(image.read.b)
     end
+
+    context 'when load_content is disabled' do
+      it 'includes the file data in the Gitlab::Git::WikiFile' do
+        file = subject.find_file('image.png', load_content: false)
+
+        expect(file.raw_data).to be_empty
+      end
+    end
   end
 
   describe '#create_page' do
@@ -474,6 +491,19 @@ RSpec.shared_examples 'wiki model' do
       expect(subject).to receive(:after_wiki_activity)
 
       subject.delete_page(page)
+    end
+
+    context 'when an error is raised' do
+      it 'logs the error and returns false' do
+        page = build(:wiki_page, wiki: wiki)
+        exception = Gitlab::Git::Index::IndexError.new('foo')
+
+        allow(subject.repository).to receive(:delete_file).and_raise(exception)
+
+        expect(Gitlab::ErrorTracking).to receive(:log_exception).with(exception, action: :deleted, wiki_id: wiki.id)
+
+        expect(subject.delete_page(page)).to be_falsey
+      end
     end
   end
 

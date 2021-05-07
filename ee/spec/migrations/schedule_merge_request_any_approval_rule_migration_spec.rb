@@ -6,8 +6,8 @@ require_migration!
 RSpec.describe ScheduleMergeRequestAnyApprovalRuleMigration do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
-  let(:namespace) { namespaces.create(name: 'gitlab', path: 'gitlab-org') }
-  let(:project) { projects.create(namespace_id: namespace.id, name: 'foo') }
+  let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
+  let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
   let(:merge_requests) { table(:merge_requests) }
 
   def create_merge_request(id, options = {})
@@ -35,7 +35,7 @@ RSpec.describe ScheduleMergeRequestAnyApprovalRuleMigration do
     stub_const("#{described_class.name}::BATCH_SIZE", 2)
 
     Sidekiq::Testing.fake! do
-      Timecop.freeze do
+      freeze_time do
         migrate!
 
         expect(described_class::MIGRATION)
@@ -58,7 +58,7 @@ RSpec.describe ScheduleMergeRequestAnyApprovalRuleMigration do
       create_merge_request(2)
 
       Sidekiq::Testing.fake! do
-        Timecop.freeze do
+        freeze_time do
           migrate!
 
           expect(BackgroundMigrationWorker.jobs.size).to eq(0)

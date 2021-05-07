@@ -1,10 +1,29 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
+import { isUserBusy } from '~/set_status_modal/utils';
 import CollapsedAssignee from './collapsed_assignee.vue';
 
 const DEFAULT_MAX_COUNTER = 99;
 const DEFAULT_RENDER_COUNT = 5;
+
+const generateCollapsedAssigneeTooltip = ({ renderUsers, allUsers, tooltipTitleMergeStatus }) => {
+  const names = renderUsers.map(({ name, availability }) => {
+    if (availability && isUserBusy(availability)) {
+      return sprintf(__('%{name} (Busy)'), { name });
+    }
+    return name;
+  });
+
+  if (!allUsers.length) {
+    return __('Assignee(s)');
+  }
+  if (allUsers.length > names.length) {
+    names.push(sprintf(__('+ %{amount} more'), { amount: allUsers.length - names.length }));
+  }
+  const text = names.join(', ');
+  return tooltipTitleMergeStatus ? `${text} (${tooltipTitleMergeStatus})` : text;
+};
 
 export default {
   directives: {
@@ -39,7 +58,7 @@ export default {
       return this.users.length > 2;
     },
     allAssigneesCanMerge() {
-      return this.users.every(user => user.can_merge);
+      return this.users.every((user) => user.can_merge);
     },
     sidebarAvatarCounter() {
       if (this.users.length > DEFAULT_MAX_COUNTER) {
@@ -58,7 +77,7 @@ export default {
         return '';
       }
 
-      const mergeLength = this.users.filter(u => u.can_merge).length;
+      const mergeLength = this.users.filter((u) => u.can_merge).length;
 
       if (mergeLength === this.users.length) {
         return '';
@@ -74,19 +93,11 @@ export default {
     tooltipTitle() {
       const maxRender = Math.min(DEFAULT_RENDER_COUNT, this.users.length);
       const renderUsers = this.users.slice(0, maxRender);
-      const names = renderUsers.map(u => u.name);
-
-      if (!this.users.length) {
-        return __('Assignee(s)');
-      }
-
-      if (this.users.length > names.length) {
-        names.push(sprintf(__('+ %{amount} more'), { amount: this.users.length - names.length }));
-      }
-
-      const text = names.join(', ');
-
-      return this.tooltipTitleMergeStatus ? `${text} (${this.tooltipTitleMergeStatus})` : text;
+      return generateCollapsedAssigneeTooltip({
+        renderUsers,
+        allUsers: this.users,
+        tooltipTitleMergeStatus: this.tooltipTitleMergeStatus,
+      });
     },
 
     tooltipOptions() {
@@ -112,11 +123,12 @@ export default {
     />
     <button v-if="hasMoreThanTwoAssignees" class="btn-link" type="button">
       <span class="avatar-counter sidebar-avatar-counter"> {{ sidebarAvatarCounter }} </span>
-      <i
+      <gl-icon
         v-if="isMergeRequest && !allAssigneesCanMerge"
+        name="warning-solid"
         aria-hidden="true"
-        class="fa fa-exclamation-triangle merge-icon"
-      ></i>
+        class="merge-icon"
+      />
     </button>
   </div>
 </template>

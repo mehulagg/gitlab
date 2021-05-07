@@ -67,7 +67,7 @@ Set up the section with the following:
   ```
 
 - Include a screenshot of the result in the GraphiQL explorer. Follow the naming
-  convention described in the [Save the image](styleguide.md#save-the-image) section of the Documentation style guide.
+  convention described in the [Save the image](styleguide/index.md#save-the-image) section of the Documentation style guide.
 - Follow up with an example of what you can do with the output. Make sure the
   example is something that readers can do on their own deployments.
 - Include a link to the [GraphQL API resources](../../api/graphql/reference/index.md).
@@ -90,7 +90,3 @@ Be aware that CI tests for that second MR will fail with a bad link until the
 main MR that adds the new GraphQL page is merged. Therefore, only merge the MR against the
 [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) repository after the content has
 been merged and live on `docs.gitlab.com`.
-
-## Include a changelog entry
-
-All client-facing changes **must** include a [changelog entry](../changelog.md).

@@ -6,7 +6,7 @@ module API
     include APIGuard
     include Helpers::CustomAttributes
 
-    allow_access_with_scope :read_user, if: -> (request) { request.get? }
+    allow_access_with_scope :read_user, if: -> (request) { request.get? || request.head? }
 
     feature_category :users, ['/users/:id/custom_attributes', '/users/:id/custom_attributes/:key']
 
@@ -58,6 +58,7 @@ module API
           optional :color_scheme_id, type: Integer, desc: 'The color scheme for the file viewer'
           optional :private_profile, type: Boolean, desc: 'Flag indicating the user has a private profile'
           optional :note, type: String, desc: 'Admin note for this user'
+          optional :view_diffs_file_by_file, type: Boolean, desc: 'Flag indicating the user sees only one file diff per page'
           all_or_none_of :extern_uid, :provider
 
           use :optional_params_ee
@@ -65,9 +66,9 @@ module API
 
         params :sort_params do
           optional :order_by, type: String, values: %w[id name username created_at updated_at],
-                              default: 'id', desc: 'Return users ordered by a field'
+            default: 'id', desc: 'Return users ordered by a field'
           optional :sort, type: String, values: %w[asc desc], default: 'desc',
-                          desc: 'Return users sorted in ascending and descending order'
+            desc: 'Return users sorted in ascending and descending order'
         end
       end
 
@@ -82,11 +83,13 @@ module API
         optional :search, type: String, desc: 'Search for a username'
         optional :active, type: Boolean, default: false, desc: 'Filters only active users'
         optional :external, type: Boolean, default: false, desc: 'Filters only external users'
+        optional :exclude_external, as: :non_external, type: Boolean, default: false, desc: 'Filters only non external users'
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
         optional :created_after, type: DateTime, desc: 'Return users created after the specified time'
         optional :created_before, type: DateTime, desc: 'Return users created before the specified time'
         optional :without_projects, type: Boolean, default: false, desc: 'Filters only users without projects'
         optional :exclude_internal, as: :non_internal, type: Boolean, default: false, desc: 'Filters only non internal users'
+        optional :admins, type: Boolean, default: false, desc: 'Filters only admin users'
         all_or_none_of :extern_uid, :provider
 
         use :sort_params
@@ -96,7 +99,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get feature_category: :users do
-        authenticated_as_admin! if params[:external].present? || (params[:extern_uid].present? && params[:provider].present?)
+        authenticated_as_admin! if params[:extern_uid].present? && params[:provider].present?
 
         unless current_user&.admin?
           params.except!(:created_after, :created_before, :order_by, :sort, :two_factor, :without_projects)
@@ -158,6 +161,68 @@ module API
         present user.status || {}, with: Entities::UserStatus
       end
 
+      desc 'Follow a user' do
+        success Entities::User
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+      end
+      post ':id/follow', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user
+
+        if current_user.follow(user)
+          present user, with: Entities::UserBasic
+        else
+          not_modified!
+        end
+      end
+
+      desc 'Unfollow a user' do
+        success Entities::User
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+      end
+      post ':id/unfollow', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user
+
+        if current_user.unfollow(user)
+          present user, with: Entities::UserBasic
+        else
+          not_modified!
+        end
+      end
+
+      desc 'Get the users who follow a user' do
+        success Entities::UserBasic
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
+      end
+      get ':id/following', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user && can?(current_user, :read_user_profile, user)
+
+        present paginate(user.followees), with: Entities::UserBasic
+      end
+
+      desc 'Get the followers of a user' do
+        success Entities::UserBasic
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+        use :pagination
+      end
+      get ':id/followers', feature_category: :users do
+        user = find_user(params[:id])
+        not_found!('User') unless user && can?(current_user, :read_user_profile, user)
+
+        present paginate(user.followers), with: Entities::UserBasic
+      end
+
       desc 'Create a user. Available only for admins.' do
         success Entities::UserWithAdmin
       end
@@ -166,7 +231,7 @@ module API
         optional :password, type: String, desc: 'The password of the new user'
         optional :reset_password, type: Boolean, desc: 'Flag indicating the user will be sent a password reset token'
         optional :skip_confirmation, type: Boolean, desc: 'Flag indicating the account is confirmed'
-        at_least_one_of :password, :reset_password
+        at_least_one_of :password, :reset_password, :force_random_password
         requires :name, type: String, desc: 'The name of the user'
         requires :username, type: String, desc: 'The username of the user'
         optional :force_random_password, type: Boolean, desc: 'Flag indicating a random password will be set'
@@ -506,8 +571,6 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       delete ":id", feature_category: :users do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/20757')
-
         authenticated_as_admin!
 
         user = User.find_by(id: params[:id])
@@ -534,6 +597,24 @@ module API
 
         user.activate
       end
+
+      desc 'Approve a pending user. Available only for admins.'
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+      end
+      post ':id/approve', feature_category: :authentication_and_authorization do
+        user = User.find_by(id: params[:id])
+        not_found!('User') unless can?(current_user, :read_user, user)
+
+        result = ::Users::ApproveService.new(current_user).execute(user)
+
+        if result[:success]
+          result
+        else
+          render_api_error!(result[:message], result[:http_status])
+        end
+      end
+
       # rubocop: enable CodeReuse/ActiveRecord
       desc 'Deactivate an active user. Available only for admins.'
       params do
@@ -703,6 +784,38 @@ module API
 
             destroy_conditionally!(token) do
               token.revoke!
+            end
+          end
+        end
+
+        resource :personal_access_tokens do
+          helpers do
+            def target_user
+              find_user_by_id(params)
+            end
+          end
+
+          before { authenticated_as_admin! }
+
+          desc 'Create a personal access token. Available only for admins.' do
+            detail 'This feature was introduced in GitLab 13.6'
+            success Entities::PersonalAccessTokenWithToken
+          end
+          params do
+            requires :name, type: String, desc: 'The name of the personal access token'
+            requires :scopes, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, values: ::Gitlab::Auth.all_available_scopes.map(&:to_s),
+              desc: 'The array of scopes of the personal access token'
+            optional :expires_at, type: Date, desc: 'The expiration date in the format YEAR-MONTH-DAY of the personal access token'
+          end
+          post feature_category: :authentication_and_authorization do
+            response = ::PersonalAccessTokens::CreateService.new(
+              current_user: current_user, target_user: target_user, params: declared_params(include_missing: false)
+            ).execute
+
+            if response.success?
+              present response.payload[:personal_access_token], with: Entities::PersonalAccessTokenWithToken
+            else
+              render_api_error!(response.message, response.http_status || :unprocessable_entity)
             end
           end
         end
@@ -883,6 +996,29 @@ module API
         present paginate(current_user.emails), with: Entities::Email
       end
 
+      desc "Update the current user's preferences" do
+        success Entities::UserPreferences
+        detail 'This feature was introduced in GitLab 13.10.'
+      end
+      params do
+        requires :view_diffs_file_by_file, type: Boolean, desc: 'Flag indicating the user sees only one file diff per page'
+      end
+      put "preferences", feature_category: :users do
+        authenticate!
+
+        preferences = current_user.user_preference
+
+        attrs = declared_params(include_missing: false)
+
+        service = ::UserPreferences::UpdateService.new(current_user, attrs).execute
+
+        if service.success?
+          present preferences, with: Entities::UserPreferences
+        else
+          render_api_error!('400 Bad Request', 400)
+        end
+      end
+
       desc 'Get a single email address owned by the currently authenticated user' do
         success Entities::Email
       end
@@ -952,6 +1088,8 @@ module API
       params do
         optional :emoji, type: String, desc: "The emoji to set on the status"
         optional :message, type: String, desc: "The status message to set"
+        optional :availability, type: String, desc: "The availability of user to set"
+        optional :clear_status_after, type: String, desc: "Automatically clear emoji, message and availability fields after a certain time", values: UserStatus::CLEAR_STATUS_QUICK_OPTIONS.keys
       end
       put "status", feature_category: :users do
         forbidden! unless can?(current_user, :update_user_status, current_user)

@@ -1,8 +1,8 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import CommitFilesList from './commit_sidebar/list.vue';
-import EmptyState from './commit_sidebar/empty_state.vue';
 import { stageKeys } from '../constants';
+import EmptyState from './commit_sidebar/empty_state.vue';
+import CommitFilesList from './commit_sidebar/list.vue';
 
 export default {
   components: {
@@ -41,12 +41,12 @@ export default {
         file,
         keyPrefix: file.staged ? stageKeys.staged : stageKeys.unstaged,
       })
-        .then(changeViewer => {
+        .then((changeViewer) => {
           if (changeViewer) {
             this.updateViewer('diff');
           }
         })
-        .catch(e => {
+        .catch((e) => {
           throw e;
         });
     },

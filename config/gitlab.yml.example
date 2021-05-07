@@ -6,7 +6,7 @@
 # This file should not receive new settings. All configuration options #
 # * are being moved to ApplicationSetting model!                       #
 # If a setting requires an application restart say so in that screen.  #
-# If you change this file in a Merge Request, please also create       #
+# If you change this file in a merge request, please also create       #
 # a MR on https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests. #
 # For more details see https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/gitlab.yml.md #
 ########################################################################
@@ -72,6 +72,8 @@ production: &base
         style_src: "'self' 'unsafe-inline'"
         worker_src: "'self' blob:"
         report_uri:
+
+    allowed_hosts: []
 
     # Trusted Proxies
     # Customize if you have GitLab behind a reverse proxy which is running on a different machine.
@@ -165,6 +167,9 @@ production: &base
     ## Disable jQuery and CSS animations
     # disable_animations: true
 
+    ## Application settings cache expiry in seconds (default: 60)
+    # application_settings_cache_seconds: 60
+
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
   # For documentation on how to set this up, see http://doc.gitlab.com/ce/administration/reply_by_email.html
@@ -204,6 +209,13 @@ production: &base
 
     # Whether to expunge (permanently remove) messages from the mailbox when they are deleted after delivery
     expunge_deleted: false
+
+    # For Microsoft Graph support
+    # inbox_method: microsoft_graph
+    # inbox_options:
+    #   tenant_id: "YOUR-TENANT-ID"
+    #   client_id: "YOUR-CLIENT-ID"
+    #   client_secret: "YOUR-CLIENT-SECRET"
 
   ## Consolidated object store config
   ## This will only take effect if the object_store sections are not defined
@@ -403,6 +415,10 @@ production: &base
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    local_store:
+      enabled: true
+      # The location where pages are stored (default: shared/pages).
+      # path: shared/pages
 
   ## Mattermost
   ## For enabling Add to Mattermost button
@@ -413,7 +429,7 @@ production: &base
   ## Gravatar
   ## If using gravatar.com, there's nothing to change here. For Libravatar
   ## you'll need to provide the custom URLs. For more information,
-  ## see: https://docs.gitlab.com/ee/customization/libravatar.html
+  ## see: https://docs.gitlab.com/ee/administration/libravatar.html
   gravatar:
     # Gravatar/Libravatar URLs: possible placeholders: %{hash} %{size} %{email} %{username}
     # plain_url: "http://..."     # default: https://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
@@ -422,6 +438,12 @@ production: &base
   ## Sidekiq
   sidekiq:
     log_format: json # (default is the original format)
+    # An array of tuples indicating the rules for re-routing a worker to a
+    # desirable queue before scheduling. For example:
+    # routing_rules:
+    #   - ["resource_boundary=cpu", "cpu_boundary"]
+    #   - ["feature_category=pages", null]
+    #   - ["*", "default"]
 
   ## Auxiliary jobs
   # Periodically executed jobs, to self-heal GitLab, do external synchronizations, etc.
@@ -432,10 +454,13 @@ production: &base
       cron: "0 * * * *"
     # Execute scheduled triggers
     pipeline_schedule_worker:
-      cron: "19 * * * *"
+      cron: "3-59/10 * * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
-      cron: "50 * * * *"
+      cron: "*/7 * * * *"
+    # Remove expired pipeline artifacts
+    ci_pipelines_expire_artifacts_worker:
+      cron: "*/23 * * * *"
     # Remove files from object storage
     ci_schedule_delete_objects_worker:
       cron: "*/16 * * * *"
@@ -475,6 +500,10 @@ production: &base
   # GitLab EE only jobs. These jobs are automatically enabled for an EE
   # installation, and ignored for a CE installation.
   ee_cron_jobs:
+    # Schedule snapshots for all devops adoption segments
+    analytics_devops_adoption_create_all_snapshots_worker:
+      cron: 0 4 * * 0
+
     # Snapshot active users statistics
     historical_data_worker:
       cron: "0 12 * * *"
@@ -580,7 +609,7 @@ production: &base
       # enabled: true
       # primary_api_url: http://localhost:5000/ # internal address to the primary registry, will be used by GitLab to directly communicate with primary registry API
 
-  ## Feature Flag https://docs.gitlab.com/ee/user/project/operations/feature_flags.html
+  ## Feature Flag https://docs.gitlab.com/ee/operations/feature_flags.html
   feature_flags:
     unleash:
       # enabled: false
@@ -615,6 +644,9 @@ production: &base
   ldap:
     enabled: false
     prevent_ldap_sign_in: false
+
+    # File location to read encrypted secrets from
+    # secret_file: /mnt/gitlab/ldap.yaml.enc # Default: shared/encrypted_settings/ldap.yaml.enc
 
     # This setting controls the number of seconds between LDAP permission checks
     # for each user. After this time has expired for a given user, their next
@@ -1038,9 +1070,22 @@ production: &base
     # Access token for FortiAuthenticator API
     # access_token: 123s3cr3t456
 
+  # FortiToken Cloud settings
+  forti_token_cloud:
+    # Allow using FortiToken Cloud as OTP provider
+    enabled: false
+
+    # Client ID and Secret to access FortiToken Cloud API
+    # client_id: 'YOUR_FORTI_TOKEN_CLOUD_CLIENT_ID'
+    # client_secret: 'YOUR_FORTI_TOKEN_CLOUD_CLIENT_SECRET'
+
   # Shared file storage settings
   shared:
     # path: /mnt/gitlab # Default: shared
+
+  # Encrypted Settings configuration
+  encrypted_settings:
+    # path: /mnt/gitlab/encrypted_settings  # Default: shared/encrypted_settings
 
   # Gitaly settings
   gitaly:
@@ -1133,9 +1178,16 @@ production: &base
     # secret_file: /home/git/gitlab/.gitlab_workhorse_secret
 
   gitlab_kas:
+    # enabled: true
     # File that contains the secret key for verifying access for gitlab-kas.
     # Default is '.gitlab_kas_secret' relative to Rails.root (i.e. root of the GitLab app).
     # secret_file: /home/git/gitlab/.gitlab_kas_secret
+
+    # The URL to the external KAS API (used by the Kubernetes agents)
+    # external_url: wss://kas.example.com
+
+    # The URL to the internal KAS API (used by the GitLab backend)
+    # internal_url: grpc://localhost:8153
 
   ## GitLab Elasticsearch settings
   elasticsearch:
@@ -1187,10 +1239,7 @@ production: &base
   # yourself, and then update the values here.
   # https://docs.gitlab.com/ee/administration/monitoring/prometheus/
   prometheus:
-    # Do not use `enable` and `listen_address` in any new code, as they are deprecated. Use `server_address` instead.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/227111
-    # enable: true
-    # listen_address: 'localhost:9090'
+    # enabled: true
     # server_address: 'localhost:9090'
 
   ## Consul settings
@@ -1213,9 +1262,17 @@ production: &base
     ## Google analytics. Uncomment if you want it
     # google_analytics_id: '_your_tracking_id'
 
-    ## Piwik analytics.
-    # piwik_url: '_your_piwik_url'
-    # piwik_site_id: '_your_piwik_site_id'
+    ## Google tag manager
+    # google_tag_manager_id: '_your_tracking_id'
+
+    ## Matomo analytics.
+    # matomo_url: '_your_matomo_url'
+    # matomo_site_id: '_your_matomo_site_id'
+    # matomo_disable_cookies: false
+
+    ## Maximum file size for syntax highlighting
+    ## https://docs.gitlab.com/ee/user/project/highlighting.html
+    # maximum_text_highlight_size_kilobytes: 512
 
   rack_attack:
     git_basic_auth:
@@ -1359,14 +1416,17 @@ test:
         aws_access_key_id: AWS_ACCESS_KEY_ID
         aws_secret_access_key: AWS_SECRET_ACCESS_KEY
         region: us-east-1
+    local_store:
+      enabled: true
+      path: tmp/tests/pages
   repositories:
     storages:
       default:
         path: tmp/tests/repositories/
-        gitaly_address: unix:tmp/tests/gitaly/gitaly.socket
+        gitaly_address: unix:tmp/tests/gitaly/praefect.socket
 
   gitaly:
-    client_path: tmp/tests/gitaly
+    client_path: tmp/tests/gitaly/_build/bin
     token: secret
   workhorse:
     secret_file: tmp/gitlab_workhorse_test_secret
@@ -1476,8 +1536,8 @@ test:
         group_base: 'ou=groups,dc=example,dc=com'
         admin_group: ''
   prometheus:
-    enable: true
-    listen_address: 'localhost:9090'
+    enabled: true
+    server_address: 'localhost:9090'
 
 staging:
   <<: *base

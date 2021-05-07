@@ -6,11 +6,6 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
-      EE_FAILURE_REASONS = {
-        activity_limit_exceeded: 20,
-        size_limit_exceeded: 21
-      }.freeze
-
       prepended do
         include UsageStatistics
 
@@ -23,7 +18,10 @@ module EE
         # Subscriptions to this pipeline
         has_many :downstream_bridges, class_name: '::Ci::Bridge', foreign_key: :upstream_pipeline_id
         has_many :security_scans, class_name: 'Security::Scan', through: :builds
+        has_many :security_findings, class_name: 'Security::Finding', through: :security_scans, source: :findings
 
+        has_one :dast_profiles_pipeline, class_name: 'Dast::ProfilesPipeline', foreign_key: :ci_pipeline_id, inverse_of: :ci_pipeline
+        has_one :dast_profile, class_name: 'Dast::Profile', through: :dast_profiles_pipeline
         has_one :source_project, class_name: 'Ci::Sources::Project', foreign_key: :pipeline_id
 
         # Legacy way to fetch security reports based on job name. This has been replaced by the reports feature.
@@ -57,7 +55,7 @@ module EE
 
         state_machine :status do
           after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
-            next unless pipeline.has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+            next unless pipeline.can_store_security_reports?
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
@@ -84,13 +82,13 @@ module EE
         end
       end
 
+      def needs_touch?
+        updated_at < 5.minutes.ago
+      end
+
       def triggers_subscriptions?
         # Currently we trigger subscriptions only for tags.
         tag? && project_has_subscriptions?
-      end
-
-      def retryable?
-        !merge_train_pipeline? && super
       end
 
       def batch_lookup_report_artifact_for_file_type(file_type)
@@ -103,19 +101,9 @@ module EE
         batch_lookup_report_artifact_for_file_type(:license_scanning).present?
       end
 
-      def security_reports(report_types: [])
-        reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
-
-        ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
-          builds.latest.with_reports(reports_scope).each do |build|
-            build.collect_security_reports!(security_reports)
-          end
-        end
-      end
-
       def license_scanning_report
         ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_license_scanning_reports!(license_management_report)
           end
         end
@@ -123,10 +111,10 @@ module EE
 
       def dependency_list_report
         ::Gitlab::Ci::Reports::DependencyList::Report.new.tap do |dependency_list_report|
-          builds.latest.with_reports(::Ci::JobArtifact.dependency_list_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.dependency_list_reports).each do |build|
             build.collect_dependency_list_reports!(dependency_list_report)
           end
-          builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
             build.collect_licenses_for_dependency_list!(dependency_list_report)
           end
         end
@@ -134,7 +122,7 @@ module EE
 
       def metrics_report
         ::Gitlab::Ci::Reports::Metrics::Report.new.tap do |metrics_report|
-          builds.latest.with_reports(::Ci::JobArtifact.metrics_reports).each do |build|
+          latest_report_builds(::Ci::JobArtifact.metrics_reports).each do |build|
             build.collect_metrics_reports!(metrics_report)
           end
         end
@@ -143,8 +131,8 @@ module EE
       ##
       # Check if it's a merge request pipeline with the HEAD of source and target branches
       # TODO: Make `Ci::Pipeline#latest?` compatible with merge request pipelines and remove this method.
-      def latest_merge_request_pipeline?
-        merge_request_pipeline? &&
+      def latest_merged_result_pipeline?
+        merged_result_pipeline? &&
           source_sha == merge_request.diff_head_sha &&
           target_sha == merge_request.target_branch_sha
       end
@@ -158,8 +146,9 @@ module EE
         end
       end
 
+      override :merge_train_pipeline?
       def merge_train_pipeline?
-        merge_request_pipeline? && merge_train_ref?
+        merged_result_pipeline? && merge_train_ref?
       end
 
       def latest_failed_security_builds
@@ -168,11 +157,20 @@ module EE
       end
 
       def license_scan_completed?
-        builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).exists?
+        latest_report_builds(::Ci::JobArtifact.license_scanning_reports).exists?
       end
 
       def can_store_security_reports?
         project.can_store_security_reports? && has_security_reports?
+      end
+
+      def has_security_findings?
+        security_findings.exists?
+      end
+
+      def triggered_for_ondemand_dast_scan?
+        ondemand_dast_scan? && parameter_source? &&
+          ::Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
       end
 
       private

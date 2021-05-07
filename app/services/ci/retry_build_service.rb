@@ -14,12 +14,10 @@ module Ci
       build.ensure_scheduling_type!
 
       reprocess!(build).tap do |new_build|
-        mark_subsequent_stages_as_processable(build)
-        build.pipeline.reset_ancestor_bridges!
+        Gitlab::OptimisticLocking.retry_lock(new_build, name: 'retry_build', &:enqueue)
+        AfterRequeueJobService.new(project, current_user).execute(build)
 
-        Gitlab::OptimisticLocking.retry_lock(new_build, &:enqueue)
-
-        MergeRequests::AddTodoWhenBuildFailsService
+        ::MergeRequests::AddTodoWhenBuildFailsService
           .new(project, current_user)
           .close(new_build)
       end
@@ -31,9 +29,9 @@ module Ci
         raise Gitlab::Access::AccessDeniedError
       end
 
-      attributes = self.class.clone_accessors.map do |attribute|
+      attributes = self.class.clone_accessors.to_h do |attribute|
         [attribute, build.public_send(attribute)] # rubocop:disable GitlabSecurity/PublicSend
-      end.to_h
+      end
 
       attributes[:user] = current_user
 
@@ -62,12 +60,6 @@ module Ci
         build.save!
       end
       build
-    end
-
-    def mark_subsequent_stages_as_processable(build)
-      build.pipeline.processables.skipped.after_stage(build.stage_idx).find_each do |processable|
-        Gitlab::OptimisticLocking.retry_lock(processable, &:process)
-      end
     end
   end
 end

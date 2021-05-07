@@ -2,11 +2,9 @@
 
 module Projects
   class DependenciesController < Projects::ApplicationController
-    before_action :authorize_read_dependency_list!
+    include SecurityAndCompliancePermissions
 
-    before_action do
-      push_frontend_feature_flag(:path_to_vulnerable_dependency, project)
-    end
+    before_action :authorize_read_dependency_list!
 
     feature_category :dependency_scanning
 

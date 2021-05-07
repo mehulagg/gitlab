@@ -12,14 +12,24 @@ module QA
               super
 
               base.class_eval do
+                view 'ee/app/views/projects/settings/_default_issue_template.html.haml' do
+                  element :issue_template_settings_content
+                end
+
                 view 'ee/app/views/projects/_merge_request_approvals_settings.html.haml' do
-                  element :merge_request_approvals_settings
+                  element :merge_request_approvals_settings_content
                 end
               end
             end
 
+            def expand_default_description_template_for_issues(&block)
+              expand_content(:issue_template_settings_content) do
+                IssueTemplateDefault.perform(&block)
+              end
+            end
+
             def expand_merge_request_approvals_settings(&block)
-              expand_content(:merge_request_approvals_settings) do
+              expand_content(:merge_request_approvals_settings_content) do
                 MergeRequestApprovals.perform(&block)
               end
             end

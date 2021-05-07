@@ -1,10 +1,10 @@
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
 import DiffDiscussions from '~/diffs/components/diff_discussions.vue';
-import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
-import NoteableDiscussion from '~/notes/components/noteable_discussion.vue';
-import DiscussionNotes from '~/notes/components/discussion_notes.vue';
 import { createStore } from '~/mr_notes/stores';
+import DiscussionNotes from '~/notes/components/discussion_notes.vue';
+import NoteableDiscussion from '~/notes/components/noteable_discussion.vue';
+import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import '~/behaviors/markdown/render_gfm';
 import discussionsMockData from '../mock_data/diff_discussions';
 
@@ -15,7 +15,7 @@ describe('DiffDiscussions', () => {
   let wrapper;
   const getDiscussionsMockData = () => [{ ...discussionsMockData }];
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     store = createStore();
     wrapper = mount(localVue.extend(DiffDiscussions), {
       store,
@@ -91,12 +91,7 @@ describe('DiffDiscussions', () => {
       const noteableDiscussion = wrapper.find(NoteableDiscussion);
 
       expect(noteableDiscussion.find('.badge-pill').exists()).toBe(true);
-      expect(
-        noteableDiscussion
-          .find('.badge-pill')
-          .text()
-          .trim(),
-      ).toBe('1');
+      expect(noteableDiscussion.find('.badge-pill').text().trim()).toBe('1');
     });
   });
 });

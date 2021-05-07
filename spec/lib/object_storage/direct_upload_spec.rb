@@ -126,6 +126,16 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(s3_config.keys).not_to include(%i(ServerSideEncryption SSEKMSKeyID))
       end
 
+      context 'when no region is specified' do
+        before do
+          raw_config.delete(:region)
+        end
+
+        it 'defaults to us-east-1' do
+          expect(subject[:ObjectStorage][:S3Config][:Region]).to eq('us-east-1')
+        end
+      end
+
       context 'when feature flag is disabled' do
         before do
           stub_feature_flags(use_workhorse_s3_client: false)
@@ -224,6 +234,17 @@ RSpec.describe ObjectStorage::DirectUpload do
         expect(subject[:CustomPutHeaders]).to be_truthy
         expect(subject[:PutHeaders]).to eq({})
       end
+
+      context 'with an object with UTF-8 characters' do
+        let(:object_name) { 'tmp/uploads/テスト' }
+
+        it 'returns an escaped path' do
+          expect(subject[:GetURL]).to start_with(storage_url)
+
+          uri = Addressable::URI.parse(subject[:GetURL])
+          expect(uri.path).to include("tmp/uploads/#{CGI.escape("テスト")}")
+        end
+      end
     end
 
     shared_examples 'a valid upload with multipart data' do
@@ -292,6 +313,7 @@ RSpec.describe ObjectStorage::DirectUpload do
 
         context 'when IAM profile is true' do
           let(:use_iam_profile) { true }
+          let(:iam_credentials_v2_url) { "http://169.254.169.254/latest/api/token" }
           let(:iam_credentials_url) { "http://169.254.169.254/latest/meta-data/iam/security-credentials/" }
           let(:iam_credentials) do
             {
@@ -303,6 +325,9 @@ RSpec.describe ObjectStorage::DirectUpload do
           end
 
           before do
+            # If IMDSv2 is disabled, we should still fall back to IMDSv1
+            stub_request(:put, iam_credentials_v2_url)
+              .to_return(status: 404)
             stub_request(:get, iam_credentials_url)
               .to_return(status: 200, body: "somerole", headers: {})
             stub_request(:get, "#{iam_credentials_url}somerole")
@@ -310,6 +335,21 @@ RSpec.describe ObjectStorage::DirectUpload do
           end
 
           it_behaves_like 'a valid S3 upload without multipart data'
+
+          context 'when IMSDv2 is available' do
+            let(:iam_token) { 'mytoken' }
+
+            before do
+              stub_request(:put, iam_credentials_v2_url)
+                .to_return(status: 200, body: iam_token)
+              stub_request(:get, iam_credentials_url).with(headers: { "X-aws-ec2-metadata-token" => iam_token })
+                .to_return(status: 200, body: "somerole", headers: {})
+              stub_request(:get, "#{iam_credentials_url}somerole").with(headers: { "X-aws-ec2-metadata-token" => iam_token })
+                .to_return(status: 200, body: iam_credentials.to_json, headers: {})
+            end
+
+            it_behaves_like 'a valid S3 upload without multipart data'
+          end
         end
       end
 
@@ -319,6 +359,30 @@ RSpec.describe ObjectStorage::DirectUpload do
         it_behaves_like 'a valid S3 upload with multipart data' do
           before do
             stub_object_storage_multipart_init(storage_url, "myUpload")
+          end
+
+          context 'when maximum upload size is 0' do
+            let(:maximum_size) { 0 }
+
+            it 'returns maximum number of parts' do
+              expect(subject[:MultipartUpload][:PartURLs].length).to eq(100)
+            end
+
+            it 'part size is minimum, 5MB' do
+              expect(subject[:MultipartUpload][:PartSize]).to eq(5.megabyte)
+            end
+          end
+
+          context 'when maximum upload size is < 5 MB' do
+            let(:maximum_size) { 1024 }
+
+            it 'returns only 1 part' do
+              expect(subject[:MultipartUpload][:PartURLs].length).to eq(1)
+            end
+
+            it 'part size is minimum, 5MB' do
+              expect(subject[:MultipartUpload][:PartSize]).to eq(5.megabyte)
+            end
           end
 
           context 'when maximum upload size is 10MB' do

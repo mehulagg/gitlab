@@ -29,10 +29,19 @@ RSpec.describe Gitlab::RepositoryCacheAdapter do
 
         def project
         end
+
+        def cached_methods
+          [:letters]
+        end
+
+        def exists?
+          true
+        end
       end
     end
 
     let(:fake_repository) { klass.new }
+    let(:redis_set_cache) { fake_repository.redis_set_cache }
 
     context 'with an existing repository' do
       it 'caches the output, sorting the results' do
@@ -42,47 +51,43 @@ RSpec.describe Gitlab::RepositoryCacheAdapter do
           expect(fake_repository.letters).to eq(%w(a b c))
         end
 
-        expect(fake_repository.redis_set_cache.exist?(:letters)).to eq(true)
+        expect(redis_set_cache.exist?(:letters)).to eq(true)
         expect(fake_repository.instance_variable_get(:@letters)).to eq(%w(a b c))
       end
 
       context 'membership checks' do
         context 'when the cache key does not exist' do
           it 'calls the original method and populates the cache' do
-            expect(fake_repository.redis_set_cache.exist?(:letters)).to eq(false)
+            expect(redis_set_cache.exist?(:letters)).to eq(false)
             expect(fake_repository).to receive(:_uncached_letters).once.and_call_original
 
             # This populates the cache and memoizes the full result
             expect(fake_repository.letters_include?('a')).to eq(true)
             expect(fake_repository.letters_include?('d')).to eq(false)
-            expect(fake_repository.redis_set_cache.exist?(:letters)).to eq(true)
+            expect(redis_set_cache.exist?(:letters)).to eq(true)
           end
         end
 
         context 'when the cache key exists' do
           before do
-            fake_repository.redis_set_cache.write(:letters, %w(b a c))
+            redis_set_cache.write(:letters, %w(b a c))
           end
 
-          it 'calls #include? on the set cache' do
-            expect(fake_repository.redis_set_cache)
-              .to receive(:include?).with(:letters, 'a').and_call_original
-            expect(fake_repository.redis_set_cache)
-              .to receive(:include?).with(:letters, 'd').and_call_original
+          it 'calls #try_include? on the set cache' do
+            expect(redis_set_cache).to receive(:try_include?).with(:letters, 'a').and_call_original
+            expect(redis_set_cache).to receive(:try_include?).with(:letters, 'd').and_call_original
 
             expect(fake_repository.letters_include?('a')).to eq(true)
             expect(fake_repository.letters_include?('d')).to eq(false)
           end
 
           it 'memoizes the result' do
-            expect(fake_repository.redis_set_cache)
-              .to receive(:include?).once.and_call_original
+            expect(redis_set_cache).to receive(:try_include?).once.and_call_original
 
             expect(fake_repository.letters_include?('a')).to eq(true)
             expect(fake_repository.letters_include?('a')).to eq(true)
 
-            expect(fake_repository.redis_set_cache)
-              .to receive(:include?).once.and_call_original
+            expect(redis_set_cache).to receive(:try_include?).once.and_call_original
 
             expect(fake_repository.letters_include?('d')).to eq(false)
             expect(fake_repository.letters_include?('d')).to eq(false)
@@ -292,12 +297,11 @@ RSpec.describe Gitlab::RepositoryCacheAdapter do
 
   describe '#expire_method_caches' do
     it 'expires the caches of the given methods' do
-      expect(cache).to receive(:expire).with(:rendered_readme)
       expect(cache).to receive(:expire).with(:branch_names)
-      expect(redis_set_cache).to receive(:expire).with(:rendered_readme, :branch_names)
-      expect(redis_hash_cache).to receive(:delete).with(:rendered_readme, :branch_names)
+      expect(redis_set_cache).to receive(:expire).with(:branch_names)
+      expect(redis_hash_cache).to receive(:delete).with(:branch_names)
 
-      repository.expire_method_caches(%i(rendered_readme branch_names))
+      repository.expire_method_caches(%i(branch_names))
     end
 
     it 'does not expire caches for non-existent methods' do

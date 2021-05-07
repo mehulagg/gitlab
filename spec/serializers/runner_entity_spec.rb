@@ -7,7 +7,7 @@ RSpec.describe RunnerEntity do
   let(:runner) { create(:ci_runner, :project, projects: [project]) }
   let(:entity) { described_class.new(runner, request: request, current_user: user) }
   let(:request) { double('request') }
-  let(:user) { create(:admin) }
+  let(:user) { project.owner }
 
   before do
     allow(request).to receive(:current_user).and_return(user)
@@ -20,6 +20,7 @@ RSpec.describe RunnerEntity do
     it 'contains required fields' do
       expect(subject).to include(:id, :description)
       expect(subject).to include(:edit_path)
+      expect(subject).to include(:short_sha)
     end
   end
 end

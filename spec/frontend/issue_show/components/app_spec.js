@@ -2,11 +2,15 @@ import { GlIntersectionObserver } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
-import axios from '~/lib/utils/axios_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
+import DescriptionComponent from '~/issue_show/components/description.vue';
+import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
+import PinnedLinks from '~/issue_show/components/pinned_links.vue';
+import { IssuableStatus, IssuableStatusText } from '~/issue_show/constants';
 import eventHub from '~/issue_show/event_hub';
+import axios from '~/lib/utils/axios_utils';
+import { visitUrl } from '~/lib/utils/url_utility';
 import {
   appProps,
   initialRequest,
@@ -14,9 +18,6 @@ import {
   secondRequest,
   zoomMeetingUrl,
 } from '../mock_data';
-import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
-import DescriptionComponent from '~/issue_show/components/description.vue';
-import PinnedLinks from '~/issue_show/components/pinned_links.vue';
 
 function formatText(text) {
   return text.trim().replace(/\s\s+/g, ' ');
@@ -36,12 +37,17 @@ describe('Issuable output', () => {
 
   const findStickyHeader = () => wrapper.find('[data-testid="issue-sticky-header"]');
 
+  const findLockedBadge = () => wrapper.find('[data-testid="locked"]');
+
+  const findConfidentialBadge = () => wrapper.find('[data-testid="confidential"]');
+
   const mountComponent = (props = {}, options = {}) => {
     wrapper = mount(IssuableApp, {
       propsData: { ...appProps, ...props },
       provide: {
         fullPath: 'gitlab-org/incidents',
         iid: '19',
+        uploadMetricsFeatureAvailable: false,
       },
       stubs: {
         HighlightBar: true,
@@ -158,40 +164,6 @@ describe('Issuable output', () => {
     return wrapper.vm.$nextTick().then(() => {
       expect(wrapper.vm.store.formState.title).not.toBe('testing 123');
     });
-  });
-
-  it('opens reCAPTCHA modal if update rejected as spam', () => {
-    let modal;
-
-    jest.spyOn(wrapper.vm.service, 'updateIssuable').mockResolvedValue({
-      data: {
-        recaptcha_html: '<div class="g-recaptcha">recaptcha_html</div>',
-      },
-    });
-
-    wrapper.vm.canUpdate = true;
-    wrapper.vm.showForm = true;
-
-    return wrapper.vm
-      .$nextTick()
-      .then(() => {
-        wrapper.vm.$refs.recaptchaModal.scriptSrc = '//scriptsrc';
-        return wrapper.vm.updateIssuable();
-      })
-      .then(() => {
-        modal = wrapper.find('.js-recaptcha-modal');
-        expect(modal.isVisible()).toBe(true);
-        expect(modal.find('.g-recaptcha').text()).toEqual('recaptcha_html');
-        expect(document.body.querySelector('.js-recaptcha-script').src).toMatch('//scriptsrc');
-      })
-      .then(() => {
-        modal.find('.close').trigger('click');
-        return wrapper.vm.$nextTick();
-      })
-      .then(() => {
-        expect(modal.isVisible()).toBe(false);
-        expect(document.body.querySelector('.js-recaptcha-script')).toBeNull();
-      });
   });
 
   describe('Pinned links propagated', () => {
@@ -393,8 +365,8 @@ describe('Issuable output', () => {
 
           wrapper.vm.poll.makeRequest();
 
-          return new Promise(resolve => {
-            wrapper.vm.$watch('formState.lockedWarningVisible', value => {
+          return new Promise((resolve) => {
+            wrapper.vm.$watch('formState.lockedWarningVisible', (value) => {
               if (value) {
                 resolve();
               }
@@ -416,8 +388,19 @@ describe('Issuable output', () => {
       formSpy = jest.spyOn(wrapper.vm, 'updateAndShowForm');
     });
 
-    it('shows the form if template names request is successful', () => {
-      const mockData = [{ name: 'Bug' }];
+    it('shows the form if template names as hash request is successful', () => {
+      const mockData = {
+        test: [{ name: 'test', id: 'test', project_path: '/', namespace_path: '/' }],
+      };
+      mock.onGet('/issuable-templates-path').reply(() => Promise.resolve([200, mockData]));
+
+      return wrapper.vm.requestTemplatesAndShowForm().then(() => {
+        expect(formSpy).toHaveBeenCalledWith(mockData);
+      });
+    });
+
+    it('shows the form if template names as array request is successful', () => {
+      const mockData = [{ name: 'test', id: 'test', project_path: '/', namespace_path: '/' }];
       mock.onGet('/issuable-templates-path').reply(() => Promise.resolve([200, mockData]));
 
       return wrapper.vm.requestTemplatesAndShowForm().then(() => {
@@ -502,13 +485,6 @@ describe('Issuable output', () => {
       expect(wrapper.vm.issueChanged).toBe(false);
     });
 
-    it('returns false when `initialTitleText` is null and `formState.title` is empty string', () => {
-      wrapper.vm.store.formState.title = '';
-      wrapper.setProps({ initialTitleText: null });
-
-      expect(wrapper.vm.issueChanged).toBe(false);
-    });
-
     it('returns true when description is changed', () => {
       wrapper.vm.store.formState.description = 'RandomText';
 
@@ -532,7 +508,7 @@ describe('Issuable output', () => {
   describe('sticky header', () => {
     describe('when title is in view', () => {
       it('is not shown', () => {
-        expect(wrapper.find('.issue-sticky-header').exists()).toBe(false);
+        expect(findStickyHeader().exists()).toBe(false);
       });
     });
 
@@ -542,24 +518,45 @@ describe('Issuable output', () => {
         wrapper.find(GlIntersectionObserver).vm.$emit('disappear');
       });
 
-      it('is shown with title', () => {
+      it('shows with title', () => {
         expect(findStickyHeader().text()).toContain('Sticky header title');
       });
 
-      it('is shown with Open when status is opened', () => {
-        wrapper.setProps({ issuableStatus: 'opened' });
+      it.each`
+        title                                        | state
+        ${'shows with Open when status is opened'}   | ${IssuableStatus.Open}
+        ${'shows with Closed when status is closed'} | ${IssuableStatus.Closed}
+        ${'shows with Open when status is reopened'} | ${IssuableStatus.Reopened}
+      `('$title', async ({ state }) => {
+        wrapper.setProps({ issuableStatus: state });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(findStickyHeader().text()).toContain('Open');
-        });
+        await wrapper.vm.$nextTick();
+
+        expect(findStickyHeader().text()).toContain(IssuableStatusText[state]);
       });
 
-      it('is shown with Closed when status is closed', () => {
-        wrapper.setProps({ issuableStatus: 'closed' });
+      it.each`
+        title                                                                | isConfidential
+        ${'does not show confidential badge when issue is not confidential'} | ${true}
+        ${'shows confidential badge when issue is confidential'}             | ${false}
+      `('$title', async ({ isConfidential }) => {
+        wrapper.setProps({ isConfidential });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(findStickyHeader().text()).toContain('Closed');
-        });
+        await wrapper.vm.$nextTick();
+
+        expect(findConfidentialBadge().exists()).toBe(isConfidential);
+      });
+
+      it.each`
+        title                                                    | isLocked
+        ${'does not show locked badge when issue is not locked'} | ${true}
+        ${'shows locked badge when issue is locked'}             | ${false}
+      `('$title', async ({ isLocked }) => {
+        wrapper.setProps({ isLocked });
+
+        await wrapper.vm.$nextTick();
+
+        expect(findLockedBadge().exists()).toBe(isLocked);
       });
     });
   });

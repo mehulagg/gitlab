@@ -64,8 +64,8 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'disables boards and lists permissions' do
-        expect_disallowed :read_board, :create_board, :update_board
-        expect_disallowed :read_list, :create_list, :update_list, :admin_list
+        expect_disallowed :read_issue_board, :create_board, :update_board
+        expect_disallowed :read_issue_board_list, :create_list, :update_list, :admin_issue_board_list
       end
 
       context 'when external tracker configured' do
@@ -105,6 +105,10 @@ RSpec.describe ProjectPolicy do
   context 'pipeline feature' do
     let(:project) { private_project }
 
+    before do
+      private_project.add_developer(current_user)
+    end
+
     describe 'for unconfirmed user' do
       let(:current_user) { create(:user, confirmed_at: nil) }
 
@@ -137,7 +141,7 @@ RSpec.describe ProjectPolicy do
       it 'disallows all permissions except pipeline when the feature is disabled' do
         builds_permissions = [
           :create_build, :read_build, :update_build, :admin_build, :destroy_build,
-          :create_pipeline_schedule, :read_pipeline_schedule, :update_pipeline_schedule, :admin_pipeline_schedule, :destroy_pipeline_schedule,
+          :create_pipeline_schedule, :read_pipeline_schedule_variables, :update_pipeline_schedule, :admin_pipeline_schedule, :destroy_pipeline_schedule,
           :create_environment, :read_environment, :update_environment, :admin_environment, :destroy_environment,
           :create_cluster, :read_cluster, :update_cluster, :admin_cluster, :destroy_cluster,
           :create_deployment, :read_deployment, :update_deployment, :admin_deployment, :destroy_deployment
@@ -401,6 +405,48 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'set_pipeline_variables' do
+    context 'when user is developer' do
+      let(:current_user) { developer }
+
+      context 'when project allows user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: false)
+        end
+
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
+      end
+
+      context 'when project restricts use of user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: true)
+        end
+
+        it { is_expected.not_to be_allowed(:set_pipeline_variables) }
+      end
+    end
+
+    context 'when user is maintainer' do
+      let(:current_user) { maintainer }
+
+      context 'when project allows user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: false)
+        end
+
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
+      end
+
+      context 'when project restricts use of user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: true)
+        end
+
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
+      end
+    end
+  end
+
   context 'support bot' do
     let(:current_user) { User.support_bot }
 
@@ -423,6 +469,49 @@ RSpec.describe ProjectPolicy do
 
         it { expect_allowed(:reporter_access, :create_note, :read_issue) }
       end
+    end
+  end
+
+  context "project bots" do
+    let(:project_bot) { create(:user, :project_bot) }
+    let(:user) { create(:user) }
+
+    context "project_bot_access" do
+      context "when regular user and part of the project" do
+        let(:current_user) { user }
+
+        before do
+          project.add_developer(user)
+        end
+
+        it { is_expected.not_to be_allowed(:project_bot_access)}
+      end
+
+      context "when project bot and not part of the project" do
+        let(:current_user) { project_bot }
+
+        it { is_expected.not_to be_allowed(:project_bot_access)}
+      end
+
+      context "when project bot and part of the project" do
+        let(:current_user) { project_bot }
+
+        before do
+          project.add_developer(project_bot)
+        end
+
+        it { is_expected.to be_allowed(:project_bot_access)}
+      end
+    end
+
+    context 'with resource access tokens' do
+      let(:current_user) { project_bot }
+
+      before do
+        project.add_maintainer(project_bot)
+      end
+
+      it { is_expected.not_to be_allowed(:create_resource_access_tokens)}
     end
   end
 
@@ -697,6 +786,7 @@ RSpec.describe ProjectPolicy do
       let(:deploy_token) { create(:deploy_token, write_package_registry: true) }
 
       it { is_expected.to be_allowed(:create_package) }
+      it { is_expected.to be_allowed(:read_package) }
       it { is_expected.to be_allowed(:read_project) }
       it { is_expected.to be_disallowed(:destroy_package) }
     end
@@ -779,7 +869,31 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  context 'security configuration feature' do
+    %w(guest reporter).each do |role|
+      context role do
+        let(:current_user) { send(role) }
+
+        it 'prevents reading security configuration' do
+          expect_disallowed(:read_security_configuration)
+        end
+      end
+    end
+
+    %w(developer maintainer owner).each do |role|
+      context role do
+        let(:current_user) { send(role) }
+
+        it 'allows reading security configuration' do
+          expect_allowed(:read_security_configuration)
+        end
+      end
+    end
+  end
+
   describe 'design permissions' do
+    include DesignManagementTestHelpers
+
     let(:current_user) { guest }
 
     let(:design_permissions) do
@@ -787,12 +901,14 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'when design management is not available' do
+      before do
+        enable_design_management(false)
+      end
+
       it { is_expected.not_to be_allowed(*design_permissions) }
     end
 
     context 'when design management is available' do
-      include DesignManagementTestHelpers
-
       before do
         enable_design_management
       end
@@ -942,5 +1058,353 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  describe 'read_analytics' do
+    context 'anonymous user' do
+      let(:current_user) { anonymous }
+
+      it { is_expected.to be_allowed(:read_analytics) }
+    end
+
+    context 'with various analytics features' do
+      let_it_be(:project_with_analytics_disabled) { create(:project, :analytics_disabled) }
+      let_it_be(:project_with_analytics_private) { create(:project, :analytics_private) }
+      let_it_be(:project_with_analytics_enabled) { create(:project, :analytics_enabled) }
+
+      before do
+        project_with_analytics_disabled.add_developer(developer)
+        project_with_analytics_private.add_developer(developer)
+        project_with_analytics_enabled.add_developer(developer)
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_disabled }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+      end
+
+      context 'when analytics is private for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_cycle_analytics) }
+          it { is_expected.to be_allowed(:read_insights) }
+          it { is_expected.to be_allowed(:read_repository_graphs) }
+        end
+      end
+
+      context 'when analytics is enabled for the project' do
+        let(:project) { project_with_analytics_private }
+
+        context 'for guest user' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_cycle_analytics) }
+          it { is_expected.to be_disallowed(:read_insights) }
+          it { is_expected.to be_disallowed(:read_repository_graphs) }
+        end
+
+        context 'for developer' do
+          let(:current_user) { developer }
+
+          it { is_expected.to be_allowed(:read_cycle_analytics) }
+          it { is_expected.to be_allowed(:read_insights) }
+          it { is_expected.to be_allowed(:read_repository_graphs) }
+        end
+      end
+    end
+
+    context 'project member' do
+      let(:project) { private_project }
+
+      %w(guest reporter developer maintainer).each do |role|
+        context role do
+          let(:current_user) { send(role) }
+
+          it { is_expected.to be_allowed(:read_analytics) }
+
+          context "without access to Analytics" do
+            before do
+              project.project_feature.update!(analytics_access_level: ProjectFeature::DISABLED)
+            end
+
+            it { is_expected.to be_disallowed(:read_analytics) }
+          end
+        end
+      end
+    end
+  end
+
   it_behaves_like 'Self-managed Core resource access tokens'
+
+  describe 'operations feature' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:guest_operations_permissions) { [:read_environment, :read_deployment] }
+
+    let(:developer_operations_permissions) do
+      guest_operations_permissions + [
+        :read_feature_flag, :read_sentry_issue, :read_alert_management_alert, :read_terraform_state,
+        :metrics_dashboard, :read_pod_logs, :read_prometheus, :create_feature_flag,
+        :create_environment, :create_deployment, :update_feature_flag, :update_environment,
+        :update_sentry_issue, :update_alert_management_alert, :update_deployment,
+        :destroy_feature_flag, :destroy_environment, :admin_feature_flag
+      ]
+    end
+
+    let(:maintainer_operations_permissions) do
+      developer_operations_permissions + [
+        :read_cluster, :create_cluster, :update_cluster, :admin_environment,
+        :admin_cluster, :admin_terraform_state, :admin_deployment
+      ]
+    end
+
+    where(:project_visibility, :access_level, :role, :allowed) do
+      :public   | ProjectFeature::ENABLED   | :maintainer | true
+      :public   | ProjectFeature::ENABLED   | :developer  | true
+      :public   | ProjectFeature::ENABLED   | :guest      | true
+      :public   | ProjectFeature::ENABLED   | :anonymous  | true
+      :public   | ProjectFeature::PRIVATE   | :maintainer | true
+      :public   | ProjectFeature::PRIVATE   | :developer  | true
+      :public   | ProjectFeature::PRIVATE   | :guest      | true
+      :public   | ProjectFeature::PRIVATE   | :anonymous  | false
+      :public   | ProjectFeature::DISABLED  | :maintainer | false
+      :public   | ProjectFeature::DISABLED  | :developer  | false
+      :public   | ProjectFeature::DISABLED  | :guest      | false
+      :public   | ProjectFeature::DISABLED  | :anonymous  | false
+      :internal | ProjectFeature::ENABLED   | :maintainer | true
+      :internal | ProjectFeature::ENABLED   | :developer  | true
+      :internal | ProjectFeature::ENABLED   | :guest      | true
+      :internal | ProjectFeature::ENABLED   | :anonymous  | false
+      :internal | ProjectFeature::PRIVATE   | :maintainer | true
+      :internal | ProjectFeature::PRIVATE   | :developer  | true
+      :internal | ProjectFeature::PRIVATE   | :guest      | true
+      :internal | ProjectFeature::PRIVATE   | :anonymous  | false
+      :internal | ProjectFeature::DISABLED  | :maintainer | false
+      :internal | ProjectFeature::DISABLED  | :developer  | false
+      :internal | ProjectFeature::DISABLED  | :guest      | false
+      :internal | ProjectFeature::DISABLED  | :anonymous  | false
+      :private  | ProjectFeature::ENABLED   | :maintainer | true
+      :private  | ProjectFeature::ENABLED   | :developer  | true
+      :private  | ProjectFeature::ENABLED   | :guest      | false
+      :private  | ProjectFeature::ENABLED   | :anonymous  | false
+      :private  | ProjectFeature::PRIVATE   | :maintainer | true
+      :private  | ProjectFeature::PRIVATE   | :developer  | true
+      :private  | ProjectFeature::PRIVATE   | :guest      | false
+      :private  | ProjectFeature::PRIVATE   | :anonymous  | false
+      :private  | ProjectFeature::DISABLED  | :maintainer | false
+      :private  | ProjectFeature::DISABLED  | :developer  | false
+      :private  | ProjectFeature::DISABLED  | :guest      | false
+      :private  | ProjectFeature::DISABLED  | :anonymous  | false
+    end
+
+    with_them do
+      let(:current_user) { user_subject(role) }
+      let(:project) { project_subject(project_visibility) }
+
+      it 'allows/disallows the abilities based on the operation feature access level' do
+        project.project_feature.update!(operations_access_level: access_level)
+
+        if allowed
+          expect_allowed(*permissions_abilities(role))
+        else
+          expect_disallowed(*permissions_abilities(role))
+        end
+      end
+
+      def project_subject(project_type)
+        case project_type
+        when :public
+          public_project
+        when :internal
+          internal_project
+        else
+          private_project
+        end
+      end
+
+      def user_subject(role)
+        case role
+        when :maintainer
+          maintainer
+        when :developer
+          developer
+        when :guest
+          guest
+        when :anonymous
+          anonymous
+        end
+      end
+
+      def permissions_abilities(role)
+        case role
+        when :maintainer
+          maintainer_operations_permissions
+        when :developer
+          developer_operations_permissions
+        else
+          guest_operations_permissions
+        end
+      end
+    end
+  end
+
+  describe 'access_security_and_compliance' do
+    context 'when the "Security & Compliance" is enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::PRIVATE)
+      end
+
+      %w[owner maintainer developer].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_allowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      %w[reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+
+    context 'when the "Security & Compliance" is not enabled' do
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: Featurable::DISABLED)
+      end
+
+      %w[owner maintainer developer reporter guest].each do |role|
+        context "when the role is #{role}" do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with admin' do
+        let(:current_user) { admin }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+
+        context 'when admin mode disabled' do
+          it { is_expected.to be_disallowed(:access_security_and_compliance) }
+        end
+      end
+
+      context 'with non member' do
+        let(:current_user) { non_member }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'with anonymous' do
+        let(:current_user) { anonymous }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+    end
+  end
+
+  context 'timelogs' do
+    context 'with admin' do
+      let(:current_user) { admin }
+
+      context 'when admin mode enabled', :enable_admin_mode do
+        it { is_expected.to be_allowed(:read_group_timelogs) }
+      end
+
+      context 'when admin mode disabled' do
+        it { is_expected.to be_disallowed(:read_group_timelogs) }
+      end
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_group_timelogs) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:read_group_timelogs) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_group_timelogs) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:read_group_timelogs) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { non_member }
+
+      it { is_expected.to be_disallowed(:read_group_timelogs) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { anonymous }
+
+      it { is_expected.to be_disallowed(:read_group_timelogs) }
+    end
+  end
 end

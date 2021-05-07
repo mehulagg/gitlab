@@ -1,6 +1,5 @@
 <script>
 import { GlEmptyState, GlSprintf, GlLink } from '@gitlab/ui';
-import { mapState } from 'vuex';
 
 export default {
   name: 'GroupEmptyState',
@@ -9,9 +8,7 @@ export default {
     GlSprintf,
     GlLink,
   },
-  computed: {
-    ...mapState(['config']),
-  },
+  inject: ['config'],
 };
 </script>
 <template>
@@ -28,7 +25,7 @@ export default {
             )
           "
         >
-          <template #docLink="{content}">
+          <template #docLink="{ content }">
             <gl-link :href="config.helpPagePath" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>

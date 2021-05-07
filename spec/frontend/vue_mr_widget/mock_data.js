@@ -1,5 +1,20 @@
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
 
+export const artifacts = [
+  {
+    text: 'result.txt',
+    url: 'bar',
+    job_name: 'generate-artifact',
+    job_path: 'bar',
+  },
+  {
+    text: 'foo.txt',
+    url: 'foo',
+    job_name: 'foo-artifact',
+    job_path: 'foo',
+  },
+];
+
 export default {
   id: 132,
   iid: 22,
@@ -33,7 +48,7 @@ export default {
   source_branch_link: 'daaaa',
   source_project_id: 19,
   source_project_full_path: '/group1/project1',
-  target_branch: 'master',
+  target_branch: 'main',
   target_project_id: 19,
   target_project_full_path: '/group2/project2',
   merge_request_add_ci_config_path: '/group2/project2/new/pipeline',
@@ -41,6 +56,7 @@ export default {
   user_callouts_path: 'some/callout/path',
   suggest_pipeline_feature_id: 'suggest_pipeline',
   new_project_pipeline_path: '/group2/project2/pipelines/new',
+  source_project_default_url: '/gitlab-org/html5-boilerplate.git',
   metrics: {
     merged_by: {
       name: 'Administrator',
@@ -67,7 +83,7 @@ export default {
   diff_head_sha: '104096c51715e12e7ae41f9333e9fa35b73f385d',
   diff_head_commit_short_id: '104096c5',
   default_merge_commit_message:
-    "Merge branch 'daaaa' into 'master'\n\nUpdate README.md\n\nSee merge request !22",
+    "Merge branch 'daaaa' into 'main'\n\nUpdate README.md\n\nSee merge request !22",
   pipeline: {
     id: 172,
     user: {
@@ -83,6 +99,7 @@ export default {
     coverage: '92.16',
     path: '/root/acets-app/pipelines/172',
     details: {
+      artifacts,
       status: {
         icon: 'status_success',
         favicon: 'favicon_status_success',
@@ -126,7 +143,6 @@ export default {
           dropdown_path: '/root/acets-app/pipelines/172/stage.json?stage=review',
         },
       ],
-      artifacts: [],
       manual_actions: [
         {
           name: 'stop_review',
@@ -157,8 +173,8 @@ export default {
       title: 'Update README.md',
       source_branch: 'feature-1',
       source_branch_path: '/root/detached-merge-request-pipelines/branches/feature-1',
-      target_branch: 'master',
-      target_branch_path: '/root/detached-merge-request-pipelines/branches/master',
+      target_branch: 'main',
+      target_branch_path: '/root/detached-merge-request-pipelines/branches/main',
     },
     commit: {
       id: '104096c51715e12e7ae41f9333e9fa35b73f385d',
@@ -193,7 +209,10 @@ export default {
     updated_at: '2017-04-07T15:28:44.800Z',
   },
   pipelineCoverageDelta: '15.25',
-  buildsWithCoverage: [{ name: 'karma', coverage: '40.2' }, { name: 'rspec', coverage: '80.4' }],
+  buildsWithCoverage: [
+    { name: 'karma', coverage: '40.2' },
+    { name: 'rspec', coverage: '80.4' },
+  ],
   work_in_progress: false,
   source_branch_exists: false,
   mergeable_discussions_state: true,
@@ -224,7 +243,7 @@ export default {
     head_path: 'blob_path',
   },
   codequality_help_path: 'code_quality.html',
-  target_branch_path: '/root/acets-app/branches/master',
+  target_branch_path: '/root/acets-app/branches/main',
   source_branch_path: '/root/acets-app/branches/daaaa',
   conflict_resolution_ui_path: '/root/acets-app/-/merge_requests/22/conflicts',
   remove_wip_path: '/root/acets-app/-/merge_requests/22/remove_wip',
@@ -245,7 +264,7 @@ export default {
   ci_environments_status_url: '/root/acets-app/-/merge_requests/22/ci_environments_status',
   project_archived: false,
   default_merge_commit_message_with_description:
-    "Merge branch 'daaaa' into 'master'\n\nUpdate README.md\n\nSee merge request !22",
+    "Merge branch 'daaaa' into 'main'\n\nUpdate README.md\n\nSee merge request !22",
   default_squash_commit_message: 'Test squash commit message',
   diverged_commits_count: 0,
   only_allow_merge_if_pipeline_succeeds: false,
@@ -263,12 +282,15 @@ export default {
   merge_trains_count: 3,
   merge_train_index: 1,
   security_reports_docs_path: 'security-reports-docs-path',
+  sast_comparison_path: '/sast_comparison_path',
+  secret_scanning_comparison_path: '/secret_scanning_comparison_path',
 };
 
 export const mockStore = {
   pipeline: {
     id: 0,
     details: {
+      artifacts,
       status: {
         details_path: '/root/review-app-tester/pipelines/66',
         favicon:
@@ -288,6 +310,7 @@ export const mockStore = {
   mergePipeline: {
     id: 1,
     details: {
+      artifacts,
       status: {
         details_path: '/root/review-app-tester/pipelines/66',
         favicon:

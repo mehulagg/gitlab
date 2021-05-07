@@ -38,15 +38,15 @@ issues:
           - S::4
         group_by: month
 mergeRequests:
-  title: Merge Requests Dashboard
+  title: Merge requests dashboard
   charts:
-    - title: Merge Requests merged per week
+    - title: Merge requests merged per week
       type: bar
       query:
         issuable_type: merge_request
         issuable_state: merged
         group_by: week
-    - title: Merge Requests merged per month
+    - title: Merge requests merged per month
       type: bar
       query:
         issuable_type: merge_request

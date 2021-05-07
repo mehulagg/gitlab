@@ -1,0 +1,19 @@
+#import "../fragments/oncall_schedule_participant.fragment.graphql"
+
+fragment OnCallRotation on IncidentManagementOncallRotation {
+  id
+  name
+  startsAt
+  endsAt
+  length
+  lengthUnit
+  activePeriod {
+    startTime
+    endTime
+  }
+  participants {
+    nodes {
+      ...OnCallParticipant
+    }
+  }
+}

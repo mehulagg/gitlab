@@ -1,6 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import * as urlUtility from '~/lib/utils/url_utility';
 
 const buttons = [
   {
@@ -23,7 +24,7 @@ describe('Split Button', () => {
   const findDropdown = () => wrapper.find(GlDropdown);
   const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SplitButton, {
       propsData: {
         ...props,
@@ -64,6 +65,20 @@ describe('Split Button', () => {
     expect(wrapper.emitted('button1Action')).toHaveLength(1);
   });
 
+  it('visits url if href property is specified', () => {
+    const spy = jest.spyOn(urlUtility, 'visitUrl').mockReturnValue({});
+    const href = 'https://gitlab.com';
+
+    createComponent({
+      buttons: [{ ...buttons.slice(0), action: undefined, href }],
+    });
+
+    findDropdown().vm.$emit('click');
+
+    expect(wrapper.emitted('button1Action')).toBeUndefined();
+    expect(spy).toHaveBeenCalledWith(href, true);
+  });
+
   it('renders a correct amount of dropdown items', () => {
     createComponent({
       buttons,
@@ -77,10 +92,6 @@ describe('Split Button', () => {
       buttons: buttons.slice(0),
     });
 
-    expect(
-      findDropdownItems()
-        .at(0)
-        .props('isChecked'),
-    ).toBe(true);
+    expect(findDropdownItems().at(0).props('isChecked')).toBe(true);
   });
 });

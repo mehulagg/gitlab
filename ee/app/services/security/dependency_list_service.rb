@@ -23,8 +23,7 @@ module Security
       collection = init_collection
       collection = filter_by_package_manager(collection)
       collection = filter_by_vulnerable(collection)
-      collection = sort(collection)
-      collection
+      sort(collection)
     end
 
     private
@@ -75,7 +74,7 @@ module Security
         level_i = dep_i.dig(:vulnerabilities, 0, :severity) || :info
         level_j = dep_j.dig(:vulnerabilities, 0, :severity) || :info
 
-        ::Vulnerabilities::Finding::SEVERITY_LEVELS[level_j] <=> ::Vulnerabilities::Finding::SEVERITY_LEVELS[level_i]
+        ::Enums::Vulnerability.severity_levels[level_j] <=> ::Enums::Vulnerability.severity_levels[level_i]
       end
     end
   end

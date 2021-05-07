@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Integrations::Jira::IssueSerializer do
-  let(:serializer) { described_class.new }
-  let(:project) { build(:project) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:jira_service) { create(:jira_service, project: project) }
 
-  subject { serializer.represent(jira_issues, project: project) }
+  subject { described_class.new.represent(jira_issues, project: project) }
 
   describe '#represent' do
     context 'when an empty array is being serialized' do

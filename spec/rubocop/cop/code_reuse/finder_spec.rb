@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
-require 'rubocop/rspec/support'
 require_relative '../../../../rubocop/cop/code_reuse/finder'
 
-RSpec.describe RuboCop::Cop::CodeReuse::Finder, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::CodeReuse::Finder do
   subject(:cop) { described_class.new }
 
   it 'flags the use of a Finder inside another Finder' do
@@ -23,8 +19,6 @@ RSpec.describe RuboCop::Cop::CodeReuse::Finder, type: :rubocop do
         end
       end
     SOURCE
-
-    expect(cop.offenses.size).to eq(1)
   end
 
   it 'flags the use of a Finder inside a model class method' do

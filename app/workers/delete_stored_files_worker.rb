@@ -3,14 +3,16 @@
 class DeleteStoredFilesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category_not_owned!
   loggable_arguments 0
 
   def perform(class_name, keys)
     klass = begin
       class_name.constantize
-            rescue NameError
-              nil
+    rescue NameError
+      nil
     end
 
     unless klass

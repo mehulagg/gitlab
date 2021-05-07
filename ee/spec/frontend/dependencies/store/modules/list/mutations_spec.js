@@ -1,7 +1,7 @@
+import { REPORT_STATUS, SORT_ORDER } from 'ee/dependencies/store/modules/list/constants';
 import * as types from 'ee/dependencies/store/modules/list/mutation_types';
 import mutations from 'ee/dependencies/store/modules/list/mutations';
 import getInitialState from 'ee/dependencies/store/modules/list/state';
-import { REPORT_STATUS, SORT_ORDER } from 'ee/dependencies/store/modules/list/constants';
 import { TEST_HOST } from 'helpers/test_constants';
 
 describe('Dependencies mutations', () => {

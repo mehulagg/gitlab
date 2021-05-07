@@ -35,6 +35,12 @@ export const TestReportStatus = {
   Failed: 'FAILED',
 };
 
+export const TestReportStatusToValue = {
+  satisfied: 'PASSED',
+  failed: 'FAILED',
+  missing: 'MISSING',
+};
+
 export const DEFAULT_PAGE_SIZE = 20;
 
 export const MAX_TITLE_LENGTH = 255;

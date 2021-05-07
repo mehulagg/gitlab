@@ -1,5 +1,5 @@
+import { GlButton, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlButton, GlSprintf } from '@gitlab/ui';
 import UsageStatistics from 'ee/storage_counter/components/usage_statistics.vue';
 import UsageStatisticsCard from 'ee/storage_counter/components/usage_statistics_card.vue';
 import { withRootStorageStatistics } from '../mock_data';
@@ -7,7 +7,7 @@ import { withRootStorageStatistics } from '../mock_data';
 describe('Usage Statistics component', () => {
   let wrapper;
 
-  const createComponent = () => {
+  const createComponent = (props = {}) => {
     wrapper = shallowMount(UsageStatistics, {
       propsData: {
         rootStorageStatistics: {
@@ -16,54 +16,66 @@ describe('Usage Statistics component', () => {
           totalRepositorySizeExcess: withRootStorageStatistics.totalRepositorySizeExcess,
           additionalPurchasedStorageSize: withRootStorageStatistics.additionalPurchasedStorageSize,
         },
+        ...props,
       },
       stubs: {
         UsageStatisticsCard,
         GlSprintf,
+        GlLink,
       },
     });
   };
 
   const getStatisticsCards = () => wrapper.findAll(UsageStatisticsCard);
-  const getStatisticsCard = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const getStatisticsCard = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findGlLinkInCard = (cardName) =>
+    getStatisticsCard(cardName).find('[data-testid="statistics-card-footer"]').find(GlLink);
 
-  beforeEach(() => {
-    createComponent();
+  describe('with purchaseStorageUrl passed', () => {
+    beforeEach(() => {
+      createComponent({
+        purchaseStorageUrl: 'some-fancy-url',
+      });
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    });
+
+    it('renders three statistics cards', () => {
+      expect(getStatisticsCards()).toHaveLength(3);
+    });
+
+    it('renders URL in total usage card footer', () => {
+      const url = findGlLinkInCard('total-usage');
+
+      expect(url.attributes('href')).toBe('/help/user/usage_quotas');
+    });
+
+    it('renders URL in excess usage card footer', () => {
+      const url = findGlLinkInCard('excess-usage');
+
+      expect(url.attributes('href')).toBe('/help/user/usage_quotas#excess-storage-usage');
+    });
+
+    it('renders button in purchased usage card footer', () => {
+      expect(getStatisticsCard('purchased-usage').find(GlButton).exists()).toBe(true);
+    });
   });
 
-  afterEach(() => {
-    wrapper.destroy();
-  });
+  describe('with no purchaseStorageUrl', () => {
+    beforeEach(() => {
+      createComponent({
+        purchaseStorageUrl: null,
+      });
+    });
 
-  it('renders three statistics cards', () => {
-    expect(getStatisticsCards()).toHaveLength(3);
-  });
+    afterEach(() => {
+      wrapper.destroy();
+    });
 
-  it('renders text in total usage card footer', () => {
-    expect(
-      getStatisticsCard('totalUsage')
-        .find('[data-testid="statisticsCardFooter"]')
-        .text(),
-    ).toMatchInterpolatedText(
-      'This is the total amount of storage used across your projects within this namespace.',
-    );
-  });
-
-  it('renders text in excess usage card footer', () => {
-    expect(
-      getStatisticsCard('excessUsage')
-        .find('[data-testid="statisticsCardFooter"]')
-        .text(),
-    ).toMatchInterpolatedText(
-      'This is the total amount of storage used by projects above the free 978.8KiB storage limit.',
-    );
-  });
-
-  it('renders button in purchased usage card footer', () => {
-    expect(
-      getStatisticsCard('purchasedUsage')
-        .find(GlButton)
-        .exists(),
-    ).toBe(true);
+    it('does not render purchased usage card if purchaseStorageUrl is not provided', () => {
+      expect(getStatisticsCard('purchased-usage').exists()).toBe(false);
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { Range, Position } from 'monaco-editor';
 import EditorLite from '~/editor/editor_lite';
-import EditorMarkdownExtension from '~/editor/editor_markdown_ext';
+import { EditorMarkdownExtension } from '~/editor/extensions/editor_markdown_ext';
 
 describe('Markdown Extension for Editor Lite', () => {
   let editor;
@@ -31,7 +31,7 @@ describe('Markdown Extension for Editor Lite', () => {
       blobPath: filePath,
       blobContent: text,
     });
-    editor.use(EditorMarkdownExtension);
+    editor.use(new EditorMarkdownExtension());
   });
 
   afterEach(() => {
@@ -114,7 +114,7 @@ describe('Markdown Extension for Editor Lite', () => {
   });
 
   describe('moveCursor', () => {
-    const setPosition = endCol => {
+    const setPosition = (endCol) => {
       const currentPos = new Position(2, endCol);
       instance.setPosition(currentPos);
     };

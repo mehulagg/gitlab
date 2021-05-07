@@ -1,22 +1,17 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import pipelineHeader from './components/header_component.vue';
 
 Vue.use(VueApollo);
 
-const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
-});
-
-export const createPipelineHeaderApp = elSelector => {
+export const createPipelineHeaderApp = (elSelector, apolloProvider, graphqlResourceEtag) => {
   const el = document.querySelector(elSelector);
 
   if (!el) {
     return;
   }
 
-  const { cancelPath, deletePath, fullPath, pipelineId, pipelineIid, retryPath } = el?.dataset;
+  const { fullPath, pipelineId, pipelineIid, pipelinesPath } = el?.dataset;
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -26,10 +21,9 @@ export const createPipelineHeaderApp = elSelector => {
     apolloProvider,
     provide: {
       paths: {
-        cancel: cancelPath,
-        delete: deletePath,
         fullProject: fullPath,
-        retry: retryPath,
+        graphqlResourceEtag,
+        pipelinesPath,
       },
       pipelineId,
       pipelineIid,

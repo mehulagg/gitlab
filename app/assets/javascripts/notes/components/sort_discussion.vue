@@ -2,8 +2,8 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
 import { __ } from '~/locale';
-import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import Tracking from '~/tracking';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { ASC, DESC } from '../constants';
 
 const SORT_OPTIONS = [
@@ -49,18 +49,17 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mr-3 gl-display-inline-block gl-vertical-align-bottom full-width-mobile">
+  <div
+    data-testid="sort-discussion-filter"
+    class="gl-mr-3 gl-display-inline-block gl-vertical-align-bottom full-width-mobile"
+  >
     <local-storage-sync
       :value="sortDirection"
       :storage-key="storageKey"
       :persist="persistSortOrder"
       @input="setDiscussionSortDirection({ direction: $event })"
     />
-    <gl-dropdown
-      :text="dropdownText"
-      data-testid="sort-discussion-filter"
-      class="js-dropdown-text full-width-mobile"
-    >
+    <gl-dropdown :text="dropdownText" class="js-dropdown-text full-width-mobile">
       <gl-dropdown-item
         v-for="{ text, key, cls } in $options.SORT_OPTIONS"
         :key="key"

@@ -1,8 +1,8 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlLoadingIcon, GlButton } from '@gitlab/ui';
-import showToast from '~/vue_shared/plugins/global_toast';
+import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
+import showToast from '~/vue_shared/plugins/global_toast';
 import ModalRuleCreate from './modal_rule_create.vue';
 import ModalRuleRemove from './modal_rule_remove.vue';
 
@@ -23,9 +23,9 @@ export default {
   computed: {
     ...mapState({
       settings: 'settings',
-      isLoading: state => state.approvals.isLoading,
-      hasLoaded: state => state.approvals.hasLoaded,
-      targetBranch: state => state.approvals.targetBranch,
+      isLoading: (state) => state.approvals.isLoading,
+      hasLoaded: (state) => state.approvals.hasLoaded,
+      targetBranch: (state) => state.approvals.targetBranch,
     }),
     createModalId() {
       return `${this.settings.prefix}-approvals-create-modal`;
@@ -66,26 +66,28 @@ export default {
       <div class="border-bottom">
         <slot name="rules"></slot>
       </div>
-      <div v-if="settings.canEdit && settings.allowMultiRule" class="border-bottom py-3 px-2">
+      <div v-if="settings.canEdit && settings.allowMultiRule" class="border-bottom py-3 px-3">
         <div class="gl-display-flex">
           <gl-button
-            v-if="targetBranch"
-            :disabled="isLoading"
-            data-testid="reset-to-defaults"
-            @click="resetToProjectDefaults"
-          >
-            {{ __('Reset to project defaults') }}
-          </gl-button>
-          <gl-button
-            :class="{ 'gl-ml-3': targetBranch, 'gl-ml-0': !targetBranch }"
+            :class="{ 'gl-mr-3': targetBranch, 'gl-mr-0': !targetBranch }"
             :disabled="isLoading"
             category="secondary"
             variant="info"
+            size="small"
             data-qa-selector="add_approvers_button"
             data-testid="add-approval-rule"
             @click="openCreateModal(null)"
           >
             {{ __('Add approval rule') }}
+          </gl-button>
+          <gl-button
+            v-if="targetBranch"
+            :disabled="isLoading"
+            size="small"
+            data-testid="reset-to-defaults"
+            @click="resetToProjectDefaults"
+          >
+            {{ __('Reset to project defaults') }}
           </gl-button>
         </div>
       </div>

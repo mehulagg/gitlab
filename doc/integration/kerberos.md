@@ -1,11 +1,11 @@
 ---
-stage: Create
-group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+stage: Manage
+group: Access
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, how-to
 ---
 
-# Kerberos integration **(STARTER ONLY)**
+# Kerberos integration **(PREMIUM SELF)**
 
 GitLab can integrate with [Kerberos](https://web.mit.edu/kerberos/) as an authentication mechanism.
 
@@ -13,13 +13,13 @@ GitLab can integrate with [Kerberos](https://web.mit.edu/kerberos/) as an authen
 
 [Kerberos](https://web.mit.edu/kerberos/) is a secure method for authenticating a request for a service in a
 computer network. Kerberos was developed in the Athena Project at the
-[Massachusetts Institute of Technology (MIT)](http://web.mit.edu/). The name is taken from Greek
+[Massachusetts Institute of Technology (MIT)](https://web.mit.edu/). The name is taken from Greek
 mythology; Kerberos was a three-headed dog who guarded the gates of Hades.
 
 ## Use-cases
 
 - GitLab can be configured to allow your users to sign with their Kerberos credentials.
-- You can use Kerberos to [prevent](http://web.mit.edu/sipb/doc/working/guide/guide/node20.html) anyone from intercepting or eavesdropping on the transmitted password.
+- You can use Kerberos to [prevent](https://web.mit.edu/sipb/doc/working/guide/guide/node20.html) anyone from intercepting or eavesdropping on the transmitted password.
 
 ## Configuration
 
@@ -47,9 +47,9 @@ sudo chmod 0600 /etc/http.keytab
 
 ### Configure GitLab
 
-**Installations from source**
+#### Installations from source
 
-NOTE: **Note:**
+NOTE:
 For source installations, make sure the `kerberos` gem group
 [has been installed](../install/installation.md#install-gems).
 
@@ -74,7 +74,7 @@ For source installations, make sure the `kerberos` gem group
 
 1. [Restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-**Omnibus package installations**
+#### Omnibus package installations
 
 1. Edit `/etc/gitlab/gitlab.rb`:
 
@@ -87,37 +87,90 @@ For source installations, make sure the `kerberos` gem group
 
 1. [Reconfigure GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-GitLab will now offer the `negotiate` authentication method for signing in and
+GitLab now offers the `negotiate` authentication method for signing in and
 HTTP Git access, enabling Git clients that support this authentication protocol
 to authenticate with Kerberos tokens.
 
-## Creating and linking Kerberos accounts
+#### Enable single sign-on
 
-The Administrative user can navigate to **Admin > Users > Example User > Identities**
-and attach a Kerberos account. Existing GitLab users can go to **Profile > Account**
-and attach a Kerberos account. If you want to allow users without a GitLab
-account to login, you should enable the option `allow_single_sign_on` as
-described in the [Configure GitLab](#configure-gitlab) section. Then, the first
-time a user signs in with Kerberos credentials, GitLab will create a new GitLab
-user associated with the email, which is built from the Kerberos username and
-realm. User accounts will be created automatically when authentication was
-successful.
+See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration)
+for initial settings to enable single sign-on and add Kerberos servers
+as an identity provider.
 
-## Linking Kerberos and LDAP accounts together
+## Create and link Kerberos accounts
 
-If your users log in with Kerberos, but you also have [LDAP integration](../administration/auth/ldap/index.md)
-enabled, then your users will be automatically linked to their LDAP accounts on
-first login. For this to work, some prerequisites must be met:
+You can either link a Kerberos account to an existing GitLab account, or
+set up GitLab to create a new account when a Kerberos user tries to sign in.
+
+### Link a Kerberos account to an existing GitLab account
+
+If you're an administrator, you can link a Kerberos account to an
+existing GitLab account. To do so:
+
+1. Navigate to **Admin Area > Overview > Users > Example User**.
+1. Select the Identities tab.
+1. Select 'Kerberos SPNEGO' in the 'Provider' dropdown box.
+1. Make sure the **Identifier** corresponds to the Kerberos username.
+1. Select **Save changes**.
+
+If you're not an administrator:
+
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Account**.
+1. In the **Social sign-in** section, select **Connect Kerberos SPNEGO**.
+   If you don't see a **Social sign-in** Kerberos option, follow the
+   requirements in [Enable single sign-on](#enable-single-sign-on).
+
+In either case, you should now be able to sign in to your GitLab account
+with your Kerberos credentials.
+
+### Create accounts on first sign-in
+
+The first time users sign in to GitLab with their Kerberos accounts,
+GitLab creates a matching account.
+Before you continue, review the [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) options in Omnibus and GitLab source. You must also include `kerberos`.
+
+With that information at hand:
+
+1. Include `'kerberos'` with the `allow_single_sign_on` setting.
+1. For now, accept the default `block_auto_created_users` option, true.
+1. When a user tries to sign in with Kerberos credentials, GitLab
+   creates a new account.
+   1. If `block_auto_created_users` is true, the Kerberos user may see
+      a message like:
+
+      ```shell
+      Your account has been blocked. Please contact your GitLab
+      administrator if you think this is an error.
+      ```
+
+      1. As an administrator, you can confirm the new, blocked account.
+         Select **Admin Area > Overview > Users** and review the Blocked tab.
+      1. You can enable the user.
+   1. If `block_auto_created_users` is false, the Kerberos user is
+      authenticated and is signed in to GitLab.
+
+WARNING:
+We recommend that you retain the default for `block_auto_created_users`.
+Kerberos users who create accounts on GitLab without administrator
+knowledge can be a security risk.
+
+## Link Kerberos and LDAP accounts together
+
+If your users sign in with Kerberos, but you also have [LDAP integration](../administration/auth/ldap/index.md)
+enabled, your users are linked to their LDAP accounts on their first sign-in.
+For this to work, some prerequisites must be met:
 
 The Kerberos username must match the LDAP user's UID. You can choose which LDAP
-attribute is used as the UID in GitLab's [LDAP configuration](../administration/auth/ldap/index.md#configuration)
+attribute is used as the UID in the GitLab [LDAP configuration](../administration/auth/ldap/index.md#configuration)
 but for Active Directory, this should be `sAMAccountName`.
 
 The Kerberos realm must match the domain part of the LDAP user's Distinguished
 Name. For instance, if the Kerberos realm is `AD.EXAMPLE.COM`, then the LDAP
 user's Distinguished Name should end in `dc=ad,dc=example,dc=com`.
 
-Taken together, these rules mean that linking will only work if your users'
+Taken together, these rules mean that linking only works if your users'
 Kerberos usernames are of the form `foo@AD.EXAMPLE.COM` and their
 LDAP Distinguished Names look like `sAMAccountName=foo,dc=ad,dc=example,dc=com`.
 
@@ -125,10 +178,10 @@ LDAP Distinguished Names look like `sAMAccountName=foo,dc=ad,dc=example,dc=com`.
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9962) in GitLab 13.5.
 
-You can configure custom allowed realms when
-the user's Kerberos realm doesn't match the domain from the user's LDAP DN. The
-configuration value must specify all domains that users may be expected to
-have. Any other domains will be ignored and an LDAP identity will not be linked.
+You can configure custom allowed realms when the user's Kerberos realm doesn't
+match the domain from the user's LDAP DN. The configuration value must specify
+all domains that users may be expected to have. Any other domains are
+ignored and an LDAP identity won't be linked.
 
 **For Omnibus installations**
 
@@ -164,11 +217,11 @@ GitLab users with a linked Kerberos account can also `git pull` and `git push`
 using Kerberos tokens, i.e., without having to send their password with each
 operation.
 
-DANGER: **Warning:**
+WARNING:
 There is a [known issue](https://github.com/curl/curl/issues/1261) with `libcurl`
 older than version 7.64.1 wherein it won't reuse connections when negotiating.
 This leads to authorization issues when push is larger than `http.postBuffer`
-config. Ensure that Git is using at least `libcurl` 7.64.1 to avoid this. To
+configuration. Ensure that Git is using at least `libcurl` 7.64.1 to avoid this. To
 know the `libcurl` version installed, run `curl-config --version`.
 
 ### HTTP Git access with Kerberos token (passwordless authentication)
@@ -183,8 +236,8 @@ authentication fails.
 
 For GitLab users to be able to use either `basic` or `negotiate` authentication
 with older Git versions, it is possible to offer Kerberos ticket-based
-authentication on a different port (e.g. 8443) while the standard port will
-keep offering only `basic` authentication.
+authentication on a different port (e.g. 8443) while the standard port offers
+only `basic` authentication.
 
 **For source installations with HTTPS**
 
@@ -227,22 +280,22 @@ keep offering only `basic` authentication.
 
 1. [Reconfigure GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-After this change, all Git remote URLs will have to be updated to
+After this change, Git remote URLs have to be updated to
 `https://gitlab.example.com:8443/mygroup/myproject.git` in order to use
 Kerberos ticket-based authentication.
 
 ## Upgrading from password-based to ticket-based Kerberos sign-ins
 
 Prior to GitLab 8.10 Enterprise Edition, users had to submit their
-Kerberos username and password to GitLab when signing in. We will
+Kerberos username and password to GitLab when signing in. We plan to
 remove support for password-based Kerberos sign-ins in a future
 release, so we recommend that you upgrade to ticket-based sign-ins.
 
 Depending on your existing GitLab configuration, the 'Sign in with:
-Kerberos Spnego' button may already be visible on your GitLab sign-in
+Kerberos SPNEGO' button may already be visible on your GitLab sign-in
 page. If not, then add the settings [described above](#configuration).
 
-Once you have verified that the 'Kerberos Spnego' button works
+Once you have verified that the 'Kerberos SPNEGO' button works
 without entering any passwords, you can proceed to disable
 password-based Kerberos sign-ins. To do this you need only need to
 remove the OmniAuth provider named `kerberos` from your `gitlab.yml` /
@@ -290,14 +343,14 @@ to a larger value in [the NGINX configuration](http://nginx.org/en/docs/http/ngx
 
 With Kerberos SPNEGO authentication, the browser is expected to send a list of
 mechanisms it supports to GitLab. If it doesn't support any of the mechanisms
-GitLab supports, authentication will fail with a message like this in the log:
+GitLab supports, authentication fails with a message like this in the log:
 
 ```plaintext
 OmniauthKerberosSpnegoController: failed to process Negotiate/Kerberos authentication: gss_accept_sec_context did not return GSS_S_COMPLETE: An unsupported mechanism was requested Unknown error
 ```
 
 This is usually seen when the browser is unable to contact the Kerberos server
-directly. It will fall back to an unsupported mechanism known as
+directly. It falls back to an unsupported mechanism known as
 [`IAKERB`](https://k5wiki.kerberos.org/wiki/Projects/IAKERB), which tries to use
 the GitLab server as an intermediary to the Kerberos server.
 
@@ -306,10 +359,10 @@ client machine and the Kerberos server - this is a prerequisite! Traffic may be
 blocked by a firewall, or the DNS records may be incorrect.
 
 Another failure mode occurs when the forward and reverse DNS records for the
-GitLab server do not match. Often, Windows clients will work in this case, while
-Linux clients will fail. They use reverse DNS while detecting the Kerberos
-realm. If they get the wrong realm, then ordinary Kerberos mechanisms will fail,
-so the client will fall back to attempting to negotiate `IAKERB`, leading to the
+GitLab server do not match. Often, Windows clients work in this case while
+Linux clients fail. They use reverse DNS while detecting the Kerberos
+realm. If they get the wrong realm then ordinary Kerberos mechanisms fail,
+so the client falls back to attempting to negotiate `IAKERB`, leading to the
 above error message.
 
 To fix this, ensure that the forward and reverse DNS for your GitLab server

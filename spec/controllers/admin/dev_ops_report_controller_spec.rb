@@ -3,6 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe Admin::DevOpsReportController do
+  describe 'show_adoption?' do
+    it 'is always false' do
+      expect(controller.show_adoption?).to be_falsey
+    end
+  end
+
+  describe 'should_track_devops_score?' do
+    it 'is always true' do
+      expect(controller.should_track_devops_score?).to be_truthy
+    end
+  end
+
   describe 'GET #show' do
     context 'as admin' do
       let(:user) { create(:admin) }

@@ -1,15 +1,25 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 
-import createDiffsStore from '~/diffs/store/modules';
-import diffFileMockDataReadable from '../mock_data/diff_file';
-import diffFileMockDataUnreadable from '../mock_data/diff_file_unreadable';
-
+import DiffContentComponent from '~/diffs/components/diff_content.vue';
 import DiffFileComponent from '~/diffs/components/diff_file.vue';
 import DiffFileHeaderComponent from '~/diffs/components/diff_file_header.vue';
-import DiffContentComponent from '~/diffs/components/diff_content.vue';
+
+import {
+  EVT_EXPAND_ALL_FILES,
+  EVT_PERF_MARK_DIFF_FILES_END,
+  EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN,
+} from '~/diffs/constants';
+import eventHub from '~/diffs/event_hub';
+import createDiffsStore from '~/diffs/store/modules';
 
 import { diffViewerModes, diffViewerErrors } from '~/ide/constants';
+import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
+import createNotesStore from '~/notes/stores/modules';
+import diffFileMockDataReadable from '../mock_data/diff_file';
+import diffFileMockDataUnreadable from '../mock_data/diff_file_unreadable';
 
 function changeViewer(store, index, { automaticallyCollapsed, manuallyCollapsed, name }) {
   const file = store.state.diffs.diffFiles[index];
@@ -55,12 +65,13 @@ function markFileToBeRendered(store, index = 0) {
   });
 }
 
-function createComponent({ file }) {
+function createComponent({ file, first = false, last = false, options = {}, props = {} }) {
   const localVue = createLocalVue();
 
   localVue.use(Vuex);
 
   const store = new Vuex.Store({
+    ...createNotesStore(),
     modules: {
       diffs: createDiffsStore(),
     },
@@ -75,7 +86,11 @@ function createComponent({ file }) {
       file,
       canCurrentUserFork: false,
       viewDiffsFileByFile: false,
+      isFirstFile: first,
+      isLastFile: last,
+      ...props,
     },
+    ...options,
   });
 
   return {
@@ -85,13 +100,13 @@ function createComponent({ file }) {
   };
 }
 
-const findDiffHeader = wrapper => wrapper.find(DiffFileHeaderComponent);
-const findDiffContentArea = wrapper => wrapper.find('[data-testid="content-area"]');
-const findLoader = wrapper => wrapper.find('[data-testid="loader-icon"]');
-const findToggleLinks = wrapper => wrapper.findAll('[data-testid="toggle-link"]');
+const findDiffHeader = (wrapper) => wrapper.find(DiffFileHeaderComponent);
+const findDiffContentArea = (wrapper) => wrapper.find('[data-testid="content-area"]');
+const findLoader = (wrapper) => wrapper.find('[data-testid="loader-icon"]');
+const findToggleButton = (wrapper) => wrapper.find('[data-testid="expand-button"]');
 
-const toggleFile = wrapper => findDiffHeader(wrapper).vm.$emit('toggleFile');
-const isDisplayNone = element => element.style.display === 'none';
+const toggleFile = (wrapper) => findDiffHeader(wrapper).vm.$emit('toggleFile');
+const isDisplayNone = (element) => element.style.display === 'none';
 const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
 const getUnreadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataUnreadable));
 
@@ -107,13 +122,82 @@ const changeViewerType = (store, newType, index = 0) =>
 describe('DiffFile', () => {
   let wrapper;
   let store;
+  let axiosMock;
 
   beforeEach(() => {
+    axiosMock = new MockAdapter(axios);
     ({ wrapper, store } = createComponent({ file: getReadableFile() }));
   });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
+    axiosMock.restore();
+  });
+
+  describe('bus events', () => {
+    beforeEach(() => {
+      jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+    });
+
+    describe('during mount', () => {
+      it.each`
+        first    | last     | events                                                                 | file
+        ${false} | ${false} | ${[]}                                                                  | ${{ inlineLines: [], parallelLines: [], readableText: true }}
+        ${true}  | ${true}  | ${[]}                                                                  | ${{ inlineLines: [], parallelLines: [], readableText: true }}
+        ${true}  | ${false} | ${[EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN]}                               | ${false}
+        ${false} | ${true}  | ${[EVT_PERF_MARK_DIFF_FILES_END]}                                      | ${false}
+        ${true}  | ${true}  | ${[EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN, EVT_PERF_MARK_DIFF_FILES_END]} | ${false}
+      `(
+        'emits the events $events based on the file and its position ({ first: $first, last: $last }) among all files',
+        async ({ file, first, last, events }) => {
+          if (file) {
+            forceHasDiff({ store, ...file });
+          }
+
+          ({ wrapper, store } = createComponent({
+            file: store.state.diffs.diffFiles[0],
+            first,
+            last,
+          }));
+
+          await wrapper.vm.$nextTick();
+
+          expect(eventHub.$emit).toHaveBeenCalledTimes(events.length);
+          events.forEach((event) => {
+            expect(eventHub.$emit).toHaveBeenCalledWith(event);
+          });
+        },
+      );
+    });
+
+    describe('after loading the diff', () => {
+      it('indicates that it loaded the file', async () => {
+        forceHasDiff({ store, inlineLines: [], parallelLines: [], readableText: true });
+        ({ wrapper, store } = createComponent({
+          file: store.state.diffs.diffFiles[0],
+          first: true,
+          last: true,
+        }));
+
+        jest.spyOn(wrapper.vm, 'loadCollapsedDiff').mockResolvedValue(getReadableFile());
+        jest.spyOn(window, 'requestIdleCallback').mockImplementation((fn) => fn());
+
+        makeFileAutomaticallyCollapsed(store);
+
+        await wrapper.vm.$nextTick(); // Wait for store updates to flow into the component
+
+        toggleFile(wrapper);
+
+        await wrapper.vm.$nextTick(); // Wait for the load to resolve
+        await wrapper.vm.$nextTick(); // Wait for the idleCallback
+        await wrapper.vm.$nextTick(); // Wait for nextTick inside postRender
+
+        expect(eventHub.$emit).toHaveBeenCalledTimes(2);
+        expect(eventHub.$emit).toHaveBeenCalledWith(EVT_PERF_MARK_FIRST_DIFF_FILE_SHOWN);
+        expect(eventHub.$emit).toHaveBeenCalledWith(EVT_PERF_MARK_DIFF_FILES_END);
+      });
+    });
   });
 
   describe('template', () => {
@@ -137,7 +221,78 @@ describe('DiffFile', () => {
     });
   });
 
+  describe('computed', () => {
+    describe('showLocalFileReviews', () => {
+      let gon;
+
+      function setLoggedIn(bool) {
+        window.gon.current_user_id = bool;
+      }
+
+      beforeAll(() => {
+        gon = window.gon;
+        window.gon = {};
+      });
+
+      afterEach(() => {
+        window.gon = gon;
+      });
+
+      it.each`
+        loggedIn | featureOn | bool
+        ${true}  | ${true}   | ${true}
+        ${false} | ${true}   | ${false}
+        ${true}  | ${false}  | ${false}
+        ${false} | ${false}  | ${false}
+      `(
+        'should be $bool when { userIsLoggedIn: $loggedIn, featureEnabled: $featureOn }',
+        ({ loggedIn, featureOn, bool }) => {
+          setLoggedIn(loggedIn);
+
+          ({ wrapper } = createComponent({
+            options: {
+              provide: {
+                glFeatures: {
+                  localFileReviews: featureOn,
+                },
+              },
+            },
+            props: {
+              file: store.state.diffs.diffFiles[0],
+            },
+          }));
+
+          expect(wrapper.vm.showLocalFileReviews).toBe(bool);
+        },
+      );
+    });
+  });
+
   describe('collapsing', () => {
+    describe(`\`${EVT_EXPAND_ALL_FILES}\` event`, () => {
+      beforeEach(() => {
+        jest.spyOn(wrapper.vm, 'handleToggle').mockImplementation(() => {});
+      });
+
+      it('performs the normal file toggle when the file is collapsed', async () => {
+        makeFileAutomaticallyCollapsed(store);
+
+        await wrapper.vm.$nextTick();
+
+        eventHub.$emit(EVT_EXPAND_ALL_FILES);
+
+        expect(wrapper.vm.handleToggle).toHaveBeenCalledTimes(1);
+      });
+
+      it('does nothing when the file is not collapsed', async () => {
+        eventHub.$emit(EVT_EXPAND_ALL_FILES);
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.vm.handleToggle).not.toHaveBeenCalled();
+      });
+    });
+
     describe('user collapsed', () => {
       beforeEach(() => {
         makeFileManuallyCollapsed(store);
@@ -146,7 +301,7 @@ describe('DiffFile', () => {
       it('should not have any content at all', async () => {
         await wrapper.vm.$nextTick();
 
-        Array.from(findDiffContentArea(wrapper).element.children).forEach(child => {
+        Array.from(findDiffContentArea(wrapper).element.children).forEach((child) => {
           expect(isDisplayNone(child)).toBe(true);
         });
       });
@@ -161,9 +316,11 @@ describe('DiffFile', () => {
         makeFileAutomaticallyCollapsed(store);
       });
 
-      it('should show the collapsed file warning with expansion link', () => {
-        expect(findDiffContentArea(wrapper).html()).toContain('This diff is collapsed');
-        expect(findToggleLinks(wrapper).length).toEqual(1);
+      it('should show the collapsed file warning with expansion button', () => {
+        expect(findDiffContentArea(wrapper).html()).toContain(
+          'Files with large changes are collapsed by default.',
+        );
+        expect(findToggleButton(wrapper).exists()).toBe(true);
       });
 
       it('should style the component so that it `.has-body` for layout purposes', () => {
@@ -250,8 +407,10 @@ describe('DiffFile', () => {
 
     describe('loading', () => {
       it('should have loading icon while loading a collapsed diffs', async () => {
+        const { load_collapsed_diff_url } = store.state.diffs.diffFiles[0];
+        axiosMock.onGet(load_collapsed_diff_url).reply(httpStatus.OK, getReadableFile());
         makeFileAutomaticallyCollapsed(store);
-        wrapper.vm.isLoadingCollapsedDiff = true;
+        wrapper.vm.requestDiff();
 
         await wrapper.vm.$nextTick();
 
@@ -266,8 +425,10 @@ describe('DiffFile', () => {
 
         await wrapper.vm.$nextTick();
 
-        expect(findDiffContentArea(wrapper).html()).toContain('This diff is collapsed');
-        expect(findToggleLinks(wrapper).length).toEqual(1);
+        expect(findDiffContentArea(wrapper).html()).toContain(
+          'Files with large changes are collapsed by default.',
+        );
+        expect(findToggleButton(wrapper).exists()).toBe(true);
       });
 
       it.each`
@@ -309,9 +470,11 @@ describe('DiffFile', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.vm.$el.innerText).toContain(
-        'This source diff could not be displayed because it is too large',
-      );
+      const button = wrapper.find('[data-testid="blob-button"]');
+
+      expect(wrapper.text()).toContain('Changes are too large to be shown.');
+      expect(button.html()).toContain('View file @');
+      expect(button.attributes('href')).toBe('/file/view/path');
     });
   });
 });

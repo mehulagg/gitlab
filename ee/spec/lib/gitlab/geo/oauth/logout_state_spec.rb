@@ -22,7 +22,7 @@ RSpec.describe Gitlab::Geo::Oauth::LogoutState do
     end
 
     it 'returns nil when encryption fails' do
-      allow_next_instance_of(OpenSSL::Cipher::AES256) do |instance|
+      allow_next_instance_of(OpenSSL::Cipher) do |instance|
         allow(instance).to receive(:final) { raise OpenSSL::OpenSSLError }
       end
 
@@ -78,7 +78,7 @@ RSpec.describe Gitlab::Geo::Oauth::LogoutState do
     end
 
     it 'returns nil when decryption fails' do
-      allow_next_instance_of(OpenSSL::Cipher::AES256) do |instance|
+      allow_next_instance_of(OpenSSL::Cipher) do |instance|
         allow(instance).to receive(:final) { raise OpenSSL::OpenSSLError }
       end
 

@@ -1,8 +1,8 @@
 <script>
 import $ from 'jquery';
 import { __ } from '~/locale';
-import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import ActionsButton from '~/vue_shared/components/actions_button.vue';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 const KEY_EDIT = 'edit';
 const KEY_WEB_IDE = 'webide';
@@ -72,7 +72,7 @@ export default {
   },
   computed: {
     actions() {
-      return [this.webIdeAction, this.editAction, this.gitpodAction].filter(action => action);
+      return [this.webIdeAction, this.editAction, this.gitpodAction].filter((action) => action);
     },
     editAction() {
       if (!this.showEditButton) {
@@ -169,7 +169,7 @@ export default {
 </script>
 
 <template>
-  <div class="d-inline-block gl-ml-3">
+  <div class="gl-sm-ml-3">
     <actions-button
       :actions="actions"
       :selected-key="selection"

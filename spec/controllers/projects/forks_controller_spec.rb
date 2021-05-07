@@ -71,7 +71,7 @@ RSpec.describe Projects::ForksController do
 
     context 'when fork is internal' do
       before do
-        forked_project.update(visibility_level: Project::INTERNAL, group: group)
+        forked_project.update!(visibility_level: Project::INTERNAL, group: group)
       end
 
       it 'forks counts are correct' do
@@ -86,7 +86,7 @@ RSpec.describe Projects::ForksController do
 
     context 'when fork is private' do
       before do
-        forked_project.update(visibility_level: Project::PRIVATE, group: group)
+        forked_project.update!(visibility_level: Project::PRIVATE, group: group)
       end
 
       shared_examples 'forks counts' do
@@ -153,8 +153,11 @@ RSpec.describe Projects::ForksController do
   end
 
   describe 'GET new' do
-    subject do
+    let(:format) { :html }
+
+    subject(:do_request) do
       get :new,
+          format: format,
           params: {
             namespace_id: project.namespace,
             project_id: project
@@ -166,24 +169,32 @@ RSpec.describe Projects::ForksController do
         sign_in(user)
       end
 
-      context 'when JSON requested' do
-        it 'responds with available groups' do
-          get :new,
-              format: :json,
-              params: {
-                namespace_id: project.namespace,
-                project_id: project
-              }
-
-          expect(json_response['namespaces'].length).to eq(1)
-          expect(json_response['namespaces'].first['id']).to eq(group.id)
-        end
-      end
-
       it 'responds with status 200' do
-        subject
+        request
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'when JSON is requested' do
+        let(:format) { :json }
+
+        it 'responds with user namespace + groups' do
+          do_request
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['namespaces'].length).to eq(2)
+          expect(json_response['namespaces'][0]['id']).to eq(user.namespace.id)
+          expect(json_response['namespaces'][1]['id']).to eq(group.id)
+        end
+
+        it 'responds with group only when fork_project_form feature flag is disabled' do
+          stub_feature_flags(fork_project_form: false)
+          do_request
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['namespaces'].length).to eq(1)
+          expect(json_response['namespaces'][0]['id']).to eq(group.id)
+        end
       end
     end
 
@@ -207,6 +218,13 @@ RSpec.describe Projects::ForksController do
         project_id: project,
         namespace_key: user.namespace.id
       }
+    end
+
+    let(:created_project) do
+      Namespace
+        .find_by_id(params[:namespace_key])
+        .projects
+        .find_by_path(params.fetch(:path, project.path))
     end
 
     subject do
@@ -258,6 +276,21 @@ RSpec.describe Projects::ForksController do
 
           expect(response).to have_gitlab_http_status(:found)
           expect(response).to redirect_to(namespace_project_import_path(user.namespace, project, continue: continue_params))
+        end
+      end
+
+      context 'custom attributes set' do
+        let(:params) { super().merge(path: 'something_custom', name: 'Something Custom', description: 'Something Custom', visibility: 'private') }
+
+        it 'creates a project with custom values' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:found)
+          expect(response).to redirect_to(namespace_project_import_path(user.namespace, params[:path]))
+          expect(created_project.path).to eq(params[:path])
+          expect(created_project.name).to eq(params[:name])
+          expect(created_project.description).to eq(params[:description])
+          expect(created_project.visibility).to eq(params[:visibility])
         end
       end
     end

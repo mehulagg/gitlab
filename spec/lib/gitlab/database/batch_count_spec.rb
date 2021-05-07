@@ -130,6 +130,16 @@ RSpec.describe Gitlab::Database::BatchCount do
       expect(described_class.batch_count(model, start: model.minimum(:id), finish: model.maximum(:id))).to eq(5)
     end
 
+    it 'stops counting when finish value is reached' do
+      stub_const('Gitlab::Database::BatchCounter::MIN_REQUIRED_BATCH_SIZE', 0)
+
+      expect(described_class.batch_count(model,
+        start: model.minimum(:id),
+        finish: model.maximum(:id) - 1, # Do not count the last record
+        batch_size: model.count - 2 # Ensure there are multiple batches
+      )).to eq(model.count - 1)
+    end
+
     it "defaults the batch size to #{Gitlab::Database::BatchCounter::DEFAULT_BATCH_SIZE}" do
       min_id = model.minimum(:id)
       relation = instance_double(ActiveRecord::Relation)
@@ -242,11 +252,26 @@ RSpec.describe Gitlab::Database::BatchCount do
       expect(described_class.batch_distinct_count(model, column, start: model.minimum(column), finish: model.maximum(column))).to eq(2)
     end
 
+    it 'stops counting when finish value is reached' do
+      # Create a new unique author that should not be counted
+      create(:issue)
+
+      stub_const('Gitlab::Database::BatchCounter::MIN_REQUIRED_BATCH_SIZE', 0)
+
+      expect(described_class.batch_distinct_count(model, column,
+        start: User.minimum(:id),
+        finish: User.maximum(:id) - 1, # Do not count the newly created issue
+        batch_size: model.count - 2 # Ensure there are multiple batches
+      )).to eq(2)
+    end
+
     it 'counts with User min and max as start and finish' do
       expect(described_class.batch_distinct_count(model, column, start: User.minimum(:id), finish: User.maximum(:id))).to eq(2)
     end
 
     it "defaults the batch size to #{Gitlab::Database::BatchCounter::DEFAULT_DISTINCT_BATCH_SIZE}" do
+      stub_feature_flags(loose_index_scan_for_distinct_values: false)
+
       min_id = model.minimum(:id)
       relation = instance_double(ActiveRecord::Relation)
       allow(model).to receive_message_chain(:select, public_send: relation)
@@ -292,13 +317,85 @@ RSpec.describe Gitlab::Database::BatchCount do
       end
     end
 
-    it_behaves_like 'when batch fetch query is canceled' do
+    context 'when the loose_index_scan_for_distinct_values feature flag is off' do
+      it_behaves_like 'when batch fetch query is canceled' do
+        let(:mode) { :distinct }
+        let(:operation) { :count }
+        let(:operation_args) { nil }
+        let(:column) { nil }
+
+        subject { described_class.method(:batch_distinct_count) }
+
+        before do
+          stub_feature_flags(loose_index_scan_for_distinct_values: false)
+        end
+      end
+    end
+
+    context 'when the loose_index_scan_for_distinct_values feature flag is on' do
       let(:mode) { :distinct }
       let(:operation) { :count }
       let(:operation_args) { nil }
       let(:column) { nil }
 
+      let(:batch_size) { 10_000 }
+
       subject { described_class.method(:batch_distinct_count) }
+
+      before do
+        stub_feature_flags(loose_index_scan_for_distinct_values: true)
+      end
+
+      it 'reduces batch size by half and retry fetch' do
+        too_big_batch_relation_mock = instance_double(ActiveRecord::Relation)
+
+        count_method = double(send: 1)
+
+        allow(too_big_batch_relation_mock).to receive(:send).and_raise(ActiveRecord::QueryCanceled)
+        allow(Gitlab::Database::LooseIndexScanDistinctCount).to receive_message_chain(:new, :build_query).with(from: 0, to: batch_size).and_return(too_big_batch_relation_mock)
+        allow(Gitlab::Database::LooseIndexScanDistinctCount).to receive_message_chain(:new, :build_query).with(from: 0, to: batch_size / 2).and_return(count_method)
+        allow(Gitlab::Database::LooseIndexScanDistinctCount).to receive_message_chain(:new, :build_query).with(from: batch_size / 2, to: batch_size).and_return(count_method)
+
+        subject.call(model, column, batch_size: batch_size, start: 0, finish: batch_size - 1)
+      end
+
+      context 'when all retries fail' do
+        let(:batch_count_query) { 'SELECT COUNT(id) FROM relation WHERE id BETWEEN 0 and 1' }
+
+        before do
+          relation = instance_double(ActiveRecord::Relation)
+          allow(Gitlab::Database::LooseIndexScanDistinctCount).to receive_message_chain(:new, :build_query).and_return(relation)
+          allow(relation).to receive(:send).and_raise(ActiveRecord::QueryCanceled.new('query timed out'))
+          allow(relation).to receive(:to_sql).and_return(batch_count_query)
+        end
+
+        it 'logs failing query' do
+          expect(Gitlab::AppJsonLogger).to receive(:error).with(
+            event: 'batch_count',
+            relation: model.table_name,
+            operation: operation,
+            operation_args: operation_args,
+            start: 0,
+            mode: mode,
+            query: batch_count_query,
+            message: 'Query has been canceled with message: query timed out'
+          )
+          expect(subject.call(model, column, batch_size: batch_size, start: 0)).to eq(-1)
+        end
+      end
+
+      context 'when LooseIndexScanDistinctCount raises error' do
+        let(:column) { :creator_id }
+        let(:error_class) { Gitlab::Database::LooseIndexScanDistinctCount::ColumnConfigurationError }
+
+        it 'rescues ColumnConfigurationError' do
+          allow(Gitlab::Database::LooseIndexScanDistinctCount).to receive(:new).and_raise(error_class.new('error message'))
+
+          expect(Gitlab::AppJsonLogger).to receive(:error).with(a_hash_including(message: 'LooseIndexScanDistinctCount column error: error message'))
+
+          expect(subject.call(Project, column, batch_size: 10_000, start: 0)).to eq(-1)
+        end
+      end
     end
   end
 

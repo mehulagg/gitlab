@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :resource_weight_event do
-    issue { create(:issue) }
-    user { issue&.author || create(:user) }
+    issue { association(:issue) }
+    user { issue&.author || association(:user) }
   end
 end

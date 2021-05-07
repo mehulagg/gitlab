@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Gotchas
 
 The purpose of this guide is to document potential "gotchas" that contributors
@@ -8,7 +14,7 @@ might encounter or should avoid during development of GitLab CE and EE.
 In GitLab 10.8 and later, Omnibus has [dropped the `app/assets` directory](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2456),
 after asset compilation. The `ee/app/assets`, `vendor/assets` directories are dropped as well.
 
-This means that reading files from that directory will fail in Omnibus-installed GitLab instances:
+This means that reading files from that directory fails in Omnibus-installed GitLab instances:
 
 ```ruby
 file = Rails.root.join('app/assets/images/logo.svg')
@@ -157,7 +163,7 @@ allow_next_found_instance_of(Project) do |project|
 end
 ```
 
-_**Note:** Since Active Record is not calling the `.new` method on model classes to instantiate the objects,
+Since Active Record is not calling the `.new` method on model classes to instantiate the objects,
 you should use `expect_next_found_instance_of` or `allow_next_found_instance_of` mock helpers to setup mock on objects returned by Active Record query & finder methods._
 
 If we also want to initialize the instance with some particular arguments, we
@@ -182,7 +188,7 @@ refresh_service.execute(oldrev, newrev, ref)
 
 See ["Why is it bad style to `rescue Exception => e` in Ruby?"](https://stackoverflow.com/questions/10048173/why-is-it-bad-style-to-rescue-exception-e-in-ruby).
 
-_**Note:** This rule is [enforced automatically by
+This rule is [enforced automatically by
 RuboCop](https://gitlab.com/gitlab-org/gitlab-foss/blob/8-4-stable/.rubocop.yml#L911-914)._
 
 ## Do not use inline JavaScript in views
@@ -190,8 +196,8 @@ RuboCop](https://gitlab.com/gitlab-org/gitlab-foss/blob/8-4-stable/.rubocop.yml#
 Using the inline `:javascript` Haml filters comes with a
 performance overhead. Using inline JavaScript is not a good way to structure your code and should be avoided.
 
-_**Note:** We've [removed these two filters](https://gitlab.com/gitlab-org/gitlab/blob/master/config/initializers/hamlit.rb)
-in an initializer._
+We've [removed these two filters](https://gitlab.com/gitlab-org/gitlab/blob/master/config/initializers/hamlit.rb)
+in an initializer.
 
 ### Further reading
 
@@ -237,8 +243,8 @@ end
 
 In this case, if for any reason the top level `ApplicationController`
 is loaded but `Projects::ApplicationController` is not, `ApplicationController`
-would be resolved to `::ApplicationController` and then the `project` method will
-be undefined and we will get an error.
+would be resolved to `::ApplicationController` and then the `project` method is
+undefined, causing an error.
 
 #### Solution
 
@@ -258,13 +264,13 @@ end
 By specifying `Projects::`, we tell Rails exactly what class we are referring
 to and we would avoid the issue.
 
-NOTE: **Note:**
-This problem will disappear as soon as we upgrade to Rails 6 and use the Zeitwerk autoloader.
+NOTE:
+This problem disappears as soon as we upgrade to Rails 6 and use the Zeitwerk autoloader.
 
 ### Further reading
 
 - Rails Guides: [Autoloading and Reloading Constants (Classic Mode)](https://guides.rubyonrails.org/autoloading_and_reloading_constants_classic_mode.html)
-- Ruby Constant lookup: [Everything you ever wanted to know about constant lookup in Ruby](http://cirw.in/blog/constant-lookup)
+- Ruby Constant lookup: [Everything you ever wanted to know about constant lookup in Ruby](https://cirw.in/blog/constant-lookup)
 - Rails 6 and Zeitwerk autoloader: [Understanding Zeitwerk in Rails 6](https://medium.com/cedarcode/understanding-zeitwerk-in-rails-6-f168a9f09a1f)
 
 ## Storing assets that do not require pre-compiling
@@ -286,7 +292,7 @@ While the code above works in local environments, it errors out in production in
 
 ### Solution
 
-The alternative is the `lib/assets` folder. Use it if you need to add assets (like images) to the repo that meet the following conditions:
+The alternative is the `lib/assets` folder. Use it if you need to add assets (like images) to the repository that meet the following conditions:
 
 - The assets do not need to be directly served to the user (and hence need not be pre-compiled).
 - The assets do need to be accessed via application code.

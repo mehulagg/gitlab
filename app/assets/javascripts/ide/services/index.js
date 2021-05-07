@@ -1,14 +1,14 @@
+import getIdeProject from 'ee_else_ce/ide/queries/get_ide_project.query.graphql';
+import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
-import Api from '~/api';
-import getUserPermissions from '../queries/getUserPermissions.query.graphql';
 import { query } from './gql';
 
-const fetchApiProjectData = projectPath => Api.project(projectPath).then(({ data }) => data);
+const fetchApiProjectData = (projectPath) => Api.project(projectPath).then(({ data }) => data);
 
-const fetchGqlProjectData = projectPath =>
+const fetchGqlProjectData = (projectPath) =>
   query({
-    query: getUserPermissions,
+    query: getIdeProject,
     variables: { projectPath },
   }).then(({ data }) => data.project);
 
@@ -27,9 +27,12 @@ export default {
       return Promise.resolve(file.raw);
     }
 
+    const options = file.binary ? { responseType: 'arraybuffer' } : {};
+
     return axios
       .get(file.rawPath, {
-        transformResponse: [f => f],
+        transformResponse: [(f) => f],
+        ...options,
       })
       .then(({ data }) => data);
   },
@@ -51,7 +54,7 @@ export default {
           escapeFileUrl(filePath),
         ),
         {
-          transformResponse: [f => f],
+          transformResponse: [(f) => f],
         },
       )
       .then(({ data }) => data);

@@ -3,8 +3,11 @@
 # Include these shared examples in specs of Replicators that include
 # BlobReplicatorStrategy.
 #
-# A let variable called model_record should be defined in the spec. It should be
-# a valid, unpersisted instance of the model class.
+# Required let variables:
+#
+# - model_record: A valid, unpersisted instance of the model class. Or a valid,
+#                 persisted instance of the model class in a not-yet loaded let
+#                 variable (so we can trigger creation).
 #
 RSpec.shared_examples 'a blob replicator' do
   include EE::GeoHelpers
@@ -21,10 +24,14 @@ RSpec.shared_examples 'a blob replicator' do
   it_behaves_like 'a replicator'
 
   # This could be included in each model's spec, but including it here is DRYer.
-  include_examples 'a replicable model'
+  include_examples 'a replicable model' do
+    let(:replicator_class) { described_class }
+  end
 
   describe '#handle_after_create_commit' do
     it 'creates a Geo::Event' do
+      model_record.save!
+
       expect do
         replicator.handle_after_create_commit
       end.to change { ::Geo::Event.count }.by(1)
@@ -33,9 +40,8 @@ RSpec.shared_examples 'a blob replicator' do
         "replicable_name" => replicator.replicable_name, "event_name" => "created", "payload" => { "model_record_id" => replicator.model_record.id })
     end
 
-    it 'schedules the checksum calculation if needed' do
-      expect(Geo::BlobVerificationPrimaryWorker).to receive(:perform_async)
-      expect(replicator).to receive(:needs_checksum?).and_return(true)
+    it 'calls #after_verifiable_update' do
+      expect(replicator).to receive(:after_verifiable_update)
 
       replicator.handle_after_create_commit
     end
@@ -45,8 +51,8 @@ RSpec.shared_examples 'a blob replicator' do
         stub_feature_flags(replicator.replication_enabled_feature_key => false)
       end
 
-      it 'does not schedule the checksum calculation' do
-        expect(Geo::BlobVerificationPrimaryWorker).not_to receive(:perform_async)
+      it 'does not call #after_verifiable_update' do
+        expect(replicator).not_to receive(:after_verifiable_update)
 
         replicator.handle_after_create_commit
       end
@@ -79,30 +85,6 @@ RSpec.shared_examples 'a blob replicator' do
 
         replicator.handle_after_create_commit
       end
-    end
-  end
-
-  describe '#calculate_checksum!' do
-    it 'calculates the checksum' do
-      model_record.save!
-
-      replicator.calculate_checksum!
-
-      expect(model_record.reload.verification_checksum).not_to be_nil
-      expect(model_record.reload.verified_at).not_to be_nil
-    end
-
-    it 'saves the error message and increments retry counter' do
-      model_record.save!
-
-      allow(model_record).to receive(:calculate_checksum!) do
-        raise StandardError.new('Failure to calculate checksum')
-      end
-
-      replicator.calculate_checksum!
-
-      expect(model_record.reload.verification_failure).to eq 'Failure to calculate checksum'
-      expect(model_record.verification_retry_count).to be 1
     end
   end
 
@@ -158,7 +140,7 @@ RSpec.shared_examples 'a blob replicator' do
         expect(::Geo::FileRegistryRemovalService)
           .to receive(:new).with(secondary_side_replicator.replicable_name, model_record_id, blob_path).and_return(service)
 
-        secondary_side_replicator.consume(:deleted, deleted_params)
+        secondary_side_replicator.consume(:deleted, **deleted_params)
       end
     end
   end
@@ -191,6 +173,34 @@ RSpec.shared_examples 'a blob replicator' do
         file_exist = File.exist?(replicator.blob_path)
 
         expect(file_exist).to be_truthy
+      end
+    end
+  end
+
+  describe '#calculate_checksum' do
+    context 'when the file is locally stored' do
+      context 'when the file exists' do
+        it 'returns hexdigest of the file' do
+          expected = described_class.model.hexdigest(subject.carrierwave_uploader.path)
+
+          expect(subject.calculate_checksum).to eq(expected)
+        end
+      end
+
+      context 'when the file does not exist' do
+        it 'raises an error' do
+          allow(subject).to receive(:file_exists?).and_return(false)
+
+          expect { subject.calculate_checksum }.to raise_error('File is not checksummable')
+        end
+      end
+    end
+
+    context 'when the file is remotely stored' do
+      it 'raises an error' do
+        allow(subject.carrierwave_uploader).to receive(:file_storage?).and_return(false)
+
+        expect { subject.calculate_checksum }.to raise_error('File is not checksummable')
       end
     end
   end

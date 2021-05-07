@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe GroupsController do
   include ExternalAuthorizationServiceHelpers
+  using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
@@ -17,6 +18,18 @@ RSpec.describe GroupsController do
     subject { get :show, params: { id: group.to_param } }
 
     it_behaves_like 'namespace storage limit alert'
+  end
+
+  describe 'GET #issues' do
+    it 'does not list test cases' do
+      issue = create(:issue, project: project, title: 'foo')
+      incident = create(:incident, project: project)
+      create(:quality_test_case, project: project)
+
+      get :issues, params: { id: group.to_param }
+
+      expect(assigns(:issues)).to match_array([issue, incident])
+    end
   end
 
   describe 'GET #activity' do
@@ -77,7 +90,7 @@ RSpec.describe GroupsController do
   end
 
   describe 'POST #restore' do
-    let(:group) do
+    let_it_be(:group) do
       create(:group_with_deletion_schedule,
         marked_for_deletion_on: 1.day.ago,
         deleting_user: user)
@@ -244,26 +257,30 @@ RSpec.describe GroupsController do
   end
 
   describe 'POST #create' do
+    let(:group_params) { { name: 'new_group', path: 'new_group' } }
+
+    subject { post :create, params: { group: group_params } }
+
     context 'authorization' do
       it 'allows an auditor with "can_create_group" set to true to create a group' do
         sign_in(create(:user, :auditor, can_create_group: true))
 
-        expect do
-          post :create, params: { group: { name: 'new_group', path: "new_group" } }
-        end.to change { Group.count }.by(1)
+        expect { subject }.to change { Group.count }.by(1)
 
         expect(response).to have_gitlab_http_status(:found)
       end
     end
 
-    context 'when creating a group with `default_branch_protection` attribute' do
-      using RSpec::Parameterized::TableSyntax
-
-      let(:params) do
-        { group: { name: 'new_group', path: 'new_group', default_branch_protection: Gitlab::Access::PROTECTION_NONE } }
+    it_behaves_like GroupInviteMembers do
+      before do
+        sign_in(user)
       end
+    end
 
-      subject { post :create, params: params }
+    context 'when creating a group with `default_branch_protection` attribute' do
+      subject do
+        post :create, params: { group: group_params.merge(default_branch_protection: Gitlab::Access::PROTECTION_NONE) }
+      end
 
       shared_examples_for 'creates the group with the expected `default_branch_protection` value' do
         it 'creates the group with the expected `default_branch_protection` value' do
@@ -319,7 +336,7 @@ RSpec.describe GroupsController do
   end
 
   describe 'PUT #update' do
-    let(:group) { create(:group) }
+    let_it_be(:group, refind: true) { create(:group) }
 
     context 'when max_pages_size param is specified' do
       let(:params) { { max_pages_size: 100 } }
@@ -327,8 +344,6 @@ RSpec.describe GroupsController do
       let(:request) do
         post :update, params: { id: group.to_param, group: params }
       end
-
-      let(:user) { create(:user) }
 
       before do
         stub_licensed_features(pages_size_limit: true)
@@ -364,11 +379,11 @@ RSpec.describe GroupsController do
     end
 
     context 'when `max_personal_access_token_lifetime` is specified' do
-      let!(:managed_group) do
+      let_it_be(:managed_group) do
         create(:group_with_managed_accounts, :private, max_personal_access_token_lifetime: 1)
       end
 
-      let(:user) { create(:user, :group_managed, managing_group: managed_group ) }
+      let_it_be(:user) { create(:user, :group_managed, managing_group: managed_group ) }
 
       let(:params) { { max_personal_access_token_lifetime: max_personal_access_token_lifetime } }
       let(:max_personal_access_token_lifetime) { 10 }
@@ -440,8 +455,6 @@ RSpec.describe GroupsController do
     end
 
     context 'when `default_branch_protection` is specified' do
-      using RSpec::Parameterized::TableSyntax
-
       let(:params) do
         { id: group.to_param, group: { default_branch_protection: Gitlab::Access::PROTECTION_NONE } }
       end
@@ -501,8 +514,8 @@ RSpec.describe GroupsController do
       end
     end
 
-    context 'when delayed_project_removal param is specified' do
-      let_it_be(:params) { { delayed_project_removal: true } }
+    context 'when `delayed_project_removal` and `lock_delayed_project_removal` params are specified' do
+      let_it_be(:params) { { delayed_project_removal: true, lock_delayed_project_removal: true } }
       let_it_be(:user) { create(:user) }
 
       subject do
@@ -518,29 +531,29 @@ RSpec.describe GroupsController do
       context 'when feature is available' do
         let(:available) { true }
 
-        it 'allows storing of setting' do
+        it 'allows storing of settings' do
           subject
 
           expect(response).to have_gitlab_http_status(:found)
-          expect(group.reload.delayed_project_removal).to eq(params[:delayed_project_removal])
+          expect(group.reload.namespace_settings.delayed_project_removal).to eq(params[:delayed_project_removal])
+          expect(group.reload.namespace_settings.lock_delayed_project_removal).to eq(params[:lock_delayed_project_removal])
         end
       end
 
       context 'when feature is not available' do
         let(:available) { false }
 
-        it 'does not allow storing of setting' do
+        it 'does not allow storing of settings' do
           subject
 
           expect(response).to have_gitlab_http_status(:found)
-          expect(group.reload.delayed_project_removal).not_to eq(params[:delayed_project_removal])
+          expect(group.reload.namespace_settings.delayed_project_removal).not_to eq(params[:delayed_project_removal])
+          expect(group.reload.namespace_settings.lock_delayed_project_removal).not_to eq(params[:lock_delayed_project_removal])
         end
       end
     end
 
     context 'when `prevent_forking_outside_group` is specified' do
-      using RSpec::Parameterized::TableSyntax
-
       subject { put :update, params: params }
 
       shared_examples_for 'updates the attribute if needed' do

@@ -1,7 +1,10 @@
+import { GlSprintf } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';
+import { stubComponent } from 'helpers/stub_component';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
+import { createExternalRule } from '../mocks';
 
 const MODAL_MODULE = 'deleteModal';
 const TEST_MODAL_ID = 'test-delete-modal-id';
@@ -12,6 +15,11 @@ const TEST_RULE = {
     .fill(1)
     .map((x, id) => ({ id })),
 };
+const SINGLE_APPROVER = {
+  ...TEST_RULE,
+  approvers: [{ id: 1 }],
+};
+const EXTERNAL_RULE = createExternalRule();
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -20,6 +28,8 @@ describe('Approvals ModalRuleRemove', () => {
   let wrapper;
   let actions;
   let deleteModalState;
+
+  const findModal = () => wrapper.findComponent(GlModalVuex);
 
   const factory = (options = {}) => {
     const store = new Vuex.Store({
@@ -42,6 +52,12 @@ describe('Approvals ModalRuleRemove', () => {
       localVue,
       store,
       propsData,
+      stubs: {
+        GlModalVuex: stubComponent(GlModalVuex, {
+          props: ['modalModule', 'modalId', 'actionPrimary', 'actionCancel'],
+        }),
+        GlSprintf,
+      },
     });
   };
 
@@ -51,52 +67,54 @@ describe('Approvals ModalRuleRemove', () => {
     };
     actions = {
       deleteRule: jest.fn(),
+      deleteExternalApprovalRule: jest.fn(),
     };
   });
 
   it('renders modal', () => {
     factory();
 
-    const modal = wrapper.find(GlModalVuex);
+    const modal = findModal();
 
     expect(modal.exists()).toBe(true);
     expect(modal.props()).toEqual(
       expect.objectContaining({
         modalModule: MODAL_MODULE,
         modalId: TEST_MODAL_ID,
+        actionPrimary: {
+          text: 'Remove approvers',
+          attributes: [{ variant: 'danger' }],
+        },
+        actionCancel: { text: 'Cancel' },
       }),
     );
   });
 
-  it('shows message', () => {
+  it.each`
+    type                    | rule
+    ${'multiple approvers'} | ${TEST_RULE}
+    ${'singular approver'}  | ${SINGLE_APPROVER}
+    ${'external approval'}  | ${EXTERNAL_RULE}
+  `('matches the snapshot for $type', ({ rule }) => {
+    deleteModalState.data = rule;
     factory();
 
-    const modal = wrapper.find(GlModalVuex);
-
-    expect(modal.text()).toContain(TEST_RULE.name);
-    expect(modal.text()).toContain(`${TEST_RULE.approvers.length} members`);
+    expect(findModal().element).toMatchSnapshot();
   });
 
-  it('shows singular message', () => {
-    deleteModalState.data = {
-      ...TEST_RULE,
-      approvers: [{ id: 1 }],
-    };
+  it.each`
+    typeType      | action                          | rule
+    ${'regular'}  | ${'deleteRule'}                 | ${TEST_RULE}
+    ${'external'} | ${'deleteExternalApprovalRule'} | ${EXTERNAL_RULE}
+  `('calls $action when the modal is submitted for a $typeType rule', ({ action, rule }) => {
+    deleteModalState.data = rule;
     factory();
 
-    const modal = wrapper.find(GlModalVuex);
+    expect(actions[action]).not.toHaveBeenCalled();
 
-    expect(modal.text()).toContain('1 member');
-  });
-
-  it('deletes rule when modal is submitted', () => {
-    factory();
-
-    expect(actions.deleteRule).not.toHaveBeenCalled();
-
-    const modal = wrapper.find(GlModalVuex);
+    const modal = findModal();
     modal.vm.$emit('ok', new Event('submit'));
 
-    expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
+    expect(actions[action]).toHaveBeenCalledWith(expect.anything(), rule.id);
   });
 });

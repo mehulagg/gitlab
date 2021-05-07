@@ -2,10 +2,10 @@ import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import Anomaly from '~/monitoring/components/charts/anomaly.vue';
 
-import { colorValues } from '~/monitoring/constants';
-import { anomalyDeploymentData, mockProjectDir } from '../../mock_data';
-import { anomalyGraphData } from '../../graph_data';
 import MonitorTimeSeriesChart from '~/monitoring/components/charts/time_series.vue';
+import { colorValues } from '~/monitoring/constants';
+import { anomalyGraphData } from '../../graph_data';
+import { anomalyDeploymentData, mockProjectDir } from '../../mock_data';
 
 const mockProjectPath = `${TEST_HOST}${mockProjectDir}`;
 
@@ -15,7 +15,7 @@ const TEST_LOWER = 9;
 describe('Anomaly chart component', () => {
   let wrapper;
 
-  const setupAnomalyChart = props => {
+  const setupAnomalyChart = (props) => {
     wrapper = shallowMount(Anomaly, {
       propsData: { ...props },
     });
@@ -91,7 +91,7 @@ describe('Anomaly chart component', () => {
           expect(series.length).toEqual(2); // 1 upper + 1 lower boundaries
           expect(series[0].stack).toEqual(series[1].stack);
 
-          series.forEach(s => {
+          series.forEach((s) => {
             expect(s.type).toBe('line');
             expect(s.lineStyle.width).toBe(0);
             expect(s.lineStyle.color).toMatch(/rgba\(.+\)/);

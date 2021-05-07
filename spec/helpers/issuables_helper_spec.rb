@@ -44,32 +44,120 @@ RSpec.describe IssuablesHelper do
     end
   end
 
+  describe '#assignees_label' do
+    let(:issuable) { build(:merge_request) }
+    let(:assignee1) { build_stubbed(:user, name: 'Jane Doe') }
+    let(:assignee2) { build_stubbed(:user, name: 'John Doe') }
+
+    before do
+      allow(issuable).to receive(:assignees).and_return(assignees)
+    end
+
+    context 'when multiple assignees exist' do
+      let(:assignees) { [assignee1, assignee2] }
+
+      it 'returns assignee label with assignee names' do
+        expect(helper.assignees_label(issuable)).to eq("Assignees: Jane Doe and John Doe")
+      end
+
+      it 'returns assignee label only with include_value: false' do
+        expect(helper.assignees_label(issuable, include_value: false)).to eq("Assignees")
+      end
+
+      context 'when the name contains a URL' do
+        let(:assignees) { [build_stubbed(:user, name: 'www.gitlab.com')] }
+
+        it 'returns sanitized name' do
+          expect(helper.assignees_label(issuable)).to eq("Assignee: www_gitlab_com")
+        end
+      end
+    end
+
+    context 'when one assignee exists' do
+      let(:assignees) { [assignee1] }
+
+      it 'returns assignee label with no names' do
+        expect(helper.assignees_label(issuable)).to eq("Assignee: Jane Doe")
+      end
+
+      it 'returns assignee label only with include_value: false' do
+        expect(helper.assignees_label(issuable, include_value: false)).to eq("Assignee")
+      end
+    end
+
+    context 'when no assignees exist' do
+      let(:assignees) { [] }
+
+      it 'returns assignee label with no names' do
+        expect(helper.assignees_label(issuable)).to eq("Assignees: ")
+      end
+
+      it 'returns assignee label only with include_value: false' do
+        expect(helper.assignees_label(issuable, include_value: false)).to eq("Assignees")
+      end
+    end
+  end
+
+  describe '#issuable_meta' do
+    let(:user) { create(:user) }
+
+    let_it_be(:project) { create(:project) }
+
+    describe 'author status' do
+      let(:issuable) { build(:merge_request, source_project: project, author: user, created_at: '2020-01-30') }
+
+      it 'displays an emoji if the user status is set' do
+        user.status = UserStatus.new(message: 'lol')
+        content = helper.issuable_meta(issuable, project)
+        expect(content).to match('<span class="user-status-emoji has-tooltip" title="lol" data-html="true" data-placement="top">')
+        expect(content).to match('<gl-emoji title="speech balloon" data-name="speech_balloon" data-unicode-version="6.0">')
+      end
+
+      it 'does not displays an emoji if the user status is not set' do
+        user.status = UserStatus.new
+        content = helper.issuable_meta(issuable, project)
+        expect(content).not_to match('class="user-status-emoji has-tooltip"')
+        expect(content).not_to match('gl-emoji')
+      end
+    end
+  end
+
   describe '#issuables_state_counter_text' do
     let(:user) { create(:user) }
 
     describe 'state text' do
-      before do
-        allow(helper).to receive(:issuables_count_for_state).and_return(42)
+      context 'when number of issuables can be generated' do
+        before do
+          allow(helper).to receive(:issuables_count_for_state).and_return(42)
+        end
+
+        it 'returns navigation with badges' do
+          expect(helper.issuables_state_counter_text(:issues, :opened, true))
+            .to eq('<span>Open</span> <span class="badge badge-muted badge-pill gl-badge gl-tab-counter-badge sm">42</span>')
+          expect(helper.issuables_state_counter_text(:issues, :closed, true))
+            .to eq('<span>Closed</span> <span class="badge badge-muted badge-pill gl-badge gl-tab-counter-badge sm">42</span>')
+          expect(helper.issuables_state_counter_text(:merge_requests, :merged, true))
+            .to eq('<span>Merged</span> <span class="badge badge-muted badge-pill gl-badge gl-tab-counter-badge sm">42</span>')
+          expect(helper.issuables_state_counter_text(:merge_requests, :all, true))
+            .to eq('<span>All</span> <span class="badge badge-muted badge-pill gl-badge gl-tab-counter-badge sm">42</span>')
+        end
       end
 
-      it 'returns "Open" when state is :opened' do
-        expect(helper.issuables_state_counter_text(:issues, :opened, true))
-          .to eq('<span>Open</span> <span class="badge badge-pill">42</span>')
-      end
+      context 'when count cannot be generated' do
+        before do
+          allow(helper).to receive(:issuables_count_for_state).and_return(-1)
+        end
 
-      it 'returns "Closed" when state is :closed' do
-        expect(helper.issuables_state_counter_text(:issues, :closed, true))
-          .to eq('<span>Closed</span> <span class="badge badge-pill">42</span>')
-      end
-
-      it 'returns "Merged" when state is :merged' do
-        expect(helper.issuables_state_counter_text(:merge_requests, :merged, true))
-          .to eq('<span>Merged</span> <span class="badge badge-pill">42</span>')
-      end
-
-      it 'returns "All" when state is :all' do
-        expect(helper.issuables_state_counter_text(:merge_requests, :all, true))
-          .to eq('<span>All</span> <span class="badge badge-pill">42</span>')
+        it 'returns avigation without badges' do
+          expect(helper.issuables_state_counter_text(:issues, :opened, true))
+            .to eq('<span>Open</span>')
+          expect(helper.issuables_state_counter_text(:issues, :closed, true))
+            .to eq('<span>Closed</span>')
+          expect(helper.issuables_state_counter_text(:merge_requests, :merged, true))
+            .to eq('<span>Merged</span>')
+          expect(helper.issuables_state_counter_text(:merge_requests, :all, true))
+            .to eq('<span>All</span>')
+        end
       end
     end
   end
@@ -175,6 +263,7 @@ RSpec.describe IssuablesHelper do
         markdownDocsPath: '/help/user/markdown',
         lockVersion: issue.lock_version,
         projectPath: @project.path,
+        projectId: @project.id,
         projectNamespace: @project.namespace.path,
         initialTitleHtml: issue.title,
         initialTitleText: issue.title,
@@ -194,7 +283,7 @@ RSpec.describe IssuablesHelper do
         assign(:project, issue.project)
       end
 
-      it 'sets sentryIssueIdentifier to nil with no sentry issue ' do
+      it 'sets sentryIssueIdentifier to nil with no sentry issue' do
         expect(helper.issuable_initial_data(issue)[:sentryIssueIdentifier])
           .to be_nil
       end
@@ -345,42 +434,29 @@ RSpec.describe IssuablesHelper do
     end
   end
 
+  describe '#issuable_display_type' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :issuable_display_type) do
+      :issue         | 'issue'
+      :incident      | 'incident'
+      :merge_request | 'merge request'
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { helper.issuable_display_type(issuable) }
+
+      it { is_expected.to eq(issuable_display_type) }
+    end
+  end
+
   describe '#sidebar_milestone_tooltip_label' do
     it 'escapes HTML in the milestone title' do
       milestone = build(:milestone, title: '&lt;img onerror=alert(1)&gt;')
 
       expect(helper.sidebar_milestone_tooltip_label(milestone)).to eq('&lt;img onerror=alert(1)&gt;<br/>Milestone')
-    end
-  end
-
-  describe '#serialize_issuable' do
-    context 'when it is a merge request' do
-      let(:merge_request) { build(:merge_request) }
-      let(:user) { build(:user) }
-
-      before do
-        allow(helper).to receive(:current_user) { user }
-      end
-
-      it 'has suggest_pipeline experiment enabled' do
-        allow(helper).to receive(:experiment_enabled?).with(:suggest_pipeline) { true }
-
-        expect_next_instance_of(MergeRequestSerializer) do |serializer|
-          expect(serializer).to receive(:represent).with(merge_request, { serializer: 'widget', experiment_enabled: :suggest_pipeline })
-        end
-
-        helper.serialize_issuable(merge_request, serializer: 'widget')
-      end
-
-      it 'suggest_pipeline experiment disabled' do
-        allow(helper).to receive(:experiment_enabled?).with(:suggest_pipeline) { false }
-
-        expect_next_instance_of(MergeRequestSerializer) do |serializer|
-          expect(serializer).to receive(:represent).with(merge_request, { serializer: 'widget' })
-        end
-
-        helper.serialize_issuable(merge_request, serializer: 'widget')
-      end
     end
   end
 end

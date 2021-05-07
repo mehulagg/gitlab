@@ -27,10 +27,12 @@ RSpec.describe 'User searches for code' do
     context 'when on a project page', :js do
       before do
         visit(search_path)
-        find('.js-search-project-dropdown').click
+        find('[data-testid="project-filter"]').click
 
-        page.within('.project-filter') do
-          click_link(project.full_name)
+        wait_for_requests
+
+        page.within('[data-testid="project-filter"]') do
+          click_on(project.full_name)
         end
       end
 

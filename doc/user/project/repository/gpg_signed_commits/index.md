@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: concepts, howto
 ---
 
-# Signing commits with GPG
+# Signing commits with GPG **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9546) in GitLab 9.5.
 > - Subkeys support was added in GitLab 10.1.
@@ -15,7 +15,7 @@ commits are labeled **Verified** if the identity of the committer can be
 verified. To verify the identity of a committer, GitLab requires their public
 GPG key.
 
-NOTE: **Note:**
+NOTE:
 The term GPG is used for all OpenPGP/PGP/GPG related material and
 implementations.
 
@@ -40,7 +40,7 @@ For a commit to be verified by GitLab:
 
 ## Generating a GPG key
 
-If you don't already have a GPG key, the following steps will help you get
+If you don't already have a GPG key, the following steps can help you get
 started:
 
 1. [Install GPG](https://www.gnupg.org/download/index.html) for your operating system.
@@ -53,7 +53,7 @@ started:
    gpg --full-gen-key
    ```
 
-   NOTE: **Note:**
+   NOTE:
    In some cases like Gpg4win on Windows and other macOS versions, the command
    here may be `gpg --gen-key`.
 
@@ -138,27 +138,25 @@ started:
    gpg --armor --export 30F2B65B9246B6CA
    ```
 
-1. Finally, copy the public key and [add it in your profile settings](#adding-a-gpg-key-to-your-account)
+1. Finally, copy the public key and [add it in your user settings](#adding-a-gpg-key-to-your-account)
 
 ## Adding a GPG key to your account
 
-NOTE: **Note:**
-Once you add a key, you cannot edit it, only remove it. In case the paste
-didn't work, you'll have to remove the offending key and re-add it.
+NOTE:
+After you add a key, you cannot edit it, only remove it. In case the paste
+didn't work, you have to remove the offending key and re-add it.
 
-You can add a GPG key in your profile's settings:
+You can add a GPG key in your user settings:
 
-1. On the upper right corner, click on your avatar and go to your **Settings**.
-
-   ![Settings dropdown](../../../profile/img/profile_settings_dropdown.png)
-
-1. Navigate to the **GPG keys** tab and paste your _public_ key in the 'Key'
-   box.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **GPG Keys**.
+1. Paste your _public_ key in the **Key** text box.
 
    ![Paste GPG public key](img/profile_settings_gpg_keys_paste_pub.png)
 
-1. Finally, click on **Add key** to add it to GitLab. You will be able to see
-   its fingerprint, the corresponding email address and creation date.
+1. Select **Add key** to add it to GitLab. You can see the key's fingerprint, the corresponding
+   email address, and creation date.
 
    ![GPG key single page](img/profile_settings_gpg_keys_single_key.png)
 
@@ -227,8 +225,8 @@ git config --global commit.gpgsign true
 ## Verifying commits
 
 1. Within a project or [merge request](../../merge_requests/index.md), navigate to
-   the **Commits** tab. Signed commits will show a badge containing either
-   "Verified" or "Unverified", depending on the verification status of the GPG
+   the **Commits** tab. Signed commits show a badge containing either
+   **Verified** or **Unverified**, depending on the verification status of the GPG
    signature.
 
    ![Signed and unsigned commits](img/project_signed_and_unsigned_commits.png)
@@ -242,28 +240,30 @@ git config --global commit.gpgsign true
 ## Revoking a GPG key
 
 Revoking a key **unverifies** already signed commits. Commits that were
-verified by using this key will change to an unverified state. Future commits
-will also stay unverified once you revoke this key. This action should be used
+verified by using this key changes to an unverified state. Future commits
+stay unverified after you revoke this key. This action should be used
 in case your key has been compromised.
 
 To revoke a GPG key:
 
-1. On the upper right corner, click on your avatar and go to your **Settings**.
-1. Navigate to the **GPG keys** tab.
-1. Click on **Revoke** besides the GPG key you want to delete.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **GPG Keys**.
+1. Select **Revoke** next to the GPG key you want to delete.
 
 ## Removing a GPG key
 
 Removing a key **does not unverify** already signed commits. Commits that were
-verified by using this key will stay verified. Only unpushed commits will stay
-unverified once you remove this key. To unverify already signed commits, you need
+verified by using this key stay verified. Only unpushed commits stay
+unverified after you remove this key. To unverify already signed commits, you need
 to [revoke the associated GPG key](#revoking-a-gpg-key) from your account.
 
 To remove a GPG key from your account:
 
-1. On the upper right corner, click on your avatar and go to your **Settings**.
-1. Navigate to the **GPG keys** tab.
-1. Click on the trash icon besides the GPG key you want to delete.
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **GPG Keys**.
+1. Select the trash icon (**{remove}**) next to the GPG key you want to delete.
 
 ## Rejecting commits that are not signed **(PREMIUM)**
 
@@ -282,6 +282,7 @@ For more details about GPG, see:
 - [Managing OpenPGP Keys](https://riseup.net/en/security/message-security/openpgp/gpg-keys)
 - [OpenPGP Best Practices](https://riseup.net/en/security/message-security/openpgp/best-practices)
 - [Creating a new GPG key with subkeys](https://www.void.gr/kargig/blog/2013/12/02/creating-a-new-gpg-key-with-subkeys/) (advanced)
+- [Review existing GPG keys in your instance](../../../admin_area/credentials_inventory.md#review-existing-gpg-keys)
 
 <!-- ## Troubleshooting
 

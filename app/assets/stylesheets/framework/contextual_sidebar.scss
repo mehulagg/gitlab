@@ -429,34 +429,6 @@
   display: none;
 }
 
-.toggle-mobile-nav {
-  display: none;
-  background-color: transparent;
-  border: 0;
-  padding: 6px 16px;
-  margin: 0 0 0 -15px;
-  height: 46px;
-
-  i {
-    font-size: 20px;
-    color: $gl-text-color-secondary;
-  }
-
-  @include media-breakpoint-down(sm) {
-    display: flex;
-    align-items: center;
-
-    i {
-      font-size: 18px;
-    }
-
-    + .breadcrumbs-links {
-      padding-left: $gl-padding;
-      border-left: 1px solid $gl-text-color-quaternary;
-    }
-  }
-}
-
 @include media-breakpoint-down(sm) {
   .close-nav-button {
     display: flex;
@@ -475,7 +447,7 @@
       background-color: $black-transparent;
       height: 100%;
       width: 100%;
-      z-index: 300;
+      z-index: $zindex-dropdown-menu;
     }
   }
 }

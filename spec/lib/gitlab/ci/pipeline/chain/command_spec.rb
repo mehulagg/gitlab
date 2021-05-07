@@ -295,4 +295,51 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Command do
       it { is_expected.to eq(false) }
     end
   end
+
+  describe '#creates_child_pipeline?' do
+    let(:command) { described_class.new(bridge: bridge) }
+
+    subject { command.creates_child_pipeline? }
+
+    context 'when bridge is present' do
+      context 'when bridge triggers a child pipeline' do
+        let(:bridge) { double(:bridge, triggers_child_pipeline?: true) }
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when bridge triggers a multi-project pipeline' do
+        let(:bridge) { double(:bridge, triggers_child_pipeline?: false) }
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when bridge is not present' do
+      let(:bridge) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#increment_pipeline_failure_reason_counter' do
+    let(:command) { described_class.new }
+    let(:reason) { :size_limit_exceeded }
+
+    subject { command.increment_pipeline_failure_reason_counter(reason) }
+
+    it 'increments the error metric' do
+      counter = Gitlab::Metrics.counter(:gitlab_ci_pipeline_failure_reasons, 'desc')
+      expect { subject }.to change { counter.get(reason: reason.to_s) }.by(1)
+    end
+
+    context 'when the reason is nil' do
+      let(:reason) { nil }
+
+      it 'increments the error metric with unknown_failure' do
+        counter = Gitlab::Metrics.counter(:gitlab_ci_pipeline_failure_reasons, 'desc')
+        expect { subject }.to change { counter.get(reason: 'unknown_failure') }.by(1)
+      end
+    end
+  end
 end

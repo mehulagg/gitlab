@@ -2,10 +2,10 @@
 /* eslint-disable vue/no-v-html */
 import { glEmojiTag } from '~/emoji';
 
+import { s__ } from '~/locale';
 import AddRequest from './add_request.vue';
 import DetailedMetric from './detailed_metric.vue';
 import RequestSelector from './request_selector.vue';
-import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -30,13 +30,17 @@ export default {
       type: String,
       required: true,
     },
+    statsUrl: {
+      type: String,
+      required: true,
+    },
   },
   detailedMetrics: [
     {
       metric: 'active-record',
       title: 'pg',
       header: s__('PerformanceBar|SQL queries'),
-      keys: ['sql', 'cached'],
+      keys: ['sql', 'cached', 'transaction', 'db_role'],
     },
     {
       metric: 'bullet',
@@ -62,6 +66,12 @@ export default {
       metric: 'es',
       header: s__('PerformanceBar|Elasticsearch calls'),
       keys: ['request', 'body'],
+    },
+    {
+      metric: 'external-http',
+      title: 'external',
+      header: s__('PerformanceBar|External Http calls'),
+      keys: ['label', 'code', 'proxy', 'error'],
     },
     {
       metric: 'total',
@@ -120,13 +130,13 @@ export default {
   <div id="js-peek" :class="env">
     <div
       v-if="currentRequest"
-      class="d-flex container-fluid container-limited"
+      class="d-flex container-fluid container-limited justify-content-center"
       data-qa-selector="performance_bar"
     >
       <div id="peek-view-host" class="view">
         <span
           v-if="hasHost"
-          class="current-host"
+          class="current-host gl-text-white"
           :class="{ canary: currentRequest.details.host.canary }"
         >
           <span v-html="birdEmoji"></span>
@@ -147,12 +157,18 @@ export default {
         id="peek-view-trace"
         class="view"
       >
-        <a :href="currentRequest.details.tracing.tracing_url">{{ s__('PerformanceBar|trace') }}</a>
+        <a class="gl-text-blue-200" :href="currentRequest.details.tracing.tracing_url">{{
+          s__('PerformanceBar|Trace')
+        }}</a>
       </div>
-      <add-request v-on="$listeners" />
       <div v-if="currentRequest.details" id="peek-download" class="view">
-        <a :download="downloadName" :href="downloadPath">{{ s__('PerformanceBar|Download') }}</a>
+        <a class="gl-text-blue-200" :download="downloadName" :href="downloadPath">{{
+          s__('PerformanceBar|Download')
+        }}</a>
       </div>
+      <a v-if="statsUrl" class="gl-text-blue-200 view" :href="statsUrl">{{
+        s__('PerformanceBar|Stats')
+      }}</a>
       <request-selector
         v-if="currentRequest"
         :current-request="currentRequest"
@@ -160,6 +176,7 @@ export default {
         class="ml-auto"
         @change-current-request="changeCurrentRequest"
       />
+      <add-request v-on="$listeners" />
     </div>
   </div>
 </template>

@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
-import createStore from '~/releases/stores';
-import createListModule from '~/releases/stores/modules/list';
-import ReleasesPaginationGraphql from '~/releases/components/releases_pagination_graphql.vue';
+import Vuex from 'vuex';
 import { historyPushState } from '~/lib/utils/common_utils';
+import ReleasesPaginationGraphql from '~/releases/components/releases_pagination_graphql.vue';
+import createStore from '~/releases/stores';
+import createIndexModule from '~/releases/stores/modules/index';
 
 jest.mock('~/lib/utils/common_utils', () => ({
   ...jest.requireActual('~/lib/utils/common_utils'),
@@ -15,7 +15,7 @@ localVue.use(Vuex);
 
 describe('~/releases/components/releases_pagination_graphql.vue', () => {
   let wrapper;
-  let listModule;
+  let indexModule;
 
   const cursors = {
     startCursor: 'startCursor',
@@ -24,17 +24,17 @@ describe('~/releases/components/releases_pagination_graphql.vue', () => {
 
   const projectPath = 'my/project';
 
-  const createComponent = pageInfo => {
-    listModule = createListModule({ projectPath });
+  const createComponent = (pageInfo) => {
+    indexModule = createIndexModule({ projectPath });
 
-    listModule.state.graphQlPageInfo = pageInfo;
+    indexModule.state.graphQlPageInfo = pageInfo;
 
-    listModule.actions.fetchReleases = jest.fn();
+    indexModule.actions.fetchReleases = jest.fn();
 
     wrapper = mount(ReleasesPaginationGraphql, {
       store: createStore({
         modules: {
-          list: listModule,
+          index: indexModule,
         },
         featureFlags: {},
       }),
@@ -72,7 +72,7 @@ describe('~/releases/components/releases_pagination_graphql.vue', () => {
     });
 
     it('does not render anything', () => {
-      expect(wrapper.isEmpty()).toBe(true);
+      expect(wrapper.html()).toBe('');
     });
   });
 
@@ -142,7 +142,7 @@ describe('~/releases/components/releases_pagination_graphql.vue', () => {
       });
 
       it('calls fetchReleases with the correct after cursor', () => {
-        expect(listModule.actions.fetchReleases.mock.calls).toEqual([
+        expect(indexModule.actions.fetchReleases.mock.calls).toEqual([
           [expect.anything(), { after: cursors.endCursor }],
         ]);
       });
@@ -160,7 +160,7 @@ describe('~/releases/components/releases_pagination_graphql.vue', () => {
       });
 
       it('calls fetchReleases with the correct before cursor', () => {
-        expect(listModule.actions.fetchReleases.mock.calls).toEqual([
+        expect(indexModule.actions.fetchReleases.mock.calls).toEqual([
           [expect.anything(), { before: cursors.startCursor }],
         ]);
       });

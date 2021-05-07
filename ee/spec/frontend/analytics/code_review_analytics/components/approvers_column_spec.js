@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAvatarLink, GlAvatarsInline } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import ApproversColumn from 'ee/analytics/code_review_analytics/components/approvers_column.vue';
 
 describe('ApproversColumn component', () => {
@@ -48,8 +48,8 @@ describe('ApproversColumn component', () => {
     if (wrapper) wrapper.destroy();
   });
 
-  const findAvatar = () => wrapper.find(GlAvatarLink);
-  const findInlineAvatars = () => wrapper.find(GlAvatarsInline);
+  const findAvatar = () => wrapper.findComponent(GlAvatarLink);
+  const findInlineAvatars = () => wrapper.findComponent(GlAvatarsInline);
 
   describe('when an empty list approvers is passed', () => {
     beforeEach(() => {

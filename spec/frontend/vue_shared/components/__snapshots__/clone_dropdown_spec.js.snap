@@ -4,7 +4,8 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
 <gl-dropdown-stub
   category="primary"
   headertext=""
-  right=""
+  hideheaderborder="true"
+  right="true"
   size="medium"
   text="Clone"
   variant="info"
@@ -39,6 +40,7 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
             tag="div"
           >
             <gl-button-stub
+              aria-label="Copy URL"
               buttontextclasses=""
               category="primary"
               class="d-inline-flex"
@@ -81,6 +83,7 @@ exports[`Clone Dropdown Button rendering matches the snapshot 1`] = `
             tag="div"
           >
             <gl-button-stub
+              aria-label="Copy URL"
               buttontextclasses=""
               category="primary"
               class="d-inline-flex"

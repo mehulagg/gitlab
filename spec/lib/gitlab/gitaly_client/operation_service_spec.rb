@@ -88,17 +88,29 @@ RSpec.describe Gitlab::GitalyClient::OperationService do
       let(:source_sha) { 'cfe32cf61b73a0d5e9f13e774abde7ff789b1660' }
       let(:ref) { 'refs/merge-requests/x/merge' }
       let(:message) { 'validación' }
-      let(:allow_conflicts) { false }
       let(:response) { Gitaly::UserMergeToRefResponse.new(commit_id: 'new-commit-id') }
 
-      subject { client.user_merge_to_ref(user, source_sha, nil, ref, message, first_parent_ref, allow_conflicts) }
+      let(:payload) do
+        { source_sha: source_sha, branch: 'branch', target_ref: ref,
+          message: message, first_parent_ref: first_parent_ref, allow_conflicts: true }
+      end
 
       it 'sends a user_merge_to_ref message' do
-        expect_any_instance_of(Gitaly::OperationService::Stub)
-          .to receive(:user_merge_to_ref).with(kind_of(Gitaly::UserMergeToRefRequest), kind_of(Hash))
-          .and_return(response)
+        freeze_time do
+          expect_any_instance_of(Gitaly::OperationService::Stub).to receive(:user_merge_to_ref) do |_, request, options|
+            expect(options).to be_kind_of(Hash)
+            expect(request.to_h).to eq(
+              payload.merge({
+                repository: repository.gitaly_repository.to_h,
+                message: message.dup.force_encoding(Encoding::ASCII_8BIT),
+                user: Gitlab::Git::User.from_gitlab(user).to_gitaly.to_h,
+                timestamp: { nanos: 0, seconds: Time.current.to_i }
+              })
+            )
+          end.and_return(response)
 
-        subject
+          client.user_merge_to_ref(user, **payload)
+        end
       end
     end
 
@@ -299,6 +311,11 @@ RSpec.describe Gitlab::GitalyClient::OperationService do
     let(:start_sha) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
     let(:end_sha) { '54cec5282aa9f21856362fe321c800c236a61615' }
     let(:commit_message) { 'Squash message' }
+
+    let(:time) do
+      Time.now.utc
+    end
+
     let(:request) do
       Gitaly::UserSquashRequest.new(
         repository: repository.gitaly_repository,
@@ -307,7 +324,8 @@ RSpec.describe Gitlab::GitalyClient::OperationService do
         start_sha: start_sha,
         end_sha: end_sha,
         author: gitaly_user,
-        commit_message: commit_message
+        commit_message: commit_message,
+        timestamp: Google::Protobuf::Timestamp.new(seconds: time.to_i)
       )
     end
 
@@ -315,7 +333,7 @@ RSpec.describe Gitlab::GitalyClient::OperationService do
     let(:response) { Gitaly::UserSquashResponse.new(squash_sha: squash_sha) }
 
     subject do
-      client.user_squash(user, squash_id, start_sha, end_sha, user, commit_message)
+      client.user_squash(user, squash_id, start_sha, end_sha, user, commit_message, time)
     end
 
     it 'sends a user_squash message and returns the squash sha' do

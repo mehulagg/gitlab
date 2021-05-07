@@ -16,7 +16,7 @@ export default (startDate = null, endDate = null) => {
 
   if (!monthData.length) return '';
 
-  const computedMonthData = monthData.map(value => {
+  const computedMonthData = monthData.map((value) => {
     const { year, month, mergedAfter, mergedBefore } = value;
 
     // first: 0 is an optimization which makes sure we don't load merge request objects into memory (backend).
@@ -32,7 +32,7 @@ export default (startDate = null, endDate = null) => {
         milestoneTitle: $milestoneTitle,
         sourceBranches: $sourceBranches,
         targetBranches: $targetBranches
-      ) { count }
+      ) { count, totalTimeToMerge }
     `;
   });
 

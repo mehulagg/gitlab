@@ -1,14 +1,15 @@
 import { mount } from '@vue/test-utils';
-import DeploymentComponent from '~/vue_merge_request_widget/components/deployment/deployment.vue';
-import DeploymentInfo from '~/vue_merge_request_widget/components/deployment/deployment_info.vue';
-import DeploymentViewButton from '~/vue_merge_request_widget/components/deployment/deployment_view_button.vue';
 import {
   CREATED,
   RUNNING,
   SUCCESS,
   FAILED,
   CANCELED,
+  SKIPPED,
 } from '~/vue_merge_request_widget/components/deployment/constants';
+import DeploymentComponent from '~/vue_merge_request_widget/components/deployment/deployment.vue';
+import DeploymentInfo from '~/vue_merge_request_widget/components/deployment/deployment_info.vue';
+import DeploymentViewButton from '~/vue_merge_request_widget/components/deployment/deployment_view_button.vue';
 import { deploymentMockData, playDetails, retryDetails } from './deployment_mock_data';
 
 describe('Deployment component', () => {
@@ -77,6 +78,10 @@ describe('Deployment component', () => {
       ${CANCELED} | ${true}  | ${noDetails}      | ${'Canceled deployment to'}      | ${defaultGroup}
       ${CANCELED} | ${false} | ${deployDetail}   | ${'Canceled deployment to'}      | ${noActions}
       ${CANCELED} | ${false} | ${noDetails}      | ${'Canceled deployment to'}      | ${noActions}
+      ${SKIPPED}  | ${true}  | ${deployDetail}   | ${'Skipped deployment to'}       | ${defaultGroup}
+      ${SKIPPED}  | ${true}  | ${noDetails}      | ${'Skipped deployment to'}       | ${defaultGroup}
+      ${SKIPPED}  | ${false} | ${deployDetail}   | ${'Skipped deployment to'}       | ${noActions}
+      ${SKIPPED}  | ${false} | ${noDetails}      | ${'Skipped deployment to'}       | ${noActions}
     `(
       '$status + previous: $previous + manual: $deploymentDetails.isManual',
       ({ status, previous, deploymentDetails, text, actionButtons }) => {
@@ -111,7 +116,7 @@ describe('Deployment component', () => {
 
         if (actionButtons.length > 0) {
           describe('renders the expected button group', () => {
-            actionButtons.forEach(button => {
+            actionButtons.forEach((button) => {
               it(`renders ${button}`, () => {
                 expect(wrapper.find(button).exists()).toBe(true);
               });
@@ -121,7 +126,7 @@ describe('Deployment component', () => {
 
         if (actionButtons.length === 0) {
           describe('does not render the button group', () => {
-            defaultGroup.forEach(button => {
+            defaultGroup.forEach((button) => {
               it(`does not render ${button}`, () => {
                 expect(wrapper.find(button).exists()).toBe(false);
               });

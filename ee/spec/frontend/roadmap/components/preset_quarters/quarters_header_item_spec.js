@@ -76,7 +76,7 @@ describe('QuartersHeaderItemComponent', () => {
         expect(vm.timelineHeaderClass).toBe('');
       });
 
-      it('returns string containing `label-dark label-bold` when current quarter is same as timeframeItem quarter', done => {
+      it('returns string containing `label-dark label-bold` when current quarter is same as timeframeItem quarter', (done) => {
         vm = createComponent({
           timeframeItem: mockTimeframeQuarters[1],
         });

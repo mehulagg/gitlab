@@ -5,7 +5,8 @@ module ResourceEvents
     attr_reader :resource, :user
 
     def initialize(resource, user)
-      @resource, @user = resource, user
+      @resource = resource
+      @user = user
     end
 
     def execute(added_labels: [], removed_labels: [])
@@ -24,6 +25,8 @@ module ResourceEvents
 
       Gitlab::Database.bulk_insert(ResourceLabelEvent.table_name, labels) # rubocop:disable Gitlab/BulkInsert
       resource.expire_note_etag_cache
+
+      Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_label_changed_action(author: user) if resource.is_a?(Issue)
     end
 
     private

@@ -43,7 +43,8 @@ module QA
         end
       end
 
-      it 'user transfers a project between groups', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/406' do
+      it 'user transfers a project between groups',
+         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1703' do
         # Retry is needed here as the target group is not avaliable for transfer right away.
         QA::Support::Retrier.retry_on_exception(reload_page: page) do
           Page::File::Show.perform(&:go_to_general_settings)

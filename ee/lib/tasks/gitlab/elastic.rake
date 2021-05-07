@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :elastic do
-    desc "GitLab | Elasticsearch | Index eveything at once"
+    desc "GitLab | Elasticsearch | Index everything at once"
     task :index do
       # UPDATE_INDEX=true can cause some projects not to be indexed properly if someone were to push a commit to the
       # project before the rake task could get to it, so we set it to `nil` here to avoid that. It doesn't make sense
@@ -57,34 +59,60 @@ namespace :gitlab do
       logger.info("Indexing snippets... " + "done".color(:green))
     end
 
-    desc "GitLab | Elasticsearch | Create empty index and assign alias"
-    task :create_empty_index, [:target_name] => [:environment] do |t, args|
+    desc "GitLab | Elasticsearch | Create empty indexes and assigns an alias for each"
+    task create_empty_index: [:environment] do |t, args|
       with_alias = ENV["SKIP_ALIAS"].nil?
       options = {}
 
-      # only create an index at the specified name
-      options[:index_name] = args[:target_name] unless with_alias
-
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+      helper = Gitlab::Elastic::Helper.default
       index_name = helper.create_empty_index(with_alias: with_alias, options: options)
+
+      # with_alias is used to support interacting with a specific index (such as when reclaiming the production index
+      # name when the index was created prior to 13.0). If the `SKIP_ALIAS` environment variable is set,
+      # do not create standalone indexes and do not create the migrations index
+      if with_alias
+        standalone_index_names = helper.create_standalone_indices(options: options)
+        standalone_index_names.each do |index_name, alias_name|
+          puts "Index '#{index_name}' has been created.".color(:green)
+          puts "Alias '#{alias_name}' -> '#{index_name}' has been created.".color(:green)
+        end
+
+        helper.create_migrations_index unless helper.migrations_index_exists?
+        ::Elastic::DataMigrationService.mark_all_as_completed!
+      end
 
       puts "Index '#{index_name}' has been created.".color(:green)
       puts "Alias '#{helper.target_name}' → '#{index_name}' has been created".color(:green) if with_alias
     end
 
-    desc "GitLab | Elasticsearch | Delete index"
-    task :delete_index, [:target_name] => [:environment] do |t, args|
-      helper = Gitlab::Elastic::Helper.new(target_name: args[:target_name])
+    desc "GitLab | Elasticsearch | Delete all indexes"
+    task delete_index: [:environment] do |t, args|
+      helper = Gitlab::Elastic::Helper.default
 
       if helper.delete_index
         puts "Index/alias '#{helper.target_name}' has been deleted".color(:green)
       else
         puts "Index/alias '#{helper.target_name}' was not found".color(:green)
       end
+
+      results = helper.delete_standalone_indices
+      results.each do |index_name, alias_name, result|
+        if result
+          puts "Index '#{index_name}' with alias '#{alias_name}' has been deleted".color(:green)
+        else
+          puts "Index '#{index_name}' with alias '#{alias_name}' was not found".color(:green)
+        end
+      end
+
+      if helper.delete_migrations_index
+        puts "Index/alias '#{helper.migrations_index_name}' has been deleted".color(:green)
+      else
+        puts "Index/alias '#{helper.migrations_index_name}' was not found".color(:green)
+      end
     end
 
-    desc "GitLab | Elasticsearch | Recreate index"
-    task :recreate_index, [:target_name] => [:environment] do |t, args|
+    desc "GitLab | Elasticsearch | Recreate indexes"
+    task recreate_index: [:environment] do |t, args|
       Rake::Task["gitlab:elastic:delete_index"].invoke(*args)
       Rake::Task["gitlab:elastic:create_empty_index"].invoke(*args)
     end
@@ -111,11 +139,50 @@ namespace :gitlab do
       end
     end
 
+    desc "GitLab | Elasticsearch | Mark last reindexing job as failed"
+    task mark_reindex_failed: :environment do
+      if Elastic::ReindexingTask.running?
+        Elastic::ReindexingTask.current.failure!
+        puts 'Marked the current reindexing job as failed.'.color(:green)
+      else
+        puts 'Did not find the current running reindexing job.'
+      end
+    end
+
+    desc "GitLab | Elasticsearch | List pending migrations"
+    task list_pending_migrations: :environment do
+      pending_migrations = ::Elastic::DataMigrationService.pending_migrations
+
+      if pending_migrations.any?
+        puts 'Pending migrations:'
+        pending_migrations.each do |migration|
+          puts migration.name
+        end
+      else
+        puts 'There are no pending migrations.'
+      end
+    end
+
+    desc "GitLab | Elasticsearch | Estimate Cluster size"
+    task estimate_cluster_size: :environment do
+      include ActionView::Helpers::NumberHelper
+
+      total_size = Namespace::RootStorageStatistics.sum(:repository_size).to_i
+      total_size_human = number_to_human_size(total_size, delimiter: ',', precision: 1, significant: false)
+
+      estimated_cluster_size = total_size * 0.5
+      estimated_cluster_size_human = number_to_human_size(estimated_cluster_size, delimiter: ',', precision: 1, significant: false)
+
+      puts "This GitLab instance repository size is #{total_size_human}."
+      puts "By our estimates for such repository size, your cluster size should be at least #{estimated_cluster_size_human}.".color(:green)
+      puts 'Please note that it is possible to index only selected namespaces/projects by using Elasticsearch indexing restrictions.'
+    end
+
     def project_id_batches(&blk)
       relation = Project.all
 
       unless ENV['UPDATE_INDEX']
-        relation = relation.includes(:index_status).where('index_statuses.id IS NULL').references(:index_statuses)
+        relation = relation.includes(:index_status).where(index_statuses: { id: nil }).references(:index_statuses)
       end
 
       if ::Gitlab::CurrentSettings.elasticsearch_limit_indexing?

@@ -24,6 +24,7 @@ RSpec.describe Gitlab::Geo::GeoTasks do
 
   describe '.set_secondary_as_primary' do
     let_it_be(:primary) { create(:geo_node, :primary) }
+
     let(:secondary) { create(:geo_node) }
 
     before do

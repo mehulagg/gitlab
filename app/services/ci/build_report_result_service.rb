@@ -33,14 +33,13 @@ module Ci
           failed: test_suite.failed_count,
           errored: test_suite.error_count,
           skipped: test_suite.skipped_count,
-          success: test_suite.success_count
+          success: test_suite.success_count,
+          suite_error: test_suite.suite_error
         }
       }
     end
 
     def track_test_cases(build, test_suite)
-      return if Feature.disabled?(:track_unique_test_cases_parsed, build.project)
-
       track_usage_event(EVENT_NAME, test_case_hashes(build, test_suite))
     end
 

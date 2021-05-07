@@ -1,14 +1,16 @@
 <script>
 import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
 
-import IssuableHeader from './issuable_header.vue';
 import IssuableBody from './issuable_body.vue';
+import IssuableDiscussion from './issuable_discussion.vue';
+import IssuableHeader from './issuable_header.vue';
 
 export default {
   components: {
     IssuableSidebar,
     IssuableHeader,
     IssuableBody,
+    IssuableDiscussion,
   },
   props: {
     issuable: {
@@ -35,7 +37,27 @@ export default {
       required: false,
       default: false,
     },
+    enableAutosave: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    enableZenMode: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    enableTaskList: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     editFormVisible: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    showFieldTitle: {
       type: Boolean,
       required: false,
       default: false,
@@ -50,6 +72,29 @@ export default {
       required: false,
       default: '',
     },
+    taskCompletionStatus: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    taskListUpdatePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    taskListLockVersion: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+  },
+  methods: {
+    handleKeydownTitle(e, issuableMeta) {
+      this.$emit('keydown-title', e, issuableMeta);
+    },
+    handleKeydownDescription(e, issuableMeta) {
+      this.$emit('keydown-description', e, issuableMeta);
+    },
   },
 };
 </script>
@@ -63,6 +108,7 @@ export default {
       :confidential="issuable.confidential"
       :created-at="issuable.createdAt"
       :author="issuable.author"
+      :task-completion-status="taskCompletionStatus"
     >
       <template #status-badge>
         <slot name="status-badge"></slot>
@@ -71,16 +117,27 @@ export default {
         <slot name="header-actions"></slot>
       </template>
     </issuable-header>
+
     <issuable-body
       :issuable="issuable"
       :status-badge-class="statusBadgeClass"
       :status-icon="statusIcon"
       :enable-edit="enableEdit"
       :enable-autocomplete="enableAutocomplete"
+      :enable-autosave="enableAutosave"
+      :enable-zen-mode="enableZenMode"
+      :enable-task-list="enableTaskList"
       :edit-form-visible="editFormVisible"
+      :show-field-title="showFieldTitle"
       :description-preview-path="descriptionPreviewPath"
       :description-help-path="descriptionHelpPath"
+      :task-list-update-path="taskListUpdatePath"
+      :task-list-lock-version="taskListLockVersion"
       @edit-issuable="$emit('edit-issuable', $event)"
+      @task-list-update-success="$emit('task-list-update-success', $event)"
+      @task-list-update-failure="$emit('task-list-update-failure')"
+      @keydown-title="handleKeydownTitle"
+      @keydown-description="handleKeydownDescription"
     >
       <template #status-badge>
         <slot name="status-badge"></slot>
@@ -89,6 +146,13 @@ export default {
         <slot name="edit-form-actions" v-bind="actionsProps"></slot>
       </template>
     </issuable-body>
+
+    <issuable-discussion>
+      <template #discussion>
+        <slot name="discussion"></slot>
+      </template>
+    </issuable-discussion>
+
     <issuable-sidebar @sidebar-toggle="$emit('sidebar-toggle', $event)">
       <template #right-sidebar-items="sidebarProps">
         <slot name="right-sidebar-items" v-bind="sidebarProps"></slot>

@@ -25,9 +25,9 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'parent pipelines passes if child passes', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/754' do
+      it 'parent pipelines passes if child passes', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1161' do
         add_ci_files(success_child_ci_file)
-        view_pipelines
+        Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completed')
 
         Page::Project::Pipeline::Show.perform do |parent_pipeline|
           expect(parent_pipeline).to have_child_pipeline
@@ -35,9 +35,9 @@ module QA
         end
       end
 
-      it 'parent pipeline passes even if child fails', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/753' do
+      it 'parent pipeline passes even if child fails', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1162' do
         add_ci_files(fail_child_ci_file)
-        view_pipelines
+        Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'completed')
 
         Page::Project::Pipeline::Show.perform do |parent_pipeline|
           expect(parent_pipeline).to have_child_pipeline
@@ -46,12 +46,6 @@ module QA
       end
 
       private
-
-      def view_pipelines
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_completion)
-        Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
-      end
 
       def success_child_ci_file
         {

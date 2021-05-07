@@ -1,6 +1,6 @@
-import createState from 'ee/analytics/productivity_analytics/store/modules/filters/state';
-import * as getters from 'ee/analytics/productivity_analytics/store/modules/filters/getters';
 import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
+import * as getters from 'ee/analytics/productivity_analytics/store/modules/filters/getters';
+import createState from 'ee/analytics/productivity_analytics/store/modules/filters/state';
 
 describe('Productivity analytics filter getters', () => {
   let state;

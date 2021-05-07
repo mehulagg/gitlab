@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 desc 'Show a list of obsolete `ignored_columns`'
 task 'db:obsolete_ignored_columns' => :environment do
   list = Gitlab::Database::ObsoleteIgnoredColumns.new.execute
@@ -18,7 +20,7 @@ task 'db:obsolete_ignored_columns' => :environment do
 
       WARNING: Removing columns is tricky because running GitLab processes may still be using the columns.
 
-      See also https://docs.gitlab.com/ee/development/what_requires_downtime.html#dropping-columns
+      See also https://docs.gitlab.com/ee/development/avoiding_downtime_in_migrations.html#dropping-columns
     TEXT
   end
 end

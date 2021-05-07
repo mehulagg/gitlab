@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Rake tasks for developers
 
 Rake tasks are available for developers and others contributing to GitLab.
@@ -12,7 +18,7 @@ bundle exec rake setup
 
 The `setup` task is an alias for `gitlab:setup`.
 This tasks calls `db:reset` to create the database, and calls `db:seed_fu` to seed the database.
-Note: `db:setup` calls `db:seed` but this does nothing.
+`db:setup` calls `db:seed` but this does nothing.
 
 ### Environment variables
 
@@ -55,12 +61,12 @@ bin/rake "gitlab:seed:insights:issues[group-path/project-path]"
 ```
 
 By default, this seeds an average of 10 issues per week for the last 52 weeks
-per project. All issues will also be randomly labeled with team, type, severity,
+per project. All issues are also randomly labeled with team, type, severity,
 and priority.
 
-#### Seeding groups with sub-groups
+#### Seeding groups with subgroups
 
-You can seed groups with sub-groups that contain milestones/projects/issues
+You can seed groups with subgroups that contain milestones/projects/issues
 with the `gitlab:seed:group_seed` task:
 
 ```shell
@@ -82,13 +88,14 @@ bundle exec rake 'gitlab:seed:development_metrics[your_project_id]'
 ### Automation
 
 If you're very sure that you want to **wipe the current database** and refill
-seeds, you could:
+seeds, you can set the `FORCE` environment variable to `yes`:
 
 ```shell
-echo 'yes' | bundle exec rake setup
+FORCE=yes bundle exec rake setup
 ```
 
-To save you from answering `yes` manually.
+This will skip the action confirmation/safety check, saving you from answering
+`yes` manually.
 
 ### Discard `stdout`
 
@@ -110,8 +117,8 @@ so no worries about missing errors.
 There are a few environment flags you can pass to change how projects are seeded
 
 - `SIZE`: defaults to `8`, max: `32`. Amount of projects to create.
-- `LARGE_PROJECTS`: defaults to false. If set will clone 6 large projects to help with testing.
-- `FORK`: defaults to false. If set to `true` will fork `torvalds/linux` five times. Can also be set to an existing project full_path and it will fork that instead.
+- `LARGE_PROJECTS`: defaults to false. If set, clones 6 large projects to help with testing.
+- `FORK`: defaults to false. If set to `true`, forks `torvalds/linux` five times. Can also be set to an existing project `full_path` to fork that instead.
 
 ## Run tests
 
@@ -126,10 +133,10 @@ In order to run the test you can use the following commands:
 `bin/rake spec` takes significant time to pass.
 Instead of running the full test suite locally, you can save a lot of time by running
 a single test or directory related to your changes. After you submit a merge request,
-CI will run full test suite for you. Green CI status in the merge request means
+CI runs full test suite for you. Green CI status in the merge request means
 full test suite is passed.
 
-You can't run `rspec .` since this will try to run all the `_spec.rb`
+You can't run `rspec .` since this tries to run all the `_spec.rb`
 files it can find, also the ones in `/tmp`
 
 You can pass RSpec command line options to the `spec:unit`,
@@ -145,13 +152,31 @@ To run several tests inside one directory:
 
 - `bin/rspec spec/requests/api/` for the RSpec tests if you want to test API only
 
+### Run RSpec tests which failed in Merge Request pipeline on your machine
+
+If your Merge Request pipeline failed with RSpec test failures,
+you can run all the failed tests on your machine with the following Rake task:
+
+```shell
+bin/rake spec:merge_request_rspec_failure
+```
+
+There are a few caveats for this Rake task:
+
+- You need to be on the same branch on your machine as the source branch of the Merge Request.
+- The pipeline must have been completed.
+- You may need to wait for the test report to be parsed and retry again.
+
+This Rake task depends on the [unit test reports](../ci/unit_test_reports.md) feature,
+which only gets parsed when it is requested for the first time.
+
 ### Speed up tests, Rake tasks, and migrations
 
 [Spring](https://github.com/rails/spring) is a Rails application pre-loader. It
 speeds up development by keeping your application running in the background so
 you don't need to boot it every time you run a test, Rake task or migration.
 
-If you want to use it, you'll need to export the `ENABLE_SPRING` environment
+If you want to use it, you must export the `ENABLE_SPRING` environment
 variable to `1`:
 
 ```shell
@@ -174,7 +199,7 @@ environment you can do so with the following command:
 RAILS_ENV=production NODE_ENV=production bundle exec rake gitlab:assets:compile
 ```
 
-This will compile and minify all JavaScript and CSS assets and copy them along
+This compiles and minifies all JavaScript and CSS assets and copy them along
 with all other frontend assets (images, fonts, etc) into `/public/assets` where
 they can be easily inspected.
 
@@ -194,7 +219,7 @@ following:
 bundle exec rake gemojione:digests
 ```
 
-This will update the file `fixtures/emojis/digests.json` based on the currently
+This updates the file `fixtures/emojis/digests.json` based on the currently
 available Emoji.
 
 To generate a sprite file containing all the Emoji, run:
@@ -254,6 +279,48 @@ bundle exec rake db:obsolete_ignored_columns
 
 Feel free to remove their definitions from their `ignored_columns` definitions.
 
+## Validate GraphQL queries
+
+To check the validity of one or more of our front-end GraphQL queries,
+run:
+
+```shell
+# Validate all queries
+bundle exec rake gitlab::graphql:validate
+# Validate one query
+bundle exec rake gitlab::graphql:validate[path/to/query.graphql]
+# Validate a directory
+bundle exec rake gitlab::graphql:validate[path/to/queries]
+```
+
+This prints out a report with an entry for each query, explaining why
+each query is invalid if it fails to pass validation.
+
+We strip out `@client` fields during validation so it is important to mark
+client fields with the `@client` directive to avoid false positives.
+
+## Analyze GraphQL queries
+
+Analogous to `ANALYZE` in SQL, we can run `gitlab:graphql:analyze` to
+estimate the of the cost of running a query.
+
+Usage:
+
+```shell
+# Analyze all queries
+bundle exec rake gitlab::graphql:analyze
+# Analyze one query
+bundle exec rake gitlab::graphql:analyze[path/to/query.graphql]
+# Analyze a directory
+bundle exec rake gitlab::graphql:analyze[path/to/queries]
+```
+
+This prints out a report for each query, including the complexity
+of the query if it is valid.
+
+The complexity depends on the arguments in some cases, so the reported
+complexity is a best-effort assessment of the upper bound.
+
 ## Update GraphQL documentation and schema definitions
 
 To generate GraphQL documentation based on the GitLab schema, run:
@@ -270,8 +337,13 @@ In its current state, the Rake task:
 This uses some features from `graphql-docs` gem like its schema parser and helper methods.
 The docs generator code comes from our side giving us more flexibility, like using Haml templates and generating Markdown files.
 
-To edit the template used, please take a look at `lib/gitlab/graphql/docs/templates/default.md.haml`.
-The actual renderer is at `Gitlab::Graphql::Docs::Renderer`.
+To edit the content, you may need to edit the following:
+
+- The template. You can edit the template at `lib/gitlab/graphql/docs/templates/default.md.haml`.
+  The actual renderer is at `Gitlab::Graphql::Docs::Renderer`.
+- The applicable `description` field in the code, which
+  [Updates machine-readable schema files](#update-machine-readable-schema-files),
+  which is then used by the `rake` task described earlier.
 
 `@parsed_schema` is an instance variable that the `graphql-docs` gem expects to have available.
 `Gitlab::Graphql::Docs::Helper` defines the `object` method we currently use. This is also where you
@@ -286,3 +358,11 @@ bundle exec rake gitlab:graphql:schema:dump
 ```
 
 This uses GraphQL Ruby's built-in Rake tasks to generate files in both [IDL](https://www.prisma.io/blog/graphql-sdl-schema-definition-language-6755bcb9ce51) and JSON formats.
+
+### Update documentation and schema definitions
+
+The following command combines the intent of [Update GraphQL documentation and schema definitions](#update-graphql-documentation-and-schema-definitions) and [Update machine-readable schema files](#update-machine-readable-schema-files):
+
+```shell
+bundle exec rake gitlab:graphql:update_all
+```

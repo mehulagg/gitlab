@@ -1,19 +1,14 @@
 import Vue from 'vue';
 
+import { initAdminUsersApp } from '~/admin/users';
+import initConfirmModal from '~/confirm_modal';
+import csrf from '~/lib/utils/csrf';
 import Translate from '~/vue_shared/translate';
 import ModalManager from './components/user_modal_manager.vue';
-import DeleteUserModal from './components/delete_user_modal.vue';
-import UserOperationConfirmationModal from './components/user_operation_confirmation_modal.vue';
-import csrf from '~/lib/utils/csrf';
 
-const MODAL_TEXTS_CONTAINER_SELECTOR = '#modal-texts';
-const MODAL_MANAGER_SELECTOR = '#user-modal';
-const ACTION_MODALS = {
-  deactivate: UserOperationConfirmationModal,
-  block: UserOperationConfirmationModal,
-  delete: DeleteUserModal,
-  'delete-with-contributions': DeleteUserModal,
-};
+const CONFIRM_DELETE_BUTTON_SELECTOR = '.js-delete-user-modal-button';
+const MODAL_TEXTS_CONTAINER_SELECTOR = '#js-modal-texts';
+const MODAL_MANAGER_SELECTOR = '#js-delete-user-modal';
 
 function loadModalsConfigurationFromHtml(modalsElement) {
   const modalsConfiguration = {};
@@ -23,7 +18,7 @@ function loadModalsConfigurationFromHtml(modalsElement) {
     throw new Error('Modals content element not found!');
   }
 
-  Array.from(modalsElement.children).forEach(node => {
+  Array.from(modalsElement.children).forEach((node) => {
     const { modal, ...config } = node.dataset;
     modalsConfiguration[modal] = {
       title: node.dataset.title,
@@ -37,6 +32,8 @@ function loadModalsConfigurationFromHtml(modalsElement) {
 
 document.addEventListener('DOMContentLoaded', () => {
   Vue.use(Translate);
+
+  initAdminUsersApp();
 
   const modalConfiguration = loadModalsConfigurationFromHtml(
     document.querySelector(MODAL_TEXTS_CONTAINER_SELECTOR),
@@ -55,11 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return h(ModalManager, {
         ref: 'manager',
         props: {
+          selector: CONFIRM_DELETE_BUTTON_SELECTOR,
           modalConfiguration,
-          actionModals: ACTION_MODALS,
           csrfToken: csrf.token,
         },
       });
     },
   });
+
+  initConfirmModal();
 });

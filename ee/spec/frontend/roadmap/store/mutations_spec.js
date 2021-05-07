@@ -1,17 +1,11 @@
-import mutations from 'ee/roadmap/store/mutations';
 import * as types from 'ee/roadmap/store/mutation_types';
+import mutations from 'ee/roadmap/store/mutations';
 
 import defaultState from 'ee/roadmap/store/state';
 
-import {
-  mockGroupId,
-  basePath,
-  epicsPath,
-  mockSortedBy,
-  mockEpic,
-} from 'ee_jest/roadmap/mock_data';
+import { mockGroupId, basePath, mockSortedBy, mockEpic } from 'ee_jest/roadmap/mock_data';
 
-const setEpicMockData = state => {
+const setEpicMockData = (state) => {
   state.epics = [mockEpic];
   state.childrenFlags = { 'gid://gitlab/Epic/1': {} };
   state.epicIds = ['gid://gitlab/Epic/1'];
@@ -33,7 +27,6 @@ describe('Roadmap Store Mutations', () => {
         epicsFetchResultEmpty: false,
         currentGroupId: mockGroupId,
         sortedBy: mockSortedBy,
-        initialEpicsPath: epicsPath,
         defaultInnerHeight: 600,
         extendedTimeframe: [],
         filterQueryString: '',
@@ -157,7 +150,7 @@ describe('Roadmap Store Mutations', () => {
 
       mutations[types.INIT_EPIC_CHILDREN_FLAGS](state, { epics });
 
-      epics.forEach(item => {
+      epics.forEach((item) => {
         expect(state.childrenFlags[item.id]).toMatchObject({
           itemExpanded: false,
           itemChildrenFetchInProgress: false,

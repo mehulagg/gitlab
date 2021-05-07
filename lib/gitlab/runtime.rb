@@ -26,13 +26,9 @@ module Gitlab
         if matches.one?
           matches.first
         elsif matches.none?
-          raise UnknownProcessError.new(
-            "Failed to identify runtime for process #{Process.pid} (#{$0})"
-          )
+          raise UnknownProcessError, "Failed to identify runtime for process #{Process.pid} (#{$0})"
         else
-          raise AmbiguousProcessError.new(
-            "Ambiguous runtime #{matches} for process #{Process.pid} (#{$0})"
-          )
+          raise AmbiguousProcessError, "Ambiguous runtime #{matches} for process #{Process.pid} (#{$0})"
         end
       end
 
@@ -79,6 +75,13 @@ module Gitlab
 
       def multi_threaded?
         puma? || sidekiq? || action_cable?
+      end
+
+      def puma_in_clustered_mode?
+        return unless puma?
+        return unless Puma.respond_to?(:cli_config)
+
+        Puma.cli_config.options[:workers].to_i > 0
       end
 
       def max_threads

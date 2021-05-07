@@ -13,12 +13,14 @@ module Packages
           )
 
           unless meta.valid?
-            raise ActiveRecord::RecordInvalid.new(meta)
+            raise ActiveRecord::RecordInvalid, meta
           end
 
           Packages::Pypi::Metadatum.upsert(meta.attributes)
 
           ::Packages::CreatePackageFileService.new(created_package, file_params).execute
+
+          created_package
         end
       end
 
@@ -32,6 +34,7 @@ module Packages
 
       def file_params
         {
+          build: params[:build],
           file: params[:content],
           file_name: params[:content].original_filename,
           file_md5: params[:md5_digest],

@@ -36,14 +36,13 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
 
         @merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = @project
           mr.source_branch = 'license-management-mr'
-          mr.target_branch = 'master'
-          mr.target = 'master'
+          mr.target_branch = @project.default_branch
+          mr.target = @project.default_branch
           mr.file_name = 'gl-license-scanning-report.json'
           mr.file_content =
             <<~FILE_UPDATE
@@ -95,19 +94,28 @@ module QA
         end
 
         @project.visit!
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-        Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
+        Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
       end
 
       it 'manage licenses from the merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/575' do
         @merge_request.visit!
 
         Page::MergeRequest::Show.perform do |show|
-          show.approve_license_with_mr(approved_license_name)
-          show.deny_license_with_mr(denied_license_name)
-
           show.wait_for_license_compliance_report
+          show.click_manage_licenses_button
+        end
 
+        EE::Page::Project::Secure::LicenseCompliance.perform do |license_compliance|
+          license_compliance.open_tab
+          license_compliance.approve_license approved_license_name
+          license_compliance.deny_license denied_license_name
+        end
+
+        @merge_request.visit!
+
+        Page::MergeRequest::Show.perform do |show|
+          show.wait_for_license_compliance_report
+          show.expand_license_report
           expect(show).to have_approved_license approved_license_name
           expect(show).to have_denied_license denied_license_name
         end

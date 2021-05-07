@@ -189,20 +189,47 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
   end
 
   describe 'issuable filter params' do
+    let_it_be(:stage) { create(:cycle_analytics_group_stage, group: root_group) }
+
     before do
       params.merge!(
         milestone_title: 'title',
         assignee_username: ['username1'],
         label_name: %w[label1 label2],
-        author_username: 'author'
+        author_username: 'author',
+        stage_id: stage.id,
+        value_stream: stage.value_stream
       )
     end
 
     subject { described_class.new(params).to_data_attributes }
 
-    it { expect(subject[:milestone]).to eq('title') }
-    it { expect(subject[:assignees]).to eq('["username1"]') }
-    it { expect(subject[:labels]).to eq('["label1","label2"]') }
-    it { expect(subject[:author]).to eq('author') }
+    it "has the correct attributes" do
+      expect(subject[:milestone]).to eq('title')
+      expect(subject[:assignees]).to eq('["username1"]')
+      expect(subject[:labels]).to eq('["label1","label2"]')
+      expect(subject[:author]).to eq('author')
+      expect(subject[:stage]).to eq(%Q|{"id":#{stage.id},"title":"#{stage.name}"}|)
+    end
+  end
+
+  describe 'sorting params' do
+    before do
+      params.merge!(sort: 'duration', direction: 'asc')
+    end
+
+    it 'converts sorting params to symbol when passing it to data collector' do
+      data_collector_params = subject.to_data_collector_params
+
+      expect(data_collector_params[:sort]).to eq(:duration)
+      expect(data_collector_params[:direction]).to eq(:asc)
+    end
+
+    it 'adds sorting params to data attributes' do
+      data_attributes = subject.to_data_attributes
+
+      expect(data_attributes[:sort]).to eq('duration')
+      expect(data_attributes[:direction]).to eq('asc')
+    end
   end
 end

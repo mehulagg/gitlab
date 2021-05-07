@@ -2,25 +2,23 @@
 /* eslint-disable vue/no-v-html */
 import {
   GlButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlModal,
   GlSearchBoxByType,
   GlModalDirective,
-  GlIcon,
 } from '@gitlab/ui';
-import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 import { s__, sprintf } from '~/locale';
+import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
+import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 
 export default {
   components: {
     GlButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlModal,
     GlSearchBoxByType,
-    GlIcon,
     ReviewAppLink,
     ModalCopyButton,
   },
@@ -79,7 +77,7 @@ export default {
       /* eslint-enable no-useless-escape */
     },
     filteredChanges() {
-      return this.changes.filter(change => change.path.includes(this.changesSearchTerm));
+      return this.changes.filter((change) => change.path.includes(this.changesSearchTerm));
     },
     instructionText() {
       return {
@@ -204,8 +202,10 @@ export default {
         <gl-button category="secondary" @click="cancel">
           {{ s__('VisualReviewApp|Cancel') }}
         </gl-button>
-        <gl-deprecated-dropdown
+        <gl-dropdown
           v-if="shouldShowChanges"
+          :text="s__('VisualReviewApp|Open review app')"
+          icon="external-link"
           dropup
           right
           split
@@ -215,23 +215,19 @@ export default {
           @click="ok"
         >
           <gl-search-box-by-type v-model.trim="changesSearchTerm" />
-          <template #button-content>
-            {{ s__('VisualReviewApp|Open review app') }}
-            <gl-icon class="fgray" name="external-link" />
-          </template>
-          <gl-deprecated-dropdown-item
+          <gl-dropdown-item
             v-for="change in filteredChanges"
             :key="change.path"
             :href="change.external_url"
             data-track-event="open_review_app"
             data-track-label="review_app"
-            >{{ change.path }}</gl-deprecated-dropdown-item
+            >{{ change.path }}</gl-dropdown-item
           >
 
           <div v-show="isSearchEmpty" class="text-secondary p-2">
             {{ s__('VisualReviewApp|No review app found or available.') }}
           </div>
-        </gl-deprecated-dropdown>
+        </gl-dropdown>
         <review-app-link
           v-else
           :display="viewAppDisplay"

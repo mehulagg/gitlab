@@ -81,45 +81,43 @@ RSpec.describe UserCalloutsHelper do
     end
   end
 
-  describe '.show_service_templates_deprecated?' do
-    subject { helper.show_service_templates_deprecated? }
+  describe '.show_service_templates_deprecated_callout?' do
+    using RSpec::Parameterized::TableSyntax
 
-    context 'when user has not dismissed' do
-      before do
-        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED) { false }
-      end
+    let_it_be(:admin) { create(:user, :admin) }
+    let_it_be(:non_admin) { create(:user) }
 
-      it { is_expected.to be true }
+    subject { helper.show_service_templates_deprecated_callout? }
+
+    where(:self_managed, :is_admin_user, :has_active_service_template, :callout_dismissed, :should_show_callout) do
+      true  | true  | true  | false | true
+      true  | true  | true  | true  | false
+      true  | false | true  | false | false
+      false | true  | true  | false | false
+      true  | true  | false | false | false
     end
 
-    context 'when user dismissed' do
+    with_them do
       before do
-        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED) { true }
+        allow(::Gitlab).to receive(:com?).and_return(!self_managed)
+        allow(helper).to receive(:current_user).and_return(is_admin_user ? admin : non_admin)
+        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED_CALLOUT) { callout_dismissed }
+        create(:service, :template, type: 'MattermostService', active: has_active_service_template)
       end
 
-      it { is_expected.to be false }
+      it { is_expected.to be should_show_callout }
     end
   end
 
   describe '.show_customize_homepage_banner?' do
-    let(:customize_homepage) { true }
-
-    subject { helper.show_customize_homepage_banner?(customize_homepage) }
+    subject { helper.show_customize_homepage_banner? }
 
     context 'when user has not dismissed' do
       before do
         allow(helper).to receive(:user_dismissed?).with(described_class::CUSTOMIZE_HOMEPAGE) { false }
       end
 
-      context 'when customize_homepage is set' do
-        it { is_expected.to be true }
-      end
-
-      context 'when customize_homepage is false' do
-        let(:customize_homepage) { false }
-
-        it { is_expected.to be false }
-      end
+      it { is_expected.to be true }
     end
 
     context 'when user dismissed' do
@@ -159,6 +157,87 @@ RSpec.describe UserCalloutsHelper do
       end
 
       it { is_expected.to be_falsy }
+    end
+  end
+
+  describe '.show_registration_enabled_user_callout?' do
+    let_it_be(:admin) { create(:user, :admin) }
+
+    subject { helper.show_registration_enabled_user_callout? }
+
+    context 'when on gitlab.com' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+        allow(helper).to receive(:current_user).and_return(admin)
+        stub_application_setting(signup_enabled: true)
+        allow(helper).to receive(:user_dismissed?).with(described_class::REGISTRATION_ENABLED_CALLOUT) { false }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when `current_user` is not an admin' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(false)
+        allow(helper).to receive(:current_user).and_return(user)
+        stub_application_setting(signup_enabled: true)
+        allow(helper).to receive(:user_dismissed?).with(described_class::REGISTRATION_ENABLED_CALLOUT) { false }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when signup is disabled' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(false)
+        allow(helper).to receive(:current_user).and_return(admin)
+        stub_application_setting(signup_enabled: false)
+        allow(helper).to receive(:user_dismissed?).with(described_class::REGISTRATION_ENABLED_CALLOUT) { false }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when user has dismissed callout' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(false)
+        allow(helper).to receive(:current_user).and_return(admin)
+        stub_application_setting(signup_enabled: true)
+        allow(helper).to receive(:user_dismissed?).with(described_class::REGISTRATION_ENABLED_CALLOUT) { true }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when not gitlab.com, `current_user` is an admin, signup is enabled, and user has not dismissed callout' do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(false)
+        allow(helper).to receive(:current_user).and_return(admin)
+        stub_application_setting(signup_enabled: true)
+        allow(helper).to receive(:user_dismissed?).with(described_class::REGISTRATION_ENABLED_CALLOUT) { false }
+      end
+
+      it { is_expected.to be true }
+    end
+  end
+
+  describe '.show_unfinished_tag_cleanup_callout?' do
+    subject { helper.show_unfinished_tag_cleanup_callout? }
+
+    before do
+      allow(helper).to receive(:user_dismissed?).with(described_class::UNFINISHED_TAG_CLEANUP_CALLOUT) { dismissed }
+    end
+
+    context 'when user has not dismissed' do
+      let(:dismissed) { false }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when user dismissed' do
+      let(:dismissed) { true }
+
+      it { is_expected.to be false }
     end
   end
 end

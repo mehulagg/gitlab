@@ -1,6 +1,4 @@
 <script>
-import { isEmpty, findKey } from 'lodash';
-import Vue from 'vue';
 import {
   GlLink,
   GlButton,
@@ -13,12 +11,14 @@ import {
   GlTooltipDirective,
   GlIcon,
 } from '@gitlab/ui';
+import { isEmpty, findKey } from 'lodash';
+import Vue from 'vue';
 import { __, s__ } from '~/locale';
-import Translate from '~/vue_shared/translate';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { alertsValidator, queriesValidator } from '../validators';
+import Translate from '~/vue_shared/translate';
 import { OPERATORS } from '../constants';
+import { alertsValidator, queriesValidator } from '../validators';
 
 Vue.use(Translate);
 
@@ -31,7 +31,7 @@ const SUBMIT_ACTION_TEXT = {
 const SUBMIT_BUTTON_CLASS = {
   create: 'btn-success',
   update: 'btn-success',
-  delete: 'btn-remove',
+  delete: 'btn-danger',
 };
 
 export default {
@@ -99,7 +99,7 @@ export default {
       return this.alertQuery.length ? true : null;
     },
     currentQuery() {
-      return this.relevantQueries.find(query => query.metricId === this.prometheusMetricId) || {};
+      return this.relevantQueries.find((query) => query.metricId === this.prometheusMetricId) || {};
     },
     formDisabled() {
       // We need a prometheusMetricId to determine whether we're
@@ -151,7 +151,7 @@ export default {
   },
   methods: {
     selectQuery(queryId) {
-      const existingAlertPath = findKey(this.alertsToManage, alert => alert.metricId === queryId);
+      const existingAlertPath = findKey(this.alertsToManage, (alert) => alert.metricId === queryId);
       const existingAlert = this.alertsToManage[existingAlertPath];
 
       if (existingAlert) {

@@ -1,15 +1,23 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownDivider,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import { debounce } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 
+import Api from '~/api';
+import createFlash, { FLASH_TYPES } from '~/flash';
+import { STORAGE_KEY } from '~/frequent_items/constants';
+import { getTopFrequentItems } from '~/frequent_items/utils';
+import AccessorUtilities from '~/lib/utils/accessor';
 import { __ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { SEARCH_DEBOUNCE } from '../constants';
@@ -17,8 +25,10 @@ import { SEARCH_DEBOUNCE } from '../constants';
 export default {
   components: {
     GlButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownSectionHeader,
+    GlDropdownDivider,
     GlFormInput,
     GlSearchBoxByType,
     GlLoadingIcon,
@@ -26,17 +36,22 @@ export default {
   },
   data() {
     return {
+      recentItems: [],
       selectedProject: null,
       searchKey: '',
       title: '',
-      preventDropdownClose: false,
+      recentItemFetchInProgress: false,
     };
   },
   computed: {
     ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects', 'parentItem']),
     dropdownToggleText() {
       if (this.selectedProject) {
-        return this.selectedProject.name_with_namespace;
+        /** When selectedProject is fetched from localStorage
+         * name_with_namespace doesn't exist. Therefore we rely on
+         * namespace directly.
+         * */
+        return this.selectedProject.name_with_namespace || this.selectedProject.namespace;
       }
 
       return __('Select a project');
@@ -50,6 +65,7 @@ export default {
      */
     searchKey: debounce(function debounceSearch() {
       this.fetchProjects(this.searchKey);
+      this.setRecentItems(this.searchKey);
     }, SEARCH_DEBOUNCE),
     /**
      * As Issue Create Form already has `autofocus` set for
@@ -81,33 +97,62 @@ export default {
     },
     handleDropdownShow() {
       this.searchKey = '';
+      this.setRecentItems();
       this.fetchProjects();
     },
-    handleDropdownHide(e) {
-      // Check if dropdown closure is to be prevented.
-      if (this.preventDropdownClose) {
-        e.preventDefault();
-        this.preventDropdownClose = false;
-      }
+    handleRecentItemSelection(selectedProject) {
+      this.recentItemFetchInProgress = true;
+      this.selectedProject = selectedProject;
+
+      Api.project(selectedProject.id)
+        .then((res) => res.data)
+        .then((data) => {
+          this.selectedProject = data;
+        })
+        .catch(() => {
+          createFlash({
+            message: __('Something went wrong while fetching details'),
+            type: FLASH_TYPES.ALERT,
+          });
+          this.selectedProject = null;
+        })
+        .finally(() => {
+          this.recentItemFetchInProgress = false;
+        });
     },
-    /**
-     * As GlDropdown can get closed if any item within
-     * it is clicked, we have to work around that behaviour
-     * by preventing dropdown close if user has clicked
-     * clear button on search input field. This hack
-     * won't be required once we add support for
-     * `BDropdownForm` https://bootstrap-vue.js.org/docs/components/dropdown#b-dropdown-form
-     * within GitLab UI.
-     */
-    handleSearchInputContainerClick({ target }) {
-      // Check if clicked target was an icon.
-      if (
-        target?.classList.contains('gl-icon') ||
-        target?.getAttribute('href')?.includes('clear')
-      ) {
-        // Enable flag to prevent dropdown close.
-        this.preventDropdownClose = true;
+    setRecentItems(searchTerm) {
+      const { current_username: currentUsername } = gon;
+
+      if (!currentUsername) {
+        return [];
       }
+
+      const storageKey = `${currentUsername}/${STORAGE_KEY.projects}`;
+
+      if (!AccessorUtilities.isLocalStorageAccessSafe()) {
+        return [];
+      }
+
+      const storedRawItems = localStorage.getItem(storageKey);
+
+      let storedFrequentItems = storedRawItems ? JSON.parse(storedRawItems) : [];
+
+      /* Filter for the current group */
+      storedFrequentItems = storedFrequentItems.filter((item) => {
+        return Boolean(item.webUrl?.slice(1)?.startsWith(this.parentItem.fullPath));
+      });
+
+      if (searchTerm) {
+        storedFrequentItems = fuzzaldrinPlus.filter(storedFrequentItems, searchTerm, {
+          key: ['namespace'],
+        });
+      }
+
+      this.recentItems = getTopFrequentItems(storedFrequentItems).map((item) => {
+        return { ...item, avatar_url: item.avatarUrl, web_url: item.webUrl };
+      });
+
+      return this.recentItems;
     },
   },
 };
@@ -116,7 +161,7 @@ export default {
 <template>
   <div>
     <div class="row mb-3">
-      <div class="col-sm">
+      <div class="col-sm-6">
         <label class="label-bold">{{ s__('Issue|Title') }}</label>
         <gl-form-input
           ref="titleInput"
@@ -127,45 +172,67 @@ export default {
           autofocus
         />
       </div>
-      <div class="col-sm">
+      <div class="col-sm-6">
         <label class="label-bold">{{ __('Project') }}</label>
-        <gl-deprecated-dropdown
+        <gl-dropdown
           ref="dropdownButton"
           :text="dropdownToggleText"
-          class="w-100 projects-dropdown"
-          menu-class="w-100 overflow-hidden"
-          toggle-class="d-flex align-items-center justify-content-between text-truncate"
+          class="gl-w-full projects-dropdown"
+          menu-class="gl-w-full! gl-overflow-hidden!"
+          toggle-class="gl-display-flex gl-align-items-center gl-justify-content-between gl-text-truncate"
           @show="handleDropdownShow"
-          @hide="handleDropdownHide"
         >
-          <div class="mx-2 mb-1" @click="handleSearchInputContainerClick">
-            <gl-search-box-by-type
-              ref="searchInputField"
-              v-model="searchKey"
-              :disabled="projectsFetchInProgress"
-            />
+          <gl-search-box-by-type
+            ref="searchInputField"
+            v-model="searchKey"
+            class="gl-mx-3 gl-mb-2"
+            :disabled="projectsFetchInProgress"
+          />
+          <div class="dropdown-contents gl-overflow-auto gl-pb-2">
+            <gl-dropdown-section-header v-if="recentItems.length > 0">{{
+              __('Recently used')
+            }}</gl-dropdown-section-header>
+
+            <div v-if="recentItems.length > 0" data-testid="recent-items-content">
+              <gl-dropdown-item
+                v-for="project in recentItems"
+                :key="`recent-${project.id}`"
+                class="gl-w-full select-project-dropdown"
+                @click="() => handleRecentItemSelection(project)"
+              >
+                <span><project-avatar :project="project" :size="32" /></span>
+                <span
+                  ><span class="block">{{ project.name }}</span>
+                  <span class="block text-secondary">{{ project.namespace }}</span></span
+                >
+              </gl-dropdown-item>
+            </div>
+
+            <gl-dropdown-divider v-if="recentItems.length > 0" />
+            <template v-if="!projectsFetchInProgress">
+              <span v-if="!projects.length" class="gl-display-block text-center gl-p-3">{{
+                __('No matches found')
+              }}</span>
+              <gl-dropdown-item
+                v-for="project in projects"
+                :key="project.id"
+                class="gl-w-full select-project-dropdown"
+                @click="selectedProject = project"
+              >
+                <span><project-avatar :project="project" :size="32" /></span>
+                <span
+                  ><span class="block">{{ project.name }}</span>
+                  <span class="block text-secondary">{{ project.namespace.name }}</span></span
+                >
+              </gl-dropdown-item>
+            </template>
           </div>
           <gl-loading-icon
             v-show="projectsFetchInProgress"
-            class="projects-fetch-loading align-items-center p-2"
+            class="projects-fetch-loading gl-align-items-center gl-p-3"
             size="md"
           />
-          <div v-if="!projectsFetchInProgress" class="dropdown-contents overflow-auto p-1">
-            <span v-if="!projects.length" class="d-block text-center p-2">{{
-              __('No matches found')
-            }}</span>
-            <gl-deprecated-dropdown-item
-              v-for="project in projects"
-              :key="project.id"
-              class="w-100"
-              @click="selectedProject = project"
-            >
-              <project-avatar :project="project" :size="32" />
-              {{ project.name }}
-              <div class="text-secondary">{{ project.namespace.name }}</div>
-            </gl-deprecated-dropdown-item>
-          </div>
-        </gl-deprecated-dropdown>
+        </gl-dropdown>
       </div>
     </div>
 
@@ -176,7 +243,7 @@ export default {
           variant="success"
           category="primary"
           :disabled="!selectedProject || itemCreateInProgress"
-          :loading="itemCreateInProgress"
+          :loading="itemCreateInProgress || recentItemFetchInProgress"
           @click="createIssue"
           >{{ __('Create issue') }}</gl-button
         >

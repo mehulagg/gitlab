@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
+import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
-const testApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));
+const testApprovers = () => Array.from({ length: 11 }, (_, i) => i).map((id) => ({ id }));
 const testRuleApproved = () => ({
   id: 1,
   name: 'Lorem',
@@ -74,7 +74,7 @@ describe('EE MRWidget approvals list', () => {
 
   const findRows = () => wrapper.findAll('tbody tr');
   const findRowElement = (row, name) => row.find(`.js-${name}`);
-  const findRowIcon = row => row.find(ApprovedIcon);
+  const findRowIcon = (row) => row.find(ApprovedIcon);
 
   afterEach(() => {
     wrapper.destroy();
@@ -91,10 +91,10 @@ describe('EE MRWidget approvals list', () => {
     it('renders a row for each rule', () => {
       const expected = testRules();
       const rows = findRows();
-      const names = rows.wrappers.map(row => findRowElement(row, 'name').text());
+      const names = rows.wrappers.map((row) => findRowElement(row, 'name').text());
 
       expect(rows).toHaveLength(expected.length);
-      expect(names).toEqual(expected.map(x => x.name));
+      expect(names).toEqual(expected.map((x) => x.name));
     });
 
     it('does not render a code owner subtitle', () => {

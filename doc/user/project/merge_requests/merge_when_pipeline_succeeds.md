@@ -1,11 +1,11 @@
 ---
 stage: Create
-group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Code Review
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
 ---
 
-# Merge when pipeline succeeds
+# Merge when pipeline succeeds **(FREE)**
 
 When reviewing a merge request that looks ready to merge but still has a
 pipeline running, you can set it to merge automatically when the
@@ -35,10 +35,19 @@ is automatically merged. When the merge request is updated with
 new commits, the automatic merge is canceled to allow the new
 changes to be reviewed.
 
+By default, all threads must be resolved before you see the **Merge when
+pipeline succeeds** button. If someone adds a new comment after
+the button is selected, but before the jobs in the CI pipeline are
+complete, the merge is blocked until you resolve all existing threads.
+
 ## Only allow merge requests to be merged if the pipeline succeeds
 
-You can prevent merge requests from being merged if their pipeline did not succeed
-or if there are threads to be resolved. This works for both:
+You can prevent merge requests from being merged if:
+
+- No pipeline ran.
+- The pipeline did not succeed.
+
+This works for both:
 
 - GitLab CI/CD pipelines
 - Pipelines run from an [external CI integration](../integrations/overview.md#integrations-listing)
@@ -53,6 +62,7 @@ CI providers with this feature. To enable it, you must:
 1. Press **Save** for the changes to take effect.
 
 This setting also prevents merge requests from being merged if there is no pipeline.
+You should be careful to configure CI/CD so that pipelines run for every merge request.
 
 ### Limitations
 
@@ -84,7 +94,7 @@ merge-request-pipeline-job:
 ```
 
 You should avoid configuration like this, and only use branch (`push`) pipelines
-or merge request pipelines, when possible. See [`rules` documentation](../../../ci/yaml/README.md#prevent-duplicate-pipelines)
+or merge request pipelines, when possible. See [`rules` documentation](../../../ci/yaml/README.md#avoid-duplicate-pipelines)
 for details on avoiding two pipelines for a single merge request.
 
 ### Skipped pipelines

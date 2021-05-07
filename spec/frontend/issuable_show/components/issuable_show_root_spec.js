@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 
+import IssuableBody from '~/issuable_show/components/issuable_body.vue';
+import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
 import IssuableShowRoot from '~/issuable_show/components/issuable_show_root.vue';
 
-import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
-import IssuableBody from '~/issuable_show/components/issuable_body.vue';
 import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
 
 import { mockIssuableShowProps, mockIssuable } from '../mock_data';
@@ -54,6 +54,7 @@ describe('IssuableShowRoot', () => {
       editFormVisible,
       descriptionPreviewPath,
       descriptionHelpPath,
+      taskCompletionStatus,
     } = mockIssuableShowProps;
     const { blocked, confidential, createdAt, author } = mockIssuable;
 
@@ -72,6 +73,7 @@ describe('IssuableShowRoot', () => {
         confidential,
         createdAt,
         author,
+        taskCompletionStatus,
       });
       expect(issuableHeader.find('.issuable-status-box').text()).toContain('Open');
       expect(issuableHeader.find('.detail-page-header-actions button.js-close').exists()).toBe(
@@ -111,6 +113,26 @@ describe('IssuableShowRoot', () => {
         expect(wrapper.emitted('edit-issuable')).toBeTruthy();
       });
 
+      it('component emits `task-list-update-success` event bubbled via issuable-body', () => {
+        const issuableBody = wrapper.find(IssuableBody);
+        const eventParam = {
+          foo: 'bar',
+        };
+
+        issuableBody.vm.$emit('task-list-update-success', eventParam);
+
+        expect(wrapper.emitted('task-list-update-success')).toBeTruthy();
+        expect(wrapper.emitted('task-list-update-success')[0]).toEqual([eventParam]);
+      });
+
+      it('component emits `task-list-update-failure` event bubbled via issuable-body', () => {
+        const issuableBody = wrapper.find(IssuableBody);
+
+        issuableBody.vm.$emit('task-list-update-failure');
+
+        expect(wrapper.emitted('task-list-update-failure')).toBeTruthy();
+      });
+
       it('component emits `sidebar-toggle` event bubbled via issuable-sidebar', () => {
         const issuableSidebar = wrapper.find(IssuableSidebar);
 
@@ -118,6 +140,27 @@ describe('IssuableShowRoot', () => {
 
         expect(wrapper.emitted('sidebar-toggle')).toBeTruthy();
       });
+
+      it.each(['keydown-title', 'keydown-description'])(
+        'component emits `%s` event with event object and issuableMeta params via issuable-body',
+        (eventName) => {
+          const eventObj = {
+            preventDefault: jest.fn(),
+            stopPropagation: jest.fn(),
+          };
+          const issuableMeta = {
+            issuableTitle: 'foo',
+            issuableDescription: 'foobar',
+          };
+
+          const issuableBody = wrapper.find(IssuableBody);
+
+          issuableBody.vm.$emit(eventName, eventObj, issuableMeta);
+
+          expect(wrapper.emitted(eventName)).toBeTruthy();
+          expect(wrapper.emitted(eventName)[0]).toMatchObject([eventObj, issuableMeta]);
+        },
+      );
     });
   });
 });

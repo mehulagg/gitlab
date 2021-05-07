@@ -15,6 +15,11 @@ export default {
       type: Array,
       required: true,
     },
+    isJira: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     numberOfIssues() {
@@ -36,13 +41,15 @@ export default {
       <gl-icon name="issues" class="gl-mr-2" />
       {{ numberOfIssues }}
     </gl-badge>
-    <gl-popover ref="popover" :target="issueBadgeEl" triggers="hover" placement="top">
+    <gl-popover ref="popover" :target="issueBadgeEl" placement="top">
       <template #title>
         {{ popoverTitle }}
       </template>
-      <div v-for="{ issue } in issues" :key="issue.iid">
-        <issue-link :issue="issue" />
-      </div>
+      <ul class="gl-list-style-none gl-p-0 gl-m-0">
+        <li v-for="{ issue } in issues" :key="issue.iid">
+          <issue-link :issue="issue" :is-jira="isJira" />
+        </li>
+      </ul>
     </gl-popover>
   </div>
 </template>

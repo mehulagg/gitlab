@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Compliance
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'Learn how to create evidence artifacts typically requested by a 3rd party auditor.'
 ---
 
@@ -18,12 +18,12 @@ needs.
 
 ## APIs
 
-- `https://docs.gitlab.com/ee/api/audit_events.html`
-- `https://docs.gitlab.com/ee/api/graphql/reference/#user`
-- `https://docs.gitlab.com/ee/api/graphql/reference/#groupmember`
-- `https://docs.gitlab.com/ee/api/graphql/reference/#projectmember`
+- [Audit events](../api/audit_events.md)
+- [GraphQL - User](../api/graphql/reference/index.md#user)
+- [GraphQL - GroupMember](../api/graphql/reference/index.md#groupmember)
+- [GraphQL - ProjectMember](../api/graphql/reference/index.md#projectmember)
 
 ## Features
 
-- `https://docs.gitlab.com/ee/administration/audit_events.html`
-- `https://docs.gitlab.com/ee/administration/logs.html`
+- [Audit events](audit_events.md)
+- [Log system](logs.md)

@@ -29,10 +29,11 @@ RSpec.describe PreferencesHelper do
         ['Starred Projects',        'stars'],
         ["Your Projects' Activity", 'project_activity'],
         ["Starred Projects' Activity", 'starred_project_activity'],
+        ["Followed Users' Activity", 'followed_user_activity'],
         ["Your Groups", 'groups'],
         ["Your To-Do List", 'todos'],
         ["Assigned Issues", 'issues'],
-        ["Assigned Merge Requests", 'merge_requests']
+        ["Assigned merge requests", 'merge_requests']
       ]
     end
   end

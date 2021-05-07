@@ -1,13 +1,11 @@
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex';
-
 import { GlTooltipDirective, GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
+import { mapGetters, mapActions, mapState } from 'vuex';
 
 import { __ } from '~/locale';
 
-import TreeItemBody from './tree_item_body.vue';
-
 import { ChildType } from '../constants';
+import TreeItemBody from './tree_item_body.vue';
 
 export default {
   ChildType,
@@ -89,6 +87,7 @@ export default {
         v-if="!childrenFetchInProgress && hasChildren"
         v-gl-tooltip.viewport.hover
         :title="chevronTooltip"
+        :aria-label="chevronTooltip"
         :class="chevronType"
         variant="link"
         class="btn-svg btn-tree-item-chevron align-self-start"

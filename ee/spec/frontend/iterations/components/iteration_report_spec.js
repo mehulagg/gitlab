@@ -1,16 +1,25 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
-import IterationReport from 'ee/iterations/components/iteration_report.vue';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
-import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
+import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
+import query from 'ee/iterations/queries/iteration.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '../mock_data';
+
+const localVue = createLocalVue();
 
 describe('Iterations report', () => {
   let wrapper;
+  let mockApollo;
+
   const defaultProps = {
     fullPath: 'gitlab-org',
-    iterationIid: '3',
+    labelsFetchPath: '/gitlab-org/gitlab-test/-/labels.json?include_ancestor_groups=true',
   };
 
   const findTopbar = () => wrapper.find({ ref: 'topbar' });
@@ -19,8 +28,83 @@ describe('Iterations report', () => {
   const findActionsDropdown = () => wrapper.find('[data-testid="actions-dropdown"]');
   const clickEditButton = () => {
     findActionsDropdown().vm.$emit('click');
-    wrapper.find(GlDropdownItem).vm.$emit('click');
+    wrapper.findComponent(GlDropdownItem).vm.$emit('click');
   };
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findIterationForm = () => wrapper.findComponent(IterationForm);
+
+  const mountComponentWithApollo = ({
+    props = defaultProps,
+    iterationQueryHandler = jest.fn(),
+  } = {}) => {
+    localVue.use(VueApollo);
+    mockApollo = createMockApollo([[query, iterationQueryHandler]]);
+
+    wrapper = shallowMount(IterationReport, {
+      localVue,
+      apolloProvider: mockApollo,
+      propsData: props,
+      stubs: {
+        GlLoadingIcon,
+        GlTab,
+        GlTabs,
+      },
+    });
+  };
+
+  describe('with mock apollo', () => {
+    describe.each([
+      [
+        'group',
+        {
+          fullPath: 'group-name',
+          iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
+        },
+        mockGroupIterations,
+        {
+          fullPath: 'group-name',
+          id: mockIterationNode.id,
+          isGroup: true,
+        },
+      ],
+      [
+        'project',
+        {
+          fullPath: 'group-name/project-name',
+          iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
+          namespaceType: Namespace.Project,
+        },
+        mockProjectIterations,
+        {
+          fullPath: 'group-name/project-name',
+          id: mockIterationNode.id,
+          isGroup: false,
+        },
+      ],
+    ])('when viewing an iteration in a %s', (_, props, mockIteration, expectedParams) => {
+      it('calls a query with correct parameters', () => {
+        const iterationQueryHandler = jest.fn();
+        mountComponentWithApollo({
+          props,
+          iterationQueryHandler,
+        });
+
+        expect(iterationQueryHandler).toHaveBeenNthCalledWith(1, expectedParams);
+      });
+
+      it('renders an iteration title', async () => {
+        mountComponentWithApollo({
+          props,
+          iterationQueryHandler: jest.fn().mockResolvedValue(mockIteration),
+        });
+
+        await waitForPromises();
+
+        expect(findTitle().text()).toContain(mockIterationNode.title);
+      });
+    });
+  });
 
   const mountComponent = ({ props = defaultProps, loading = false } = {}) => {
     wrapper = shallowMount(IterationReport, {
@@ -48,7 +132,7 @@ describe('Iterations report', () => {
       loading: true,
     });
 
-    expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    expect(findLoadingIcon().exists()).toBe(true);
   });
 
   describe('empty state', () => {
@@ -57,8 +141,7 @@ describe('Iterations report', () => {
         loading: false,
       });
 
-      expect(wrapper.find(GlEmptyState).exists()).toBe(true);
-      expect(wrapper.find(GlEmptyState).props('title')).toEqual('Could not find iteration');
+      expect(findEmptyState().props('title')).toBe('Could not find iteration');
       expect(findTitle().exists()).toBe(false);
       expect(findDescription().exists()).toBe(false);
       expect(findActionsDropdown().exists()).toBe(false);
@@ -72,6 +155,7 @@ describe('Iterations report', () => {
       descriptionHtml: 'The first week of June',
       startDate: '2020-06-02',
       dueDate: '2020-06-08',
+      state: 'opened',
     };
 
     describe('user without edit permission', () => {
@@ -92,8 +176,8 @@ describe('Iterations report', () => {
       });
 
       it('hides empty region and loading spinner', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-        expect(wrapper.find(GlEmptyState).exists()).toBe(false);
+        expect(findLoadingIcon().exists()).toBe(false);
+        expect(findEmptyState().exists()).toBe(false);
       });
 
       it('shows title and description', () => {
@@ -103,6 +187,17 @@ describe('Iterations report', () => {
 
       it('hides actions dropdown', () => {
         expect(findActionsDropdown().exists()).toBe(false);
+      });
+
+      it('shows IterationReportTabs component', () => {
+        const iterationReportTabs = wrapper.findComponent(IterationReportTabs);
+
+        expect(iterationReportTabs.props()).toMatchObject({
+          fullPath: defaultProps.fullPath,
+          iterationId: iteration.id,
+          labelsFetchPath: defaultProps.labelsFetchPath,
+          namespaceType: Namespace.Group,
+        });
       });
     });
 
@@ -135,22 +230,6 @@ describe('Iterations report', () => {
             '/edit',
           );
         });
-
-        it('passes correct props to IterationReportSummary', () => {
-          const iterationReportSummary = wrapper.find(IterationReportSummary);
-
-          expect(iterationReportSummary.props('fullPath')).toBe(defaultProps.fullPath);
-          expect(iterationReportSummary.props('iterationId')).toBe(iteration.id);
-          expect(iterationReportSummary.props('namespaceType')).toBe(Namespace.Group);
-        });
-
-        it('passes correct props to IterationReportTabs', () => {
-          const iterationReportTabs = wrapper.find(IterationReportTabs);
-
-          expect(iterationReportTabs.props('fullPath')).toBe(defaultProps.fullPath);
-          expect(iterationReportTabs.props('iterationId')).toBe(iteration.id);
-          expect(iterationReportTabs.props('namespaceType')).toBe(Namespace.Group);
-        });
       });
 
       describe('loading edit form directly', () => {
@@ -171,7 +250,7 @@ describe('Iterations report', () => {
 
         it('updates URL when cancelling form submit', async () => {
           jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
-          wrapper.find(IterationForm).vm.$emit('cancel');
+          findIterationForm().vm.$emit('cancel');
 
           await wrapper.vm.$nextTick();
 
@@ -184,7 +263,7 @@ describe('Iterations report', () => {
 
         it('updates URL after form submitted', async () => {
           jest.spyOn(window.history, 'pushState').mockImplementation(() => {});
-          wrapper.find(IterationForm).vm.$emit('updated');
+          findIterationForm().vm.$emit('updated');
 
           await wrapper.vm.$nextTick();
 
@@ -222,7 +301,7 @@ describe('Iterations report', () => {
           });
 
           it(`${canEditIteration ? 'is shown' : 'is hidden'}`, () => {
-            expect(wrapper.find(GlDropdown).exists()).toBe(canEditIteration);
+            expect(wrapper.findComponent(GlDropdown).exists()).toBe(canEditIteration);
           });
         },
       );

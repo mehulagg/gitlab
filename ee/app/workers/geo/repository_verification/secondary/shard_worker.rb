@@ -36,7 +36,7 @@ module Geo
         end
 
         def max_capacity
-          current_node.verification_max_capacity
+          Gitlab::Geo.verification_max_capacity_per_replicator_class
         end
 
         # rubocop:disable CodeReuse/ActiveRecord

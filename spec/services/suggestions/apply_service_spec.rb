@@ -20,7 +20,7 @@ RSpec.describe Suggestions::ApplyService do
     position_args = args.slice(:old_path, :new_path, :old_line, :new_line)
     content_args = args.slice(:from_content, :to_content)
 
-    position = build_position(position_args)
+    position = build_position(**position_args)
 
     diff_note = create(:diff_note_on_merge_request,
                        noteable: merge_request,
@@ -32,8 +32,8 @@ RSpec.describe Suggestions::ApplyService do
     create(:suggestion, :content_from_repo, suggestion_args)
   end
 
-  def apply(suggestions)
-    result = apply_service.new(user, *suggestions).execute
+  def apply(suggestions, custom_message = nil)
+    result = apply_service.new(user, *suggestions, message: custom_message).execute
 
     suggestions.map { |suggestion| suggestion.reload }
 
@@ -67,11 +67,21 @@ RSpec.describe Suggestions::ApplyService do
       apply(suggestions)
 
       commit = project.repository.commit
+      author = suggestions.first.note.author
 
       expect(user.commit_email).not_to eq(user.email)
-      expect(commit.author_email).to eq(user.commit_email)
+      expect(commit.author_email).to eq(author.commit_email)
       expect(commit.committer_email).to eq(user.commit_email)
-      expect(commit.author_name).to eq(user.name)
+      expect(commit.author_name).to eq(author.name)
+      expect(commit.committer_name).to eq(user.name)
+    end
+
+    it 'tracks apply suggestion event' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_apply_suggestion_action)
+        .with(user: user)
+
+      apply(suggestions)
     end
 
     context 'when a custom suggestion commit message' do
@@ -101,6 +111,16 @@ RSpec.describe Suggestions::ApplyService do
             eq("refactor: Project_1 master test.user")
           )
         end
+      end
+    end
+
+    context 'with a user suggested commit message' do
+      let(:message) { "i'm a custom commit message!" }
+
+      it "uses the user's commit message" do
+        apply(suggestions, message)
+
+        expect(project.repository.commit.message).to(eq(message))
       end
     end
   end
@@ -298,6 +318,73 @@ RSpec.describe Suggestions::ApplyService do
           result = apply_service.new(user, suggestion).execute
 
           expect(result).to eq(message: 'A file has been changed.', status: :error)
+        end
+      end
+
+      context 'single suggestion' do
+        let(:author) { suggestions.first.note.author }
+        let(:commit) { project.repository.commit }
+
+        context 'author of suggestion applies suggestion' do
+          before do
+            suggestion.note.update!(author_id: user.id)
+
+            apply(suggestions)
+          end
+
+          it 'created commit by same author and committer' do
+            expect(user.commit_email).to eq(author.commit_email)
+            expect(author).to eq(user)
+            expect(commit.author_email).to eq(author.commit_email)
+            expect(commit.committer_email).to eq(user.commit_email)
+            expect(commit.author_name).to eq(author.name)
+            expect(commit.committer_name).to eq(user.name)
+          end
+        end
+
+        context 'another user applies suggestion' do
+          before do
+            apply(suggestions)
+          end
+
+          it 'created commit has authors info and commiters info' do
+            expect(user.commit_email).not_to eq(user.email)
+            expect(author).not_to eq(user)
+            expect(commit.author_email).to eq(author.commit_email)
+            expect(commit.committer_email).to eq(user.commit_email)
+            expect(commit.author_name).to eq(author.name)
+            expect(commit.committer_name).to eq(user.name)
+          end
+        end
+      end
+
+      context 'multiple suggestions' do
+        let(:author_emails) { suggestions.map {|s| s.note.author.commit_email } }
+        let(:first_author) { suggestion.note.author }
+        let(:commit) { project.repository.commit }
+
+        context 'when all the same author' do
+          before do
+            apply(suggestions)
+          end
+
+          it 'uses first authors information' do
+            expect(author_emails).to include(first_author.commit_email).exactly(3)
+            expect(commit.author_email).to eq(first_author.commit_email)
+          end
+        end
+
+        context 'when all different authors' do
+          before do
+            suggestion2.note.update!(author_id: create(:user).id)
+            suggestion3.note.update!(author_id: create(:user).id)
+            apply(suggestions)
+          end
+
+          it 'uses committers information' do
+            expect(commit.author_email).to eq(user.commit_email)
+            expect(commit.committer_email).to eq(user.commit_email)
+          end
         end
       end
 
@@ -570,56 +657,84 @@ RSpec.describe Suggestions::ApplyService do
       project.add_maintainer(user)
     end
 
-    context 'diff file was not found' do
-      it 'returns error message' do
-        expect(suggestion.note).to receive(:latest_diff_file) { nil }
+    shared_examples_for 'service not tracking apply suggestion event' do
+      it 'does not track apply suggestion event' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .not_to receive(:track_apply_suggestion_action)
 
-        result = apply_service.new(user, suggestion).execute
-
-        expect(result).to eq(message: 'A file was not found.',
-                             status: :error)
+        result
       end
     end
 
+    context 'diff file was not found' do
+      let(:result) { apply_service.new(user, suggestion).execute }
+
+      before do
+        expect(suggestion.note).to receive(:latest_diff_file) { nil }
+      end
+
+      it 'returns error message' do
+        expect(result).to eq(message: 'A file was not found.',
+                             status: :error)
+      end
+
+      it_behaves_like 'service not tracking apply suggestion event'
+    end
+
     context 'when not all suggestions belong to the same branch' do
+      let(:merge_request2) do
+        create(
+          :merge_request,
+          :conflict,
+          source_project: project,
+          target_project: project
+        )
+      end
+
+      let(:position2) do
+        Gitlab::Diff::Position.new(
+          old_path: "files/ruby/popen.rb",
+          new_path: "files/ruby/popen.rb",
+          old_line: nil,
+          new_line: 15,
+          diff_refs: merge_request2.diff_refs
+        )
+      end
+
+      let(:diff_note2) do
+        create(
+          :diff_note_on_merge_request,
+          noteable: merge_request2,
+          position: position2,
+          project: project
+        )
+      end
+
+      let(:other_branch_suggestion) { create(:suggestion, note: diff_note2) }
+      let(:result) { apply_service.new(user, suggestion, other_branch_suggestion).execute }
+
       it 'renders error message' do
-        merge_request2 = create(:merge_request,
-                                :conflict,
-                                source_project: project,
-                                target_project: project)
-
-        position2 = Gitlab::Diff::Position.new(old_path: "files/ruby/popen.rb",
-                                               new_path: "files/ruby/popen.rb",
-                                               old_line: nil,
-                                               new_line: 15,
-                                               diff_refs: merge_request2
-                                                            .diff_refs)
-
-        diff_note2 = create(:diff_note_on_merge_request,
-                            noteable: merge_request2,
-                            position: position2,
-                            project: project)
-
-        other_branch_suggestion = create(:suggestion, note: diff_note2)
-
-        result = apply_service.new(user, suggestion, other_branch_suggestion).execute
-
         expect(result).to eq(message: 'Suggestions must all be on the same branch.',
                              status: :error)
       end
+
+      it_behaves_like 'service not tracking apply suggestion event'
     end
 
     context 'suggestion is not appliable' do
       let(:inapplicable_reason) { "Can't apply this suggestion." }
+      let(:result) { apply_service.new(user, suggestion).execute }
 
-      it 'returns error message' do
+      before do
         expect(suggestion).to receive(:appliable?).and_return(false)
         expect(suggestion).to receive(:inapplicable_reason).and_return(inapplicable_reason)
+      end
 
-        result = apply_service.new(user, suggestion).execute
-
+      it 'returns error message' do
         expect(result).to eq(message: inapplicable_reason, status: :error)
       end
+
+      it_behaves_like 'service not tracking apply suggestion event'
     end
 
     context 'lines of suggestions overlap' do
@@ -632,12 +747,14 @@ RSpec.describe Suggestions::ApplyService do
         create_suggestion(to_content: "I Overlap!")
       end
 
-      it 'returns error message' do
-        result = apply_service.new(user, suggestion, overlapping_suggestion).execute
+      let(:result) { apply_service.new(user, suggestion, overlapping_suggestion).execute }
 
+      it 'returns error message' do
         expect(result).to eq(message: 'Suggestions are not applicable as their lines cannot overlap.',
                              status: :error)
       end
+
+      it_behaves_like 'service not tracking apply suggestion event'
     end
   end
 end

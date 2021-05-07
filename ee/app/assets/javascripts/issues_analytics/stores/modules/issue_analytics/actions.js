@@ -1,4 +1,4 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import service from '../../../services/issue_analytics_service';
 import * as types from './mutation_types';
@@ -16,8 +16,12 @@ export const fetchChartData = ({ commit, dispatch, getters }, endpoint) => {
 
   return service
     .fetchChartData(endpoint, getters.appliedFilters)
-    .then(res => res.data)
-    .then(data => commit(types.SET_CHART_DATA, data))
+    .then((res) => res.data)
+    .then((data) => commit(types.SET_CHART_DATA, data))
     .then(() => dispatch('setLoadingState', false))
-    .catch(() => flash(__('An error occurred while loading chart data')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while loading chart data'),
+      }),
+    );
 };

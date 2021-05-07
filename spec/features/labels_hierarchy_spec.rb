@@ -18,6 +18,7 @@ RSpec.describe 'Labels Hierarchy', :js do
 
   before do
     stub_feature_flags(graphql_board_lists: false)
+    stub_feature_flags(board_new_list: false)
     grandparent.add_owner(user)
 
     sign_in(user)
@@ -159,7 +160,7 @@ RSpec.describe 'Labels Hierarchy', :js do
       find('a.label-item', text: parent_group_label.title).click
       find('a.label-item', text: project_label_1.title).click
 
-      find('.btn-success').click
+      find('.btn-confirm').click
 
       expect(page.find('.issue-details h2.title')).to have_content('new created issue')
       expect(page).to have_selector('span.gl-label-text', text: grandparent_group_label.title)
@@ -270,6 +271,10 @@ RSpec.describe 'Labels Hierarchy', :js do
   end
 
   context 'creating boards lists' do
+    before do
+      stub_feature_flags(board_new_list: false)
+    end
+
     context 'on project boards' do
       let(:board) { create(:board, project: project_1) }
 

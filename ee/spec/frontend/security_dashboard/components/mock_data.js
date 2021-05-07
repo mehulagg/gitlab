@@ -2,6 +2,13 @@ export const generateVulnerabilities = () => [
   {
     id: 'id_0',
     detectedAt: '2020-07-29T15:36:54Z',
+    hasSolutions: true,
+    mergeRequest: {
+      webUrl: 'www.testmr.com/1',
+      state: 'status_warning',
+      securityAutoFix: true,
+      iid: 1,
+    },
     identifiers: [
       {
         externalType: 'cve',
@@ -19,7 +26,7 @@ export const generateVulnerabilities = () => [
     resolvedOnDefaultBranch: true,
     location: {
       image:
-        'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
     },
     project: {
       nameWithNamespace: 'Administrator / Security reports',
@@ -30,10 +37,14 @@ export const generateVulnerabilities = () => [
     issueLinks: {
       nodes: [{ issue: { iid: 15 } }],
     },
+    externalIssueLinks: {
+      nodes: [{ issue: { iid: 15, externalTracker: 'jira' } }],
+    },
   },
   {
     id: 'id_1',
     detectedAt: '2020-07-22T19:31:24Z',
+    hasSolutions: false,
     identifiers: [
       {
         externalType: 'gemnasium',
@@ -47,6 +58,8 @@ export const generateVulnerabilities = () => [
     location: {
       file: 'src/main/java/com/gitlab/security_products/tests/App.java',
       startLine: '1337',
+      blobPath:
+        '/gitlab-org/security-reports2/-/blob/e5c61e4d5d0b8418011171def04ca0aa36532621/src/main/java/com/gitlab/security_products/tests/App.java',
     },
     project: {
       nameWithNamespace: 'Administrator / Vulnerability reports',
@@ -97,116 +110,19 @@ export const generateVulnerabilities = () => [
     },
     scanner: {},
   },
+  {
+    id: 'id_5',
+    title: 'Vulnerability 5',
+    severity: 'high',
+    state: 'DETECTED',
+    location: {
+      path: '/v1/trees',
+    },
+    project: {
+      nameWithNamespace: 'Administrator / Security reports',
+    },
+    scanner: {},
+  },
 ];
 
 export const vulnerabilities = generateVulnerabilities();
-
-export const generateProjectsWithSeverityCounts = () => [
-  {
-    id: 'gid://gitlab/Project/1',
-    name: 'Gitlab Test 1',
-    nameWithNamespace: 'Gitlab Org / Gitlab Test 1',
-    fullPath: 'gitlab-org/gitlab-test-1',
-    securityDashboardPath: '/gitlab-org/gitlab-test-1/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 2,
-      high: 0,
-      info: 0,
-      low: 0,
-      medium: 0,
-      unknown: 0,
-    },
-  },
-  {
-    id: 'gid://gitlab/Project/2',
-    name: 'Gitlab Test 2',
-    nameWithNamespace: 'Gitlab Org / Gitlab Test 2',
-    fullPath: 'gitlab-org/gitlab-test-2',
-    securityDashboardPath: '/gitlab-org/gitlab-test-2/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 0,
-      high: 1,
-      info: 0,
-      low: 0,
-      medium: 0,
-      unknown: 0,
-    },
-  },
-  {
-    id: 'gid://gitlab/Project/3',
-    name: 'Gitlab Test 3',
-    nameWithNamespace: 'Gitlab Org / Gitlab Test 3',
-    fullPath: 'gitlab-org/gitlab-test-3',
-    securityDashboardPath: '/gitlab-org/gitlab-test-3/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 0,
-      high: 0,
-      info: 0,
-      low: 0,
-      medium: 5,
-      unknown: 0,
-    },
-  },
-  {
-    id: 'gid://gitlab/Project/4',
-    name: 'Gitlab Test 4',
-    nameWithNamespace: 'Gitlab Org / Gitlab Test 4',
-    fullPath: 'gitlab-org/gitlab-test-4',
-    securityDashboardPath: '/gitlab-org/gitlab-test-4/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 0,
-      high: 0,
-      info: 0,
-      low: 0,
-      medium: 4,
-      unknown: 0,
-    },
-  },
-  {
-    id: 'gid://gitlab/Project/5',
-    name: 'Gitlab Test 5',
-    nameWithNamespace: 'Gitlab Org / Gitlab Test 5',
-    fullPath: 'gitlab-org/gitlab-test-5',
-    securityDashboardPath: '/gitlab-org/gitlab-test-5/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 0,
-      high: 0,
-      info: 0,
-      low: 2,
-      medium: 0,
-      unknown: 0,
-    },
-  },
-  {
-    id: 'gid://gitlab/Project/6',
-    name: 'Gitlab Test 6',
-    nameWithNamespace: 'Gitlab Org / Gitlab Test 6',
-    fullPath: 'gitlab-org/gitlab-test-6',
-    securityDashboardPath: '/gitlab-org/gitlab-test-6/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 0,
-      high: 0,
-      info: 0,
-      low: 0,
-      medium: 0,
-      unknown: 0,
-    },
-  },
-  {
-    id: 'gid://gitlab/Project/7',
-    name: 'Gitlab Test 7',
-    nameWithNamespace: 'Gitlab Org / Subgroup / Gitlab Test 7',
-    fullPath: 'gitlab-org/subgroup/gitlab-test-7',
-    securityDashboardPath: '/gitlab-org/subgroup/gitlab-test-7/-/security/dashboard',
-    vulnerabilitySeveritiesCount: {
-      critical: 0,
-      high: 0,
-      info: 2,
-      low: 0,
-      medium: 0,
-      unknown: 0,
-    },
-  },
-];
-
-export const projectsWithSeverityCounts = generateProjectsWithSeverityCounts();

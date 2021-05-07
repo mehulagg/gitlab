@@ -6,7 +6,7 @@ module QA
       module Admin
         class License < QA::Page::Base
           view 'ee/app/views/admin/licenses/missing.html.haml' do
-            element :missing_license
+            element :missing_license_content
           end
 
           view 'ee/app/views/admin/licenses/show.html.haml' do
@@ -18,25 +18,24 @@ module QA
           end
 
           view 'ee/app/views/admin/licenses/new.html.haml' do
-            element :license_type, 'radio_button_tag :license_type' # rubocop:disable QA/ElementWithPattern
-            element :license_type_placeholder, 'Enter license key' # rubocop:disable QA/ElementWithPattern
-            element :license_key_field, 'text_area :data' # rubocop:disable QA/ElementWithPattern
-            element :license_key_placeholder, 'label :data, "License key"' # rubocop:disable QA/ElementWithPattern
-            element :license_upload_button, "submit 'Upload License'" # rubocop:disable QA/ElementWithPattern
+            element :accept_eula_checkbox
+            element :license_key_field
+            element :license_type_key_radio
+            element :license_upload_button
           end
 
           def license?
-            has_element?(:remove_license_link) || !has_element?(:missing_license)
+            has_element?(:remove_license_link) || !has_element?(:missing_license_content)
           end
 
           def add_new_license(key)
             raise 'License key empty!' if key.to_s.empty?
 
-            click_link 'Upload New License'
-            choose 'Enter license key'
-            fill_in 'License key', with: key
-            check 'accept_eula'
-            click_button 'Upload License'
+            click_element(:license_upload_link)
+            choose_element(:license_type_key_radio)
+            fill_element(:license_key_field, key)
+            check_element(:accept_eula_checkbox)
+            click_element(:license_upload_button)
           end
         end
       end

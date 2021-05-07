@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent, :cl
 
   let_it_be(:secondary) { create(:geo_node) }
   let_it_be(:secondary_excludes_all_projects) { create(:geo_node, :selective_sync_excludes_all_projects) }
+
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:project) { create(:project) }
   let(:design_repository_updated_event) { create(:geo_design_repository_updated_event, project: project) }

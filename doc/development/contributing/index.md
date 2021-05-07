@@ -2,7 +2,7 @@
 type: reference, dev
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Contribute to GitLab
@@ -37,7 +37,7 @@ Report suspected security vulnerabilities in private to
 `support@gitlab.com`, also see the
 [disclosure section on the GitLab.com website](https://about.gitlab.com/security/disclosure/).
 
-DANGER: **Warning:**
+WARNING:
 Do **NOT** create publicly viewable issues for suspected security vulnerabilities.
 
 ## Code of conduct
@@ -123,7 +123,7 @@ The general flow of contributing to GitLab is:
 1. [Create a fork](../../user/project/repository/forking_workflow.md#creating-a-fork)
    of GitLab. In some cases, you will want to set up the
    [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit) to
-   [develop against your fork](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/index.md#develop-in-your-own-gitlab-fork).
+   [develop against your fork](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/index.md#develop-in-your-own-gitlab-fork).
 1. Make your changes in your fork.
 1. When you're ready, [create a new merge request](../../user/project/merge_requests/creating_merge_requests.md).
 1. In the merge request's description:
@@ -144,15 +144,15 @@ Keep the following in mind when submitting merge requests:
 
 - When reviewers are reading through a merge request they may request guidance from other
   reviewers.
-- If the code quality is found to not meet GitLab’s standards, the merge request reviewer will
+- If the code quality is found to not meet GitLab standards, the merge request reviewer will
   provide guidance and refer the author to our:
-  - [Documentation](../documentation/styleguide.md) style guide.
-  - Code style guides.
+  - [Documentation](../documentation/styleguide/index.md) style guide.
+  - [Code style guides](style_guides.md).
 - Sometimes style guides will be followed but the code will lack structural integrity, or the
-  reviewer will have reservations about the code’s overall quality. When there is a reservation,
+  reviewer will have reservations about the code's overall quality. When there is a reservation,
   the reviewer will inform the author and provide some guidance.
 - Though GitLab generally allows anyone to indicate
-  [approval](../../user/project/merge_requests/merge_request_approvals.md) of merge requests, the
+  [approval](../../user/project/merge_requests/approvals/index.md) of merge requests, the
   maintainer may require [approvals from certain reviewers](../code_review.md#approval-guidelines)
   before merging a merge request.
 - After review, the author may be asked to update the merge request. Once the merge request has been
@@ -181,10 +181,20 @@ reasons for including it.
 `@mention` a maintainer in merge requests that contain:
 
 - More than 500 changes.
-- Any major breaking changes.
+- Any major [breaking changes](#breaking-changes).
 - External libraries.
 
 If you are not sure who to mention, the reviewer will do this for you early in the merge request process.
+
+#### Breaking changes
+
+A "breaking change" is any change that requires users to make a corresponding change to their code, settings, or workflow. "Users" might be humans, API clients, or even code classes that "use" another class. Examples of breaking changes include:
+
+- Removing a user-facing feature without a replacement/workaround.
+- Changing the definition of an existing API (by re-naming query parameters, changing routes, etc.).
+- Removing a public method from a code class.
+
+A breaking change can be considered "major" if it affects many users, or represents a significant change in behavior.
 
 #### Issues workflow
 

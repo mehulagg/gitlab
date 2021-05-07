@@ -194,7 +194,7 @@ RSpec.describe Geo::FileDownloadService do
             end
 
             it 'sets a retry date and increments the retry count' do
-              Timecop.freeze do
+              freeze_time do
                 execute!
 
                 expect(registry.last.reload.retry_count).to eq(1)
@@ -223,7 +223,7 @@ RSpec.describe Geo::FileDownloadService do
             end
 
             it 'sets a retry date and increments the retry count' do
-              Timecop.freeze do
+              freeze_time do
                 execute!
 
                 expect(registry.last.reload.retry_count).to eq(1)
@@ -315,7 +315,7 @@ RSpec.describe Geo::FileDownloadService do
           end
 
           it 'sets a retry date and increments the retry count' do
-            Timecop.freeze do
+            freeze_time do
               execute!
 
               expect(registry_entry.reload.retry_count).to eq(4)
@@ -323,13 +323,13 @@ RSpec.describe Geo::FileDownloadService do
             end
           end
 
-          it 'sets a retry date with a maximum of about 7 days' do
-            registry_entry.update!(retry_count: 100, retry_at: 7.days.from_now)
+          it 'sets a retry date with a maximum of about 4 hours' do
+            registry_entry.update!(retry_count: 100, retry_at: 1.minute.ago)
 
-            Timecop.freeze do
+            freeze_time do
               execute!
 
-              expect(registry_entry.reload.retry_at < 8.days.from_now).to be_truthy
+              expect(registry_entry.reload.retry_at).to be_within(3.minutes).of(4.hours.from_now)
             end
           end
         end
@@ -354,7 +354,7 @@ RSpec.describe Geo::FileDownloadService do
           end
 
           it 'sets a retry date and increments the retry count' do
-            Timecop.freeze do
+            freeze_time do
               execute!
 
               expect(registry_entry.reload.retry_count).to eq(4)
@@ -362,13 +362,13 @@ RSpec.describe Geo::FileDownloadService do
             end
           end
 
-          it 'sets a retry date with a maximum of about 7 days' do
-            registry_entry.update!(retry_count: 100, retry_at: 7.days.from_now)
+          it 'sets a retry date with a maximum of about 1 hour' do
+            registry_entry.update!(retry_count: 100, retry_at: 1.minute.ago)
 
-            Timecop.freeze do
+            freeze_time do
               execute!
 
-              expect(registry_entry.reload.retry_at < 8.days.from_now).to be_truthy
+              expect(registry_entry.reload.retry_at).to be_within(3.minutes).of(1.hour.from_now)
             end
           end
         end
@@ -433,7 +433,18 @@ RSpec.describe Geo::FileDownloadService do
       it_behaves_like 'a service that handles orphaned uploads', 'namespace_file'
     end
 
+    context 'with an incident metrics upload' do
+      let(:file) { create(:upload, :issue_metric_image) }
+
+      it_behaves_like 'a service that downloads the file and registers the sync result', 'issuable_metric_image'
+      it_behaves_like 'a service that handles orphaned uploads', 'issuable_metric_image'
+    end
+
     context 'LFS object' do
+      before do
+        stub_feature_flags(geo_lfs_object_replication: false)
+      end
+
       it_behaves_like "a service that downloads the file and registers the sync result", 'lfs' do
         let(:file) { create(:lfs_object) }
       end
@@ -450,6 +461,13 @@ RSpec.describe Geo::FileDownloadService do
 
       it_behaves_like "a service that downloads the file and registers the sync result", 'import_export'
       it_behaves_like 'a service that handles orphaned uploads', 'import_export'
+    end
+
+    context 'with bulk imports export upload' do
+      let(:file) { create(:upload, model: build(:bulk_import_export_upload)) }
+
+      it_behaves_like 'a service that downloads the file and registers the sync result', :'bulk_imports/export'
+      it_behaves_like 'a service that handles orphaned uploads', :'bulk_imports/export'
     end
 
     context 'bad object type' do

@@ -14,11 +14,13 @@ RSpec.describe 'Trial Sign In' do
       url_params = { glm_source: 'any-source', glm_content: 'any-content' }
       visit(new_trial_registration_path(url_params))
 
+      click_on 'Sign in'
+
       within('div#login-pane') do
         fill_in 'user_login', with: user.email
         fill_in 'user_password', with: '12345678'
 
-        click_button 'Continue'
+        click_button 'Sign in'
       end
 
       expect(current_url).to eq(new_trial_url(url_params))

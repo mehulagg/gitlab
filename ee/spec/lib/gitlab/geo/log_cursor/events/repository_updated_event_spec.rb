@@ -7,6 +7,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gi
 
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let_it_be(:secondary) { create(:geo_node) }
+
   let(:project) { create(:project) }
   let(:repository_updated_event) { create(:geo_repository_updated_event, project: project) }
   let(:event_log) { create(:geo_event_log, repository_updated_event: repository_updated_event) }
@@ -68,7 +69,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gi
         end
 
         it 'sets resync_repository_was_scheduled_at to the scheduled time' do
-          Timecop.freeze do
+          freeze_time do
             subject.process
             reloaded_registry = registry.reload
 
@@ -100,7 +101,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gi
         end
 
         it 'sets resync_wiki_was_scheduled_at to the scheduled time' do
-          Timecop.freeze do
+          freeze_time do
             subject.process
             reloaded_registry = registry.reload
 

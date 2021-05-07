@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import AuditEventsExportButton from './audit_events_export_button.vue';
 import AuditEventsFilter from './audit_events_filter.vue';
+import AuditEventsTable from './audit_events_table.vue';
 import DateRangeField from './date_range_field.vue';
 import SortingField from './sorting_field.vue';
-import AuditEventsTable from './audit_events_table.vue';
-import AuditEventsExportButton from './audit_events_export_button.vue';
 
 export default {
   components: {
@@ -34,6 +34,11 @@ export default {
       required: false,
       default: '',
     },
+    showFilter: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   computed: {
     ...mapState(['filterValue', 'startDate', 'endDate', 'sortBy']),
@@ -62,6 +67,7 @@ export default {
       <div class="gl-display-flex gl-justify-content-space-between gl-flex-wrap">
         <div class="gl-mb-5 gl-w-full">
           <audit-events-filter
+            v-if="showFilter"
             :filter-token-options="filterTokenOptions"
             :value="filterValue"
             @selected="setFilterValue"

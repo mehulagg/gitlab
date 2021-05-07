@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import { find } from 'lodash';
-import AccessDropdown from '~/projects/settings/access_dropdown';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as Flash } from '~/flash';
-import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 import { __ } from '~/locale';
+import AccessDropdown from '~/projects/settings/access_dropdown';
+import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedEnvironmentEdit {
   constructor(options) {
@@ -60,7 +60,7 @@ export default class ProtectedEnvironmentEdit {
       .then(({ data }) => {
         this.hasChanges = false;
 
-        Object.keys(ACCESS_LEVELS).forEach(level => {
+        Object.keys(ACCESS_LEVELS).forEach((level) => {
           const accessLevelName = ACCESS_LEVELS[level];
 
           // The data coming from server will be the new persisted *state* for each dropdown
@@ -70,12 +70,16 @@ export default class ProtectedEnvironmentEdit {
       })
       .catch(() => {
         this.$allowedToDeployDropdown.enable();
-        Flash(__('Failed to update environment!'), null, $('.js-protected-environments-list'));
+        createFlash({
+          message: __('Failed to update environment!'),
+          type: null,
+          parent: $('.js-protected-environments-list'),
+        });
       });
   }
 
   setSelectedItemsToDropdown(items = [], dropdownName) {
-    const itemsToAdd = items.map(currentItem => {
+    const itemsToAdd = items.map((currentItem) => {
       if (currentItem.user_id) {
         // Do this only for users for now
         // get the current data for selected items

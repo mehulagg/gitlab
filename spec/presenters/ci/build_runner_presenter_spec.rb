@@ -17,7 +17,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
   describe '#artifacts' do
     context "when option contains archive-type artifacts" do
-      let(:build) { create(:ci_build, options: { artifacts: archive } ) }
+      let(:build) { create(:ci_build, options: { artifacts: archive }) }
 
       it 'presents correct hash' do
         expect(presenter.artifacts.first).to include(archive_expectation)
@@ -85,7 +85,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
       Ci::JobArtifact::DEFAULT_FILE_NAMES.each do |file_type, filename|
         context file_type.to_s do
           let(:report) { { "#{file_type}": [filename] } }
-          let(:build) { create(:ci_build, options: { artifacts: { reports: report } } ) }
+          let(:build) { create(:ci_build, options: { artifacts: { reports: report } }) }
 
           let(:report_expectation) do
             {
@@ -106,7 +106,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
     context "when option has both archive and reports specification" do
       let(:report) { { junit: ['junit.xml'] } }
-      let(:build) { create(:ci_build, options: { script: 'echo', artifacts: { **archive, reports: report } } ) }
+      let(:build) { create(:ci_build, options: { script: 'echo', artifacts: { **archive, reports: report } }) }
 
       let(:report_expectation) do
         {
@@ -189,7 +189,11 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
     it 'returns the correct refspecs' do
       is_expected.to contain_exactly("+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}",
-                                     "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                     "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
+    end
+
+    it 'uses a SHA in the persistent refspec' do
+      expect(subject[0]).to match(/^\+[0-9a-f]{40}:refs\/pipelines\/[0-9]+$/)
     end
 
     context 'when ref is tag' do
@@ -197,7 +201,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
       it 'returns the correct refspecs' do
         is_expected.to contain_exactly("+refs/tags/#{build.ref}:refs/tags/#{build.ref}",
-                                       "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                       "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
       end
 
       context 'when GIT_DEPTH is zero' do
@@ -208,7 +212,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
         it 'returns the correct refspecs' do
           is_expected.to contain_exactly('+refs/tags/*:refs/tags/*',
                                          '+refs/heads/*:refs/remotes/origin/*',
-                                         "+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+                                         "+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
         end
       end
     end
@@ -219,12 +223,12 @@ RSpec.describe Ci::BuildRunnerPresenter do
       let(:build) { create(:ci_build, ref: pipeline.ref, pipeline: pipeline) }
 
       before do
-        pipeline.persistent_ref.create
+        pipeline.persistent_ref.create # rubocop:disable Rails/SaveBang
       end
 
       it 'returns the correct refspecs' do
         is_expected
-          .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}")
+          .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}")
       end
 
       context 'when GIT_DEPTH is zero' do
@@ -234,7 +238,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
 
         it 'returns the correct refspecs' do
           is_expected
-            .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+            .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                 '+refs/heads/*:refs/remotes/origin/*',
                                 '+refs/tags/*:refs/tags/*')
         end
@@ -244,8 +248,8 @@ RSpec.describe Ci::BuildRunnerPresenter do
         let(:merge_request) { create(:merge_request, :with_legacy_detached_merge_request_pipeline) }
 
         it 'returns the correct refspecs' do
-          is_expected.to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
-                                          "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
+          is_expected.to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
+                                         "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
         end
       end
     end
@@ -257,13 +261,92 @@ RSpec.describe Ci::BuildRunnerPresenter do
       let(:build) { create(:ci_build, pipeline: pipeline) }
 
       before do
-        pipeline.persistent_ref.create
+        pipeline.persistent_ref.create # rubocop:disable Rails/SaveBang
       end
 
       it 'exposes the persistent pipeline ref' do
         is_expected
-          .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+          .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                               "+refs/heads/#{build.ref}:refs/remotes/origin/#{build.ref}")
+      end
+    end
+  end
+
+  describe '#runner_variables' do
+    subject { presenter.runner_variables }
+
+    let_it_be(:project_with_flag_disabled) { create(:project, :repository) }
+    let_it_be(:project_with_flag_enabled) { create(:project, :repository) }
+
+    before do
+      stub_feature_flags(variable_inside_variable: [project_with_flag_enabled])
+    end
+
+    shared_examples 'returns an array with the expected variables' do
+      it 'returns an array' do
+        is_expected.to be_an_instance_of(Array)
+      end
+
+      it 'returns the expected variables' do
+        is_expected.to eq(presenter.variables.to_runner_variables)
+      end
+    end
+
+    context 'when FF :variable_inside_variable is disabled' do
+      let(:sha) { project_with_flag_disabled.repository.commit.sha }
+      let(:pipeline) { create(:ci_pipeline, sha: sha, project: project_with_flag_disabled) }
+      let(:build) { create(:ci_build, pipeline: pipeline) }
+
+      it_behaves_like 'returns an array with the expected variables'
+    end
+
+    context 'when FF :variable_inside_variable is enabled' do
+      let(:sha) { project_with_flag_enabled.repository.commit.sha }
+      let(:pipeline) { create(:ci_pipeline, sha: sha, project: project_with_flag_enabled) }
+      let(:build) { create(:ci_build, pipeline: pipeline) }
+
+      it_behaves_like 'returns an array with the expected variables'
+    end
+  end
+
+  describe '#runner_variables subset' do
+    subject { presenter.runner_variables.select { |v| %w[A B C].include?(v.fetch(:key)) } }
+
+    let(:build) { create(:ci_build) }
+
+    context 'with references in pipeline variables' do
+      before do
+        create(:ci_pipeline_variable, key: 'A', value: 'refA-$B', pipeline: build.pipeline)
+        create(:ci_pipeline_variable, key: 'B', value: 'refB-$C-$D', pipeline: build.pipeline)
+        create(:ci_pipeline_variable, key: 'C', value: 'value', pipeline: build.pipeline)
+      end
+
+      context 'when FF :variable_inside_variable is disabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: false)
+        end
+
+        it 'returns non-expanded variables' do
+          is_expected.to eq [
+                              { key: 'A', value: 'refA-$B', public: false, masked: false },
+                              { key: 'B', value: 'refB-$C-$D', public: false, masked: false },
+                              { key: 'C', value: 'value', public: false, masked: false }
+                            ]
+        end
+      end
+
+      context 'when FF :variable_inside_variable is enabled' do
+        before do
+          stub_feature_flags(variable_inside_variable: [build.project])
+        end
+
+        it 'returns expanded and sorted variables' do
+          is_expected.to eq [
+                              { key: 'C', value: 'value', public: false, masked: false },
+                              { key: 'B', value: 'refB-value-$D', public: false, masked: false },
+                              { key: 'A', value: 'refA-refB-value-$D', public: false, masked: false }
+                            ]
+        end
       end
     end
   end

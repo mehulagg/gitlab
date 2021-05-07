@@ -4,18 +4,18 @@ module Ci
   module Minutes
     class EmailNotificationService < ::BaseService
       def execute
-        return unless namespace.shared_runners_minutes_limit_enabled?
+        return unless notification.eligible_for_notifications?
 
         notify
       end
 
       private
 
-      attr_reader :notification
+      def notification
+        @notification ||= ::Ci::Minutes::Notification.new(project, nil)
+      end
 
       def notify
-        @notification = ::Ci::Minutes::Notification.new(project, nil)
-
         if notification.no_remaining_minutes?
           notify_total_usage
         elsif notification.running_out?

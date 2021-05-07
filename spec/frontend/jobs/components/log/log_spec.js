@@ -1,7 +1,7 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { logLinesParser } from '~/jobs/store/utils';
 import Log from '~/jobs/components/log/log.vue';
+import { logLinesParser } from '~/jobs/store/utils';
 import { jobLog } from './mock_data';
 
 describe('Job Log', () => {
@@ -62,11 +62,7 @@ describe('Job Log', () => {
     });
 
     it('renders an icon with the open state', () => {
-      expect(
-        findCollapsibleLine()
-          .find('[data-testid="angle-down-icon"]')
-          .exists(),
-      ).toBe(true);
+      expect(findCollapsibleLine().find('[data-testid="angle-down-icon"]').exists()).toBe(true);
     });
 
     describe('on click header section', () => {

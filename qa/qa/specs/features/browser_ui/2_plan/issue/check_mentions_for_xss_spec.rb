@@ -18,13 +18,19 @@ module QA
 
     describe 'check xss occurence in @mentions in issues', :requires_admin do
       before do
+        Runtime::Feature.enable(:invite_members_group_modal)
+
         Flow::Login.sign_in
 
-        Flow::Project.add_member(project: project, username: user.username)
+        project.add_member(user)
 
         Resource::Issue.fabricate_via_api! do |issue|
           issue.project = project
         end.visit!
+      end
+
+      after do
+        user&.remove_via_api!
       end
 
       it 'mentions a user in a comment', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/452' do

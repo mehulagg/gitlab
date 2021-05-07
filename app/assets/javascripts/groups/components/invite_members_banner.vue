@@ -1,7 +1,7 @@
 <script>
 import { GlBanner } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import { parseBoolean, setCookie, getCookie } from '~/lib/utils/common_utils';
+import { s__ } from '~/locale';
 import Tracking from '~/tracking';
 
 const trackingMixin = Tracking.mixin();
@@ -35,7 +35,9 @@ export default {
       this.track(this.$options.dismissEvent);
     },
     trackOnShow() {
-      if (!this.isDismissed) this.track(this.$options.displayEvent);
+      this.$nextTick(() => {
+        if (!this.isDismissed) this.track(this.$options.displayEvent);
+      });
     },
     addTrackingAttributesToButton() {
       if (this.$refs.banner === undefined) return;

@@ -31,11 +31,13 @@ RSpec.describe 'Epic show', :js do
     group.add_developer(user)
     stub_licensed_features(epics: true, subepics: true)
     sign_in(user)
-
-    visit group_epic_path(group, epic)
   end
 
   describe 'when sub-epics feature is available' do
+    before do
+      visit group_epic_path(group, epic)
+    end
+
     describe 'Epic metadata' do
       it 'shows epic tabs `Epics and Issues` and `Roadmap`' do
         page.within('.js-epic-tabs-container') do
@@ -65,11 +67,11 @@ RSpec.describe 'Epic show', :js do
         wait_for_requests
       end
 
-      it 'shows Roadmap timeline with child epics' do
+      it 'shows Roadmap timeline with child epics', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/299298' do
         page.within('.js-epic-tabs-content #roadmap') do
-          expect(page).to have_selector('.roadmap-container .roadmap-shell')
+          expect(page).to have_selector('.roadmap-container .js-roadmap-shell')
 
-          page.within('.roadmap-shell .epics-list-section') do
+          page.within('.js-roadmap-shell .epics-list-section') do
             expect(page).not_to have_content(not_child.title)
             expect(find('.epic-item-container:nth-child(1) .epics-list-item .epic-title')).to have_content('Child epic B')
             expect(find('.epic-item-container:nth-child(2) .epics-list-item .epic-title')).to have_content('Child epic A')
@@ -81,7 +83,7 @@ RSpec.describe 'Epic show', :js do
         expect(find('.js-noteable-awards')).to have_selector('.js-discussion-filter-container', visible: false)
       end
 
-      it 'has no limit on container width' do
+      it 'has no limit on container width', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/299440' do
         expect(find('.content-wrapper .container-fluid:not(.breadcrumbs)')[:class]).not_to include('container-limited')
       end
     end
@@ -89,8 +91,6 @@ RSpec.describe 'Epic show', :js do
 
   describe 'when sub-epics feature not is available' do
     before do
-      stub_licensed_features(epics: true, subepics: false)
-
       visit group_epic_path(group, epic)
     end
 
@@ -116,12 +116,16 @@ RSpec.describe 'Epic show', :js do
   end
 
   describe 'Epic metadata' do
+    before do
+      visit group_epic_path(group, epic)
+    end
+
     it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos commodius agimus. Ex rebus enim timiditas, non ex vocabulis nascitur. Ita prorsus, inquam; Duo...'
 
     it 'shows epic status, date and author in header' do
       page.within('.epic-page-container .detail-page-header-body') do
         expect(find('.issuable-status-box > span')).to have_content('Open')
-        expect(find('.issuable-meta')).to have_content('Opened')
+        expect(find('.issuable-meta')).to have_content('Created')
         expect(find('.issuable-meta .js-user-avatar-link-username')).to have_content('Rick Sanchez')
       end
     end
@@ -161,11 +165,7 @@ RSpec.describe 'Epic show', :js do
           end
         end
 
-        it 'shows comments in the correct order', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225637' do
-          page.within('[data-testid="sort-discussion-filter"]') do
-            expect(find('.js-newest-first')).to have_content('Newest first')
-          end
-
+        it 'shows comments in the correct order' do
           items = all('.timeline-entry .timeline-discussion-body .note-text')
           expect(items[0]).to have_content(notes[1].note)
           expect(items[1]).to have_content(notes[0].note)
@@ -175,6 +175,10 @@ RSpec.describe 'Epic show', :js do
   end
 
   describe 'Epic sidebar' do
+    before do
+      visit group_epic_path(group, epic)
+    end
+
     describe 'Labels select' do
       it 'opens dropdown when `Edit` is clicked' do
         page.within('aside.right-sidebar') do
@@ -254,6 +258,76 @@ RSpec.describe 'Epic show', :js do
             expect(page).to have_selector('.js-labels-list')
           end
         end
+      end
+    end
+  end
+
+  describe 'epic actions', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297505' do
+    shared_examples 'epic closed' do |selector|
+      it 'can close an epic' do
+        expect(find('.status-box')).to have_content 'Open'
+
+        within selector do
+          click_button 'Close epic'
+        end
+
+        expect(find('.status-box')).to have_content 'Closed'
+      end
+    end
+
+    shared_examples 'epic reopened' do |selector|
+      it 'can reopen an epic' do
+        expect(find('.status-box')).to have_content 'Closed'
+
+        within selector do
+          click_button 'Reopen epic'
+        end
+
+        expect(find('.status-box')).to have_content 'Open'
+      end
+    end
+
+    describe 'when open' do
+      context 'when clicking the top `Close epic` button', :aggregate_failures do
+        let(:open_epic) { create(:epic, group: group) }
+
+        before do
+          visit group_epic_path(group, open_epic)
+        end
+
+        it_behaves_like 'epic closed', '.detail-page-header'
+      end
+
+      context 'when clicking the bottom `Close epic` button', :aggregate_failures do
+        let(:open_epic) { create(:epic, group: group) }
+
+        before do
+          visit group_epic_path(group, open_epic)
+        end
+
+        it_behaves_like 'epic closed', '.timeline-content-form'
+      end
+    end
+
+    describe 'when closed' do
+      context 'when clicking the top `Reopen epic` button', :aggregate_failures do
+        let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
+        before do
+          visit group_epic_path(group, closed_epic)
+        end
+
+        it_behaves_like 'epic reopened', '.detail-page-header'
+      end
+
+      context 'when clicking the bottom `Reopen epic` button', :aggregate_failures do
+        let(:closed_epic) { create(:epic, group: group, state: 'closed') }
+
+        before do
+          visit group_epic_path(group, closed_epic)
+        end
+
+        it_behaves_like 'epic reopened', '.timeline-content-form'
       end
     end
   end

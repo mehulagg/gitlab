@@ -11,7 +11,6 @@ exports[`Repository file preview component renders file HTML 1`] = `
       class="file-header-content"
     >
       <gl-icon-stub
-        aria-hidden="true"
         name="doc-text"
         size="16"
       />
@@ -29,6 +28,7 @@ exports[`Repository file preview component renders file HTML 1`] = `
   <div
     class="blob-viewer"
     data-qa-selector="blob_viewer_content"
+    itemprop="about"
   >
     <div>
       <div

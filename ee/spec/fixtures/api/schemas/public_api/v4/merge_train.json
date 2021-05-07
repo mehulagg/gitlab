@@ -12,11 +12,11 @@
     "pipeline": {
       "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/pipeline.json"
     },
-    "created_at": { "type": "date" },
-    "updated_at": { "type": "date" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
     "target_branch": { "type": "string" },
     "status": { "type": "string" },
-    "merged_at": { "type": ["date", "null"] },
+    "merged_at": { "type": ["string", "null"], "format": "date-time" },
     "duration": { "type": ["integer", "null"] }
   },
   "additionalProperties": false

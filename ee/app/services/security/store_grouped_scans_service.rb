@@ -22,6 +22,8 @@ module Security
           store_scan_for(artifact, deduplicate)
         end
       end
+    rescue Gitlab::Ci::Parsers::ParserError => error
+      Gitlab::ErrorTracking.track_exception(error)
     end
 
     private
@@ -41,14 +43,12 @@ module Security
     end
 
     def sorted_artifacts
-      @sorted_artifacts ||= artifacts.sort_by { |artifact| [scanner_order_for(artifact), artifact.job.name] }
-    end
+      @sorted_artifacts ||= artifacts.sort do |a, b|
+        report_a = a.security_report(validate: true)
+        report_b = b.security_report(validate: true)
 
-    # This method returns the priority of scanners for dependency_scanning
-    # and `INFINITY` for all the other scan types. There is no problem with
-    # calling this method for all the scan types to get rid of branching.
-    def scanner_order_for(artifact)
-      MergeReportsService::ANALYZER_ORDER.fetch(artifact.security_report.primary_scanner&.external_id, Float::INFINITY)
+        report_a.primary_scanner_order_to(report_b)
+      end
     end
 
     def store_scan_for(artifact, deduplicate)

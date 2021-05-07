@@ -5,14 +5,14 @@ require 'spec_helper'
 RSpec.describe 'getting an issue list for a project' do
   include GraphqlHelpers
 
-  let(:issues_data) { graphql_data['project']['issues']['edges'] }
-
   let_it_be(:project) { create(:project, :repository, :public) }
   let_it_be(:current_user) { create(:user) }
-  let_it_be(:issues, reload: true) do
-    [create(:issue, project: project, discussion_locked: true),
-     create(:issue, :with_alert, project: project)]
-  end
+  let_it_be(:issue_a, reload: true) { create(:issue, project: project, discussion_locked: true) }
+  let_it_be(:issue_b, reload: true) { create(:issue, :with_alert, project: project) }
+  let_it_be(:issues, reload: true) { [issue_a, issue_b] }
+
+  let(:issues_data) { graphql_data['project']['issues']['edges'] }
+  let(:issue_filter_params) { {} }
 
   let(:fields) do
     <<~QUERY
@@ -28,7 +28,7 @@ RSpec.describe 'getting an issue list for a project' do
     graphql_query_for(
       'project',
       { 'fullPath' => project.full_path },
-      query_graphql_field('issues', {}, fields)
+      query_graphql_field('issues', issue_filter_params, fields)
     )
   end
 
@@ -49,6 +49,16 @@ RSpec.describe 'getting an issue list for a project' do
 
     expect(issues_data[0]['node']['discussionLocked']).to eq(false)
     expect(issues_data[1]['node']['discussionLocked']).to eq(true)
+  end
+
+  context 'when both assignee_username filters are provided' do
+    let(:issue_filter_params) { { assignee_username: current_user.username, assignee_usernames: [current_user.username] } }
+
+    it 'returns a mutually exclusive param error' do
+      post_graphql(query, current_user: current_user)
+
+      expect_graphql_errors_to_include('only one of [assigneeUsernames, assigneeUsername] arguments is allowed at the same time.')
+    end
   end
 
   context 'when limiting the number of results' do
@@ -77,7 +87,7 @@ RSpec.describe 'getting an issue list for a project' do
       end
     end
 
-    context 'no limit is provided' do
+    context 'when no limit is provided' do
       let(:issue_limit) { nil }
 
       it 'returns all issues' do
@@ -143,16 +153,16 @@ RSpec.describe 'getting an issue list for a project' do
   describe 'sorting and pagination' do
     let_it_be(:data_path) { [:project, :issues] }
 
-    def pagination_query(params, page_info)
+    def pagination_query(params)
       graphql_query_for(
-        'project',
-        { 'fullPath' => sort_project.full_path },
-        query_graphql_field('issues', params, "#{page_info} edges { node { iid dueDate} }")
+        :project,
+        { full_path: sort_project.full_path },
+        query_graphql_field(:issues, params, "#{page_info} nodes { iid }")
       )
     end
 
     def pagination_results_data(data)
-      data.map { |issue| issue.dig('node', 'iid').to_i }
+      data.map { |issue| issue['iid'].to_i }
     end
 
     context 'when sorting by due date' do
@@ -165,7 +175,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'DUE_DATE_ASC' }
+          let(:sort_param)       { :DUE_DATE_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [due_issue3.iid, due_issue5.iid, due_issue1.iid, due_issue4.iid, due_issue2.iid] }
         end
@@ -173,7 +183,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'DUE_DATE_DESC' }
+          let(:sort_param)       { :DUE_DATE_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [due_issue1.iid, due_issue5.iid, due_issue3.iid, due_issue4.iid, due_issue2.iid] }
         end
@@ -190,37 +200,50 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'RELATIVE_POSITION_ASC' }
+          let(:sort_param)       { :RELATIVE_POSITION_ASC }
           let(:first_param)      { 2 }
-          let(:expected_results) { [relative_issue5.iid, relative_issue3.iid, relative_issue1.iid, relative_issue4.iid, relative_issue2.iid] }
+          let(:expected_results) do
+            [
+              relative_issue5.iid, relative_issue3.iid, relative_issue1.iid,
+              relative_issue4.iid, relative_issue2.iid
+            ]
+          end
         end
       end
     end
 
     context 'when sorting by priority' do
       let_it_be(:sort_project) { create(:project, :public) }
-      let_it_be(:early_milestone) { create(:milestone, project: sort_project, due_date: 10.days.from_now) }
-      let_it_be(:late_milestone) { create(:milestone, project: sort_project, due_date: 30.days.from_now) }
-      let_it_be(:priority_label1) { create(:label, project: sort_project, priority: 1) }
-      let_it_be(:priority_label2) { create(:label, project: sort_project, priority: 5) }
-      let_it_be(:priority_issue1) { create(:issue, project: sort_project, labels: [priority_label1], milestone: late_milestone) }
-      let_it_be(:priority_issue2) { create(:issue, project: sort_project, labels: [priority_label2]) }
-      let_it_be(:priority_issue3) { create(:issue, project: sort_project, milestone: early_milestone) }
-      let_it_be(:priority_issue4) { create(:issue, project: sort_project) }
+      let_it_be(:on_project) { { project: sort_project } }
+      let_it_be(:early_milestone) { create(:milestone, **on_project, due_date: 10.days.from_now) }
+      let_it_be(:late_milestone) { create(:milestone, **on_project, due_date: 30.days.from_now) }
+      let_it_be(:priority_1) { create(:label, **on_project, priority: 1) }
+      let_it_be(:priority_2) { create(:label, **on_project, priority: 5) }
+      let_it_be(:priority_issue1) { create(:issue, **on_project, labels: [priority_1], milestone: late_milestone) }
+      let_it_be(:priority_issue2) { create(:issue, **on_project, labels: [priority_2]) }
+      let_it_be(:priority_issue3) { create(:issue, **on_project, milestone: early_milestone) }
+      let_it_be(:priority_issue4) { create(:issue, **on_project) }
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'PRIORITY_ASC' }
+          let(:sort_param)       { :PRIORITY_ASC }
           let(:first_param)      { 2 }
-          let(:expected_results) { [priority_issue3.iid, priority_issue1.iid, priority_issue2.iid, priority_issue4.iid] }
+          let(:expected_results) do
+            [
+              priority_issue3.iid, priority_issue1.iid,
+              priority_issue2.iid, priority_issue4.iid
+            ]
+          end
         end
       end
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'PRIORITY_DESC' }
+          let(:sort_param)       { :PRIORITY_DESC }
           let(:first_param)      { 2 }
-          let(:expected_results) { [priority_issue1.iid, priority_issue3.iid, priority_issue2.iid, priority_issue4.iid] }
+          let(:expected_results) do
+            [priority_issue1.iid, priority_issue3.iid, priority_issue2.iid, priority_issue4.iid]
+          end
         end
       end
     end
@@ -237,7 +260,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'LABEL_PRIORITY_ASC' }
+          let(:sort_param)       { :LABEL_PRIORITY_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [label_issue3.iid, label_issue1.iid, label_issue2.iid, label_issue4.iid] }
         end
@@ -245,7 +268,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'LABEL_PRIORITY_DESC' }
+          let(:sort_param)       { :LABEL_PRIORITY_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [label_issue2.iid, label_issue3.iid, label_issue1.iid, label_issue4.iid] }
         end
@@ -262,7 +285,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when ascending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'MILESTONE_DUE_ASC' }
+          let(:sort_param)       { :MILESTONE_DUE_ASC }
           let(:first_param)      { 2 }
           let(:expected_results) { [milestone_issue2.iid, milestone_issue3.iid, milestone_issue1.iid] }
         end
@@ -270,7 +293,7 @@ RSpec.describe 'getting an issue list for a project' do
 
       context 'when descending' do
         it_behaves_like 'sorted paginated query' do
-          let(:sort_param)       { 'MILESTONE_DUE_DESC' }
+          let(:sort_param)       { :MILESTONE_DUE_DESC }
           let(:first_param)      { 2 }
           let(:expected_results) { [milestone_issue3.iid, milestone_issue2.iid, milestone_issue1.iid] }
         end
@@ -278,7 +301,7 @@ RSpec.describe 'getting an issue list for a project' do
     end
   end
 
-  context 'fetching alert management alert' do
+  context 'when fetching alert management alert' do
     let(:fields) do
       <<~QUERY
       edges {
@@ -300,7 +323,7 @@ RSpec.describe 'getting an issue list for a project' do
     it 'avoids N+1 queries' do
       control = ActiveRecord::QueryRecorder.new { post_graphql(query, current_user: current_user) }
 
-      create(:alert_management_alert, :with_issue, project: project )
+      create(:alert_management_alert, :with_issue, project: project)
 
       expect { post_graphql(query, current_user: current_user) }.not_to exceed_query_limit(control)
     end
@@ -315,7 +338,7 @@ RSpec.describe 'getting an issue list for a project' do
     end
   end
 
-  context 'fetching labels' do
+  context 'when fetching labels' do
     let(:fields) do
       <<~QUERY
         edges {
@@ -365,7 +388,7 @@ RSpec.describe 'getting an issue list for a project' do
     end
   end
 
-  context 'fetching assignees' do
+  context 'when fetching assignees' do
     let(:fields) do
       <<~QUERY
         edges {
@@ -412,6 +435,56 @@ RSpec.describe 'getting an issue list for a project' do
       issues_data = Gitlab::Json.parse(response.body)['data']['project']['issues']['edges']
       expect(issues_data.count).to eq(3)
       expect(response_assignee_ids(issues_data)).to match_array(assignees_as_global_ids(new_issues))
+    end
+  end
+
+  describe 'N+1 query checks' do
+    let(:extra_iid_for_second_query) { issue_b.iid.to_s }
+    let(:search_params) { { iids: [issue_a.iid.to_s] } }
+
+    def execute_query
+      query = graphql_query_for(
+        :project,
+        { full_path: project.full_path },
+        query_graphql_field(
+          :issues, search_params,
+          query_graphql_field(:nodes, nil, requested_fields)
+        )
+      )
+      post_graphql(query, current_user: current_user)
+    end
+
+    context 'when requesting `user_notes_count`' do
+      let(:requested_fields) { [:user_notes_count] }
+
+      before do
+        create_list(:note_on_issue, 2, noteable: issue_a, project: project)
+        create(:note_on_issue, noteable: issue_b, project: project)
+      end
+
+      include_examples 'N+1 query check'
+    end
+
+    context 'when requesting `user_discussions_count`' do
+      let(:requested_fields) { [:user_discussions_count] }
+
+      before do
+        create_list(:note_on_issue, 2, noteable: issue_a, project: project)
+        create(:note_on_issue, noteable: issue_b, project: project)
+      end
+
+      include_examples 'N+1 query check'
+    end
+
+    context 'when requesting `timelogs`' do
+      let(:requested_fields) { 'timelogs { nodes { timeSpent } }' }
+
+      before do
+        create_list(:issue_timelog, 2, issue: issue_a)
+        create(:issue_timelog, issue: issue_b)
+      end
+
+      include_examples 'N+1 query check'
     end
   end
 end

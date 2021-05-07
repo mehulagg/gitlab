@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Gitaly
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -12,23 +12,25 @@ Workhorse and GitLab Shell.
 
 ## Deep Dive
 
-In May 2019, Bob Van Landuyt hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`)
-on GitLab's [Gitaly project](https://gitlab.com/gitlab-org/gitaly) and how to contribute to it as a
-Ruby developer, to share his domain specific knowledge with anyone who may work in this part of the
-code base in the future.
+In May 2019, <!-- vale gitlab.Spelling = NO --> Bob Van Landuyt <!-- vale gitlab.Spelling = YES -->
+hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`)
+on the [Gitaly project](https://gitlab.com/gitlab-org/gitaly). It included how to contribute to it as a
+Ruby developer, and shared domain-specific knowledge with anyone who may work in this part of the
+codebase in the future.
 
-You can find the [recording on YouTube](https://www.youtube.com/watch?v=BmlEWFS8ORo), and the slides
+You can find the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=BmlEWFS8ORo), and the slides
 on [Google Slides](https://docs.google.com/presentation/d/1VgRbiYih9ODhcPnL8dS0W98EwFYpJ7GXMPpX-1TM6YE/edit)
 and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/a4fdb1026278bda5c1c5bb574379cf80/Create_Deep_Dive__Gitaly_for_Create_Ruby_Devs.pdf).
 
 Everything covered in this deep dive was accurate as of GitLab 11.11, and while specific details may
-have changed since then, it should still serve as a good introduction.
+have changed, it should still serve as a good introduction.
 
 ## Beginner's guide
 
 Start by reading the Gitaly repository's
-[Beginner's guide to Gitaly contributions](https://gitlab.com/gitlab-org/gitaly/blob/master/doc/beginners_guide.md).
-It describes how to set up Gitaly, the various components of Gitaly and what they do, and how to run its test suites.
+[Beginner's guide to Gitaly contributions](https://gitlab.com/gitlab-org/gitaly/-/blob/master/doc/beginners_guide.md).
+It describes how to set up Gitaly, the various components of Gitaly and what
+they do, and how to run its test suites.
 
 ## Developing new Git features
 
@@ -36,33 +38,17 @@ To read or write Git data, a request has to be made to Gitaly. This means that
 if you're developing a new feature where you need data that's not yet available
 in `lib/gitlab/git` changes have to be made to Gitaly.
 
-> This is a new process that is not clearly defined yet. If you want
-to contribute a Git feature and you're getting stuck, reach out to the
-Gitaly team or `@jacobvosmaer-gitlab`.
+There should be no new code that touches Git repositories via disk access (for example,
+Rugged, `git`, `rm -rf`) anywhere in the `gitlab` repository. Anything that
+needs direct access to the Git repository *must* be implemented in Gitaly, and
+exposed via an RPC.
 
-By 'new feature' we mean any method or class in `lib/gitlab/git` that is
-called from outside `lib/gitlab/git`. For new methods that are called
-from inside `lib/gitlab/git`, see 'Modifying existing Git features'
-below.
+It's often easier to develop a new feature in Gitaly if you make the changes to
+GitLab that intends to use the new feature in a separate merge request, to be merged
+immediately after the Gitaly one. This allows you to test your changes before
+they are merged.
 
-There should be no new code that touches Git repositories via
-disk access (e.g. Rugged, `git`, `rm -rf`) anywhere outside
-`lib/gitlab/git`.
-
-The process for adding new Gitaly features is:
-
-- exploration / prototyping
-- design and create a new Gitaly RPC in [`gitaly-proto`](https://gitlab.com/gitlab-org/gitaly-proto)
-- release a new version of `gitaly-proto`
-- write implementation and tests for the RPC [in Gitaly](https://gitlab.com/gitlab-org/gitaly), in Go or Ruby
-- release a new version of Gitaly
-- write client code in GitLab CE/EE, GitLab Workhorse or GitLab Shell that calls the new Gitaly RPC
-
-These steps often overlap. It is possible to use an unreleased version
-of Gitaly and `gitaly-proto` during testing and development.
-
-- See the [Gitaly repository](https://gitlab.com/gitlab-org/gitaly/blob/master/CONTRIBUTING.md#development-and-testing-with-a-custom-gitaly-proto) for instructions on writing server side code with an unreleased protocol.
-- See [below](#running-tests-with-a-locally-modified-version-of-gitaly) for instructions on running GitLab CE tests with a modified version of Gitaly.
+- See [below](#running-tests-with-a-locally-modified-version-of-gitaly) for instructions on running GitLab tests with a modified version of Gitaly.
 - In GDK run `gdk install` and restart `gdk run` (or `gdk run app`) to use a locally modified Gitaly version for development
 
 ### `gitaly-ruby`
@@ -84,7 +70,7 @@ If your test-suite is failing with Gitaly issues, as a first step, try running:
 rm -rf tmp/tests/gitaly
 ```
 
-During RSpec tests, the Gitaly instance will write logs to `gitlab/log/gitaly-test.log`.
+During RSpec tests, the Gitaly instance writes logs to `gitlab/log/gitaly-test.log`.
 
 ## Legacy Rugged code
 
@@ -121,30 +107,30 @@ bundle exec rake gitlab:features:disable_rugged
 
 Most of this code exists in the `lib/gitlab/git/rugged_impl` directory.
 
-NOTE: **Note:**
-You should NOT need to add or modify code related to
-Rugged unless explicitly discussed with the [Gitaly
-Team](https://gitlab.com/groups/gl-gitaly/group_members). This code will
+NOTE:
+You should *not* need to add or modify code related to
+Rugged unless explicitly discussed with the
+[Gitaly Team](https://gitlab.com/groups/gl-gitaly/group_members). This code does
 NOT work on GitLab.com or other GitLab instances that do not use NFS.
 
 ## `TooManyInvocationsError` errors
 
 During development and testing, you may experience `Gitlab::GitalyClient::TooManyInvocationsError` failures.
-The `GitalyClient` will attempt to block against potential n+1 issues by raising this error
+The `GitalyClient` attempts to block against potential n+1 issues by raising this error
 when Gitaly is called more than 30 times in a single Rails request or Sidekiq execution.
 
-As a temporary measure, export `GITALY_DISABLE_REQUEST_LIMITS=1` to suppress the error. This will disable the n+1 detection
+As a temporary measure, export `GITALY_DISABLE_REQUEST_LIMITS=1` to suppress the error. This disables the n+1 detection
 in your development environment.
 
 Please raise an issue in the GitLab CE or EE repositories to report the issue. Include the labels ~Gitaly
 ~performance ~"technical debt". Please ensure that the issue contains the full stack trace and error message of the
 `TooManyInvocationsError`. Also include any known failing tests if possible.
 
-Isolate the source of the n+1 problem. This will normally be a loop that results in Gitaly being called for each
+Isolate the source of the n+1 problem. This is normally a loop that results in Gitaly being called for each
 element in an array. If you are unable to isolate the problem, please contact a member
 of the [Gitaly Team](https://gitlab.com/groups/gl-gitaly/group_members) for assistance.
 
-Once the source has been found, wrap it in an `allow_n_plus_1_calls` block, as follows:
+After the source has been found, wrap it in an `allow_n_plus_1_calls` block, as follows:
 
 ```ruby
 # n+1: link to n+1 issue
@@ -154,7 +140,7 @@ Gitlab::GitalyClient.allow_n_plus_1_calls do
 end
 ```
 
-Once the code is wrapped in this block, this code-path will be excluded from n+1 detection.
+After the code is wrapped in this block, this code path is excluded from n+1 detection.
 
 ## Request counts
 
@@ -179,17 +165,21 @@ end
 Normally, GitLab CE/EE tests use a local clone of Gitaly in
 `tmp/tests/gitaly` pinned at the version specified in
 `GITALY_SERVER_VERSION`. The `GITALY_SERVER_VERSION` file supports also
-branches and SHA to use a custom commit in <https://gitlab.com/gitlab-org/gitaly>.
+branches and SHA to use a custom commit in [the repository](https://gitlab.com/gitlab-org/gitaly).
 
-NOTE: **Note:**
+NOTE:
 With the introduction of auto-deploy for Gitaly, the format of
 `GITALY_SERVER_VERSION` was aligned with Omnibus syntax.
-It no longer supports `=revision`, it will evaluate the file content as a Git
-reference (branch or SHA), only if it matches a semver it will prepend a `v`.
+It no longer supports `=revision`, it evaluates the file content as a Git
+reference (branch or SHA). Only if it matches a semantic version does it prepend a `v`.
 
 If you want to run tests locally against a modified version of Gitaly you
 can replace `tmp/tests/gitaly` with a symlink. This is much faster
-because if will avoid a Gitaly re-install each time you run `rspec`.
+because it avoids a Gitaly re-install each time you run `rspec`.
+
+Make sure this directory contains the files `config.toml` and `praefect.config.toml`.
+You can copy them from `config.toml.example` and `config.praefect.toml.example` respectively.
+After copying, make sure to edit them so everything points to the correct paths.
 
 ```shell
 rm -rf tmp/tests/gitaly
@@ -197,16 +187,16 @@ ln -s /path/to/gitaly tmp/tests/gitaly
 ```
 
 Make sure you run `make` in your local Gitaly directory before running
-tests. Otherwise, Gitaly will fail to boot.
+tests. Otherwise, Gitaly fails to boot.
 
 If you make changes to your local Gitaly in between test runs you need
 to manually run `make` again.
 
-Note that CI tests will not use your locally modified version of
+Note that CI tests do not use your locally modified version of
 Gitaly. To use a custom Gitaly version in CI you need to update
-GITALY_SERVER_VERSION as described at the beginning of this paragraph.
+GITALY_SERVER_VERSION as described at the beginning of this section.
 
-To use a different Gitaly repository, e.g., if your changes are present
+To use a different Gitaly repository, such as if your changes are present
 on a fork, you can specify a `GITALY_REPO_URL` environment variable when
 running tests:
 
@@ -221,15 +211,15 @@ and specify it in the URL:
 GITALY_REPO_URL=https://gitlab+deploy-token-1000:token-here@gitlab.com/nick.thomas/gitaly bundle exec rspec spec/lib/gitlab/git/repository_spec.rb
 ```
 
-To use a custom Gitaly repository in CI, for instance if you want your
+To use a custom Gitaly repository in CI/CD, for instance if you want your
 GitLab fork to always use your own Gitaly fork, set `GITALY_REPO_URL`
-as a [CI environment variable](../ci/variables/README.md#gitlab-cicd-environment-variables).
+as a [CI/CD variable](../ci/variables/README.md).
 
 ### Use a locally modified version of Gitaly RPC client
 
 If you are making changes to the RPC client, such as adding a new endpoint or adding a new
 parameter to an existing endpoint, follow the guide for
-[Gitaly proto](https://gitlab.com/gitlab-org/gitaly/blob/master/proto/README.md). After pushing
+[Gitaly protobuf specifications](https://gitlab.com/gitlab-org/gitaly/blob/master/proto/README.md). After pushing
 the branch with the changes (`new-feature-branch`, for example):
 
 1. Change the `gitaly` line in the Rails' `Gemfile` to:
@@ -239,6 +229,9 @@ the branch with the changes (`new-feature-branch`, for example):
    ```
 
 1. Run `bundle install` to use the modified RPC client.
+
+Re-run `bundle install` in the `gitlab` project each time the Gitaly branch
+changes to embed a new SHA in the `Gemfile.lock` file.
 
 ---
 
@@ -310,16 +303,19 @@ Here are the steps to gate a new feature in Gitaly behind a feature flag.
 
 ### GitLab Rails
 
-1. Test in a Rails console by setting the feature flag:
+Test in a Rails console by setting the feature flag:
 
-   NOTE: **Note:**
-   Pay attention to the name of the flag and the one used in the Rails console.
-   There is a difference between them (dashes replaced by underscores and name
-   prefix is changed). Make sure to prefix all flags with `gitaly_`.
+```ruby
+Feature.enable('gitaly_go_find_all_tags')
+```
 
-   ```ruby
-   Feature.enable('gitaly_go_find_all_tags')
-   ```
+Pay attention to the name of the flag and the one used in the Rails console. There is a difference
+between them (dashes replaced by underscores and name prefix is changed). Make sure to prefix all
+flags with `gitaly_`.
+
+NOTE:
+If not set in GitLab, feature flags are read as false from the console and Gitaly uses their
+default value. The default value depends on the GitLab version.
 
 ### Testing with GDK
 
@@ -336,15 +332,15 @@ the integration by using GDK:
    1. Uncomment `prometheus_listen_addr` in the configuration file and run `gdk restart gitaly`.
 
 1. Make sure that the flag is not enabled yet:
-   1. Perform whatever action is required to trigger your changes (project creation,
-      submitting commit, observing history, etc.).
+   1. Perform whatever action is required to trigger your changes, such as project creation,
+      submitting commit, or observing history.
    1. Check that the list of current metrics has the new counter for the feature flag:
 
       ```shell
-      curl --silent http://localhost:9236/metrics | grep go_find_all_tags
+      curl --silent "http://localhost:9236/metrics" | grep go_find_all_tags
       ```
 
-1. Once you observe the metrics for the new feature flag and it increments, you
+1. After you observe the metrics for the new feature flag and it increments, you
    can enable the new feature:
    1. Navigate to GDK's root directory.
    1. Start a Rails console:
@@ -367,9 +363,9 @@ the integration by using GDK:
       ```
 
    1. Exit the Rails console and perform whatever action is required to trigger
-      your changes (project creation, submitting commit, observing history, etc.).
+      your changes, such as project creation, submitting commit, or observing history.
    1. Verify the feature is on by observing the metrics for it:
 
       ```shell
-      curl --silent http://localhost:9236/metrics | grep go_find_all_tags
+      curl --silent "http://localhost:9236/metrics" | grep go_find_all_tags
       ```

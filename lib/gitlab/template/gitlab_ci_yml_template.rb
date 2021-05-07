@@ -5,9 +5,8 @@ module Gitlab
     class GitlabCiYmlTemplate < BaseTemplate
       BASE_EXCLUDED_PATTERNS = [%r{\.latest\.}].freeze
 
-      def content
-        explanation = "# This file is a template, and might need editing before it works on your project."
-        [explanation, super].join("\n")
+      def description
+        "# This file is a template, and might need editing before it works on your project."
       end
 
       class << self
@@ -23,6 +22,12 @@ module Gitlab
             'Pages' => 'Pages',
             'Verify' => 'Verify',
             'Auto deploy' => 'autodeploy'
+          }
+        end
+
+        def include_categories_for_file
+          {
+            "SAST#{self.extension}" => { 'Security' => 'Security' }
           }
         end
 
@@ -42,7 +47,11 @@ module Gitlab
 
         def finder(project = nil)
           Gitlab::Template::Finders::GlobalTemplateFinder.new(
-            self.base_dir, self.extension, self.categories, excluded_patterns: self.excluded_patterns
+            self.base_dir,
+            self.extension,
+            self.categories,
+            self.include_categories_for_file,
+            excluded_patterns: self.excluded_patterns
           )
         end
       end

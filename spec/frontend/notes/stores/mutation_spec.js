@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import mutations from '~/notes/stores/mutations';
 import { DISCUSSION_NOTE, ASC, DESC } from '~/notes/constants';
+import mutations from '~/notes/stores/mutations';
 import {
   note,
   discussionMock,
@@ -357,7 +357,7 @@ describe('Notes Store mutations', () => {
 
       mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds, expanded: true });
 
-      state.discussions.forEach(discussion => {
+      state.discussions.forEach((discussion) => {
         expect(discussion.expanded).toEqual(true);
       });
     });
@@ -371,9 +371,19 @@ describe('Notes Store mutations', () => {
 
       mutations.SET_EXPAND_DISCUSSIONS(state, { discussionIds, expanded: false });
 
-      state.discussions.forEach(discussion => {
+      state.discussions.forEach((discussion) => {
         expect(discussion.expanded).toEqual(false);
       });
+    });
+  });
+
+  describe('SET_RESOLVING_DISCUSSION', () => {
+    it('should set resolving discussion state', () => {
+      const state = {};
+
+      mutations.SET_RESOLVING_DISCUSSION(state, true);
+
+      expect(state.isResolvingDiscussion).toEqual(true);
     });
   });
 
@@ -388,6 +398,19 @@ describe('Notes Store mutations', () => {
       mutations.UPDATE_NOTE(state, updated);
 
       expect(state.discussions[0].notes[0].note).toEqual('Foo');
+    });
+
+    it('does not update existing note if it matches', () => {
+      const state = {
+        discussions: [{ ...individualNote, individual_note: false }],
+      };
+      jest.spyOn(state.discussions[0].notes, 'splice');
+
+      const updated = individualNote.notes[0];
+
+      mutations.UPDATE_NOTE(state, updated);
+
+      expect(state.discussions[0].notes.splice).not.toHaveBeenCalled();
     });
 
     it('transforms an individual note to discussion', () => {
@@ -687,44 +710,8 @@ describe('Notes Store mutations', () => {
     });
   });
 
-  describe('TOGGLE_BLOCKED_ISSUE_WARNING', () => {
-    it('should set isToggleBlockedIssueWarning as true', () => {
-      const state = {
-        discussions: [],
-        targetNoteHash: null,
-        lastFetchedAt: null,
-        isToggleStateButtonLoading: false,
-        isToggleBlockedIssueWarning: false,
-        notesData: {},
-        userData: {},
-        noteableData: {},
-      };
-
-      mutations.TOGGLE_BLOCKED_ISSUE_WARNING(state, true);
-
-      expect(state.isToggleBlockedIssueWarning).toEqual(true);
-    });
-
-    it('should set isToggleBlockedIssueWarning as false', () => {
-      const state = {
-        discussions: [],
-        targetNoteHash: null,
-        lastFetchedAt: null,
-        isToggleStateButtonLoading: false,
-        isToggleBlockedIssueWarning: true,
-        notesData: {},
-        userData: {},
-        noteableData: {},
-      };
-
-      mutations.TOGGLE_BLOCKED_ISSUE_WARNING(state, false);
-
-      expect(state.isToggleBlockedIssueWarning).toEqual(false);
-    });
-  });
-
   describe('SET_APPLYING_BATCH_STATE', () => {
-    const buildDiscussions = suggestionsInfo => {
+    const buildDiscussions = (suggestionsInfo) => {
       const suggestions = suggestionsInfo.map(({ suggestionId }) => ({ id: suggestionId }));
 
       const notes = suggestionsInfo.map(({ noteId }, index) => ({
@@ -764,7 +751,7 @@ describe('Notes Store mutations', () => {
       const expectedSuggestions = [updatedSuggestion, suggestions[1]];
 
       const actualSuggestions = state.discussions
-        .map(discussion => discussion.notes.map(n => n.suggestions))
+        .map((discussion) => discussion.notes.map((n) => n.suggestions))
         .flat(2);
 
       expect(actualSuggestions).toEqual(expectedSuggestions);

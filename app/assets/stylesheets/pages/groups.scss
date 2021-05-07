@@ -43,12 +43,6 @@
   }
 }
 
-.ldap-group-links {
-  .form-actions {
-    margin-bottom: $gl-padding;
-  }
-}
-
 .save-group-loader {
   margin-top: $gl-padding-50;
   margin-bottom: $gl-padding-50;
@@ -85,12 +79,6 @@
     .dropdown .dropdown-toggle,
     .btn-success {
       width: 100%;
-    }
-
-    .dropdown .dropdown-toggle .fa-chevron-down {
-      position: absolute;
-      top: 11px;
-      right: 8px;
     }
   }
 }
@@ -170,17 +158,6 @@
 .home-panel-buttons {
   .home-panel-action-button {
     vertical-align: top;
-  }
-
-
-  .notification-dropdown {
-    .dropdown-menu {
-      @extend .dropdown-menu-right;
-    }
-
-    .icon {
-      fill: $gl-text-color-secondary;
-    }
   }
 
   .new-project-subgroup {
@@ -272,7 +249,6 @@
 }
 
 .pipeline-quota {
-  border-top: 1px solid $table-border-color;
   border-bottom: 1px solid $table-border-color;
   margin: 0 0 $gl-padding;
 
@@ -303,12 +279,6 @@
 
 table.pipeline-project-metrics tr td {
   padding: $gl-padding;
-}
-
-.mattermost-icon svg {
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
 }
 
 .mattermost-team-name {
@@ -343,11 +313,11 @@ table.pipeline-project-metrics tr td {
 }
 
 .user-access-role {
+  @include gl-px-3;
   display: inline-block;
   color: $gl-text-color-secondary;
   font-size: 12px;
   line-height: 20px;
-  padding: 0 $label-padding;
   border: 1px solid $border-color;
   border-radius: $label-border-radius;
   font-weight: $gl-font-weight-normal;
@@ -397,10 +367,6 @@ table.pipeline-project-metrics tr td {
 
   .folder-caret {
     width: $gl-font-size-large;
-
-    svg {
-      margin-bottom: 2px;
-    }
   }
 
   .item-type-icon {
@@ -536,10 +502,6 @@ table.pipeline-project-metrics tr td {
 
     > span:first-child {
       margin-left: 25px;
-    }
-
-    .item-visibility {
-      margin-right: 0;
     }
 
     .last-updated {

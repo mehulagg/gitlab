@@ -4,7 +4,7 @@ module Gitlab
   module Metrics
     module Samplers
       class DatabaseSampler < BaseSampler
-        SAMPLING_INTERVAL_SECONDS = 5
+        DEFAULT_SAMPLING_INTERVAL_SECONDS = 5
 
         METRIC_PREFIX = 'gitlab_database_connection_pool_'
 
@@ -32,9 +32,9 @@ module Gitlab
         private
 
         def init_metrics
-          METRIC_DESCRIPTIONS.map do |name, description|
+          METRIC_DESCRIPTIONS.to_h do |name, description|
             [name, ::Gitlab::Metrics.gauge(:"#{METRIC_PREFIX}#{name}", description)]
-          end.to_h
+          end
         end
 
         def host_stats

@@ -3,22 +3,55 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Security::ConfigurationController do
-  let(:group) { create(:group) }
-  let(:project) { create(:project, :repository, namespace: group) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be_with_refind(:project) { create(:project, :repository, namespace: group) }
+
+  before do
+    stub_licensed_features(security_dashboard: true)
+    group.add_developer(user)
+  end
 
   describe 'GET #show' do
+    using RSpec::Parameterized::TableSyntax
+
     subject(:request) { get :show, params: { namespace_id: project.namespace, project_id: project } }
 
-    it_behaves_like SecurityDashboardsPermissions do
-      let(:vulnerable) { project }
-      let(:security_dashboard_action) { request }
+    let(:user) { create(:user) }
+
+    render_views
+
+    where(:user_role, :security_dashboard_enabled, :status, :selector) do
+      :guest     | false | :forbidden | nil
+      :guest     | true  | :forbidden | nil
+      :developer | false | :ok        | '#js-security-configuration-static'
+      :developer | true  | :ok        | '#js-security-configuration'
     end
 
-    context 'with user' do
-      let(:user) { create(:user) }
+    with_them do
+      before do
+        stub_licensed_features(security_dashboard: security_dashboard_enabled)
+        group.send("add_#{user_role}", user)
+        sign_in(user)
+      end
 
-      render_views
+      include_context '"Security & Compliance" permissions' do
+        let(:valid_request) { request }
+      end
 
+      it 'responds with the correct status' do
+        request
+
+        expect(response).to have_gitlab_http_status(status)
+
+        unless selector.nil?
+          expect(response).to render_template(:show)
+          expect(response.body).to have_css(selector)
+        end
+      end
+    end
+
+    context 'with developer and security dashboard feature enabled' do
       before do
         stub_licensed_features(security_dashboard: true)
 
@@ -92,7 +125,6 @@ RSpec.describe Projects::Security::ConfigurationController do
     end
 
     before do
-      stub_licensed_features(security_dashboard: true)
       project.add_maintainer(maintainer)
       project.add_developer(developer)
       sign_in(user)
@@ -107,7 +139,6 @@ RSpec.describe Projects::Security::ConfigurationController do
 
       context 'with sufficient permissions' do
         let(:user) { maintainer }
-        let(:setting) { project.security_setting }
 
         it 'shows auto fix disable for dependency scanning for json format' do
           get :show, params: { namespace_id: project.namespace, project_id: project, format: :json }
@@ -121,7 +152,7 @@ RSpec.describe Projects::Security::ConfigurationController do
 
           it 'processes request and updates setting' do
             expect(response).to have_gitlab_http_status(:ok)
-            expect(setting.auto_fix_dependency_scanning).to be_falsey
+            expect(project.security_setting.reload.auto_fix_dependency_scanning).to be_falsey
             expect(response[:dependency_scanning]).to be_falsey
           end
         end
@@ -130,6 +161,8 @@ RSpec.describe Projects::Security::ConfigurationController do
           let(:feature) { '' }
 
           it 'processes request and updates setting' do
+            setting = project.reload.security_setting
+
             expect(response).to have_gitlab_http_status(:ok)
             expect(setting.auto_fix_dependency_scanning).to be_falsey
             expect(setting.auto_fix_dast).to be_falsey
@@ -139,11 +172,10 @@ RSpec.describe Projects::Security::ConfigurationController do
 
         context 'without processable feature' do
           let(:feature) { :dep_scan }
-          let(:setting) { project.create_security_setting }
 
           it 'does not pass validation' do
             expect(response).to have_gitlab_http_status(:unprocessable_entity)
-            expect(setting.auto_fix_dependency_scanning).to be_truthy
+            expect(project.security_setting.auto_fix_dependency_scanning).to be_truthy
           end
         end
       end

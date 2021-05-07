@@ -1,8 +1,8 @@
+import { GlLink, GlSprintf } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
-import { MERGE_DISABLED_TEXT_UNAPPROVED } from 'ee/vue_merge_request_widget/mixins/ready_to_merge';
 import MergeImmediatelyConfirmationDialog from 'ee/vue_merge_request_widget/components/merge_immediately_confirmation_dialog.vue';
 import MergeTrainHelperText from 'ee/vue_merge_request_widget/components/merge_train_helper_text.vue';
-import { GlLink, GlSprintf } from '@gitlab/ui';
+import { MERGE_DISABLED_TEXT_UNAPPROVED } from 'ee/vue_merge_request_widget/mixins/ready_to_merge';
 import ReadyToMerge from '~/vue_merge_request_widget/components/states/ready_to_merge.vue';
 import {
   MWPS_MERGE_STRATEGY,
@@ -49,7 +49,7 @@ describe('ReadyToMerge', () => {
     commitMessageWithDescription: 'This is the commit message description',
     shouldRemoveSourceBranch: true,
     canRemoveSourceBranch: false,
-    targetBranch: 'master',
+    targetBranch: 'main',
     preferredAutoMergeStrategy: MWPS_MERGE_STRATEGY,
     availableAutoMergeStrategies: [MWPS_MERGE_STRATEGY],
     mergeImmediatelyDocsPath: 'path/to/merge/immediately/docs',
@@ -78,7 +78,7 @@ describe('ReadyToMerge', () => {
   const findResolveItemsMessage = () => wrapper.find(GlSprintf);
   const findPipelineConflictMessage = () =>
     wrapper.find('[data-testid="pipeline-succeed-conflict"]');
-  const findMergeButton = () => wrapper.find('.qa-merge-button');
+  const findMergeButton = () => wrapper.find('[data-testid="merge-button"]');
   const findMergeButtonDropdown = () => wrapper.find('.js-merge-moment');
   const findMergeImmediatelyButton = () => wrapper.find('.js-merge-immediately-button');
   const findMergeTrainHelperText = () => wrapper.find(MergeTrainHelperText);

@@ -8,7 +8,7 @@ class Admin::LicensesController < Admin::ApplicationController
 
   respond_to :html
 
-  feature_category :provision
+  feature_category :license
 
   def show
     if @license.present? || License.future_dated_only?
@@ -27,20 +27,14 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   def create
-    unless params[:license][:data].present? || params[:license][:data_file].present?
-      flash[:alert] = _('Please enter or upload a license.')
-
-      @license = License.new
-      redirect_to new_admin_license_path
-      return
-    end
+    return upload_license_error if license_params[:data].blank? && license_params[:data_file].blank?
 
     @license = License.new(license_params)
 
+    return upload_license_error if @license.cloud_license?
+
     respond_with(@license, location: admin_license_path) do
       if @license.save
-        @license.update_trial_setting
-
         notice = if @license.started?
                    _('The license was successfully uploaded and is now active. You can see the details below.')
                  else
@@ -53,7 +47,7 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   def destroy
-    license.destroy
+    Licenses::DestroyService.new(license, current_user).execute
 
     if License.current
       flash[:notice] = _('The license was removed. GitLab has fallen back on the previous license.')
@@ -62,6 +56,22 @@ class Admin::LicensesController < Admin::ApplicationController
     end
 
     redirect_to admin_license_path, status: :found
+  rescue Licenses::DestroyService::DestroyCloudLicenseError => e
+    flash[:error] = e.message
+
+    redirect_to admin_license_path, status: :found
+  end
+
+  def sync_seat_link
+    respond_to do |format|
+      format.json do
+        if Gitlab::SeatLinkData.new.sync
+          render json: { success: true }
+        else
+          render json: { success: false }, status: :unprocessable_entity
+        end
+      end
+    end
   end
 
   private
@@ -74,5 +84,11 @@ class Admin::LicensesController < Admin::ApplicationController
     license_params = params.require(:license).permit(:data_file, :data)
     license_params.delete(:data) if license_params[:data_file]
     license_params
+  end
+
+  def upload_license_error
+    flash[:alert] = _('Please enter or upload a valid license.')
+    @license = License.new
+    redirect_to new_admin_license_path
   end
 end

@@ -1,7 +1,7 @@
 <script>
+import { sanitizeItem } from '../utils';
 import FrequentItemsListItem from './frequent_items_list_item.vue';
 import frequentItemsMixin from './frequent_items_mixin';
-import { sanitizeItem } from '../utils';
 
 export default {
   components: {
@@ -59,7 +59,11 @@ export default {
 <template>
   <div class="frequent-items-list-container">
     <ul ref="frequentItemsList" class="list-unstyled">
-      <li v-if="isListEmpty" :class="{ 'section-failure': isFetchFailed }" class="section-empty">
+      <li
+        v-if="isListEmpty"
+        :class="{ 'section-failure': isFetchFailed }"
+        class="section-empty gl-mb-3"
+      >
         {{ listEmptyMessage }}
       </li>
       <frequent-items-list-item

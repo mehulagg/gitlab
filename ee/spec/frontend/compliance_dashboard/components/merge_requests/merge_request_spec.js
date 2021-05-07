@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAvatarLink, GlAvatar } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import MergeRequest from 'ee/compliance_dashboard/components/merge_requests/merge_request.vue';
 import { createMergeRequest } from '../../mock_data';
@@ -9,7 +9,7 @@ describe('MergeRequest component', () => {
 
   const findAuthorAvatarLink = () => wrapper.find('.issuable-authored').find(GlAvatarLink);
 
-  const createComponent = mergeRequest => {
+  const createComponent = (mergeRequest) => {
     return shallowMount(MergeRequest, {
       propsData: {
         mergeRequest,
@@ -47,11 +47,7 @@ describe('MergeRequest component', () => {
     });
 
     it('renders the author avatar', () => {
-      expect(
-        findAuthorAvatarLink()
-          .find(GlAvatar)
-          .exists(),
-      ).toEqual(true);
+      expect(findAuthorAvatarLink().find(GlAvatar).exists()).toEqual(true);
     });
 
     it('renders the author name', () => {

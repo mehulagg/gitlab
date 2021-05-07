@@ -2,10 +2,10 @@
 type: reference
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# General LDAP Setup
+# General LDAP setup **(FREE SELF)**
 
 GitLab integrates with LDAP to support user authentication.
 
@@ -17,7 +17,7 @@ This integration works with most LDAP-compliant directory servers, including:
 - Open LDAP
 - 389 Server
 
-Users added through LDAP take a [licensed seat](../../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+Users added through LDAP take a [licensed seat](../../../subscriptions/self_managed/index.md#billable-users).
 
 GitLab Enterprise Editions (EE) include enhanced integration,
 including group membership syncing as well as multiple LDAP servers support.
@@ -29,7 +29,7 @@ stands for **Lightweight Directory Access Protocol**, which is a standard
 application protocol for accessing and maintaining distributed directory
 information services over an Internet Protocol (IP) network.
 
-## Security **(CORE ONLY)**
+## Security
 
 GitLab assumes that LDAP users:
 
@@ -44,36 +44,36 @@ We recommend against using LDAP integration if your LDAP users are
 allowed to change their 'mail', 'email' or 'userPrincipalName' attribute on
 the LDAP server or share email addresses.
 
-### User deletion **(CORE ONLY)**
+### User deletion
 
-If a user is deleted from the LDAP server, they will be blocked in GitLab as
-well. Users will be immediately blocked from logging in. However, there is an
+If a user is deleted from the LDAP server, they are also blocked in GitLab.
+Users are immediately blocked from logging in. However, there is an
 LDAP check cache time of one hour (see note) which means users that
-are already logged in or are using Git over SSH will still be able to access
+are already logged in or are using Git over SSH are be able to access
 GitLab for up to one hour. Manually block the user in the GitLab Admin Area to
 immediately block all access.
 
-GitLab Enterprise Edition Starter supports a
-[configurable sync time](#adjusting-ldap-user-sync-schedule). **(STARTER)**
+GitLab Enterprise Edition Premium supports a
+[configurable sync time](#adjusting-ldap-user-sync-schedule). **(PREMIUM)**
 
-## Git password authentication **(CORE ONLY)**
+## Git password authentication
 
 LDAP-enabled users can always authenticate with Git using their GitLab username
 or email and LDAP password, even if password authentication for Git is disabled
 in the application settings.
 
-## Enabling LDAP sign-in for existing GitLab users **(CORE ONLY)**
+## Enabling LDAP sign-in for existing GitLab users
 
 When a user signs in to GitLab with LDAP for the first time, and their LDAP
 email address is the primary email address of an existing GitLab user, then
-the LDAP DN will be associated with the existing user. If the LDAP email
-attribute is not found in GitLab's database, a new user is created.
+the LDAP DN is associated with the existing user. If the LDAP email
+attribute is not found in the GitLab user database, a new user is created.
 
 In other words, if an existing GitLab user wants to enable LDAP sign-in for
 themselves, they should check that their GitLab email address matches their
 LDAP email address, and then sign into GitLab via their LDAP credentials.
 
-## Google Secure LDAP **(CORE ONLY)**
+## Google Secure LDAP
 
 > Introduced in GitLab 11.9.
 
@@ -81,7 +81,7 @@ LDAP email address, and then sign into GitLab via their LDAP credentials.
 LDAP service that can be configured with GitLab for authentication and group sync.
 See [Google Secure LDAP](google_secure_ldap.md) for detailed configuration instructions.
 
-## Configuration **(CORE ONLY)**
+## Configuration
 
 To enable LDAP integration you need to add your LDAP server settings in
 `/etc/gitlab/gitlab.rb` or `/home/git/gitlab/config/gitlab.yml` for Omnibus
@@ -91,15 +91,16 @@ There is a Rake task to check LDAP configuration. After configuring LDAP
 using the documentation below, see [LDAP check Rake task](../../raketasks/check.md#ldap-check)
 for information on the LDAP check Rake task.
 
-NOTE: **Note:**
+NOTE:
 The `encryption` value `simple_tls` corresponds to 'Simple TLS' in the LDAP
 library. `start_tls` corresponds to StartTLS, not to be confused with regular TLS.
-Normally, if you specify `simple_tls` it will be on port 636, while `start_tls` (StartTLS)
+Normally, if you specify `simple_tls` it is on port 636, while `start_tls` (StartTLS)
 would be on port 389. `plain` also operates on port 389. Removed values: `tls` was replaced with `start_tls` and `ssl` was replaced with `simple_tls`.
 
-LDAP users must have an email address set, regardless of whether it is used to sign-in.
+LDAP users must have a set email address, regardless of whether or not it's used
+to sign in.
 
-### Example Configurations **(CORE ONLY)**
+### Example Configurations
 
 **Omnibus Configuration**
 
@@ -162,49 +163,56 @@ production:
         ...
 ```
 
-### Basic Configuration Settings **(CORE ONLY)**
+### Basic Configuration Settings
 
 | Setting | Description | Required | Examples |
 | ------- | ----------- | -------- | -------- |
-| `label` | A human-friendly name for your LDAP server. It will be displayed on your sign-in page. | yes | `'Paris'` or `'Acme, Ltd.'` |
+| `label` | A human-friendly name for your LDAP server. It is displayed on your sign-in page. | yes | `'Paris'` or `'Acme, Ltd.'` |
 | `host`  | IP address or domain name of your LDAP server. | yes | `'ldap.mydomain.com'` |
 | `port`  | The port to connect with on your LDAP server. Always an integer, not a string. | yes | `389` or `636` (for SSL) |
-| `uid`   | LDAP attribute for username. Should be the attribute, not the value that maps to the `uid`. | yes | `'sAMAccountName'`, `'uid'`, `'userPrincipalName'` |
-| `bind_dn` | The full DN of the user you will bind with. | no | `'america\momo'` or `'CN=Gitlab,OU=Users,DC=domain,DC=com'` |
+| `uid`   | LDAP attribute for username. Should be the attribute, not the value that maps to the `uid`. | yes | `'sAMAccountName'` or `'uid'` or `'userPrincipalName'` |
+| `bind_dn` | The full DN of the user you bind with. | no | `'america\momo'` or `'CN=Gitlab,OU=Users,DC=domain,DC=com'` |
 | `password` | The password of the bind user. | no | `'your_great_password'` |
 | `encryption` | Encryption method. The `method` key is deprecated in favor of `encryption`. | yes | `'start_tls'` or `'simple_tls'` or `'plain'` |
 | `verify_certificates` | Enables SSL certificate verification if encryption method is `start_tls` or `simple_tls`. Defaults to true. | no | boolean |
-| `timeout` | Set a timeout, in seconds, for LDAP queries. This helps avoid blocking a request if the LDAP server becomes unresponsive. A value of 0 means there is no timeout. | no | `10` or `30` |
+| `timeout` | Set a timeout, in seconds, for LDAP queries. This helps avoid blocking a request if the LDAP server becomes unresponsive. A value of `0` means there is no timeout. (default: `10`) | no | `10` or `30` |
 | `active_directory` | This setting specifies if LDAP server is Active Directory LDAP server. For non-AD servers it skips the AD specific queries. If your LDAP server is not AD, set this to false. | no | boolean |
-| `allow_username_or_email_login` | If enabled, GitLab will ignore everything after the first `@` in the LDAP username submitted by the user on sign-in. If you are using `uid: 'userPrincipalName'` on ActiveDirectory you need to disable this setting, because the userPrincipalName contains an `@`. | no | boolean |
-| `block_auto_created_users` | To maintain tight control over the number of active users on your GitLab installation, enable this setting to keep new users blocked until they have been cleared by the admin (default: false). | no | boolean |
+| `allow_username_or_email_login` | If enabled, GitLab ignores everything after the first `@` in the LDAP username submitted by the user on sign-in. If you are using `uid: 'userPrincipalName'` on ActiveDirectory you need to disable this setting, because the userPrincipalName contains an `@`. | no | boolean |
+| `block_auto_created_users` | To maintain tight control over the number of billable users on your GitLab installation, enable this setting to keep new users blocked until they have been cleared by an administrator (default: false). | no | boolean |
 | `base` | Base where we can search for users. | yes | `'ou=people,dc=gitlab,dc=example'` or `'DC=mydomain,DC=com'` |
-| `user_filter` | Filter LDAP users. Format: [RFC 4515](https://tools.ietf.org/search/rfc4515) Note: GitLab does not support `omniauth-ldap`'s custom filter syntax. | no | `'(employeeType=developer)'` or `'(&(objectclass=user)(|(samaccountname=momo)(samaccountname=toto)))'` |
-| `lowercase_usernames` | If lowercase_usernames is enabled, GitLab will lower case the username. | no | boolean |
+| `user_filter` | Filter LDAP users. Format: [RFC 4515](https://tools.ietf.org/search/rfc4515) Note: GitLab does not support `omniauth-ldap`'s custom filter syntax. | no | For examples, read [Examples of user filters](#examples-of-user-filters). |
+| `lowercase_usernames` | If lowercase_usernames is enabled, GitLab converts the name to lower case. | no | boolean |
 
-### SSL Configuration Settings **(CORE ONLY)**
+#### Examples of user filters
+
+Some examples of the `user_filter` field syntax:
+
+- `'(employeeType=developer)'`
+- `'(&(objectclass=user)(|(samaccountname=momo)(samaccountname=toto)))'`
+
+### SSL Configuration Settings
 
 | Setting | Description | Required | Examples |
 | ------- | ----------- | -------- | -------- |
-| `ca_file` | Specifies the path to a file containing a PEM-format CA certificate, e.g. if you need to use an internal CA. | no | `'/etc/ca.pem'` |
+| `ca_file` | Specifies the path to a file containing a PEM-format CA certificate, for example, if you need to use an internal CA. | no | `'/etc/ca.pem'` |
 | `ssl_version` | Specifies the SSL version for OpenSSL to use, if the OpenSSL default is not appropriate. | no | `'TLSv1_1'` |
 | `ciphers` | Specific SSL ciphers to use in communication with LDAP servers. | no | `'ALL:!EXPORT:!LOW:!aNULL:!eNULL:!SSLv2'` |
 | `cert` | Client certificate | no | `'-----BEGIN CERTIFICATE----- <REDACTED> -----END CERTIFICATE -----'` |
 | `key` | Client private key | no | `'-----BEGIN PRIVATE KEY----- <REDACTED> -----END PRIVATE KEY -----'` |
 
-### Attribute Configuration Settings **(CORE ONLY)**
+### Attribute Configuration Settings
 
-LDAP attributes that GitLab will use to create an account for the LDAP user. The specified attribute can either be the attribute name as a string (e.g. `'mail'`), or an array of attribute names to try in order (e.g. `['mail', 'email']`). Note that the user's LDAP sign-in will always be the attribute specified as `uid` above.
+LDAP attributes that GitLab uses to create an account for the LDAP user. The specified attribute can either be the attribute name as a string (for example, `'mail'`), or an array of attribute names to try in order (for example, `['mail', 'email']`). Note that the user's LDAP sign-in is the attribute specified as `uid` above.
 
 | Setting | Description | Required | Examples |
 | ------- | ----------- | -------- | -------- |
-| `username` | The username will be used in paths for the user's own projects (like `gitlab.example.com/username/project`) and when mentioning them in issues, merge request and comments (like `@username`). If the attribute specified for `username` contains an email address, the GitLab username will be the part of the email address before the `@`. | no | `['uid', 'userid', 'sAMAccountName']` |
+| `username` | The username is used in paths for the user's own projects (like `gitlab.example.com/username/project`) and when mentioning them in issues, merge request and comments (like `@username`). If the attribute specified for `username` contains an email address, the GitLab username is part of the email address before the `@`. | no | `['uid', 'userid', 'sAMAccountName']` |
 | `email` | LDAP attribute for user email. | no | `['mail', 'email', 'userPrincipalName']` |
-| `name` | LDAP attribute for user display name. If no full name could be found at the attribute specified for `name`, the full name is determined using the attributes specified for `first_name` and `last_name`. | no | `'cn'` or `'displayName'` |
-| `first_name` | LDAP attribute for user first name. | no | `'givenName'` |
-| `last_name` | LDAP attribute for user last name. | no | `'sn'` |
+| `name` | LDAP attribute for user display name. If `name` is blank, the full name is taken from the `first_name` and `last_name`. | no | Attributes `'cn'`, or `'displayName'` commonly carry full names. Alternatively, you can force the use of `first_name` and `last_name` by specifying an absent attribute such as `'somethingNonExistent'`. |
+| `first_name` | LDAP attribute for user first name. Used when the attribute configured for `name` does not exist. | no | `'givenName'` |
+| `last_name` | LDAP attribute for user last name. Used when the attribute configured for `name` does not exist. | no | `'sn'` |
 
-### LDAP Sync Configuration Settings **(STARTER ONLY)**
+### LDAP Sync Configuration Settings **(PREMIUM SELF)**
 
 | Setting | Description | Required | Examples |
 | ------- | ----------- | -------- | -------- |
@@ -213,7 +221,7 @@ LDAP attributes that GitLab will use to create an account for the LDAP user. The
 | `external_groups` | An array of CNs of groups containing users that should be considered external. Note: Not `cn=interns` or the full DN. | no | `['interns', 'contractors']` |
 | `sync_ssh_keys` | The LDAP attribute containing a user's public SSH key. | no | `'sshPublicKey'` or false if not set |
 
-### Set up LDAP user filter **(CORE ONLY)**
+### Set up LDAP user filter
 
 If you want to limit all GitLab access to a subset of the LDAP users on your
 LDAP server, the first step should be to narrow the configured `base`. However,
@@ -253,12 +261,12 @@ group, you can use the following syntax:
 For more information about this "LDAP_MATCHING_RULE_IN_CHAIN" filter, see the following
 [Microsoft Search Filter Syntax](https://docs.microsoft.com/en-us/windows/win32/adsi/search-filter-syntax) document.
 Support for nested members in the user filter should not be confused with
-[group sync nested groups support](#supported-ldap-group-typesattributes). **(STARTER ONLY)**
+[group sync nested groups support](#supported-ldap-group-typesattributes). **(PREMIUM SELF)**
 
 Please note that GitLab does not support the custom filter syntax used by
 OmniAuth LDAP.
 
-#### Escaping special characters **(CORE ONLY)**
+#### Escaping special characters
 
 The `user_filter` DN can contain special characters. For example:
 
@@ -289,7 +297,7 @@ The `user_filter` DN can contain special characters. For example:
   OU=Gitlab \28Inc\29,DC=gitlab,DC=com
   ```
 
-### Enabling LDAP username lowercase **(CORE ONLY)**
+### Enabling LDAP username lowercase
 
 Some LDAP servers, depending on their configurations, can return uppercase usernames.
 This can lead to several confusing issues such as creating links or namespaces with uppercase names.
@@ -327,14 +335,14 @@ the configuration option `lowercase_usernames`. By default, this configuration o
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-### Disable LDAP web sign in **(CORE ONLY)**
+### Disable LDAP web sign in
 
 It can be useful to prevent using LDAP credentials through the web UI when
 an alternative such as SAML is preferred. This allows LDAP to be used for group
 sync, while also allowing your SAML identity provider to handle additional
 checks like custom 2FA.
 
-When LDAP web sign in is disabled, users will not see a **LDAP** tab on the sign in page.
+When LDAP web sign in is disabled, users don't see an **LDAP** tab on the sign in page.
 This does not disable [using LDAP credentials for Git access](#git-password-authentication).
 
 **Omnibus configuration**
@@ -359,7 +367,94 @@ This does not disable [using LDAP credentials for Git access](#git-password-auth
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-## Encryption **(CORE ONLY)**
+### Using encrypted credentials
+
+Instead of having the LDAP integration credentials stored in plaintext in the configuration files, you can optionally
+use an encrypted file for the LDAP credentials. To use this feature, you first need to enable
+[GitLab encrypted configuration](../../encrypted_configuration.md).
+
+The encrypted configuration for LDAP exists in an encrypted YAML file. By default the file will be created at
+`shared/encrypted_configuration/ldap.yaml.enc`. This location is configurable in the GitLab configuration.
+
+The unencrypted contents of the file should be a subset of the secret settings from your `servers` block in the LDAP
+configuration.
+
+The supported configuration items for the encrypted file are:
+
+- `bind_dn`
+- `password`
+
+The encrypted contents can be configured with the [LDAP secret edit Rake command](../../raketasks/ldap.md#edit-secret).
+
+**Omnibus configuration**
+
+If initially your LDAP configuration looked like:
+
+1. In `/etc/gitlab/gitlab.rb`:
+
+  ```ruby
+    gitlab_rails['ldap_servers'] = {
+    'main' => {
+      # snip...
+      'bind_dn' => 'admin',
+      'password' => '123'
+      }
+    }
+  ```
+
+1. Edit the encrypted secret:
+
+   ```shell
+   sudo gitlab-rake gitlab:ldap:secret:edit EDITOR=vim
+   ```
+
+1. The unencrypted contents of the LDAP secret should be entered like:
+
+   ```yaml
+   main:
+     bind_dn: admin
+     password: '123'
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and remove the settings for `user_bn` and `password`.
+
+1. [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+**Source configuration**
+
+If initially your LDAP configuration looked like:
+
+1. In `config/gitlab.yaml`:
+
+   ```yaml
+   production:
+     ldap:
+       servers:
+         main:
+           # snip...
+           bind_dn: admin
+           password: '123'
+   ```
+
+1. Edit the encrypted secret:
+
+   ```shell
+   bundle exec rake gitlab:ldap:secret:edit EDITOR=vim RAILS_ENVIRONMENT=production
+   ```
+
+1. The unencrypted contents of the LDAP secret should be entered like:
+
+   ```yaml
+   main:
+    bind_dn: admin
+    password: '123'
+   ```
+
+1. Edit `config/gitlab.yaml` and remove the settings for `user_bn` and `password`.
+
+1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
+
+## Encryption
 
 ### TLS Server Authentication
 
@@ -379,10 +474,10 @@ You should disable anonymous LDAP authentication and enable simple or SASL
 authentication. The TLS client authentication setting in your LDAP server cannot
 be mandatory and clients cannot be authenticated with the TLS protocol.
 
-## Multiple LDAP servers **(STARTER ONLY)**
+## Multiple LDAP servers **(PREMIUM SELF)**
 
-With GitLab Enterprise Edition Starter, you can configure multiple LDAP servers
-that your GitLab instance will connect to.
+With GitLab, you can configure multiple LDAP servers that your GitLab instance
+connects to.
 
 To add another LDAP server:
 
@@ -390,7 +485,7 @@ To add another LDAP server:
 1. Edit them to match the additional LDAP server.
 
 Be sure to choose a different provider ID made of letters a-z and numbers 0-9.
-This ID will be stored in the database so that GitLab can remember which LDAP
+This ID is stored in the database so that GitLab can remember which LDAP
 server a user belongs to.
 
 ![Multiple LDAP Servers Sign in](img/multi_login.gif)
@@ -427,7 +522,7 @@ gitlab_rails['ldap_servers'] = {
 
 If you configure multiple LDAP servers, use a unique naming convention for the `label` section of each entry. That label is used as the display name of the tab shown on the sign-in page.
 
-## User sync **(STARTER ONLY)**
+## User sync **(PREMIUM SELF)**
 
 Once per day, GitLab runs a worker to check and update GitLab
 users against LDAP.
@@ -436,18 +531,23 @@ The process executes the following access checks:
 
 - Ensure the user is still present in LDAP.
 - If the LDAP server is Active Directory, ensure the user is active (not
-  blocked/disabled state). This will only be checked if
+  blocked/disabled state). This is checked only if
   `active_directory: true` is set in the LDAP configuration.
 
 In Active Directory, a user is marked as disabled/blocked if the user
 account control attribute (`userAccountControl:1.2.840.113556.1.4.803`)
 has bit 2 set.
-For more information, see <https://ctovswild.com/2009/09/03/bitmask-searches-in-ldap/>
 
-The user will be set to `ldap_blocked` state in GitLab if the above conditions
-fail. This means the user will not be able to sign-in or push/pull code.
+<!-- vale gitlab.Spelling = NO -->
 
-The process will also update the following user information:
+For more information, see [Bitmask Searches in LDAP](https://ctovswild.com/2009/09/03/bitmask-searches-in-ldap/).
+
+<!-- vale gitlab.Spelling = YES -->
+
+The user is set to an `ldap_blocked` state in GitLab if the previous conditions
+fail. This means the user is not able to sign in or push/pull code.
+
+The process also updates the following user information:
 
 - Email address.
 - If `sync_ssh_keys` is set, SSH public keys.
@@ -458,18 +558,14 @@ The LDAP sync process:
 - Updates existing users.
 - Creates new users on first sign in.
 
-### Adjusting LDAP user sync schedule **(STARTER ONLY)**
-
-NOTE: **Note:**
-These are cron formatted values. You can use a crontab generator to create
-these values, for example <http://www.crontabgenerator.com/>.
+### Adjusting LDAP user sync schedule **(PREMIUM SELF)**
 
 By default, GitLab runs a worker once per day at 01:30 a.m. server time to
 check and update GitLab users against LDAP.
 
 You can manually configure LDAP user sync times by setting the
 following configuration values, in cron format. If needed, you can
-use a [crontab generator](http://crontabgenerator.com).
+use a [crontab generator](http://www.crontabgenerator.com).
 The example below shows how to set LDAP user
 sync to run once every 12 hours at the top of the hour.
 
@@ -495,21 +591,21 @@ sync to run once every 12 hours at the top of the hour.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-## Group Sync **(STARTER ONLY)**
+## Group Sync **(PREMIUM SELF)**
 
 If your LDAP supports the `memberof` property, when the user signs in for the
-first time GitLab will trigger a sync for groups the user should be a member of.
+first time GitLab triggers a sync for groups the user should be a member of.
 That way they don't need to wait for the hourly sync to be granted
 access to their groups and projects.
 
-A group sync process will run every hour on the hour, and `group_base` must be set
+A group sync process runs every hour on the hour, and `group_base` must be set
 in LDAP configuration for LDAP synchronizations based on group CN to work. This allows
 GitLab group membership to be automatically updated based on LDAP group members.
 
 The `group_base` configuration should be a base LDAP 'container', such as an
 'organization' or 'organizational unit', that contains LDAP groups that should
 be available to GitLab. For example, `group_base` could be
-`ou=groups,dc=example,dc=com`. In the configuration file it will look like the
+`ou=groups,dc=example,dc=com`. In the configuration file it looks like the
 following.
 
 **Omnibus configuration**
@@ -542,24 +638,24 @@ following.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-To take advantage of group sync, group owners or maintainers will need to [create one
+To take advantage of group sync, group owners or maintainers need to [create one
 or more LDAP group links](#adding-group-links).
 
-### Adding group links **(STARTER ONLY)**
+### Adding group links **(PREMIUM SELF)**
 
 For information on adding group links via CNs and filters, refer to [the GitLab groups documentation](../../../user/group/index.md#manage-group-memberships-via-ldap).
 
-### Administrator sync **(STARTER ONLY)**
+### Administrator sync **(PREMIUM SELF)**
 
 As an extension of group sync, you can automatically manage your global GitLab
 administrators. Specify a group CN for `admin_group` and all members of the
-LDAP group will be given administrator privileges. The configuration will look
+LDAP group will be given administrator privileges. The configuration looks
 like the following.
 
-NOTE: **Note:**
-Administrators will not be synced unless `group_base` is also
-specified alongside `admin_group`. Also, only specify the CN of the admin
-group, as opposed to the full DN.
+NOTE:
+Administrators are not synced unless `group_base` is also
+specified alongside `admin_group`. Also, only specify the CN of the `admin_group`,
+as opposed to the full DN.
 
 **Omnibus configuration**
 
@@ -593,7 +689,7 @@ group, as opposed to the full DN.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-### Global group memberships lock **(STARTER ONLY)**
+### Global group memberships lock **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1793) in GitLab 12.0.
 
@@ -609,16 +705,16 @@ When enabled, the following applies:
 To enable it you need to:
 
 1. [Enable LDAP](#configuration)
-1. Navigate to **(admin)** **Admin Area > Settings -> Visibility and access controls**.
-1. Make sure the "Lock memberships to LDAP synchronization" checkbox is enabled.
+1. Go to **Admin Area > Settings > Visibility and access controls**.
+1. Make sure the **Lock memberships to LDAP synchronization** checkbox is selected.
 
-### Adjusting LDAP group sync schedule **(STARTER ONLY)**
+### Adjusting LDAP group sync schedule **(PREMIUM SELF)**
 
 By default, GitLab runs a group sync process every hour, on the hour.
 The values shown are in cron format. If needed, you can use a
 [Crontab Generator](http://www.crontabgenerator.com).
 
-CAUTION: **Important:**
+WARNING:
 Do not start the sync process too frequently as this
 could lead to multiple syncs running concurrently. This is primarily a concern
 for installations with a large number of LDAP users. Please review the
@@ -651,7 +747,7 @@ sync to run once every 2 hours at the top of the hour.
 
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-### External groups **(STARTER ONLY)**
+### External groups **(PREMIUM SELF)**
 
 Using the `external_groups` setting will allow you to mark all users belonging
 to these groups as [external users](../../../user/permissions.md#external-users).
@@ -694,10 +790,10 @@ There is a lot going on with group sync 'under the hood'. This section
 outlines what LDAP queries are executed and what behavior you can expect
 from group sync.
 
-Group member access will be downgraded from a higher level if their LDAP group
+Group member access are downgraded from a higher level if their LDAP group
 membership changes. For example, if a user has 'Owner' rights in a group and the
 next group sync reveals they should only have 'Developer' privileges, their
-access will be adjusted accordingly. The only exception is if the user is the
+access is adjusted accordingly. The only exception is if the user is the
 *last* owner in a group. Groups need at least one owner to fulfill
 administrative duties.
 
@@ -719,13 +815,13 @@ are defined as one of the mentioned attributes. This also means GitLab supports
 Microsoft Active Directory, Apple Open Directory, Open LDAP, and 389 Server.
 Other LDAP servers should work, too.
 
-Active Directory also supports nested groups. Group sync will recursively
-resolve membership if `active_directory: true` is set in the configuration file.
+Active Directory also supports nested groups. Group sync recursively
+resolves membership if `active_directory: true` is set in the configuration file.
 
 ##### Nested group memberships
 
 Nested group memberships are resolved only if the nested group
-is found within the configured `group_base`. For example, if GitLab sees a
+is found in the configured `group_base`. For example, if GitLab sees a
 nested group with DN `cn=nested_group,ou=special_groups,dc=example,dc=com` but
 the configured `group_base` is `ou=groups,dc=example,dc=com`, `cn=nested_group`
 is ignored.
@@ -734,7 +830,7 @@ is ignored.
 
 - Each LDAP group is queried a maximum of one time with base `group_base` and
   filter `(cn=<cn_from_group_link>)`.
-- If the LDAP group has the `memberuid` attribute, GitLab will execute another
+- If the LDAP group has the `memberuid` attribute, GitLab executes another
   LDAP query per member to obtain each user's full DN. These queries are
   executed with base `base`, scope 'base object', and a filter depending on
   whether `user_filter` is set. Filter may be `(uid=<uid_from_group>)` or a
@@ -753,9 +849,9 @@ LDAP group links each:
 - Subsequent syncs (checking membership, no writes) took 15 minutes
 
 These metrics are meant to provide a baseline and performance may vary based on
-any number of factors. This was a pretty extreme benchmark and most instances will
-not have near this many users or groups. Disk speed, database performance,
-network and LDAP server response time will affect these metrics.
+any number of factors. This was an extreme benchmark and most instances don't
+have near this many users or groups. Disk speed, database performance,
+network and LDAP server response time affects these metrics.
 
 ## Troubleshooting
 

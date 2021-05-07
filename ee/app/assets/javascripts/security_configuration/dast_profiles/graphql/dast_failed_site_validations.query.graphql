@@ -1,0 +1,9 @@
+query DastFailedSiteValidations($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    validations: dastSiteValidations(normalizedTargetUrls: $urls, status: "FAILED_VALIDATION") {
+      nodes {
+        normalizedTargetUrl
+      }
+    }
+  }
+}

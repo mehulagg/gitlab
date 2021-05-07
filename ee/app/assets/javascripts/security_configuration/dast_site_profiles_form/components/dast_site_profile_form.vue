@@ -1,56 +1,56 @@
 <script>
-import { isEqual } from 'lodash';
 import {
   GlAlert,
   GlButton,
-  GlCollapse,
   GlForm,
   GlFormGroup,
   GlFormInput,
   GlModal,
-  GlToggle,
+  GlFormTextarea,
+  GlFormText,
+  GlFormRadioGroup,
 } from '@gitlab/ui';
-import * as Sentry from '~/sentry/wrapper';
-import { __, s__ } from '~/locale';
-import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
-import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
-import { fetchPolicies } from '~/lib/graphql';
+import * as Sentry from '@sentry/browser';
+import { isEqual } from 'lodash';
+import { initFormField } from 'ee/security_configuration/utils';
+import { serializeFormObject } from '~/lib/utils/forms';
+import { __, s__, n__, sprintf } from '~/locale';
+import validation from '~/vue_shared/directives/validation';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import DastSiteValidation from './dast_site_validation.vue';
+import tooltipIcon from '../../dast_scanner_profiles/components/tooltip_icon.vue';
+import {
+  MAX_CHAR_LIMIT_EXCLUDED_URLS,
+  MAX_CHAR_LIMIT_REQUEST_HEADERS,
+  EXCLUDED_URLS_SEPARATOR,
+  REDACTED_PASSWORD,
+  REDACTED_REQUEST_HEADERS,
+  TARGET_TYPES,
+} from '../constants';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
-import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
-import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
-import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
-
-const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
-
-const initField = value => ({
-  value,
-  state: null,
-  feedback: null,
-});
+import DastSiteAuthSection from './dast_site_auth_section.vue';
 
 export default {
   name: 'DastSiteProfileForm',
   components: {
     GlAlert,
     GlButton,
-    GlCollapse,
     GlForm,
     GlFormGroup,
     GlFormInput,
     GlModal,
-    GlToggle,
-    DastSiteValidation,
+    GlFormTextarea,
+    DastSiteAuthSection,
+    GlFormText,
+    tooltipIcon,
+    GlFormRadioGroup,
+  },
+  directives: {
+    validation: validation(),
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
-      type: String,
-      required: true,
-    },
-    profilesLibraryPath: {
       type: String,
       required: true,
     },
@@ -59,38 +59,61 @@ export default {
       required: false,
       default: null,
     },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
-    const { name = '', targetUrl = '' } = this.siteProfile || {};
+    const {
+      name = '',
+      targetUrl = '',
+      excludedUrls = [],
+      requestHeaders = '',
+      auth = {},
+      targetType = TARGET_TYPES.WEBSITE.value,
+    } = this.siteProfile || {};
 
     const form = {
-      profileName: initField(name),
-      targetUrl: initField(targetUrl),
+      state: false,
+      showValidation: false,
+      fields: {
+        profileName: initFormField({ value: name }),
+        targetUrl: initFormField({ value: targetUrl }),
+        excludedUrls: initFormField({
+          value: (excludedUrls || []).join(EXCLUDED_URLS_SEPARATOR),
+          required: false,
+          skipValidation: true,
+        }),
+        requestHeaders: initFormField({
+          value: requestHeaders || '',
+          required: false,
+          skipValidation: true,
+        }),
+        targetType: initFormField({ value: targetType, skipValidation: true }),
+      },
     };
 
     return {
-      fetchValidationTimeout: null,
       form,
-      initialFormValues: serializeFormObject(form),
-      isFetchingValidationStatus: false,
-      isValidatingSite: false,
+      authSection: { fields: auth },
+      initialFormValues: serializeFormObject(form.fields),
       isLoading: false,
       hasAlert: false,
       tokenId: null,
       token: null,
-      isSiteValidationActive: false,
-      isSiteValidationTouched: false,
-      validationStatus: null,
       errorMessage: '',
       errors: [],
+      targetTypesOptions: Object.values(TARGET_TYPES),
     };
   },
   computed: {
     isEdit() {
       return Boolean(this.siteProfile?.id);
     },
-    isSiteValidationDisabled() {
-      return !this.form.targetUrl.state || this.validationStatusMatches(INPROGRESS);
+    hasRequestHeaders() {
+      return Boolean(this.siteProfile?.requestHeaders);
     },
     i18n() {
       const { isEdit } = this;
@@ -108,190 +131,93 @@ export default {
           okTitle: __('Discard'),
           cancelTitle: __('Cancel'),
         },
-        siteValidation: {
-          validationStatusFetchError: s__(
-            'DastProfiles|Could not retrieve site validation status. Please refresh the page, or try again later.',
+        excludedUrls: {
+          label: s__('DastProfiles|Excluded URLs (Optional)'),
+          description: s__('DastProfiles|Enter URLs in a comma-separated list.'),
+          tooltip: s__('DastProfiles|URLs to skip during the authenticated scan.'),
+          placeholder: 'https://example.com/logout, https://example.com/send_mail',
+        },
+        requestHeaders: {
+          label: s__('DastProfiles|Additional request headers (Optional)'),
+          description: s__('DastProfiles|Enter headers in a comma-separated list.'),
+          tooltip: s__(
+            'DastProfiles|Request header names and values. Headers are added to every request made by DAST.',
           ),
-          createTokenError: s__(
-            'DastProfiles|Could not create site validation token. Please refresh the page, or try again later.',
-          ),
+          // eslint-disable-next-line @gitlab/require-i18n-strings
+          placeholder: 'Cache-control: no-cache, User-Agent: DAST/1.0',
         },
       };
     },
     formTouched() {
-      return !isEqual(serializeFormObject(this.form), this.initialFormValues);
+      return !isEqual(serializeFormObject(this.form.fields), this.initialFormValues);
     },
-    formHasErrors() {
-      return Object.values(this.form).some(({ state }) => state === false);
+    isPolicyProfile() {
+      return Boolean(this.siteProfile?.referencedInSecurityPolicies?.length);
     },
-    someFieldEmpty() {
-      return Object.values(this.form).some(({ value }) => isEmptyValue(value));
+    parsedExcludedUrls() {
+      return this.form.fields.excludedUrls.value
+        .split(EXCLUDED_URLS_SEPARATOR)
+        .map((url) => url.trim());
     },
-    isSubmitDisabled() {
-      return (
-        (this.isSiteValidationActive && !this.validationStatusMatches(PASSED)) ||
-        this.formHasErrors ||
-        this.someFieldEmpty ||
-        this.validationStatusMatches(INPROGRESS)
-      );
-    },
-    showValidationSection() {
-      return (
-        this.isSiteValidationActive &&
-        !this.isValidatingSite &&
-        ![INPROGRESS, PASSED].some(this.validationStatusMatches)
-      );
-    },
-    siteValidationStatusDescription() {
-      const descriptions = {
-        [PENDING]: { text: s__('DastProfiles|Site must be validated to run an active scan.') },
-        [INPROGRESS]: {
-          text: s__('DastProfiles|Validation is in progress...'),
-        },
-        [PASSED]: {
-          text: s__(
-            'DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site.',
-          ),
-          cssClass: 'gl-text-green-500',
-        },
-        [FAILED]: {
-          text: s__('DastProfiles|Validation failed. Please try again.'),
-          cssClass: 'gl-text-red-500',
-          dismissed: this.isSiteValidationTouched,
-        },
-      };
-
-      const defaultDescription = descriptions[PENDING];
-      const currentStatusDescription = descriptions[this.validationStatus];
-
-      return currentStatusDescription && !currentStatusDescription.dismissed
-        ? currentStatusDescription
-        : defaultDescription;
-    },
-  },
-  async created() {
-    if (this.isEdit) {
-      this.validateTargetUrl();
-
-      if (this.glFeatures.securityOnDemandScansSiteValidation) {
-        await this.fetchValidationStatus();
-
-        this.isSiteValidationActive = this.validationStatusMatches(PASSED);
+    serializedAuthFields() {
+      const authFields = this.authSection.fields;
+      // not to send password value if unchanged
+      if (authFields.password === REDACTED_PASSWORD) {
+        delete authFields.password;
       }
-    }
-  },
-  destroyed() {
-    clearTimeout(this.fetchValidationTimeout);
-    this.fetchValidationTimeout = null;
+      return authFields;
+    },
+    isTargetAPI() {
+      return (
+        this.glFeatures.securityDastSiteProfilesApiOption &&
+        this.form.fields.targetType.value === TARGET_TYPES.API.value
+      );
+    },
   },
   methods: {
-    async validateSite(validate) {
-      this.isSiteValidationActive = validate;
-      this.isSiteValidationTouched = true;
-      this.tokenId = null;
-      this.token = null;
+    onSubmit() {
+      const isAuthEnabled =
+        this.glFeatures.securityDastSiteProfilesAdditionalFields &&
+        this.authSection.fields.enabled &&
+        !this.isTargetAPI;
 
-      if (!validate) {
-        this.validationStatus = null;
-      } else {
-        try {
-          this.isValidatingSite = true;
+      this.form.showValidation = true;
 
-          await this.fetchValidationStatus();
-
-          if (![PASSED, INPROGRESS].some(this.validationStatusMatches)) {
-            await this.createValidationToken();
-          }
-        } catch (exception) {
-          this.captureException(exception);
-          this.isSiteValidationActive = false;
-        } finally {
-          this.isValidatingSite = false;
-        }
-      }
-    },
-    validationStatusMatches(status) {
-      return this.validationStatus === status;
-    },
-    validateTargetUrl() {
-      if (!isAbsolute(this.form.targetUrl.value)) {
-        this.form.targetUrl.state = false;
-        this.form.targetUrl.feedback = s__(
-          'DastProfiles|Please enter a valid URL format, ex: http://www.example.com/home',
-        );
+      if (!this.form.state || (isAuthEnabled && !this.authSection.state)) {
         return;
       }
-      this.form.targetUrl.state = true;
-      this.form.targetUrl.feedback = null;
-    },
-    async fetchValidationStatus() {
-      this.isFetchingValidationStatus = true;
 
-      try {
-        const {
-          data: {
-            project: {
-              dastSiteValidation: { status },
-            },
-          },
-        } = await this.$apollo.query({
-          query: dastSiteValidationQuery,
-          variables: {
-            fullPath: this.fullPath,
-            targetUrl: this.form.targetUrl.value,
-          },
-          fetchPolicy: fetchPolicies.NETWORK_ONLY,
-        });
-        this.validationStatus = status;
-
-        if (this.validationStatusMatches(INPROGRESS)) {
-          await new Promise(resolve => {
-            this.fetchValidationTimeout = setTimeout(resolve, DAST_SITE_VALIDATION_POLL_INTERVAL);
-          });
-          await this.fetchValidationStatus();
-        }
-      } catch (exception) {
-        this.showErrors({
-          message: this.i18n.siteValidation.validationStatusFetchError,
-        });
-        throw new Error(exception);
-      } finally {
-        this.isFetchingValidationStatus = false;
-      }
-    },
-    async createValidationToken() {
-      const errorMessage = this.i18n.siteValidation.createTokenError;
-
-      try {
-        const {
-          data: {
-            dastSiteTokenCreate: { id, token, errors = [] },
-          },
-        } = await this.$apollo.mutate({
-          mutation: dastSiteTokenCreateMutation,
-          variables: { projectFullPath: this.fullPath, targetUrl: this.form.targetUrl.value },
-        });
-        if (errors.length) {
-          this.showErrors({ message: errorMessage, errors });
-        } else {
-          this.tokenId = id;
-          this.token = token;
-        }
-      } catch (exception) {
-        this.showErrors({ message: errorMessage });
-
-        throw new Error(exception);
-      }
-    },
-    onSubmit() {
       this.isLoading = true;
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
+      const {
+        profileName,
+        targetUrl,
+        targetType,
+        requestHeaders,
+        excludedUrls,
+      } = serializeFormObject(this.form.fields);
+
       const variables = {
-        fullPath: this.fullPath,
-        ...(this.isEdit ? { id: this.siteProfile.id } : {}),
-        ...serializeFormObject(this.form),
+        input: {
+          fullPath: this.fullPath,
+          ...(this.isEdit ? { id: this.siteProfile.id } : {}),
+          profileName,
+          targetUrl,
+          ...(this.glFeatures.securityDastSiteProfilesApiOption && {
+            targetType,
+          }),
+          ...(this.glFeatures.securityDastSiteProfilesAdditionalFields && {
+            ...(!this.isTargetAPI && { auth: this.serializedAuthFields }),
+            ...(excludedUrls && {
+              excludedUrls: this.parsedExcludedUrls,
+            }),
+            ...(requestHeaders !== REDACTED_REQUEST_HEADERS && {
+              requestHeaders,
+            }),
+          }),
+        },
       };
 
       this.$apollo
@@ -302,18 +228,23 @@ export default {
         .then(
           ({
             data: {
-              [this.isEdit ? 'dastSiteProfileUpdate' : 'dastSiteProfileCreate']: { errors = [] },
+              [this.isEdit ? 'dastSiteProfileUpdate' : 'dastSiteProfileCreate']: {
+                id,
+                errors = [],
+              },
             },
           }) => {
             if (errors.length > 0) {
               this.showErrors({ message: errorMessage, errors });
               this.isLoading = false;
             } else {
-              redirectTo(this.profilesLibraryPath);
+              this.$emit('success', {
+                id,
+              });
             }
           },
         )
-        .catch(exception => {
+        .catch((exception) => {
           this.showErrors({ message: errorMessage });
           this.captureException(exception);
           this.isLoading = false;
@@ -326,11 +257,8 @@ export default {
         this.$refs[this.$options.modalId].show();
       }
     },
-    onValidationSuccess() {
-      this.validationStatus = PASSED;
-    },
     discard() {
-      redirectTo(this.profilesLibraryPath);
+      this.$emit('cancel');
     },
     captureException(exception) {
       Sentry.captureException(exception);
@@ -345,16 +273,39 @@ export default {
       this.errors = [];
       this.hasAlert = false;
     },
+    getCharacterLimitText(value, limit) {
+      return value.length
+        ? n__('%d character remaining', '%d characters remaining', limit - value.length)
+        : sprintf(__('Maximum character limit - %{limit}'), {
+            limit,
+          });
+    },
   },
   modalId: 'deleteDastProfileModal',
+  MAX_CHAR_LIMIT_EXCLUDED_URLS,
+  MAX_CHAR_LIMIT_REQUEST_HEADERS,
 };
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit">
-    <h2 class="gl-mb-6">
+  <gl-form novalidate @submit.prevent="onSubmit">
+    <h2 v-if="showHeader" class="gl-mb-6">
       {{ i18n.title }}
     </h2>
+
+    <gl-alert
+      v-if="isPolicyProfile"
+      data-testid="dast-policy-site-profile-form-alert"
+      variant="info"
+      class="gl-mb-5"
+      :dismissible="false"
+    >
+      {{
+        s__(
+          'DastProfiles|This site profile is currently being used by a policy. To make edits you must remove it from the active policy.',
+        )
+      }}
+    </gl-alert>
 
     <gl-alert
       v-if="hasAlert"
@@ -369,89 +320,129 @@ export default {
       </ul>
     </gl-alert>
 
-    <gl-form-group :label="s__('DastProfiles|Profile name')">
-      <gl-form-input
-        v-model="form.profileName.value"
-        class="mw-460"
-        data-testid="profile-name-input"
-        type="text"
-      />
-    </gl-form-group>
-
-    <hr />
-
-    <gl-form-group
-      data-testid="target-url-input-group"
-      :invalid-feedback="form.targetUrl.feedback"
-      :description="
-        isSiteValidationActive && !isValidatingSite
-          ? s__('DastProfiles|Validation must be turned off to change the target URL')
-          : null
-      "
-      :label="s__('DastProfiles|Target URL')"
-    >
-      <gl-form-input
-        v-model="form.targetUrl.value"
-        class="mw-460"
-        data-testid="target-url-input"
-        type="url"
-        :state="form.targetUrl.state"
-        :disabled="isSiteValidationActive"
-        @input="validateTargetUrl"
-      />
-    </gl-form-group>
-
-    <template v-if="glFeatures.securityOnDemandScansSiteValidation">
-      <gl-form-group :label="s__('DastProfiles|Validate target site')">
-        <template #description>
-          <p
-            v-if="siteValidationStatusDescription.text"
-            class="gl-mt-3"
-            :class="siteValidationStatusDescription.cssClass"
-            data-testid="siteValidationStatusDescription"
-          >
-            {{ siteValidationStatusDescription.text }}
-          </p>
-        </template>
-        <gl-toggle
-          data-testid="dast-site-validation-toggle"
-          :value="isSiteValidationActive"
-          :disabled="isSiteValidationDisabled"
-          :is-loading="
-            !isSiteValidationDisabled && (isFetchingValidationStatus || isValidatingSite)
-          "
-          @change="validateSite"
+    <gl-form-group data-testid="dast-site-parent-group" :disabled="isPolicyProfile">
+      <gl-form-group
+        :label="s__('DastProfiles|Profile name')"
+        :invalid-feedback="form.fields.profileName.feedback"
+      >
+        <gl-form-input
+          v-model="form.fields.profileName.value"
+          v-validation:[form.showValidation]
+          name="profileName"
+          class="mw-460"
+          data-testid="profile-name-input"
+          type="text"
+          required
+          :state="form.fields.profileName.state"
         />
       </gl-form-group>
 
-      <gl-collapse :visible="showValidationSection">
-        <dast-site-validation
-          :full-path="fullPath"
-          :token-id="tokenId"
-          :token="token"
-          :target-url="form.targetUrl.value"
-          @success="onValidationSuccess"
-        />
-      </gl-collapse>
-    </template>
+      <hr class="gl-border-gray-100" />
 
-    <hr />
-
-    <div class="gl-mt-6 gl-pt-6">
-      <gl-button
-        type="submit"
-        variant="success"
-        class="js-no-auto-disable"
-        data-testid="dast-site-profile-form-submit-button"
-        :disabled="isSubmitDisabled"
-        :loading="isLoading"
+      <gl-form-group
+        v-if="glFeatures.securityDastSiteProfilesApiOption"
+        :label="s__('DastProfiles|Site type')"
       >
-        {{ s__('DastProfiles|Save profile') }}
-      </gl-button>
-      <gl-button data-testid="dast-site-profile-form-cancel-button" @click="onCancelClicked">
-        {{ __('Cancel') }}
-      </gl-button>
-    </div>
+        <gl-form-radio-group
+          v-model="form.fields.targetType.value"
+          :options="targetTypesOptions"
+          data-testid="site-type-option"
+        />
+      </gl-form-group>
+
+      <gl-form-group
+        data-testid="target-url-input-group"
+        :invalid-feedback="form.fields.targetUrl.feedback"
+        :label="s__('DastProfiles|Target URL')"
+      >
+        <gl-form-input
+          v-model="form.fields.targetUrl.value"
+          v-validation:[form.showValidation]
+          name="targetUrl"
+          class="mw-460"
+          data-testid="target-url-input"
+          required
+          type="url"
+          :state="form.fields.targetUrl.state"
+        />
+      </gl-form-group>
+
+      <div v-if="glFeatures.securityDastSiteProfilesAdditionalFields" class="row">
+        <gl-form-group
+          :label="s__('DastProfiles|Excluded URLs (Optional)')"
+          :invalid-feedback="form.fields.excludedUrls.feedback"
+          class="col-md-6"
+        >
+          <template #label>
+            {{ i18n.excludedUrls.label }}
+            <tooltip-icon :title="i18n.excludedUrls.tooltip" />
+            <gl-form-text class="gl-mt-3">{{ i18n.excludedUrls.description }}</gl-form-text>
+          </template>
+          <gl-form-textarea
+            v-model="form.fields.excludedUrls.value"
+            :maxlength="$options.MAX_CHAR_LIMIT_EXCLUDED_URLS"
+            :placeholder="i18n.excludedUrls.placeholder"
+            :no-resize="false"
+            data-testid="excluded-urls-input"
+          />
+          <gl-form-text>{{
+            getCharacterLimitText(
+              form.fields.excludedUrls.value,
+              $options.MAX_CHAR_LIMIT_EXCLUDED_URLS,
+            )
+          }}</gl-form-text>
+        </gl-form-group>
+
+        <gl-form-group :invalid-feedback="form.fields.requestHeaders.feedback" class="col-md-6">
+          <template #label>
+            {{ i18n.requestHeaders.label }}
+            <tooltip-icon :title="i18n.requestHeaders.tooltip" />
+            <gl-form-text class="gl-mt-3">{{ i18n.requestHeaders.description }}</gl-form-text>
+          </template>
+          <gl-form-textarea
+            v-model="form.fields.requestHeaders.value"
+            :maxlength="$options.MAX_CHAR_LIMIT_REQUEST_HEADERS"
+            :placeholder="i18n.requestHeaders.placeholder"
+            :no-resize="false"
+            data-testid="request-headers-input"
+          />
+          <gl-form-text>{{
+            getCharacterLimitText(
+              form.fields.requestHeaders.value,
+              $options.MAX_CHAR_LIMIT_REQUEST_HEADERS,
+            )
+          }}</gl-form-text>
+        </gl-form-group>
+      </div>
+    </gl-form-group>
+
+    <dast-site-auth-section
+      v-if="glFeatures.securityDastSiteProfilesAdditionalFields && !isTargetAPI"
+      v-model="authSection"
+      :disabled="isPolicyProfile"
+      :show-validation="form.showValidation"
+      :is-edit-mode="isEdit"
+    />
+
+    <hr class="gl-border-gray-100" />
+
+    <gl-button
+      :disabled="isPolicyProfile"
+      type="submit"
+      variant="success"
+      class="js-no-auto-disable"
+      data-testid="dast-site-profile-form-submit-button"
+      :loading="isLoading"
+    >
+      {{ s__('DastProfiles|Save profile') }}
+    </gl-button>
+    <gl-button
+      class="gl-ml-2"
+      data-testid="dast-site-profile-form-cancel-button"
+      @click="onCancelClicked"
+    >
+      {{ __('Cancel') }}
+    </gl-button>
 
     <gl-modal
       :ref="$options.modalId"

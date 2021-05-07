@@ -27,3 +27,6 @@ export const SITE_PROFILES_QUERY = {
   fetchQuery: dastSiteProfilesQuery,
   fetchError: ERROR_FETCH_SITE_PROFILES,
 };
+
+export const TYPE_SITE_PROFILE = 'DastSiteProfile';
+export const TYPE_SCANNER_PROFILE = 'DastScannerProfile';

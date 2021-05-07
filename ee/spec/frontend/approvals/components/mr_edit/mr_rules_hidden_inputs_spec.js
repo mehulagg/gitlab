@@ -1,12 +1,12 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
+import MRRulesHiddenInputs from 'ee/approvals/components/mr_edit/mr_rules_hidden_inputs.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import MREditModule from 'ee/approvals/stores/modules/mr_edit';
-import MRRulesHiddenInputs from 'ee/approvals/components/mr_edit/mr_rules_hidden_inputs.vue';
 import { createMRRule } from '../../mocks';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 const {
   INPUT_ID,
@@ -28,8 +28,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
   let store;
 
   const factory = () => {
-    wrapper = shallowMount(localVue.extend(MRRulesHiddenInputs), {
-      localVue,
+    wrapper = shallowMount(MRRulesHiddenInputs, {
       store: new Vuex.Store(store),
     });
   };
@@ -49,7 +48,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
   });
 
   const findHiddenInputs = () =>
-    wrapper.findAll('input[type=hidden]').wrappers.map(x => ({
+    wrapper.findAll('input[type=hidden]').wrappers.map((x) => ({
       name: x.attributes('name'),
       value: x.element.value,
     }));
@@ -137,7 +136,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
         it('renders empty users input', () => {
           factory();
 
-          expect(findHiddenInputs().filter(x => x.name === INPUT_USER_IDS)).toEqual([
+          expect(findHiddenInputs().filter((x) => x.name === INPUT_USER_IDS)).toEqual([
             { name: INPUT_USER_IDS, value: '' },
           ]);
         });
@@ -151,7 +150,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
         it('renders empty groups input', () => {
           factory();
 
-          expect(findHiddenInputs().filter(x => x.name === INPUT_GROUP_IDS)).toEqual([
+          expect(findHiddenInputs().filter((x) => x.name === INPUT_GROUP_IDS)).toEqual([
             { name: INPUT_GROUP_IDS, value: '' },
           ]);
         });
@@ -165,7 +164,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
         it('does render id input', () => {
           factory();
 
-          expect(findHiddenInputs().map(x => x.name)).toContain(INPUT_ID);
+          expect(findHiddenInputs().map((x) => x.name)).toContain(INPUT_ID);
         });
 
         describe('with source', () => {

@@ -1,26 +1,27 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# GitLab Rails Console Cheat Sheet
+# GitLab Rails Console Cheat Sheet **(FREE SELF)**
 
 This is the GitLab Support Team's collection of information regarding the GitLab Rails
 console, for use while troubleshooting. It is listed here for transparency,
 and it may be useful for users with experience with these tools. If you are currently
-having an issue with GitLab, it is highly recommended that you check your
-[support options](https://about.gitlab.com/support/) first, before attempting to use
+having an issue with GitLab, it is highly recommended that you first check
+our guide on [navigating our Rails console](navigating_gitlab_via_rails_console.md),
+and your [support options](https://about.gitlab.com/support/), before attempting to use
 this information.
 
-CAUTION: **Caution:**
+WARNING:
 Please note that some of these scripts could be damaging if not run correctly,
 or under the right conditions. We highly recommend running them under the
 guidance of a Support Engineer, or running them in a test environment with a
 backup of the instance ready to be restored, just in case.
 
-CAUTION: **Caution:**
+WARNING:
 Please also note that as GitLab changes, changes to the code are inevitable,
 and so some scripts may not work as they once used to. These are not kept
 up-to-date as these scripts/commands were added as they were found/needed. As
@@ -44,6 +45,40 @@ instance_of_object.method(:foo).source_location
 
 # Example for when we would call project.private?
 project.method(:private?).source_location
+```
+
+## Attributes
+
+View available attributes, formatted using pretty print (`pp`).
+
+For example, determine what attributes contain users' names and email addresses:
+
+```ruby
+u = User.find_by_username('someuser')
+pp u.attributes
+```
+
+Partial output:
+
+```plaintext
+{"id"=>1234,
+ "email"=>"someuser@example.com",
+ "sign_in_count"=>99,
+ "name"=>"S User",
+ "username"=>"someuser",
+ "first_name"=>nil,
+ "last_name"=>nil,
+ "bot_type"=>nil}
+```
+
+Then make use of the attributes, [testing SMTP, for example](https://docs.gitlab.com/omnibus/settings/smtp.html#testing-the-smtp-configuration):
+
+```ruby
+e = u.email
+n = u.name
+Notify.test_email(e, "Test email for #{n}", 'Test email').deliver_now
+#
+Notify.test_email(u.email, "Test email for #{u.name}", 'Test email').deliver_now
 ```
 
 ## Query the database using an ActiveRecord Model
@@ -148,7 +183,7 @@ project.repository.expire_exists_cache
 Project.update_all(visibility_level: 0)
 ```
 
-### Find & remove projects that are pending deletion
+### Find projects that are pending deletion
 
 ```ruby
 #
@@ -177,13 +212,11 @@ project = Project.find_by_full_path('group-changeme/project-changeme')
 ::Projects::DestroyService.new(project, user, {}).execute
 ```
 
-Next, run `sudo gitlab-rake gitlab:cleanup:repos` on the command line to finish.
-
 ### Destroy a project
 
 ```ruby
-project = Project.find_by_full_path('')
-user = User.find_by_username('')
+project = Project.find_by_full_path('<project_path>')
+user = User.find_by_username('<username>')
 ProjectDestroyWorker.perform_async(project.id, user.id, {})
 # or ProjectDestroyWorker.new.perform(project.id, user.id, {})
 # or Projects::DestroyService.new(project, user).execute
@@ -192,8 +225,8 @@ ProjectDestroyWorker.perform_async(project.id, user.id, {})
 ### Remove fork relationship manually
 
 ```ruby
-p = Project.find_by_full_path('')
-u = User.find_by_username('')
+p = Project.find_by_full_path('<project_path>')
+u = User.find_by_username('<username>')
 ::Projects::UnlinkForkService.new(p, u).execute
 ```
 
@@ -210,13 +243,13 @@ project.update!(repository_read_only: true)
 ### Transfer project from one namespace to another
 
 ```ruby
- p= Project.find_by_full_path('')
+ p= Project.find_by_full_path('<project_path>')
 
  # To set the owner of the project
  current_user= p.creator
 
 # Namespace where you want this to be moved.
-namespace = Namespace.find_by_full_path("")
+namespace = Namespace.find_by_full_path("<new_namespace>")
 
 ::Projects::TransferService.new(p, current_user).execute(namespace)
 ```
@@ -276,10 +309,10 @@ pp p.statistics  # compare with earlier values
 
 ### Recreate
 
-A Projects Wiki can be recreated by
-
-NOTE: **Note:**
+WARNING:
 This is a destructive operation, the Wiki will be empty.
+
+A Projects Wiki can be recreated by this command:
 
 ```ruby
 p = Project.find_by_full_path('<username-or-group>/<project-name>')  ### enter your projects path
@@ -341,6 +374,26 @@ Clear the cache:
 ```shell
 sudo gitlab-rake cache:clear
 ```
+
+### Export a repository
+
+It's typically recommended to export a project through [the web interface](../../user/project/settings/import_export.md#exporting-a-project-and-its-data) or through [the API](../../api/project_import_export.md). In situations where this is not working as expected, it may be preferable to export a project directly via the Rails console:
+
+```ruby
+user = User.find_by_username('USERNAME')
+project = Project.find_by_full_path('PROJECT_PATH')
+Projects::ImportExport::ExportService.new(project, user).execute
+```
+
+If the project you wish to export is available at `https://gitlab.example.com/baltig/pipeline-templates`, the value to use for `PROJECT_PATH` would be `baltig/pipeline-templates`.
+
+If this all runs successfully, you will see output like the following before being returned to the Rails console prompt:
+
+```ruby
+=> nil
+```
+
+The exported project will be located within a `.tar.gz` file in `/var/opt/gitlab/gitlab-rails/uploads/-/system/import_export_upload/export_file/`.
 
 ## Repository
 
@@ -415,7 +468,7 @@ end
 ### Skip reconfirmation
 
 ```ruby
-user = User.find_by_username ''
+user = User.find_by_username '<username>'
 user.skip_reconfirmation!
 ```
 
@@ -426,14 +479,15 @@ user.skip_reconfirmation!
 User.active.count
 
 # Users taking a seat on the instance
-License.current.current_active_users_count
+User.billable.count
 
 # The historical max on the instance as of the past year
 ::HistoricalData.max_historical_user_count
 ```
 
+Using cURL and jq (up to a max 100, see the [pagination docs](../../api/README.md#pagination)):
+
 ```shell
-# Using curl and jq (up to a max 100, see pagination docs https://docs.gitlab.com/ee/api/#pagination
 curl --silent --header "Private-Token: ********************" "https://gitlab.example.com/api/v4/users?per_page=100&active" | jq --compact-output '.[] | [.id,.name,.username]'
 ```
 
@@ -459,10 +513,22 @@ users.each do |user|
 end
 ```
 
+### Deactivate Users that have no recent activity
+
+```ruby
+days_inactive = 90
+inactive_users = User.active.where("last_activity_on <= ?", days_inactive.days.ago)
+
+inactive_users.each do |user|
+    puts "user '#{user.username}': #{user.last_activity_on}"
+    user.deactivate!
+end
+```
+
 ### Block Users that have no recent activity
 
 ```ruby
-days_inactive = 60
+days_inactive = 90
 inactive_users = User.active.where("last_activity_on <= ?", days_inactive.days.ago)
 
 inactive_users.each do |user|
@@ -492,12 +558,12 @@ user.max_member_access_for_group group.id
 ```ruby
 user = User.find_by_username('<username>')
 group = Group.find_by_name("<group_name>")
-parent_group = Group.find_by(id: "") # empty string amounts to root as parent
+parent_group = Group.find_by(id: "<group_id>")
 service = ::Groups::TransferService.new(group, user)
 service.execute(parent_group)
 ```
 
-### Count unique users in a group and sub-groups
+### Count unique users in a group and subgroups
 
 ```ruby
 group = Group.find_by_path_or_name("groupname")
@@ -531,6 +597,17 @@ GroupDestroyWorker.perform_async(group_id, user_id)
 # Project creation levels: 0 - No one, 1 - Maintainers, 2 - Developers + Maintainers
 group = Group.find_by_path_or_name('group-name')
 group.project_creation_level=0
+```
+
+### Modify group - disable 2FA requirement
+
+WARNING:
+When disabling the 2FA Requirement on a subgroup, the whole parent group (including all subgroups) is affected by this change.
+
+```ruby
+group = Group.find_by_path_or_name('group-name')
+group.require_two_factor_authentication=false
+group.save
 ```
 
 ## SCIM
@@ -602,7 +679,7 @@ conflicting_permanent_redirects.destroy_all
 ```ruby
 p = Project.find_by_full_path('<full/path/to/project>')
 m = p.merge_requests.find_by(iid: <iid>)
-u = User.find_by_username('')
+u = User.find_by_username('<username>')
 MergeRequests::PostMergeService.new(p, u).execute(m)
 ```
 
@@ -618,9 +695,9 @@ Issuable::DestroyService.new(m.project, u).execute(m)
 ### Rebase manually
 
 ```ruby
-p = Project.find_by_full_path('')
+p = Project.find_by_full_path('<project_path>')
 m = project.merge_requests.find_by(iid: )
-u = User.find_by_username('')
+u = User.find_by_username('<username>')
 MergeRequests::RebaseService.new(m.target_project, u).execute(m)
 ```
 
@@ -657,7 +734,7 @@ build.dependencies.each do |d| { puts "status: #{d.status}, finished at: #{d.fin
 ### Try CI service
 
 ```ruby
-p = Project.find_by_full_path('')
+p = Project.find_by_full_path('<project_path>')
 m = project.merge_requests.find_by(iid: )
 m.project.try(:ci_service)
 ```
@@ -667,7 +744,7 @@ m.project.try(:ci_service)
 ```ruby
 project = Project.find_by_full_path 'group/project'
 content = project.repository.gitlab_ci_yml_for(project.repository.root_ref_sha)
-Gitlab::Ci::YamlProcessor.validation_message(content,  user: User.first)
+Gitlab::Ci::Lint.new(project: project,  current_user: User.first).validate(content)
 ```
 
 ### Disable AutoDevOps on Existing Projects
@@ -683,6 +760,21 @@ end
 
 ```ruby
 Gitlab::CurrentSettings.current_application_settings.runners_registration_token
+```
+
+### Run pipeline schedules manually
+
+You can run pipeline schedules manually through the Rails console to reveal any errors that are usually not visible.
+
+```ruby
+# schedule_id can be obtained from Edit Pipeline Schedule page
+schedule = Ci::PipelineSchedule.find_by(id: <schedule_id>)
+
+# Select the user that you want to run the schedule for
+user = User.find_by_username('<username>')
+
+# Run the schedule
+ps = Ci::CreatePipelineService.new(schedule.project, user, ref: schedule.ref).execute!(:schedule, ignore_skip_ci: true, save_on_errors: false, schedule: schedule)
 ```
 
 ## License
@@ -826,7 +918,7 @@ Find this content in the [Container Registry troubleshooting docs](../packages/c
 
 ## Sidekiq
 
-This content has been moved to the [Troubleshooting Sidekiq docs](./sidekiq.md).
+This content has been moved to the [Troubleshooting Sidekiq docs](sidekiq.md).
 
 ## Redis
 
@@ -966,4 +1058,133 @@ Geo::ProjectRegistry.update_all(resync_repository: true, resync_wiki: true)
 project = Project.find_by_full_path('<group/project>')
 
 Geo::RepositorySyncService.new(project).execute
+```
+
+### Blob types newer than uploads/artifacts/LFS
+
+- `Packages::PackageFile`
+- `Terraform::StateVersion`
+- `MergeRequestDiff`
+
+`Packages::PackageFile` is used in the following examples, but things generally work the same for the other Blob types.
+
+#### The Replicator
+
+The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it):
+
+```ruby
+model_record = Packages::PackageFile.last
+model_record.replicator.registry.replicator.model_record # just showing that these methods exist
+```
+
+#### Replicate a package file, synchronously, given an ID
+
+```ruby
+model_record = Packages::PackageFile.find(id)
+model_record.replicator.send(:download)
+```
+
+#### Replicate a package file, synchronously, given a registry ID
+
+```ruby
+registry = Geo::PackageFileRegistry.find(registry_id)
+registry.replicator.send(:download)
+```
+
+### Repository types newer than project/wiki repositories
+
+- `SnippetRepository`
+- `GroupWikiRepository`
+
+`SnippetRepository` is used in the examples below, but things generally work the same for the other Repository types.
+
+#### The Replicator
+
+The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it).
+
+```ruby
+model_record = SnippetRepository.last
+model_record.replicator.registry.replicator.model_record # just showing that these methods exist
+```
+
+#### Replicate a snippet repository, synchronously, given an ID
+
+```ruby
+model_record = SnippetRepository.find(id)
+model_record.replicator.send(:sync_repository)
+```
+
+#### Replicate a snippet repository, synchronously, given a registry ID
+
+```ruby
+registry = Geo::SnippetRepositoryRegistry.find(registry_id)
+registry.replicator.send(:sync_repository)
+```
+
+### Generate usage ping
+
+#### Generate or get the cached usage ping
+
+```ruby
+Gitlab::UsageData.to_json
+```
+
+#### Generate a fresh new usage ping
+
+This will also refresh the cached usage ping displayed in the admin area
+
+```ruby
+Gitlab::UsageData.to_json(force_refresh: true)
+```
+
+#### Generate and print
+
+Generates usage ping data in JSON format.
+
+```shell
+rake gitlab:usage_data:generate
+```
+
+#### Generate and send usage ping
+
+Prints the metrics saved in `conversational_development_index_metrics`.
+
+```shell
+rake gitlab:usage_data:generate_and_send
+```
+
+## Elasticsearch
+
+### Configuration attributes
+
+Open the rails console (`gitlab rails c`) and run the following command to see all the available attributes:
+
+```ruby
+ApplicationSetting.last.attributes
+```
+
+Among other attributes, in the output you will notice that all the settings available in the [Elasticsearch Integration page](../../integration/elasticsearch.md), like: `elasticsearch_indexing`, `elasticsearch_url`, `elasticsearch_replicas`, `elasticsearch_pause_indexing`, etc.
+
+#### Setting attributes
+
+You can then set anyone of Elasticsearch integration settings by issuing a command similar to:
+
+```ruby
+ApplicationSetting.last.update_attributes(elasticsearch_url: '<your ES URL and port>')
+
+#or
+
+ApplicationSetting.last.update_attributes(elasticsearch_indexing: false)
+```
+
+#### Getting attributes
+
+You can then check if the settings have been set in the [Elasticsearch Integration page](../../integration/elasticsearch.md) or in the rails console by issuing:
+
+```ruby
+Gitlab::CurrentSettings.elasticsearch_url
+
+#or
+
+Gitlab::CurrentSettings.elasticsearch_indexing
 ```

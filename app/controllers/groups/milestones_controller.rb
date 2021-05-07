@@ -5,9 +5,6 @@ class Groups::MilestonesController < Groups::ApplicationController
 
   before_action :milestone, only: [:edit, :show, :update, :issues, :merge_requests, :participants, :labels, :destroy]
   before_action :authorize_admin_milestones!, only: [:edit, :new, :create, :update, :destroy]
-  before_action do
-    push_frontend_feature_flag(:burnup_charts, @group, default_enabled: true)
-  end
 
   feature_category :issue_tracking
 
@@ -24,7 +21,7 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 
   def new
-    @milestone = Milestone.new
+    @noteable = @milestone = Milestone.new
   end
 
   def create
@@ -73,7 +70,7 @@ class Groups::MilestonesController < Groups::ApplicationController
   end
 
   def milestone
-    @milestone = group.milestones.find_by_iid(params[:id])
+    @noteable = @milestone ||= group.milestones.find_by_iid(params[:id])
 
     render_404 unless @milestone
   end

@@ -13,6 +13,8 @@ module EE
         end
 
         cleanup_group_identity(member)
+        cleanup_group_deletion_schedule(member) if member.source.is_a?(Group)
+        cleanup_oncall_rotations(member)
       end
 
       private
@@ -39,6 +41,29 @@ module EE
         return unless saml_provider
 
         saml_provider.identities.for_user(member.user).delete_all
+      end
+
+      def cleanup_group_deletion_schedule(member)
+        deletion_schedule = member.source&.deletion_schedule
+
+        return unless deletion_schedule
+
+        deletion_schedule.destroy if deletion_schedule.deleting_user == member.user
+      end
+
+      def cleanup_oncall_rotations(member)
+        user = member.user
+
+        return unless user
+
+        user_rotations = ::IncidentManagement::MemberOncallRotationsFinder.new(member).execute
+
+        return unless user_rotations.present?
+
+        ::IncidentManagement::OncallRotations::RemoveParticipantsService.new(
+          user_rotations,
+          user
+        ).execute
       end
     end
   end

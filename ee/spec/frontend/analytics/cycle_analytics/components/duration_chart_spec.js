@@ -1,9 +1,9 @@
-import Vuex from 'vuex';
 import { GlDropdownItem } from '@gitlab/ui';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
-import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
+import Vuex from 'vuex';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import StageDropdownFilter from 'ee/analytics/cycle_analytics/components/stage_dropdown_filter.vue';
+import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { allowedStages as stages, durationChartPlottableData as durationData } from '../mock_data';
 
@@ -59,16 +59,13 @@ function createComponent({
 describe('DurationChart', () => {
   let wrapper;
 
-  const findContainer = _wrapper => _wrapper.find('[data-testid="vsa-duration-chart"]');
-  const findScatterPlot = _wrapper => _wrapper.find(Scatterplot);
-  const findStageDropdown = _wrapper => _wrapper.find(StageDropdownFilter);
-  const findLoader = _wrapper => _wrapper.find(ChartSkeletonLoader);
+  const findContainer = (_wrapper) => _wrapper.find('[data-testid="vsa-duration-chart"]');
+  const findScatterPlot = (_wrapper) => _wrapper.find(Scatterplot);
+  const findStageDropdown = (_wrapper) => _wrapper.find(StageDropdownFilter);
+  const findLoader = (_wrapper) => _wrapper.find(ChartSkeletonLoader);
 
   const selectStage = (_wrapper, index = 0) => {
-    findStageDropdown(_wrapper)
-      .findAll(GlDropdownItem)
-      .at(index)
-      .vm.$emit('click');
+    findStageDropdown(_wrapper).findAll(GlDropdownItem).at(index).vm.$emit('click');
   };
 
   beforeEach(() => {

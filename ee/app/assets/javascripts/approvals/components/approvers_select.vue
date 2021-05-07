@@ -1,14 +1,14 @@
 <script>
 import $ from 'jquery';
-import 'select2/select2';
 import { escape, debounce } from 'lodash';
 import Api from 'ee/api';
+import { renderAvatar } from '~/helpers/avatar_helper';
+import { loadCSSFile } from '~/lib/utils/css_utils';
 import { __ } from '~/locale';
 import { TYPE_USER, TYPE_GROUP } from '../constants';
-import { renderAvatar } from '~/helpers/avatar_helper';
 
 function addType(type) {
-  return items => items.map(obj => Object.assign(obj, { type }));
+  return (items) => items.map((obj) => Object.assign(obj, { type }));
 }
 
 function formatSelection(group) {
@@ -80,6 +80,11 @@ export default {
       default: false,
     },
   },
+  computed: {
+    isFeatureEnabled() {
+      return Boolean(gon.features?.showRelevantApprovalRuleApprovers);
+    },
+  },
   watch: {
     value(val) {
       if (val.length > 0) {
@@ -97,18 +102,30 @@ export default {
     },
   },
   mounted() {
-    $(this.$refs.input)
-      .select2({
-        placeholder: __('Search users or groups'),
-        minimumInputLength: 0,
-        multiple: true,
-        closeOnSelect: false,
-        formatResult,
-        formatSelection,
-        query: debounce(({ term, callback }) => this.fetchGroupsAndUsers(term).then(callback), 250),
-        id: ({ type, id }) => `${type}${id}`,
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(() => {
+        // eslint-disable-next-line promise/no-nesting
+        loadCSSFile(gon.select2_css_path)
+          .then(() => {
+            $(this.$refs.input)
+              .select2({
+                placeholder: __('Search users or groups'),
+                minimumInputLength: 0,
+                multiple: true,
+                closeOnSelect: false,
+                formatResult,
+                formatSelection,
+                query: debounce(({ term, callback }) => {
+                  // eslint-disable-next-line promise/no-nesting
+                  return this.fetchGroupsAndUsers(term).then(callback);
+                }, 250),
+                id: ({ type, id }) => `${type}${id}`,
+              })
+              .on('change', (e) => this.onChange(e));
+          })
+          .catch(() => {});
       })
-      .on('change', e => this.onChange(e));
+      .catch(() => {});
   },
   beforeDestroy() {
     $(this.$refs.input).select2('destroy');
@@ -120,9 +137,21 @@ export default {
 
       return Promise.all([groupsAsync, usersAsync])
         .then(([groups, users]) => groups.concat(users))
-        .then(results => ({ results }));
+        .then((results) => ({ results }));
     },
     fetchGroups(term) {
+      if (this.isFeatureEnabled) {
+        const hasTerm = term.trim().length > 0;
+        const DEVELOPER_ACCESS_LEVEL = 30;
+
+        return Api.projectGroups(this.projectId, {
+          skip_groups: this.skipGroupIds,
+          ...(hasTerm ? { search: term } : {}),
+          with_shared: true,
+          shared_min_access_level: DEVELOPER_ACCESS_LEVEL,
+        });
+      }
+
       // Don't includeAll when search is empty. Otherwise, the user could get a lot of garbage choices.
       // https://gitlab.com/gitlab-org/gitlab/issues/11566
       const includeAll = term.trim().length > 0;

@@ -3,6 +3,8 @@
 class IterationsUpdateStatusWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   idempotent!
 
   queue_namespace :cronjob

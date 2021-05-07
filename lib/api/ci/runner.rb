@@ -7,6 +7,8 @@ module API
 
       content_type :txt, 'text/plain'
 
+      feature_category :continuous_integration
+
       resource :runners do
         desc 'Registers a new Runner' do
           success Entities::RunnerRegistrationDetails
@@ -32,22 +34,22 @@ module API
             if runner_registration_token_valid?
               # Create shared runner. Requires admin access
               attributes.merge(runner_type: :instance_type)
-            elsif project = Project.find_by_runners_token(params[:token])
+            elsif @project = Project.find_by_runners_token(params[:token])
               # Create a specific runner for the project
-              attributes.merge(runner_type: :project_type, projects: [project])
-            elsif group = Group.find_by_runners_token(params[:token])
+              attributes.merge(runner_type: :project_type, projects: [@project])
+            elsif @group = Group.find_by_runners_token(params[:token])
               # Create a specific runner for the group
-              attributes.merge(runner_type: :group_type, groups: [group])
+              attributes.merge(runner_type: :group_type, groups: [@group])
             else
               forbidden!
             end
 
-          runner = ::Ci::Runner.create(attributes)
+          @runner = ::Ci::Runner.create(attributes)
 
-          if runner.persisted?
-            present runner, with: Entities::RunnerRegistrationDetails
+          if @runner.persisted?
+            present @runner, with: Entities::RunnerRegistrationDetails
           else
-            render_validation_error!(runner)
+            render_validation_error!(@runner)
           end
         end
 
@@ -60,9 +62,7 @@ module API
         delete '/' do
           authenticate_runner!
 
-          runner = ::Ci::Runner.find_by_token(params[:token])
-
-          destroy_conditionally!(runner)
+          destroy_conditionally!(current_runner)
         end
 
         desc 'Validates authentication credentials' do
@@ -79,12 +79,7 @@ module API
       end
 
       resource :jobs do
-        before do
-          Gitlab::ApplicationContext.push(
-            user: -> { current_job&.user },
-            project: -> { current_job&.project }
-          )
-        end
+        before { set_application_context }
 
         desc 'Request a job' do
           success Entities::JobRequest::Response
@@ -174,6 +169,11 @@ module API
           optional :state, type: String, desc: %q(Job's status: success, failed)
           optional :checksum, type: String, desc: %q(Job's trace CRC32 checksum)
           optional :failure_reason, type: String, desc: %q(Job's failure_reason)
+          optional :output, type: Hash, desc: %q(Build log state) do
+            optional :checksum, type: String, desc: %q(Job's trace CRC32 checksum)
+            optional :bytesize, type: Integer, desc: %q(Job's trace size in bytes)
+          end
+          optional :exit_code, type: Integer, desc: %q(Job's exit code)
         end
         put '/:id' do
           job = authenticate_job!
@@ -184,6 +184,8 @@ module API
             .new(job, declared_params(include_missing: false))
 
           service.execute.then do |result|
+            track_ci_minutes_usage!(job, current_runner)
+
             header 'X-GitLab-Trace-Update-Interval', result.backoff
             status result.status
             body result.status.to_s
@@ -205,27 +207,20 @@ module API
 
           error!('400 Missing header Content-Range', 400) unless request.headers.key?('Content-Range')
           content_range = request.headers['Content-Range']
-          content_range = content_range.split('-')
 
-          # TODO:
-          # it seems that `Content-Range` as formatted by runner is wrong,
-          # the `byte_end` should point to final byte, but it points byte+1
-          # that means that we have to calculate end of body,
-          # as we cannot use `content_length[1]`
-          # Issue: https://gitlab.com/gitlab-org/gitlab-runner/issues/3275
+          result = ::Ci::AppendBuildTraceService
+            .new(job, content_range: content_range)
+            .execute(request.body.read)
 
-          body_data = request.body.read
-          body_start = content_range[0].to_i
-          body_end = body_start + body_data.bytesize
-
-          stream_size = job.trace.append(body_data, body_start)
-          unless stream_size == body_end
-            break error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{stream_size}" })
+          if result.status == 416
+            break error!('416 Range Not Satisfiable', 416, { 'Range' => "0-#{result.stream_size}" })
           end
 
-          status 202
+          track_ci_minutes_usage!(job, current_runner)
+
+          status result.status
           header 'Job-Status', job.status
-          header 'Range', "0-#{stream_size}"
+          header 'Range', "0-#{result.stream_size}"
           header 'X-GitLab-Trace-Update-Interval', job.trace.update_interval.to_s
         end
 
@@ -254,7 +249,7 @@ module API
 
           job = authenticate_job!
 
-          result = ::Ci::CreateJobArtifactsService.new(job).authorize(artifact_type: params[:artifact_type], filesize: params[:filesize])
+          result = ::Ci::JobArtifacts::CreateService.new(job).authorize(artifact_type: params[:artifact_type], filesize: params[:filesize])
 
           if result[:status] == :success
             content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
@@ -293,7 +288,7 @@ module API
           artifacts = params[:file]
           metadata = params[:metadata]
 
-          result = ::Ci::CreateJobArtifactsService.new(job).execute(artifacts, params, metadata_file: metadata)
+          result = ::Ci::JobArtifacts::CreateService.new(job).execute(artifacts, params, metadata_file: metadata)
 
           if result[:status] == :success
             status :created

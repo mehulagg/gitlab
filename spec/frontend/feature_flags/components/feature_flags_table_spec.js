@@ -1,7 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlToggle, GlBadge } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { trimText } from 'helpers/text_helper';
 import { mockTracking } from 'helpers/tracking_helper';
+import FeatureFlagsTable from '~/feature_flags/components/feature_flags_table.vue';
 import {
   ROLLOUT_STRATEGY_ALL_USERS,
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
@@ -11,7 +12,6 @@ import {
   LEGACY_FLAG,
   DEFAULT_PERCENT_ROLLOUT,
 } from '~/feature_flags/constants';
-import FeatureFlagsTable from '~/feature_flags/components/feature_flags_table.vue';
 
 const getDefaultProps = () => ({
   featureFlags: [
@@ -120,18 +120,19 @@ describe('Feature flag table', () => {
 
   describe('when active and with an update toggle', () => {
     let toggle;
-    let spy;
 
     beforeEach(() => {
       props.featureFlags[0].update_path = props.featureFlags[0].destroy_path;
       createWrapper(props);
       toggle = wrapper.find(GlToggle);
-      spy = mockTracking('_category_', toggle.element, jest.spyOn);
     });
 
     it('should have a toggle', () => {
       expect(toggle.exists()).toBe(true);
-      expect(toggle.props('value')).toBe(true);
+      expect(toggle.props()).toMatchObject({
+        label: FeatureFlagsTable.i18n.toggleLabel,
+        value: true,
+      });
     });
 
     it('should trigger a toggle event', () => {
@@ -140,14 +141,6 @@ describe('Feature flag table', () => {
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted('toggle-flag')).toEqual([[flag]]);
-      });
-    });
-
-    it('should track a click', () => {
-      toggle.trigger('click');
-
-      expect(spy).toHaveBeenCalledWith('_category_', 'click_button', {
-        label: 'feature_flag_toggle',
       });
     });
   });
@@ -180,6 +173,8 @@ describe('Feature flag table', () => {
   });
 
   describe('with a new version flag', () => {
+    let toggle;
+    let spy;
     let badges;
 
     beforeEach(() => {
@@ -194,6 +189,7 @@ describe('Feature flag table', () => {
             description: 'flag description',
             destroy_path: 'destroy/path',
             edit_path: 'edit/path',
+            update_path: 'update/path',
             version: NEW_VERSION_FLAG,
             scopes: [],
             strategies: [
@@ -226,6 +222,8 @@ describe('Feature flag table', () => {
         provide: { csrfToken: 'fakeToken', glFeatures: { featureFlagsNewVersion: true } },
       });
 
+      toggle = wrapper.find(GlToggle);
+      spy = mockTracking('_category_', toggle.element, jest.spyOn);
       badges = wrapper.findAll('[data-testid="strategy-badge"]');
     });
 
@@ -253,6 +251,14 @@ describe('Feature flag table', () => {
 
     it('shows the name of a user list for user list', () => {
       expect(badges.at(3).text()).toContain('User List - test list');
+    });
+
+    it('tracks a click', () => {
+      toggle.trigger('click');
+
+      expect(spy).toHaveBeenCalledWith('_category_', 'click_button', {
+        label: 'feature_flag_toggle',
+      });
     });
   });
 

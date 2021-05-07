@@ -10,13 +10,16 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Build::Associations,
                 Gitlab::Ci::Pipeline::Chain::Validate::Abilities,
                 Gitlab::Ci::Pipeline::Chain::Validate::Repository,
+                Gitlab::Ci::Pipeline::Chain::Validate::SecurityOrchestrationPolicy,
                 Gitlab::Ci::Pipeline::Chain::Config::Content,
                 Gitlab::Ci::Pipeline::Chain::Config::Process,
                 Gitlab::Ci::Pipeline::Chain::RemoveUnwantedChatJobs,
                 Gitlab::Ci::Pipeline::Chain::Skip,
+                Gitlab::Ci::Pipeline::Chain::SeedBlock,
                 Gitlab::Ci::Pipeline::Chain::EvaluateWorkflowRules,
                 Gitlab::Ci::Pipeline::Chain::Seed,
                 Gitlab::Ci::Pipeline::Chain::Limit::Size,
+                Gitlab::Ci::Pipeline::Chain::Limit::Deployments,
                 Gitlab::Ci::Pipeline::Chain::Validate::External,
                 Gitlab::Ci::Pipeline::Chain::Populate,
                 Gitlab::Ci::Pipeline::Chain::StopDryRun,
@@ -25,6 +28,7 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Limit::JobActivity,
                 Gitlab::Ci::Pipeline::Chain::CancelPendingPipelines,
                 Gitlab::Ci::Pipeline::Chain::Metrics,
+                Gitlab::Ci::Pipeline::Chain::TemplateUsage,
                 Gitlab::Ci::Pipeline::Chain::Pipeline::Process].freeze
 
     # Create a new pipeline in the specified project.
@@ -79,7 +83,10 @@ module Ci
         .new(pipeline, command, SEQUENCE)
         .build!
 
-      schedule_head_pipeline_update if pipeline.persisted?
+      if pipeline.persisted?
+        schedule_head_pipeline_update
+        create_namespace_onboarding_action
+      end
 
       # If pipeline is not persisted, try to recover IID
       pipeline.reset_project_iid unless pipeline.persisted?
@@ -89,7 +96,10 @@ module Ci
     # rubocop: enable Metrics/ParameterLists
 
     def execute!(*args, &block)
-      execute(*args, &block).tap do |pipeline|
+      source = args[0]
+      params = Hash(args[1])
+
+      execute(source, **params, &block).tap do |pipeline|
         unless pipeline.persisted?
           raise CreateError, pipeline.full_error_messages
         end
@@ -110,6 +120,10 @@ module Ci
       pipeline.all_merge_requests.opened.each do |merge_request|
         UpdateHeadPipelineForMergeRequestWorker.perform_async(merge_request.id)
       end
+    end
+
+    def create_namespace_onboarding_action
+      Namespaces::OnboardingPipelineCreatedWorker.perform_async(project.namespace_id)
     end
 
     def extra_options(content: nil, dry_run: false)

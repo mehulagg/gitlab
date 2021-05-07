@@ -1,9 +1,9 @@
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, sprintf } from '~/locale';
+import createFlash from '~/flash';
+import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
-import * as types from './mutation_types';
-import { FETCH_VALUE_STREAM_DATA } from '../constants';
+import { __, sprintf } from '~/locale';
+import { FETCH_VALUE_STREAM_DATA, OVERVIEW_STAGE_CONFIG } from '../constants';
 import {
   removeFlash,
   throwIfUserForbidden,
@@ -11,8 +11,9 @@ import {
   checkForDataError,
   flashErrorIfStatusNotOk,
 } from '../utils';
+import * as types from './mutation_types';
 
-const appendExtension = path => (path.indexOf('.') > -1 ? path : `${path}.json`);
+const appendExtension = (path) => (path.indexOf('.') > -1 ? path : `${path}.json`);
 
 export const setPaths = ({ dispatch }, options) => {
   const { groupPath, milestonesPath = '', labelsPath = '' } = options;
@@ -30,20 +31,21 @@ export const setFeatureFlags = ({ commit }, featureFlags) =>
 export const setSelectedProjects = ({ commit }, projects) =>
   commit(types.SET_SELECTED_PROJECTS, projects);
 
-export const setSelectedStage = ({ commit }, stage) => commit(types.SET_SELECTED_STAGE, stage);
+export const setSelectedStage = ({ commit, getters: { paginationParams } }, stage) => {
+  commit(types.SET_SELECTED_STAGE, stage);
+  commit(types.SET_PAGINATION, { ...paginationParams, page: 1, hasNextPage: null });
+};
 
-export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDate, endDate }) => {
+export const setDateRange = (
+  { commit, dispatch, getters: { isOverviewStageSelected }, state: { selectedStage } },
+  { startDate, endDate },
+) => {
   commit(types.SET_DATE_RANGE, { startDate, endDate });
-
-  if (skipFetch) return false;
-
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };
 
 export const requestStageData = ({ commit }) => commit(types.REQUEST_STAGE_DATA);
-export const receiveStageDataSuccess = ({ commit }, data) => {
-  commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
-};
 
 export const receiveStageDataError = ({ commit }, error) => {
   const { message = '' } = error;
@@ -54,26 +56,40 @@ export const receiveStageDataError = ({ commit }, error) => {
   commit(types.RECEIVE_STAGE_DATA_ERROR, message);
 };
 
-export const fetchStageData = ({ dispatch, getters }, stageId) => {
-  const { cycleAnalyticsRequestParams = {}, currentValueStreamId, currentGroupPath } = getters;
+export const fetchStageData = ({ dispatch, getters, commit }, stageId) => {
+  const {
+    cycleAnalyticsRequestParams = {},
+    currentValueStreamId,
+    currentGroupPath,
+    paginationParams,
+  } = getters;
   dispatch('requestStageData');
 
   return Api.cycleAnalyticsStageEvents({
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
     stageId,
-    params: cycleAnalyticsRequestParams,
+    params: {
+      ...cycleAnalyticsRequestParams,
+      ...paginationParams,
+    },
   })
     .then(checkForDataError)
-    .then(({ data }) => dispatch('receiveStageDataSuccess', data))
-    .catch(error => dispatch('receiveStageDataError', error));
+    .then(({ data, headers }) => {
+      const { page = null, nextPage = null } = parseIntPagination(normalizeHeaders(headers));
+      commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
+      commit(types.SET_PAGINATION, { ...paginationParams, page, hasNextPage: Boolean(nextPage) });
+    })
+    .catch((error) => dispatch('receiveStageDataError', error));
 };
 
 export const requestStageMedianValues = ({ commit }) => commit(types.REQUEST_STAGE_MEDIANS);
 
 export const receiveStageMedianValuesError = ({ commit }, error) => {
   commit(types.RECEIVE_STAGE_MEDIANS_ERROR, error);
-  createFlash(__('There was an error fetching median data for stages'));
+  createFlash({
+    message: __('There was an error fetching median data for stages'),
+  });
 };
 
 const fetchStageMedian = ({ groupId, valueStreamId, stageId, params }) =>
@@ -96,11 +112,11 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
     activeStages,
     currentValueStreamId,
   } = getters;
-  const stageIds = activeStages.map(s => s.slug);
+  const stageIds = activeStages.map((s) => s.slug);
 
   dispatch('requestStageMedianValues');
   return Promise.all(
-    stageIds.map(stageId =>
+    stageIds.map((stageId) =>
       fetchStageMedian({
         groupId: currentGroupPath,
         valueStreamId: currentValueStreamId,
@@ -109,23 +125,25 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
       }),
     ),
   )
-    .then(data => commit(types.RECEIVE_STAGE_MEDIANS_SUCCESS, data))
-    .catch(error => dispatch('receiveStageMedianValuesError', error));
+    .then((data) => commit(types.RECEIVE_STAGE_MEDIANS_SUCCESS, data))
+    .catch((error) => dispatch('receiveStageMedianValuesError', error));
 };
 
-export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_CYCLE_ANALYTICS_DATA);
+export const requestCycleAnalyticsData = ({ commit }) => commit(types.REQUEST_VALUE_STREAM_DATA);
 
 export const receiveCycleAnalyticsDataSuccess = ({ commit, dispatch }) => {
-  commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS);
+  commit(types.RECEIVE_VALUE_STREAM_DATA_SUCCESS);
   dispatch('typeOfWork/fetchTopRankedGroupLabels');
 };
 
 export const receiveCycleAnalyticsDataError = ({ commit }, { response = {} }) => {
   const { status = httpStatus.INTERNAL_SERVER_ERROR } = response;
 
-  commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR, status);
+  commit(types.RECEIVE_VALUE_STREAM_DATA_ERROR, status);
   if (status !== httpStatus.FORBIDDEN) {
-    createFlash(__('There was an error while fetching value stream analytics data.'));
+    createFlash({
+      message: __('There was an error while fetching value stream analytics data.'),
+    });
   }
 };
 
@@ -136,7 +154,7 @@ export const fetchCycleAnalyticsData = ({ dispatch }) => {
     .then(() => dispatch('requestCycleAnalyticsData'))
     .then(() => dispatch('fetchValueStreams'))
     .then(() => dispatch('receiveCycleAnalyticsDataSuccess'))
-    .catch(error => {
+    .catch((error) => {
       return Promise.all([
         dispatch('receiveCycleAnalyticsDataError', error),
         dispatch('durationChart/setLoading', false),
@@ -149,11 +167,18 @@ export const requestGroupStages = ({ commit }) => commit(types.REQUEST_GROUP_STA
 
 export const receiveGroupStagesError = ({ commit }, error) => {
   commit(types.RECEIVE_GROUP_STAGES_ERROR, error);
-  createFlash(__('There was an error fetching value stream analytics stages.'));
+  createFlash({
+    message: __('There was an error fetching value stream analytics stages.'),
+  });
 };
 
-export const setDefaultSelectedStage = ({ dispatch, getters }) => {
+export const setDefaultSelectedStage = ({ state: { featureFlags }, dispatch, getters }) => {
   const { activeStages = [] } = getters;
+
+  if (featureFlags?.hasPathNavigation) {
+    return dispatch('setSelectedStage', OVERVIEW_STAGE_CONFIG);
+  }
+
   if (activeStages?.length) {
     const [firstActiveStage] = activeStages;
     return Promise.all([
@@ -162,13 +187,24 @@ export const setDefaultSelectedStage = ({ dispatch, getters }) => {
     ]);
   }
 
-  createFlash(__('There was an error while fetching value stream analytics data.'));
+  createFlash({
+    message: __('There was an error while fetching value stream analytics data.'),
+  });
+
   return Promise.resolve();
 };
 
-export const receiveGroupStagesSuccess = ({ commit, dispatch }, stages) => {
+export const receiveGroupStagesSuccess = (
+  { state: { featureFlags }, commit, dispatch },
+  stages,
+) => {
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
-  return dispatch('setDefaultSelectedStage');
+
+  if (!featureFlags?.hasPathNavigation) {
+    return dispatch('setDefaultSelectedStage');
+  }
+
+  return Promise.resolve();
 };
 
 export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
@@ -193,7 +229,7 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
       dispatch('receiveGroupStagesSuccess', stages);
       dispatch('customStages/setStageEvents', events);
     })
-    .catch(error => {
+    .catch((error) => {
       throwIfUserForbidden(error);
       return dispatch('receiveGroupStagesError', error);
     });
@@ -202,12 +238,17 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
 export const requestUpdateStage = ({ commit }) => commit(types.REQUEST_UPDATE_STAGE);
 export const receiveUpdateStageSuccess = ({ commit, dispatch }, updatedData) => {
   commit(types.RECEIVE_UPDATE_STAGE_SUCCESS);
-  createFlash(__('Stage data updated'), 'notice');
+  createFlash({
+    message: __('Stage data updated'),
+    type: 'notice',
+  });
   return Promise.resolve()
     .then(() => dispatch('fetchGroupStagesAndEvents'))
     .then(() => dispatch('customStages/showEditForm', updatedData))
     .catch(() => {
-      createFlash(__('There was a problem refreshing the data, please try again'));
+      createFlash({
+        message: __('There was a problem refreshing the data, please try again'),
+      });
     });
 };
 
@@ -223,7 +264,9 @@ export const receiveUpdateStageError = (
       ? sprintf(__(`'%{name}' stage already exists`), { name })
       : __('There was a problem saving your custom stage, please try again');
 
-  createFlash(__(message));
+  createFlash({
+    message: __(message),
+  });
   return dispatch('customStages/setStageFormErrors', errors);
 };
 
@@ -248,13 +291,18 @@ export const updateStage = ({ dispatch, getters }, { id, ...params }) => {
 export const requestRemoveStage = ({ commit }) => commit(types.REQUEST_REMOVE_STAGE);
 export const receiveRemoveStageSuccess = ({ commit, dispatch }) => {
   commit(types.RECEIVE_REMOVE_STAGE_RESPONSE);
-  createFlash(__('Stage removed'), 'notice');
+  createFlash({
+    message: __('Stage removed'),
+    type: 'notice',
+  });
   return dispatch('fetchCycleAnalyticsData');
 };
 
 export const receiveRemoveStageError = ({ commit }) => {
   commit(types.RECEIVE_REMOVE_STAGE_RESPONSE);
-  createFlash(__('There was an error removing your custom stage, please try again'));
+  createFlash({
+    message: __('There was an error removing your custom stage, please try again'),
+  });
 };
 
 export const removeStage = ({ dispatch, getters }, stageId) => {
@@ -267,14 +315,14 @@ export const removeStage = ({ dispatch, getters }, stageId) => {
     stageId,
   })
     .then(() => dispatch('receiveRemoveStageSuccess'))
-    .catch(error => dispatch('receiveRemoveStageError', error));
+    .catch((error) => dispatch('receiveRemoveStageError', error));
 };
 
 export const initializeCycleAnalyticsSuccess = ({ commit }) =>
-  commit(types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS);
+  commit(types.INITIALIZE_VALUE_STREAM_SUCCESS);
 
 export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {}) => {
-  commit(types.INITIALIZE_CYCLE_ANALYTICS, initialData);
+  commit(types.INITIALIZE_VSA, initialData);
 
   const {
     featureFlags = {},
@@ -284,13 +332,17 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
     selectedMilestone,
     selectedAssigneeList,
     selectedLabelList,
+    stage: selectedStage,
     group,
   } = initialData;
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
   if (group?.fullPath) {
     return Promise.all([
-      dispatch('setPaths', { group, milestonesPath, labelsPath }),
+      selectedStage
+        ? dispatch('setSelectedStage', selectedStage)
+        : dispatch('setDefaultSelectedStage'),
+      dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
         selectedMilestone,
@@ -300,7 +352,12 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       dispatch('durationChart/setLoading', true),
       dispatch('typeOfWork/setLoading', true),
     ])
-      .then(() => dispatch('fetchCycleAnalyticsData'))
+      .then(() =>
+        Promise.all([
+          selectedStage?.id ? dispatch('fetchStageData', selectedStage.id) : Promise.resolve(),
+          dispatch('fetchCycleAnalyticsData'),
+        ]),
+      )
       .then(() => dispatch('initializeCycleAnalyticsSuccess'));
   }
 
@@ -314,7 +371,9 @@ export const receiveReorderStageSuccess = ({ commit }) =>
 
 export const receiveReorderStageError = ({ commit }) => {
   commit(types.RECEIVE_REORDER_STAGE_ERROR);
-  createFlash(__('There was an error updating the stage order. Please try reloading the page.'));
+  createFlash({
+    message: __('There was an error updating the stage order. Please try reloading the page.'),
+  });
 };
 
 export const reorderStage = ({ dispatch, getters }, initialData) => {
@@ -336,8 +395,8 @@ export const reorderStage = ({ dispatch, getters }, initialData) => {
     );
 };
 
-export const receiveCreateValueStreamSuccess = ({ commit, dispatch }) => {
-  commit(types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS);
+export const receiveCreateValueStreamSuccess = ({ commit, dispatch }, valueStream = {}) => {
+  commit(types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS, valueStream);
   return dispatch('fetchCycleAnalyticsData');
 };
 
@@ -346,10 +405,28 @@ export const createValueStream = ({ commit, dispatch, getters }, data) => {
   commit(types.REQUEST_CREATE_VALUE_STREAM);
 
   return Api.cycleAnalyticsCreateValueStream(currentGroupPath, data)
-    .then(() => dispatch('receiveCreateValueStreamSuccess'))
+    .then(({ data: newValueStream }) => dispatch('receiveCreateValueStreamSuccess', newValueStream))
     .catch(({ response } = {}) => {
       const { data: { message, payload: { errors } } = null } = response;
-      commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors });
+      commit(types.RECEIVE_CREATE_VALUE_STREAM_ERROR, { message, errors, data });
+    });
+};
+
+export const updateValueStream = (
+  { commit, dispatch, getters },
+  { id: valueStreamId, ...data },
+) => {
+  const { currentGroupPath } = getters;
+  commit(types.REQUEST_UPDATE_VALUE_STREAM);
+
+  return Api.cycleAnalyticsUpdateValueStream({ groupId: currentGroupPath, valueStreamId, data })
+    .then(({ data: newValueStream }) => {
+      commit(types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS, newValueStream);
+      return dispatch('fetchCycleAnalyticsData');
+    })
+    .catch(({ response } = {}) => {
+      const { data: { message, payload: { errors } } = null } = response;
+      commit(types.RECEIVE_UPDATE_VALUE_STREAM_ERROR, { message, errors, data });
     });
 };
 
@@ -372,8 +449,8 @@ export const fetchValueStreamData = ({ dispatch }) =>
     .then(() => dispatch('fetchStageMedianValues'))
     .then(() => dispatch('durationChart/fetchDurationData'));
 
-export const setSelectedValueStream = ({ commit, dispatch }, streamId) => {
-  commit(types.SET_SELECTED_VALUE_STREAM, streamId);
+export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
+  commit(types.SET_SELECTED_VALUE_STREAM, valueStream);
   return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
@@ -389,28 +466,35 @@ export const receiveValueStreamsSuccess = (
   return dispatch(FETCH_VALUE_STREAM_DATA);
 };
 
-export const fetchValueStreams = ({ commit, dispatch, getters, state }) => {
-  const {
-    featureFlags: { hasCreateMultipleValueStreams = false },
-  } = state;
+export const fetchValueStreams = ({ commit, dispatch, getters }) => {
   const { currentGroupPath } = getters;
 
-  if (hasCreateMultipleValueStreams) {
-    commit(types.REQUEST_VALUE_STREAMS);
+  commit(types.REQUEST_VALUE_STREAMS);
 
-    return Api.cycleAnalyticsValueStreams(currentGroupPath)
-      .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
-      .catch(error => {
-        const {
-          response: { status },
-        } = error;
-        commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
-        throw error;
-      });
-  }
-  return dispatch(FETCH_VALUE_STREAM_DATA);
+  return Api.cycleAnalyticsValueStreams(currentGroupPath)
+    .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
+    .catch((error) => {
+      const {
+        response: { status },
+      } = error;
+      commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
+      throw error;
+    });
 };
 
-export const setFilters = ({ dispatch }) => {
+export const setFilters = ({
+  dispatch,
+  getters: { isOverviewStageSelected },
+  state: { selectedStage },
+}) => {
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
+};
+
+export const updateStageTablePagination = (
+  { commit, dispatch, state: { selectedStage } },
+  paginationParams,
+) => {
+  commit(types.SET_PAGINATION, paginationParams);
+  return dispatch('fetchStageData', selectedStage.id);
 };

@@ -3,15 +3,16 @@
 - expanded = expanded_by_default?
 %section.settings.no-animate#js-push-rules{ class: ('expanded' if expanded), data: { qa_selector: 'push_rules_content' } }
   .settings-header
-    %h4
-      Push Rules
-    %button.btn.js-settings-toggle
-      = expanded ? 'Collapse' : 'Expand'
+    %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
+      = s_('PushRule|Push rules')
+    %button.gl-button.btn.btn-default.js-settings-toggle
+      = expanded ? _('Collapse') : _('Expand')
     %p
-      Push Rules outline what is accepted for this project.
+      = s_('PushRules|Restrict push operations for this project.')
+      = link_to _('Learn more.'), help_page_path('push_rules/push_rules'), target: '_blank', rel: 'noopener noreferrer'
   .settings-content
     %h5
-      Add new push rule
+      = s_('PushRules|Select push rules')
     = form_for [@project, @push_rule] do |f|
       = form_errors(@push_rule)
 

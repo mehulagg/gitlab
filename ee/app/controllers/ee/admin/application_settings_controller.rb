@@ -6,20 +6,24 @@ module EE
       extend ::Gitlab::Utils::Override
       extend ActiveSupport::Concern
 
-      include ::Admin::MergeRequestApprovalSettingsHelper
-
       prepended do
-        before_action :elasticsearch_reindexing_task, only: [:general]
+        before_action :elasticsearch_reindexing_task, only: [:advanced_search]
+        before_action :elasticsearch_index_settings, only: [:advanced_search]
 
-        feature_category :provision, [:seat_link_payload]
+        feature_category :license, [:seat_link_payload]
         feature_category :source_code_management, [:templates]
+        feature_category :global_search, [:advanced_search]
 
         def elasticsearch_reindexing_task
           @elasticsearch_reindexing_task = Elastic::ReindexingTask.last
         end
+
+        def elasticsearch_index_settings
+          @elasticsearch_index_settings = Elastic::IndexSetting.order_by_name
+        end
       end
 
-      EE_VALID_SETTING_PANELS = %w(templates).freeze
+      EE_VALID_SETTING_PANELS = %w(advanced_search templates).freeze
 
       EE_VALID_SETTING_PANELS.each do |action|
         define_method(action) { perform_update if submitted? }
@@ -50,18 +54,27 @@ module EE
           end
         end
 
+        if License.feature_available?(:git_two_factor_enforcement) && ::Feature.enabled?(:two_factor_for_cli)
+          attrs << :git_two_factor_session_expiry
+        end
+
         if License.feature_available?(:admin_merge_request_approvers_rules)
           attrs += EE::ApplicationSettingsHelper.merge_request_appovers_rules_attributes
         end
 
-        if show_compliance_merge_request_approval_settings?
-          attrs << { compliance_frameworks: [] }
+        if License.feature_available?(:elastic_search)
+          attrs += [
+            elasticsearch_shards: {},
+            elasticsearch_replicas: {}
+          ]
         end
 
-        if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+        if ::Gitlab::Geo.license_allows?
           attrs << :maintenance_mode
           attrs << :maintenance_mode_message
         end
+
+        attrs << :new_user_signups_cap
 
         attrs
       end

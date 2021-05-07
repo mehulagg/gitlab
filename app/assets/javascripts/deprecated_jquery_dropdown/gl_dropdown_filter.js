@@ -1,7 +1,8 @@
 /* eslint-disable consistent-return */
 
-import $ from 'jquery';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
+import $ from 'jquery';
+import { debounce } from 'lodash';
 import { isObject } from '~/lib/utils/type_utility';
 
 const BLUR_KEYCODES = [27, 40];
@@ -11,26 +12,30 @@ const HAS_VALUE_CLASS = 'has-value';
 export class GitLabDropdownFilter {
   constructor(input, options) {
     let ref;
-    let timeout;
     this.input = input;
     this.options = options;
     // eslint-disable-next-line no-cond-assign
     this.filterInputBlur = (ref = this.options.filterInputBlur) != null ? ref : true;
     const $inputContainer = this.input.parent();
     const $clearButton = $inputContainer.find('.js-dropdown-input-clear');
-    $clearButton.on('click', e => {
+    const filterRemoteDebounced = debounce(() => {
+      $inputContainer.parent().addClass('is-loading');
+
+      return this.options.query(this.input.val(), (data) => {
+        $inputContainer.parent().removeClass('is-loading');
+        return this.options.callback(data);
+      });
+    }, 500);
+
+    $clearButton.on('click', (e) => {
       // Clear click
       e.preventDefault();
       e.stopPropagation();
-      return this.input
-        .val('')
-        .trigger('input')
-        .focus();
+      return this.input.val('').trigger('input').focus();
     });
     // Key events
-    timeout = '';
     this.input
-      .on('keydown', e => {
+      .on('keydown', (e) => {
         const keyCode = e.which;
         if (keyCode === 13 && !options.elIsInput) {
           e.preventDefault();
@@ -44,16 +49,7 @@ export class GitLabDropdownFilter {
         }
         // Only filter asynchronously only if option remote is set
         if (this.options.remote) {
-          clearTimeout(timeout);
-          // eslint-disable-next-line no-return-assign
-          return (timeout = setTimeout(() => {
-            $inputContainer.parent().addClass('is-loading');
-
-            return this.options.query(this.input.val(), data => {
-              $inputContainer.parent().removeClass('is-loading');
-              return this.options.callback(data);
-            });
-          }, 250));
+          return filterRemoteDebounced();
         }
         return this.filter(this.input.val());
       });
@@ -97,13 +93,13 @@ export class GitLabDropdownFilter {
         // }
         else if (isObject(data)) {
           results = {};
-          Object.keys(data).forEach(key => {
+          Object.keys(data).forEach((key) => {
             group = data[key];
             tmp = fuzzaldrinPlus.filter(group, searchText, {
               key: this.options.keys,
             });
             if (tmp.length) {
-              results[key] = tmp.map(item => item);
+              results[key] = tmp.map((item) => item);
             }
           });
         }
@@ -113,7 +109,7 @@ export class GitLabDropdownFilter {
     const elements = this.options.elements();
     if (searchText) {
       // eslint-disable-next-line func-names
-      elements.each(function() {
+      elements.each(function () {
         const $el = $(this);
         const matches = fuzzaldrinPlus.match($el.text().trim(), searchText);
         if (!$el.is('.dropdown-header')) {

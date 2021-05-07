@@ -3,8 +3,5 @@
 ---
 inherit_from: ../../../../../lib/gitlab/background_migration/.rubocop.yml
 
-CodeReuse/ActiveRecord:
-  Enabled: false
-
 Style/Documentation:
   Enabled: false

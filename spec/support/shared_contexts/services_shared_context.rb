@@ -16,6 +16,8 @@ Service.available_services_names.each do |service|
           hash.merge!(k => 'secrettoken')
         elsif service == 'confluence' && k == :confluence_url
           hash.merge!(k => 'https://example.atlassian.net/wiki')
+        elsif service == 'datadog' && k == :datadog_site
+          hash.merge!(k => 'datadoghq.com')
         elsif k =~ /^(.*_url|url|webhook)/
           hash.merge!(k => "http://example.com")
         elsif service_klass.method_defined?("#{k}?")
@@ -26,6 +28,10 @@ Service.available_services_names.each do |service|
           hash.merge!(k => 1234)
         elsif service == 'jira' && k == :jira_issue_transition_id
           hash.merge!(k => '1,2,3')
+        elsif service == 'emails_on_push' && k == :recipients
+          hash.merge!(k => 'foo@bar.com')
+        elsif service == 'slack' || service == 'mattermost' && k == :labels_to_be_notified_behavior
+          hash.merge!(k => "match_any")
         else
           hash.merge!(k => "someword")
         end
@@ -34,8 +40,7 @@ Service.available_services_names.each do |service|
 
     let(:licensed_features) do
       {
-        'github' => :github_project_service_integration,
-        'jenkins' => :jenkins_integration
+        'github' => :github_project_service_integration
       }
     end
 
@@ -61,7 +66,6 @@ Service.available_services_names.each do |service|
 
       stub_licensed_features(licensed_feature => true)
       project.clear_memoization(:disabled_services)
-      project.clear_memoization(:licensed_feature_available)
     end
   end
 end

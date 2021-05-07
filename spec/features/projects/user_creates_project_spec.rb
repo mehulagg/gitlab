@@ -8,12 +8,19 @@ RSpec.describe 'User creates a project', :js do
   before do
     sign_in(user)
     create(:personal_key, user: user)
+
+    stub_experiments(new_project_readme: :candidate)
   end
 
   it 'creates a new project' do
     visit(new_project_path)
 
+    find('[data-qa-selector="blank_project_link"]').click
     fill_in(:project_name, with: 'Empty')
+
+    # part of the new_project_readme experiment
+    expect(page).to have_checked_field 'Initialize repository with a README'
+    uncheck 'Initialize repository with a README'
 
     page.within('#content-body') do
       click_button('Create project')
@@ -39,6 +46,7 @@ RSpec.describe 'User creates a project', :js do
     it 'creates a new project' do
       visit(new_project_path)
 
+      find('[data-qa-selector="blank_project_link"]').click
       fill_in :project_name, with: 'A Subgroup Project'
       fill_in :project_path, with: 'a-subgroup-project'
 
@@ -67,6 +75,7 @@ RSpec.describe 'User creates a project', :js do
     it 'creates a new project' do
       visit(new_project_path)
 
+      find('[data-qa-selector="blank_project_link"]').click
       fill_in :project_name, with: 'a-new-project'
       fill_in :project_path, with: 'a-new-project'
 

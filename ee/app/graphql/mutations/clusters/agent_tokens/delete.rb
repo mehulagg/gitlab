@@ -12,7 +12,7 @@ module Mutations
 
         argument :id, TokenID,
                  required: true,
-                 description: 'Global ID of the cluster agent token that will be deleted'
+                 description: 'Global ID of the cluster agent token that will be deleted.'
 
         def resolve(id:)
           token = authorized_find!(id: id)

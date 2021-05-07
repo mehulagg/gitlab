@@ -7,9 +7,10 @@ module EE
 
       prepended do
         include ::Gitlab::Geo::ReplicableModel
+        include ::Gitlab::Geo::VerificationState
+
         with_replicator Geo::TerraformStateVersionReplicator
 
-        scope :with_files_stored_locally, -> { where(file_store: ::ObjectStorage::Store::LOCAL) }
         scope :project_id_in, ->(ids) { joins(:terraform_state).where('terraform_states.project_id': ids) }
       end
 

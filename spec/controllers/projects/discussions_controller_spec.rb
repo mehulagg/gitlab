@@ -85,7 +85,7 @@ RSpec.describe Projects::DiscussionsController do
 
       context "when the discussion is not resolvable" do
         before do
-          note.update(system: true)
+          note.update!(system: true)
         end
 
         it "returns status 404" do
@@ -168,7 +168,7 @@ RSpec.describe Projects::DiscussionsController do
 
       context "when the discussion is not resolvable" do
         before do
-          note.update(system: true)
+          note.update!(system: true)
         end
 
         it "returns status 404" do
@@ -184,6 +184,13 @@ RSpec.describe Projects::DiscussionsController do
 
           # discussion is memoized and reload doesn't clear the memoization
           expect(Note.find(note.id).discussion.resolved?).to be false
+        end
+
+        it "tracks thread unresolve usage data" do
+          expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+            .to receive(:track_unresolve_thread_action).with(user: user)
+
+          delete :unresolve, params: request_params
         end
 
         it "returns status 200" do

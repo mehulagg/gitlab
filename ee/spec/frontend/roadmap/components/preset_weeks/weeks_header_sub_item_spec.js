@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
 import WeeksHeaderSubItemComponent from 'ee/roadmap/components/preset_weeks/weeks_header_sub_item.vue';
-import { getTimeframeForWeeksView } from 'ee/roadmap/utils/roadmap_utils';
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import { getTimeframeForWeeksView } from 'ee/roadmap/utils/roadmap_utils';
 
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { mockTimeframeInitialDate } from '../../mock_data';
@@ -44,7 +44,7 @@ describe('MonthsHeaderSubItemComponent', () => {
 
         expect(Array.isArray(vm.headerSubItems)).toBe(true);
         expect(vm.headerSubItems).toHaveLength(7);
-        vm.headerSubItems.forEach(subItem => {
+        vm.headerSubItems.forEach((subItem) => {
           expect(subItem instanceof Date).toBe(true);
         });
       });

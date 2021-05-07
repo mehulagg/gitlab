@@ -30,19 +30,6 @@ RSpec.describe 'User views an open merge request' do
     end
   end
 
-  context 'when merge_request_reviewers is turned off' do
-    let(:project) { create(:project, :public, :repository) }
-
-    before do
-      stub_feature_flags(merge_request_reviewers: false)
-      visit(merge_request_path(merge_request))
-    end
-
-    it 'has reviewers in sidebar' do
-      expect(page).not_to have_css('.reviewer')
-    end
-  end
-
   context 'when a merge request has repository', :js do
     let(:project) { create(:project, :public, :repository) }
 
@@ -89,7 +76,7 @@ RSpec.describe 'User views an open merge request' do
 
       it 'does not show diverged commits count' do
         page.within('.mr-source-target') do
-          expect(page).not_to have_content(/([0-9]+ commit[s]? behind)/)
+          expect(page).not_to have_content(/([0-9]+ commits? behind)/)
         end
       end
     end
@@ -106,6 +93,39 @@ RSpec.describe 'User views an open merge request' do
           expect(page).to have_content(/([0-9]+ commits behind)/)
         end
       end
+    end
+
+    context 'when the assignee\'s availability set' do
+      before do
+        merge_request.author.create_status(availability: 'busy')
+        merge_request.assignees << merge_request.author
+
+        visit(merge_request_path(merge_request))
+      end
+
+      it 'exposes the availability in the data-availability attribute' do
+        assignees_data = find_all("input[name='merge_request[assignee_ids][]']", visible: false)
+
+        expect(assignees_data.size).to eq(1)
+        expect(assignees_data.first['data-availability']).to eq('busy')
+      end
+    end
+  end
+
+  context 'XSS source branch' do
+    let(:project) { create(:project, :public, :repository) }
+    let(:source_branch) { "&#39;&gt;&lt;iframe/srcdoc=&#39;&#39;&gt;&lt;/iframe&gt;" }
+
+    before do
+      project.repository.create_branch(source_branch, "master")
+
+      mr = create(:merge_request, source_project: project, target_project: project, source_branch: source_branch)
+
+      visit(merge_request_path(mr))
+    end
+
+    it 'encodes branch name' do
+      expect(find("[data-testid='ref-name']")[:title]).to eq(source_branch)
     end
   end
 end

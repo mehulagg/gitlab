@@ -1,15 +1,15 @@
 ---
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Place GitLab into a read-only state **(CORE ONLY)**
+# Place GitLab into a read-only state **(FREE SELF)**
 
-CAUTION: **Warning:**
-This document should be used as a temporary solution.
-There's work in progress to make this
-[possible with Geo](https://gitlab.com/groups/gitlab-org/-/epics/2149).
+NOTE:
+In GitLab 13.9 and later, the recommended method to
+place GitLab in a read-only state is to enable
+[maintenance mode](../administration/maintenance_mode/index.md).
 
 In some cases, you might want to place GitLab under a read-only state.
 The configuration for doing so depends on your desired outcome.
@@ -68,7 +68,7 @@ the database is read-only:
 
 1. Take a [GitLab backup](../raketasks/backup_restore.md#back-up-gitlab)
    in case things don't go as expected.
-1. Enter PostgreSQL on the console as an admin user:
+1. Enter PostgreSQL on the console as an administrator user:
 
     ```shell
     sudo \

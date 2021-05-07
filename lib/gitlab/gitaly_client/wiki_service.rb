@@ -64,16 +64,6 @@ module Gitlab
         GitalyClient.call(@repository.storage, :wiki_service, :wiki_update_page, enum, timeout: GitalyClient.medium_timeout)
       end
 
-      def delete_page(page_path, commit_details)
-        request = Gitaly::WikiDeletePageRequest.new(
-          repository: @gitaly_repo,
-          page_path: encode_binary(page_path),
-          commit_details: gitaly_commit_details(commit_details)
-        )
-
-        GitalyClient.call(@repository.storage, :wiki_service, :wiki_delete_page, request, timeout: GitalyClient.medium_timeout)
-      end
-
       def find_page(title:, version: nil, dir: nil)
         request = Gitaly::WikiFindPageRequest.new(
           repository: @gitaly_repo,
@@ -151,32 +141,6 @@ module Gitlab
         end
 
         versions
-      end
-
-      def find_file(name, revision)
-        request = Gitaly::WikiFindFileRequest.new(
-          repository: @gitaly_repo,
-          name: encode_binary(name),
-          revision: encode_binary(revision)
-        )
-
-        response = GitalyClient.call(@repository.storage, :wiki_service, :wiki_find_file, request, timeout: GitalyClient.fast_timeout)
-        wiki_file = nil
-
-        response.each do |message|
-          next unless message.name.present? || wiki_file
-
-          if wiki_file
-            wiki_file.raw_data = "#{wiki_file.raw_data}#{message.raw_data}"
-          else
-            wiki_file = GitalyClient::WikiFile.new(message.to_h)
-            # All gRPC strings in a response are frozen, so we get
-            # an unfrozen version here so appending in the else clause below doesn't blow up.
-            wiki_file.raw_data = wiki_file.raw_data.dup
-          end
-        end
-
-        wiki_file
       end
 
       private

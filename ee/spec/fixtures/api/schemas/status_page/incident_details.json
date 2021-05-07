@@ -10,7 +10,7 @@
           "required": ["note", "created_at"],
           "properties": {
             "note": { "type": "string" },
-            "created_at": { "type": "date" }
+            "created_at":  { "type": "string", "format": "date-time"}
           },
           "additionalProperties": false
         }

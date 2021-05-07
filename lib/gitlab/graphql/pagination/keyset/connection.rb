@@ -31,6 +31,9 @@ module Gitlab
       module Keyset
         class Connection < GraphQL::Pagination::ActiveRecordRelationConnection
           include Gitlab::Utils::StrongMemoize
+          include ::Gitlab::Graphql::ConnectionCollectionMethods
+          prepend ::Gitlab::Graphql::ConnectionRedaction
+          prepend GenericKeysetPagination
 
           # rubocop: disable Naming/PredicateName
           # https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo.Fields
@@ -65,9 +68,14 @@ module Gitlab
                 # next page
                 true
               elsif first
-                # If we count the number of requested items plus one (`limit_value + 1`),
-                # then if we get `limit_value + 1` then we know there is a next page
-                relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                case sliced_nodes
+                when Array
+                  sliced_nodes.size > limit_value
+                else
+                  # If we count the number of requested items plus one (`limit_value + 1`),
+                  # then if we get `limit_value + 1` then we know there is a next page
+                  relation_count(set_limit(sliced_nodes, limit_value + 1)) == limit_value + 1
+                end
               else
                 false
               end
@@ -106,7 +114,7 @@ module Gitlab
           def limited_nodes
             strong_memoize(:limited_nodes) do
               if first && last
-                raise Gitlab::Graphql::Errors::ArgumentError.new("Can only provide either `first` or `last`, not both")
+                raise Gitlab::Graphql::Errors::ArgumentError, "Can only provide either `first` or `last`, not both"
               end
 
               if last
@@ -150,13 +158,13 @@ module Gitlab
           def ordered_items
             strong_memoize(:ordered_items) do
               unless items.primary_key.present?
-                raise ArgumentError.new('Relation must have a primary key')
+                raise ArgumentError, 'Relation must have a primary key'
               end
 
               list = OrderInfo.build_order_list(items)
 
-              if loaded?(items)
-                @order_list = list.presence || [items.primary_key]
+              if loaded?(items) && !before.present? && !after.present?
+                @order_list = list.presence || [OrderInfo.new(items.primary_key)]
 
                 # already sorted, or trivially sorted
                 next items if list.present? || items.size <= 1
@@ -192,7 +200,7 @@ module Gitlab
             ordering = { 'id' => node[:id].to_s }
 
             order_list.each do |field|
-              field_name = field.attribute_name
+              field_name = field.try(:attribute_name) || field
               field_value = node[field_name]
               ordering[field_name] = if field_value.is_a?(Time)
                                        field_value.strftime('%Y-%m-%d %H:%M:%S.%N %Z')

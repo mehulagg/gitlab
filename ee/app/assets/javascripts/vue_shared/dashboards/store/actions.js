@@ -1,9 +1,9 @@
-import Visibility from 'visibilityjs';
 import { find } from 'lodash';
+import Visibility from 'visibilityjs';
 import Api from '~/api';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
 import * as types from './mutation_types';
 
@@ -27,9 +27,9 @@ export const forceProjectsRequest = () => {
 export const addProjectsToDashboard = ({ state, dispatch }) =>
   axios
     .post(state.projectEndpoints.add, {
-      project_ids: state.selectedProjects.map(p => p.id),
+      project_ids: state.selectedProjects.map((p) => p.id),
     })
-    .then(response => dispatch('receiveAddProjectsToDashboardSuccess', response.data))
+    .then((response) => dispatch('receiveAddProjectsToDashboardSuccess', response.data))
     .catch(() => dispatch('receiveAddProjectsToDashboardError'));
 
 export const toggleSelectedProject = ({ commit, state }, project) => {
@@ -49,8 +49,8 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
 
   if (invalid.length) {
     const [firstProject, secondProject, ...rest] = state.selectedProjects
-      .filter(project => invalid.includes(project.id))
-      .map(project => project.name);
+      .filter((project) => invalid.includes(project.id))
+      .map((project) => project.name);
     const translationValues = {
       firstProject,
       secondProject,
@@ -70,16 +70,16 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
     } else {
       invalidProjects = firstProject;
     }
-    createFlash(
-      sprintf(
+    createFlash({
+      message: sprintf(
         s__(
-          'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Silver plan.',
+          'Dashboard|Unable to add %{invalidProjects}. This dashboard is available for public projects, and private projects in groups with a Premium plan.',
         ),
         {
           invalidProjects,
         },
       ),
-    );
+    });
   }
 
   if (added.length) {
@@ -88,11 +88,11 @@ export const receiveAddProjectsToDashboardSuccess = ({ dispatch, state }, data) 
 };
 
 export const receiveAddProjectsToDashboardError = ({ state }) => {
-  createFlash(
-    sprintf(__('Something went wrong, unable to add %{project} to dashboard'), {
+  createFlash({
+    message: sprintf(__('Something went wrong, unable to add %{project} to dashboard'), {
       project: n__('project', 'projects', state.selectedProjects.length),
     }),
-  );
+  });
 };
 
 export const fetchProjects = ({ state, dispatch, commit }, page) => {
@@ -105,7 +105,7 @@ export const fetchProjects = ({ state, dispatch, commit }, page) => {
       fetchProjects: () => axios.get(state.projectEndpoints.list, { params: { page } }),
     },
     method: 'fetchProjects',
-    successCallback: response => {
+    successCallback: (response) => {
       const {
         data: { projects },
         headers,
@@ -134,7 +134,9 @@ export const requestProjects = ({ commit }) => {
 
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
-  createFlash(__('Something went wrong, unable to get projects'));
+  createFlash({
+    message: __('Something went wrong, unable to get projects'),
+  });
 };
 
 export const removeProject = ({ dispatch }, removePath) => {
@@ -147,7 +149,9 @@ export const removeProject = ({ dispatch }, removePath) => {
 export const receiveRemoveProjectSuccess = ({ dispatch }) => dispatch('forceProjectsRequest');
 
 export const receiveRemoveProjectError = () => {
-  createFlash(__('Something went wrong, unable to delete project'));
+  createFlash({
+    message: __('Something went wrong, unable to delete project'),
+  });
 };
 
 export const setSearchQuery = ({ commit }, query) => commit(types.SET_SEARCH_QUERY, query);
@@ -160,7 +164,7 @@ export const fetchSearchResults = ({ state, dispatch }) => {
     dispatch('minimumQueryMessage');
   } else {
     Api.projects(searchQuery, {})
-      .then(results => dispatch('receiveSearchResultsSuccess', results))
+      .then((results) => dispatch('receiveSearchResultsSuccess', results))
       .catch(() => dispatch('receiveSearchResultsError'));
   }
 };
@@ -170,7 +174,7 @@ export const fetchNextPage = ({ state, dispatch }) => {
     return;
   }
   Api.projects(state.searchQuery, { page: state.pageInfo.nextPage })
-    .then(results => dispatch('receiveNextPageSuccess', results))
+    .then((results) => dispatch('receiveNextPageSuccess', results))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 

@@ -2,6 +2,7 @@
 
 class Geo::BaseRegistry < Geo::TrackingBase
   include BulkInsertSafe
+  include EachBatch
 
   self.abstract_class = true
 
@@ -42,7 +43,7 @@ class Geo::BaseRegistry < Geo::TrackingBase
   end
 
   def self.delete_worker_class
-    ::Geo::FileRegistryRemovalWorker
+    ::Geo::DestroyWorker
   end
 
   def self.replicator_class

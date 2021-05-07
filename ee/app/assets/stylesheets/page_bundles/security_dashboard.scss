@@ -1,0 +1,202 @@
+@import 'page_bundles/mixins_and_variables_and_functions';
+
+$security-filter-height: 90px;
+$selection-summary-height: 66px;
+$selection-summary-with-error-height: 118px;
+
+@mixin sticky-top-positioning($extra: 0) {
+  top: $header-height + $extra;
+
+  .with-performance-bar & {
+    top: $header-height + $performance-bar-height + $extra;
+  }
+}
+
+.vulnerabilities-row {
+  &.dismissed .table-mobile-content:not(.action-buttons) {
+    opacity: 0.5;
+  }
+
+  @include media-breakpoint-up(md) {
+    .action-buttons {
+      opacity: 0;
+    }
+
+    &:hover,
+    &:focus,
+    &:focus-within {
+      background: $blue-50;
+      border-bottom: 1px solid $blue-200;
+      border-top: 1px solid $blue-200;
+      margin-top: -1px;
+
+      .action-buttons {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.security-dashboard-filters {
+  @include sticky-top-positioning();
+}
+
+.security-dashboard-accordion > ul {
+  @include gl-display-flex;
+  @include gl-flex-fill-1;
+}
+
+.security-charts > section {
+  flex: 1 1 40%;
+  margin: 1rem;
+}
+
+.vulnerability-list {
+  @media (min-width: $breakpoint-sm) {
+    .checkbox {
+      padding-left: $gl-spacing-scale-4;
+      padding-right: 0;
+      width: 1px;
+
+      + td,
+      + th {
+        padding-left: $gl-spacing-scale-4;
+      }
+    }
+
+    .detected {
+      width: 9%;
+    }
+
+    .status {
+      width: 8%;
+    }
+
+    .severity {
+      width: 10%;
+    }
+
+    .description {
+      max-width: 0;
+    }
+
+    .identifier {
+      width: 16%;
+    }
+
+    .scanner {
+      width: 10%;
+    }
+
+    .activity {
+      width: 5%;
+    }
+  }
+
+  // Due to position: sticky not being supported on Chrome (https://caniuse.com/#feat=css-sticky),
+  // the property is assigned to the th element as a workaround
+  .card,
+  thead th {
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 1;
+    @include sticky-top-positioning($security-filter-height);
+  }
+
+  thead th {
+    box-shadow: 0 1px $gray-100;
+  }
+
+  thead.below-selection-summary th {
+    @include sticky-top-positioning($security-filter-height + $selection-summary-height);
+  }
+
+  tr:hover .vulnerability-title {
+    text-decoration: underline;
+  }
+
+  .card.with-error + table thead.below-selection-summary th {
+    @include sticky-top-positioning($security-filter-height + $selection-summary-with-error-height);
+  }
+}
+
+.generic-report-container {
+  @include gl-display-grid;
+
+  grid-template-columns: max-content auto;
+}
+
+.generic-report-row {
+  display: contents;
+
+  &:last-child .generic-report-column {
+    @include gl-border-b-0;
+  }
+}
+
+.generic-report-column {
+  @include gl-px-3;
+  @include gl-py-5;
+  @include gl-border-b-1;
+  @include gl-border-b-solid;
+  @include gl-border-gray-100;
+
+  &:first-child {
+    max-width: 15rem;
+  }
+}
+
+.generic-report-list {
+  margin-bottom: 0 !important;
+
+  li {
+    @include gl-ml-0;
+    @include gl-list-style-none;
+  }
+
+  &.generic-report-list-nested li {
+    @include gl-ml-5;
+    list-style-type: disc;
+  }
+}
+
+.generic-report-named-list {
+  @include gl-display-grid;
+  grid-template-columns: max-content auto;
+  margin: 0 !important;
+
+  > .generic-report-named-list-item {
+    display: contents;
+  }
+}
+
+.generic-report-named-list-item {
+  @include gl-list-style-none;
+  margin: 0 !important;
+
+  .generic-report-named-list-label,
+  .generic-report-named-list-value {
+    @include gl-m-0;
+    @include gl-display-flex;
+    @include gl-pr-5;
+    @include gl-py-3;
+    @include gl-border-b-1;
+    @include gl-border-b-solid;
+    @include gl-border-gray-100;
+  }
+
+  &:first-child {
+    > .generic-report-named-list-label,
+    > .generic-report-named-list-value {
+      @include gl-pt-0;
+    }
+  }
+
+  &:last-child {
+    > .generic-report-named-list-label,
+    > .generic-report-named-list-value {
+      @include gl-pb-0;
+      @include gl-border-b-0;
+    }
+  }
+}

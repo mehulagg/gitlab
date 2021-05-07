@@ -7,6 +7,43 @@ RSpec.describe HelpController do
 
   let(:user) { create(:user) }
 
+  shared_examples 'documentation pages local render' do
+    it 'renders HTML' do
+      aggregate_failures do
+        is_expected.to render_template('show.html.haml')
+        expect(response.media_type).to eq 'text/html'
+      end
+    end
+  end
+
+  shared_examples 'documentation pages redirect' do |documentation_base_url|
+    let(:gitlab_version) { '13.4.0-ee' }
+
+    before do
+      stub_version(gitlab_version, 'ignored_revision_value')
+    end
+
+    it 'redirects user to custom documentation url with a specified version' do
+      is_expected.to redirect_to("#{documentation_base_url}/13.4/ee/#{path}.html")
+    end
+
+    context 'when it is a pre-release' do
+      let(:gitlab_version) { '13.4.0-pre' }
+
+      it 'redirects user to custom documentation url without a version' do
+        is_expected.to redirect_to("#{documentation_base_url}/ee/#{path}.html")
+      end
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(help_page_documentation_redirect: false)
+      end
+
+      it_behaves_like 'documentation pages local render'
+    end
+  end
+
   before do
     sign_in(user)
   end
@@ -95,72 +132,96 @@ RSpec.describe HelpController do
         expect(response).to redirect_to(new_user_session_path)
       end
     end
+
+    context 'when two factor is required' do
+      before do
+        stub_two_factor_required
+      end
+
+      it 'does not redirect to two factor auth' do
+        get :index
+
+        expect(response).not_to redirect_to(profile_two_factor_auth_path)
+      end
+    end
   end
 
   describe 'GET #show' do
     context 'for Markdown formats' do
+      subject { get :show, params: { path: path }, format: :md }
+
+      let(:path) { 'ssh/README' }
+
       context 'when requested file exists' do
         before do
-          expect(File).to receive(:read).and_return(fixture_file('blockquote_fence_after.md'))
-          get :show, params: { path: 'ssh/README' }, format: :md
+          expect_file_read(File.join(Rails.root, 'doc/ssh/README.md'), content: fixture_file('blockquote_fence_after.md'))
+
+          subject
         end
 
         it 'assigns to @markdown' do
           expect(assigns[:markdown]).not_to be_empty
         end
 
-        it 'renders HTML' do
-          aggregate_failures do
-            expect(response).to render_template('show.html.haml')
-            expect(response.media_type).to eq 'text/html'
+        it_behaves_like 'documentation pages local render'
+
+        context 'when two factor is required' do
+          before do
+            stub_two_factor_required
+          end
+
+          it 'does not redirect to two factor auth' do
+            expect(response).not_to redirect_to(profile_two_factor_auth_path)
           end
         end
       end
 
-      context 'when a custom help_page_documentation_url is set' do
+      context 'when a custom help_page_documentation_url is set in database' do
         before do
-          stub_application_setting(help_page_documentation_base_url: documentation_base_url)
-          stub_version(gitlab_version, 'deadbeaf')
+          stub_application_setting(help_page_documentation_base_url: 'https://in-db.gitlab.com')
         end
 
-        subject { get :show, params: { path: path }, format: 'html' }
+        it_behaves_like 'documentation pages redirect', 'https://in-db.gitlab.com'
+      end
 
-        let(:gitlab_version) { '13.4.0-ee' }
-        let(:documentation_base_url) { 'https://docs.gitlab.com' }
-        let(:path) { 'ssh/README' }
+      context 'when a custom help_page_documentation_url is set in configuration file' do
+        let(:host) { 'https://in-yaml.gitlab.com' }
+        let(:docs_enabled) { true }
 
-        it 'redirects user to custom documentation url with a specified version' do
-          is_expected.to redirect_to("#{documentation_base_url}/13.4/ee/#{path}.html")
+        before do
+          allow(Settings).to receive(:gitlab_docs) { double(enabled: docs_enabled, host: host) }
         end
 
-        context 'when documentation url ends with a slash' do
-          let(:documentation_base_url) { 'https://docs.gitlab.com/' }
+        it_behaves_like 'documentation pages redirect', 'https://in-yaml.gitlab.com'
 
-          it 'redirects user to custom documentation url without slash duplicates' do
-            is_expected.to redirect_to("https://docs.gitlab.com/13.4/ee/#{path}.html")
-          end
+        context 'when gitlab_docs is disabled' do
+          let(:docs_enabled) { false }
+
+          it_behaves_like 'documentation pages local render'
         end
 
-        context 'when it is a pre-release' do
-          let(:gitlab_version) { '13.4.0-pre' }
+        context 'when host is missing' do
+          let(:host) { nil }
 
-          it 'redirects user to custom documentation url without a version' do
-            is_expected.to redirect_to("#{documentation_base_url}/ee/#{path}.html")
-          end
+          it_behaves_like 'documentation pages local render'
+        end
+      end
+
+      context 'when help_page_documentation_url is set in both db and configuration file' do
+        before do
+          stub_application_setting(help_page_documentation_base_url: 'https://in-db.gitlab.com')
+          allow(Settings).to receive(:gitlab_docs) { double(enabled: true, host: 'https://in-yaml.gitlab.com') }
         end
 
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(help_page_documentation_redirect: false)
-          end
+        it_behaves_like 'documentation pages redirect', 'https://in-yaml.gitlab.com'
+      end
 
-          it 'renders HTML' do
-            aggregate_failures do
-              is_expected.to render_template('show.html.haml')
-              expect(response.media_type).to eq 'text/html'
-            end
-          end
+      context 'when help_page_documentation_url has a trailing slash' do
+        before do
+          allow(Settings).to receive(:gitlab_docs) { double(enabled: true, host: 'https://in-yaml.gitlab.com/') }
         end
+
+        it_behaves_like 'documentation pages redirect', 'https://in-yaml.gitlab.com'
       end
 
       context 'when requested file is missing' do
@@ -213,6 +274,11 @@ RSpec.describe HelpController do
   end
 
   def stub_readme(content)
-    expect(File).to receive(:read).and_return(content)
+    expect_file_read(Rails.root.join('doc', 'README.md'), content: content)
+  end
+
+  def stub_two_factor_required
+    allow(controller).to receive(:two_factor_authentication_required?).and_return(true)
+    allow(controller).to receive(:current_user_requires_two_factor?).and_return(true)
   end
 end

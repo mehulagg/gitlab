@@ -40,11 +40,33 @@ RSpec.shared_examples 'boards create mutation' do
         end
       end
 
+      context 'when hide_backlog_list parameter is true' do
+        before do
+          params[:hide_backlog_list] = true
+        end
+
+        it 'returns the board with correct hide_backlog_list field' do
+          post_graphql_mutation(mutation, current_user: current_user)
+
+          expect(mutation_response['board']['hideBacklogList']).to eq(true)
+        end
+      end
+
+      context 'when hide_closed_list parameter is true' do
+        before do
+          params[:hide_closed_list] = true
+        end
+
+        it 'returns the board with correct hide_closed_list field' do
+          post_graphql_mutation(mutation, current_user: current_user)
+
+          expect(mutation_response['board']['hideClosedList']).to eq(true)
+        end
+      end
+
       context 'when the Boards::CreateService returns an error response' do
         before do
-          allow_next_instance_of(Boards::CreateService) do |service|
-            allow(service).to receive(:execute).and_return(ServiceResponse.error(message: 'There was an error.'))
-          end
+          params[:name] = ''
         end
 
         it 'does not create a board' do
@@ -56,7 +78,7 @@ RSpec.shared_examples 'boards create mutation' do
 
           expect(mutation_response).to have_key('board')
           expect(mutation_response['board']).to be_nil
-          expect(mutation_response['errors'].first).to eq('There was an error.')
+          expect(mutation_response['errors'].first).to eq('There was an error when creating a board.')
         end
       end
     end
@@ -65,7 +87,7 @@ RSpec.shared_examples 'boards create mutation' do
       let(:params) { { name: name } }
 
       it_behaves_like 'a mutation that returns top-level errors',
-        errors: ['group_path or project_path arguments are required']
+        errors: ['Exactly one of group_path or project_path arguments is required']
 
       it 'does not create the board' do
         expect { subject }.not_to change { Board.count }

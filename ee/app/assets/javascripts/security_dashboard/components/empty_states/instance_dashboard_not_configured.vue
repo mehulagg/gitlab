@@ -1,35 +1,31 @@
 <script>
-import { GlButton, GlEmptyState, GlLink } from '@gitlab/ui';
+import { GlEmptyState } from '@gitlab/ui';
+import { s__, __ } from '~/locale';
 
 export default {
   components: {
     GlEmptyState,
-    GlButton,
-    GlLink,
   },
   inject: ['dashboardDocumentation', 'emptyStateSvgPath', 'instanceDashboardSettingsPath'],
+  i18n: {
+    title: s__('SecurityReports|Monitor vulnerabilities in all of your projects'),
+    description: s__(
+      'SecurityReports|Manage and track vulnerabilities identified in your selected projects. Vulnerabilities for selected projects with security testing configured are shown here.',
+    ),
+    primaryButtonText: s__('Add projects'),
+    secondaryButtonText: __('Learn more'),
+  },
 };
 </script>
 
 <template>
   <gl-empty-state
-    :title="s__('SecurityReports|Add a project to your dashboard')"
+    :title="$options.i18n.title"
     :svg-path="emptyStateSvgPath"
-  >
-    <template #description>
-      {{
-        s__(
-          'SecurityReports|The security dashboard displays the latest security findings for projects you wish to monitor. Select "Edit dashboard" to add and remove projects.',
-        )
-      }}
-      <gl-link :href="dashboardDocumentation">{{
-        s__('SecurityReports|More information')
-      }}</gl-link>
-    </template>
-    <template #actions>
-      <gl-button variant="success" :href="instanceDashboardSettingsPath">
-        {{ s__('SecurityReports|Add projects') }}
-      </gl-button>
-    </template>
-  </gl-empty-state>
+    :description="$options.i18n.description"
+    :primary-button-text="$options.i18n.primaryButtonText"
+    :primary-button-link="instanceDashboardSettingsPath"
+    :secondary-button-text="$options.i18n.secondaryButtonText"
+    :secondary-button-link="dashboardDocumentation"
+  />
 </template>

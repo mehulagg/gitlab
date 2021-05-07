@@ -24,11 +24,10 @@ RSpec.describe 'projects/_home_panel' do
         assign(:notification_setting, notification_settings)
       end
 
-      it 'makes it possible to set notification level' do
+      it 'renders Vue app root' do
         render
 
-        expect(view).to render_template('shared/notifications/_new_button')
-        expect(rendered).to have_selector('.notification-dropdown')
+        expect(rendered).to have_selector('.js-vue-notification-dropdown')
       end
     end
 
@@ -39,10 +38,10 @@ RSpec.describe 'projects/_home_panel' do
         assign(:notification_setting, nil)
       end
 
-      it 'is not possible to set notification level' do
+      it 'does not render Vue app root' do
         render
 
-        expect(rendered).not_to have_selector('.notification_dropdown')
+        expect(rendered).not_to have_selector('.js-vue-notification-dropdown')
       end
     end
   end

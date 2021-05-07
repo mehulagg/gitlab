@@ -3,6 +3,8 @@
 module Projects
   module Security
     class DiscoverController < Projects::ApplicationController
+      include SecurityAndCompliancePermissions
+
       feature_category :navigation
 
       def show

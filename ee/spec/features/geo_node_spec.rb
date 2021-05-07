@@ -42,6 +42,7 @@ RSpec.describe 'GEO Nodes', :geo do
       stub_licensed_features(geo: true)
 
       sign_in(admin_user)
+      gitlab_enable_admin_mode_sign_in(admin_user)
     end
 
     describe 'Geo Nodes admin screen' do

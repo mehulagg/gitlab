@@ -5,16 +5,13 @@ import approvalsModule, {
   APPROVALS,
   APPROVALS_MODAL,
 } from 'ee/approvals/stores/modules/license_compliance';
-import { licenseManagementModule } from 'ee/vue_shared/license_compliance/store/index';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
-import createState from './state';
-
+import { licenseManagementModule } from 'ee/vue_shared/license_compliance/store/index';
 import modalModule from '~/vuex_shared/modules/modal';
-
-import mediator from './plugins/mediator';
-
-import listModule from './modules/list';
 import { LICENSE_LIST } from './constants';
+import listModule from './modules/list';
+import mediator from './plugins/mediator';
+import createState from './state';
 
 Vue.use(Vuex);
 

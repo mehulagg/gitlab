@@ -1,1 +1,1 @@
-export const isEmpty = state => !state.rules || !state.rules.length;
+export const isEmpty = (state) => !state.rules || !state.rules.length;

@@ -1,31 +1,36 @@
+import { GlIcon, GlSprintf, GlSkeletonLoader } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlIcon, GlSprintf } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import Component from '~/registry/explorer/components/list_page/image_list_row.vue';
-import ListItem from '~/vue_shared/components/registry/list_item.vue';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import DeleteButton from '~/registry/explorer/components/delete_button.vue';
+import Component from '~/registry/explorer/components/list_page/image_list_row.vue';
 import {
   ROW_SCHEDULED_FOR_DELETION,
   LIST_DELETE_BUTTON_DISABLED,
   REMOVE_REPOSITORY_LABEL,
   ASYNC_DELETE_IMAGE_ERROR_MESSAGE,
   CLEANUP_TIMED_OUT_ERROR_MESSAGE,
+  IMAGE_DELETE_SCHEDULED_STATUS,
+  IMAGE_FAILED_DELETED_STATUS,
+  ROOT_IMAGE_TEXT,
 } from '~/registry/explorer/constants';
-import { RouterLink } from '../../stubs';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
+import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import { imagesListResponse } from '../../mock_data';
+import { RouterLink } from '../../stubs';
 
 describe('Image List Row', () => {
   let wrapper;
-  const item = imagesListResponse.data[0];
+  const [item] = imagesListResponse;
 
-  const findDetailsLink = () => wrapper.find('[data-testid="detailsLink"]');
-  const findTagsCount = () => wrapper.find('[data-testid="tagsCount"]');
+  const findDetailsLink = () => wrapper.find('[data-testid="details-link"]');
+  const findTagsCount = () => wrapper.find('[data-testid="tags-count"]');
   const findDeleteBtn = () => wrapper.find(DeleteButton);
   const findClipboardButton = () => wrapper.find(ClipboardButton);
   const findWarningIcon = () => wrapper.find('[data-testid="warning-icon"]');
+  const findSkeletonLoader = () => wrapper.find(GlSkeletonLoader);
 
-  const mountComponent = props => {
+  const mountComponent = (props) => {
     wrapper = shallowMount(Component, {
       stubs: {
         RouterLink,
@@ -50,13 +55,15 @@ describe('Image List Row', () => {
   describe('main tooltip', () => {
     it(`the title is ${ROW_SCHEDULED_FOR_DELETION}`, () => {
       mountComponent();
+
       const tooltip = getBinding(wrapper.element, 'gl-tooltip');
       expect(tooltip).toBeDefined();
       expect(tooltip.value.title).toBe(ROW_SCHEDULED_FOR_DELETION);
     });
 
     it('is disabled when item is being deleted', () => {
-      mountComponent({ item: { ...item, deleting: true } });
+      mountComponent({ item: { ...item, status: IMAGE_DELETE_SCHEDULED_STATUS } });
+
       const tooltip = getBinding(wrapper.element, 'gl-tooltip');
       expect(tooltip.value.disabled).toBe(false);
     });
@@ -65,9 +72,21 @@ describe('Image List Row', () => {
   describe('image title and path', () => {
     it('contains a link to the details page', () => {
       mountComponent();
+
       const link = findDetailsLink();
-      expect(link.html()).toContain(item.path);
-      expect(link.props('to').name).toBe('details');
+      expect(link.text()).toBe(item.path);
+      expect(findDetailsLink().props('to')).toMatchObject({
+        name: 'details',
+        params: {
+          id: getIdFromGraphQLId(item.id),
+        },
+      });
+    });
+
+    it(`when the image has no name appends ${ROOT_IMAGE_TEXT} to the path`, () => {
+      mountComponent({ item: { ...item, name: '' } });
+
+      expect(findDetailsLink().text()).toBe(`${item.path}/ ${ROOT_IMAGE_TEXT}`);
     });
 
     it('contains a clipboard button', () => {
@@ -80,16 +99,18 @@ describe('Image List Row', () => {
 
     describe('warning icon', () => {
       it.each`
-        failedDelete | cleanup_policy_started_at | shown    | title
-        ${true}      | ${true}                   | ${true}  | ${ASYNC_DELETE_IMAGE_ERROR_MESSAGE}
-        ${false}     | ${true}                   | ${true}  | ${CLEANUP_TIMED_OUT_ERROR_MESSAGE}
-        ${false}     | ${false}                  | ${false} | ${''}
+        status                         | expirationPolicyStartedAt | shown    | title
+        ${IMAGE_FAILED_DELETED_STATUS} | ${true}                   | ${true}  | ${ASYNC_DELETE_IMAGE_ERROR_MESSAGE}
+        ${''}                          | ${true}                   | ${true}  | ${CLEANUP_TIMED_OUT_ERROR_MESSAGE}
+        ${''}                          | ${false}                  | ${false} | ${''}
       `(
-        'when failedDelete is $failedDelete and cleanup_policy_started_at is $cleanup_policy_started_at',
-        ({ cleanup_policy_started_at, failedDelete, shown, title }) => {
-          mountComponent({ item: { ...item, failedDelete, cleanup_policy_started_at } });
+        'when status is $status and expirationPolicyStartedAt is $expirationPolicyStartedAt',
+        ({ expirationPolicyStartedAt, status, shown, title }) => {
+          mountComponent({ item: { ...item, status, expirationPolicyStartedAt } });
+
           const icon = findWarningIcon();
           expect(icon.exists()).toBe(shown);
+
           if (shown) {
             const tooltip = getBinding(icon.element, 'gl-tooltip');
             expect(tooltip.value.title).toBe(title);
@@ -107,30 +128,33 @@ describe('Image List Row', () => {
 
     it('has the correct props', () => {
       mountComponent();
-      expect(findDeleteBtn().attributes()).toMatchObject({
+
+      expect(findDeleteBtn().props()).toMatchObject({
         title: REMOVE_REPOSITORY_LABEL,
-        tooltipdisabled: `${Boolean(item.destroy_path)}`,
-        tooltiptitle: LIST_DELETE_BUTTON_DISABLED,
+        tooltipDisabled: item.canDelete,
+        tooltipTitle: LIST_DELETE_BUTTON_DISABLED,
       });
     });
 
     it('emits a delete event', () => {
       mountComponent();
+
       findDeleteBtn().vm.$emit('delete');
       expect(wrapper.emitted('delete')).toEqual([[item]]);
     });
 
     it.each`
-      destroy_path | deleting | state
-      ${null}      | ${null}  | ${'true'}
-      ${null}      | ${true}  | ${'true'}
-      ${'foo'}     | ${true}  | ${'true'}
-      ${'foo'}     | ${false} | ${undefined}
+      canDelete | status                           | state
+      ${false}  | ${''}                            | ${true}
+      ${false}  | ${IMAGE_DELETE_SCHEDULED_STATUS} | ${true}
+      ${true}   | ${IMAGE_DELETE_SCHEDULED_STATUS} | ${true}
+      ${true}   | ${''}                            | ${false}
     `(
-      'disabled is $state when destroy_path is $destroy_path and deleting is $deleting',
-      ({ destroy_path, deleting, state }) => {
-        mountComponent({ item: { ...item, destroy_path, deleting } });
-        expect(findDeleteBtn().attributes('disabled')).toBe(state);
+      'disabled is $state when canDelete is $canDelete and status is $status',
+      ({ canDelete, status, state }) => {
+        mountComponent({ item: { ...item, canDelete, status } });
+
+        expect(findDeleteBtn().props('disabled')).toBe(state);
       },
     );
   });
@@ -148,13 +172,29 @@ describe('Image List Row', () => {
       expect(icon.props('name')).toBe('tag');
     });
 
+    describe('loading state', () => {
+      it('shows a loader when metadataLoading is true', () => {
+        mountComponent({ metadataLoading: true });
+
+        expect(findSkeletonLoader().exists()).toBe(true);
+      });
+
+      it('hides the tags count while loading', () => {
+        mountComponent({ metadataLoading: true });
+
+        expect(findTagsCount().exists()).toBe(false);
+      });
+    });
+
     describe('tags count text', () => {
       it('with one tag in the image', () => {
-        mountComponent({ item: { ...item, tags_count: 1 } });
+        mountComponent({ item: { ...item, tagsCount: 1 } });
+
         expect(findTagsCount().text()).toMatchInterpolatedText('1 Tag');
       });
       it('with more than one tag in the image', () => {
-        mountComponent({ item: { ...item, tags_count: 3 } });
+        mountComponent({ item: { ...item, tagsCount: 3 } });
+
         expect(findTagsCount().text()).toMatchInterpolatedText('3 Tags');
       });
     });

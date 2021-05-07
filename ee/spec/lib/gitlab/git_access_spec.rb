@@ -5,14 +5,14 @@ require 'spec_helper'
 RSpec.describe Gitlab::GitAccess do
   include GitHelpers
   include EE::GeoHelpers
+  include AdminModeHelper
 
   let_it_be(:user) { create(:user) }
 
   let(:actor) { user }
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
-  let(:namespace_path) { nil }
-  let(:project_path) { nil }
+  let(:repository_path) { "#{project.full_path}.git" }
   let(:protocol) { 'web' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
@@ -38,7 +38,7 @@ RSpec.describe Gitlab::GitAccess do
     let(:primary_repo_url) { geo_primary_http_url_to_repo(project) }
     let(:primary_repo_ssh_url) { geo_primary_ssh_url_to_repo(project) }
 
-    it_behaves_like 'a read-only GitLab instance'
+    it_behaves_like 'git access for a read-only GitLab instance'
   end
 
   describe "push_rule_check" do
@@ -408,8 +408,6 @@ RSpec.describe Gitlab::GitAccess do
   end
 
   describe '#check_push_access!' do
-    let(:project_path) { project.path }
-    let(:namespace_path) { project&.namespace&.path }
     let(:protocol) { 'ssh' }
     let(:unprotected_branch) { 'unprotected_branch' }
 
@@ -459,8 +457,9 @@ RSpec.describe Gitlab::GitAccess do
         # Expectations are given a custom failure message proc so that it's
         # easier to identify which check(s) failed.
         it "has the correct permissions for #{role}s" do
-          if role == :admin
+          if [:admin_with_admin_mode, :admin_without_admin_mode].include?(role)
             user.update_attribute(:admin, true)
+            enable_admin_mode!(user) if role == :admin_with_admin_mode
             project.add_guest(user)
           else
             project.add_role(user, role)
@@ -512,7 +511,7 @@ RSpec.describe Gitlab::GitAccess do
     end
 
     permissions_matrix = {
-      admin: {
+      admin_with_admin_mode: {
         any: true,
         push_new_branch: true,
         push_master: true,
@@ -522,6 +521,18 @@ RSpec.describe Gitlab::GitAccess do
         push_new_tag: true,
         push_all: true,
         merge_into_protected_branch: true
+      },
+
+      admin_without_admin_mode: {
+        any: false,
+        push_new_branch: false,
+        push_master: false,
+        push_protected_branch: false,
+        push_remove_protected_branch: false,
+        push_tag: false,
+        push_new_tag: false,
+        push_all: false,
+        merge_into_protected_branch: false
       },
 
       maintainer: {
@@ -592,7 +603,8 @@ RSpec.describe Gitlab::GitAccess do
             create(:merge_request, source_project: project, source_branch: unprotected_branch, target_branch: 'feature', state: 'locked', in_progress_merge_commit_sha: merge_into_protected_branch)
           end
 
-          run_permission_checks(permissions_matrix.deep_merge(admin: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
+          run_permission_checks(permissions_matrix.deep_merge(admin_with_admin_mode: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
+                                                              admin_without_admin_mode: { push_protected_branch: false, merge_into_protected_branch: false },
                                                               maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
                                                               developer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
                                                               guest: { push_protected_branch: false, merge_into_protected_branch: false },
@@ -616,6 +628,7 @@ RSpec.describe Gitlab::GitAccess do
         before do
           create_current_license(starts_at: 1.month.ago.to_date, block_changes_at: Date.current, notify_admins_at: Date.current)
           user.update_attribute(:admin, true)
+          enable_admin_mode!(user)
           project.add_role(user, :developer)
         end
 
@@ -635,9 +648,10 @@ RSpec.describe Gitlab::GitAccess do
         context "when a specific group is allowed to push into the #{protected_branch_type} protected branch" do
           let(:protected_branch) { build(:protected_branch, authorize_group_to_push: group, name: protected_branch_name, project: project) }
 
-          permissions = permissions_matrix.except(:admin).deep_merge(developer: { push_protected_branch: true, push_all: true, merge_into_protected_branch: true },
-                                                                     guest: { push_protected_branch: false, merge_into_protected_branch: false },
-                                                                     reporter: { push_protected_branch: false, merge_into_protected_branch: false })
+          permissions = permissions_matrix.except(:admin_with_admin_mode, :admin_without_admin_mode)
+                            .deep_merge(developer: { push_protected_branch: true, push_all: true, merge_into_protected_branch: true },
+                                        guest: { push_protected_branch: false, merge_into_protected_branch: false },
+                                        reporter: { push_protected_branch: false, merge_into_protected_branch: false })
 
           run_group_permission_checks(permissions)
         end
@@ -649,10 +663,11 @@ RSpec.describe Gitlab::GitAccess do
             create(:merge_request, source_project: project, source_branch: unprotected_branch, target_branch: 'feature', state: 'locked', in_progress_merge_commit_sha: merge_into_protected_branch)
           end
 
-          permissions = permissions_matrix.except(:admin).deep_merge(maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
-                                                                     developer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
-                                                                     guest: { push_protected_branch: false, merge_into_protected_branch: false },
-                                                                     reporter: { push_protected_branch: false, merge_into_protected_branch: false })
+          permissions = permissions_matrix.except(:admin_with_admin_mode, :admin_without_admin_mode)
+                            .deep_merge(maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
+                                        developer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: true },
+                                        guest: { push_protected_branch: false, merge_into_protected_branch: false },
+                                        reporter: { push_protected_branch: false, merge_into_protected_branch: false })
 
           run_group_permission_checks(permissions)
         end
@@ -664,9 +679,10 @@ RSpec.describe Gitlab::GitAccess do
             create(:merge_request, source_project: project, source_branch: unprotected_branch, target_branch: 'feature', state: 'locked', in_progress_merge_commit_sha: merge_into_protected_branch)
           end
 
-          permissions = permissions_matrix.except(:admin).deep_merge(developer: { push_protected_branch: true, push_all: true, merge_into_protected_branch: true },
-                                                                     guest: { push_protected_branch: false, merge_into_protected_branch: false },
-                                                                     reporter: { push_protected_branch: false, merge_into_protected_branch: false })
+          permissions = permissions_matrix.except(:admin_with_admin_mode, :admin_without_admin_mode)
+                            .deep_merge(developer: { push_protected_branch: true, push_all: true, merge_into_protected_branch: true },
+                                        guest: { push_protected_branch: false, merge_into_protected_branch: false },
+                                        reporter: { push_protected_branch: false, merge_into_protected_branch: false })
 
           run_group_permission_checks(permissions)
         end
@@ -729,6 +745,239 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
+  describe '#check_otp_session!' do
+    let_it_be(:user) { create(:user, :two_factor_via_otp)}
+    let_it_be(:key) { create(:key, user: user) }
+    let_it_be(:actor) { key }
+    let(:protocol) { 'ssh' }
+
+    before do
+      project.add_developer(user)
+      stub_feature_flags(two_factor_for_cli: true)
+      stub_licensed_features(git_two_factor_enforcement: true)
+    end
+
+    context 'with an OTP session', :clean_gitlab_redis_shared_state do
+      before do
+        Gitlab::Redis::SharedState.with do |redis|
+          redis.set("#{Gitlab::Auth::Otp::SessionEnforcer::OTP_SESSIONS_NAMESPACE}:#{key.id}", true)
+        end
+      end
+
+      it 'allows push and pull access' do
+        aggregate_failures do
+          expect { push_changes }.not_to raise_error
+          expect { pull_changes }.not_to raise_error
+        end
+      end
+
+      context 'based on the duration set by the `git_two_factor_session_expiry` setting' do
+        let_it_be(:git_two_factor_session_expiry) { 20 }
+        let_it_be(:redis_key_expiry_at) { git_two_factor_session_expiry.minutes.from_now }
+
+        before do
+          stub_application_setting(git_two_factor_session_expiry: git_two_factor_session_expiry)
+        end
+
+        def value_of_key
+          key_expired = Time.current > redis_key_expiry_at
+          return if key_expired
+
+          true
+        end
+
+        def stub_redis
+          redis = double(:redis)
+          expect(Gitlab::Redis::SharedState).to receive(:with).at_most(:twice).and_yield(redis)
+
+          expect(redis).to(
+            receive(:get)
+              .with("#{Gitlab::Auth::Otp::SessionEnforcer::OTP_SESSIONS_NAMESPACE}:#{key.id}"))
+                       .at_most(:twice)
+                       .and_return(value_of_key)
+        end
+
+        context 'at a time before the stipulated expiry' do
+          it 'allows push and pull access' do
+            travel_to(10.minutes.from_now) do
+              stub_redis
+
+              aggregate_failures do
+                expect { push_changes }.not_to raise_error
+                expect { pull_changes }.not_to raise_error
+              end
+            end
+          end
+        end
+
+        context 'at a time after the stipulated expiry' do
+          it 'does not allow push and pull access' do
+            travel_to(30.minutes.from_now) do
+              stub_redis
+
+              aggregate_failures do
+                expect { push_changes }.to raise_error(::Gitlab::GitAccess::ForbiddenError)
+                expect { pull_changes }.to raise_error(::Gitlab::GitAccess::ForbiddenError)
+              end
+            end
+          end
+        end
+      end
+    end
+
+    context 'without OTP session' do
+      it 'does not allow push or pull access' do
+        user = 'jane.doe'
+        host = 'fridge.ssh'
+        port = 42
+
+        stub_config(
+          gitlab_shell: {
+            ssh_user: user,
+            ssh_host: host,
+            ssh_port: port
+          }
+        )
+
+        error_message = "OTP verification is required to access the repository.\n\n"\
+                        "   Use: ssh #{user}@#{host} -p #{port} 2fa_verify"
+
+        aggregate_failures do
+          expect { push_changes }.to raise_forbidden(error_message)
+          expect { pull_changes }.to raise_forbidden(error_message)
+        end
+      end
+
+      context 'when protocol is HTTP' do
+        let(:protocol) { 'http' }
+
+        it 'allows push and pull access' do
+          aggregate_failures do
+            expect { push_changes }.not_to raise_error
+            expect { pull_changes }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when actor is not an SSH key' do
+        let(:deploy_key) { create(:deploy_key, user: user) }
+        let(:actor) { deploy_key }
+
+        before do
+          deploy_key.deploy_keys_projects.create(project: project, can_push: true)
+        end
+
+        it 'allows push and pull access' do
+          aggregate_failures do
+            expect { push_changes }.not_to raise_error
+            expect { pull_changes }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when 2FA is not enabled for the user' do
+        let(:user) { create(:user)}
+        let(:actor) { create(:key, user: user) }
+
+        it 'allows push and pull access' do
+          aggregate_failures do
+            expect { push_changes }.not_to raise_error
+            expect { pull_changes }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(two_factor_for_cli: false)
+        end
+
+        it 'allows push and pull access' do
+          aggregate_failures do
+            expect { push_changes }.not_to raise_error
+            expect { pull_changes }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when licensed feature is not available' do
+        before do
+          stub_licensed_features(git_two_factor_enforcement: false)
+        end
+
+        it 'allows push and pull access' do
+          aggregate_failures do
+            expect { push_changes }.not_to raise_error
+            expect { pull_changes }.not_to raise_error
+          end
+        end
+      end
+    end
+  end
+
+  describe '#check_sso_session!' do
+    before do
+      project.add_developer(user)
+    end
+
+    context 'with project without group' do
+      it 'allows pull and push changes' do
+        expect(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive(:new).with(user, nil).and_return(double(access_restricted?: false))
+        pull_changes
+      end
+    end
+
+    context 'with project with group' do
+      let_it_be(:group) { create(:group) }
+
+      before do
+        project.update!(namespace: group)
+      end
+
+      context 'user with a sso session' do
+        let(:access_restricted?) { false }
+
+        it 'allows pull and push changes' do
+          expect(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive(:new).with(user, group).twice.and_return(double(access_restricted?: access_restricted?))
+
+          expect { pull_changes }.not_to raise_error
+          expect { push_changes }.not_to raise_error
+        end
+      end
+
+      context 'user without a sso session' do
+        let(:access_restricted?) { true }
+
+        before do
+          expect(Gitlab::Auth::GroupSaml::SessionEnforcer).to receive(:new).with(user, group).twice.and_return(double(access_restricted?: access_restricted?))
+        end
+
+        it 'does not allow pull or push changes with proper url in the message' do
+          aggregate_failures do
+            address = "http://localhost/groups/#{group.name}/-/saml/sso?token=#{group.saml_discovery_token}"
+
+            expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+            expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+          end
+        end
+
+        context 'with a subgroup' do
+          let_it_be(:root_group) { create(:group) }
+          let_it_be(:group) { create(:group, parent: root_group) }
+
+          it 'does not allow pull or push changes with proper url in the message' do
+            aggregate_failures do
+              address = "http://localhost/groups/#{root_group.name}/-/saml/sso?token=#{root_group.saml_discovery_token}"
+
+              expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+              expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError, /#{Regexp.quote(address)}/)
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe '#check_maintenance_mode!' do
     let(:changes) { Gitlab::GitAccess::ANY }
 
@@ -742,7 +991,7 @@ RSpec.describe Gitlab::GitAccess do
 
     context 'when maintenance mode is enabled' do
       before do
-        stub_application_setting(maintenance_mode: true)
+        stub_maintenance_mode_setting(true)
       end
 
       it 'blocks git push' do
@@ -754,11 +1003,27 @@ RSpec.describe Gitlab::GitAccess do
 
     context 'when maintenance mode is disabled' do
       before do
-        stub_application_setting(maintenance_mode: false)
+        stub_maintenance_mode_setting(false)
       end
 
       it 'allows git push' do
         expect { push_access_check }.not_to raise_error
+      end
+    end
+  end
+
+  describe '#check_valid_actor!' do
+    context 'key expiration is enforced' do
+      let(:actor) { build(:personal_key, expires_at: 2.days.ago) }
+
+      before do
+        stub_licensed_features(enforce_ssh_key_expiration: true)
+        stub_ee_application_setting(enforce_ssh_key_expiration: true)
+      end
+
+      it 'does not allow expired keys', :aggregate_failures do
+        expect { push_changes }.to raise_forbidden('Your SSH key has expired and the instance administrator has enforced expiration.')
+        expect { pull_changes }.to raise_forbidden('Your SSH key has expired and the instance administrator has enforced expiration.')
       end
     end
   end
@@ -771,8 +1036,7 @@ RSpec.describe Gitlab::GitAccess do
       project,
       protocol,
       authentication_abilities: authentication_abilities,
-      namespace_path: namespace_path,
-      repository_path: project_path,
+      repository_path: repository_path,
       redirected_path: redirected_path
     )
   end

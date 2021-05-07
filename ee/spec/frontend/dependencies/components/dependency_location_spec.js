@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlIntersperse, GlPopover } from '@gitlab/ui';
-import { trimText } from 'helpers/text_helper';
+import { shallowMount } from '@vue/test-utils';
 import DependencyLocation from 'ee/dependencies/components/dependency_location.vue';
 import DependencyPathViewer from 'ee/dependencies/components/dependency_path_viewer.vue';
+import { trimText } from 'helpers/text_helper';
 import * as Paths from './mock_data';
 
 describe('Dependency Location component', () => {
@@ -12,11 +12,6 @@ describe('Dependency Location component', () => {
     wrapper = shallowMount(DependencyLocation, {
       propsData: { ...propsData },
       stubs: { GlLink, DependencyPathViewer, GlIntersperse },
-      provide: {
-        glFeatures: {
-          pathToVulnerableDependency: true,
-        },
-      },
       ...options,
     });
   };
@@ -52,11 +47,11 @@ describe('Dependency Location component', () => {
       });
     });
 
-    it('shoud render the popover', () => {
+    it('should render the popover', () => {
       expect(findPopover().exists()).toBe(true);
     });
 
-    it('shoud have the complete path', () => {
+    it('should have the complete path', () => {
       expect(trimText(findPopover().text())).toBe(
         'swell 1.2 / emmajsq 10.11 / zeb 12.1 / post 2.5 / core 1.0 There may be multiple paths',
       );
@@ -85,25 +80,6 @@ describe('Dependency Location component', () => {
 
     it('should not render the popover', () => {
       expect(findPopover().exists()).toBe(false);
-    });
-  });
-
-  describe('with feature flag off', () => {
-    it.each`
-      name                | location              | path
-      ${'no path'}        | ${Paths.noPath}       | ${'package.json'}
-      ${'top level path'} | ${Paths.topLevelPath} | ${'package.json'}
-      ${'short path'}     | ${Paths.shortPath}    | ${'package.json'}
-      ${'long path'}      | ${Paths.longPath}     | ${'package.json'}
-    `('do not show dependency path for $name', ({ location, path }) => {
-      createComponent({
-        propsData: {
-          location,
-        },
-        provide: { glFeatures: { pathToVulnerableDependency: false } },
-      });
-
-      expect(wrapper.text()).toBe(path);
     });
   });
 });

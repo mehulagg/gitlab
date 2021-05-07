@@ -1,11 +1,14 @@
+import Cookies from 'js-cookie';
 import Vue from 'vue';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import Cookies from 'js-cookie';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import eventHub from '../notes/event_hub';
 import diffsApp from './components/app.vue';
+
 import { TREE_LIST_STORAGE_KEY, DIFF_WHITESPACE_COOKIE_NAME } from './constants';
+import { getReviewsForMergeRequest } from './utils/file_reviews';
+import { getDerivedMergeRequestInformation } from './utils/merge_request';
 
 export default function initDiffsApp(store) {
   const fileFinderEl = document.getElementById('js-diff-file-finder');
@@ -70,6 +73,8 @@ export default function initDiffsApp(store) {
         endpointMetadata: dataset.endpointMetadata || '',
         endpointBatch: dataset.endpointBatch || '',
         endpointCoverage: dataset.endpointCoverage || '',
+        endpointCodequality: dataset.endpointCodequality || '',
+        endpointUpdateUser: dataset.updateCurrentUserPath,
         projectPath: dataset.projectPath,
         helpPagePath: dataset.helpPagePath,
         currentUser: JSON.parse(dataset.currentUserData) || {},
@@ -79,11 +84,12 @@ export default function initDiffsApp(store) {
         showSuggestPopover: parseBoolean(dataset.showSuggestPopover),
         showWhitespaceDefault: parseBoolean(dataset.showWhitespaceDefault),
         viewDiffsFileByFile: parseBoolean(dataset.fileByFileDefault),
+        defaultSuggestionCommitMessage: dataset.defaultSuggestionCommitMessage,
       };
     },
     computed: {
       ...mapState({
-        activeTab: state => state.page.activeTab,
+        activeTab: (state) => state.page.activeTab,
       }),
     },
     created() {
@@ -102,12 +108,16 @@ export default function initDiffsApp(store) {
       ...mapActions('diffs', ['setRenderTreeList', 'setShowWhitespace']),
     },
     render(createElement) {
+      const { mrPath } = getDerivedMergeRequestInformation({ endpoint: this.endpoint });
+
       return createElement('diffs-app', {
         props: {
           endpoint: this.endpoint,
           endpointMetadata: this.endpointMetadata,
           endpointBatch: this.endpointBatch,
           endpointCoverage: this.endpointCoverage,
+          endpointCodequality: this.endpointCodequality,
+          endpointUpdateUser: this.endpointUpdateUser,
           currentUser: this.currentUser,
           projectPath: this.projectPath,
           helpPagePath: this.helpPagePath,
@@ -116,7 +126,9 @@ export default function initDiffsApp(store) {
           isFluidLayout: this.isFluidLayout,
           dismissEndpoint: this.dismissEndpoint,
           showSuggestPopover: this.showSuggestPopover,
-          viewDiffsFileByFile: this.viewDiffsFileByFile,
+          fileByFileUserPreference: this.viewDiffsFileByFile,
+          defaultSuggestionCommitMessage: this.defaultSuggestionCommitMessage,
+          rehydratedMrReviews: getReviewsForMergeRequest(mrPath),
         },
       });
     },

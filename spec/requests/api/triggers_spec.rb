@@ -49,9 +49,16 @@ RSpec.describe API::Triggers do
 
         expect(response).to have_gitlab_http_status(:created)
         expect(json_response).to include('id' => pipeline.id)
-        pipeline.builds.reload
-        expect(pipeline.builds.pending.size).to eq(2)
         expect(pipeline.builds.size).to eq(5)
+      end
+
+      it 'stores payload as a variable' do
+        post api("/projects/#{project.id}/trigger/pipeline"), params: options.merge(ref: 'master')
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(pipeline.variables.find { |v| v.key == 'TRIGGER_PAYLOAD' }.value).to eq(
+          "{\"ref\":\"master\",\"id\":\"#{project.id}\",\"variables\":{}}"
+        )
       end
 
       it 'returns bad request with no pipeline created if there\'s no commit for that ref' do
@@ -84,7 +91,7 @@ RSpec.describe API::Triggers do
           post api("/projects/#{project.id}/trigger/pipeline"), params: options.merge(variables: variables, ref: 'master')
 
           expect(response).to have_gitlab_http_status(:created)
-          expect(pipeline.variables.map { |v| { v.key => v.value } }.last).to eq(variables)
+          expect(pipeline.variables.find { |v| v.key == 'TRIGGER_KEY' }.value).to eq('TRIGGER_VALUE')
         end
       end
     end
@@ -113,6 +120,39 @@ RSpec.describe API::Triggers do
           end.to change(project.builds, :count).by(4)
 
           expect(response).to have_gitlab_http_status(:created)
+        end
+      end
+    end
+
+    describe 'adding arguments to the application context' do
+      subject { subject_proc.call }
+
+      let(:expected_params) { { client_id: "user/#{user.id}", project: project.full_path } }
+      let(:subject_proc) { proc { post api("/projects/#{project.id}/ref/master/trigger/pipeline?token=#{trigger_token}"), params: { ref: 'refs/heads/other-branch' } } }
+
+      context 'when triggering a pipeline from a trigger token' do
+        it_behaves_like 'storing arguments in the application context'
+        it_behaves_like 'not executing any extra queries for the application context'
+      end
+
+      context 'when triggered from another running job' do
+        let!(:trigger) { }
+        let!(:trigger_request) { }
+
+        context 'when other job is triggered by a user' do
+          let(:trigger_token) { create(:ci_build, :running, project: project, user: user).token }
+
+          it_behaves_like 'storing arguments in the application context'
+          it_behaves_like 'not executing any extra queries for the application context'
+        end
+
+        context 'when other job is triggered by a runner' do
+          let(:trigger_token) { create(:ci_build, :running, project: project, runner: runner).token }
+          let(:runner) { create(:ci_runner) }
+          let(:expected_params) { { client_id: "runner/#{runner.id}", project: project.full_path } }
+
+          it_behaves_like 'storing arguments in the application context'
+          it_behaves_like 'not executing any extra queries for the application context', 1
         end
       end
     end

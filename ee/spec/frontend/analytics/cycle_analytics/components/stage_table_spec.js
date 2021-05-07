@@ -1,6 +1,6 @@
-import { shallowMount, mount } from '@vue/test-utils';
-import { getByText } from '@testing-library/dom';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { getByText } from '@testing-library/dom';
+import { shallowMount, mount } from '@vue/test-utils';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import { issueEvents, issueStage, allowedStages } from '../mock_data';
 
@@ -65,7 +65,7 @@ describe('StageTable', () => {
       expect(renderedHeaders).toHaveLength(headers.length);
 
       const headerText = wrapper.find($sel.headersList).text();
-      headers.forEach(title => {
+      headers.forEach((title) => {
         expect(headerText).toContain(title);
       });
     });
@@ -85,7 +85,7 @@ describe('StageTable', () => {
       expect(evs).toHaveLength(allowedStages.length);
 
       const nav = wrapper.find($sel.nav).html();
-      allowedStages.forEach(stage => {
+      allowedStages.forEach((stage) => {
         expect(nav).toContain(stage.title);
       });
     });
@@ -105,7 +105,7 @@ describe('StageTable', () => {
       expect(evs).toHaveLength(issueEvents.length);
 
       const evshtml = wrapper.find($sel.eventList).html();
-      issueEvents.forEach(ev => {
+      issueEvents.forEach((ev) => {
         expect(evshtml).toContain(ev.title);
       });
     });
@@ -128,7 +128,7 @@ describe('StageTable', () => {
     it('will render the list of stages', () => {
       const navEl = wrapper.find($sel.nav).element;
 
-      allowedStages.forEach(stage => {
+      allowedStages.forEach((stage) => {
         expect(getByText(navEl, stage.title, { selector: 'li' })).not.toBe(null);
       });
     });

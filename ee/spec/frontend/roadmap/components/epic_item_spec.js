@@ -2,13 +2,13 @@ import { mount } from '@vue/test-utils';
 
 import { delay } from 'lodash';
 
-import createStore from 'ee/roadmap/store';
+import CurrentDayIndicator from 'ee/roadmap/components/current_day_indicator.vue';
 import EpicItemComponent from 'ee/roadmap/components/epic_item.vue';
 import EpicItemContainer from 'ee/roadmap/components/epic_item_container.vue';
 
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import createStore from 'ee/roadmap/store';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import {
   mockTimeframeInitialDate,
@@ -18,7 +18,7 @@ import {
 } from 'ee_jest/roadmap/mock_data';
 
 jest.mock('lodash/delay', () =>
-  jest.fn(func => {
+  jest.fn((func) => {
     // eslint-disable-next-line no-param-reassign
     func.delay = jest.fn();
     return func;
@@ -36,7 +36,7 @@ const createComponent = ({
   currentGroupId = mockGroupId,
   childLevel = 0,
   childrenEpics = {},
-  childrenFlags = { '1': { itemExpanded: false } },
+  childrenFlags = { [mockEpic.id]: { itemExpanded: false } },
   hasFiltersApplied = false,
 }) => {
   return mount(EpicItemComponent, {
@@ -54,6 +54,12 @@ const createComponent = ({
       childrenEpics,
       childrenFlags,
       hasFiltersApplied,
+    },
+    data() {
+      return {
+        // Arbitrarily set the current date to be in timeframe[1] (2017-12-01)
+        currentDate: timeframe[1],
+      };
     },
   });
 };
@@ -100,7 +106,7 @@ describe('EpicItemComponent', () => {
 
   describe('timeframeString', () => {
     it('returns timeframe string correctly when both start and end dates are defined', () => {
-      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Jul 10, 2017 – Jun 2, 2018');
+      expect(wrapper.vm.timeframeString(mockEpic)).toBe('Nov 10, 2017 – Jun 2, 2018');
     });
 
     it('returns timeframe string correctly when no dates are defined', () => {
@@ -114,7 +120,7 @@ describe('EpicItemComponent', () => {
       const epic = { ...mockEpic, endDateUndefined: true };
       wrapper = createComponent({ epic });
 
-      expect(wrapper.vm.timeframeString(epic)).toBe('Jul 10, 2017 – No end date');
+      expect(wrapper.vm.timeframeString(epic)).toBe('Nov 10, 2017 – No end date');
     });
 
     it('returns timeframe string correctly when only end date is defined', () => {
@@ -171,14 +177,18 @@ describe('EpicItemComponent', () => {
     it('renders Epic item container element with class `epic-list-item-container` if epic has children and is expanded', () => {
       wrapper = createComponent({
         childrenEpics: {
-          '1': [mockFormattedChildEpic1],
+          1: [mockFormattedChildEpic1],
         },
         childrenFlags: {
-          '1': { itemExpanded: true },
-          '50': { itemExpanded: false },
+          1: { itemExpanded: true },
+          50: { itemExpanded: false },
         },
       });
       expect(wrapper.find('.epic-list-item-container').exists()).toBe(true);
+    });
+
+    it('renders current day indicator element', () => {
+      expect(wrapper.find(CurrentDayIndicator).exists()).toBe(true);
     });
   });
 });

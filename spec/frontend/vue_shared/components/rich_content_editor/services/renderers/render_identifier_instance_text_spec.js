@@ -1,5 +1,5 @@
-import renderer from '~/vue_shared/components/rich_content_editor/services/renderers/render_identifier_instance_text';
 import { buildUneditableInlineTokens } from '~/vue_shared/components/rich_content_editor/services/renderers/build_uneditable_token';
+import renderer from '~/vue_shared/components/rich_content_editor/services/renderers/render_identifier_instance_text';
 
 import { buildMockTextNode, normalTextNode } from './mock_data';
 
@@ -36,7 +36,7 @@ describe('Render Identifier Instance Text renderer', () => {
     `(
       'should return inline editable, uneditable, and editable tokens in sequence',
       ({ start, middle, end }) => {
-        const buildMockTextToken = content => ({ type: 'text', tagName: null, content });
+        const buildMockTextToken = (content) => ({ type: 'text', tagName: null, content });
 
         const startToken = buildMockTextToken(start);
         const middleToken = buildMockTextToken(middle);

@@ -6,6 +6,18 @@ class WebHookService
 
     attr_reader :body, :headers, :code
 
+    def success?
+      false
+    end
+
+    def redirection?
+      false
+    end
+
+    def internal_server_error?
+      true
+    end
+
     def initialize
       @headers = Gitlab::HTTP::Response::Headers.new({})
       @body = ''
@@ -33,6 +45,8 @@ class WebHookService
   end
 
   def execute
+    return { status: :error, message: 'Hook disabled' } unless hook.executable?
+
     start_time = Gitlab::Metrics::System.monotonic_time
 
     response = if parsed_url.userinfo.blank?
@@ -54,7 +68,9 @@ class WebHookService
       http_status: response.code,
       message: response.to_s
     }
-  rescue SocketError, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::OpenTimeout, Net::ReadTimeout, Gitlab::HTTP::BlockedUrlError, Gitlab::HTTP::RedirectionTooDeep, Gitlab::Json::LimitedEncoder::LimitExceeded => e
+  rescue SocketError, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::EHOSTUNREACH,
+         Net::OpenTimeout, Net::ReadTimeout, Gitlab::HTTP::BlockedUrlError, Gitlab::HTTP::RedirectionTooDeep,
+         Gitlab::Json::LimitedEncoder::LimitExceeded, URI::InvalidURIError => e
     execution_duration = Gitlab::Metrics::System.monotonic_time - start_time
     log_execution(
       trigger: hook_name,
@@ -102,6 +118,8 @@ class WebHookService
   end
 
   def log_execution(trigger:, url:, request_data:, response:, execution_duration:, error_message: nil)
+    handle_failure(response, hook)
+
     WebHookLog.create(
       web_hook: hook,
       trigger: trigger,
@@ -116,10 +134,22 @@ class WebHookService
     )
   end
 
+  def handle_failure(response, hook)
+    if response.success? || response.redirection?
+      hook.enable!
+    elsif response.internal_server_error?
+      next_backoff = hook.next_backoff
+      hook.update!(disabled_until: next_backoff.from_now, backoff_count: hook.backoff_count + 1)
+    else
+      hook.update!(recent_failures: hook.recent_failures + 1)
+    end
+  end
+
   def build_headers(hook_name)
     @headers ||= begin
       {
         'Content-Type' => 'application/json',
+        'User-Agent' => "GitLab/#{Gitlab::VERSION}",
         GITLAB_EVENT_HEADER => self.class.hook_to_event(hook_name)
       }.tap do |hash|
         hash['X-Gitlab-Token'] = Gitlab::Utils.remove_line_breaks(hook.token) if hook.token.present?

@@ -13,6 +13,8 @@ module EE
           ::Gitlab::StatusPage.trigger_publish(project, current_user, updated_note)
         end
 
+        note.usage_ping_track_updated_epic_note(current_user) if note.for_epic?
+
         updated_note
       end
     end

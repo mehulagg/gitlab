@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlTooltip } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { useMockMutationObserver } from 'helpers/mock_dom_observer';
 import Tooltips from '~/tooltips/components/tooltips.vue';
 
@@ -18,7 +18,7 @@ describe('tooltips/components/tooltips.vue', () => {
       ...attributes,
     };
 
-    Object.keys(defaults).forEach(name => {
+    Object.keys(defaults).forEach((name) => {
       target.setAttribute(name, defaults[name]);
     });
 
@@ -49,6 +49,16 @@ describe('tooltips/components/tooltips.vue', () => {
       await wrapper.vm.$nextTick();
 
       expect(wrapper.find(GlTooltip).props('target')).toBe(target);
+    });
+
+    it('does not attach a tooltip to a target with empty title', async () => {
+      target.setAttribute('title', '');
+
+      wrapper.vm.addTooltips([target]);
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlTooltip).exists()).toBe(false);
     });
 
     it('does not attach a tooltip twice to the same element', async () => {
@@ -206,5 +216,15 @@ describe('tooltips/components/tooltips.vue', () => {
 
     wrapper.destroy();
     expect(observersCount()).toBe(0);
+  });
+
+  it('exposes hidden event', async () => {
+    buildWrapper();
+    wrapper.vm.addTooltips([createTooltipTarget()]);
+
+    await wrapper.vm.$nextTick();
+
+    wrapper.findComponent(GlTooltip).vm.$emit('hidden');
+    expect(wrapper.emitted('hidden')).toHaveLength(1);
   });
 });

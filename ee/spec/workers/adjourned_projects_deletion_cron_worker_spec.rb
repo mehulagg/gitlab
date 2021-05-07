@@ -8,6 +8,7 @@ RSpec.describe AdjournedProjectsDeletionCronWorker do
 
     let_it_be(:user) { create(:user)}
     let_it_be(:marked_for_deletion_at) { 14.days.ago }
+
     let!(:project_marked_for_deletion) { create(:project, marked_for_deletion_at: marked_for_deletion_at, deleting_user: user) }
 
     before do
@@ -35,7 +36,7 @@ RSpec.describe AdjournedProjectsDeletionCronWorker do
     context 'marked for deletion exectly before number of days from settings' do
       let(:marked_for_deletion_at) { 7.days.ago }
 
-      it 'schedules to delete project ' do
+      it 'schedules to delete project' do
         expect(AdjournedProjectDeletionWorker).to receive(:perform_in).with(0, project_marked_for_deletion.id)
 
         worker.perform

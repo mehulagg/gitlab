@@ -85,8 +85,7 @@ RSpec.describe SessionsController do
         it 'does not authenticate user' do
           post(:create, params: { user: { login: 'invalid', password: 'invalid' } })
 
-          expect(response)
-            .to set_flash.now[:alert].to /Invalid Login or password/
+          expect(controller).to set_flash.now[:alert].to(/Invalid login or password/)
         end
       end
 
@@ -299,7 +298,7 @@ RSpec.describe SessionsController do
     context 'when using two-factor authentication via OTP' do
       let(:user) { create(:user, :two_factor) }
 
-      def authenticate_2fa(user_params, otp_user_id: user.id)
+      def authenticate_2fa(otp_user_id: user.id, **user_params)
         post(:create, params: { user: user_params }, session: { otp_user_id: otp_user_id })
       end
 
@@ -343,11 +342,12 @@ RSpec.describe SessionsController do
 
         it 'favors login over otp_user_id when password is present and does not authenticate the user' do
           authenticate_2fa(
-            { login: 'random_username', password: user.password },
+            login: 'random_username',
+            password: user.password,
             otp_user_id: user.id
           )
 
-          expect(response).to set_flash.now[:alert].to /Invalid Login or password/
+          expect(controller).to set_flash.now[:alert].to(/Invalid login or password/)
         end
       end
 
@@ -395,8 +395,8 @@ RSpec.describe SessionsController do
               end
 
               it 'warns about invalid OTP code' do
-                expect(response).to set_flash.now[:alert]
-                  .to /Invalid two-factor code/
+                expect(controller).to set_flash.now[:alert]
+                  .to(/Invalid two-factor code/)
               end
             end
           end
@@ -523,7 +523,7 @@ RSpec.describe SessionsController do
 
       it 'sets the username and caller_id in the context' do
         expect(controller).to receive(:destroy).and_wrap_original do |m, *args|
-          expect(Labkit::Context.current.to_h)
+          expect(Gitlab::ApplicationContext.current)
             .to include('meta.user' => user.username,
                         'meta.caller_id' => 'SessionsController#destroy')
 
@@ -537,9 +537,9 @@ RSpec.describe SessionsController do
     context 'when not signed in' do
       it 'sets the caller_id in the context' do
         expect(controller).to receive(:new).and_wrap_original do |m, *args|
-          expect(Labkit::Context.current.to_h)
+          expect(Gitlab::ApplicationContext.current)
             .to include('meta.caller_id' => 'SessionsController#new')
-          expect(Labkit::Context.current.to_h)
+          expect(Gitlab::ApplicationContext.current)
             .not_to include('meta.user')
 
           m.call(*args)
@@ -556,9 +556,9 @@ RSpec.describe SessionsController do
 
       it 'sets the caller_id in the context' do
         allow_any_instance_of(User).to receive(:lock_access!).and_wrap_original do |m, *args|
-          expect(Labkit::Context.current.to_h)
+          expect(Gitlab::ApplicationContext.current)
             .to include('meta.caller_id' => 'SessionsController#create')
-          expect(Labkit::Context.current.to_h)
+          expect(Gitlab::ApplicationContext.current)
             .not_to include('meta.user')
 
           m.call(*args)

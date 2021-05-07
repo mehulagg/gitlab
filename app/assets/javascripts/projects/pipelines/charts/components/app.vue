@@ -1,148 +1,74 @@
 <script>
-import dateFormat from 'dateformat';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
-import { __, sprintf } from '~/locale';
-import { getDateInPast } from '~/lib/utils/datetime_utility';
-import StatisticsList from './statistics_list.vue';
-import PipelinesAreaChart from './pipelines_area_chart.vue';
-import {
-  CHART_CONTAINER_HEIGHT,
-  INNER_CHART_HEIGHT,
-  X_AXIS_LABEL_ROTATION,
-  X_AXIS_TITLE_OFFSET,
-  CHART_DATE_FORMAT,
-  ONE_WEEK_AGO_DAYS,
-  ONE_MONTH_AGO_DAYS,
-} from '../constants';
+import { GlTabs, GlTab } from '@gitlab/ui';
+import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
+import PipelineCharts from './pipeline_charts.vue';
 
 export default {
   components: {
-    StatisticsList,
-    GlColumnChart,
-    PipelinesAreaChart,
+    GlTabs,
+    GlTab,
+    PipelineCharts,
+    DeploymentFrequencyCharts: () =>
+      import('ee_component/dora/components/deployment_frequency_charts.vue'),
+    LeadTimeCharts: () => import('ee_component/dora/components/lead_time_charts.vue'),
   },
-  props: {
-    counts: {
-      type: Object,
-      required: true,
-    },
-    timesChartData: {
-      type: Object,
-      required: true,
-    },
-    lastWeekChartData: {
-      type: Object,
-      required: true,
-    },
-    lastMonthChartData: {
-      type: Object,
-      required: true,
-    },
-    lastYearChartData: {
-      type: Object,
-      required: true,
+  inject: {
+    shouldRenderDoraCharts: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
     return {
-      timesChartTransformedData: {
-        full: this.mergeLabelsAndValues(this.timesChartData.labels, this.timesChartData.values),
-      },
+      selectedTab: 0,
     };
   },
   computed: {
-    areaCharts() {
-      const { lastWeek, lastMonth, lastYear } = this.$options.chartTitles;
+    charts() {
+      const chartsToShow = ['pipelines'];
 
-      return [
-        this.buildAreaChartData(lastWeek, this.lastWeekChartData),
-        this.buildAreaChartData(lastMonth, this.lastMonthChartData),
-        this.buildAreaChartData(lastYear, this.lastYearChartData),
-      ];
+      if (this.shouldRenderDoraCharts) {
+        chartsToShow.push('deployment-frequency', 'lead-time');
+      }
+
+      return chartsToShow;
     },
+  },
+  created() {
+    this.selectTab();
+    window.addEventListener('popstate', this.selectTab);
   },
   methods: {
-    mergeLabelsAndValues(labels, values) {
-      return labels.map((label, index) => [label, values[index]]);
+    selectTab() {
+      const [chart] = getParameterValues('chart') || this.charts;
+      const tab = this.charts.indexOf(chart);
+      this.selectedTab = tab >= 0 ? tab : 0;
     },
-    buildAreaChartData(title, data) {
-      const { labels, totals, success } = data;
-
-      return {
-        title,
-        data: [
-          {
-            name: 'all',
-            data: this.mergeLabelsAndValues(labels, totals),
-          },
-          {
-            name: 'success',
-            data: this.mergeLabelsAndValues(labels, success),
-          },
-        ],
-      };
+    onTabChange(index) {
+      if (index !== this.selectedTab) {
+        this.selectedTab = index;
+        const path = mergeUrlParams({ chart: this.charts[index] }, window.location.pathname);
+        updateHistory({ url: path, title: window.title });
+      }
     },
-  },
-  chartContainerHeight: CHART_CONTAINER_HEIGHT,
-  timesChartOptions: {
-    height: INNER_CHART_HEIGHT,
-    xAxis: {
-      axisLabel: {
-        rotate: X_AXIS_LABEL_ROTATION,
-      },
-      nameGap: X_AXIS_TITLE_OFFSET,
-    },
-  },
-  get chartTitles() {
-    const today = dateFormat(new Date(), CHART_DATE_FORMAT);
-    const pastDate = timeScale =>
-      dateFormat(getDateInPast(new Date(), timeScale), CHART_DATE_FORMAT);
-    return {
-      lastWeek: sprintf(__('Pipelines for last week (%{oneWeekAgo} - %{today})'), {
-        oneWeekAgo: pastDate(ONE_WEEK_AGO_DAYS),
-        today,
-      }),
-      lastMonth: sprintf(__('Pipelines for last month (%{oneMonthAgo} - %{today})'), {
-        oneMonthAgo: pastDate(ONE_MONTH_AGO_DAYS),
-        today,
-      }),
-      lastYear: __('Pipelines for last year'),
-    };
   },
 };
 </script>
 <template>
   <div>
-    <div class="mb-3">
-      <h3>{{ s__('PipelineCharts|CI / CD Analytics') }}</h3>
-    </div>
-    <h4 class="my-4">{{ s__('PipelineCharts|Overall statistics') }}</h4>
-    <div class="row">
-      <div class="col-md-6">
-        <statistics-list :counts="counts" />
-      </div>
-      <div class="col-md-6">
-        <strong>
-          {{ __('Duration for the last 30 commits') }}
-        </strong>
-        <gl-column-chart
-          :height="$options.chartContainerHeight"
-          :option="$options.timesChartOptions"
-          :data="timesChartTransformedData"
-          :y-axis-title="__('Minutes')"
-          :x-axis-title="__('Commit')"
-          x-axis-type="category"
-        />
-      </div>
-    </div>
-    <hr />
-    <h4 class="my-4">{{ __('Pipelines charts') }}</h4>
-    <pipelines-area-chart
-      v-for="(chart, index) in areaCharts"
-      :key="index"
-      :chart-data="chart.data"
-    >
-      {{ chart.title }}
-    </pipelines-area-chart>
+    <gl-tabs v-if="charts.length > 1" :value="selectedTab" @input="onTabChange">
+      <gl-tab :title="__('Pipelines')">
+        <pipeline-charts />
+      </gl-tab>
+      <template v-if="shouldRenderDoraCharts">
+        <gl-tab :title="__('Deployment frequency')">
+          <deployment-frequency-charts />
+        </gl-tab>
+        <gl-tab :title="__('Lead time')">
+          <lead-time-charts />
+        </gl-tab>
+      </template>
+    </gl-tabs>
+    <pipeline-charts v-else />
   </div>
 </template>

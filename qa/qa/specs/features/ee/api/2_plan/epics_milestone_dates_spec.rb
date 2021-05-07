@@ -3,7 +3,8 @@
 require 'airborne'
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  RSpec.describe 'Plan' do
+    # TODO: Convert back to reliable once proved to be stable. Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/219495
     describe 'Epics milestone dates API' do
       before(:context) do
         @api_client = Runtime::API::Client.new(:gitlab)
@@ -15,7 +16,7 @@ module QA
         @fixed_due_date = (Date.today.to_date + 90).strftime("%Y-%m-%d")
       end
 
-      it 'changes epic dates when updating milestones', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/616' do
+      it 'changes epic dates when updating milestones', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1668' do
         epic_iid, milestone_id = create_epic_issue_milestone
         milestone_start_date = Date.today.to_date.strftime("%Y-%m-%d")
         milestone_due_date = (Date.today.to_date + 30).strftime("%Y-%m-%d")
@@ -36,7 +37,7 @@ module QA
         expect_json('due_date', milestone_due_date)
       end
 
-      it 'updates epic dates when adding another issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/611' do
+      it 'updates epic dates when adding another issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1671' do
         epic_iid = create_epic_issue_milestone[0]
         milestone_start_date = Date.today.to_date.strftime("%Y-%m-%d")
         milestone_due_date = (Date.today.to_date + 150).strftime("%Y-%m-%d")
@@ -59,7 +60,7 @@ module QA
         expect_json('due_date', milestone_due_date)
       end
 
-      it 'updates epic dates when removing issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/615' do
+      it 'updates epic dates when removing issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1669' do
         epic_iid = create_epic_issue_milestone[0]
 
         # Get epic_issue_id
@@ -84,7 +85,7 @@ module QA
         expect_json('due_date', nil)
       end
 
-      it 'updates epic dates when deleting milestones', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/613' do
+      it 'updates epic dates when deleting milestones', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1670' do
         epic_iid, milestone_id = create_epic_issue_milestone
 
         # Delete Milestone

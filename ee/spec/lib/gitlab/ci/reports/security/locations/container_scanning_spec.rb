@@ -14,6 +14,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Locations::ContainerScanning do
 
   let(:mandatory_params) { %i[image operating_system] }
   let(:expected_fingerprint) { Digest::SHA1.hexdigest('registry.gitlab.com/my/project:glibc') }
+  let(:expected_fingerprint_path) { 'registry.gitlab.com/my/project:glibc' }
 
   it_behaves_like 'vulnerability location'
 

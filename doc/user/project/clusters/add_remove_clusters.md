@@ -1,10 +1,10 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Adding and removing Kubernetes clusters
+# Adding and removing Kubernetes clusters **(FREE)**
 
 GitLab offers integrated cluster creation for the following Kubernetes providers:
 
@@ -13,16 +13,16 @@ GitLab offers integrated cluster creation for the following Kubernetes providers
 
 GitLab can also integrate with any standard Kubernetes provider, either on-premise or hosted.
 
-NOTE: **Note:**
+NOTE:
 Watch the webcast [Scalable app deployment with GitLab and Google Cloud Platform](https://about.gitlab.com/webcast/scalable-app-deploy/)
 and learn how to spin up a Kubernetes cluster managed by Google Cloud Platform (GCP)
 in a few clicks.
 
-TIP: **Tip:**
+NOTE:
 Every new Google Cloud Platform (GCP) account receives
 [$300 in credit upon sign up](https://console.cloud.google.com/freetrial).
 In partnership with Google, GitLab is able to offer an additional $200 for new GCP
-accounts to get started with GitLab's Google Kubernetes Engine Integration.
+accounts to get started with the GitLab integration with Google Kubernetes Engine.
 [Follow this link](https://cloud.google.com/partners/partnercredit/?pcn_code=0014M00001h35gDQAQ#contact-form)
 to apply for credit.
 
@@ -40,7 +40,7 @@ Before [adding a Kubernetes cluster](#create-new-cluster) using GitLab, you need
   - [Maintainer access to a group](../../permissions.md#group-members-permissions) for a
     group-level cluster.
   - [Admin Area access](../../admin_area/index.md) for a self-managed instance-level
-    cluster. **(CORE ONLY)**
+    cluster. **(FREE SELF)**
 
 ## Access controls
 
@@ -94,7 +94,11 @@ GitLab creates the following resources for RBAC clusters.
 | Environment namespace | `Namespace`          | Contains all environment-specific resources                                                                | Deploying to a cluster |
 | Environment namespace | `ServiceAccount`     | Uses namespace of environment                                                                              | Deploying to a cluster |
 | Environment namespace | `Secret`             | Token for environment ServiceAccount                                                                       | Deploying to a cluster |
-| Environment namespace | `RoleBinding`        | [`edit`](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles) roleRef          | Deploying to a cluster |
+| Environment namespace | `RoleBinding`        | [`admin`](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles) roleRef         | Deploying to a cluster |
+
+The environment namespace `RoleBinding` was
+[updated](https://gitlab.com/gitlab-org/gitlab/-/issues/31113) in GitLab 13.6
+to `admin` roleRef. Previously, the `edit` roleRef was used.
 
 ### ABAC cluster resources
 
@@ -149,6 +153,9 @@ Amazon Elastic Kubernetes Service (EKS) at the project, group, or instance level
    - [Amazon EKS](add_eks_clusters.md#new-eks-cluster).
    - [Google GKE](add_gke_clusters.md#creating-the-cluster-on-gke).
 
+After creating a cluster, you can install runners for it as described in
+[GitLab Managed Apps](../../clusters/applications.md).
+
 ## Add existing cluster
 
 If you have an existing Kubernetes cluster, you can add it to a project, group,
@@ -157,6 +164,9 @@ or instance.
 Kubernetes integration isn't supported for arm64 clusters. See the issue
 [Helm Tiller fails to install on arm64 cluster](https://gitlab.com/gitlab-org/gitlab/-/issues/29838)
 for details.
+
+After adding an existing cluster, you can install runners for it as described in
+[GitLab Managed Apps](../../clusters/applications.md).
 
 ### Existing Kubernetes cluster
 
@@ -179,7 +189,7 @@ To add a Kubernetes cluster to your project, group, or instance:
       Get the API URL by running this command:
 
       ```shell
-      kubectl cluster-info | grep 'Kubernetes master' | awk '/http/ {print $NF}'
+      kubectl cluster-info | grep -E 'Kubernetes master|Kubernetes control plane' | awk '/http/ {print $NF}'
       ```
 
    1. **CA certificate** (required) - A valid Kubernetes certificate is needed to authenticate to the cluster. We use the certificate created by default.
@@ -221,7 +231,7 @@ To add a Kubernetes cluster to your project, group, or instance:
            name: gitlab
            namespace: kube-system
          ---
-         apiVersion: rbac.authorization.k8s.io/v1beta1
+         apiVersion: rbac.authorization.k8s.io/v1
          kind: ClusterRoleBinding
          metadata:
            name: gitlab-admin
@@ -250,7 +260,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          kubectl apply -f gitlab-admin-service-account.yaml --username=admin --password=<password>
          ```
 
-         NOTE: **Note:**
+         NOTE:
          Basic Authentication can be turned on and the password credentials
          can be obtained using the Google Cloud Console.
 
@@ -285,7 +295,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          token:      <authentication_token>
          ```
 
-      NOTE: **Note:**
+      NOTE:
       For GKE clusters, you need the
       `container.clusterRoleBindings.create` permission to create a cluster
       role binding. You can follow the [Google Cloud
@@ -320,7 +330,7 @@ integration to work properly.
 
 ![RBAC](img/rbac_v13_1.png)
 
-CAUTION: **Caution:**
+WARNING:
 Disabling RBAC means that any application running in the cluster,
 or user who can authenticate to the cluster, has full API access. This is a
 [security concern](index.md#security-implications), and may not be desirable.
@@ -377,3 +387,13 @@ If you encounter this error while adding a Kubernetes cluster, ensure you're
 properly pasting the service token. Some shells may add a line break to the
 service token, making it invalid. Ensure that there are no line breaks by
 pasting your token into an editor and removing any additional spaces.
+
+You may also experience this error if your certificate is not valid. To check that your certificate's
+subject alternative names contain the correct domain for your cluster's API, run this:
+
+```shell
+echo | openssl s_client -showcerts -connect kubernetes.example.com:443 2>/dev/null |
+openssl x509 -inform pem -noout -text
+```
+
+Note that the `-connect` argument expects a `host:port` combination. For example, `https://kubernetes.example.com` would be `kubernetes.example.com:443`.

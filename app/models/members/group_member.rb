@@ -7,7 +7,7 @@ class GroupMember < Member
   SOURCE_TYPE = 'Namespace'
 
   belongs_to :group, foreign_key: 'source_id'
-
+  alias_attribute :namespace_id, :source_id
   delegate :update_two_factor_requirement, to: :user
 
   # Make sure group member points only to group as it source
@@ -25,6 +25,8 @@ class GroupMember < Member
 
   after_create :update_two_factor_requirement, unless: :invite?
   after_destroy :update_two_factor_requirement, unless: :invite?
+
+  attr_accessor :last_owner, :last_blocked_owner
 
   def self.access_level_roles
     Gitlab::Access.options_with_owner
@@ -62,7 +64,9 @@ class GroupMember < Member
   end
 
   def post_create_hook
-    run_after_commit_or_now { notification_service.new_group_member(self) }
+    if send_welcome_email?
+      run_after_commit_or_now { notification_service.new_group_member(self) }
+    end
 
     super
   end
@@ -70,6 +74,10 @@ class GroupMember < Member
   def post_update_hook
     if saved_change_to_access_level?
       run_after_commit { notification_service.update_group_member(self) }
+    end
+
+    if saved_change_to_expires_at?
+      run_after_commit { notification_service.updated_group_member_expiration(self) }
     end
 
     super
@@ -86,6 +94,10 @@ class GroupMember < Member
     notification_service.decline_group_invite(self)
 
     super
+  end
+
+  def send_welcome_email?
+    true
   end
 end
 

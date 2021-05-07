@@ -1,4 +1,5 @@
-%commit-description-base {
+.commit-description,
+.commit-row-description {
   padding: $gl-padding-8 0 $gl-padding-8 $gl-padding-8;
   margin-top: $gl-padding-8;
   border: 0;
@@ -10,16 +11,6 @@
   color: $gl-text-color-secondary;
 }
 
-.commit-description {
-  @extend %commit-description-base;
-}
-
-.js-details-expand {
-  &:hover {
-    text-decoration: none;
-  }
-}
-
 .commit-box {
   border-top: 1px solid $border-color;
   padding: $gl-padding 0;
@@ -27,17 +18,6 @@
   .commit-title {
     margin: 0;
     color: $gl-text-color;
-  }
-}
-
-.commit-hash-full {
-  @include media-breakpoint-down(sm) {
-    width: 80px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    vertical-align: bottom;
   }
 }
 
@@ -191,12 +171,6 @@
 }
 
 .commit-actions {
-  @include media-breakpoint-up(sm) {
-    .fa-spinner {
-      font-size: 12px;
-    }
-  }
-
   .ci-status-icon svg {
     vertical-align: text-bottom;
   }
@@ -225,9 +199,9 @@
   display: inline-flex;
 
   .label,
-  .btn {
+  .btn:not(.gl-button) {
     padding: $gl-vert-padding $gl-btn-padding;
-    border: 1px $border-color solid;
+    border: 1px $gray-200 solid;
     font-size: $gl-font-size;
     line-height: $line-height-base;
     border-radius: 0;
@@ -263,11 +237,6 @@
 
 .commit,
 .generic-commit-status {
-  a,
-  button {
-    vertical-align: baseline;
-  }
-
   a {
     color: $gl-text-color;
 
@@ -277,7 +246,6 @@
   }
 
   .commit-row-description {
-    @extend %commit-description-base;
     display: none;
     flex: 1;
   }

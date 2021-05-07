@@ -1,224 +1,172 @@
 ---
 stage: Create
 group: Source Code
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Numerous undo possibilities in Git
+# Undo possibilities in Git **(FREE)**
 
-In this tutorial, we will show you different ways of undoing your work in Git, for which
-we will assume you have a basic working knowledge of. Check GitLab's
-[Git documentation](../index.md) for reference.
+[Nothing in Git is deleted](https://git-scm.com/book/en/v2/Git-Internals-Maintenance-and-Data-Recovery),
+so when you work in Git, you can undo your work.
 
-Also, we will only provide some general information of the commands, which is enough
-to get you started for the easy cases/examples, but for anything more advanced
-please refer to the [Git book](https://git-scm.com/book/en/v2).
+All version control systems have options for undoing work. However,
+because of the de-centralized nature of Git, these options are multiplied.
+The actions you take are based on the
+[stage of development](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository)
+you are in.
 
-We will explain a few different techniques to undo your changes based on the stage
-of the change in your current development. Also, keep in mind that [nothing in
-Git is really deleted](https://git-scm.com/book/en/v2/Git-Internals-Maintenance-and-Data-Recovery).
+For more information about working with Git and GitLab:
 
-This means that until Git automatically cleans detached commits (which cannot be
-accessed by branch or tag) it will be possible to view them with `git reflog` command
-and access them with direct commit ID. Read more about _[redoing the undo](#redoing-the-undo)_ in the section below.
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Learn why [North Western Mutual chose GitLab](https://youtu.be/kPNMyxKRRoM) for their enterprise source code management.
+- Learn how to [get started with Git](https://about.gitlab.com/resources/whitepaper-moving-to-git/).
+- For more advanced examples, refer to the [Git book](https://git-scm.com/book/en/v2).
 
-> For more information about working with Git and GitLab:
->
-> - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Learn why [North Western Mutual chose GitLab](https://youtu.be/kPNMyxKRRoM) for their Enterprise source code management.
-> - Learn how to [get started with Git](https://about.gitlab.com/resources/whitepaper-moving-to-git/).
+## When you can undo changes
 
-## Introduction
+In the standard Git workflow:
 
-This guide is organized depending on the [stage of development](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository)
-where you want to undo your changes from and if they were shared with other developers
-or not. Because Git is tracking changes a created or edited file is in the unstaged state
-(if created it is untracked by Git). After you add it to a repository (`git add`) you put
-a file into the **staged** state, which is then committed (`git commit`) to your
-local repository. After that, file can be shared with other developers (`git push`).
-Here's what we'll cover in this tutorial:
+1. You create or edit a file. It starts in the unstaged state. If it's new, it is not yet tracked by Git.
+1. You add the file to your local repository (`git add`), which puts the file into the staged state.
+1. You commit the file to your local repository (`git commit`).
+1. You can then share the file with other developers, by committing to a remote repository (`git push`).
 
-- [Undo local changes](#undo-local-changes) which were not pushed to a remote repository:
+You can undo changes at any point in this workflow:
 
-  - Before you commit, in both unstaged and staged state.
-  - After you committed.
-
-- Undo changes after they are pushed to a remote repository:
-
-  - [Without history modification](#undo-remote-changes-without-changing-history) (preferred way).
-  - [With history modification](#undo-remote-changes-with-modifying-history) (requires
+- [When you're working locally](#undo-local-changes) and haven't yet pushed to a remote repository.
+- When you have already pushed to a remote repository and you want to:
+  - [Keep the history intact](#undo-remote-changes-without-changing-history) (preferred).
+  - [Change the history](#undo-remote-changes-with-modifying-history) (requires
     coordination with team and force pushes).
-    - [Use cases when modifying history is generally acceptable](#where-modifying-history-is-generally-acceptable).
-    - [How to modify history](#how-modifying-history-is-done).
-    - [How to remove sensitive information from repository](#deleting-sensitive-information-from-commits).
-
-### Branching strategy
-
-[Git](https://git-scm.com/) is a de-centralized version control system, which means that beside regular
-versioning of the whole repository, it has possibilities to exchange changes
-with other repositories.
-
-To avoid chaos with
-[multiple sources of truth](https://git-scm.com/about/distributed), various
-development workflows have to be followed, and it depends on your internal
-workflow how certain changes or commits can be undone or changed.
-
-[GitLab Flow](https://about.gitlab.com/blog/2014/09/29/gitlab-flow/) provides a good
-balance between developers clashing with each other while
-developing the same feature and cooperating seamlessly, but it does not enable
-joined development of the same feature by multiple developers by default.
-
-When multiple developers develop the same feature on the same branch, clashing
-with every synchronization is unavoidable, but a proper or chosen Git Workflow will
-prevent that anything is lost or out of sync when the feature is complete.
-
-You can also
-read through this blog post on [Git Tips & Tricks](https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/)
-to learn how to easily **do** things in Git.
 
 ## Undo local changes
 
-Until you push your changes to any remote repository, they will only affect you.
-That broadens your options on how to handle undoing them. Still, local changes
-can be on various stages and each stage has a different approach on how to tackle them.
+Until you push your changes to a remote repository, changes
+you make in Git are only in your local development environment.
 
-### Unstaged local changes (before you commit)
+### Undo unstaged local changes before you commit
 
-When a change is made, but it is not added to the staged tree, Git itself
-proposes a solution to discard changes to a certain file.
+When you make a change, but have not yet staged it, you can undo your work.
 
-Suppose you edited a file to change the content using your favorite editor:
+1. Confirm that the file is unstaged (that you did not use `git add <file>`) by running `git status`:
 
-```shell
-vim <file>
-```
+   ```shell
+   $ git status
+   On branch main
+   Your branch is up-to-date with 'origin/main'.
+   Changes not staged for commit:
+     (use "git add <file>..." to update what will be committed)
+     (use "git checkout -- <file>..." to discard changes in working directory)
 
-Since you did not `git add <file>` to staging, it should be under unstaged files (or
-untracked if file was created). You can confirm that with:
+       modified:   <file>
+   no changes added to commit (use "git add" and/or "git commit -a")
+   ```
 
-```shell
-$ git status
-On branch master
-Your branch is up-to-date with 'origin/master'.
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git checkout -- <file>..." to discard changes in working directory)
+1. Choose an option and undo your changes:
 
-    modified:   <file>
-no changes added to commit (use "git add" and/or "git commit -a")
-```
+   - To overwrite local changes:
 
-At this point there are 3 options to undo the local changes you have:
+     ```shell
+     git checkout -- <file>
+     ```
 
-- Discard all local changes, but save them for possible re-use [later](#quickly-save-local-changes):
+   - To save local changes so you can [re-use them later](#quickly-save-local-changes):
 
-  ```shell
-  git stash
-  ```
+     ```shell
+     git stash
+     ```
 
-- Discarding local changes (permanently) to a file:
+   - To discard local changes to all files, permanently:
 
-  ```shell
-  git checkout -- <file>
-  ```
+     ```shell
+     git reset --hard
+     ```
 
-- Discard all local changes to all files permanently:
+### Undo staged local changes before you commit
 
-  ```shell
-  git reset --hard
-  ```
+If you added a file to staging, you can undo it.
 
-Before executing `git reset --hard`, keep in mind that there is also a way to
-just temporary store the changes without committing them using `git stash`.
-This command resets the changes to all files, but it also saves them in case
-you would like to apply them at some later time. You can read more about it in
-[section below](#quickly-save-local-changes).
+1. Confirm that the file is staged (that you used `git add <file>`) by running `git status`:
+
+   ```shell
+   $ git status
+   On branch main
+   Your branch is up-to-date with 'origin/main'.
+   Changes to be committed:
+     (use "git restore --staged <file>..." to unstage)
+
+     new file:   <file>
+   ```
+
+1. Choose an option and undo your changes:
+
+   - To unstage the file but keep your changes:
+
+     ```shell
+     git restore --staged <file>
+     ```
+
+   - To unstage everything but keep your changes:
+
+     ```shell
+     git reset
+     ```
+
+   - To unstage the file to current commit (HEAD):
+
+     ```shell
+     git reset HEAD <file>
+     ```
+
+   - To discard all local changes, but save them for [later](#quickly-save-local-changes):
+
+     ```shell
+     git stash
+     ```
+
+   - To discard everything permanently:
+
+     ```shell
+     git reset --hard
+     ```
 
 ### Quickly save local changes
 
-You are working on a feature when a boss drops by with an urgent task. Since your
+You are working on a feature when someone drops by with an urgent task. Because your
 feature is not complete, but you need to swap to another branch, you can use
-`git stash` to save what you had done, swap to another branch, commit, push,
-test, then get back to previous feature branch, do `git stash pop` and continue
-where you left.
+`git stash` to:
 
-The example above shows that discarding all changes is not always a preferred option,
-but Git provides a way to save them for later, while resetting the repository to state without
+- Save what you have done.
+- Swap to another branch.
+- Commit, push, and test.
+- Return to the feature branch.
+- Run `git stash pop`.
+- Resume your work.
+
+The example above shows that discarding all changes is not always a preferred option.
+However, Git provides a way to save them for later, while resetting the repository to state without
 them. This is achieved by Git stashing command `git stash`, which in fact saves your
 current work and runs `git reset --hard`, but it also has various
 additional options like:
 
-- `git stash save`, which enables including temporary commit message, which will help you identify changes, among with other options
+- `git stash save`, which enables including temporary commit message, which helps you identify changes, among with other options
 - `git stash list`, which lists all previously stashed commits (yes, there can be more) that were not `pop`ed
 - `git stash pop`, which redoes previously stashed changes and removes them from stashed list
 - `git stash apply`, which redoes previously stashed changes, but keeps them on stashed list
 
-### Staged local changes (before you commit)
+## Undo committed local changes
 
-Let's say you have added some files to staging, but you want to remove them from the
-current commit, yet you want to retain those changes - just move them outside
-of the staging tree. You also have an option to discard all changes with
-`git reset --hard` or think about `git stash` [as described earlier.](#quickly-save-local-changes)
-
-Lets start the example by editing a file, with your favorite editor, to change the
-content and add it to staging
-
-```shell
-vim <file>
-git add <file>
-```
-
-The file is now added to staging as confirmed by `git status` command:
-
-```shell
-$ git status
-On branch master
-Your branch is up-to-date with 'origin/master'.
-Changes to be committed:
-  (use "git reset HEAD <file>..." to unstage)
-
-  new file:   <file>
-```
-
-Now you have 4 options to undo your changes:
-
-- Unstage the file to current commit (HEAD):
-
-  ```shell
-  git reset HEAD <file>
-  ```
-
-- Unstage everything - retain changes:
-
-  ```shell
-  git reset
-  ```
-
-- Discard all local changes, but save them for [later](#quickly-save-local-changes):
-
-  ```shell
-  git stash
-  ```
-
-- Discard everything permanently:
-
-  ```shell
-  git reset --hard
-  ```
-
-## Committed local changes
-
-Once you commit, your changes are recorded by the version control system.
+After you commit, your changes are recorded by the version control system.
 Because you haven't pushed to your remote repository yet, your changes are
 still not public (or shared with other developers). At this point, undoing
-things is a lot easier, we have quite some workaround options. Once you push
-your code, you'll have less options to troubleshoot your work.
+things is a lot easier, we have quite some workaround options. After you push
+your code, you have fewer options to troubleshoot your work.
 
 ### Without modifying history
 
 Through the development process some of the previously committed changes do not
-fit anymore in the end solution, or are source of the bugs. Once you find the
-commit which triggered bug, or once you have a faulty commit, you can simply
+fit anymore in the end solution, or are source of the bugs. After you find the
+commit which triggered bug, or identify a faulty commit, you can
 revert it with `git revert commit-id`.
 
 This command inverts (swaps) the additions and
@@ -226,19 +174,19 @@ deletions in that commit, so that it does not modify history. Retaining history
 can be helpful in future to notice that some changes have been tried
 unsuccessfully in the past.
 
-In our example we will assume there are commits `A`,`B`,`C`,`D`,`E` committed in this order: `A-B-C-D-E`,
+In our example we assume there are commits `A`,`B`,`C`,`D`,`E` committed in this order: `A-B-C-D-E`,
 and `B` is the commit you want to undo. There are many different ways to identify commit
-`B` as bad, one of them is to pass a range to `git bisect` command. The provided range includes
-last known good commit (we assume `A`) and first known bad commit (where bug was detected - we will assume `E`).
+`B` as bad. One of them is to pass a range to `git bisect` command. The provided range includes
+last known good commit (we assume `A`) and first known bad commit where the bug was detected (we assume `E`).
 
 ```shell
 git bisect A..E
 ```
 
-Bisect will provide us with commit ID of the middle commit to test, and then guide us
-through simple bisection process. You can read more about it [in official Git Tools](https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git)
-In our example we will end up with commit `B`, that introduced the bug/error. We have
-4 options on how to remove it (or part of it) from our repository.
+Bisect provides us with commit ID of the middle commit to test, and then guide us
+through the bisection process. You can read more about it [in official Git Tools](https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git)
+Our example results in commit `B`, which introduced the bug/error. We have
+these options to remove all or part of it from our repository:
 
 - Undo (swap additions and deletions) changes introduced by commit `B`:
 
@@ -260,13 +208,13 @@ In our example we will end up with commit `B`, that introduced the bug/error. We
 
 - There is one command we also must not forget: **creating a new branch**
   from the point where changes are not applicable or where the development has hit a
-  dead end. For example you have done commits `A-B-C-D` on your feature-branch
+  dead end. For example you have done commits `A-B-C-D` on your feature branch
   and then you figure `C` and `D` are wrong.
 
   At this point you either reset to `B`
-  and do commit `F` (which will cause problems with pushing and if forced pushed also with other developers)
-  since branch now looks `A-B-F`, which clashes with what other developers have locally (you will
-  [change history](#with-history-modification)), or you simply checkout commit `B` create
+  and do commit `F` (which causes problems with pushing and if forced pushed also with other developers)
+  because the branch now looks `A-B-F`, which clashes with what other developers have locally (you will
+  [change history](#with-history-modification)), or you checkout commit `B` create
   a new branch and do commit `F`. In the last case, everyone else can still do their work while you
   have your new way to get it right and merge it back in later. Alternatively, with GitLab,
   you can [cherry-pick](../../../user/project/merge_requests/cherry_pick_changes.md#cherry-picking-a-commit)
@@ -283,6 +231,9 @@ In our example we will end up with commit `B`, that introduced the bug/error. We
 
 ### With history modification
 
+You can rewrite history in Git, but you should avoid it, because it can cause problems
+when multiple developers are contributing to the same codebase.
+
 There is one command for history modification and that is `git rebase`. Command
 provides interactive mode (`-i` flag) which enables you to:
 
@@ -291,7 +242,7 @@ provides interactive mode (`-i` flag) which enables you to:
 - **edit** the commit content (changes introduced by commit) and message.
 - **squash** multiple commits into a single one, and have a custom or aggregated
   commit message.
-- **drop** commits - simply delete them.
+- **drop** commits - delete them.
 - and few more options.
 
 Let us check few examples. Again there are commits `A-B-C-D` where you want to
@@ -326,10 +277,10 @@ In case you want to modify something introduced in commit `B`.
   git commit -a
   ```
 
-You can find some more examples in [below section where we explain how to modify
-history](#how-modifying-history-is-done)
+You can find some more examples in the section explaining
+[how to modify history](#how-modifying-history-is-done).
 
-### Redoing the Undo
+### Redoing the undo
 
 Sometimes you realize that the changes you undid were useful and you want them
 back. Well because of first paragraph you are in luck. Command `git reflog`
@@ -373,7 +324,7 @@ it also provides a clear timeline and development structure.
 
 ![Use revert to keep branch flowing](img/revert.png)
 
-If you want to revert changes introduced in certain `commit-id` you can simply
+If you want to revert changes introduced in certain `commit-id`, you can
 revert that `commit-id` (swap additions and deletions) in newly created commit:
 You can do this with
 
@@ -391,12 +342,12 @@ git checkout -b new-path-of-feature
 ## Undo remote changes with modifying history
 
 This is useful when you want to *hide* certain things - like secret keys,
-passwords, SSH keys, etc. It is and should not be used to hide mistakes, as
-it will make it harder to debug in case there are some other bugs. The main
-reason for this is that you loose the real development progress. **Also keep in
+passwords, and SSH keys. It is and should not be used to hide mistakes, as
+it makes it harder to debug in case there are some other bugs. The main
+reason for this is that you loose the real development progress. Keep in
 mind that, even with modified history, commits are just detached and can still be
-accessed through commit ID** - at least until all repositories perform
-the cleanup of detached commits (happens automatically).
+accessed through commit ID - at least until all repositories perform
+the automated cleanup of detached commits.
 
 ![Modifying history causes problems on remote branch](img/rebase_reset.png)
 
@@ -404,16 +355,16 @@ the cleanup of detached commits (happens automatically).
 
 Modified history breaks the development chain of other developers, as changed
 history does not have matching commit IDs. For that reason it should not be
-used on any public branch or on branch that *might* be used by other developers.
+used on any public branch or on branch that might be used by other developers.
 When contributing to big open source repositories (for example, [GitLab](https://gitlab.com/gitlab-org/gitlab/blob/master/CONTRIBUTING.md#contribution-acceptance-criteria)
-itself), it is acceptable to *squash* commits into a single one, to present a
+itself), it is acceptable to squash commits into a single one, to present a
 nicer history of your contribution.
 
 Keep in mind that this also removes the comments attached to certain commits
 in merge requests, so if you need to retain traceability in GitLab, then
 modifying history is not acceptable.
 
-A feature-branch of a merge request is a public branch and might be used by
+A feature branch of a merge request is a public branch and might be used by
 other developers, but project process and rules might allow or require
 you to use `git rebase` (command that changes history) to reduce number of
 displayed commits on target branch after reviews are done (for example
@@ -421,13 +372,13 @@ GitLab). There is a `git merge --squash` command which does exactly that
 (squashes commits on feature-branch to a single commit on target branch
 at merge).
 
-NOTE: **Note:**
+NOTE:
 Never modify the commit history of `master` or shared branch.
 
 ### How modifying history is done
 
 After you know what you want to modify (how far in history or how which range of
-old commits), use `git rebase -i commit-id`. This command will then display all the commits from
+old commits), use `git rebase -i commit-id`. This command displays all the commits from
 current version to chosen commit ID and allow modification, squashing, deletion
 of that commits.
 
@@ -457,13 +408,13 @@ pick <commit3-id> <commit3-commit-message>
 # Note that empty commits are commented out
 ```
 
-NOTE: **Note:**
-It is important to notice that comment from the output clearly states that, if
-you decide to abort, then do not just close your editor (as that will in-fact
-modify history), but remove all uncommented lines and save.
+NOTE:
+The comment from the output clearly states that, if
+you decide to abort, don't just close your editor (as that
+modifies history), but remove all uncommented lines and save.
 
-That is one of the reasons why `git rebase` should be used carefully on
-shared and remote branches. But don't worry, there will be nothing broken until
+Use `git rebase` carefully on
+shared and remote branches, but rest assured: nothing is broken until
 you push back to the remote repository (so you can freely explore the
 different outcomes locally).
 
@@ -486,20 +437,14 @@ file from history altogether use:
 git filter-branch --tree-filter 'rm filename' HEAD
 ```
 
-Since `git filter-branch` command might be slow on big repositories, there are
+Because `git filter-branch` command might be slow on big repositories, there are
 tools that can use some of Git specifics to enable faster execution of common
 tasks (which is exactly what removing sensitive information file is about).
 An alternative is the open source community-maintained tool [BFG](https://rtyley.github.io/bfg-repo-cleaner/).
 Keep in mind that these tools are faster because they do not provide the same
 feature set as `git filter-branch` does, but focus on specific use cases.
 
-## Conclusion
-
-There are various options of undoing your work with any version control system, but
-because of de-centralized nature of Git, these options are multiplied (or limited)
-depending on the stage of your process. Git also enables rewriting history, but that
-should be avoided as it might cause problems when multiple developers are
-contributing to the same codebase.
+Refer [Reduce repository size](../../../user/project/repository/reducing_the_repo_size_using_git.md) page to know more about purging files from repository history & GitLab storage.
 
 <!-- ## Troubleshooting
 

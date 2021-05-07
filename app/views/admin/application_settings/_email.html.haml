@@ -18,11 +18,19 @@
           = _('By default GitLab sends emails in HTML and plain text formats so mail clients can choose what format to use. Disable this option if you only want to send emails in plain text format.')
     .form-group
       = f.label :commit_email_hostname, _('Custom hostname (for private commit emails)'), class: 'label-bold'
-      = f.text_field :commit_email_hostname, class: 'form-control'
+      = f.text_field :commit_email_hostname, class: 'form-control gl-form-input'
       .form-text.text-muted
         - commit_email_hostname_docs_link = link_to _('Learn more'), help_page_path('user/admin_area/settings/email.md', anchor: 'custom-hostname-for-private-commit-emails'), target: '_blank'
         = _("This setting will update the hostname that is used to generate private commit emails. %{learn_more}").html_safe % { learn_more: commit_email_hostname_docs_link }
 
     = render_if_exists 'admin/application_settings/email_additional_text_setting', form: f
 
-  = f.submit _('Save changes'), class: "gl-button btn btn-success", data: { qa_selector: 'save_changes_button' }
+    .form-group
+      .form-check
+        = f.check_box :in_product_marketing_emails_enabled, class: 'form-check-input'
+        = f.label :in_product_marketing_emails_enabled, class: 'form-check-label' do
+          = _('Enable in-product marketing emails')
+        .form-text.text-muted
+          = _('By default, GitLab sends emails to help guide users through the onboarding process.')
+
+  = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'save_changes_button' }

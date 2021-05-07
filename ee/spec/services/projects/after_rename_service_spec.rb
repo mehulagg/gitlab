@@ -9,6 +9,7 @@ RSpec.describe Projects::AfterRenameService do
     context 'when running on a primary node' do
       let_it_be(:primary) { create(:geo_node, :primary) }
       let_it_be(:secondary) { create(:geo_node) }
+
       let(:project) { create(:project, :repository, :legacy_storage) }
       let!(:path_before_rename) { project.path }
       let!(:full_path_before_rename) { project.full_path }

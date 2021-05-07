@@ -7,13 +7,13 @@ require 'spec_helper'
 RSpec.describe 'Epics through GroupQuery' do
   include GraphqlHelpers
 
-  let(:user)       { create(:user) }
-  let(:group)      { create(:group) }
-  let(:project)    { create(:project, :public, group: group) }
-  let(:label)      { create(:label) }
-  let(:epic)       { create(:labeled_epic, group: group, labels: [label]) }
-  let(:epics_data) { graphql_data['group']['epics']['edges'] }
-  let(:epic_data)  { graphql_data['group']['epic'] }
+  let(:user)        { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let(:project)     { create(:project, :public, group: group) }
+  let(:label)       { create(:label) }
+  let(:epic)        { create(:labeled_epic, group: group, labels: [label]) }
+  let(:epics_data)  { graphql_data['group']['epics']['edges'] }
+  let(:epic_data)   { graphql_data['group']['epic'] }
 
   # similar to GET /groups/:id/epics
   describe 'Get list of epics from a group' do
@@ -60,12 +60,67 @@ RSpec.describe 'Epics through GroupQuery' do
     end
 
     context 'with multiple epics' do
-      let(:user2)  { create(:user) }
-      let!(:epic)  { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago) }
-      let!(:epic2) { create(:epic, author: user2, group: group, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago) }
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:epic)  { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago, start_date: 2.days.ago, end_date: 4.days.ago) }
+      let_it_be(:epic2) { create(:epic, author: user2, group: group, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago, start_date: 3.days.ago, end_date: 3.days.ago ) }
 
       before do
         stub_licensed_features(epics: true)
+      end
+
+      context 'with sort and pagination' do
+        let_it_be(:epic3) { create(:epic, group: group, start_date: 4.days.ago, end_date: 7.days.ago ) }
+        let_it_be(:epic4) { create(:epic, group: group, start_date: 5.days.ago, end_date: 6.days.ago ) }
+        let(:current_user) { user }
+        let(:data_path) { [:group, :epics] }
+
+        def pagination_query(params)
+          query =
+            <<~QUERY
+            epics(#{params}) {
+              #{page_info}
+              nodes { id }
+            }
+            QUERY
+
+          graphql_query_for('group', { 'fullPath' => group.full_path }, ['epicsEnabled', query])
+        end
+
+        def global_ids(*epics)
+          epics.map { |epic| global_id_of(epic) }
+        end
+
+        context 'with start_date_asc' do
+          it_behaves_like 'sorted paginated query', is_reversible: true do
+            let(:sort_param) { :start_date_asc }
+            let(:first_param) { 2 }
+            let(:expected_results) { global_ids(epic4, epic3, epic2, epic) }
+          end
+        end
+
+        context 'with start_date_desc' do
+          it_behaves_like 'sorted paginated query', is_reversible: true do
+            let(:sort_param) { :start_date_desc }
+            let(:first_param) { 2 }
+            let(:expected_results) { global_ids(epic, epic2, epic3, epic4) }
+          end
+        end
+
+        context 'with end_date_asc' do
+          it_behaves_like 'sorted paginated query', is_reversible: true do
+            let(:sort_param) { :end_date_asc }
+            let(:first_param) { 2 }
+            let(:expected_results) { global_ids(epic3, epic4, epic, epic2) }
+          end
+        end
+
+        context 'with end_date_desc' do
+          it_behaves_like 'sorted paginated query', is_reversible: true do
+            let(:sort_param) { :end_date_desc }
+            let(:first_param) { 2 }
+            let(:expected_results) { global_ids(epic2, epic, epic4, epic3) }
+          end
+        end
       end
 
       it 'sorts by created_at descending by default' do
@@ -124,23 +179,25 @@ RSpec.describe 'Epics through GroupQuery' do
 
         before do
           group.reload
-          post_graphql(query, current_user: user)
         end
 
         it 'avoids n+1 queries when loading parent field' do
+          # warm up
+          post_graphql(query({ iids: [epic.iid] }), current_user: user)
+
           control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
-            post_graphql(query, current_user: user)
+            post_graphql(query({ iids: [epic.iid] }), current_user: user)
           end.count
 
           epics_with_parent = create_list(:epic, 3, group: group) do |epic|
-            epic.update(parent: create(:epic, group: group))
+            epic.update!(parent: create(:epic, group: group))
           end
           group.reload
 
-          # Added +1 to control_count due to an existing N+1 with licenses
+          # Added +5 to control_count due to an existing N+1 with licenses
           expect do
             post_graphql(query({ iids: epics_with_parent.pluck(:iid) }), current_user: user)
-          end.not_to exceed_all_query_limit(control_count + 1)
+          end.not_to exceed_all_query_limit(control_count + 5)
         end
       end
     end
@@ -164,8 +221,8 @@ RSpec.describe 'Epics through GroupQuery' do
           end
 
           it 'returns a nil group for a user without permissions to see the group' do
-            project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-            group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+            project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+            group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
             post_graphql(query, current_user: user)
 
@@ -191,7 +248,7 @@ RSpec.describe 'Epics through GroupQuery' do
       before do
         stub_licensed_features(epics: true)
 
-        post_graphql(query)
+        post_graphql(query, current_user: user)
       end
 
       it_behaves_like 'a working graphql query'
@@ -203,6 +260,47 @@ RSpec.describe 'Epics through GroupQuery' do
         expect(graphql_data['group']['epicsEnabled']).to be_truthy
         expect(epic_data['confidential']).to be_falsey
       end
+    end
+  end
+
+  describe 'N+1 query checks' do
+    let(:epic_a) { create(:epic, group: group) }
+    let(:epic_b) { create(:epic, group: group) }
+    let(:epics) { [epic_a, epic_b] }
+    let(:extra_iid_for_second_query) { epic_b.iid.to_s }
+    let(:search_params) { { iids: [epic_a.iid.to_s] } }
+
+    def execute_query
+      query = graphql_query_for(
+        :group,
+        { full_path: group.full_path },
+        query_graphql_field(:epics, search_params, [
+          query_graphql_field(:nodes, nil, requested_fields)
+        ])
+      )
+      post_graphql(query, current_user: user)
+    end
+
+    context 'when requesting `user_notes_count`' do
+      let(:requested_fields) { [:user_notes_count] }
+
+      before do
+        create_list(:note_on_epic, 2, noteable: epic_a)
+        create(:note_on_epic, noteable: epic_b)
+      end
+
+      include_examples 'N+1 query check'
+    end
+
+    context 'when requesting `user_discussions_count`' do
+      let(:requested_fields) { [:user_discussions_count] }
+
+      before do
+        create_list(:note_on_epic, 2, noteable: epic_a)
+        create(:note_on_epic, noteable: epic_b)
+      end
+
+      include_examples 'N+1 query check'
     end
   end
 

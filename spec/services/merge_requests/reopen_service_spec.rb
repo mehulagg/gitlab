@@ -17,12 +17,15 @@ RSpec.describe MergeRequests::ReopenService do
 
   describe '#execute' do
     it_behaves_like 'cache counters invalidator'
+    it_behaves_like 'merge request reviewers cache counters invalidator'
 
     context 'valid params' do
       let(:service) { described_class.new(project, user, {}) }
 
       before do
         allow(service).to receive(:execute_hooks)
+        merge_request.create_cleanup_schedule(scheduled_at: Time.current)
+        merge_request.update_column(:merge_ref_sha, 'abc123')
 
         perform_enqueued_jobs do
           service.execute(merge_request)
@@ -41,6 +44,14 @@ RSpec.describe MergeRequests::ReopenService do
         email = ActionMailer::Base.deliveries.last
         expect(email.to.first).to eq(user2.email)
         expect(email.subject).to include(merge_request.title)
+      end
+
+      it 'destroys cleanup schedule record' do
+        expect(merge_request.reload.cleanup_schedule).to be_nil
+      end
+
+      it 'clears the cached merge_ref_sha' do
+        expect(merge_request.reload.merge_ref_sha).to be_nil
       end
 
       context 'note creation' do
@@ -66,6 +77,14 @@ RSpec.describe MergeRequests::ReopenService do
         .and_return(service)
 
       expect(service).to receive(:reopen)
+
+      described_class.new(project, user, {}).execute(merge_request)
+    end
+
+    it 'calls the merge request activity counter' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_reopen_mr_action)
+        .with(user: user)
 
       described_class.new(project, user, {}).execute(merge_request)
     end

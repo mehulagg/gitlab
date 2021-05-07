@@ -1,17 +1,17 @@
-import { sortBy } from 'lodash';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import { TEST_HOST } from 'helpers/test_constants';
+import { sortBy } from 'lodash';
 import * as actions from 'ee/dependencies/store/modules/list/actions';
-import * as types from 'ee/dependencies/store/modules/list/mutation_types';
-import getInitialState from 'ee/dependencies/store/modules/list/state';
 import {
   FILTER,
   SORT_ORDER,
   FETCH_ERROR_MESSAGE,
 } from 'ee/dependencies/store/modules/list/constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as types from 'ee/dependencies/store/modules/list/mutation_types';
+import getInitialState from 'ee/dependencies/store/modules/list/state';
+import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 
 import mockDependenciesResponse from './data/mock_dependencies.json';
 
@@ -250,7 +250,9 @@ describe('Dependencies actions', () => {
           ],
         ).then(() => {
           expect(createFlash).toHaveBeenCalledTimes(1);
-          expect(createFlash).toHaveBeenCalledWith(FETCH_ERROR_MESSAGE);
+          expect(createFlash).toHaveBeenCalledWith({
+            message: FETCH_ERROR_MESSAGE,
+          });
         }));
     });
   });

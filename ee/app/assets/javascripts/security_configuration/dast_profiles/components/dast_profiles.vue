@@ -1,12 +1,12 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
-import { camelCase, kebabCase } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
-import { s__ } from '~/locale';
+import * as Sentry from '@sentry/browser';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import ProfilesList from './dast_profiles_list.vue';
+import { __, s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
+import DastFailedSiteValidations from './dast_failed_site_validations.vue';
 
 export default {
   components: {
@@ -14,8 +14,9 @@ export default {
     GlDropdownItem,
     GlTab,
     GlTabs,
-    ProfilesList,
+    DastFailedSiteValidations,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     createNewProfilePaths: {
       type: Object,
@@ -43,17 +44,17 @@ export default {
     },
     tabIndex: {
       get() {
-        const activeTabIndex = Object.keys(this.profileSettings).indexOf(
-          camelCase(getLocationHash()),
+        const activeTabIndex = Object.values(this.profileSettings).findIndex(
+          ({ tabName }) => tabName === getLocationHash(),
         );
 
         return Math.max(0, activeTabIndex);
       },
       set(newTabIndex) {
-        const profileTypeName = Object.keys(this.profileSettings)[newTabIndex];
+        const { tabName } = Object.values(this.profileSettings)[newTabIndex];
 
-        if (profileTypeName) {
-          window.location.hash = kebabCase(profileTypeName);
+        if (tabName) {
+          window.location.hash = tabName;
         }
       },
     },
@@ -143,7 +144,7 @@ export default {
           variables: { after: pageInfo.endCursor },
           updateQuery: cacheUtils.appendToPreviousResult(profileType),
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -174,8 +175,10 @@ export default {
         .mutate({
           mutation: deletion.mutation,
           variables: {
-            projectFullPath,
-            profileId,
+            input: {
+              ...(profileType !== 'dastProfiles' ? { fullPath: projectFullPath } : {}),
+              id: profileId,
+            },
           },
           update(store, { data = {} }) {
             const errors = data[`${profileType}Delete`]?.errors ?? [];
@@ -199,7 +202,7 @@ export default {
           },
           optimisticResponse: deletion.optimisticResponse,
         })
-        .catch(error => {
+        .catch((error) => {
           this.handleError({
             profileType,
             exception: error,
@@ -210,8 +213,8 @@ export default {
   },
   profilesPerPage: 10,
   i18n: {
-    heading: s__('DastProfiles|Manage Profiles'),
-    newProfileDropdownLabel: s__('DastProfiles|New Profile'),
+    heading: s__('DastProfiles|Manage DAST scans'),
+    newProfileDropdownLabel: __('New'),
     subHeading: s__(
       'DastProfiles|Save commonly used configurations for target sites and scan specifications as profiles. Use these with an on-demand scan.',
     ),
@@ -221,6 +224,10 @@ export default {
 
 <template>
   <section>
+    <dast-failed-site-validations
+      v-if="glFeatures.dastFailedSiteValidations"
+      :full-path="projectFullPath"
+    />
     <header>
       <div class="gl-display-flex gl-align-items-center gl-pt-6 gl-pb-4">
         <h2 class="my-0">
@@ -249,18 +256,22 @@ export default {
     <gl-tabs v-model="tabIndex">
       <gl-tab v-for="(settings, profileType) in profileSettings" :key="profileType">
         <template #title>
-          <span>{{ settings.i18n.tabName }}</span>
+          <span>{{ settings.i18n.name }}</span>
         </template>
 
-        <profiles-list
+        <component
+          :is="profileSettings[profileType].component"
           :data-testid="`${profileType}List`"
           :error-message="profileTypes[profileType].errorMessage"
           :error-details="profileTypes[profileType].errorDetails"
+          :no-profiles-message="settings.i18n.noProfilesMessage"
           :has-more-profiles-to-load="hasMoreProfiles(profileType)"
           :is-loading="isLoadingProfiles(profileType)"
           :profiles-per-page="$options.profilesPerPage"
           :profiles="profileTypes[profileType].profiles"
+          :table-label="settings.i18n.name"
           :fields="settings.tableFields"
+          :full-path="projectFullPath"
           @load-more-profiles="fetchMoreProfiles(profileType)"
           @delete-profile="deleteProfile(profileType, $event)"
         />

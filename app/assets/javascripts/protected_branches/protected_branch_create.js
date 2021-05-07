@@ -1,11 +1,11 @@
 import $ from 'jquery';
-import AccessDropdown from '~/projects/settings/access_dropdown';
-import axios from '~/lib/utils/axios_utils';
-import AccessorUtilities from '~/lib/utils/accessor';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import CreateItemDropdown from '~/create_item_dropdown';
-import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import AccessorUtilities from '~/lib/utils/accessor';
+import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
+import AccessDropdown from '~/projects/settings/access_dropdown';
+import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 
 export default class ProtectedBranchCreate {
   constructor(options) {
@@ -15,15 +15,21 @@ export default class ProtectedBranchCreate {
     this.isLocalStorageAvailable = AccessorUtilities.isLocalStorageAccessSafe();
     this.currentProjectUserDefaults = {};
     this.buildDropdowns();
+    this.$forcePushToggle = this.$form.find('.js-force-push-toggle');
     this.$codeOwnerToggle = this.$form.find('.js-code-owner-toggle');
     this.bindEvents();
   }
 
   bindEvents() {
+    this.$forcePushToggle.on('click', this.onForcePushToggleClick.bind(this));
     if (this.hasLicense) {
       this.$codeOwnerToggle.on('click', this.onCodeOwnerToggleClick.bind(this));
     }
     this.$form.on('submit', this.onFormSubmit.bind(this));
+  }
+
+  onForcePushToggleClick() {
+    this.$forcePushToggle.toggleClass('is-checked');
   }
 
   onCodeOwnerToggleClick() {
@@ -86,16 +92,17 @@ export default class ProtectedBranchCreate {
       authenticity_token: this.$form.find('input[name="authenticity_token"]').val(),
       protected_branch: {
         name: this.$form.find('input[name="protected_branch[name]"]').val(),
+        allow_force_push: this.$forcePushToggle.hasClass('is-checked'),
         code_owner_approval_required: this.$codeOwnerToggle.hasClass('is-checked'),
       },
     };
 
-    Object.keys(ACCESS_LEVELS).forEach(level => {
+    Object.keys(ACCESS_LEVELS).forEach((level) => {
       const accessLevel = ACCESS_LEVELS[level];
       const selectedItems = this[`${accessLevel}_dropdown`].getSelectedItems();
       const levelAttributes = [];
 
-      selectedItems.forEach(item => {
+      selectedItems.forEach((item) => {
         if (item.type === LEVEL_TYPES.USER) {
           levelAttributes.push({
             user_id: item.user_id,

@@ -1,5 +1,7 @@
 ---
-description: "Learn how GitLab's documentation website is architectured."
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Documentation site architecture
@@ -11,8 +13,8 @@ static site generator.
 
 ## Architecture
 
-While the source of the documentation content is stored in GitLab's respective product
-repositories, the source that is used to build the documentation
+While the source of the documentation content is stored in the repositories for
+each GitLab product, the source that is used to build the documentation
 site _from that content_ is located at <https://gitlab.com/gitlab-org/gitlab-docs>.
 
 The following diagram illustrates the relationship between the repositories
@@ -43,7 +45,7 @@ from where content is sourced, the `gitlab-docs` project, and the published outp
     H -- symlink --> G
 ```
 
-You will not find any GitLab docs content in the `gitlab-docs` repository.
+GitLab docs content isn't kept in the `gitlab-docs` repository.
 All documentation files are hosted in the respective repository of each
 product, and all together are pulled to generate the docs website:
 
@@ -52,14 +54,14 @@ product, and all together are pulled to generate the docs website:
 - [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/tree/master/docs)
 - [GitLab Chart](https://gitlab.com/charts/gitlab/tree/master/doc)
 
-NOTE: **Note:**
+NOTE:
 In September 2019, we [moved towards a single codebase](https://gitlab.com/gitlab-org/gitlab/-/issues/2952),
 as such the docs for CE and EE are now identical. For historical reasons and
 in order not to break any existing links throughout the internet, we still
 maintain the CE docs (`https://docs.gitlab.com/ce/`), although it is hidden
 from the website, and is now a symlink to the EE docs. When
 [Pages supports redirects](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/24),
-we will be able to remove this completely.
+we can remove this completely.
 
 ## Assets
 
@@ -111,13 +113,13 @@ located in the [Dockerfiles directory](https://gitlab.com/gitlab-org/gitlab-docs
 
 If you need to rebuild the Docker images immediately (must have maintainer level permissions):
 
-CAUTION: **Caution:**
-If you change the dockerfile configuration and rebuild the images, you can break the master
+WARNING:
+If you change the Dockerfile configuration and rebuild the images, you can break the master
 pipeline in the main `gitlab` repository as well as in `gitlab-docs`. Create an image with
 a different name first and test it to ensure you do not break the pipelines.
 
-1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI / CD > Pipelines**.
-1. Click the **Run Pipeline** button.
+1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI/CD > Pipelines**.
+1. Click the **Run pipeline** button.
 1. See that a new pipeline is running. The jobs that build the images are in the first
    stage, `build-images`. You can click the pipeline number to see the larger pipeline
    graph, or click the first (`build-images`) stage in the mini pipeline graph to
@@ -135,7 +137,7 @@ and deploys it to <https://docs.gitlab.com>.
 
 If you need to build and deploy the site immediately (must have maintainer level permissions):
 
-1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI / CD > Schedules**.
+1. In [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs), go to **{rocket}** **CI/CD > Schedules**.
 1. For the `Build docs.gitlab.com every 4 hours` scheduled pipeline, click the **play** (**{play}**) button.
 
 Read more about the [deployment process](deployment_process.md).
@@ -176,7 +178,7 @@ we reference the array with a symbol (`:versions`).
 
 Whenever the custom CSS and JavaScript files under `content/assets/` change,
 make sure to bump their version in the front matter. This method guarantees that
-your changes will take effect by clearing the cache of previous files.
+your changes take effect by clearing the cache of previous files.
 
 Always use Nanoc's way of including those files, do not hardcode them in the
 layouts. For example use:
@@ -193,7 +195,7 @@ The links pointing to the files should be similar to:
 <%= @items['/path/to/assets/file.*'].path %>
 ```
 
-Nanoc will then build and render those links correctly according with what's
+Nanoc then builds and renders those links correctly according with what's
 defined in [`Rules`](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/Rules).
 
 ## Linking to source files
@@ -227,12 +229,13 @@ for its search function. This is how it works:
    there's a JavaScript snippet which initiates DocSearch by using an API key
    and an index name (`gitlab`) that are needed for Algolia to show the results.
 
-NOTE: **For GitLab Team Members:**
-If you’re a GitLab Team Member, find credentials for the Algolia dashboard
+### Algolia notes for GitLab team members
+
+If you're a GitLab team member, find credentials for the Algolia dashboard
 in the shared [GitLab 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
 To receive weekly reports of the search usage, search the Google doc with
 title `Email, Slack, and GitLab Groups and Aliases`, search for `docsearch`,
-and add a comment with your email. You'll be added to the alias that gets the weekly
+and add a comment with your email to be added to the alias that gets the weekly
 reports.
 
 ## Monthly release process (versions)

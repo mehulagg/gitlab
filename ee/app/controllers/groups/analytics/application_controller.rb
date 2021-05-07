@@ -17,7 +17,7 @@ class Groups::Analytics::ApplicationController < ApplicationController
   end
 
   def check_feature_availability!(feature)
-    return render_403 unless @group && @group.feature_available?(feature)
+    return render_403 unless @group && @group.licensed_feature_available?(feature)
   end
 
   def load_group

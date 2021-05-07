@@ -26,13 +26,17 @@ module EE
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
       # rubocop: disable CodeReuse/ActiveRecord
       def override
-        member = @group.members.find_by!(id: params[:id])
-        updated_member = ::Members::UpdateService.new(current_user, override_params)
-          .execute(member, permission: :override)
+        member = membershipable_members.find_by!(id: params[:id])
 
-        if updated_member.valid?
-          respond_to do |format|
-            format.js { head :ok }
+        result = ::Members::UpdateService.new(current_user, override_params).execute(member, permission: :override)
+
+        respond_to do |format|
+          format.js do
+            if result[:status] == :success
+              head :ok
+            else
+              render json: result[:message], status: :unprocessable_entity
+            end
           end
         end
       end
@@ -53,7 +57,7 @@ module EE
 
       override :membershipable_members
       def membershipable_members
-        return super unless group.feature_available?(:minimal_access_role)
+        return super unless group.licensed_feature_available?(:minimal_access_role)
 
         group.all_group_members
       end

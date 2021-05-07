@@ -1,9 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
-import { createStore } from '~/mr_notes/stores';
-import InlineDiffTableRow from '~/diffs/components/inline_diff_table_row.vue';
 import DiffGutterAvatars from '~/diffs/components/diff_gutter_avatars.vue';
-import diffFileMockData from '../mock_data/diff_file';
+import { mapInline } from '~/diffs/components/diff_row_utils';
+import InlineDiffTableRow from '~/diffs/components/inline_diff_table_row.vue';
+import { createStore } from '~/mr_notes/stores';
+import { findInteropAttributes } from '../find_interop_attributes';
 import discussionsMockData from '../mock_data/diff_discussions';
+import diffFileMockData from '../mock_data/diff_file';
 
 const TEST_USER_ID = 'abc123';
 const TEST_USER = { id: TEST_USER_ID };
@@ -11,7 +13,16 @@ const TEST_USER = { id: TEST_USER_ID };
 describe('InlineDiffTableRow', () => {
   let wrapper;
   let store;
-  const thisLine = diffFileMockData.highlighted_diff_lines[0];
+  const mockDiffContent = {
+    diffFile: diffFileMockData,
+    shouldRenderDraftRow: jest.fn(),
+    hasParallelDraftLeft: jest.fn(),
+    hasParallelDraftRight: jest.fn(),
+    draftForLine: jest.fn(),
+  };
+
+  const applyMap = mapInline(mockDiffContent);
+  const thisLine = applyMap(diffFileMockData.highlighted_diff_lines[0]);
 
   const createComponent = (props = {}, propsStore = store) => {
     wrapper = shallowMount(InlineDiffTableRow, {
@@ -132,7 +143,7 @@ describe('InlineDiffTableRow', () => {
         ${true}  | ${{ ...thisLine, type: 'old-nonewline', discussions: [] }} | ${false}
         ${true}  | ${{ ...thisLine, discussions: [{}] }}                      | ${false}
       `('visible is $expectation - line ($line)', ({ isHover, line, expectation }) => {
-        createComponent({ line });
+        createComponent({ line: applyMap(line) });
         wrapper.setData({ isHover });
 
         return wrapper.vm.$nextTick().then(() => {
@@ -148,7 +159,7 @@ describe('InlineDiffTableRow', () => {
         'has attribute disabled=$disabled when the outer component has prop commentsDisabled=$commentsDisabled',
         ({ disabled, commentsDisabled }) => {
           createComponent({
-            line: { ...thisLine, commentsDisabled },
+            line: applyMap({ ...thisLine, commentsDisabled }),
           });
 
           wrapper.setData({ isHover: true });
@@ -177,7 +188,7 @@ describe('InlineDiffTableRow', () => {
         'has the correct tooltip when commentsDisabled=$commentsDisabled',
         ({ tooltip, commentsDisabled }) => {
           createComponent({
-            line: { ...thisLine, commentsDisabled },
+            line: applyMap({ ...thisLine, commentsDisabled }),
           });
 
           wrapper.setData({ isHover: true });
@@ -205,18 +216,18 @@ describe('InlineDiffTableRow', () => {
         const TEST_LINE_NUMBER = 1;
 
         describe.each`
-          lineProps                                                                                     | findLineNumber       | expectedHref            | expectedClickArg
-          ${{ line_code: TEST_LINE_CODE, old_line: TEST_LINE_NUMBER }}                                  | ${findLineNumberOld} | ${`#${TEST_LINE_CODE}`} | ${TEST_LINE_CODE}
-          ${{ line_code: undefined, old_line: TEST_LINE_NUMBER }}                                       | ${findLineNumberOld} | ${'#'}                  | ${undefined}
-          ${{ line_code: undefined, left: { line_code: TEST_LINE_CODE }, old_line: TEST_LINE_NUMBER }}  | ${findLineNumberOld} | ${'#'}                  | ${TEST_LINE_CODE}
-          ${{ line_code: undefined, right: { line_code: TEST_LINE_CODE }, new_line: TEST_LINE_NUMBER }} | ${findLineNumberNew} | ${'#'}                  | ${TEST_LINE_CODE}
+          lineProps                                                                                     | findLineNumber       | expectedHref            | expectedClickArg  | expectedQaSelector
+          ${{ line_code: TEST_LINE_CODE, old_line: TEST_LINE_NUMBER }}                                  | ${findLineNumberOld} | ${`#${TEST_LINE_CODE}`} | ${TEST_LINE_CODE} | ${undefined}
+          ${{ line_code: undefined, old_line: TEST_LINE_NUMBER }}                                       | ${findLineNumberOld} | ${'#'}                  | ${undefined}      | ${undefined}
+          ${{ line_code: undefined, left: { line_code: TEST_LINE_CODE }, old_line: TEST_LINE_NUMBER }}  | ${findLineNumberOld} | ${'#'}                  | ${TEST_LINE_CODE} | ${undefined}
+          ${{ line_code: undefined, right: { line_code: TEST_LINE_CODE }, new_line: TEST_LINE_NUMBER }} | ${findLineNumberNew} | ${'#'}                  | ${TEST_LINE_CODE} | ${'new_diff_line_link'}
         `(
           'with line ($lineProps)',
-          ({ lineProps, findLineNumber, expectedHref, expectedClickArg }) => {
+          ({ lineProps, findLineNumber, expectedHref, expectedClickArg, expectedQaSelector }) => {
             beforeEach(() => {
               jest.spyOn(store, 'dispatch').mockImplementation();
               createComponent({
-                line: { ...thisLine, ...lineProps },
+                line: applyMap({ ...thisLine, ...lineProps }),
               });
             });
 
@@ -225,6 +236,7 @@ describe('InlineDiffTableRow', () => {
               expect(findLineNumber().attributes()).toEqual({
                 href: expectedHref,
                 'data-linenumber': TEST_LINE_NUMBER.toString(),
+                'data-qa-selector': expectedQaSelector,
               });
             });
 
@@ -268,7 +280,7 @@ describe('InlineDiffTableRow', () => {
 
       describe('with showCommentButton', () => {
         it('renders if line has discussions', () => {
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(findAvatars().props()).toEqual({
             discussions: line.discussions,
@@ -278,13 +290,13 @@ describe('InlineDiffTableRow', () => {
 
         it('does notrender if line has no discussions', () => {
           line.discussions = [];
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(findAvatars().exists()).toEqual(false);
         });
 
         it('toggles line discussion', () => {
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(store.dispatch).toHaveBeenCalledTimes(1);
 
@@ -297,6 +309,18 @@ describe('InlineDiffTableRow', () => {
           });
         });
       });
+    });
+  });
+
+  describe('interoperability', () => {
+    it.each`
+      desc               | line                                                      | expectation
+      ${'with type old'} | ${{ ...thisLine, type: 'old', old_line: 3, new_line: 5 }} | ${{ type: 'old', line: '3', oldLine: '3', newLine: '5' }}
+      ${'with type new'} | ${{ ...thisLine, type: 'new', old_line: 3, new_line: 5 }} | ${{ type: 'new', line: '5', oldLine: '3', newLine: '5' }}
+    `('$desc, sets interop data attributes', ({ line, expectation }) => {
+      createComponent({ line });
+
+      expect(findInteropAttributes(wrapper)).toEqual(expectation);
     });
   });
 });

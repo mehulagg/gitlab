@@ -1,8 +1,11 @@
 ---
+stage: Growth
+group: Activation
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
-# Broadcast Messages **(CORE ONLY)**
+# Broadcast Messages **(FREE SELF)**
 
 GitLab can display broadcast messages to all users of a GitLab instance. There are two types of broadcast messages:
 
@@ -44,13 +47,13 @@ The available placeholders are:
 - `{{username}}`
 - `{{instance_id}}`
 
-If the user is not signed in, user related values will be empty.
+If the user is not signed in, user related values are empty.
 
 ![Broadcast Message Notification](img/broadcast_messages_notification_v12_10.png)
 
 Broadcast messages can be managed using the [broadcast messages API](../../api/broadcast_messages.md).
 
-NOTE: **Note:**
+NOTE:
 If more than one banner message is active at one time, they are displayed in a stack in order of creation.
 If more than one notification message is active at one time, only the newest is shown.
 
@@ -62,12 +65,22 @@ To add a broadcast message:
 
 1. Navigate to the **Admin Area > Messages** page.
 1. Add the text for the message to the **Message** field. Markdown and emoji are supported.
-1. If required, click the **Customize colors** link to edit the background color and font color of the message.
-1. If required, add a **Target Path** to only show the broadcast message on URLs matching that path. You can use the wildcard character `*` to match multiple URLs, for example `/users/*/issues`.
+1. Select one of the suggested background colors, or add the hex code of a different color. The default color is orange.
+1. If required, add a **Target Path** to only show the broadcast message on URLs matching that path. You can use the wildcard character `*` to match multiple URLs, for example `mygroup/myproject*`.
 1. Select a date for the message to start and end.
 1. Click the **Add broadcast message** button.
 
-NOTE: **Note:**
+NOTE:
+When scoping messages, you can't use preceding or trailing slashes. For example,
+instead of `/mygroup/myproject/`, you must use `mygroup/myproject`. A fix is
+[planned for GitLab 13.12](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59482).
+
+NOTE:
+The **Background color** field expects the value to be a hexadecimal code because
+the form uses the [color_field](https://api.rubyonrails.org/v6.0.3.4/classes/ActionView/Helpers/FormHelper.html#method-i-color_field)
+helper method, which generates the proper HTML to render.
+
+NOTE:
 Once a broadcast message has expired, it is no longer displayed in the UI but is still listed in the
 list of broadcast messages. User can also dismiss a broadcast message if the option **Dismissable** is set.
 
@@ -81,7 +94,7 @@ To edit a broadcast message:
 1. From the list of broadcast messages, click the appropriate button to edit the message.
 1. After making the required changes, click the **Update broadcast message** button.
 
-TIP: **Tip:**
+NOTE:
 Expired messages can be made active again by changing their end date.
 
 ## Deleting a broadcast message
@@ -95,7 +108,7 @@ To delete a broadcast message:
 
 Once deleted, the broadcast message is removed from the list of broadcast messages.
 
-NOTE: **Note:**
+NOTE:
 Broadcast messages can be deleted while active.
 
 <!-- ## Troubleshooting

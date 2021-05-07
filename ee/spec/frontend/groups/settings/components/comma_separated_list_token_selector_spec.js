@@ -1,6 +1,6 @@
-import { nextTick } from 'vue';
-import { mount } from '@vue/test-utils';
 import { GlToken, GlTokenSelector } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 
 import CommaSeparatedListTokenSelector from 'ee/groups/settings/components/comma_separated_list_token_selector.vue';
 
@@ -16,7 +16,7 @@ describe('CommaSeparatedListTokenSelector', () => {
     disallowedValueErrorMessage: 'The value entered is not allowed',
   };
 
-  const createComponent = options => {
+  const createComponent = (options) => {
     wrapper = mount(CommaSeparatedListTokenSelector, {
       attachTo: div,
       scopedSlots: {
@@ -37,11 +37,9 @@ describe('CommaSeparatedListTokenSelector', () => {
   const findTokenSelectorDropdown = () => findTokenSelector().find('[role="menu"]');
 
   const findErrorMessageText = () =>
-    findTokenSelector()
-      .find('[role="menuitem"][disabled="disabled"]')
-      .text();
+    findTokenSelector().find('[role="menuitem"][disabled="disabled"]').text();
 
-  const setTokenSelectorInputValue = value => {
+  const setTokenSelectorInputValue = (value) => {
     const tokenSelectorInput = findTokenSelectorInput();
 
     tokenSelectorInput.element.value = value;
@@ -50,7 +48,7 @@ describe('CommaSeparatedListTokenSelector', () => {
     return nextTick();
   };
 
-  const tokenSelectorTriggerEnter = event => {
+  const tokenSelectorTriggerEnter = (event) => {
     const tokenSelectorInput = findTokenSelectorInput();
     tokenSelectorInput.trigger('keydown.enter', event);
   };

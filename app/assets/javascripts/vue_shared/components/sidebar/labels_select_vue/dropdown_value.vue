@@ -1,6 +1,6 @@
 <script>
-import { mapState } from 'vuex';
 import { GlLabel } from '@gitlab/ui';
+import { mapState } from 'vuex';
 
 import { isScopedLabel } from '~/lib/utils/common_utils';
 
@@ -21,11 +21,14 @@ export default {
       'allowLabelRemove',
       'allowScopedLabels',
       'labelsFilterBasePath',
+      'labelsFilterParam',
     ]),
   },
   methods: {
     labelFilterUrl(label) {
-      return `${this.labelsFilterBasePath}?label_name[]=${encodeURIComponent(label.title)}`;
+      return `${this.labelsFilterBasePath}?${this.labelsFilterParam}[]=${encodeURIComponent(
+        label.title,
+      )}`;
     },
     scopedLabel(label) {
       return this.allowScopedLabels && isScopedLabel(label);

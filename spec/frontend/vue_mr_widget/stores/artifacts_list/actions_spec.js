@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'helpers/test_constants';
+import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
 import {
   setEndpoint,
@@ -11,8 +11,8 @@ import {
   receiveArtifactsSuccess,
   receiveArtifactsError,
 } from '~/vue_merge_request_widget/stores/artifacts_list/actions';
-import state from '~/vue_merge_request_widget/stores/artifacts_list/state';
 import * as types from '~/vue_merge_request_widget/stores/artifacts_list/mutation_types';
+import state from '~/vue_merge_request_widget/stores/artifacts_list/state';
 
 describe('Artifacts App Store Actions', () => {
   let mockedState;
@@ -22,7 +22,7 @@ describe('Artifacts App Store Actions', () => {
   });
 
   describe('setEndpoint', () => {
-    it('should commit SET_ENDPOINT mutation', done => {
+    it('should commit SET_ENDPOINT mutation', (done) => {
       testAction(
         setEndpoint,
         'endpoint.json',
@@ -35,7 +35,7 @@ describe('Artifacts App Store Actions', () => {
   });
 
   describe('requestArtifacts', () => {
-    it('should commit REQUEST_ARTIFACTS mutation', done => {
+    it('should commit REQUEST_ARTIFACTS mutation', (done) => {
       testAction(
         requestArtifacts,
         null,
@@ -62,7 +62,7 @@ describe('Artifacts App Store Actions', () => {
     });
 
     describe('success', () => {
-      it('dispatches requestArtifacts and receiveArtifactsSuccess ', done => {
+      it('dispatches requestArtifacts and receiveArtifactsSuccess ', (done) => {
         mock.onGet(`${TEST_HOST}/endpoint.json`).replyOnce(200, [
           {
             text: 'result.txt',
@@ -106,7 +106,7 @@ describe('Artifacts App Store Actions', () => {
         mock.onGet(`${TEST_HOST}/endpoint.json`).reply(500);
       });
 
-      it('dispatches requestArtifacts and receiveArtifactsError ', done => {
+      it('dispatches requestArtifacts and receiveArtifactsError ', (done) => {
         testAction(
           fetchArtifacts,
           null,
@@ -127,7 +127,7 @@ describe('Artifacts App Store Actions', () => {
   });
 
   describe('receiveArtifactsSuccess', () => {
-    it('should commit RECEIVE_ARTIFACTS_SUCCESS mutation with 200', done => {
+    it('should commit RECEIVE_ARTIFACTS_SUCCESS mutation with 200', (done) => {
       testAction(
         receiveArtifactsSuccess,
         { data: { summary: {} }, status: 200 },
@@ -138,7 +138,7 @@ describe('Artifacts App Store Actions', () => {
       );
     });
 
-    it('should not commit RECEIVE_ARTIFACTS_SUCCESS mutation with 204', done => {
+    it('should not commit RECEIVE_ARTIFACTS_SUCCESS mutation with 204', (done) => {
       testAction(
         receiveArtifactsSuccess,
         { data: { summary: {} }, status: 204 },
@@ -151,7 +151,7 @@ describe('Artifacts App Store Actions', () => {
   });
 
   describe('receiveArtifactsError', () => {
-    it('should commit RECEIVE_ARTIFACTS_ERROR mutation', done => {
+    it('should commit RECEIVE_ARTIFACTS_ERROR mutation', (done) => {
       testAction(
         receiveArtifactsError,
         null,

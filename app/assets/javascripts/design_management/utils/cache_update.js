@@ -1,8 +1,8 @@
 /* eslint-disable @gitlab/require-i18n-strings */
 
-import { differenceBy } from 'lodash';
 import produce from 'immer';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { differenceBy } from 'lodash';
+import createFlash from '~/flash';
 import { extractCurrentDiscussion, extractDesign, extractDesigns } from './design_management_utils';
 import {
   ADD_IMAGE_DIFF_NOTE_ERROR,
@@ -11,14 +11,14 @@ import {
   designDeletionError,
 } from './error_messages';
 
-const designsOf = data => data.project.issue.designCollection.designs;
+const designsOf = (data) => data.project.issue.designCollection.designs;
 
 const deleteDesignsFromStore = (store, query, selectedDesigns) => {
   const sourceData = store.readQuery(query);
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const changedDesigns = designsOf(sourceData).nodes.filter(
-      design => !selectedDesigns.includes(design.filename),
+      (design) => !selectedDesigns.includes(design.filename),
     );
     designsOf(draftData).nodes = [...changedDesigns];
   });
@@ -40,8 +40,7 @@ const addNewVersionToStore = (store, query, version) => {
   if (!version) return;
   const sourceData = store.readQuery(query);
 
-  const data = produce(sourceData, draftData => {
-    // eslint-disable-next-line no-param-reassign
+  const data = produce(sourceData, (draftData) => {
     draftData.project.issue.designCollection.versions.nodes = [
       version,
       ...draftData.project.issue.designCollection.versions.nodes,
@@ -74,14 +73,14 @@ const addImageDiffNoteToStore = (store, createImageDiffNote, query, variables) =
     },
   };
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const design = extractDesign(draftData);
     design.notesCount += 1;
     design.discussions.nodes = [...design.discussions.nodes, newDiscussion];
 
     if (
       !design.issue.participants.nodes.some(
-        participant => participant.username === createImageDiffNote.note.author.username,
+        (participant) => participant.username === createImageDiffNote.note.author.username,
       )
     ) {
       design.issue.participants.nodes = [
@@ -101,22 +100,22 @@ const addImageDiffNoteToStore = (store, createImageDiffNote, query, variables) =
   });
 };
 
-const updateImageDiffNoteInStore = (store, updateImageDiffNote, query, variables) => {
+const updateImageDiffNoteInStore = (store, repositionImageDiffNote, query, variables) => {
   const sourceData = store.readQuery({
     query,
     variables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const design = extractDesign(draftData);
     const discussion = extractCurrentDiscussion(
       design.discussions,
-      updateImageDiffNote.note.discussion.id,
+      repositionImageDiffNote.note.discussion.id,
     );
 
     discussion.notes = {
       ...discussion.notes,
-      nodes: [updateImageDiffNote.note, ...discussion.notes.nodes.slice(1)],
+      nodes: [repositionImageDiffNote.note, ...discussion.notes.nodes.slice(1)],
     };
   });
 
@@ -130,18 +129,18 @@ const updateImageDiffNoteInStore = (store, updateImageDiffNote, query, variables
 const addNewDesignToStore = (store, designManagementUpload, query) => {
   const sourceData = store.readQuery(query);
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const currentDesigns = extractDesigns(draftData);
     const difference = differenceBy(designManagementUpload.designs, currentDesigns, 'filename');
 
     const newDesigns = currentDesigns
-      .map(design => {
-        return designManagementUpload.designs.find(d => d.filename === design.filename) || design;
+      .map((design) => {
+        return designManagementUpload.designs.find((d) => d.filename === design.filename) || design;
       })
       .concat(difference);
 
     let newVersionNode;
-    const findNewVersions = designManagementUpload.designs.find(design => design.versions);
+    const findNewVersions = designManagementUpload.designs.find((design) => design.versions);
 
     if (findNewVersions) {
       const findNewVersionsNodes = findNewVersions.versions.nodes;
@@ -168,7 +167,6 @@ const addNewDesignToStore = (store, designManagementUpload, query) => {
         nodes: newVersions,
       },
     };
-    // eslint-disable-next-line no-param-reassign
     draftData.project.issue.designCollection = updatedDesigns;
   });
 
@@ -181,8 +179,7 @@ const addNewDesignToStore = (store, designManagementUpload, query) => {
 const moveDesignInStore = (store, designManagementMove, query) => {
   const sourceData = store.readQuery(query);
 
-  const data = produce(sourceData, draftData => {
-    // eslint-disable-next-line no-param-reassign
+  const data = produce(sourceData, (draftData) => {
     draftData.project.issue.designCollection.designs =
       designManagementMove.designCollection.designs;
   });
@@ -199,7 +196,7 @@ export const addPendingTodoToStore = (store, pendingTodo, query, queryVariables)
     variables: queryVariables,
   });
 
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const design = extractDesign(draftData);
     const existingTodos = design.currentUserTodos?.nodes || [];
     const newTodoNodes = [...existingTodos, { ...pendingTodo, __typename: 'Todo' }];
@@ -226,7 +223,7 @@ export const deletePendingTodoFromStore = (store, todoMarkDone, query, queryVari
   const {
     todo: { id: todoId },
   } = todoMarkDone;
-  const data = produce(sourceData, draftData => {
+  const data = produce(sourceData, (draftData) => {
     const design = extractDesign(draftData);
     const existingTodos = design.currentUserTodos?.nodes || [];
 
@@ -237,7 +234,7 @@ export const deletePendingTodoFromStore = (store, todoMarkDone, query, queryVari
 };
 
 const onError = (data, message) => {
-  createFlash(message);
+  createFlash({ message });
   throw new Error(data.errors);
 };
 
@@ -268,7 +265,7 @@ export const updateStoreAfterAddImageDiffNote = (store, data, query, queryVariab
   }
 };
 
-export const updateStoreAfterUpdateImageDiffNote = (store, data, query, queryVariables) => {
+export const updateStoreAfterRepositionImageDiffNote = (store, data, query, queryVariables) => {
   if (hasErrors(data)) {
     onError(data, UPDATE_IMAGE_DIFF_NOTE_ERROR);
   } else {
@@ -286,7 +283,7 @@ export const updateStoreAfterUploadDesign = (store, data, query) => {
 
 export const updateDesignsOnStoreAfterReorder = (store, data, query) => {
   if (hasErrors(data)) {
-    createFlash(data.errors[0]);
+    createFlash({ message: data.errors[0] });
   } else {
     moveDesignInStore(store, data, query);
   }

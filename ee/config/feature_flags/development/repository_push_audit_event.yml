@@ -1,7 +1,8 @@
 ---
 name: repository_push_audit_event
-introduced_by_url: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/15667
 rollout_issue_url: 
-group: 
+milestone: '12.3'
 type: development
+group: group::compliance
 default_enabled: false

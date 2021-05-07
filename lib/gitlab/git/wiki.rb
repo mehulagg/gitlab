@@ -73,12 +73,6 @@ module Gitlab
         end
       end
 
-      def delete_page(page_path, commit_details)
-        wrapped_gitaly_errors do
-          gitaly_delete_page(page_path, commit_details)
-        end
-      end
-
       def update_page(page_path, title, format, content, commit_details)
         wrapped_gitaly_errors do
           gitaly_update_page(page_path, title, format, content, commit_details)
@@ -99,12 +93,6 @@ module Gitlab
       def page(title:, version: nil, dir: nil)
         wrapped_gitaly_errors do
           gitaly_find_page(title: title, version: version, dir: dir)
-        end
-      end
-
-      def file(name, version)
-        wrapped_gitaly_errors do
-          gitaly_find_file(name, version)
         end
       end
 
@@ -146,24 +134,15 @@ module Gitlab
         gitaly_wiki_client.update_page(page_path, title, format, content, commit_details)
       end
 
-      def gitaly_delete_page(page_path, commit_details)
-        gitaly_wiki_client.delete_page(page_path, commit_details)
-      end
-
       def gitaly_find_page(title:, version: nil, dir: nil)
+        return unless title.present?
+
         wiki_page, version = gitaly_wiki_client.find_page(title: title, version: version, dir: dir)
         return unless wiki_page
 
         Gitlab::Git::WikiPage.new(wiki_page, version)
       rescue GRPC::InvalidArgument
         nil
-      end
-
-      def gitaly_find_file(name, version)
-        wiki_file = gitaly_wiki_client.find_file(name, version)
-        return unless wiki_file
-
-        Gitlab::Git::WikiFile.new(wiki_file)
       end
 
       def gitaly_list_pages(limit: 0, sort: nil, direction_desc: false, load_content: false)

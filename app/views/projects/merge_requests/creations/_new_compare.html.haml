@@ -1,5 +1,5 @@
 %h3.page-title
-  New Merge Request
+  New merge request
 
 = form_for [@project, @merge_request], url: project_new_merge_request_path(@project), method: :get, html: { class: "merge-request-form js-requires-input" } do |f|
   - if params[:nav_source].present?
@@ -30,7 +30,7 @@
               = dropdown_loading
         .card-footer
           .text-center
-            .js-source-loading.mt-1.spinner.spinner-sm
+            .js-source-loading.mt-1.gl-spinner
           %ul.list-unstyled.mr_source_commit
 
     .col-lg-6
@@ -59,9 +59,9 @@
               = dropdown_loading
         .card-footer
           .text-center
-            .js-target-loading.mt-1.spinner.spinner-sm
+            .js-target-loading.mt-1.gl-spinner
           %ul.list-unstyled.mr_target_commit
 
   - if @merge_request.errors.any?
     = form_errors(@merge_request)
-  = f.submit 'Compare branches and continue', class: "gl-button btn btn-success mr-compare-btn"
+  = f.submit 'Compare branches and continue', class: "gl-button btn btn-confirm mr-compare-btn"

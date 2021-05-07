@@ -119,7 +119,7 @@ RSpec.describe Clusters::Applications::Knative do
 
   shared_examples 'a command' do
     it 'is an instance of Helm::InstallCommand' do
-      expect(subject).to be_an_instance_of(Gitlab::Kubernetes::Helm::InstallCommand)
+      expect(subject).to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::InstallCommand)
     end
 
     it 'is initialized with knative arguments' do
@@ -150,7 +150,7 @@ RSpec.describe Clusters::Applications::Knative do
     subject { knative.install_command }
 
     it 'is initialized with latest version' do
-      expect(subject.version).to eq('0.9.0')
+      expect(subject.version).to eq('0.10.0')
     end
 
     it_behaves_like 'a command'
@@ -171,7 +171,7 @@ RSpec.describe Clusters::Applications::Knative do
   describe '#uninstall_command' do
     subject { knative.uninstall_command }
 
-    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::DeleteCommand) }
+    it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::Helm::V3::DeleteCommand) }
 
     it "removes knative deployed services before uninstallation" do
       2.times do |i|
@@ -204,8 +204,8 @@ RSpec.describe Clusters::Applications::Knative do
 
       expect(subject.postdelete).to include(*remove_knative_istio_leftovers_script)
       expect(subject.postdelete.size).to eq(full_delete_commands_size)
-      expect(subject.postdelete[2]).to eq("kubectl api-resources -o name --api-group #{api_groups[0]} | xargs kubectl delete --ignore-not-found crd")
-      expect(subject.postdelete[3]).to eq("kubectl api-resources -o name --api-group #{api_groups[1]} | xargs kubectl delete --ignore-not-found crd")
+      expect(subject.postdelete[2]).to include("kubectl api-resources -o name --api-group #{api_groups[0]} | xargs -r kubectl delete --ignore-not-found crd")
+      expect(subject.postdelete[3]).to include("kubectl api-resources -o name --api-group #{api_groups[1]} | xargs -r kubectl delete --ignore-not-found crd")
     end
   end
 

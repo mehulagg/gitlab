@@ -2,6 +2,8 @@
 
 class ExpireJobCacheWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include PipelineQueue
 
   queue_namespace :pipeline_cache
@@ -10,24 +12,18 @@ class ExpireJobCacheWorker
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(job_id)
-    job = CommitStatus.joins(:pipeline, :project).find_by(id: job_id)
+    job = CommitStatus.eager_load_pipeline.find_by(id: job_id)
     return unless job
 
     pipeline = job.pipeline
     project = job.project
 
-    Gitlab::EtagCaching::Store.new.tap do |store|
-      store.touch(project_pipeline_path(project, pipeline))
-      store.touch(project_job_path(project, job))
-    end
+    Gitlab::EtagCaching::Store.new.touch(project_job_path(project, job))
+    ExpirePipelineCacheWorker.perform_async(pipeline.id)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   private
-
-  def project_pipeline_path(project, pipeline)
-    Gitlab::Routing.url_helpers.project_pipeline_path(project, pipeline, format: :json)
-  end
 
   def project_job_path(project, job)
     Gitlab::Routing.url_helpers.project_build_path(project, job.id, format: :json)

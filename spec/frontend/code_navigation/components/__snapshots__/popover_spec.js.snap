@@ -12,11 +12,12 @@ exports[`Code navigation popover component renders popover 1`] = `
    
   <gl-tabs-stub
     contentclass="gl-py-0"
-    nav-class="gl-hidden"
+    navclass="gl-hidden"
     theme="indigo"
   >
     <gl-tab-stub
       title="Definition"
+      titlelinkclass=""
     >
       <div
         class="overflow-auto code-navigation-popover-container"
@@ -76,6 +77,7 @@ exports[`Code navigation popover component renders popover 1`] = `
     <gl-tab-stub
       class="py-2"
       data-testid="references-tab"
+      titlelinkclass=""
     >
        
       <p

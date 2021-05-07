@@ -6,6 +6,7 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gi
   include ::EE::GeoHelpers
 
   let_it_be(:secondary) { create(:geo_node) }
+
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:project) { create(:project) }
   let(:repository_created_event) { create(:geo_repository_created_event, project: project) }

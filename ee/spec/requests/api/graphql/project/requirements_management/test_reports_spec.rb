@@ -63,27 +63,29 @@ RSpec.describe 'getting test reports of a requirement' do
       let_it_be(:data_path) { [:project, :requirement, :testReports] }
       let_it_be(:test_report_3) { create(:test_report, requirement: requirement, created_at: 4.days.ago) }
 
-      def pagination_query(params, page_info)
-        graphql_query_for(
-          'project',
-          { 'fullPath' => project.full_path },
-          "requirement { testReports(#{params}) { #{page_info} edges { node { id } } } }"
+      def pagination_query(params)
+        graphql_query_for(:project, { full_path: project.full_path },
+          "requirement { testReports(#{params}) { #{page_info} nodes { id } } }"
         )
       end
 
-      def pagination_results_data(data)
-        data.map { |test_report| test_report.dig('node', 'id') }
+      let(:in_creation_order) do
+        [test_report_3, test_report_2, test_report_1]
       end
 
       it_behaves_like 'sorted paginated query' do
-        let(:sort_param)       { 'created_asc' }
+        let(:sort_param)       { :CREATED_ASC }
         let(:first_param)      { 2 }
         let(:expected_results) do
-          [
-            test_report_3.to_global_id.to_s,
-            test_report_2.to_global_id.to_s,
-            test_report_1.to_global_id.to_s
-          ]
+          in_creation_order.map { |r| global_id_of(r) }
+        end
+      end
+
+      it_behaves_like 'sorted paginated query' do
+        let(:sort_param)       { :CREATED_DESC }
+        let(:first_param)      { 2 }
+        let(:expected_results) do
+          in_creation_order.reverse.map { |r| global_id_of(r) }
         end
       end
     end

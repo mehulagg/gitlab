@@ -1,19 +1,19 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Geo database replication **(PREMIUM ONLY)**
+# Geo database replication **(PREMIUM SELF)**
 
-NOTE: **Note:**
+NOTE:
 If your GitLab installation uses external (not managed by Omnibus) PostgreSQL
 instances, the Omnibus roles will not be able to perform all necessary
 configuration steps. In this case,
 [follow the Geo with external PostgreSQL instances document instead](external_database.md).
 
-NOTE: **Note:**
+NOTE:
 The stages of the setup process must be completed in the documented order.
 Before attempting the steps in this stage, [complete all prior stages](../setup/index.md#using-omnibus-gitlab).
 
@@ -44,7 +44,7 @@ The following guide assumes that:
   you have a new **secondary** server set up with the same versions of the OS,
   PostgreSQL, and GitLab on all nodes.
 
-CAUTION: **Warning:**
+WARNING:
 Geo works with streaming replication. Logical replication is not supported at this time.
 There is an [issue where support is being discussed](https://gitlab.com/gitlab-org/gitlab/-/issues/7420).
 
@@ -79,7 +79,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
 
 1. GitLab 10.4 and up only: Do the following to make sure the `gitlab` database user has a password defined:
 
-   NOTE: **Note:**
+   NOTE:
    Until FDW settings are removed in GitLab version 14.0, avoid using single or double quotes in the
    password for PostgreSQL as that will lead to errors when reconfiguring.
 
@@ -134,7 +134,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    connect to the **primary** node's database. For this reason, we need the address of
    each node.
 
-   NOTE: **Note:**
+   NOTE:
    For external PostgreSQL instances, see [additional instructions](external_database.md).
 
    If you are using a cloud provider, you can lookup the addresses for each
@@ -151,7 +151,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    ##
    ## Public address
    ##
-   echo "External address: $(curl --silent ipinfo.io/ip)"
+   echo "External address: $(curl --silent "ipinfo.io/ip")"
    ```
 
    In most cases, the following addresses will be used to configure GitLab
@@ -171,7 +171,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    corresponding to the given address. See [the PostgreSQL documentation](https://www.postgresql.org/docs/11/runtime-config-connection.html)
    for more details.
 
-   NOTE: **Note:**
+   NOTE:
    If you need to use `0.0.0.0` or `*` as the listen_address, you will also need to add
    `127.0.0.1/32` to the `postgresql['md5_auth_cidr_addresses']` setting, to allow Rails to connect through
    `127.0.0.1`. For more information, see [omnibus-5258](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5258).
@@ -290,7 +290,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    gitlab-ctl stop sidekiq
    ```
 
-   NOTE: **Note:**
+   NOTE:
    This step is important so we don't try to execute anything before the node is fully configured.
 
 1. [Check TCP connectivity](../../raketasks/maintenance.md) to the **primary** node's PostgreSQL server:
@@ -299,7 +299,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    gitlab-rake gitlab:tcp_check[<primary_node_ip>,5432]
    ```
 
-   NOTE: **Note:**
+   NOTE:
    If this step fails, you may be using the wrong IP address, or a firewall may
    be preventing access to the server. Check the IP address, paying close
    attention to the difference between public and private addresses and ensure
@@ -404,7 +404,7 @@ needed files for streaming replication.
 The directories used are the defaults that are set up in Omnibus. If you have
 changed any defaults, configure it as you see fit replacing the directories and paths.
 
-CAUTION: **Warning:**
+WARNING:
 Make sure to run this on the **secondary** server as it removes all PostgreSQL's
 data before running `pg_basebackup`.
 
@@ -421,7 +421,7 @@ data before running `pg_basebackup`.
 
 1. Execute the command below to start a backup/restore and begin the replication
 
-   CAUTION: **Warning:**
+   WARNING:
    Each Geo **secondary** node must have its own unique replication slot name.
    Using the same slot name between two secondaries will break PostgreSQL replication.
 
@@ -431,13 +431,8 @@ data before running `pg_basebackup`.
       --host=<primary_node_ip>
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Replication slot names must only contain lowercase letters, numbers, and the underscore character.
-
-   NOTE: **Note:**
-   In GitLab 13.4, a seed project is added when GitLab is first installed. This makes it necessary to pass `--force` even
-   on a new Geo secondary node. There is an [issue to account for seed projects](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5618)
-   when checking the database.
 
    When prompted, enter the _plaintext_ password you set up for the `gitlab_replicator`
    user in the first step.
@@ -471,83 +466,476 @@ The replication process is now complete.
 [PgBouncer](https://www.pgbouncer.org/) may be used with GitLab Geo to pool
 PostgreSQL connections. We recommend using PgBouncer if you use GitLab in a
 high-availability configuration with a cluster of nodes supporting a Geo
-**primary** node and another cluster of nodes supporting a Geo **secondary** node. For more
-information, see [High Availability with Omnibus GitLab](../../postgresql/replication_and_failover.md).
+**primary** site and two other clusters of nodes supporting a Geo **secondary** site.
+One for the main database and the other for the tracking database. For more information,
+see [High Availability with Omnibus GitLab](../../postgresql/replication_and_failover.md).
 
 ## Patroni support
 
 Support for Patroni is intended to replace `repmgr` as a
-[highly availabile PostgreSQL solution](../../postgresql/replication_and_failover.md) 
+[highly available PostgreSQL solution](../../postgresql/replication_and_failover.md)
 on the primary node, but it can also be used for PostgreSQL HA on a secondary
-node.
+site. Similar to `repmgr`, using Patroni on a secondary node is optional.
 
 Starting with GitLab 13.5, Patroni is available for _experimental_ use with Geo
-primary and secondary nodes. Due to its experimental nature, Patroni support is
+primary and secondary sites. Due to its experimental nature, Patroni support is
 subject to change without notice.
 
 This experimental implementation has the following limitations:
 
-- Whenever a new Leader is elected, the PgBouncer instance must be reconfigured
-  to point to the new Leader.
-- Whenever a new Leader is elected on the primary node, the Standby Leader on
-  the secondary needs to be reconfigured to point to the new Leader.
 - Whenever `gitlab-ctl reconfigure` runs on a Patroni Leader instance, there's a
   chance the node will be demoted due to the required short-time restart. To
   avoid this, you can pause auto-failover by running `gitlab-ctl patroni pause`.
-  After a reconfigure, it unpauses on its own.
+  After a reconfigure, it resumes on its own.
 
-For instructions about how to set up Patroni on the primary node, see the 
+For instructions about how to set up Patroni on the primary site, see the
 [PostgreSQL replication and failover with Omnibus GitLab](../../postgresql/replication_and_failover.md#patroni) page.
 
-A production-ready and secure setup requires at least three Patroni instances on
-the primary, and a similar configuration on the secondary nodes. Be sure to use
-password credentials and other database best practices.
+### Configuring Patroni cluster for a Geo secondary site
 
-Similar to `repmgr`, using Patroni on a secondary node is optional. 
+In a Geo secondary site, the main PostgreSQL database is a read-only replica of the primary site’s PostgreSQL database.
 
-To set up database replication with Patroni on a secondary node, configure a
-_permanent replication slot_ on the primary node's Patroni cluster, and ensure
-password authentication is used.
+If you are currently using `repmgr` on your Geo primary site, see [these instructions](#migrating-from-repmgr-to-patroni) for migrating from `repmgr` to Patroni.
 
-On Patroni instances for the primary node, add the following to the
-`/etc/gitlab/gitlab.rb` file:
+A production-ready and secure setup requires at least three Consul nodes, three
+Patroni nodes, one internal load-balancing node on the primary site, and a similar
+configuration for the secondary site. The internal load balancer provides a single
+endpoint for connecting to the Patroni cluster's leader whenever a new leader is
+elected. Be sure to use [password credentials](../../postgresql/replication_and_failover.md#database-authorization-for-patroni) and other database best practices.
 
-```ruby
-# You need one entry for each secondary, with a unique name following PostgreSQL slot_name constraints:
-#
-# Configuration syntax will be: 'unique_slotname' => { 'type' => 'physical' },
-# We don't support setting a permanent replication slot for logical replication type 
-patroni['replication_slots'] = {
-    'geo_secondary' => { 'type' => 'physical' }
-}
+#### Step 1. Configure Patroni permanent replication slot on the primary site
 
-postgresql['md5_auth_cidr_addresses'] = [
-  'PATRONI_PRIMARY1_IP/32', 'PATRONI_PRIMARY2_IP/32', 'PATRONI_PRIMARY3_IP/32', 'PATRONI_PRIMARY_PGBOUNCER/32',
-  'PATRONI_SECONDARY1_IP/32', 'PATRONI_SECONDARY2_IP/32', 'PATRONI_SECONDARY3_IP/32' # we list all secondary instances as they can all become a Standby Leader
-  # any other instance that needs access to the database as per documentation 
-]
+To set up database replication with Patroni on a secondary node, we need to
+configure a _permanent replication slot_ on the primary node's Patroni cluster,
+and ensure password authentication is used.
 
-postgresql['pgbouncer_user_password'] = 'PGBOUNCER_PASSWORD_HASH'
-postgresql['sql_replication_password'] = 'POSTGRESQL_REPLICATION_PASSWORD_HASH'
-postgresql['sql_user_password'] = 'POSTGRESQL_PASSWORD_HASH'
+For each Patroni instance on the primary site **starting on the Patroni
+Leader instance**:
+
+1. SSH into your Patroni instance and login as root:
+
+   ```shell
+   sudo -i
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following:
+
+   ```ruby
+   consul['enable'] = true
+   consul['configuration'] = {
+     retry_join: %w[CONSUL_PRIMARY1_IP CONSUL_PRIMARY2_IP CONSUL_PRIMARY3_IP]
+   }
+
+   repmgr['enable'] = false
+
+   # You need one entry for each secondary, with a unique name following PostgreSQL slot_name constraints:
+   #
+   # Configuration syntax will be: 'unique_slotname' => { 'type' => 'physical' },
+   # We don't support setting a permanent replication slot for logical replication type
+   patroni['replication_slots'] = {
+     'geo_secondary' => { 'type' => 'physical' }
+   }
+
+   patroni['use_pg_rewind'] = true
+   patroni['postgresql']['max_wal_senders'] = 8 # Use double of the amount of patroni/reserved slots (3 patronis + 1 reserved slot for a Geo secondary).
+   patroni['postgresql']['max_replication_slots'] = 8 # Use double of the amount of patroni/reserved slots (3 patronis + 1 reserved slot for a Geo secondary).
+
+   postgresql['md5_auth_cidr_addresses'] = [
+     'PATRONI_PRIMARY1_IP/32', 'PATRONI_PRIMARY2_IP/32', 'PATRONI_PRIMARY3_IP/32', 'PATRONI_PRIMARY_PGBOUNCER/32',
+     'PATRONI_SECONDARY1_IP/32', 'PATRONI_SECONDARY2_IP/32', 'PATRONI_SECONDARY3_IP/32', 'PATRONI_SECONDARY_PGBOUNCER/32' # We list all secondary instances as they can all become a Standby Leader
+   ]
+
+   postgresql['pgbouncer_user_password'] = 'PGBOUNCER_PASSWORD_HASH'
+   postgresql['sql_replication_password'] = 'POSTGRESQL_REPLICATION_PASSWORD_HASH'
+   postgresql['sql_user_password'] = 'POSTGRESQL_PASSWORD_HASH'
+   ```
+
+1. Reconfigure GitLab for the changes to take effect:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+#### Step 2. Configure the internal load balancer on the primary site
+
+To avoid reconfiguring the Standby Leader on the secondary site whenever a new
+Leader is elected on the primary site, we'll need to set up a TCP internal load
+balancer which will give a single endpoint for connecting to the Patroni
+cluster's Leader.
+
+The Omnibus GitLab packages do not include a Load Balancer. Here's how you
+could do it with [HAProxy](https://www.haproxy.org/).
+
+The following IPs and names will be used as an example:
+
+- `10.6.0.21`: Patroni 1 (`patroni1.internal`)
+- `10.6.0.21`: Patroni 2 (`patroni2.internal`)
+- `10.6.0.22`: Patroni 3 (`patroni3.internal`)
+
+```plaintext
+global
+    log /dev/log local0
+    log localhost local1 notice
+    log stdout format raw local0
+
+defaults
+    log global
+    default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+
+frontend internal-postgresql-tcp-in
+    bind *:5000
+    mode tcp
+    option tcplog
+
+    default_backend postgresql
+
+backend postgresql
+    option httpchk
+    http-check expect status 200
+
+    server patroni1.internal 10.6.0.21:5432 maxconn 100 check port 8008
+    server patroni2.internal 10.6.0.22:5432 maxconn 100 check port 8008
+    server patroni3.internal 10.6.0.23.195:5432 maxconn 100 check port 8008
 ```
 
-On Patroni instances for the secondary node, add the following to the
-`/etc/gitlab/gitlab.rb` file:
+Refer to your preferred Load Balancer's documentation for further guidance.
 
-```ruby
-postgresql['md5_auth_cidr_addresses'] = [
-  'PATRONI_SECONDARY1_IP/32', 'PATRONI_SECONDARY2_IP/32', 'PATRONI_SECONDARY3_IP/32', 'PATRONI_SECONDARY_PGBOUNCER/32',
-  # any other instance that needs access to the database as per documentation 
-]
+#### Step 3. Configure a PgBouncer node on the secondary site
 
-patroni['enable'] = true
-patroni['standby_cluster']['enable'] = true
-patroni['standby_cluster']['host'] = 'PATRONI_PRIMARY_LEADER_IP' # this needs to be changed anytime the primary Leader changes
-patroni['standby_cluster']['port'] = 5432
-patroni['standby_cluster']['primary_slot_name'] = 'geo_secondary' # or the unique replication slot name you setup before
-patroni['replication_password'] = 'PLAIN_TEXT_POSTGRESQL_REPLICATION_PASSWORD'
-```
+A production-ready and highly available configuration requires at least
+three Consul nodes, a minimum of one PgBouncer node, but it’s recommended to have
+one per database node. An internal load balancer (TCP) is required when there is
+more than one PgBouncer service nodes. The internal load balancer provides a single
+endpoint for connecting to the PgBouncer cluster. For more information,
+see [High Availability with Omnibus GitLab](../../postgresql/replication_and_failover.md).
+
+Follow the minimal configuration for the PgBouncer node:
+
+1. SSH into your PgBouncer node and login as root:
+
+   ```shell
+   sudo -i
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following:
+
+   ```ruby
+   # Disable all components except Pgbouncer and Consul agent
+   roles ['pgbouncer_role']
+
+   # PgBouncer configuration
+   pgbouncer['users'] = {
+     'pgbouncer': {
+       password: 'PGBOUNCER_PASSWORD_HASH'
+     }
+   }
+
+   # Consul configuration
+   consul['watchers'] = %w(postgresql)
+
+   consul['configuration'] = {
+     retry_join: %w[CONSUL_SECONDARY1_IP CONSUL_SECONDARY2_IP CONSUL_SECONDARY3_IP]
+   }
+
+   consul['monitoring_service_discovery'] =  true
+   ```
+
+1. Reconfigure GitLab for the changes to take effect:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+1. Create a `.pgpass` file so Consul is able to reload PgBouncer. Enter the `PLAIN_TEXT_PGBOUNCER_PASSWORD` twice when asked:
+
+   ```shell
+   gitlab-ctl write-pgpass --host 127.0.0.1 --database pgbouncer --user pgbouncer --hostuser gitlab-consul
+   ```
+
+1. Restart the PgBouncer service:
+
+   ```shell
+   gitlab-ctl restart pgbouncer
+   ```
+
+#### Step 4. Configure a Standby cluster on the secondary site
+
+NOTE:
+If you are converting a secondary site to a Patroni Cluster, you must start
+on the PostgreSQL instance. It will become the Patroni Standby Leader instance,
+and then you can switchover to another replica if you need.
+
+For each Patroni instance on the secondary site:
+
+1. SSH into your Patroni node and login as root:
+
+   ```shell
+   sudo -i
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following:
+
+   ```ruby
+   roles ['consul_role', 'postgres_role']
+
+   consul['enable'] = true
+   consul['configuration'] = {
+     retry_join: %w[CONSUL_SECONDARY1_IP CONSUL_SECONDARY2_IP CONSUL_SECONDARY3_IP]
+   }
+
+   repmgr['enable'] = false
+
+   postgresql['md5_auth_cidr_addresses'] = [
+     'PATRONI_SECONDARY1_IP/32', 'PATRONI_SECONDARY2_IP/32', 'PATRONI_SECONDARY3_IP/32', 'PATRONI_SECONDARY_PGBOUNCER/32',
+     # Any other instance that needs access to the database as per documentation
+   ]
+
+   patroni['enable'] = false
+   patroni['standby_cluster']['enable'] = true
+   patroni['standby_cluster']['host'] = 'INTERNAL_LOAD_BALANCER_PRIMARY_IP'
+   patroni['standby_cluster']['port'] = INTERNAL_LOAD_BALANCER_PRIMARY_PORT
+   patroni['standby_cluster']['primary_slot_name'] = 'geo_secondary' # Or the unique replication slot name you setup before
+   patroni['replication_password'] = 'PLAIN_TEXT_POSTGRESQL_REPLICATION_PASSWORD'
+   patroni['use_pg_rewind'] = true
+   patroni['postgresql']['max_wal_senders'] = 5 # A minimum of three for one replica, plus two for each additional replica
+   patroni['postgresql']['max_replication_slots'] = 5 # A minimum of three for one replica, plus two for each additional replica
+   ```
+
+1. Reconfigure GitLab for the changes to take effect.
+   This is required to bootstrap PostgreSQL users and settings:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+1. Remove the PostgreSQL data directory:
+
+   WARNING:
+   If you are converting a secondary site to a Patroni Cluster, you must skip
+   this step on the PostgreSQL instance.
+
+   ```shell
+   rm -rf /var/opt/gitlab/postgresql/data
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` to enable Patroni:
+
+   ```ruby
+   patroni['enable'] = true
+   ```
+
+1. Reconfigure GitLab for the changes to take effect:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+### Migrating from repmgr to Patroni
+
+1. Before migrating, it is recommended that there is no replication lag between the primary and secondary sites and that replication is paused. In GitLab 13.2 and later, you can pause and resume replication with `gitlab-ctl geo-replication-pause` and `gitlab-ctl geo-replication-resume` on a Geo secondary database node.
+1. Follow the [instructions to migrate repmgr to Patroni](../../postgresql/replication_and_failover.md#switching-from-repmgr-to-patroni). When configuring Patroni on each primary site database node, add `patroni['replication_slots'] = { '<slot_name>' => 'physical' }`
+to `gitlab.rb` where `<slot_name>` is the name of the replication slot for your Geo secondary. This will ensure that Patroni recognizes the replication slot as permanent and will not drop it upon restarting.
+1. If database replication to the secondary was paused before migration, resume replication once Patroni is confirmed working on the primary.
+
+### Migrating a single PostgreSQL node to Patroni
+
+Before the introduction of Patroni, Geo had no Omnibus support for HA setups on the secondary node.
+
+With Patroni it's now possible to support that. In order to migrate the existing PostgreSQL to Patroni:
+
+1. Make sure you have a Consul cluster setup on the secondary (similar to how you set it up on the primary).
+1. [Configure a permanent replication slot](#step-1-configure-patroni-permanent-replication-slot-on-the-primary-site).
+1. [Configure the internal load balancer](#step-2-configure-the-internal-load-balancer-on-the-primary-site).
+1. [Configure a PgBouncer node](#step-3-configure-a-pgbouncer-node-on-the-secondary-site)
+1. [Configure a Standby Cluster](#step-4-configure-a-standby-cluster-on-the-secondary-site)
+   on that single node machine.
+
+You will end up with a "Standby Cluster" with a single node. That allows you to later on add additional Patroni nodes
+by following the same instructions above.
+
+### Configuring Patroni cluster for the tracking PostgreSQL database
+
+Secondary sites use a separate PostgreSQL installation as a tracking database to
+keep track of replication status and automatically recover from potential replication issues.
+Omnibus automatically configures a tracking database when `roles ['geo_secondary_role']` is set.
+If you want to run this database in a highly available configuration, follow the instructions below.
+
+A production-ready and secure setup requires at least three Consul nodes, three
+Patroni nodes on the secondary site secondary site. Be sure to use [password credentials](../../postgresql/replication_and_failover.md#database-authorization-for-patroni) and other database best practices.
+
+#### Step 1. Configure a PgBouncer node on the secondary site
+
+A production-ready and highly available configuration requires at least
+three Consul nodes, three PgBouncer nodes, and one internal load-balancing node.
+The internal load balancer provides a single endpoint for connecting to the
+PgBouncer cluster. For more information, see [High Availability with Omnibus GitLab](../../postgresql/replication_and_failover.md).
+
+Follow the minimal configuration for the PgBouncer node for the tracking database:
+
+1. SSH into your PgBouncer node and login as root:
+
+   ```shell
+   sudo -i
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following:
+
+   ```ruby
+   # Disable all components except Pgbouncer and Consul agent
+   roles ['pgbouncer_role']
+
+   # PgBouncer configuration
+   pgbouncer['users'] = {
+     'pgbouncer': {
+       password: 'PGBOUNCER_PASSWORD_HASH'
+     }
+   }
+
+   pgbouncer['databases'] = {
+     gitlabhq_geo_production: {
+       user: 'pgbouncer',
+       password: 'PGBOUNCER_PASSWORD_HASH'
+     }
+   }
+
+   # Consul configuration
+   consul['watchers'] = %w(postgresql)
+
+   consul['configuration'] = {
+     retry_join: %w[CONSUL_TRACKINGDB1_IP CONSUL_TRACKINGDB2_IP CONSUL_TRACKINGDB3_IP]
+   }
+
+   consul['monitoring_service_discovery'] =  true
+
+   # GitLab database settings
+   gitlab_rails['db_database'] = 'gitlabhq_geo_production'
+   gitlab_rails['db_username'] = 'gitlab_geo'
+   ```
+
+1. Reconfigure GitLab for the changes to take effect:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+1. Create a `.pgpass` file so Consul is able to reload PgBouncer. Enter the `PLAIN_TEXT_PGBOUNCER_PASSWORD` twice when asked:
+
+   ```shell
+   gitlab-ctl write-pgpass --host 127.0.0.1 --database pgbouncer --user pgbouncer --hostuser gitlab-consul
+   ```
+
+1. Restart the PgBouncer service:
+
+   ```shell
+   gitlab-ctl restart pgbouncer
+   ```
+
+#### Step 2. Configure a Patroni cluster
+
+For each Patroni instance on the secondary site for the tracking database:
+
+1. SSH into your Patroni node and login as root:
+
+   ```shell
+   sudo -i
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following:
+
+   ```ruby
+   # Disable all components except PostgreSQL, Patroni, and Consul
+   roles ['patroni_role']
+
+   # Consul configuration
+   consul['services'] = %w(postgresql)
+
+   consul['configuration'] = {
+     server: true,
+     retry_join: %w[CONSUL_TRACKINGDB1_IP CONSUL_TRACKINGDB2_IP CONSUL_TRACKINGDB3_IP]
+   }
+
+   # PostgreSQL configuration
+   postgresql['listen_address'] = '0.0.0.0'
+   postgresql['hot_standby'] = 'on'
+   postgresql['wal_level'] = 'replica'
+
+   postgresql['pgbouncer_user_password'] = 'PGBOUNCER_PASSWORD_HASH'
+   postgresql['sql_replication_password'] = 'POSTGRESQL_REPLICATION_PASSWORD_HASH'
+   postgresql['sql_user_password'] = 'POSTGRESQL_PASSWORD_HASH'
+
+   postgresql['md5_auth_cidr_addresses'] = [
+      'PATRONI_TRACKINGDB1_IP/32', 'PATRONI_TRACKINGDB2_IP/32', 'PATRONI_TRACKINGDB3_IP/32', 'PATRONI_TRACKINGDB_PGBOUNCER/32',
+      # Any other instance that needs access to the database as per documentation
+   ]
+
+   # Patroni configuration
+   patroni['replication_password'] = 'PLAIN_TEXT_POSTGRESQL_REPLICATION_PASSWORD'
+   patroni['postgresql']['max_wal_senders'] = 5 # A minimum of three for one replica, plus two for each additional replica
+
+   # GitLab database settings
+   gitlab_rails['db_database'] = 'gitlabhq_geo_production'
+   gitlab_rails['db_username'] = 'gitlab_geo'
+
+   # Disable automatic database migrations
+   gitlab_rails['auto_migrate'] = false
+   ```
+
+1. Reconfigure GitLab for the changes to take effect.
+   This is required to bootstrap PostgreSQL users and settings:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+#### Step 3. Configure the tracking database on the secondary nodes
+
+For each node running the `gitlab-rails`, `sidekiq`, and `geo-logcursor` services:
+
+1. SSH into your node and login as root:
+
+   ```shell
+   sudo -i
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the following attributes. You may have other attributes set, but the following need to be set.
+
+   ```ruby
+   # Tracking database settings
+   geo_secondary['db_username'] = 'gitlab_geo'
+   geo_secondary['db_password'] = 'PLAIN_TEXT_PGBOUNCER_PASSWORD'
+   geo_secondary['db_database'] = 'gitlabhq_geo_production'
+   geo_secondary['db_host'] = 'PATRONI_TRACKINGDB_PGBOUNCER_IP'
+   geo_secondary['db_port'] = 6432
+   geo_secondary['auto_migrate'] = false
+
+   # Disable the tracking database service
+   geo_postgresql['enable'] = false
+   ```
+
+1. Reconfigure GitLab for the changes to take effect.
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+1. Run the tracking database migrations:
+
+   ```shell
+   gitlab-rake geo:db:migrate
+   ```
+
+### Migrating a single tracking database node to Patroni
+
+Before the introduction of Patroni, Geo had no Omnibus support for HA setups on
+the secondary node.
+
+With Patroni, it's now possible to support that. Due to some restrictions on the
+Patroni implementation on Omnibus that do not allow us to manage two different
+clusters on the same machine, we recommend setting up a new Patroni cluster for
+the tracking database by following the same instructions above.
+
+The secondary nodes will backfill the new tracking database, and no data
+synchronization will be required.
 
 ## Troubleshooting
 

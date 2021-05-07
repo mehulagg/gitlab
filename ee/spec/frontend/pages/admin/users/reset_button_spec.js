@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import ResetButton from 'ee/pages/admin/users/pipeline_minutes/reset_button.vue';
 import axios from '~/lib/utils/axios_utils';
@@ -87,7 +87,9 @@ describe('Reset pipeline minutes button', () => {
         expect(axiosSpy).toHaveBeenCalled();
         expect($toast.show).toHaveBeenCalledWith(
           'There was an error resetting user pipeline minutes.',
-          { type: 'error' },
+          {
+            type: 'error',
+          },
         );
       });
     });

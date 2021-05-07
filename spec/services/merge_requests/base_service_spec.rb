@@ -6,6 +6,7 @@ RSpec.describe MergeRequests::BaseService do
   include ProjectForksHelper
 
   let_it_be(:project) { create(:project, :repository) }
+
   let(:title) { 'Awesome merge_request' }
   let(:params) do
     {
@@ -20,7 +21,8 @@ RSpec.describe MergeRequests::BaseService do
 
   describe '#execute_hooks' do
     shared_examples 'enqueues Jira sync worker' do
-      it do
+      specify :aggregate_failures do
+        expect(JiraConnect::SyncMergeRequestWorker).to receive(:perform_async).with(kind_of(Numeric), kind_of(Numeric)).and_call_original
         Sidekiq::Testing.fake! do
           expect { subject.execute }.to change(JiraConnect::SyncMergeRequestWorker.jobs, :size).by(1)
         end

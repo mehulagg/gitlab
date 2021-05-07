@@ -1,6 +1,6 @@
+import { PARALLEL_DIFF_VIEW_TYPE, INLINE_DIFF_VIEW_TYPE } from '~/diffs/constants';
 import * as getters from '~/diffs/store/getters';
 import state from '~/diffs/store/modules/diff_state';
-import { PARALLEL_DIFF_VIEW_TYPE, INLINE_DIFF_VIEW_TYPE } from '~/diffs/constants';
 import discussion from '../mock_data/diff_discussions';
 
 describe('Diffs Module Getters', () => {
@@ -251,9 +251,12 @@ describe('Diffs Module Getters', () => {
       discussionMock.diff_file.file_hash = diffFileMock.file_hash;
 
       expect(
-        getters.getDiffFileDiscussions(localState, {}, {}, { discussions: [discussionMock] })(
-          diffFileMock,
-        ).length,
+        getters.getDiffFileDiscussions(
+          localState,
+          {},
+          {},
+          { discussions: [discussionMock] },
+        )(diffFileMock).length,
       ).toEqual(1);
     });
 
@@ -345,7 +348,7 @@ describe('Diffs Module Getters', () => {
 
   describe('fileLineCoverage', () => {
     beforeEach(() => {
-      Object.assign(localState.coverageFiles, { files: { 'app.js': { '1': 0, '2': 5 } } });
+      Object.assign(localState.coverageFiles, { files: { 'app.js': { 1: 0, 2: 5 } } });
     });
 
     it('returns empty object when no coverage data is available', () => {
@@ -371,5 +374,77 @@ describe('Diffs Module Getters', () => {
         class: 'coverage',
       });
     });
+  });
+
+  describe('suggestionCommitMessage', () => {
+    let rootState;
+
+    beforeEach(() => {
+      Object.assign(localState, {
+        defaultSuggestionCommitMessage:
+          '%{branch_name}%{project_path}%{project_name}%{username}%{user_full_name}%{file_paths}%{suggestions_count}%{files_count}',
+      });
+      rootState = {
+        page: {
+          mrMetadata: {
+            branch_name: 'branch',
+            project_path: '/path',
+            project_name: 'name',
+            username: 'user',
+            user_full_name: 'user userton',
+          },
+        },
+      };
+    });
+
+    it.each`
+      specialState                | output
+      ${{}}                       | ${'branch/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ user_full_name: null }} | ${'branch/pathnameuser%{user_full_name}%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ username: null }}       | ${'branch/pathname%{username}user userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ project_name: null }}   | ${'branch/path%{project_name}useruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ project_path: null }}   | ${'branch%{project_path}nameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ branch_name: null }}    | ${'%{branch_name}/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+    `(
+      'provides the correct "base" default commit message based on state ($specialState)',
+      ({ specialState, output }) => {
+        Object.assign(rootState.page.mrMetadata, specialState);
+
+        expect(getters.suggestionCommitMessage(localState, null, rootState)()).toBe(output);
+      },
+    );
+
+    it.each`
+      stateOverrides              | output
+      ${{}}                       | ${'branch/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ user_full_name: null }} | ${'branch/pathnameuser%{user_full_name}%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ username: null }}       | ${'branch/pathname%{username}user userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ project_name: null }}   | ${'branch/path%{project_name}useruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ project_path: null }}   | ${'branch%{project_path}nameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+      ${{ branch_name: null }}    | ${'%{branch_name}/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+    `(
+      "properly overrides state values ($stateOverrides) if they're provided",
+      ({ stateOverrides, output }) => {
+        expect(getters.suggestionCommitMessage(localState, null, rootState)(stateOverrides)).toBe(
+          output,
+        );
+      },
+    );
+
+    it.each`
+      providedValues                                                          | output
+      ${{ file_paths: 'path1, path2', suggestions_count: 1, files_count: 1 }} | ${'branch/pathnameuseruser usertonpath1, path211'}
+      ${{ suggestions_count: 1, files_count: 1 }}                             | ${'branch/pathnameuseruser userton%{file_paths}11'}
+      ${{ file_paths: 'path1, path2', files_count: 1 }}                       | ${'branch/pathnameuseruser usertonpath1, path2%{suggestions_count}1'}
+      ${{ file_paths: 'path1, path2', suggestions_count: 1 }}                 | ${'branch/pathnameuseruser usertonpath1, path21%{files_count}'}
+      ${{ something_unused: 'CrAzY TeXt' }}                                   | ${'branch/pathnameuseruser userton%{file_paths}%{suggestions_count}%{files_count}'}
+    `(
+      "fills in any missing interpolations ($providedValues) when they're provided at the getter callsite",
+      ({ providedValues, output }) => {
+        expect(getters.suggestionCommitMessage(localState, null, rootState)(providedValues)).toBe(
+          output,
+        );
+      },
+    );
   });
 });

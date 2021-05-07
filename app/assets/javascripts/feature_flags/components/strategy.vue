@@ -1,7 +1,7 @@
 <script>
-import Vue from 'vue';
-import { isNumber } from 'lodash';
 import { GlAlert, GlButton, GlFormSelect, GlFormGroup, GlIcon, GlLink, GlToken } from '@gitlab/ui';
+import { isNumber } from 'lodash';
+import Vue from 'vue';
 import { s__, __ } from '~/locale';
 import {
   EMPTY_PARAMETERS,
@@ -83,7 +83,7 @@ export default {
       );
     },
     filteredEnvironments() {
-      return this.environments.filter(e => !e.shouldBeDestroyed);
+      return this.environments.filter((e) => !e.shouldBeDestroyed);
     },
     isPercentUserRollout() {
       return this.formStrategy.name === ROLLOUT_STRATEGY_PERCENT_ROLLOUT;
@@ -91,7 +91,9 @@ export default {
   },
   methods: {
     addEnvironment(environment) {
-      const allEnvironmentsScope = this.environments.find(scope => scope.environmentScope === '*');
+      const allEnvironmentsScope = this.environments.find(
+        (scope) => scope.environmentScope === '*',
+      );
       if (allEnvironmentsScope) {
         allEnvironmentsScope.shouldBeDestroyed = true;
       }
@@ -113,7 +115,7 @@ export default {
       if (isNumber(environment.id)) {
         Vue.set(environment, 'shouldBeDestroyed', true);
       } else {
-        this.environments = this.environments.filter(e => e !== environment);
+        this.environments = this.environments.filter((e) => e !== environment);
       }
       if (this.filteredEnvironments.length === 0) {
         this.environments.push({ environmentScope: '*' });
@@ -163,6 +165,7 @@ export default {
             data-testid="delete-strategy-button"
             variant="danger"
             icon="remove"
+            :aria-label="__('Delete')"
             @click="$emit('delete')"
           />
         </div>
@@ -183,11 +186,11 @@ export default {
           <span v-if="appliesToAllEnvironments" class="text-secondary gl-mt-3 mt-md-0 ml-md-3">
             {{ $options.i18n.allEnvironments }}
           </span>
-          <div v-else class="gl-display-flex gl-align-items-center">
+          <div v-else class="gl-display-flex gl-align-items-center gl-flex-wrap">
             <gl-token
               v-for="environment in filteredEnvironments"
               :key="environment.id"
-              class="gl-mt-3 gl-mr-3 mt-md-0 mr-md-0 ml-md-2 rounded-pill"
+              class="gl-mt-3 gl-mr-3 gl-mb-3 mt-md-0 mr-md-0 ml-md-2 rounded-pill"
               @close="removeScope(environment)"
             >
               {{ environment.environmentScope }}

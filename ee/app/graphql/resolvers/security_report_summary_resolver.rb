@@ -4,6 +4,8 @@ module Resolvers
   class SecurityReportSummaryResolver < BaseResolver
     type Types::SecurityReportSummaryType, null: true
 
+    extras [:lookahead]
+
     alias_method :pipeline, :object
 
     def resolve(lookahead:)

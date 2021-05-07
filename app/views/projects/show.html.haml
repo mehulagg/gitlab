@@ -1,6 +1,7 @@
-- breadcrumb_title _("Details")
-- page_title _("Projects")
+- current_route_path = request.fullpath.match(%r{-/tree/[^/]+/(.+$)}).to_a[1]
+- add_page_startup_graphql_call('repository/path_last_commit', { projectPath: @project.full_path, ref: current_ref, path: current_route_path || "" })
 - @content_class = "limit-container-width" unless fluid_layout
+- @skip_current_level_breadcrumb = true
 
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, project_path(@project, rss_url_options), title: "#{@project.name} activity")

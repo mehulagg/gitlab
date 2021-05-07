@@ -105,21 +105,47 @@ module CommitsHelper
       tooltip = _("Browse Directory")
     end
 
-    link_to url, class: "btn btn-default has-tooltip", title: tooltip, data: { container: "body" } do
+    link_to url, class: "btn gl-button btn-default btn-icon has-tooltip", title: tooltip, data: { container: "body" } do
       sprite_icon('folder-open')
     end
   end
 
-  def revert_commit_link(commit, continue_to_path, btn_class: nil, has_tooltip: true)
-    commit_action_link('revert', commit, continue_to_path, btn_class: btn_class, has_tooltip: has_tooltip)
-  end
+  def commit_options_dropdown_data(project, commit)
+    can_collaborate = current_user && can_collaborate_with_project?(project)
 
-  def cherry_pick_commit_link(commit, continue_to_path, btn_class: nil, has_tooltip: true)
-    commit_action_link('cherry-pick', commit, continue_to_path, btn_class: btn_class, has_tooltip: has_tooltip)
+    {
+      new_project_tag_path: new_project_tag_path(project, ref: commit),
+      email_patches_path: project_commit_path(project, commit, format: :patch),
+      plain_diff_path: project_commit_path(project, commit, format: :diff),
+      can_revert: "#{can_collaborate && !commit.has_been_reverted?(current_user)}",
+      can_cherry_pick: can_collaborate.to_s,
+      can_tag: can?(current_user, :push_code, project).to_s,
+      can_email_patches: (commit.parents.length < 2).to_s
+    }
   end
 
   def commit_signature_badge_classes(additional_classes)
     %w(btn gpg-status-box) + Array(additional_classes)
+  end
+
+  def conditionally_paginate_diff_files(diffs, paginate:, per:)
+    if paginate
+      Kaminari.paginate_array(diffs.diff_files.to_a).page(params[:page]).per(per)
+    else
+      diffs.diff_files
+    end
+  end
+
+  def cherry_pick_projects_data(project)
+    return [] unless Feature.enabled?(:pick_into_project, project, default_enabled: :yaml)
+
+    [project, project.forked_from_project].compact.map do |project|
+      {
+        id: project.id.to_s,
+        name: project.full_path,
+        refsUrl: refs_project_path(project)
+      }
+    end
   end
 
   protected
@@ -135,7 +161,7 @@ module CommitsHelper
   def commit_person_link(commit, options = {})
     user = commit.public_send(options[:source]) # rubocop:disable GitlabSecurity/PublicSend
 
-    source_name  = clean(commit.public_send(:"#{options[:source]}_name"))  # rubocop:disable GitlabSecurity/PublicSend
+    source_name = clean(commit.public_send(:"#{options[:source]}_name")) # rubocop:disable GitlabSecurity/PublicSend
     source_email = clean(commit.public_send(:"#{options[:source]}_email")) # rubocop:disable GitlabSecurity/PublicSend
 
     person_name = user.try(:name) || source_name
@@ -158,33 +184,11 @@ module CommitsHelper
     end
   end
 
-  def commit_action_link(action, commit, continue_to_path, btn_class: nil, has_tooltip: true)
-    return unless current_user
-
-    tooltip = "#{action.capitalize} this #{commit.change_type_title(current_user)} in a new merge request" if has_tooltip
-    btn_class = "btn btn-#{btn_class}" unless btn_class.nil?
-
-    if can_collaborate_with_project?(@project)
-      link_to action.capitalize, "#modal-#{action}-commit", 'data-toggle' => 'modal', 'data-container' => 'body', title: (tooltip if has_tooltip), class: "#{btn_class} #{'has-tooltip' if has_tooltip}"
-    elsif can?(current_user, :fork_project, @project)
-      continue_params = {
-        to: continue_to_path,
-        notice: "#{edit_in_new_fork_notice} Try to #{action} this commit again.",
-        notice_now: edit_in_new_fork_notice_now
-      }
-      fork_path = project_forks_path(@project,
-        namespace_key: current_user.namespace.id,
-        continue: continue_params)
-
-      link_to action.capitalize, fork_path, class: btn_class, method: :post, 'data-toggle' => 'tooltip', 'data-container' => 'body', title: (tooltip if has_tooltip)
-    end
-  end
-
   def view_file_button(commit_sha, diff_new_path, project, replaced: false)
     path = project_blob_path(project, tree_join(commit_sha, diff_new_path))
     title = replaced ? _('View replaced file @ ') : _('View file @ ')
 
-    link_to(path, class: 'btn') do
+    link_to(path, class: 'btn gl-button btn-default') do
       raw(title) + content_tag(:span, truncate_sha(commit_sha), class: 'commit-sha')
     end
   end
@@ -195,7 +199,7 @@ module CommitsHelper
     external_url = environment.external_url_for(diff_new_path, commit_sha)
     return unless external_url
 
-    link_to(external_url, class: 'btn btn-file-option has-tooltip', target: '_blank', rel: 'noopener noreferrer', title: "View on #{environment.formatted_external_url}", data: { container: 'body' }) do
+    link_to(external_url, class: 'btn gl-button btn-default btn-file-option has-tooltip', target: '_blank', rel: 'noopener noreferrer', title: "View on #{environment.formatted_external_url}", data: { container: 'body' }) do
       sprite_icon('external-link')
     end
   end

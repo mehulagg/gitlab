@@ -46,7 +46,8 @@ RSpec.describe 'shared/_mirror_status.html.haml' do
       render 'shared/mirror_status'
 
       expect(rendered).to have_content("Pull mirroring failed")
-      expect(rendered).to have_css('i', class: 'fa-warning')
+
+      expect(rendered).to have_selector('[data-testid="warning-solid-icon"]')
     end
 
     context 'with a previous successful update' do
@@ -65,7 +66,7 @@ RSpec.describe 'shared/_mirror_status.html.haml' do
       it 'renders hard failed message' do
         render 'shared/mirror_status', raw_message: true
 
-        expect(rendered).to have_content("Repository mirroring has been paused due to too many failed attempts, and can be resumed by a project maintainer.")
+        expect(rendered).to have_content("Repository mirroring has been paused due to too many failed attempts. It can be resumed by a project maintainer.")
       end
     end
   end

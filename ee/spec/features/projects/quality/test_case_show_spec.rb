@@ -18,7 +18,7 @@ RSpec.describe 'Test Cases', :js do
 
   context 'test case page' do
     before do
-      visit project_issue_path(project, test_case)
+      visit project_quality_test_case_path(project, test_case)
 
       wait_for_all_requests
     end
@@ -72,6 +72,15 @@ RSpec.describe 'Test Cases', :js do
         end
       end
 
+      it 'enters into zen mode when clicking on zen mode button' do
+        page.within('.test-case-container .issuable-details') do
+          page.find('.js-issuable-edit').click
+          page.find('.js-vue-markdown-field button.js-zen-enter').click
+
+          expect(page).to have_selector('.zen-backdrop.fullscreen')
+        end
+      end
+
       it 'update title and description' do
         title = 'Updated title'
         description = 'Updated test case description.'
@@ -89,7 +98,7 @@ RSpec.describe 'Test Cases', :js do
         page.within('.test-case-container .issuable-details') do
           expect(page.find('.title')).to have_content(title)
           expect(page.find('.description')).to have_content(description)
-          expect(page.find('.edited-text')).to have_content('')
+          expect(page.find('.edited-text')).to have_content("Edited just now by #{user.name}")
         end
       end
     end

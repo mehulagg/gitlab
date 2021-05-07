@@ -91,4 +91,54 @@ RSpec.describe Gitlab::Ci::Reports::Security::Scanner do
       end
     end
   end
+
+  describe '#<=>' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:scanner_1) { create(:ci_reports_security_scanner, **scanner_1_attributes) }
+    let(:scanner_2) { create(:ci_reports_security_scanner, **scanner_2_attributes) }
+
+    subject { scanner_1 <=> scanner_2 }
+
+    context 'when the `external_id` of the scanners are different' do
+      where(:scanner_1_attributes, :scanner_2_attributes, :expected_comparison_result) do
+        { external_id: 'bundler_audit', name: 'foo', vendor: 'bar' }    | { external_id: 'retire.js', name: 'foo', vendor: 'bar' }        | -1
+        { external_id: 'retire.js', name: 'foo', vendor: 'bar' }        | { external_id: 'gemnasium', name: 'foo', vendor: 'bar' }        | -1
+        { external_id: 'gemnasium', name: 'foo', vendor: 'bar' }        | { external_id: 'gemnasium-maven', name: 'foo', vendor: 'bar' }  | -1
+        { external_id: 'gemnasium-maven', name: 'foo', vendor: 'bar' }  | { external_id: 'gemnasium-python', name: 'foo', vendor: 'bar' } | -1
+        { external_id: 'gemnasium-python', name: 'foo', vendor: 'bar' } | { external_id: 'bandit', name: 'foo', vendor: 'bar' }           | 1
+        { external_id: 'bandit', name: 'foo', vendor: 'bar' }           | { external_id: 'semgrep', name: 'foo', vendor: 'bar' }          | -1
+        { external_id: 'semgrep', name: 'foo', vendor: 'bar' }          | { external_id: 'unknown', name: 'foo', vendor: 'bar' }          | -1
+      end
+
+      with_them do
+        it { is_expected.to eq(expected_comparison_result) }
+      end
+    end
+
+    context 'when the `external_id` of the scanners are equal' do
+      context 'when the `name` of the scanners are different' do
+        where(:scanner_1_attributes, :scanner_2_attributes, :expected_comparison_result) do
+          { external_id: 'gemnasium', name: 'a', vendor: 'bar' } | { external_id: 'gemnasium', name: 'b', vendor: 'bar' } | -1
+          { external_id: 'gemnasium', name: 'd', vendor: 'bar' } | { external_id: 'gemnasium', name: 'c', vendor: 'bar' } | 1
+        end
+
+        with_them do
+          it { is_expected.to eq(expected_comparison_result) }
+        end
+      end
+
+      context 'when the `name` of the scanners are equal' do
+        where(:scanner_1_attributes, :scanner_2_attributes, :expected_comparison_result) do
+          { external_id: 'gemnasium', name: 'foo', vendor: 'a' } | { external_id: 'gemnasium', name: 'foo', vendor: 'a' } | 0 # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
+          { external_id: 'gemnasium', name: 'foo', vendor: 'a' } | { external_id: 'gemnasium', name: 'foo', vendor: 'b' } | -1
+          { external_id: 'gemnasium', name: 'foo', vendor: 'b' } | { external_id: 'gemnasium', name: 'foo', vendor: 'a' } | 1
+        end
+
+        with_them do
+          it { is_expected.to eq(expected_comparison_result) }
+        end
+      end
+    end
+  end
 end

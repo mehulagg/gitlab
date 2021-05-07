@@ -36,7 +36,7 @@ RSpec.describe Geo::RepositorySyncService, :geo do
 
       allow_any_instance_of(Repository)
         .to receive(:find_remote_root_ref)
-        .with('geo')
+        .with('geo', url_to_repo, anything)
         .and_return('master')
 
       allow_any_instance_of(Geo::ProjectHousekeepingService).to receive(:execute)
@@ -48,7 +48,6 @@ RSpec.describe Geo::RepositorySyncService, :geo do
     it 'fetches project repository with JWT credentials' do
       expect(repository).to receive(:with_config)
         .with("http.#{url_to_repo}.extraHeader" => anything)
-        .twice
         .and_call_original
 
       expect(repository).to receive(:fetch_as_mirror)
@@ -238,7 +237,7 @@ RSpec.describe Geo::RepositorySyncService, :geo do
             before do
               allow(project.repository)
                 .to receive(:find_remote_root_ref)
-                .with('geo')
+                .with('geo', url_to_repo, anything)
                 .and_return('feature')
             end
 
@@ -251,7 +250,6 @@ RSpec.describe Geo::RepositorySyncService, :geo do
             it 'updates the default branch with JWT credentials' do
               expect(repository).to receive(:with_config)
                 .with("http.#{url_to_repo}.extraHeader" => anything)
-                .twice
                 .and_call_original
 
               expect(project).to receive(:change_head).with('feature').once
@@ -264,7 +262,7 @@ RSpec.describe Geo::RepositorySyncService, :geo do
             before do
               allow(project.repository)
                 .to receive(:find_remote_root_ref)
-                .with('geo')
+                .with('geo', url_to_repo, anything)
                 .and_return(project.default_branch)
             end
 
@@ -277,7 +275,6 @@ RSpec.describe Geo::RepositorySyncService, :geo do
             it 'updates the default branch with JWT credentials' do
               expect(repository).to receive(:with_config)
                 .with("http.#{url_to_repo}.extraHeader" => anything)
-                .twice
                 .and_call_original
 
               expect(project).to receive(:change_head).with('master').once

@@ -1,11 +1,11 @@
 import { mount, shallowMount } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
 import MergeTrainPositionIndicator from 'ee/vue_merge_request_widget/components/merge_train_position_indicator.vue';
 import VisualReviewAppLink from 'ee/vue_merge_request_widget/components/visual_review_app_link.vue';
 import { mockStore } from 'jest/vue_mr_widget/mock_data';
-import MockAdapter from 'axios-mock-adapter';
+import axios from '~/lib/utils/axios_utils';
 import MrWidgetPipelineContainer from '~/vue_merge_request_widget/components/mr_widget_pipeline_container.vue';
 import { MT_MERGE_STRATEGY, MWPS_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
-import axios from '~/lib/utils/axios_utils';
 
 describe('MrWidgetPipelineContainer', () => {
   let wrapper;
@@ -24,7 +24,7 @@ describe('MrWidgetPipelineContainer', () => {
       provide: {
         ...provide,
       },
-      attachToDocument: true,
+      attachTo: document.body,
     });
   };
 
@@ -86,7 +86,7 @@ describe('MrWidgetPipelineContainer', () => {
       return wrapper.vm.$nextTick();
     });
 
-    it('renders the visual review app link', done => {
+    it('renders the visual review app link', (done) => {
       // the visual review app link component is lazy loaded
       // so we need to re-render the component again, as once
       // apparently isn't enough.
@@ -123,7 +123,7 @@ describe('MrWidgetPipelineContainer', () => {
       return wrapper.vm.$nextTick();
     });
 
-    it('does not render the visual review app link', done => {
+    it('does not render the visual review app link', (done) => {
       // the visual review app link component is lazy loaded
       // so we need to re-render the component again, as once
       // apparently isn't enough.

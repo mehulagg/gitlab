@@ -8,9 +8,11 @@ module Packages
       project
         .packages
         .with_package_type(package_type)
-        .safe_find_or_create_by!(name: name, version: version) do |pkg|
-          pkg.creator = package_creator
-          yield pkg if block_given?
+        .safe_find_or_create_by!(name: name, version: version) do |package|
+          package.status = params[:status] if params[:status]
+          package.creator = package_creator
+
+          add_build_info(package)
         end
     end
 
@@ -18,7 +20,9 @@ module Packages
       project
         .packages
         .with_package_type(package_type)
-        .create!(package_attrs(attrs))
+        .create!(package_attrs(attrs)) do |package|
+          add_build_info(package)
+        end
     end
 
     private
@@ -27,12 +31,19 @@ module Packages
       {
         creator: package_creator,
         name: params[:name],
-        version: params[:version]
-      }.merge(attrs)
+        version: params[:version],
+        status: params[:status]
+      }.compact.merge(attrs)
     end
 
     def package_creator
       current_user if current_user.is_a?(User)
+    end
+
+    def add_build_info(package)
+      if params[:build].present?
+        package.build_infos.new(pipeline: params[:build].pipeline)
+      end
     end
   end
 end

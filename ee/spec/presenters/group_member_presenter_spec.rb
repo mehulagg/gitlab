@@ -12,6 +12,14 @@ RSpec.describe GroupMemberPresenter do
     let(:saml_provider) { double(:saml_provider) }
     let(:group) { double(:group) }
 
+    context 'when member does not have a user (invited member)' do
+      let(:group_member) { build(:group_member, :invited) }
+
+      it 'returns `false`' do
+        expect(presenter.group_sso?).to eq false
+      end
+    end
+
     it 'calls through to User#group_sso?' do
       expect(user).to receive(:group_sso?).with(group).and_return(true)
 
@@ -20,6 +28,14 @@ RSpec.describe GroupMemberPresenter do
   end
 
   describe '#group_managed_account?' do
+    context 'when member does not have a user (invited member)' do
+      let(:group_member) { build(:group_member, :invited) }
+
+      it 'returns `false`' do
+        expect(presenter.group_managed_account?).to eq false
+      end
+    end
+
     context 'when user is part of the group managed account' do
       before do
         expect(user).to receive(:group_managed_account?).and_return(true)
@@ -77,7 +93,7 @@ RSpec.describe GroupMemberPresenter do
         let(:expected_roles) { { 'Developer' => 30, 'Maintainer' => 40, 'Owner' => 50, 'Reporter' => 20 } }
 
         before do
-          entity.parent = group
+          entity.update!(parent: group)
         end
       end
     end

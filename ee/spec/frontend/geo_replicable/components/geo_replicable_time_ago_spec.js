@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
 import { createLocalVue, mount } from '@vue/test-utils';
-import { useFakeDate } from 'helpers/fake_date';
-import createStore from 'ee/geo_replicable/store';
+import Vuex from 'vuex';
 import GeoReplicableTimeAgo from 'ee/geo_replicable/components/geo_replicable_time_ago.vue';
+import createStore from 'ee/geo_replicable/store';
+import { useFakeDate } from 'helpers/fake_date';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 

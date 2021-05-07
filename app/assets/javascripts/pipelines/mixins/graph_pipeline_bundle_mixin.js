@@ -6,7 +6,7 @@ export default {
     getExpandedPipelines(pipeline) {
       this.mediator.service
         .getPipeline(this.mediator.getExpandedParameters())
-        .then(response => {
+        .then((response) => {
           this.mediator.store.toggleLoading(pipeline);
           this.mediator.store.storePipeline(response.data);
           this.mediator.poll.enable({ data: this.mediator.getExpandedParameters() });
@@ -41,13 +41,13 @@ export default {
         this.mediator.poll.enable({ data: this.mediator.getExpandedParameters() });
       }
     },
-    resetTriggeredPipelines(parentPipeline, pipeline) {
+    resetDownstreamPipelines(parentPipeline, pipeline) {
       this.mediator.store.resetTriggeredPipelines(parentPipeline, pipeline);
     },
-    clickTriggeredByPipeline(pipeline) {
+    clickUpstreamPipeline(pipeline) {
       this.clickPipeline(pipeline, 'openPipeline', 'closePipeline');
     },
-    clickTriggeredPipeline(pipeline) {
+    clickDownstreamPipeline(pipeline) {
       this.clickPipeline(pipeline, 'openPipeline', 'closePipeline');
     },
     requestRefreshPipelineGraph() {

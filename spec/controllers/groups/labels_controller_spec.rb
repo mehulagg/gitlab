@@ -9,8 +9,6 @@ RSpec.describe Groups::LabelsController do
 
   before do
     group.add_owner(user)
-    # by default FFs are enabled in specs so we turn it off
-    stub_feature_flags(show_inherited_labels: false)
 
     sign_in(user)
   end
@@ -34,41 +32,12 @@ RSpec.describe Groups::LabelsController do
         subgroup.add_owner(user)
       end
 
-      RSpec.shared_examples 'returns ancestor group labels' do
-        it 'returns ancestor group labels' do
-          get :index, params: params, format: :json
+      it 'returns ancestor group labels' do
+        params = { group_id: subgroup, only_group_labels: true }
+        get :index, params: params, format: :json
 
-          label_ids = json_response.map {|label| label['title']}
-          expect(label_ids).to match_array([group_label_1.title, subgroup_label_1.title])
-        end
-      end
-
-      context 'when include_ancestor_groups true' do
-        let(:params) { { group_id: subgroup, include_ancestor_groups: true, only_group_labels: true } }
-
-        it_behaves_like 'returns ancestor group labels'
-      end
-
-      context 'when include_ancestor_groups false' do
-        let(:params) { { group_id: subgroup, only_group_labels: true } }
-
-        it 'does not return ancestor group labels', :aggregate_failures do
-          get :index, params: params, format: :json
-
-          label_ids = json_response.map {|label| label['title']}
-          expect(label_ids).to match_array([subgroup_label_1.title])
-          expect(label_ids).not_to include([group_label_1.title])
-        end
-      end
-
-      context 'when show_inherited_labels enabled' do
-        let(:params) { { group_id: subgroup } }
-
-        before do
-          stub_feature_flags(show_inherited_labels: true)
-        end
-
-        it_behaves_like 'returns ancestor group labels'
+        label_ids = json_response.map {|label| label['title']}
+        expect(label_ids).to match_array([group_label_1.title, subgroup_label_1.title])
       end
     end
 
@@ -76,6 +45,24 @@ RSpec.describe Groups::LabelsController do
       subject { get :index, params: { group_id: group.to_param } }
 
       it_behaves_like 'disabled when using an external authorization service'
+    end
+
+    context 'with views rendered' do
+      render_views
+
+      before do
+        get :index, params: { group_id: group.to_param }
+      end
+
+      it 'avoids N+1 queries' do
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get :index, params: { group_id: group.to_param } }
+
+        create_list(:group_label, 3, group: group)
+
+        # some n+1 queries still exist
+        expect { get :index, params: { group_id: group.to_param } }.not_to exceed_all_query_limit(control.count).with_threshold(10)
+        expect(assigns(:labels).count).to eq(4)
+      end
     end
   end
 

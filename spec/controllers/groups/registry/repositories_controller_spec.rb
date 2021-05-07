@@ -6,6 +6,7 @@ RSpec.describe Groups::Registry::RepositoriesController do
   let_it_be(:user)  { create(:user) }
   let_it_be(:guest) { create(:user) }
   let_it_be(:group, reload: true) { create(:group) }
+
   let(:additional_parameters) { {} }
 
   subject do
@@ -64,12 +65,11 @@ RSpec.describe Groups::Registry::RepositoriesController do
       context 'html format' do
         let(:format) { :html }
 
-        it 'show index page' do
-          expect(Gitlab::Tracking).not_to receive(:event)
-
+        it 'show index page', :snowplow do
           subject
 
           expect(response).to have_gitlab_http_status(:ok)
+          expect_no_snowplow_event
         end
       end
 

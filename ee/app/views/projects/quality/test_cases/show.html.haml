@@ -1,0 +1,20 @@
+- @content_class = "limit-container-width" unless fluid_layout
+- add_to_breadcrumbs _('Test Cases'), project_quality_test_cases_path(@project)
+- breadcrumb_title @test_case.to_reference
+
+- page_title           "#{@test_case.title} (#{@test_case.to_reference})", _('Test Cases')
+- page_description     @test_case.description
+
+#js-issuable-app{ data: { initial: issuable_initial_data(@test_case).to_json,
+  update_path: issuable_path(@test_case, format: :json),
+  lock_version: @test_case.lock_version,
+  can_edit_test_case: can?(current_user, :admin_issue, @project).to_s,
+  can_move_test_case: @issuable_sidebar.dig(:current_user, :can_move).to_s,
+  description_preview_path: preview_markdown_path(@project),
+  description_help_path: help_page_path('user/markdown'),
+  project_full_path: @project.full_path,
+  labels_manage_path: project_labels_path(@project),
+  labels_fetch_path: project_labels_path(@project, format: :json),
+  test_case_new_path: new_project_quality_test_case_path(@project),
+  sidebar_options: issuable_sidebar_options(@issuable_sidebar).to_json.html_safe,
+  test_case_id: @test_case.iid } }

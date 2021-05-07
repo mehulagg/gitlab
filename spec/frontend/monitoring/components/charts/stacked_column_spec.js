@@ -1,12 +1,12 @@
-import { shallowMount, mount } from '@vue/test-utils';
-import timezoneMock from 'timezone-mock';
-import { cloneDeep } from 'lodash';
 import { GlStackedColumnChart, GlChartLegend } from '@gitlab/ui/dist/charts';
+import { shallowMount, mount } from '@vue/test-utils';
+import { cloneDeep } from 'lodash';
+import timezoneMock from 'timezone-mock';
 import StackedColumnChart from '~/monitoring/components/charts/stacked_column.vue';
 import { stackedColumnGraphData } from '../../graph_data';
 
 jest.mock('~/lib/utils/icon_utils', () => ({
-  getSvgIconPathContent: jest.fn().mockImplementation(icon => Promise.resolve(`${icon}-content`)),
+  getSvgIconPathContent: jest.fn().mockImplementation((icon) => Promise.resolve(`${icon}-content`)),
 }));
 
 describe('Stacked column chart component', () => {
@@ -26,7 +26,7 @@ describe('Stacked column chart component', () => {
       stubs: {
         GlPopover: true,
       },
-      attachToDocument: true,
+      attachTo: document.body,
     });
 
   beforeEach(() => {
@@ -44,19 +44,19 @@ describe('Stacked column chart component', () => {
     });
 
     it('data should match the graphData y value for each series', () => {
-      const data = findChart().props('data');
+      const data = findChart().props('bars');
 
       data.forEach((series, index) => {
         const { values } = stackedColumnMockedData.metrics[index].result[0];
-        expect(series).toEqual(values.map(value => value[1]));
+        expect(series.data).toEqual(values.map((value) => value[1]));
       });
     });
 
-    it('series names should be the same as the graphData metrics labels', () => {
-      const seriesNames = findChart().props('seriesNames');
+    it('data should be the same length as the graphData metrics labels', () => {
+      const barDataProp = findChart().props('bars');
 
-      expect(seriesNames).toHaveLength(stackedColumnMockedData.metrics.length);
-      seriesNames.forEach((name, index) => {
+      expect(barDataProp).toHaveLength(stackedColumnMockedData.metrics.length);
+      barDataProp.forEach(({ name }, index) => {
         expect(stackedColumnMockedData.metrics[index].label).toBe(name);
       });
     });

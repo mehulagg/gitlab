@@ -11,7 +11,7 @@ export const createProjectWithZeroVulnerabilities = () => ({
 
 // in the future this will be replaced by generated fixtures
 // see https://gitlab.com/gitlab-org/gitlab/merge_requests/20892#note_253602093
-export const createProjectWithVulnerabilities = count => (...severityLevels) => ({
+export const createProjectWithVulnerabilities = (count) => (...severityLevels) => ({
   ...createProjectWithZeroVulnerabilities(),
   ...(severityLevels
     ? severityLevels.reduce(

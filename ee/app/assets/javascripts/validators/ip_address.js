@@ -1,6 +1,6 @@
 import ipaddr from 'ipaddr.js';
 
-export default address => {
+export default (address) => {
   // Reject IP addresses that are only integers to match Ruby IPAddr
   // https://github.com/whitequark/ipaddr.js/issues/7#issuecomment-158545695
   if (/^\d+$/.exec(address)) {

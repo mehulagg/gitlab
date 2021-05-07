@@ -1,118 +1,269 @@
 import { mount } from '@vue/test-utils';
-import Api from '~/api';
-import Flash from '~/flash';
+import MockAdapter from 'axios-mock-adapter';
+import { merge } from 'lodash';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
+import Vuex from 'vuex';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { trimText } from 'helpers/text_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import {
+  expectedDownloadDropdownProps,
+  securityReportDownloadPathsQueryNoArtifactsResponse,
+  securityReportDownloadPathsQueryResponse,
+  sastDiffSuccessMock,
+  secretScanningDiffSuccessMock,
+} from 'jest/vue_shared/security_reports/mock_data';
+import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import HelpIcon from '~/vue_shared/security_reports/components/help_icon.vue';
+import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
+import {
+  REPORT_TYPE_SAST,
+  REPORT_TYPE_SECRET_DETECTION,
+} from '~/vue_shared/security_reports/constants';
+import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
 import SecurityReportsApp from '~/vue_shared/security_reports/security_reports_app.vue';
 
 jest.mock('~/flash');
 
-describe('Grouped security reports app', () => {
+Vue.use(VueApollo);
+Vue.use(Vuex);
+
+const SAST_COMPARISON_PATH = '/sast.json';
+const SECRET_SCANNING_COMPARISON_PATH = '/secret_detection.json';
+
+describe('Security reports app', () => {
   let wrapper;
-  let mrTabsMock;
 
   const props = {
     pipelineId: 123,
     projectId: 456,
     securityReportsDocsPath: '/docs',
+    discoverProjectSecurityPath: '/discoverProjectSecurityPath',
   };
 
-  const createComponent = () => {
-    wrapper = mount(SecurityReportsApp, {
-      propsData: { ...props },
-    });
+  const createComponent = (options) => {
+    wrapper = mount(
+      SecurityReportsApp,
+      merge(
+        {
+          propsData: { ...props },
+          stubs: {
+            HelpIcon: true,
+          },
+        },
+        options,
+      ),
+    );
   };
 
-  const findPipelinesTabAnchor = () => wrapper.find('[data-testid="show-pipelines"]');
-  const findHelpLink = () => wrapper.find('[data-testid="help"]');
-  const setupMrTabsMock = () => {
-    mrTabsMock = { tabShown: jest.fn() };
-    window.mrTabs = mrTabsMock;
+  const pendingHandler = () => new Promise(() => {});
+  const successHandler = () => Promise.resolve({ data: securityReportDownloadPathsQueryResponse });
+  const successEmptyHandler = () =>
+    Promise.resolve({ data: securityReportDownloadPathsQueryNoArtifactsResponse });
+  const failureHandler = () => Promise.resolve({ errors: [{ message: 'some error' }] });
+  const createMockApolloProvider = (handler) => {
+    const requestHandlers = [[securityReportDownloadPathsQuery, handler]];
+
+    return createMockApollo(requestHandlers);
   };
-  const setupMockJobArtifact = reportType => {
-    jest
-      .spyOn(Api, 'pipelineJobs')
-      .mockResolvedValue({ data: [{ artifacts: [{ file_type: reportType }] }] });
-  };
+
+  const findDownloadDropdown = () => wrapper.find(SecurityReportDownloadDropdown);
+  const findHelpIconComponent = () => wrapper.find(HelpIcon);
 
   afterEach(() => {
     wrapper.destroy();
-    delete window.mrTabs;
   });
 
-  describe.each(SecurityReportsApp.reportTypes)('given a report type %p', reportType => {
+  describe('given the artifacts query is loading', () => {
     beforeEach(() => {
-      window.mrTabs = { tabShown: jest.fn() };
-      setupMockJobArtifact(reportType);
-      createComponent();
+      createComponent({
+        apolloProvider: createMockApolloProvider(pendingHandler),
+      });
     });
 
-    it('calls the pipelineJobs API correctly', () => {
-      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId);
+    // TODO: Remove this assertion as part of
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/273431
+    it('initially renders nothing', () => {
+      expect(wrapper.html()).toBe('');
+    });
+  });
+
+  describe('given the artifacts query loads successfully', () => {
+    beforeEach(() => {
+      createComponent({
+        apolloProvider: createMockApolloProvider(successHandler),
+      });
+    });
+
+    it('renders the download dropdown', () => {
+      expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
     });
 
     it('renders the expected message', () => {
-      expect(wrapper.text()).toMatchInterpolatedText(SecurityReportsApp.i18n.scansHaveRun);
-    });
-
-    describe('clicking the anchor to the pipelines tab', () => {
-      beforeEach(() => {
-        setupMrTabsMock();
-        findPipelinesTabAnchor().trigger('click');
-      });
-
-      it('calls the mrTabs.tabShown global', () => {
-        expect(mrTabsMock.tabShown.mock.calls).toEqual([['pipelines']]);
-      });
+      expect(wrapper.text()).toContain(SecurityReportsApp.i18n.scansHaveRun);
     });
 
     it('renders a help link', () => {
-      expect(findHelpLink().attributes()).toMatchObject({
-        href: props.securityReportsDocsPath,
+      expect(findHelpIconComponent().props()).toEqual({
+        helpPath: props.securityReportsDocsPath,
+        discoverProjectSecurityPath: props.discoverProjectSecurityPath,
       });
     });
   });
 
-  describe('given a report type "foo"', () => {
+  describe('given the artifacts query loads successfully with no artifacts', () => {
     beforeEach(() => {
-      setupMockJobArtifact('foo');
-      createComponent();
+      createComponent({
+        apolloProvider: createMockApolloProvider(successEmptyHandler),
+      });
     });
 
-    it('calls the pipelineJobs API correctly', () => {
-      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId);
+    // TODO: Remove this assertion as part of
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/273431
+    it('initially renders nothing', () => {
+      expect(wrapper.html()).toBe('');
+    });
+  });
+
+  describe('given the artifacts query fails', () => {
+    beforeEach(() => {
+      createComponent({
+        apolloProvider: createMockApolloProvider(failureHandler),
+      });
     });
 
+    it('calls createFlash correctly', () => {
+      expect(createFlash).toHaveBeenCalledWith({
+        message: SecurityReportsApp.i18n.apiError,
+        captureError: true,
+        error: expect.any(Error),
+      });
+    });
+
+    // TODO: Remove this assertion as part of
+    // https://gitlab.com/gitlab-org/gitlab/-/issues/273431
     it('renders nothing', () => {
       expect(wrapper.html()).toBe('');
     });
   });
 
-  describe('given an error from the API', () => {
-    let error;
+  describe('given the coreSecurityMrWidgetCounts feature flag is enabled', () => {
+    let mock;
+
+    const createComponentWithFlagEnabled = (options) =>
+      createComponent(
+        merge(options, {
+          provide: {
+            glFeatures: {
+              coreSecurityMrWidgetCounts: true,
+            },
+          },
+          apolloProvider: createMockApolloProvider(successHandler),
+        }),
+      );
 
     beforeEach(() => {
-      error = new Error('an error');
-      jest.spyOn(Api, 'pipelineJobs').mockRejectedValue(error);
-      createComponent();
+      mock = new MockAdapter(axios);
     });
 
-    it('calls the pipelineJobs API correctly', () => {
-      expect(Api.pipelineJobs).toHaveBeenCalledWith(props.projectId, props.pipelineId);
+    afterEach(() => {
+      mock.restore();
     });
 
-    it('renders nothing', () => {
-      expect(wrapper.html()).toBe('');
-    });
+    const SAST_SUCCESS_MESSAGE =
+      'Security scanning detected 1 potential vulnerability 1 Critical 0 High and 0 Others';
+    const SECRET_SCANNING_SUCCESS_MESSAGE =
+      'Security scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others';
+    describe.each`
+      reportType                      | pathProp                          | path                               | successResponse                  | successMessage
+      ${REPORT_TYPE_SAST}             | ${'sastComparisonPath'}           | ${SAST_COMPARISON_PATH}            | ${sastDiffSuccessMock}           | ${SAST_SUCCESS_MESSAGE}
+      ${REPORT_TYPE_SECRET_DETECTION} | ${'secretScanningComparisonPath'} | ${SECRET_SCANNING_COMPARISON_PATH} | ${secretScanningDiffSuccessMock} | ${SECRET_SCANNING_SUCCESS_MESSAGE}
+    `(
+      'given a $pathProp and $reportType artifact',
+      ({ pathProp, path, successResponse, successMessage }) => {
+        describe('when loading', () => {
+          beforeEach(() => {
+            mock = new MockAdapter(axios, { delayResponse: 1 });
+            mock.onGet(path).replyOnce(200, successResponse);
 
-    it('calls Flash correctly', () => {
-      expect(Flash.mock.calls).toEqual([
-        [
-          {
-            message: SecurityReportsApp.i18n.apiError,
-            captureError: true,
-            error,
-          },
-        ],
-      ]);
-    });
+            createComponentWithFlagEnabled({
+              propsData: {
+                [pathProp]: path,
+              },
+            });
+
+            return waitForPromises();
+          });
+
+          it('should have loading message', () => {
+            expect(wrapper.text()).toContain('Security scanning is loading');
+          });
+
+          it('renders the download dropdown', () => {
+            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+          });
+        });
+
+        describe('when successfully loaded', () => {
+          beforeEach(() => {
+            mock.onGet(path).replyOnce(200, successResponse);
+
+            createComponentWithFlagEnabled({
+              propsData: {
+                [pathProp]: path,
+              },
+            });
+
+            return waitForPromises();
+          });
+
+          it('should show counts', () => {
+            expect(trimText(wrapper.text())).toContain(successMessage);
+          });
+
+          it('renders the download dropdown', () => {
+            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+          });
+        });
+
+        describe('when an error occurs', () => {
+          beforeEach(() => {
+            mock.onGet(path).replyOnce(500);
+
+            createComponentWithFlagEnabled({
+              propsData: {
+                [pathProp]: path,
+              },
+            });
+
+            return waitForPromises();
+          });
+
+          it('should show error message', () => {
+            expect(trimText(wrapper.text())).toContain('Loading resulted in an error');
+          });
+
+          it('renders the download dropdown', () => {
+            expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+          });
+        });
+
+        describe('when the comparison endpoint is not provided', () => {
+          beforeEach(() => {
+            mock.onGet(path).replyOnce(500);
+
+            createComponentWithFlagEnabled();
+
+            return waitForPromises();
+          });
+
+          it('renders the basic scansHaveRun  message', () => {
+            expect(wrapper.text()).toContain(SecurityReportsApp.i18n.scansHaveRun);
+          });
+        });
+      },
+    );
   });
 });

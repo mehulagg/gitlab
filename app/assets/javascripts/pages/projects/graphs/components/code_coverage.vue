@@ -74,7 +74,7 @@ export default {
       );
     },
     formattedData() {
-      return this.sortedData.map(value => [dateFormat(value.date, 'mmm dd'), value.coverage]);
+      return this.sortedData.map((value) => [dateFormat(value.date, 'mmm dd'), value.coverage]);
     },
     chartData() {
       return [
@@ -153,17 +153,15 @@ export default {
       :option="chartOptions"
       :format-tooltip-text="formatTooltipText"
     >
-      <template v-if="canShowData" #tooltipTitle>
+      <template v-if="canShowData" #tooltip-title>
         {{ tooltipTitle }}
       </template>
-      <template v-if="canShowData" #tooltipContent>
+      <template v-if="canShowData" #tooltip-content>
         <gl-sprintf :message="__('Code Coverage: %{coveragePercentage}%{percentSymbol}')">
           <template #coveragePercentage>
             {{ coveragePercentage }}
           </template>
-          <template #percentSymbol>
-            %
-          </template>
+          <template #percentSymbol> % </template>
         </gl-sprintf>
       </template>
     </gl-area-chart>

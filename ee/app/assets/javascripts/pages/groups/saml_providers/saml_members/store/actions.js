@@ -1,7 +1,7 @@
-import { __ } from '~/locale';
 import Api from '~/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import * as types from './mutation_types';
 
 export function fetchPage({ commit, state }, newPage) {
@@ -10,7 +10,7 @@ export function fetchPage({ commit, state }, newPage) {
     page: newPage || state.pageInfo.page,
     per_page: state.pageInfo.perPage,
   })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       const pageInfo = parseIntPagination(normalizeHeaders(headers));
       commit(types.RECEIVE_SAML_MEMBERS_SUCCESS, {
@@ -22,6 +22,8 @@ export function fetchPage({ commit, state }, newPage) {
       });
     })
     .catch(() => {
-      createFlash(__('An error occurred while loading group members.'));
+      createFlash({
+        message: __('An error occurred while loading group members.'),
+      });
     });
 }

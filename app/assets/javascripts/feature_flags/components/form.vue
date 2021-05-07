@@ -1,6 +1,4 @@
 <script>
-import Vue from 'vue';
-import { memoize, isString, cloneDeep, isNumber, uniqueId } from 'lodash';
 import {
   GlButton,
   GlBadge,
@@ -10,15 +8,13 @@ import {
   GlFormCheckbox,
   GlSprintf,
   GlIcon,
+  GlToggle,
 } from '@gitlab/ui';
-import Api from '~/api';
-import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
+import { memoize, isString, cloneDeep, isNumber, uniqueId } from 'lodash';
+import Vue from 'vue';
 import { s__ } from '~/locale';
-import { deprecatedCreateFlash as flash, FLASH_TYPES } from '~/flash';
+import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import ToggleButton from '~/vue_shared/components/toggle_button.vue';
-import EnvironmentsDropdown from './environments_dropdown.vue';
-import Strategy from './strategy.vue';
 import {
   ROLLOUT_STRATEGY_ALL_USERS,
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
@@ -29,8 +25,14 @@ import {
   LEGACY_FLAG,
 } from '../constants';
 import { createNewEnvironmentScope } from '../store/helpers';
+import EnvironmentsDropdown from './environments_dropdown.vue';
+import Strategy from './strategy.vue';
 
 export default {
+  i18n: {
+    removeLabel: s__('FeatureFlags|Remove'),
+    statusLabel: s__('FeatureFlags|Status'),
+  },
   components: {
     GlButton,
     GlBadge,
@@ -39,7 +41,7 @@ export default {
     GlTooltip,
     GlSprintf,
     GlIcon,
-    ToggleButton,
+    GlToggle,
     EnvironmentsDropdown,
     Strategy,
     RelatedIssuesRoot,
@@ -48,6 +50,11 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [featureFlagsMixin()],
+  inject: {
+    featureFlagIssuesEndpoint: {
+      default: '',
+    },
+  },
   props: {
     active: {
       type: Boolean,
@@ -88,12 +95,6 @@ export default {
       default: LEGACY_FLAG,
     },
   },
-  inject: {
-    projectId: {},
-    featureFlagIssuesEndpoint: {
-      default: '',
-    },
-  },
   translations: {
     allEnvironmentsText: s__('FeatureFlags|* (All Environments)'),
 
@@ -120,51 +121,34 @@ export default {
       formDescription: this.description,
 
       // operate on a clone to avoid mutating props
-      formScopes: this.scopes.map(s => ({ ...s })),
+      formScopes: this.scopes.map((s) => ({ ...s })),
       formStrategies: cloneDeep(this.strategies),
 
       newScope: '',
-      userLists: [],
     };
   },
   computed: {
     filteredScopes() {
-      return this.formScopes.filter(scope => !scope.shouldBeDestroyed);
+      return this.formScopes.filter((scope) => !scope.shouldBeDestroyed);
     },
     filteredStrategies() {
-      return this.formStrategies.filter(s => !s.shouldBeDestroyed);
+      return this.formStrategies.filter((s) => !s.shouldBeDestroyed);
     },
     canUpdateFlag() {
-      return !this.permissionsFlag || (this.formScopes || []).every(scope => scope.canUpdate);
+      return !this.permissionsFlag || (this.formScopes || []).every((scope) => scope.canUpdate);
     },
     permissionsFlag() {
       return this.glFeatures.featureFlagPermissions;
     },
     supportsStrategies() {
-      return this.glFeatures.featureFlagsNewVersion && this.version === NEW_VERSION_FLAG;
+      return this.version === NEW_VERSION_FLAG;
     },
     showRelatedIssues() {
       return this.featureFlagIssuesEndpoint.length > 0;
     },
     readOnly() {
-      return (
-        this.glFeatures.featureFlagsNewVersion &&
-        this.glFeatures.featureFlagsLegacyReadOnly &&
-        !this.glFeatures.featureFlagsLegacyReadOnlyOverride &&
-        this.version === LEGACY_FLAG
-      );
+      return this.version === LEGACY_FLAG;
     },
-  },
-  mounted() {
-    if (this.supportsStrategies) {
-      Api.fetchFeatureFlagUserLists(this.projectId)
-        .then(({ data }) => {
-          this.userLists = data;
-        })
-        .catch(() => {
-          flash(s__('FeatureFlags|There was an error retrieving user lists'), FLASH_TYPES.WARNING);
-        });
-    }
   },
   methods: {
     keyFor(strategy) {
@@ -183,7 +167,7 @@ export default {
       if (isNumber(s.id)) {
         Vue.set(s, 'shouldBeDestroyed', true);
       } else {
-        this.formStrategies = this.formStrategies.filter(strategy => strategy !== s);
+        this.formStrategies = this.formStrategies.filter((strategy) => strategy !== s);
       }
     },
 
@@ -204,7 +188,7 @@ export default {
      */
     removeScope(scope) {
       if (isString(scope.id) && scope.id.startsWith(INTERNAL_ID_PREFIX)) {
-        this.formScopes = this.formScopes.filter(s => s !== scope);
+        this.formScopes = this.formScopes.filter((s) => s !== scope);
       } else {
         Vue.set(scope, 'shouldBeDestroyed', true);
       }
@@ -334,7 +318,7 @@ export default {
             <h4>{{ s__('FeatureFlags|Strategies') }}</h4>
             <div class="flex align-items-baseline justify-content-between">
               <p class="mr-3">{{ $options.translations.newHelpText }}</p>
-              <gl-button variant="success" category="secondary" @click="addStrategy">
+              <gl-button variant="confirm" category="secondary" @click="addStrategy">
                 {{ s__('FeatureFlags|Add strategy') }}
               </gl-button>
             </div>
@@ -346,7 +330,6 @@ export default {
             :key="keyFor(strategy)"
             :strategy="strategy"
             :index="index"
-            :user-lists="userLists"
             @change="onFormStrategyChange($event, index)"
             @delete="deleteStrategy(strategy)"
           />
@@ -393,7 +376,7 @@ export default {
                   {{ s__('FeatureFlags|Environment Spec') }}
                 </div>
                 <div
-                  class="table-mobile-content js-feature-flag-status d-flex align-items-center justify-content-start"
+                  class="table-mobile-content gl-display-flex gl-align-items-center gl-justify-content-start"
                 >
                   <p v-if="isAllEnvironment(scope.environmentScope)" class="js-scope-all pl-3">
                     {{ $options.translations.allEnvironmentsText }}
@@ -404,9 +387,9 @@ export default {
                     class="col-12"
                     :value="scope.environmentScope"
                     :disabled="!canUpdateScope(scope) || scope.environmentScope !== ''"
-                    @selectEnvironment="env => (scope.environmentScope = env)"
-                    @createClicked="env => (scope.environmentScope = env)"
-                    @clearInput="env => (scope.environmentScope = '')"
+                    @selectEnvironment="(env) => (scope.environmentScope = env)"
+                    @createClicked="(env) => (scope.environmentScope = env)"
+                    @clearInput="(env) => (scope.environmentScope = '')"
                   />
 
                   <gl-badge v-if="permissionsFlag && scope.protected" variant="success">
@@ -417,13 +400,15 @@ export default {
 
               <div class="table-section section-20 text-center" role="gridcell">
                 <div class="table-mobile-header" role="rowheader">
-                  {{ s__('FeatureFlags|Status') }}
+                  {{ $options.i18n.statusLabel }}
                 </div>
-                <div class="table-mobile-content js-feature-flag-status">
-                  <toggle-button
+                <div class="table-mobile-content gl-display-flex gl-justify-content-center">
+                  <gl-toggle
                     :value="scope.active"
-                    :disabled-input="!active || !canUpdateScope(scope)"
-                    @change="status => (scope.active = status)"
+                    :disabled="!active || !canUpdateScope(scope)"
+                    :label="$options.i18n.statusLabel"
+                    label-position="hidden"
+                    @change="(status) => (scope.active = status)"
                   />
                 </div>
               </div>
@@ -519,41 +504,45 @@ export default {
                 <div class="table-mobile-header" role="rowheader">
                   {{ s__('FeatureFlags|Remove') }}
                 </div>
-                <div class="table-mobile-content js-feature-flag-delete">
+                <div class="table-mobile-content">
                   <gl-button
                     v-if="!isAllEnvironment(scope.environmentScope) && canUpdateScope(scope)"
                     v-gl-tooltip
-                    :title="s__('FeatureFlags|Remove')"
+                    :title="$options.i18n.removeLabel"
+                    :aria-label="$options.i18n.removeLabel"
                     class="js-delete-scope btn-transparent pr-3 pl-3"
                     icon="clear"
+                    data-testid="feature-flag-delete"
                     @click="removeScope(scope)"
                   />
                 </div>
               </div>
             </div>
 
-            <div class="js-add-new-scope gl-responsive-table-row" role="row">
+            <div class="gl-responsive-table-row" role="row" data-testid="add-new-scope">
               <div class="table-section section-30" role="gridcell">
                 <div class="table-mobile-header" role="rowheader">
                   {{ s__('FeatureFlags|Environment Spec') }}
                 </div>
-                <div class="table-mobile-content js-feature-flag-status">
+                <div class="table-mobile-content">
                   <environments-dropdown
                     class="js-new-scope-name col-12"
                     :value="newScope"
-                    @selectEnvironment="env => createNewScope({ environmentScope: env })"
-                    @createClicked="env => createNewScope({ environmentScope: env })"
+                    @selectEnvironment="(env) => createNewScope({ environmentScope: env })"
+                    @createClicked="(env) => createNewScope({ environmentScope: env })"
                   />
                 </div>
               </div>
 
               <div class="table-section section-20 text-center" role="gridcell">
                 <div class="table-mobile-header" role="rowheader">
-                  {{ s__('FeatureFlags|Status') }}
+                  {{ $options.i18n.statusLabel }}
                 </div>
-                <div class="table-mobile-content js-feature-flag-status">
-                  <toggle-button
-                    :disabled-input="!active"
+                <div class="table-mobile-content gl-display-flex gl-justify-content-center">
+                  <gl-toggle
+                    :disabled="!active"
+                    :label="$options.i18n.statusLabel"
+                    label-position="hidden"
                     :value="false"
                     @change="createNewScope({ active: true })"
                   />
@@ -595,7 +584,7 @@ export default {
         ref="submitButton"
         :disabled="readOnly"
         type="button"
-        variant="success"
+        variant="confirm"
         class="js-ff-submit col-xs-12"
         @click="handleSubmit"
         >{{ submitText }}</gl-button

@@ -1,0 +1,5 @@
+---
+title: Add scannerId field to project vulnerabilities query
+merge_request: 58157
+author:
+type: changed

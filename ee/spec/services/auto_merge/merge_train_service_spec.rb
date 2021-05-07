@@ -5,8 +5,9 @@ require 'spec_helper'
 RSpec.describe AutoMerge::MergeTrainService do
   include ExclusiveLeaseHelpers
 
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:user) { create(:user) }
+
   let(:service) { described_class.new(project, user, params) }
   let(:params) { {} }
 
@@ -23,7 +24,6 @@ RSpec.describe AutoMerge::MergeTrainService do
     stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_trains: true, merge_pipelines: true)
-    project.update!(merge_pipelines_enabled: true)
   end
 
   describe '#execute' do
@@ -59,7 +59,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when failed to save the record' do
       before do
-        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled.new }
+        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled }
       end
 
       it 'returns result code' do
@@ -69,7 +69,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns failed status' do
@@ -103,10 +103,11 @@ RSpec.describe AutoMerge::MergeTrainService do
         target_project: project, target_branch: 'master')
     end
 
-    it 'calls RefreshMergeRequestsService' do
-      expect_next_instance_of(MergeTrains::RefreshMergeRequestsService) do |service|
-        expect(service).to receive(:execute).with(merge_request)
-      end
+    it 'calls RefreshWorker' do
+      expect(MergeTrains::RefreshWorker)
+        .to receive(:perform_async)
+        .with(merge_request.target_project_id, merge_request.target_branch)
+        .once
 
       subject
     end
@@ -114,8 +115,8 @@ RSpec.describe AutoMerge::MergeTrainService do
     context 'when merge request is not on a merge train' do
       let(:merge_request) { create(:merge_request) }
 
-      it 'does not call RefreshMergeRequestsService' do
-        expect(MergeTrains::RefreshMergeRequestsService).not_to receive(:new)
+      it 'does not call RefreshWorker' do
+        expect(MergeTrains::RefreshWorker).not_to receive(:perform_async)
 
         subject
       end
@@ -194,8 +195,8 @@ RSpec.describe AutoMerge::MergeTrainService do
 
       let(:status) { MergeTrain.state_machines[:status].states[:fresh].value }
 
-      it 'processes the next merge request on the train by default' do
-        expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_2.id)
+      it 'processes the train by default' do
+        expect(MergeTrains::RefreshWorker).to receive(:perform_async).with(merge_request_2.target_project_id, merge_request_2.target_branch)
 
         subject
 
@@ -206,7 +207,7 @@ RSpec.describe AutoMerge::MergeTrainService do
         let(:status) { MergeTrain.state_machines[:status].states[:stale].value }
 
         it 'does not do anything' do
-          expect(AutoMergeProcessWorker).not_to receive(:perform_async).with(merge_request_2.id)
+          expect(MergeTrains::RefreshWorker).not_to receive(:perform_async)
 
           expect { subject }.not_to raise_error
 
@@ -217,7 +218,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns error' do
@@ -282,8 +283,8 @@ RSpec.describe AutoMerge::MergeTrainService do
           status: MergeTrain.state_machines[:status].states[:fresh].value)
       end
 
-      it 'processes the next merge request on the train' do
-        expect(AutoMergeProcessWorker).to receive(:perform_async).with(merge_request_2.id)
+      it 'processes the train' do
+        expect(MergeTrains::RefreshWorker).to receive(:perform_async).with(merge_request_2.target_project_id, merge_request_2.target_branch)
 
         subject
 
@@ -294,7 +295,7 @@ RSpec.describe AutoMerge::MergeTrainService do
         let(:args) { { process_next: false } }
 
         it 'does not process the next merge request on the train' do
-          expect(AutoMergeProcessWorker).not_to receive(:perform_async)
+          expect(MergeTrains::RefreshWorker).not_to receive(:perform_async)
 
           subject
         end
@@ -303,7 +304,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns error' do
@@ -349,7 +350,15 @@ RSpec.describe AutoMerge::MergeTrainService do
       2.times { is_expected.to be_truthy }
     end
 
-    context 'when merge trains project option is disabled' do
+    context 'when merge trains flag is disabled' do
+      before do
+        project.update!(merge_trains_enabled: false)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when merge train ci setting is disabled' do
       before do
         stub_feature_flags(disable_merge_trains: true)
       end

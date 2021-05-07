@@ -254,4 +254,91 @@ RSpec.describe IssuesHelper do
       expect(helper.use_startup_call?).to eq(true)
     end
   end
+
+  describe '#issue_header_actions_data' do
+    let(:current_user) { create(:user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:can?).and_return(true)
+    end
+
+    it 'returns expected result' do
+      expected = {
+        can_create_issue: "true",
+        can_reopen_issue: "true",
+        can_report_spam: "false",
+        can_update_issue: "true",
+        iid: issue.iid,
+        is_issue_author: "false",
+        issue_type: "issue",
+        new_issue_path: new_project_issue_path(project),
+        project_path: project.full_path,
+        report_abuse_path: new_abuse_report_path(user_id: issue.author.id, ref_url: issue_url(issue)),
+        submit_as_spam_path: mark_as_spam_project_issue_path(project, issue)
+      }
+
+      expect(helper.issue_header_actions_data(project, issue, current_user)).to include(expected)
+    end
+  end
+
+  shared_examples 'issues list data' do
+    it 'returns expected result' do
+      finder = double.as_null_object
+      allow(helper).to receive(:current_user).and_return(current_user)
+      allow(helper).to receive(:finder).and_return(finder)
+      allow(helper).to receive(:can?).and_return(true)
+      allow(helper).to receive(:image_path).and_return('#')
+      allow(helper).to receive(:import_csv_namespace_project_issues_path).and_return('#')
+      allow(helper).to receive(:url_for).and_return('#')
+
+      expected = {
+        autocomplete_award_emojis_path: autocomplete_award_emojis_path,
+        autocomplete_users_path: autocomplete_users_path(active: true, current_user: true, project_id: project.id, format: :json),
+        calendar_path: '#',
+        can_bulk_update: 'true',
+        can_edit: 'true',
+        can_import_issues: 'true',
+        email: current_user&.notification_email,
+        emails_help_page_path: help_page_path('development/emails', anchor: 'email-namespace'),
+        empty_state_svg_path: '#',
+        endpoint: expose_path(api_v4_projects_issues_path(id: project.id)),
+        export_csv_path: export_csv_project_issues_path(project),
+        has_issues: project_issues(project).exists?.to_s,
+        import_csv_issues_path: '#',
+        initial_email: project.new_issuable_address(current_user, 'issue'),
+        is_signed_in: current_user.present?.to_s,
+        issues_path: project_issues_path(project),
+        jira_integration_path: help_page_url('user/project/integrations/jira', anchor: 'view-jira-issues'),
+        markdown_help_path: help_page_path('user/markdown'),
+        max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
+        new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.id, milestone_id: finder.milestones.first.id }),
+        project_import_jira_path: project_import_jira_path(project),
+        project_labels_path: project_labels_path(project, include_ancestor_groups: true, format: :json),
+        project_milestones_path: project_milestones_path(project, format: :json),
+        project_path: project.full_path,
+        quick_actions_help_path: help_page_path('user/project/quick_actions'),
+        reset_path: new_issuable_address_project_path(project, issuable_type: 'issue'),
+        rss_path: '#',
+        show_new_issue_link: 'true',
+        sign_in_path: new_user_session_path
+      }
+
+      expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
+    end
+  end
+
+  describe '#issues_list_data' do
+    context 'when user is signed in' do
+      it_behaves_like 'issues list data' do
+        let(:current_user) { double.as_null_object }
+      end
+    end
+
+    context 'when user is anonymous' do
+      it_behaves_like 'issues list data' do
+        let(:current_user) { nil }
+      end
+    end
+  end
 end

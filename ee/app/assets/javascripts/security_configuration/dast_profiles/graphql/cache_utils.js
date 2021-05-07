@@ -1,3 +1,7 @@
+import gql from 'graphql-tag';
+import { produce } from 'immer';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+
 /**
  * Appends paginated results to existing ones
  * - to be used with $apollo.queries.x.fetchMore
@@ -5,7 +9,7 @@
  * @param {*} profileType
  * @returns {function(*, {fetchMoreResult: *}): *}
  */
-export const appendToPreviousResult = profileType => (previousResult, { fetchMoreResult }) => {
+export const appendToPreviousResult = (profileType) => (previousResult, { fetchMoreResult }) => {
   const newResult = { ...fetchMoreResult };
   const previousEdges = previousResult.project[profileType].edges;
   const newEdges = newResult.project[profileType].edges;
@@ -24,10 +28,14 @@ export const appendToPreviousResult = profileType => (previousResult, { fetchMor
  * @param queryBody
  */
 export const removeProfile = ({ profileId, profileType, store, queryBody }) => {
-  const data = store.readQuery(queryBody);
+  const sourceData = store.readQuery(queryBody);
 
-  data.project[profileType].edges = data.project[profileType].edges.filter(({ node }) => {
-    return node.id !== profileId;
+  const data = produce(sourceData, (draftState) => {
+    draftState.project[profileType].edges = draftState.project[profileType].edges.filter(
+      ({ node }) => {
+        return node.id !== profileId;
+      },
+    );
   });
 
   store.writeQuery({ ...queryBody, data });
@@ -48,3 +56,34 @@ export const dastProfilesDeleteResponse = ({ mutationName, payloadTypeName }) =>
     errors: [],
   },
 });
+
+export const updateSiteProfilesStatuses = ({ fullPath, normalizedTargetUrl, status, store }) => {
+  const queryBody = {
+    query: dastSiteProfilesQuery,
+    variables: {
+      fullPath,
+    },
+  };
+
+  const sourceData = store.readQuery(queryBody);
+
+  const profilesWithNormalizedTargetUrl = sourceData.project.siteProfiles.edges.flatMap(
+    ({ node }) => (node.normalizedTargetUrl === normalizedTargetUrl ? node : []),
+  );
+
+  profilesWithNormalizedTargetUrl.forEach(({ id }) => {
+    store.writeFragment({
+      id: `DastSiteProfile:${id}`,
+      fragment: gql`
+        fragment profile on DastSiteProfile {
+          validationStatus
+          __typename
+        }
+      `,
+      data: {
+        validationStatus: status,
+        __typename: 'DastSiteProfile',
+      },
+    });
+  });
+};

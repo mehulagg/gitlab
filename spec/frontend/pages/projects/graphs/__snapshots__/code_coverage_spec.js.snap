@@ -10,8 +10,9 @@ exports[`Code Coverage when fetching data is successful matches the snapshot 1`]
     <!---->
      
     <gl-dropdown-stub
-      category="tertiary"
+      category="primary"
       headertext=""
+      hideheaderborder="true"
       size="medium"
       text="rspec"
       variant="default"
@@ -20,6 +21,7 @@ exports[`Code Coverage when fetching data is successful matches the snapshot 1`]
         avatarurl=""
         iconcolor=""
         iconname=""
+        iconrightarialabel=""
         iconrightname=""
         ischecked="true"
         ischeckitem="true"
@@ -34,6 +36,7 @@ exports[`Code Coverage when fetching data is successful matches the snapshot 1`]
         avatarurl=""
         iconcolor=""
         iconname=""
+        iconrightarialabel=""
         iconrightname=""
         ischeckitem="true"
         secondarytext=""
@@ -47,6 +50,7 @@ exports[`Code Coverage when fetching data is successful matches the snapshot 1`]
         avatarurl=""
         iconcolor=""
         iconname=""
+        iconrightarialabel=""
         iconrightname=""
         ischeckitem="true"
         secondarytext=""

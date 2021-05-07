@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
+import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
 import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';
-import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
-import { makeAnalyzerEntities, makeEntities, makeSastCiConfiguration } from './helpers';
+import { makeAnalyzerEntities, makeEntities, makeSastCiConfiguration } from '../../helpers';
 
 describe('AnalyzerConfiguration component', () => {
   let wrapper;

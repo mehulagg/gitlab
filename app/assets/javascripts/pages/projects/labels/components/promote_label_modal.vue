@@ -1,15 +1,21 @@
 <script>
-import { GlSprintf } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
+import { GlSprintf, GlModal } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
-import { s__, sprintf } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
+import { s__, __, sprintf } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
+  primaryProps: {
+    text: s__('Labels|Promote Label'),
+    attributes: [{ variant: 'warning' }, { category: 'primary' }],
+  },
+  cancelProps: {
+    text: __('Cancel'),
+  },
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
     GlSprintf,
   },
   props: {
@@ -52,14 +58,14 @@ export default {
       eventHub.$emit('promoteLabelModal.requestStarted', this.url);
       return axios
         .post(this.url, { params: { format: 'json' } })
-        .then(response => {
+        .then((response) => {
           eventHub.$emit('promoteLabelModal.requestFinished', {
             labelUrl: this.url,
             successful: true,
           });
           visitUrl(response.data.url);
         })
-        .catch(error => {
+        .catch((error) => {
           eventHub.$emit('promoteLabelModal.requestFinished', {
             labelUrl: this.url,
             successful: false,
@@ -72,12 +78,12 @@ export default {
 </script>
 <template>
   <gl-modal
-    id="promote-label-modal"
-    :footer-primary-button-text="s__('Labels|Promote Label')"
-    footer-primary-button-variant="warning"
-    @submit="onSubmit"
+    modal-id="promote-label-modal"
+    :action-primary="$options.primaryProps"
+    :action-cancel="$options.cancelProps"
+    @primary="onSubmit"
   >
-    <div slot="title" class="modal-title-with-label">
+    <div slot="modal-title" class="modal-title-with-label">
       <gl-sprintf
         :message="
           s__(

@@ -34,17 +34,12 @@ RSpec.describe EE::PersonalAccessTokens::RevokeService do
         let_it_be(:token) { create(:personal_access_token, user: managed_user) }
 
         it_behaves_like 'a successfully revoked token'
-      end
 
-      context 'when feature flag is disabled' do
-        let_it_be(:current_user) { group_owner }
-        let_it_be(:token) { create(:personal_access_token, user: managed_user) }
+        context 'and an empty token is given' do
+          let_it_be(:token) { nil }
 
-        before do
-          stub_feature_flags(revoke_managed_users_token: false)
+          it { expect(subject.success?).to be false }
         end
-
-        it_behaves_like 'an unsuccessfully revoked token'
       end
 
       context 'when current user is a group owner of a different managed group' do

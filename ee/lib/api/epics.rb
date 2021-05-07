@@ -4,6 +4,8 @@ module API
   class Epics < ::API::Base
     include PaginationParams
 
+    feature_category :epics
+
     before do
       authenticate_non_get!
       authorize_epics_feature!
@@ -37,6 +39,7 @@ module API
         optional :include_ancestor_groups, type: Boolean, default: false, desc: 'Include epics from ancestor groups'
         optional :include_descendant_groups, type: Boolean, default: true, desc: 'Include epics from descendant groups'
         optional :my_reaction_emoji, type: String, desc: 'Return epics reacted by the authenticated user by the given emoji'
+        optional :confidential, type: Boolean, desc: 'Return epics with given confidentiality'
         use :pagination
       end
       [':id/epics', ':id/-/epics'].each do |path|
@@ -106,11 +109,13 @@ module API
         optional :end_date, as: :due_date_fixed, type: String, desc: 'The due date of an epic'
         optional :due_date_is_fixed, type: Boolean, desc: 'Indicates due date should be sourced from due_date_fixed field not the issue milestones'
         optional :labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
+        optional :add_labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
+        optional :remove_labels, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Comma-separated list of label names'
         optional :state_event, type: String, values: %w[reopen close], desc: 'State event for an epic'
-        at_least_one_of :title, :description, :start_date_fixed, :start_date_is_fixed, :due_date_fixed, :due_date_is_fixed, :labels, :state_event, :confidential
+        at_least_one_of :title, :description, :start_date_fixed, :start_date_is_fixed, :due_date_fixed, :due_date_is_fixed, :labels, :add_labels, :remove_labels, :state_event, :confidential
       end
       put ':id/(-/)epics/:epic_iid' do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/194104')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/issues/194104')
 
         authorize_can_admin_epic!
 

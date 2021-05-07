@@ -1,10 +1,5 @@
+import { GlModal, GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlModal } from '@gitlab/ui';
-import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
-import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
-import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
-import NetworkPolicyEditor from 'ee/threat_monitoring/components/network_policy_editor.vue';
-import createStore from 'ee/threat_monitoring/store';
 import {
   RuleDirectionInbound,
   PortMatchModeAny,
@@ -13,8 +8,14 @@ import {
   EndpointMatchModeLabel,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
 import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
+import PolicyAlertPicker from 'ee/threat_monitoring/components/policy_editor/policy_alert_picker.vue';
+import PolicyEditorApp from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';
+import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
+import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/policy_rule_builder.vue';
+import createStore from 'ee/threat_monitoring/store';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility');
@@ -22,8 +23,27 @@ jest.mock('~/lib/utils/url_utility');
 describe('PolicyEditorApp component', () => {
   let store;
   let wrapper;
+  const l7manifest = `apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+metadata:
+  name: limit-inbound-ip
+spec:
+  endpointSelector: {}
+  ingress:
+  - toPorts:
+    - ports:
+      - port: '80'
+        protocol: TCP
+      - port: '443'
+        protocol: TCP
+      rules:
+        http:
+        - headers:
+          - 'X-Forwarded-For: 192.168.1.1'
+    fromEntities:
+    - cluster`;
 
-  const factory = ({ propsData, state, data } = {}) => {
+  const factory = ({ propsData, provide = {}, state, data } = {}) => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, {
       ...state,
@@ -34,26 +54,47 @@ describe('PolicyEditorApp component', () => {
 
     jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
 
-    wrapper = shallowMount(PolicyEditorApp, {
-      propsData: {
-        threatMonitoringPath: '/threat-monitoring',
-        ...propsData,
-      },
-      store,
-      data,
-    });
+    wrapper = extendedWrapper(
+      shallowMount(PolicyEditorApp, {
+        propsData: {
+          threatMonitoringPath: '/threat-monitoring',
+          projectId: '21',
+          ...propsData,
+        },
+        provide: {
+          glFeatures: { threatMonitoringAlerts: false },
+          ...provide,
+        },
+        store,
+        data,
+        stubs: { NetworkPolicyEditor: true },
+      }),
+    );
   };
 
-  const findRuleEditor = () => wrapper.find('[data-testid="rule-editor"]');
-  const findYamlEditor = () => wrapper.find('[data-testid="yaml-editor"]');
+  const findRuleEditor = () => wrapper.findByTestId('rule-editor');
+  const findYamlEditor = () => wrapper.findByTestId('yaml-editor');
   const findPreview = () => wrapper.find(PolicyPreview);
-  const findAddRuleButton = () => wrapper.find('[data-testid="add-rule"]');
-  const findYAMLParsingAlert = () => wrapper.find('[data-testid="parsing-alert"]');
-  const findNetworkPolicyEditor = () => wrapper.find(NetworkPolicyEditor);
+  const findAddRuleButton = () => wrapper.findByTestId('add-rule');
+  const findYAMLParsingAlert = () => wrapper.findByTestId('parsing-alert');
+  const findNetworkPolicyEditor = () => wrapper.findByTestId('network-policy-editor');
+  const findPolicyAlertPicker = () => wrapper.find(PolicyAlertPicker);
+  const findPolicyDescription = () => wrapper.find("[id='policyDescription']");
+  const findPolicyEnableContainer = () => wrapper.findByTestId('policy-enable');
   const findPolicyName = () => wrapper.find("[id='policyName']");
-  const findSavePolicy = () => wrapper.find("[data-testid='save-policy']");
-  const findDeletePolicy = () => wrapper.find("[data-testid='delete-policy']");
-  const findEditorModeToggle = () => wrapper.find("[data-testid='editor-mode']");
+  const findPolicyRuleBuilder = () => wrapper.findComponent(PolicyRuleBuilder);
+  const findSavePolicy = () => wrapper.findByTestId('save-policy');
+  const findDeletePolicy = () => wrapper.findByTestId('delete-policy');
+  const findEditorModeToggle = () => wrapper.findByTestId('editor-mode');
+
+  const modifyPolicyAlert = async ({ isAlertEnabled }) => {
+    const policyAlertPicker = findPolicyAlertPicker();
+    policyAlertPicker.vm.$emit('update-alert', isAlertEnabled);
+    await wrapper.vm.$nextTick();
+    expect(policyAlertPicker.props('policyAlert')).toBe(isAlertEnabled);
+    findSavePolicy().vm.$emit('click');
+    await wrapper.vm.$nextTick();
+  };
 
   beforeEach(() => {
     factory();
@@ -61,10 +102,23 @@ describe('PolicyEditorApp component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders the policy editor layout', () => {
     expect(wrapper.find('section').element).toMatchSnapshot();
+  });
+
+  it('renders toggle with label', () => {
+    expect(wrapper.findComponent(GlToggle).props('label')).toBe(PolicyEditorApp.i18n.toggleLabel);
+  });
+
+  it('renders a default rule with label', () => {
+    expect(findPolicyRuleBuilder().exists()).toBe(true);
+    expect(findPolicyRuleBuilder().attributes()).toMatchObject({
+      endpointlabels: '',
+      endpointmatchmode: 'any',
+    });
   });
 
   it('does not render yaml editor', () => {
@@ -77,6 +131,10 @@ describe('PolicyEditorApp component', () => {
 
   it('does not render delete button', () => {
     expect(findDeletePolicy().exists()).toBe(false);
+  });
+
+  it('does not render the policy alert picker', () => {
+    expect(findPolicyAlertPicker().exists()).toBe(false);
   });
 
   describe('given .yaml editor mode is enabled', () => {
@@ -104,6 +162,8 @@ kind: CiliumNetworkPolicy
 description: test description
 metadata:
   name: test-policy
+  labels:
+    app.gitlab.com/proj: '21'
 spec:
   endpointSelector:
     matchLabels:
@@ -127,7 +187,25 @@ spec:
             matchLabels: 'foo:bar',
           },
         ],
+        labels: { 'app.gitlab.com/proj': '21' },
       });
+    });
+
+    it('saves L7 policies', async () => {
+      factory({
+        data: () => ({
+          editorMode: EditorModeYAML,
+          yamlEditorValue: l7manifest,
+        }),
+      });
+      findSavePolicy().vm.$emit('click');
+
+      await wrapper.vm.$nextTick();
+      expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: { manifest: l7manifest },
+      });
+      expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
     });
   });
 
@@ -149,7 +227,7 @@ spec:
 
     beforeEach(() => {
       initialValue = findPreview().props('policyDescription');
-      wrapper.find("[data-testid='add-rule']").vm.$emit('click');
+      wrapper.findByTestId('add-rule').vm.$emit('click');
     });
 
     it('updates policy description preview', () => {
@@ -158,13 +236,13 @@ spec:
   });
 
   it('adds a new rule', async () => {
-    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(0);
+    expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(1);
     const button = findAddRuleButton();
     button.vm.$emit('click');
     button.vm.$emit('click');
     await wrapper.vm.$nextTick();
-    const elements = wrapper.findAll(PolicyRuleBuilder);
-    expect(elements.length).toEqual(2);
+    const elements = wrapper.findAllComponents(PolicyRuleBuilder);
+    expect(elements).toHaveLength(3);
 
     elements.wrappers.forEach((builder, idx) => {
       expect(builder.props().rule).toMatchObject({
@@ -181,11 +259,11 @@ spec:
   it('removes a new rule', async () => {
     findAddRuleButton().vm.$emit('click');
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(1);
+    expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(2);
 
-    wrapper.find(PolicyRuleBuilder).vm.$emit('remove');
+    findPolicyRuleBuilder().vm.$emit('remove');
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(0);
+    expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(1);
   });
 
   it('updates yaml editor value on switch to yaml editor', async () => {
@@ -195,7 +273,7 @@ spec:
 
     const editor = findNetworkPolicyEditor();
     expect(editor.exists()).toBe(true);
-    expect(fromYaml(editor.props('value'))).toMatchObject({
+    expect(fromYaml(editor.attributes('value'))).toMatchObject({
       name: 'test-policy',
     });
   });
@@ -209,20 +287,32 @@ spec:
       });
     });
 
+    it('disables policy name field', () => {
+      expect(findPolicyName().attributes().disabled).toBe('true');
+    });
+
+    it('disables policy description field', () => {
+      expect(findPolicyDescription().attributes().disabled).toBe('true');
+    });
+
+    it('disables policy enable/disable toggle', () => {
+      expect(findPolicyEnableContainer().attributes().disabled).toBe('true');
+    });
+
     it('renders parsing error alert', () => {
       expect(findYAMLParsingAlert().exists()).toBe(true);
     });
 
     it('disables rule builder', () => {
-      expect(wrapper.find("[data-testid='rule-builder-container']").props().disabled).toBe(true);
+      expect(wrapper.findByTestId('rule-builder-container').props().disabled).toBe(true);
     });
 
     it('disables action picker', () => {
-      expect(wrapper.find("[data-testid='policy-action-container']").props().disabled).toBe(true);
+      expect(wrapper.findByTestId('policy-action-container').props().disabled).toBe(true);
     });
 
     it('disables policy preview', () => {
-      expect(wrapper.find("[data-testid='policy-preview-container']").props().disabled).toBe(true);
+      expect(wrapper.findByTestId('policy-preview-container').props().disabled).toBe(true);
     });
 
     it('does not update yaml editor value on switch to yaml editor', async () => {
@@ -232,7 +322,7 @@ spec:
 
       const editor = findNetworkPolicyEditor();
       expect(editor.exists()).toBe(true);
-      expect(editor.props('value')).toEqual('');
+      expect(editor.attributes('value')).toEqual('');
     });
   });
 
@@ -281,7 +371,7 @@ spec:
 
     it('presents existing policy', () => {
       expect(findPolicyName().attributes().value).toEqual('policy');
-      expect(wrapper.findAll(PolicyRuleBuilder).length).toEqual(1);
+      expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(1);
     });
 
     it('updates existing policy and redirects to a threat monitoring path', async () => {
@@ -337,6 +427,36 @@ spec:
         policy: { name: 'policy', manifest: toYaml(wrapper.vm.policy) },
       });
       expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
+    });
+  });
+
+  describe('add alert picker', () => {
+    beforeEach(() => {
+      factory({ provide: { glFeatures: { threatMonitoringAlerts: true } } });
+    });
+
+    it('does render the policy alert picker', () => {
+      expect(findPolicyAlertPicker().exists()).toBe(true);
+    });
+
+    it('adds a policy annotation on alert addition', async () => {
+      await modifyPolicyAlert({ isAlertEnabled: true });
+      expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: {
+          manifest: expect.stringContaining("app.gitlab.com/alert: 'true'"),
+        },
+      });
+    });
+
+    it('removes a policy annotation on alert removal', async () => {
+      await modifyPolicyAlert({ isAlertEnabled: false });
+      expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {
+        environmentId: -1,
+        policy: {
+          manifest: expect.not.stringContaining("app.gitlab.com/alert: 'true'"),
+        },
+      });
     });
   });
 });

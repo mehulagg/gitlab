@@ -7,6 +7,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:issue, refind: true) { create(:issue, project: project) }
+
   let(:target_issue) { create(:issue) }
 
   subject { described_class.new(project, user, issue: issue, target_issue: target_issue).execute }
@@ -66,6 +67,31 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             end
 
             include_examples 'service error', message: 'Target design collection already has designs'
+          end
+
+          context 'when target project already has designs' do
+            let!(:issue_x) { create(:issue, project: target_issue.project) }
+            let!(:existing) { create(:design, issue: issue_x, project: target_issue.project) }
+
+            let(:new_designs) do
+              target_issue.reset
+              target_issue.designs.where.not(id: existing.id)
+            end
+
+            it 'sets IIDs for new designs above existing ones' do
+              subject
+
+              expect(new_designs).to all(have_attributes(iid: (be > existing.iid)))
+            end
+
+            it 'does not allow for IID collisions' do
+              subject
+              create(:design, issue: issue_x, project: target_issue.project)
+
+              design_iids = target_issue.project.designs.map(&:id)
+
+              expect(design_iids).to match_array(design_iids.uniq)
+            end
           end
 
           include_examples 'service success'
@@ -162,9 +188,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
           it 'copies the Git repository data', :aggregate_failures do
             subject
 
-            commit_shas = target_repository.commits('master', limit: 99).map(&:id)
-
-            expect(commit_shas).to include(*target_issue.design_versions.ordered.pluck(:sha))
+            expect(commits_on_master(limit: 99)).to include(*target_issue.design_versions.ordered.pluck(:sha))
           end
 
           it 'creates a master branch if none previously existed' do
@@ -212,9 +236,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
               issue_2 = create(:issue, project: target_issue.project)
               create(:design, :with_file, issue: issue_2, project: target_issue.project)
 
-              expect { subject }.not_to change {
-                expect(target_repository.commits('master', limit: 10).size).to eq(1)
-              }
+              expect { subject }.not_to change { commits_on_master }
             end
 
             it 'sets the design collection copy state' do
@@ -222,6 +244,10 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
 
               expect(target_issue.design_collection).to be_copy_error
             end
+          end
+
+          def commits_on_master(limit: 10)
+            target_repository.commits('master', limit: limit).map(&:id)
           end
         end
       end

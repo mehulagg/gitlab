@@ -97,6 +97,7 @@ RSpec.describe Gitlab::Geo::Replication::BaseTransfer do
 
   describe '#stream_from_primary_to_object_storage' do
     let_it_be(:lfs_object) { create(:lfs_object, :with_file, :correct_oid) }
+
     let(:auth_headers) { { 'Authorization' => 'Bearer 12345' } }
     let(:download_link) { 'http://download.link' }
 

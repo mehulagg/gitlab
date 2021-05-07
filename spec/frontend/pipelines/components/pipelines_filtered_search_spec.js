@@ -1,6 +1,6 @@
+import { GlFilteredSearch } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { GlFilteredSearch } from '@gitlab/ui';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import PipelinesFilteredSearch from '~/pipelines/components/pipelines_list/pipelines_filtered_search.vue';
@@ -11,10 +11,10 @@ describe('Pipelines filtered search', () => {
   let mock;
 
   const findFilteredSearch = () => wrapper.find(GlFilteredSearch);
-  const getSearchToken = type =>
+  const getSearchToken = (type) =>
     findFilteredSearch()
       .props('availableTokens')
-      .find(token => token.type === type);
+      .find((token) => token.type === type);
   const findBranchToken = () => getSearchToken('ref');
   const findTagToken = () => getSearchToken('tag');
   const findUserToken = () => getSearchToken('username');
@@ -26,7 +26,7 @@ describe('Pipelines filtered search', () => {
         projectId: '21',
         params,
       },
-      attachToDocument: true,
+      attachTo: document.body,
     });
   };
 
@@ -138,7 +138,7 @@ describe('Pipelines filtered search', () => {
   describe('Url query params', () => {
     const params = {
       username: 'deja.green',
-      ref: 'master',
+      ref: 'main',
     };
 
     beforeEach(() => {

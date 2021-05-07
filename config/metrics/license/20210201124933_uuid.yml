@@ -1,0 +1,21 @@
+---
+key_path: uuid
+description: GitLab instance unique identifier
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: string
+status: data_available
+milestone: "9.1"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1521
+time_frame: none
+data_source: database
+instrumentation_class: 'Gitlab::Usage::Metrics::Instrumentations::UuidMetric'
+distribution:
+- ee
+- ce
+tier:
+- free
+- premium
+- ultimate

@@ -26,7 +26,7 @@ RSpec.describe Projects::IssuesController do
 
     context 'licensed' do
       before do
-        stub_licensed_features(issue_weights: true, epics: true)
+        stub_licensed_features(issue_weights: true, epics: true, security_dashboard: true)
       end
 
       describe '#index' do
@@ -60,6 +60,31 @@ RSpec.describe Projects::IssuesController do
         end
       end
 
+      describe '#new' do
+        render_views
+
+        context 'when a vulnerability_id is provided' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+          let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
+
+          subject { get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id } }
+
+          it 'sets the vulnerability_id' do
+            subject
+
+            expect(response.body).to include(vulnerability_field)
+          end
+
+          it 'sets the confidential flag to true by default' do
+            subject
+
+            expect(assigns(:issue).confidential).to eq(true)
+          end
+        end
+      end
+
       describe '#create' do
         it 'sets issue weight and epic' do
           perform :post, :create, issue: new_issue.attributes.merge(epic_id: epic.id)
@@ -71,12 +96,71 @@ RSpec.describe Projects::IssuesController do
           expect(issue.weight).to eq(new_issue.weight)
           expect(issue.epic).to eq(epic)
         end
+
+        context 'when created from a vulnerability' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+
+          before do
+            stub_licensed_features(security_dashboard: true)
+          end
+
+          it 'links the issue to the vulnerability' do
+            send_request
+
+            expect(project.issues.last.vulnerability_links.first.vulnerability).to eq(vulnerability)
+          end
+
+          it 'creates vulnerability feedback' do
+            send_request
+
+            expect(project.issues.last).to eq(Vulnerabilities::Feedback.last.issue)
+          end
+
+          it 'overwrites the default fields' do
+            send_request
+
+            issue = project.issues.last
+            expect(issue.title).to eq('Title')
+            expect(issue.description).to eq('Description')
+            expect(issue.confidential).to be false
+          end
+
+          it 'does not show an error message' do
+            expect(flash[:alert]).to be_nil
+          end
+
+          context 'when vulnerability already has a linked issue' do
+            render_views
+
+            let!(:vulnerabilities_issue_link) { create(:vulnerabilities_issue_link, :created, vulnerability: vulnerability) }
+
+            it 'shows an error message' do
+              send_request
+
+              expect(flash[:alert]).to include('Unable to create link to vulnerability')
+              expect(vulnerability.issue_links.map(&:issue)).to eq([vulnerabilities_issue_link.issue])
+            end
+          end
+
+          private
+
+          def send_request
+            post :create, params: {
+              namespace_id: project.namespace.to_param,
+              project_id: project,
+              issue: { title: 'Title', description: 'Description', confidential: 'false' },
+              vulnerability_id: vulnerability.id
+            }
+          end
+        end
       end
     end
 
     context 'unlicensed' do
       before do
-        stub_licensed_features(issue_weights: false, epics: false)
+        stub_licensed_features(issue_weights: false, epics: false, security_dashboard: false)
       end
 
       describe '#index' do
@@ -97,6 +181,24 @@ RSpec.describe Projects::IssuesController do
           expect(response).to have_gitlab_http_status(:ok)
           expect(issue.reload.weight).to be_nil
           expect(issue.reload.read_attribute(:weight)).to eq(5) # pre-existing data is not overwritten
+        end
+      end
+
+      describe '#new' do
+        render_views
+
+        context 'when a vulnerability_id is provided' do
+          let(:pipeline) { create(:ci_pipeline, project: project) }
+          let(:finding) { create(:vulnerabilities_finding, pipelines: [pipeline]) }
+          let(:vulnerability) { create(:vulnerability, project: project, findings: [finding]) }
+          let(:vulnerability_field) { "<input type=\"hidden\" name=\"vulnerability_id\" id=\"vulnerability_id\" value=\"#{vulnerability.id}\" />" }
+
+          it 'does not build issue from a vulnerability' do
+            get :new, params: { namespace_id: project.namespace, project_id: project, vulnerability_id: vulnerability.id }
+
+            expect(response.body).not_to include(vulnerability_field)
+            expect(issue.description).to be_nil
+          end
         end
       end
 

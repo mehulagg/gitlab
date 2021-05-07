@@ -27,7 +27,7 @@ export default {
 <template>
   <!-- TODO: im not sure why this is rendered only for exactly 50 items, why not >= 50? -->
   <span v-if="count >= $options.eventsListItemLimit" class="events-info float-right">
-    <gl-icon v-gl-tooltip="{ title: $options.tooltipTitle }" name="warning" aria-hidden="true" />
+    <gl-icon v-gl-tooltip="{ title: $options.tooltipTitle }" name="warning" />
     {{ n__('Showing %d event', 'Showing %d events', $options.eventsListItemLimit) }}
   </span>
 </template>

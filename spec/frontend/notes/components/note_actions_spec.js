@@ -1,11 +1,13 @@
-import Vue from 'vue';
-import { shallowMount, createLocalVue, createWrapper } from '@vue/test-utils';
-import { TEST_HOST } from 'spec/test_constants';
+import { mount, createLocalVue, createWrapper } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import createStore from '~/notes/stores';
-import noteActions from '~/notes/components/note_actions.vue';
-import { userDataMock } from '../mock_data';
+import Vue from 'vue';
+import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
+import noteActions from '~/notes/components/note_actions.vue';
+import createStore from '~/notes/stores';
+import UserAccessRoleBadge from '~/vue_shared/components/user_access_role_badge.vue';
+import { userDataMock } from '../mock_data';
 
 describe('noteActions', () => {
   let wrapper;
@@ -14,9 +16,12 @@ describe('noteActions', () => {
   let actions;
   let axiosMock;
 
-  const shallowMountNoteActions = (propsData, computed) => {
+  const findUserAccessRoleBadge = (idx) => wrapper.findAll(UserAccessRoleBadge).at(idx);
+  const findUserAccessRoleBadgeText = (idx) => findUserAccessRoleBadge(idx).text().trim();
+
+  const mountNoteActions = (propsData, computed) => {
     const localVue = createLocalVue();
-    return shallowMount(localVue.extend(noteActions), {
+    return mount(localVue.extend(noteActions), {
       store,
       propsData,
       localVue,
@@ -43,6 +48,7 @@ describe('noteActions', () => {
       projectName: 'project',
       reportAbusePath: `${TEST_HOST}/abuse_reports/new?ref_url=http%3A%2F%2Flocalhost%3A3000%2Fgitlab-org%2Fgitlab-ce%2Fissues%2F7%23note_539&user_id=26`,
       showReply: false,
+      awardPath: `${TEST_HOST}/award_emoji`,
     };
 
     actions = {
@@ -61,27 +67,15 @@ describe('noteActions', () => {
     beforeEach(() => {
       store.dispatch('setUserData', userDataMock);
 
-      wrapper = shallowMountNoteActions(props);
+      wrapper = mountNoteActions(props);
     });
 
     it('should render noteable author badge', () => {
-      expect(
-        wrapper
-          .findAll('.note-role')
-          .at(0)
-          .text()
-          .trim(),
-      ).toEqual('Author');
+      expect(findUserAccessRoleBadgeText(0)).toBe('Author');
     });
 
     it('should render access level badge', () => {
-      expect(
-        wrapper
-          .findAll('.note-role')
-          .at(1)
-          .text()
-          .trim(),
-      ).toEqual(props.accessLevel);
+      expect(findUserAccessRoleBadgeText(1)).toBe(props.accessLevel);
     });
 
     it('should render contributor badge', () => {
@@ -91,13 +85,7 @@ describe('noteActions', () => {
       });
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          wrapper
-            .findAll('.note-role')
-            .at(1)
-            .text()
-            .trim(),
-        ).toBe('Contributor');
+        expect(findUserAccessRoleBadgeText(1)).toBe('Contributor');
       });
     });
 
@@ -119,7 +107,7 @@ describe('noteActions', () => {
         expect(wrapper.find('.js-btn-copy-note-link').exists()).toBe(true);
       });
 
-      it('should not show copy link action when `noteUrl` prop is empty', done => {
+      it('should not show copy link action when `noteUrl` prop is empty', (done) => {
         wrapper.setProps({
           ...props,
           author: {
@@ -145,7 +133,7 @@ describe('noteActions', () => {
         expect(wrapper.find('.js-note-delete').exists()).toBe(true);
       });
 
-      it('closes tooltip when dropdown opens', done => {
+      it('closes tooltip when dropdown opens', (done) => {
         wrapper.find('.more-actions-toggle').trigger('click');
 
         const rootWrapper = createWrapper(wrapper.vm.$root);
@@ -153,7 +141,7 @@ describe('noteActions', () => {
           .then(() => {
             const emitted = Object.keys(rootWrapper.emitted());
 
-            expect(emitted).toEqual(['bv::hide::tooltip']);
+            expect(emitted).toEqual([BV_HIDE_TOOLTIP]);
             done();
           })
           .catch(done.fail);
@@ -162,6 +150,22 @@ describe('noteActions', () => {
       it('should not be possible to assign or unassign the comment author in a merge request', () => {
         const assignUserButton = wrapper.find('[data-testid="assign-user"]');
         expect(assignUserButton.exists()).toBe(false);
+      });
+
+      it('should render the correct (unescaped) name in the Resolved By tooltip', () => {
+        const complexUnescapedName = 'This is a Ǝ\'𝞓\'E "cat"?';
+        wrapper = mountNoteActions({
+          ...props,
+          canResolve: true,
+          isResolving: false,
+          isResolved: true,
+          resolvedBy: {
+            name: complexUnescapedName,
+          },
+        });
+
+        const { resolveButton } = wrapper.vm.$refs;
+        expect(resolveButton.$el.getAttribute('title')).toBe(`Resolved by ${complexUnescapedName}`);
       });
     });
   });
@@ -178,7 +182,7 @@ describe('noteActions', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMountNoteActions(props, {
+      wrapper = mountNoteActions(props, {
         targetType: () => 'issue',
       });
       store.state.noteableData = {
@@ -205,7 +209,7 @@ describe('noteActions', () => {
     };
 
     beforeEach(() => {
-      wrapper = shallowMountNoteActions(props, {
+      wrapper = mountNoteActions(props, {
         targetType: () => 'issue',
       });
     });
@@ -221,7 +225,7 @@ describe('noteActions', () => {
   describe('user is not logged in', () => {
     beforeEach(() => {
       store.dispatch('setUserData', {});
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         canDelete: false,
         canEdit: false,
@@ -241,7 +245,7 @@ describe('noteActions', () => {
 
   describe('for showReply = true', () => {
     beforeEach(() => {
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         showReply: true,
       });
@@ -256,7 +260,7 @@ describe('noteActions', () => {
 
   describe('for showReply = false', () => {
     beforeEach(() => {
-      wrapper = shallowMountNoteActions({
+      wrapper = mountNoteActions({
         ...props,
         showReply: false,
       });
@@ -273,7 +277,7 @@ describe('noteActions', () => {
     beforeEach(() => {
       store.dispatch('setUserData', userDataMock);
 
-      wrapper = shallowMountNoteActions({ ...props, canResolve: true, isDraft: true });
+      wrapper = mountNoteActions({ ...props, canResolve: true, isDraft: true });
     });
 
     it('should render the right resolve button title', () => {

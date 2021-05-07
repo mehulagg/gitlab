@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -11,9 +14,11 @@ review the sessions, and revoke any you don't recognize.
 
 ## Listing all active sessions
 
-1. Click your avatar.
-1. Select **Settings**.
-1. Click **Active Sessions** in the sidebar.
+To list all active sessions:
+
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Active Sessions**.
 
 ![Active sessions list](img/active_sessions_list.png)
 
@@ -26,12 +31,16 @@ exceeds 100, the oldest ones are deleted.
 
 ## Revoking a session
 
-1. Use the previous steps to navigate to **Active Sessions**.
-1. Click on **Revoke** besides a session. The current session cannot be revoked, as this would sign you out of GitLab.
+To revoke an active session:
 
-NOTE: **Note:**
+1. In the top-right corner, select your avatar.
+1. Select **Edit profile**.
+1. In the left sidebar, select **Active Sessions**.
+1. Select **Revoke** next to a session. The current session cannot be revoked, as this would sign you out of GitLab.
+
+NOTE:
 When any session is revoked all **Remember me** tokens for all
-devices will be revoked. See ['Why do I keep getting signed out?'](index.md#why-do-i-keep-getting-signed-out)
+devices are revoked. See ['Why do I keep getting signed out?'](index.md#why-do-i-keep-getting-signed-out)
 for more information about the **Remember me** feature.
 
 <!-- ## Troubleshooting

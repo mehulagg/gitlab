@@ -35,8 +35,10 @@ module ApplicationSettingImplementation
   class_methods do
     def defaults
       {
+        admin_mode: false,
         after_sign_up_text: nil,
         akismet_enabled: false,
+        akismet_api_key: nil,
         allow_local_requests_from_system_hooks: true,
         allow_local_requests_from_web_hooks_and_services: false,
         asset_proxy_enabled: false,
@@ -58,9 +60,10 @@ module ApplicationSettingImplementation
         default_projects_limit: Settings.gitlab['default_projects_limit'],
         default_snippet_visibility: Settings.gitlab.default_projects_features['visibility_level'],
         diff_max_patch_bytes: Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES,
+        disable_feed_token: false,
         disabled_oauth_sign_in_sources: [],
         dns_rebinding_protection_enabled: true,
-        domain_whitelist: Settings.gitlab['domain_whitelist'],
+        domain_allowlist: Settings.gitlab['domain_allowlist'],
         dsa_key_restriction: 0,
         ecdsa_key_restriction: 0,
         ed25519_key_restriction: 0,
@@ -70,7 +73,11 @@ module ApplicationSettingImplementation
         eks_secret_access_key: nil,
         email_restrictions_enabled: false,
         email_restrictions: nil,
+        external_pipeline_validation_service_timeout: nil,
+        external_pipeline_validation_service_token: nil,
+        external_pipeline_validation_service_url: nil,
         first_day_of_week: 0,
+        floc_enabled: false,
         gitaly_timeout_default: 55,
         gitaly_timeout_fast: 10,
         gitaly_timeout_medium: 30,
@@ -90,19 +97,23 @@ module ApplicationSettingImplementation
         housekeeping_gc_period: 200,
         housekeeping_incremental_repack_period: 10,
         import_sources: Settings.gitlab['import_sources'],
+        invisible_captcha_enabled: false,
         issues_create_limit: 300,
         local_markdown_version: 0,
         login_recaptcha_protection_enabled: false,
         max_artifacts_size: Settings.artifacts['max_size'],
         max_attachment_size: Settings.gitlab['max_attachment_size'],
-        max_import_size: 50,
+        max_import_size: 0,
         minimum_password_length: DEFAULT_MINIMUM_PASSWORD_LENGTH,
         mirror_available: true,
+        notes_create_limit: 300,
+        notes_create_limit_allowlist: [],
         notify_on_unknown_sign_in: true,
         outbound_local_requests_whitelist: [],
         password_authentication_enabled_for_git: true,
         password_authentication_enabled_for_web: Settings.gitlab['signin_enabled'],
         performance_bar_allowed_group_id: nil,
+        personal_access_token_prefix: nil,
         plantuml_enabled: false,
         plantuml_url: nil,
         polling_interval_multiplier: 1,
@@ -118,9 +129,9 @@ module ApplicationSettingImplementation
         raw_blob_request_limit: 300,
         recaptcha_enabled: false,
         repository_checks_enabled: true,
-        repository_storages_weighted: { default: 100 },
+        repository_storages_weighted: { 'default' => 100 },
         repository_storages: ['default'],
-        require_admin_approval_after_user_signup: false,
+        require_admin_approval_after_user_signup: true,
         require_two_factor_authentication: false,
         restricted_visibility_levels: Settings.gitlab['restricted_visibility_levels'],
         rsa_key_restriction: 0,
@@ -140,6 +151,7 @@ module ApplicationSettingImplementation
         sourcegraph_url: nil,
         spam_check_endpoint_enabled: false,
         spam_check_endpoint_url: nil,
+        spam_check_api_key: nil,
         terminal_max_session_time: 0,
         throttle_authenticated_api_enabled: false,
         throttle_authenticated_api_period_in_seconds: 3600,
@@ -147,6 +159,9 @@ module ApplicationSettingImplementation
         throttle_authenticated_web_enabled: false,
         throttle_authenticated_web_period_in_seconds: 3600,
         throttle_authenticated_web_requests_per_period: 7200,
+        throttle_authenticated_packages_api_enabled: false,
+        throttle_authenticated_packages_api_period_in_seconds: 15,
+        throttle_authenticated_packages_api_requests_per_period: 1000,
         throttle_incident_management_notification_enabled: false,
         throttle_incident_management_notification_per_period: 3600,
         throttle_incident_management_notification_period_in_seconds: 3600,
@@ -156,6 +171,9 @@ module ApplicationSettingImplementation
         throttle_unauthenticated_enabled: false,
         throttle_unauthenticated_period_in_seconds: 3600,
         throttle_unauthenticated_requests_per_period: 3600,
+        throttle_unauthenticated_packages_api_enabled: false,
+        throttle_unauthenticated_packages_api_period_in_seconds: 15,
+        throttle_unauthenticated_packages_api_requests_per_period: 800,
         time_tracking_limit_to_hours: false,
         two_factor_grace_period: 48,
         unique_ips_limit_enabled: false,
@@ -168,7 +186,12 @@ module ApplicationSettingImplementation
         user_show_add_ssh_key_message: true,
         wiki_page_max_content_bytes: 50.megabytes,
         container_registry_delete_tags_service_timeout: 250,
-        container_registry_expiration_policies_worker_capacity: 0
+        container_registry_expiration_policies_worker_capacity: 0,
+        kroki_enabled: false,
+        kroki_url: nil,
+        kroki_formats: { blockdiag: false, bpmn: false, excalidraw: false },
+        rate_limiting_response_text: nil,
+        whats_new_variant: 0
       }
     end
 
@@ -202,38 +225,38 @@ module ApplicationSettingImplementation
     super(sources)
   end
 
-  def domain_whitelist_raw
-    array_to_string(self.domain_whitelist)
+  def domain_allowlist_raw
+    array_to_string(self.domain_allowlist)
   end
 
-  def domain_blacklist_raw
-    array_to_string(self.domain_blacklist)
+  def domain_denylist_raw
+    array_to_string(self.domain_denylist)
   end
 
-  def domain_whitelist_raw=(values)
-    self.domain_whitelist = strings_to_array(values)
+  def domain_allowlist_raw=(values)
+    self.domain_allowlist = strings_to_array(values)
   end
 
-  def domain_blacklist_raw=(values)
-    self.domain_blacklist = strings_to_array(values)
+  def domain_denylist_raw=(values)
+    self.domain_denylist = strings_to_array(values)
   end
 
-  def domain_blacklist_file=(file)
-    self.domain_blacklist_raw = file.read
+  def domain_denylist_file=(file)
+    self.domain_denylist_raw = file.read
   end
 
-  def outbound_local_requests_whitelist_raw
+  def outbound_local_requests_allowlist_raw
     array_to_string(self.outbound_local_requests_whitelist)
   end
 
-  def outbound_local_requests_whitelist_raw=(values)
-    clear_memoization(:outbound_local_requests_whitelist_arrays)
+  def outbound_local_requests_allowlist_raw=(values)
+    clear_memoization(:outbound_local_requests_allowlist_arrays)
 
     self.outbound_local_requests_whitelist = strings_to_array(values)
   end
 
   def add_to_outbound_local_requests_whitelist(values_array)
-    clear_memoization(:outbound_local_requests_whitelist_arrays)
+    clear_memoization(:outbound_local_requests_allowlist_arrays)
 
     self.outbound_local_requests_whitelist ||= []
     self.outbound_local_requests_whitelist += values_array
@@ -245,13 +268,13 @@ module ApplicationSettingImplementation
   # application_setting.outbound_local_requests_whitelist array into 2 arrays;
   # an array of IPAddr objects (`[IPAddr.new('127.0.0.1')]`), and an array of
   # domain strings (`['www.example.com']`).
-  def outbound_local_requests_whitelist_arrays
-    strong_memoize(:outbound_local_requests_whitelist_arrays) do
+  def outbound_local_requests_allowlist_arrays
+    strong_memoize(:outbound_local_requests_allowlist_arrays) do
       next [[], []] unless self.outbound_local_requests_whitelist
 
-      ip_whitelist, domain_whitelist = separate_whitelists(self.outbound_local_requests_whitelist)
+      ip_allowlist, domain_allowlist = separate_allowlists(self.outbound_local_requests_whitelist)
 
-      [ip_whitelist, domain_whitelist]
+      [ip_allowlist, domain_allowlist]
     end
   end
 
@@ -263,21 +286,30 @@ module ApplicationSettingImplementation
     self.protected_paths = strings_to_array(values)
   end
 
+  def notes_create_limit_allowlist_raw
+    array_to_string(self.notes_create_limit_allowlist)
+  end
+
+  def notes_create_limit_allowlist_raw=(values)
+    self.notes_create_limit_allowlist = strings_to_array(values).map(&:downcase)
+  end
+
   def asset_proxy_whitelist=(values)
     values = strings_to_array(values) if values.is_a?(String)
 
-    # make sure we always whitelist the running host
+    # make sure we always allow the running host
     values << Gitlab.config.gitlab.host unless values.include?(Gitlab.config.gitlab.host)
 
     self[:asset_proxy_whitelist] = values
   end
+  alias_method :asset_proxy_allowlist=, :asset_proxy_whitelist=
+
+  def asset_proxy_allowlist
+    read_attribute(:asset_proxy_whitelist)
+  end
 
   def repository_storages
     Array(read_attribute(:repository_storages))
-  end
-
-  def repository_storages_weighted
-    read_attribute(:repository_storages_weighted)
   end
 
   def commit_email_hostname
@@ -311,9 +343,10 @@ module ApplicationSettingImplementation
 
   def normalized_repository_storage_weights
     strong_memoize(:normalized_repository_storage_weights) do
-      weights_total = repository_storages_weighted.values.reduce(:+)
+      repository_storages_weights = repository_storages_weighted.slice(*Gitlab.config.repositories.storages.keys)
+      weights_total = repository_storages_weights.values.reduce(:+)
 
-      repository_storages_weighted.transform_values do |w|
+      repository_storages_weights.transform_values do |w|
         next w if weights_total == 0
 
         w.to_f / weights_total
@@ -396,30 +429,33 @@ module ApplicationSettingImplementation
 
   private
 
-  def separate_whitelists(string_array)
-    string_array.reduce([[], []]) do |(ip_whitelist, domain_whitelist), string|
+  def separate_allowlists(string_array)
+    string_array.reduce([[], []]) do |(ip_allowlist, domain_allowlist), string|
       address, port = parse_addr_and_port(string)
 
       ip_obj = Gitlab::Utils.string_to_ip_object(address)
 
       if ip_obj
-        ip_whitelist << Gitlab::UrlBlockers::IpWhitelistEntry.new(ip_obj, port: port)
+        ip_allowlist << Gitlab::UrlBlockers::IpAllowlistEntry.new(ip_obj, port: port)
       else
-        domain_whitelist << Gitlab::UrlBlockers::DomainWhitelistEntry.new(address, port: port)
+        domain_allowlist << Gitlab::UrlBlockers::DomainAllowlistEntry.new(address, port: port)
       end
 
-      [ip_whitelist, domain_whitelist]
+      [ip_allowlist, domain_allowlist]
     end
   end
 
   def parse_addr_and_port(str)
     case str
     when /\A\[(?<address> .* )\]:(?<port> \d+ )\z/x      # string like "[::1]:80"
-      address, port = $~[:address], $~[:port]
+      address = $~[:address]
+      port = $~[:port]
     when /\A(?<address> [^:]+ ):(?<port> \d+ )\z/x       # string like "127.0.0.1:80"
-      address, port = $~[:address], $~[:port]
+      address = $~[:address]
+      port = $~[:port]
     else                                                 # string with no port number
-      address, port = str, nil
+      address = str
+      port = nil
     end
 
     [address, port&.to_i]
@@ -451,16 +487,20 @@ module ApplicationSettingImplementation
       invalid.empty?
   end
 
+  def coerce_repository_storages_weighted
+    repository_storages_weighted.transform_values!(&:to_i)
+  end
+
   def check_repository_storages_weighted
     invalid = repository_storages_weighted.keys - Gitlab.config.repositories.storages.keys
-    errors.add(:repository_storages_weighted, "can't include: %{invalid_storages}" % { invalid_storages: invalid.join(", ") }) unless
+    errors.add(:repository_storages_weighted, _("can't include: %{invalid_storages}") % { invalid_storages: invalid.join(", ") }) unless
       invalid.empty?
 
     repository_storages_weighted.each do |key, val|
       next unless val.present?
 
-      errors.add(:"repository_storages_weighted_#{key}", "value must be an integer") unless val.is_a?(Integer)
-      errors.add(:"repository_storages_weighted_#{key}", "value must be between 0 and 100") unless val.between?(0, 100)
+      errors.add(:repository_storages_weighted, _("value for '%{storage}' must be an integer") % { storage: key }) unless val.is_a?(Integer)
+      errors.add(:repository_storages_weighted, _("value for '%{storage}' must be between 0 and 100") % { storage: key }) unless val.between?(0, 100)
     end
   end
 

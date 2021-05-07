@@ -11,6 +11,10 @@ RSpec.describe ChatNotificationService do
     it { is_expected.to validate_presence_of :webhook }
   end
 
+  describe 'validations' do
+    it { is_expected.to validate_inclusion_of(:labels_to_be_notified_behavior).in_array(%w[match_any match_all]) }
+  end
+
   describe '#can_test?' do
     context 'with empty repository' do
       it 'returns true' do
@@ -32,8 +36,9 @@ RSpec.describe ChatNotificationService do
   describe '#execute' do
     subject(:chat_service) { described_class.new }
 
+    let_it_be(:project) { create(:project, :repository) }
+
     let(:user) { create(:user) }
-    let(:project) { create(:project, :repository) }
     let(:webhook_url) { 'https://example.gitlab.com/' }
     let(:data) { Gitlab::DataBuilder::Push.build_sample(subject.project, user) }
 
@@ -72,6 +77,142 @@ RSpec.describe ChatNotificationService do
 
         expect(chat_service).to receive(:get_message).with(any_args, hash_including(project_name: 'Project Name'))
         chat_service.execute(data)
+      end
+    end
+
+    context 'when the data object has a label' do
+      let_it_be(:label) { create(:label, name: 'Bug') }
+      let_it_be(:label_2) { create(:label, name: 'Community contribution') }
+      let_it_be(:label_3) { create(:label, name: 'Backend') }
+      let_it_be(:issue) { create(:labeled_issue, project: project, labels: [label, label_2, label_3]) }
+      let_it_be(:note) { create(:note, noteable: issue, project: project) }
+
+      let(:data) { Gitlab::DataBuilder::Note.build(note, user) }
+
+      it 'notifies the chat service' do
+        expect(chat_service).to receive(:notify).with(any_args)
+
+        chat_service.execute(data)
+      end
+
+      shared_examples 'notifies the chat service' do
+        specify do
+          expect(chat_service).to receive(:notify).with(any_args)
+
+          chat_service.execute(data)
+        end
+      end
+
+      shared_examples 'does not notify the chat service' do
+        specify do
+          expect(chat_service).not_to receive(:notify).with(any_args)
+
+          chat_service.execute(data)
+        end
+      end
+
+      context 'when labels_to_be_notified_behavior is not defined' do
+        subject(:chat_service) { described_class.new(labels_to_be_notified: label_filter) }
+
+        context 'no matching labels' do
+          let(:label_filter) { '~some random label' }
+
+          it_behaves_like 'does not notify the chat service'
+        end
+
+        context 'only one label matches' do
+          let(:label_filter) { '~some random label, ~Bug' }
+
+          it_behaves_like 'notifies the chat service'
+        end
+      end
+
+      context 'when labels_to_be_notified_behavior is match_any' do
+        subject(:chat_service) do
+          described_class.new(
+            labels_to_be_notified: label_filter,
+            labels_to_be_notified_behavior: 'match_any'
+          )
+        end
+
+        context 'no label filter' do
+          let(:label_filter) { nil }
+
+          it_behaves_like 'notifies the chat service'
+        end
+
+        context 'no matching labels' do
+          let(:label_filter) { '~some random label' }
+
+          it_behaves_like 'does not notify the chat service'
+        end
+
+        context 'only one label matches' do
+          let(:label_filter) { '~some random label, ~Bug' }
+
+          it_behaves_like 'notifies the chat service'
+        end
+      end
+
+      context 'when labels_to_be_notified_behavior is match_all' do
+        subject(:chat_service) do
+          described_class.new(
+            labels_to_be_notified: label_filter,
+            labels_to_be_notified_behavior: 'match_all'
+          )
+        end
+
+        context 'no label filter' do
+          let(:label_filter) { nil }
+
+          it_behaves_like 'notifies the chat service'
+        end
+
+        context 'no matching labels' do
+          let(:label_filter) { '~some random label' }
+
+          it_behaves_like 'does not notify the chat service'
+        end
+
+        context 'only one label matches' do
+          let(:label_filter) { '~some random label, ~Bug' }
+
+          it_behaves_like 'does not notify the chat service'
+        end
+
+        context 'labels matches exactly' do
+          let(:label_filter) { '~Bug, ~Backend, ~Community contribution' }
+
+          it_behaves_like 'notifies the chat service'
+        end
+
+        context 'labels matches but object has more' do
+          let(:label_filter) { '~Bug, ~Backend' }
+
+          it_behaves_like 'notifies the chat service'
+        end
+
+        context 'labels are distributed on multiple objects' do
+          let(:label_filter) { '~Bug, ~Backend' }
+          let(:data) do
+            Gitlab::DataBuilder::Note.build(note, user).merge({
+              issue: {
+                labels: [
+                  { title: 'Bug' }
+                ]
+              },
+              merge_request: {
+                labels: [
+                  {
+                    title: 'Backend'
+                  }
+                ]
+              }
+            })
+          end
+
+          it_behaves_like 'does not notify the chat service'
+        end
       end
     end
 

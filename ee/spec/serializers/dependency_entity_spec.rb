@@ -7,6 +7,7 @@ RSpec.describe DependencyEntity do
     subject { described_class.represent(dependency, request: request).as_json }
 
     let_it_be(:user) { create(:user) }
+
     let(:project) { create(:project, :repository, :private) }
     let(:request) { double('request') }
     let(:dependency) { build(:dependency, :with_vulnerabilities, :with_licenses, :indirect) }
@@ -28,7 +29,9 @@ RSpec.describe DependencyEntity do
           project.add_developer(user)
         end
 
-        it { is_expected.to eq(dependency.except(:package_manager)) }
+        it 'includes license info and vulnerabilities' do
+          is_expected.to eq(dependency.except(:package_manager, :iid))
+        end
       end
 
       context 'with reporter' do
@@ -37,7 +40,7 @@ RSpec.describe DependencyEntity do
         end
 
         it 'includes license info and not vulnerabilities' do
-          is_expected.to eq(dependency.except(:vulnerabilities, :package_manager))
+          is_expected.to eq(dependency.except(:vulnerabilities, :package_manager, :iid))
         end
       end
     end
@@ -48,7 +51,7 @@ RSpec.describe DependencyEntity do
       end
 
       it 'does not include licenses and vulnerabilities' do
-        is_expected.to eq(dependency.except(:vulnerabilities, :licenses, :package_manager))
+        is_expected.to eq(dependency.except(:vulnerabilities, :licenses, :package_manager, :iid))
       end
     end
 

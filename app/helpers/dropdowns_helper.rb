@@ -29,7 +29,7 @@ module DropdownsHelper
           output << dropdown_filter(options[:placeholder])
         end
 
-        output << content_tag(:div, class: "dropdown-content #{options[:content_class] if options.key?(:content_class)}") do
+        output << content_tag(:div, data: { qa_selector: "dropdown_list_content" }, class: "dropdown-content #{options[:content_class] if options.key?(:content_class)}") do
           capture(&block) if block && !options.key?(:footer_content)
         end
 
@@ -51,7 +51,7 @@ module DropdownsHelper
     default_label = data_attr[:default_label]
     content_tag(:button, disabled: options[:disabled], class: "dropdown-menu-toggle #{options[:toggle_class] if options.key?(:toggle_class)}", id: (options[:id] if options.key?(:id)), type: "button", data: data_attr) do
       output = content_tag(:span, toggle_text, class: "dropdown-toggle-text #{'is-default' if toggle_text == default_label}")
-      output << icon('chevron-down')
+      output << sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
       output.html_safe
     end
   end
@@ -102,7 +102,7 @@ module DropdownsHelper
 
   def dropdown_filter(placeholder, search_id: nil)
     content_tag :div, class: "dropdown-input" do
-      filter_output = search_field_tag search_id, nil, class: "dropdown-input-field qa-dropdown-input-field", placeholder: placeholder, autocomplete: 'off'
+      filter_output = search_field_tag search_id, nil, data: { qa_selector: "dropdown_input_field" }, class: "dropdown-input-field", placeholder: placeholder, autocomplete: 'off'
       filter_output << sprite_icon('search', css_class: 'dropdown-input-search')
       filter_output << sprite_icon('close', size: 16, css_class: 'dropdown-input-clear js-dropdown-input-clear')
 

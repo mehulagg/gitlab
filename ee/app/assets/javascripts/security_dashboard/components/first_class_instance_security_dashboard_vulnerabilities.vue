@@ -1,11 +1,11 @@
 <script>
-import produce from 'immer';
 import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
+import produce from 'immer';
 import { fetchPolicies } from '~/lib/graphql';
-import VulnerabilityList from './vulnerability_list.vue';
-import vulnerabilitiesQuery from '../graphql/instance_vulnerabilities.graphql';
-import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import vulnerabilitiesQuery from '../graphql/queries/instance_vulnerabilities.query.graphql';
 import { preparePageInfo } from '../helpers';
+import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import VulnerabilityList from './vulnerability_list.vue';
 
 export default {
   components: {
@@ -18,13 +18,12 @@ export default {
     filters: {
       type: Object,
       required: false,
-      default: () => ({}),
+      default: null,
     },
   },
   data() {
     return {
       pageInfo: {},
-      isFirstResultLoading: true,
       vulnerabilities: [],
       errorLoadingVulnerabilities: false,
       sortBy: 'severity',
@@ -34,6 +33,9 @@ export default {
   computed: {
     isLoadingQuery() {
       return this.$apollo.queries.vulnerabilities.loading;
+    },
+    isLoadingFirstResult() {
+      return this.isLoadingQuery && this.vulnerabilities.length === 0;
     },
     sort() {
       return `${this.sortBy}_${this.sortDirection}`;
@@ -51,13 +53,26 @@ export default {
         };
       },
       update: ({ vulnerabilities }) => vulnerabilities.nodes,
-      result({ data, loading }) {
-        this.isFirstResultLoading = loading;
+      result({ data }) {
         this.pageInfo = preparePageInfo(data?.vulnerabilities?.pageInfo);
       },
       error() {
         this.errorLoadingVulnerabilities = true;
       },
+      skip() {
+        return !this.filters;
+      },
+    },
+  },
+  watch: {
+    filters() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
+      this.pageInfo = {};
+    },
+    sort() {
+      // Clear out the existing vulnerabilities so that the skeleton loader is shown.
+      this.vulnerabilities = [];
     },
   },
   methods: {
@@ -69,14 +84,12 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            const results = produce(fetchMoreResult, draftData => {
-              // eslint-disable-next-line no-param-reassign
+            return produce(fetchMoreResult, (draftData) => {
               draftData.vulnerabilities.nodes = [
                 ...previousResult.vulnerabilities.nodes,
                 ...draftData.vulnerabilities.nodes,
               ];
             });
-            return results;
           },
         });
       }
@@ -106,7 +119,7 @@ export default {
     <vulnerability-list
       v-else
       :filters="filters"
-      :is-loading="isFirstResultLoading"
+      :is-loading="isLoadingFirstResult"
       :vulnerabilities="vulnerabilities"
       should-show-project-namespace
       @sort-changed="handleSortChange"

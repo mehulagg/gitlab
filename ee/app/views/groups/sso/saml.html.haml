@@ -1,21 +1,28 @@
 - page_title _('SAML SSO for %{group_name}') % { group_name: @group_name }
 
-= render 'devise/shared/tab_single', tab_title: _('SAML SSO')
-.login-box
-  .login-body
-    - if @group_saml_identity || !user_signed_in?
-      %h4= _('Sign in to "%{group_name}"') % { group_name: @group_name }
-    - else
-      %h4= _('Allow "%{group_name}" to sign you in') % { group_name: @group_name }
+- if @auto_redirect_to_provider
+  .gl-spinner-container
+    .gl-spinner.gl-spinner-dark.gl-spinner-lg{ aria: { label: 'Loading' } }
+  .gl-text-center.gl-mt-7
+    %h4= _('Reauthenticating with SAML provider.')
+  = saml_link _('Sign in with Single Sign-On'), @group_path, id: 'js-auto-redirect-to-provider', html_class: 'gl-display-none', redirect: @redirect_path
+- else
+  = render 'devise/shared/tab_single', tab_title: _('SAML SSO')
+  .login-box
+    .login-body
+      - if @group_saml_identity || !user_signed_in?
+        %h4= _('Sign in to "%{group_name}"') % { group_name: @group_name }
+      - else
+        %h4= _('Allow "%{group_name}" to sign you in') % { group_name: @group_name }
 
-    %p= _('The "%{group_path}" group allows you to sign in with your Single Sign-On Account') % { group_path: @group_path }
+      %p= _('The "%{group_path}" group allows you to sign in with your Single Sign-On Account') % { group_path: @group_path }
 
-    - if @group_saml_identity || !user_signed_in?
-      %p= _("This will redirect you to an external sign in page.")
+      - if @group_saml_identity || !user_signed_in?
+        %p= _("This will redirect you to an external sign in page.")
 
-      = saml_link _('Sign in with Single Sign-On'), @group_path, html_class: 'btn btn-success btn-block qa-saml-sso-signin-button', redirect: @redirect_path
-    - else
-      .card.card-body.bs-callout-warning
-        = _("Only proceed if you trust %{idp_url} to control your GitLab account sign in.") % { idp_url: @idp_url }
+        = saml_link _('Sign in with Single Sign-On'), @group_path, html_class: 'btn btn-success btn-md gl-button btn-block qa-saml-sso-signin-button', redirect: @redirect_path
+      - else
+        .card.card-body.bs-callout-warning
+          = _("Only proceed if you trust %{idp_url} to control your GitLab account sign in.") % { idp_url: @idp_url }
 
-      = saml_link _('Authorize'), @group_path, html_class: 'btn btn-success btn-block qa-saml-sso-signin-button'
+        = saml_link _('Authorize'), @group_path, html_class: 'btn btn-success btn-md gl-button btn-block qa-saml-sso-signin-button'

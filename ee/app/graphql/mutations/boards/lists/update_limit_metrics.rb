@@ -29,7 +29,7 @@ module Mutations
         field :list,
               ::Types::BoardListType,
               null: true,
-              description: 'The updated list'
+              description: 'The updated list.'
 
         def ready?(**args)
           if limit_metric_settings_of(args).blank?
@@ -46,8 +46,8 @@ module Mutations
           update_result = update_list(args)
 
           {
-            list: update_result[:list],
-            errors: list.errors.full_messages
+            list: update_result.payload.fetch(:list),
+            errors: update_result.errors
           }
         end
 
@@ -69,26 +69,16 @@ module Mutations
         end
 
         def authorize_admin_rights!
-          raise_resource_not_available_error! unless Ability.allowed?(current_user, :admin_list, board)
+          raise_resource_not_available_error! unless Ability.allowed?(current_user, :admin_issue_board_list, board)
         end
 
         def find_list_by_global_id(gid)
-          parsed_gid = GlobalID.parse(gid)
-          id = parsed_gid.model_id.to_i if list_accessible?(parsed_gid)
-          return unless id
+          return unless gid
 
-          List.find_by_id(id)
-        end
-
-        def list_accessible?(gid)
-          gid.app == GlobalID.app && list?(gid)
-        end
-
-        def list?(gid)
-          model_class = gid&.model_class
-          return unless model_class
-
-          model_class <= List
+          # TODO: remove this line when the compatibility layer is removed
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+          gid = ::Types::GlobalIDType[::List].coerce_isolated_input(gid)
+          List.find_by_id(gid.model_id)
         end
 
         def board

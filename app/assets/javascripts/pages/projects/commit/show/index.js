@@ -1,49 +1,48 @@
 /* eslint-disable no-new */
-
 import $ from 'jquery';
-import Diff from '~/diff';
-import ZenMode from '~/zen_mode';
-import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
-import initNotes from '~/init_notes';
-import initChangesDropdown from '~/init_changes_dropdown';
-import '~/sourcegraph/load';
-import { handleLocationHash } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
-import syntaxHighlight from '~/syntax_highlight';
-import flash from '~/flash';
-import { __ } from '~/locale';
 import loadAwardsHandler from '~/awards_handler';
+import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
+import Diff from '~/diff';
+import flash from '~/flash';
+import initChangesDropdown from '~/init_changes_dropdown';
+import initNotes from '~/init_notes';
+import axios from '~/lib/utils/axios_utils';
+import { handleLocationHash } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
+import initCommitActions from '~/projects/commit';
 import { initCommitBoxInfo } from '~/projects/commit_box/info';
+import syntaxHighlight from '~/syntax_highlight';
+import ZenMode from '~/zen_mode';
+import '~/sourcegraph/load';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const hasPerfBar = document.querySelector('.with-performance-bar');
-  const performanceHeight = hasPerfBar ? 35 : 0;
-  initChangesDropdown(document.querySelector('.navbar-gitlab').offsetHeight + performanceHeight);
-  new ZenMode();
-  new ShortcutsNavigation();
+const hasPerfBar = document.querySelector('.with-performance-bar');
+const performanceHeight = hasPerfBar ? 35 : 0;
+initChangesDropdown(document.querySelector('.navbar-gitlab').offsetHeight + performanceHeight);
+new ZenMode();
+new ShortcutsNavigation();
 
-  initCommitBoxInfo();
+initCommitBoxInfo();
 
-  initNotes();
+initNotes();
 
-  const filesContainer = $('.js-diffs-batch');
+const filesContainer = $('.js-diffs-batch');
 
-  if (filesContainer.length) {
-    const batchPath = filesContainer.data('diffFilesPath');
+if (filesContainer.length) {
+  const batchPath = filesContainer.data('diffFilesPath');
 
-    axios
-      .get(batchPath)
-      .then(({ data }) => {
-        filesContainer.html($(data.html));
-        syntaxHighlight(filesContainer);
-        handleLocationHash();
-        new Diff();
-      })
-      .catch(() => {
-        flash(__('An error occurred while retrieving diff files'));
-      });
-  } else {
-    new Diff();
-  }
-  loadAwardsHandler();
-});
+  axios
+    .get(batchPath)
+    .then(({ data }) => {
+      filesContainer.html($(data));
+      syntaxHighlight(filesContainer);
+      handleLocationHash();
+      new Diff();
+    })
+    .catch(() => {
+      flash({ message: __('An error occurred while retrieving diff files') });
+    });
+} else {
+  new Diff();
+}
+loadAwardsHandler();
+initCommitActions();

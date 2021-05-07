@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
 
@@ -10,9 +13,9 @@ This is a guide for how to get a Windows development virtual machine on Google C
 
 ## Why Windows in Google Cloud?
 
-Use of Microsoft Windows operating systems on company laptops is banned under GitLab's [Approved Operating Systems policy](https://about.gitlab.com/handbook/security/approved_os.html#windows).
+Use of Microsoft Windows operating systems on company laptops is banned under the GitLab [Approved Operating Systems policy](https://about.gitlab.com/handbook/security/approved_os.html#windows).
 
-This can make it difficult to develop features for the Windows platforms. Using GCP will allow us to have a temporary Windows machine that can be removed once we're done with it.
+This can make it difficult to develop features for the Windows platforms. Using GCP allows us to have a temporary Windows machine that can be removed once we're done with it.
 
 ## Shared Windows runners
 
@@ -60,7 +63,7 @@ Build a Google Cloud image with the above shared runners repository by doing the
 
 ## How to use a Windows image in GCP
 
-1. In a web browser, go to <https://console.cloud.google.com/compute/images>.
+1. In a web browser, go to the [Google Cloud Platform console](https://console.cloud.google.com/compute/images).
 1. Filter images by the name you used when creating image, `windows` is likely all you need to filter by.
 1. Click the image's name.
 1. Click the **CREATE INSTANCE** link.
@@ -71,14 +74,14 @@ Build a Google Cloud image with the above shared runners repository by doing the
 1. Click **Set Windows password**.
 1. Optional: Set a username or use default.
 1. Click **Next**.
-1. Copy and save the password as it won't be shown again.
+1. Copy and save the password as it is not shown again.
 1. Click **RDP** down arrow.
 1. Click **Download the RDP file**.
 1. Open the downloaded RDP file with the Windows remote desktop app (<https://docs.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-clients>).
 1. Click **Continue** to accept the certificate.
 1. Enter the password and click **Next**.
 
-You should now be remoted into a Windows machine with a command prompt.
+You should now be connected into a Windows machine with a command prompt.
 
 ### Optional: Use GCP VM Instance as a runner
 
@@ -95,8 +98,8 @@ Here are a few tips on GCP and Windows.
 
 ### GCP cost savings
 
-To minimise the cost of your GCP VM instance, stop it when you're not using it.
-If you do, you'll need to re-download the RDP file from the console as the IP
+To minimize the cost of your GCP VM instance, stop it when you're not using it.
+If you do, you must download the RDP file again from the console as the IP
 address changes every time you stop and start it.
 
 ### chocolatey

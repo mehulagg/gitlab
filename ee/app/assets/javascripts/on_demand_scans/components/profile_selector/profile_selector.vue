@@ -1,7 +1,20 @@
 <script>
-import { GlButton, GlCard, GlFormGroup, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import {
+  GlButton,
+  GlCard,
+  GlFormGroup,
+  GlDropdown,
+  GlDropdownItem,
+  GlSearchBoxByType,
+  GlTooltipDirective,
+} from '@gitlab/ui';
+import fuzzaldrinPlus from 'fuzzaldrin-plus';
+import { s__ } from '~/locale';
 
 export default {
+  i18n: {
+    editProfileLabel: s__('DastProfiles|Edit profile'),
+  },
   name: 'OnDemandScansProfileSelector',
   components: {
     GlButton,
@@ -9,6 +22,10 @@ export default {
     GlFormGroup,
     GlDropdown,
     GlDropdownItem,
+    GlSearchBoxByType,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     libraryPath: {
@@ -30,9 +47,23 @@ export default {
       default: null,
     },
   },
+  data() {
+    return { searchTerm: '' };
+  },
   computed: {
     selectedProfile() {
       return this.value ? this.profiles.find(({ id }) => this.value === id) : null;
+    },
+    filteredProfiles() {
+      if (this.searchTerm) {
+        return fuzzaldrinPlus.filter(this.profiles, this.searchTerm, {
+          key: ['profileName'],
+        });
+      }
+      return this.profiles;
+    },
+    filteredProfilesEmpty() {
+      return this.filteredProfiles.length === 0;
     },
   },
 };
@@ -42,22 +73,10 @@ export default {
   <gl-card>
     <template #header>
       <div class="row">
-        <div class="col-7">
-          <h3 class="gl-font-lg gl-display-inline">
+        <div class="col-7 gl-display-flex gl-align-items-center">
+          <h3 class="gl-font-lg gl-my-0">
             <slot name="title"></slot>
           </h3>
-        </div>
-        <div class="col-5 gl-text-right">
-          <gl-button
-            :href="profiles.length ? libraryPath : null"
-            :disabled="!profiles.length"
-            variant="success"
-            category="secondary"
-            size="small"
-            data-testid="manage-profiles-link"
-          >
-            {{ s__('OnDemandScans|Manage profiles') }}
-          </gl-button>
         </div>
       </div>
     </template>
@@ -65,6 +84,7 @@ export default {
       <template #label>
         <slot name="label"></slot>
       </template>
+
       <gl-dropdown
         :text="
           selectedProfile
@@ -74,8 +94,11 @@ export default {
         class="mw-460"
         data-testid="profiles-dropdown"
       >
+        <template #header>
+          <gl-search-box-by-type v-model.trim="searchTerm" />
+        </template>
         <gl-dropdown-item
-          v-for="profile in profiles"
+          v-for="profile in filteredProfiles"
           :key="profile.id"
           :is-checked="value === profile.id"
           is-check-item
@@ -83,13 +106,35 @@ export default {
         >
           {{ profile.profileName }}
         </gl-dropdown-item>
+        <div v-show="filteredProfilesEmpty" class="gl-p-3 gl-text-center">
+          {{ __('No matching results...') }}
+        </div>
+        <template #footer>
+          <gl-dropdown-item :href="newProfilePath" data-testid="create-profile-option">
+            <slot name="new-profile"></slot>
+          </gl-dropdown-item>
+          <gl-dropdown-item :href="libraryPath" data-testid="manage-profiles-option">
+            <slot name="manage-profile"></slot>
+          </gl-dropdown-item>
+        </template>
       </gl-dropdown>
+
       <div
         v-if="selectedProfile && $scopedSlots.summary"
         data-testid="selected-profile-summary"
         class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
       >
-        <slot name="summary" :profile="selectedProfile"></slot>
+        <gl-button
+          v-if="selectedProfile"
+          v-gl-tooltip
+          category="primary"
+          icon="pencil"
+          :title="$options.i18n.editProfileLabel"
+          :aria-label="$options.i18n.editProfileLabel"
+          :href="selectedProfile.editPath"
+          class="gl-absolute gl-right-7"
+        />
+        <slot name="summary"></slot>
       </div>
     </gl-form-group>
     <template v-else>

@@ -8,10 +8,10 @@ module Mutations
       argument :target_project_path,
                GraphQL::ID_TYPE,
                required: true,
-               description: 'The project to move the issue to'
+               description: 'The project to move the issue to.'
 
       def resolve(project_path:, iid:, target_project_path:)
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/267762')
+        Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20816')
 
         issue = authorized_find!(project_path: project_path, iid: iid)
         source_project = issue.project

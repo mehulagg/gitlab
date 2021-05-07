@@ -54,4 +54,51 @@ RSpec.describe Ci::Artifactable do
       end
     end
   end
+
+  context 'ActiveRecord scopes' do
+    let_it_be(:recently_expired_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
+    let_it_be(:later_expired_artifact) { create(:ci_job_artifact, expire_at: 2.days.ago) }
+    let_it_be(:not_expired_artifact) { create(:ci_job_artifact, expire_at: 1.day.from_now) }
+
+    describe '.expired_before' do
+      it 'returns expired artifacts' do
+        expect(Ci::JobArtifact.expired_before(1.hour.ago))
+          .to match_array([recently_expired_artifact, later_expired_artifact])
+      end
+    end
+
+    describe '.expired' do
+      it 'returns a limited number of expired artifacts' do
+        expect(Ci::JobArtifact.expired(1).order_id_asc).to eq([recently_expired_artifact])
+      end
+    end
+
+    describe '.with_files_stored_locally' do
+      it 'returns artifacts stored locally' do
+        expect(Ci::JobArtifact.with_files_stored_locally).to contain_exactly(recently_expired_artifact, later_expired_artifact, not_expired_artifact)
+      end
+    end
+
+    describe '.with_files_stored_remotely' do
+      let(:remote_artifact) { create(:ci_job_artifact, :remote_store) }
+
+      before do
+        stub_artifacts_object_storage
+      end
+
+      it 'returns artifacts stored remotely' do
+        expect(Ci::JobArtifact.with_files_stored_remotely).to contain_exactly(remote_artifact)
+      end
+    end
+
+    describe '.project_id_in' do
+      context 'when artifacts belongs to projects' do
+        let(:project_ids) { [recently_expired_artifact.project.id, not_expired_artifact.project.id, non_existing_record_id] }
+
+        it 'returns artifacts belonging to projects' do
+          expect(Ci::JobArtifact.project_id_in(project_ids)).to contain_exactly(recently_expired_artifact, not_expired_artifact)
+        end
+      end
+    end
+  end
 end

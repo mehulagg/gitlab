@@ -6,18 +6,29 @@
   .settings-header
     %h4
       = _('Email')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
       = _('Various email settings.')
   .settings-content
     = render 'email'
 
+%section.settings.as-whats-new-page.no-animate#js-whats-new-settings{ class: ('expanded' if expanded_by_default?) }
+  .settings-header
+    %h4
+      = _("What's new")
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
+      = expanded_by_default? ? _('Collapse') : _('Expand')
+    %p
+      = _("Configure What's new drawer and content.")
+  .settings-content
+    = render 'whats_new'
+
 %section.settings.as-help-page.no-animate#js-help-settings{ class: ('expanded' if expanded_by_default?) }
   .settings-header
     %h4
       = _('Help page')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
       = _('Help page text and support page url.')
@@ -28,7 +39,7 @@
   .settings-header
     %h4
       = _('Pages')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
       = _('Size and domain settings for static websites')
@@ -39,7 +50,7 @@
   .settings-header
     %h4
       = _('Real-time features')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
       = _('Change this value to influence how frequently the GitLab UI polls for updates.')
@@ -50,7 +61,7 @@
   .settings-header
     %h4
       = _('Gitaly')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
       = _('Configure Gitaly timeouts.')
@@ -61,7 +72,7 @@
   .settings-header
     %h4
       = _('Localization')
-    %button.btn.btn-default.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
       = _('Various localization settings.')

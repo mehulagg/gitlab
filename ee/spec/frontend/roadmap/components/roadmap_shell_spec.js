@@ -1,13 +1,17 @@
-import Vue from 'vue';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 
-import roadmapShellComponent from 'ee/roadmap/components/roadmap_shell.vue';
-import createStore from 'ee/roadmap/store';
+import EpicsListSection from 'ee/roadmap/components/epics_list_section.vue';
+import MilestonesListSection from 'ee/roadmap/components/milestones_list_section.vue';
+import MonthsHeaderItem from 'ee/roadmap/components/preset_months/months_header_item.vue';
+import MonthsHeaderSubItem from 'ee/roadmap/components/preset_months/months_header_sub_item.vue';
+import RoadmapShell from 'ee/roadmap/components/roadmap_shell.vue';
+import RoadmapTimelineSection from 'ee/roadmap/components/roadmap_timeline_section.vue';
+import { PRESET_TYPES } from 'ee/roadmap/constants';
 import eventHub from 'ee/roadmap/event_hub';
+import createStore from 'ee/roadmap/store';
 import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
-import { PRESET_TYPES } from 'ee/roadmap/constants';
-
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import {
   mockEpic,
   mockTimeframeInitialDate,
@@ -17,61 +21,75 @@ import {
 
 const mockTimeframeMonths = getTimeframeForMonthsView(mockTimeframeInitialDate);
 
-const createComponent = (
-  {
-    epics = [mockEpic],
-    milestones = [mockMilestone],
-    timeframe = mockTimeframeMonths,
-    currentGroupId = mockGroupId,
-    defaultInnerHeight = 0,
-    hasFiltersApplied = false,
-  },
-  el,
-) => {
-  const Component = Vue.extend(roadmapShellComponent);
+describe('RoadmapShell', () => {
+  const localVue = createLocalVue();
+  localVue.use(Vuex);
 
-  const store = createStore();
-  store.dispatch('setInitialData', {
-    defaultInnerHeight,
-    childrenFlags: { '1': { itemExpanded: false } },
-  });
+  let store;
+  let wrapper;
 
-  return mountComponentWithStore(Component, {
-    el,
-    store,
-    props: {
-      presetType: PRESET_TYPES.MONTHS,
-      epics,
-      milestones,
-      timeframe,
-      currentGroupId,
-      hasFiltersApplied,
+  const storeFactory = ({ defaultInnerHeight = 0 }) => {
+    store = createStore();
+    store.dispatch('setInitialData', {
+      defaultInnerHeight,
+      childrenFlags: { 1: { itemExpanded: false } },
+    });
+  };
+
+  const createComponent = (
+    {
+      epics = [mockEpic],
+      milestones = [mockMilestone],
+      timeframe = mockTimeframeMonths,
+      currentGroupId = mockGroupId,
+      hasFiltersApplied = false,
     },
-  });
-};
+    el,
+  ) => {
+    wrapper = shallowMount(RoadmapShell, {
+      localVue,
+      store,
+      attachTo: el,
+      propsData: {
+        presetType: PRESET_TYPES.MONTHS,
+        epics,
+        milestones,
+        timeframe,
+        currentGroupId,
+        hasFiltersApplied,
+      },
+      stubs: {
+        RoadmapTimelineSection,
+        MilestonesListSection,
+        EpicsListSection,
+        MonthsHeaderItem,
+        MonthsHeaderSubItem,
+      },
+    });
+  };
 
-describe('RoadmapShellComponent', () => {
-  let vm;
-
-  beforeEach(done => {
-    vm = createComponent({});
-    vm.$nextTick(done);
+  beforeEach(() => {
+    storeFactory({});
+    createComponent({});
   });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
+    store = null;
   });
 
   describe('data', () => {
     it('returns default data props', () => {
-      expect(vm.timeframeStartOffset).toBe(0);
+      expect(wrapper.vm.timeframeStartOffset).toBe(0);
     });
   });
 
   describe('methods', () => {
     beforeEach(() => {
       document.body.innerHTML +=
-        '<div class="roadmap-container"><div id="roadmap-shell"></div></div>';
+        '<div class="roadmap-container"><div data-testid="roadmap-shell"></div></div>';
+      createComponent({}, document.querySelector('[data-testid="roadmap-shell"]'));
     });
 
     afterEach(() => {
@@ -79,38 +97,20 @@ describe('RoadmapShellComponent', () => {
     });
 
     describe('handleScroll', () => {
-      it('emits `epicsListScrolled` event via eventHub', done => {
-        const vmWithParentEl = createComponent({}, document.getElementById('roadmap-shell'));
+      it('emits `epicsListScrolled` event via eventHub', async () => {
         jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
 
-        Vue.nextTick()
-          .then(() => {
-            vmWithParentEl.handleScroll();
+        await wrapper.vm.$nextTick();
+        wrapper.vm.handleScroll();
 
-            expect(eventHub.$emit).toHaveBeenCalledWith('epicsListScrolled', expect.any(Object));
-
-            vmWithParentEl.$destroy();
-          })
-          .then(done)
-          .catch(done.fail);
+        expect(eventHub.$emit).toHaveBeenCalledWith('epicsListScrolled', expect.any(Object));
       });
     });
   });
 
   describe('template', () => {
-    it('renders component container element with class `roadmap-shell`', () => {
-      expect(vm.$el.classList.contains('roadmap-shell')).toBe(true);
-    });
-
-    it('renders skeleton loader element when Epics list is empty', done => {
-      vm.epics = [];
-
-      vm.$nextTick()
-        .then(() => {
-          expect(vm.$el.querySelector('.js-skeleton-loader')).not.toBeNull();
-        })
-        .then(done)
-        .catch(done.fail);
+    it('renders component container element with class `js-roadmap-shell`', () => {
+      expect(wrapper.find('.js-roadmap-shell').exists()).toBe(true);
     });
   });
 });

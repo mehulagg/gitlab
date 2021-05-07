@@ -2,20 +2,30 @@
 
 class Admin::UsersController < Admin::ApplicationController
   include RoutableActions
+  include Analytics::UniqueVisitsHelper
 
-  before_action :user, except: [:index, :new, :create]
+  before_action :user, except: [:index, :cohorts, :new, :create]
   before_action :check_impersonation_availability, only: :impersonate
   before_action :ensure_destroy_prerequisites_met, only: [:destroy]
-  before_action :check_admin_approval_feature_available!, only: [:approve]
 
   feature_category :users
 
+  PAGINATION_WITH_COUNT_LIMIT = 1000
+
   def index
+    return redirect_to cohorts_admin_users_path if params[:tab] == 'cohorts'
+
     @users = User.filter_items(params[:filter]).order_name_asc
     @users = @users.search_with_secondary_emails(params[:search_query]) if params[:search_query].present?
-    @users = @users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
+    @users = users_with_included_associations(@users)
     @users = @users.sort_by_attribute(@sort = params[:sort])
     @users = @users.page(params[:page])
+    @users = @users.without_count if paginate_without_count?
+  end
+
+  def cohorts
+    @cohorts = load_cohorts
+    track_cohorts_visit
   end
 
   def show
@@ -68,6 +78,16 @@ class Admin::UsersController < Admin::ApplicationController
 
     if result[:status] == :success
       redirect_back_or_admin_user(notice: _("Successfully approved"))
+    else
+      redirect_back_or_admin_user(alert: result[:message])
+    end
+  end
+
+  def reject
+    result = Users::RejectService.new(current_user).execute(user)
+
+    if result[:status] == :success
+      redirect_to admin_users_path, status: :found, notice: _("You've rejected %{user}" % { user: user.name })
     else
       redirect_back_or_admin_user(alert: result[:message])
     end
@@ -214,6 +234,16 @@ class Admin::UsersController < Admin::ApplicationController
 
   protected
 
+  def paginate_without_count?
+    counts = Gitlab::Database::Count.approximate_counts([User])
+
+    counts[User] > PAGINATION_WITH_COUNT_LIMIT
+  end
+
+  def users_with_included_associations(users)
+    users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
+  end
+
   def admin_making_changes_for_another_user?
     user != current_user
   end
@@ -299,8 +329,18 @@ class Admin::UsersController < Admin::ApplicationController
     Gitlab::AppLogger.info(_("User %{current_user_username} has started impersonating %{username}") % { current_user_username: current_user.username, username: user.username })
   end
 
-  def check_admin_approval_feature_available!
-    access_denied! unless Feature.enabled?(:admin_approval_for_new_user_signups, default_enabled: true)
+  def load_cohorts
+    cohorts_results = Rails.cache.fetch('cohorts', expires_in: 1.day) do
+      CohortsService.new.execute
+    end
+
+    CohortsSerializer.new.represent(cohorts_results)
+  end
+
+  def track_cohorts_visit
+    if request.format.html? && request.headers['DNT'] != '1'
+      track_visit('i_analytics_cohorts')
+    end
   end
 end
 

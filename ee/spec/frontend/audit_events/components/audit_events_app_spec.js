@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 
 import AuditEventsApp from 'ee/audit_events/components/audit_events_app.vue';
+import AuditEventsExportButton from 'ee/audit_events/components/audit_events_export_button.vue';
+import AuditEventsFilter from 'ee/audit_events/components/audit_events_filter.vue';
+import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
 import DateRangeField from 'ee/audit_events/components/date_range_field.vue';
 import SortingField from 'ee/audit_events/components/sorting_field.vue';
-import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
-import AuditEventsFilter from 'ee/audit_events/components/audit_events_filter.vue';
-import AuditEventsExportButton from 'ee/audit_events/components/audit_events_export_button.vue';
 import { AVAILABLE_TOKEN_TYPES } from 'ee/audit_events/constants';
 import createStore from 'ee/audit_events/store';
 
@@ -19,7 +19,7 @@ describe('AuditEventsApp', () => {
   let store;
 
   const events = [{ foo: 'bar' }];
-  const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map(type => ({ type }));
+  const filterTokenOptions = AVAILABLE_TOKEN_TYPES.map((type) => ({ type }));
   const exportUrl = 'http://example.com/audit_log_reports.csv';
 
   const initComponent = (props = {}) => {
@@ -30,6 +30,7 @@ describe('AuditEventsApp', () => {
         filterTokenOptions,
         events,
         exportUrl,
+        showFilter: true,
         ...props,
       },
       stubs: {
@@ -123,6 +124,16 @@ describe('AuditEventsApp', () => {
 
     it('does not render the audit events export button', () => {
       expect(wrapper.find(AuditEventsExportButton).exists()).toBe(false);
+    });
+  });
+
+  describe('when the show filter flag is disabled', () => {
+    beforeEach(() => {
+      initComponent({ showFilter: false });
+    });
+
+    it('does not render the audit events filter', () => {
+      expect(wrapper.find(AuditEventsFilter).exists()).toBe(false);
     });
   });
 });

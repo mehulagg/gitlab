@@ -2,26 +2,33 @@
 
 class License < ApplicationRecord
   include ActionView::Helpers::NumberHelper
+  include Gitlab::Utils::StrongMemoize
 
-  STARTER_PLAN = 'starter'.freeze
-  PREMIUM_PLAN = 'premium'.freeze
-  ULTIMATE_PLAN = 'ultimate'.freeze
+  STARTER_PLAN = 'starter'
+  PREMIUM_PLAN = 'premium'
+  ULTIMATE_PLAN = 'ultimate'
+  CLOUD_LICENSE_TYPE = 'cloud'
+  LEGACY_LICENSE_TYPE = 'legacy'
+  ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
+
+  EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
 
   EES_FEATURES = %i[
     audit_events
     blocked_issues
+    board_iteration_lists
     code_owners
     code_review_analytics
     contribution_analytics
     description_diffs
     elastic_search
+    full_codequality_report
     group_activity_analytics
     group_bulk_edit
     group_webhooks
     issuable_default_templates
     issue_weights
     iterations
-    jenkins_integration
     ldap_group_sync
     member_lock
     merge_request_approvers
@@ -58,6 +65,7 @@ class License < ApplicationRecord
     code_owner_approval_required
     commit_committer_check
     compliance_framework
+    custom_compliance_frameworks
     cross_project_pipelines
     custom_file_templates
     custom_file_templates_for_namespace
@@ -66,8 +74,6 @@ class License < ApplicationRecord
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
-    dependency_proxy
-    deploy_board
     disable_name_update_for_users
     email_additional_text
     epics
@@ -77,18 +83,23 @@ class License < ApplicationRecord
     file_locks
     geo
     generic_alert_fingerprinting
+    git_two_factor_enforcement
     github_project_service_integration
     group_allowed_email_domains
     group_coverage_reports
     group_forking_protection
     group_ip_restriction
     group_merge_request_analytics
+    group_merge_request_approval_settings
     group_milestone_project_releases
     group_project_templates
     group_repository_analytics
     group_saml
+    group_saml_group_sync
+    group_scoped_ci_variables
     group_wikis
     incident_sla
+    incident_metric_upload
     ide_schema_config
     issues_analytics
     jira_issues_integration
@@ -101,9 +112,9 @@ class License < ApplicationRecord
     multiple_alert_http_integrations
     multiple_approval_rules
     multiple_group_issue_boards
+    multiple_iteration_cadences
     object_storage
     operations_dashboard
-    opsgenie_integration
     package_forwarding
     pages_size_limit
     productivity_analytics
@@ -114,35 +125,50 @@ class License < ApplicationRecord
     scoped_labels
     smartcard_auth
     swimlanes
-    group_timelogs
     type_of_work_analytics
     minimal_access_role
     unprotection_restrictions
     ci_project_subscriptions
     incident_timeline_view
+    oncall_schedules
+    escalation_policies
+    export_user_permissions
   ]
   EEP_FEATURES.freeze
 
   EEU_FEATURES = EEP_FEATURES + %i[
+    api_fuzzing
+    auto_rollback
+    cilium_alerts
+    compliance_approval_gates
     container_scanning
     coverage_fuzzing
     credentials_inventory
     dast
     dependency_scanning
+    devops_adoption
+    dora4_analytics
+    enforce_personal_access_token_expiration
+    enforce_ssh_key_expiration
     enterprise_templates
-    api_fuzzing
+    environment_alerts
+    evaluate_group_level_compliance_pipeline
+    group_ci_cd_analytics
     group_level_compliance_dashboard
+    group_level_devops_adoption
     incident_management
+    inline_codequality
     insights
+    instance_level_devops_adoption
     issuable_health_status
+    jira_vulnerabilities_integration
+    jira_issue_association_enforcement
     license_scanning
-    personal_access_token_api_management
     personal_access_token_expiration_policy
-    enforce_pat_expiration
     prometheus_alerts
     pseudonymizer
+    quality_management
     release_evidence_test_artifacts
-    environment_alerts
     report_approver_rules
     requirements
     sast
@@ -150,10 +176,12 @@ class License < ApplicationRecord
     secret_detection
     security_dashboard
     security_on_demand_scans
+    security_orchestration_policies
     status_page
     subepics
     threat_monitoring
-    quality_management
+    vulnerability_auto_fix
+    vulnerability_finding_signatures
   ]
   EEU_FEATURES.freeze
 
@@ -173,7 +201,6 @@ class License < ApplicationRecord
   # Add on codes that may occur in legacy licenses that don't have a plan yet.
   FEATURES_FOR_ADD_ONS = {
     'GitLab_Auditor_User' => :auditor_user,
-    'GitLab_DeployBoard' => :deploy_board,
     'GitLab_FileLocks' => :file_locks,
     'GitLab_Geo' => :geo
   }.freeze
@@ -213,6 +240,8 @@ class License < ApplicationRecord
     { range: (1000..nil), percentage: true, value: 5 }
   ].freeze
 
+  LICENSEE_ATTRIBUTES = %w[Name Email Company].freeze
+
   validate :valid_license
   validate :check_users_limit, if: :new_record?, unless: :validate_with_trueup?
   validate :check_trueup, unless: :persisted?, if: :validate_with_trueup?
@@ -221,11 +250,15 @@ class License < ApplicationRecord
   before_validation :reset_license, if: :data_changed?
 
   after_create :reset_current
+  after_create :update_trial_setting
   after_destroy :reset_current
   after_commit :reset_future_dated, on: [:create, :destroy]
+  after_commit :reset_previous, on: [:create, :destroy]
 
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
+
+  CACHE_KEY = :current_license
 
   class << self
     def features_for_plan(plan)
@@ -245,17 +278,22 @@ class License < ApplicationRecord
     end
 
     def current
-      if RequestStore.active?
-        RequestStore.fetch(:current_license) { load_license }
-      else
-        load_license
-      end
+      cache.fetch(CACHE_KEY, as: License, expires_in: 1.minute) { load_license }
+    end
+
+    def cache
+      Gitlab::SafeRequestStore[:license_cache] ||=
+        Gitlab::JsonCache.new(namespace: :ee, backend: ::Gitlab::ProcessMemoryCache.cache_backend)
+    end
+
+    def all_plans
+      EE_ALL_PLANS
     end
 
     delegate :block_changes?, :feature_available?, to: :current, allow_nil: true
 
     def reset_current
-      RequestStore.delete(:current_license)
+      cache.expire(CACHE_KEY)
     end
 
     def load_license
@@ -276,6 +314,14 @@ class License < ApplicationRecord
       return false if current.present?
 
       future_dated.present?
+    end
+
+    def previous
+      Gitlab::SafeRequestStore.fetch(:previous_license) { load_previous }
+    end
+
+    def reset_previous
+      Gitlab::SafeRequestStore.delete(:previous_license)
     end
 
     def global_feature?(feature)
@@ -304,19 +350,19 @@ class License < ApplicationRecord
       yield(current_license) if block_given?
     end
 
-    def current_active_users
-      User.active.without_bots
-    end
-
     private
 
     def load_future_dated
       self.last_hundred.find { |license| license.valid? && license.future_dated? }
     end
+
+    def load_previous
+      self.last_hundred.find { |license| license.valid? && !license.future_dated? && license != License.current }
+    end
   end
 
   def data_filename
-    company_name = self.licensee["Company"] || self.licensee.each_value.first
+    company_name = self.licensee_company || self.licensee.each_value.first
     clean_company_name = company_name.gsub(/[^A-Za-z0-9]/, "")
     "#{clean_company_name}.gitlab-license"
   end
@@ -372,6 +418,11 @@ class License < ApplicationRecord
     restricted_attr(:add_ons, {})
   end
 
+  # License zuora_subscription_id
+  def subscription_id
+    restricted_attr(:subscription_id)
+  end
+
   def features_from_add_ons
     add_ons.map { |name, count| FEATURES_FOR_ADD_ONS[name] if count.to_i > 0 }.compact
   end
@@ -383,9 +434,6 @@ class License < ApplicationRecord
   def feature_available?(feature)
     return false if trial? && expired?
 
-    # This feature might not be behind a feature flag at all, so default to true
-    return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
-
     features.include?(feature)
   end
 
@@ -395,6 +443,10 @@ class License < ApplicationRecord
 
   def restricted_user_count
     restricted_attr(:active_user_count)
+  end
+
+  def restricted_user_count?
+    restricted_user_count.to_i > 0
   end
 
   def previous_user_count
@@ -418,11 +470,9 @@ class License < ApplicationRecord
     end
   end
 
-  def current_active_users_count
-    @current_active_users_count ||= begin
-      scope = self.class.current_active_users
-      scope = scope.excluding_guests if exclude_guests_from_active_count?
-      scope.count
+  def daily_billable_users_count
+    strong_memoize(:daily_billable_users_count) do
+      ::Analytics::UsageTrends::Measurement.find_latest_or_fallback(:billable_users).count
     end
   end
 
@@ -451,26 +501,31 @@ class License < ApplicationRecord
   def overage(user_count = nil)
     return 0 if restricted_user_count.nil?
 
-    user_count ||= current_active_users_count
+    user_count ||= daily_billable_users_count
 
     [user_count - restricted_user_count, 0].max
   end
 
   def overage_with_historical_max
-    overage(historical_max_with_default_period)
+    overage(maximum_user_count)
   end
 
-  def historical_max(from = nil, to = nil)
-    HistoricalData.max_historical_user_count(license: self, from: from, to: to)
+  def historical_data(from: nil, to: nil)
+    from ||= starts_at_for_historical_data
+    to ||= expires_at_for_historical_data
+
+    HistoricalData.during(from..to)
+  end
+
+  def historical_max(from: nil, to: nil)
+    from ||= starts_at_for_historical_data
+    to ||= expires_at_for_historical_data
+
+    HistoricalData.max_historical_user_count(from: from, to: to)
   end
 
   def maximum_user_count
-    [historical_max, current_active_users_count].max
-  end
-
-  def historical_max_with_default_period
-    @historical_max_with_default_period ||=
-      historical_max
+    [historical_max(from: starts_at), daily_billable_users_count].max
   end
 
   def update_trial_setting
@@ -496,6 +551,14 @@ class License < ApplicationRecord
     starts_at > Date.current
   end
 
+  def cloud_license?
+    license&.type == CLOUD_LICENSE_TYPE
+  end
+
+  def license_type
+    cloud_license? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+  end
+
   def auto_renew
     false
   end
@@ -508,18 +571,28 @@ class License < ApplicationRecord
 
   def active_user_count_threshold_reached?
     return false if restricted_user_count.nil?
-    return false if current_active_users_count <= 1
-    return false if current_active_users_count > restricted_user_count
+    return false if daily_billable_users_count <= 1
+    return false if daily_billable_users_count > restricted_user_count
 
     active_user_count_threshold[:value] >= if active_user_count_threshold[:percentage]
-                                             remaining_user_count.fdiv(current_active_users_count) * 100
+                                             remaining_user_count.fdiv(daily_billable_users_count) * 100
                                            else
                                              remaining_user_count
                                            end
   end
 
   def remaining_user_count
-    restricted_user_count - current_active_users_count
+    restricted_user_count - daily_billable_users_count
+  end
+
+  LICENSEE_ATTRIBUTES.each do |attribute|
+    define_method "licensee_#{attribute.downcase}" do
+      licensee[attribute]
+    end
+  end
+
+  def activated_at
+    super || created_at
   end
 
   private
@@ -538,6 +611,10 @@ class License < ApplicationRecord
     self.class.reset_future_dated
   end
 
+  def reset_previous
+    self.class.reset_previous
+  end
+
   def reset_license
     @license = nil
   end
@@ -550,41 +627,46 @@ class License < ApplicationRecord
 
   def prior_historical_max
     @prior_historical_max ||= begin
-      from = starts_at - 1.year
-      to   = starts_at
-
-      historical_max(from, to)
+      historical_max(from: previous_started_at, to: previous_expired_at)
     end
   end
 
+  def restricted_user_count_with_threshold
+    # overage should only be applied for new subscriptions not for renewals.
+    return restricted_user_count if previous_user_count
+
+    (restricted_user_count * (1 + ALLOWED_PERCENTAGE_OF_USERS_OVERAGE)).to_i
+  end
+
   def check_users_limit
+    return if cloud_license?
     return unless restricted_user_count
 
     if previous_user_count && (prior_historical_max <= previous_user_count)
-      return if restricted_user_count >= current_active_users_count
+      return if restricted_user_count >= daily_billable_users_count
     else
-      return if restricted_user_count >= prior_historical_max
+      return if restricted_user_count_with_threshold >= prior_historical_max
     end
 
-    user_count = prior_historical_max == 0 ? current_active_users_count : prior_historical_max
+    user_count = prior_historical_max == 0 ? daily_billable_users_count : prior_historical_max
 
     add_limit_error(current_period: prior_historical_max == 0, user_count: user_count)
   end
 
   def check_trueup
     trueup_qty          = restrictions[:trueup_quantity]
-    trueup_from         = Date.parse(restrictions[:trueup_from]) rescue (starts_at - 1.year)
-    trueup_to           = Date.parse(restrictions[:trueup_to]) rescue starts_at
-    max_historical      = historical_max(trueup_from, trueup_to)
+    trueup_from         = Date.parse(restrictions[:trueup_from]).beginning_of_day rescue previous_started_at
+    trueup_to           = Date.parse(restrictions[:trueup_to]).end_of_day rescue previous_expired_at
+    max_historical      = historical_max(from: trueup_from, to: trueup_to)
     expected_trueup_qty = if previous_user_count
                             max_historical - previous_user_count
                           else
-                            max_historical - current_active_users_count
+                            max_historical - daily_billable_users_count
                           end
 
     if trueup_qty >= expected_trueup_qty
-      if restricted_user_count < current_active_users_count
-        add_limit_error(user_count: current_active_users_count)
+      if restricted_user_count < daily_billable_users_count
+        add_limit_error(user_count: daily_billable_users_count)
       end
     else
       message = ["You have applied a True-up for #{trueup_qty} #{"user".pluralize(trueup_qty)}"]
@@ -612,5 +694,21 @@ class License < ApplicationRecord
     return unless self.license? && self.expired?
 
     self.errors.add(:base, _('This license has already expired.'))
+  end
+
+  def previous_started_at
+    (License.previous&.starts_at || starts_at - 1.year).beginning_of_day
+  end
+
+  def previous_expired_at
+    (License.previous&.expires_at || starts_at).end_of_day
+  end
+
+  def starts_at_for_historical_data
+    (starts_at || Time.current - 1.year).beginning_of_day
+  end
+
+  def expires_at_for_historical_data
+    (expires_at || Time.current).end_of_day
   end
 end

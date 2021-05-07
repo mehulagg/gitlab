@@ -1,21 +1,23 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import Dag from './components/dag/dag.vue';
 
 Vue.use(VueApollo);
 
-const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
-});
+const createDagApp = (apolloProvider) => {
+  const el = document.querySelector('#js-pipeline-dag-vue');
 
-const createDagApp = () => {
-  if (!window.gon?.features?.dagPipelineTab) {
+  if (!el) {
     return;
   }
 
-  const el = document.querySelector('#js-pipeline-dag-vue');
-  const { pipelineProjectPath, pipelineIid, emptySvgPath, dagDocPath } = el?.dataset;
+  const {
+    aboutDagDocPath,
+    dagDocPath,
+    emptySvgPath,
+    pipelineProjectPath,
+    pipelineIid,
+  } = el?.dataset;
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -25,10 +27,11 @@ const createDagApp = () => {
     },
     apolloProvider,
     provide: {
+      aboutDagDocPath,
+      dagDocPath,
+      emptySvgPath,
       pipelineProjectPath,
       pipelineIid,
-      emptySvgPath,
-      dagDocPath,
     },
     render(createElement) {
       return createElement('dag', {});

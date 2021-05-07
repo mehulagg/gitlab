@@ -1,11 +1,11 @@
 <script>
 import { GlIcon, GlPopover } from '@gitlab/ui';
 import { __ } from '~/locale';
-import CommonMixin from '../mixins/common_mixin';
-import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
-import MonthsPresetMixin from '../mixins/months_preset_mixin';
-import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 import { TIMELINE_CELL_MIN_WIDTH, SCROLL_BAR_SIZE } from '../constants';
+import CommonMixin from '../mixins/common_mixin';
+import MonthsPresetMixin from '../mixins/months_preset_mixin';
+import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
+import WeeksPresetMixin from '../mixins/weeks_preset_mixin';
 
 export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,
@@ -38,38 +38,6 @@ export default {
     };
   },
   computed: {
-    startDateValues() {
-      const { startDate } = this.milestone;
-
-      return {
-        day: startDate.getDay(),
-        date: startDate.getDate(),
-        month: startDate.getMonth(),
-        year: startDate.getFullYear(),
-        time: startDate.getTime(),
-      };
-    },
-    endDateValues() {
-      const { endDate } = this.milestone;
-
-      return {
-        day: endDate.getDay(),
-        date: endDate.getDate(),
-        month: endDate.getMonth(),
-        year: endDate.getFullYear(),
-        time: endDate.getTime(),
-      };
-    },
-    hasStartDate() {
-      if (this.presetTypeQuarters) {
-        return this.hasStartDateForQuarter();
-      } else if (this.presetTypeMonths) {
-        return this.hasStartDateForMonth();
-      } else if (this.presetTypeWeeks) {
-        return this.hasStartDateForWeek();
-      }
-      return false;
-    },
     startDate() {
       return this.milestone.startDateOutOfRange
         ? this.milestone.originalStartDate
@@ -162,8 +130,7 @@ export default {
       <gl-popover
         :target="`milestone-item-${milestone.id}`"
         boundary="viewport"
-        placement="lefttop"
-        triggers="hover"
+        placement="left"
         :title="milestone.title"
       >
         <div class="milestone-item-type gl-line-height-normal">

@@ -36,13 +36,10 @@ RSpec.describe NamespaceSetting, type: :model do
 
       context "when an empty string" do
         before do
-          namespace_settings.default_branch_name = ''
+          namespace_settings.default_branch_name = ""
         end
 
-        it "returns an error" do
-          expect(namespace_settings.valid?).to be_falsey
-          expect(namespace_settings.errors.full_messages).not_to be_empty
-        end
+        it_behaves_like "doesn't return an error"
       end
     end
 
@@ -66,6 +63,37 @@ RSpec.describe NamespaceSetting, type: :model do
           settings.allow_mfa_for_subgroups = false
 
           expect(settings).to be_invalid
+        end
+      end
+    end
+
+    describe '#allow_resource_access_token_creation_for_group' do
+      let(:settings) { group.namespace_settings }
+
+      context 'group is top-level group' do
+        let(:group) { create(:group) }
+
+        it 'is valid' do
+          settings.resource_access_token_creation_allowed = false
+
+          expect(settings).to be_valid
+        end
+      end
+
+      context 'group is a subgroup' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it 'is invalid when resource access token creation is not enabled' do
+          settings.resource_access_token_creation_allowed = false
+
+          expect(settings).to be_invalid
+          expect(group.namespace_settings.errors.messages[:resource_access_token_creation_allowed]).to include("is not allowed since the group is not top-level group.")
+        end
+
+        it 'is valid when resource access tokens are enabled' do
+          settings.resource_access_token_creation_allowed = true
+
+          expect(settings).to be_valid
         end
       end
     end

@@ -2,12 +2,19 @@
 
 module Registrations
   class ProjectsController < ApplicationController
+    include LearnGitlabHelper
     layout 'checkout'
 
-    before_action :check_experiment_enabled
-    before_action :find_namespace, only: :new
+    LEARN_GITLAB_TEMPLATE = 'learn_gitlab.tar.gz'
+    LEARN_GITLAB_ULTIMATE_TEMPLATE = 'learn_gitlab_ultimate_trial.tar.gz'
 
-    feature_category :navigation
+    before_action :check_signup_onboarding_enabled
+    before_action only: [:new] do
+      set_namespace
+      authorize_create_project!
+    end
+
+    feature_category :onboarding
 
     def new
       @project = Project.new(namespace: @namespace)
@@ -17,8 +24,31 @@ module Registrations
       @project = ::Projects::CreateService.new(current_user, project_params).execute
 
       if @project.saved?
-        create_learn_gitlab_project
-        redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
+        learn_gitlab_project = create_learn_gitlab_project
+        onboarding_context = {
+          namespace_id: learn_gitlab_project.namespace_id,
+          project_id: @project.id,
+          learn_gitlab_project_id: learn_gitlab_project.id
+        }
+
+        experiment(:registrations_group_invite, actor: current_user)
+          .track(:signup_successful, property: @project.namespace_id.to_s)
+
+        if helpers.in_trial_onboarding_flow?
+          record_experiment_user(:trial_onboarding_issues, onboarding_context)
+          record_experiment_conversion_event(:trial_onboarding_issues)
+
+          redirect_to trial_getting_started_users_sign_up_welcome_path(learn_gitlab_project_id: learn_gitlab_project.id)
+        else
+          record_experiment_user(:learn_gitlab_a, onboarding_context)
+          record_experiment_user(:learn_gitlab_b, onboarding_context)
+
+          if continous_onboarding_experiment_enabled_for_user?
+            redirect_to continuous_onboarding_getting_started_users_sign_up_welcome_path(project_id: @project.id)
+          else
+            redirect_to users_sign_up_experience_level_path(namespace_path: @project.namespace)
+          end
+        end
       else
         render :new
       end
@@ -26,31 +56,27 @@ module Registrations
 
     private
 
+    def check_signup_onboarding_enabled
+      access_denied! unless helpers.signup_onboarding_enabled?
+    end
+
     def create_learn_gitlab_project
-      learn_gitlab_project = File.open(learn_gitlab_template_path) do |archive|
+      File.open(learn_gitlab_template_path) do |archive|
         ::Projects::GitlabProjectsImportService.new(
           current_user,
           namespace_id: @project.namespace_id,
           file: archive,
-          name: s_('Learn GitLab')
+          name: learn_gitlab_project_name
         ).execute
       end
-
-      cookies[:onboarding_issues_settings] = { 'groups#show' => true, 'projects#show' => true, 'issues#index' => true }.to_json if learn_gitlab_project.saved?
     end
 
-    def learn_gitlab_template_path
-      Rails.root.join('vendor', 'project_templates', 'learn_gitlab.tar.gz')
-    end
-
-    def check_experiment_enabled
-      access_denied! unless experiment_enabled?(:onboarding_issues)
-    end
-
-    def find_namespace
-      @namespace = Namespace.find_by_id(params[:namespace_id])
-
+    def authorize_create_project!
       access_denied! unless can?(current_user, :create_projects, @namespace)
+    end
+
+    def set_namespace
+      @namespace = Namespace.find_by_id(params[:namespace_id])
     end
 
     def project_params
@@ -64,6 +90,25 @@ module Registrations
         :path,
         :visibility_level
       ]
+    end
+
+    def learn_gitlab_project_name
+      helpers.in_trial_onboarding_flow? ? s_('Learn GitLab - Ultimate trial') : s_('Learn GitLab')
+    end
+
+    def learn_gitlab_template_path
+      file = if helpers.in_trial_onboarding_flow? || learn_gitlab_experiment_enabled?
+               LEARN_GITLAB_ULTIMATE_TEMPLATE
+             else
+               LEARN_GITLAB_TEMPLATE
+             end
+
+      Rails.root.join('vendor', 'project_templates', file)
+    end
+
+    def learn_gitlab_experiment_enabled?
+      Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_a, subject: current_user) ||
+        Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
     end
   end
 end

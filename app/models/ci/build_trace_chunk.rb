@@ -8,6 +8,9 @@ module Ci
     include ::Checksummable
     include ::Gitlab::ExclusiveLeaseHelpers
     include ::Gitlab::OptimisticLocking
+    include IgnorableColumns
+
+    ignore_columns :build_id_convert_to_bigint, remove_with: '14.1', remove_after: '2021-07-22'
 
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
@@ -22,20 +25,26 @@ module Ci
 
     FailedToPersistDataError = Class.new(StandardError)
 
-    # Note: The ordering of this enum is related to the precedence of persist store.
+    # Note: The ordering of this hash is related to the precedence of persist store.
     # The bottom item takes the highest precedence, and the top item takes the lowest precedence.
-    enum data_store: {
+    DATA_STORES = {
       redis: 1,
       database: 2,
       fog: 3
-    }
+    }.freeze
+
+    STORE_TYPES = DATA_STORES.keys.to_h do |store|
+      [store, "Ci::BuildTraceChunks::#{store.capitalize}".constantize]
+    end.freeze
+
+    enum data_store: DATA_STORES
 
     scope :live, -> { redis }
     scope :persisted, -> { not_redis.order(:chunk_index) }
 
     class << self
       def all_stores
-        @all_stores ||= self.data_stores.keys
+        STORE_TYPES.keys
       end
 
       def persistable_store
@@ -44,8 +53,11 @@ module Ci
       end
 
       def get_store_class(store)
-        @stores ||= {}
-        @stores[store] ||= "Ci::BuildTraceChunks::#{store.capitalize}".constantize.new
+        store = store.to_sym
+
+        raise "Unknown store type: #{store}" unless STORE_TYPES.key?(store)
+
+        STORE_TYPES[store].new
       end
 
       ##
@@ -65,6 +77,22 @@ module Ci
         keys.each do |store, value|
           get_store_class(store).delete_keys(value)
         end
+      end
+
+      ##
+      # Sometime we need to ensure that the first read goes to a primary
+      # database, what is especially important in EE. This method does not
+      # change the behavior in CE.
+      #
+      def with_read_consistency(build, &block)
+        return yield unless consistent_reads_enabled?(build)
+
+        ::Gitlab::Database::Consistency
+          .with_read_consistency(&block)
+      end
+
+      def consistent_reads_enabled?(build)
+        Feature.enabled?(:gitlab_ci_trace_read_consistency, build.project, type: :development, default_enabled: true)
       end
 
       ##
@@ -96,7 +124,7 @@ module Ci
       raise ArgumentError, 'Offset is out of range' if offset < 0 || offset > size
       raise ArgumentError, 'Chunk size overflow' if CHUNK_SIZE < (offset + new_data.bytesize)
 
-      in_lock(*lock_params) { unsafe_append_data!(new_data, offset) }
+      in_lock(lock_key, **lock_params) { unsafe_append_data!(new_data, offset) }
 
       schedule_to_persist! if full?
     end
@@ -142,11 +170,11 @@ module Ci
     # acquired
     #
     def persist_data!
-      in_lock(*lock_params) do         # exclusive Redis lock is acquired first
+      in_lock(lock_key, **lock_params) do # exclusive Redis lock is acquired first
         raise FailedToPersistDataError, 'Modifed build trace chunk detected' if has_changes_to_save?
 
-        self.reset.then do |chunk|     # we ensure having latest lock_version
-          chunk.unsafe_persist_data!   # we migrate the data and update data store
+        self.class.with_read_consistency(build) do
+          self.reset.then { |chunk| chunk.unsafe_persist_data! }
         end
       end
     rescue FailedToObtainLockError
@@ -280,11 +308,16 @@ module Ci
       build.trace_chunks.maximum(:chunk_index).to_i
     end
 
+    def lock_key
+      "trace_write:#{build_id}:chunks:#{chunk_index}"
+    end
+
     def lock_params
-      ["trace_write:#{build_id}:chunks:#{chunk_index}",
-       { ttl: WRITE_LOCK_TTL,
-         retries: WRITE_LOCK_RETRY,
-         sleep_sec: WRITE_LOCK_SLEEP }]
+      {
+        ttl: WRITE_LOCK_TTL,
+        retries: WRITE_LOCK_RETRY,
+        sleep_sec: WRITE_LOCK_SLEEP
+      }
     end
 
     def metrics

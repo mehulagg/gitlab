@@ -1,10 +1,11 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'spec/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
-import eventHub from '~/deploy_keys/eventhub';
+import { TEST_HOST } from 'spec/test_constants';
 import deployKeysApp from '~/deploy_keys/components/app.vue';
+import ConfirmModal from '~/deploy_keys/components/confirm_modal.vue';
+import eventHub from '~/deploy_keys/eventhub';
+import axios from '~/lib/utils/axios_utils';
 
 const TEST_ENDPOINT = `${TEST_HOST}/dummy/`;
 
@@ -35,7 +36,8 @@ describe('Deploy keys app component', () => {
   });
 
   const findLoadingIcon = () => wrapper.find('.gl-spinner');
-  const findKeyPanels = () => wrapper.findAll('.deploy-keys .nav-links li');
+  const findKeyPanels = () => wrapper.findAll('.deploy-keys .gl-tabs-nav li');
+  const findModal = () => wrapper.findComponent(ConfirmModal);
 
   it('renders loading icon while waiting for request', () => {
     mock.onGet(TEST_ENDPOINT).reply(() => new Promise());
@@ -54,22 +56,14 @@ describe('Deploy keys app component', () => {
   });
 
   it.each`
-    selector                                       | label                                 | count
-    ${'.js-deployKeys-tab-enabled_keys'}           | ${'Enabled deploy keys'}              | ${1}
-    ${'.js-deployKeys-tab-available_project_keys'} | ${'Privately accessible deploy keys'} | ${0}
-    ${'.js-deployKeys-tab-public_keys'}            | ${'Publicly accessible deploy keys'}  | ${1}
-  `('$selector title is $label with keys count equal to $count', ({ selector, label, count }) => {
+    selector
+    ${'.js-deployKeys-tab-enabled_keys'}
+    ${'.js-deployKeys-tab-available_project_keys'}
+    ${'.js-deployKeys-tab-public_keys'}
+  `('$selector title exists', ({ selector }) => {
     return mountComponent().then(() => {
       const element = wrapper.find(selector);
       expect(element.exists()).toBe(true);
-      expect(element.text().trim()).toContain(label);
-
-      expect(
-        element
-          .find('.badge')
-          .text()
-          .trim(),
-      ).toBe(count.toString());
     });
   });
 
@@ -102,11 +96,16 @@ describe('Deploy keys app component', () => {
     const key = data.public_keys[0];
     return mountComponent()
       .then(() => {
-        jest.spyOn(window, 'confirm').mockReturnValue(true);
         jest.spyOn(wrapper.vm.service, 'getKeys').mockImplementation(() => {});
         jest.spyOn(wrapper.vm.service, 'disableKey').mockImplementation(() => Promise.resolve());
 
-        eventHub.$emit('disable.key', key);
+        eventHub.$emit('disable.key', key, () => {});
+
+        return wrapper.vm.$nextTick();
+      })
+      .then(() => {
+        expect(findModal().props('visible')).toBe(true);
+        findModal().vm.$emit('remove');
 
         return wrapper.vm.$nextTick();
       })
@@ -120,11 +119,16 @@ describe('Deploy keys app component', () => {
     const key = data.public_keys[0];
     return mountComponent()
       .then(() => {
-        jest.spyOn(window, 'confirm').mockReturnValue(true);
         jest.spyOn(wrapper.vm.service, 'getKeys').mockImplementation(() => {});
         jest.spyOn(wrapper.vm.service, 'disableKey').mockImplementation(() => Promise.resolve());
 
-        eventHub.$emit('remove.key', key);
+        eventHub.$emit('remove.key', key, () => {});
+
+        return wrapper.vm.$nextTick();
+      })
+      .then(() => {
+        expect(findModal().props('visible')).toBe(true);
+        findModal().vm.$emit('remove');
 
         return wrapper.vm.$nextTick();
       })

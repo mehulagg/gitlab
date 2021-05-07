@@ -1,8 +1,8 @@
 import AxiosMockAdapter from 'axios-mock-adapter';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
 import { TEST_HOST } from 'helpers/test_constants';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -99,7 +99,7 @@ describe('BoardsStoreEE', () => {
 
     beforeEach(() => {
       requestSpy = jest.fn();
-      axiosMock.onPut(dummyEndpoint).replyOnce(config => requestSpy(config));
+      axiosMock.onPut(dummyEndpoint).replyOnce((config) => requestSpy(config));
     });
 
     it('makes a request to update the weight', () => {

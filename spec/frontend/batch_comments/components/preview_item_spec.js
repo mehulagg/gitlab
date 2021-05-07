@@ -56,17 +56,30 @@ describe('Batch comments draft preview item component', () => {
       createComponent(false, {
         file_path: 'index.js',
         file_hash: 'abc',
-        position: { new_line: 1 },
+        position: {
+          line_range: {
+            start: {
+              new_line: 1,
+              type: 'new',
+            },
+          },
+        },
       });
 
-      expect(vm.$el.querySelector('.bold').textContent).toContain(':1');
+      expect(vm.$el.querySelector('.bold').textContent).toContain(':+1');
     });
 
     it('renders old line position', () => {
       createComponent(false, {
         file_path: 'index.js',
         file_hash: 'abc',
-        position: { old_line: 2 },
+        position: {
+          line_range: {
+            start: {
+              old_line: 2,
+            },
+          },
+        },
       });
 
       expect(vm.$el.querySelector('.bold').textContent).toContain(':2');
@@ -85,7 +98,7 @@ describe('Batch comments draft preview item component', () => {
 
   describe('for thread', () => {
     beforeEach(() => {
-      createComponent(false, { discussion_id: '1', resolve_discussion: true }, store => {
+      createComponent(false, { discussion_id: '1', resolve_discussion: true }, (store) => {
         store.state.notes.discussions.push({
           id: '1',
           notes: [
@@ -108,6 +121,18 @@ describe('Batch comments draft preview item component', () => {
     it('it renders thread resolved text', () => {
       expect(vm.$el.querySelector('.draft-note-resolution').textContent).toContain(
         'Thread will be resolved',
+      );
+    });
+  });
+
+  describe('for new comment', () => {
+    it('renders title', () => {
+      createComponent(false, {}, (store) => {
+        store.state.notes.discussions.push({});
+      });
+
+      expect(vm.$el.querySelector('.review-preview-item-header-text').textContent).toContain(
+        'Your new comment',
       );
     });
   });

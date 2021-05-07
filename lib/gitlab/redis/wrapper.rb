@@ -18,6 +18,10 @@ module Gitlab
           pool.with { |redis| yield redis }
         end
 
+        def version
+          with { |redis| redis.info['redis_version'] }
+        end
+
         def pool
           @pool ||= ConnectionPool.new(size: pool_size) { ::Redis.new(params) }
         end
@@ -138,7 +142,7 @@ module Gitlab
       def fetch_config
         return false unless self.class._raw_config
 
-        yaml = YAML.load(self.class._raw_config)
+        yaml = YAML.safe_load(self.class._raw_config, aliases: true)
 
         # If the file has content but it's invalid YAML, `load` returns false
         if yaml

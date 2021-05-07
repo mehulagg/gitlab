@@ -19,10 +19,17 @@ describe('waitForCSSLoaded', () => {
     });
   });
 
-  describe('with startup css disabled', () => {
-    gon.features = {
-      startupCss: false,
-    };
+  describe('when gon features is not provided', () => {
+    let originalGon;
+
+    beforeEach(() => {
+      originalGon = window.gon;
+      window.gon = null;
+    });
+
+    afterEach(() => {
+      window.gon = originalGon;
+    });
 
     it('should invoke the action right away', async () => {
       const events = waitForCSSLoaded(mockedCallback);
@@ -33,10 +40,6 @@ describe('waitForCSSLoaded', () => {
   });
 
   describe('with startup css enabled', () => {
-    gon.features = {
-      startupCss: true,
-    };
-
     it('should dispatch CSSLoaded when the assets are cached or already loaded', async () => {
       setFixtures(`
         <link href="one.css" data-startupcss="loaded">
@@ -55,7 +58,7 @@ describe('waitForCSSLoaded', () => {
       const events = waitForCSSLoaded(mockedCallback);
       document
         .querySelectorAll('[data-startupcss="loading"]')
-        .forEach(elem => elem.setAttribute('data-startupcss', 'loaded'));
+        .forEach((elem) => elem.setAttribute('data-startupcss', 'loaded'));
       document.dispatchEvent(new CustomEvent('CSSStartupLinkLoaded'));
       await events;
 

@@ -1,16 +1,17 @@
 <script>
-import $ from 'jquery';
 import { GlButton } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { produce } from 'immer';
+import $ from 'jquery';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { __ } from '~/locale';
 import MergeRequest from '~/merge_request';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import eventHub from '../../event_hub';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import getStateQuery from '../../queries/get_state.query.graphql';
 import workInProgressQuery from '../../queries/states/work_in_progress.query.graphql';
 import removeWipMutation from '../../queries/toggle_wip.mutation.graphql';
 import StatusIcon from '../mr_widget_status_icon.vue';
-import eventHub from '../../event_hub';
 
 export default {
   name: 'WorkInProgress',
@@ -28,7 +29,7 @@ export default {
       variables() {
         return this.mergeRequestQueryVariables;
       },
-      update: data => data.project.mergeRequest.userPermissions,
+      update: (data) => data.project.mergeRequest.userPermissions,
     },
   },
   props: {
@@ -69,7 +70,7 @@ export default {
               data: {
                 mergeRequestSetWip: {
                   errors,
-                  mergeRequest: { workInProgress, title },
+                  mergeRequest: { mergeableDiscussionsState, workInProgress, title },
                 },
               },
             },
@@ -80,12 +81,17 @@ export default {
               return;
             }
 
-            const data = store.readQuery({
+            const sourceData = store.readQuery({
               query: getStateQuery,
               variables: mergeRequestQueryVariables,
             });
-            data.project.mergeRequest.workInProgress = workInProgress;
-            data.project.mergeRequest.title = title;
+
+            const data = produce(sourceData, (draftState) => {
+              draftState.project.mergeRequest.mergeableDiscussionsState = mergeableDiscussionsState;
+              draftState.project.mergeRequest.workInProgress = workInProgress;
+              draftState.project.mergeRequest.title = title;
+            });
+
             store.writeQuery({
               query: getStateQuery,
               data,
@@ -100,16 +106,25 @@ export default {
               errors: [],
               mergeRequest: {
                 __typename: 'MergeRequest',
+                mergeableDiscussionsState: true,
                 title: this.mr.title,
                 workInProgress: false,
               },
             },
           },
         })
-        .then(({ data: { mergeRequestSetWip: { mergeRequest: { title } } } }) => {
-          createFlash(__('The merge request can now be merged.'), 'notice');
-          $('.merge-request .detail-page-description .title').text(title);
-        })
+        .then(
+          ({
+            data: {
+              mergeRequestSetWip: {
+                mergeRequest: { title },
+              },
+            },
+          }) => {
+            createFlash(__('The merge request can now be merged.'), 'notice');
+            $('.merge-request .detail-page-description .title').text(title);
+          },
+        )
         .catch(() => createFlash(__('Something went wrong. Please try again.')))
         .finally(() => {
           this.isMakingRequest = false;
@@ -122,8 +137,8 @@ export default {
         this.isMakingRequest = true;
         this.service
           .removeWIP()
-          .then(res => res.data)
-          .then(data => {
+          .then((res) => res.data)
+          .then((data) => {
             eventHub.$emit('UpdateWidgetData', data);
             MergeRequest.toggleDraftStatus(this.mr.title, true);
           })
@@ -143,7 +158,7 @@ export default {
     <div class="media-body">
       <div class="gl-ml-3 float-left">
         <span class="gl-font-weight-bold">
-          {{ __('This merge request is still a work in progress.') }}
+          {{ __('This merge request is still a draft.') }}
         </span>
         <span class="gl-display-block text-muted">{{
           __("Draft merge requests can't be merged.")

@@ -1,9 +1,10 @@
-import { nextTick } from 'vue';
+import { GlDropdown, GlLoadingIcon, GlDropdownSectionHeader } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import { GlDeprecatedDropdown, GlLoadingIcon } from '@gitlab/ui';
+import MockAdapter from 'axios-mock-adapter';
+import { nextTick } from 'vue';
 import { TEST_HOST } from 'spec/test_constants';
 import BoardsSelector from '~/boards/components/boards_selector.vue';
-import boardsStore from '~/boards/stores/boards_store';
+import axios from '~/lib/utils/axios_utils';
 
 const throttleDuration = 1;
 
@@ -23,10 +24,11 @@ describe('BoardsSelector', () => {
   let wrapper;
   let allBoardsResponse;
   let recentBoardsResponse;
+  let mock;
   const boards = boardGenerator(20);
   const recentBoards = boardGenerator(5);
 
-  const fillSearchBox = filterTerm => {
+  const fillSearchBox = (filterTerm) => {
     const searchBox = wrapper.find({ ref: 'searchBox' });
     const searchBoxInput = searchBox.find('input');
     searchBoxInput.setValue(filterTerm);
@@ -34,10 +36,12 @@ describe('BoardsSelector', () => {
   };
 
   const getDropdownItems = () => wrapper.findAll('.js-dropdown-item');
-  const getDropdownHeaders = () => wrapper.findAll('.dropdown-bold-header');
+  const getDropdownHeaders = () => wrapper.findAll(GlDropdownSectionHeader);
   const getLoadingIcon = () => wrapper.find(GlLoadingIcon);
+  const findDropdown = () => wrapper.find(GlDropdown);
 
   beforeEach(() => {
+    mock = new MockAdapter(axios);
     const $apollo = {
       queries: {
         boards: {
@@ -46,19 +50,11 @@ describe('BoardsSelector', () => {
       },
     };
 
-    boardsStore.setEndpoints({
-      boardsEndpoint: '',
-      recentBoardsEndpoint: '',
-      listsEndpoint: '',
-      bulkUpdatePath: '',
-      boardId: '',
-    });
-
     allBoardsResponse = Promise.resolve({
       data: {
         group: {
           boards: {
-            edges: boards.map(board => ({ node: board })),
+            edges: boards.map((board) => ({ node: board })),
           },
         },
       },
@@ -66,9 +62,6 @@ describe('BoardsSelector', () => {
     recentBoardsResponse = Promise.resolve({
       data: recentBoards,
     });
-
-    boardsStore.allBoards = jest.fn(() => allBoardsResponse);
-    boardsStore.recentBoards = jest.fn(() => recentBoardsResponse);
 
     wrapper = mount(BoardsSelector, {
       propsData: {
@@ -93,7 +86,11 @@ describe('BoardsSelector', () => {
         weights: [],
       },
       mocks: { $apollo },
-      attachToDocument: true,
+      attachTo: document.body,
+      provide: {
+        fullPath: '',
+        recentBoardsEndpoint: `${TEST_HOST}/recent`,
+      },
     });
 
     wrapper.vm.$apollo.addSmartQuery = jest.fn((_, options) => {
@@ -102,13 +99,16 @@ describe('BoardsSelector', () => {
       });
     });
 
+    mock.onGet(`${TEST_HOST}/recent`).replyOnce(200, recentBoards);
+
     // Emits gl-dropdown show event to simulate the dropdown is opened at initialization time
-    wrapper.find(GlDeprecatedDropdown).vm.$emit('show');
+    findDropdown().vm.$emit('show');
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    mock.restore();
   });
 
   describe('loading', () => {
@@ -125,11 +125,15 @@ describe('BoardsSelector', () => {
   });
 
   describe('loaded', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
+      await wrapper.setData({
+        loadingBoards: false,
+      });
       return Promise.all([allBoardsResponse, recentBoardsResponse]).then(() => nextTick());
     });
 
-    it('hides loading spinner', () => {
+    it('hides loading spinner', async () => {
+      await wrapper.vm.$nextTick();
       expect(getLoadingIcon().exists()).toBe(false);
     });
 
@@ -148,7 +152,7 @@ describe('BoardsSelector', () => {
 
       it('shows only matching boards when filtering', () => {
         const filterTerm = 'board1';
-        const expectedCount = boards.filter(board => board.name.includes(filterTerm)).length;
+        const expectedCount = boards.filter((board) => board.name.includes(filterTerm)).length;
 
         fillSearchBox(filterTerm);
 

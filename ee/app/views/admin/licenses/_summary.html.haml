@@ -1,0 +1,17 @@
+.h3.gl-mb-5= _('License overview')
+.gl-mb-5.gl-card
+  .gl-display-flex.gl-justify-content-space-between.gl-align-items-center.gl-card-body
+    %div
+      %p.gl-mb-0
+        = sprite_icon('license', css_class: 'gl-fill-gray-700')
+        %span.gl-ml-3
+          = _('Plan:')
+        %strong= @license.plan.capitalize
+        %span.gl-ml-5
+          = render 'admin/licenses/license_status'
+        %span.gl-ml-5
+          = _('Licensed to:')
+          %strong= @license.licensee_name
+          = "(#{@license.licensee_email})"
+    %div
+      = link_to 'View details', admin_license_path, class: "gl-button btn btn-default"

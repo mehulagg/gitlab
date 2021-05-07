@@ -1,10 +1,10 @@
-import testAction from 'helpers/vuex_action_helper';
-import * as types from 'ee/pages/groups/saml_providers/saml_members/store/mutation_types';
 import { fetchPage } from 'ee/pages/groups/saml_providers/saml_members/store/actions';
+import * as types from 'ee/pages/groups/saml_providers/saml_members/store/mutation_types';
 import createInitialState from 'ee/pages/groups/saml_providers/saml_members/store/state';
+import testAction from 'helpers/vuex_action_helper';
 import Api from '~/api';
 
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 
 jest.mock('~/flash');
 jest.mock('~/api', () => ({
@@ -19,11 +19,11 @@ const state = {
 describe('saml_members actions', () => {
   afterEach(() => {
     Api.groupMembers.mockClear();
-    flash.mockClear();
+    createFlash.mockClear();
   });
 
   describe('fetchPage', () => {
-    it('should commit RECEIVE_SAML_MEMBERS_SUCCESS mutation on correct data', done => {
+    it('should commit RECEIVE_SAML_MEMBERS_SUCCESS mutation on correct data', (done) => {
       const members = [
         { id: 1, name: 'user 1', group_saml_identity: null },
         { id: 2, name: 'user 2', group_saml_identity: { extern_uid: 'a' } },
@@ -72,10 +72,10 @@ describe('saml_members actions', () => {
       );
     });
 
-    it('should show flash on wrong data', done => {
+    it('should show flash on wrong data', (done) => {
       Api.groupMembers.mockReturnValue(Promise.reject(new Error()));
       testAction(fetchPage, undefined, state, [], [], () => {
-        expect(flash).toHaveBeenCalledTimes(1);
+        expect(createFlash).toHaveBeenCalledTimes(1);
         done();
       });
     });

@@ -1,7 +1,7 @@
 import axios from '~/lib/utils/axios_utils';
-import * as types from './mutation_types';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { daysToMergeMetric } from '../../../constants';
+import * as types from './mutation_types';
 
 export const fetchMergeRequests = ({ dispatch, state, rootState, rootGetters }) => {
   dispatch('requestMergeRequests');
@@ -17,11 +17,11 @@ export const fetchMergeRequests = ({ dispatch, state, rootState, rootGetters }) 
 
   return axios
     .get(rootState.endpoint, { params })
-    .then(response => {
+    .then((response) => {
       const { headers, data } = response;
       dispatch('receiveMergeRequestsSuccess', { headers, data });
     })
-    .catch(err => dispatch('receiveMergeRequestsError', err));
+    .catch((err) => dispatch('receiveMergeRequestsError', err));
 };
 
 export const requestMergeRequests = ({ commit }) => commit(types.REQUEST_MERGE_REQUESTS);

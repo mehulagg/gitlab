@@ -69,10 +69,18 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
       end
     end
 
-    context 'when given scanner' do
+    context 'when given scanner external IDs' do
       let(:params) { { scanner: [high_vulnerability.finding_scanner_external_id] } }
 
-      it 'only returns vulnerabilities of the given scanner' do
+      it 'only returns vulnerabilities of the given scanner external IDs' do
+        is_expected.to contain_exactly(high_vulnerability)
+      end
+    end
+
+    context 'when given scanner ID' do
+      let(:params) { { scanner_id: [GitlabSchema.id_from_object(high_vulnerability.finding.scanner)] } }
+
+      it 'only returns vulnerabilities of the given scanner IDs' do
         is_expected.to contain_exactly(high_vulnerability)
       end
     end
@@ -134,7 +142,7 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
       let(:vulnerable) { group }
 
       before do
-        project.update(namespace: group)
+        project.update!(namespace: group)
       end
 
       it 'only returns vulnerabilities belonging to the given projects' do

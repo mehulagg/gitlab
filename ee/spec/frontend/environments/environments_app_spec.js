@@ -1,17 +1,15 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import CanaryDeploymentBoard from 'ee/environments/components/canary_deployment_callout.vue';
-import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
+import DeployBoard from '~/environments/components/deploy_board.vue';
+import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 import axios from '~/lib/utils/axios_utils';
 import { environment } from './mock_data';
-import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 
 describe('Environment', () => {
   let mock;
   let wrapper;
 
   const mockData = {
-    canaryDeploymentFeatureId: 'canary_deployment',
     canCreateEnvironment: true,
     canReadEnvironment: true,
     endpoint: 'environments.json',
@@ -19,19 +17,15 @@ describe('Environment', () => {
     helpPagePath: 'help',
     lockPromotionSvgPath: '/assets/illustrations/lock-promotion.svg',
     newEnvironmentPath: 'environments/new',
-    showCanaryDeploymentCallout: true,
     userCalloutsPath: '/callouts',
   };
-
-  const canaryPromoKeyValue = () =>
-    wrapper.find(CanaryDeploymentBoard).attributes('data-js-canary-promo-key');
 
   const createWrapper = () => {
     wrapper = mount(EnvironmentsComponent, { propsData: mockData });
     return axios.waitForAll();
   };
 
-  const mockRequest = environmentList => {
+  const mockRequest = (environmentList) => {
     mock.onGet(mockData.endpoint).reply(
       200,
       {
@@ -86,23 +80,6 @@ describe('Environment', () => {
         expect(wrapper.find('.deploy-board-icon [data-testid="chevron-down-icon"]').exists()).toBe(
           true,
         );
-      });
-    });
-
-    describe('canary callout with one environment', () => {
-      it('should render banner underneath first environment', () => {
-        expect(canaryPromoKeyValue()).toBe('0');
-      });
-    });
-
-    describe('canary callout with multiple environments', () => {
-      beforeEach(() => {
-        mockRequest([environment, environment, environment]);
-        return createWrapper();
-      });
-
-      it('should render banner underneath second environment', () => {
-        expect(canaryPromoKeyValue()).toBe('1');
       });
     });
   });

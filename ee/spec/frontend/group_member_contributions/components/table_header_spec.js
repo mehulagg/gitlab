@@ -1,9 +1,8 @@
 import Vue from 'vue';
 
-import mountComponent from 'helpers/vue_mount_component_helper';
-
 import TableHeaderComponent from 'ee/group_member_contributions/components/table_header.vue';
 import defaultColumns from 'ee/group_member_contributions/constants';
+import mountComponent from 'helpers/vue_mount_component_helper';
 
 import { mockSortOrders } from '../mock_data';
 
@@ -26,7 +25,7 @@ describe('TableHeaderComponent', () => {
 
   describe('data', () => {
     it('returns data with columnIconMeta prop initialized', () => {
-      defaultColumns.forEach(column => {
+      defaultColumns.forEach((column) => {
         expect(vm.columnIconMeta[column.name].sortIcon).toBe('angle-up');
         expect(vm.columnIconMeta[column.name].iconTooltip).toBe('Ascending');
       });

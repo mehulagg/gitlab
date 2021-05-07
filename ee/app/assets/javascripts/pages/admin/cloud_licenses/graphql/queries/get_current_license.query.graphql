@@ -1,0 +1,7 @@
+#import "../fragments/license.fragment.graphql"
+
+query getCurrentLicense {
+  currentLicense {
+    ...License
+  }
+}

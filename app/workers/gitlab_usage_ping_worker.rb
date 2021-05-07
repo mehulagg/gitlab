@@ -8,11 +8,15 @@ class GitlabUsagePingWorker # rubocop:disable Scalability/IdempotentWorker
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
   include Gitlab::ExclusiveLeaseHelpers
 
-  feature_category :collection
+  feature_category :usage_ping
   sidekiq_options retry: 3, dead: false
   sidekiq_retry_in { |count| (count + 1) * 8.hours.to_i }
 
   def perform
+    # Disable usage ping for GitLab.com
+    # See https://gitlab.com/gitlab-org/gitlab/-/issues/292929 for details
+    return if Gitlab.com?
+
     # Multiple Sidekiq workers could run this. We should only do this at most once a day.
     in_lock(LEASE_KEY, ttl: LEASE_TIMEOUT) do
       # Splay the request over a minute to avoid thundering herd problems.

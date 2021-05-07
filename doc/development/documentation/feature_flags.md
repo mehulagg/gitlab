@@ -14,9 +14,13 @@ feature flag depends on its state (enabled or disabled). When the state
 changes, the developer who made the change **must update the documentation**
 accordingly.
 
+Every feature introduced to the codebase, even if it's behind a feature flag,
+must be documented. For context, see the
+[latest merge request that updated this guideline](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47917#note_459984428).
+
 ## Criteria
 
-According to the process of [deploying GitLab features behind feature flags](../feature_flags/process.md):
+According to the process of [deploying GitLab features behind feature flags](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/):
 
 > - _By default, feature flags should be off._
 > - _Feature flags should remain in the codebase for a short period as possible to reduce the need for feature flag accounting._
@@ -30,20 +34,17 @@ See how to document them below, according to the state of the flag:
 - [Features that can be enabled or disabled for a single project](#features-enabled-by-project).
 - [Features with the feature flag removed](#features-with-flag-removed).
 
-NOTE: **Note:**
-The [`**(CORE ONLY)**`](styleguide.md#product-badges) badge or equivalent for
+The [`**(FREE SELF)**`](styleguide/index.md#product-tier-badges) badge or equivalent for
 the feature's tier should be added to the line and heading that refers to
 enabling/disabling feature flags as Admin access is required to do so,
 therefore, it indicates that it cannot be done by regular users of GitLab.com.
 
 ### Features disabled by default
 
-For features disabled by default, if they cannot be used yet due to lack of
-completeness, or if they're still under internal evaluation (for example, for
-performance implications) do **not document them**: add (or merge) the docs
-only when the feature is safe and ready to use and test by end-users.
+For features disabled by default, add or improve the docs with every change in line with the
+[definition of done](../contributing/merge_request_workflow.md#definition-of-done).
 
-For feature flags disabled by default, if they can be used by end users:
+Include details of the feature flag in the documentation:
 
 - Say that it's disabled by default.
 - Say whether it's enabled on GitLab.com.
@@ -61,19 +62,20 @@ be enabled for a single project, and is not ready for production use:
 # Feature Name
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
-> - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(CORE ONLY)**
+> - [Deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
 
-CAUTION: **Warning:**
-This feature might not be available to you. Check the **version history** note above for details.
+This in-development feature might not be available for your use. There can be
+[risks when enabling features still in development](<replace with path to>/user/feature_flags.md#risks-when-enabling-features-still-in-development).
+Refer to this feature's version history for more details.
 
 (...Regular content goes here...)
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
@@ -94,7 +96,7 @@ Feature.disable(:<feature flag>)
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`, and
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`, and
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features that became enabled by default
@@ -119,20 +121,21 @@ use:
 # Feature Name
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
-> - It was [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
-> - [Became enabled by default](link-to-issue) on GitLab 12.1.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+> - [Deployed behind a feature flag](<replace with path to>/user/feature_flags.md), disabled by default.
+> - [Enabled by default](link-to-issue) in GitLab 12.1.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
-CAUTION: **Warning:**
-This feature might not be available to you. Check the **version history** note above for details.
+There can be
+[risks when disabling released features](<replace with path to>/user/feature_flags.md#risks-when-disabling-released-features).
+Refer to this feature's version history for more details.
 
 (...Regular content goes here...)
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -153,7 +156,7 @@ Feature.disable(:<feature flag>)
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`,
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`,
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features directly enabled by default
@@ -176,19 +179,20 @@ cannot be enabled for a single project, and is ready for production use:
 # Feature Name
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
-> - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+> - [Deployed behind a feature flag](<replace with path to>/user/feature_flags.md), enabled by default.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
-CAUTION: **Warning:**
-This feature might not be available to you. Check the **version history** note above for details.
+There can be
+[risks when disabling released features](<replace with path to>/user/feature_flags.md#risks-when-disabling-released-features).
+Refer to this feature's version history for more details.
 
 (...Regular content goes here...)
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
@@ -209,7 +213,7 @@ Feature.disable(:<feature flag>)
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`,
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`,
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features enabled by project
@@ -248,27 +252,28 @@ be enabled by project, and is ready for production use:
 # Feature Name
 
 > - [Introduced](link-to-issue) in GitLab 12.0.
-> - It's [deployed behind a feature flag](<replace with path to>/user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It can be enabled or disabled for a single project.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(CORE ONLY)**
+> - [Deployed behind a feature flag](<replace with path to>/user/feature_flags.md), enabled by default.
+> - Enabled on GitLab.com.
+> - Can be enabled or disabled for a single project.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#anchor-to-section). **(FREE SELF)**
 
-CAUTION: **Warning:**
-This feature might not be available to you. Check the **version history** note above for details.
+There can be
+[risks when disabling released features](<replace with path to>/user/feature_flags.md#risks-when-disabling-released-features).
+Refer to this feature's version history for more details.
 
 (...Regular content goes here...)
 
 <!-- Add this at the end of the file -->
 
-### Enable or disable <Feature Name> **(CORE ONLY)**
+### Enable or disable <Feature Name> **(FREE SELF)**
 
 <Feature Name> is under development but ready for production use.
 It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](<replace with path to>/administration/feature_flags.md)
 can opt to disable it.
 
-To enabled it:
+To enable it:
 
 ```ruby
 # For the instance
@@ -288,7 +293,7 @@ Feature.disable(:<feature flag>, Project.find(<project id>))
 ````
 
 Adjust the blurb according to the state of the feature you're documenting.
-Replace `<Feature name>`, `**(CORE ONLY)**`, `<feature flag>`,
+Replace `<Feature name>`, `**(FREE SELF)**`, `<feature flag>`,
 `<replace with path to>`, and `#anchor-to-section` accordingly.
 
 ### Features with flag removed

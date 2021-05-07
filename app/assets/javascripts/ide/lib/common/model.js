@@ -1,8 +1,9 @@
 import { editor as monacoEditor, Uri } from 'monaco-editor';
-import Disposable from './disposable';
+import { insertFinalNewline } from '~/lib/utils/text_utility';
 import eventHub from '../../eventhub';
-import { trimTrailingWhitespace, insertFinalNewline } from '../../utils';
+import { trimTrailingWhitespace } from '../../utils';
 import { defaultModelOptions } from '../editor_options';
+import Disposable from './disposable';
 
 export default class Model {
   constructor(file, head = null) {
@@ -74,7 +75,7 @@ export default class Model {
   }
 
   onChange(cb) {
-    this.events.add(this.disposable.add(this.model.onDidChangeContent(e => cb(this, e))));
+    this.events.add(this.disposable.add(this.model.onDidChangeContent((e) => cb(this, e))));
   }
 
   onDispose(cb) {
@@ -120,7 +121,7 @@ export default class Model {
   dispose() {
     if (!this.model.isDisposed()) this.applyCustomOptions();
 
-    this.events.forEach(cb => {
+    this.events.forEach((cb) => {
       if (typeof cb === 'function') cb();
     });
 

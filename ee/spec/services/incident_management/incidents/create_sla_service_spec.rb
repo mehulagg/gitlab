@@ -54,6 +54,17 @@ RSpec.describe IncidentManagement::Incidents::CreateSlaService do
         it_behaves_like 'no issuable sla created'
       end
 
+      context 'issuable sla already exists' do
+        let!(:issuable_sla) { create(:issuable_sla, issue: incident) }
+
+        it 'returns a success with the sla', :aggregate_failures do
+          expect { subject }.not_to change(IssuableSla, :count)
+
+          expect(create_issuable_sla_response.success?).to eq(true)
+          expect(response_payload_sla).to be_a(IssuableSla)
+        end
+      end
+
       it 'creates the issuable sla with the given offset', :aggregate_failures do
         expect { subject }.to change(IssuableSla, :count)
 

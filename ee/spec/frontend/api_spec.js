@@ -1,8 +1,9 @@
 import MockAdapter from 'axios-mock-adapter';
-import Api from 'ee/api';
 import * as valueStreamAnalyticsConstants from 'ee/analytics/cycle_analytics/constants';
+import Api from 'ee/api';
 import * as analyticsMockData from 'ee_jest/analytics/cycle_analytics/mock_data';
 import axios from '~/lib/utils/axios_utils';
+import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 import httpStatus from '~/lib/utils/http_status';
 
 describe('Api', () => {
@@ -42,7 +43,7 @@ describe('Api', () => {
   });
 
   describe('ldapGroups', () => {
-    it('calls callback on completion', done => {
+    it('calls callback on completion', (done) => {
       const query = 'query';
       const provider = 'provider';
       const callback = jest.fn();
@@ -55,7 +56,7 @@ describe('Api', () => {
       ]);
 
       Api.ldapGroups(query, provider, callback)
-        .then(response => {
+        .then((response) => {
           expect(callback).toHaveBeenCalledWith(response);
         })
         .then(done)
@@ -64,24 +65,24 @@ describe('Api', () => {
   });
 
   describe('createChildEpic', () => {
-    it('calls `axios.post` using params `groupId`, `parentEpicIid` and title', done => {
+    it('calls `axios.post` using params `groupId`, `parentEpicIid` and title', (done) => {
       const groupId = 'gitlab-org';
-      const parentEpicIid = 1;
+      const parentEpicId = 1;
       const title = 'Sample epic';
-      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics/${parentEpicIid}/epics`;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics`;
       const expectedRes = {
         title,
         id: 20,
-        iid: 5,
+        parentId: 5,
       };
 
       mock.onPost(expectedUrl).reply(httpStatus.OK, expectedRes);
 
-      Api.createChildEpic({ groupId, parentEpicIid, title })
+      Api.createChildEpic({ groupId, parentEpicId, title })
         .then(({ data }) => {
           expect(data.title).toBe(expectedRes.title);
           expect(data.id).toBe(expectedRes.id);
-          expect(data.iid).toBe(expectedRes.iid);
+          expect(data.parentId).toBe(expectedRes.parentId);
         })
         .then(done)
         .catch(done.fail);
@@ -89,7 +90,7 @@ describe('Api', () => {
   });
 
   describe('groupEpics', () => {
-    it('calls `axios.get` using param `groupId`', done => {
+    it('calls `axios.get` using param `groupId`', (done) => {
       const groupId = 2;
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics`;
 
@@ -115,7 +116,7 @@ describe('Api', () => {
         .catch(done.fail);
     });
 
-    it('calls `axios.get` using param `search` when it is provided', done => {
+    it('calls `axios.get` using param `search` when it is provided', (done) => {
       const groupId = 2;
       const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${groupId}/epics`;
 
@@ -144,7 +145,7 @@ describe('Api', () => {
   });
 
   describe('addEpicIssue', () => {
-    it('calls `axios.post` using params `groupId`, `epicIid` and `issueId`', done => {
+    it('calls `axios.post` using params `groupId`, `epicIid` and `issueId`', (done) => {
       const groupId = 2;
       const mockIssue = {
         id: 20,
@@ -170,7 +171,7 @@ describe('Api', () => {
   });
 
   describe('removeEpicIssue', () => {
-    it('calls `axios.delete` using params `groupId`, `epicIid` and `epicIssueId`', done => {
+    it('calls `axios.delete` using params `groupId`, `epicIid` and `epicIssueId`', (done) => {
       const groupId = 2;
       const mockIssue = {
         id: 20,
@@ -200,7 +201,7 @@ describe('Api', () => {
     });
   });
 
-  describe('Cycle analytics', () => {
+  describe('Value Stream Analytics', () => {
     const createdBefore = '2019-11-18';
     const createdAfter = '2019-08-18';
     const groupId = 'counting-54321';
@@ -227,7 +228,7 @@ describe('Api', () => {
     };
 
     describe('cycleAnalyticsTasksByType', () => {
-      it('fetches tasks by type data', done => {
+      it('fetches tasks by type data', (done) => {
         const tasksByTypeResponse = [
           {
             label: {
@@ -266,7 +267,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsTopLabels', () => {
-      it('fetches top group level labels', done => {
+      it('fetches top group level labels', (done) => {
         const response = [];
         const labelIds = [10, 9, 8, 7];
         const params = {
@@ -291,14 +292,17 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsSummaryData', () => {
-      it('fetches value stream analytics summary data', done => {
-        const response = [{ value: 0, title: 'New Issues' }, { value: 0, title: 'Deploys' }];
+      it('fetches value stream analytics summary data', (done) => {
+        const response = [
+          { value: 0, title: 'New Issues' },
+          { value: 0, title: 'Deploys' },
+        ];
         const params = { ...defaultParams };
         const expectedUrl = `${dummyValueStreamAnalyticsUrlRoot}/summary`;
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsSummaryData(groupId, params)
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -311,7 +315,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsTimeSummaryData', () => {
-      it('fetches value stream analytics summary data', done => {
+      it('fetches value stream analytics summary data', (done) => {
         const response = [
           { value: '10.0', title: 'Lead time', unit: 'per day' },
           { value: '2.0', title: 'Cycle Time', unit: 'per day' },
@@ -322,7 +326,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsTimeSummaryData(groupId, params)
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -335,13 +339,13 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsValueStreams', () => {
-      it('fetches custom value streams', done => {
+      it('fetches custom value streams', (done) => {
         const response = [{ name: 'value stream 1', id: 1 }];
         const expectedUrl = valueStreamBaseUrl({ resource: 'value_streams' });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsValueStreams(groupId)
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               expectedUrl,
@@ -353,7 +357,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsCreateValueStream', () => {
-      it('submit the custom value stream data', done => {
+      it('submit the custom value stream data', (done) => {
         const response = {};
         const customValueStream = { name: 'cool-value-stream-stage' };
         const expectedUrl = valueStreamBaseUrl({ resource: 'value_streams' });
@@ -370,8 +374,26 @@ describe('Api', () => {
       });
     });
 
+    describe('cycleAnalyticsUpdateValueStream', () => {
+      it('updates the custom value stream data', (done) => {
+        const response = {};
+        const customValueStream = { name: 'cool-value-stream-stage', stages: [] };
+        const expectedUrl = valueStreamBaseUrl({ resource: `value_streams/${valueStreamId}` });
+        mock.onPut(expectedUrl).reply(httpStatus.OK, response);
+
+        Api.cycleAnalyticsUpdateValueStream({ groupId, valueStreamId, data: customValueStream })
+          .then(({ data, config: { data: reqData, url } }) => {
+            expect(data).toEqual(response);
+            expect(JSON.parse(reqData)).toMatchObject(customValueStream);
+            expect(url).toEqual(expectedUrl);
+          })
+          .then(done)
+          .catch(done.fail);
+      });
+    });
+
     describe('cycleAnalyticsDeleteValueStream', () => {
-      it('delete the custom value stream', done => {
+      it('delete the custom value stream', (done) => {
         const response = {};
         const expectedUrl = valueStreamBaseUrl({ resource: `value_streams/${valueStreamId}` });
         mock.onDelete(expectedUrl).reply(httpStatus.OK, response);
@@ -387,7 +409,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsGroupStagesAndEvents', () => {
-      it('fetches custom stage events and all stages', done => {
+      it('fetches custom stage events and all stages', (done) => {
         const response = { events: [], stages: [] };
         const params = {
           group_id: groupId,
@@ -398,7 +420,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsGroupStagesAndEvents({ groupId, valueStreamId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -411,7 +433,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsStageEvents', () => {
-      it('fetches stage events', done => {
+      it('fetches stage events', (done) => {
         const response = { events: [] };
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
@@ -421,7 +443,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsStageEvents({ groupId, valueStreamId, stageId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -434,7 +456,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsStageMedian', () => {
-      it('fetches stage events', done => {
+      it('fetches stage events', (done) => {
         const response = { value: '5 days ago' };
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
@@ -444,7 +466,7 @@ describe('Api', () => {
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsStageMedian({ groupId, valueStreamId, stageId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -457,7 +479,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsCreateStage', () => {
-      it('submit the custom stage data', done => {
+      it('submit the custom stage data', (done) => {
         const response = {};
         const customStage = {
           name: 'cool-stage',
@@ -485,7 +507,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsUpdateStage', () => {
-      it('updates the stage data', done => {
+      it('updates the stage data', (done) => {
         const response = { id: stageId, custom: false, hidden: true, name: 'nice-stage' };
         const stageData = { name: 'nice-stage', hidden: true };
         const expectedUrl = valueStreamBaseUrl({
@@ -506,7 +528,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsRemoveStage', () => {
-      it('deletes the specified data', done => {
+      it('deletes the specified data', (done) => {
         const response = { id: stageId, hidden: true, custom: true };
         const expectedUrl = valueStreamBaseUrl({
           id: valueStreamId,
@@ -526,17 +548,17 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsDurationChart', () => {
-      it('fetches stage duration data', done => {
+      it('fetches stage duration data', (done) => {
         const response = [];
         const params = { ...defaultParams };
         const expectedUrl = valueStreamBaseUrl({
           id: valueStreamId,
-          resource: `stages/${stageId}/duration_chart`,
+          resource: `stages/${stageId}/average_duration_chart`,
         });
         mock.onGet(expectedUrl).reply(httpStatus.OK, response);
 
         Api.cycleAnalyticsDurationChart({ groupId, valueStreamId, stageId, params })
-          .then(responseObj =>
+          .then((responseObj) =>
             expectRequestWithCorrectParameters(responseObj, {
               response,
               params,
@@ -549,7 +571,7 @@ describe('Api', () => {
     });
 
     describe('cycleAnalyticsGroupLabels', () => {
-      it('fetches group level labels', done => {
+      it('fetches group level labels', (done) => {
         const response = [];
         const expectedUrl = `${dummyUrlRoot}/groups/${groupId}/-/labels.json`;
 
@@ -631,7 +653,10 @@ describe('Api', () => {
 
     describe('getGeoReplicableItems', () => {
       it('fetches replicableItems based on replicableType', () => {
-        apiResponse = [{ id: 1, name: 'foo' }, { id: 2, name: 'bar' }];
+        apiResponse = [
+          { id: 1, name: 'foo' },
+          { id: 2, name: 'bar' },
+        ];
         mockParams = { page: 1 };
 
         jest.spyOn(Api, 'buildUrl').mockReturnValue(expectedUrl);
@@ -758,80 +783,19 @@ describe('Api', () => {
         });
       });
     });
-  });
 
-  describe('Feature Flag User List', () => {
-    let expectedUrl;
-    let projectId;
-    let mockUserList;
-
-    beforeEach(() => {
-      projectId = 1000;
-      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/feature_flags_user_lists`;
-      mockUserList = {
-        name: 'mock_user_list',
-        user_xids: '1,2,3,4',
-        project_id: 1,
-        id: 1,
-        iid: 1,
-      };
-    });
-
-    describe('fetchFeatureFlagUserLists', () => {
-      it('GETs the right url', () => {
-        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
-
-        return Api.fetchFeatureFlagUserLists(projectId).then(({ data }) => {
-          expect(data).toEqual([]);
-        });
-      });
-    });
-
-    describe('createFeatureFlagUserList', () => {
-      it('POSTs data to the right url', () => {
-        const mockUserListData = {
-          name: 'mock_user_list',
-          user_xids: '1,2,3,4',
+    describe('removeGeoNode', () => {
+      it('DELETES with correct ID', () => {
+        mockNode = {
+          id: 1,
         };
-        mock.onPost(expectedUrl, mockUserListData).replyOnce(httpStatus.OK, mockUserList);
 
-        return Api.createFeatureFlagUserList(projectId, mockUserListData).then(({ data }) => {
-          expect(data).toEqual(mockUserList);
-        });
-      });
-    });
+        jest.spyOn(Api, 'buildUrl').mockReturnValue(`${expectedUrl}/${mockNode.id}`);
+        jest.spyOn(axios, 'delete');
+        mock.onDelete(`${expectedUrl}/${mockNode.id}`).replyOnce(httpStatus.OK, {});
 
-    describe('fetchFeatureFlagUserList', () => {
-      it('GETs the right url', () => {
-        mock.onGet(`${expectedUrl}/1`).replyOnce(httpStatus.OK, mockUserList);
-
-        return Api.fetchFeatureFlagUserList(projectId, 1).then(({ data }) => {
-          expect(data).toEqual(mockUserList);
-        });
-      });
-    });
-
-    describe('updateFeatureFlagUserList', () => {
-      it('PUTs the right url', () => {
-        mock
-          .onPut(`${expectedUrl}/1`)
-          .replyOnce(httpStatus.OK, { ...mockUserList, user_xids: '5' });
-
-        return Api.updateFeatureFlagUserList(projectId, {
-          ...mockUserList,
-          user_xids: '5',
-        }).then(({ data }) => {
-          expect(data).toEqual({ ...mockUserList, user_xids: '5' });
-        });
-      });
-    });
-
-    describe('deleteFeatureFlagUserList', () => {
-      it('DELETEs the right url', () => {
-        mock.onDelete(`${expectedUrl}/1`).replyOnce(httpStatus.OK, 'deleted');
-
-        return Api.deleteFeatureFlagUserList(projectId, 1).then(({ data }) => {
-          expect(data).toBe('deleted');
+        return Api.removeGeoNode(mockNode.id).then(() => {
+          expect(axios.delete).toHaveBeenCalledWith(`${expectedUrl}/${mockNode.id}`);
         });
       });
     });
@@ -871,21 +835,86 @@ describe('Api', () => {
   });
 
   describe('Billable members list', () => {
-    let expectedUrl;
-    let namespaceId;
-
-    beforeEach(() => {
-      namespaceId = 1000;
-      expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members`;
-    });
+    const namespaceId = 1000;
 
     describe('fetchBillableGroupMembersList', () => {
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members`;
+
       it('GETs the right url', () => {
         mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
 
         return Api.fetchBillableGroupMembersList(namespaceId).then(({ data }) => {
           expect(data).toEqual([]);
         });
+      });
+    });
+
+    describe('fetchBillableGroupMemberMemberships', () => {
+      const memberId = 2;
+      const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/groups/${namespaceId}/billable_members/${memberId}/memberships`;
+
+      it('fetches memberships for the member', async () => {
+        jest.spyOn(axios, 'get');
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        const { data } = await Api.fetchBillableGroupMemberMemberships(namespaceId, memberId);
+
+        expect(data).toEqual([]);
+        expect(axios.get).toHaveBeenCalledWith(expectedUrl);
+      });
+    });
+  });
+
+  describe('Project analytics: deployment frequency', () => {
+    const projectPath = 'test/project';
+    const encodedProjectPath = encodeURIComponent(projectPath);
+    const params = { environment: 'production' };
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${encodedProjectPath}/analytics/deployment_frequency`;
+
+    describe('deploymentFrequencies', () => {
+      it('GETs the right url', async () => {
+        mock.onGet(expectedUrl, { params }).replyOnce(httpStatus.OK, []);
+
+        const { data } = await Api.deploymentFrequencies(projectPath, params);
+
+        expect(data).toEqual([]);
+      });
+    });
+  });
+
+  describe('Issue metric images', () => {
+    const projectId = 1;
+    const issueIid = '2';
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/issues/${issueIid}/metric_images`;
+
+    describe('fetchIssueMetricImages', () => {
+      it('fetches a list of images', async () => {
+        jest.spyOn(axios, 'get');
+        mock.onGet(expectedUrl).replyOnce(httpStatus.OK, []);
+
+        await Api.fetchIssueMetricImages({ issueIid, id: projectId }).then(({ data }) => {
+          expect(data).toEqual([]);
+          expect(axios.get).toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe('uploadIssueMetricImage', () => {
+      const file = 'mock file';
+      const url = 'mock url';
+
+      it('uploads an image', async () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl).replyOnce(httpStatus.OK, {});
+
+        await Api.uploadIssueMetricImage({ issueIid, id: projectId, file, url }).then(
+          ({ data }) => {
+            expect(data).toEqual({});
+            expect(axios.post.mock.calls[0][2]).toEqual({
+              headers: { ...ContentTypeMultipartFormData },
+            });
+          },
+        );
       });
     });
   });

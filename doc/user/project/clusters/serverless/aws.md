@@ -1,10 +1,10 @@
 ---
 stage: Configure
 group: Configure
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Deploying AWS Lambda function using GitLab CI/CD
+# Deploying AWS Lambda function using GitLab CI/CD **(FREE)**
 
 GitLab allows users to easily deploy AWS Lambda functions and create rich serverless applications.
 
@@ -25,11 +25,11 @@ Additionally, in the [How To section](#how-to), you can read about different use
 - Working with secrets.
 - Setting up CORS.
 
-Alternatively, you can quickly [create a new project with a template](../../../../gitlab-basics/create-project.md#project-templates). The [`Serverless Framework/JS` template](https://gitlab.com/gitlab-org/project-templates/serverless-framework/) already includes all parts described below.
+Alternatively, you can quickly [create a new project with a template](../../working_with_projects.md#create-a-project). The [`Serverless Framework/JS` template](https://gitlab.com/gitlab-org/project-templates/serverless-framework/) already includes all parts described below.
 
 ### Example
 
-In the following example, you will:
+This example shows you how to:
 
 1. Create a basic AWS Lambda Node.js function.
 1. Link the function to an API Gateway `GET` endpoint.
@@ -49,7 +49,7 @@ Lets take it step by step.
 
 #### Creating a Lambda handler function
 
-Your Lambda function will be the primary handler of requests. In this case we will create a very simple Node.js `hello` function:
+Your Lambda function is the primary handler of requests. In this case, create a very simple Node.js `hello` function:
 
 ```javascript
 'use strict';
@@ -72,13 +72,13 @@ Place this code in the file `src/handler.js`.
 
 `src` is the standard location for serverless functions, but is customizable should you desire that.
 
-In our case, `module.exports.hello` defines the `hello` handler that will be referenced later in the `serverless.yml`
+In our case, `module.exports.hello` defines the `hello` handler to reference later in the `serverless.yml`.
 
-You can learn more about the AWS Lambda Node.js function handler and all its various options here: <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html>
+You can learn more about the [AWS Lambda Node.js function handler](https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html) and all its various options in its documentation.
 
 #### Creating a `serverless.yml` file
 
-In the root of your project, create a `serverless.yml` file that will contain configuration specifics for the Serverless Framework.
+In the root of your project, create a `serverless.yml` file containing configuration specifics for the Serverless Framework.
 
 Put the following code in the file:
 
@@ -97,9 +97,9 @@ functions:
 
 Our function contains a handler and a event.
 
-The handler definition will provision the Lambda function using the source code located `src/handler.hello`.
+The handler definition provisions the Lambda function using the source code located `src/handler.hello`.
 
-The `events` declaration will create a AWS API Gateway `GET` endpoint to receive external requests and hand them over to the Lambda function via a service integration.
+The `events` declaration creates an AWS API Gateway `GET` endpoint to receive external requests and hand them over to the Lambda function via a service integration.
 
 You can read more about the [available properties and additional configuration possibilities](https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/) of the Serverless Framework.
 
@@ -134,17 +134,17 @@ This example code does the following:
 #### Setting up your AWS credentials with your GitLab account
 
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be defined in your GitLab settings under **Settings > CI/CD > Variables**.
-For more information please see [Create a custom variable in the UI](../../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
+For more information please see [Create a custom variable in the UI](../../../../ci/variables/README.md#custom-variables-validated-by-gitlab).
 
  The AWS credentials you provide must include IAM policies that provision correct
  access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 
 #### Deploying your function
 
-`git push` the changes to your GitLab repository and the GitLab build pipeline will automatically deploy your function.
+`git push` the changes to your GitLab repository and the GitLab build pipeline deploys your function.
 
-In your GitLab deploy stage log, there will be output containing your AWS Lambda endpoint URL.
-The log line will look similar to this:
+Your GitLab deploy stage log contains output containing your AWS Lambda endpoint URL,
+with log lines similar to this:
 
 ```plaintext
 endpoints:
@@ -157,7 +157,7 @@ Running the following `curl` command should trigger your function.
 Your URL should be the one retrieved from the GitLab deploy stage log:
 
 ```shell
-curl https://u768nzby1j.execute-api.us-east-1.amazonaws.com/production/hello
+curl "https://u768nzby1j.execute-api.us-east-1.amazonaws.com/production/hello"
 ```
 
 That should output:
@@ -200,7 +200,7 @@ The `serverless-offline` plugin allows to run your code locally. To run your cod
 Running the following `curl` command should trigger your function.
 
 ```shell
-curl http://localhost:3000/hello
+curl "http://localhost:3000/hello"
 ```
 
 It should output:
@@ -227,9 +227,9 @@ provider:
 ```
 
 From there, you can reference them in your functions as well.
-Remember to add `A_VARIABLE` to your GitLab CI/CD variables under **Settings > CI/CD > Variables**, and it will get picked up and deployed with your function.
+Remember to add `A_VARIABLE` to your GitLab CI/CD variables under **Settings > CI/CD > Variables** to be picked up and deployed with your function.
 
-NOTE: **Note:**
+NOTE:
 Anyone with access to the AWS environment may be able to see the values of those
 variables persisted in the lambda definition.
 
@@ -290,7 +290,7 @@ The example code is available:
 - As a [clonable repository](https://gitlab.com/gitlab-org/serverless/examples/serverless-framework-js).
 - In a version with [tests and secret variables](https://gitlab.com/gitlab-org/project-templates/serverless-framework/).
 
-You can also use a [template](../../../../gitlab-basics/create-project.md#project-templates)
+You can also use a [template](../../working_with_projects.md#project-templates)
 (based on the version with tests and secret variables) from within the GitLab UI (see
 the `Serverless Framework/JS` template).
 
@@ -309,7 +309,7 @@ GitLab allows developers to build and deploy serverless applications using the c
 
 ### Example
 
-In the following example, you will:
+This example shows you how to:
 
 - Install SAM CLI.
 - Create a sample SAM application including a Lambda function and API Gateway.
@@ -335,7 +335,7 @@ Some steps in this documentation use SAM CLI. Follow the instructions for
 [installing SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 to install and configure SAM CLI.
 
-If you use [AWS Cloud9](https://aws.amazon.com/cloud9/) as your integrated development
+If you use [AWS Cloud9](https://aws.amazon.com/cloud9/) as your integrated development
 environment (IDE), the following are installed for you:
 
 - [AWS Command Line Interface](https://docs.aws.amazon.com/en_pv/cli/latest/userguide/cli-chap-install.html)
@@ -357,7 +357,7 @@ To create a new AWS SAM application:
 1. `git push` the application back to the GitLab project.
 
 This creates a SAM app named `gitlabpoc` using the default configuration, a single
-Python 3.8 function invoked by an [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
+Python 3.8 function invoked by an [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
 endpoint. To see additional runtimes supported by SAM and options for `sam init`, run:
 
 ```shell
@@ -367,13 +367,12 @@ sam init -h
 ### Setting up your AWS credentials with your GitLab account
 
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both
-`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be set in the project's CI/CD
-variables.
+`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be set in the project's CI/CD variables.
 
 To set these:
 
-1. Navigate to the project's **Settings > CI / CD**.
-1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
+1. Navigate to the project's **Settings > CI/CD**.
+1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
    `AWS_SECRET_ACCESS_KEY`.
 1. Mask the credentials so they do not show in logs using the **Masked** toggle.
 
@@ -404,7 +403,7 @@ production:
   environment: production
 ```
 
-Let’s examine the configuration file more closely:
+Let's examine the configuration file more closely:
 
 - `image` specifies the Docker image to use for this build. This is the latest Python
   image since the sample application is written in Python.
@@ -414,8 +413,8 @@ Let’s examine the configuration file more closely:
 
 ### Deploying your application
 
-Push changes to your GitLab repository and the GitLab build pipeline will automatically
-deploy your application. If your:
+Push changes to your GitLab repository and the GitLab build pipeline
+deploys your application. If your:
 
 - Build and deploy are successful, [test your deployed application](#testing-the-deployed-application).
 - Build fails, look at the build log to see why the build failed. Some common reasons
@@ -424,8 +423,8 @@ deploy your application. If your:
   - Incompatible versions of software. For example, Python runtime version might be
     different from the Python on the build machine. Address this by installing the
     required versions of the software.
-  - You may not be able to access your AWS account from GitLab. Check the environment
-    variables you set up with AWS credentials.
+  - You may not be able to access your AWS account from GitLab. Check the CI/CD variables
+    you set up with AWS credentials.
   - You may not have permission to deploy a serverless application. Make sure you
     provide all required permissions to deploy a serverless application.
 
@@ -433,7 +432,7 @@ deploy your application. If your:
 
 To test the application you deployed, please go to the build log and follow the following steps:
 
-1. Click on “Show complete raw” on the upper right-hand corner:
+1. Click on "Show complete raw" on the upper right-hand corner:
 
    ![sam-complete-raw](img/sam-complete-raw.png)
 
@@ -444,7 +443,7 @@ To test the application you deployed, please go to the build log and follow the 
 1. Use curl to test the API. For example:
 
    ```shell
-   curl https://py4rg7qtlg.execute-api.us-east-1.amazonaws.com/Prod/hello/
+   curl "https://py4rg7qtlg.execute-api.us-east-1.amazonaws.com/Prod/hello/"
    ```
 
 Output should be:
@@ -460,7 +459,7 @@ CLI installed locally for you to test locally.
 
 First, test the function.
 
-SAM provides a default event in `events/event.json` that includes a message body of:
+SAM provides a default event in `events/event.json` that includes a message body of:
 
 ```plaintext
 {\"message\": \"hello world\"}
@@ -491,12 +490,12 @@ sam local start-api
 ```
 
 SAM again launches a Docker container, this time with a mocked Amazon API Gateway
-listening on `localhost:3000`.
+listening on `localhost:3000`.
 
 Call the `hello` API by running:
 
 ```shell
-curl http://127.0.0.1:3000/hello
+curl "http://127.0.0.1:3000/hello"
 ```
 
 Output again should be:

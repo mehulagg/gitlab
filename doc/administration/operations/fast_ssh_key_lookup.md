@@ -1,15 +1,12 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Fast lookup of authorized SSH keys in the database
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
-> - [Available in](https://gitlab.com/gitlab-org/gitlab/-/issues/3953) GitLab Community Edition 10.4.
-
-NOTE: **Note:**
+NOTE:
 This document describes a drop-in replacement for the
 `authorized_keys` file. For normal (non-deploy key) users, consider using
 [SSH certificates](ssh_certificates.md). They are even faster, but are not a
@@ -19,7 +16,7 @@ Regular SSH operations become slow as the number of users grows because OpenSSH
 searches for a key to authorize a user via a linear search. In the worst case,
 such as when the user is not authorized to access GitLab, OpenSSH will scan the
 entire file to search for a key. This can take significant time and disk I/O,
-which will delay users attempting to push or pull to a repository. Making
+which delays users attempting to push or pull to a repository. Making
 matters worse, if users add or remove keys frequently, the operating system may
 not be able to cache the `authorized_keys` file, which causes the disk to be
 accessed repeatedly.
@@ -28,9 +25,10 @@ GitLab Shell solves this by providing a way to authorize SSH users via a fast,
 indexed lookup in the GitLab database. This page describes how to enable the fast
 lookup of authorized SSH keys.
 
-> **Warning:** OpenSSH version 6.9+ is required because
+WARNING:
+OpenSSH version 6.9+ is required because
 `AuthorizedKeysCommand` must be able to accept a fingerprint. These
-instructions will break installations using older versions of OpenSSH, such as
+instructions break installations that use older versions of OpenSSH, such as
 those included with CentOS 6 as of September 2017. If you want to use this
 feature for CentOS 6, follow [the instructions on how to build and install a custom OpenSSH package](#compiling-a-custom-version-of-openssh-for-centos-6) before continuing.
 
@@ -42,9 +40,9 @@ single source of truth, [Geo](../geo/index.md) needs to be configured to perform
 lookups via database lookup.
 
 As part of [setting up Geo](../geo/index.md#setup-instructions),
-you will be required to follow the steps outlined below for both the primary and
+you are required to follow the steps outlined below for both the primary and
 secondary nodes, but note that the `Write to "authorized keys" file` checkbox
-only needs to be unchecked on the primary node since it will be reflected
+only needs to be unchecked on the primary node since it is reflected
 automatically on the secondary if database replication is working.
 
 ## Setting up fast lookup via GitLab Shell
@@ -80,23 +78,23 @@ Confirm that SSH is working by commenting out your user's key in the `authorized
 A successful pull would mean that GitLab was able to find the key in the database,
 since it is not present in the file anymore.
 
-NOTE: **Note:**
+NOTE:
 For Omnibus Docker, `AuthorizedKeysCommand` is setup by default in
 GitLab 11.11 and later.
 
-NOTE: **Note:**
+NOTE:
 For Installations from source, the command would be located at
 `/home/git/gitlab-shell/bin/gitlab-shell-authorized-keys-check` if [the install from source](../../install/installation.md#install-gitlab-shell) instructions were followed.
 You might want to consider creating a wrapper script somewhere else since this command needs to be
 owned by `root` and not be writable by group or others. You could also consider changing the ownership of this command
 as required, but that might require temporary ownership changes during `gitlab-shell` upgrades.
 
-CAUTION: **Caution:**
+WARNING:
 Do not disable writes until SSH is confirmed to be working
-perfectly, because the file will quickly become out-of-date.
+perfectly; otherwise, the file quickly becomes out-of-date.
 
 In the case of lookup failures (which are common), the `authorized_keys`
-file will still be scanned. So Git SSH performance will still be slow for many
+file is still scanned. So Git SSH performance would still be slow for many
 users as long as a large file exists.
 
 You can disable any more writes to the `authorized_keys` file by unchecking
@@ -139,7 +137,7 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    ```shell
    sudo su -
    cd /tmp
-   curl --remote-name https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.5p1.tar.gz
+   curl --remote-name "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-7.5p1.tar.gz"
    tar xzvf openssh-7.5p1.tar.gz
    yum install rpm-build gcc make wget openssl-devel krb5-devel pam-devel libX11-devel xmkmf libXt-devel
    ```
@@ -185,8 +183,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    -rw-r--r--. 1 root root 367516 Jun 20 19:37 openssh-server-7.5p1-1.x86_64.rpm
    ```
 
-1. Install the packages. OpenSSH packages will replace `/etc/pam.d/sshd`
-   with its own version, which may prevent users from logging in, so be sure
+1. Install the packages. OpenSSH packages replace `/etc/pam.d/sshd`
+   with their own versions, which may prevent users from logging in, so be sure
    that the file is backed up and restored after installation:
 
    ```shell
@@ -196,7 +194,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
    yes | cp pam-ssh-conf-$timestamp /etc/pam.d/sshd
    ```
 
-1. Verify the installed version. In another window, attempt to login to the server:
+1. Verify the installed version. In another window, attempt to sign in to the
+   server:
 
    ```shell
    ssh -v <your-centos-machine>
@@ -204,7 +203,7 @@ the database. The following instructions can be used to build OpenSSH 7.5:
 
    You should see a line that reads: "debug1: Remote protocol version 2.0, remote software version OpenSSH_7.5"
 
-   If not, you may need to restart `sshd` (e.g. `systemctl restart sshd.service`).
+   If not, you may need to restart `sshd` (for example, `systemctl restart sshd.service`).
 
 1. *IMPORTANT!* Open a new SSH session to your server before exiting to make
    sure everything is working! If you need to downgrade, simple install the
@@ -217,10 +216,8 @@ the database. The following instructions can be used to build OpenSSH 7.5:
 
 ## SELinux support and limitations
 
-> [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/2855) in GitLab 10.5.
-
 GitLab supports `authorized_keys` database lookups with [SELinux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux).
 
 Because the SELinux policy is static, GitLab doesn't support the ability to change
-internal Unicorn ports at the moment. Admins would have to create a special `.te`
+internal Unicorn ports at the moment. Administrators would have to create a special `.te`
 file for the environment, since it isn't generated dynamically.

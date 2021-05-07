@@ -73,12 +73,12 @@ RSpec.describe AuthHelper do
 
   describe 'enabled_button_based_providers' do
     before do
-      allow(helper).to receive(:auth_providers) { [:twitter, :github, :google_oauth2] }
+      allow(helper).to receive(:auth_providers) { [:twitter, :github, :google_oauth2, :openid_connect] }
     end
 
     context 'all providers are enabled to sign in' do
       it 'returns all the enabled providers from settings' do
-        expect(helper.enabled_button_based_providers).to include('twitter', 'github', 'google_oauth2')
+        expect(helper.enabled_button_based_providers).to include('twitter', 'github', 'google_oauth2', 'openid_connect')
       end
 
       it 'puts google and github in the beginning' do
@@ -96,6 +96,22 @@ RSpec.describe AuthHelper do
         expect(helper.enabled_button_based_providers).to include('twitter')
         expect(helper.enabled_button_based_providers).not_to include('github')
       end
+    end
+  end
+
+  describe 'trial_enabled_button_based_providers' do
+    it 'returns the intersection set of github & google_oauth2 with enabled providers' do
+      allow(helper).to receive(:enabled_button_based_providers) { %w(twitter github google_oauth2) }
+
+      expect(helper.trial_enabled_button_based_providers).to eq(%w(github google_oauth2))
+
+      allow(helper).to receive(:enabled_button_based_providers) { %w(google_oauth2 bitbucket) }
+
+      expect(helper.trial_enabled_button_based_providers).to eq(%w(google_oauth2))
+
+      allow(helper).to receive(:enabled_button_based_providers) { %w(bitbucket) }
+
+      expect(helper.trial_enabled_button_based_providers).to be_empty
     end
   end
 
@@ -257,6 +273,76 @@ RSpec.describe AuthHelper do
 
       it 'returns false when not present' do
         expect(auth_active?).to be false
+      end
+    end
+  end
+
+  describe '#google_tag_manager_enabled?' do
+    let(:is_gitlab_com) { true }
+    let(:user) { nil }
+
+    before do
+      allow(Gitlab).to receive(:com?).and_return(is_gitlab_com)
+      stub_config(extra: { google_tag_manager_id: 'key' })
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    subject(:google_tag_manager_enabled?) { helper.google_tag_manager_enabled? }
+
+    context 'on gitlab.com and a key set without a current user' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when not on gitlab.com' do
+      let(:is_gitlab_com) { false }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when current user is set' do
+      let(:user) { instance_double('User') }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when no key is set' do
+      before do
+        stub_config(extra: {})
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#auth_app_owner_text' do
+    shared_examples 'generates text with the correct info' do
+      it 'includes the name of the application owner' do
+        auth_app_owner_text = helper.auth_app_owner_text(owner)
+
+        expect(auth_app_owner_text).to include(owner.name)
+        expect(auth_app_owner_text).to include(path_to_owner)
+      end
+    end
+
+    context 'when owner is a user' do
+      let_it_be(:owner) { create(:user) }
+
+      let(:path_to_owner) { user_path(owner) }
+
+      it_behaves_like 'generates text with the correct info'
+    end
+
+    context 'when owner is a group' do
+      let_it_be(:owner) { create(:group) }
+
+      let(:path_to_owner) { user_path(owner) }
+
+      it_behaves_like 'generates text with the correct info'
+    end
+
+    context 'when the user is missing' do
+      it 'returns nil' do
+        expect(helper.auth_app_owner_text(nil)).to be(nil)
       end
     end
   end

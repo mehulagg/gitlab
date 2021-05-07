@@ -1,21 +1,27 @@
+---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Internationalization for GitLab
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10669) in GitLab 9.2.
 
 For working with internationalization (i18n),
 [GNU gettext](https://www.gnu.org/software/gettext/) is used given it's the most
-used tool for this task and there are a lot of applications that will help us to
+used tool for this task and there are a lot of applications that help us
 work with it.
 
-TIP: **Tip:**
+NOTE:
 All `rake` commands described on this page must be run on a GitLab instance, usually GDK.
 
 ## Setting up GitLab Development Kit (GDK)
 
 In order to be able to work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
-project you must download and configure it through [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/set-up-gdk.md).
+project you must download and configure it through [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/set-up-gdk.md).
 
-Once you have the GitLab project ready, you can start working on the translation.
+After you have the GitLab project ready, you can start working on the translation.
 
 ## Tools
 
@@ -98,9 +104,8 @@ Active Record's `:message` option accepts a `Proc`, so we can do this instead:
 validates :group_id, uniqueness: { scope: [:project_id], message: -> (object, data) { _("already shared with this group") } }
 ```
 
-NOTE: **Note:**
 Messages in the API (`lib/api/` or `app/graphql`) do
-not need to be externalised.
+not need to be externalized.
 
 ### HAML files
 
@@ -250,7 +255,45 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
 
 - In Vue:
 
-  See the section on [Vue component interpolation](#vue-components-interpolation).
+  Use the [`GlSprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/docs/utilities-sprintf--sentence-with-link) component if:
+
+  - you need to include child components in the translation string.
+  - you need to include HTML in your translation string.
+  - you are using `sprintf` and need to pass `false` as the third argument to
+    prevent it from escaping placeholder values.
+
+  For example:
+
+  ```html
+  <gl-sprintf :message="s__('ClusterIntegration|Learn more about %{linkStart}zones%{linkEnd}')">
+    <template #link="{ content }">
+      <gl-link :href="somePath">{{ content }}</gl-link>
+    </template>
+  </gl-sprintf>
+  ```
+
+  In other cases it may be simpler to use `sprintf`, perhaps in a computed
+  property. For example:
+
+  ```html
+  <script>
+  import { __, sprintf } from '~/locale';
+
+  export default {
+    ...
+    computed: {
+      userWelcome() {
+        sprintf(__('Hello %{username}'), { username: this.user.name });
+      }
+    }
+    ...
+  }
+  </script>
+
+  <template>
+    <span>{{ userWelcome }}</span>
+  </template>
+  ```
 
 - In JavaScript (when Vue cannot be used):
 
@@ -260,12 +303,10 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   sprintf(__('Hello %{username}'), { username: 'Joe' }); // => 'Hello Joe'
   ```
 
-  If you want to use markup within the translation and are using Vue, you
-  **must** use the [`gl-sprintf`](#vue-components-interpolation) component. If
-  for some reason you cannot use Vue, use `sprintf` and stop it from escaping
-  placeholder values by passing `false` as its third argument. You **must**
-  escape any interpolated dynamic values yourself, for instance using
-  `escape` from `lodash`.
+  If you need to use markup within the translation, use `sprintf` and stop it
+  from escaping placeholder values by passing `false` as its third argument.
+  You **must** escape any interpolated dynamic values yourself, for instance
+  using `escape` from `lodash`.
 
   ```javascript
   import { escape } from 'lodash';
@@ -371,7 +412,7 @@ Namespaces should be PascalCase.
   s_('OpenedNDaysAgo|Opened')
   ```
 
-  In case the translation is not found it will return `Opened`.
+  In case the translation is not found it returns `Opened`.
 
 - In JavaScript:
 
@@ -379,8 +420,8 @@ Namespaces should be PascalCase.
   s__('OpenedNDaysAgo|Opened')
   ```
 
-Note: The namespace should be removed from the translation. See the [translation
-guidelines for more details](translation.md#namespaced-strings).
+The namespace should be removed from the translation. See the
+[translation guidelines for more details](translation.md#namespaced-strings).
 
 ### HTML
 
@@ -412,12 +453,12 @@ To include formatting in the translated string, we can do the following:
 
   See the section on [interpolation](#interpolation).
 
-When [this translation helper issue](https://gitlab.com/gitlab-org/gitlab/-/issues/217935) is complete, we'll update the
+When [this translation helper issue](https://gitlab.com/gitlab-org/gitlab/-/issues/217935) is complete, we plan to update the
 process of including formatting in translated strings.
 
 #### Including Angle Brackets
 
-If a string contains angles brackets (`<`/`>`) that are not used for HTML, it will still be flagged by the
+If a string contains angles brackets (`<`/`>`) that are not used for HTML, it is still flagged by the
 `rake gettext:lint` linter.
 To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) instead:
 
@@ -450,6 +491,48 @@ To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) inst
   // => 'In < 1 hour'
   ```
 
+### Numbers
+
+Different locales may use different number formats. To support localization of numbers, we use `formatNumber`,
+which leverages [`toLocaleString()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString).
+
+`formatNumber` formats numbers as strings using the current user locale by default.
+
+- In JavaScript
+
+```javascript
+import { formatNumber } from '~/locale';
+
+// Assuming "User Preferences > Language" is set to "English":
+
+const tenThousand = formatNumber(10000); // "10,000" (uses comma as decimal symbol in English locale)
+const fiftyPercent = formatNumber(0.5, { style: 'percent' }) // "50%" (other options are passed to toLocaleString)
+```
+
+- In Vue templates
+
+```html
+<script>
+import { formatNumber } from '~/locale';
+
+export default {
+  //...
+  methods: {
+    // ...
+    formatNumber,
+  },
+}
+</script>
+<template>
+<div class="my-number">
+  {{ formatNumber(10000) }} <!-- 10,000 -->
+</div>
+<div class="my-percent">
+  {{ formatNumber(0.5,  { style: 'percent' }) }} <!-- 50% -->
+</div>
+</template>
+```
+
 ### Dates / times
 
 - In JavaScript:
@@ -468,12 +551,27 @@ This makes use of [`Intl.DateTimeFormat`](https://developer.mozilla.org/en-US/do
   1. **Through the `l` helper**, i.e. `l(active_session.created_at, format: :short)`. We have some predefined formats for
      [dates](https://gitlab.com/gitlab-org/gitlab/blob/4ab54c2233e91f60a80e5b6fa2181e6899fdcc3e/config/locales/en.yml#L54) and [times](https://gitlab.com/gitlab-org/gitlab/blob/4ab54c2233e91f60a80e5b6fa2181e6899fdcc3e/config/locales/en.yml#L262).
      If you need to add a new format, because other parts of the code could benefit from it,
-     you'll need to add it to [en.yml](https://gitlab.com/gitlab-org/gitlab/blob/master/config/locales/en.yml) file.
+     you can add it to [en.yml](https://gitlab.com/gitlab-org/gitlab/blob/master/config/locales/en.yml) file.
   1. **Through `strftime`**, i.e. `milestone.start_date.strftime('%b %-d')`. We use `strftime` in case none of the formats
      defined on [en.yml](https://gitlab.com/gitlab-org/gitlab/blob/master/config/locales/en.yml) matches the date/time
      specifications we need, and if there is no need to add it as a new format because is very particular (i.e. it's only used in a single view).
 
 ## Best practices
+
+### Minimize translation updates
+
+Updates can result in the loss of the translations for this string. To minimize risks,
+avoid changes to strings, unless they:
+
+- Add value to the user.
+- Include extra context for translators.
+
+For example, we should avoid changes like this:
+
+```diff
+- _('Number of things: %{count}') % { count: 10 }
++ n_('Number of things: %d', 10)
+```
 
 ### Keep translations dynamic
 
@@ -484,7 +582,7 @@ Examples:
 - Mappings for a dropdown list
 - Error messages
 
-To store these kinds of data, using a constant seems like the best choice, however this won't work for translations.
+To store these kinds of data, using a constant seems like the best choice, however this doesn't work for translations.
 
 Bad, avoid it:
 
@@ -498,7 +596,7 @@ class MyPresenter
 end
 ```
 
-The translation method (`_`) will be called when the class is loaded for the first time and translates the text to the default locale. Regardless of what's the user's locale, these values will not be translated again.
+The translation method (`_`) is called when the class is loaded for the first time and translates the text to the default locale. Regardless of the user's locale, these values are not translated a second time.
 
 Similar thing happens when using class methods with memoization.
 
@@ -516,7 +614,7 @@ class MyModel
 end
 ```
 
-This method will memoize the translations using the locale of the user, who first "called" this method.
+This method memorizes the translations using the locale of the user, who first "called" this method.
 
 To avoid these problems, keep the translations dynamic.
 
@@ -569,7 +667,7 @@ This also applies when using links in between translated sentences, otherwise th
   ```haml
   - zones_link_url = 'https://cloud.google.com/compute/docs/regions-zones/regions-zones'
   - zones_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: zones_link_url }
-  = s_('ClusterIntegration|Learn more about %{zones_link_start}zones%{zones_link_end}').html_safe % { zones_link_start: zones_link_start, zones_link_end: '</a>'.html_safe }
+  = html_escape(s_('ClusterIntegration|Learn more about %{zones_link_start}zones%{zones_link_end}')) % { zones_link_start: zones_link_start, zones_link_end: '</a>'.html_safe }
   ```
 
 - In Vue, instead of:
@@ -612,7 +710,7 @@ This also applies when using links in between translated sentences, otherwise th
   {{
       sprintf(s__("ClusterIntegration|Learn more about %{link}"), {
           link: '<a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones" target="_blank" rel="noopener noreferrer">zones</a>'
-      })
+      }, false)
   }}
   ```
 
@@ -623,7 +721,7 @@ This also applies when using links in between translated sentences, otherwise th
       sprintf(s__("ClusterIntegration|Learn more about %{linkStart}zones%{linkEnd}"), {
           linkStart: '<a href="https://cloud.google.com/compute/docs/regions-zones/regions-zones" target="_blank" rel="noopener noreferrer">',
           linkEnd: '</a>',
-      })
+      }, false)
   }}
   ```
 
@@ -631,45 +729,6 @@ The reasoning behind this is that in some languages words change depending on co
 
 When in doubt, try to follow the best practices described in this [Mozilla
 Developer documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_content_best_practices#Splitting).
-
-##### Vue components interpolation
-
-When translating UI text in Vue components, you might want to include child components inside
-the translation string.
-You could not use a JavaScript-only solution to render the translation,
-because Vue would not be aware of the child components and would render them as plain text.
-
-For this use case, you should use the `gl-sprintf` component which is maintained
-in **GitLab UI**.
-
-The `gl-sprintf` component accepts a `message` property, which is the translatable string,
-and it exposes a named slot for every placeholder in the string, which lets you include Vue
-components easily.
-
-Assume you want to print the translatable string
-`Pipeline %{pipelineId} triggered %{timeago} by %{author}`. To replace the `%{timeago}` and
-`%{author}` placeholders with Vue components, here's how you would do that with `gl-sprintf`:
-
-```html
-<template>
-  <div>
-    <gl-sprintf :message="__('Pipeline %{pipelineId} triggered %{timeago} by %{author}')">
-      <template #pipelineId>{{ pipeline.id }}</template>
-      <template #timeago>
-        <timeago :time="pipeline.triggerTime" />
-      </template>
-      <template #author>
-        <gl-avatar-labeled
-          :src="pipeline.triggeredBy.avatarPath"
-          :label="pipeline.triggeredBy.name"
-        />
-      </template>
-    </gl-sprintf>
-  </div>
-</template>
-```
-
-For more information, see the [`gl-sprintf`](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-sprintf--default) documentation.
 
 ## Updating the PO files with the new content
 
@@ -680,9 +739,9 @@ Now that the new content is marked for translation, we need to update
 bin/rake gettext:regenerate
 ```
 
-This command will update `locale/gitlab.pot` file with the newly externalized
+This command updates `locale/gitlab.pot` file with the newly externalized
 strings and remove any strings that aren't used anymore. You should check this
-file in. Once the changes are on master, they will be picked up by
+file in. Once the changes are on the default branch, they are picked up by
 [CrowdIn](https://translate.gitlab.com) and be presented for
 translation.
 
@@ -699,7 +758,7 @@ running on CI as part of the `static-analysis` job.
 
 To lint the adjustments in PO files locally you can run `rake gettext:lint`.
 
-The linter will take the following into account:
+The linter takes the following into account:
 
 - Valid PO-file syntax
 - Variable usage
@@ -736,9 +795,9 @@ aren't in the message with ID `1 pipeline`.
 
 ## Adding a new language
 
-NOTE: **Note:**
+NOTE:
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
-Languages with less than 2% of translations won't be available in the UI.
+Languages with less than 2% of translations are not available in the UI.
 
 Let's suppose you want to add translations for a new language, let's say French.
 

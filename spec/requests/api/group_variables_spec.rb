@@ -3,16 +3,19 @@
 require 'spec_helper'
 
 RSpec.describe API::GroupVariables do
-  let(:group) { create(:group) }
-  let(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:variable) { create(:ci_group_variable, group: group) }
+
+  let(:access_level) {}
+
+  before do
+    group.add_user(user, access_level) if access_level
+  end
 
   describe 'GET /groups/:id/variables' do
-    let!(:variable) { create(:ci_group_variable, group: group) }
-
     context 'authorized user with proper permissions' do
-      before do
-        group.add_maintainer(user)
-      end
+      let(:access_level) { :owner }
 
       it 'returns group variables' do
         get api("/groups/#{group.id}/variables", user)
@@ -23,6 +26,8 @@ RSpec.describe API::GroupVariables do
     end
 
     context 'authorized user with invalid permissions' do
+      let(:access_level) { :maintainer }
+
       it 'does not return group variables' do
         get api("/groups/#{group.id}/variables", user)
 
@@ -40,12 +45,8 @@ RSpec.describe API::GroupVariables do
   end
 
   describe 'GET /groups/:id/variables/:key' do
-    let!(:variable) { create(:ci_group_variable, group: group) }
-
     context 'authorized user with proper permissions' do
-      before do
-        group.add_maintainer(user)
-      end
+      let(:access_level) { :owner }
 
       it 'returns group variable details' do
         get api("/groups/#{group.id}/variables/#{variable.key}", user)
@@ -54,6 +55,7 @@ RSpec.describe API::GroupVariables do
         expect(json_response['value']).to eq(variable.value)
         expect(json_response['protected']).to eq(variable.protected?)
         expect(json_response['variable_type']).to eq(variable.variable_type)
+        expect(json_response['environment_scope']).to eq(variable.environment_scope)
       end
 
       it 'responds with 404 Not Found if requesting non-existing variable' do
@@ -64,6 +66,8 @@ RSpec.describe API::GroupVariables do
     end
 
     context 'authorized user with invalid permissions' do
+      let(:access_level) { :maintainer }
+
       it 'does not return group variable details' do
         get api("/groups/#{group.id}/variables/#{variable.key}", user)
 
@@ -82,11 +86,7 @@ RSpec.describe API::GroupVariables do
 
   describe 'POST /groups/:id/variables' do
     context 'authorized user with proper permissions' do
-      let!(:variable) { create(:ci_group_variable, group: group) }
-
-      before do
-        group.add_maintainer(user)
-      end
+      let(:access_level) { :owner }
 
       it 'creates variable' do
         expect do
@@ -99,6 +99,7 @@ RSpec.describe API::GroupVariables do
         expect(json_response['protected']).to be_truthy
         expect(json_response['masked']).to be_truthy
         expect(json_response['variable_type']).to eq('env_var')
+        expect(json_response['environment_scope']).to eq('*')
       end
 
       it 'creates variable with optional attributes' do
@@ -112,6 +113,7 @@ RSpec.describe API::GroupVariables do
         expect(json_response['protected']).to be_falsey
         expect(json_response['masked']).to be_falsey
         expect(json_response['variable_type']).to eq('file')
+        expect(json_response['environment_scope']).to eq('*')
       end
 
       it 'does not allow to duplicate variable key' do
@@ -124,6 +126,8 @@ RSpec.describe API::GroupVariables do
     end
 
     context 'authorized user with invalid permissions' do
+      let(:access_level) { :maintainer }
+
       it 'does not create variable' do
         post api("/groups/#{group.id}/variables", user)
 
@@ -141,12 +145,8 @@ RSpec.describe API::GroupVariables do
   end
 
   describe 'PUT /groups/:id/variables/:key' do
-    let!(:variable) { create(:ci_group_variable, group: group) }
-
     context 'authorized user with proper permissions' do
-      before do
-        group.add_maintainer(user)
-      end
+      let(:access_level) { :owner }
 
       it 'updates variable data' do
         initial_variable = group.variables.reload.first
@@ -180,6 +180,8 @@ RSpec.describe API::GroupVariables do
     end
 
     context 'authorized user with invalid permissions' do
+      let(:access_level) { :maintainer }
+
       it 'does not update variable' do
         put api("/groups/#{group.id}/variables/#{variable.key}", user)
 
@@ -197,12 +199,8 @@ RSpec.describe API::GroupVariables do
   end
 
   describe 'DELETE /groups/:id/variables/:key' do
-    let!(:variable) { create(:ci_group_variable, group: group) }
-
     context 'authorized user with proper permissions' do
-      before do
-        group.add_maintainer(user)
-      end
+      let(:access_level) { :owner }
 
       it 'deletes variable' do
         expect do
@@ -224,6 +222,8 @@ RSpec.describe API::GroupVariables do
     end
 
     context 'authorized user with invalid permissions' do
+      let(:access_level) { :maintainer }
+
       it 'does not delete variable' do
         delete api("/groups/#{group.id}/variables/#{variable.key}", user)
 

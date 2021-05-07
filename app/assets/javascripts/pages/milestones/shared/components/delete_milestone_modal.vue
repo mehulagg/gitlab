@@ -1,10 +1,10 @@
 <script>
 import { GlSafeHtmlDirective as SafeHtml, GlModal } from '@gitlab/ui';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 
-import { deprecatedCreateFlash as Flash } from '~/flash';
-import { __, n__, s__, sprintf } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { __, n__, s__, sprintf } from '~/locale';
 import eventHub from '../event_hub';
 
 export default {
@@ -82,7 +82,7 @@ Once deleted, it cannot be undone or recovered.`),
 
       return axios
         .delete(this.milestoneUrl)
-        .then(response => {
+        .then((response) => {
           eventHub.$emit('deleteMilestoneModal.requestFinished', {
             milestoneUrl: this.milestoneUrl,
             successful: true,
@@ -91,7 +91,7 @@ Once deleted, it cannot be undone or recovered.`),
           // follow the rediect to milestones overview page
           redirectTo(response.request.responseURL);
         })
-        .catch(error => {
+        .catch((error) => {
           eventHub.$emit('deleteMilestoneModal.requestFinished', {
             milestoneUrl: this.milestoneUrl,
             successful: false,

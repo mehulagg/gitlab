@@ -1,13 +1,13 @@
 <script>
 import { GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { reduce } from 'lodash';
-import { s__ } from '~/locale';
 import {
   capitalizeFirstCharacter,
   convertToSentenceCase,
   splitCamelCase,
 } from '~/lib/utils/text_utility';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { s__ } from '~/locale';
+import { PAGE_CONFIG } from '~/vue_shared/alert_details/constants';
 
 const thClass = 'gl-bg-transparent! gl-border-1! gl-border-b-solid! gl-border-gray-200!';
 const tdClass = 'gl-border-gray-100! gl-p-5!';
@@ -25,6 +25,7 @@ const allowedFields = [
   'endedAt',
   'details',
   'hosts',
+  'environment',
 ];
 
 export default {
@@ -32,7 +33,6 @@ export default {
     GlLoadingIcon,
     GlTable,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     alert: {
       type: Object,
@@ -43,6 +43,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    statuses: {
+      type: Object,
+      required: false,
+      default: () => PAGE_CONFIG.OPERATIONS.STATUSES,
+    },
   },
   fields: [
     {
@@ -50,7 +55,8 @@ export default {
       label: s__('AlertManagement|Key'),
       thClass,
       tdClass,
-      formatter: string => capitalizeFirstCharacter(convertToSentenceCase(splitCamelCase(string))),
+      formatter: (string) =>
+        capitalizeFirstCharacter(convertToSentenceCase(splitCamelCase(string))),
     },
     {
       key: 'value',
@@ -60,9 +66,6 @@ export default {
     },
   ],
   computed: {
-    flaggedAllowedFields() {
-      return this.shouldDisplayEnvironment ? [...allowedFields, 'environment'] : allowedFields;
-    },
     items() {
       if (!this.alert) {
         return [];
@@ -74,6 +77,8 @@ export default {
             let value;
             if (fieldName === 'environment') {
               value = fieldValue?.name;
+            } else if (fieldName === 'status') {
+              value = this.statuses[fieldValue] || fieldValue;
             } else {
               value = fieldValue;
             }
@@ -84,13 +89,10 @@ export default {
         [],
       );
     },
-    shouldDisplayEnvironment() {
-      return this.glFeatures.exposeEnvironmentPathInAlertDetails;
-    },
   },
   methods: {
     isAllowed(fieldName) {
-      return this.flaggedAllowedFields.includes(fieldName);
+      return allowedFields.includes(fieldName);
     },
   },
 };

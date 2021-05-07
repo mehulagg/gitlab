@@ -4,12 +4,15 @@ class PersonalAccessToken < ApplicationRecord
   include Expirable
   include TokenAuthenticatable
   include Sortable
+  include EachBatch
   extend ::Gitlab::Utils::Override
 
   add_authentication_token_field :token, digest: true
 
   REDIS_EXPIRY_TIME = 3.minutes
-  TOKEN_LENGTH = 20
+
+  # PATs are 20 characters + optional configurable settings prefix (0..20)
+  TOKEN_LENGTH_RANGE = (20..40).freeze
 
   serialize :scopes, Array # rubocop:disable Cop/ActiveRecordSerialize
 
@@ -26,6 +29,7 @@ class PersonalAccessToken < ApplicationRecord
   scope :revoked, -> { where(revoked: true) }
   scope :not_revoked, -> { where(revoked: [false, nil]) }
   scope :for_user, -> (user) { where(user: user) }
+  scope :for_users, -> (users) { where(user: users) }
   scope :preload_users, -> { preload(:user) }
   scope :order_expires_at_asc, -> { reorder(expires_at: :asc) }
   scope :order_expires_at_desc, -> { reorder(expires_at: :desc) }
@@ -51,7 +55,7 @@ class PersonalAccessToken < ApplicationRecord
 
       begin
         Gitlab::CryptoHelper.aes256_gcm_decrypt(encrypted_token)
-      rescue => ex
+      rescue StandardError => ex
         logger.warn "Failed to decrypt #{self.name} value stored in Redis for key ##{redis_key}: #{ex.class}"
         encrypted_token
       end
@@ -76,6 +80,15 @@ class PersonalAccessToken < ApplicationRecord
     )
   end
 
+  def self.token_prefix
+    Gitlab::CurrentSettings.current_application_settings.personal_access_token_prefix
+  end
+
+  override :format_token
+  def format_token(token)
+    "#{self.class.token_prefix}#{token}"
+  end
+
   protected
 
   def validate_scopes
@@ -85,6 +98,10 @@ class PersonalAccessToken < ApplicationRecord
   end
 
   def set_default_scopes
+    # When only loading a select set of attributes, for example using `EachBatch`,
+    # the `scopes` attribute is not present, so we can't initialize it.
+    return unless has_attribute?(:scopes)
+
     self.scopes = Gitlab::Auth::DEFAULT_SCOPES if self.scopes.empty?
   end
 

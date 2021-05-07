@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlBarChart } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import Bar from '~/monitoring/components/charts/bar.vue';
 import { barGraphData } from '../../graph_data';
 
@@ -44,7 +44,7 @@ describe('Bar component', () => {
       it('should return chartData as array of arrays', () => {
         expect(chartData).toBeInstanceOf(Array);
 
-        chartData.forEach(item => {
+        chartData.forEach((item) => {
           expect(item).toBeInstanceOf(Array);
         });
       });

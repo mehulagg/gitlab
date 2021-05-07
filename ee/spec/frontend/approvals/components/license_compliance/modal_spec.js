@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import LicenseComplianceModal from 'ee/approvals/components/license_compliance/modal.vue';
 import { APPROVALS_MODAL } from 'ee/approvals/stores/modules/license_compliance';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
@@ -72,7 +72,7 @@ describe('EE Approvals LicenseCompliance Modal', () => {
     wrapper = null;
   });
 
-  const findByHref = href => wrapper.find(`[href="${href}"`);
+  const findByHref = (href) => wrapper.find(`[href="${href}"`);
   const findModal = () => wrapper.find(GlModalVuex);
   const findRuleForm = () => wrapper.find(mocks.RuleForm);
   const findInformationIcon = () => wrapper.find('[name="question"]');
@@ -89,11 +89,7 @@ describe('EE Approvals LicenseCompliance Modal', () => {
 
       createWrapper();
 
-      expect(
-        findModal()
-          .attributes('title')
-          .startsWith(expectTitleStartsWith),
-      ).toBe(true);
+      expect(findModal().attributes('title').startsWith(expectTitleStartsWith)).toBe(true);
     });
   });
 

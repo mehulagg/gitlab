@@ -1,5 +1,5 @@
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import DropdownField from '~/monitoring/components/variables/dropdown_field.vue';
 
 describe('Custom variable component', () => {
@@ -10,11 +10,14 @@ describe('Custom variable component', () => {
     label: 'Select environment',
     value: 'Production',
     options: {
-      values: [{ text: 'Production', value: 'prod' }, { text: 'Canary', value: 'canary' }],
+      values: [
+        { text: 'Production', value: 'prod' },
+        { text: 'Canary', value: 'canary' },
+      ],
     },
   };
 
-  const createShallowWrapper = props => {
+  const createShallowWrapper = (props) => {
     wrapper = shallowMount(DropdownField, {
       propsData: {
         ...defaultProps,
@@ -23,8 +26,8 @@ describe('Custom variable component', () => {
     });
   };
 
-  const findDropdown = () => wrapper.find(GlDeprecatedDropdown);
-  const findDropdownItems = () => wrapper.findAll(GlDeprecatedDropdownItem);
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
 
   it('renders dropdown element when all necessary props are passed', () => {
     createShallowWrapper();
@@ -54,9 +57,7 @@ describe('Custom variable component', () => {
     createShallowWrapper();
     jest.spyOn(wrapper.vm, '$emit');
 
-    findDropdownItems()
-      .at(1)
-      .vm.$emit('click');
+    findDropdownItems().at(1).vm.$emit('click');
 
     return wrapper.vm.$nextTick(() => {
       expect(wrapper.vm.$emit).toHaveBeenCalledWith('input', 'canary');

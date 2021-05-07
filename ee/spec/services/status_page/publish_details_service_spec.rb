@@ -6,6 +6,7 @@ RSpec.describe StatusPage::PublishDetailsService do
   include ::StatusPage::PublicationServiceResponses
 
   let_it_be(:project, refind: true) { create(:project) }
+
   let(:user_notes) { [] }
   let(:incident_id) { 1 }
   let(:issue) { instance_double(Issue, notes: user_notes, description: 'Incident Occuring', iid: incident_id) }

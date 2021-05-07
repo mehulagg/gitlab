@@ -126,16 +126,18 @@ class Settings < Settingslogic
       File.expand_path(path, Rails.root)
     end
 
-    # Ruby 2.4+ requires passing in the exact required length for OpenSSL keys
-    # (https://github.com/ruby/ruby/commit/ce635262f53b760284d56bb1027baebaaec175d1).
-    # Previous versions quietly truncated the input.
-    #
-    # Use this when using :per_attribute_iv mode for attr_encrypted.
-    # We have to truncate the string to 32 bytes for a 256-bit cipher.
+    # Don't use this in new code, use attr_encrypted_db_key_base_32 instead!
     def attr_encrypted_db_key_base_truncated
       Gitlab::Application.secrets.db_key_base[0..31]
     end
 
+    # Ruby 2.4+ requires passing in the exact required length for OpenSSL keys
+    # (https://github.com/ruby/ruby/commit/ce635262f53b760284d56bb1027baebaaec175d1).
+    # Previous versions quietly truncated the input.
+    #
+    # Makes sure the key is exactly 32 bytes long, either by
+    # truncating or right-padding it with ASCII 0s. Use this when
+    # using :per_attribute_iv mode for attr_encrypted.
     def attr_encrypted_db_key_base_32
       Gitlab::Utils.ensure_utf8_size(attr_encrypted_db_key_base, bytes: 32.bytes)
     end
@@ -150,6 +152,14 @@ class Settings < Settingslogic
     # https://github.com/attr-encrypted/encryptor/blob/c3a62c4a9e74686dd95e0548f9dc2a361fdc95d1/lib/encryptor.rb#L77
     def attr_encrypted_db_key_base
       Gitlab::Application.secrets.db_key_base
+    end
+
+    def encrypted(path)
+      Gitlab::EncryptedConfiguration.new(
+        content_path: path,
+        base_key: Gitlab::Application.secrets.encrypted_settings_key_base,
+        previous_keys: Gitlab::Application.secrets.rotated_encrypted_settings_key_base || []
+      )
     end
 
     def load_dynamic_cron_schedules!

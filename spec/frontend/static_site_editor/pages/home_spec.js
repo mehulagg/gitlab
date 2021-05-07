@@ -1,18 +1,18 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
-import Home from '~/static_site_editor/pages/home.vue';
-import SkeletonLoader from '~/static_site_editor/components/skeleton_loader.vue';
 import EditArea from '~/static_site_editor/components/edit_area.vue';
 import EditMetaModal from '~/static_site_editor/components/edit_meta_modal.vue';
 import InvalidContentMessage from '~/static_site_editor/components/invalid_content_message.vue';
+import SkeletonLoader from '~/static_site_editor/components/skeleton_loader.vue';
 import SubmitChangesError from '~/static_site_editor/components/submit_changes_error.vue';
-import submitContentChangesMutation from '~/static_site_editor/graphql/mutations/submit_content_changes.mutation.graphql';
-import hasSubmittedChangesMutation from '~/static_site_editor/graphql/mutations/has_submitted_changes.mutation.graphql';
-import { SUCCESS_ROUTE } from '~/static_site_editor/router/constants';
 import { TRACKING_ACTION_INITIALIZE_EDITOR } from '~/static_site_editor/constants';
+import hasSubmittedChangesMutation from '~/static_site_editor/graphql/mutations/has_submitted_changes.mutation.graphql';
+import submitContentChangesMutation from '~/static_site_editor/graphql/mutations/submit_content_changes.mutation.graphql';
+import Home from '~/static_site_editor/pages/home.vue';
+import { SUCCESS_ROUTE } from '~/static_site_editor/router/constants';
 
 import {
-  projectId as project,
+  project,
   returnUrl,
   sourceContentYAML as content,
   sourceContentTitle as title,
@@ -24,6 +24,9 @@ import {
   trackingCategory,
   images,
   mounts,
+  branch,
+  baseUrl,
+  imageRoot,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -43,6 +46,9 @@ describe('static_site_editor/pages/home', () => {
     username,
     sourcePath,
     mounts,
+    branch,
+    baseUrl,
+    imageUploadPath: imageRoot,
   };
   const hasSubmittedChangesMutationPayload = {
     data: {
@@ -229,6 +235,7 @@ describe('static_site_editor/pages/home', () => {
 
   describe('when submitting changes succeeds', () => {
     const newContent = `new ${content}`;
+    const formattedMarkdown = `formatted ${content}`;
 
     beforeEach(() => {
       mutateMock.mockResolvedValueOnce(hasSubmittedChangesMutationPayload).mockResolvedValueOnce({
@@ -237,7 +244,12 @@ describe('static_site_editor/pages/home', () => {
         },
       });
 
-      buildWrapper({ content: newContent, images });
+      buildWrapper();
+
+      findEditMetaModal().vm.show = jest.fn();
+
+      findEditArea().vm.$emit('submit', { content: newContent, images, formattedMarkdown });
+
       findEditMetaModal().vm.$emit('primary', mergeRequestMeta);
 
       return wrapper.vm.$nextTick();
@@ -260,8 +272,10 @@ describe('static_site_editor/pages/home', () => {
         variables: {
           input: {
             content: newContent,
+            formattedMarkdown,
             project,
             sourcePath,
+            targetBranch: branch,
             username,
             images,
             mergeRequestMeta,

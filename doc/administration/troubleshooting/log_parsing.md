@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Parsing GitLab logs with `jq`
@@ -40,6 +40,20 @@ jq -cR 'fromjson?' file.json | jq <COMMAND>
 
 By default `jq` will error out when it encounters a line that is not valid JSON.
 This skips over all invalid lines and parses the rest.
+
+#### Print a JSON log's time range
+
+```shell
+cat log.json | (head -1; tail -1) | jq '.time'
+```
+
+Use `zcat` if the file has been rotated and compressed:
+
+```shell
+zcat @400000006026b71d1a7af804.s | (head -1; tail -1) | jq '.time'
+
+zcat some_json.log.25.gz | (head -1; tail -1) | jq '.time'
+```
 
 ### Parsing `production_json.log` and `api_json.log`
 
@@ -143,16 +157,86 @@ jq 'select(."grpc.code" != null and ."grpc.code" != "OK")' current
 jq 'select(."grpc.time_ms" > 30000)' current
 ```
 
-#### Print top three projects by request volume and their three longest durations
+#### Print top ten projects by request volume and their three longest durations
 
 ```shell
-jq -s -r 'map(select(."grpc.request.glProjectPath" != null and ."grpc.request.glProjectPath" != "" and ."grpc.time_ms" != null)) | group_by(."grpc.request.glProjectPath") | sort_by(-length) | limit(3; .[]) | sort_by(-."grpc.time_ms") | "CT: \(length)\tPROJECT: \(.[0]."grpc.request.glProjectPath")\tDURS: \(.[0]."grpc.time_ms"),  \(.[1]."grpc.time_ms"),  \(.[2]."grpc.time_ms")"' current
+jq --raw-output --slurp '
+  map(
+    select(
+      ."grpc.request.glProjectPath" != null
+      and ."grpc.request.glProjectPath" != ""
+      and ."grpc.time_ms" != null
+    )
+  )
+  | group_by(."grpc.request.glProjectPath")
+  | sort_by(-length)
+  | limit(10; .[])
+  | sort_by(-."grpc.time_ms")
+  | [
+      length,
+      .[0]."grpc.time_ms",
+      .[1]."grpc.time_ms",
+      .[2]."grpc.time_ms",
+      .[0]."grpc.request.glProjectPath"
+    ]
+  | @sh' /var/log/gitlab/gitaly/current \
+| awk 'BEGIN { printf "%7s %10s %10s %10s\t%s\n", "CT", "MAX DURS", "", "", "PROJECT" }
+  { printf "%7u %7u ms, %7u ms, %7u ms\t%s\n", $1, $2, $3, $4, $5 }'
 ```
 
 **Example output**
 
 ```plaintext
-CT: 635 PROJECT: groupA/project1     DURS: 4292.269,  4228.853,  2885.548
-CT: 462 PROJECT: groupB/project5     DURS: 4368.981,  3623.553,  361.399
-CT: 455 PROJECT: groupC/project7     DURS: 387.295,  381.874,  373.988
+   CT    MAX DURS                              PROJECT
+  206    4898 ms,    1101 ms,    1032 ms      'groupD/project4'
+  109    1420 ms,     962 ms,     875 ms      'groupEF/project56'
+  663     106 ms,      96 ms,      94 ms      'groupABC/project123'
+  ...
+```
+
+#### Find all projects affected by a fatal Git problem
+
+```shell
+grep "fatal: " /var/log/gitlab/gitaly/current | \
+    jq '."grpc.request.glProjectPath"' | \
+    sort | uniq
+```
+
+### Parsing `gitlab-shell.log`
+
+For investigating Git calls via SSH, from [GitLab 12.10](https://gitlab.com/gitlab-org/gitlab-shell/-/merge_requests/367).
+
+Find the top 20 calls by project and user:
+
+```shell
+jq --raw-output --slurp '
+  map(
+    select(
+      .username != null and
+      .gl_project_path !=null
+    )
+  )
+  | group_by(.username+.gl_project_path)
+  | sort_by(-length)
+  | limit(20; .[])
+  | "count: \(length)\tuser: \(.[0].username)\tproject: \(.[0].gl_project_path)" ' \
+  /var/log/gitlab/gitlab-shell/gitlab-shell.log
+```
+
+Find the top 20 calls by project, user, and command:
+
+```shell
+jq --raw-output --slurp '
+  map(
+    select(
+      .command  != null and
+      .username != null and
+      .gl_project_path !=null
+    )
+  )
+  | group_by(.username+.gl_project_path+.command)
+  | sort_by(-length)
+  | limit(20; .[])
+  | "count: \(length)\tcommand: \(.[0].command)\tuser: \(.[0].username)\tproject: \(.[0].gl_project_path)" ' \
+  /var/log/gitlab/gitlab-shell/gitlab-shell.log
 ```

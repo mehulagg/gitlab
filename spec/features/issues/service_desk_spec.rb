@@ -4,7 +4,9 @@ require 'spec_helper'
 
 RSpec.describe 'Service Desk Issue Tracker', :js do
   let(:project) { create(:project, :private, service_desk_enabled: true) }
-  let(:user) { create(:user) }
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:support_bot) { User.support_bot }
 
   before do
     # The following two conditions equate to Gitlab::ServiceDesk.supported == true
@@ -19,11 +21,21 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
     before do
       visit project_path(project)
       find('.sidebar-top-level-items .shortcuts-issues').click
-      find('.sidebar-sub-level-items a[title="Service Desk"]').click
+      find('.sidebar-sub-level-items a', text: 'Service Desk').click
     end
 
     it 'can navigate to the service desk from link in the sidebar' do
       expect(page).to have_content('Use Service Desk to connect with your users')
+    end
+  end
+
+  context 'issue page' do
+    let(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
+
+    it 'shows service_desk_reply_to in issue header' do
+      visit project_issue_path(project, service_desk_issue)
+
+      expect(page).to have_text('by service.desk@example.com via GitLab Support Bot')
     end
   end
 
@@ -37,8 +49,8 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
             aggregate_failures do
               expect(page).to have_css('.empty-state')
               expect(page).to have_text('Use Service Desk to connect with your users')
-              expect(page).to have_link('Read more', href: help_page_path('user/project/service_desk'))
-              expect(page).not_to have_link('Turn on Service Desk')
+              expect(page).to have_link('Learn more.', href: help_page_path('user/project/service_desk'))
+              expect(page).not_to have_link('Enable Service Desk')
               expect(page).to have_content(project.service_desk_address)
             end
           end
@@ -56,8 +68,8 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
               aggregate_failures do
                 expect(page).to have_css('.empty-state')
                 expect(page).to have_text('Use Service Desk to connect with your users')
-                expect(page).to have_link('Read more', href: help_page_path('user/project/service_desk'))
-                expect(page).not_to have_link('Turn on Service Desk')
+                expect(page).to have_link('Learn more.', href: help_page_path('user/project/service_desk'))
+                expect(page).not_to have_link('Enable Service Desk')
                 expect(page).not_to have_content(project.service_desk_address)
               end
             end
@@ -66,10 +78,10 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
       end
 
       context 'when there are issues' do
-        let(:support_bot) { User.support_bot }
-        let(:other_user) { create(:user) }
-        let!(:service_desk_issue) { create(:issue, project: project, author: support_bot) }
-        let!(:other_user_issue) { create(:issue, project: project, author: other_user) }
+        let_it_be(:project) { create(:project, :private, service_desk_enabled: true) }
+        let_it_be(:other_user) { create(:user) }
+        let_it_be(:service_desk_issue) { create(:issue, project: project, author: support_bot, service_desk_reply_to: 'service.desk@example.com') }
+        let_it_be(:other_user_issue) { create(:issue, project: project, author: other_user) }
 
         describe 'service desk info content' do
           before do
@@ -79,8 +91,8 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
           it 'displays the small info box, documentation, a button to configure service desk, and the address' do
             aggregate_failures do
               expect(page).to have_css('.non-empty-state')
-              expect(page).to have_link('Read more', href: help_page_path('user/project/service_desk'))
-              expect(page).not_to have_link('Turn on Service Desk')
+              expect(page).to have_link('Learn more.', href: help_page_path('user/project/service_desk'))
+              expect(page).not_to have_link('Enable Service Desk')
               expect(page).to have_content(project.service_desk_address)
             end
           end
@@ -93,6 +105,10 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
 
           it 'only displays issues created by support bot' do
             expect(page).to have_selector('.issues-list .issue', count: 1)
+          end
+
+          it 'shows service_desk_reply_to in issues list' do
+            expect(page).to have_text('by service.desk@example.com via GitLab Support Bot')
           end
         end
 
@@ -140,8 +156,8 @@ RSpec.describe 'Service Desk Issue Tracker', :js do
             aggregate_failures do
               expect(page).to have_css('.empty-state')
               expect(page).to have_text('Service Desk is not supported')
-              expect(page).to have_text('In order to enable Service Desk for your instance, you must first set up incoming email.')
-              expect(page).to have_link('More information', href: help_page_path('administration/incoming_email', anchor: 'set-it-up'))
+              expect(page).to have_text('To enable Service Desk on this instance, an instance administrator must first set up incoming email.')
+              expect(page).to have_link('Learn more.', href: help_page_path('administration/incoming_email', anchor: 'set-it-up'))
             end
           end
         end

@@ -1,14 +1,14 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 
 import * as actions from 'ee/threat_monitoring/store/modules/threat_monitoring/actions';
 import * as types from 'ee/threat_monitoring/store/modules/threat_monitoring/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/threat_monitoring/state';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import httpStatus from '~/lib/utils/http_status';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import httpStatus from '~/lib/utils/http_status';
 
-import { mockEnvironmentsResponse } from '../../../mock_data';
+import { mockEnvironmentsResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 
@@ -140,7 +140,7 @@ describe('Threat Monitoring actions', () => {
 
     describe('given more than one page of environments', () => {
       beforeEach(() => {
-        const oneEnvironmentPerPage = ({ totalPages }) => config => {
+        const oneEnvironmentPerPage = ({ totalPages }) => (config) => {
           const { page } = config.params;
           const response = [httpStatus.OK, { environments: [{ id: page }] }];
           if (page < totalPages) {

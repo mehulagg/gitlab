@@ -5,7 +5,8 @@ class Admin::CredentialsController < Admin::ApplicationController
   include CredentialsInventoryActions
   include Analytics::UniqueVisitsHelper
 
-  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?, :ssh_key_delete_path
+  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path,
+                :ssh_key_delete_path, :gpg_keys_available?
 
   before_action :check_license_credentials_inventory_available!, only: [:index, :revoke, :destroy]
 
@@ -24,6 +25,11 @@ class Admin::CredentialsController < Admin::ApplicationController
     admin_credentials_path(args)
   end
 
+  override :filter_credentials
+  def filter_credentials
+    show_gpg_keys? ? ::GpgKeysFinder.new(users: users).execute : super
+  end
+
   override :user_detail_path
   def user_detail_path(user)
     admin_user_path(user)
@@ -39,13 +45,18 @@ class Admin::CredentialsController < Admin::ApplicationController
     revoke_admin_credential_path(token)
   end
 
-  override :revoke_button_available?
-  def revoke_button_available?
+  override :gpg_keys_available?
+  def gpg_keys_available?
     true
   end
 
   override :users
   def users
+    nil
+  end
+
+  override :revocable
+  def revocable
     nil
   end
 end

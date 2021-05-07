@@ -1,6 +1,6 @@
-import { s__ } from '~/locale';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { s__ } from '~/locale';
 import * as types from './mutation_types';
 
 export const setEndpoints = ({ commit }, endpoints) => {
@@ -20,7 +20,9 @@ export const receiveEnvironmentsSuccess = ({ commit }, environments) =>
   commit(types.RECEIVE_ENVIRONMENTS_SUCCESS, environments);
 export const receiveEnvironmentsError = ({ commit }) => {
   commit(types.RECEIVE_ENVIRONMENTS_ERROR);
-  createFlash(s__('ThreatMonitoring|Something went wrong, unable to fetch environments'));
+  createFlash({
+    message: s__('ThreatMonitoring|Something went wrong, unable to fetch environments'),
+  });
 };
 
 const getAllEnvironments = (url, page = 1) =>
@@ -35,7 +37,7 @@ const getAllEnvironments = (url, page = 1) =>
       const nextPage = headers && headers['x-next-page'];
       return nextPage
         ? // eslint-disable-next-line promise/no-nesting
-          getAllEnvironments(url, nextPage).then(environments => [
+          getAllEnvironments(url, nextPage).then((environments) => [
             ...data.environments,
             ...environments,
           ])
@@ -50,7 +52,7 @@ export const fetchEnvironments = ({ state, dispatch }) => {
   dispatch('requestEnvironments');
 
   return getAllEnvironments(state.environmentsEndpoint)
-    .then(environments => dispatch('receiveEnvironmentsSuccess', environments))
+    .then((environments) => dispatch('receiveEnvironmentsSuccess', environments))
     .catch(() => dispatch('receiveEnvironmentsError'));
 };
 

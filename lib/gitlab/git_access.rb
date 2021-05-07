@@ -22,7 +22,7 @@ module Gitlab
       auth_download: 'You are not allowed to download code.',
       deploy_key_upload: 'This deploy key does not have write access to this project.',
       no_repo: 'A repository for this project does not exist yet.',
-      project_not_found: 'The project you were looking for could not be found.',
+      project_not_found: "The project you were looking for could not be found or you don't have permission to view it.",
       command_not_allowed: "The command you're trying to execute is not allowed.",
       upload_pack_disabled_over_http: 'Pulling over HTTP is not allowed.',
       receive_pack_disabled_over_http: 'Pushing over HTTP is not allowed.',
@@ -43,7 +43,7 @@ module Gitlab
     ALL_COMMANDS = DOWNLOAD_COMMANDS + PUSH_COMMANDS
 
     attr_reader :actor, :protocol, :authentication_abilities,
-                :namespace_path, :redirected_path, :auth_result_type,
+                :repository_path, :redirected_path, :auth_result_type,
                 :cmd, :changes
     attr_accessor :container
 
@@ -57,19 +57,14 @@ module Gitlab
       raise ArgumentError, "No error message defined for #{key}"
     end
 
-    def initialize(actor, container, protocol, authentication_abilities:, namespace_path: nil, repository_path: nil, redirected_path: nil, auth_result_type: nil)
+    def initialize(actor, container, protocol, authentication_abilities:, repository_path: nil, redirected_path: nil, auth_result_type: nil)
       @actor     = actor
       @container = container
       @protocol  = protocol
       @authentication_abilities = Array(authentication_abilities)
-      @namespace_path = namespace_path
       @repository_path = repository_path
       @redirected_path = redirected_path
       @auth_result_type = auth_result_type
-    end
-
-    def repository_path
-      @repository_path ||= project&.path
     end
 
     def check(cmd, changes)
@@ -96,6 +91,7 @@ module Gitlab
       when *PUSH_COMMANDS
         check_push_access!
       end
+      check_additional_conditions!
 
       success_result
     end
@@ -324,11 +320,9 @@ module Gitlab
     end
 
     def check_change_access!
-      # Deploy keys with write access can push anything
-      return if deploy_key?
-
       if changes == ANY
-        can_push = user_can_push? ||
+        can_push = deploy_key? ||
+                   user_can_push? ||
           project&.any_branch_allows_collaboration?(user_access.user)
 
         unless can_push
@@ -404,6 +398,10 @@ module Gitlab
       protocol == 'http'
     end
 
+    def ssh?
+      protocol == 'ssh'
+    end
+
     def upload_pack?
       cmd == 'git-upload-pack'
     end
@@ -454,6 +452,8 @@ module Gitlab
                          CiAccess.new
                        elsif user && request_from_ci_build?
                          BuildAccess.new(user, container: container)
+                       elsif deploy_key?
+                         DeployKeyAccess.new(deploy_key, container: container)
                        else
                          UserAccess.new(user, container: container)
                        end
@@ -530,6 +530,10 @@ module Gitlab
 
     def size_checker
       container.repository_size_checker
+    end
+
+    # overriden in EE
+    def check_additional_conditions!
     end
   end
 end

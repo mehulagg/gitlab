@@ -6,6 +6,8 @@ module Gitlab
       module Security
         module Locations
           class DependencyScanning < Base
+            include Security::Concerns::FingerprintPathFromFile
+
             attr_reader :file_path
             attr_reader :package_name
             attr_reader :package_version
@@ -15,8 +17,6 @@ module Gitlab
               @package_name = package_name
               @package_version = package_version
             end
-
-            private
 
             def fingerprint_data
               "#{file_path}:#{package_name}"

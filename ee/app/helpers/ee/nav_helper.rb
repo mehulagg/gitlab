@@ -25,10 +25,14 @@ module EE
       controllers = %w(issues_analytics#show)
 
       if @group&.feature_available?(:iterations)
-        controllers = %w(iterations#index)
+        controllers = iterations_sub_menu_controllers
       end
 
       super.concat(controllers)
+    end
+
+    def iterations_sub_menu_controllers
+      ['iterations#index', 'iterations#show']
     end
   end
 end

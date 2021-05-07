@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Application limits development
 
 This document provides a development guide for contributors to add application
@@ -6,7 +12,7 @@ limits to GitLab.
 ## Documentation
 
 First of all, you have to gather information and decide which are the different
-limits that will be set for the different GitLab tiers. You also need to
+limits that are set for the different GitLab tiers. You also need to
 coordinate with others to [document](../administration/instance_limits.md)
 and communicate those limits.
 
@@ -27,7 +33,6 @@ It's recommended to create two separate migration script files.
    add_column(:plan_limits, :project_hooks, :integer, default: 100, null: false)
    ```
 
-   NOTE: **Note:**
    Plan limits entries set to `0` mean that limits are not enabled. You should
    use this setting only in special and documented circumstances.
 
@@ -37,8 +42,6 @@ It's recommended to create two separate migration script files.
    ```ruby
    class InsertProjectHooksPlanLimits < ActiveRecord::Migration[5.2]
      include Gitlab::Database::MigrationHelpers
-
-     DOWNTIME = false
 
      def up
        create_or_update_plan_limit('project_hooks', 'default', 0)
@@ -58,8 +61,7 @@ It's recommended to create two separate migration script files.
    end
    ```
 
-   NOTE: **Note:**
-   Some plans exist only on GitLab.com. This will be a no-op for plans
+   Some plans exist only on GitLab.com. This is a no-op for plans
    that do not exist.
 
 ### Plan limits validation
@@ -97,7 +99,6 @@ can be used to validate that a model does not exceed the limits. It ensures
 that the count of the records for the current model does not exceed the defined
 limit.
 
-NOTE: **Note:**
 You must specify the limit scope of the object being validated
 and the limit name if it's different from the pluralized model name.
 
@@ -136,15 +137,14 @@ end
 
 Self-managed:
 
-- `default` - Everyone
+- `default`: Everyone.
 
 GitLab.com:
 
-- `default` - Any system-wide feature
-- `free` - Namespaces and projects with a Free subscription
-- `bronze`- Namespaces and projects with a Bronze subscription
-- `silver` - Namespaces and projects with a Silver subscription
-- `gold` - Namespaces and projects with a Gold subscription
+- `default`: Any system-wide feature.
+- `free`: Namespaces and projects with a Free subscription.
+- `bronze`: Namespaces and projects with a Bronze subscription. This tier is no longer available for purchase.
+- `silver`: Namespaces and projects with a Premium subscription.
+- `gold`: Namespaces and projects with an Ultimate subscription.
 
-NOTE: **Note:**
-The test environment doesn't have any plans.
+The `test` environment doesn't have any plans.

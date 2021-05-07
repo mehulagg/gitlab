@@ -6,7 +6,7 @@ module Ci
 
     TerminalCreationError = Class.new(StandardError)
 
-    TERMINAL_NAME = 'terminal'.freeze
+    TERMINAL_NAME = 'terminal'
 
     attr_reader :terminal
 
@@ -28,6 +28,13 @@ module Ci
     def create_pipeline!
       build_pipeline.tap do |pipeline|
         pipeline.stages << terminal_stage_seed(pipeline).to_resource
+
+        if Feature.enabled?(:ci_pipeline_ensure_iid_on_save, pipeline.project, default_enabled: :yaml)
+          # Project iid must be called outside a transaction, so we ensure it is set here
+          # otherwise it may be set within the save! which it will lock the InternalId row for the whole transaction
+          pipeline.ensure_project_iid!
+        end
+
         pipeline.save!
 
         Ci::ProcessPipelineService
@@ -58,7 +65,8 @@ module Ci
         builds: [terminal_build_seed]
       }
 
-      Gitlab::Ci::Pipeline::Seed::Stage.new(pipeline, attributes, [])
+      seed_context = Gitlab::Ci::Pipeline::Seed::Context.new(pipeline)
+      Gitlab::Ci::Pipeline::Seed::Stage.new(seed_context, attributes, [])
     end
 
     def terminal_build_seed

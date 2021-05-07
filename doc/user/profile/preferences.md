@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: concepts, howto
 ---
 
@@ -9,9 +12,8 @@ of GitLab to their liking.
 
 To navigate to your profile's preferences:
 
-1. Click your avatar.
-1. Select **Settings**.
-1. Click **Preferences** in the sidebar.
+1. In the top-right corner, select your avatar.
+1. Select **Preferences**.
 
 ## Navigation theme
 
@@ -33,8 +35,7 @@ The default theme is Indigo. You can choose between 10 themes:
 - Light Red
 - Dark
 - Light
-
-![Profile preferences navigation themes](img/profil-preferences-navigation-theme.png)
+- [Dark Mode](#dark-mode)
 
 ## Dark mode
 
@@ -42,29 +43,29 @@ The default theme is Indigo. You can choose between 10 themes:
 
 GitLab has started work on dark mode! The dark mode Alpha release is available in the
 spirit of iteration and the lower expectations of
-[Alpha versions](https://about.gitlab.com/handbook/product/#alpha).
+[Alpha versions](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha).
 
-Progress on dark mode is tracked in the [Dark theme epic](https://gitlab.com/groups/gitlab-org/-/epics/2902). See the epic for:
+Progress on dark mode is tracked in the [Dark theme epic](https://gitlab.com/groups/gitlab-org/-/epics/2902).
+See the epic for:
 
 - A list of known issues.
 - Our planned direction and next steps.
 
-If you find an issue that isn’t listed, please leave a comment on the epic or create a
+If you find an issue that isn't listed, please leave a comment on the epic or create a
 new issue.
 
 Dark mode is available as a navigation theme, for MVC and compatibility reasons. In
 the future, we plan to make it configurable in its own section along with support for
 [different navigation themes](https://gitlab.com/gitlab-org/gitlab/-/issues/219512).
 
-NOTE: **Note:**
-Dark theme currently only works with the 'Dark' syntax highlighting.
+Dark theme only works with the **Dark** syntax highlighting theme.
 
 ## Syntax highlighting theme
 
-NOTE: **Note:**
 GitLab uses the [rouge Ruby library](http://rouge.jneen.net/ "Rouge website")
 for syntax highlighting outside of any Editor context. The WebIDE (like Snippets)
-uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) and it's provided [Monarch](https://microsoft.github.io/monaco-editor/monarch.html) library for
+uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) and it's provided
+[Monarch](https://microsoft.github.io/monaco-editor/monarch.html) library for
 syntax highlighting. For a list of supported languages, visit the documentation of
 the respective libraries.
 
@@ -73,23 +74,23 @@ syntax highlighted code on GitLab.
 
 The default syntax theme is White, and you can choose among 5 different themes:
 
+<!-- vale gitlab.Spelling = NO -->
+
 - White
 - Dark
 - Solarized light
 - Solarized dark
 - Monokai
 
+<!-- vale gitlab.Spelling = YES -->
+
 ![Profile preferences syntax highlighting themes](img/profile-preferences-syntax-themes.png)
 
-[Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in 13.0, the theme
-you choose also applies to the [Web IDE](../project/web_ide/index.md)'s code editor and [Snippets](../snippets.md).
-The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
-the [Solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
-which apply to the entire Web IDE screen.
+Introduced in GitLab 13.6, the themes [Solarized](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) and [Monokai](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) also apply to the [Web IDE](../project/web_ide/index.md) and [Snippets](../snippets.md).
 
 ## Behavior
 
-The following settings allow you to customize the behavior of GitLab's layout
+The following settings allow you to customize the behavior of the GitLab layout
 and default views of your dashboard and the projects' landing pages.
 
 ### Layout width
@@ -97,24 +98,25 @@ and default views of your dashboard and the projects' landing pages.
 GitLab can be set up to use different widths depending on your liking. Choose
 between the fixed (max. `1280px`) and the fluid (`100%`) application layout.
 
-NOTE: **Note:**
+NOTE:
 While `1280px` is the standard max width when using fixed layout, some pages still use 100% width, depending on the content.
 
 ### Default dashboard
 
 For users who have access to a large number of projects but only keep up with a
 select few, the amount of activity on the default Dashboard page can be
-overwhelming. Changing this setting allows you to redefine what your default
-dashboard will be.
+overwhelming. Changing this setting allows you to redefine your default
+dashboard.
 
-You have 8 options here that you can use for your default dashboard view:
+You can include the following options for your default dashboard view:
 
 - Your projects (default)
 - Starred projects
 - Your projects' activity
 - Starred projects' activity
+- Followed Users' Activity
 - Your groups
-- Your [to-dos](../todos.md)
+- Your [To-Do List](../todos.md)
 - Assigned Issues
 - Assigned Merge Requests
 - Operations Dashboard **(PREMIUM)**
@@ -122,7 +124,7 @@ You have 8 options here that you can use for your default dashboard view:
 ### Group overview content
 
 The **Group overview content** dropdown allows you to choose what information is
-displayed on a group’s home page.
+displayed on a group's home page.
 
 You can choose between 2 options:
 
@@ -132,14 +134,14 @@ You can choose between 2 options:
 ### Project overview content
 
 The **Project overview content** setting allows you to choose what content you want to
-see on a project’s home page.
+see on a project's home page.
 
 ### Tab width
 
 You can set the displayed width of tab characters across various parts of
 GitLab, for example, blobs, diffs, and snippets.
 
-NOTE: **Note:**
+NOTE:
 Some parts of GitLab do not respect this setting, including the WebIDE, file
 editor and Markdown editor.
 
@@ -161,7 +163,7 @@ You can choose one of the following options as the first day of the week:
 - Sunday
 - Monday
 
-If you select **System Default**, the system-wide default setting will be used.
+If you select **System Default**, the system-wide default setting is used.
 
 ## Integrations
 
@@ -169,7 +171,7 @@ Configure your preferences with third-party services which provide enhancements 
 
 ### Sourcegraph
 
-NOTE: **Note:**
+NOTE:
 This setting is only visible if Sourcegraph has been enabled by a GitLab administrator.
 
 Manage the availability of integrated code intelligence features powered by

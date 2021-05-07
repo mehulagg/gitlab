@@ -9,7 +9,13 @@ module Enums
         {
           unknown_failure: 0,
           config_error: 1,
-          external_validation_failure: 2
+          external_validation_failure: 2,
+          activity_limit_exceeded: 20,
+          size_limit_exceeded: 21,
+          job_activity_limit_exceeded: 22,
+          deployments_limit_exceeded: 23,
+          user_blocked: 24,
+          project_deleted: 25
         }
       end
 
@@ -24,8 +30,6 @@ module Enums
           schedule: 4,
           api: 5,
           external: 6,
-          # TODO: Rename `pipeline` to `cross_project_pipeline` in 13.0
-          # https://gitlab.com/gitlab-org/gitlab/issues/195991
           pipeline: 7,
           chat: 8,
           webide: 9,
@@ -53,6 +57,14 @@ module Enums
         sources.except(*dangling_sources.keys)
       end
 
+      def self.ci_branch_sources
+        ci_sources.except(:merge_request_event)
+      end
+
+      def self.ci_and_parent_sources
+        ci_sources.merge(sources.slice(:parent_pipeline))
+      end
+
       # Returns the `Hash` to use for creating the `config_sources` enum for
       # `Ci::Pipeline`.
       def self.config_sources
@@ -64,11 +76,10 @@ module Enums
           remote_source: 4,
           external_project_source: 5,
           bridge_source: 6,
-          parameter_source: 7
+          parameter_source: 7,
+          compliance_source: 8
         }
       end
     end
   end
 end
-
-Enums::Ci::Pipeline.prepend_if_ee('EE::Enums::Ci::Pipeline')

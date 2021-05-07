@@ -17,6 +17,28 @@ RSpec.shared_examples 'raw snippet blob' do
     end
   end
 
+  context 'Content Disposition' do
+    context 'when the disposition is inline' do
+      let(:inline) { true }
+
+      it 'returns inline in the content disposition header' do
+        subject
+
+        expect(response.header['Content-Disposition']).to eq('inline')
+      end
+    end
+
+    context 'when the disposition is attachment' do
+      let(:inline) { false }
+
+      it 'returns attachment plus the filename in the content disposition header' do
+        subject
+
+        expect(response.header['Content-Disposition']).to match "attachment; filename=\"#{filepath}\""
+      end
+    end
+  end
+
   context 'with invalid file path' do
     let(:filepath) { 'doesnotexist' }
 

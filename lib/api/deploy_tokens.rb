@@ -4,6 +4,8 @@ module API
   class DeployTokens < ::API::Base
     include PaginationParams
 
+    feature_category :continuous_delivery
+
     helpers do
       def scope_params
         scopes = params.delete(:scopes)
@@ -16,6 +18,10 @@ module API
         result_hash[:read_repository] = scopes.include?('read_repository')
         result_hash
       end
+
+      params :filter_params do
+        optional :active, type: Boolean, desc: 'Limit by active status'
+      end
     end
 
     desc 'Return all deploy tokens' do
@@ -24,25 +30,27 @@ module API
     end
     params do
       use :pagination
+      use :filter_params
     end
     get 'deploy_tokens' do
-      service_unavailable! unless Feature.enabled?(:deploy_tokens_api, default_enabled: true)
-
       authenticated_as_admin!
 
-      present paginate(DeployToken.all), with: Entities::DeployToken
+      deploy_tokens = ::DeployTokens::TokensFinder.new(
+        current_user,
+        :all,
+        declared_params
+      ).execute
+
+      present paginate(deploy_tokens), with: Entities::DeployToken
     end
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
-      before do
-        service_unavailable! unless Feature.enabled?(:deploy_tokens_api, user_project, default_enabled: true)
-      end
-
       params do
         use :pagination
+        use :filter_params
       end
       desc 'List deploy tokens for a project' do
         detail 'This feature was introduced in GitLab 12.9'
@@ -51,7 +59,13 @@ module API
       get ':id/deploy_tokens' do
         authorize!(:read_deploy_token, user_project)
 
-        present paginate(user_project.deploy_tokens), with: Entities::DeployToken
+        deploy_tokens = ::DeployTokens::TokensFinder.new(
+          current_user,
+          user_project,
+          declared_params
+        ).execute
+
+        present paginate(deploy_tokens), with: Entities::DeployToken
       end
 
       params do
@@ -100,12 +114,9 @@ module API
       requires :id, type: String, desc: 'The ID of a group'
     end
     resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
-      before do
-        service_unavailable! unless Feature.enabled?(:deploy_tokens_api, user_group, default_enabled: true)
-      end
-
       params do
         use :pagination
+        use :filter_params
       end
       desc 'List deploy tokens for a group' do
         detail 'This feature was introduced in GitLab 12.9'
@@ -114,7 +125,13 @@ module API
       get ':id/deploy_tokens' do
         authorize!(:read_deploy_token, user_group)
 
-        present paginate(user_group.deploy_tokens), with: Entities::DeployToken
+        deploy_tokens = ::DeployTokens::TokensFinder.new(
+          current_user,
+          user_group,
+          declared_params
+        ).execute
+
+        present paginate(deploy_tokens), with: Entities::DeployToken
       end
 
       params do

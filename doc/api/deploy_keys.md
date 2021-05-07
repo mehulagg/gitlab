@@ -1,14 +1,14 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Deploy Keys API
+# Deploy keys API
 
 ## List all deploy keys
 
-Get a list of all deploy keys across all projects of the GitLab instance. This endpoint requires admin access and is not available on GitLab.com.
+Get a list of all deploy keys across all projects of the GitLab instance. This endpoint requires administrator access and is not available on GitLab.com.
 
 ```plaintext
 GET /deploy_keys
@@ -109,8 +109,8 @@ Example response:
 
 Creates a new deploy key for a project.
 
-If the deploy key already exists in another project, it will be joined to current
-project only if original one is accessible by the same user.
+If the deploy key already exists in another project, it's joined to the current
+project only if the original one is accessible by the same user.
 
 ```plaintext
 POST /projects/:id/deploy_keys
@@ -171,7 +171,7 @@ Example response:
 
 ## Delete deploy key
 
-Removes a deploy key from the project. If the deploy key is used only for this project, it will be deleted from the system.
+Removes a deploy key from the project. If the deploy key is used only for this project, it's deleted from the system.
 
 ```plaintext
 DELETE /projects/:id/deploy_keys/:key_id

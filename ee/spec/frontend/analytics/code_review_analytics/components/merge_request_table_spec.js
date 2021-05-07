@@ -1,6 +1,6 @@
+import { GlTable } from '@gitlab/ui';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlTable } from '@gitlab/ui';
 import MergeRequestTable from 'ee/analytics/code_review_analytics/components/merge_request_table.vue';
 import createState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
 import { mockMergeRequests } from '../mock_data';
@@ -25,13 +25,13 @@ describe('MergeRequestTable component', () => {
       },
     });
 
-  const createComponent = store =>
+  const createComponent = (store) =>
     mount(MergeRequestTable, {
       localVue,
       store,
     });
 
-  const bootstrap = initialState => {
+  const bootstrap = (initialState) => {
     vuexStore = createStore(initialState);
     wrapper = createComponent(vuexStore);
   };
@@ -41,14 +41,8 @@ describe('MergeRequestTable component', () => {
   });
 
   const findTable = () => wrapper.find(GlTable);
-  const findTableRow = index =>
-    findTable()
-      .findAll('tbody tr')
-      .at(index);
-  const findReviewTimeCol = rowIndex =>
-    findTableRow(rowIndex)
-      .findAll('td')
-      .at(1);
+  const findTableRow = (index) => findTable().findAll('tbody tr').at(index);
+  const findReviewTimeCol = (rowIndex) => findTableRow(rowIndex).findAll('td').at(1);
 
   const updateMergeRequests = (index, attrs) =>
     mockMergeRequests.map((item, idx) => {
@@ -64,8 +58,6 @@ describe('MergeRequestTable component', () => {
 
   describe('template', () => {
     beforeEach(() => {
-      jest.spyOn(global, 'Date').mockImplementationOnce(() => new Date('2020-03-09T11:01:58.135Z'));
-
       bootstrap({ mergeRequests: mockMergeRequests });
     });
 

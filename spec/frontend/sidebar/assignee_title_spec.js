@@ -1,12 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { mockTracking, triggerEvent } from 'helpers/tracking_helper';
 import Component from '~/sidebar/components/assignees/assignee_title.vue';
 
 describe('AssigneeTitle component', () => {
   let wrapper;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     return shallowMount(Component, {
       propsData: {
         numberOfAssignees: 0,

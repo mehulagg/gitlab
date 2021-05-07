@@ -82,6 +82,10 @@ module Ci
         unless checksum.valid?
           metrics.increment_trace_operation(operation: :invalid)
 
+          if checksum.corrupted?
+            metrics.increment_trace_operation(operation: :corrupted)
+          end
+
           next unless log_invalid_chunks?
 
           ::Gitlab::ErrorTracking.log_exception(InvalidTraceError.new,
@@ -89,7 +93,8 @@ module Ci
             build_id: build.id,
             state_crc32: checksum.state_crc32,
             chunks_crc32: checksum.chunks_crc32,
-            chunks_count: checksum.chunks_count
+            chunks_count: checksum.chunks_count,
+            chunks_corrupted: checksum.corrupted?
           )
         end
       end
@@ -106,7 +111,7 @@ module Ci
 
         Result.new(status: 200)
       when 'failed'
-        build.drop!(params[:failure_reason] || :unknown_failure)
+        build.drop_with_exit_code!(params[:failure_reason] || :unknown_failure, params[:exit_code])
 
         Result.new(status: 200)
       else
@@ -151,11 +156,19 @@ module Ci
     end
 
     def has_checksum?
-      params.dig(:checksum).present?
+      trace_checksum.present?
     end
 
     def build_running?
       build_state == 'running'
+    end
+
+    def trace_checksum
+      params.dig(:output, :checksum) || params.dig(:checksum)
+    end
+
+    def trace_bytesize
+      params.dig(:output, :bytesize)
     end
 
     def pending_state
@@ -163,16 +176,19 @@ module Ci
     end
 
     def ensure_pending_state
-      Ci::BuildPendingState.create_or_find_by!(
+      build_state = Ci::BuildPendingState.safe_find_or_create_by(
         build_id: build.id,
         state: params.fetch(:state),
-        trace_checksum: params.fetch(:checksum),
+        trace_checksum: trace_checksum,
+        trace_bytesize: trace_bytesize,
         failure_reason: params.dig(:failure_reason)
       )
-    rescue ActiveRecord::RecordNotFound
-      metrics.increment_trace_operation(operation: :conflict)
 
-      build.pending_state
+      unless build_state.present?
+        metrics.increment_trace_operation(operation: :conflict)
+      end
+
+      build_state || build.pending_state
     end
 
     ##

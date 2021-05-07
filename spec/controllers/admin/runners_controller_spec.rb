@@ -27,7 +27,8 @@ RSpec.describe Admin::RunnersController do
 
       # There is still an N+1 query for `runner.builds.count`
       # We also need to add 1 because it takes 2 queries to preload tags
-      expect { get :index }.not_to exceed_query_limit(control_count + 6)
+      # also looking for token nonce requires database queries
+      expect { get :index }.not_to exceed_query_limit(control_count + 16)
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(response.body).to have_content('tag1')
@@ -124,7 +125,7 @@ RSpec.describe Admin::RunnersController do
 
   describe '#resume' do
     it 'marks the runner as active and ticks the queue' do
-      runner.update(active: false)
+      runner.update!(active: false)
 
       expect do
         post :resume, params: { id: runner.id }
@@ -139,7 +140,7 @@ RSpec.describe Admin::RunnersController do
 
   describe '#pause' do
     it 'marks the runner as inactive and ticks the queue' do
-      runner.update(active: true)
+      runner.update!(active: true)
 
       expect do
         post :pause, params: { id: runner.id }

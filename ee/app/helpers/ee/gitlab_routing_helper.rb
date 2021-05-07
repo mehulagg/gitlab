@@ -2,9 +2,6 @@
 
 module EE
   module GitlabRoutingHelper
-    include ::ProjectsHelper
-    include ::ApplicationSettingsHelper
-
     def geo_primary_web_url(container)
       File.join(::Gitlab::Geo.primary_node.url, container.full_path)
     end
@@ -71,6 +68,14 @@ module EE
       path = '/users/auth/group_saml/metadata'
 
       ActionDispatch::Http::URL.path_for(path: path, params: params)
+    end
+
+    def usage_quotas_path(namespace, *args)
+      if namespace.group?
+        group_usage_quotas_path(namespace, *args)
+      else
+        profile_usage_quotas_path(*args)
+      end
     end
   end
 end

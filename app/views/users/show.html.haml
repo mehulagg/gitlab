@@ -1,9 +1,10 @@
 - @hide_top_links = true
 - @hide_breadcrumbs = true
 - @no_container = true
-- page_title       @user.blocked? ? s_('UserProfile|Blocked user') : @user.name
+- page_title       user_display_name(@user)
 - page_description @user.bio_html
 - header_title     @user.name, user_path(@user)
+- page_itemtype    'http://schema.org/Person'
 - link_classes = "flex-grow-1 mx-1 "
 
 = content_for :meta_tags do
@@ -13,56 +14,67 @@
   .cover-block.user-cover-block{ class: [('border-bottom' if profile_tabs.empty?)] }
     = render layout: 'users/cover_controls' do
       - if @user == current_user
-        = link_to profile_path, class: link_classes + 'btn gl-button btn-default has-tooltip', title: s_('UserProfile|Edit profile'), 'aria-label': 'Edit profile' do
+        = link_to profile_path, class: link_classes + 'btn gl-button btn-default btn-icon has-tooltip',
+          title: s_('UserProfile|Edit profile'), 'aria-label': 'Edit profile', data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } do
           = sprite_icon('pencil')
       - elsif current_user
         - if @user.abuse_report
-          %button{ class: link_classes + 'btn gl-button btn-danger', title: s_('UserProfile|Already reported for abuse'),
+          %button{ class: link_classes + 'btn gl-button btn-danger btn-icon', title: s_('UserProfile|Already reported for abuse'),
             data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } }>
             = sprite_icon('error')
         - else
-          = link_to new_abuse_report_path(user_id: @user.id, ref_url: request.referrer), class: link_classes + 'btn gl-button',
+          = link_to new_abuse_report_path(user_id: @user.id, ref_url: request.referrer), class: link_classes + 'btn gl-button btn-default btn-icon',
             title: s_('UserProfile|Report abuse'), data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } do
             = sprite_icon('error')
       - if can?(current_user, :read_user_profile, @user)
-        = link_to user_path(@user, rss_url_options), class: link_classes + 'btn gl-button btn-svg btn-default has-tooltip', title: s_('UserProfile|Subscribe'), 'aria-label': 'Subscribe' do
+        = link_to user_path(@user, rss_url_options), class: link_classes + 'btn gl-button btn-default btn-icon has-tooltip',
+          title: s_('UserProfile|Subscribe'), data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } do
           = sprite_icon('rss', css_class: 'qa-rss-icon')
       - if current_user && current_user.admin?
-        = link_to [:admin, @user], class: link_classes + 'btn gl-button btn-default', title: s_('UserProfile|View user in admin area'),
+        = link_to [:admin, @user], class: link_classes + 'btn gl-button btn-default btn-icon', title: s_('UserProfile|View user in admin area'),
           data: {toggle: 'tooltip', placement: 'bottom', container: 'body'} do
           = sprite_icon('user')
+      - if current_user && current_user.id != @user.id
+        - if current_user.following?(@user)
+          = link_to user_unfollow_path(@user, :json) , class: link_classes + 'btn gl-button btn-default', method: :post do
+            = _('Unfollow')
+        - else
+          = link_to user_follow_path(@user, :json) , class: link_classes + 'btn gl-button btn-confirm', method: :post, data: { qa_selector: 'follow_user_link' } do
+            = _('Follow')
 
     .profile-header{ class: [('with-no-profile-tabs' if profile_tabs.empty?)] }
       .avatar-holder
         = link_to avatar_icon_for_user(@user, 400), target: '_blank', rel: 'noopener noreferrer' do
-          = image_tag avatar_icon_for_user(@user, 90), class: "avatar s90", alt: ''
+          = image_tag avatar_icon_for_user(@user, 90), class: "avatar s90", alt: '', itemprop: 'image'
 
-      - if @user.blocked?
+      - if @user.blocked? || !@user.confirmed?
         .user-info
           .cover-title
-            = s_('UserProfile|Blocked user')
+            = user_display_name(@user)
         = render "users/profile_basic_info"
       - else
         .user-info
-          .cover-title
+          .cover-title{ itemprop: 'name' }
             = @user.name
+            - if @user&.status && user_status_set_to_busy?(@user.status)
+              %span.gl-font-base.gl-text-gray-500.gl-vertical-align-middle= s_("UserProfile|(Busy)")
 
-          - if @user.status
-            .cover-status
-              = emoji_icon(@user.status.emoji)
+          - if show_status_emoji?(@user.status)
+            .cover-status.gl-display-inline-flex.gl-align-items-center
+              = emoji_icon(@user.status.emoji, class: 'gl-mr-2')
               = markdown_field(@user.status, :message)
           = render "users/profile_basic_info"
           .cover-desc.cgray.mb-1.mb-sm-2
             - unless @user.location.blank?
-              .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mb-1.mb-sm-0
-                = sprite_icon('location', css_class: 'vertical-align-sub fgray')
-                %span.vertical-align-middle
+              .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mb-1.mb-sm-0{ itemprop: 'address', itemscope: true, itemtype: 'https://schema.org/PostalAddress' }
+                = sprite_icon('location', css_class: 'fgray')
+                %span{ itemprop: 'addressLocality' }
                   = @user.location
             - unless work_information(@user).blank?
               .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline
-                = sprite_icon('work', css_class: 'vertical-align-middle fgray')
-                %span.vertical-align-middle
-                  = work_information(@user)
+                = sprite_icon('work', css_class: 'fgray')
+                %span
+                  = work_information(@user, with_schema_markup: true)
           .cover-desc.cgray.mb-1.mb-sm-2
             - unless @user.skype.blank?
               .profile-link-holder.middle-dot-divider
@@ -80,10 +92,20 @@
               .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mt-1.mt-sm-0
                 - if Feature.enabled?(:security_auto_fix) && @user.bot?
                   = sprite_icon('question', css_class: 'gl-text-blue-600')
-                = link_to @user.short_website_url, @user.full_website_url, class: 'text-link', target: '_blank', rel: 'me noopener noreferrer nofollow'
+                = link_to @user.short_website_url, @user.full_website_url, class: 'text-link', target: '_blank', rel: 'me noopener noreferrer nofollow', itemprop: 'url'
             - unless @user.public_email.blank?
               .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mt-1.mt-sm-0
-                = link_to @user.public_email, "mailto:#{@user.public_email}", class: 'text-link'
+                = link_to @user.public_email, "mailto:#{@user.public_email}", class: 'text-link', itemprop: 'email'
+          .cover-desc.gl-text-gray-900.gl-mb-2.mb-sm-2
+            = sprite_icon('users', css_class: 'gl-vertical-align-middle gl-text-gray-500')
+            .profile-link-holder.middle-dot-divider
+              = link_to user_followers_path, class: 'text-link' do
+                - count = @user.followers.count
+                = n_('1 follower', '%{count} followers', count) % { count: count }
+            .profile-link-holder.middle-dot-divider
+              = link_to user_following_path, class: 'text-link', data: { qa_selector: 'following_link' } do
+                = @user.followees.count
+                = _('following')
         - if @user.bio.present?
           .cover-desc.cgray
             .profile-user-bio
@@ -124,6 +146,14 @@
               %li.js-snippets-tab
                 = link_to user_snippets_path, data: { target: 'div#snippets', action: 'snippets', toggle: 'tab', endpoint: user_snippets_path(format: :json) } do
                   = s_('UserProfile|Snippets')
+            - if profile_tab?(:followers)
+              %li.js-followers-tab
+                = link_to user_followers_path, data: { target: 'div#followers', action: 'followers', toggle: 'tab', endpoint: user_followers_path(format: :json) } do
+                  = s_('UserProfile|Followers')
+            - if profile_tab?(:following)
+              %li.js-following-tab
+                = link_to user_following_path, data: { target: 'div#following', action: 'following', toggle: 'tab', endpoint: user_following_path(format: :json) } do
+                  = s_('UserProfile|Following')
 
   %div{ class: container_class }
     .tab-content
@@ -133,12 +163,13 @@
 
       - if profile_tab?(:activity)
         #activity.tab-pane
+          .flash-container
           - if can?(current_user, :read_cross_project)
             %h4.prepend-top-20
               = s_('UserProfile|Most Recent Activity')
-            .content_list{ data: { href: user_path } }
+            .content_list{ data: { href: user_activity_path } }
             .loading
-              .spinner.spinner-md
+              .gl-spinner.gl-spinner-md
       - unless @user.bot?
         - if profile_tab?(:groups)
           #groups.tab-pane
@@ -160,8 +191,16 @@
           #snippets.tab-pane
             -# This tab is always loaded via AJAX
 
+        - if profile_tab?(:followers)
+          #followers.tab-pane
+            -# This tab is always loaded via AJAX
+
+        - if profile_tab?(:following)
+          #following.tab-pane
+            -# This tab is always loaded via AJAX
+
     .loading.hide
-      .spinner.spinner-md
+      .gl-spinner.gl-spinner-md
 
     - if profile_tabs.empty?
       .svg-content

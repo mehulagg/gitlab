@@ -20,6 +20,9 @@ UsageData/LargeTable:
     - :Gitlab::Runtime
     - :Gitaly::Server
     - :Gitlab::UsageData
+    - :Gitlab::UsageDataCounters
+    - :Arel::Nodes::NamedFunction
+    - :Arel
     - :License
     - :Rails
     - :Time
@@ -27,9 +30,11 @@ UsageData/LargeTable:
     - :Settings
     - :CE_MEMOIZED_VALUES
     - :EE_MEMOIZED_VALUES
+    - :Ohai::System
   CountMethods:
     - :count
     - :distinct_count
+    - :histogram
   AllowedMethods:
     - :arel_table
     - :minimum
@@ -50,3 +55,5 @@ UsageData/DistinctCountByLargeForeignKey:
     - 'owner_id'
     - 'project_id'
     - 'user_id'
+    - 'resource_owner_id'
+    - 'requirement_id'

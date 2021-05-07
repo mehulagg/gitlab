@@ -7,16 +7,21 @@ require:
   - rubocop-rspec
 
 inherit_from:
-  - .rubocop_todo.yml
+  <% unless ENV['REVEAL_RUBOCOP_TODO'] == '1' %>
+  - '.rubocop_manual_todo.yml'
+  - '.rubocop_todo.yml'
+  <% end %>
   - ./rubocop/rubocop-migrations.yml
   - ./rubocop/rubocop-usage-data.yml
+  - ./rubocop/rubocop-code_reuse.yml
 
 inherit_mode:
   merge:
     - Include
+    - Exclude
 
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.7
   TargetRailsVersion: 6.0
   Exclude:
     - 'vendor/**/*'
@@ -30,6 +35,7 @@ AllCops:
     - 'builds/**/*'
     - 'plugins/**/*'
     - 'file_hooks/**/*'
+    - 'workhorse/**/*'
   CacheRootDirectory: tmp
   MaxFilesInCache: 18000
 
@@ -44,6 +50,15 @@ Cop/StaticTranslationDefinition:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+
+InternalAffairs/DeprecateCopHelper:
+  Enabled: true
+  Include:
+    - spec/rubocop/**/*.rb
+
+Lint/LastKeywordArgument:
+  Enabled: true
+  Safe: false
 
 # This cop checks whether some constant value isn't a
 # mutable literal (e.g. array or hash).
@@ -66,21 +81,7 @@ Style/AccessModifierDeclarations:
 # Frozen String Literal
 Style/FrozenStringLiteralComment:
   Enabled: true
-  Exclude:
-    - 'config.ru'
-    - 'Dangerfile'
-    - 'Gemfile'
-    - 'Rakefile'
-    - 'app/views/**/*'
-    - 'config/**/*'
-    - 'danger/**/*'
-    - 'db/**/*'
-    - 'ee/db/**/*'
-    - 'ee/lib/tasks/**/*'
-    - 'lib/tasks/**/*'
-    - 'qa/**/*'
-    - 'rubocop/**/*'
-    - 'scripts/**/*'
+  EnforcedStyle: always_true
 
 RSpec/FilePath:
   Exclude:
@@ -88,6 +89,17 @@ RSpec/FilePath:
     - 'spec/frontend/fixtures/*'
     - 'ee/spec/frontend/fixtures/*'
     - 'spec/requests/api/v3/*'
+
+# Configuration parameters: AllowSubject.
+RSpec/MultipleMemoizedHelpers:
+  Max: 28
+  AllowSubject: true
+  Exclude:
+    - 'spec/migrations/**/*.rb'
+    - 'spec/lib/gitlab/background_migration/populate_project_snippet_statistics_spec.rb'
+    - 'spec/lib/gitlab/background_migration/populate_finding_uuid_for_vulnerability_feedback_spec.rb'
+    - 'ee/spec/lib/ee/gitlab/background_migration/populate_uuids_for_security_findings_spec.rb'
+    - 'ee/spec/lib/gitlab/background_migration/user_mentions/create_resource_user_mention_spec.rb'
 
 Naming/FileName:
   ExpectMatchingDefinition: true
@@ -242,9 +254,9 @@ Gitlab/Json:
     - 'db/**/*'
     - 'qa/**/*'
     - 'scripts/**/*'
-    - 'lib/rspec_flaky/**/*'
+    - 'tooling/rspec_flaky/**/*'
     - 'lib/quality/**/*'
-    - 'lib/gitlab/danger/**/*'
+    - 'tooling/danger/**/*'
 
 Gitlab/AvoidUploadedFileFromParams:
   Enabled: true
@@ -269,6 +281,12 @@ GitlabSecurity/PublicSend:
 Gitlab/DuplicateSpecLocation:
   Enabled: true
 
+Gitlab/PolicyRuleBoolean:
+  Enabled: true
+  Include:
+    - 'app/policies/**/*'
+    - 'ee/app/policies/**/*'
+
 Cop/InjectEnterpriseEditionModule:
   Enabled: true
   Exclude:
@@ -289,6 +307,9 @@ Cop/ActiveRecordAssociationReload:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
+Cop/ActiveModelErrorsDirectManipulation:
+  Enabled: true
+
 Gitlab/AvoidFeatureGet:
   Enabled: true
 
@@ -307,6 +328,14 @@ RSpec/TimecopTravel:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
+
+RSpec/WebMockEnable:
+  Enabled: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+  Exclude:
+    - 'spec/support/webmock.rb'
 
 Naming/PredicateName:
   Enabled: true
@@ -352,6 +381,14 @@ Cop/SidekiqOptionsQueue:
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
+
+Graphql/ResolverType:
+  Enabled: true
+  Exclude:
+    - 'app/graphql/resolvers/base_resolver.rb'
+  Include:
+    - 'app/graphql/resolvers/**/*'
+    - 'ee/app/graphql/resolvers/**/*'
 
 Graphql/AuthorizeTypes:
   Enabled: true
@@ -414,12 +451,10 @@ Scalability/FileUploads:
 
 Graphql/Descriptions:
   Enabled: true
+  AutoCorrect: true
   Include:
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'
-
-RSpec/AnyInstanceOf:
-  Enabled: false
 
 # Cops for upgrade to gitlab-styles 3.1.0
 RSpec/ImplicitSubject:
@@ -540,6 +575,9 @@ Rails/SaveBang:
     - 'ee/spec/**/*.rb'
     - 'qa/spec/**/*.rb'
     - 'qa/qa/specs/**/*.rb'
+  Exclude:
+  - spec/models/wiki_page/**/*
+  - spec/models/wiki_page_spec.rb
 
 Cop/PutProjectRoutesUnderScope:
   Include:
@@ -577,3 +615,51 @@ FactoryBot/InlineAssociation:
   Include:
     - 'spec/factories/**/*.rb'
     - 'ee/spec/factories/**/*.rb'
+
+# WIP: https://gitlab.com/gitlab-org/gitlab/-/issues/321982
+Gitlab/NamespacedClass:
+  Exclude:
+    - 'config/**/*.rb'
+    - 'db/**/*.rb'
+    - 'ee/bin/**/*'
+    - 'ee/db/**/*.rb'
+    - 'ee/elastic/**/*.rb'
+    - 'scripts/**/*'
+    - 'spec/migrations/**/*.rb'
+
+Lint/HashCompareByIdentity:
+  Enabled: true
+
+Lint/RedundantSafeNavigation:
+  Enabled: true
+
+Style/ClassEqualityComparison:
+  Enabled: true
+
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/207950
+Cop/UserAdmin:
+  Enabled: true
+  Exclude:
+    - 'app/controllers/admin/sessions_controller.rb'
+    - 'app/controllers/concerns/enforces_admin_authentication.rb'
+    - 'app/policies/base_policy.rb'
+    - 'lib/gitlab/auth/current_user_mode.rb'
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
+Performance/OpenStruct:
+  Exclude:
+    - 'ee/spec/**/*.rb'
+
+# See https://gitlab.com/gitlab-org/gitlab/-/issues/327495
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/RegexpLiteralMixedPreserve:
+  Enabled: true
+  SupportedStyles:
+    - slashes
+    - percent_r
+    - mixed
+    - mixed_preserve
+  EnforcedStyle: mixed_preserve

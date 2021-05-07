@@ -10,8 +10,6 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 describe('deprecatedJQueryDropdown', () => {
-  preloadFixtures('static/deprecated_jquery_dropdown.html');
-
   const NON_SELECTABLE_CLASSES =
     '.divider, .separator, .dropdown-header, .dropdown-menu-empty-item';
   const SEARCH_INPUT_SELECTOR = '.dropdown-input-field';
@@ -56,8 +54,8 @@ describe('deprecatedJQueryDropdown', () => {
       search: {
         fields: ['name'],
       },
-      text: project => project.name_with_namespace || project.name,
-      id: project => project.id,
+      text: (project) => project.name_with_namespace || project.name,
+      id: (project) => project.id,
       ...extraOpts,
     };
     test.dropdownButtonElement = $('#js-project-dropdown', test.dropdownContainerElement);
@@ -230,10 +228,7 @@ describe('deprecatedJQueryDropdown', () => {
   it('should still have input value on close and restore', () => {
     const $searchInput = $(SEARCH_INPUT_SELECTOR);
     initDropDown.call(this, false, true);
-    $searchInput
-      .trigger('focus')
-      .val('g')
-      .trigger('input');
+    $searchInput.trigger('focus').val('g').trigger('input');
 
     expect($searchInput.val()).toEqual('g');
     test.dropdownButtonElement.trigger('hidden.bs.dropdown');

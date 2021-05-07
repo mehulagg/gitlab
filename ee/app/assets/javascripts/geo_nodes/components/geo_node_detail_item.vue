@@ -1,13 +1,12 @@
 <script>
 import { GlIcon, GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import popover from '~/vue_shared/directives/popover';
 
 import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from '../constants';
 
-import GeoNodeSyncSettings from './geo_node_sync_settings.vue';
 import GeoNodeEventStatus from './geo_node_event_status.vue';
 import GeoNodeSyncProgress from './geo_node_sync_progress.vue';
+import GeoNodeSyncSettings from './geo_node_sync_settings.vue';
 
 export default {
   components: {
@@ -18,9 +17,6 @@ export default {
     GlPopover,
     GlLink,
     GlSprintf,
-  },
-  directives: {
-    popover,
   },
   props: {
     itemTitle: {
@@ -121,12 +117,7 @@ export default {
           __('Synchronization disabled')
         }}</span>
       </div>
-      <gl-popover
-        :target="`syncDisabled-${itemTitle}`"
-        placement="right"
-        triggers="hover focus"
-        :css-classes="['w-100']"
-      >
+      <gl-popover :target="`syncDisabled-${itemTitle}`" placement="right" :css-classes="['w-100']">
         <section>
           <gl-sprintf :message="$options.disabledText">
             <template #itemTitle>{{ itemTitle.toLowerCase() }}</template>

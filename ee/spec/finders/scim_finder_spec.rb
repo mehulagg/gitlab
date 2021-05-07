@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ScimFinder do
   let_it_be(:group) { create(:group) }
+
   let(:unused_params) { double }
 
   subject(:finder) { described_class.new(group) }

@@ -5,12 +5,15 @@
 #
 # By default it creates the hash only for the last 12 months including the current month, but it accepts
 # a parameter to get issuables for n months back.
+#
+# This class should be removed together with feature flag :new_issues_analytics_chart_data when
+# :new_issues_analytics_chart_data becomes default behavior
 class IssuablesAnalytics
   include Gitlab::Utils::StrongMemoize
 
   attr_reader :issuables, :start_date, :end_date, :months_back
 
-  DATE_FORMAT = "%Y-%m".freeze
+  DATE_FORMAT = "%Y-%m"
 
   def initialize(issuables:, months_back: nil)
     @issuables = issuables

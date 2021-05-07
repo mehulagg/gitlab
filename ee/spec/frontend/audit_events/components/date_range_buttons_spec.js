@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButtonGroup, GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DateRangeButtons from 'ee/audit_events/components/date_range_buttons.vue';
 import { CURRENT_DATE } from 'ee/audit_events/constants';
@@ -24,12 +24,7 @@ describe('DateRangeButtons component', () => {
       dateRange: { startDate: getDateInPast(CURRENT_DATE, 7), endDate: CURRENT_DATE },
     });
 
-    expect(
-      wrapper
-        .find(GlButtonGroup)
-        .find('[selected="true"]')
-        .text(),
-    ).toBe('Last 7 days');
+    expect(wrapper.find(GlButtonGroup).find('[selected="true"]').text()).toBe('Last 7 days');
   });
 
   it('shows no date range as selected when the dateRange property does not match any option', () => {
@@ -40,22 +35,14 @@ describe('DateRangeButtons component', () => {
       },
     });
 
-    expect(
-      wrapper
-        .find(GlButtonGroup)
-        .find('[selected="true"]')
-        .exists(),
-    ).toBe(false);
+    expect(wrapper.find(GlButtonGroup).find('[selected="true"]').exists()).toBe(false);
   });
 
   it('emits an "input" event with the dateRange when a new date range is selected', async () => {
     createComponent({
       dateRange: { startDate: getDateInPast(CURRENT_DATE, 1), endDate: CURRENT_DATE },
     });
-    wrapper
-      .find(GlButtonGroup)
-      .find(GlButton)
-      .vm.$emit('click');
+    wrapper.find(GlButtonGroup).find(GlButton).vm.$emit('click');
 
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted().input[0]).toEqual([

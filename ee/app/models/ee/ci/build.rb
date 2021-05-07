@@ -10,6 +10,7 @@ module EE
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
+      VALIDATE_SCHEMA_VARIABLE_NAME = 'VALIDATE_SCHEMA'
       LICENSED_PARSER_FEATURES = {
         sast: :sast,
         secret_detection: :secret_detection,
@@ -31,6 +32,7 @@ module EE
         has_many :security_scans, class_name: 'Security::Scan'
 
         after_save :stick_build_if_status_changed
+        after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
 
         scope :license_scan, -> { joins(:job_artifacts).merge(::Ci::JobArtifact.license_scanning_reports) }
@@ -39,6 +41,17 @@ module EE
             .by_name(build_name)
             .for_ref(ref)
             .for_project_paths(project_path)
+        end
+      end
+
+      override :variables
+      def variables
+        strong_memoize(:variables) do
+          super.tap do |collection|
+            if pipeline.triggered_for_ondemand_dast_scan? && pipeline.dast_profile
+              collection.concat(pipeline.dast_profile.ci_variables)
+            end
+          end
         end
       end
 
@@ -70,8 +83,8 @@ module EE
             next unless project.feature_available?(LICENSED_PARSER_FEATURES.fetch(file_type))
 
             parse_security_artifact_blob(security_report, blob)
-          rescue => e
-            security_report.error = e
+          rescue StandardError
+            security_report.add_error('ParsingError')
           end
         end
       end
@@ -88,7 +101,7 @@ module EE
 
       def collect_dependency_list_reports!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::DEPENDENCY_LIST_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse!(blob, dependency_list_report)
@@ -100,7 +113,7 @@ module EE
 
       def collect_licenses_for_dependency_list!(dependency_list_report)
         if project.feature_available?(:dependency_scanning)
-          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha)
+          dependency_list = ::Gitlab::Ci::Parsers::Security::DependencyList.new(project, sha, pipeline)
 
           each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |_, blob|
             dependency_list.parse_licenses!(blob, dependency_list_report)
@@ -130,11 +143,9 @@ module EE
         requirements_report
       end
 
-      def retryable?
-        !merge_train_pipeline? && super
-      end
-
       def ci_secrets_management_available?
+        return false unless project
+
         project.feature_available?(:ci_secrets_management)
       end
 
@@ -151,17 +162,22 @@ module EE
         variables_hash.fetch(key, default)
       end
 
+      def validate_schema?
+        variables[VALIDATE_SCHEMA_VARIABLE_NAME]&.value&.casecmp?('true')
+      end
+
       private
 
       def variables_hash
-        @variables_hash ||= variables.map do |variable|
+        @variables_hash ||= variables.to_h do |variable|
           [variable[:key], variable[:value]]
-        end.to_h
+        end
       end
 
       def parse_security_artifact_blob(security_report, blob)
         report_clone = security_report.clone_as_blank
-        ::Gitlab::Ci::Parsers.fabricate!(security_report.type).parse!(blob, report_clone)
+        signatures_enabled = ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        ::Gitlab::Ci::Parsers.fabricate!(security_report.type, blob, report_clone, signatures_enabled).parse!
         security_report.merge!(report_clone)
       end
 
@@ -171,6 +187,12 @@ module EE
             method.call(self)
           end.keys
         end
+      end
+
+      def track_ci_secrets_management_usage
+        return unless ci_secrets_management_available? && secrets?
+
+        ::Gitlab::UsageDataCounters::HLLRedisCounter.track_event('i_ci_secrets_management_vault_build_created', values: user_id)
       end
     end
   end

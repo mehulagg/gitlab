@@ -1,13 +1,15 @@
 - container = @no_breadcrumb_container ? 'container-fluid' : container_class
 - hide_top_links = @hide_top_links || false
+- unless @skip_current_level_breadcrumb
+  - push_to_schema_breadcrumb(@breadcrumb_title, breadcrumb_title_link)
 
-%nav.breadcrumbs{ role: "navigation", class: [container, @content_class] }
+%nav.breadcrumbs{ class: [container, @content_class], 'aria-label': _('Breadcrumbs') }
   .breadcrumbs-container{ class: ("border-bottom-0" if @no_breadcrumb_border) }
     - if defined?(@left_sidebar)
       = button_tag class: 'toggle-mobile-nav', type: 'button' do
         %span.sr-only= _("Open sidebar")
-        = sprite_icon('hamburger')
-    .breadcrumbs-links.js-title-container{ data: { qa_selector: 'breadcrumb_links_content' } }
+        = sprite_icon('hamburger', size: 18)
+    .breadcrumbs-links{ data: { testid: 'breadcrumb-links', qa_selector: 'breadcrumb_links_content' } }
       %ul.list-unstyled.breadcrumbs-list.js-breadcrumbs-list
         - unless hide_top_links
           = header_title
@@ -15,6 +17,11 @@
           - @breadcrumbs_extra_links.each do |extra|
             = breadcrumb_list_item link_to(extra[:text], extra[:link])
         = render "layouts/nav/breadcrumbs/collapsed_dropdown", location: :after
-        %li
-          %h2.breadcrumbs-sub-title= link_to @breadcrumb_title, breadcrumb_title_link
+        - unless @skip_current_level_breadcrumb
+          %li
+            %h2.breadcrumbs-sub-title
+              = link_to @breadcrumb_title, breadcrumb_title_link
+    %script{ type: 'application/ld+json' }
+      :plain
+        #{schema_breadcrumb_json}
     = yield :header_content

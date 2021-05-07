@@ -22,6 +22,13 @@ module AlertManagement
     }.freeze
     private_constant :STATUSES
 
+    STATUS_DESCRIPTIONS = {
+      triggered: 'Investigation has not started',
+      acknowledged: 'Someone is actively investigating the problem',
+      resolved: 'No further work is required',
+      ignored: 'No action will be taken on the alert'
+    }.freeze
+
     belongs_to :project
     belongs_to :issue, optional: true
     belongs_to :prometheus_alert, optional: true
@@ -34,7 +41,7 @@ module AlertManagement
     has_many :ordered_notes, -> { fresh }, as: :noteable, class_name: 'Note'
     has_many :user_mentions, class_name: 'AlertManagement::AlertUserMention', foreign_key: :alert_management_alert_id
 
-    has_internal_id :iid, scope: :project, init: ->(s) { s.project.alert_management_alerts.maximum(:iid) }
+    has_internal_id :iid, scope: :project
 
     sha_attribute :fingerprint
 
@@ -67,6 +74,11 @@ module AlertManagement
       low: 3,
       info: 4,
       unknown: 5
+    }
+
+    enum domain: {
+      operations: 0,
+      threat_monitoring: 1
     }
 
     state_machine :status, initial: :triggered do
@@ -122,6 +134,8 @@ module AlertManagement
     scope :open, -> { with_status(open_statuses) }
     scope :not_resolved, -> { without_status(:resolved) }
     scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
+    scope :with_threat_monitoring_alerts, -> { where(domain: :threat_monitoring ) }
+    scope :with_operations_alerts, -> { where(domain: :operations) }
 
     scope :order_start_time,    -> (sort_order) { order(started_at: sort_order) }
     scope :order_end_time,      -> (sort_order) { order(ended_at: sort_order) }
@@ -263,3 +277,5 @@ module AlertManagement
     end
   end
 end
+
+AlertManagement::Alert.prepend_if_ee('EE::AlertManagement::Alert')

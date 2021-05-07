@@ -1,9 +1,9 @@
-import { mount } from '@vue/test-utils';
 import { GlAlert, GlBadge, GlPagination, GlTabs, GlTab } from '@gitlab/ui';
-import PageWrapper from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
+import { mount } from '@vue/test-utils';
+import Tracking from '~/tracking';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import Tracking from '~/tracking';
+import PageWrapper from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
 import mockItems from './mocks/items.json';
 import mockFilters from './mocks/items_filters.json';
 
@@ -70,7 +70,7 @@ describe('AlertManagementEmptyState', () => {
         ...props,
       },
       slots: {
-        'emtpy-state': EmptyStateSlot,
+        'empty-state': EmptyStateSlot,
         'header-actions': HeaderActionsSlot,
         title: TitleSlot,
         table: TableSlot,
@@ -124,7 +124,10 @@ describe('AlertManagementEmptyState', () => {
     it('renders the tabs selection with valid tabs', () => {
       mountComponent({
         props: {
-          statusTabs: [{ status: 'opened', title: 'Open' }, { status: 'closed', title: 'Closed' }],
+          statusTabs: [
+            { status: 'opened', title: 'Open' },
+            { status: 'closed', title: 'Closed' },
+          ],
         },
       });
 
@@ -216,12 +219,7 @@ describe('AlertManagementEmptyState', () => {
         findPagination().vm.$emit('input', 3);
 
         await wrapper.vm.$nextTick();
-        expect(
-          findPagination()
-            .findAll('.page-item')
-            .at(0)
-            .text(),
-        ).toBe('Prev');
+        expect(findPagination().findAll('.page-item').at(0).text()).toBe('Prev');
       });
 
       it('returns prevPage number', async () => {
@@ -244,12 +242,7 @@ describe('AlertManagementEmptyState', () => {
         findPagination().vm.$emit('input', 3);
 
         await wrapper.vm.$nextTick();
-        expect(
-          findPagination()
-            .findAll('.page-item')
-            .at(1)
-            .text(),
-        ).toBe('Next');
+        expect(findPagination().findAll('.page-item').at(1).text()).toBe('Next');
       });
 
       it('returns nextPage number', async () => {

@@ -6,6 +6,7 @@ module Gitlab
       module Epics
         class LazyEpicAggregate
           include ::Gitlab::Graphql::Aggregations::Epics::Constants
+          include ::Gitlab::Graphql::Deferred
 
           attr_reader :facet, :epic_id, :lazy_state
 
@@ -18,7 +19,7 @@ module Gitlab
 
             error = validate_facet(aggregate_facet)
             if error
-              raise ArgumentError.new("#{error}. Please specify either #{COUNT} or #{WEIGHT_SUM}")
+              raise ArgumentError, "#{error}. Please specify either #{COUNT} or #{WEIGHT_SUM}"
             end
 
             @facet = aggregate_facet.to_sym
@@ -48,6 +49,8 @@ module Gitlab
 
             @block ? @block.call(node, object) : object
           end
+
+          alias_method :execute, :epic_aggregate
 
           private
 

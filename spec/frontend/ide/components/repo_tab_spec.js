@@ -1,23 +1,34 @@
+import { GlTab } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { createStore } from '~/ide/stores';
+import { stubComponent } from 'helpers/stub_component';
 import RepoTab from '~/ide/components/repo_tab.vue';
 import { createRouter } from '~/ide/ide_router';
+import { createStore } from '~/ide/stores';
 import { file } from '../helpers';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
+
+const GlTabStub = stubComponent(GlTab, {
+  template: '<li><slot name="title" /></li>',
+});
 
 describe('RepoTab', () => {
   let wrapper;
   let store;
   let router;
 
+  const findTab = () => wrapper.find(GlTabStub);
+
   function createComponent(propsData) {
     wrapper = mount(RepoTab, {
       localVue,
       store,
       propsData,
+      stubs: {
+        GlTab: GlTabStub,
+      },
     });
   }
 
@@ -55,7 +66,7 @@ describe('RepoTab', () => {
 
     jest.spyOn(wrapper.vm, 'openPendingTab').mockImplementation(() => {});
 
-    await wrapper.trigger('click');
+    await findTab().vm.$emit('click');
 
     expect(wrapper.vm.openPendingTab).not.toHaveBeenCalled();
   });
@@ -67,7 +78,7 @@ describe('RepoTab', () => {
 
     jest.spyOn(wrapper.vm, 'clickFile').mockImplementation(() => {});
 
-    wrapper.trigger('click');
+    findTab().vm.$emit('click');
 
     expect(wrapper.vm.clickFile).toHaveBeenCalledWith(wrapper.vm.tab);
   });
@@ -91,11 +102,11 @@ describe('RepoTab', () => {
       tab,
     });
 
-    await wrapper.trigger('mouseover');
+    await findTab().vm.$emit('mouseover');
 
     expect(wrapper.find('.file-modified').exists()).toBe(false);
 
-    await wrapper.trigger('mouseout');
+    await findTab().vm.$emit('mouseout');
 
     expect(wrapper.find('.file-modified').exists()).toBe(true);
   });
@@ -134,9 +145,7 @@ describe('RepoTab', () => {
     });
 
     it('renders a tooltip', () => {
-      expect(wrapper.find('span:nth-child(2)').attributes('data-original-title')).toContain(
-        'Locked by testuser',
-      );
+      expect(wrapper.find('span:nth-child(2)').attributes('title')).toBe('Locked by testuser');
     });
   });
 

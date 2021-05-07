@@ -1,8 +1,8 @@
 import { isFinite, uniq, sortBy, includes } from 'lodash';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import { __, s__ } from '~/locale';
-import { formatDate, timezones, formats } from '../../format_date';
 import { thresholdModeTypes } from '../../constants';
+import { formatDate, timezones, formats } from '../../format_date';
 
 const yAxisBoundaryGap = [0.1, 0.1];
 /**
@@ -51,7 +51,7 @@ const getDataAxisOptions = ({ format, precision, name }) => {
     nameLocation: 'center', // same as gitlab-ui's default
     scale: true,
     axisLabel: {
-      formatter: val => formatter(val, precision, maxDataAxisTickLength),
+      formatter: (val) => formatter(val, precision, maxDataAxisTickLength),
     },
   };
 };
@@ -85,7 +85,7 @@ export const getTimeAxisOptions = ({
   name: __('Time'),
   type: axisTypes.time,
   axisLabel: {
-    formatter: date => formatDate(date, { format, timezone }),
+    formatter: (date) => formatDate(date, { format, timezone }),
   },
   axisPointer: {
     snap: false,
@@ -109,7 +109,7 @@ export const getTooltipFormatter = ({
   precision = defaultTooltipPrecision,
 } = {}) => {
   const formatter = getFormatter(format);
-  return num => formatter(num, precision);
+  return (num) => formatter(num, precision);
 };
 
 // Thresholds
@@ -138,9 +138,9 @@ export const getValidThresholds = ({ mode, range = {}, values = [] } = {}) => {
 
   const uniqueThresholds = uniq(values);
 
-  const numberThresholds = uniqueThresholds.filter(threshold => isFinite(threshold));
+  const numberThresholds = uniqueThresholds.filter((threshold) => isFinite(threshold));
 
-  const validThresholds = numberThresholds.filter(threshold => {
+  const validThresholds = numberThresholds.filter((threshold) => {
     let isValid;
 
     if (mode === thresholdModeTypes.PERCENTAGE) {
@@ -152,7 +152,7 @@ export const getValidThresholds = ({ mode, range = {}, values = [] } = {}) => {
     return isValid;
   });
 
-  const transformedThresholds = validThresholds.map(threshold => {
+  const transformedThresholds = validThresholds.map((threshold) => {
     let transformedThreshold;
 
     if (mode === 'percentage') {

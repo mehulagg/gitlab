@@ -1,13 +1,13 @@
 <script>
+import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import { __ } from '~/locale';
 import eventHub from '~/sidebar/event_hub';
 import Store from '~/sidebar/stores/sidebar_store';
-import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AssigneeTitle from './assignee_title.vue';
 import Assignees from './assignees.vue';
 import AssigneesRealtime from './assignees_realtime.vue';
-import { __ } from '~/locale';
 
 export default {
   name: 'SidebarAssignees',
@@ -44,6 +44,15 @@ export default {
       type: String,
       required: true,
     },
+    issuableId: {
+      type: Number,
+      required: true,
+    },
+    assigneeAvailabilityStatus: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
   },
   data() {
     return {
@@ -55,6 +64,12 @@ export default {
     shouldEnableRealtime() {
       // Note: Realtime is only available on issues right now, future support for MR wil be built later.
       return this.glFeatures.realTimeIssueSidebar && this.issuableType === 'issue';
+    },
+    queryVariables() {
+      return {
+        iid: this.issuableIid,
+        fullPath: this.projectPath,
+      };
     },
     relativeUrlRoot() {
       return gon.relative_url_root ?? '';
@@ -101,6 +116,13 @@ export default {
           return new Flash(__('Error occurred when saving assignees'));
         });
     },
+    exposeAvailabilityStatus(users) {
+      return users.map(({ username, ...rest }) => ({
+        ...rest,
+        username,
+        availability: this.assigneeAvailabilityStatus[username] || '',
+      }));
+    },
   },
 };
 </script>
@@ -109,8 +131,9 @@ export default {
   <div>
     <assignees-realtime
       v-if="shouldEnableRealtime"
-      :issuable-iid="issuableIid"
-      :project-path="projectPath"
+      :issuable-type="issuableType"
+      :issuable-id="issuableId"
+      :query-variables="queryVariables"
       :mediator="mediator"
     />
     <assignee-title
@@ -123,7 +146,7 @@ export default {
     <assignees
       v-if="!store.isFetching.assignees"
       :root-path="relativeUrlRoot"
-      :users="store.assignees"
+      :users="exposeAvailabilityStatus(store.assignees)"
       :editable="store.editable"
       :issuable-type="issuableType"
       class="value"

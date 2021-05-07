@@ -2,6 +2,7 @@
 name: specialized_project_authorization_workers
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31377
 rollout_issue_url:
-group: group::access
+milestone: '13.0'
 type: development
-default_enabled: false
+group: group::access
+default_enabled: true

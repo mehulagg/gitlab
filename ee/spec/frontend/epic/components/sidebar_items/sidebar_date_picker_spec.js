@@ -1,17 +1,11 @@
+import { GlLoadingIcon, GlIcon, GlPopover, GlLink, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
-import { TEST_HOST } from 'helpers/test_constants';
 import SidebarDatepicker from 'ee/epic/components/sidebar_items/sidebar_date_picker.vue';
-import { mockDatePickerProps } from '../../mock_data';
+import { TEST_HOST } from 'helpers/test_constants';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
-import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
-
-const mockPopoverBind = jest.fn();
-
-jest.mock('~/vue_shared/directives/popover', () => ({
-  bind: (...args) => mockPopoverBind(...args),
-}));
+import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
+import { mockDatePickerProps } from '../../mock_data';
 
 describe('SidebarDatePicker', () => {
   let originalGon;
@@ -26,14 +20,12 @@ describe('SidebarDatePicker', () => {
 
   let wrapper;
 
-  const findIconByName = name =>
+  const findIconByName = (name) =>
     wrapper
       .findAll(GlIcon)
-      .filter(w => w.props().name === name)
+      .filter((w) => w.props().name === name)
       .at(0);
   const findEditButton = () => wrapper.find({ ref: 'editButton' });
-  const findDirectiveCallByTitle = title =>
-    mockPopoverBind.mock.calls.find(([, binding]) => binding.value.title === title);
   const findRemoveButton = () => wrapper.find({ ref: 'removeButton' });
 
   const createFakeEvent = () => ({ stopPropagation: jest.fn() });
@@ -43,7 +35,7 @@ describe('SidebarDatePicker', () => {
     findEditButton().vm.$emit('click', e);
   };
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(SidebarDatepicker, {
       propsData: {
         ...mockDatePickerProps,
@@ -117,40 +109,33 @@ describe('SidebarDatePicker', () => {
     expect(wrapper.text()).toContain('Inherited: None');
   });
 
-  it('passes correct popover options to directive', () => {
+  it('popover has message and link', () => {
     createComponent();
-    return wrapper.vm.$nextTick().then(() => {
-      const expectedTitle =
-        'These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.';
-      const [, binding] = findDirectiveCallByTitle(expectedTitle);
-      const { content, ...popoverConfig } = binding.value;
-      delete popoverConfig.template;
-      const expectedContent = '/help/user/group/epics/index.md#start-date-and-due-date';
-      const expectedPopoverConfig = {
-        html: true,
-        trigger: 'focus',
-        title: expectedTitle,
 
-        container: 'body',
-        boundary: 'viewport',
-      };
-      expect(mockPopoverBind).toHaveBeenCalled();
+    const message =
+      'These dates affect how your epics appear in the roadmap. Dates from milestones come from the milestones assigned to issues in the epic. You can also set fixed dates or remove them entirely.';
 
-      expect(popoverConfig).toStrictEqual(expectedPopoverConfig);
-      expect(content).toContain(expectedContent);
-    });
+    const popover = wrapper.find(GlPopover);
+    const popoverLink = popover.find(GlLink);
+
+    expect(popover.text()).toContain(message);
+    expect(popoverLink.text()).toBe('More information');
+    expect(popoverLink.attributes('href')).toContain(
+      '/help/user/group/epics/index.md#start-date-and-due-date',
+    );
   });
 
-  it('returns popover config object containing title with appropriate string', () => {
+  it('popover has different message and link when date is invalid', () => {
     createComponent({ isDateInvalid: true, selectedDateIsFixed: false });
-    return wrapper.vm.$nextTick().then(() => {
-      const expectedTitle = 'Selected date is invalid';
-      const [, targetBinding] = findDirectiveCallByTitle(expectedTitle);
-      const { content } = targetBinding.value;
 
-      expect(content).toContain('/help/user/group/epics/index.md#start-date-and-due-date');
-      expect(content).toContain('How can I solve this?');
-    });
+    const popover = wrapper.findAll(GlPopover).at(1);
+    const popoverLink = popover.find(GlLink);
+
+    expect(popover.text()).toContain('Selected date is invalid');
+    expect(popoverLink.text()).toBe('How can I solve this?');
+    expect(popoverLink.attributes('href')).toContain(
+      '/help/user/group/epics/index.md#start-date-and-due-date',
+    );
   });
 
   it('stops editing and emits `toggleDateType` event on component on `hidePicker` from date picker', () => {
@@ -212,12 +197,24 @@ describe('SidebarDatePicker', () => {
     });
   });
 
-  it('renders expected template', () => {
-    createComponent({
-      fieldName: 'datetype_test',
-    });
+  it('renders help icon', () => {
+    createComponent();
 
-    expect(wrapper.element).toMatchSnapshot();
+    expect(wrapper.find(GlIcon).attributes('arialabel')).toBe('Help');
+  });
+
+  it('renders edit button', () => {
+    createComponent();
+
+    expect(wrapper.find(GlButton).text()).toBe('Edit');
+  });
+
+  it('renders an abbreviation', () => {
+    createComponent();
+
+    expect(wrapper.find('abbr').attributes('title')).toBe(
+      'Select an issue with milestone to set date',
+    );
   });
 
   it('renders collapse button when `showToggleSidebar` prop is `true`', () => {

@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -119,7 +119,7 @@ associated with it. Usually one pipeline is a merge request pipeline, and the ot
 is a branch pipeline.
 
 This is usually caused by the `rules` configuration, and there are several ways to
-[prevent duplicate pipelines](yaml/README.md#prevent-duplicate-pipelines).
+[prevent duplicate pipelines](yaml/README.md#avoid-duplicate-pipelines).
 
 #### A job is not in the pipeline
 
@@ -141,7 +141,7 @@ be checked to make sure the jobs are added to the correct pipeline type. For
 example, if a merge request pipeline did not run, the jobs may have been added to
 a branch pipeline instead.
 
-It's also possible that your [`workflow: rules`](yaml/README.md#workflowrules) configuration
+It's also possible that your [`workflow: rules`](yaml/README.md#workflow) configuration
 blocked the pipeline, or allowed the wrong pipeline type.
 
 ### A job runs unexpectedly
@@ -164,7 +164,7 @@ a branch to its remote repository. To illustrate the problem, suppose you've had
 
 1. A user creates a feature branch named `example` and pushes it to a remote repository.
 1. A new pipeline starts running on the `example` branch.
-1. A user rebases the `example` branch on the latest `master` branch and force-pushes it to its remote repository.
+1. A user rebases the `example` branch on the latest default branch and force-pushes it to its remote repository.
 1. A new pipeline starts running on the `example` branch again, however,
    the previous pipeline (2) fails because of `fatal: reference is not a tree:` error.
 
@@ -197,6 +197,7 @@ latest commit yet. This might be because:
 - GitLab hasn't finished creating the pipeline yet.
 - You are using an external CI service and GitLab hasn't heard back from the service yet.
 - You are not using CI/CD pipelines in your project.
+- You are using CI/CD pipelines in your project, but your configuration prevented a pipeline from running on the source branch for your merge request.
 - The latest pipeline was deleted (this is a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/214323)).
 
 After the pipeline is created, the message updates with the pipeline status.
@@ -221,11 +222,34 @@ This also applies if the pipeline has not been created yet, or if you are waitin
 for an external CI service. If you don't use pipelines for your project, then you
 should disable **Pipelines must succeed** so you can accept merge requests.
 
+### "The pipeline for this merge request did not complete. Push a new commit to fix the failure or check the troubleshooting documentation to see other possible actions." message
+
+This message is shown if the [merge request pipeline](merge_request_pipelines/index.md),
+[merged results pipeline](merge_request_pipelines/pipelines_for_merged_results/index.md),
+or [merge train pipeline](merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md)
+has failed or been canceled.
+
+If a merge request pipeline or merged result pipeline was canceled or failed, you can:
+
+- Re-run the entire pipeline by clicking **Run pipeline** in the pipeline tab in the merge request.
+- [Retry only the jobs that failed](pipelines/index.md#view-pipelines). If you re-run the entire pipeline, this is not necessary.
+- Push a new commit to fix the failure.
+
+If the merge train pipeline has failed, you can:
+
+- Check the failure and determine if you can use the [`/merge` quick action](../user/project/quick_actions.md) to immediately add the merge request to the train again.
+- Re-run the entire pipeline by clicking **Run pipeline** in the pipeline tab in the merge request, then add the merge request to the train again.
+- Push a commit to fix the failure, then add the merge request to the train again.
+
+If the merge train pipeline was canceled before the merge request was merged, without a failure, you can:
+
+- Add it to the train again.
+
 ## Pipeline warnings
 
 Pipeline configuration warnings are shown when you:
 
-- [Validate configuration with the CI Lint tool](yaml/README.md#validate-the-gitlab-ciyml).
+- [Validate configuration with the CI Lint tool](yaml/README.md).
 - [Manually run a pipeline](pipelines/index.md#run-a-pipeline-manually).
 
 ### "Job may allow multiple pipelines to run for a single action" warning
@@ -234,9 +258,26 @@ When you use [`rules`](yaml/README.md#rules) with a `when:` clause without an `i
 clause, multiple pipelines may run. Usually this occurs when you push a commit to
 a branch that has an open merge request associated with it.
 
-To [prevent duplicate pipelines](yaml/README.md#prevent-duplicate-pipelines), use
-[`workflow: rules`](yaml/README.md#workflowrules) or rewrite your rules to control
+To [prevent duplicate pipelines](yaml/README.md#avoid-duplicate-pipelines), use
+[`workflow: rules`](yaml/README.md#workflow) or rewrite your rules to control
 which pipelines can run.
+
+### Console workaround if job using resource_group gets stuck
+
+```ruby
+# find resource group by name
+resource_group = Project.find_by_full_path('...').resource_groups.find_by(key: 'the-group-name')
+busy_resources = resource_group.resources.where('build_id IS NOT NULL')
+
+# identify which builds are occupying the resource
+# (I think it should be 1 as of today)
+busy_resources.pluck(:build_id)
+
+# it's good to check why this build is holding the resource.
+# Is it stuck? Has it been forcefully dropped by the system?
+# free up busy resources
+busy_resources.update_all(build_id: nil)
+```
 
 ## How to get help
 

@@ -1,17 +1,23 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Database case study: Namespaces storage statistics
 
-## Introduction
+## Introduction
 
 On [Storage and limits management for groups](https://gitlab.com/groups/gitlab-org/-/epics/886),
 we want to facilitate a method for easily viewing the amount of
 storage consumed by a group, and allow easy management.
 
-## Proposal
+## Proposal
 
 1. Create a new ActiveRecord model to hold the namespaces' statistics in an aggregated form (only for root namespaces).
 1. Refresh the statistics in this model every time a project belonging to this namespace is changed.
 
-## Problem
+## Problem
 
 In GitLab, we update the project storage statistics through a
 [callback](https://gitlab.com/gitlab-org/gitlab/blob/4ab54c2233e91f60a80e5b6fa2181e6899fdcc3e/app/models/project.rb#L97)
@@ -27,7 +33,7 @@ Additionally, the pattern that is currently used to update the project statistic
 (the callback) doesn't scale adequately. It is currently one of the largest
 [database queries transactions on production](https://gitlab.com/gitlab-org/gitlab/-/issues/29070)
 that takes the most time overall. We can't add one more query to it as
-it will increase the transaction's length.
+it increases the transaction's length.
 
 Because of all of the above, we can't apply the same pattern to store
 and update the namespaces statistics, as the `namespaces` table is one
@@ -36,7 +42,7 @@ alternative method.
 
 ## Attempts
 
-### Attempt A: PostgreSQL materialized view
+### Attempt A: PostgreSQL materialized view
 
 Model can be updated through a refresh strategy based on a project routes SQL and a [materialized view](https://www.postgresql.org/docs/11/rules-materializedviews.html):
 
@@ -65,7 +71,7 @@ While this implied a single query update (and probably a fast one), it has some 
 - Materialized views syntax varies from PostgreSQL and MySQL. While this feature was worked on, MySQL was still supported by GitLab.
 - Rails does not have native support for materialized views. We'd need to use a specialized gem to take care of the management of the database views, which implies additional work.
 
-### Attempt B: An update through a CTE
+### Attempt B: An update through a CTE
 
 Similar to Attempt A: Model update done through a refresh strategy with a [Common Table Expression](https://www.postgresql.org/docs/9.1/queries-with.html)
 
@@ -131,19 +137,19 @@ WHERE namespace_id IN (
 
 Even though this approach would make aggregating much easier, it has some major downsides:
 
-- We'd have to migrate **all namespaces** by adding and filling a new column. Because of the size of the table, dealing with time/cost will not be great. The background migration will take approximately `153h`, see <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29772>.
+- We'd have to migrate **all namespaces** by adding and filling a new column. Because of the size of the table, dealing with time/cost would be significant. The background migration would take approximately `153h`, see <https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29772>.
 - Background migration has to be shipped one release before, delaying the functionality by another milestone.
 
-### Attempt E (final): Update the namespace storage statistics in async way
+### Attempt E (final): Update the namespace storage statistics asynchronously
 
-This approach consists of keep using the incremental statistics updates we currently already have,
+This approach consists of continuing to use the incremental statistics updates we already have,
 but we refresh them through Sidekiq jobs and in different transactions:
 
 1. Create a second table (`namespace_aggregation_schedules`) with two columns `id` and `namespace_id`.
 1. Whenever the statistics of a project changes, insert a row into `namespace_aggregation_schedules`
    - We don't insert a new row if there's already one related to the root namespace.
    - Keeping in mind the length of the transaction that involves updating `project_statistics`(<https://gitlab.com/gitlab-org/gitlab/-/issues/29070>), the insertion should be done in a different transaction and through a Sidekiq Job.
-1. After inserting the row, we schedule another worker to be executed async at two different moments:
+1. After inserting the row, we schedule another worker to be executed asynchronously at two different moments:
    - One enqueued for immediate execution and another one scheduled in `1.5h` hours.
    - We only schedule the jobs, if we can obtain a `1.5h` lease on Redis on a key based on the root namespace ID.
    - If we can't obtain the lease, it indicates there's another aggregation already in progress, or scheduled in no more than `1.5h`.
@@ -155,7 +161,7 @@ but we refresh them through Sidekiq jobs and in different transactions:
 
 This implementation has the following benefits:
 
-- All the updates are done async, so we're not increasing the length of the transactions for `project_statistics`.
+- All the updates are done asynchronously, so we're not increasing the length of the transactions for `project_statistics`.
 - We're doing the update in a single SQL query.
 - It is compatible with PostgreSQL and MySQL.
 - No background migration required.
@@ -164,7 +170,7 @@ The only downside of this approach is that namespaces' statistics are updated up
 which means there's a time window in which the statistics are inaccurate. Because we're still not
 [enforcing storage limits](https://gitlab.com/gitlab-org/gitlab/-/issues/17664), this is not a major problem.
 
-## Conclusion
+## Conclusion
 
 Updating the storage statistics asynchronously, was the less problematic and
 performant approach of aggregating the root namespaces.

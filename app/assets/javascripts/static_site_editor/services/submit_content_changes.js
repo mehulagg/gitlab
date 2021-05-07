@@ -1,20 +1,23 @@
 import Api from '~/api';
-import Tracking from '~/tracking';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import generateBranchName from '~/static_site_editor/services/generate_branch_name';
+import Tracking from '~/tracking';
 
 import {
-  DEFAULT_TARGET_BRANCH,
   SUBMIT_CHANGES_BRANCH_ERROR,
   SUBMIT_CHANGES_COMMIT_ERROR,
   SUBMIT_CHANGES_MERGE_REQUEST_ERROR,
   TRACKING_ACTION_CREATE_COMMIT,
   TRACKING_ACTION_CREATE_MERGE_REQUEST,
+  USAGE_PING_TRACKING_ACTION_CREATE_COMMIT,
+  USAGE_PING_TRACKING_ACTION_CREATE_MERGE_REQUEST,
+  DEFAULT_FORMATTING_CHANGES_COMMIT_MESSAGE,
+  DEFAULT_FORMATTING_CHANGES_COMMIT_DESCRIPTION,
 } from '../constants';
 
-const createBranch = (projectId, branch) =>
+const createBranch = (projectId, branch, targetBranch) =>
   Api.createBranch(projectId, {
-    ref: DEFAULT_TARGET_BRANCH,
+    ref: targetBranch,
     branch,
   }).catch(() => {
     throw new Error(SUBMIT_CHANGES_BRANCH_ERROR);
@@ -28,7 +31,7 @@ const createImageActions = (images, markdown) => {
   }
 
   images.forEach((imageContent, filePath) => {
-    const imageExistsInMarkdown = path => new RegExp(`!\\[([^[\\]\\n]*)\\](\\(${path})\\)`); // matches the image markdown syntax: ![<any-string-except-newline>](<path>)
+    const imageExistsInMarkdown = (path) => new RegExp(`!\\[([^[\\]\\n]*)\\](\\(${path})\\)`); // matches the image markdown syntax: ![<any-string-except-newline>](<path>)
 
     if (imageExistsInMarkdown(filePath).test(markdown)) {
       actions.push(
@@ -45,36 +48,33 @@ const createImageActions = (images, markdown) => {
   return actions;
 };
 
-const commitContent = (projectId, message, branch, sourcePath, content, images) => {
+const createUpdateSourceFileAction = (sourcePath, content) => [
+  convertObjectPropsToSnakeCase({
+    action: 'update',
+    filePath: sourcePath,
+    content,
+  }),
+];
+
+const commit = (projectId, message, branch, actions) => {
   Tracking.event(document.body.dataset.page, TRACKING_ACTION_CREATE_COMMIT);
+  Api.trackRedisCounterEvent(USAGE_PING_TRACKING_ACTION_CREATE_COMMIT);
 
   return Api.commitMultiple(
     projectId,
     convertObjectPropsToSnakeCase({
       branch,
       commitMessage: message,
-      actions: [
-        convertObjectPropsToSnakeCase({
-          action: 'update',
-          filePath: sourcePath,
-          content,
-        }),
-        ...createImageActions(images, content),
-      ],
+      actions,
     }),
   ).catch(() => {
     throw new Error(SUBMIT_CHANGES_COMMIT_ERROR);
   });
 };
 
-const createMergeRequest = (
-  projectId,
-  title,
-  description,
-  sourceBranch,
-  targetBranch = DEFAULT_TARGET_BRANCH,
-) => {
+const createMergeRequest = (projectId, title, description, sourceBranch, targetBranch) => {
   Tracking.event(document.body.dataset.page, TRACKING_ACTION_CREATE_MERGE_REQUEST);
+  Api.trackRedisCounterEvent(USAGE_PING_TRACKING_ACTION_CREATE_MERGE_REQUEST);
 
   return Api.createProjectMergeRequest(
     projectId,
@@ -93,24 +93,47 @@ const submitContentChanges = ({
   username,
   projectId,
   sourcePath,
+  targetBranch,
   content,
   images,
   mergeRequestMeta,
+  formattedMarkdown,
 }) => {
-  const branch = generateBranchName(username);
+  const branch = generateBranchName(username, targetBranch);
   const { title: mergeRequestTitle, description: mergeRequestDescription } = mergeRequestMeta;
   const meta = {};
 
-  return createBranch(projectId, branch)
+  return createBranch(projectId, branch, targetBranch)
     .then(({ data: { web_url: url } }) => {
+      const message = `${DEFAULT_FORMATTING_CHANGES_COMMIT_MESSAGE}\n\n${DEFAULT_FORMATTING_CHANGES_COMMIT_DESCRIPTION}`;
+
       Object.assign(meta, { branch: { label: branch, url } });
 
-      return commitContent(projectId, mergeRequestTitle, branch, sourcePath, content, images);
+      return formattedMarkdown
+        ? commit(
+            projectId,
+            message,
+            branch,
+            createUpdateSourceFileAction(sourcePath, formattedMarkdown),
+          )
+        : meta;
     })
+    .then(() =>
+      commit(projectId, mergeRequestTitle, branch, [
+        ...createUpdateSourceFileAction(sourcePath, content),
+        ...createImageActions(images, content),
+      ]),
+    )
     .then(({ data: { short_id: label, web_url: url } }) => {
       Object.assign(meta, { commit: { label, url } });
 
-      return createMergeRequest(projectId, mergeRequestTitle, mergeRequestDescription, branch);
+      return createMergeRequest(
+        projectId,
+        mergeRequestTitle,
+        mergeRequestDescription,
+        branch,
+        targetBranch,
+      );
     })
     .then(({ data: { iid: label, web_url: url } }) => {
       Object.assign(meta, { mergeRequest: { label: label.toString(), url } });

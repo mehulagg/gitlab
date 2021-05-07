@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PipelineDetailsEntity < PipelineEntity
+class PipelineDetailsEntity < Ci::PipelineEntity
   expose :project, using: ProjectEntity
 
   expose :flags do
@@ -8,10 +8,14 @@ class PipelineDetailsEntity < PipelineEntity
   end
 
   expose :details do
-    expose :artifacts do |pipeline, options|
+    expose :artifacts, unless: proc { options[:disable_artifacts] } do |pipeline, options|
       rel = pipeline.downloadable_artifacts
 
-      BuildArtifactEntity.represent(rel, options)
+      if Feature.enabled?(:non_public_artifacts, type: :development)
+        rel = rel.select { |artifact| can?(request.current_user, :read_job_artifacts, artifact.job) }
+      end
+
+      BuildArtifactEntity.represent(rel, options.merge(project: pipeline.project))
     end
     expose :manual_actions, using: BuildActionEntity
     expose :scheduled_actions, using: BuildActionEntity

@@ -18,12 +18,15 @@ RSpec.describe Gitlab::UrlBuilder do
 
     where(:factory, :path_generator) do
       :project           | ->(project)       { "/#{project.full_path}" }
+      :board             | ->(board)         { "/#{board.project.full_path}/-/boards/#{board.id}" }
+      :group_board       | ->(board)         { "/groups/#{board.group.full_path}/-/boards/#{board.id}" }
       :commit            | ->(commit)        { "/#{commit.project.full_path}/-/commit/#{commit.id}" }
       :issue             | ->(issue)         { "/#{issue.project.full_path}/-/issues/#{issue.iid}" }
       :merge_request     | ->(merge_request) { "/#{merge_request.project.full_path}/-/merge_requests/#{merge_request.iid}" }
       :project_milestone | ->(milestone)     { "/#{milestone.project.full_path}/-/milestones/#{milestone.iid}" }
       :project_snippet   | ->(snippet)       { "/#{snippet.project.full_path}/-/snippets/#{snippet.id}" }
       :project_wiki      | ->(wiki)          { "/#{wiki.container.full_path}/-/wikis/home" }
+      :release           | ->(release)       { "/#{release.project.full_path}/-/releases/#{release.tag}" }
       :ci_build          | ->(build)         { "/#{build.project.full_path}/-/jobs/#{build.id}" }
       :design            | ->(design)        { "/#{design.project.full_path}/-/design_management/designs/#{design.id}/raw_image" }
 
@@ -89,6 +92,7 @@ RSpec.describe Gitlab::UrlBuilder do
     context 'when passing a Snippet' do
       let_it_be(:personal_snippet) { create(:personal_snippet, :repository) }
       let_it_be(:project_snippet)  { create(:project_snippet, :repository) }
+
       let(:blob)                   { snippet.blobs.first }
       let(:ref)                    { blob.repository.root_ref }
 

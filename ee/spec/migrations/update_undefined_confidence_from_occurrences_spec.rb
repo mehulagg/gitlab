@@ -8,8 +8,8 @@ RSpec.describe UpdateUndefinedConfidenceFromOccurrences, :migration do
   let(:identifiers) { table(:vulnerability_identifiers) }
   let(:scanners) { table(:vulnerability_scanners) }
   let(:projects) { table(:projects) }
-  let(:vul1) { attributes_for(:vulnerabilities_occurrence, id: 1, report_type: 2, confidence: 5) }
-  let(:vul2) { attributes_for(:vulnerabilities_occurrence, id: 2, report_type: 2, confidence: 5) }
+  let(:vul1) { attributes_for_vulnerability_finding(id: 1) }
+  let(:vul2) { attributes_for_vulnerability_finding(id: 2) }
 
   before do
     stub_const("#{described_class}::BATCH_SIZE", 2)
@@ -104,5 +104,41 @@ RSpec.describe UpdateUndefinedConfidenceFromOccurrences, :migration do
     migrate!
 
     expect(vulnerabilities.exists?(confidence: 0)).to be_truthy
+  end
+
+  private
+
+  def attributes_for_vulnerability_finding(id:, report_type: 2, confidence: 5)
+    uuid = SecureRandom.uuid
+    {
+      id: id,
+      confidence: confidence,
+      report_type: report_type,
+      project_fingerprint: SecureRandom.hex(20),
+      location_fingerprint: Digest::SHA1.hexdigest(SecureRandom.hex(10)),
+      uuid: uuid,
+      name: "Vulnerability Finding #{uuid}",
+      raw_metadata: raw_metadata
+    }
+  end
+
+  def raw_metadata
+    { "description" => "The cipher does not provide data integrity update 1",
+     "message" => "The cipher does not provide data integrity",
+     "cve" => "818bf5dacb291e15d9e6dc3c5ac32178:CIPHER",
+     "solution" => "GCM mode introduces an HMAC into the resulting encrypted data, providing integrity of the result.",
+     "location" => { "file" => "maven/src/main/java/com/gitlab/security_products/tests/App.java", "start_line" => 29, "end_line" => 29, "class" => "com.gitlab.security_products.tests.App", "method" => "insecureCypher" },
+     "links" => [{ "name" => "Cipher does not check for integrity first?", "url" => "https://crypto.stackexchange.com/questions/31428/pbewithmd5anddes-cipher-does-not-check-for-integrity-first" }],
+     "assets" => [{ "type" => "postman", "name" => "Test Postman Collection", "url" => "http://localhost/test.collection" }],
+     "evidence" =>
+      { "summary" => "Credit card detected",
+       "request" => { "headers" => [{ "name" => "Accept", "value" => "*/*" }], "method" => "GET", "url" => "http://goat:8080/WebGoat/logout", "body" => nil },
+       "response" => { "headers" => [{ "name" => "Content-Length", "value" => "0" }], "reason_phrase" => "OK", "status_code" => 200, "body" => nil },
+       "source" => { "id" => "assert:Response Body Analysis", "name" => "Response Body Analysis", "url" => "htpp://hostname/documentation" },
+       "supporting_messages" =>
+        [{ "name" => "Origional", "request" => { "headers" => [{ "name" => "Accept", "value" => "*/*" }], "method" => "GET", "url" => "http://goat:8080/WebGoat/logout", "body" => "" } },
+         { "name" => "Recorded",
+          "request" => { "headers" => [{ "name" => "Accept", "value" => "*/*" }], "method" => "GET", "url" => "http://goat:8080/WebGoat/logout", "body" => "" },
+          "response" => { "headers" => [{ "name" => "Content-Length", "value" => "0" }], "reason_phrase" => "OK", "status_code" => 200, "body" => "" } }] } }
   end
 end

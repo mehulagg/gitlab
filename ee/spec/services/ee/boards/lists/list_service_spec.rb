@@ -4,6 +4,14 @@ require 'spec_helper'
 
 RSpec.describe Boards::Lists::ListService do
   describe '#execute' do
+    before do
+      stub_licensed_features(board_assignee_lists: false, board_milestone_lists: false, board_iteration_lists: false)
+    end
+
+    def execute_service
+      service.execute(Board.find(board.id))
+    end
+
     shared_examples 'list service for board with assignee lists' do
       let!(:assignee_list) { build(:user_list, board: board).tap { |l| l.save(validate: false) } }
       let!(:backlog_list) { create(:backlog_list, board: board) }
@@ -11,18 +19,17 @@ RSpec.describe Boards::Lists::ListService do
 
       context 'when the feature is enabled' do
         before do
-          allow(board.resource_parent).to receive(:feature_available?).with(:board_assignee_lists).and_return(true)
-          allow(board.resource_parent).to receive(:feature_available?).with(:board_milestone_lists).and_return(false)
+          stub_licensed_features(board_assignee_lists: true)
         end
 
         it 'returns all lists' do
-          expect(service.execute(board)).to match_array [backlog_list, list, assignee_list, board.closed_list]
+          expect(execute_service).to match_array [backlog_list, list, assignee_list, board.lists.closed.first]
         end
       end
 
       context 'when the feature is disabled' do
         it 'filters out assignee lists that might have been created while subscribed' do
-          expect(service.execute(board)).to match_array [backlog_list, list, board.closed_list]
+          expect(execute_service).to match_array [backlog_list, list, board.lists.closed.first]
         end
       end
     end
@@ -34,39 +41,51 @@ RSpec.describe Boards::Lists::ListService do
 
       context 'when the feature is enabled' do
         before do
-          allow(board.resource_parent).to receive(:feature_available?).with(:board_assignee_lists).and_return(false)
-          allow(board.resource_parent).to receive(:feature_available?).with(:board_milestone_lists).and_return(true)
+          stub_licensed_features(board_milestone_lists: true)
         end
 
         it 'returns all lists' do
-          expect(service.execute(board))
-            .to match_array([backlog_list, list, milestone_list, board.closed_list])
+          expect(execute_service)
+            .to match_array([backlog_list, list, milestone_list, board.lists.closed.first])
         end
       end
 
       context 'when the feature is disabled' do
         it 'filters out assignee lists that might have been created while subscribed' do
-          expect(service.execute(board)).to match_array [backlog_list, list, board.closed_list]
+          expect(execute_service).to match_array [backlog_list, list, board.lists.closed.first]
         end
       end
     end
 
-    shared_examples 'hidden lists' do
+    shared_examples 'list service for board with iteration lists' do
+      let!(:iteration_list) { build(:iteration_list, board: board).tap { |l| l.save(validate: false) } }
+      let!(:backlog_list) { create(:backlog_list, board: board) }
       let!(:list) { create(:list, board: board, label: label) }
 
-      context 'when hide_backlog_list is true' do
-        it 'hides backlog list' do
-          board.update(hide_backlog_list: true)
+      context 'when the feature is enabled' do
+        before do
+          stub_licensed_features(board_iteration_lists: true)
+        end
 
-          expect(service.execute(board)).to match_array([board.closed_list, list])
+        it 'returns all lists' do
+          expect(execute_service)
+            .to match_array([backlog_list, list, iteration_list, board.lists.closed.first])
+        end
+
+        context 'when the feature flag is disabled' do
+          before do
+            stub_feature_flags(iteration_board_lists: false)
+          end
+
+          it 'filters out iteration lists that might have been created while subscribed' do
+            expect(execute_service).to match_array [backlog_list, list, board.lists.closed.first]
+          end
         end
       end
 
-      context 'when hide_closed_list is true' do
-        it 'hides closed list' do
-          board.update(hide_closed_list: true)
-
-          expect(service.execute(board)).to match_array([board.backlog_list, list])
+      context 'when feature is disabled' do
+        it 'filters out iteration lists that might have been created while subscribed' do
+          expect(execute_service).to match_array [backlog_list, list, board.lists.closed.first]
         end
       end
     end
@@ -80,7 +99,7 @@ RSpec.describe Boards::Lists::ListService do
 
       it_behaves_like 'list service for board with assignee lists'
       it_behaves_like 'list service for board with milestone lists'
-      it_behaves_like 'hidden lists'
+      it_behaves_like 'list service for board with iteration lists'
     end
 
     context 'when board parent is a group' do
@@ -92,7 +111,7 @@ RSpec.describe Boards::Lists::ListService do
 
       it_behaves_like 'list service for board with assignee lists'
       it_behaves_like 'list service for board with milestone lists'
-      it_behaves_like 'hidden lists'
+      it_behaves_like 'list service for board with iteration lists'
     end
   end
 end

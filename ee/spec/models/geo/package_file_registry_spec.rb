@@ -11,6 +11,7 @@ RSpec.describe Geo::PackageFileRegistry, :geo, type: :model do
   end
 
   include_examples 'a Geo framework registry'
+  include_examples 'a Geo verifiable registry'
 
   describe '.find_registry_differences' do
     let(:synced_group) { create(:group) }

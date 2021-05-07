@@ -83,16 +83,26 @@ module SystemNotes
     # Called when a branch in Noteable is changed
     #
     # branch_type - 'source' or 'target'
+    # event_type  - the source of event: 'update' or 'delete'
     # old_branch  - old branch name
     # new_branch  - new branch name
+
+    # Example Note text is based on event_type:
     #
-    # Example Note text:
-    #
-    #   "changed target branch from `Old` to `New`"
+    #   update: "changed target branch from `Old` to `New`"
+    #   delete: "deleted the `Old` branch. This merge request now targets the `New` branch"
     #
     # Returns the created Note object
-    def change_branch(branch_type, old_branch, new_branch)
-      body = "changed #{branch_type} branch from `#{old_branch}` to `#{new_branch}`"
+    def change_branch(branch_type, event_type, old_branch, new_branch)
+      body =
+        case event_type.to_s
+        when 'delete'
+          "deleted the `#{old_branch}` branch. This merge request now targets the `#{new_branch}` branch"
+        when 'update'
+          "changed #{branch_type} branch from `#{old_branch}` to `#{new_branch}`"
+        else
+          raise ArgumentError, "invalid value for event_type: #{event_type}"
+        end
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'branch'))
     end

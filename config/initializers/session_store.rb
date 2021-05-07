@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Be sure to restart your server when you modify this file.
 
 require 'gitlab/current_settings'
@@ -5,7 +7,7 @@ require 'gitlab/current_settings'
 # allow it to fail: it may do so when create_from_defaults is executed before migrations are actually done
 begin
   Settings.gitlab['session_expire_delay'] = Gitlab::CurrentSettings.current_application_settings.session_expire_delay || 10080
-rescue
+rescue StandardError
   Settings.gitlab['session_expire_delay'] ||= 10080
 end
 

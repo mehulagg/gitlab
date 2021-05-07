@@ -12,10 +12,13 @@
 class JsonSchemaValidator < ActiveModel::EachValidator
   FILENAME_ALLOWED = /\A[a-z0-9_-]*\Z/.freeze
   FilenameError = Class.new(StandardError)
+  BASE_DIRECTORY = %w(app validators json_schemas).freeze
 
   def initialize(options)
     raise ArgumentError, "Expected 'filename' as an argument" unless options[:filename]
     raise FilenameError, "Must be a valid 'filename'" unless options[:filename].match?(FILENAME_ALLOWED)
+
+    @base_directory = options.delete(:base_directory) || BASE_DIRECTORY
 
     super(options)
   end
@@ -28,11 +31,27 @@ class JsonSchemaValidator < ActiveModel::EachValidator
 
   private
 
+  attr_reader :base_directory
+
   def valid_schema?(value)
-    JSON::Validator.validate(schema_path, value)
+    validator.valid?(value)
+  end
+
+  def validator
+    @validator ||= JSONSchemer.schema(Pathname.new(schema_path))
   end
 
   def schema_path
-    Rails.root.join('app', 'validators', 'json_schemas', "#{options[:filename]}.json").to_s
+    @schema_path ||= Rails.root.join(*base_directory, filename_with_extension).to_s
+  end
+
+  def filename_with_extension
+    "#{options[:filename]}.json"
+  end
+
+  def draft_version
+    options[:draft] || JSON_VALIDATOR_MAX_DRAFT_VERSION
   end
 end
+
+JsonSchemaValidator.prepend_ee_mod

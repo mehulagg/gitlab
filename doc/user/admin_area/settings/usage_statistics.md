@@ -1,10 +1,13 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Usage statistics **(CORE ONLY)**
+# Usage statistics **(FREE SELF)**
 
-GitLab Inc. will periodically collect information about your instance in order
+GitLab Inc. periodically collects information about your instance in order
 to perform various actions.
 
 All statistics are opt-out. You can enable/disable them in the
@@ -17,9 +20,9 @@ usage statistics to GitLab Inc.
 
 If your GitLab instance is behind a proxy, set the appropriate [proxy configuration variables](https://docs.gitlab.com/omnibus/settings/environment-variables.html).
 
-## Version Check **(CORE ONLY)**
+## Version Check **(FREE SELF)**
 
-If enabled, version check will inform you if a new version is available and the
+If enabled, version check informs you if a new version is available and the
 importance of it through a status. This is shown on the help page (i.e. `/help`)
 for all signed in users, and on the admin pages. The statuses are:
 
@@ -34,10 +37,10 @@ GitLab Inc. collects your instance's version and hostname (through the HTTP
 referer) as part of the version check. No other information is collected.
 
 This information is used, among other things, to identify to which versions
-patches will need to be backported, making sure active GitLab instances remain
+patches must be backported, making sure active GitLab instances remain
 secure.
 
-If you disable version check, this information will not be collected. Enable or
+If you disable version check, this information isn't collected. Enable or
 disable the version check in **Admin Area > Settings > Metrics and profiling > Usage statistics**.
 
 ### Request flow example
@@ -56,15 +59,14 @@ sequenceDiagram
     Version Application->>GitLab instance: Response (PNG/SVG)
 ```
 
-## Usage Ping **(CORE ONLY)**
+## Usage Ping **(FREE SELF)**
 
-See [Usage Ping guide](../../../development/product_analytics/usage_ping.md).
+See [Usage Ping guide](../../../development/usage_ping/index.md).
 
-## Instance-level statistics **(CORE ONLY)**
+## Instance-level analytics availability
 
-Once usage ping is enabled, GitLab will gather data from other instances and
-will be able to show [usage statistics](../analytics/index.md)
-of your instance to your admins in **Admin Area > Analytics**.
+After usage ping is enabled, GitLab gathers data from other instances and
+enables certain [instance-level analytics features](../analytics/index.md) that are dependent on usage ping.
 
 <!-- ## Troubleshooting
 

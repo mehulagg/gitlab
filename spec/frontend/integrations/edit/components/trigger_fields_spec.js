@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlFormGroup, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import TriggerFields from '~/integrations/edit/components/trigger_fields.vue';
 
 describe('TriggerFields', () => {
@@ -29,7 +29,7 @@ describe('TriggerFields', () => {
   const findAllGlFormCheckboxes = () => wrapper.findAll(GlFormCheckbox);
   const findAllGlFormInputs = () => wrapper.findAll(GlFormInput);
 
-  describe.each([true, false])('template, isInheriting = `%p`', isInheriting => {
+  describe.each([true, false])('template, isInheriting = `%p`', (isInheriting) => {
     it('renders a label with text "Trigger"', () => {
       createComponent();
 
@@ -138,11 +138,11 @@ describe('TriggerFields', () => {
         const expectedResults = [
           {
             name: 'service[push_channel]',
-            placeholder: 'Slack channels (e.g. general, development)',
+            placeholder: 'general, development',
           },
           {
             name: 'service[merge_request_channel]',
-            placeholder: 'Slack channels (e.g. general, development)',
+            placeholder: 'general, development',
           },
         ];
 

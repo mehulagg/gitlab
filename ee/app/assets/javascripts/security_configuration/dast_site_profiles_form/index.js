@@ -1,7 +1,8 @@
 import Vue from 'vue';
+import { returnToPreviousPageFactory } from 'ee/security_configuration/dast_profiles/redirect';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import apolloProvider from './graphql/provider';
 import DastSiteProfileForm from './components/dast_site_profile_form.vue';
+import apolloProvider from './graphql/provider';
 
 export default () => {
   const el = document.querySelector('.js-dast-site-profile-form');
@@ -9,16 +10,21 @@ export default () => {
     return;
   }
 
-  const { fullPath, profilesLibraryPath } = el.dataset;
+  const { fullPath, profilesLibraryPath, onDemandScansPath } = el.dataset;
 
   const props = {
     fullPath,
-    profilesLibraryPath,
   };
 
   if (el.dataset.siteProfile) {
     props.siteProfile = convertObjectPropsToCamelCase(JSON.parse(el.dataset.siteProfile));
   }
+
+  const factoryParams = {
+    onDemandScansPath,
+    profilesLibraryPath,
+    urlParamKey: 'site_profile_id',
+  };
 
   // eslint-disable-next-line no-new
   new Vue({
@@ -27,6 +33,10 @@ export default () => {
     render(h) {
       return h(DastSiteProfileForm, {
         props,
+        on: {
+          success: returnToPreviousPageFactory(factoryParams),
+          cancel: returnToPreviousPageFactory(factoryParams),
+        },
       });
     },
   });

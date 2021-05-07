@@ -9,8 +9,8 @@ RSpec.describe RepositoryImportWorker do
     stub_licensed_features(custom_project_templates: true)
     error = %q{remote: Not Found fatal: repository 'https://user:pass@test.com/root/repoC.git/' not found }
 
-    project.update(import_type: 'gitlab_custom_project_template')
-    project.import_state.update(jid: '123')
+    project.update!(import_type: 'gitlab_custom_project_template')
+    project.import_state.update!(jid: '123')
     expect_next_instance_of(Projects::ImportService) do |service|
       expect(service).to receive(:execute).and_return({ status: :error, message: error })
     end

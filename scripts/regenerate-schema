@@ -33,6 +33,7 @@ class SchemaRegenerator
       checkout_clean_schema
       hide_migrations
       remove_schema_migration_files
+      stop_spring
       reset_db
       unhide_migrations
       migrate
@@ -149,6 +150,12 @@ class SchemaRegenerator
   end
 
   ##
+  # Stop spring before modifying the database
+  def stop_spring
+    run %q[bin/spring stop]
+  end
+
+  ##
   # Run rake task to reset the database.
   def reset_db
     run %q[bin/rails db:reset RAILS_ENV=test]
@@ -187,7 +194,7 @@ class SchemaRegenerator
   # Get source ref from CI environment variable, or read the +TARGET+
   # environment+ variable, or default to +HEAD+.
   def target_branch
-    ENV['CI_MERGE_REQUEST_TARGET_BRANCH_NAME'] || ENV['TARGET'] || 'master'
+    ENV['CI_MERGE_REQUEST_TARGET_BRANCH_NAME'] || ENV['TARGET'] || ENV['CI_DEFAULT_BRANCH'] || 'master'
   end
 
   ##

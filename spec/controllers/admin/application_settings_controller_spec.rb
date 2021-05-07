@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Admin::ApplicationSettingsController do
+RSpec.describe Admin::ApplicationSettingsController, :do_not_mock_admin_mode_setting do
   include StubENV
   include UsageDataHelpers
 
@@ -144,10 +144,17 @@ RSpec.describe Admin::ApplicationSettingsController do
     end
 
     it 'updates repository_storages_weighted setting' do
-      put :update, params: { application_setting: { repository_storages_weighted_default: 75 } }
+      put :update, params: { application_setting: { repository_storages_weighted: { default: 75 } } }
 
       expect(response).to redirect_to(general_admin_application_settings_path)
-      expect(ApplicationSetting.current.repository_storages_weighted_default).to eq(75)
+      expect(ApplicationSetting.current.repository_storages_weighted).to eq('default' => 75)
+    end
+
+    it 'updates kroki_formats setting' do
+      put :update, params: { application_setting: { kroki_formats_excalidraw: '1' } }
+
+      expect(response).to redirect_to(general_admin_application_settings_path)
+      expect(ApplicationSetting.current.kroki_formats_excalidraw).to eq(true)
     end
 
     it "updates default_branch_name setting" do
@@ -155,6 +162,51 @@ RSpec.describe Admin::ApplicationSettingsController do
 
       expect(response).to redirect_to(general_admin_application_settings_path)
       expect(ApplicationSetting.current.default_branch_name).to eq("example_branch_name")
+    end
+
+    it "updates admin_mode setting" do
+      put :update, params: { application_setting: { admin_mode: true } }
+
+      expect(response).to redirect_to(general_admin_application_settings_path)
+      expect(ApplicationSetting.current.admin_mode).to be(true)
+    end
+
+    context "personal access token prefix settings" do
+      let(:application_settings) { ApplicationSetting.current }
+
+      shared_examples "accepts prefix setting" do |prefix|
+        it "updates personal_access_token_prefix setting" do
+          put :update, params: { application_setting: { personal_access_token_prefix: prefix } }
+
+          expect(response).to redirect_to(general_admin_application_settings_path)
+          expect(application_settings.reload.personal_access_token_prefix).to eq(prefix)
+        end
+      end
+
+      shared_examples "rejects prefix setting" do |prefix|
+        it "does not update personal_access_token_prefix setting" do
+          put :update, params: { application_setting: { personal_access_token_prefix: prefix } }
+
+          expect(response).not_to redirect_to(general_admin_application_settings_path)
+          expect(application_settings.reload.personal_access_token_prefix).not_to eq(prefix)
+        end
+      end
+
+      context "with valid prefix" do
+        include_examples("accepts prefix setting", "a_prefix@")
+      end
+
+      context "with blank prefix" do
+        include_examples("accepts prefix setting", "")
+      end
+
+      context "with too long prefix" do
+        include_examples("rejects prefix setting", "a_prefix@" * 10)
+      end
+
+      context "with invalid characters prefix" do
+        include_examples("rejects prefix setting", "a_préfixñ:")
+      end
     end
 
     context 'external policy classification settings' do

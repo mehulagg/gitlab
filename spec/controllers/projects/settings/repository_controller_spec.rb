@@ -23,13 +23,15 @@ RSpec.describe Projects::Settings::RepositoryController do
   describe 'PUT cleanup' do
     let(:object_map) { fixture_file_upload('spec/fixtures/bfg_object_map.txt') }
 
-    it 'enqueues a RepositoryCleanupWorker' do
-      allow(RepositoryCleanupWorker).to receive(:perform_async)
+    it 'enqueues a project cleanup' do
+      expect(Projects::CleanupService)
+        .to receive(:enqueue)
+        .with(project, user, anything)
+        .and_return(status: :success)
 
-      put :cleanup, params: { namespace_id: project.namespace, project_id: project, project: { object_map: object_map } }
+      put :cleanup, params: { namespace_id: project.namespace, project_id: project, project: { bfg_object_map: object_map } }
 
       expect(response).to redirect_to project_settings_repository_path(project)
-      expect(RepositoryCleanupWorker).to have_received(:perform_async).once
     end
   end
 
@@ -76,6 +78,8 @@ RSpec.describe Projects::Settings::RepositoryController do
             'username' => deploy_token_params[:username],
             'expires_at' => Time.zone.parse(deploy_token_params[:expires_at]),
             'token' => be_a(String),
+            'expired' => false,
+            'revoked' => false,
             'scopes' => deploy_token_params.inject([]) do |scopes, kv|
               key, value = kv
               key.to_s.start_with?('read_') && value.to_i != 0 ? scopes << key.to_s : scopes

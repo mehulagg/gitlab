@@ -3,6 +3,7 @@ import { GlAlert, GlBadge, GlEmptyState, GlLink, GlLoadingIcon, GlTab } from '@g
 
 export default {
   components: { GlAlert, GlBadge, GlEmptyState, GlLink, GlLoadingIcon, GlTab },
+  inject: ['errorStateSvgPath', 'featureFlagsHelpPagePath'],
   props: {
     title: {
       required: true,
@@ -41,8 +42,11 @@ export default {
       required: true,
       type: String,
     },
+    emptyDescription: {
+      required: true,
+      type: String,
+    },
   },
-  inject: ['errorStateSvgPath', 'featureFlagsHelpPagePath'],
   computed: {
     itemCount() {
       return this.count ?? 0;
@@ -64,45 +68,39 @@ export default {
       <span data-testid="feature-flags-tab-title">{{ title }}</span>
       <gl-badge size="sm" class="gl-tab-counter-badge">{{ itemCount }}</gl-badge>
     </template>
-    <template>
-      <gl-alert
-        v-for="(message, index) in alerts"
-        :key="index"
-        data-testid="serverErrors"
-        variant="danger"
-        @dismiss="clearAlert(index)"
-      >
-        {{ message }}
-      </gl-alert>
+    <gl-alert
+      v-for="(message, index) in alerts"
+      :key="index"
+      data-testid="serverErrors"
+      variant="danger"
+      @dismiss="clearAlert(index)"
+    >
+      {{ message }}
+    </gl-alert>
 
-      <gl-loading-icon v-if="isLoading" :label="loadingLabel" size="md" class="gl-mt-4" />
+    <gl-loading-icon v-if="isLoading" :label="loadingLabel" size="md" class="gl-mt-4" />
 
-      <gl-empty-state
-        v-else-if="errorState"
-        :title="errorTitle"
-        :description="s__(`FeatureFlags|Try again in a few moments or contact your support team.`)"
-        :svg-path="errorStateSvgPath"
-        data-testid="error-state"
-      />
+    <gl-empty-state
+      v-else-if="errorState"
+      :title="errorTitle"
+      :description="s__(`FeatureFlags|Try again in a few moments or contact your support team.`)"
+      :svg-path="errorStateSvgPath"
+      data-testid="error-state"
+    />
 
-      <gl-empty-state
-        v-else-if="emptyState"
-        :title="emptyTitle"
-        :svg-path="errorStateSvgPath"
-        data-testid="empty-state"
-      >
-        <template #description>
-          {{
-            s__(
-              'FeatureFlags|Feature flags allow you to configure your code into different flavors by dynamically toggling certain functionality.',
-            )
-          }}
-          <gl-link :href="featureFlagsHelpPagePath" target="_blank">
-            {{ s__('FeatureFlags|More information') }}
-          </gl-link>
-        </template>
-      </gl-empty-state>
-      <slot> </slot>
-    </template>
+    <gl-empty-state
+      v-else-if="emptyState"
+      :title="emptyTitle"
+      :svg-path="errorStateSvgPath"
+      data-testid="empty-state"
+    >
+      <template #description>
+        {{ emptyDescription }}
+        <gl-link :href="featureFlagsHelpPagePath" target="_blank">
+          {{ s__('FeatureFlags|More information') }}
+        </gl-link>
+      </template>
+    </gl-empty-state>
+    <slot> </slot>
   </gl-tab>
 </template>

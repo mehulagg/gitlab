@@ -3,9 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Epic do
+  include NestedEpicsHelper
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let(:project) { create(:project, group: group) }
+  let_it_be(:project) { create(:project, group: group) }
 
   describe 'associations' do
     subject { build(:epic) }
@@ -17,7 +19,8 @@ RSpec.describe Epic do
     it { is_expected.to have_many(:epic_issues) }
     it { is_expected.to have_many(:children) }
     it { is_expected.to have_many(:user_mentions).class_name('EpicUserMention') }
-    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference') }
+    it { is_expected.to have_many(:boards_epic_user_preferences).class_name('Boards::EpicUserPreference').inverse_of(:epic) }
+    it { is_expected.to have_many(:epic_board_positions).class_name('Boards::EpicBoardPosition').inverse_of(:epic_board) }
   end
 
   describe 'scopes' do
@@ -41,6 +44,36 @@ RSpec.describe Epic do
         create(:epic, confidential: true)
 
         expect(described_class.not_confidential_or_in_groups(group)).to match_array([confidential_epic, public_epic])
+      end
+    end
+
+    describe '.order_relative_position_on_board' do
+      let_it_be(:board) { create(:epic_board) }
+      let_it_be(:epic1) { create(:epic) }
+      let_it_be(:epic2) { create(:epic) }
+      let_it_be(:epic3) { create(:epic) }
+
+      it 'returns epics ordered by position on the board, null last' do
+        create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10)
+        create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20)
+        create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20)
+
+        expect(described_class.order_relative_position_on_board(board.id)).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
+      end
+    end
+
+    describe '.in_milestone' do
+      let_it_be(:milestone) { create(:milestone, project: project) }
+
+      it 'returns epics which have an issue in the milestone' do
+        issue1 = create(:issue, project: project, milestone: milestone)
+        issue2 = create(:issue, project: project, milestone: milestone)
+        other_issue = create(:issue, project: project)
+        epic1 = create(:epic_issue, issue: issue1).epic
+        epic2 = create(:epic_issue, issue: issue2).epic
+        create(:epic_issue, issue: other_issue)
+
+        expect(described_class.in_milestone(milestone.id)).to match_array([epic1, epic2])
       end
     end
   end
@@ -185,31 +218,29 @@ RSpec.describe Epic do
 
       it 'returns false when level is too deep' do
         epic1 = create(:epic, group: group)
-        epic2 = create(:epic, group: group, parent: epic1)
-        epic3 = create(:epic, group: group, parent: epic2)
-        epic4 = create(:epic, group: group, parent: epic3)
-        epic5 = create(:epic, group: group, parent: epic4)
-        epic.parent = epic5
+        add_parents_to(epic: epic1, count: 6)
+
+        epic.parent = epic1
 
         expect(epic.valid_parent?).to be_falsey
       end
     end
 
     context 'when adding an Epic that has existing children' do
-      let(:parent_epic) { create(:epic, group: group) }
+      let_it_be(:parent_epic) { create(:epic, group: group) }
+
       let(:epic) { build(:epic, group: group) }
-      let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
       it 'returns true when total depth after adding will not exceed limit' do
+        create(:epic, group: group, parent: epic)
+
         epic.parent = parent_epic
 
         expect(epic.valid_parent?).to be_truthy
       end
 
       it 'returns false when total depth after adding would exceed limit' do
-        child_epic2 = create(:epic, group: group, parent: child_epic1)
-        child_epic3 = create(:epic, group: group, parent: child_epic2)
-        create(:epic, group: group, parent: child_epic3)
+        add_children_to(epic: epic, count: 6)
 
         epic.parent = parent_epic
 
@@ -218,8 +249,9 @@ RSpec.describe Epic do
     end
 
     context 'when parent has ancestors and epic has children' do
-      let(:root_epic) { create(:epic, group: group) }
-      let(:parent_epic) { create(:epic, group: group, parent: root_epic) }
+      let_it_be(:root_epic) { create(:epic, group: group) }
+      let_it_be(:parent_epic) { create(:epic, group: group, parent: root_epic) }
+
       let(:epic) { build(:epic, group: group) }
       let(:child_epic1) { create(:epic, group: group, parent: epic)}
 
@@ -230,8 +262,8 @@ RSpec.describe Epic do
       end
 
       it 'returns false when total depth after adding would exceed limit' do
-        root_epic.update(parent: create(:epic, group: group))
-        create(:epic, group: group, parent: child_epic1)
+        add_parents_to(epic: root_epic, count: 2)
+        add_children_to(epic: child_epic1, count: 2)
 
         epic.parent = parent_epic
 
@@ -639,21 +671,68 @@ RSpec.describe Epic do
     end
   end
 
-  describe '.related_issues' do
-    it 'returns epic issues ordered by relative position' do
-      epic1 = create(:epic, group: group)
-      epic2 = create(:epic, group: group)
-      issue1 = create(:issue, project: project)
-      issue2 = create(:issue, project: project)
-      create(:issue, project: project)
-      create(:epic_issue, epic: epic1, issue: issue1, relative_position: 5)
-      create(:epic_issue, epic: epic2, issue: issue2, relative_position: 2)
+  context 'with existing epics and related issues' do
+    let_it_be(:epic1) { create(:epic, group: group) }
+    let_it_be(:epic2) { create(:epic, group: group, parent: epic1) }
+    let_it_be(:epic3) { create(:epic, group: group, parent: epic2, state: :closed) }
+    let_it_be(:epic4) { create(:epic, group: group) }
+    let_it_be(:issue1) { create(:issue, weight: 2) }
+    let_it_be(:issue2) { create(:issue, weight: 3) }
+    let_it_be(:issue3) { create(:issue, state: :closed) }
+    let_it_be(:epic_issue1) { create(:epic_issue, epic: epic2, issue: issue1, relative_position: 5) }
+    let_it_be(:epic_issue2) { create(:epic_issue, epic: epic2, issue: issue2, relative_position: 2) }
+    let_it_be(:epic_issue3) { create(:epic_issue, epic: epic3, issue: issue3) }
 
-      result = described_class.related_issues(ids: [epic1.id, epic2.id])
+    describe '.related_issues' do
+      it 'returns epic issues ordered by relative position' do
+        result = described_class.related_issues(ids: [epic1.id, epic2.id])
 
-      expect(result.pluck(:id)).to eq [issue2.id, issue1.id]
+        expect(result.pluck(:id)).to eq [issue2.id, issue1.id]
+      end
+    end
+
+    describe '.ids_for_base_and_decendants' do
+      it 'returns epic ids only for selected epics or its descendant epics' do
+        create(:epic, group: group)
+
+        expect(described_class.ids_for_base_and_decendants([epic1.id, epic4.id]))
+          .to match_array([epic1.id, epic2.id, epic3.id, epic4.id])
+      end
+    end
+
+    describe '.issue_metadata_for_epics' do
+      it 'returns hash containing epic issues count and weight and epic status' do
+        result = described_class.issue_metadata_for_epics(epic_ids: [epic2.id, epic3.id], limit: 100)
+
+        expected = [{
+          "epic_state_id" => 1,
+          "id" => epic2.id,
+          "iid" => epic2.iid,
+          "issues_count" => 2,
+          "issues_state_id" => 1,
+          "issues_weight_sum" => 5,
+          "parent_id" => epic1.id
+        }, {
+          "epic_state_id" => 2,
+          "id" => epic3.id,
+          "iid" => epic3.iid,
+          "issues_count" => 1,
+          "issues_state_id" => 2,
+          "issues_weight_sum" => 0,
+          "parent_id" => epic2.id
+        }]
+        expect(result).to match_array(expected)
+      end
     end
   end
 
   it_behaves_like 'versioned description'
+
+  describe '#usage_ping_record_epic_creation' do
+    it 'records epic creation after saving' do
+      expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_created_action)
+
+      create(:epic)
+    end
+  end
 end

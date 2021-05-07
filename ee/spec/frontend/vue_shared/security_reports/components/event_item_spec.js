@@ -1,6 +1,6 @@
 import { GlButton } from '@gitlab/ui';
-import Component from 'ee/vue_shared/security_reports/components/event_item.vue';
 import { shallowMount, mount } from '@vue/test-utils';
+import Component from 'ee/vue_shared/security_reports/components/event_item.vue';
 import NoteHeader from '~/notes/components/note_header.vue';
 
 describe('Event Item', () => {

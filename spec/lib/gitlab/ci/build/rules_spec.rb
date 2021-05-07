@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
   let(:seed) do
     double('build seed',
       to_resource: ci_build,
-      variables: ci_build.scoped_variables_hash
+      variables: ci_build.scoped_variables
     )
   end
 
@@ -104,7 +104,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
     context 'with one rule without any clauses' do
       let(:rule_list) { [{ when: 'manual', allow_failure: true }] }
 
-      it { is_expected.to eq(described_class::Result.new('manual', nil, true)) }
+      it { is_expected.to eq(described_class::Result.new('manual', nil, true, nil)) }
     end
 
     context 'with one matching rule' do
@@ -171,7 +171,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
       context 'with matching rule' do
         let(:rule_list) { [{ if: '$VAR == null', allow_failure: true }] }
 
-        it { is_expected.to eq(described_class::Result.new('on_success', nil, true)) }
+        it { is_expected.to eq(described_class::Result.new('on_success', nil, true, nil)) }
       end
 
       context 'with non-matching rule' do
@@ -180,18 +180,33 @@ RSpec.describe Gitlab::Ci::Build::Rules do
         it { is_expected.to eq(described_class::Result.new('never')) }
       end
     end
+
+    context 'with variables' do
+      context 'with matching rule' do
+        let(:rule_list) { [{ if: '$VAR == null', variables: { MY_VAR: 'my var' } }] }
+
+        it { is_expected.to eq(described_class::Result.new('on_success', nil, nil, { MY_VAR: 'my var' })) }
+      end
+    end
   end
 
   describe 'Gitlab::Ci::Build::Rules::Result' do
     let(:when_value) { 'on_success' }
     let(:start_in) { nil }
     let(:allow_failure) { nil }
+    let(:variables) { nil }
 
-    subject { Gitlab::Ci::Build::Rules::Result.new(when_value, start_in, allow_failure) }
+    subject(:result) do
+      Gitlab::Ci::Build::Rules::Result.new(when_value, start_in, allow_failure, variables)
+    end
 
     describe '#build_attributes' do
+      subject(:build_attributes) do
+        result.build_attributes
+      end
+
       it 'compacts nil values' do
-        expect(subject.build_attributes).to eq(options: {}, when: 'on_success')
+        is_expected.to eq(options: {}, when: 'on_success')
       end
     end
 
@@ -200,7 +215,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
         let!(:when_value) { 'never' }
 
         it 'returns false' do
-          expect(subject.pass?).to eq(false)
+          expect(result.pass?).to eq(false)
         end
       end
 
@@ -208,7 +223,7 @@ RSpec.describe Gitlab::Ci::Build::Rules do
         let!(:when_value) { 'on_success' }
 
         it 'returns true' do
-          expect(subject.pass?).to eq(true)
+          expect(result.pass?).to eq(true)
         end
       end
     end

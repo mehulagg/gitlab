@@ -363,7 +363,7 @@ RSpec.describe API::GoProxy do
     let(:module_name) { base }
 
     before do
-      project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
     end
 
     describe 'GET /projects/:id/packages/go/*module_name/@v/list' do
@@ -412,7 +412,7 @@ RSpec.describe API::GoProxy do
     let(:module_name) { base }
 
     before do
-      project.update(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+      project.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
     end
 
     describe 'GET /projects/:id/packages/go/*module_name/@v/list' do
@@ -428,7 +428,7 @@ RSpec.describe API::GoProxy do
 
   context 'with a non-existent project' do
     def get_resource(user = nil, **params)
-      get api("/projects/not%2fa%2fproject/packages/go/#{base}/@v/list", user, params)
+      get api("/projects/not%2fa%2fproject/packages/go/#{base}/@v/list", user, **params)
     end
 
     describe 'GET /projects/:id/packages/go/*module_name/@v/list' do
@@ -465,7 +465,7 @@ RSpec.describe API::GoProxy do
   end
 
   def get_resource(user = nil, headers: {}, **params)
-    get api("/projects/#{project.id}/packages/go/#{module_name}/@v/#{resource}", user, params), headers: headers
+    get api("/projects/#{project.id}/packages/go/#{module_name}/@v/#{resource}", user, **params), headers: headers
   end
 
   def fmt_pseudo_version(prefix, commit)

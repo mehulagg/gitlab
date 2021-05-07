@@ -7,6 +7,7 @@ RSpec.describe 'Reset namespace pipeline minutes', :js do
 
   before do
     sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   shared_examples 'resetting pipeline minutes' do
@@ -18,7 +19,7 @@ RSpec.describe 'Reset namespace pipeline minutes', :js do
       it 'resets pipeline minutes' do
         time = Time.now
 
-        Timecop.freeze(time) do
+        travel_to(time) do
           click_button 'Reset pipeline minutes'
         end
 

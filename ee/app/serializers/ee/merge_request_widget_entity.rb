@@ -31,10 +31,6 @@ module EE
         end
       end
 
-      expose :enabled_reports do |merge_request|
-        merge_request.enabled_reports
-      end
-
       expose :license_scanning, if: -> (mr, _) { can?(current_user, :read_licenses, mr.target_project) } do
         expose :managed_licenses_path do |merge_request|
           expose_path(api_v4_projects_managed_licenses_path(id: merge_request.target_project.id))
@@ -65,6 +61,10 @@ module EE
         merge_request.head_pipeline.iid
       end
 
+      expose :can_read_vulnerabilities do |merge_request|
+        can?(current_user, :read_vulnerability, merge_request.project)
+      end
+
       expose :can_read_vulnerability_feedback do |merge_request|
         can?(current_user, :read_vulnerability_feedback, merge_request.project)
       end
@@ -83,6 +83,10 @@ module EE
 
       expose :create_vulnerability_feedback_dismissal_path do |merge_request|
         presenter(merge_request).create_vulnerability_feedback_dismissal_path(merge_request.project)
+      end
+
+      expose :discover_project_security_path do |merge_request|
+        presenter(merge_request).discover_project_security_path
       end
 
       expose :has_approvals_available do |merge_request|

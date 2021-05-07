@@ -15,17 +15,9 @@ RSpec.describe 'projects/settings/operations/show' do
   end
 
   let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
-  let_it_be(:alerts_service) { create(:alerts_service, project: project) }
-
-  let(:operations_show_locals) do
-    {
-      prometheus_service: prometheus_service,
-      alerts_service: alerts_service
-    }
-  end
 
   before_all do
-    project.add_reporter(user)
+    project.add_maintainer(user)
   end
 
   before do
@@ -35,16 +27,51 @@ RSpec.describe 'projects/settings/operations/show' do
       .and_return(error_tracking_setting)
     allow(view).to receive(:tracing_setting)
       .and_return(tracing_setting)
+    allow(view).to receive(:prometheus_service)
+      .and_return(prometheus_service)
     allow(view).to receive(:current_user).and_return(user)
+  end
+
+  describe 'Operations > Alerts' do
+    it 'renders the Operations Settings page' do
+      render
+
+      expect(rendered).to have_content _('Alert integrations')
+      expect(rendered).to have_content _('Display alerts from all configured monitoring tools.')
+    end
   end
 
   describe 'Operations > Error Tracking' do
     context 'Settings page ' do
       it 'renders the Operations Settings page' do
-        render template: 'projects/settings/operations/show', locals: operations_show_locals
+        render
 
         expect(rendered).to have_content _('Error tracking')
-        expect(rendered).to have_content _('To link Sentry to GitLab, enter your Sentry URL and Auth Token')
+        expect(rendered).to have_content _('Link Sentry to GitLab to discover and view the errors your application generates.')
+      end
+    end
+  end
+
+  describe 'Operations > Prometheus' do
+    context 'when settings_operations_prometheus_service flag is enabled' do
+      it 'renders the Operations Settings page' do
+        render
+
+        expect(rendered).to have_content _('Prometheus')
+        expect(rendered).to have_content _('Link Prometheus monitoring to GitLab.')
+        expect(rendered).to have_content _('To enable the installation of Prometheus on your clusters, deactivate the manual configuration.')
+      end
+    end
+
+    context 'when settings_operations_prometheus_service is disabled' do
+      before do
+        stub_feature_flags(settings_operations_prometheus_service: false)
+      end
+
+      it 'renders the Operations Settings page' do
+        render
+
+        expect(rendered).not_to have_content _('Auto configuration settings are used unless you override their values here.')
       end
     end
   end
@@ -52,7 +79,7 @@ RSpec.describe 'projects/settings/operations/show' do
   describe 'Operations > Tracing' do
     context 'with project.tracing_external_url' do
       it 'links to project.tracing_external_url' do
-        render template: 'projects/settings/operations/show', locals: operations_show_locals
+        render
 
         expect(rendered).to have_link('Tracing', href: tracing_setting.external_url)
       end
@@ -66,7 +93,7 @@ RSpec.describe 'projects/settings/operations/show' do
         end
 
         it 'sanitizes external_url' do
-          render template: 'projects/settings/operations/show', locals: operations_show_locals
+          render
 
           expect(tracing_setting.external_url).to eq(malicious_tracing_url)
           expect(rendered).to have_link('Tracing', href: cleaned_url)
@@ -82,7 +109,7 @@ RSpec.describe 'projects/settings/operations/show' do
       end
 
       it 'links to Tracing page' do
-        render template: 'projects/settings/operations/show', locals: operations_show_locals
+        render
 
         expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
       end

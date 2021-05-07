@@ -5,41 +5,43 @@
   .col-sm-6
     .bs-callout
       %p
-        = (_"A 'Runner' is a process which runs a job. You can set up as many Runners as you need.")
+        = _("Runners are processes that pick up and execute CI/CD jobs for GitLab.")
         %br
-        = _('Runners can be placed on separate users, servers, even on your local machine.')
+        = _('You can register runners as separate users, on separate servers, and on your local machine. Register as many runners as you want.')
         %br
 
       %div
-        %span= _('Each Runner can be in one of the following states and/or belong to one of the following types:')
+        %span= _('Runners can be:')
         %ul
           %li
-            %span.badge.badge-success shared
+            %span.badge.badge-pill.gl-badge.sm.badge-success shared
             \-
-            = _('Runner runs jobs from all unassigned projects')
+            = _('Runs jobs from all unassigned projects.')
           %li
-            %span.badge.badge-success group
+            %span.badge.badge-pill.gl-badge.sm.badge-success group
             \-
-            = _('Runner runs jobs from all unassigned projects in its group')
+            = _('Runs jobs from all unassigned projects in its group.')
           %li
-            %span.badge.badge-info specific
+            %span.badge.badge-pill.gl-badge.sm.badge-info specific
             \-
-            = _('Runner runs jobs from assigned projects')
+            = _('Runs jobs from assigned projects.')
           %li
-            %span.badge.badge-warning locked
+            %span.badge.badge-pill.gl-badge.sm.badge-warning locked
             \-
-            = _('Runner cannot be assigned to other projects')
+            = _('Cannot be assigned to other projects.')
           %li
-            %span.badge.badge-danger paused
+            %span.badge.badge-pill.gl-badge.sm.badge-danger paused
             \-
-            = _('Runner will not receive any new jobs')
+            = _('Not available to run jobs.')
 
   .col-sm-6
     .bs-callout
       = render partial: 'ci/runner/how_to_setup_runner',
                 locals: { registration_token: Gitlab::CurrentSettings.runners_registration_token,
                           type: 'shared',
-                          reset_token_url: reset_registration_token_admin_application_settings_path }
+                          reset_token_url: reset_registration_token_admin_application_settings_path,
+                          project_path: '',
+                          group_path: '' }
 
 .row
   .col-sm-9
@@ -48,7 +50,7 @@
         .filtered-search-box
           = dropdown_tag(_('Recent searches'),
             options: { wrapper_class: 'filtered-search-history-dropdown-wrapper',
-            toggle_class: 'gl-button btn filtered-search-history-dropdown-toggle-button',
+            toggle_class: 'gl-button btn btn-default filtered-search-history-dropdown-toggle-button',
             dropdown_class: 'filtered-search-history-dropdown',
             content_class: 'filtered-search-history-dropdown-content' }) do
             .js-filtered-search-history-dropdown{ data: { full_path: admin_runners_path } }
@@ -70,7 +72,7 @@
             #js-dropdown-operator.filtered-search-input-dropdown-menu.dropdown-menu
               %ul.filter-dropdown{ data: { dropdown: true, dynamic: true } }
                 %li.filter-dropdown-item{ data: { value: "{{ title }}" } }
-                  %button.btn.btn-link{ type: 'button' }
+                  %button.gl-button.btn.btn-link{ type: 'button' }
                     {{ title }}
                     %span.btn-helptext
                       {{ help }}
@@ -98,12 +100,12 @@
           #js-dropdown-runner-tag.filtered-search-input-dropdown-menu.dropdown-menu
             %ul{ data: { dropdown: true } }
               %li.filter-dropdown-item{ data: { value: 'none' } }
-                %button.btn.btn-link
+                %button.gl-button.btn.btn-link
                   = _('No Tag')
               %li.divider.droplab-item-ignore
             %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
               %li.filter-dropdown-item
-                %button.btn.btn-link.js-data-value
+                %button.gl-button.btn.btn-link.js-data-value
                   %span.dropdown-light-content
                     {{name}}
 
@@ -116,12 +118,11 @@
     = _('Runners currently online: %{active_runners_count}') % { active_runners_count: @active_runners_count }
 
 - if @runners.any?
-  .runners-content.content-list
+  .content-list{ data: { testid: 'runners-table' } }
     .table-holder
       .gl-responsive-table-row.table-row-header{ role: 'row' }
         .table-section.section-10{ role: 'rowheader' }= _('Type/State')
-        .table-section.section-10{ role: 'rowheader' }= _('Runner token')
-        .table-section.section-20{ role: 'rowheader' }= _('Description')
+        .table-section.section-30{ role: 'rowheader' }= s_('Runners|Runner')
         .table-section.section-10{ role: 'rowheader' }= _('Version')
         .table-section.section-10{ role: 'rowheader' }= _('IP Address')
         .table-section.section-5{ role: 'rowheader' }= _('Projects')

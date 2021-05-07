@@ -29,18 +29,13 @@ export default {
         :size="14"
         class="author-link suggestion-help-hover"
       />
-      <gl-popover
-        target="pop-approver"
-        container="popovercontainer"
-        placement="top"
-        triggers="hover focus"
-      >
-        <template #title>{{ __('Who can be an approver?') }}</template>
+      <gl-popover target="pop-approver" container="popovercontainer" placement="top">
+        <template #title>{{ __('Who can approve?') }}</template>
         <ul class="pl-3">
           <li>
-            {{ __('Any member with Developer or higher permissions to the project.') }}
+            {{ __('Any member with at least Developer permissions on the project.') }}
           </li>
-          <li>{{ __('Code Owners to the merge request changes.') }}</li>
+          <li>{{ __('Members listed as CODEOWNERS of affected files.') }}</li>
           <li>
             {{
               __("Users or groups set as approvers in the project's or merge request's settings.")

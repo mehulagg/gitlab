@@ -8,7 +8,7 @@ module EE
 
         attr_accessor :total_geo_registries
 
-        def initialize(*)
+        def initialize(**kwargs)
           super
 
           @total_geo_registries = 0

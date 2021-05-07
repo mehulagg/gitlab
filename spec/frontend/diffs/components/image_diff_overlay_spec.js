@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import ImageDiffOverlay from '~/diffs/components/image_diff_overlay.vue';
 import { createStore } from '~/mr_notes/stores';
 import { imageDiffDiscussions } from '../mock_data/diff_discussions';
@@ -21,13 +21,17 @@ describe('Diffs image diff overlay component', () => {
 
     wrapper = shallowMount(ImageDiffOverlay, {
       store,
+      parentComponent: {
+        data() {
+          return dimensions;
+        },
+      },
       propsData: {
         discussions: [...imageDiffDiscussions],
         fileHash: 'ABC',
+        renderedWidth: 200,
+        renderedHeight: 200,
         ...props,
-      },
-      methods: {
-        getImageDimensions: jest.fn().mockReturnValue(dimensions),
       },
     });
   }
@@ -47,18 +51,8 @@ describe('Diffs image diff overlay component', () => {
     createComponent();
     const imageBadges = getAllImageBadges();
 
-    expect(
-      imageBadges
-        .at(0)
-        .text()
-        .trim(),
-    ).toBe('1');
-    expect(
-      imageBadges
-        .at(1)
-        .text()
-        .trim(),
-    ).toBe('2');
+    expect(imageBadges.at(0).text().trim()).toBe('1');
+    expect(imageBadges.at(1).text().trim()).toBe('2');
   });
 
   it('renders icon when showCommentIcon is true', () => {
@@ -71,8 +65,8 @@ describe('Diffs image diff overlay component', () => {
     createComponent();
     const imageBadges = getAllImageBadges();
 
-    expect(imageBadges.at(0).attributes('style')).toBe('left: 10px; top: 10px;');
-    expect(imageBadges.at(1).attributes('style')).toBe('left: 5px; top: 5px;');
+    expect(imageBadges.at(0).attributes('style')).toBe('left: 10%; top: 5%;');
+    expect(imageBadges.at(1).attributes('style')).toBe('left: 5%; top: 2.5%;');
   });
 
   it('renders single badge for discussion object', () => {
@@ -95,6 +89,8 @@ describe('Diffs image diff overlay component', () => {
       y: 0,
       width: 100,
       height: 200,
+      xPercent: 0,
+      yPercent: 0,
     });
   });
 
@@ -120,11 +116,13 @@ describe('Diffs image diff overlay component', () => {
   describe('comment form', () => {
     const getCommentIndicator = () => wrapper.find('.comment-indicator');
     beforeEach(() => {
-      createComponent({}, store => {
+      createComponent({ canComment: true }, (store) => {
         store.state.diffs.commentForms.push({
           fileHash: 'ABC',
           x: 20,
           y: 10,
+          xPercent: 10,
+          yPercent: 10,
         });
       });
     });
@@ -134,7 +132,7 @@ describe('Diffs image diff overlay component', () => {
     });
 
     it('sets comment form badge position', () => {
-      expect(getCommentIndicator().attributes('style')).toBe('left: 20px; top: 10px;');
+      expect(getCommentIndicator().attributes('style')).toBe('left: 10%; top: 10%;');
     });
   });
 });

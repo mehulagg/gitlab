@@ -1,10 +1,12 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlAlert } from '@gitlab/ui';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__, sprintf } from '~/locale';
 
 export default {
   components: {
     GlButton,
+    GlAlert,
   },
   props: {
     quotaUsed: {
@@ -14,11 +16,6 @@ export default {
     quotaLimit: {
       type: Number,
       required: true,
-    },
-    runnersPath: {
-      type: String,
-      required: false,
-      default: null,
     },
     projectPath: {
       type: String,
@@ -42,11 +39,16 @@ export default {
         { quotaUsed: this.quotaUsed, quotaLimit: this.quotaLimit },
       );
     },
+    runnersPath() {
+      return helpPagePath('ci/runners/README.html', {
+        anchor: 'set-maximum-job-timeout-for-a-runner',
+      });
+    },
   },
 };
 </script>
 <template>
-  <div class="bs-callout bs-callout-danger">
+  <gl-alert class="gl-my-5" variant="danger" :dismissible="false">
     <p>
       {{ runnersWarningMessage }}
 
@@ -64,5 +66,5 @@ export default {
     >
       {{ __('Purchase more minutes') }}
     </gl-button>
-  </div>
+  </gl-alert>
 </template>

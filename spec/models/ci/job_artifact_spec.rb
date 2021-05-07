@@ -96,6 +96,22 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '.codequality_reports' do
+    subject { described_class.codequality_reports }
+
+    context 'when there is a codequality report' do
+      let!(:artifact) { create(:ci_job_artifact, :codequality) }
+
+      it { is_expected.to eq([artifact]) }
+    end
+
+    context 'when there are no codequality reports' do
+      let!(:artifact) { create(:ci_job_artifact, :archive) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
   describe '.terraform_reports' do
     context 'when there is a terraform report' do
       it 'return the job artifact' do
@@ -179,6 +195,22 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
+  describe '#archived_trace_exists?' do
+    subject { artifact.archived_trace_exists? }
+
+    context 'when the file exists' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the file does not exist' do
+      before do
+        artifact.file.remove!
+      end
+
+      it { is_expected.to be_falsy }
+    end
+  end
+
   describe '.for_sha' do
     let(:first_pipeline) { create(:ci_pipeline) }
     let(:second_pipeline) { create(:ci_pipeline, project: first_pipeline.project, sha: Digest::SHA1.hexdigest(SecureRandom.hex)) }
@@ -200,6 +232,39 @@ RSpec.describe Ci::JobArtifact do
 
       expect(described_class.for_job_name(first_job.name)).to eq([first_artifact])
       expect(described_class.for_job_name(second_job.name)).to eq([second_artifact])
+    end
+  end
+
+  describe '.unlocked' do
+    let_it_be(:job_artifact) { create(:ci_job_artifact) }
+
+    context 'with locked pipelines' do
+      before do
+        job_artifact.job.pipeline.artifacts_locked!
+      end
+
+      it 'returns an empty array' do
+        expect(described_class.unlocked).to be_empty
+      end
+    end
+
+    context 'with unlocked pipelines' do
+      before do
+        job_artifact.job.pipeline.unlocked!
+      end
+
+      it 'returns the artifact' do
+        expect(described_class.unlocked).to eq([job_artifact])
+      end
+    end
+  end
+
+  describe '.order_expired_desc' do
+    let_it_be(:first_artifact) { create(:ci_job_artifact, expire_at: 2.days.ago) }
+    let_it_be(:second_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
+
+    it 'returns ordered artifacts' do
+      expect(described_class.order_expired_desc).to eq([second_artifact, first_artifact])
     end
   end
 

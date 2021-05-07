@@ -55,16 +55,16 @@ RSpec.describe 'Login' do
           stub_licensed_features(smartcard_auth: false)
         end
 
-        it 'correctly renders tabs and panes' do
+        it 'does not render any tabs' do
           subject
 
-          ensure_tab_pane_correctness(false)
+          ensure_no_tabs
         end
 
-        it 'does not show smartcard login form' do
-          subject
+        it 'renders link to sign up path' do
+          visit new_user_session_path
 
-          expect(page).not_to have_selector('.nav-tabs a[href="#smartcard"]')
+          expect(page.body).to have_link('Register now', href: new_user_registration_path)
         end
       end
 
@@ -76,16 +76,13 @@ RSpec.describe 'Login' do
         it 'correctly renders tabs and panes' do
           subject
 
-          expect(page.all('.nav-tabs a[data-toggle="tab"]').length).to be(3)
-
-          ensure_one_active_tab
-          ensure_one_active_pane
+          ensure_tab_pane_correctness(%w(Smartcard Standard))
         end
 
-        it 'shows smartcard login form' do
-          subject
+        it 'renders link to sign up path' do
+          visit new_user_session_path
 
-          expect(page).to have_selector('.nav-tabs a[href="#smartcard"]')
+          expect(page.body).to have_link('Register now', href: new_user_registration_path)
         end
 
         describe 'with two-factor authentication required', :clean_gitlab_redis_shared_state do

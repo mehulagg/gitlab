@@ -3,7 +3,7 @@
 module QA
   # This test was quarantined because relative URL isn't supported
   # See https://gitlab.com/gitlab-org/gitlab/issues/13833
-  context 'Create', :runner, :quarantine do
+  RSpec.describe 'Create', :runner, :quarantine do
     describe 'Web IDE web terminal' do
       before do
         project = Resource::Project.fabricate_via_api! do |project|
@@ -51,7 +51,7 @@ module QA
         @runner.remove_via_api! if @runner
       end
 
-      it 'user starts the web terminal', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/405' do
+      it 'user starts the web terminal', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1664' do
         Page::Project::Show.perform(&:open_web_ide!)
 
         # Start the web terminal and check that there were no errors

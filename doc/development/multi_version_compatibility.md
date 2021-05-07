@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Compatibility with multiple versions of the application running at the same time
 
 When adding or changing features, we must be aware that there may be multiple versions of the application running
@@ -15,7 +21,7 @@ We must make sure that the application works properly in these states.
 For GitLab.com, we also run a set of canary servers which run a more recent version of the application. Users with
 the canary cookie set would be handled by these servers. Some URL patterns may also be forced to the canary servers,
 even without the cookie being set. This also means that some pages may match the pattern and get handled by canary servers,
-but AJAX requests to URLs (like the GraphQL endpoint) won't match the pattern.
+but AJAX requests to URLs (like the GraphQL endpoint) fail to match the pattern.
 
 With this canary setup, we'd be in this mixed-versions state for an extended period of time until canary is promoted to
 production and post-deployment migrations run.
@@ -32,7 +38,7 @@ default. The feature flag can be enabled when the deployment is in a
 consistent state. However, this method of synchronization doesn't
 guarantee that customers with on-premise instances can [upgrade with
 zero downtime](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates)
-since point releases bundle many changes together. Minimizing the time
+because point releases bundle many changes together. Minimizing the time
 between when versions are out of sync across the fleet may help mitigate
 errors caused by upgrades.
 
@@ -59,12 +65,12 @@ Let's see how we can handle them safely.
 ### Route changes
 
 When changing routing we should pay attention to make sure a route generated from the new version can be served by the old one and vice versa.
-As you can see in [an example later on this page](#some-links-to-issues-and-mrs-were-broken), not doing it can lead to an outage.
+[As you can see](#some-links-to-issues-and-mrs-were-broken), not doing it can lead to an outage.
 This type of change may look like an immediate switch between the two implementations. However,
 especially with the canary stage, there is an extended period of time where both version of the code
 coexists in production.
 
-1. **expand**: a new route is added, pointing to the same controller as the old one. But nothing in the application will generate links for the new routes.
+1. **expand**: a new route is added, pointing to the same controller as the old one. But nothing in the application generates links for the new routes.
 1. **migrate**: now that every machine in the fleet can understand the new route, we can generate links with the new routing.
 1. **contract**: the old route can be safely removed. (If the old route was likely to be widely shared, like the link to a repository file, we might want to add redirects and keep the old route for a longer period.)
 
@@ -78,12 +84,12 @@ When we need to add a new parameter to a Sidekiq worker class, we can split this
 1. **migrate**: we add the new parameter to all the invocations of the worker.
 1. **contract**: we remove the default value.
 
-At a first look, it may seem safe to bundle expand and migrate into a single milestone, but this will cause an outage if Puma restarts before Sidekiq.
+At a first look, it may seem safe to bundle expand and migrate into a single milestone, but this causes an outage if Puma restarts before Sidekiq.
 Puma enqueues jobs with an extra parameter that the old Sidekiq cannot handle.
 
 ### Database migrations
 
-The following graph is a simplified visual representation of a deployment, this will guide us in understanding how expand and contract is implemented in our migrations strategy.
+The following graph is a simplified visual representation of a deployment, this guides us in understanding how expand and contract is implemented in our migrations strategy.
 
 There's a special consideration here. Using our post-deployment migrations framework allows us to bundle all three phases into one milestone.
 
@@ -128,12 +134,12 @@ And these deployments align perfectly with application changes.
 
 With all those details in mind, let's imagine we need to replace a query, and this query has an index to support it.
 
-1. **expand**: this is the from `Schema A` to `Schema B` deployment. We add the new index, but the application will ignore it for now
-1. **migrate**: this is the `Version N` to `Version N+1` application deployment. The new code is deployed, at this point in time only the new query will run.
+1. **expand**: this is the from `Schema A` to `Schema B` deployment. We add the new index, but the application ignores it for now.
+1. **migrate**: this is the `Version N` to `Version N+1` application deployment. The new code is deployed, at this point in time only the new query runs.
 1. **contract**: from `Schema B` to `Schema C` (post-deployment migration). Nothing uses the old index anymore, we can safely remove it.
 
-This is only an example. More complex migrations, especially when background migrations are needed will
-still require more than one milestone. For details please refer to our [migration style guide](migration_style_guide.md).
+This is only an example. More complex migrations, especially when background migrations are needed may
+require more than one milestone. For details please refer to our [migration style guide](migration_style_guide.md).
 
 ## Examples of previous incidents
 
@@ -201,7 +207,7 @@ variable `CI_NODE_TOTAL` being an integer failed. This was caused because after 
 1. Old code: Runners requested a job from an API node that is running the previous version.
 1. As a result, the [new code](https://gitlab.com/gitlab-org/gitlab/blob/42b82a9a3ac5a96f9152aad6cbc583c42b9fb082/app/models/concerns/ci/contextable.rb#L104)
 was not run on the API server. The runner's request failed because the
-older API server tried return the `CI_NODE_TOTAL` CI variable, but
+older API server tried return the `CI_NODE_TOTAL` CI/CD variable, but
 instead of sending an integer value (e.g. 9), it sent a serialized
 `Hash` value (`{:number=>9, :total=>9}`).
 

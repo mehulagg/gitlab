@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 class Projects::RequirementsManagement::RequirementsController < Projects::ApplicationController
+  include WorkhorseAuthorization
+
+  EXTENSION_WHITELIST = %w[csv].map(&:downcase).freeze
+
   before_action :authorize_read_requirement!
+  before_action :authorize_import_access!, only: [:import_csv, :authorize]
 
   feature_category :requirements_management
 
@@ -9,5 +14,49 @@ class Projects::RequirementsManagement::RequirementsController < Projects::Appli
     respond_to do |format|
       format.html
     end
+  end
+
+  def import_csv
+    return render json: { message: invalid_file_message } unless file_is_valid?(params[:file])
+
+    uploader = UploadService.new(project, params[:file]).execute
+    message =
+      if uploader
+        RequirementsManagement::ImportRequirementsCsvWorker.perform_async(current_user.id, project.id, uploader.upload.id) # rubocop:disable CodeReuse/Worker
+        _("Your requirements are being imported. Once finished, you'll receive a confirmation email.")
+      else
+        _("File upload error.")
+      end
+
+    render json: { message: message }
+  end
+
+  private
+
+  def authorize_import_access!
+    return if can?(current_user, :import_requirements, project)
+
+    if current_user || action_name == 'authorize'
+      render_404
+    else
+      authenticate_user!
+    end
+  end
+
+  def invalid_file_message
+    supported_file_extensions = ".#{EXTENSION_WHITELIST.join(', .')}"
+    _("The uploaded file was invalid. Supported file extensions are %{extensions}.") % { extensions: supported_file_extensions }
+  end
+
+  def uploader_class
+    FileUploader
+  end
+
+  def maximum_size
+    Gitlab::CurrentSettings.max_attachment_size.megabytes
+  end
+
+  def file_extension_whitelist
+    EXTENSION_WHITELIST
   end
 end

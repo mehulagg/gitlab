@@ -1,18 +1,18 @@
-import Api from 'ee/api';
 import { flatten } from 'lodash';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { visitUrl } from '~/lib/utils/url_utility';
+import Api from 'ee/api';
+import createFlash from '~/flash';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import * as types from './mutation_types';
 
-const getSaveErrorMessageParts = messages => {
+const getSaveErrorMessageParts = (messages) => {
   return flatten(
-    Object.entries(messages || {}).map(([key, value]) => value.map(x => `${key} ${x}`)),
+    Object.entries(messages || {}).map(([key, value]) => value.map((x) => `${key} ${x}`)),
   );
 };
 
-const getSaveErrorMessage = messages => {
+const getSaveErrorMessage = (messages) => {
   const parts = getSaveErrorMessageParts(messages);
   return `${__('Errors:')} ${parts.join(', ')}`;
 };
@@ -21,7 +21,9 @@ export const requestSyncNamespaces = ({ commit }) => commit(types.REQUEST_SYNC_N
 export const receiveSyncNamespacesSuccess = ({ commit }, data) =>
   commit(types.RECEIVE_SYNC_NAMESPACES_SUCCESS, data);
 export const receiveSyncNamespacesError = ({ commit }) => {
-  createFlash(__("There was an error fetching the Node's Groups"));
+  createFlash({
+    message: __("There was an error fetching the Node's Groups"),
+  });
   commit(types.RECEIVE_SYNC_NAMESPACES_ERROR);
 };
 
@@ -29,7 +31,7 @@ export const fetchSyncNamespaces = ({ dispatch }, search) => {
   dispatch('requestSyncNamespaces');
 
   Api.groups(search)
-    .then(res => {
+    .then((res) => {
       dispatch('receiveSyncNamespacesSuccess', res);
     })
     .catch(() => {
@@ -49,7 +51,9 @@ export const receiveSaveGeoNodeError = ({ commit }, data) => {
     errorMessage += ` ${getSaveErrorMessage(data.message)}`;
   }
 
-  createFlash(errorMessage);
+  createFlash({
+    message: errorMessage,
+  });
   commit(types.RECEIVE_SAVE_GEO_NODE_COMPLETE);
 };
 

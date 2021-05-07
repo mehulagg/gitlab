@@ -76,15 +76,12 @@ RSpec.describe ::Packages::PackagesFinder do
     end
 
     context 'with processing packages' do
-      let_it_be(:nuget_package) { create(:nuget_package, project: project, name: Packages::Nuget::CreatePackageService::TEMPORARY_PACKAGE_NAME) }
+      let_it_be(:nuget_package) { create(:nuget_package, project: project, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
       it { is_expected.to match_array([conan_package, maven_package]) }
     end
 
-    context 'does not include packages without version number' do
-      let_it_be(:package_without_version) { create(:maven_package, project: project, version: nil) }
-
-      it { is_expected.not_to include(package_without_version) }
-    end
+    it_behaves_like 'concerning versionless param'
+    it_behaves_like 'concerning package statuses'
   end
 end

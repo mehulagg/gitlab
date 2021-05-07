@@ -16,10 +16,11 @@ module Gitlab
       SERIALIZE_KEYS = [
         :id, :message, :parent_ids,
         :authored_date, :author_name, :author_email,
-        :committed_date, :committer_name, :committer_email
+        :committed_date, :committer_name, :committer_email, :trailers
       ].freeze
 
       attr_accessor(*SERIALIZE_KEYS)
+      attr_reader :repository
 
       def ==(other)
         return false unless other.is_a?(Gitlab::Git::Commit)
@@ -262,7 +263,7 @@ module Gitlab
 
       def has_zero_stats?
         stats.total == 0
-      rescue
+      rescue StandardError
         true
       end
 
@@ -389,6 +390,7 @@ module Gitlab
         @committer_name = commit.committer.name.dup
         @committer_email = commit.committer.email.dup
         @parent_ids = Array(commit.parent_ids)
+        @trailers = commit.trailers.to_h { |t| [t.key, t.value] }
       end
 
       # Gitaly provides a UNIX timestamp in author.date.seconds, and a timezone

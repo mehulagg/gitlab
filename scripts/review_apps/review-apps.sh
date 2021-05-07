@@ -281,13 +281,12 @@ function download_chart() {
 
   curl --location -o gitlab.tar.bz2 "https://gitlab.com/gitlab-org/charts/gitlab/-/archive/${GITLAB_HELM_CHART_REF}/gitlab-${GITLAB_HELM_CHART_REF}.tar.bz2"
   tar -xjf gitlab.tar.bz2
-  cd "gitlab-${GITLAB_HELM_CHART_REF}"
 
   echoinfo "Adding the gitlab repo to Helm..."
   helm repo add gitlab https://charts.gitlab.io
 
   echoinfo "Building the gitlab chart's dependencies..."
-  helm dependency build .
+  helm dependency build "gitlab-${GITLAB_HELM_CHART_REF}"
 }
 
 function base_config_changed() {
@@ -310,11 +309,11 @@ function parse_gitaly_image_tag() {
 function deploy() {
   local namespace="${KUBE_NAMESPACE}"
   local release="${CI_ENVIRONMENT_SLUG}"
-  local base_config_file_ref="master"
+  local base_config_file_ref="${CI_DEFAULT_BRANCH}"
   if [[ "$(base_config_changed)" == "true" ]]; then base_config_file_ref="${CI_COMMIT_SHA}"; fi
   local base_config_file="https://gitlab.com/gitlab-org/gitlab/raw/${base_config_file_ref}/scripts/review_apps/base-config.yaml"
 
-  echoinfo "Deploying ${release}..." true
+  echoinfo "Deploying ${release} to ${CI_ENVIRONMENT_URL} ..." true
 
   IMAGE_REPOSITORY="registry.gitlab.com/gitlab-org/build/cng-mirror"
   gitlab_migrations_image_repository="${IMAGE_REPOSITORY}/gitlab-rails-ee"
@@ -372,7 +371,7 @@ HELM_CMD=$(cat << EOF
   ${HELM_CMD} \
   --version="${CI_PIPELINE_ID}-${CI_JOB_ID}" \
   -f "${base_config_file}" \
-  "${release}" .
+  "${release}" "gitlab-${GITLAB_HELM_CHART_REF}"
 EOF
 )
 

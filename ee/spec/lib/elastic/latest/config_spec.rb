@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
+require_relative './config_shared_examples'
 
 RSpec.describe Elastic::Latest::Config do
   describe '.document_type' do
@@ -10,9 +11,7 @@ RSpec.describe Elastic::Latest::Config do
   end
 
   describe '.settings' do
-    it 'returns config' do
-      expect(described_class.settings).to be_a(Elasticsearch::Model::Indexing::Settings)
-    end
+    it_behaves_like 'config settings return correct values'
   end
 
   describe '.mappings' do

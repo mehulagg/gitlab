@@ -1,33 +1,39 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
+import { flatten } from 'lodash';
 import Mousetrap from 'mousetrap';
 import Vue from 'vue';
-import { flatten } from 'lodash';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import findAndFollowLink from '~/lib/utils/navigation_utility';
+import { refreshCurrentPage, visitUrl } from '~/lib/utils/url_utility';
+import {
+  keysFor,
+  TOGGLE_KEYBOARD_SHORTCUTS_DIALOG,
+  START_SEARCH,
+  FOCUS_FILTER_BAR,
+  TOGGLE_PERFORMANCE_BAR,
+  TOGGLE_CANARY,
+  TOGGLE_MARKDOWN_PREVIEW,
+  GO_TO_YOUR_TODO_LIST,
+  GO_TO_ACTIVITY_FEED,
+  GO_TO_YOUR_ISSUES,
+  GO_TO_YOUR_MERGE_REQUESTS,
+  GO_TO_YOUR_PROJECTS,
+  GO_TO_YOUR_GROUPS,
+  GO_TO_MILESTONE_LIST,
+  GO_TO_YOUR_SNIPPETS,
+  GO_TO_PROJECT_FIND_FILE,
+} from './keybindings';
 import { disableShortcuts, shouldDisableShortcuts } from './shortcuts_toggle';
-import ShortcutsToggle from './shortcuts_toggle.vue';
-import axios from '../../lib/utils/axios_utils';
-import { refreshCurrentPage, visitUrl } from '../../lib/utils/url_utility';
-import findAndFollowLink from '../../lib/utils/navigation_utility';
-import { parseBoolean, getCspNonceValue } from '~/lib/utils/common_utils';
-import { keysFor, TOGGLE_PERFORMANCE_BAR } from './keybindings';
 
 const defaultStopCallback = Mousetrap.prototype.stopCallback;
 Mousetrap.prototype.stopCallback = function customStopCallback(e, element, combo) {
-  if (['ctrl+shift+p', 'command+shift+p'].indexOf(combo) !== -1) {
+  if (keysFor(TOGGLE_MARKDOWN_PREVIEW).indexOf(combo) !== -1) {
     return false;
   }
 
   return defaultStopCallback.call(this, e, element, combo);
 };
-
-function initToggleButton() {
-  return new Vue({
-    el: document.querySelector('.js-toggle-shortcuts'),
-    render(createElement) {
-      return createElement(ShortcutsToggle);
-    },
-  });
-}
 
 /**
  * The key used to save and fetch the local Mousetrap instance
@@ -65,29 +71,44 @@ function getToolbarBtnToShortcutsMap($textarea) {
 export default class Shortcuts {
   constructor() {
     this.onToggleHelp = this.onToggleHelp.bind(this);
-    this.enabledHelp = [];
+    this.helpModalElement = null;
+    this.helpModalVueInstance = null;
 
-    Mousetrap.bind('?', this.onToggleHelp);
-    Mousetrap.bind('s', Shortcuts.focusSearch);
-    Mousetrap.bind('/', Shortcuts.focusSearch);
-    Mousetrap.bind('f', this.focusFilter.bind(this));
+    Mousetrap.bind(keysFor(TOGGLE_KEYBOARD_SHORTCUTS_DIALOG), this.onToggleHelp);
+    Mousetrap.bind(keysFor(START_SEARCH), Shortcuts.focusSearch);
+    Mousetrap.bind(keysFor(FOCUS_FILTER_BAR), this.focusFilter.bind(this));
     Mousetrap.bind(keysFor(TOGGLE_PERFORMANCE_BAR), Shortcuts.onTogglePerfBar);
+    Mousetrap.bind(keysFor(TOGGLE_CANARY), Shortcuts.onToggleCanary);
 
     const findFileURL = document.body.dataset.findFile;
 
-    Mousetrap.bind('shift+t', () => findAndFollowLink('.shortcuts-todos'));
-    Mousetrap.bind('shift+a', () => findAndFollowLink('.dashboard-shortcuts-activity'));
-    Mousetrap.bind('shift+i', () => findAndFollowLink('.dashboard-shortcuts-issues'));
-    Mousetrap.bind('shift+m', () => findAndFollowLink('.dashboard-shortcuts-merge_requests'));
-    Mousetrap.bind('shift+p', () => findAndFollowLink('.dashboard-shortcuts-projects'));
-    Mousetrap.bind('shift+g', () => findAndFollowLink('.dashboard-shortcuts-groups'));
-    Mousetrap.bind('shift+l', () => findAndFollowLink('.dashboard-shortcuts-milestones'));
-    Mousetrap.bind('shift+s', () => findAndFollowLink('.dashboard-shortcuts-snippets'));
+    Mousetrap.bind(keysFor(GO_TO_YOUR_TODO_LIST), () => findAndFollowLink('.shortcuts-todos'));
+    Mousetrap.bind(keysFor(GO_TO_ACTIVITY_FEED), () =>
+      findAndFollowLink('.dashboard-shortcuts-activity'),
+    );
+    Mousetrap.bind(keysFor(GO_TO_YOUR_ISSUES), () =>
+      findAndFollowLink('.dashboard-shortcuts-issues'),
+    );
+    Mousetrap.bind(keysFor(GO_TO_YOUR_MERGE_REQUESTS), () =>
+      findAndFollowLink('.dashboard-shortcuts-merge_requests'),
+    );
+    Mousetrap.bind(keysFor(GO_TO_YOUR_PROJECTS), () =>
+      findAndFollowLink('.dashboard-shortcuts-projects'),
+    );
+    Mousetrap.bind(keysFor(GO_TO_YOUR_GROUPS), () =>
+      findAndFollowLink('.dashboard-shortcuts-groups'),
+    );
+    Mousetrap.bind(keysFor(GO_TO_MILESTONE_LIST), () =>
+      findAndFollowLink('.dashboard-shortcuts-milestones'),
+    );
+    Mousetrap.bind(keysFor(GO_TO_YOUR_SNIPPETS), () =>
+      findAndFollowLink('.dashboard-shortcuts-snippets'),
+    );
 
-    Mousetrap.bind(['ctrl+shift+p', 'command+shift+p'], Shortcuts.toggleMarkdownPreview);
+    Mousetrap.bind(keysFor(TOGGLE_MARKDOWN_PREVIEW), Shortcuts.toggleMarkdownPreview);
 
     if (typeof findFileURL !== 'undefined' && findFileURL !== null) {
-      Mousetrap.bind('t', () => {
+      Mousetrap.bind(keysFor(GO_TO_PROJECT_FIND_FILE), () => {
         visitUrl(findFileURL);
       });
     }
@@ -97,9 +118,8 @@ export default class Shortcuts {
       e.preventDefault();
     });
 
-    $('.js-shortcuts-modal-trigger')
-      .off('click')
-      .on('click', this.onToggleHelp);
+    // eslint-disable-next-line @gitlab/no-global-event-off
+    $('.js-shortcuts-modal-trigger').off('click').on('click', this.onToggleHelp);
 
     if (shouldDisableShortcuts()) {
       disableShortcuts();
@@ -107,11 +127,33 @@ export default class Shortcuts {
   }
 
   onToggleHelp(e) {
-    if (e.preventDefault) {
+    if (e?.preventDefault) {
       e.preventDefault();
     }
 
-    Shortcuts.toggleHelp(this.enabledHelp);
+    if (this.helpModalElement && this.helpModalVueInstance) {
+      this.helpModalVueInstance.$destroy();
+      this.helpModalElement.remove();
+      this.helpModalElement = null;
+      this.helpModalVueInstance = null;
+    } else {
+      this.helpModalElement = document.createElement('div');
+      document.body.append(this.helpModalElement);
+
+      this.helpModalVueInstance = new Vue({
+        el: this.helpModalElement,
+        components: {
+          ShortcutsHelp: () => import('./shortcuts_help.vue'),
+        },
+        render: (createElement) => {
+          return createElement('shortcuts-help', {
+            on: {
+              hidden: this.onToggleHelp,
+            },
+          });
+        },
+      });
+    }
   }
 
   static onTogglePerfBar(e) {
@@ -125,6 +167,14 @@ export default class Shortcuts {
     refreshCurrentPage();
   }
 
+  static onToggleCanary(e) {
+    e.preventDefault();
+    const canaryCookieName = 'gitlab_canary';
+    const currentValue = parseBoolean(Cookies.get(canaryCookieName));
+    Cookies.set(canaryCookieName, (!currentValue).toString(), { expires: 365, path: '/' });
+    refreshCurrentPage();
+  }
+
   static toggleMarkdownPreview(e) {
     // Check if short-cut was triggered while in Write Mode
     const $target = $(e.target);
@@ -134,34 +184,6 @@ export default class Shortcuts {
       $('.js-md-preview-button', $form).focus();
     }
     $(document).triggerHandler('markdown-preview:toggle', [e]);
-  }
-
-  static toggleHelp(location) {
-    const $modal = $('#modal-shortcuts');
-
-    if ($modal.length) {
-      $modal.modal('toggle');
-      return null;
-    }
-
-    return axios
-      .get(gon.shortcuts_path, {
-        responseType: 'text',
-      })
-      .then(({ data }) => {
-        $.globalEval(data, { nonce: getCspNonceValue() });
-
-        if (location && location.length > 0) {
-          const results = [];
-          for (let i = 0, len = location.length; i < len; i += 1) {
-            results.push($(location[i]).show());
-          }
-          return results;
-        }
-
-        return $('.js-more-help-button').remove();
-      })
-      .then(initToggleButton);
   }
 
   focusFilter(e) {
@@ -198,7 +220,7 @@ export default class Shortcuts {
     $textarea.data(LOCAL_MOUSETRAP_DATA_KEY, localMousetrap);
 
     toolbarBtnToShortcutsMap.forEach((keyboardShortcuts, $toolbarBtn) => {
-      localMousetrap.bind(keyboardShortcuts, e => {
+      localMousetrap.bind(keyboardShortcuts, (e) => {
         e.preventDefault();
 
         handler($toolbarBtn);
@@ -232,7 +254,7 @@ export default class Shortcuts {
     const localMousetrap = $textarea.data(LOCAL_MOUSETRAP_DATA_KEY);
 
     if (localMousetrap) {
-      getToolbarBtnToShortcutsMap($textarea).forEach(keyboardShortcuts => {
+      getToolbarBtnToShortcutsMap($textarea).forEach((keyboardShortcuts) => {
         localMousetrap.unbind(keyboardShortcuts);
       });
     }

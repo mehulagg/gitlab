@@ -1,20 +1,26 @@
+import { GlSprintf, GlLabel, GlIcon, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlSprintf, GlLabel, GlIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
-import initUserPopovers from '~/user_popovers';
+import Issuable from '~/issues_list/components/issuable.vue';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
-import Issuable from '~/issues_list/components/issuable.vue';
+import initUserPopovers from '~/user_popovers';
 import IssueAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import { simpleIssue, testAssignees, testLabels } from '../issuable_list_test_data';
-import { isScopedLabel } from '~/lib/utils/common_utils';
 
 jest.mock('~/user_popovers');
 
-const TEST_NOW = '2019-08-28T20:03:04.713Z';
-const TEST_MONTH_AGO = '2019-07-28';
-const TEST_MONTH_LATER = '2019-09-30';
+const TODAY = new Date();
+
+const createTestDateFromDelta = (timeDelta) =>
+  formatDate(new Date(TODAY.getTime() + timeDelta), 'yyyy-mm-dd');
+
+// TODO: Encapsulate date helpers https://gitlab.com/gitlab-org/gitlab/-/issues/320883
+const MONTHS_IN_MS = 1000 * 60 * 60 * 24 * 31;
+const TEST_MONTH_AGO = createTestDateFromDelta(-MONTHS_IN_MS);
+const TEST_MONTH_LATER = createTestDateFromDelta(MONTHS_IN_MS);
 const DATE_FORMAT = 'mmm d, yyyy';
 const TEST_USER_NAME = 'Tyler Durden';
 const TEST_BASE_URL = `${TEST_HOST}/issues`;
@@ -25,20 +31,13 @@ const TEST_MILESTONE = {
 };
 const TEXT_CLOSED = 'CLOSED';
 const TEST_META_COUNT = 100;
-
-// Use FixedDate so that time sensitive info in snapshots don't fail
-class FixedDate extends Date {
-  constructor(date = TEST_NOW) {
-    super(date);
-  }
-}
+const MOCK_GITLAB_URL = 'http://0.0.0.0:3000';
 
 describe('Issuable component', () => {
   let issuable;
-  let DateOrig;
   let wrapper;
 
-  const factory = (props = {}, scopedLabels = false) => {
+  const factory = (props = {}, scopedLabelsAvailable = false) => {
     wrapper = shallowMount(Issuable, {
       propsData: {
         issuable: simpleIssue,
@@ -46,9 +45,7 @@ describe('Issuable component', () => {
         ...props,
       },
       provide: {
-        glFeatures: {
-          scopedLabels,
-        },
+        scopedLabelsAvailable,
       },
       stubs: {
         'gl-sprintf': GlSprintf,
@@ -58,6 +55,7 @@ describe('Issuable component', () => {
 
   beforeEach(() => {
     issuable = { ...simpleIssue };
+    gon.gitlab_url = MOCK_GITLAB_URL;
   });
 
   afterEach(() => {
@@ -65,18 +63,9 @@ describe('Issuable component', () => {
     wrapper = null;
   });
 
-  beforeAll(() => {
-    DateOrig = window.Date;
-    window.Date = FixedDate;
-  });
-
-  afterAll(() => {
-    window.Date = DateOrig;
-  });
-
-  const checkExists = findFn => () => findFn().exists();
+  const checkExists = (findFn) => () => findFn().exists();
   const hasIcon = (iconName, iconWrapper = wrapper) =>
-    iconWrapper.findAll(GlIcon).wrappers.some(icon => icon.props('name') === iconName);
+    iconWrapper.findAll(GlIcon).wrappers.some((icon) => icon.props('name') === iconName);
   const hasConfidentialIcon = () => hasIcon('eye-slash');
   const findTaskStatus = () => wrapper.find('.task-status');
   const findOpenedAgoContainer = () => wrapper.find('[data-testid="openedByMessage"]');
@@ -93,8 +82,8 @@ describe('Issuable component', () => {
   const findDownvotes = () => wrapper.find('[data-testid="downvotes"]');
   const findNotes = () => wrapper.find('[data-testid="notes-count"]');
   const findBulkCheckbox = () => wrapper.find('input.selected-issuable');
-  const findScopedLabels = () => findLabels().filter(w => isScopedLabel({ title: w.text() }));
-  const findUnscopedLabels = () => findLabels().filter(w => !isScopedLabel({ title: w.text() }));
+  const findScopedLabels = () => findLabels().filter((w) => isScopedLabel({ title: w.text() }));
+  const findUnscopedLabels = () => findLabels().filter((w) => !isScopedLabel({ title: w.text() }));
   const findIssuableTitle = () => wrapper.find('[data-testid="issuable-title"]');
   const findIssuableStatus = () => wrapper.find('[data-testid="issuable-status"]');
   const containsJiraLogo = () => wrapper.find('[data-testid="jira-logo"]').exists();
@@ -203,15 +192,42 @@ describe('Issuable component', () => {
       expect(wrapper.classes('closed')).toBe(false);
     });
 
-    it('renders fuzzy opened date and author', () => {
+    it('renders fuzzy created date and author', () => {
       expect(trimText(findOpenedAgoContainer().text())).toContain(
-        `opened 1 month ago by ${TEST_USER_NAME}`,
+        `created 1 month ago by ${TEST_USER_NAME}`,
       );
     });
 
     it('renders no comments', () => {
       expect(findNotes().classes('no-comments')).toBe(true);
     });
+
+    it.each`
+      gitlabWebUrl           | webUrl                        | expectedHref                  | expectedTarget | isExternal
+      ${undefined}           | ${`${MOCK_GITLAB_URL}/issue`} | ${`${MOCK_GITLAB_URL}/issue`} | ${undefined}   | ${false}
+      ${undefined}           | ${'https://jira.com/issue'}   | ${'https://jira.com/issue'}   | ${'_blank'}    | ${true}
+      ${'/gitlab-org/issue'} | ${'https://jira.com/issue'}   | ${'/gitlab-org/issue'}        | ${undefined}   | ${false}
+    `(
+      'renders issuable title correctly when `gitlabWebUrl` is `$gitlabWebUrl` and webUrl is `$webUrl`',
+      async ({ webUrl, gitlabWebUrl, expectedHref, expectedTarget, isExternal }) => {
+        factory({
+          issuable: {
+            ...issuable,
+            web_url: webUrl,
+            gitlab_web_url: gitlabWebUrl,
+          },
+        });
+
+        const titleEl = findIssuableTitle();
+
+        expect(titleEl.exists()).toBe(true);
+        expect(titleEl.find(GlLink).attributes('href')).toBe(expectedHref);
+        expect(titleEl.find(GlLink).attributes('target')).toBe(expectedTarget);
+        expect(titleEl.find(GlLink).text()).toBe(issuable.title);
+
+        expect(titleEl.find(GlIcon).exists()).toBe(isExternal);
+      },
+    );
   });
 
   describe('with confidential issuable', () => {
@@ -338,13 +354,13 @@ describe('Issuable component', () => {
     it('renders labels', () => {
       factory({ issuable });
 
-      const labels = findLabels().wrappers.map(label => ({
+      const labels = findLabels().wrappers.map((label) => ({
         href: label.props('target'),
         text: label.text(),
         tooltip: label.attributes('description'),
       }));
 
-      const expected = testLabels.map(label => ({
+      const expected = testLabels.map((label) => ({
         href: mergeUrlParams({ 'label_name[]': label.name }, TEST_BASE_URL),
         text: label.name,
         tooltip: label.description,
@@ -365,13 +381,13 @@ describe('Issuable component', () => {
     it('renders labels', () => {
       factory({ issuable });
 
-      const labels = findLabels().wrappers.map(label => ({
+      const labels = findLabels().wrappers.map((label) => ({
         href: label.props('target'),
         text: label.text(),
         tooltip: label.attributes('description'),
       }));
 
-      const expected = testLabels.map(label => ({
+      const expected = testLabels.map((label) => ({
         href: mergeUrlParams({ 'labels[]': label.name }, TEST_BASE_URL),
         text: label.name,
         tooltip: label.description,

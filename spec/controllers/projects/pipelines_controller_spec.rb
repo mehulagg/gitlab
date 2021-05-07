@@ -7,13 +7,14 @@ RSpec.describe Projects::PipelinesController do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:feature) { ProjectFeature::ENABLED }
 
   before do
     allow(Sidekiq.logger).to receive(:info)
     stub_not_protect_default_branch
     project.add_developer(user)
-    project.project_feature.update(builds_access_level: feature)
+    project.project_feature.update!(builds_access_level: feature)
 
     sign_in(user)
   end
@@ -269,6 +270,56 @@ RSpec.describe Projects::PipelinesController do
         expect(json_response['pipelines'].count).to eq returned
         expect(json_response['count']['all'].to_i).to eq all
       end
+    end
+  end
+
+  describe 'GET #index' do
+    context 'pipeline_empty_state_templates experiment' do
+      before do
+        stub_application_setting(auto_devops_enabled: false)
+      end
+
+      it 'tracks the view', :experiment do
+        expect(experiment(:pipeline_empty_state_templates))
+          .to track(:view, value: project.namespace_id)
+          .with_context(actor: user)
+          .on_next_instance
+
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+      end
+    end
+  end
+
+  describe 'GET #show' do
+    render_views
+
+    let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
+
+    subject { get_pipeline_html }
+
+    def get_pipeline_html
+      get :show, params: { namespace_id: project.namespace, project_id: project, id: pipeline }, format: :html
+    end
+
+    def create_build_with_artifacts(stage, stage_idx, name)
+      create(:ci_build, :artifacts, :tags, pipeline: pipeline, stage: stage, stage_idx: stage_idx, name: name)
+    end
+
+    before do
+      create_build_with_artifacts('build', 0, 'job1')
+      create_build_with_artifacts('build', 0, 'job2')
+    end
+
+    it 'avoids N+1 database queries', :request_store do
+      get_pipeline_html
+
+      control_count = ActiveRecord::QueryRecorder.new { get_pipeline_html }.count
+      expect(response).to have_gitlab_http_status(:ok)
+
+      create_build_with_artifacts('build', 0, 'job3')
+
+      expect { get_pipeline_html }.not_to exceed_query_limit(control_count)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 
@@ -628,44 +679,6 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
-  describe 'GET stages_ajax.json' do
-    let(:pipeline) { create(:ci_pipeline, project: project) }
-
-    context 'when accessing existing stage' do
-      before do
-        create(:ci_build, pipeline: pipeline, stage: 'build')
-
-        get_stage_ajax('build')
-      end
-
-      it 'returns html source for stage dropdown' do
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template('projects/pipelines/_stage')
-        expect(json_response).to include('html')
-      end
-    end
-
-    context 'when accessing unknown stage' do
-      before do
-        get_stage_ajax('test')
-      end
-
-      it 'responds with not found' do
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    def get_stage_ajax(name)
-      get :stage_ajax, params: {
-                         namespace_id: project.namespace,
-                         project_id: project,
-                         id: pipeline.id,
-                         stage: name
-                       },
-                       format: :json
-    end
-  end
-
   describe 'GET status.json' do
     let(:pipeline) { create(:ci_pipeline, project: project) }
     let(:status) { pipeline.detailed_status(double('user')) }
@@ -702,7 +715,7 @@ RSpec.describe Projects::PipelinesController do
 
     before do
       project.add_developer(user)
-      project.project_feature.update(builds_access_level: feature)
+      project.project_feature.update!(builds_access_level: feature)
     end
 
     context 'with a valid .gitlab-ci.yml file' do
@@ -721,7 +734,7 @@ RSpec.describe Projects::PipelinesController do
 
           pipeline = project.ci_pipelines.last
           expected_redirect_path = Gitlab::Routing.url_helpers.project_pipeline_path(project, pipeline)
-          expect(pipeline).to be_pending
+          expect(pipeline).to be_created
           expect(response).to redirect_to(expected_redirect_path)
         end
       end
@@ -777,7 +790,7 @@ RSpec.describe Projects::PipelinesController do
 
     before do
       project.add_developer(user)
-      project.project_feature.update(builds_access_level: feature)
+      project.project_feature.update!(builds_access_level: feature)
     end
 
     context 'with a valid .gitlab-ci.yml file' do
@@ -963,49 +976,26 @@ RSpec.describe Projects::PipelinesController do
       end
     end
 
-    context 'when junit_pipeline_screenshots_view is enabled' do
-      before do
-        stub_feature_flags(junit_pipeline_screenshots_view: project)
-      end
+    context 'when test_report contains attachment and scope is with_attachment as a URL param' do
+      let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
 
-      context 'when test_report contains attachment and scope is with_attachment as a URL param' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
+      it 'returns a test reports with attachment' do
+        get_test_report_json(scope: 'with_attachment')
 
-        it 'returns a test reports with attachment' do
-          get_test_report_json(scope: 'with_attachment')
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["test_suites"]).to be_present
-          expect(json_response["test_suites"].first["test_cases"].first).to include("attachment_url")
-        end
-      end
-
-      context 'when test_report does not contain attachment and scope is with_attachment as a URL param' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
-
-        it 'returns a test reports with empty values' do
-          get_test_report_json(scope: 'with_attachment')
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["test_suites"]).to be_empty
-        end
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response["test_suites"]).to be_present
+        expect(json_response["test_suites"].first["test_cases"].first).to include("attachment_url")
       end
     end
 
-    context 'when junit_pipeline_screenshots_view is disabled' do
-      before do
-        stub_feature_flags(junit_pipeline_screenshots_view: false)
-      end
+    context 'when test_report does not contain attachment and scope is with_attachment as a URL param' do
+      let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
 
-      context 'when test_report contains attachment and scope is with_attachment as a URL param' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
+      it 'returns a test reports with empty values' do
+        get_test_report_json(scope: 'with_attachment')
 
-        it 'returns a test reports without attachment_url' do
-          get_test_report_json(scope: 'with_attachment')
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["test_suites"].first["test_cases"].first).not_to include("attachment_url")
-        end
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response["test_suites"]).to be_empty
       end
     end
 
@@ -1149,11 +1139,17 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
-  describe 'GET config_variables.json' do
+  describe 'GET config_variables.json', :use_clean_rails_memory_store_caching do
+    include ReactiveCachingHelpers
+
     let(:result) { YAML.dump(ci_config) }
+    let(:service) { Ci::ListConfigVariablesService.new(project, user) }
 
     before do
       stub_gitlab_ci_yml_for_sha(sha, result)
+      allow(Ci::ListConfigVariablesService)
+        .to receive(:new)
+        .and_return(service)
     end
 
     context 'when sending a valid sha' do
@@ -1170,6 +1166,10 @@ RSpec.describe Projects::PipelinesController do
         }
       end
 
+      before do
+        synchronous_reactive_cache(service)
+      end
+
       it 'returns variable list' do
         get_config_variables
 
@@ -1181,6 +1181,10 @@ RSpec.describe Projects::PipelinesController do
     context 'when sending an invalid sha' do
       let(:sha) { 'invalid-sha' }
       let(:ci_config) { nil }
+
+      before do
+        synchronous_reactive_cache(service)
+      end
 
       it 'returns empty json' do
         get_config_variables
@@ -1204,11 +1208,36 @@ RSpec.describe Projects::PipelinesController do
         }
       end
 
+      before do
+        synchronous_reactive_cache(service)
+      end
+
       it 'returns empty result' do
         get_config_variables
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq({})
+      end
+    end
+
+    context 'when the cache is empty' do
+      let(:sha) { 'master' }
+      let(:ci_config) do
+        {
+          variables: {
+            KEY1: { value: 'val 1', description: 'description 1' }
+          },
+          test: {
+            stage: 'test',
+            script: 'echo'
+          }
+        }
+      end
+
+      it 'returns no content' do
+        get_config_variables
+
+        expect(response).to have_gitlab_http_status(:no_content)
       end
     end
 
@@ -1226,6 +1255,61 @@ RSpec.describe Projects::PipelinesController do
                                        project_id: project,
                                        sha: sha },
                              format: :json
+    end
+  end
+
+  describe 'GET downloadable_artifacts.json' do
+    context 'when pipeline is empty' do
+      let(:pipeline) { create(:ci_empty_pipeline) }
+
+      it 'returns status not_found' do
+        get_downloadable_artifacts_json
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when pipeline exists' do
+      context 'when pipeline does not have any downloadable artifacts' do
+        let(:pipeline) { create(:ci_pipeline, project: project) }
+
+        it 'returns an empty array' do
+          get_downloadable_artifacts_json
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['artifacts']).to be_empty
+        end
+      end
+
+      context 'when pipeline has downloadable artifacts' do
+        let(:pipeline) { create(:ci_pipeline, :with_codequality_reports, project: project) }
+
+        before do
+          create(:ci_build, name: 'rspec', pipeline: pipeline).tap do |build|
+            create(:ci_job_artifact, :junit, job: build)
+          end
+        end
+
+        it 'returns an array of artifacts' do
+          get_downloadable_artifacts_json
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['artifacts']).to be_kind_of(Array)
+          expect(json_response['artifacts'].size).to eq(2)
+        end
+      end
+    end
+
+    private
+
+    def get_downloadable_artifacts_json
+      get :downloadable_artifacts,
+        params: {
+          namespace_id: project.namespace,
+          project_id: project,
+          id: pipeline.id
+        },
+        format: :json
     end
   end
 end

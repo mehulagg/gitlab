@@ -1,8 +1,11 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 ---
 
-# Universal update guide for patch versions
+# Universal update guide for patch versions of source installations **(FREE SELF)**
 
 ## Select Version to Install
 
@@ -40,7 +43,12 @@ sudo -u git -H git checkout LATEST_TAG -b LATEST_TAG
 ```shell
 cd /home/git/gitlab
 
-sudo -u git -H bundle install --without development test mysql --deployment
+# If you haven't done so during installation or a previous upgrade already
+sudo -u git -H bundle config set --local deployment 'true'
+sudo -u git -H bundle config set --local without 'development test mysql aws kerberos'
+
+# Update gems
+sudo -u git -H bundle install
 
 # Optional: clean up old gems
 sudo -u git -H bundle clean
@@ -93,7 +101,7 @@ sudo -u git -H git checkout v$(</home/git/gitlab/GITLAB_PAGES_VERSION)
 sudo -u git -H make
 ```
 
-### 8. Install/Update `gitlab-elasticsearch-indexer` **(STARTER ONLY)**
+### 8. Install/Update `gitlab-elasticsearch-indexer` **(PREMIUM SELF)**
 
 Please follow the [install instruction](../integration/elasticsearch.md#installing-elasticsearch).
 

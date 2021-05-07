@@ -1,13 +1,13 @@
 /* eslint-disable consistent-return */
+import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import $ from 'jquery';
 import { escape } from 'lodash';
-import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { isObject } from '~/lib/utils/type_utility';
-import renderItem from './render';
-import { GitLabDropdownRemote } from './gl_dropdown_remote';
-import { GitLabDropdownInput } from './gl_dropdown_input';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { GitLabDropdownFilter } from './gl_dropdown_filter';
+import { GitLabDropdownInput } from './gl_dropdown_input';
+import { GitLabDropdownRemote } from './gl_dropdown_remote';
+import renderItem from './render';
 
 const LOADING_CLASS = 'is-loading';
 
@@ -29,6 +29,26 @@ const FILTER_INPUT = '.dropdown-input .dropdown-input-field:not(.dropdown-no-fil
 
 const NO_FILTER_INPUT = '.dropdown-input .dropdown-input-field.dropdown-no-filter';
 
+let mouseEventListenersAdded = false;
+let mousedownTarget = null;
+let mouseupTarget = null;
+
+function addGlobalMouseEventListeners() {
+  // Remember mousedown and mouseup locations.
+  // Required in the `hide.bs.dropdown` listener for
+  // dropdown close prevention in some cases.
+  document.addEventListener('mousedown', ({ target }) => {
+    mousedownTarget = target;
+  });
+  document.addEventListener('mouseup', ({ target }) => {
+    mouseupTarget = target;
+  });
+  document.addEventListener('click', () => {
+    mousedownTarget = null;
+    mouseupTarget = null;
+  });
+}
+
 export class GitLabDropdown {
   constructor(el1, options) {
     let selector;
@@ -36,9 +56,14 @@ export class GitLabDropdown {
     this.el = el1;
     this.options = options;
     this.updateLabel = this.updateLabel.bind(this);
-    this.hidden = this.hidden.bind(this);
     this.opened = this.opened.bind(this);
+    this.hide = this.hide.bind(this);
+    this.hidden = this.hidden.bind(this);
     this.shouldPropagate = this.shouldPropagate.bind(this);
+    if (!mouseEventListenersAdded) {
+      addGlobalMouseEventListeners();
+      mouseEventListenersAdded = true;
+    }
     self = this;
     selector = $(this.el).data('target');
     this.dropdown = selector != null ? $(selector) : $(this.el).parent();
@@ -68,7 +93,7 @@ export class GitLabDropdown {
         this.remote = new GitLabDropdownRemote(this.options.data, {
           dataType: this.options.dataType,
           beforeSend: this.toggleLoading.bind(this),
-          success: data => {
+          success: (data) => {
             this.fullData = data;
             this.parseData(this.fullData);
             this.focusTextInput();
@@ -113,7 +138,7 @@ export class GitLabDropdown {
           return $(selector, this.dropdown);
         },
         data: () => this.fullData,
-        callback: data => {
+        callback: (data) => {
           this.parseData(data);
           if (this.filterInput.val() !== '') {
             selector = SELECTABLE_CLASSES;
@@ -123,10 +148,7 @@ export class GitLabDropdown {
             if ($(this.el).is('input')) {
               currentIndex = -1;
             } else {
-              $(selector, this.dropdown)
-                .first()
-                .find('a')
-                .addClass('is-focused');
+              $(selector, this.dropdown).first().find('a').addClass('is-focused');
               currentIndex = 0;
             }
           }
@@ -135,16 +157,17 @@ export class GitLabDropdown {
     }
     // Event listeners
     this.dropdown.on('shown.bs.dropdown', this.opened);
+    this.dropdown.on('hide.bs.dropdown', this.hide);
     this.dropdown.on('hidden.bs.dropdown', this.hidden);
     $(this.el).on('update.label', this.updateLabel);
     this.dropdown.on('click', '.dropdown-menu, .dropdown-menu-close', this.shouldPropagate);
-    this.dropdown.on('keyup', e => {
+    this.dropdown.on('keyup', (e) => {
       // Escape key
       if (e.which === 27) {
         return $('.dropdown-menu-close', this.dropdown).trigger('click');
       }
     });
-    this.dropdown.on('blur', 'a', e => {
+    this.dropdown.on('blur', 'a', (e) => {
       let $dropdownMenu;
       let $relatedTarget;
       if (e.relatedTarget != null) {
@@ -156,7 +179,7 @@ export class GitLabDropdown {
       }
     });
     if (this.dropdown.find('.dropdown-toggle-page').length) {
-      this.dropdown.find('.dropdown-toggle-page, .dropdown-menu-back').on('click', e => {
+      this.dropdown.find('.dropdown-toggle-page, .dropdown-menu-back').on('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         return this.togglePage();
@@ -167,7 +190,7 @@ export class GitLabDropdown {
       if (this.dropdown.find('.dropdown-toggle-page').length) {
         selector = '.dropdown-page-one .dropdown-content a';
       }
-      this.dropdown.on('click', selector, e => {
+      this.dropdown.on('click', selector, (e) => {
         const $el = $(e.currentTarget);
         const selected = self.rowClicked($el);
         const selectedObj = selected ? selected[0] : null;
@@ -224,7 +247,7 @@ export class GitLabDropdown {
     else if (isObject(data)) {
       html = [];
 
-      Object.keys(data).forEach(name => {
+      Object.keys(data).forEach((name) => {
         groupData = data[name];
         html.push(
           this.renderItem(
@@ -235,7 +258,7 @@ export class GitLabDropdown {
             name,
           ),
         );
-        this.renderData(groupData, name).map(item => html.push(item));
+        this.renderData(groupData, name).map((item) => html.push(item));
       });
     } else {
       // Render each row
@@ -274,7 +297,7 @@ export class GitLabDropdown {
 
   filteredFullData() {
     return this.fullData.filter(
-      r =>
+      (r) =>
         typeof r === 'object' &&
         !Object.prototype.hasOwnProperty.call(r, 'beforeDivider') &&
         !Object.prototype.hasOwnProperty.call(r, 'header'),
@@ -337,6 +360,21 @@ export class GitLabDropdown {
     $menu.css('bottom', '100%');
   }
 
+  hide(e) {
+    // Prevent dropdowns with a search from being closed when the
+    // mousedown event happened inside the dropdown box and only
+    // the mouseup event did not.
+    if (this.options.search && mousedownTarget) {
+      const isIn = (element, $possibleContainer) => Boolean($possibleContainer.has(element).length);
+      const $menu = this.dropdown.find('.dropdown-menu');
+      const mousedownInsideDropdown = isIn(mousedownTarget, $menu);
+      const mouseupOutsideDropdown = !isIn(mouseupTarget, $menu);
+      if (mousedownInsideDropdown && mouseupOutsideDropdown) {
+        e.preventDefault();
+      }
+    }
+  }
+
   hidden(e) {
     this.resetRows();
     this.removeArrowKeyEvent();
@@ -392,7 +430,7 @@ export class GitLabDropdown {
         ...this.options,
         icon: this.icon,
         highlight: this.highlight,
-        highlightText: text => this.highlightTextMatches(text, this.filterInput.val()),
+        highlightText: (text) => this.highlightTextMatches(text, this.filterInput.val()),
         highlightTemplate: this.highlightTemplate.bind(this),
         parent,
       },
@@ -440,6 +478,7 @@ export class GitLabDropdown {
       groupName = el.data('group');
       if (groupName) {
         selectedIndex = el.data('index');
+        this.selectedIndex = selectedIndex;
         selectedObject = this.renderedData[groupName][selectedIndex];
       } else {
         selectedIndex = el.closest('li').index();
@@ -493,10 +532,7 @@ export class GitLabDropdown {
       if (!this.options.multiSelect || el.hasClass('dropdown-clear-active')) {
         this.dropdown.find(`.${ACTIVE_CLASS}`).removeClass(ACTIVE_CLASS);
         if (!isInput) {
-          this.dropdown
-            .parent()
-            .find(`input[name='${fieldName}']`)
-            .remove();
+          this.dropdown.parent().find(`input[name='${fieldName}']`).remove();
         }
       }
       if (field && field.length && value == null) {
@@ -536,16 +572,13 @@ export class GitLabDropdown {
       $(`input[name="${fieldName}"]`).remove();
     }
 
-    const $input = $('<input>')
-      .attr('type', 'hidden')
-      .attr('name', fieldName)
-      .val(value);
+    const $input = $('<input>').attr('type', 'hidden').attr('name', fieldName).val(value);
     if (this.options.inputId != null) {
       $input.attr('id', this.options.inputId);
     }
 
     if (this.options.multiSelect) {
-      Object.keys(selectedObject).forEach(attribute => {
+      Object.keys(selectedObject).forEach((attribute) => {
         $input.attr(`data-${attribute}`, selectedObject[attribute]);
       });
     }
@@ -586,7 +619,7 @@ export class GitLabDropdown {
     if (this.dropdown.find('.dropdown-toggle-page').length) {
       selector = `.dropdown-page-one ${selector}`;
     }
-    return $('body').on('keydown', e => {
+    return $('body').on('keydown', (e) => {
       let $listItems;
       let PREV_INDEX;
       const currentKeyCode = e.which;
@@ -622,6 +655,7 @@ export class GitLabDropdown {
 
   // eslint-disable-next-line class-methods-use-this
   removeArrowKeyEvent() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     return $('body').off('keydown');
   }
 
@@ -677,9 +711,7 @@ export class GitLabDropdown {
       toggleText = this.options.updateLabel;
     }
 
-    return $(this.el)
-      .find('.dropdown-toggle-text')
-      .text(toggleText);
+    return $(this.el).find('.dropdown-toggle-text').text(toggleText);
   }
 
   // eslint-disable-next-line class-methods-use-this

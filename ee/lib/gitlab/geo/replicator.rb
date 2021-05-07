@@ -23,7 +23,10 @@ module Gitlab
       delegate :in_replicables_for_current_secondary?, to: :model_record
 
       class << self
-        delegate :find_registries_never_attempted_sync, :find_registries_needs_sync_again, to: :registry_class
+        delegate :find_registries_never_attempted_sync,
+                 :find_registries_needs_sync_again,
+                 :fail_sync_timeouts,
+                 to: :registry_class
       end
 
       # Declare supported event
@@ -134,18 +137,6 @@ module Gitlab
         replicator_class.new(model_record_id: replicable_id)
       end
 
-      def self.checksummed
-        model.available_replicables.checksummed
-      end
-
-      def self.checksummed_count
-        model.available_replicables.checksummed.count
-      end
-
-      def self.checksum_failed_count
-        model.available_replicables.checksum_failed.count
-      end
-
       def self.primary_total_count
         model.available_replicables.count
       end
@@ -191,6 +182,11 @@ module Gitlab
 
       def self.replication_enabled_feature_key
         :"geo_#{replicable_name}_replication"
+      end
+
+      # Overridden by VerifiableReplicator, if it is included
+      def self.verification_enabled?
+        false
       end
 
       # @param [ActiveRecord::Base] model_record
@@ -265,17 +261,6 @@ module Gitlab
         registry_class.for_model_record_id(model_record_id)
       end
 
-      # Checksum value from the main database
-      #
-      # @abstract
-      def primary_checksum
-        model_record.verification_checksum
-      end
-
-      def secondary_checksum
-        registry.verification_checksum
-      end
-
       # Return exactly the data needed by `for_replicable_params` to
       # reinstantiate this Replicator elsewhere.
       #
@@ -285,21 +270,19 @@ module Gitlab
       end
 
       def handle_after_destroy
-        return false unless Gitlab::Geo.enabled?
+        return false unless Gitlab::Geo.primary?
         return unless self.class.enabled?
 
         publish(:deleted, **deleted_params)
       end
 
       def handle_after_update
-        return false unless Gitlab::Geo.enabled?
+        return false unless Gitlab::Geo.primary?
         return unless self.class.enabled?
 
         publish(:updated, **updated_params)
-      end
 
-      def schedule_checksum_calculation
-        raise NotImplementedError
+        after_verifiable_update
       end
 
       def created_params
@@ -316,12 +299,6 @@ module Gitlab
 
       def event_params
         { model_record_id: model_record.id }
-      end
-
-      def needs_checksum?
-        return true unless model_record.respond_to?(:needs_checksum?)
-
-        model_record.needs_checksum?
       end
 
       protected

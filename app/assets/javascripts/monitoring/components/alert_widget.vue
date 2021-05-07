@@ -1,12 +1,13 @@
 <script>
 import { GlBadge, GlLoadingIcon, GlModalDirective, GlIcon, GlTooltip, GlSprintf } from '@gitlab/ui';
 import { values, get } from 'lodash';
-import { s__ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import AlertWidgetForm from './alert_widget_form.vue';
+import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
+import { s__ } from '~/locale';
+import { OPERATORS } from '../constants';
 import AlertsService from '../services/alerts_service';
 import { alertsValidator, queriesValidator } from '../validators';
-import { OPERATORS } from '../constants';
+import AlertWidgetForm from './alert_widget_form.vue';
 
 export default {
   components: {
@@ -97,12 +98,12 @@ export default {
       return Boolean(this.firingAlerts.length);
     },
     firingAlerts() {
-      return values(this.alertsToManage).filter(alert =>
+      return values(this.alertsToManage).filter((alert) =>
         this.passedAlertThreshold(this.getQueryData(alert), alert),
       );
     },
     formattedFiringAlerts() {
-      return this.firingAlerts.map(alert => this.formatAlertSummary(alert.alert_path));
+      return this.firingAlerts.map((alert) => this.formatAlertSummary(alert.alert_path));
     },
     configuredAlert() {
       return this.hasAlerts ? values(this.alertsToManage)[0].metricId : '';
@@ -116,13 +117,13 @@ export default {
     fetchAlertData() {
       this.isLoading = true;
 
-      const queriesWithAlerts = this.relevantQueries.filter(query => query.alert_path);
+      const queriesWithAlerts = this.relevantQueries.filter((query) => query.alert_path);
 
       return Promise.all(
-        queriesWithAlerts.map(query =>
+        queriesWithAlerts.map((query) =>
           this.service
             .readAlert(query.alert_path)
-            .then(alertAttributes => this.setAlert(alertAttributes, query.metricId)),
+            .then((alertAttributes) => this.setAlert(alertAttributes, query.metricId)),
         ),
       )
         .then(() => {
@@ -141,7 +142,7 @@ export default {
     },
     formatAlertSummary(alertPath) {
       const alert = this.alertsToManage[alertPath];
-      const alertQuery = this.relevantQueries.find(query => query.metricId === alert.metricId);
+      const alertQuery = this.relevantQueries.find((query) => query.metricId === alert.metricId);
 
       return `${alertQuery.label} ${alert.operator} ${alert.threshold}`;
     },
@@ -150,26 +151,26 @@ export default {
 
       switch (operator) {
         case OPERATORS.greaterThan:
-          return data.some(value => value > threshold);
+          return data.some((value) => value > threshold);
         case OPERATORS.lessThan:
-          return data.some(value => value < threshold);
+          return data.some((value) => value < threshold);
         case OPERATORS.equalTo:
-          return data.some(value => value === threshold);
+          return data.some((value) => value === threshold);
         default:
           return false;
       }
     },
     getQueryData(alert) {
-      const alertQuery = this.relevantQueries.find(query => query.metricId === alert.metricId);
+      const alertQuery = this.relevantQueries.find((query) => query.metricId === alert.metricId);
 
-      return get(alertQuery, 'result[0].values', []).map(value => get(value, '[1]', null));
+      return get(alertQuery, 'result[0].values', []).map((value) => get(value, '[1]', null));
     },
     showModal() {
-      this.$root.$emit('bv::show::modal', this.modalId);
+      this.$root.$emit(BV_SHOW_MODAL, this.modalId);
     },
     hideModal() {
       this.errorMessage = null;
-      this.$root.$emit('bv::hide::modal', this.modalId);
+      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
     handleSetApiAction(apiAction) {
       this.apiAction = apiAction;
@@ -179,7 +180,7 @@ export default {
       this.isLoading = true;
       this.service
         .createAlert(newAlert)
-        .then(alertAttributes => {
+        .then((alertAttributes) => {
           this.setAlert(alertAttributes, prometheus_metric_id);
           this.isLoading = false;
           this.hideModal();
@@ -194,7 +195,7 @@ export default {
       this.isLoading = true;
       this.service
         .updateAlert(alert, updatedAlert)
-        .then(alertAttributes => {
+        .then((alertAttributes) => {
           this.setAlert(alertAttributes, this.alertsToManage[alert].metricId);
           this.isLoading = false;
           this.hideModal();

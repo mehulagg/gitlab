@@ -15,7 +15,7 @@ module Gitlab
             end
 
             def data
-              [lead_time]
+              [lead_time, cycle_time]
             end
 
             private
@@ -23,6 +23,15 @@ module Gitlab
             def lead_time
               serialize(
                 Summary::Group::LeadTime.new(
+                  group: group, current_user: current_user, options: options
+                ),
+                with_unit: true
+              )
+            end
+
+            def cycle_time
+              serialize(
+                Summary::Group::CycleTime.new(
                   group: group, current_user: current_user, options: options
                 ),
                 with_unit: true

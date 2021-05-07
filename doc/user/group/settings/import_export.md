@@ -2,7 +2,7 @@
 type: reference
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 # Group Import/Export
 
@@ -48,6 +48,7 @@ The following items are exported:
 - Subgroups (including all the aforementioned data)
 - Epics
 - Events
+- Wikis **(PREMIUM SELF)** (Introduced in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/53247))
 
 The following items are **not** exported:
 
@@ -55,7 +56,7 @@ The following items are **not** exported:
 - Runner tokens
 - SAML discovery tokens
 
-NOTE: **Note:**
+NOTE:
 For more details on the specific data persisted in a group export, see the
 [`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/group/import_export.yml) file.
 
@@ -69,15 +70,15 @@ For more details on the specific data persisted in a group export, see the
 
    ![Export group panel](img/export_panel_v13_0.png)
 
-1. Once the export is generated, you should receive an e-mail with a link to the [exported contents](#exported-contents)
-   in a compressed tar archive, with contents in JSON format.
+1. After the export is generated, you should receive an e-mail with a link to the [exported contents](#exported-contents)
+   in a compressed tar archive, with contents in NDJSON format.
 
 1. Alternatively, you can come back to the project settings and download the
    file from there by clicking **Download export**, or generate a new file by clicking **Regenerate export**.
 
-NOTE: **Note:**
-The maximum import file size can be set by the Administrator, default is 50MB.
-As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md).
+NOTE:
+The maximum import file size can be set by the Administrator, default is `0` (unlimited).
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md). Default [modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to 0 in GitLab 13.8.
 
 ### Between CE and EE
 
@@ -108,6 +109,14 @@ on an existing group's page.
 
 ## Version history
 
+### 14.0+
+
+In GitLab 14.0, the JSON format is no longer supported for project and group exports. To allow for a
+transitional period, you can still import any JSON exports. The new format for imports and exports
+is NDJSON.
+
+### 13.0+
+
 GitLab can import bundles that were exported from a different GitLab deployment.
 This ability is limited to two previous GitLab [minor](../../../policy/maintenance.md#versioning)
 releases, which is similar to our process for [Security Releases](../../../policy/maintenance.md#security-releases).
@@ -121,10 +130,12 @@ For example:
 
 ## Rate Limits
 
-To help avoid abuse, users are rate limited to:
+To help avoid abuse, by default, users are rate limited to:
 
 | Request Type     | Limit                                    |
 | ---------------- | ---------------------------------------- |
-| Export           | 30 groups every 5 minutes                |
-| Download export  | 10 downloads per group every 10 minutes  |
-| Import           | 30 groups every 5 minutes                |
+| Export           | 6 groups per minute                |
+| Download export  | 1 download per group per minute  |
+| Import           | 6 groups per minute                |
+
+Please note that GitLab.com may have [different settings](../../gitlab_com/index.md#importexport) from the defaults.

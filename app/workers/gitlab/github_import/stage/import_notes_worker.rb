@@ -5,12 +5,15 @@ module Gitlab
     module Stage
       class ImportNotesWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include StageMethods
 
         # client - An instance of Gitlab::GithubImport::Client.
         # project - An instance of Project.
         def import(client, project)
+          info(project.id, message: "starting importer", importer: 'Importer::NotesImporter')
           waiter = Importer::NotesImporter
             .new(project, client)
             .execute

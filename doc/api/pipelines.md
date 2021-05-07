@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Pipelines API
@@ -39,8 +39,8 @@ GET /projects/:id/pipelines
 | `yaml_errors`| boolean  | no       | Returns pipelines with invalid configurations |
 | `name`| string  | no       | The name of the user who triggered pipelines |
 | `username`| string  | no       | The username of the user who triggered pipelines |
-| `updated_after` | datetime | no | Return pipelines updated after the specified date. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ |
-| `updated_before` | datetime | no | Return pipelines updated before the specified date. Format: ISO 8601 YYYY-MM-DDTHH:MM:SSZ |
+| `updated_after` | datetime | no | Return pipelines updated after the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `updated_before` | datetime | no | Return pipelines updated before the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
 | `order_by`| string  | no       | Order pipelines by `id`, `status`, `ref`, `updated_at` or `user_id` (default: `id`) |
 | `sort`    | string  | no       | Sort pipelines in `asc` or `desc` order (default: `desc`) |
 
@@ -54,21 +54,23 @@ Example of response
 [
   {
     "id": 47,
+    "project_id": 1,
     "status": "pending",
     "ref": "new-pipeline",
     "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
     "web_url": "https://example.com/foo/bar/pipelines/47",
     "created_at": "2016-08-11T11:28:34.085Z",
-    "updated_at": "2016-08-11T11:32:35.169Z",
+    "updated_at": "2016-08-11T11:32:35.169Z"
   },
   {
     "id": 48,
+    "project_id": 1,
     "status": "pending",
     "ref": "new-pipeline",
     "sha": "eb94b618fb5865b26e80fdd8ae531b7a63ad851a",
     "web_url": "https://example.com/foo/bar/pipelines/48",
     "created_at": "2016-08-12T10:06:04.561Z",
-    "updated_at": "2016-08-12T10:09:56.223Z",
+    "updated_at": "2016-08-12T10:09:56.223Z"
   }
 ]
 ```
@@ -95,6 +97,7 @@ Example of response
 ```json
 {
   "id": 46,
+  "project_id": 1,
   "status": "success",
   "ref": "master",
   "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
@@ -114,7 +117,8 @@ Example of response
   "started_at": null,
   "finished_at": "2016-08-11T11:32:35.145Z",
   "committed_at": null,
-  "duration": null,
+  "duration": 123.65,
+  "queued_duration": 0.010,
   "coverage": "30.0",
   "web_url": "https://example.com/foo/bar/pipelines/46"
 }
@@ -155,7 +159,7 @@ Example of response
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202525) in GitLab 13.0.
 
-NOTE: **Note:**
+NOTE:
 This API route is part of the [Unit test report](../ci/unit_test_reports.md) feature.
 
 ```plaintext
@@ -230,6 +234,7 @@ Example of response
 ```json
 {
   "id": 61,
+  "project_id": 1,
   "sha": "384c444e840a515b23f21915ee5766b87068a70d",
   "ref": "master",
   "status": "pending",
@@ -250,6 +255,7 @@ Example of response
   "finished_at": null,
   "committed_at": null,
   "duration": null,
+  "queued_duration": 0.010,
   "coverage": null,
   "web_url": "https://example.com/foo/bar/pipelines/61"
 }
@@ -277,6 +283,7 @@ Response:
 ```json
 {
   "id": 46,
+  "project_id": 1,
   "status": "pending",
   "ref": "master",
   "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
@@ -297,6 +304,7 @@ Response:
   "finished_at": "2016-08-11T11:32:35.145Z",
   "committed_at": null,
   "duration": null,
+  "queued_duration": 0.010,
   "coverage": null,
   "web_url": "https://example.com/foo/bar/pipelines/46"
 }
@@ -324,6 +332,7 @@ Response:
 ```json
 {
   "id": 46,
+  "project_id": 1,
   "status": "canceled",
   "ref": "master",
   "sha": "a91957a858320c0e17f3a0eca7cfacbff50ea29a",
@@ -344,6 +353,7 @@ Response:
   "finished_at": "2016-08-11T11:32:35.145Z",
   "committed_at": null,
   "duration": null,
+  "queued_duration": 0.010,
   "coverage": null,
   "web_url": "https://example.com/foo/bar/pipelines/46"
 }

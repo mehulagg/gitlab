@@ -2,56 +2,32 @@
 
 exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
 <div
-  class="card"
+  class="gl-card"
   data-foo="bar"
   value="gid://gitlab/DastSiteProfile/1"
 >
-  <!---->
   <div
-    class="card-header"
+    class="gl-card-header"
   >
     <div
       class="row"
     >
       <div
-        class="col-7"
+        class="col-7 gl-display-flex gl-align-items-center"
       >
         <h3
-          class="gl-font-lg gl-display-inline"
+          class="gl-font-lg gl-my-0"
         >
           Site profile
         </h3>
       </div>
-       
-      <div
-        class="col-5 gl-text-right"
-      >
-        <a
-          class="btn btn-success btn-sm gl-button btn-success-secondary"
-          data-testid="manage-profiles-link"
-          href="/test/site/profiles/library/path"
-        >
-          <!---->
-           
-          <!---->
-            
-          <span
-            class="gl-button-text"
-          >
-            
-          Manage profiles
-        
-          </span>
-        </a>
-      </div>
     </div>
   </div>
+   
   <div
-    class="card-body"
+    class="gl-card-body"
   >
-    <!---->
-    <!---->
-      
+     
     <fieldset
       class="form-group gl-form-group"
     >
@@ -80,10 +56,12 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
           >
             <!---->
              
+            <!---->
+             
             <span
               class="gl-new-dropdown-button-text"
             >
-              Site profile #1: https://foo.com
+              Site profile #1: https://foo.com (Not Validated)
             </span>
              
             <svg
@@ -101,86 +79,209 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             role="menu"
             tabindex="-1"
           >
-            <!---->
-             
-            <li
-              class="gl-new-dropdown-item"
-              role="presentation"
+            <div
+              class="gl-new-dropdown-inner"
             >
-              <button
-                class="dropdown-item"
-                role="menuitem"
-                type="button"
+              <div
+                class="gl-new-dropdown-header gl-border-b-0!"
               >
-                <svg
-                  class="gl-icon s16 gl-new-dropdown-item-check-icon"
-                  data-testid="mobile-issue-close-icon"
-                >
-                  <use
-                    href="#mobile-issue-close"
-                  />
-                </svg>
-                 
-                <!---->
-                 
                 <!---->
                  
                 <div
-                  class="gl-new-dropdown-item-text-wrapper"
+                  class="gl-search-box-by-type"
                 >
-                  <p
-                    class="gl-new-dropdown-item-text-primary"
+                  <svg
+                    aria-hidden="true"
+                    class="gl-search-box-by-type-search-icon gl-icon s16"
+                    data-testid="search-icon"
                   >
-                    
+                    <use
+                      href="#search"
+                    />
+                  </svg>
+                   
+                  <input
+                    aria-label="Search"
+                    class="gl-form-input gl-search-box-by-type-input form-control"
+                    placeholder="Search"
+                    type="text"
+                  />
+                   
+                  <div
+                    class="gl-search-box-by-type-right-icons"
+                  >
+                    <!---->
+                     
+                    <!---->
+                  </div>
+                </div>
+              </div>
+               
+              <div
+                class="gl-new-dropdown-contents"
+              >
+                 
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
+                >
+                  <button
+                    class="dropdown-item"
+                    role="menuitem"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="gl-icon s16 gl-new-dropdown-item-check-icon gl-mt-3 gl-align-self-start"
+                      data-testid="dropdown-item-checkbox"
+                    >
+                      <use
+                        href="#mobile-issue-close"
+                      />
+                    </svg>
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        
         Site profile #1
       
-                  </p>
-                   
-                  <!---->
-                </div>
-                 
-                <!---->
-              </button>
-            </li>
-            <li
-              class="gl-new-dropdown-item"
-              role="presentation"
-            >
-              <button
-                class="dropdown-item"
-                role="menuitem"
-                type="button"
-              >
-                <svg
-                  class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden"
-                  data-testid="mobile-issue-close-icon"
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </button>
+                </li>
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
                 >
-                  <use
-                    href="#mobile-issue-close"
-                  />
-                </svg>
-                 
-                <!---->
-                 
-                <!---->
-                 
-                <div
-                  class="gl-new-dropdown-item-text-wrapper"
-                >
-                  <p
-                    class="gl-new-dropdown-item-text-primary"
+                  <button
+                    class="dropdown-item"
+                    role="menuitem"
+                    type="button"
                   >
-                    
+                    <svg
+                      aria-hidden="true"
+                      class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden gl-mt-3 gl-align-self-start"
+                      data-testid="dropdown-item-checkbox"
+                    >
+                      <use
+                        href="#mobile-issue-close"
+                      />
+                    </svg>
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        
         Site profile #2
       
-                  </p>
-                   
-                  <!---->
-                </div>
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </button>
+                </li>
                  
-                <!---->
-              </button>
-            </li>
+                <div
+                  class="gl-p-3 gl-text-center"
+                  style="display: none;"
+                >
+                  
+        No matching results...
+      
+                </div>
+              </div>
+               
+              <div
+                class="gl-new-dropdown-footer"
+              >
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
+                >
+                  <a
+                    class="dropdown-item"
+                    data-testid="create-profile-option"
+                    href="/test/new/site/profile/path"
+                    role="menuitem"
+                    target="_self"
+                  >
+                    <!---->
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        Create new site profile
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </a>
+                </li>
+                 
+                <li
+                  class="gl-new-dropdown-item"
+                  role="presentation"
+                >
+                  <a
+                    class="dropdown-item"
+                    data-testid="manage-profiles-option"
+                    href="/test/site/profiles/library/path"
+                    role="menuitem"
+                    target="_self"
+                  >
+                    <!---->
+                     
+                    <!---->
+                     
+                    <!---->
+                     
+                    <div
+                      class="gl-new-dropdown-item-text-wrapper"
+                    >
+                      <p
+                        class="gl-new-dropdown-item-text-primary"
+                      >
+                        Manage site profiles
+                      </p>
+                       
+                      <!---->
+                    </div>
+                     
+                    <!---->
+                  </a>
+                </li>
+              </div>
+            </div>
              
           </ul>
         </div>
@@ -189,30 +290,29 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
           class="gl-mt-6 gl-pt-6 gl-border-t-solid gl-border-gray-100 gl-border-t-1"
           data-testid="selected-profile-summary"
         >
-          <div
-            class="row"
+          <a
+            aria-label="Edit profile"
+            class="btn gl-absolute gl-right-7 btn-default btn-md gl-button btn-icon"
+            href="/site_profiles/edit/1"
+            title="Edit profile"
           >
-            <div
-              class="col-md-6"
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="pencil-icon"
             >
-              <div
-                class="row gl-my-2"
-              >
-                <div
-                  class="col-md-3"
-                >
-                  Target URL:
-                </div>
-                 
-                <div
-                  class="col-md-9"
-                >
-                  <strong>
-                    https://foo.com
-                  </strong>
-                </div>
-              </div>
-            </div>
+              <use
+                href="#pencil"
+              />
+            </svg>
+              
+            <!---->
+          </a>
+           
+          <div>
+            Site profile #1's summary
           </div>
         </div>
         <!---->
@@ -220,65 +320,39 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
         <!---->
       </div>
     </fieldset>
-     
   </div>
-  <!---->
+   
   <!---->
 </div>
 `;
 
 exports[`OnDemandScansSiteProfileSelector renders properly without profiles 1`] = `
 <div
-  class="card"
+  class="gl-card"
   data-foo="bar"
 >
-  <!---->
   <div
-    class="card-header"
+    class="gl-card-header"
   >
     <div
       class="row"
     >
       <div
-        class="col-7"
+        class="col-7 gl-display-flex gl-align-items-center"
       >
         <h3
-          class="gl-font-lg gl-display-inline"
+          class="gl-font-lg gl-my-0"
         >
           Site profile
         </h3>
       </div>
-       
-      <div
-        class="col-5 gl-text-right"
-      >
-        <button
-          class="btn btn-success btn-sm disabled gl-button btn-success-secondary"
-          data-testid="manage-profiles-link"
-          disabled="disabled"
-          type="button"
-        >
-          <!---->
-           
-          <!---->
-            
-          <span
-            class="gl-button-text"
-          >
-            
-          Manage profiles
-        
-          </span>
-        </button>
-      </div>
     </div>
   </div>
+   
   <div
-    class="card-body"
+    class="gl-card-body"
   >
-    <!---->
-    <!---->
-      
+     
     <p
       class="gl-text-gray-700"
     >
@@ -297,12 +371,11 @@ exports[`OnDemandScansSiteProfileSelector renders properly without profiles 1`] 
       <span
         class="gl-button-text"
       >
-        Create a new site profile
+        Create new site profile
       </span>
     </a>
-     
   </div>
-  <!---->
+   
   <!---->
 </div>
 `;

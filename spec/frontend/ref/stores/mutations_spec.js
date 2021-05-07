@@ -1,7 +1,7 @@
-import createState from '~/ref/stores/state';
-import mutations from '~/ref/stores/mutations';
+import { X_TOTAL_HEADER, ALL_REF_TYPES } from '~/ref/constants';
 import * as types from '~/ref/stores/mutation_types';
-import { X_TOTAL_HEADER } from '~/ref/constants';
+import mutations from '~/ref/stores/mutations';
+import createState from '~/ref/stores/state';
 
 describe('Ref selector Vuex store mutations', () => {
   let state;
@@ -13,6 +13,7 @@ describe('Ref selector Vuex store mutations', () => {
   describe('initial state', () => {
     it('is created with the correct structure and initial values', () => {
       expect(state).toEqual({
+        enabledRefTypes: [],
         projectId: null,
 
         query: '',
@@ -36,6 +37,14 @@ describe('Ref selector Vuex store mutations', () => {
         selectedRef: null,
         requestCount: 0,
       });
+    });
+  });
+
+  describe(`${types.SET_ENABLED_REF_TYPES}`, () => {
+    it('sets the enabled ref types', () => {
+      mutations[types.SET_ENABLED_REF_TYPES](state, ALL_REF_TYPES);
+
+      expect(state.enabledRefTypes).toBe(ALL_REF_TYPES);
     });
   });
 
@@ -99,7 +108,7 @@ describe('Ref selector Vuex store mutations', () => {
       const response = {
         data: [
           {
-            name: 'master',
+            name: 'main',
             default: true,
 
             // everything except "name" and "default" should be stripped
@@ -121,7 +130,7 @@ describe('Ref selector Vuex store mutations', () => {
       expect(state.matches.branches).toEqual({
         list: [
           {
-            name: 'master',
+            name: 'main',
             default: true,
           },
           {

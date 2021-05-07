@@ -1,32 +1,27 @@
 <script>
-import { GlButton, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlLoadingIcon, GlModal, GlLink } from '@gitlab/ui';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import PipelinesTableComponent from '~/pipelines/components/pipelines_list/pipelines_table.vue';
+import eventHub from '~/pipelines/event_hub';
+import PipelinesMixin from '~/pipelines/mixins/pipelines_mixin';
 import PipelinesService from '~/pipelines/services/pipelines_service';
 import PipelineStore from '~/pipelines/stores/pipelines_store';
-import pipelinesMixin from '~/pipelines/mixins/pipelines';
-import eventHub from '~/pipelines/event_hub';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
-import { getParameterByName } from '~/lib/utils/common_utils';
-import CIPaginationMixin from '~/vue_shared/mixins/ci_pagination_api_mixin';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
-    TablePagination,
     GlButton,
+    GlEmptyState,
+    GlLink,
     GlLoadingIcon,
     GlModal,
-    GlLink,
+    PipelinesTableComponent,
+    TablePagination,
   },
-  mixins: [pipelinesMixin, CIPaginationMixin],
+  mixins: [PipelinesMixin, glFeatureFlagMixin()],
   props: {
     endpoint: {
-      type: String,
-      required: true,
-    },
-    helpPagePath: {
-      type: String,
-      required: true,
-    },
-    autoDevopsHelpPath: {
       type: String,
       required: true,
     },
@@ -86,7 +81,7 @@ export default {
       return this.hasError && !this.isLoading;
     },
     /**
-     * The Run Pipeline button can only be rendered when:
+     * The "Run pipeline" button can only be rendered when:
      * - In MR view -  we use `canCreatePipelineInTargetProject` for that purpose
      * - If the latest pipeline has the `detached_merge_request_pipeline` flag
      *
@@ -150,7 +145,7 @@ export default {
       }
     },
     /**
-     * When the user clicks on the Run Pipeline button
+     * When the user clicks on the "Run pipeline" button
      * we need to make a post request and
      * to update the table content once the request is finished.
      *
@@ -179,17 +174,17 @@ export default {
   <div class="content-list pipelines">
     <gl-loading-icon
       v-if="isLoading"
-      :label="s__('Pipelines|Loading Pipelines')"
+      :label="s__('Pipelines|Loading pipelines')"
       size="lg"
       class="prepend-top-20"
     />
 
-    <svg-blank-state
+    <gl-empty-state
       v-else-if="shouldRenderErrorState"
       :svg-path="errorStateSvgPath"
-      :message="
+      :title="
         s__(`Pipelines|There was an error fetching the pipelines.
-      Try again in a few moments or contact your support team.`)
+        Try again in a few moments or contact your support team.`)
       "
     />
 
@@ -197,30 +192,29 @@ export default {
       <gl-button
         v-if="canRenderPipelineButton"
         block
-        class="gl-mt-3 gl-mb-0 gl-display-md-none"
-        variant="success"
+        class="gl-mt-3 gl-mb-3 gl-lg-display-none"
+        variant="confirm"
         data-testid="run_pipeline_button_mobile"
         :loading="state.isRunningMergeRequestPipeline"
         @click="tryRunPipeline"
       >
-        {{ s__('Pipelines|Run Pipeline') }}
+        {{ s__('Pipeline|Run pipeline') }}
       </gl-button>
 
       <pipelines-table-component
         :pipelines="state.pipelines"
         :update-graph-dropdown="updateGraphDropdown"
-        :auto-devops-help-path="autoDevopsHelpPath"
         :view-type="viewType"
       >
         <template #table-header-actions>
           <div v-if="canRenderPipelineButton" class="gl-text-right">
             <gl-button
-              variant="success"
+              variant="confirm"
               data-testid="run_pipeline_button"
               :loading="state.isRunningMergeRequestPipeline"
               @click="tryRunPipeline"
             >
-              {{ s__('Pipelines|Run Pipeline') }}
+              {{ s__('Pipeline|Run pipeline') }}
             </gl-button>
           </div>
         </template>
@@ -233,7 +227,7 @@ export default {
       ref="modal"
       :modal-id="modalId"
       :title="s__('Pipelines|Are you sure you want to run this pipeline?')"
-      :ok-title="s__('Pipelines|Run Pipeline')"
+      :ok-title="s__('Pipeline|Run pipeline')"
       ok-variant="danger"
       @ok="onClickRunPipeline"
     >

@@ -21,6 +21,22 @@ RSpec.describe 'Group navbar' do
     insert_package_nav(_('Kubernetes'))
   end
 
+  context 'when devops adoption analytics is available' do
+    before do
+      stub_licensed_features(group_level_devops_adoption: true)
+
+      insert_after_sub_nav_item(
+        _('Contribution'),
+        within: _('Analytics'),
+        new_sub_nav_item_name: _('DevOps Adoption')
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
   context 'when productivity analytics is available' do
     before do
       stub_licensed_features(productivity_analytics: true)
@@ -66,13 +82,36 @@ RSpec.describe 'Group navbar' do
   context 'when epics are available' do
     before do
       stub_licensed_features(epics: true)
+      stub_feature_flags(epic_boards: false)
 
       insert_after_nav_item(
-        _('Group overview'),
+        _('Group information'),
         new_nav_item: {
           nav_item: _('Epics'),
           nav_sub_items: [
             _('List'),
+            _('Roadmap')
+          ]
+        }
+      )
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when epics and epic boards are available' do
+    before do
+      stub_licensed_features(epics: true)
+
+      insert_after_nav_item(
+        _('Group information'),
+        new_nav_item: {
+          nav_item: _('Epics'),
+          nav_sub_items: [
+            _('List'),
+            _('Boards'),
             _('Roadmap')
           ]
         }
@@ -122,22 +161,22 @@ RSpec.describe 'Group navbar' do
   end
 
   context 'when security dashboard is available' do
+    let(:security_and_compliance_nav_item) do
+      {
+        nav_item: _('Security & Compliance'),
+        nav_sub_items: [
+          _('Security Dashboard'),
+          _('Vulnerability Report'),
+          _('Compliance'),
+          _('Audit Events')
+        ]
+      }
+    end
+
     before do
       group.add_owner(user)
 
       stub_licensed_features(security_dashboard: true, group_level_compliance_dashboard: true)
-
-      insert_after_nav_item(
-        _('Merge Requests'),
-        new_nav_item: {
-          nav_item: _('Security & Compliance'),
-          nav_sub_items: [
-            _('Security Dashboard'),
-            _('Vulnerability Report'),
-            _('Compliance')
-          ]
-        }
-      )
 
       insert_after_nav_item(_('Members'), new_nav_item: settings_nav_item)
       insert_after_nav_item(_('Settings'), new_nav_item: administration_nav_item)
@@ -204,16 +243,5 @@ RSpec.describe 'Group navbar' do
     end
 
     it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when invite team members is available' do
-    it 'includes the div for js-invite-members-trigger' do
-      stub_feature_flags(invite_members_group_modal: true)
-      allow_any_instance_of( InviteMembersHelper ).to receive(:invite_members_allowed?).and_return(true)
-
-      visit group_path(group)
-
-      expect(page).to have_selector('.js-invite-members-trigger')
-    end
   end
 end

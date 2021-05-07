@@ -91,14 +91,7 @@
 
 body.modal-open {
   overflow: hidden;
-}
-
-.modal-no-backdrop {
-  @extend .modal-dialog;
-
-  .modal-content {
-    box-shadow: none;
-  }
+  padding-right: 0 !important;
 }
 
 .modal {
@@ -128,23 +121,7 @@ body.modal-open {
 }
 
 .issues-import-modal,
-.issues-export-modal {
-  .modal-header {
-    justify-content: flex-start;
-
-    .import-export-svg-container {
-      flex-grow: 1;
-      height: 56px;
-      padding: $gl-btn-padding $gl-btn-padding 0;
-      text-align: right;
-
-      .illustration {
-        height: inherit;
-        width: initial;
-      }
-    }
-  }
-
+.issuable-export-modal {
   .modal-body {
     padding: 0;
 

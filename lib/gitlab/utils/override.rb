@@ -43,12 +43,12 @@ module Gitlab
             instance_method_defined?(parent, method_name)
           end
 
-          raise NotImplementedError.new("#{klass}\##{method_name} doesn't exist!") unless overridden_parent
+          raise NotImplementedError, "#{klass}\##{method_name} doesn't exist!" unless overridden_parent
 
           super_method_arity = find_direct_method(overridden_parent, method_name).arity
 
           unless arity_compatible?(sub_method_arity, super_method_arity)
-            raise NotImplementedError.new("#{subject}\##{method_name} has arity of #{sub_method_arity}, but #{overridden_parent}\##{method_name} has arity of #{super_method_arity}")
+            raise NotImplementedError, "#{subject}\##{method_name} has arity of #{sub_method_arity}, but #{overridden_parent}\##{method_name} has arity of #{super_method_arity}"
           end
         end
 
@@ -153,7 +153,13 @@ module Gitlab
       def extended(mod = nil)
         super
 
-        queue_verification(mod.singleton_class) if mod
+        # Hack to resolve https://gitlab.com/gitlab-org/gitlab/-/issues/23932
+        is_not_concern_hack =
+          (mod.is_a?(Class) || !name&.end_with?('::ClassMethods'))
+
+        if mod && is_not_concern_hack
+          queue_verification(mod.singleton_class)
+        end
       end
 
       def queue_verification(base, verify: false)
@@ -174,7 +180,7 @@ module Gitlab
       end
 
       def self.verify!
-        extensions.values.each(&:verify!)
+        extensions.each_value(&:verify!)
       end
     end
   end

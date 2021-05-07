@@ -5,7 +5,7 @@
  */
 
 // TODO: need to move this component to graphql - https://gitlab.com/gitlab-org/gitlab/-/issues/221246
-import { escape, isNumber } from 'lodash';
+import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
 import {
   GlLink,
   GlTooltipDirective as GlTooltip,
@@ -14,7 +14,8 @@ import {
   GlIcon,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import jiraLogo from '@gitlab/svgs/dist/illustrations/logos/jira.svg';
+import { escape, isNumber } from 'lodash';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import {
   dateInWords,
   formatDate,
@@ -23,19 +24,17 @@ import {
   timeFor,
   newDateAsLocaleTime,
 } from '~/lib/utils/datetime_utility';
+import { convertToCamelCase } from '~/lib/utils/text_utility';
+import { mergeUrlParams, setUrlFragment, isExternal } from '~/lib/utils/url_utility';
 import { sprintf, __ } from '~/locale';
 import initUserPopovers from '~/user_popovers';
-import { mergeUrlParams } from '~/lib/utils/url_utility';
 import IssueAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
-import { isScopedLabel } from '~/lib/utils/common_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-
-import { convertToCamelCase } from '~/lib/utils/text_utility';
 
 export default {
   i18n: {
-    openedAgo: __('opened %{timeAgoString} by %{user}'),
-    openedAgoJira: __('opened %{timeAgoString} by %{user} in Jira'),
+    openedAgo: __('created %{timeAgoString} by %{user}'),
+    openedAgoJira: __('created %{timeAgoString} by %{user} in Jira'),
+    openedAgoServiceDesk: __('created %{timeAgoString} by %{email} via %{user}'),
   },
   components: {
     IssueAssignees,
@@ -50,7 +49,7 @@ export default {
     GlTooltip,
     SafeHtml,
   },
-  mixins: [glFeatureFlagsMixin()],
+  inject: ['scopedLabelsAvailable'],
   props: {
     issuable: {
       type: Object,
@@ -85,9 +84,6 @@ export default {
 
       return this.issuableLink({ milestone_title: title });
     },
-    scopedLabelsAvailable() {
-      return this.glFeatures.scopedLabels;
-    },
     hasWeight() {
       return isNumber(this.issuable.weight);
     },
@@ -106,14 +102,20 @@ export default {
     isJiraIssue() {
       return this.issuable.external_tracker === 'jira';
     },
+    webUrl() {
+      return this.issuable.gitlab_web_url || this.issuable.web_url;
+    },
+    isIssuableUrlExternal() {
+      return isExternal(this.webUrl);
+    },
     linkTarget() {
-      return this.isJiraIssue ? '_blank' : null;
+      return this.isIssuableUrlExternal ? '_blank' : null;
     },
     issueCreatedToday() {
       return getDayDifference(new Date(this.issuable.created_at), new Date()) < 1;
     },
     labelIdsString() {
-      return JSON.stringify(this.issuable.labels.map(l => l.id));
+      return JSON.stringify(this.issuable.labels.map((l) => l.id));
     },
     milestoneDueDate() {
       const { due_date: dueDate } = this.issuable.milestone || {};
@@ -192,7 +194,7 @@ export default {
           value: this.issuable.blocking_issues_count,
           title: __('Blocking issues'),
           dataTestId: 'blocking-issues',
-          href: `${this.issuable.web_url}#related-issues`,
+          href: setUrlFragment(this.webUrl, 'related-issues'),
           icon: 'issue-block',
         },
         {
@@ -201,7 +203,7 @@ export default {
           value: this.issuable.user_notes_count,
           title: __('Comments'),
           dataTestId: 'notes-count',
-          href: `${this.issuable.web_url}#notes`,
+          href: setUrlFragment(this.webUrl, 'notes'),
           class: { 'no-comments': !this.issuable.user_notes_count, 'issuable-comments': true },
           icon: 'comments',
         },
@@ -209,6 +211,11 @@ export default {
     },
     healthStatus() {
       return convertToCamelCase(this.issuable.health_status);
+    },
+    openedMessage() {
+      if (this.isJiraIssue) return this.$options.i18n.openedAgoJira;
+      if (this.issuable.service_desk_reply_to) return this.$options.i18n.openedAgoServiceDesk;
+      return this.$options.i18n.openedAgo;
     },
   },
   mounted() {
@@ -251,7 +258,7 @@ export default {
     :class="{ today: issueCreatedToday, closed: isClosed }"
     :data-id="issuable.id"
     :data-labels="labelIdsString"
-    :data-url="issuable.web_url"
+    :data-url="webUrl"
     data-qa-selector="issue_container"
     :data-qa-issue-title="issuable.title"
   >
@@ -283,13 +290,14 @@ export default {
               :aria-label="$options.confidentialTooltipText"
             />
             <gl-link
-              :href="issuable.web_url"
+              :href="webUrl"
               :target="linkTarget"
               data-testid="issuable-title"
               data-qa-selector="issue_link"
-              >{{ issuable.title
-              }}<gl-icon
-                v-if="isJiraIssue"
+            >
+              {{ issuable.title }}
+              <gl-icon
+                v-if="isIssuableUrlExternal"
                 name="external-link"
                 class="gl-vertical-align-text-bottom gl-ml-2"
               />
@@ -315,9 +323,7 @@ export default {
 
           <span data-testid="openedByMessage" class="gl-display-none d-sm-inline-block gl-mr-4">
             &middot;
-            <gl-sprintf
-              :message="isJiraIssue ? $options.i18n.openedAgoJira : $options.i18n.openedAgo"
-            >
+            <gl-sprintf :message="openedMessage">
               <template #timeAgoString>
                 <span>{{ issuableCreatedAt }}</span>
               </template>
@@ -329,6 +335,9 @@ export default {
                   :target="linkTarget"
                   >{{ issuableAuthor.name }}</gl-link
                 >
+              </template>
+              <template #email>
+                <span>{{ issuable.service_desk_reply_to }}</span>
               </template>
             </gl-sprintf>
           </span>
@@ -411,7 +420,7 @@ export default {
               v-if="meta.visible"
               :key="meta.key"
               v-gl-tooltip
-              class="gl-display-none gl-display-sm-flex gl-align-items-center gl-ml-3"
+              class="gl-display-none gl-sm-display-flex gl-align-items-center gl-ml-3"
               :class="meta.class"
               :data-testid="meta.dataTestId"
               :title="meta.title"

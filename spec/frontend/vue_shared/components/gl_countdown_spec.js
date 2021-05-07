@@ -1,5 +1,5 @@
-import mountComponent from 'helpers/vue_mount_component_helper';
 import Vue from 'vue';
+import mountComponent from 'helpers/vue_mount_component_helper';
 import GlCountdown from '~/vue_shared/components/gl_countdown.vue';
 
 describe('GlCountdown', () => {
@@ -17,21 +17,19 @@ describe('GlCountdown', () => {
   });
 
   describe('when there is time remaining', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       vm = mountComponent(Component, {
         endDateString: '2000-01-01T01:02:03Z',
       });
 
-      Vue.nextTick()
-        .then(done)
-        .catch(done.fail);
+      Vue.nextTick().then(done).catch(done.fail);
     });
 
     it('displays remaining time', () => {
       expect(vm.$el.textContent).toContain('01:02:03');
     });
 
-    it('updates remaining time', done => {
+    it('updates remaining time', (done) => {
       now = '2000-01-01T00:00:01Z';
       jest.advanceTimersByTime(1000);
 
@@ -45,14 +43,12 @@ describe('GlCountdown', () => {
   });
 
   describe('when there is no time remaining', () => {
-    beforeEach(done => {
+    beforeEach((done) => {
       vm = mountComponent(Component, {
         endDateString: '1900-01-01T00:00:00Z',
       });
 
-      Vue.nextTick()
-        .then(done)
-        .catch(done.fail);
+      Vue.nextTick().then(done).catch(done.fail);
     });
 
     it('displays 00:00:00', () => {

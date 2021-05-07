@@ -1,22 +1,28 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Vuex
 
-When there's a clear benefit to separating state management from components (e.g. due to state complexity) we recommend using [Vuex](https://vuex.vuejs.org) over any other Flux pattern. Otherwise, feel free to manage state within the components.
+When there's a clear benefit to separating state management from components (for example, due to state complexity) we recommend using [Vuex](https://vuex.vuejs.org) over any other Flux pattern. Otherwise, feel free to manage state in the components.
 
 Vuex should be strongly considered when:
 
-- You expect multiple parts of the application to react to state changes
-- There's a need to share data between multiple components
-- There are complex interactions with Backend, e.g. multiple API calls
-- The app involves interacting with backend via both traditional REST API and GraphQL (especially when moving the REST API over to GraphQL is a pending backend task)
+- You expect multiple parts of the application to react to state changes.
+- There's a need to share data between multiple components.
+- There are complex interactions with Backend, for example, multiple API calls.
+- The app involves interacting with backend via both traditional REST API and GraphQL (especially when moving the REST API over to GraphQL is a pending backend task).
 
-_Note:_ All of the below is explained in more detail in the official [Vuex documentation](https://vuex.vuejs.org).
+The information included in this page is explained in more detail in the
+official [Vuex documentation](https://vuex.vuejs.org).
 
 ## Separation of concerns
 
 Vuex is composed of State, Getters, Mutations, Actions, and Modules.
 
-When a user clicks on an action, we need to `dispatch` it. This action will `commit` a mutation that will change the state.
-_Note:_ The action itself will not update the state, only a mutation should update the state.
+When a user clicks on an action, we need to `dispatch` it. This action `commits` a mutation that changes the state. The action itself does not update the state; only a mutation should update the state.
 
 ## File structure
 
@@ -60,7 +66,7 @@ export const createStore = () =>
 
 The first thing you should do before writing any code is to design the state.
 
-Often we need to provide data from haml to our Vue application. Let's store it in the state for better access.
+Often we need to provide data from HAML to our Vue application. Let's store it in the state for better access.
 
 ```javascript
   export default () => ({
@@ -86,7 +92,7 @@ An action is a payload of information to send data from our application to our s
 
 An action is usually composed by a `type` and a `payload` and they describe what happened. Unlike [mutations](#mutationsjs), actions can contain asynchronous operations - that's why we always need to handle asynchronous logic in actions.
 
-In this file, we will write the actions that will call mutations for handling a list of users:
+In this file, we write the actions that call mutations for handling a list of users:
 
 ```javascript
   import * as types from './mutation_types';
@@ -140,7 +146,7 @@ The only way to change state in a Vuex store is by committing a mutation.
 Most mutations are committed from an action using `commit`. If you don't have any
 asynchronous operations, you can call mutations from a component using the `mapMutations` helper.
 
-See the Vuex docs for examples of [committing mutations from components](https://vuex.vuejs.org/guide/mutations.html#committing-mutations-in-components).
+See the Vuex documentation for examples of [committing mutations from components](https://vuex.vuejs.org/guide/mutations.html#committing-mutations-in-components).
 
 #### Naming Pattern: `REQUEST` and `RECEIVE` namespaces
 
@@ -157,15 +163,15 @@ Instead of creating an mutation to toggle the loading state, we should:
         - `PUT`: `updateSomething`
         - `DELETE`: `deleteSomething`
 
-As a result, we can dispatch the `fetchNamespace` action from the component and it will be responsible to commit  `REQUEST_NAMESPACE`, `RECEIVE_NAMESPACE_SUCCESS` and `RECEIVE_NAMESPACE_ERROR` mutations.
+As a result, we can dispatch the `fetchNamespace` action from the component and it is responsible to commit  `REQUEST_NAMESPACE`, `RECEIVE_NAMESPACE_SUCCESS` and `RECEIVE_NAMESPACE_ERROR` mutations.
 
-> Previously, we were dispatching actions from the `fetchNamespace` action instead of committing mutation, so please don't be confused if you find a different pattern in the older parts of the codebase. However, we encourage leveraging a new pattern whenever you write new Vuex stores
+> Previously, we were dispatching actions from the `fetchNamespace` action instead of committing mutation, so please don't be confused if you find a different pattern in the older parts of the codebase. However, we encourage leveraging a new pattern whenever you write new Vuex stores.
 
 By following this pattern we guarantee:
 
-1. All applications follow the same pattern, making it easier for anyone to maintain the code
-1. All data in the application follows the same lifecycle pattern
-1. Unit tests are easier
+1. All applications follow the same pattern, making it easier for anyone to maintain the code.
+1. All data in the application follows the same lifecycle pattern.
+1. Unit tests are easier.
 
 #### Updating complex state
 
@@ -209,7 +215,7 @@ While this approach works it has several dependencies:
 - Correct selection of `item` in the component/action.
 - The `item` property is already declared in the `closed` state.
   - A new `confidential` property would not be reactive.
-- Noting that `item` is referenced by `items`
+- Noting that `item` is referenced by `items`.
 
 A mutation written like this is harder to maintain and more error prone. We should rather write a mutation like this:
 
@@ -239,7 +245,7 @@ A mutation written like this is easier to maintain. In addition, we avoid errors
 ### `getters.js`
 
 Sometimes we may need to get derived state based on store state, like filtering for a specific prop.
-Using a getter will also cache the result based on dependencies due to [how computed props work](https://vuejs.org/v2/guide/computed.html#Computed-Caching-vs-Methods)
+Using a getter also caches the result based on dependencies due to [how computed props work](https://vuejs.org/v2/guide/computed.html#Computed-Caching-vs-Methods)
 This can be done through the `getters`:
 
 ```javascript
@@ -265,8 +271,11 @@ import { mapGetters } from 'vuex';
 
 ### `mutation_types.js`
 
-From [vuex mutations docs](https://vuex.vuejs.org/guide/mutations.html):
-> It is a commonly seen pattern to use constants for mutation types in various Flux implementations. This allows the code to take advantage of tooling like linters, and putting all constants in a single file allows your collaborators to get an at-a-glance view of what mutations are possible in the entire application.
+From [Vuex mutations documentation](https://vuex.vuejs.org/guide/mutations.html):
+> It is a commonly seen pattern to use constants for mutation types in various Flux implementations.
+> This allows the code to take advantage of tooling like linters, and putting all constants in a
+> single file allows your collaborators to get an at-a-glance view of what mutations are possible
+> in the entire application.
 
 ```javascript
 export const ADD_USER = 'ADD_USER';
@@ -340,7 +349,7 @@ export default ({
 
 #### Why not just ...spread the initial state?
 
-The astute reader will see an opportunity to cut out a few lines of code from
+The astute reader sees an opportunity to cut out a few lines of code from
 the example above:
 
 ```javascript
@@ -353,17 +362,17 @@ export default initialState => ({
 });
 ```
 
-We've made the conscious decision to avoid this pattern to aid in the
-discoverability and searchability of our frontend codebase. The reasoning for
-this is described in [this
+We made the conscious decision to avoid this pattern to improve the ability to
+discover and search our frontend codebase. The same applies
+when [providing data to a Vue app](vue.md#providing-data-from-haml-to-javascript). The reasoning for this is described in [this
 discussion](https://gitlab.com/gitlab-org/frontend/rfcs/-/issues/56#note_302514865):
 
 > Consider a `someStateKey` is being used in the store state. You _may_ not be
 > able to grep for it directly if it was provided only by `el.dataset`. Instead,
-> you'd have to grep for `some_state_key`, since it could have come from a rails
+> you'd have to grep for `some_state_key`, because it could have come from a Rails
 > template. The reverse is also true: if you're looking at a rails template, you
 > might wonder what uses `some_state_key`, but you'd _have_ to grep for
-> `someStateKey`
+> `someStateKey`.
 
 ### Communicating with the Store
 
@@ -420,23 +429,22 @@ export default {
 
 #### Testing Vuex concerns
 
-Refer to [vuex docs](https://vuex.vuejs.org/guide/testing.html) regarding testing Actions, Getters and Mutations.
+Refer to [Vuex documentation](https://vuex.vuejs.org/guide/testing.html) regarding testing Actions, Getters and Mutations.
 
 #### Testing components that need a store
 
-Smaller components might use `store` properties to access the data.
-In order to write unit tests for those components, we need to include the store and provide the correct state:
+Smaller components might use `store` properties to access the data. To write unit tests for those
+components, we need to include the store and provide the correct state:
 
 ```javascript
 //component_spec.js
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { createStore } from './store';
 import Component from './component.vue'
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('component', () => {
   let store;
@@ -446,7 +454,6 @@ describe('component', () => {
     store = createStore();
 
     wrapper = mount(Component, {
-      localVue,
       store,
     });
   };
@@ -474,10 +481,16 @@ describe('component', () => {
 });
 ```
 
+Some test files may still use the
+[deprecated `createLocalVue` function](https://gitlab.com/gitlab-org/gitlab/-/issues/220482)
+from `@vue/test-utils` and `localVue.use(Vuex)`. This is unnecessary, and should be
+avoided or removed when possible.
+
 ### Two way data binding
 
-When storing form data in Vuex, it is sometimes necessary to update the value stored. The store should never be mutated directly, and an action should be used instead.
-In order to still use `v-model` in our code, we need to create computed properties in this form:
+When storing form data in Vuex, it is sometimes necessary to update the value stored. The store
+should never be mutated directly, and an action should be used instead.
+To use `v-model` in our code, we need to create computed properties in this form:
 
 ```javascript
 export default {
@@ -515,7 +528,7 @@ export default {
 };
 ```
 
-Adding a few of these properties becomes cumbersome, and makes the code more repetitive with more tests to write. To simplify this there is a helper in `~/vuex_shared/bindings.js`
+Adding a few of these properties becomes cumbersome, and makes the code more repetitive with more tests to write. To simplify this there is a helper in `~/vuex_shared/bindings.js`.
 
 The helper can be used like so:
 
@@ -562,4 +575,4 @@ export default {
 }
 ```
 
-`mapComputed` will then generate the appropriate computed properties that get the data from the store and dispatch the correct action when updated.
+`mapComputed` then generates the appropriate computed properties that get the data from the store and dispatch the correct action when updated.

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'groups/edit.html.haml' do
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
 
   before do
@@ -20,9 +21,9 @@ RSpec.describe 'groups/edit.html.haml' do
 
         expect(rendered).to render_template('groups/settings/_ip_restriction')
         expect(rendered).to(have_field('group_ip_restriction_ranges',
-                                       { disabled: false,
-                                         with: ranges.join(","),
-                                         type: :hidden }))
+                                       disabled: false,
+                                       with: ranges.join(","),
+                                       type: :hidden))
       end
     end
 
@@ -31,7 +32,7 @@ RSpec.describe 'groups/edit.html.haml' do
         render
 
         expect(rendered).to render_template('groups/settings/_ip_restriction')
-        expect(rendered).not_to have_field('group_ip_restriction_ranges', { type: :hidden })
+        expect(rendered).not_to have_field('group_ip_restriction_ranges', type: :hidden)
       end
     end
 
@@ -83,9 +84,9 @@ RSpec.describe 'groups/edit.html.haml' do
 
         expect(rendered).to render_template('groups/settings/_allowed_email_domain')
         expect(rendered).to(have_field('group_allowed_email_domains_list',
-                                       { disabled: false,
-                                         with: domains.join(","),
-                                         type: :hidden }))
+                                       disabled: false,
+                                       with: domains.join(","),
+                                       type: :hidden))
       end
     end
 
@@ -100,8 +101,8 @@ RSpec.describe 'groups/edit.html.haml' do
 
     context 'feature is enabled' do
       before do
-        allow(group).to receive(:feature_available?).and_return(false)
-        allow(group).to receive(:feature_available?).with(:group_allowed_email_domains).and_return(true)
+        allow(group).to receive(:licensed_feature_available?).and_return(false)
+        allow(group).to receive(:licensed_feature_available?).with(:group_allowed_email_domains).and_return(true)
       end
 
       context 'top-level group' do

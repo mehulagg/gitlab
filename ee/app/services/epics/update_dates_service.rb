@@ -11,7 +11,7 @@ module Epics
 
     def initialize(epics)
       @epics = epics
-      @epics = Epic.for_ids(@epics) unless @epics.is_a?(ActiveRecord::Relation)
+      @epics = Epic.id_in(@epics) unless @epics.is_a?(ActiveRecord::Relation)
     end
 
     def execute

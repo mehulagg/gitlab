@@ -30,6 +30,18 @@ RSpec.describe Projects::UpdateMirrorService do
       service.execute
     end
 
+    it 'runs project housekeeping' do
+      stub_fetch_mirror(project)
+
+      expect_next_instance_of(Repositories::HousekeepingService) do |svc|
+        expect(svc).to receive(:increment!)
+        expect(svc).to receive(:needed?).and_return(true)
+        expect(svc).to receive(:execute)
+      end
+
+      service.execute
+    end
+
     it 'rescues exceptions from Repository#ff_merge' do
       stub_fetch_mirror(project)
 
@@ -87,12 +99,22 @@ RSpec.describe Projects::UpdateMirrorService do
     end
 
     context "updating tags" do
-      it "creates new tags" do
+      it "creates new tags, expiring cache if there are tag changes" do
         stub_fetch_mirror(project)
+
+        expect(project.repository).to receive(:expire_tags_cache).and_call_original
 
         service.execute
 
         expect(project.repository.tag_names).to include('new-tag')
+      end
+
+      it 'does not expire cache if there are no tag changes' do
+        stub_fetch_mirror(project, tags_changed: false)
+
+        expect(project.repository).not_to receive(:expire_tags_cache)
+
+        service.execute
       end
 
       it "only invokes Git::TagPushService for tags pointing to commits" do
@@ -189,156 +211,118 @@ RSpec.describe Projects::UpdateMirrorService do
     end
 
     context 'updating branches' do
-      shared_examples 'a working pull mirror' do |branch_prefix|
-        context 'when the mirror has a repository' do
-          let(:master) { "#{branch_prefix}master"}
+      context 'when the mirror has a repository' do
+        let(:master) { "master"}
+
+        before do
+          stub_fetch_mirror(project)
+        end
+
+        it 'creates new branches' do
+          service.execute
+
+          expect(project.repository.branch_names).to include("new-branch")
+        end
+
+        it 'updates existing branches' do
+          service.execute
+
+          expect(project.repository.find_branch("existing-branch").dereferenced_target)
+            .to eq(project.repository.find_branch(master).dereferenced_target)
+        end
+
+        context 'when mirror only protected branches option is set' do
+          let(:new_protected_branch_name) { "new-branch" }
+          let(:protected_branch_name) { "existing-branch" }
 
           before do
-            stub_fetch_mirror(project)
+            project.update!(only_mirror_protected_branches: true)
           end
 
-          it 'creates new branches' do
+          it 'creates a new protected branch' do
+            create(:protected_branch, project: project, name: new_protected_branch_name)
+            project.reload
+
             service.execute
 
-            expect(project.repository.branch_names).to include("#{branch_prefix}new-branch")
+            expect(project.repository.branch_names).to include(new_protected_branch_name)
           end
 
-          it 'updates existing branches' do
+          it 'does not create an unprotected branch' do
             service.execute
 
-            expect(project.repository.find_branch("#{branch_prefix}existing-branch").dereferenced_target)
+            expect(project.repository.branch_names).not_to include(new_protected_branch_name)
+          end
+
+          it 'updates existing protected branches' do
+            create(:protected_branch, project: project, name: protected_branch_name)
+            project.reload
+
+            service.execute
+
+            expect(project.repository.find_branch(protected_branch_name).dereferenced_target)
               .to eq(project.repository.find_branch(master).dereferenced_target)
           end
 
-          context 'when mirror only protected branches option is set' do
-            let(:new_protected_branch_name) { "#{branch_prefix}new-branch" }
-            let(:protected_branch_name) { "#{branch_prefix}existing-branch" }
+          it 'does not update unprotected branches' do
+            service.execute
 
-            before do
-              project.update!(only_mirror_protected_branches: true)
-            end
+            expect(project.repository.find_branch(protected_branch_name).dereferenced_target)
+              .not_to eq(project.repository.find_branch(master).dereferenced_target)
+          end
+        end
 
-            it 'creates a new protected branch' do
-              create(:protected_branch, project: project, name: new_protected_branch_name)
-              project.reload
+        context 'with diverged branches' do
+          let(:diverged_branch) { "markdown"}
 
-              service.execute
-
-              expect(project.repository.branch_names).to include(new_protected_branch_name)
-            end
-
-            it 'does not create an unprotected branch' do
-              service.execute
-
-              expect(project.repository.branch_names).not_to include(new_protected_branch_name)
-            end
-
-            it 'updates existing protected branches' do
-              create(:protected_branch, project: project, name: protected_branch_name)
-              project.reload
+          context 'when mirror_overwrites_diverged_branches is true' do
+            it 'update diverged branches' do
+              project.mirror_overwrites_diverged_branches = true
 
               service.execute
 
-              expect(project.repository.find_branch(protected_branch_name).dereferenced_target)
+              expect(project.repository.find_branch(diverged_branch).dereferenced_target)
                 .to eq(project.repository.find_branch(master).dereferenced_target)
             end
+          end
 
-            it 'does not update unprotected branches' do
+          context 'when mirror_overwrites_diverged_branches is false' do
+            it "doesn't update diverged branches" do
+              project.mirror_overwrites_diverged_branches = false
+
               service.execute
 
-              expect(project.repository.find_branch(protected_branch_name).dereferenced_target)
+              expect(project.repository.find_branch(diverged_branch).dereferenced_target)
                 .not_to eq(project.repository.find_branch(master).dereferenced_target)
             end
           end
 
-          context 'with diverged branches' do
-            let(:diverged_branch) { "#{branch_prefix}markdown"}
+          context 'when mirror_overwrites_diverged_branches is nil' do
+            it "doesn't update diverged branches" do
+              project.mirror_overwrites_diverged_branches = nil
 
-            context 'when mirror_overwrites_diverged_branches is true' do
-              it 'update diverged branches' do
-                project.mirror_overwrites_diverged_branches = true
+              service.execute
 
-                service.execute
-
-                expect(project.repository.find_branch(diverged_branch).dereferenced_target)
-                  .to eq(project.repository.find_branch(master).dereferenced_target)
-              end
+              expect(project.repository.find_branch(diverged_branch).dereferenced_target)
+                .not_to eq(project.repository.find_branch(master).dereferenced_target)
             end
-
-            context 'when mirror_overwrites_diverged_branches is false' do
-              it "doesn't update diverged branches" do
-                project.mirror_overwrites_diverged_branches = false
-
-                service.execute
-
-                expect(project.repository.find_branch(diverged_branch).dereferenced_target)
-                  .not_to eq(project.repository.find_branch(master).dereferenced_target)
-              end
-            end
-
-            context 'when mirror_overwrites_diverged_branches is nil' do
-              it "doesn't update diverged branches" do
-                project.mirror_overwrites_diverged_branches = nil
-
-                service.execute
-
-                expect(project.repository.find_branch(diverged_branch).dereferenced_target)
-                  .not_to eq(project.repository.find_branch(master).dereferenced_target)
-              end
-            end
-          end
-        end
-
-        context 'when project is empty' do
-          it 'does not add a default master branch' do
-            project    = create(:project_empty_repo, :mirror, import_url: Project::UNKNOWN_IMPORT_URL)
-            repository = project.repository
-
-            allow(project).to receive(:fetch_mirror) { create_file(repository) }
-            expect(::Branches::CreateService).not_to receive(:create_master_branch)
-
-            service.execute
-
-            expect(repository.branch_names).not_to include('master')
           end
         end
       end
 
-      context 'when pull_mirror_branch_prefix is set' do
-        let(:pull_mirror_branch_prefix) { 'upstream/' }
+      context 'when project is empty' do
+        it 'does not add a default master branch' do
+          project    = create(:project_empty_repo, :mirror, import_url: Project::UNKNOWN_IMPORT_URL)
+          repository = project.repository
 
-        before do
-          project.update!(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
-        end
-
-        it "doesn't create unprefixed branches" do
-          stub_fetch_mirror(project)
+          allow(project).to receive(:fetch_mirror) { create_file(repository) }
+          expect(::Branches::CreateService).not_to receive(:create_master_branch)
 
           service.execute
 
-          expect(project.repository.branch_names).not_to include('new-branch')
-        end
-
-        it_behaves_like 'a working pull mirror', 'upstream/'
-
-        context 'when pull_mirror_branch_prefix feature flag is disabled' do
-          before do
-            stub_feature_flags(pull_mirror_branch_prefix: false)
-          end
-
-          it_behaves_like 'a working pull mirror'
-
-          it "doesn't create prefixed branches" do
-            stub_fetch_mirror(project)
-
-            service.execute
-
-            expect(project.repository.branch_names).not_to include("#{pull_mirror_branch_prefix}new-branch")
-          end
+          expect(repository.branch_names).not_to include('master')
         end
       end
-
-      it_behaves_like 'a working pull mirror'
 
       def create_file(repository)
         repository.create_file(
@@ -454,42 +438,16 @@ RSpec.describe Projects::UpdateMirrorService do
     end
   end
 
-  def rewrite_refs_as_pull_mirror(project)
-    return unless project.pull_mirror_branch_prefix
-    return unless Feature.enabled?(:pull_mirror_branch_prefix)
-
-    repository = project.repository
-    old_branches = repository.branches.each_with_object({}) do |branch, branches|
-      branches[branch.name] = branch.dereferenced_target.id
-    end
-
-    rugged = rugged_repo(repository)
-    old_branches.each do |name, target|
-      mirrored_branch_ref = "refs/heads/#{project.pull_mirror_branch_prefix}#{name}"
-      rugged.references.create(mirrored_branch_ref, target)
-      rugged.head = mirrored_branch_ref if name == 'master'
-      rugged.branches.delete(name)
-    end
-
-    repository.expire_branches_cache
-    repository.branches
+  def stub_fetch_mirror(project, repository: project.repository, tags_changed: true )
+    allow(project).to receive(:fetch_mirror) { fetch_mirror(repository, tags_changed: tags_changed) }
   end
 
-  def stub_fetch_mirror(project, repository: project.repository)
-    branch_prefix = project.pull_mirror_branch_prefix
-    branch_prefix = '' unless Feature.enabled?(:pull_mirror_branch_prefix)
-
-    rewrite_refs_as_pull_mirror(project)
-
-    allow(project).to receive(:fetch_mirror) { fetch_mirror(repository, branch_prefix: branch_prefix) }
-  end
-
-  def fetch_mirror(repository, branch_prefix: '')
+  def fetch_mirror(repository, tags_changed: true)
     rugged = rugged_repo(repository)
-    masterrev = repository.find_branch("#{branch_prefix}master").dereferenced_target.id
+    masterrev = repository.find_branch("master").dereferenced_target.id
 
     parentrev = repository.commit(masterrev).parent_id
-    rugged.references.create("refs/heads/#{branch_prefix}existing-branch", parentrev)
+    rugged.references.create("refs/heads/existing-branch", parentrev)
 
     repository.expire_branches_cache
     repository.branches
@@ -508,6 +466,8 @@ RSpec.describe Projects::UpdateMirrorService do
 
     # New tag that point to a blob
     rugged.references.create('refs/tags/new-tag-on-blob', 'c74175afd117781cbc983664339a0f599b5bb34e')
+
+    Gitaly::FetchRemoteResponse.new(tags_changed: tags_changed)
   end
 
   def modify_tag(repository, tag_name)

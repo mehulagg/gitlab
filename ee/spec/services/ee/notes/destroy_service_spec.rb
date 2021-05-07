@@ -31,5 +31,17 @@ RSpec.describe Notes::DestroyService do
 
       include_examples 'trigger status page publish'
     end
+
+    describe 'tracking via usage ping' do
+      let_it_be(:note) do
+        create(:note_on_epic, author: user)
+      end
+
+      it 'tracks epic note destroy' do
+        expect(::Gitlab::UsageDataCounters::EpicActivityUniqueCounter).to receive(:track_epic_note_destroyed_action)
+
+        service.execute(note)
+      end
+    end
   end
 end

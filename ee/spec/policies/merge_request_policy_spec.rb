@@ -140,6 +140,7 @@ RSpec.describe MergeRequestPolicy do
     let_it_be(:user) { create :user }
     let(:protected_branch) { create(:protected_branch, project: project, name: branch_name, code_owner_approval_required: true) }
     let_it_be(:approver_group) { create(:group) }
+
     let(:merge_request) { create(:merge_request, source_project: project, target_project: project, target_branch: branch_name) }
 
     before do

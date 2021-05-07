@@ -1,6 +1,5 @@
+import { GlTab, GlBadge, GlButton, GlTabs } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-
-import { GlLink, GlBadge, GlButton } from '@gitlab/ui';
 
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';
 import { FilterState } from 'ee/requirements/constants';
@@ -20,6 +19,10 @@ const createComponent = ({
       showCreateForm,
       canCreateRequirement,
     },
+    stubs: {
+      GlTabs,
+      GlTab,
+    },
   });
 
 describe('RequirementsTabs', () => {
@@ -35,39 +38,30 @@ describe('RequirementsTabs', () => {
 
   describe('template', () => {
     it('renders "Open" tab', () => {
-      const tabEl = wrapper.findAll(GlLink).at(0);
+      const tabEl = wrapper.findAll(GlTab).at(0);
 
-      expect(tabEl.attributes('id')).toBe('state-opened');
-      expect(tabEl.attributes('data-state')).toBe('opened');
-      expect(tabEl.attributes('title')).toBe('Filter by requirements that are currently opened.');
       expect(tabEl.text()).toContain('Open');
       expect(tabEl.find(GlBadge).text()).toBe(`${mockRequirementsCount.OPENED}`);
     });
 
     it('renders "Archived" tab', () => {
-      const tabEl = wrapper.findAll(GlLink).at(1);
+      const tabEl = wrapper.findAll(GlTab).at(1);
 
-      expect(tabEl.attributes('id')).toBe('state-archived');
-      expect(tabEl.attributes('data-state')).toBe('archived');
-      expect(tabEl.attributes('title')).toBe('Filter by requirements that are currently archived.');
       expect(tabEl.text()).toContain('Archived');
       expect(tabEl.find(GlBadge).text()).toBe(`${mockRequirementsCount.ARCHIVED}`);
     });
 
     it('renders "All" tab', () => {
-      const tabEl = wrapper.findAll(GlLink).at(2);
+      const tabEl = wrapper.findAll(GlTab).at(2);
 
-      expect(tabEl.attributes('id')).toBe('state-all');
-      expect(tabEl.attributes('data-state')).toBe('all');
-      expect(tabEl.attributes('title')).toBe('Show all requirements.');
       expect(tabEl.text()).toContain('All');
       expect(tabEl.find(GlBadge).text()).toBe(`${mockRequirementsCount.ALL}`);
     });
 
     it('renders class `active` on currently selected tab', () => {
-      const tabEl = wrapper.findAll('li').at(0);
+      const tabEl = wrapper.findAll(GlTab).at(0);
 
-      expect(tabEl.classes()).toContain('active');
+      expect(tabEl.attributes('active')).toBeDefined();
     });
 
     it('renders "New requirement" button when current tab is "Open" tab', () => {
@@ -76,7 +70,7 @@ describe('RequirementsTabs', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const buttonEl = wrapper.find(GlButton);
+        const buttonEl = wrapper.findAll(GlButton).at(2);
 
         expect(buttonEl.exists()).toBe(true);
         expect(buttonEl.text()).toBe('New requirement');
@@ -85,7 +79,7 @@ describe('RequirementsTabs', () => {
 
     it('does not render "New requirement" button when current tab is not "Open" tab', () => {
       wrapper.setProps({
-        filterBy: FilterState.closed,
+        filterBy: FilterState.archived,
       });
 
       return wrapper.vm.$nextTick(() => {
@@ -114,9 +108,11 @@ describe('RequirementsTabs', () => {
       });
 
       return wrapper.vm.$nextTick(() => {
-        const buttonEl = wrapper.find(GlButton);
+        const buttonEl = wrapper.findAll(GlButton);
 
-        expect(buttonEl.props('disabled')).toBe(true);
+        expect(buttonEl.at(0).props('disabled')).toBe(true);
+        expect(buttonEl.at(1).props('disabled')).toBe(true);
+        expect(buttonEl.at(2).props('disabled')).toBe(true);
       });
     });
   });

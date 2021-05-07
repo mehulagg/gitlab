@@ -6,6 +6,7 @@ require 'mime/types'
 RSpec.describe API::Repositories do
   include RepoHelpers
   include WorkhorseHelpers
+  include ProjectForksHelper
 
   let(:user) { create(:user) }
   let(:guest) { create(:user).tap { |u| create(:project_member, :guest, user: u, project: project) } }
@@ -392,6 +393,28 @@ RSpec.describe API::Repositories do
         expect(json_response['diffs']).to be_present
       end
 
+      it "compare commits between different projects with non-forked relation" do
+        public_project = create(:project, :repository, :public)
+
+        get api(route, current_user), params: { from: sample_commit.parent_id, to: sample_commit.id, from_project_id: public_project.id }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+
+      it "compare commits between different projects" do
+        group = create(:group)
+        group.add_owner(current_user)
+
+        forked_project = fork_project(project, current_user, repository: true, namespace: group)
+        forked_project.repository.create_ref('refs/heads/improve/awesome', 'refs/heads/improve/more-awesome')
+
+        get api(route, current_user), params: { from: 'improve/awesome', to: 'feature', from_project_id: forked_project.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['commits']).to be_present
+        expect(json_response['diffs']).to be_present
+      end
+
       it "compares same refs" do
         get api(route, current_user), params: { from: 'master', to: 'master' }
 
@@ -608,6 +631,121 @@ RSpec.describe API::Repositories do
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['message']).to eq('Provide at least 2 refs')
       end
+    end
+  end
+
+  describe 'POST /projects/:id/repository/changelog' do
+    it 'generates the changelog for a version' do
+      spy = instance_spy(Repositories::ChangelogService)
+
+      allow(Repositories::ChangelogService)
+        .to receive(:new)
+        .with(
+          project,
+          user,
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: DateTime.new(2020, 1, 1),
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        )
+        .and_return(spy)
+
+      allow(spy).to receive(:execute)
+
+      post(
+        api("/projects/#{project.id}/repository/changelog", user),
+        params: {
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: '2020-01-01',
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+
+    it 'supports leaving out the from and to attribute' do
+      spy = instance_spy(Repositories::ChangelogService)
+
+      allow(Repositories::ChangelogService)
+        .to receive(:new)
+        .with(
+          project,
+          user,
+          version: '1.0.0',
+          date: DateTime.new(2020, 1, 1),
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        )
+        .and_return(spy)
+
+      expect(spy).to receive(:execute)
+
+      post(
+        api("/projects/#{project.id}/repository/changelog", user),
+        params: {
+          version: '1.0.0',
+          date: '2020-01-01',
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        }
+      )
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+
+    it 'produces an error when generating the changelog fails' do
+      spy = instance_spy(Repositories::ChangelogService)
+
+      allow(Repositories::ChangelogService)
+        .to receive(:new)
+        .with(
+          project,
+          user,
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: DateTime.new(2020, 1, 1),
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        )
+        .and_return(spy)
+
+      allow(spy)
+        .to receive(:execute)
+        .and_raise(Gitlab::Changelog::Error.new('oops'))
+
+      post(
+        api("/projects/#{project.id}/repository/changelog", user),
+        params: {
+          version: '1.0.0',
+          from: 'foo',
+          to: 'bar',
+          date: '2020-01-01',
+          branch: 'kittens',
+          trailer: 'Foo',
+          file: 'FOO.md',
+          message: 'Commit message'
+        }
+      )
+
+      expect(response).to have_gitlab_http_status(:unprocessable_entity)
+      expect(json_response['message']).to eq('Failed to generate the changelog: oops')
     end
   end
 end

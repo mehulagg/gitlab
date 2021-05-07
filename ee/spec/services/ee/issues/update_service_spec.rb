@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Issues::UpdateService do
   let_it_be(:group) { create(:group) }
+
   let(:project) { create(:project, group: group) }
   let(:issue) { create(:issue, project: project) }
   let(:user) { issue.author }
@@ -19,6 +20,7 @@ RSpec.describe Issues::UpdateService do
 
     context 'refresh epic dates' do
       let_it_be(:epic) { create(:epic) }
+
       let(:issue) { create(:issue, epic: epic, project: project) }
 
       context 'updating milestone' do
@@ -59,6 +61,22 @@ RSpec.describe Issues::UpdateService do
               end
 
               update_issue(iteration: nil)
+            end
+          end
+
+          context 'setting to IssuableFinder::Params::NONE' do
+            it 'calls NotificationService#removed_iteration_issue' do
+              expect_next_instance_of(NotificationService::Async) do |ns|
+                expect(ns).to receive(:removed_iteration_issue)
+              end
+
+              update_issue(sprint_id: IssuableFinder::Params::NONE)
+            end
+
+            it 'removes the iteration properly' do
+              update_issue(sprint_id: IssuableFinder::Params::NONE)
+
+              expect(issue.reload.iteration).to be_nil
             end
           end
 
@@ -148,6 +166,41 @@ RSpec.describe Issues::UpdateService do
         let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
 
         it_behaves_like 'creates iteration resource event'
+      end
+    end
+
+    context 'changing issue_type' do
+      let!(:sla_setting) { create(:project_incident_management_setting, :sla_enabled, project: project) }
+
+      before do
+        stub_licensed_features(incident_sla: true)
+      end
+
+      context 'from issue to incident' do
+        it 'creates an SLA' do
+          expect { update_issue(issue_type: 'incident') }.to change(IssuableSla, :count).by(1)
+          expect(issue.reload.issuable_sla).to be_present
+        end
+      end
+
+      context 'from incident to issue' do
+        let(:issue) { create(:incident, project: project) }
+        let!(:sla) { create(:issuable_sla, issue: issue) }
+
+        it 'does not remove the SLA or create a new one' do
+          expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
+          expect(issue.reload.issuable_sla).to be_present
+        end
+      end
+
+      # Not an expected scenario, but covers an SLA-agnostic hypothetical
+      context 'from test_case to issue' do
+        let(:issue) { create(:quality_test_case, project: project) }
+
+        it 'does nothing' do
+          expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
+          expect(issue.reload.issuable_sla).to be_nil
+        end
       end
     end
 

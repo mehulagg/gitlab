@@ -1,34 +1,61 @@
 <script>
+import { GlCard, GlEmptyState, GlLink, GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import Vue from 'vue';
-import { GlCard, GlEmptyState, GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import api from '~/api';
+import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
+import { joinPaths } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import SelectProjectsDropdown from './select_projects_dropdown.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
+import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
 export default {
   name: 'TestCoverageTable',
   components: {
     GlCard,
     GlEmptyState,
+    GlLink,
     GlSkeletonLoader,
     GlTable,
     SelectProjectsDropdown,
     TimeAgoTooltip,
   },
+  mixins: [glFeatureFlagsMixin()],
+  inject: {
+    groupFullPath: {
+      default: '',
+    },
+  },
   apollo: {
-    coverageData: {
+    projects: {
       query: getProjectsTestCoverage,
       debounce: 500,
       variables() {
         return {
-          projectIds: this.selectedProjectIds,
+          groupFullPath: this.groupFullPath,
+          projectIds: this.projectIdsToFetch,
         };
       },
       result({ data }) {
+        const projects = data.group.projects.nodes;
         // Keep data from all queries so that we don't
         // fetch the same data more than once
-        this.allCoverageData = [...this.allCoverageData, ...data.projects.nodes];
+        this.allCoverageData = [
+          ...this.allCoverageData,
+          ...projects
+            .filter(({ id }) => !this.allCoverageData.some((project) => project.id === id))
+            .map((project) => ({
+              ...project,
+              codeCoveragePath: joinPaths(
+                gon.relative_url_root || '',
+                `/${project.fullPath}/-/graphs/${project.repository.rootRef}/charts`,
+              ),
+            })),
+        ];
+      },
+      update(data) {
+        return data.group.projects.nodes;
       },
       error() {
         this.handleError();
@@ -44,10 +71,11 @@ export default {
   data() {
     return {
       allProjectsSelected: false,
-      allCoverageData: [],
+      allCoverageData: [], // All data we have ever received whether selected or not
       hasError: false,
       isLoading: false,
-      projectIds: {},
+      selectedProjectIds: {},
+      projects: {},
     };
   },
   computed: {
@@ -56,41 +84,68 @@ export default {
     },
     skipQuery() {
       // Skip if we haven't selected any projects yet
-      return !this.selectedProjectIds.length;
+      return !this.allProjectsSelected && !this.projectIdsToFetch.length;
     },
-    selectedProjectIds() {
+    /**
+     * projectIdsToFetch is a subset of selectedProjectIds
+     * The difference is that it only returns the projects
+     * that we have selected but haven't requested yet
+     */
+    projectIdsToFetch() {
+      if (this.allProjectsSelected) {
+        return null;
+      }
       // Get the IDs of the projects that we haven't requested yet
-      return Object.keys(this.projectIds).filter(
-        id => !this.allCoverageData.some(project => project.id === id),
+      return Object.keys(this.selectedProjectIds).filter(
+        (id) => !this.allCoverageData.some((project) => project.id === id),
       );
     },
     selectedCoverageData() {
-      return this.allCoverageData.filter(({ id }) => this.projectIds[id]);
+      if (this.allProjectsSelected) {
+        return this.allCoverageData;
+      }
+
+      return this.allCoverageData.filter(({ id }) => this.selectedProjectIds[id]);
+    },
+    sortedCoverageData() {
+      // Sort the table by most recently updated coverage report
+      return [...this.selectedCoverageData].sort((a, b) => {
+        if (a.codeCoverageSummary.lastUpdatedOn > b.codeCoverageSummary.lastUpdatedOn) {
+          return -1;
+        } else if (a.codeCoverageSummary.lastUpdatedOn < b.codeCoverageSummary.lastUpdatedOn) {
+          return 1;
+        }
+        return 0;
+      });
     },
   },
   methods: {
     handleError() {
       this.hasError = true;
     },
-    selectAllProjects(allProjects) {
-      this.projectIds = Object.fromEntries(allProjects.map(({ id }) => [id, true]));
+    onProjectClick() {
+      if (this.glFeatures.usageDataITestingGroupCodeCoverageProjectClickTotal) {
+        api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
+      }
+    },
+    selectAllProjects() {
       this.allProjectsSelected = true;
     },
     toggleProject({ id }) {
       if (this.allProjectsSelected) {
         // Reset all project selections to false
         this.allProjectsSelected = false;
-        this.projectIds = Object.fromEntries(
-          Object.entries(this.projectIds).map(([key]) => [key, false]),
+        this.selectedProjectIds = Object.fromEntries(
+          Object.entries(this.selectedProjectIds).map(([key]) => [key, false]),
         );
       }
 
-      if (Object.prototype.hasOwnProperty.call(this.projectIds, id)) {
-        Vue.set(this.projectIds, id, !this.projectIds[id]);
+      if (Object.prototype.hasOwnProperty.call(this.selectedProjectIds, id)) {
+        Vue.set(this.selectedProjectIds, id, !this.selectedProjectIds[id]);
         return;
       }
 
-      Vue.set(this.projectIds, id, true);
+      Vue.set(this.selectedProjectIds, id, true);
     },
   },
   tableFields: [
@@ -99,19 +154,20 @@ export default {
       label: __('Project'),
     },
     {
-      key: 'coverage',
+      key: 'averageCoverage',
       label: s__('RepositoriesAnalytics|Coverage'),
     },
     {
-      key: 'numberOfCoverages',
-      label: s__('RepositoriesAnalytics|Number of Coverages'),
+      key: 'coverageCount',
+      label: s__('RepositoriesAnalytics|Coverage Jobs'),
     },
     {
-      key: 'lastUpdate',
+      key: 'lastUpdatedOn',
       label: s__('RepositoriesAnalytics|Last Update'),
     },
   ],
   text: {
+    header: s__('RepositoriesAnalytics|Latest test coverage results'),
     emptyStateTitle: s__('RepositoriesAnalytics|Please select projects to display.'),
     emptyStateDescription: s__(
       'RepositoriesAnalytics|Please select a project or multiple projects to display their most recent test coverage data.',
@@ -126,17 +182,22 @@ export default {
     totalWidth: 430,
     totalHeight: 15,
   },
+  averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
+  usagePingProjectEvent: 'i_testing_group_code_coverage_project_click_total',
 };
 </script>
 <template>
   <gl-card>
     <template #header>
-      <select-projects-dropdown
-        class="gl-w-quarter"
-        @projects-query-error="handleError"
-        @select-all-projects="selectAllProjects"
-        @select-project="toggleProject"
-      />
+      <div class="gl-display-flex gl-justify-content-space-between">
+        <h5>{{ $options.text.header }}</h5>
+        <select-projects-dropdown
+          class="gl-w-quarter"
+          @projects-query-error="handleError"
+          @select-all-projects="selectAllProjects"
+          @select-project="toggleProject"
+        />
+      </div>
     </template>
 
     <template v-if="isLoading">
@@ -164,33 +225,42 @@ export default {
       data-testid="test-coverage-data-table"
       thead-class="thead-white"
       :fields="$options.tableFields"
-      :items="selectedCoverageData"
+      :items="sortedCoverageData"
     >
       <template #head(project)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(coverage)="data">
+      <template #head(averageCoverage)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(numberOfCoverages)="data">
+      <template #head(coverageCount)="data">
         <div>{{ data.label }}</div>
       </template>
-      <template #head(lastUpdate)="data">
+      <template #head(lastUpdatedOn)="data">
         <div>{{ data.label }}</div>
       </template>
 
       <template #cell(project)="{ item }">
-        <div :data-testid="`${item.id}-name`">{{ item.name }}</div>
+        <gl-link
+          target="_blank"
+          :href="item.codeCoveragePath"
+          :data-testid="`${item.id}-name`"
+          @click.once="onProjectClick"
+        >
+          {{ item.name }}
+        </gl-link>
       </template>
-      <template #cell(coverage)="{ item }">
-        <div :data-testid="`${item.id}-average`">{{ item.codeCoverage.average }}%</div>
+      <template #cell(averageCoverage)="{ item }">
+        <div :data-testid="`${item.id}-average`">
+          {{ $options.averageCoverageFormatter(item.codeCoverageSummary.averageCoverage, 2) }}
+        </div>
       </template>
-      <template #cell(numberOfCoverages)="{ item }">
-        <div :data-testid="`${item.id}-count`">{{ item.codeCoverage.count }}</div>
+      <template #cell(coverageCount)="{ item }">
+        <div :data-testid="`${item.id}-count`">{{ item.codeCoverageSummary.coverageCount }}</div>
       </template>
-      <template #cell(lastUpdate)="{ item }">
+      <template #cell(lastUpdatedOn)="{ item }">
         <time-ago-tooltip
-          :time="item.codeCoverage.lastUpdatedAt"
+          :time="item.codeCoverageSummary.lastUpdatedOn"
           :data-testid="`${item.id}-date`"
         />
       </template>

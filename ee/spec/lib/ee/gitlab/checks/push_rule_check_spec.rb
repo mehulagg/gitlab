@@ -59,7 +59,24 @@ RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
   end
 
   describe '#validate!' do
-    it_behaves_like "push checks"
+    context "parallel push checks" do
+      it_behaves_like "push checks"
+
+      before do
+        ::Gitlab::Git::HookEnv.set(project.repository.gl_repository,
+                                   "GIT_OBJECT_DIRECTORY_RELATIVE" => "objects",
+                                   "GIT_ALTERNATE_OBJECT_DIRECTORIES_RELATIVE" => [])
+      end
+
+      it "sets the git env correctly for all hooks", :request_store do
+        expect(Gitaly::Repository).to receive(:new)
+                                        .with(a_hash_including(git_object_directory: "objects"))
+                                        .and_call_original
+
+        # This push fails because of the commit message check
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError)
+      end
+    end
 
     context ":parallel_push_checks feature is disabled" do
       before do

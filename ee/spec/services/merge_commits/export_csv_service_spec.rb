@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe MergeCommits::ExportCsvService do
-  subject { described_class.new(user, group) }
+  let(:service) { described_class.new(user, group) }
 
   let_it_be(:group) { create(:group, name: 'Kombucha lovers') }
   let_it_be(:user) { create(:user, name: 'John Cena') }
@@ -17,6 +17,8 @@ RSpec.describe MergeCommits::ExportCsvService do
   before_all do
     project.add_maintainer(user)
   end
+
+  it { expect(service.csv_data).to be_success }
 
   it 'includes the appropriate headers' do
     expect(csv.headers).to eq(['Merge Commit', 'Author', 'Merge Request', 'Merged By', 'Pipeline', 'Group', 'Project', 'Approver(s)'])
@@ -57,14 +59,54 @@ RSpec.describe MergeCommits::ExportCsvService do
   end
 
   context 'with multiple merge requests' do
-    let_it_be(:merge_request_2) { create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged) }
+    let_it_be(:merge_request_2) { create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged, merge_commit_sha: 'rurebf') }
 
-    it do
-      expect(csv.count).to eq 2
+    it { expect(csv.count).to eq 2 }
+
+    context 'by commit_sha filter' do
+      context 'when valid' do
+        let(:service) { described_class.new(user, group, { commit_sha: merge_request_2.merge_commit_sha }) }
+
+        it { expect(service.csv_data).to be_success }
+
+        it { expect(csv.count).to eq 1 }
+
+        it do
+          expect(csv[0]['Merge Commit']).to eq merge_request_2.merge_commit_sha
+        end
+      end
+
+      context 'when merge commit does not exist' do
+        let(:service) { described_class.new(user, group, { commit_sha: 'inexistent' }) }
+
+        it { expect(csv.count).to eq 0 }
+      end
+    end
+  end
+
+  context 'possible merge commit SHA values' do
+    subject { csv[1]['Merge Commit'] }
+
+    context 'when squash_commit_sha is present' do
+      let_it_be(:squash_commit_merge_request) do
+        create(:merged_merge_request, squash_commit_sha: 'f7ce827c314c9340b075657fd61c789fb01cf74d', source_project: project, target_project: project, state: :merged)
+      end
+
+      it { is_expected.to eq squash_commit_merge_request.squash_commit_sha }
+    end
+
+    context 'when diff_head_sha is present' do
+      let_it_be(:diff_head_merge_request) do
+        create(:merge_request_with_diffs, source_project: project, target_project: project, state: :merged)
+      end
+
+      it { is_expected.to eq diff_head_merge_request.diff_head_sha }
     end
   end
 
   def csv
-    CSV.parse(subject.csv_data, headers: true)
+    data = service.csv_data.payload
+
+    CSV.parse(data, headers: true)
   end
 end

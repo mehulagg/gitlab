@@ -6,7 +6,7 @@ module EE
     extend ::Gitlab::Utils::Override
 
     def supports_epic?
-      is_a?(Issue) && issue_type_supports?(:epics) && project.group.present?
+      false
     end
 
     def supports_health_status?
@@ -27,8 +27,22 @@ module EE
       supports_sla?
     end
 
+    def metric_images_available?
+      return false unless IssuableMetricImage.available_for?(project)
+
+      supports_metric_images?
+    end
+
     def supports_sla?
       incident?
+    end
+
+    def supports_metric_images?
+      incident?
+    end
+
+    def supports_iterations?
+      false
     end
   end
 end

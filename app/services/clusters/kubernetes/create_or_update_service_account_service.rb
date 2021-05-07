@@ -53,6 +53,8 @@ module Clusters
         create_or_update_knative_serving_role_binding
         create_or_update_crossplane_database_role
         create_or_update_crossplane_database_role_binding
+        create_or_update_cilium_role
+        create_or_update_cilium_role_binding
       end
 
       private
@@ -69,7 +71,13 @@ module Clusters
 
       def create_role_or_cluster_role_binding
         if namespace_creator
-          kubeclient.create_or_update_role_binding(role_binding_resource)
+          begin
+            kubeclient.delete_role_binding(role_binding_name, service_account_namespace)
+          rescue Kubeclient::ResourceNotFoundError
+            # Do nothing as we will create new role binding below
+          end
+
+          kubeclient.update_role_binding(role_binding_resource)
         else
           kubeclient.create_or_update_cluster_role_binding(cluster_role_binding_resource)
         end
@@ -89,6 +97,14 @@ module Clusters
 
       def create_or_update_crossplane_database_role_binding
         kubeclient.update_role_binding(crossplane_database_role_binding_resource)
+      end
+
+      def create_or_update_cilium_role
+        kubeclient.update_role(cilium_role_resource)
+      end
+
+      def create_or_update_cilium_role_binding
+        kubeclient.update_role_binding(cilium_role_binding_resource)
       end
 
       def service_account_resource
@@ -117,11 +133,9 @@ module Clusters
       end
 
       def role_binding_resource
-        role_name = Feature.enabled?(:kubernetes_cluster_namespace_role_admin) ? 'admin' : Clusters::Kubernetes::PROJECT_CLUSTER_ROLE_NAME
-
         Gitlab::Kubernetes::RoleBinding.new(
           name: role_binding_name,
-          role_name: role_name,
+          role_name: Clusters::Kubernetes::PROJECT_CLUSTER_ROLE_NAME,
           role_kind: :ClusterRole,
           namespace: service_account_namespace,
           service_account_name: service_account_name
@@ -166,6 +180,28 @@ module Clusters
         Gitlab::Kubernetes::RoleBinding.new(
           name: Clusters::Kubernetes::GITLAB_CROSSPLANE_DATABASE_ROLE_BINDING_NAME,
           role_name: Clusters::Kubernetes::GITLAB_CROSSPLANE_DATABASE_ROLE_NAME,
+          role_kind: :Role,
+          namespace: service_account_namespace,
+          service_account_name: service_account_name
+        ).generate
+      end
+
+      def cilium_role_resource
+        Gitlab::Kubernetes::Role.new(
+          name: Clusters::Kubernetes::GITLAB_CILIUM_ROLE_NAME,
+          namespace: service_account_namespace,
+          rules: [{
+            apiGroups: %w(cilium.io),
+            resources: %w(ciliumnetworkpolicies),
+            verbs: %w(get list create update patch)
+          }]
+        ).generate
+      end
+
+      def cilium_role_binding_resource
+        Gitlab::Kubernetes::RoleBinding.new(
+          name: Clusters::Kubernetes::GITLAB_CILIUM_ROLE_BINDING_NAME,
+          role_name: Clusters::Kubernetes::GITLAB_CILIUM_ROLE_NAME,
           role_kind: :Role,
           namespace: service_account_namespace,
           service_account_name: service_account_name

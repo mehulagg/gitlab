@@ -95,8 +95,6 @@
 
   &:active,
   &.active {
-    box-shadow: $gl-btn-active-background;
-
     background-color: $dark;
     border-color: $border-dark;
     color: $color;
@@ -166,8 +164,7 @@
     line-height: $gl-btn-xs-line-height;
   }
 
-  &.btn-success,
-  &.btn-register {
+  &.btn-success {
     @include btn-green;
   }
 
@@ -176,7 +173,6 @@
       @include btn-outline($white, $green-600, $green-500, $green-100, $green-700, $green-500, $green-200, $green-600, $green-800);
     }
 
-    &.btn-remove,
     &.btn-danger {
       @include btn-outline($white, $red-500, $red-500, $red-100, $red-700, $red-500, $red-200, $red-600, $red-800);
     }
@@ -200,28 +196,12 @@
     @include btn-orange;
   }
 
-  &.btn-close,
-  &.btn-close-color {
-    @include btn-outline($white, $orange-500, $orange-500, $orange-50, $orange-600, $orange-600, $orange-100, $orange-700, $orange-700);
-  }
-
-  &.btn-spam {
-    @include btn-outline($white, $red-500, $red-500, $red-100, $red-700, $red-500, $red-200, $red-600, $red-800);
-  }
-
-  &.btn-danger,
-  &.btn-remove,
-  &.btn-red {
+  &.btn-danger {
     @include btn-red;
   }
 
   &.btn-cancel {
     float: right;
-  }
-
-  &.btn-reopen,
-  .btn-reopen-color {
-    /* should be same as parent class for now */
   }
 
   &.btn-grouped {
@@ -232,17 +212,7 @@
     color: $gray-700;
   }
 
-  .fa-caret-down,
-  .fa-chevron-down {
-    margin-left: 5px;
-  }
-
-  &.dropdown-toggle {
-    .fa-caret-down {
-      margin-left: 3px;
-    }
-  }
-
+  // deprecated class
   &.btn-text-field {
     width: 100%;
     text-align: left;
@@ -276,11 +246,8 @@
     width: 15px;
   }
 
-  svg,
-  .fa {
-    &:not(:last-child) {
-      margin-right: 5px;
-    }
+  svg:not(:last-child) {
+    margin-right: 5px;
   }
 }
 
@@ -370,26 +337,9 @@
 
 .btn-loading {
   &:not(.disabled) {
-    .fa,
-    .spinner {
+    .gl-spinner {
       display: none;
     }
-  }
-
-  .fa {
-    margin-right: 5px;
-  }
-}
-
-.btn-build {
-  margin-left: 10px;
-
-  i {
-    color: $gl-text-color-secondary;
-  }
-
-  svg {
-    fill: $gl-text-color-secondary;
   }
 }
 
@@ -474,19 +424,6 @@
   }
 }
 
-.btn-missing {
-  color: $gl-text-color-secondary;
-  border: 1px dashed $border-gray-normal-dashed;
-  border-radius: $border-radius-default;
-
-  &:hover,
-  &:active,
-  &:focus {
-    color: $gl-text-color-secondary;
-    background-color: $white-normal;
-  }
-}
-
 // The .btn-svg class is available for legacy icon buttons to
 // preserve a 34px height and have 16x16 icons at the same time.
 // Once a button is migrated (to the current 32px height)
@@ -496,32 +433,27 @@
 }
 
 // All disabled buttons, regardless of color, type, etc
-%disabled {
-  background-color: $gray-light;
-  border-color: $gray-100;
-  color: $gl-text-color-disabled;
-  opacity: 1;
-  text-decoration: none;
-  cursor: default;
-
-  &.cursor-not-allowed {
-    cursor: not-allowed;
-  }
-
-  i {
-    color: $gl-text-color-disabled;
-  }
-}
-
 .btn.disabled,
 .btn[disabled],
 fieldset[disabled] .btn,
 .dropdown-toggle[disabled],
 [disabled].dropdown-menu-toggle {
-  @extend %disabled;
-
+  &,
   &:hover {
-    @extend %disabled;
+    background-color: $gray-light;
+    border-color: $gray-100;
+    color: $gl-text-color-disabled;
+    opacity: 1;
+    text-decoration: none;
+    cursor: default;
+
+    &.cursor-not-allowed {
+      cursor: not-allowed;
+    }
+
+    i {
+      color: $gl-text-color-disabled;
+    }
   }
 
   &.btn-link {

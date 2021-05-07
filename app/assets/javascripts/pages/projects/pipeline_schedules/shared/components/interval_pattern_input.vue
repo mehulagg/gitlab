@@ -1,7 +1,7 @@
 <script>
 import { GlFormRadio, GlFormRadioGroup, GlLink, GlSprintf } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
 import { getWeekdayNames } from '~/lib/utils/datetime_utility';
+import { s__, sprintf } from '~/locale';
 
 const KEY_EVERY_DAY = 'everyDay';
 const KEY_EVERY_WEEK = 'everyWeek';
@@ -125,7 +125,7 @@ export default {
         :data-testid="option.value"
       >
         <gl-sprintf v-if="option.link" :message="option.text">
-          <template #link="{content}">
+          <template #link="{ content }">
             <gl-link :href="option.link" target="_blank" class="gl-font-sm">
               {{ content }}
             </gl-link>
@@ -139,7 +139,7 @@ export default {
       v-model="cronInterval"
       :placeholder="__('Define a custom pattern with cron syntax')"
       :name="inputNameAttribute"
-      class="form-control inline cron-interval-input"
+      class="form-control inline cron-interval-input gl-form-input"
       type="text"
       required="true"
       @input="onCustomInput"

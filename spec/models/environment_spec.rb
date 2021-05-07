@@ -19,6 +19,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   it { is_expected.to have_many(:deployments) }
   it { is_expected.to have_many(:metrics_dashboard_annotations) }
   it { is_expected.to have_many(:alert_management_alerts) }
+  it { is_expected.to have_one(:upcoming_deployment) }
   it { is_expected.to have_one(:latest_opened_most_severe_alert) }
 
   it { is_expected.to delegate_method(:stop_action).to(:last_deployment) }
@@ -32,6 +33,27 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   it { is_expected.to validate_length_of(:slug).is_at_most(24) }
 
   it { is_expected.to validate_length_of(:external_url).is_at_most(255) }
+
+  describe '.before_save' do
+    it 'ensures environment tier when a new object is created' do
+      environment = build(:environment, name: 'gprd', tier: nil)
+
+      expect { environment.save }.to change { environment.tier }.from(nil).to('production')
+    end
+
+    it 'ensures environment tier when an existing object is updated' do
+      environment = create(:environment, name: 'gprd')
+      environment.update_column(:tier, nil)
+
+      expect { environment.stop! }.to change { environment.reload.tier }.from(nil).to('production')
+    end
+
+    it 'does not overwrite the existing environment tier' do
+      environment = create(:environment, name: 'gprd', tier: :production)
+
+      expect { environment.update!(name: 'gstg') }.not_to change { environment.reload.tier }
+    end
+  end
 
   describe '.order_by_last_deployed_at' do
     let!(:environment1) { create(:environment, project: project) }
@@ -47,6 +69,62 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
     it 'returns the environments in descending order of having been last deployed' do
       expect(project.environments.order_by_last_deployed_at_desc.to_a).to eq([environment1, environment2, environment3])
+    end
+  end
+
+  describe ".stopped_review_apps" do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:old_stopped_review_env) { create(:environment, :with_review_app, :stopped, created_at: 31.days.ago, project: project) }
+    let_it_be(:new_stopped_review_env) { create(:environment, :with_review_app, :stopped, project: project) }
+    let_it_be(:old_active_review_env) { create(:environment, :with_review_app, :available, created_at: 31.days.ago, project: project) }
+    let_it_be(:old_stopped_other_env) { create(:environment, :stopped, created_at: 31.days.ago, project: project) }
+    let_it_be(:new_stopped_other_env) { create(:environment, :stopped, project: project) }
+    let_it_be(:old_active_other_env) { create(:environment, :available, created_at: 31.days.ago, project: project) }
+
+    let(:before) { 30.days.ago }
+    let(:limit) { 1000 }
+
+    subject { project.environments.stopped_review_apps(before, limit) } # rubocop: disable RSpec/SingleLineHook
+
+    it { is_expected.to contain_exactly(old_stopped_review_env) }
+
+    context "current timestamp" do
+      let(:before) { Time.zone.now }
+
+      it { is_expected.to contain_exactly(old_stopped_review_env, new_stopped_review_env) }
+    end
+  end
+
+  describe "scheduled deletion" do
+    let_it_be(:deletable_environment) { create(:environment, auto_delete_at: Time.zone.now) }
+    let_it_be(:undeletable_environment) { create(:environment, auto_delete_at: nil) }
+
+    describe ".scheduled_for_deletion" do
+      subject { described_class.scheduled_for_deletion }
+
+      it { is_expected.to contain_exactly(deletable_environment) }
+    end
+
+    describe ".not_scheduled_for_deletion" do
+      subject { described_class.not_scheduled_for_deletion }
+
+      it { is_expected.to contain_exactly(undeletable_environment) }
+    end
+
+    describe ".schedule_to_delete" do
+      subject { described_class.for_id(deletable_environment).schedule_to_delete }
+
+      it "schedules the record for deletion" do
+        freeze_time do
+          subject
+
+          deletable_environment.reload
+          undeletable_environment.reload
+
+          expect(deletable_environment.auto_delete_at).to eq(1.week.from_now)
+          expect(undeletable_environment.auto_delete_at).to be_nil
+        end
+      end
     end
   end
 
@@ -194,6 +272,70 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe '.for_tier' do
+    let_it_be(:environment) { create(:environment, :production) }
+
+    it 'returns the production environment when searching for production tier' do
+      expect(described_class.for_tier(:production)).to eq([environment])
+    end
+
+    it 'returns nothing when searching for staging tier' do
+      expect(described_class.for_tier(:staging)).to be_empty
+    end
+  end
+
+  describe '#guess_tier' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { environment.send(:guess_tier) }
+
+    let(:environment) { build(:environment, name: name) }
+
+    where(:name, :tier) do
+      'review/feature'     | described_class.tiers[:development]
+      'review/product'     | described_class.tiers[:development]
+      'DEV'                | described_class.tiers[:development]
+      'development'        | described_class.tiers[:development]
+      'trunk'              | described_class.tiers[:development]
+      'test'               | described_class.tiers[:testing]
+      'TEST'               | described_class.tiers[:testing]
+      'testing'            | described_class.tiers[:testing]
+      'testing-prd'        | described_class.tiers[:testing]
+      'acceptance-testing' | described_class.tiers[:testing]
+      'production-test'    | described_class.tiers[:testing]
+      'test-production'    | described_class.tiers[:testing]
+      'QC'                 | described_class.tiers[:testing]
+      'gstg'               | described_class.tiers[:staging]
+      'staging'            | described_class.tiers[:staging]
+      'stage'              | described_class.tiers[:staging]
+      'Model'              | described_class.tiers[:staging]
+      'MODL'               | described_class.tiers[:staging]
+      'Pre-production'     | described_class.tiers[:staging]
+      'pre'                | described_class.tiers[:staging]
+      'Demo'               | described_class.tiers[:staging]
+      'gprd'               | described_class.tiers[:production]
+      'gprd-cny'           | described_class.tiers[:production]
+      'production'         | described_class.tiers[:production]
+      'Production'         | described_class.tiers[:production]
+      'PRODUCTION'         | described_class.tiers[:production]
+      'Production/eu'      | described_class.tiers[:production]
+      'production/eu'      | described_class.tiers[:production]
+      'PRODUCTION/EU'      | described_class.tiers[:production]
+      'productioneu'       | described_class.tiers[:production]
+      'production/www.gitlab.com' | described_class.tiers[:production]
+      'prod'               | described_class.tiers[:production]
+      'PROD'               | described_class.tiers[:production]
+      'Live'               | described_class.tiers[:production]
+      'canary'             | described_class.tiers[:other]
+      'other'              | described_class.tiers[:other]
+      'EXP'                | described_class.tiers[:other]
+    end
+
+    with_them do
+      it { is_expected.to eq(tier) }
+    end
+  end
+
   describe '#expire_etag_cache' do
     let(:store) { Gitlab::EtagCaching::Store.new }
 
@@ -306,31 +448,6 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
         it 'returns false' do
           expect(environment.includes_commit?(RepoHelpers.sample_commit)).to be false
         end
-      end
-    end
-  end
-
-  describe '#update_merge_request_metrics?' do
-    {
-      'gprd' => false,
-      'prod' => true,
-      'prod-test' => false,
-      'PROD' => true,
-      'production' => true,
-      'production-test' => false,
-      'PRODUCTION' => true,
-      'production/eu' => true,
-      'PRODUCTION/EU' => true,
-      'production/www.gitlab.com' => true,
-      'productioneu' => false,
-      'Production' => true,
-      'Production/eu' => true,
-      'test-production' => false
-    }.each do |name, expected_value|
-      it "returns #{expected_value} for #{name}" do
-        env = create(:environment, name: name)
-
-        expect(env.update_merge_request_metrics?).to eq(expected_value), "Expected the name '#{name}' to result in #{expected_value}, but it didn't."
       end
     end
   end
@@ -723,6 +840,22 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe '#upcoming_deployment' do
+    subject { environment.upcoming_deployment }
+
+    context 'when environment has a successful deployment' do
+      let!(:deployment) { create(:deployment, :success, environment: environment, project: project) }
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when environment has a running deployment' do
+      let!(:deployment) { create(:deployment, :running, environment: environment, project: project) }
+
+      it { is_expected.to eq(deployment) }
+    end
+  end
+
   describe '#has_terminals?' do
     subject { environment.has_terminals? }
 
@@ -860,16 +993,6 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
       expect(described_class.reactive_cache_hard_limit).to eq(10.megabyte)
     end
 
-    it 'overrides reactive_cache_limit_enabled? with a FF' do
-      environment_with_enabled_ff = build(:environment, project: create(:project))
-      environment_with_disabled_ff = build(:environment, project: create(:project))
-
-      stub_feature_flags(reactive_caching_limit_environment: environment_with_enabled_ff.project)
-
-      expect(environment_with_enabled_ff.send(:reactive_cache_limit_enabled?)).to be_truthy
-      expect(environment_with_disabled_ff.send(:reactive_cache_limit_enabled?)).to be_falsey
-    end
-
     it 'returns cache data from the deployment platform' do
       expect(environment.deployment_platform).to receive(:calculate_reactive_cache_for)
         .with(environment).and_return(pods: %w(pod1 pod2))
@@ -979,6 +1102,22 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
       end
 
       it { is_expected.to be_falsy }
+    end
+  end
+
+  describe '#has_running_deployments?' do
+    subject { environment.has_running_deployments? }
+
+    it 'return false when no deployments exist' do
+      is_expected.to eq(false)
+    end
+
+    context 'when deployment is running on the environment' do
+      let!(:deployment) { create(:deployment, :running, environment: environment) }
+
+      it 'return true' do
+        is_expected.to eq(true)
+      end
     end
   end
 
@@ -1376,6 +1515,166 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
     context 'when environment does not have an alert' do
       it { is_expected.to be(false) }
+    end
+  end
+
+  describe '#cancel_deployment_jobs!' do
+    subject { environment.cancel_deployment_jobs! }
+
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:environment, reload: true) { create(:environment, project: project) }
+    let!(:deployment) { create(:deployment, project: project, environment: environment, deployable: build) }
+    let!(:build) { create(:ci_build, :running, project: project, environment: environment) }
+
+    it 'cancels an active deployment job' do
+      subject
+
+      expect(build.reset).to be_canceled
+    end
+
+    context 'when deployable does not exist' do
+      before do
+        deployment.update_column(:deployable_id, non_existing_record_id)
+      end
+
+      it 'does not raise an error' do
+        expect { subject }.not_to raise_error
+
+        expect(build.reset).to be_running
+      end
+    end
+  end
+
+  describe '#rollout_status' do
+    let!(:cluster) { create(:cluster, :project, :provided_by_user, projects: [project]) }
+    let!(:environment) { create(:environment, project: project) }
+    let!(:deployment) { create(:deployment, :success, environment: environment, project: project) }
+
+    subject { environment.rollout_status }
+
+    context 'environment does not have a deployment board available' do
+      before do
+        allow(environment).to receive(:has_terminals?).and_return(false)
+      end
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'cached rollout status is present' do
+      let(:pods) { %w(pod1 pod2) }
+      let(:deployments) { %w(deployment1 deployment2) }
+
+      before do
+        stub_reactive_cache(environment, pods: pods, deployments: deployments)
+      end
+
+      it 'fetches the rollout status from the deployment platform' do
+        expect(environment.deployment_platform).to receive(:rollout_status)
+          .with(environment, pods: pods, deployments: deployments)
+          .and_return(:mock_rollout_status)
+
+        is_expected.to eq(:mock_rollout_status)
+      end
+    end
+
+    context 'cached rollout status is not present yet' do
+      before do
+        stub_reactive_cache(environment, nil)
+      end
+
+      it 'falls back to a loading status' do
+        expect(::Gitlab::Kubernetes::RolloutStatus).to receive(:loading).and_return(:mock_loading_status)
+
+        is_expected.to eq(:mock_loading_status)
+      end
+    end
+  end
+
+  describe '#ingresses' do
+    subject { environment.ingresses }
+
+    let(:deployment_platform) { double(:deployment_platform) }
+    let(:deployment_namespace) { 'production' }
+
+    before do
+      allow(environment).to receive(:deployment_platform) { deployment_platform }
+      allow(environment).to receive(:deployment_namespace) { deployment_namespace }
+    end
+
+    context 'when rollout status is available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { true }
+      end
+
+      it 'fetches ingresses from the deployment platform' do
+        expect(deployment_platform).to receive(:ingresses).with(deployment_namespace)
+
+        subject
+      end
+    end
+
+    context 'when rollout status is not available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { false }
+      end
+
+      it 'does nothing' do
+        expect(deployment_platform).not_to receive(:ingresses)
+
+        subject
+      end
+    end
+  end
+
+  describe '#patch_ingress' do
+    subject { environment.patch_ingress(ingress, data) }
+
+    let(:ingress) { double(:ingress) }
+    let(:data) { double(:data) }
+    let(:deployment_platform) { double(:deployment_platform) }
+    let(:deployment_namespace) { 'production' }
+
+    before do
+      allow(environment).to receive(:deployment_platform) { deployment_platform }
+      allow(environment).to receive(:deployment_namespace) { deployment_namespace }
+    end
+
+    context 'when rollout status is available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { true }
+      end
+
+      it 'fetches ingresses from the deployment platform' do
+        expect(deployment_platform).to receive(:patch_ingress).with(deployment_namespace, ingress, data)
+
+        subject
+      end
+    end
+
+    context 'when rollout status is not available' do
+      before do
+        allow(environment).to receive(:rollout_status_available?) { false }
+      end
+
+      it 'does nothing' do
+        expect(deployment_platform).not_to receive(:patch_ingress)
+
+        subject
+      end
+    end
+  end
+
+  describe '#clear_all_caches' do
+    subject { environment.clear_all_caches }
+
+    it 'clears all caches on the environment' do
+      expect_next_instance_of(Gitlab::EtagCaching::Store) do |store|
+        expect(store).to receive(:touch).with(environment.etag_cache_key)
+      end
+
+      expect(environment).to receive(:clear_reactive_cache!)
+
+      subject
     end
   end
 end

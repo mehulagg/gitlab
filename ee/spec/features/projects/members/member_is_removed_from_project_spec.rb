@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Projects > Members > Member is removed from project' do
+RSpec.describe 'Projects > Members > Member is removed from project', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
   let(:other_user) { create(:user) }
@@ -10,12 +10,17 @@ RSpec.describe 'Projects > Members > Member is removed from project' do
   before do
     project.add_maintainer(user)
     project.add_maintainer(other_user)
+
     sign_in(user)
     visit project_project_members_path(project)
   end
 
   it 'user is removed from project' do
-    click_link 'Leave'
+    click_button 'Leave'
+
+    page.within('[role="dialog"]') do
+      click_button('Leave')
+    end
 
     expect(project.users.exists?(user.id)).to be_falsey
   end
@@ -25,7 +30,11 @@ RSpec.describe 'Projects > Members > Member is removed from project' do
     let!(:non_matching_protected_branch) { create(:protected_branch, authorize_user_to_push: other_user, authorize_user_to_merge: other_user, project: project) }
 
     it 'user leaves project' do
-      click_link 'Leave'
+      click_button 'Leave'
+
+      page.within('[role="dialog"]') do
+        click_button('Leave')
+      end
 
       expect(project.users.exists?(user.id)).to be_falsey
       expect(matching_protected_branch.push_access_levels.where(user: user)).not_to exist

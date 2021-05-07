@@ -31,6 +31,7 @@ RSpec.describe Groups::TodosController do
     context 'when epic is not confidential' do
       let_it_be(:group) { create(:group, :private) }
       let_it_be(:epic) { create(:epic, group: group) }
+
       let(:parent) { group }
 
       context 'when epics are available' do

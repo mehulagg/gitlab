@@ -102,14 +102,32 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
 
     before do
       setup_import_export_config('complex', 'ee')
+      restored_project_json
     end
 
     it 'creates security setting' do
-      project = Project.find_by_path('project')
-
-      expect { restored_project_json }.to change { ProjectSecuritySetting.count }.from(0).to(1)
       expect(project.security_setting.auto_fix_dependency_scanning).to be_falsey
       expect(project.security_setting.auto_fix_container_scanning).to be_truthy
+    end
+  end
+
+  describe 'push_rules' do
+    let_it_be(:project) { create(:project, name: 'project', path: 'project') }
+    let(:user) { create(:user)}
+
+    before do
+      setup_import_export_config('complex', 'ee')
+    end
+
+    it 'creates push rules' do
+      project = Project.find_by_path('project')
+
+      expect { restored_project_json }.to change { PushRule.count }.from(0).to(1)
+
+      expect(project.push_rule.force_push_regex).to eq("MustContain")
+      expect(project.push_rule.commit_message_negative_regex).to eq("MustNotContain")
+      expect(project.push_rule.max_file_size).to eq(1)
+      expect(project.push_rule.deny_delete_tag).to be_truthy
     end
   end
 end

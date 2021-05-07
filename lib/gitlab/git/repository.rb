@@ -89,9 +89,9 @@ module Gitlab
       def root_ref
         gitaly_ref_client.default_branch_name
       rescue GRPC::NotFound => e
-        raise NoRepository.new(e.message)
+        raise NoRepository, e.message
       rescue GRPC::Unknown => e
-        raise Gitlab::Git::CommandError.new(e.message)
+        raise Gitlab::Git::CommandError, e.message
       end
 
       def exists?
@@ -302,7 +302,7 @@ module Gitlab
       private :archive_file_path
 
       def archive_version_path
-        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive)
+        return '' unless Feature.enabled?(:include_lfs_blobs_in_archive, default_enabled: true)
 
         '@v2'
       end
@@ -348,7 +348,7 @@ module Gitlab
 
         limit = options[:limit]
         if limit == 0 || !limit.is_a?(Integer)
-          raise ArgumentError.new("invalid Repository#log limit: #{limit.inspect}")
+          raise ArgumentError, "invalid Repository#log limit: #{limit.inspect}"
         end
 
         wrapped_gitaly_errors do
@@ -414,7 +414,7 @@ module Gitlab
             end
           end
       rescue ArgumentError => e
-        raise Gitlab::Git::Repository::GitError.new(e)
+        raise Gitlab::Git::Repository::GitError, e
       end
 
       # Returns the SHA of the most recent common ancestor of +from+ and +to+
@@ -465,6 +465,18 @@ module Gitlab
         Gitlab::Git::DiffStatsCollection.new(stats)
       rescue CommandError, TypeError
         empty_diff_stats
+      end
+
+      def find_changed_paths(commits)
+        processed_commits = commits.reject { |ref| ref.blank? || Gitlab::Git.blank_ref?(ref) }
+
+        return [] if processed_commits.empty?
+
+        wrapped_gitaly_errors do
+          gitaly_commit_client.find_changed_paths(processed_commits)
+        end
+      rescue CommandError, TypeError, NoRepository
+        []
       end
 
       # Returns a RefName for a given SHA
@@ -587,9 +599,9 @@ module Gitlab
         tags.find { |tag| tag.name == name }
       end
 
-      def merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
+      def merge_to_ref(user, **kwargs)
         wrapped_gitaly_errors do
-          gitaly_operation_client.user_merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
+          gitaly_operation_client.user_merge_to_ref(user, **kwargs)
         end
       end
 
@@ -688,11 +700,11 @@ module Gitlab
         end
       end
 
-      def find_remote_root_ref(remote_name)
-        return unless remote_name.present?
+      def find_remote_root_ref(remote_name, remote_url, authorization = nil)
+        return unless remote_name.present? && remote_url.present?
 
         wrapped_gitaly_errors do
-          gitaly_remote_client.find_remote_root_ref(remote_name)
+          gitaly_remote_client.find_remote_root_ref(remote_name, remote_url, authorization)
         end
       end
 
@@ -789,7 +801,8 @@ module Gitlab
       # forced - should we use --force flag?
       # no_tags - should we use --no-tags flag?
       # prune - should we use --prune flag?
-      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true)
+      # check_tags_changed - should we ask gitaly to calculate whether any tags changed?
+      def fetch_remote(remote, ssh_auth: nil, forced: false, no_tags: false, prune: true, check_tags_changed: false)
         wrapped_gitaly_errors do
           gitaly_repository_client.fetch_remote(
             remote,
@@ -797,6 +810,7 @@ module Gitlab
             forced: forced,
             no_tags: no_tags,
             prune: prune,
+            check_tags_changed: check_tags_changed,
             timeout: GITLAB_PROJECTS_TIMEOUT
           )
         end
@@ -822,7 +836,7 @@ module Gitlab
       def fsck
         msg, status = gitaly_repository_client.fsck
 
-        raise GitError.new("Could not fsck repository: #{msg}") unless status == 0
+        raise GitError, "Could not fsck repository: #{msg}" unless status == 0
       end
 
       def create_from_bundle(bundle_path)
@@ -1001,6 +1015,10 @@ module Gitlab
         return [] if empty? || safe_query.blank?
 
         gitaly_repository_client.search_files_by_name(ref, safe_query)
+      end
+
+      def search_files_by_regexp(filter, ref = 'HEAD')
+        gitaly_repository_client.search_files_by_regexp(ref, filter)
       end
 
       def find_commits_by_message(query, ref, path, limit, offset)

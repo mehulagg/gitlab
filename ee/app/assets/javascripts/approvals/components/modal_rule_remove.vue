@@ -1,13 +1,33 @@
 <script>
-/* eslint-disable vue/no-v-html */
+import { GlSprintf } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { escape } from 'lodash';
-import { sprintf, n__, s__ } from '~/locale';
+import { n__, s__, __ } from '~/locale';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
+import { RULE_TYPE_EXTERNAL_APPROVAL } from '../constants';
+
+const i18n = {
+  cancelButtonText: __('Cancel'),
+  regularRule: {
+    primaryButtonText: __('Remove approvers'),
+    modalTitle: __('Remove approvers?'),
+    removeWarningText: (i) =>
+      n__(
+        'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{strongStart}%{count} member%{strongEnd}. Approvals from this member are not revoked.',
+        'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{strongStart}%{count} members%{strongEnd}. Approvals from these members are not revoked.',
+        i,
+      ),
+  },
+  externalRule: {
+    primaryButtonText: s__('StatusCheck|Remove status check'),
+    modalTitle: s__('StatusCheck|Remove status check?'),
+    removeWarningText: s__('StatusCheck|You are about to remove the %{name} status check.'),
+  },
+};
 
 export default {
   components: {
     GlModalVuex,
+    GlSprintf,
   },
   props: {
     modalId: {
@@ -19,41 +39,53 @@ export default {
     ...mapState('deleteModal', {
       rule: 'data',
     }),
-    message() {
-      if (!this.rule) {
-        return '';
-      }
-
-      const nMembers = n__(
+    isExternalApprovalRule() {
+      return this.rule?.ruleType === RULE_TYPE_EXTERNAL_APPROVAL;
+    },
+    approversCount() {
+      return this.rule.approvers.length;
+    },
+    membersText() {
+      return n__(
         'ApprovalRuleRemove|%d member',
         'ApprovalRuleRemove|%d members',
         this.rule.approvers.length,
       );
-      const removeWarning = sprintf(
-        s__(
-          'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}.',
-        ),
-        {
-          name: `<strong>${escape(this.rule.name)}</strong>`,
-          nMembers: `<strong>${nMembers}</strong>`,
-        },
-        false,
-      );
-      const revokeWarning = n__(
-        'ApprovalRuleRemove|Approvals from this member are not revoked.',
-        'ApprovalRuleRemove|Approvals from these members are not revoked.',
-        this.rule.approvers.length,
-      );
-
-      return `${removeWarning} ${revokeWarning}`;
+    },
+    modalTitle() {
+      return this.isExternalApprovalRule
+        ? i18n.externalRule.modalTitle
+        : i18n.regularRule.modalTitle;
+    },
+    modalText() {
+      return this.isExternalApprovalRule
+        ? i18n.externalRule.removeWarningText
+        : i18n.regularRule.removeWarningText(this.approversCount);
+    },
+    primaryButtonProps() {
+      const text = this.isExternalApprovalRule
+        ? i18n.externalRule.primaryButtonText
+        : i18n.regularRule.primaryButtonText;
+      return {
+        text,
+        attributes: [{ variant: 'danger' }],
+      };
     },
   },
   methods: {
-    ...mapActions(['deleteRule']),
+    ...mapActions(['deleteRule', 'deleteExternalApprovalRule']),
     submit() {
-      this.deleteRule(this.rule.id);
+      if (this.rule.externalUrl) {
+        this.deleteExternalApprovalRule(this.rule.id);
+      } else {
+        this.deleteRule(this.rule.id);
+      }
     },
   },
+  cancelButtonProps: {
+    text: i18n.cancelButtonText,
+  },
+  i18n,
 };
 </script>
 
@@ -61,12 +93,24 @@ export default {
   <gl-modal-vuex
     modal-module="deleteModal"
     :modal-id="modalId"
-    :title="__('Remove approvers?')"
-    :ok-title="__('Remove approvers')"
-    ok-variant="remove"
-    :cancel-title="__('Cancel')"
+    :title="modalTitle"
+    :action-primary="primaryButtonProps"
+    :action-cancel="$options.cancelButtonProps"
     @ok.prevent="submit"
   >
-    <p v-html="message"></p>
+    <p v-if="rule">
+      <gl-sprintf :message="modalText">
+        <template #name>
+          <strong>{{ rule.name }}</strong>
+        </template>
+        <template #strong="{ content }">
+          <strong>
+            <gl-sprintf :message="content">
+              <template #count>{{ approversCount }}</template>
+            </gl-sprintf>
+          </strong>
+        </template>
+      </gl-sprintf>
+    </p>
   </gl-modal-vuex>
 </template>

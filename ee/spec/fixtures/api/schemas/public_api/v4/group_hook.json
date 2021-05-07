@@ -17,13 +17,15 @@
     "pipeline_events",
     "wiki_page_events",
     "job_events",
-    "deployment_events"
+    "deployment_events",
+    "releases_events",
+    "subgroup_events"
   ],
   "properties": {
     "id": { "type": "integer" },
     "group_id": { "type": "integer" },
     "url": { "type": "string" },
-    "created_at": { "type": "date" },
+    "created_at": { "type": "string", "format": "date-time" },
     "push_events": { "type": "boolean" },
     "tag_push_events": { "type": "boolean" },
     "merge_requests_events": { "type": "boolean" },
@@ -36,7 +38,9 @@
     "pipeline_events": { "type": "boolean" },
     "wiki_page_events": { "type": "boolean" },
     "job_events": { "type": "boolean" },
-    "deployment_events": { "type": "boolean" }
+    "deployment_events": { "type": "boolean" },
+    "releases_events": { "type": "boolean" },
+    "subgroup_events": { "type": "boolean" }
   },
   "additionalProperties": false
 }

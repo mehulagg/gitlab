@@ -4,7 +4,9 @@ require 'spec_helper'
 
 RSpec.describe 'Admin Builds' do
   before do
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   describe 'GET /admin/builds' do
@@ -12,7 +14,7 @@ RSpec.describe 'Admin Builds' do
 
     context 'All tab' do
       context 'when have jobs' do
-        it 'shows all jobs' do
+        it 'shows all jobs', :js do
           create(:ci_build, pipeline: pipeline, status: :pending)
           create(:ci_build, pipeline: pipeline, status: :running)
           create(:ci_build, pipeline: pipeline, status: :success)
@@ -24,6 +26,10 @@ RSpec.describe 'Admin Builds' do
           expect(page).to have_selector('.row-content-block', text: 'All jobs')
           expect(page.all('.build-link').size).to eq(4)
           expect(page).to have_button 'Stop all jobs'
+
+          click_button 'Stop all jobs'
+          expect(page).to have_button 'Stop jobs'
+          expect(page).to have_content 'Stop all jobs?'
         end
       end
 

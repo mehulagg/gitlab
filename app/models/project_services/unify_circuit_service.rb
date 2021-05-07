@@ -6,7 +6,7 @@ class UnifyCircuitService < ChatNotificationService
   end
 
   def description
-    'Receive event notifications in Unify Circuit'
+    s_('Integrations|Send notifications about project events to Unify Circuit.')
   end
 
   def self.to_param
@@ -47,7 +47,7 @@ class UnifyCircuitService < ChatNotificationService
   def notify(message, opts)
     response = Gitlab::HTTP.post(webhook, body: {
       subject: message.project_name,
-      text: message.pretext,
+      text: message.summary,
       markdown: true
     }.to_json)
 

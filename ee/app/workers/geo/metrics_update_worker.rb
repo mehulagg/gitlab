@@ -3,6 +3,8 @@
 module Geo
   class MetricsUpdateWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include ExclusiveLeaseGuard
     # rubocop:disable Scalability/CronWorkerContext
     # This worker does not perform work scoped to a context

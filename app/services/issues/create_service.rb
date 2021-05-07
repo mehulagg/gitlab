@@ -2,36 +2,41 @@
 
 module Issues
   class CreateService < Issues::BaseService
-    include SpamCheckMethods
     include ResolveDiscussions
 
     def execute(skip_system_notes: false)
+      @request = params.delete(:request)
+      @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
+
       @issue = BuildService.new(project, current_user, params).execute
 
-      filter_spam_check_params
       filter_resolve_discussion_params
 
       create(@issue, skip_system_notes: skip_system_notes)
     end
 
     def before_create(issue)
-      spam_check(issue, current_user, action: :create)
+      Spam::SpamActionService.new(
+        spammable: issue,
+        request: request,
+        user: current_user,
+        action: :create
+      ).execute(spam_params: spam_params)
 
       # current_user (defined in BaseService) is not available within run_after_commit block
       user = current_user
       issue.run_after_commit do
         NewIssueWorker.perform_async(issue.id, user.id)
         IssuePlacementWorker.perform_async(nil, issue.project_id)
+        Namespaces::OnboardingIssueCreatedWorker.perform_async(issue.namespace.id)
       end
     end
 
+    # Add new items to Issues::AfterCreateService if they can be performed in Sidekiq
     def after_create(issue)
       add_incident_label(issue)
-      todo_service.new_issue(issue, current_user)
       user_agent_detail_service.create
       resolve_discussions_with_issue(issue)
-      delete_milestone_total_issue_counter_cache(issue.milestone)
-      track_incident_action(current_user, issue, :incident_created)
 
       super
     end
@@ -46,10 +51,28 @@ module Issues
 
     private
 
+    attr_reader :request, :spam_params
+
     def user_agent_detail_service
-      UserAgentDetailService.new(@issue, @request)
+      UserAgentDetailService.new(@issue, request)
+    end
+
+    # Applies label "incident" (creates it if missing) to incident issues.
+    # For use in "after" hooks only to ensure we are not appyling
+    # labels prematurely.
+    def add_incident_label(issue)
+      return unless issue.incident?
+
+      label = ::IncidentManagement::CreateIncidentLabelService
+        .new(project, current_user)
+        .execute
+        .payload[:label]
+
+      return if issue.label_ids.include?(label.id)
+
+      issue.labels << label
     end
   end
 end
 
-Issues::CreateService.prepend_if_ee('EE::Issues::CreateService')
+Issues::CreateService.prepend_ee_mod

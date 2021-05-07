@@ -54,9 +54,17 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
   end
 
   describe 'GET #summary' do
-    subject { get :summary, params: action_params, format: :json }
+    subject(:request) { get :summary, params: action_params, format: :json }
 
     let_it_be(:kubernetes_namespace) { environment.deployment_namespace }
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
+
+      before_request do
+        group.add_developer(user)
+      end
+    end
 
     context 'with authorized user' do
       before do
@@ -73,7 +81,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         end
 
         it 'returns network policies summary' do
-          Timecop.freeze do
+          freeze_time do
             expect(adapter).to(
               receive(:query)
                 .with(:packet_flow, kubernetes_namespace, "minute", 1.hour.ago.to_s, Time.current.to_s)
@@ -114,7 +122,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
           end
 
           it 'queries with default arguments' do
-            Timecop.freeze do
+            freeze_time do
               expect(adapter).to(
                 receive(:query)
                   .with(:packet_flow, kubernetes_namespace, "minute", 1.hour.ago.to_s, Time.current.to_s)
@@ -160,7 +168,15 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
   end
 
   describe 'GET #index' do
-    subject { get :index, params: action_params, format: :json }
+    subject(:request) { get :index, params: action_params, format: :json }
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
+
+      before_request do
+        group.add_developer(user)
+      end
+    end
 
     context 'with authorized user' do
       let(:service) { instance_double('NetworkPolicies::ResourcesService', execute: ServiceResponse.success(payload: [policy])) }
@@ -198,7 +214,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
   end
 
   describe 'POST #create' do
-    subject { post :create, params: action_params.merge(manifest: manifest), format: :json }
+    subject(:request) { post :create, params: action_params.merge(manifest: manifest), format: :json }
 
     let(:service) { instance_double('NetworkPolicies::DeployResourceService', execute: ServiceResponse.success(payload: policy)) }
     let(:policy) do
@@ -208,6 +224,14 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         selector: { matchLabels: { role: 'db' } },
         ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
       )
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
+
+      before_request do
+        group.add_developer(user)
+      end
     end
 
     context 'with authorized user' do
@@ -240,7 +264,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
   end
 
   describe 'PUT #update' do
-    subject { put :update, params: action_params.merge(id: 'example-policy', manifest: manifest, enabled: enabled), as: :json }
+    subject(:request) { put :update, params: action_params.merge(id: 'example-policy', manifest: manifest, enabled: enabled), as: :json }
 
     let(:enabled) { nil }
     let(:service) { instance_double('NetworkPolicies::DeployResourceService', execute: ServiceResponse.success(payload: policy)) }
@@ -251,6 +275,14 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         selector: { matchLabels: { role: 'db' } },
         ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
       )
+    end
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
+
+      before_request do
+        group.add_developer(user)
+      end
     end
 
     context 'with authorized user' do
@@ -283,9 +315,17 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
   end
 
   describe 'DELETE #destroy' do
-    subject { delete :destroy, params: action_params.merge(id: 'example-policy', manifest: manifest), format: :json }
+    subject(:request) { delete :destroy, params: action_params.merge(id: 'example-policy', manifest: manifest), format: :json }
 
     let(:service) { instance_double('NetworkPolicies::DeleteResourceService', execute: ServiceResponse.success) }
+
+    include_context '"Security & Compliance" permissions' do
+      let(:valid_request) { request }
+
+      before_request do
+        group.add_developer(user)
+      end
+    end
 
     context 'with authorized user' do
       before do

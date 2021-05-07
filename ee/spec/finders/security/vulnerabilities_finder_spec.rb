@@ -58,11 +58,19 @@ RSpec.describe Security::VulnerabilitiesFinder do
     end
   end
 
-  context 'when filtered by scanner' do
+  context 'when filtered by scanner external ID' do
     let(:filters) { { scanner: [vulnerability1.finding_scanner_external_id, vulnerability2.finding_scanner_external_id] } }
 
-    it 'only returns vulnerabilities matching the given scanners' do
+    it 'only returns vulnerabilities matching the given scanner IDs' do
       is_expected.to contain_exactly(vulnerability1, vulnerability2)
+    end
+  end
+
+  context 'when filtered by scanner_id' do
+    let(:filters) { { scanner_id: [vulnerability1.finding_scanner_id, vulnerability3.finding_scanner_id] } }
+
+    it 'only returns vulnerabilities matching the given scanner IDs' do
+      is_expected.to contain_exactly(vulnerability1, vulnerability3)
     end
   end
 

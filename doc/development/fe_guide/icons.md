@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Icons and SVG Illustrations
 
 We manage our own icon and illustration library in the [`gitlab-svgs`](https://gitlab.com/gitlab-org/gitlab-svgs)
@@ -12,21 +18,19 @@ We are using SVG Icons in GitLab with a SVG Sprite.
 This means the icons are only loaded once, and are referenced through an ID.
 The sprite SVG is located under `/assets/icons.svg`.
 
-Our goal is to replace one by one all inline SVG Icons (as those currently bloat the HTML) and also all Font Awesome icons.
-
 ### Usage in HAML/Rails
 
-To use a sprite Icon in HAML or Rails we use a specific helper function :
+To use a sprite Icon in HAML or Rails we use a specific helper function:
 
 ```ruby
 sprite_icon(icon_name, size: nil, css_class: '')
 ```
 
-- **icon_name**: Use the icon_name for the SVG sprite in the list of
+- **`icon_name`**: Use the `icon_name` for the SVG sprite in the list of
   ([GitLab SVGs](https://gitlab-org.gitlab.io/gitlab-svgs)).
-- **size (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
-  will be translated into a `s16` class)
-- **css_class (optional)**: If you want to add additional CSS classes.
+- **`size` (optional)**: Use one of the following sizes : 16, 24, 32, 48, 72 (this
+  is translated into a `s16` class)
+- **`css_class` (optional)**: If you want to add additional CSS classes.
 
 **Example**
 
@@ -84,11 +88,6 @@ Please use the following function inside JS to render an icon:
 
 ### Usage in HAML/Rails
 
-DANGER: **Warning:**
-Do not use the `spinner` or `icon('spinner spin')` rails helpers to insert
-loading icons. These helpers rely on the Font Awesome icon library which is
-deprecated.
-
 To insert a loading spinner in HAML or Rails use the `loading_icon` helper:
 
 ```haml
@@ -101,11 +100,11 @@ by the examples that follow:
 - `container` (optional): wraps the loading icon in a container, which centers the loading icon using the `text-center` CSS property.
 - `color` (optional): either `orange` (default), `light`, or `dark`.
 - `size` (optional): either `sm` (default), `md`, `lg`, or `xl`.
-- `css_class` (optional): defaults to an empty string, but can be useful for utility classes to fine-tune alignment or spacing.
+- `css_class` (optional): defaults to an empty string, but can be used for utility classes to fine-tune alignment or spacing.
 
 **Example 1:**
 
-The following HAML expression generates a loading icon’s markup and
+The following HAML expression generates a loading icon's markup and
 centers the icon by wrapping it in a `gl-spinner-container` element.
 
 ```haml
@@ -122,7 +121,7 @@ centers the icon by wrapping it in a `gl-spinner-container` element.
 
 **Example 2:**
 
-The following HAML expression generates a loading icon’s markup
+The following HAML expression generates a loading icon's markup
 with a custom size. It also appends a margin utility class.
 
 ```haml
@@ -138,7 +137,7 @@ with a custom size. It also appends a margin utility class.
 ### Usage in Vue
 
 The [GitLab UI](https://gitlab-org.gitlab.io/gitlab-ui/) components library provides a
-`GlLoadingIcon` component. See the component’s
+`GlLoadingIcon` component. See the component's
 [storybook](https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-loading-icon--default)
 for more information about its usage.
 
@@ -165,8 +164,8 @@ export default {
 
 ## SVG Illustrations
 
-Please use from now on for any SVG based illustrations simple `img` tags to show an illustration by simply using either `image_tag` or `image_path` helpers.
-Please use the class `svg-content` around it to ensure nice rendering.
+From now on, use `img` tags to display any SVG based illustrations with either `image_tag` or `image_path` helpers.
+Using the class `svg-content` around it ensures nice rendering.
 
 ### Usage in HAML/Rails
 
@@ -199,3 +198,10 @@ export default {
   <img :src="svgIllustrationPath" />
 </template>
 ```
+
+### Minimize SVGs
+
+When you develop or export a new SVG illustration, minimize it with an [SVGO](https://github.com/svg/svgo) powered tool, like
+[SVGOMG](https://jakearchibald.github.io/svgomg/), to save space. Illustrations
+added to [GitLab SVG](https://gitlab.com/gitlab-org/gitlab-svgs) are automatically
+minimized, so no manual action is needed.

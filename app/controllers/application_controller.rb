@@ -16,20 +16,19 @@ class ApplicationController < ActionController::Base
   include SessionlessAuthentication
   include SessionsHelper
   include ConfirmEmailWarning
-  include Gitlab::Tracking::ControllerConcern
   include Gitlab::Experimentation::ControllerConcern
   include InitializesCurrentUserMode
   include Impersonation
   include Gitlab::Logging::CloudflareHelper
   include Gitlab::Utils::StrongMemoize
   include ::Gitlab::WithFeatureCategory
+  include FlocOptOut
 
   before_action :authenticate_user!, except: [:route_not_found]
   before_action :enforce_terms!, if: :should_enforce_terms?
   before_action :validate_user_service_ticket!
   before_action :check_password_expiration, if: :html_request?
   before_action :ldap_security_check
-  around_action :sentry_context
   before_action :default_headers
   before_action :default_cache_headers
   before_action :add_gon_variables, if: :html_request?
@@ -61,8 +60,7 @@ class ApplicationController < ActionController::Base
     :gitea_import_enabled?, :github_import_configured?,
     :gitlab_import_enabled?, :gitlab_import_configured?,
     :bitbucket_import_enabled?, :bitbucket_import_configured?,
-    :bitbucket_server_import_enabled?,
-    :google_code_import_enabled?, :fogbugz_import_enabled?,
+    :bitbucket_server_import_enabled?, :fogbugz_import_enabled?,
     :git_import_enabled?, :gitlab_project_import_enabled?,
     :manifest_import_enabled?, :phabricator_import_enabled?
 
@@ -102,14 +100,6 @@ class ApplicationController < ActionController::Base
 
   rescue_from Gitlab::Auth::TooManyIps do |e|
     head :forbidden, retry_after: Gitlab::Auth::UniqueIpsLimiter.config.unique_ips_limit_time_window
-  end
-
-  rescue_from GRPC::Unavailable, Gitlab::Git::CommandError do |exception|
-    log_exception(exception)
-
-    headers['Retry-After'] = exception.retry_after if exception.respond_to?(:retry_after)
-
-    render_503
   end
 
   def redirect_back_or_default(default: root_path, options: {})
@@ -180,7 +170,12 @@ class ApplicationController < ActionController::Base
   end
 
   def log_exception(exception)
-    Gitlab::ErrorTracking.track_exception(exception)
+    # At this point, the controller already exits set_current_context around
+    # block. To maintain the context while handling error exception, we need to
+    # set the context again
+    set_current_context do
+      Gitlab::ErrorTracking.track_exception(exception)
+    end
 
     backtrace_cleaner = request.env["action_dispatch.backtrace_cleaner"]
     application_trace = ActionDispatch::ExceptionWrapper.new(backtrace_cleaner, exception).application_trace
@@ -213,13 +208,13 @@ class ApplicationController < ActionController::Base
       end
 
     respond_to do |format|
-      format.any { head status }
       format.html do
         render template,
                layout: "errors",
                status: status,
                locals: { message: message }
       end
+      format.any { head status }
     end
   end
 
@@ -229,8 +224,8 @@ class ApplicationController < ActionController::Base
 
   def render_403
     respond_to do |format|
-      format.any { head :forbidden }
       format.html { render "errors/access_denied", layout: "errors", status: :forbidden }
+      format.any { head :forbidden }
     end
   end
 
@@ -247,23 +242,16 @@ class ApplicationController < ActionController::Base
     head :unprocessable_entity
   end
 
-  def render_503
-    respond_to do |format|
-      format.html do
-        render(
-          file: Rails.root.join("public", "503"),
-          layout: false,
-          status: :service_unavailable
-        )
-      end
-      format.any { head :service_unavailable }
-    end
-  end
-
   def no_cache_headers
     DEFAULT_GITLAB_NO_CACHE_HEADERS.each do |k, v|
       headers[k] = v
     end
+  end
+
+  def stream_headers
+    headers['Content-Length'] = nil
+    headers['X-Accel-Buffering'] = 'no' # Disable buffering on Nginx
+    headers['Last-Modified'] = '0' # Prevent buffering via Rack::ETag middleware
   end
 
   def default_headers
@@ -279,6 +267,14 @@ class ApplicationController < ActionController::Base
       headers['Cache-Control'] = default_cache_control
       headers['Pragma'] = 'no-cache' # HTTP 1.0 compatibility
     end
+  end
+
+  def stream_csv_headers(csv_filename)
+    no_cache_headers
+    stream_headers
+
+    headers['Content-Type'] = 'text/csv; charset=utf-8; header=present'
+    headers['Content-Disposition'] = "attachment; filename=\"#{csv_filename}\""
   end
 
   def default_cache_control
@@ -428,10 +424,6 @@ class ApplicationController < ActionController::Base
     Gitlab::Auth::OAuth::Provider.enabled?(:bitbucket)
   end
 
-  def google_code_import_enabled?
-    Gitlab::CurrentSettings.import_sources.include?('google_code')
-  end
-
   def fogbugz_import_enabled?
     Gitlab::CurrentSettings.import_sources.include?('fogbugz')
   end
@@ -467,10 +459,11 @@ class ApplicationController < ActionController::Base
       project: -> { @project if @project&.persisted? },
       namespace: -> { @group if @group&.persisted? },
       caller_id: caller_id,
+      remote_ip: request.ip,
       feature_category: feature_category) do
       yield
     ensure
-      @current_context = Labkit::Context.current.to_h
+      @current_context = Gitlab::ApplicationContext.current
     end
   end
 
@@ -490,7 +483,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_admin(&block)
-    return yield unless Feature.enabled?(:user_mode_in_session)
+    return yield unless Gitlab::CurrentSettings.admin_mode
     return yield unless current_user
 
     Gitlab::Auth::CurrentUserMode.with_current_admin(current_user, &block)
@@ -539,10 +532,6 @@ class ApplicationController < ActionController::Base
       .execute
   end
 
-  def sentry_context(&block)
-    Gitlab::ErrorTracking.with_context(current_user, &block)
-  end
-
   def allow_gitaly_ref_name_caching
     ::Gitlab::GitalyClient.allow_ref_name_caching do
       yield
@@ -567,4 +556,4 @@ class ApplicationController < ActionController::Base
   end
 end
 
-ApplicationController.prepend_if_ee('EE::ApplicationController')
+ApplicationController.prepend_ee_mod

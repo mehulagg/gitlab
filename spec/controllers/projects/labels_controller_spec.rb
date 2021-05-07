@@ -65,7 +65,7 @@ RSpec.describe Projects::LabelsController do
       end
 
       it 'does not include group labels when project does not belong to a group' do
-        project.update(namespace: create(:namespace))
+        project.update!(namespace: create(:namespace))
 
         list_labels
 
@@ -84,46 +84,32 @@ RSpec.describe Projects::LabelsController do
         create(:label_priority, project: project, label: subgroup_label_2, priority: 1)
       end
 
-      RSpec.shared_examples 'returns ancestor group labels' do
-        it 'returns ancestor group labels', :aggregate_failures do
-          get :index, params: params
+      it 'returns ancestor group labels', :aggregate_failures do
+        params = { namespace_id: project.namespace.to_param, project_id: project }
+        get :index, params: params
 
-          expect(assigns(:labels)).to match_array([subgroup_label_1] + group_labels + project_labels)
-          expect(assigns(:prioritized_labels)).to match_array([subgroup_label_2] + group_priority_labels + project_priority_labels)
-        end
+        expect(assigns(:labels)).to match_array([subgroup_label_1] + group_labels + project_labels)
+        expect(assigns(:prioritized_labels)).to match_array([subgroup_label_2] + group_priority_labels + project_priority_labels)
+      end
+    end
+
+    context 'with views rendered' do
+      render_views
+
+      before do
+        list_labels
       end
 
-      context 'when show_inherited_labels disabled' do
-        before do
-          stub_feature_flags(show_inherited_labels: false)
-        end
+      it 'avoids N+1 queries' do
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { list_labels }
 
-        context 'when include_ancestor_groups false' do
-          let(:params) { { namespace_id: project.namespace.to_param, project_id: project } }
+        create_list(:label, 3, project: project)
+        create_list(:group_label, 3, group: group)
 
-          it 'does not return ancestor group labels', :aggregate_failures do
-            get :index, params: params
-
-            expect(assigns(:labels)).to match_array([subgroup_label_1] + project_labels)
-            expect(assigns(:prioritized_labels)).to match_array([subgroup_label_2] + project_priority_labels)
-          end
-        end
-
-        context 'when include_ancestor_groups true' do
-          let(:params) { { namespace_id: project.namespace.to_param, project_id: project, include_ancestor_groups: true } }
-
-          it_behaves_like 'returns ancestor group labels'
-        end
-      end
-
-      context 'when show_inherited_labels enabled' do
-        let(:params) { { namespace_id: project.namespace.to_param, project_id: project } }
-
-        before do
-          stub_feature_flags(show_inherited_labels: true)
-        end
-
-        it_behaves_like 'returns ancestor group labels'
+        # some n+1 queries still exist
+        # calls to get max project authorization access level
+        expect { list_labels }.not_to exceed_all_query_limit(control.count).with_threshold(25)
+        expect(assigns(:labels).count).to eq(10)
       end
     end
 
@@ -215,7 +201,7 @@ RSpec.describe Projects::LabelsController do
       context 'service raising InvalidRecord' do
         before do
           expect_any_instance_of(Labels::PromoteService).to receive(:execute) do |label|
-            raise ActiveRecord::RecordInvalid.new(label_1)
+            raise ActiveRecord::RecordInvalid, label_1
           end
         end
 
@@ -255,7 +241,7 @@ RSpec.describe Projects::LabelsController do
       end
 
       context 'when requesting a redirected path' do
-        let_it_be(:redirect_route) { project.redirect_routes.create(path: project.full_path + 'old') }
+        let_it_be(:redirect_route) { project.redirect_routes.create!(path: project.full_path + 'old') }
 
         it 'redirects to the canonical path' do
           get :index, params: { namespace_id: project.namespace, project_id: project.to_param + 'old' }
@@ -301,7 +287,7 @@ RSpec.describe Projects::LabelsController do
     end
 
     context 'when requesting a redirected path' do
-      let_it_be(:redirect_route) { project.redirect_routes.create(path: project.full_path + 'old') }
+      let_it_be(:redirect_route) { project.redirect_routes.create!(path: project.full_path + 'old') }
 
       it 'returns not found' do
         post :generate, params: { namespace_id: project.namespace, project_id: project.to_param + 'old' }

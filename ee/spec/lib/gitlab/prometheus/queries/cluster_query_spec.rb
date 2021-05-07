@@ -8,7 +8,7 @@ RSpec.describe Gitlab::Prometheus::Queries::ClusterQuery do
   subject { described_class.new(client) }
 
   around do |example|
-    Timecop.freeze { example.run }
+    freeze_time { example.run }
   end
 
   it 'load cluster metrics from yaml' do

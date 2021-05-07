@@ -11,19 +11,23 @@ export const getSnippetMixin = {
           ids: [this.snippetGid],
         };
       },
-      update: data => {
+      update(data) {
         const res = data.snippets.nodes[0];
+
+        // Set `snippet.blobs` since some child components are coupled to this.
         if (res) {
-          res.blobs = res.blobs.nodes;
+          // It's possible for us to not get any blobs in a response.
+          // In this case, we should default to current blobs.
+          res.blobs = res.blobs ? res.blobs.nodes : this.blobs;
         }
 
         return res;
       },
       result(res) {
         this.blobs = res.data.snippets.nodes[0]?.blobs || blobsDefault;
-        if (this.onSnippetFetch) {
-          this.onSnippetFetch(res);
-        }
+      },
+      skip() {
+        return this.newSnippet;
       },
     },
   },
@@ -36,7 +40,7 @@ export const getSnippetMixin = {
   data() {
     return {
       snippet: {},
-      newSnippet: false,
+      newSnippet: !this.snippetGid,
       blobs: blobsDefault,
     };
   },

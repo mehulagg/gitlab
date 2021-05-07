@@ -1,16 +1,16 @@
-import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import Vue from 'vue';
+import ContributorsCharts from '~/contributors/components/contributors.vue';
 import { createStore } from '~/contributors/stores';
 import axios from '~/lib/utils/axios_utils';
-import ContributorsCharts from '~/contributors/components/contributors.vue';
 
 let wrapper;
 let mock;
 let store;
 const Component = Vue.extend(ContributorsCharts);
 const endpoint = 'contributors';
-const branch = 'master';
+const branch = 'main';
 const chartData = [
   { author_name: 'John', author_email: 'jawnnypoo@gmail.com', date: '2019-05-05' },
   { author_name: 'John', author_email: 'jawnnypoo@gmail.com', date: '2019-03-03' },

@@ -1,22 +1,14 @@
 <script>
-import { SCAN_TYPE_OPTIONS } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelector from './profile_selector.vue';
-import SummaryCell from './summary_cell.vue';
-import { __, s__ } from '~/locale';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
   components: {
     ProfileSelector,
-    SummaryCell,
   },
-  props: {
-    profiles: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-  },
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     scannerProfilesLibraryPath: {
       default: '',
@@ -25,17 +17,22 @@ export default {
       default: '',
     },
   },
-  methods: {
-    getScanModeText(scanType) {
-      return SCAN_TYPE_OPTIONS.find(({ value }) => scanType === value)?.text;
+  props: {
+    profiles: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
-    getAjaxSpiderText(isEnabled) {
-      return isEnabled ? __('On') : __('Off');
-    },
-    getDebugMessageText(isEnabled) {
-      return isEnabled
-        ? s__('DastProfiles|Show debug messages')
-        : s__('DastProfiles|Hide debug messages');
+  },
+  computed: {
+    formattedProfiles() {
+      return this.profiles.map((profile) => {
+        const addSuffix = (str) => `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`;
+        return {
+          ...profile,
+          dropdownLabel: addSuffix(profile.profileName),
+        };
+      });
     },
   },
 };
@@ -45,7 +42,7 @@ export default {
   <profile-selector
     :library-path="scannerProfilesLibraryPath"
     :new-profile-path="newScannerProfilePath"
-    :profiles="profiles.map(profile => ({ ...profile, dropdownLabel: profile.profileName }))"
+    :profiles="formattedProfiles"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -56,34 +53,10 @@ export default {
         'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
       )
     }}</template>
-    <template #new-profile>{{ s__('OnDemandScans|Create a new scanner profile') }}</template>
-    <template #summary="{ profile }">
-      <div class="row">
-        <summary-cell
-          :label="s__('DastProfiles|Scan mode')"
-          :value="getScanModeText(profile.scanType)"
-        />
-      </div>
-      <div class="row">
-        <summary-cell
-          :label="s__('DastProfiles|Spider timeout')"
-          :value="n__('%d minute', '%d minutes', profile.spiderTimeout)"
-        />
-        <summary-cell
-          :label="s__('DastProfiles|Target timeout')"
-          :value="n__('%d second', '%d seconds', profile.targetTimeout)"
-        />
-      </div>
-      <div class="row">
-        <summary-cell
-          :label="s__('DastProfiles|AJAX spider')"
-          :value="getAjaxSpiderText(profile.useAjaxSpider)"
-        />
-        <summary-cell
-          :label="s__('DastProfiles|Debug messages')"
-          :value="getDebugMessageText(profile.showDebugMessages)"
-        />
-      </div>
+    <template #new-profile>{{ s__('OnDemandScans|Create new scanner profile') }}</template>
+    <template #manage-profile>{{ s__('OnDemandScans|Manage scanner profiles') }}</template>
+    <template #summary>
+      <slot name="summary"></slot>
     </template>
   </profile-selector>
 </template>

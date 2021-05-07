@@ -7,7 +7,9 @@ RSpec.describe 'Admin updates EE-only settings' do
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
     allow(License).to receive(:feature_available?).and_return(true)
     allow(Gitlab::Elastic::Helper.default).to receive(:index_exists?).and_return(true)
   end
@@ -39,7 +41,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  it 'Enables external authentication' do
+  it 'enables external authentication' do
     visit general_admin_application_settings_path
     page.within('.as-external-auth') do
       check 'Enable classification control using an external service'
@@ -51,19 +53,27 @@ RSpec.describe 'Admin updates EE-only settings' do
   end
 
   context 'Elasticsearch settings' do
+    let(:elastic_search_license) { true }
+
     before do
-      visit general_admin_application_settings_path
-      page.within('.as-elasticsearch') do
-        click_button 'Expand'
-      end
+      stub_licensed_features(elastic_search: elastic_search_license)
+      visit advanced_search_admin_application_settings_path
     end
 
     it 'changes elasticsearch settings' do
       page.within('.as-elasticsearch') do
         check 'Elasticsearch indexing'
         check 'Search with Elasticsearch enabled'
-        fill_in 'Number of Elasticsearch shards', with: '120'
-        fill_in 'Number of Elasticsearch replicas', with: '2'
+
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test]', with: '120'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test]', with: '2'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-issues]', with: '10'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-issues]', with: '3'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-notes]', with: '20'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-notes]', with: '4'
+        fill_in 'application_setting_elasticsearch_shards[gitlab-test-merge_requests]', with: '15'
+        fill_in 'application_setting_elasticsearch_replicas[gitlab-test-merge_requests]', with: '5'
+
         fill_in 'Maximum file size indexed (KiB)', with: '5000'
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
@@ -76,8 +86,18 @@ RSpec.describe 'Admin updates EE-only settings' do
       aggregate_failures do
         expect(current_settings.elasticsearch_indexing).to be_truthy
         expect(current_settings.elasticsearch_search).to be_truthy
+
         expect(current_settings.elasticsearch_shards).to eq(120)
         expect(current_settings.elasticsearch_replicas).to eq(2)
+        expect(Elastic::IndexSetting['gitlab-test'].number_of_shards).to eq(120)
+        expect(Elastic::IndexSetting['gitlab-test'].number_of_replicas).to eq(2)
+        expect(Elastic::IndexSetting['gitlab-test-issues'].number_of_shards).to eq(10)
+        expect(Elastic::IndexSetting['gitlab-test-issues'].number_of_replicas).to eq(3)
+        expect(Elastic::IndexSetting['gitlab-test-notes'].number_of_shards).to eq(20)
+        expect(Elastic::IndexSetting['gitlab-test-notes'].number_of_replicas).to eq(4)
+        expect(Elastic::IndexSetting['gitlab-test-merge_requests'].number_of_shards).to eq(15)
+        expect(Elastic::IndexSetting['gitlab-test-merge_requests'].number_of_replicas).to eq(5)
+
         expect(current_settings.elasticsearch_indexed_file_size_limit_kb).to eq(5000)
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)
@@ -87,7 +107,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       end
     end
 
-    it 'Allows limiting projects and namespaces to index', :aggregate_failures, :js do
+    it 'allows limiting projects and namespaces to index', :aggregate_failures, :js do
       project = create(:project)
       namespace = create(:namespace)
 
@@ -130,20 +150,18 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.exists?(project_id: project.id)).to be_truthy
     end
 
-    it 'Allows removing all namespaces and projects', :aggregate_failures, :js do
+    it 'allows removing all namespaces and projects', :aggregate_failures, :js do
       stub_ee_application_setting(elasticsearch_limit_indexing: true)
 
       namespace = create(:elasticsearch_indexed_namespace).namespace
       project = create(:elasticsearch_indexed_project).project
 
-      visit general_admin_application_settings_path
+      visit advanced_search_admin_application_settings_path
 
       expect(ElasticsearchIndexedNamespace.count).to be > 0
       expect(ElasticsearchIndexedProject.count).to be > 0
 
       page.within('.as-elasticsearch') do
-        click_button 'Expand'
-
         expect(page).to have_content('Namespaces to index')
         expect(page).to have_content('Projects to index')
         expect(page).to have_content(namespace.full_path)
@@ -173,9 +191,17 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(text).to eq 'Are you sure you want to reindex?'
       page.driver.browser.switch_to.alert.accept
     end
+
+    context 'when not licensed' do
+      let(:elastic_search_license) { false }
+
+      it 'cannot access the page' do
+        expect(page).not_to have_content("Advanced Search with Elasticsearch")
+      end
+    end
   end
 
-  it 'Enable Slack application' do
+  it 'enable Slack application' do
     allow(Gitlab).to receive(:com?).and_return(true)
     visit general_admin_application_settings_path
 
@@ -192,13 +218,13 @@ RSpec.describe 'Admin updates EE-only settings' do
       visit templates_admin_application_settings_path
     end
 
-    it 'Render "Templates" section' do
+    it 'render "Templates" section' do
       page.within('.as-visibility-access') do
         expect(page).to have_content 'Templates'
       end
     end
 
-    it 'Render "Custom project templates" section' do
+    it 'render "Custom project templates" section' do
       page.within('.as-custom-project-templates') do
         expect(page).to have_content 'Custom project templates'
       end
@@ -215,7 +241,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     context 'with LDAP enabled' do
       let(:ldap_setting) { true }
 
-      it 'Changes to allow group owners to manage ldap' do
+      it 'changes to allow group owners to manage ldap' do
         page.within('.as-visibility-access') do
           find('#application_setting_allow_group_owners_to_manage_ldap').set(false)
           click_button 'Save'
@@ -229,7 +255,7 @@ RSpec.describe 'Admin updates EE-only settings' do
     context 'with LDAP disabled' do
       let(:ldap_setting) { false }
 
-      it 'Does not show option to allow group owners to manage ldap' do
+      it 'does not show option to allow group owners to manage ldap' do
         expect(page).not_to have_css('#application_setting_allow_group_owners_to_manage_ldap')
       end
     end
@@ -242,7 +268,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'allows you to change the npm_forwaring setting' do
       page.within('#js-package-settings') do
-        check 'Enable forwarding of NPM package requests to npmjs.org'
+        check 'Enable forwarding of npm package requests to npmjs.org'
         click_button 'Save'
       end
 
@@ -257,7 +283,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
     it 'loads seat link payload on click', :js do
       page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
+        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"active_users")/m
 
         expect(page).not_to have_content expected_payload_content
 
@@ -268,6 +294,56 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(page).to have_selector '.js-seat-link-payload'
         expect(page).to have_button 'Hide payload'
         expect(page).to have_content expected_payload_content
+      end
+    end
+  end
+
+  context 'sign up settings', :js do
+    context 'when license has active user count' do
+      let(:license) { create(:license, restrictions: { active_user_count: 1 }) }
+
+      before do
+        allow(License).to receive(:current).and_return(license)
+      end
+
+      it 'disallows entering user cap greater then license allows' do
+        visit general_admin_application_settings_path
+
+        page.within('#js-signup-settings') do
+          fill_in 'application_setting[new_user_signups_cap]', with: 5
+
+          click_button 'Save changes'
+
+          page.within '#error_explanation' do
+            expect(page).to have_text('New user signups cap must be less than or equal to 1')
+          end
+        end
+      end
+    end
+
+    it 'changes the user cap from unlimited to 5' do
+      visit general_admin_application_settings_path
+
+      expect(current_settings.new_user_signups_cap).to be_nil
+
+      page.within('#js-signup-settings') do
+        fill_in 'application_setting[new_user_signups_cap]', with: 5
+
+        click_button 'Save changes'
+
+        expect(current_settings.new_user_signups_cap).to eq(5)
+      end
+    end
+
+    it 'changes the user cap to unlimited' do
+      visit general_admin_application_settings_path
+
+      page.within('#js-signup-settings') do
+        fill_in 'application_setting[new_user_signups_cap]', with: nil
+
+        click_button 'Save changes'
+
+        expect(current_settings.new_user_signups_cap).to be_nil
       end
     end
   end

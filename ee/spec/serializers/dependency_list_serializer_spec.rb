@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe DependencyListSerializer do
   let_it_be(:project) { create(:project, :repository, :private) }
   let_it_be(:user) { create(:user) }
+
   let(:ci_build) { create(:ee_ci_build, :success) }
   let(:dependencies) { [build(:dependency, :with_vulnerabilities, :with_licenses)] }
 

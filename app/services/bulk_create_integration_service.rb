@@ -11,8 +11,6 @@ class BulkCreateIntegrationService
     service_list = ServiceList.new(batch, service_hash, association).to_array
 
     Service.transaction do
-      run_callbacks(batch) if association == 'project'
-
       results = bulk_insert(*service_list)
 
       if integration.data_fields_present?
@@ -31,16 +29,6 @@ class BulkCreateIntegrationService
     items_to_insert = values_array.map { |array| Hash[columns.zip(array)] }
 
     klass.insert_all(items_to_insert, returning: [:id])
-  end
-
-  def run_callbacks(batch)
-    if integration.issue_tracker? && integration.active?
-      batch.update_all(has_external_issue_tracker: true)
-    end
-
-    if integration.type == 'ExternalWikiService' && integration.active?
-      batch.update_all(has_external_wiki: true)
-    end
   end
 
   def service_hash

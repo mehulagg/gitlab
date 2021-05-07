@@ -39,7 +39,7 @@ RSpec.describe GroupProjectsFinder do
     end
 
     context 'when security dashboard is enabled for a group' do
-      let(:group) { create(:group_with_plan, plan: :gold_plan) } # overriding group from 'GroupProjectsFinder context'
+      let(:group) { create(:group_with_plan, plan: :ultimate_plan) } # overriding group from 'GroupProjectsFinder context'
 
       before do
         stub_licensed_features(security_dashboard: true)

@@ -1,4 +1,5 @@
 import Mousetrap from 'mousetrap';
+import { keysFor, PROJECT_FILES_GO_TO_PERMALINK } from '~/behaviors/shortcuts/keybindings';
 import {
   getLocationHash,
   updateHistory,
@@ -28,7 +29,7 @@ export default class ShortcutsBlob extends Shortcuts {
 
     this.shortcircuitPermalinkButton();
 
-    Mousetrap.bind('y', this.moveToFilePermalink.bind(this));
+    Mousetrap.bind(keysFor(PROJECT_FILES_GO_TO_PERMALINK), this.moveToFilePermalink.bind(this));
   }
 
   moveToFilePermalink() {
@@ -53,7 +54,7 @@ export default class ShortcutsBlob extends Shortcuts {
 
   shortcircuitPermalinkButton() {
     const button = this.options.fileBlobPermalinkUrlElement;
-    const handleButton = e => {
+    const handleButton = (e) => {
       if (!eventHasModifierKeys(e)) {
         e.preventDefault();
         this.moveToFilePermalink();

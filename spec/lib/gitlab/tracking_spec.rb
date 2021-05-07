@@ -2,13 +2,13 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Tracking do
-  let(:timestamp) { Time.utc(2017, 3, 22) }
-
   before do
     stub_application_setting(snowplow_enabled: true)
     stub_application_setting(snowplow_collector_hostname: 'gitfoo.com')
     stub_application_setting(snowplow_cookie_domain: '.gitfoo.com')
     stub_application_setting(snowplow_app_id: '_abc123_')
+
+    described_class.instance_variable_set("@snowplow", nil)
   end
 
   describe '.snowplow_options' do
@@ -35,99 +35,53 @@ RSpec.describe Gitlab::Tracking do
     end
   end
 
-  describe 'tracking events' do
-    shared_examples 'events not tracked' do
-      it 'does not track events' do
-        stub_application_setting(snowplow_enabled: false)
-        expect(SnowplowTracker::AsyncEmitter).not_to receive(:new)
-        expect(SnowplowTracker::Tracker).not_to receive(:new)
+  describe '.event' do
+    let(:namespace) { create(:namespace) }
 
-        track_event
+    shared_examples 'delegates to destination' do |klass|
+      before do
+        allow_any_instance_of(Gitlab::Tracking::Destinations::Snowplow).to receive(:event)
+        allow_any_instance_of(Gitlab::Tracking::Destinations::ProductAnalytics).to receive(:event)
+      end
+
+      it "delegates to #{klass} destination" do
+        other_context = double(:context)
+
+        project = double(:project)
+        user = double(:user)
+
+        expect(Gitlab::Tracking::StandardContext)
+          .to receive(:new)
+          .with(project: project, user: user, namespace: namespace, extra_key_1: 'extra value 1', extra_key_2: 'extra value 2')
+          .and_call_original
+
+        expect_any_instance_of(klass).to receive(:event) do |_, category, action, args|
+          expect(category).to eq('category')
+          expect(action).to eq('action')
+          expect(args[:label]).to eq('label')
+          expect(args[:property]).to eq('property')
+          expect(args[:value]).to eq(1.5)
+          expect(args[:context].length).to eq(2)
+          expect(args[:context].first.to_json[:schema]).to eq(Gitlab::Tracking::StandardContext::GITLAB_STANDARD_SCHEMA_URL)
+          expect(args[:context].last).to eq(other_context)
+        end
+
+        described_class.event('category', 'action', label: 'label', property: 'property', value: 1.5,
+                              context: [other_context], project: project, user: user, namespace: namespace,
+                              extra_key_1: 'extra value 1', extra_key_2: 'extra value 2')
       end
     end
 
-    around do |example|
-      travel_to(timestamp) { example.run }
-    end
+    it_behaves_like 'delegates to destination', Gitlab::Tracking::Destinations::Snowplow
+    it_behaves_like 'delegates to destination', Gitlab::Tracking::Destinations::ProductAnalytics
 
-    before do
-      described_class.instance_variable_set("@snowplow", nil)
-    end
+    it 'tracks errors' do
+      expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).with(
+        an_instance_of(ContractError),
+        snowplow_category: nil, snowplow_action: 'some_action'
+      )
 
-    let(:tracker) { double }
-
-    def receive_events
-      expect(SnowplowTracker::AsyncEmitter).to receive(:new).with(
-        'gitfoo.com', { protocol: 'https' }
-      ).and_return('_emitter_')
-
-      expect(SnowplowTracker::Tracker).to receive(:new).with(
-        '_emitter_',
-        an_instance_of(SnowplowTracker::Subject),
-        'gl',
-        '_abc123_'
-      ).and_return(tracker)
-    end
-
-    describe '.event' do
-      let(:track_event) do
-        described_class.event('category', 'action',
-          label: '_label_',
-          property: '_property_',
-          value: '_value_',
-          context:  nil
-        )
-      end
-
-      it_behaves_like 'events not tracked'
-
-      it 'can track events' do
-        receive_events
-        expect(tracker).to receive(:track_struct_event).with(
-          'category',
-          'action',
-          '_label_',
-          '_property_',
-          '_value_',
-          nil,
-          (timestamp.to_f * 1000).to_i
-        )
-
-        track_event
-      end
-    end
-
-    describe '.self_describing_event' do
-      let(:track_event) do
-        described_class.self_describing_event('iglu:com.gitlab/example/jsonschema/1-0-2',
-          {
-            foo: 'bar',
-            foo_count: 42
-          },
-          context: nil
-        )
-      end
-
-      it_behaves_like 'events not tracked'
-
-      it 'can track self describing events' do
-        receive_events
-        expect(SnowplowTracker::SelfDescribingJson).to receive(:new).with(
-          'iglu:com.gitlab/example/jsonschema/1-0-2',
-          {
-            foo: 'bar',
-            foo_count: 42
-          }
-        ).and_return('_event_json_')
-
-        expect(tracker).to receive(:track_self_describing_event).with(
-          '_event_json_',
-          nil,
-          (timestamp.to_f * 1000).to_i
-        )
-
-        track_event
-      end
+      described_class.event(nil, 'some_action')
     end
   end
 end

@@ -23,6 +23,9 @@ class Groups::SsoController < Groups::ApplicationController
     @group_name = unauthenticated_group.full_name
     @group_saml_identity = linked_identity
     @idp_url = unauthenticated_group.saml_provider.sso_url
+    @auto_redirect_to_provider = current_user&.group_sso?(unauthenticated_group)
+
+    render layout: 'devise_empty' if @auto_redirect_to_provider
   end
 
   def unlink
@@ -30,7 +33,11 @@ class Groups::SsoController < Groups::ApplicationController
 
     GroupSaml::Identity::DestroyService.new(linked_identity).execute
 
-    redirect_to profile_account_path
+    if current_user.authorized_by_provisioning_group?(unauthenticated_group)
+      sign_out current_user
+    else
+      redirect_to profile_account_path
+    end
   end
 
   def sign_up_form

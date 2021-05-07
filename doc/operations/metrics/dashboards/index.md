@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Custom dashboards **(CORE)**
+# Custom dashboards **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/59974) in GitLab 12.1.
 
@@ -13,9 +13,6 @@ includes a few key metrics, but you can also define your own custom dashboards.
 
 You may create a [new dashboard from scratch](#add-a-new-dashboard-to-your-project)
 or [duplicate a GitLab-defined Prometheus dashboard](#duplicate-a-gitlab-defined-dashboard).
-
-The metrics as defined below do not support alerts, unlike
-[custom metrics](../index.md#adding-custom-metrics).
 
 ## Add a new dashboard to your project
 
@@ -68,9 +65,9 @@ To create a new dashboard from the command line:
 
 Your custom dashboard is available at `https://example.com/project/-/metrics/custom_dashboard_name.yml`.
 
-NOTE: **Note:**
-Configuration files nested under subdirectories of `.gitlab/dashboards` are not
-supported and won't be available in the UI.
+NOTE:
+Configuration files nested under subdirectories of `.gitlab/dashboards` aren't
+supported or available in the UI.
 
 ## Add a new metrics panel to a dashboard
 
@@ -84,7 +81,7 @@ with the **Add Panel** page:
    [permissions](../../../user/permissions.md#project-members-permissions).
 1. Click **Add panel** in the **{ellipsis_v}** **More actions** menu.
 
-   NOTE: **Note:**
+   NOTE:
    You can only add panels to custom dashboards.
 
    ![Monitoring Dashboard actions menu with add panel item](img/actions_menu_create_add_panel_v13_3.png)
@@ -97,7 +94,7 @@ with the **Add Panel** page:
 ## Duplicate a GitLab-defined dashboard
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/37238) in GitLab 12.7.
-> - From [GitLab 12.8 onwards](https://gitlab.com/gitlab-org/gitlab/-/issues/39505), custom metrics are also duplicated when you duplicate a dashboard.
+> - [GitLab versions 12.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/39505), custom metrics are also duplicated when you duplicate a dashboard.
 
 You can save a complete copy of a GitLab-defined dashboard along with all custom metrics added to it.
 The resulting `.yml` file can be customized and adapted to your project.
@@ -131,7 +128,7 @@ any chart on a dashboard:
 The options are:
 
 - **Expand panel** - Displays a larger version of a visualization. To return to
-  the dashboard, click the **Back** button in your browser, or press the <kbd>Esc</kbd> key.
+  the dashboard, click the **Back** button in your browser, or press the <kbd>Escape</kbd> key.
   ([Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3100) in GitLab 13.0.)
 - **View logs** **(ULTIMATE)** - Displays [Logs](../../../user/project/clusters/kubernetes_pod_logs.md),
   if they are enabled. If used in conjunction with the [timeline zoom](#timeline-zoom-and-url-sharing)
@@ -150,7 +147,7 @@ The options are:
 You can use the **Timeline zoom** function at the bottom of a chart to zoom in
 on a date and time of your choice. When you click and drag the sliders to select
 a different beginning or end date of data to display, GitLab adds your selected start
-and end times to the URL, enabling you to share specific timeframes more easily.
+and end times to the URL, enabling you to share specific time frames more easily.
 
 ## Dashboard Annotations
 
@@ -159,7 +156,7 @@ and end times to the URL, enabling you to share specific timeframes more easily.
 
 You can use **Metrics Dashboard Annotations** to mark any important events on
 every metrics dashboard by adding annotations to it. While viewing a dashboard,
-annotation entries assigned to the selected time range will be automatically
+annotation entries assigned to the selected time range are automatically
 fetched and displayed on every chart within that dashboard. On mouse hover, each
 annotation presents additional details, including the exact time of an event and
 its description.

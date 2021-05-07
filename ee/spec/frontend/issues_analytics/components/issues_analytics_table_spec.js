@@ -1,11 +1,11 @@
+import { GlLoadingIcon, GlTable } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import IssuesAnalyticsTable from 'ee/issues_analytics/components/issues_analytics_table.vue';
-import { mount } from '@vue/test-utils';
-import { GlLoadingIcon, GlTable } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { mockIssuesApiResponse, tableHeaders, endpoints } from '../mock_data';
 
 jest.mock('~/flash');
@@ -24,20 +24,12 @@ describe('IssuesAnalyticsTable', () => {
 
   const findTable = () => wrapper.find(GlTable);
 
-  const findIssueDetailsCol = rowIndex =>
-    findTable()
-      .findAll('[data-testid="detailsCol"]')
-      .at(rowIndex);
+  const findIssueDetailsCol = (rowIndex) =>
+    findTable().findAll('[data-testid="detailsCol"]').at(rowIndex);
 
-  const findAgeCol = rowIndex =>
-    findTable()
-      .findAll('[data-testid="ageCol"]')
-      .at(rowIndex);
+  const findAgeCol = (rowIndex) => findTable().findAll('[data-testid="ageCol"]').at(rowIndex);
 
-  const findStatusCol = rowIndex =>
-    findTable()
-      .findAll('[data-testid="statusCol"]')
-      .at(rowIndex);
+  const findStatusCol = (rowIndex) => findTable().findAll('[data-testid="statusCol"]').at(rowIndex);
 
   beforeEach(() => {
     jest.spyOn(Date, 'now').mockImplementation(() => new Date('2020-01-08'));
@@ -115,7 +107,9 @@ describe('IssuesAnalyticsTable', () => {
     });
 
     it('displays an error', () => {
-      expect(createFlash).toHaveBeenCalledWith('Failed to load issues. Please try again.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Failed to load issues. Please try again.',
+      });
     });
   });
 });

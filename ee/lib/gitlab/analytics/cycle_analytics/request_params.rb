@@ -7,6 +7,7 @@ module Gitlab
         include ActiveModel::Model
         include ActiveModel::Validations
         include ActiveModel::Attributes
+        include Gitlab::Utils::StrongMemoize
 
         MAX_RANGE_DAYS = 180.days.freeze
         DEFAULT_DATE_RANGE = 29.days # 30 including Date.today
@@ -16,6 +17,11 @@ module Gitlab
           :created_after,
           :author_username,
           :milestone_title,
+          :sort,
+          :direction,
+          :page,
+          :stage_id,
+          :end_event_filter,
           label_name: [].freeze,
           assignee_username: [].freeze,
           project_ids: [].freeze
@@ -35,6 +41,11 @@ module Gitlab
         attribute :group
         attribute :current_user
         attribute :value_stream
+        attribute :sort
+        attribute :direction
+        attribute :page
+        attribute :stage_id
+        attribute :end_event_filter
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -50,7 +61,8 @@ module Gitlab
           super(params)
 
           self.created_before = (self.created_before || Time.current).at_end_of_day
-          self.created_after  = (created_after || default_created_after).at_beginning_of_day
+          self.created_after = (created_after || default_created_after).at_beginning_of_day
+          self.end_event_filter ||= Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder::DEFAULT_END_EVENT_FILTER
         end
 
         def project_ids
@@ -62,7 +74,11 @@ module Gitlab
             current_user: current_user,
             from: created_after,
             to: created_before,
-            project_ids: project_ids
+            project_ids: project_ids,
+            sort: sort&.to_sym,
+            direction: direction&.to_sym,
+            page: page,
+            end_event_filter: end_event_filter.to_sym
           }.merge(attributes.symbolize_keys.slice(*FINDER_PARAM_NAMES))
         end
 
@@ -77,6 +93,9 @@ module Gitlab
             attrs[:assignees] = assignee_username.to_json if assignee_username.present?
             attrs[:author] = author_username if author_username.present?
             attrs[:milestone] = milestone_title if milestone_title.present?
+            attrs[:sort] = sort if sort.present?
+            attrs[:direction] = direction if direction.present?
+            attrs[:stage] = stage_data_attributes.to_json if stage_id.present?
           end
         end
 
@@ -122,6 +141,15 @@ module Gitlab
           }
         end
 
+        def stage_data_attributes
+          return unless stage
+
+          {
+            id: stage.id || stage.name,
+            title: stage.name
+          }
+        end
+
         def validate_created_before
           return if created_after.nil? || created_before.nil?
 
@@ -141,6 +169,14 @@ module Gitlab
             (created_before - DEFAULT_DATE_RANGE)
           else
             DEFAULT_DATE_RANGE.ago
+          end
+        end
+
+        def stage
+          return unless value_stream
+
+          strong_memoize(:stage) do
+            ::Analytics::CycleAnalytics::StageFinder.new(parent: group, stage_id: stage_id).execute if stage_id
           end
         end
       end

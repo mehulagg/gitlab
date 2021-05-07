@@ -32,10 +32,10 @@ RSpec.describe UpdateAllMirrorsWorker do
       outer_context = nil
 
       Gitlab::ApplicationContext.with_context(project: build(:project)) do
-        outer_context = Labkit::Context.current.to_h
+        outer_context = Gitlab::ApplicationContext.current
 
         expect(worker).to receive(:schedule_mirrors!) do
-          inner_context = Labkit::Context.current.to_h
+          inner_context = Gitlab::ApplicationContext.current
 
           # `schedule_mirrors!` needs to return an integer.
           0
@@ -141,7 +141,7 @@ RSpec.describe UpdateAllMirrorsWorker do
     context 'when the instance is licensed' do
       def scheduled_mirror(at:)
         project = create(:project, :mirror)
-        project.import_state.update!(next_execution_timestamp: at)
+        project.import_state.update_column(:next_execution_timestamp, at)
         project
       end
 
@@ -160,13 +160,13 @@ RSpec.describe UpdateAllMirrorsWorker do
     context 'when the instance checks namespace plans' do
       def scheduled_mirror(at:, licensed:, public: false, subgroup: nil)
         group_args = [:group, :public, subgroup && :nested].compact
-        namespace = create(*group_args)
+        namespace = create(*group_args) # rubocop:disable Rails/SaveBang
         project = create(:project, :public, :mirror, namespace: namespace)
 
         create(:gitlab_subscription, (licensed ? :bronze : :free), namespace: namespace.root_ancestor)
 
-        project.import_state.update!(next_execution_timestamp: at)
-        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE) unless public
+        project.import_state.update_column(:next_execution_timestamp, at)
+        project.update_column(:visibility_level, Gitlab::VisibilityLevel::PRIVATE) unless public
         project
       end
 
@@ -232,7 +232,17 @@ RSpec.describe UpdateAllMirrorsWorker do
           end
 
           it "does not schedule a mirror of an archived project" do
-            licensed_project1.update!(archived: true)
+            licensed_project1.update_column(:archived, true)
+
+            schedule_mirrors!(capacity: 4)
+
+            expect_import_scheduled(licensed_project2, public_project)
+            expect_import_not_scheduled(licensed_project1)
+            expect_import_not_scheduled(*unlicensed_projects)
+          end
+
+          it "does not schedule a mirror of an pending_delete project" do
+            licensed_project1.update_column(:pending_delete, true)
 
             schedule_mirrors!(capacity: 4)
 

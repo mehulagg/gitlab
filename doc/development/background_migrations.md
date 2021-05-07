@@ -36,7 +36,7 @@ Some examples where background migrations can be useful:
 - Populating one column based on JSON stored in another column.
 - Migrating data that depends on the output of external services (e.g. an API).
 
-NOTE: **Note:**
+NOTE:
 If the background migration is part of an important upgrade, make sure it's announced
 in the release post. Discuss with your Project Manager if you're not sure the migration falls
 into this category.
@@ -142,9 +142,17 @@ migration performing the scheduling. Otherwise the background migration would be
 scheduled multiple times on systems that are upgrading multiple patch releases at
 once.
 
+When you start the second post-deployment migration, you should delete any
+previously queued jobs from the initial migration with the provided
+helper:
+
+```ruby
+delete_queued_jobs('BackgroundMigrationClassName')
+```
+
 ## Cleaning Up
 
-NOTE: **Note:**
+NOTE:
 Cleaning up any remaining background migrations _must_ be done in either a major
 or minor release, you _must not_ do this in a patch release.
 

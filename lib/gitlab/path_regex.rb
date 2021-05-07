@@ -49,6 +49,7 @@ module Gitlab
       s
       search
       sent_notifications
+      sitemap
       sitemap.xml
       sitemap.xml.gz
       slash-command-logo.png
@@ -179,12 +180,16 @@ module Gitlab
       end
     end
 
-    def project_git_route_regex
-      @project_git_route_regex ||= /#{project_route_regex}\.git/.freeze
+    def repository_route_regex
+      @repository_route_regex ||= /#{full_namespace_route_regex}|#{personal_snippet_repository_path_regex}/.freeze
     end
 
-    def project_wiki_git_route_regex
-      @project_wiki_git_route_regex ||= /#{PATH_REGEX_STR}\.wiki/.freeze
+    def repository_git_route_regex
+      @repository_git_route_regex ||= /#{repository_route_regex}\.git/.freeze
+    end
+
+    def repository_wiki_git_route_regex
+      @repository_wiki_git_route_regex ||= /#{full_namespace_route_regex}\.wiki\.git/.freeze
     end
 
     def full_namespace_path_regex
@@ -249,8 +254,12 @@ module Gitlab
       %r{\A(#{personal_snippet_repository_path_regex}|#{project_snippet_repository_path_regex})\z}
     end
 
-    def personal_and_project_snippets_path_regex
-      %r{#{personal_snippet_path_regex}|#{project_snippet_path_regex}}
+    def container_image_regex
+      @container_image_regex ||= %r{([\w\.-]+\/){0,1}[\w\.-]+}.freeze
+    end
+
+    def container_image_blob_sha_regex
+      @container_image_blob_sha_regex ||= %r{[\w+.-]+:?\w+}.freeze
     end
 
     private

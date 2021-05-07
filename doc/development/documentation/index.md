@@ -1,18 +1,18 @@
 ---
 stage: none
 group: Documentation Guidelines
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: Learn how to contribute to GitLab Documentation.
 ---
 
 # GitLab Documentation guidelines
 
-GitLab's documentation is [intended as the single source of truth (SSOT)](https://about.gitlab.com/handbook/documentation/) for information about how to configure, use, and troubleshoot GitLab. The documentation contains use cases and usage instructions for every GitLab feature, organized by product area and subject. This includes topics and workflows that span multiple GitLab features, and the use of GitLab with other applications.
+The GitLab documentation is [intended as the single source of truth (SSOT)](https://about.gitlab.com/handbook/documentation/) for information about how to configure, use, and troubleshoot GitLab. The documentation contains use cases and usage instructions for every GitLab feature, organized by product area and subject. This includes topics and workflows that span multiple GitLab features, and the use of GitLab with other applications.
 
 In addition to this page, the following resources can help you craft and contribute to documentation:
 
-- [Style Guide](styleguide.md) - What belongs in the docs, language guidelines, Markdown standards to follow, links, and more.
-- [Structure and template](structure.md) - Learn the typical parts of a doc page and how to write each one.
+- [Style Guide](styleguide/index.md) - What belongs in the docs, language guidelines, Markdown standards to follow, links, and more.
+- [Topic type template](structure.md) - Learn about the different types of topics.
 - [Documentation process](workflow.md).
 - [Markdown Guide](../../user/markdown.md) - A reference for all Markdown syntax supported by GitLab.
 - [Site architecture](site_architecture/index.md) - How <https://docs.gitlab.com> is built.
@@ -38,8 +38,8 @@ Documentation issues and merge requests are part of their respective repositorie
 
 The [CI pipeline for the main GitLab project](../pipelines.md) is configured to automatically
 run only the jobs that match the type of contribution. If your contribution contains
-**only** documentation changes, then only documentation-related jobs will be run, and
-the pipeline will complete much faster than a code contribution.
+**only** documentation changes, then only documentation-related jobs run, and
+the pipeline completes much faster than a code contribution.
 
 If you are submitting documentation-only changes to Runner, Omnibus, or Charts,
 the fast pipeline is not determined automatically. Instead, create branches for
@@ -64,11 +64,11 @@ However, anyone can contribute [documentation improvements](workflow.md) that ar
 [GitLab docs](https://gitlab.com/gitlab-org/gitlab-docs) uses [GitLab Kramdown](https://gitlab.com/gitlab-org/gitlab_kramdown)
 as its Markdown rendering engine. See the [GitLab Markdown Guide](https://about.gitlab.com/handbook/markdown-guide/) for a complete Kramdown reference.
 
-Adhere to the [Documentation Style Guide](styleguide.md). If a style standard is missing, you are welcome to suggest one via a merge request.
+Adhere to the [Documentation Style Guide](styleguide/index.md). If a style standard is missing, you are welcome to suggest one via a merge request.
 
 ## Folder structure and files
 
-See the [Structure](styleguide.md#structure) section of the [Documentation Style Guide](styleguide.md).
+See the [Structure](styleguide/index.md#structure) section of the [Documentation Style Guide](styleguide/index.md).
 
 ## Metadata
 
@@ -82,7 +82,7 @@ All values are treated as strings and are only used for the
 Each page should ideally have metadata related to the stage and group it
 belongs to, as well as an information block as described below:
 
-- `stage`: The [Stage](https://about.gitlab.com/handbook/product/product-categories/#devops-stages)
+- `stage`: The [Stage](https://about.gitlab.com/handbook/product/categories/#devops-stages)
   to which the majority of the page's content belongs.
 - `group`: The [Group](https://about.gitlab.com/company/team/structure/#product-groups)
   to which the majority of the page's content belongs.
@@ -93,20 +93,20 @@ belongs to, as well as an information block as described below:
   ```plaintext
   To determine the technical writer assigned to the Stage/Group
   associated with this page, see
-  https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+  https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
   ```
 
-For example, the following metadata would be at the beginning of a product
-documentation page whose content is primarily associated with the Audit Events
-feature:
+For example:
 
 ```yaml
 ---
-stage: Monitor
-group: APM
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Example Stage
+group: Example Group
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 ```
+
+If you need help determining the correct stage, read [Ask for help](workflow.md#ask-for-help).
 
 ### Document type metadata
 
@@ -152,7 +152,7 @@ comments: false
 
 Each page can have additional, optional metadata (set in the
 [default.html](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/fc3577921343173d589dfa43d837b4307e4e620f/layouts/default.html#L30-52)
-Nanoc layout), which will be displayed at the top of the page if defined:
+Nanoc layout), which is displayed at the top of the page if defined:
 
 - `reading_time`: If you want to add an indication of the approximate reading
   time of a page, you can set `reading_time` to `true`. This uses a simple
@@ -161,78 +161,110 @@ Nanoc layout), which will be displayed at the top of the page if defined:
 
 ## Move or rename a page
 
-Moving or renaming a document is the same as changing its location. This process
-requires specific steps to ensure that visitors can find the new
-documentation page, whether they're using `/help` from a GitLab instance or by
-visiting <https://docs.gitlab.com>.
+Moving or renaming a document is the same as changing its location. Be sure to
+assign a technical writer to any merge request that renames or moves a page.
+Technical Writers can help with any questions and can review your change.
 
-Be sure to assign a technical writer to a page move or rename MR. Technical
-Writers can help with any questions and can review your change.
+When moving or renaming a page, you must redirect browsers to the new page.
+This ensures users find the new page, and have the opportunity to update their
+bookmarks.
 
-To change a document's location, don't remove the old document, but instead
-replace all of its content with the following:
+There are two types of redirects:
 
-```markdown
----
-redirect_to: '../path/to/file/index.md'
----
+- Redirect codes added into the documentation files themselves, for users who
+  view the docs in `/help` on self-managed instances. For example,
+  [`/help` on GitLab.com](https://gitlab.com/help).
+- [GitLab Pages redirects](../../user/project/pages/redirects.md),
+  for users who view the docs on [`docs.gitlab.com`](https://docs.gitlab.com).
 
-This document was moved to [another location](../path/to/file/index.md).
-```
+The Technical Writing team manages the [process](https://gitlab.com/gitlab-org/technical-writing/-/blob/master/.gitlab/issue_templates/tw-monthly-tasks.md)
+to regularly update the [`redirects.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/redirects.yaml)
+file.
 
-Replace `../path/to/file/index.md` with the relative path to the old document.
+To add a redirect:
 
-The `redirect_to` variable supports both full and relative URLs; for example:
+1. In the repository (`gitlab`, `gitlab-runner`, `omnibus-gitlab`, or `charts`),
+   create a new documentation file. Don't delete the old one. The easiest
+   way is to copy it. For example:
 
-- `https://docs.gitlab.com/ee/path/to/file.html`
-- `../path/to/file.html`
-- `path/to/file.md`
+   ```shell
+   cp doc/user/search/old_file.md doc/api/new_file.md
+   ```
 
-The redirect works for <https://docs.gitlab.com>, and any `*.md` paths are
-changed to `*.html`. The description line following the `redirect_to` code
-informs the visitor that the document changed location if the redirect process
-doesn't complete successfully.
+1. Add the redirect code to the old documentation file by running the
+   following Rake task. The first argument is the path of the old file,
+   and the second argument is the path of the new file:
 
-For example, if you move `doc/workflow/lfs/index.md` to
-`doc/administration/lfs.md`, then the steps would be:
+   - To redirect to a page in the same project, use relative paths and
+     the `.md` extension. Both old and new paths start from the same location.
+     In the following example, both paths are relative to `doc/`:
 
-1. Copy `doc/workflow/lfs/index.md` to `doc/administration/lfs.md`
-1. Replace the contents of `doc/workflow/lfs/index.md` with:
+     ```shell
+     bundle exec rake "gitlab:docs:redirect[doc/user/search/old_file.md, doc/api/new_file.md]"
+     ```
+
+   - To redirect to a page in a different project or site, use the full URL (with `https://`) :
+
+     ```shell
+     bundle exec rake "gitlab:docs:redirect[doc/user/search/old_file.md, https://example.com]"
+     ```
+
+   Alternatively, you can omit the arguments, and you'll be asked to enter
+   their values:
+
+   ```shell
+   bundle exec rake gitlab:docs:redirect
+   ```
+
+   If you don't want to use the Rake task, you can use the following template.
+   However, the file paths must be relative to the `doc` or `docs` directory.
+
+   Replace the value of `redirect_to` with the new file path and `YYYY-MM-DD`
+   with the date the file should be removed.
+
+   Redirect files that link to docs in internal documentation projects
+   are removed after three months. Redirect files that link to external sites are
+   removed after one year:
 
    ```markdown
    ---
-   redirect_to: '../../administration/lfs.md'
+   redirect_to: '../newpath/to/file/index.md'
    ---
 
-   This document was moved to [another location](../../administration/lfs.md).
+   This document was moved to [another location](../path/to/file/index.md).
+
+   <!-- This redirect file can be deleted after <YYYY-MM-DD>. -->
+   <!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->
    ```
 
-1. Find and replace any occurrences of the old location with the new one.
-   A quick way to find them is to use `git grep` on the repository you changed
-   the file from:
-
-   ```shell
-   git grep -n "workflow/lfs/lfs_administration"
-   git grep -n "lfs/lfs_administration"
-   ```
-
-1. If the document being moved has any Disqus comments on it, follow the steps
+1. If the documentation page being moved has any Disqus comments, follow the steps
    described in [Redirections for pages with Disqus comments](#redirections-for-pages-with-disqus-comments).
+1. Open a merge request with your changes. If a documentation page
+   you're removing includes images that aren't used
+   with any other documentation pages, be sure to use your merge request to delete
+   those images from the repository.
+1. Assign the merge request to a technical writer for review and merge.
+1. Search for links to the old documentation file. You must find and update all
+   links that point to the old documentation file:
 
-Things to note:
+   - In <https://gitlab.com/gitlab-com/www-gitlab-com>, search for full URLs:
+     `grep -r "docs.gitlab.com/ee/path/to/file.html" .`
+   - In <https://gitlab.com/gitlab-org/gitlab-docs/-/tree/master/content/_data>,
+     search the navigation bar configuration files for the path with `.html`:
+     `grep -r "path/to/file.html" .`
+   - In any of the four internal projects, search for links in the docs
+     and codebase. Search for all variations, including full URL and just the path.
+     For example, go to the root directory of the `gitlab` project and run:
 
-- Since we also use inline documentation, except for the documentation itself,
-  the document might also be referenced in the views of GitLab (`app/`) which will
-  render when visiting `/help`, and sometimes in the testing suite (`spec/`).
-  You must search these paths for references to the doc and update them as well.
-- The above `git grep` command will search recursively in the directory you run
-  it in for `workflow/lfs/lfs_administration` and `lfs/lfs_administration`
-  and will print the file and the line where this file is mentioned.
-  You may ask why the two greps. Since [we use relative paths to link to
-  documentation](styleguide.md#links), sometimes it might be useful to search a path deeper.
-- The `*.md` extension is not used when a document is linked to GitLab's
-  built-in help page, which is why we omit it in `git grep`.
-- Use the checklist on the "Change documentation location" MR description template.
+     ```shell
+     grep -r "docs.gitlab.com/ee/path/to/file.html" .
+     grep -r "path/to/file.html" .
+     grep -r "path/to/file.md" .
+     grep -r "path/to/file" .
+     ```
+
+     You may need to try variations of relative links, such as `../path/to/file` or
+     `../file` to find every case.
 
 ### Redirections for pages with Disqus comments
 
@@ -249,7 +281,7 @@ available under `https://docs.gitlab.com/my-old-location/README.html` to a new l
 `https://docs.gitlab.com/my-new-location/index.html`.
 
 Into the **new document** front matter, we add the following information. You must
-include the file name in the `disqus_identifier` URL, even if it's `index.html` or `README.html`.
+include the filename in the `disqus_identifier` URL, even if it's `index.html` or `README.html`.
 
 ```yaml
 ---
@@ -267,7 +299,7 @@ Before getting started, make sure you read the introductory section
 - Label the MR `Documentation` (can only be done by people with `developer` access, for example, GitLab team members)
 - Assign the correct milestone per note below (can only be done by people with `developer` access, for example, GitLab team members)
 
-Documentation will be merged if it is an improvement on existing content,
+Documentation is merged if it is an improvement on existing content,
 represents a good-faith effort to follow the template and style standards,
 and is believed to be accurate.
 
@@ -285,87 +317,83 @@ Every GitLab instance includes the documentation, which is available at `/help`
 (`https://gitlab.example.com/help`). For example, <https://gitlab.com/help>.
 
 The documentation available online on <https://docs.gitlab.com> is deployed every four hours from the `master` branch of GitLab, Omnibus, and Runner. Therefore,
-after a merge request gets merged, it will be available online on the same day.
-However, it will be shipped (and available on `/help`) within the milestone assigned
+after a merge request gets merged, it is available online on the same day.
+However, it's shipped (and available on `/help`) within the milestone assigned
 to the MR.
 
 For example, let's say your merge request has a milestone set to 11.3, which
-will be released on 2018-09-22. If it gets merged on 2018-09-15, it will be
+a release date of 2018-09-22. If it gets merged on 2018-09-15, it is
 available online on 2018-09-15, but, as the feature freeze date has passed, if
 the MR does not have a `~"Pick into 11.3"` label, the milestone has to be changed
-to 11.4 and it will be shipped with all GitLab packages only on 2018-10-22,
-with GitLab 11.4. Meaning, it will only be available under `/help` from GitLab
+to 11.4 and it ships with all GitLab packages only on 2018-10-22,
+with GitLab 11.4. Meaning, it's available only with `/help` from GitLab
 11.4 onward, but available on <https://docs.gitlab.com/> on the same day it was merged.
 
 ### Linking to `/help`
 
-When you're building a new feature, you may need to link the documentation
-from GitLab, the application. This is normally done in files inside the
-`app/views/` directory with the help of the `help_page_path` helper method.
+When you're building a new feature, you may need to link to the documentation
+from the GitLab application. This is normally done in files inside the
+`app/views/` directory, with the help of the `help_page_path` helper method.
 
-In its simplest form, the HAML code to generate a link to the `/help` page is:
+The `help_page_path` contains the path to the document you want to link to,
+with the following conventions:
 
-```haml
-= link_to 'Help page', help_page_path('user/permissions')
+- It's relative to the `doc/` directory in the GitLab repository.
+- It omits the `.md` extension.
+- It doesn't end with a slash (`/`).
+
+The help text follows the [Pajamas guidelines](https://design.gitlab.com/usability/helping-users/#formatting-help-content).
+
+Use the following special cases depending on the context, ensuring all links
+are inside `_()` so they can be translated:
+
+- Linking to a doc page. In its most basic form, the HAML code to generate a
+  link to the `/help` page is:
+
+  ```haml
+  = link_to _('Learn more.'), help_page_path('user/permissions'), target: '_blank', rel: 'noopener noreferrer'
+  ```
+
+- Linking to an anchor link. Use `anchor` as part of the `help_page_path`
+  method:
+
+  ```haml
+  = link_to _('Learn more.'), help_page_path('user/permissions', anchor: 'anchor-link'), target: '_blank', rel: 'noopener noreferrer'
+  ```
+
+- Using links inline of some text. First, define the link, and then use it. In
+  this example, `link_start` is the name of the variable that contains the
+  link:
+
+  ```haml
+  - link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/permissions') }
+  %p= _("This is a text describing the option/feature in a sentence. %{link_start}Learn more.%{link_end}").html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
+  ```
+
+- Using a button link. Useful in places where text would be out of context with
+  the rest of the page layout:
+
+  ```haml
+  = link_to _('Learn more.'), help_page_path('user/permissions'),  class: 'btn btn-info', target: '_blank', rel: 'noopener noreferrer'
+  ```
+
+#### Linking to `/help` in JavaScript
+
+To link to the documentation from a JavaScript or a Vue component, use the `helpPagePath` function from [`help_page_helper.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/helpers/help_page_helper.js):
+
+```javascript
+import { helpPagePath } from '~/helpers/help_page_helper';
+
+helpPagePath('user/permissions', { anchor: 'anchor-link' })
+// evaluates to '/help/user/permissions#anchor-link' for GitLab.com
 ```
 
-The `help_page_path` contains the path to the document you want to link to with
-the following conventions:
-
-- it is relative to the `doc/` directory in the GitLab repository
-- the `.md` extension must be omitted
-- it must not end with a slash (`/`)
-
-Below are some special cases where should be used depending on the context.
-You can combine one or more of the following:
-
-1. **Linking to an anchor link.** Use `anchor` as part of the `help_page_path`
-   method:
-
-   ```haml
-   = link_to 'Help page', help_page_path('user/permissions', anchor: 'anchor-link')
-   ```
-
-1. **Opening links in a new tab.** This should be the default behavior:
-
-   ```haml
-   = link_to 'Help page', help_page_path('user/permissions'), target: '_blank'
-   ```
-
-1. **Using a question icon.** Usually used in settings where a long
-   description cannot be used, like near checkboxes. You can basically use
-   any GitLab SVG icon, but prefer the `question-o`:
-
-   ```haml
-   = link_to sprite_icon('question-o'), help_page_path('user/permissions')
-   ```
-
-1. **Using a button link.** Useful in places where text would be out of context
-   with the rest of the page layout:
-
-   ```haml
-   = link_to 'Help page', help_page_path('user/permissions'),  class: 'btn btn-info'
-   ```
-
-1. **Using links inline of some text.**
-
-   ```haml
-   Description to #{link_to 'Help page', help_page_path('user/permissions')}.
-   ```
-
-1. **Adding a period at the end of the sentence.** Useful when you don't want
-   the period to be part of the link:
-
-   ```haml
-   = succeed '.' do
-     Learn more in the
-     = link_to 'Help page', help_page_path('user/permissions')
-   ```
+This is preferred over static paths, as the helper also works on instances installed under a [relative URL](../../install/relative_url.md).
 
 ### GitLab `/help` tests
 
 Several [RSpec tests](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/features/help_pages_spec.rb)
-are run to ensure GitLab documentation renders and works correctly. In particular, that [main docs landing page](../../README.md) will work correctly from `/help`.
+are run to ensure GitLab documentation renders and works correctly. In particular, that [main docs landing page](../../README.md) works correctly from `/help`.
 For example, [GitLab.com's `/help`](https://gitlab.com/help).
 
 ## Docs site architecture
@@ -381,31 +409,26 @@ on how the left-side navigation menu is built and updated.
 
 ## Previewing the changes live
 
-NOTE: **Note:**
+NOTE:
 To preview your changes to documentation locally, follow this
-[development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/gitlab_docs.md).
+[development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/gitlab_docs.md).
 
 The live preview is currently enabled for the following projects:
 
 - [`gitlab`](https://gitlab.com/gitlab-org/gitlab)
+- [`omnibus-gitlab`](https://gitlab.com/gitlab-org/omnibus-gitlab)
 - [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner)
 
 If your merge request has docs changes, you can use the manual `review-docs-deploy` job
 to deploy the docs review app for your merge request.
-You will need at least Maintainer permissions to be able to run it.
 
 ![Manual trigger a docs build](img/manual_build_docs.png)
 
 You must push a branch to those repositories, as it doesn't work for forks.
 
-The `review-docs-deploy*` job will:
+The `review-docs-deploy*` job:
 
-1. Create a new branch in the [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs)
-   project named after the scheme: `docs-preview-$DOCS_GITLAB_REPO_SUFFIX-$CI_MERGE_REQUEST_IID`,
-   where `DOCS_GITLAB_REPO_SUFFIX` is the suffix for each product, e.g, `ee` for
-   EE, `omnibus` for Omnibus GitLab, etc, and `CI_MERGE_REQUEST_IID` is the ID
-   of the respective merge request.
-1. Trigger a cross project pipeline and build the docs site with your changes.
+1. Triggers a cross project pipeline and build the docs site with your changes.
 
 In case the review app URL returns 404, this means that either the site is not
 yet deployed, or something went wrong with the remote pipeline. Give it a few
@@ -413,12 +436,7 @@ minutes and it should appear online, otherwise you can check the status of the
 remote pipeline from the link in the merge request's job output.
 If the pipeline failed or got stuck, drop a line in the `#docs` chat channel.
 
-Make sure that you always delete the branch of the merge request you were
-working on. If you don't, the remote docs branch won't be removed either,
-and the server where the Review Apps are hosted will eventually be out of
-disk space.
-
-TIP: **Tip:**
+NOTE:
 Someone with no merge rights to the GitLab projects (think of forks from
 contributors) cannot run the manual job. In that case, you can
 ask someone from the GitLab team who has the permissions to do that for you.
@@ -441,19 +459,11 @@ If you want to know the in-depth details, here's what's really happening:
 
 1. You manually run the `review-docs-deploy` job in a merge request.
 1. The job runs the [`scripts/trigger-build`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/trigger-build)
-   script with the `docs deploy` flag, which in turn:
-   1. Takes your branch name and applies the following:
-      - The `docs-preview-` prefix is added.
-      - The product slug is used to know the project the review app originated
-        from.
-      - The number of the merge request is added so that you can know by the
-        `gitlab-docs` branch name the merge request it originated from.
-   1. The remote branch is then created if it doesn't exist (meaning you can
-      re-run the manual job as many times as you want and this step will be skipped).
-   1. A new cross-project pipeline is triggered in the docs project.
-   1. The preview URL is shown both at the job output and in the merge request
-      widget. You also get the link to the remote pipeline.
-1. In the docs project, the pipeline is created and it
+   script with the `docs deploy` flag, which triggers the "Triggered from `gitlab-org/gitlab` 'review-docs-deploy' job"
+   pipeline trigger in the `gitlab-org/gitlab-docs` project for the `$DOCS_BRANCH` (defaults to `master`).
+1. The preview URL is shown both at the job output and in the merge request
+   widget. You also get the link to the remote pipeline.
+1. In the `gitlab-org/gitlab-docs` project, the pipeline is created and it
    [skips the test jobs](https://gitlab.com/gitlab-org/gitlab-docs/blob/8d5d5c750c602a835614b02f9db42ead1c4b2f5e/.gitlab-ci.yml#L50-55)
    to lower the build time.
 1. Once the docs site is built, the HTML files are uploaded as artifacts.
@@ -472,269 +482,8 @@ The following GitLab features are used among others:
 
 ## Testing
 
-We treat documentation as code, and so use tests in our CI pipeline to maintain the
-standards and quality of the docs. The current tests, which run in CI jobs when a
-merge request with new or changed docs is submitted, are:
-
-- [`docs lint`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L41):
-  Runs several tests on the content of the docs themselves:
-  - [`lint-doc.sh` script](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/lint-doc.sh)
-    runs the following checks and linters:
-    - All cURL examples use the long flags (ex: `--header`, not `-H`).
-    - The `CHANGELOG.md` does not contain duplicate versions.
-    - No files in `doc/` are executable.
-    - No new `README.md` was added.
-    - [markdownlint](#markdownlint).
-    - [Vale](#vale).
-  - Nanoc tests:
-    - [`internal_links`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L58)
-      checks that all internal links (ex: `[link](../index.md)`) are valid.
-    - [`internal_anchors`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L60)
-      checks that all internal anchors (ex: `[link](../index.md#internal_anchor)`)
-      are valid.
-  - [`ui-docs-links lint`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L62)
-    checks that all links to docs from UI elements (`app/views` files, for example)
-    are linking to valid docs and anchors.
-
-### Run tests locally
-
-Apart from [previewing your changes locally](#previewing-the-changes-live), you can also run all lint checks
-and Nanoc tests locally.
-
-#### Lint checks
-
-Lint checks are performed by the [`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/lint-doc.sh)
-script and can be executed as follows:
-
-1. Navigate to the `gitlab` directory.
-1. Run:
-
-   ```shell
-   MD_DOC_PATH=path/to/my_doc.md scripts/lint-doc.sh
-   ```
-
-Where `MD_DOC_PATH` points to the file or directory you would like to run lint checks for.
-If you omit it completely, it will default to the `doc/` directory.
-The output should be similar to:
-
-```plaintext
-=> Linting documents at path /path/to/gitlab as <user>...
-=> Checking for cURL short options...
-=> Checking for CHANGELOG.md duplicate entries...
-=> Checking /path/to/gitlab/doc for executable permissions...
-=> Checking for new README.md files...
-=> Linting markdown style...
-=> Linting prose...
-✔ 0 errors, 0 warnings and 0 suggestions in 1 file.
-✔ Linting passed
-```
-
-Note that this requires you to either have the required lint tools installed on your machine,
-or a working Docker installation, in which case an image with these tools pre-installed will be used.
-
-#### Nanoc tests
-
-To execute Nanoc tests locally:
-
-1. Navigate to the [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) directory.
-1. Run:
-
-   ```shell
-   # Check for broken internal links
-   bundle exec nanoc check internal_links
-
-   # Check for broken external links (might take a lot of time to complete).
-   # This test is set to be allowed to fail and is run only in the gitlab-docs project CI
-   bundle exec nanoc check internal_anchors
-   ```
-
-#### `ui-docs-links` test
-
-The `ui-docs-links lint` job uses `haml-lint` to test that all links to docs from
-UI elements (`app/views` files, for example) are linking to valid docs and anchors.
-
-To run the `ui-docs-links` test locally:
-
-1. Open the `gitlab` directory in a terminal window.
-1. Run:
-
-   ```shell
-   bundle exec haml-lint -i DocumentationLinks
-   ```
-
-If you receive an error the first time you run this test, run `bundle install`, which
-installs GitLab's dependencies, and try again.
-
-If you don't want to install all of GitLab's dependencies to test the links, you can:
-
-1. Open the `gitlab` directory in a terminal window.
-1. Install `haml-lint`:
-
-   ```shell
-   gem install haml_lint
-   ```
-
-1. Run:
-
-   ```shell
-   haml-lint -i DocumentationLinks
-   ```
-
-If you manually install `haml-lint` with this process, it will not update automatically
-and you should make sure your version matches the version used by GitLab.
-
-### Local linters
-
-To help adhere to the [documentation style guidelines](styleguide.md), and improve the content
-added to documentation, [install documentation linters](#install-linters) and
-[integrate them with your code editor](#configure-editors).
-
-At GitLab, we mostly use:
-
-- [markdownlint](#markdownlint)
-- [Vale](#vale)
-
-#### markdownlint
-
-[markdownlint](https://github.com/DavidAnson/markdownlint) checks that Markdown syntax follows
-[certain rules](https://github.com/DavidAnson/markdownlint/blob/master/doc/Rules.md#rules), and is
-used by the [`docs-lint` test](#testing).
-
-Our [Documentation Style Guide](styleguide.md#markdown) and
-[Markdown Guide](https://about.gitlab.com/handbook/markdown-guide/) elaborate on which choices must
-be made when selecting Markdown syntax for GitLab documentation. This tool helps catch deviations
-from those guidelines.
-
-markdownlint configuration is found in the following projects:
-
-- [`gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.markdownlint.json)
-- [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner/blob/master/.markdownlint.json)
-- [`omnibus-gitlab`](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/.markdownlint.json)
-- [`charts`](https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/.markdownlint.json)
-- [`gitlab-development-kit`](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/.markdownlint.json)
-
-This configuration is also used within build pipelines.
-
-You can use markdownlint:
-
-- [On the command line](https://github.com/igorshubovych/markdownlint-cli#markdownlint-cli--).
-- [Within a code editor](#configure-editors).
-- [In a `pre-commit` hook](#configure-pre-commit-hooks).
-
-#### Vale
-
-[Vale](https://errata-ai.gitbook.io/vale/) is a grammar, style, and word usage linter for the
-English language. Vale's configuration is stored in the
-[`.vale.ini`](https://gitlab.com/gitlab-org/gitlab/blob/master/.vale.ini) file located in the root
-directory of projects.
-
-Vale supports creating [custom tests](https://errata-ai.github.io/vale/styles/) that extend any of
-several types of checks, which we store in the `.linting/vale/styles/gitlab` directory within the
-documentation directory of projects.
-
-Vale configuration is found in the following projects:
-
-- [`gitlab`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc/.vale/gitlab)
-- [`gitlab-runner`](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/master/docs/.vale/gitlab)
-- [`omnibus-gitlab`](https://gitlab.com/gitlab-org/omnibus-gitlab/-/tree/master/doc/.vale/gitlab)
-- [`charts`](https://gitlab.com/gitlab-org/charts/gitlab/-/tree/master/doc/.vale/gitlab)
-- [`gitlab-development-kit`](https://gitlab.com/gitlab-org/gitlab-development-kit/-/tree/master/doc/.vale/gitlab)
-
-This configuration is also used within build pipelines.
-
-You can use Vale:
-
-- [On the command line](https://errata-ai.gitbook.io/vale/getting-started/usage).
-- [Within a code editor](#configure-editors).
-- [In a `pre-commit` hook](#configure-pre-commit-hooks). Vale only reports errors in the
-  `pre-commit` hook (the same configuration as the CI/CD pipelines), and does not report suggestions
-  or warnings.
-
-#### Install linters
-
-At a minimum, install [markdownlint](#markdownlint) and [Vale](#vale) to match the checks run in
-build pipelines:
-
-1. Install `markdownlint-cli`, using either:
-
-   - `npm`:
-
-     ```shell
-     npm install -g markdownlint-cli
-     ```
-
-   - `yarn`:
-
-     ```shell
-     yarn global add markdownlint-cli
-     ```
-
-     We recommend installing the version of `markdownlint-cli` currently used in the documentation
-     linting [Docker image](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/.gitlab-ci.yml#L420).
-
-1. Install [`vale`](https://github.com/errata-ai/vale/releases). For example, to install using
-   `brew` for macOS, run:
-
-   ```shell
-   brew install vale
-   ```
-
-   We recommend installing the version of Vale currently used in the documentation linting
-   [Docker image](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/.gitlab-ci.yml#L419).
-
-In addition to using markdownlint and Vale at the command line, these tools can be
-[integrated with your code editor](#configure-editors).
-
-#### Configure editors
-
-To configure markdownlint within your editor, install one of the following as appropriate:
-
-- [Sublime Text](https://packagecontrol.io/packages/SublimeLinter-contrib-markdownlint)
-- [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint)
-- [Atom](https://atom.io/packages/linter-node-markdownlint)
-- [Vim](https://github.com/dense-analysis/ale)
-
-To configure Vale within your editor, install one of the following as appropriate:
-
-- The Sublime Text [`SublimeLinter-contrib-vale` plugin](https://packagecontrol.io/packages/SublimeLinter-contrib-vale).
-- The Visual Studio Code [`errata-ai.vale-server` extension](https://marketplace.visualstudio.com/items?itemName=errata-ai.vale-server). You don't need Vale Server to use the plugin.
-- [Vim](https://github.com/dense-analysis/ale).
-
-We don't use [Vale Server](https://errata-ai.github.io/vale/#using-vale-with-a-text-editor-or-another-third-party-application).
-
-#### Configure pre-commit hooks
-
-Git [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) allow Git users to
-run tests or other processes before committing to a branch, with the ability to not commit to the branch if
-failures occur with these tests.
-
-[`overcommit`](https://github.com/sds/overcommit) is a Git hooks manager, making configuring,
-installing, and removing Git hooks easy.
-
-Sample configuration for `overcommit` is available in the
-[`.overcommit.yml.example`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.overcommit.yml.example)
-file for the [`gitlab`](https://gitlab.com/gitlab-org/gitlab) project.
-
-To set up `overcommit` for documentation linting, see
-[Pre-commit static analysis](../contributing/style_guides.md#pre-commit-static-analysis).
-
-#### Disable Vale tests
-
-You can disable a specific Vale linting rule or all Vale linting rules for any portion of a
-document:
-
-- To disable a specific rule, add a `<!-- vale gitlab.rulename = NO -->` tag before the text, and a
-  `<!-- vale gitlab.rulename = YES -->` tag after the text, replacing `rulename` with the filename
-  of a test in the
-  [GitLab styles](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc/.linting/vale/styles/gitlab)
-  directory.
-- To disable all Vale linting rules, add a `<!-- vale off -->` tag before the text, and a
-  `<!-- vale on -->` tag after the text.
-
-Whenever possible, exclude only the problematic rule and line(s).
-
-For more information, see
-[Vale's documentation](https://errata-ai.gitbook.io/vale/getting-started/markup#markup-based-configuration).
+For more information about documentation testing, see the [Documentation testing](testing.md)
+guide.
 
 ## Danger Bot
 
@@ -753,10 +502,10 @@ help of a configuration file known as **screenshot generator**.
 
 To run the tool on an existing screenshot generator, take the following steps:
 
-1. Set up the [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/gitlab_docs.md).
+1. Set up the [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/gitlab_docs.md).
 1. Navigate to the subdirectory with your cloned GitLab repository, typically `gdk/gitlab`.
 1. Make sure that your GDK database is fully migrated: `bin/rake db:migrate RAILS_ENV=development`.
-1. Install pngquant, see the tool website for more info: [`pngquant`](https://pngquant.org/)
+1. Install `pngquant`, see the tool website for more information: [`pngquant`](https://pngquant.org/)
 1. Run `scripts/docs_screenshots.rb spec/docs_screenshots/<name_of_screenshot_generator>.rb <milestone-version>`.
 1. Identify the location of the screenshots, based on the `gitlab/doc` location defined by the `it` parameter in your script.
 1. Commit the newly created screenshots.
@@ -799,8 +548,12 @@ To have the screenshot focuses few more steps are needed:
 - **wait for the content**: `expect(screenshot_area).to have_content 'Expiration interval'`
 - **set the crop area**: `set_crop_data(screenshot_area, 20)`
 
-In particular `set_crop_data` accepts as arguments: a `DOM` element and a padding, the padding will be added around the element enlarging the screenshot area.
+In particular, `set_crop_data` accepts as arguments: a `DOM` element and a
+padding. The padding is added around the element, enlarging the screenshot area.
 
 #### Live example
 
 Please use `spec/docs_screenshots/container_registry_docs.rb` as a guide and as an example to create your own scripts.
+
+<!-- This redirect file can be deleted after February 1, 2021. -->
+<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->

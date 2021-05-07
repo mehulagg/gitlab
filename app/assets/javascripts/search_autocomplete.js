@@ -2,8 +2,10 @@
 
 import $ from 'jquery';
 import { escape, throttle } from 'lodash';
-import { s__, __, sprintf } from '~/locale';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 import { getIdenticonBackgroundClass, getIdenticonTitle } from '~/helpers/avatar_helper';
+import { s__, __, sprintf } from '~/locale';
+import Tracking from '~/tracking';
 import axios from './lib/utils/axios_utils';
 import {
   isInGroupsPage,
@@ -12,8 +14,6 @@ import {
   getProjectSlug,
   spriteIcon,
 } from './lib/utils/common_utils';
-import Tracking from '~/tracking';
-import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 /**
  * Search input in top navigation bar.
@@ -76,8 +76,8 @@ export class SearchAutocomplete {
     this.wrap = wrap || $('.search');
     this.optsEl = optsEl || this.wrap.find('.search-autocomplete-opts');
     this.autocompletePath = autocompletePath || this.optsEl.data('autocompletePath');
-    this.projectId = projectId || (this.optsEl.data('autocompleteProjectId') || '');
-    this.projectRef = projectRef || (this.optsEl.data('autocompleteProjectRef') || '');
+    this.projectId = projectId || this.optsEl.data('autocompleteProjectId') || '';
+    this.projectRef = projectRef || this.optsEl.data('autocompleteProjectRef') || '';
     this.dropdown = this.wrap.find('.dropdown');
     this.dropdownToggle = this.wrap.find('.js-dropdown-search-toggle');
     this.dropdownMenu = this.dropdown.find('.dropdown-menu');
@@ -172,7 +172,7 @@ export class SearchAutocomplete {
           term,
         },
       })
-      .then(response => {
+      .then((response) => {
         const options = this.scopedSearchOptions(term);
 
         // List results
@@ -248,6 +248,10 @@ export class SearchAutocomplete {
       {
         text: s__('SearchAutocomplete|Merge requests assigned to me'),
         url: `${mrPath}/?assignee_username=${userName}`,
+      },
+      {
+        text: s__("SearchAutocomplete|Merge requests that I'm a reviewer"),
+        url: `${mrPath}/?reviewer_username=${userName}`,
       },
       {
         text: s__("SearchAutocomplete|Merge requests I've created"),
@@ -341,7 +345,7 @@ export class SearchAutocomplete {
     this.clearInput.on('click', this.onClearInputClick);
     this.dropdownContent.on('scroll', throttle(this.setScrollFade, 250));
 
-    this.searchInput.on('click', e => {
+    this.searchInput.on('click', (e) => {
       e.stopPropagation();
     });
   }

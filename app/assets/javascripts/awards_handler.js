@@ -1,16 +1,18 @@
 /* eslint-disable class-methods-use-this, @gitlab/require-i18n-strings */
 
-import $ from 'jquery';
-import { uniq } from 'lodash';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
+import $ from 'jquery';
 import Cookies from 'js-cookie';
-import { __ } from './locale';
-import { updateTooltipTitle } from './lib/utils/common_utils';
-import { isInVueNoteablePage } from './lib/utils/dom_utils';
+import { uniq } from 'lodash';
+import * as Emoji from '~/emoji';
+import { scrollToElement } from '~/lib/utils/common_utils';
+import { dispose, fixTitle } from '~/tooltips';
 import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
-import * as Emoji from '~/emoji';
+import { isInVueNoteablePage } from './lib/utils/dom_utils';
+import { __ } from './locale';
 
+window.axios = axios;
 const animationEndEventString = 'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd';
 const transitionEndEventString = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
 
@@ -56,13 +58,13 @@ export class AwardsHandler {
         }
       },
     );
-    this.registerEventListener('on', $parentEl, 'click', this.toggleButtonSelector, e => {
+    this.registerEventListener('on', $parentEl, 'click', this.toggleButtonSelector, (e) => {
       e.stopPropagation();
       e.preventDefault();
       this.showEmojiMenu($(e.currentTarget));
     });
 
-    this.registerEventListener('on', $('html'), 'click', e => {
+    this.registerEventListener('on', $('html'), 'click', (e) => {
       const $target = $(e.target);
       if (!$target.closest(`.${this.menuClass}`).length) {
         $('.js-awards-block.current').removeClass('current');
@@ -74,7 +76,7 @@ export class AwardsHandler {
     });
 
     const emojiButtonSelector = `.js-awards-block .js-emoji-btn, .${this.menuClass} .js-emoji-btn`;
-    this.registerEventListener('on', $parentEl, 'click', emojiButtonSelector, e => {
+    this.registerEventListener('on', $parentEl, 'click', emojiButtonSelector, (e) => {
       e.preventDefault();
       const $target = $(e.currentTarget);
       const $glEmojiElement = $target.find('gl-emoji');
@@ -98,10 +100,7 @@ export class AwardsHandler {
 
   showEmojiMenu($addBtn) {
     if ($addBtn.hasClass('js-note-emoji')) {
-      $addBtn
-        .closest('.note')
-        .find('.js-awards-block')
-        .addClass('current');
+      $addBtn.closest('.note').find('.js-awards-block').addClass('current');
     } else {
       $addBtn.closest('.js-awards-block').addClass('current');
     }
@@ -193,7 +192,7 @@ export class AwardsHandler {
       (promiseChain, categoryNameKey) =>
         promiseChain.then(
           () =>
-            new Promise(resolve => {
+            new Promise((resolve) => {
               const emojisInCategory = categoryMap[categoryNameKey];
               const categoryMarkup = this.renderCategory(
                 categoryLabelMap[categoryNameKey],
@@ -216,7 +215,7 @@ export class AwardsHandler {
           menu.dispatchEvent(new CustomEvent('build-emoji-menu-finish'));
         }
       })
-      .catch(err => {
+      .catch((err) => {
         emojiContentElement.insertAdjacentHTML(
           'beforeend',
           '<p>We encountered an error while adding the remaining categories</p>',
@@ -233,7 +232,7 @@ export class AwardsHandler {
       <ul class="clearfix emoji-menu-list ${opts.menuListClass || ''}">
         ${emojiList
           .map(
-            emojiName => `
+            (emojiName) => `
           <li class="emoji-menu-list-item">
             <button class="emoji-menu-btn text-center js-emoji-btn" type="button">
               ${this.emoji.glEmojiTag(emojiName, {
@@ -374,7 +373,7 @@ export class AwardsHandler {
       counter.text(counterNumber - 1);
       this.removeYouFromUserList($emojiButton);
     } else if (emoji === 'thumbsup' || emoji === 'thumbsdown') {
-      $emojiButton.tooltip('dispose');
+      dispose($emojiButton);
       counter.text('0');
       this.removeYouFromUserList($emojiButton);
       if ($emojiButton.parents('.note').length) {
@@ -387,7 +386,8 @@ export class AwardsHandler {
   }
 
   removeEmoji($emojiButton) {
-    $emojiButton.tooltip('dispose');
+    dispose($emojiButton);
+
     $emojiButton.remove();
     const $votesBlock = this.getVotesBlock();
     if ($votesBlock.find('.js-emoji-btn').length === 0) {
@@ -415,13 +415,17 @@ export class AwardsHandler {
     const originalTitle = this.getAwardTooltip(awardBlock);
     const authors = originalTitle.split(FROM_SENTENCE_REGEX);
     authors.splice(authors.indexOf('You'), 1);
-    return awardBlock
+
+    awardBlock
       .closest('.js-emoji-btn')
       .removeData('title')
       .removeAttr('data-title')
       .removeAttr('data-original-title')
-      .attr('title', this.toSentence(authors))
-      .tooltip('_fixTitle');
+      .attr('title', this.toSentence(authors));
+
+    fixTitle(awardBlock);
+
+    return awardBlock;
   }
 
   addYouToUserList(votesBlock, emoji) {
@@ -432,12 +436,17 @@ export class AwardsHandler {
       users = origTitle.trim().split(FROM_SENTENCE_REGEX);
     }
     users.unshift('You');
-    return awardBlock.attr('title', this.toSentence(users)).tooltip('_fixTitle');
+
+    awardBlock.attr('title', this.toSentence(users));
+
+    fixTitle(awardBlock);
+
+    return awardBlock;
   }
 
   createAwardButtonForVotesBlock(votesBlock, emojiName) {
     const buttonHtml = `
-      <button class="btn award-control js-emoji-btn has-tooltip active" title="You">
+      <button class="gl-button btn btn-default award-control js-emoji-btn has-tooltip active" title="You">
         ${this.emoji.glEmojiTag(emojiName)}
         <span class="award-control-text js-counter">1</span>
       </button>
@@ -448,7 +457,7 @@ export class AwardsHandler {
       .find('.emoji-icon')
       .data('name', emojiName);
     this.animateEmoji($emojiButton);
-    $('.award-control').tooltip();
+
     votesBlock.removeClass('current');
   }
 
@@ -456,7 +465,7 @@ export class AwardsHandler {
     const className = 'pulse animated once short';
     $emoji.addClass(className);
 
-    this.registerEventListener('on', $emoji, animationEndEventString, e => {
+    this.registerEventListener('on', $emoji, animationEndEventString, (e) => {
       $(e.currentTarget).removeClass(className);
     });
   }
@@ -487,24 +496,8 @@ export class AwardsHandler {
     return votesBlock.find(`.js-emoji-btn [data-name="${emoji}"]`);
   }
 
-  userAuthored($emojiButton) {
-    const oldTitle = this.getAwardTooltip($emojiButton);
-    const newTitle = 'You cannot vote on your own issue, MR and note';
-    updateTooltipTitle($emojiButton, newTitle).tooltip('show');
-    // Restore tooltip back to award list
-    return setTimeout(() => {
-      $emojiButton.tooltip('hide');
-      updateTooltipTitle($emojiButton, oldTitle);
-    }, 2800);
-  }
-
   scrollToAwards() {
-    const options = {
-      scrollTop: $('.awards').offset().top - 110,
-    };
-
-    // eslint-disable-next-line no-jquery/no-animate
-    return $('body, html').animate(options, 200);
+    scrollToElement('.awards', { offset: -110 });
   }
 
   addEmojiToFrequentlyUsedList(emoji) {
@@ -519,7 +512,7 @@ export class AwardsHandler {
       this.frequentlyUsedEmojis ||
       (() => {
         const frequentlyUsedEmojis = uniq((Cookies.get('frequently_used_emojis') || '').split(','));
-        this.frequentlyUsedEmojis = frequentlyUsedEmojis.filter(inputName =>
+        this.frequentlyUsedEmojis = frequentlyUsedEmojis.filter((inputName) =>
           this.emoji.isEmojiNameValid(inputName),
         );
 
@@ -531,15 +524,13 @@ export class AwardsHandler {
   setupSearch() {
     const $search = $('.js-emoji-menu-search');
 
-    this.registerEventListener('on', $search, 'input', e => {
-      const term = $(e.target)
-        .val()
-        .trim();
+    this.registerEventListener('on', $search, 'input', (e) => {
+      const term = $(e.target).val().trim();
       this.searchEmojis(term);
     });
 
     const $menu = $(`.${this.menuClass}`);
-    this.registerEventListener('on', $menu, transitionEndEventString, e => {
+    this.registerEventListener('on', $menu, transitionEndEventString, (e) => {
       if (e.target === e.currentTarget) {
         // Clear the search
         this.searchEmojis('');
@@ -557,22 +548,16 @@ export class AwardsHandler {
       // Generate a search result block
       const h5 = $('<h5 class="emoji-search-title"/>').text('Search results');
       const foundEmojis = this.findMatchingEmojiElements(term).show();
-      const ul = $('<ul>')
-        .addClass('emoji-menu-list emoji-menu-search')
-        .append(foundEmojis);
+      const ul = $('<ul>').addClass('emoji-menu-list emoji-menu-search').append(foundEmojis);
       $('.emoji-menu-content ul, .emoji-menu-content h5').hide();
-      $('.emoji-menu-content')
-        .append(h5)
-        .append(ul);
+      $('.emoji-menu-content').append(h5).append(ul);
     } else {
-      $('.emoji-menu-content')
-        .children()
-        .show();
+      $('.emoji-menu-content').children().show();
     }
   }
 
   findMatchingEmojiElements(query) {
-    const emojiMatches = this.emoji.searchEmoji(query, { match: 'fuzzy' }).map(({ name }) => name);
+    const emojiMatches = this.emoji.searchEmoji(query).map((x) => x.emoji.name);
     const $emojiElements = $('.emoji-menu-list:not(.frequent-emojis) [data-name]');
     const $matchingElements = $emojiElements.filter(
       (i, elm) => emojiMatches.indexOf(elm.dataset.name) >= 0,
@@ -595,8 +580,9 @@ export class AwardsHandler {
   }
 
   hideMenuElement($emojiMenu) {
-    $emojiMenu.on(transitionEndEventString, e => {
+    $emojiMenu.on(transitionEndEventString, (e) => {
       if (e.currentTarget === e.target) {
+        // eslint-disable-next-line @gitlab/no-global-event-off
         $emojiMenu.removeClass(IS_RENDERED).off(transitionEndEventString);
       }
     });
@@ -605,7 +591,7 @@ export class AwardsHandler {
   }
 
   destroy() {
-    this.eventListeners.forEach(entry => {
+    this.eventListeners.forEach((entry) => {
       entry.element.off.call(entry.element, ...entry.args);
     });
     $(`.${this.menuClass}`).remove();

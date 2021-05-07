@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
-import { Rails } from '~/lib/utils/rails_ujs';
-import { deprecatedCreateFlash as flash } from '../flash';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import { Rails } from '~/lib/utils/rails_ujs';
 import TimezoneDropdown, {
   formatTimezone,
 } from '~/pages/projects/pipeline_schedules/shared/components/timezone_dropdown';
+import { deprecatedCreateFlash as flash } from '../flash';
 
 export default class Profile {
   constructor({ form } = {}) {
@@ -20,7 +20,7 @@ export default class Profile {
     this.timezoneDropdown = new TimezoneDropdown({
       $inputEl: this.$inputEl,
       $dropdownEl: $('.js-timezone-dropdown'),
-      displayFormat: selectedItem => formatTimezone(selectedItem),
+      displayFormat: (selectedItem) => formatTimezone(selectedItem),
     });
   }
 
@@ -33,17 +33,16 @@ export default class Profile {
       uploadImageBtn: '.js-upload-user-avatar',
       modalCropImg: '.modal-profile-crop-image',
     };
-    this.avatarGlCrop = $('.js-user-avatar-input')
-      .glCrop(cropOpts)
-      .data('glcrop');
+    this.avatarGlCrop = $('.js-user-avatar-input').glCrop(cropOpts).data('glcrop');
   }
 
   bindEvents() {
     $('.js-preferences-form').on('change.preference', 'input[type=radio]', this.submitForm);
     $('.js-group-notification-email').on('change', this.submitForm);
-    $('#user_notification_email').on('select2-selecting', event => {
+    $('#user_notification_email').on('select2-selecting', (event) => {
       setTimeout(this.submitForm.bind(event.currentTarget));
     });
+    $('#user_email_opted_in').on('change', this.submitForm);
     $('#user_notified_of_own_activity').on('change', this.submitForm);
     this.form.on('submit', this.onSubmitForm);
   }
@@ -91,11 +90,12 @@ export default class Profile {
         // Enable submit button after requests ends
         self.form.find(':input[disabled]').enable();
       })
-      .catch(error => flash(error.message));
+      .catch((error) => flash(error.message));
   }
 
   updateHeaderAvatar() {
     $('.header-user-avatar').attr('src', this.avatarGlCrop.dataURL);
+    $('.js-sidebar-user-avatar').attr('src', this.avatarGlCrop.dataURL);
   }
 
   setRepoRadio() {

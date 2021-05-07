@@ -25,10 +25,6 @@ module QA
             element :file_title_content
           end
 
-          base.view 'app/assets/javascripts/vue_shared/components/blob_viewers/simple_viewer.vue' do
-            element :file_content
-          end
-
           base.view 'app/assets/javascripts/blob/components/blob_content.vue' do
             element :file_content
           end
@@ -78,6 +74,11 @@ module QA
           base.view 'app/assets/javascripts/snippets/components/embed_dropdown.vue' do
             element :copy_button
           end
+
+          base.view 'app/assets/javascripts/blob/components/blob_header_default_actions.vue' do
+            element :default_actions_container
+            element :copy_contents_button
+          end
         end
 
         def has_snippet_title?(snippet_title)
@@ -106,6 +107,18 @@ module QA
           else
             within_element(:file_title_content) do
               has_text?(file_name)
+            end
+          end
+        end
+
+        def has_no_file_name?(file_name, file_number = nil)
+          if file_number
+            within_element_by_index(:file_title_content, file_number - 1) do
+              has_no_text?(file_name)
+            end
+          else
+            within_element(:file_title_content) do
+              has_no_text?(file_name)
             end
           end
         end
@@ -170,7 +183,10 @@ module QA
         def add_comment(comment)
           fill_element(:note_field, comment)
           click_element(:comment_button)
-          wait_until(reload: false) { has_element?(:note_author_content) }
+
+          unless has_element?(:note_author_content)
+            raise ElementNotFound, "Comment did not appear as expected"
+          end
         end
 
         def has_comment_author?(author_username)
@@ -195,7 +211,10 @@ module QA
           click_element(:edit_comment_button)
           fill_element(:edit_note_field, comment)
           click_element(:save_comment_button)
-          wait_until(reload: false) { has_element?(:note_author_content) }
+
+          unless has_element?(:note_author_content)
+            raise ElementNotFound, "Comment did not appear as expected"
+          end
         end
 
         def delete_comment(comment)
@@ -203,7 +222,32 @@ module QA
           accept_alert do
             click_element(:delete_comment_button)
           end
-          wait_until(reload: false) { has_no_text?(comment) }
+
+          unless has_no_element?(:note_content, text: comment)
+            raise ElementNotFound, "Comment was not removed as expected"
+          end
+        end
+
+        def click_copy_file_contents(file_number = nil)
+          if file_number
+            within_element_by_index(:default_actions_container, file_number - 1) do
+              click_element(:copy_contents_button)
+            end
+          else
+            within_element(:default_actions_container) do
+              click_element(:copy_contents_button)
+            end
+          end
+        end
+
+        def copy_file_contents_to_comment(file_number = nil)
+          click_copy_file_contents(file_number)
+          send_keys_to_element(:note_field, [:shift, :insert])
+          click_element(:comment_button)
+
+          unless has_element?(:note_author_content)
+            raise ElementNotFound, "Comment did not appear as expected"
+          end
         end
       end
     end

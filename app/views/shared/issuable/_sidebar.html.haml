@@ -2,12 +2,13 @@
   This should be removed when this sidebar is converted to Vue since assignee data is also available in the `issuable_sidebar` hash
 
 - issuable_type = issuable_sidebar[:type]
+- show_forwarding_email = !issuable_sidebar[:create_note_email].nil?
 - signed_in = !!issuable_sidebar.dig(:current_user, :id)
 - can_edit_issuable = issuable_sidebar.dig(:current_user, :can_edit)
 - add_page_startup_api_call "#{issuable_sidebar[:issuable_json_path]}?serializer=sidebar_extras"
 - reviewers = local_assigns.fetch(:reviewers, nil)
 
-%aside.right-sidebar.js-right-sidebar.js-issuable-sidebar{ data: { signed: { in: signed_in }, issuable_type: issuable_type }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite' }
+%aside.right-sidebar.js-right-sidebar.js-issuable-sidebar{ data: { signed: { in: signed_in }, issuable_type: issuable_type }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite', 'aria-label': issuable_type }
   .issuable-sidebar
     .block.issuable-sidebar-header
       - if signed_in
@@ -25,7 +26,7 @@
       .block.assignee.qa-assignee-block
         = render "shared/issuable/sidebar_assignees", issuable_sidebar: issuable_sidebar, assignees: assignees, signed_in: signed_in
 
-      - if Feature.enabled?(:merge_request_reviewers, @project) && reviewers
+      - if reviewers
         .block.reviewer.qa-reviewer-block
           = render "shared/issuable/sidebar_reviewers", issuable_sidebar: issuable_sidebar, reviewers: reviewers, signed_in: signed_in
 
@@ -33,7 +34,7 @@
 
       - if issuable_sidebar[:supports_milestone]
         - milestone = issuable_sidebar[:milestone] || {}
-        .block.milestone{ data: { qa_selector: 'milestone_block' } }
+        .block.milestone{ :class => ("gl-border-b-0!" if issuable_sidebar[:supports_iterations]), data: { qa_selector: 'milestone_block' } }
           .sidebar-collapsed-icon.has-tooltip{ title: sidebar_milestone_tooltip_label(milestone), data: { container: 'body', html: 'true', placement: 'left', boundary: 'viewport' } }
             = sprite_icon('clock')
             %span.milestone-title.collapse-truncated-title
@@ -57,63 +58,21 @@
           .selectbox.hide-collapsed
             = f.hidden_field 'milestone_id', value: milestone[:id], id: nil
             = dropdown_tag('Milestone', options: { title: _('Assign milestone'), toggle_class: 'js-milestone-select js-extra-options', filter: true, dropdown_class: 'dropdown-menu-selectable', placeholder: _('Search milestones'), data: { show_no: true, field_name: "#{issuable_type}[milestone_id]", project_id: issuable_sidebar[:project_id], issuable_id: issuable_sidebar[:id], ability_name: issuable_type, issue_update: issuable_sidebar[:issuable_json_path], use_id: true, default_no: true, selected: milestone[:title], null_default: true, display: 'static' }})
-          - if @project.group.present?
-            = render_if_exists 'shared/issuable/iteration_select', { can_edit: can_edit_issuable, group_path: @project.group.full_path, project_path: issuable_sidebar[:project_full_path], issue_iid: issuable_sidebar[:iid], issuable_type: issuable_type }
+
+      - if @project.group.present? && issuable_sidebar[:supports_iterations]
+        .block{ class: 'gl-pt-0!' }
+          = render_if_exists 'shared/issuable/iteration_select', can_edit: can_edit_issuable.to_s, group_path: @project.group.full_path, project_path: issuable_sidebar[:project_full_path], issue_iid: issuable_sidebar[:iid], issuable_type: issuable_type
 
       - if issuable_sidebar[:supports_time_tracking]
         #issuable-time-tracker.block
           // Fallback while content is loading
           .title.hide-collapsed
             = _('Time tracking')
-            = loading_icon
+            = loading_icon(css_class: 'gl-vertical-align-text-bottom')
       - if issuable_sidebar.has_key?(:due_date)
-        .block.due_date
-          .sidebar-collapsed-icon.has-tooltip{ data: { placement: 'left', container: 'body', html: 'true', boundary: 'viewport' }, title: sidebar_due_date_tooltip_label(issuable_sidebar[:due_date]) }
-            = sprite_icon('calendar')
-            %span.js-due-date-sidebar-value
-              = issuable_sidebar[:due_date].try(:to_s, :medium) || _('None')
-          .title.hide-collapsed
-            = _('Due date')
-            = loading_icon(css_class: 'gl-vertical-align-text-bottom hidden block-loading')
-            - if can_edit_issuable
-              = link_to _('Edit'), '#', class: 'js-sidebar-dropdown-toggle edit-link float-right', data: { track_label: "right_sidebar", track_property: "due_date", track_event: "click_edit_button", track_value: "" }
-          .value.hide-collapsed
-            %span.value-content
-              - if issuable_sidebar[:due_date]
-                %span.bold= issuable_sidebar[:due_date].to_s(:medium)
-              - else
-                %span.no-value
-                  = _('None')
-            - if can_edit_issuable
-              %span.no-value.js-remove-due-date-holder{ class: ("hidden" if issuable_sidebar[:due_date].nil?) }
-                \-
-                %a.js-remove-due-date{ href: "#", role: "button" }
-                  = _('remove due date')
-          - if can_edit_issuable
-            .selectbox.hide-collapsed
-              = f.hidden_field :due_date, value: issuable_sidebar[:due_date].try(:strftime, 'yy-mm-dd')
-              .dropdown
-                %button.dropdown-menu-toggle.js-due-date-select{ type: 'button', data: { toggle: 'dropdown', field_name: "#{issuable_type}[due_date]", ability_name: issuable_type, issue_update: issuable_sidebar[:issuable_json_path], display: 'static' } }
-                  %span.dropdown-toggle-text
-                    = _('Due date')
-                  = icon('chevron-down', 'aria-hidden': 'true')
-                .dropdown-menu.dropdown-menu-due-date
-                  = dropdown_title(_('Due date'))
-                  = dropdown_content do
-                    .js-due-date-calendar
+        #js-due-date-entry-point
 
-
-      .js-sidebar-labels{ data: { allow_label_create: issuable_sidebar.dig(:current_user, :can_admin_label).to_s,
-        allow_scoped_labels: issuable_sidebar[:scoped_labels_available].to_s,
-        can_edit: can_edit_issuable.to_s,
-        iid: issuable_sidebar[:iid],
-        issuable_type: issuable_type,
-        labels_fetch_path: issuable_sidebar[:project_labels_path],
-        labels_manage_path: project_labels_path(@project),
-        labels_update_path: issuable_sidebar[:issuable_json_path],
-        project_issues_path: issuable_sidebar[:project_issuables_path],
-        project_path: @project.full_path,
-        selected_labels: issuable_sidebar[:labels].to_json } }
+      .js-sidebar-labels{ data: sidebar_labels_data(issuable_sidebar, @project) }
 
       = render_if_exists 'shared/issuable/sidebar_weight', issuable_sidebar: issuable_sidebar
 
@@ -127,6 +86,8 @@
         %script#js-confidential-issue-data{ type: "application/json" }= { is_confidential: issuable_sidebar[:confidential], is_editable: can_edit_issuable }.to_json.html_safe
         #js-confidential-entry-point
 
+        = render_if_exists 'shared/issuable/sidebar_cve_id_request', issuable_sidebar: issuable_sidebar
+
       %script#js-lock-issue-data{ type: "application/json" }= { is_locked: !!issuable_sidebar[:discussion_locked], is_editable: can_edit_issuable }.to_json.html_safe
       #js-lock-entry-point
 
@@ -135,32 +96,26 @@
       - if signed_in
         .js-sidebar-subscriptions-entry-point
 
-      - project_ref = issuable_sidebar[:reference]
       .block.with-sub-blocks
-        .project-reference.sub-block
-          .sidebar-collapsed-icon.dont-change-state
-            = clipboard_button(text: project_ref, title: _('Copy reference'), placement: "left", boundary: 'viewport')
-          .cross-project-reference.hide-collapsed
-            %span
-              = _('Reference:')
-              %cite{ title: project_ref }
-                = project_ref
-            = clipboard_button(text: project_ref, title: _('Copy reference'), placement: "left", boundary: 'viewport')
+        #js-reference-entry-point
         - if issuable_type == 'merge_request'
-          .sidebar-source-branch.sub-block
+          .sub-block.js-sidebar-source-branch
             .sidebar-collapsed-icon.dont-change-state
               = clipboard_button(text: source_branch, title: _('Copy branch name'), placement: "left", boundary: 'viewport')
-            .sidebar-mr-source-branch.hide-collapsed
-              %span
-                = _('Source branch: %{source_branch_open}%{source_branch}%{source_branch_close}').html_safe % { source_branch_open: "<cite class='ref-name' title='#{source_branch}'>".html_safe, source_branch_close: "</cite>".html_safe, source_branch: source_branch }
+            .gl-display-flex.gl-align-items-center.gl-justify-content-space-between.gl-mb-2.hide-collapsed
+              %span.gl-overflow-hidden.gl-text-overflow-ellipsis.gl-white-space-nowrap
+                = _('Source branch: %{source_branch_open}%{source_branch}%{source_branch_close}').html_safe % { source_branch_open: "<span class='gl-font-monospace' data-testid='ref-name' title='#{html_escape(source_branch)}'>".html_safe, source_branch_close: "</span>".html_safe, source_branch: html_escape(source_branch) }
               = clipboard_button(text: source_branch, title: _('Copy branch name'), placement: "left", boundary: 'viewport')
 
+      - if show_forwarding_email
+        .block
+          #issuable-copy-email
       - if issuable_sidebar.dig(:current_user, :can_move)
         .block.js-sidebar-move-issue-block
           .sidebar-collapsed-icon{ data: { toggle: 'tooltip', placement: 'left', container: 'body', boundary: 'viewport' }, title: _('Move issue') }
             = custom_icon('icon_arrow_right')
           .dropdown.sidebar-move-issue-dropdown.hide-collapsed
-            %button.btn.btn-default.btn-block.js-sidebar-dropdown-toggle.js-move-issue{ type: 'button',
+            %button.gl-button.btn.btn-default.btn-block.js-sidebar-dropdown-toggle.js-move-issue{ type: 'button',
               data: { toggle: 'dropdown', display: 'static', track_label: "right_sidebar", track_property: "move_issue", track_event: "click_button", track_value: "" } }
               = _('Move issue')
             .dropdown-menu.dropdown-menu-selectable.dropdown-extended-height
@@ -169,7 +124,7 @@
               = dropdown_content
               = dropdown_loading
               = dropdown_footer add_content_class: true do
-                %button.btn.btn-success.sidebar-move-issue-confirmation-button.js-move-issue-confirmation-button{ type: 'button', disabled: true }
+                %button.gl-button.btn.btn-confirm.sidebar-move-issue-confirmation-button.js-move-issue-confirmation-button{ type: 'button', disabled: true }
                   = _('Move')
                   = loading_icon(css_class: 'gl-vertical-align-text-bottom sidebar-move-issue-confirmation-loading-icon')
 

@@ -34,7 +34,7 @@ module Issues
 
     private
 
-    def filter_params(merge_request)
+    def filter_params(issue)
       super
 
       moved_issue = params.delete(:moved_issue)
@@ -44,6 +44,8 @@ module Issues
       params.delete(:iid) unless current_user.can?(:set_issue_iid, project)
       params.delete(:created_at) unless moved_issue || current_user.can?(:set_issue_created_at, project)
       params.delete(:updated_at) unless moved_issue || current_user.can?(:set_issue_updated_at, project)
+
+      issue.system_note_timestamp = params[:created_at] || params[:updated_at]
     end
 
     def create_assignee_note(issue, old_assignees)
@@ -52,7 +54,7 @@ module Issues
     end
 
     def execute_hooks(issue, action = 'open', old_associations: {})
-      issue_data  = hook_data(issue, action, old_associations: old_associations)
+      issue_data  = Gitlab::Lazy.new { hook_data(issue, action, old_associations: old_associations) }
       hooks_scope = issue.confidential? ? :confidential_issue_hooks : :issue_hooks
       issue.project.execute_hooks(issue_data, hooks_scope)
       issue.project.execute_services(issue_data, hooks_scope)
@@ -72,22 +74,6 @@ module Issues
       return unless milestone
 
       Milestones::IssuesCountService.new(milestone).delete_cache
-    end
-
-    # Applies label "incident" (creates it if missing) to incident issues.
-    # Please use in "after" hooks only to ensure we are not appyling
-    # labels prematurely.
-    def add_incident_label(issue)
-      return unless issue.incident?
-
-      label = ::IncidentManagement::CreateIncidentLabelService
-        .new(project, current_user)
-        .execute
-        .payload[:label]
-
-      return if issue.label_ids.include?(label.id)
-
-      issue.labels << label
     end
   end
 end

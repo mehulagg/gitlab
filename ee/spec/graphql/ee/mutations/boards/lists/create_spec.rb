@@ -21,22 +21,22 @@ RSpec.describe Mutations::Boards::Lists::Create do
   end
 
   before do
-    stub_licensed_features(board_assignee_lists: true, board_milestone_lists: true)
+    stub_licensed_features(board_assignee_lists: true, board_milestone_lists: true, board_iteration_lists: true)
   end
 
   subject { mutation.resolve(board_id: board.to_global_id.to_s, **list_create_params) }
 
   describe '#ready?' do
     it 'raises an error if required arguments are missing' do
-      expect { mutation.ready?({ board_id: 'some id' }) }
+      expect { mutation.ready?(board_id: 'some id') }
         .to raise_error(Gitlab::Graphql::Errors::ArgumentError,
-                        'one and only one of backlog or labelId or milestoneId or assigneeId is required')
+                        'one and only one of backlog or labelId or milestoneId or iterationId or assigneeId is required')
     end
 
     it 'raises an error if too many required arguments are specified' do
-      expect { mutation.ready?({ board_id: 'some id', milestone_id: 'some milestone', assignee_id: 'some label' }) }
+      expect { mutation.ready?(board_id: 'some id', milestone_id: 'some milestone', assignee_id: 'some label') }
         .to raise_error(Gitlab::Graphql::Errors::ArgumentError,
-                        'one and only one of backlog or labelId or milestoneId or assigneeId is required')
+                        'one and only one of backlog or labelId or milestoneId or iterationId or assigneeId is required')
     end
   end
 
@@ -49,7 +49,7 @@ RSpec.describe Mutations::Boards::Lists::Create do
           it 'returns an error' do
             stub_licensed_features(board_milestone_lists: false)
 
-            expect(subject[:errors]).to include 'List type Milestone lists not available with your current license'
+            expect(subject[:errors]).to include 'Milestone lists not available with your current license'
           end
         end
 
@@ -66,9 +66,8 @@ RSpec.describe Mutations::Boards::Lists::Create do
         context 'when milestone not found' do
           let(:list_create_params) { { milestone_id: "gid://gitlab/Milestone/#{non_existing_record_id}" } }
 
-          it 'raises an error' do
-            expect { subject }
-              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'Milestone not found!')
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Milestone not found'
           end
         end
       end
@@ -80,7 +79,7 @@ RSpec.describe Mutations::Boards::Lists::Create do
           it 'returns an error' do
             stub_licensed_features(board_assignee_lists: false)
 
-            expect(subject[:errors]).to include 'List type Assignee lists not available with your current license'
+            expect(subject[:errors]).to include 'Assignee lists not available with your current license'
           end
         end
 
@@ -97,9 +96,47 @@ RSpec.describe Mutations::Boards::Lists::Create do
         context 'when user not found' do
           let(:list_create_params) { { assignee_id: "gid://gitlab/User/#{non_existing_record_id}" } }
 
-          it 'raises an error' do
-            expect { subject }
-              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'User not found!')
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Assignee not found'
+          end
+        end
+      end
+
+      describe 'iteration list' do
+        let(:iteration) { create(:iteration, group: group) }
+        let(:list_create_params) { { iteration_id: iteration.to_global_id.to_s } }
+
+        context 'when feature unavailable' do
+          it 'returns an error' do
+            stub_licensed_features(board_iteration_lists: false)
+
+            expect(subject[:errors]).to include 'Iteration lists not available with your current license'
+          end
+        end
+
+        context 'when feature flag is disabled' do
+          it 'returns an error' do
+            stub_feature_flags(iteration_board_lists: false)
+
+            expect(subject[:errors]).to include 'iteration_board_lists feature flag is disabled'
+          end
+        end
+
+        it 'creates a new issue board list for the iteration' do
+          expect { subject }.to change { board.lists.count }.from(1).to(2)
+
+          new_list = subject[:list]
+
+          expect(new_list.title).to eq "#{iteration.title}"
+          expect(new_list.iteration_id).to eq iteration.id
+          expect(new_list.position).to eq 0
+        end
+
+        context 'when iteration not found' do
+          let(:list_create_params) { { iteration_id: "gid://gitlab/Iteration/#{non_existing_record_id}" } }
+
+          it 'returns an error' do
+            expect(subject[:errors]).to include 'Iteration not found'
           end
         end
       end

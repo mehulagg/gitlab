@@ -1,13 +1,3 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
-import axios from 'axios';
-import MockAdapter from 'axios-mock-adapter';
-import ProductivityApp from 'ee/analytics/productivity_analytics/components/app.vue';
-import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
-import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr_table.vue';
-import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
-import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
-import { TEST_HOST } from 'helpers/test_constants';
 import {
   GlEmptyState,
   GlLoadingIcon,
@@ -17,11 +7,21 @@ import {
   GlAlert,
 } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
-import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
+import ProductivityApp from 'ee/analytics/productivity_analytics/components/app.vue';
 import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
+import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr_table.vue';
+import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
+import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
+import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
+import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
+import { TEST_HOST } from 'helpers/test_constants';
 import * as commonUtils from '~/lib/utils/common_utils';
-import * as urlUtils from '~/lib/utils/url_utility';
 import httpStatusCodes from '~/lib/utils/http_status';
+import * as urlUtils from '~/lib/utils/url_utility';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -218,9 +218,7 @@ describe('ProductivityApp component', () => {
                   },
                 };
 
-                findMainMetricChart()
-                  .find(GlColumnChart)
-                  .vm.$emit('chartItemClicked', data);
+                findMainMetricChart().find(GlColumnChart).vm.$emit('chartItemClicked', data);
               });
 
               it('dispatches updateSelectedItems action', () => {
@@ -410,11 +408,7 @@ describe('ProductivityApp component', () => {
                 });
 
                 it('renders a loading indicator', () => {
-                  expect(
-                    findMrTableSection()
-                      .find(GlLoadingIcon)
-                      .exists(),
-                  ).toBe(true);
+                  expect(findMrTableSection().find(GlLoadingIcon).exists()).toBe(true);
                 });
               });
 
@@ -432,11 +426,7 @@ describe('ProductivityApp component', () => {
                   });
 
                   it('doesn’t render a "no data" message', () => {
-                    expect(
-                      findMrTableSection()
-                        .find(GlAlert)
-                        .exists(),
-                    ).toBe(false);
+                    expect(findMrTableSection().find(GlAlert).exists()).toBe(false);
                   });
 
                   it('should change the column metric', async () => {
@@ -459,10 +449,7 @@ describe('ProductivityApp component', () => {
                     });
 
                     it('should change the sort field', () => {
-                      findSortFieldDropdown()
-                        .findAll(GlDropdownItem)
-                        .at(0)
-                        .vm.$emit('click');
+                      findSortFieldDropdown().findAll(GlDropdownItem).at(0).vm.$emit('click');
 
                       expect(tableActionSpies.setSortField).toHaveBeenCalled();
                     });
@@ -483,11 +470,7 @@ describe('ProductivityApp component', () => {
                   });
 
                   it('renders a "no data" message', () => {
-                    expect(
-                      findMrTableSection()
-                        .find(GlAlert)
-                        .exists(),
-                    ).toBe(true);
+                    expect(findMrTableSection().find(GlAlert).exists()).toBe(true);
                   });
 
                   it('doesn`t render the MR table', () => {
@@ -587,7 +570,7 @@ describe('ProductivityApp component', () => {
       milestone_title: null,
     };
 
-    const shouldSetUrlParams = result => {
+    const shouldSetUrlParams = (result) => {
       expect(urlUtils.setUrlParams).toHaveBeenCalledWith(result, window.location.href, true);
       expect(commonUtils.historyPushState).toHaveBeenCalled();
     };

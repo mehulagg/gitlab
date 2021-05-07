@@ -1,5 +1,5 @@
-import Vuex from 'vuex';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import TreeList from '~/diffs/components/tree_list.vue';
 import createStore from '~/diffs/store/modules';
 import FileTree from '~/vue_shared/components/file_tree.vue';
@@ -88,16 +88,8 @@ describe('Diffs tree list component', () => {
 
     it('renders tree', () => {
       expect(getFileRows()).toHaveLength(2);
-      expect(
-        getFileRows()
-          .at(0)
-          .text(),
-      ).toContain('index.js');
-      expect(
-        getFileRows()
-          .at(1)
-          .text(),
-      ).toContain('app');
+      expect(getFileRows().at(0).html()).toContain('index.js');
+      expect(getFileRows().at(1).html()).toContain('app');
     });
 
     it('hides file stats', () => {
@@ -111,9 +103,7 @@ describe('Diffs tree list component', () => {
     it('calls toggleTreeOpen when clicking folder', () => {
       jest.spyOn(wrapper.vm.$store, 'dispatch').mockReturnValue(undefined);
 
-      getFileRows()
-        .at(1)
-        .trigger('click');
+      getFileRows().at(1).trigger('click');
 
       expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('diffs/toggleTreeOpen', 'app');
     });
@@ -138,7 +128,7 @@ describe('Diffs tree list component', () => {
       wrapper.vm.$store.state.diffs.renderTreeList = false;
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.find('.file-row').text()).toContain('index.js');
+        expect(wrapper.find('.file-row').html()).toContain('index.js');
       });
     });
   });

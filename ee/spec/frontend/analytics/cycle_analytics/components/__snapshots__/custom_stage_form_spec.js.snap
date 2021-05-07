@@ -1,13 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomStageForm Editing a custom stage isSavingCustomStage=true displays a loading icon 1`] = `
-"<button disabled=\\"disabled\\" type=\\"button\\" class=\\"js-save-stage btn btn-success\\"><span class=\\"gl-spinner-container\\"><span aria-label=\\"Loading\\" class=\\"align-text-bottom gl-spinner gl-spinner-orange gl-spinner-sm\\"></span></span>
+"<gl-button-stub category=\\"primary\\" variant=\\"success\\" size=\\"medium\\" icon=\\"\\" buttontextclasses=\\"\\" disabled=\\"true\\" data-testid=\\"save-custom-stage\\">
+  <gl-loading-icon-stub label=\\"Loading\\" size=\\"sm\\" color=\\"dark\\" inline=\\"true\\"></gl-loading-icon-stub>
   Update stage
-</button>"
+</gl-button-stub>"
 `;
 
 exports[`CustomStageForm isSavingCustomStage=true displays a loading icon 1`] = `
-"<button disabled=\\"disabled\\" type=\\"button\\" class=\\"js-save-stage btn btn-success\\"><span class=\\"gl-spinner-container\\"><span aria-label=\\"Loading\\" class=\\"align-text-bottom gl-spinner gl-spinner-orange gl-spinner-sm\\"></span></span>
+"<gl-button-stub category=\\"primary\\" variant=\\"success\\" size=\\"medium\\" icon=\\"\\" buttontextclasses=\\"\\" disabled=\\"true\\" data-testid=\\"save-custom-stage\\">
+  <gl-loading-icon-stub label=\\"Loading\\" size=\\"sm\\" color=\\"dark\\" inline=\\"true\\"></gl-loading-icon-stub>
   Add stage
-</button>"
+</gl-button-stub>"
 `;

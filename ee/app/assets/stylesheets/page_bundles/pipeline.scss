@@ -3,19 +3,6 @@
 /**
  * Cross-project pipelines (applied conditionally to pipeline graph)
  */
-
-.stage-cell {
-  .stage-container {
-    &.has-downstream {
-      &::after {
-        content: '';
-        width: 0;
-        border: 0;
-      }
-    }
-  }
-}
-
 .upstream-pipeline {
   margin-right: 84px;
 }

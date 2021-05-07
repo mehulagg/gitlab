@@ -1,5 +1,0 @@
-- return unless @project.feature_available?(:file_locks)
-
-= nav_link(controller: [:path_locks]) do
-  = link_to project_path_locks_path(@project), data: { qa_selector: 'path_locks_link' } do
-    = _('Locked Files')

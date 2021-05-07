@@ -9,7 +9,7 @@ RSpec.describe SchedulePopulateResolvedOnDefaultBranchColumn do
   end
 
   around do |example|
-    Timecop.freeze { Sidekiq::Testing.fake! { example.run } }
+    freeze_time { Sidekiq::Testing.fake! { example.run } }
   end
 
   context 'when the Gitlab instance is CE' do

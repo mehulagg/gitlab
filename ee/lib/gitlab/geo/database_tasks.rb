@@ -5,9 +5,9 @@ module Gitlab
     module DatabaseTasks
       extend self
 
-      DATABASE_CONFIG = 'config/database.yml'.freeze
-      GEO_DATABASE_CONFIG = 'config/database_geo.yml'.freeze
-      GEO_DB_DIR = 'ee/db/geo'.freeze
+      DATABASE_CONFIG = 'config/database.yml'
+      GEO_DATABASE_CONFIG = 'config/database_geo.yml'
+      GEO_DB_DIR = 'ee/db/geo'
 
       def method_missing(method_name, *args, &block)
         with_geo_db do

@@ -8,8 +8,8 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
   ].freeze
 
   HUMAN_ACCESS_LEVELS = {
-    Gitlab::Access::MAINTAINER => 'Maintainers'.freeze,
-    Gitlab::Access::DEVELOPER => 'Developers + Maintainers'.freeze
+    Gitlab::Access::MAINTAINER => 'Maintainers',
+    Gitlab::Access::DEVELOPER => 'Developers + Maintainers'
   }.freeze
 
   belongs_to :user

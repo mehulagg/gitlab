@@ -15,7 +15,7 @@ module Gitlab
           include ::Gitlab::Config::Entry::Inheritable
 
           PROCESSABLE_ALLOWED_KEYS = %i[extends stage only except rules variables
-                                        inherit allow_failure when needs].freeze
+                                        inherit allow_failure when needs resource_group].freeze
 
           included do
             validations do
@@ -32,6 +32,7 @@ module Gitlab
               with_options allow_nil: true do
                 validates :extends, array_of_strings_or_string: true
                 validates :rules, array_of_hashes: true
+                validates :resource_group, type: String
               end
             end
 
@@ -64,7 +65,7 @@ module Gitlab
               inherit: false,
               default: {}
 
-            attributes :extends, :rules
+            attributes :extends, :rules, :resource_group
           end
 
           def compose!(deps = nil)
@@ -123,9 +124,12 @@ module Gitlab
               stage: stage_value,
               extends: extends,
               rules: rules_value,
-              variables: root_and_job_variables_value,
+              variables: root_and_job_variables_value, # https://gitlab.com/gitlab-org/gitlab/-/issues/300581
+              job_variables: job_variables,
+              root_variables_inheritance: root_variables_inheritance,
               only: only_value,
-              except: except_value }.compact
+              except: except_value,
+              resource_group: resource_group }.compact
           end
 
           def root_and_job_variables_value
@@ -135,6 +139,18 @@ module Gitlab
             end
 
             root_variables.merge(variables_value.to_h)
+          end
+
+          def job_variables
+            variables_value.to_h
+          end
+
+          def root_variables_inheritance
+            inherit_entry&.variables_entry&.value
+          end
+
+          def manual_action?
+            self.when == 'manual'
           end
         end
       end

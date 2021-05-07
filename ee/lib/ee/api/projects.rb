@@ -10,7 +10,7 @@ module EE
           desc 'Restore a project' do
             success Entities::Project
           end
-          post ':id/restore' do
+          post ':id/restore', feature_category: :authentication_and_authorization do
             authorize!(:remove_project, user_project)
             break not_found! unless user_project.feature_available?(:adjourned_deletion_for_projects_and_groups)
 
@@ -21,9 +21,9 @@ module EE
               render_api_error!(result[:message], 400)
             end
           end
-          segment ':id/audit_events' do
+          segment ':id/audit_events', feature_category: :audit_events do
             before do
-              authorize! :admin_project, user_project
+              authorize! :read_project_audit_events, user_project
               check_audit_events_available!(user_project)
               increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end
@@ -37,7 +37,7 @@ module EE
 
               use :pagination
             end
-            get '/' do
+            get '/', feature_category: :audit_events do
               level = ::Gitlab::Audit::Levels::Project.new(project: user_project)
               audit_events = AuditLogFinder.new(
                 level: level,
@@ -53,7 +53,7 @@ module EE
             params do
               requires :audit_event_id, type: Integer, desc: 'The ID of the audit event'
             end
-            get '/:audit_event_id' do
+            get '/:audit_event_id', feature_category: :audit_events do
               level = ::Gitlab::Audit::Levels::Project.new(project: user_project)
               # rubocop: disable CodeReuse/ActiveRecord
               # This is not `find_by!` from ActiveRecord
@@ -82,6 +82,7 @@ module EE
             super
 
             verify_mirror_attrs!(project, attrs)
+            verify_issuable_default_templates_attrs!(project, attrs)
           end
 
           def verify_mirror_attrs!(project, attrs)
@@ -92,12 +93,25 @@ module EE
             end
           end
 
+          def verify_issuable_default_templates_attrs!(project, attrs)
+            unless project.feature_available?(:issuable_default_templates)
+              attrs.delete(:issues_template)
+              attrs.delete(:merge_requests_template)
+            end
+          end
+
           def check_audit_events_available!(project)
             forbidden! unless project.feature_available?(:audit_events)
           end
 
           def audit_log_finder_params
-            params.slice(:created_after, :created_before)
+            params
+              .slice(:created_after, :created_before)
+              .then { |params| filter_by_author(params) }
+          end
+
+          def filter_by_author(params)
+            can?(current_user, :admin_project, user_project) ? params : params.merge(author_id: current_user.id)
           end
 
           override :delete_project

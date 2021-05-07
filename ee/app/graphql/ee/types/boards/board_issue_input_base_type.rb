@@ -9,11 +9,19 @@ module EE
         prepended do
           argument :epic_id, ::Types::GlobalIDType[::Epic],
                    required: false,
-                   description: 'Filter by epic ID. Incompatible with epicWildcardId'
+                   description: 'Filter by epic ID. Incompatible with epicWildcardId.'
+
+          argument :iteration_title, GraphQL::STRING_TYPE,
+                   required: false,
+                   description: 'Filter by iteration title.'
 
           argument :weight, GraphQL::STRING_TYPE,
                    required: false,
-                   description: 'Filter by weight'
+                   description: 'Filter by weight.'
+
+          argument :iteration_id, [::Types::GlobalIDType[::Iteration]],
+                   required: false,
+                   description: 'Filter by a list of iteration IDs. Incompatible with iterationWildcardId.'
         end
       end
     end

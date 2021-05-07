@@ -2,8 +2,10 @@
 
 module Clusters
   module Applications
+    # DEPRECATED for removal in %14.0
+    # See https://gitlab.com/groups/gitlab-org/-/epics/4280
     class Knative < ApplicationRecord
-      VERSION = '0.9.0'
+      VERSION = '0.10.0'
       REPOSITORY = 'https://charts.gitlab.io'
       METRICS_CONFIG = 'https://gitlab.com/gitlab-org/charts/knative/-/raw/v0.9.0/vendor/istio-metrics.yml'
       FETCH_IP_ADDRESS_DELAY = 30.seconds
@@ -70,7 +72,7 @@ module Clusters
       end
 
       def install_command
-        Gitlab::Kubernetes::Helm::InstallCommand.new(
+        helm_command_module::InstallCommand.new(
           name: name,
           version: VERSION,
           rbac: cluster.platform_kubernetes_rbac?,
@@ -94,7 +96,7 @@ module Clusters
       end
 
       def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
+        helm_command_module::DeleteCommand.new(
           name: name,
           rbac: cluster.platform_kubernetes_rbac?,
           files: files,

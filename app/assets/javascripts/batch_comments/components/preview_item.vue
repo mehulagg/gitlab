@@ -1,22 +1,21 @@
 <script>
-import { mapGetters } from 'vuex';
 import { GlSprintf, GlIcon } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 import { IMAGE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import { sprintf, __ } from '~/locale';
-import resolvedStatusMixin from '../mixins/resolved_status';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   getStartLineNumber,
   getEndLineNumber,
   getLineClasses,
 } from '~/notes/components/multiline_comment_utils';
+import resolvedStatusMixin from '../mixins/resolved_status';
 
 export default {
   components: {
     GlIcon,
     GlSprintf,
   },
-  mixins: [resolvedStatusMixin, glFeatureFlagsMixin()],
+  mixins: [resolvedStatusMixin],
   props: {
     draft: {
       type: Object,
@@ -42,13 +41,17 @@ export default {
     titleText() {
       const file = this.discussion ? this.discussion.diff_file : this.draft;
 
-      if (file) {
+      if (file?.file_path) {
         return file.file_path;
       }
 
-      return sprintf(__("%{authorsName}'s thread"), {
-        authorsName: this.discussion.notes.find(note => !note.system).author.name,
-      });
+      if (this.discussion) {
+        return sprintf(__("%{authorsName}'s thread"), {
+          authorsName: this.discussion.notes.find((note) => !note.system).author.name,
+        });
+      }
+
+      return __('Your new comment');
     },
     linePosition() {
       if (this.position?.position_type === IMAGE_DIFF_POSITION_TYPE) {
@@ -71,6 +74,10 @@ export default {
       return this.draft.position || this.discussion.position;
     },
     startLineNumber() {
+      if (this.position?.position_type === IMAGE_DIFF_POSITION_TYPE) {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        return `${this.position.x}x ${this.position.y}y`;
+      }
       return getStartLineNumber(this.position?.line_range);
     },
     endLineNumber() {
@@ -90,18 +97,12 @@ export default {
   <span>
     <span class="review-preview-item-header">
       <gl-icon class="flex-shrink-0" :name="iconName" />
-      <span
-        class="bold text-nowrap"
-        :class="{ 'gl-align-items-center': glFeatures.multilineComments }"
-      >
-        <span class="review-preview-item-header-text block-truncated">
+      <span class="bold text-nowrap gl-align-items-center">
+        <span class="review-preview-item-header-text block-truncated gl-ml-2">
           {{ titleText }}
         </span>
         <template v-if="showLinePosition">
-          <template v-if="!glFeatures.multilineComments"
-            >:{{ linePosition }}</template
-          >
-          <template v-else-if="startLineNumber === endLineNumber">
+          <template v-if="startLineNumber === endLineNumber">
             :<span :class="getLineClasses(startLineNumber)">{{ startLineNumber }}</span>
           </template>
           <gl-sprintf v-else :message="__(':%{startLine} to %{endLine}')">

@@ -1,12 +1,12 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import { GlLabel } from '@gitlab/ui';
-import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { mapGetters, mapActions } from 'vuex';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import { isScopedLabel } from '~/lib/utils/common_utils';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 export default {
   components: {
@@ -14,49 +14,45 @@ export default {
     LabelsSelect,
     GlLabel,
   },
+  inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
   data() {
     return {
       loading: false,
     };
   },
-  inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
   computed: {
-    ...mapGetters({ issue: 'getActiveIssue' }),
+    ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
     selectedLabels() {
-      const { labels = [] } = this.issue;
+      const { labels = [] } = this.activeBoardItem;
 
-      return labels.map(label => ({
+      return labels.map((label) => ({
         ...label,
         id: getIdFromGraphQLId(label.id),
       }));
     },
     issueLabels() {
-      const { labels = [] } = this.issue;
+      const { labels = [] } = this.activeBoardItem;
 
-      return labels.map(label => ({
+      return labels.map((label) => ({
         ...label,
         scoped: isScopedLabel(label),
       }));
     },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
-    },
   },
   methods: {
-    ...mapActions(['setActiveIssueLabels']),
+    ...mapActions(['setActiveBoardItemLabels']),
     async setLabels(payload) {
       this.loading = true;
       this.$refs.sidebarItem.collapse();
 
       try {
-        const addLabelIds = payload.filter(label => label.set).map(label => label.id);
+        const addLabelIds = payload.filter((label) => label.set).map((label) => label.id);
         const removeLabelIds = this.selectedLabels
-          .filter(label => !payload.find(selected => selected.id === label.id))
-          .map(label => label.id);
+          .filter((label) => !payload.find((selected) => selected.id === label.id))
+          .map((label) => label.id);
 
-        const input = { addLabelIds, removeLabelIds, projectPath: this.projectPath };
-        await this.setActiveIssueLabels(input);
+        const input = { addLabelIds, removeLabelIds, projectPath: this.projectPathForActiveIssue };
+        await this.setActiveBoardItemLabels(input);
       } catch (e) {
         createFlash({ message: __('An error occurred while updating labels.') });
       } finally {
@@ -68,8 +64,8 @@ export default {
 
       try {
         const removeLabelIds = [getIdFromGraphQLId(id)];
-        const input = { removeLabelIds, projectPath: this.projectPath };
-        await this.setActiveIssueLabels(input);
+        const input = { removeLabelIds, projectPath: this.projectPathForActiveIssue };
+        await this.setActiveBoardItemLabels(input);
       } catch (e) {
         createFlash({ message: __('An error occurred when removing the label.') });
       } finally {
@@ -81,7 +77,12 @@ export default {
 </script>
 
 <template>
-  <board-editable-item ref="sidebarItem" :title="__('Labels')" :loading="loading">
+  <board-editable-item
+    ref="sidebarItem"
+    :title="__('Labels')"
+    :loading="loading"
+    data-testid="sidebar-labels"
+  >
     <template #collapsed>
       <gl-label
         v-for="label in issueLabels"
@@ -96,7 +97,7 @@ export default {
         @close="removeLabel(label.id)"
       />
     </template>
-    <template>
+    <template #default="{ edit }">
       <labels-select
         ref="labelsSelect"
         :allow-label-edit="false"
@@ -109,6 +110,7 @@ export default {
         :labels-filter-base-path="labelsFilterBasePath"
         :labels-list-title="__('Select label')"
         :dropdown-button-text="__('Choose labels')"
+        :is-editing="edit"
         variant="embedded"
         class="gl-display-block labels gl-w-full"
         @updateSelectedLabels="setLabels"

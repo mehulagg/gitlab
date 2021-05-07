@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon, GlPopover, GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import geoNodeReplicationStatusComponent from 'ee/geo_nodes/components/geo_node_replication_status.vue';
 import {
   REPLICATION_STATUS_CLASS,
@@ -56,11 +56,7 @@ describe('GeoNodeReplicationStatusComponent', () => {
       });
 
       it(`sets background of StatusPill to ${replicationStatusCssClass} when enabled is ${enabled}`, () => {
-        expect(
-          findStatusPill()
-            .classes()
-            .join(' '),
-        ).toContain(replicationStatusCssClass);
+        expect(findStatusPill().classes().join(' ')).toContain(replicationStatusCssClass);
       });
 
       it('renders StatusPill correctly', () => {

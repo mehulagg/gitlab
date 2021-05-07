@@ -1,10 +1,12 @@
-import initSettingsPanels from '~/settings_panels';
+import initArtifactsSettings from '~/artifacts_settings';
 import SecretValues from '~/behaviors/secret_values';
-import AjaxVariableList from '~/ci_variable_list/ajax_variable_list';
-import registrySettingsApp from '~/registry/settings/registry_settings_bundle';
+import initSettingsPipelinesTriggers from '~/ci_settings_pipeline_triggers';
 import initVariableList from '~/ci_variable_list';
 import initDeployFreeze from '~/deploy_freeze';
-import initSettingsPipelinesTriggers from '~/ci_settings_pipeline_triggers';
+import registrySettingsApp from '~/packages_and_registries/settings/project/registry_settings_bundle';
+import { initInstallRunner } from '~/pages/shared/mount_runner_instructions';
+import initSharedRunnersToggle from '~/projects/settings/mount_shared_runners_toggle';
+import initSettingsPanels from '~/settings_panels';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -18,24 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     runnerTokenSecretValue.init();
   }
 
-  if (gon.features.newVariablesUi) {
-    initVariableList();
-  } else {
-    const variableListEl = document.querySelector('.js-ci-variable-list-section');
-    // eslint-disable-next-line no-new
-    new AjaxVariableList({
-      container: variableListEl,
-      saveButton: variableListEl.querySelector('.js-ci-variables-save-button'),
-      errorBox: variableListEl.querySelector('.js-ci-variable-error-box'),
-      saveEndpoint: variableListEl.dataset.saveEndpoint,
-      maskableRegex: variableListEl.dataset.maskableRegex,
-    });
-  }
+  initVariableList();
 
   // hide extra auto devops settings based checkbox state
   const autoDevOpsExtraSettings = document.querySelector('.js-extra-settings');
   const instanceDefaultBadge = document.querySelector('.js-instance-default-badge');
-  document.querySelector('.js-toggle-extra-settings').addEventListener('click', event => {
+  document.querySelector('.js-toggle-extra-settings').addEventListener('click', (event) => {
     const { target } = event;
     if (instanceDefaultBadge) instanceDefaultBadge.style.display = 'none';
     autoDevOpsExtraSettings.classList.toggle('hidden', !target.checked);
@@ -45,4 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeployFreeze();
 
   initSettingsPipelinesTriggers();
+  initArtifactsSettings();
+
+  if (gon?.features?.vueifySharedRunnersToggle) {
+    initSharedRunnersToggle();
+  }
+
+  initInstallRunner();
 });

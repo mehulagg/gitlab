@@ -16,51 +16,74 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
   end
 
   describe '#format' do
-    let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
     let(:package_manager) { 'bundler' }
-    let(:file_path) { 'rails/Gemfile.lock' }
+    let(:file_path) { 'file.path' }
     let(:data) { formatter.format(dependency, package_manager, file_path) }
-    let(:blob_path) { "/#{project.full_path}/-/blob/#{sha}/rails/Gemfile.lock" }
+    let(:blob_path) { "/#{project.full_path}/-/blob/#{sha}/file.path" }
 
     context 'with secure dependency' do
-      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
+      context 'with top-level dependency' do
+        let(:dependency) { parsed_report['dependency_files'][1]['dependencies'][0] }
 
-      it 'format report into a right format' do
-        expect(data[:name]).to eq('mini_portile2')
-        expect(data[:packager]).to eq('Ruby (Bundler)')
-        expect(data[:package_manager]).to eq('bundler')
-        expect(data[:location][:blob_path]).to eq(blob_path)
-        expect(data[:location][:path]).to eq('rails/Gemfile.lock')
-        expect(data[:location][:top_level]).to be_falsey
-        expect(data[:location][:ancestors].first[:name]).to eq('dep1')
-        expect(data[:version]).to eq('2.2.0')
-        expect(data[:vulnerabilities]).to be_empty
-        expect(data[:licenses]).to be_empty
-      end
-    end
-
-    context 'when feature flag for dependency path is off' do
-      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
-      let(:location) { data[:location] }
-
-      before do
-        stub_feature_flags(path_to_vulnerable_dependency: false)
+        it 'formats the dependency' do
+          expect(data[:name]).to eq('async')
+          expect(data[:iid]).to eq(1)
+          expect(data[:location][:blob_path]).to eq(blob_path)
+          expect(data[:location][:path]).to eq('file.path')
+          expect(data[:location][:top_level]).to be_truthy
+          expect(data[:location][:ancestors]).to be_nil
+        end
       end
 
-      it { expect(location[:top_level]).to be_nil }
-      it { expect(location[:ancestors]).to be_nil }
-      it { expect(location[:path]).to eq('rails/Gemfile.lock') }
+      context 'with dependency path included' do
+        let(:dependency) { parsed_report['dependency_files'][1]['dependencies'][4] }
+
+        it 'formats the dependency' do
+          expect(data[:name]).to eq('ms')
+          expect(data[:iid]).to eq(5)
+          expect(data[:location][:blob_path]).to eq(blob_path)
+          expect(data[:location][:path]).to eq('file.path')
+          expect(data[:location][:top_level]).to be_falsey
+          expect(data[:location][:ancestors][0][:iid]).to eq(3)
+        end
+      end
+
+      context 'without dependency path' do
+        let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
+
+        it 'formats the dependency' do
+          expect(data[:name]).to eq('mini_portile2')
+          expect(data[:iid]).to be_nil
+          expect(data[:packager]).to eq('Ruby (Bundler)')
+          expect(data[:package_manager]).to eq('bundler')
+          expect(data[:location][:blob_path]).to eq(blob_path)
+          expect(data[:location][:path]).to eq('file.path')
+          expect(data[:location][:top_level]).to be_nil
+          expect(data[:location][:ancestors]).to be_nil
+          expect(data[:version]).to eq('2.2.0')
+          expect(data[:vulnerabilities]).to be_empty
+          expect(data[:licenses]).to be_empty
+        end
+      end
     end
 
     context 'with vulnerable dependency' do
-      let(:data) { formatter.format(dependency, package_manager, file_path, parsed_report['vulnerabilities'].first) }
       let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][1] }
+      let(:data) { formatter.format(dependency, package_manager, file_path, vulnerability_data) }
+      let_it_be(:standalone_vulnerability) { create(:vulnerability, report_type: :dependency_scanning) }
+
+      let(:vulnerability_data) do
+        create(:vulnerabilities_finding, :with_dependency_scanning_metadata, vulnerability: standalone_vulnerability)
+      end
 
       it 'merge vulnerabilities data' do
-        vulnerabilities = data[:vulnerabilities]
+        vulnerability = data[:vulnerabilities].first
+        path = "/security/vulnerabilities/#{standalone_vulnerability.id}"
 
-        expect(vulnerabilities.first[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
-        expect(vulnerabilities.first[:severity]).to eq('high')
+        expect(vulnerability[:id]).to eq(standalone_vulnerability.id)
+        expect(vulnerability[:url]).to end_with(path)
+        expect(vulnerability[:name]).to eq('Vulnerabilities in libxml2 in nokogiri')
+        expect(vulnerability[:severity]).to eq('high')
       end
     end
   end

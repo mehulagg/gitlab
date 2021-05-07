@@ -1,9 +1,10 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import waitForPromises from 'helpers/wait_for_promises';
 import { TEST_HOST } from 'spec/test_constants';
 import TerminalEmptyState from '~/ide/components/terminal/empty_state.vue';
-import TerminalView from '~/ide/components/terminal/view.vue';
 import TerminalSession from '~/ide/components/terminal/session.vue';
+import TerminalView from '~/ide/components/terminal/view.vue';
 
 const TEST_HELP_PATH = `${TEST_HOST}/help`;
 const TEST_SVG_PATH = `${TEST_HOST}/illustration.svg`;
@@ -17,7 +18,7 @@ describe('IDE TerminalView', () => {
   let getters;
   let wrapper;
 
-  const factory = () => {
+  const factory = async () => {
     const store = new Vuex.Store({
       modules: {
         terminal: {
@@ -30,6 +31,9 @@ describe('IDE TerminalView', () => {
     });
 
     wrapper = shallowMount(TerminalView, { localVue, store });
+
+    // Uses deferred components, so wait for those to load...
+    await waitForPromises();
   };
 
   beforeEach(() => {
@@ -59,8 +63,8 @@ describe('IDE TerminalView', () => {
     wrapper.destroy();
   });
 
-  it('renders empty state', () => {
-    factory();
+  it('renders empty state', async () => {
+    await factory();
 
     expect(wrapper.find(TerminalEmptyState).props()).toEqual({
       helpPath: TEST_HELP_PATH,
@@ -69,8 +73,8 @@ describe('IDE TerminalView', () => {
     });
   });
 
-  it('hides splash and starts, when started', () => {
-    factory();
+  it('hides splash and starts, when started', async () => {
+    await factory();
 
     expect(actions.startSession).not.toHaveBeenCalled();
     expect(actions.hideSplash).not.toHaveBeenCalled();
@@ -81,9 +85,9 @@ describe('IDE TerminalView', () => {
     expect(actions.hideSplash).toHaveBeenCalled();
   });
 
-  it('shows Web Terminal when started', () => {
+  it('shows Web Terminal when started', async () => {
     state.isShowSplash = false;
-    factory();
+    await factory();
 
     expect(wrapper.find(TerminalEmptyState).exists()).toBe(false);
     expect(wrapper.find(TerminalSession).exists()).toBe(true);

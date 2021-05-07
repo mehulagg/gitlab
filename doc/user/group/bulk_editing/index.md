@@ -1,38 +1,38 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Bulk editing issues, epics, and merge requests at the group level **(PREMIUM)**
 
-NOTE: **Note:**
+NOTE:
 Bulk editing issues and merge requests is also available at the **project level**.
 For more details, see [Bulk editing issues and merge requests at the project level](../../project/bulk_editing.md).
 
 If you want to update attributes across multiple issues, epics, or merge requests in a group, you
 can do it by bulk editing them, that is, editing them together.
 
-NOTE: **Note:**
 Only the items visible on the current page are selected for bulk editing (up to 20).
 
-![Bulk editing](img/bulk-editing_v13_2.png)
+![Bulk editing](img/bulk_editing_v13_11.png)
 
 ## Bulk edit issues at the group level
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7249) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7249) in GitLab 12.1.
+> - Assigning epic ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210470) in GitLab 13.2.
+> - Editing health status [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218395) in GitLab 13.2.
+> - Editing iteration [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196806) in GitLab 13.9.
 
-NOTE: **Note:**
-You need a permission level of [Reporter or higher](../../permissions.md) to manage issues.
+Users with permission level of [Reporter or higher](../../permissions.md) can manage issues.
 
 When bulk editing issues in a group, you can edit the following attributes:
 
-- Epic ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210470) in
-   [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.) **(PREMIUM)**
-- Milestone
-- Labels
-- Health status ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218395) in
-   [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.2.) **(ULTIMATE)**
+- [Epic](../epics/index.md)
+- [Milestone](../../project/milestones/index.md)
+- [Labels](../../project/labels.md)
+- [Health status](../../project/issues/managing_issues.md#health-status)
+- [Iteration](../iterations/index.md)
 
 To update multiple project issues at the same time:
 
@@ -46,8 +46,7 @@ To update multiple project issues at the same time:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7250) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
 
-NOTE: **Note:**
-You need a permission level of [Reporter or higher](../../permissions.md) to manage epics.
+Users with permission level of [Reporter or higher](../../permissions.md) can manage epics.
 
 When bulk editing epics in a group, you can edit their labels.
 
@@ -63,8 +62,7 @@ To update multiple epics at the same time:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12719) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
 
-NOTE: **Note:**
-You need a permission level of [Developer or higher](../../permissions.md) to manage merge requests.
+Users with permission level of [Developer or higher](../../permissions.md) can manage merge requests.
 
 When bulk editing merge requests in a group, you can edit the following attributes:
 

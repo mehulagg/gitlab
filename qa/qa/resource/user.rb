@@ -5,9 +5,11 @@ require 'securerandom'
 module QA
   module Resource
     class User < Base
+      InvalidUserError = Class.new(RuntimeError)
+
       attr_reader :unique_id
       attr_writer :username, :password
-      attr_accessor :admin, :provider, :extern_uid
+      attr_accessor :admin, :provider, :extern_uid, :expect_fabrication_success
 
       attribute :id
       attribute :name
@@ -18,6 +20,14 @@ module QA
       def initialize
         @admin = false
         @unique_id = SecureRandom.hex(8)
+        @expect_fabrication_success = true
+      end
+
+      def self.default
+        Resource::User.new.tap do |user|
+          user.username = Runtime::User.ldap_user? ? Runtime::User.ldap_username : Runtime::User.username
+          user.password = Runtime::User.ldap_user? ? Runtime::User.ldap_password : Runtime::User.password
+        end
       end
 
       def admin?
@@ -27,10 +37,12 @@ module QA
       def username
         @username || "qa-user-#{unique_id}"
       end
+      alias_method :ldap_username, :username
 
       def password
         @password || 'password'
       end
+      alias_method :ldap_password, :password
 
       def name
         @name ||= api_resource&.dig(:name) || "QA User #{unique_id}"
@@ -74,12 +86,7 @@ module QA
             login.sign_in_using_credentials(user: self)
           end
         else
-          Page::Main::Login.perform do |login|
-            login.switch_to_register_tab
-          end
-          Page::Main::SignUp.perform do |signup|
-            signup.sign_up!(self)
-          end
+          Flow::SignUp.sign_up!(self)
         end
       end
 
@@ -111,6 +118,10 @@ module QA
         '/users'
       end
 
+      def api_block_path
+        "/users/#{id}/block"
+      end
+
       def api_post_body
         {
           admin: admin,
@@ -136,14 +147,22 @@ module QA
         end
       end
 
+      def block!
+        response = post(Runtime::API::Request.new(api_client, api_block_path).url, nil)
+
+        unless response.code == HTTP_STATUS_CREATED
+          raise ResourceUpdateFailedError, "Failed to block user. Request returned (#{response.code}): `#{response}`."
+        end
+      end
+
       private
 
       def ldap_post_body
         return {} unless extern_uid && provider
 
         {
-            extern_uid: extern_uid,
-            provider: provider
+          extern_uid: extern_uid,
+          provider: provider
         }
       end
 

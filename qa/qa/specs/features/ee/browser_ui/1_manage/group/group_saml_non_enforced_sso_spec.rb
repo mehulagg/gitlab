@@ -30,7 +30,7 @@ module QA
         let(:default_membership_role) { 'Developer' }
 
         it 'adds the new member with access level as set in SAML SSO configuration', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/968' do
-          managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service, default_membership_role)
+          managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service, default_membership_role: default_membership_role)
           Page::Main::Menu.perform(&:sign_out_if_signed_in)
 
           Flow::Login.while_signed_in(as: user) do
@@ -47,7 +47,7 @@ module QA
         end
       end
 
-      it 'User logs in to group with SAML SSO', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/673' do
+      it 'user logs in to group with SAML SSO', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/673' do
         managed_group_url = Flow::Saml.enable_saml_sso(@group, @saml_idp_service)
 
         Flow::Login.while_signed_in(as: user) do
@@ -61,13 +61,11 @@ module QA
 
           page.visit managed_group_url
 
-          EE::Page::Group::SamlSSOSignIn.perform(&:click_sign_in)
-
           expect(page).to have_content("Already signed in with SAML for #{@group.path}")
         end
       end
 
-      it 'Lets group admin test settings', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/674' do
+      it 'lets group admin test settings', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/674' do
         incorrect_fingerprint = Digest::SHA1.hexdigest(rand.to_s)
 
         Flow::Saml.visit_saml_sso_settings(@group)

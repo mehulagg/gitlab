@@ -5,11 +5,13 @@ module UserCalloutsHelper
   GKE_CLUSTER_INTEGRATION = 'gke_cluster_integration'
   GCP_SIGNUP_OFFER = 'gcp_signup_offer'
   SUGGEST_POPOVER_DISMISSED = 'suggest_popover_dismissed'
-  SERVICE_TEMPLATES_DEPRECATED = 'service_templates_deprecated'
+  SERVICE_TEMPLATES_DEPRECATED_CALLOUT = 'service_templates_deprecated_callout'
   TABS_POSITION_HIGHLIGHT = 'tabs_position_highlight'
   WEBHOOKS_MOVED = 'webhooks_moved'
   CUSTOMIZE_HOMEPAGE = 'customize_homepage'
   FEATURE_FLAGS_NEW_VERSION = 'feature_flags_new_version'
+  REGISTRATION_ENABLED_CALLOUT = 'registration_enabled_callout'
+  UNFINISHED_TAG_CLEANUP_CALLOUT = 'unfinished_tag_cleanup_callout'
 
   def show_admin_integrations_moved?
     !user_dismissed?(ADMIN_INTEGRATIONS_MOVED)
@@ -29,7 +31,7 @@ module UserCalloutsHelper
     render 'shared/flash_user_callout', flash_type: flash_type, message: message, feature_name: feature_name
   end
 
-  def render_dashboard_gold_trial(user)
+  def render_dashboard_ultimate_trial(user)
   end
 
   def render_account_recovery_regular_check
@@ -39,20 +41,34 @@ module UserCalloutsHelper
     !user_dismissed?(SUGGEST_POPOVER_DISMISSED)
   end
 
-  def show_service_templates_deprecated?
-    !user_dismissed?(SERVICE_TEMPLATES_DEPRECATED)
+  def show_service_templates_deprecated_callout?
+    !Gitlab.com? &&
+    current_user&.admin? &&
+    Service.for_template.active.exists? &&
+    !user_dismissed?(SERVICE_TEMPLATES_DEPRECATED_CALLOUT)
   end
 
   def show_webhooks_moved_alert?
     !user_dismissed?(WEBHOOKS_MOVED)
   end
 
-  def show_customize_homepage_banner?(customize_homepage)
-    customize_homepage && !user_dismissed?(CUSTOMIZE_HOMEPAGE)
+  def show_customize_homepage_banner?
+    !user_dismissed?(CUSTOMIZE_HOMEPAGE)
   end
 
   def show_feature_flags_new_version?
     !user_dismissed?(FEATURE_FLAGS_NEW_VERSION)
+  end
+
+  def show_unfinished_tag_cleanup_callout?
+    !user_dismissed?(UNFINISHED_TAG_CLEANUP_CALLOUT)
+  end
+
+  def show_registration_enabled_user_callout?
+    !Gitlab.com? &&
+    current_user&.admin? &&
+    signup_enabled? &&
+    !user_dismissed?(REGISTRATION_ENABLED_CALLOUT)
   end
 
   private

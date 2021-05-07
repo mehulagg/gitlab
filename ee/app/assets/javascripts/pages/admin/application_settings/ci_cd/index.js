@@ -1,3 +1,3 @@
 import CiTemplate from './ci_template';
-
-document.addEventListener('DOMContentLoaded', () => new CiTemplate());
+// eslint-disable-next-line no-new
+new CiTemplate();

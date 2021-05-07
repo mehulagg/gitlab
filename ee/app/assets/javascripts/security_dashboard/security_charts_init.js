@@ -1,12 +1,13 @@
 import Vue from 'vue';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
-import UnavailableState from './components/unavailable_state.vue';
-import createStore from './store';
-import createRouter from './router';
-import apolloProvider from './graphql/provider';
-
+import { parseBoolean } from '~/lib/utils/common_utils';
 import GroupSecurityCharts from './components/group_security_charts.vue';
 import InstanceSecurityCharts from './components/instance_security_charts.vue';
+import ProjectSecurityCharts from './components/project_security_charts.vue';
+import UnavailableState from './components/unavailable_state.vue';
+import apolloProvider from './graphql/provider';
+import createRouter from './router';
+import createStore from './store';
 
 export default (el, dashboardType) => {
   if (!el) {
@@ -31,6 +32,10 @@ export default (el, dashboardType) => {
   const provide = {
     dashboardDocumentation: el.dataset.dashboardDocumentation,
     emptyStateSvgPath: el.dataset.emptyStateSvgPath,
+    groupFullPath: el.dataset.groupFullPath,
+    securityConfigurationPath: el.dataset.securityConfigurationPath,
+    surveyRequestSvgPath: el.dataset.surveyRequestSvgPath,
+    securityDashboardHelpPath: el.dataset.securityDashboardHelpPath,
   };
 
   let component;
@@ -41,6 +46,10 @@ export default (el, dashboardType) => {
   } else if (dashboardType === DASHBOARD_TYPES.INSTANCE) {
     component = InstanceSecurityCharts;
     provide.instanceDashboardSettingsPath = el.dataset.instanceDashboardSettingsPath;
+  } else if (dashboardType === DASHBOARD_TYPES.PROJECT) {
+    component = ProjectSecurityCharts;
+    props.projectFullPath = el.dataset.projectFullPath;
+    props.hasVulnerabilities = parseBoolean(el.dataset.hasVulnerabilities);
   }
 
   const router = createRouter();

@@ -42,6 +42,7 @@ RSpec.describe 'Projects > Settings > Repository settings' do
     context 'Deploy Keys', :js do
       let_it_be(:private_deploy_key) { create(:deploy_key, title: 'private_deploy_key', public: false) }
       let_it_be(:public_deploy_key) { create(:another_deploy_key, title: 'public_deploy_key', public: true) }
+
       let(:new_ssh_key) { attributes_for(:key)[:key] }
 
       it 'get list of keys' do
@@ -63,7 +64,7 @@ RSpec.describe 'Projects > Settings > Repository settings' do
         click_button 'Add key'
 
         expect(page).to have_content('new_deploy_key')
-        expect(page).to have_content('Write access allowed')
+        expect(page).to have_content('Grant write permissions to this key')
       end
 
       it 'edit an existing deploy key' do
@@ -77,7 +78,7 @@ RSpec.describe 'Projects > Settings > Repository settings' do
         click_button 'Save changes'
 
         expect(page).to have_content('updated_deploy_key')
-        expect(page).to have_content('Write access allowed')
+        expect(page).to have_content('Grant write permissions to this key')
       end
 
       it 'edit an existing public deploy key to be writable' do
@@ -90,7 +91,7 @@ RSpec.describe 'Projects > Settings > Repository settings' do
         click_button 'Save changes'
 
         expect(page).to have_content('public_deploy_key')
-        expect(page).to have_content('Write access allowed')
+        expect(page).to have_content('Grant write permissions to this key')
       end
 
       it 'edit a deploy key from projects user has access to' do
@@ -116,7 +117,8 @@ RSpec.describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << private_deploy_key
         visit project_settings_repository_path(project)
 
-        accept_confirm { find('.deploy-key', text: private_deploy_key.title).find('[data-testid="remove-icon"]').click }
+        click_button 'Remove'
+        click_button 'Remove deploy key'
 
         expect(page).not_to have_content(private_deploy_key.title)
       end
@@ -289,13 +291,13 @@ RSpec.describe 'Projects > Settings > Repository settings' do
       visit project_settings_repository_path(project)
     end
 
-    context 'when project mirroring is enabled' do
+    context 'when project mirroring is enabled', :enable_admin_mode do
       let(:mirror_available) { true }
 
       include_examples 'shows mirror settings'
     end
 
-    context 'when project mirroring is disabled' do
+    context 'when project mirroring is disabled', :enable_admin_mode do
       let(:mirror_available) { false }
 
       include_examples 'shows mirror settings'

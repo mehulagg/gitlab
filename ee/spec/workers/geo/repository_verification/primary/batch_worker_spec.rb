@@ -26,7 +26,7 @@ RSpec.describe Geo::RepositoryVerification::Primary::BatchWorker, :clean_gitlab_
       create(:repository_state, :repository_outdated, project: unhealthy_outdated)
 
       allow(Gitlab::GitalyClient).to receive(:call) do
-        raise GRPC::Unavailable.new('No Gitaly available')
+        raise GRPC::Unavailable, 'No Gitaly available'
       end
 
       expect(Geo::RepositoryVerification::Primary::ShardWorker).not_to receive(:perform_async).with('broken')

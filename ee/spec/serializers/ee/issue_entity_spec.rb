@@ -8,6 +8,7 @@ RSpec.describe IssueEntity do
   let_it_be(:user) { create(:user) }
   let_it_be(:blocking_issue) { create(:issue, project: project) }
   let_it_be(:blocked_issue) { create(:issue, project: project) }
+
   let(:request) { double('request', current_user: user) }
 
   before_all do

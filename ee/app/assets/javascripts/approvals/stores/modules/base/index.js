@@ -1,6 +1,6 @@
-import createState from './state';
-import mutations from './mutations';
 import * as getters from './getters';
+import mutations from './mutations';
+import createState from './state';
 
 export default () => ({
   state: createState(),

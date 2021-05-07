@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Axios
 
 We use [Axios](https://github.com/axios/axios) to communicate with the server in Vue applications and most new code.
@@ -38,7 +44,7 @@ Advantages over [`spyOn()`](https://jasmine.github.io/api/edge/global.html#spyOn
 
 - no need to create response objects
 - does not allow call through (which we want to avoid)
-- simple API to test error cases
+- clear API to test error cases
 - provides `replyOnce()` to allow for different responses
 
 We have also decided against using [Axios interceptors](https://github.com/axios/axios#interceptors) because they are not suitable for mocking.

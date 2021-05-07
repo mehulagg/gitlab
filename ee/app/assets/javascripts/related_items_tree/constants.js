@@ -41,6 +41,8 @@ export const OVERFLOW_AFTER = 5;
 
 export const SEARCH_DEBOUNCE = 500;
 
+export const EXPAND_DELAY = 1000;
+
 export const itemRemoveModalId = 'item-remove-confirmation';
 
 export const treeItemChevronBtnClassName = 'btn-tree-item-chevron';

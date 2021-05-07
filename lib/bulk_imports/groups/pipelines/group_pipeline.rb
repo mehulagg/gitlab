@@ -6,10 +6,11 @@ module BulkImports
       class GroupPipeline
         include Pipeline
 
+        abort_on_failure!
+
         extractor Common::Extractors::GraphqlExtractor, query: Graphql::GetGroupQuery
 
-        transformer Common::Transformers::GraphqlCleanerTransformer
-        transformer Common::Transformers::UnderscorifyKeysTransformer
+        transformer Common::Transformers::ProhibitedAttributesTransformer
         transformer Groups::Transformers::GroupAttributesTransformer
 
         loader Groups::Loaders::GroupLoader

@@ -1,12 +1,15 @@
 import MockAdapter from 'axios-mock-adapter';
 import * as actions from 'ee/codequality_report/store/actions';
+import { VIEW_EVENT_NAME, VIEW_EVENT_FEATURE_FLAG } from 'ee/codequality_report/store/constants';
 import * as types from 'ee/codequality_report/store/mutation_types';
 import { TEST_HOST } from 'helpers/test_constants';
 import testAction from 'helpers/vuex_action_helper';
+import Api from '~/api';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { unparsedIssues, parsedIssues } from '../mock_data';
 
+jest.mock('~/api.js');
 jest.mock('~/flash');
 
 describe('Codequality report actions', () => {
@@ -28,19 +31,37 @@ describe('Codequality report actions', () => {
   });
 
   describe('setPage', () => {
-    it('sets the page number', done => {
+    it('sets the page number', (done) => {
       testAction(actions.setPage, 12, state, [{ type: types.SET_PAGE, payload: 12 }], [], done);
     });
   });
 
   describe('requestReport', () => {
-    it('sets the loading flag', done => {
+    it('sets the loading flag', (done) => {
+      window.gon = { features: { [VIEW_EVENT_FEATURE_FLAG]: true } };
+
       testAction(actions.requestReport, null, state, [{ type: types.REQUEST_REPORT }], [], done);
+    });
+
+    it('tracks a usage ping event when the feature flag is enabled', () => {
+      window.gon = { features: { [VIEW_EVENT_FEATURE_FLAG]: true } };
+
+      actions.requestReport({ commit: jest.fn() });
+
+      expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(VIEW_EVENT_NAME);
+    });
+
+    it('does not track a usage ping event when the feature flag is disabled', () => {
+      window.gon = { features: { [VIEW_EVENT_FEATURE_FLAG]: false } };
+
+      actions.requestReport({ commit: jest.fn() });
+
+      expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
     });
   });
 
   describe('receiveReportSuccess', () => {
-    it('parses the list of issues from the report', done => {
+    it('parses the list of issues from the report', (done) => {
       testAction(
         actions.receiveReportSuccess,
         unparsedIssues,
@@ -53,7 +74,7 @@ describe('Codequality report actions', () => {
   });
 
   describe('receiveReportError', () => {
-    it('accepts a report error', done => {
+    it('accepts a report error', (done) => {
       testAction(
         actions.receiveReportError,
         'error',
@@ -70,7 +91,7 @@ describe('Codequality report actions', () => {
       mock.onGet(endpoint).replyOnce(200, unparsedIssues);
     });
 
-    it('fetches the report', done => {
+    it('fetches the report', (done) => {
       testAction(
         actions.fetchReport,
         null,
@@ -81,7 +102,7 @@ describe('Codequality report actions', () => {
       );
     });
 
-    it('shows a flash message when there is an error', done => {
+    it('shows a flash message when there is an error', (done) => {
       testAction(
         actions.fetchReport,
         'error',
@@ -89,15 +110,15 @@ describe('Codequality report actions', () => {
         [],
         [{ type: 'requestReport' }, { type: 'receiveReportError', payload: new Error() }],
         () => {
-          expect(createFlash).toHaveBeenCalledWith(
-            'There was an error fetching the codequality report.',
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching the codequality report.',
+          });
           done();
         },
       );
     });
 
-    it('shows an error when blob path is missing', done => {
+    it('shows an error when blob path is missing', (done) => {
       testAction(
         actions.fetchReport,
         null,
@@ -105,9 +126,9 @@ describe('Codequality report actions', () => {
         [],
         [{ type: 'requestReport' }, { type: 'receiveReportError', payload: new Error() }],
         () => {
-          expect(createFlash).toHaveBeenCalledWith(
-            'There was an error fetching the codequality report.',
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching the codequality report.',
+          });
           done();
         },
       );

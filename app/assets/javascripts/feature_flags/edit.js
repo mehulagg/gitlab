@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import createStore from './store/edit';
 import EditFeatureFlag from './components/edit_feature_flag.vue';
+import createStore from './store/edit';
 
 Vue.use(Vuex);
 
@@ -22,7 +22,7 @@ export default () => {
   } = el.dataset;
 
   return new Vue({
-    store: createStore({ endpoint, path: featureFlagsPath }),
+    store: createStore({ endpoint, projectId, path: featureFlagsPath }),
     el,
     provide: {
       environmentsScopeDocsPath,

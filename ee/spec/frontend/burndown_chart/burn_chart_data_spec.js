@@ -1,6 +1,7 @@
 import dateFormat from 'dateformat';
 import timezoneMock from 'timezone-mock';
 import BurndownChartData from 'ee/burndown_chart/burn_chart_data';
+import { useFakeDate } from 'helpers/fake_date';
 
 describe('BurndownChartData', () => {
   const startDate = '2017-03-01';
@@ -68,16 +69,7 @@ describe('BurndownChartData', () => {
     });
 
     describe('when viewing before due date', () => {
-      const realDateNow = Date.now;
-
-      beforeAll(() => {
-        const today = jest.fn(() => new Date(2017, 2, 2));
-        global.Date.now = today;
-      });
-
-      afterAll(() => {
-        global.Date.now = realDateNow;
-      });
+      useFakeDate(2017, 2, 2);
 
       it('counts until today if milestone due date > date today', () => {
         const chartData = burndownChartData.generateBurndownTimeseries();
@@ -232,7 +224,11 @@ describe('BurndownChartData', () => {
     it('generates an array of arrays with date and issue count', () => {
       const { burnupScope } = burndownChartData().generateBurnupTimeseries({ milestoneId });
 
-      expect(burnupScope).toEqual([['2017-03-01', 2], ['2017-03-02', 1], ['2017-03-03', 0]]);
+      expect(burnupScope).toEqual([
+        ['2017-03-01', 2],
+        ['2017-03-02', 1],
+        ['2017-03-03', 0],
+      ]);
     });
 
     it('starts from 0', () => {
@@ -265,7 +261,11 @@ describe('BurndownChartData', () => {
         milestoneId,
       });
 
-      expect(burnupScope).toEqual([['2017-03-01', 0], ['2017-03-02', 0], ['2017-03-03', 0]]);
+      expect(burnupScope).toEqual([
+        ['2017-03-01', 0],
+        ['2017-03-02', 0],
+        ['2017-03-03', 0],
+      ]);
     });
 
     it('ignores removed from other milestones', () => {
@@ -289,7 +289,11 @@ describe('BurndownChartData', () => {
 
       const { burnupScope } = burndownChartData(events).generateBurnupTimeseries({ milestoneId });
 
-      expect(burnupScope).toEqual([['2017-03-01', 1], ['2017-03-02', 1], ['2017-03-03', 1]]);
+      expect(burnupScope).toEqual([
+        ['2017-03-01', 1],
+        ['2017-03-02', 1],
+        ['2017-03-03', 1],
+      ]);
     });
 
     it('only adds milestone event_type', () => {
@@ -314,7 +318,11 @@ describe('BurndownChartData', () => {
 
       const { burnupScope } = burndownChartData(events).generateBurnupTimeseries({ milestoneId });
 
-      expect(burnupScope).toEqual([['2017-03-01', 0], ['2017-03-02', 1], ['2017-03-03', 1]]);
+      expect(burnupScope).toEqual([
+        ['2017-03-01', 0],
+        ['2017-03-02', 1],
+        ['2017-03-03', 1],
+      ]);
     });
 
     it('only removes milestone event_type', () => {
@@ -345,7 +353,11 @@ describe('BurndownChartData', () => {
 
       const { burnupScope } = burndownChartData(events).generateBurnupTimeseries({ milestoneId });
 
-      expect(burnupScope).toEqual([['2017-03-01', 1], ['2017-03-02', 1], ['2017-03-03', 0]]);
+      expect(burnupScope).toEqual([
+        ['2017-03-01', 1],
+        ['2017-03-02', 1],
+        ['2017-03-03', 0],
+      ]);
     });
   });
 });

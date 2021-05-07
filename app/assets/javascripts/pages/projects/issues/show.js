@@ -1,51 +1,60 @@
 import loadAwardsHandler from '~/awards_handler';
-import initIssuableSidebar from '~/init_issuable_sidebar';
-import Issue from '~/issue';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
-import ZenMode from '~/zen_mode';
-import '~/notes/index';
-import { store } from '~/notes/stores';
-import initIssueApp from '~/issue_show/issue';
-import initIncidentApp from '~/issue_show/incident';
-import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
-import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
-import initRelatedMergeRequestsApp from '~/related_merge_requests';
-import { parseIssuableData } from '~/issue_show/utils/parse_data';
-import initInviteMemberTrigger from '~/invite_member/init_invite_member_trigger';
-import initInviteMemberModal from '~/invite_member/init_invite_member_modal';
-
+import initIssuableSidebar from '~/init_issuable_sidebar';
+import initInviteMembersModal from '~/invite_members/init_invite_members_modal';
+import initInviteMembersTrigger from '~/invite_members/init_invite_members_trigger';
 import { IssuableType } from '~/issuable_show/constants';
+import Issue from '~/issue';
+import '~/notes/index';
+import initIncidentApp from '~/issue_show/incident';
+import { initIssuableApp, initIssueHeaderActions } from '~/issue_show/issue';
+import { parseIssuableData } from '~/issue_show/utils/parse_data';
+import { store } from '~/notes/stores';
+import initRelatedMergeRequestsApp from '~/related_merge_requests';
+import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
+import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
+import ZenMode from '~/zen_mode';
 
-export default function() {
-  const { issueType, ...issuableData } = parseIssuableData();
+export default function initShowIssue() {
+  const initialDataEl = document.getElementById('js-issuable-app');
+  const { issueType, ...issuableData } = parseIssuableData(initialDataEl);
 
   switch (issueType) {
     case IssuableType.Incident:
       initIncidentApp(issuableData);
       break;
     case IssuableType.Issue:
-      initIssueApp(issuableData);
+      initIssuableApp(issuableData, store);
       break;
     default:
       break;
   }
 
   initIssuableHeaderWarning(store);
+  initIssueHeaderActions(store);
   initSentryErrorStackTraceApp();
   initRelatedMergeRequestsApp();
+  initInviteMembersModal();
+  initInviteMembersTrigger();
 
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
-    .then(module => module.default())
+    .then((module) => module.default())
     .catch(() => {});
 
   new ZenMode(); // eslint-disable-line no-new
 
   if (issueType !== IssuableType.TestCase) {
+    const awardEmojiEl = document.getElementById('js-vue-awards-block');
+
     new Issue(); // eslint-disable-line no-new
     new ShortcutsIssuable(); // eslint-disable-line no-new
     initIssuableSidebar();
-    loadAwardsHandler();
-    initInviteMemberModal();
-    initInviteMemberTrigger();
+    if (awardEmojiEl) {
+      import('~/emoji/awards_app')
+        .then((m) => m.default(awardEmojiEl))
+        .catch(() => {});
+    } else {
+      loadAwardsHandler();
+    }
   }
 }

@@ -137,7 +137,11 @@ describe('Productivity Analytics utils', () => {
         [{ merged_at: '2019-08-06T18:00:00.000Z', metric: 80 }],
       ];
       const result = getMedianLineData(data, startDate, endDate, daysOffset);
-      const expected = [['2019-08-04', 45], ['2019-08-05', 55], ['2019-08-06', 65]];
+      const expected = [
+        ['2019-08-04', 45],
+        ['2019-08-05', 55],
+        ['2019-08-06', 65],
+      ];
       expect(result).toEqual(expected);
     });
   });

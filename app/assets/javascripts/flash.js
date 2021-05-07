@@ -1,5 +1,5 @@
+import * as Sentry from '@sentry/browser';
 import { escape } from 'lodash';
-import * as Sentry from '~/sentry/wrapper';
 import { spriteIcon } from './lib/utils/common_utils';
 
 const FLASH_TYPES = {
@@ -7,6 +7,10 @@ const FLASH_TYPES = {
   NOTICE: 'notice',
   SUCCESS: 'success',
   WARNING: 'warning',
+};
+
+const getCloseEl = (flashEl) => {
+  return flashEl.querySelector('.js-close-icon');
 };
 
 const hideFlash = (flashEl, fadeTransition = true) => {
@@ -34,7 +38,7 @@ const hideFlash = (flashEl, fadeTransition = true) => {
   if (!fadeTransition) flashEl.dispatchEvent(new Event('transitionend'));
 };
 
-const createAction = config => `
+const createAction = (config) => `
   <a
     href="${config.href || '#'}"
     class="flash-action"
@@ -56,58 +60,7 @@ const createFlashEl = (message, type) => `
 `;
 
 const removeFlashClickListener = (flashEl, fadeTransition) => {
-  flashEl
-    .querySelector('.js-close-icon')
-    .addEventListener('click', () => hideFlash(flashEl, fadeTransition));
-};
-
-/*
- *  Flash banner supports different types of Flash configurations
- *  along with ability to provide actionConfig which can be used to show
- *  additional action or link on banner next to message
- *
- *  @param {String} message           Flash message text
- *  @param {String} type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
- *  @param {Object} parent            Reference to parent element under which Flash needs to appear
- *  @param {Object} actonConfig       Map of config to show action on banner
- *    @param {String} href            URL to which action config should point to (default: '#')
- *    @param {String} title           Title of action
- *    @param {Function} clickHandler  Method to call when action is clicked on
- *  @param {Boolean} fadeTransition   Boolean to determine whether to fade the alert out
- */
-const deprecatedCreateFlash = function deprecatedCreateFlash(
-  message,
-  type = FLASH_TYPES.ALERT,
-  parent = document,
-  actionConfig = null,
-  fadeTransition = true,
-  addBodyClass = false,
-) {
-  const flashContainer = parent.querySelector('.flash-container');
-
-  if (!flashContainer) return null;
-
-  flashContainer.innerHTML = createFlashEl(message, type);
-
-  const flashEl = flashContainer.querySelector(`.flash-${type}`);
-
-  if (actionConfig) {
-    flashEl.innerHTML += createAction(actionConfig);
-
-    if (actionConfig.clickHandler) {
-      flashEl
-        .querySelector('.flash-action')
-        .addEventListener('click', e => actionConfig.clickHandler(e));
-    }
-  }
-
-  removeFlashClickListener(flashEl, fadeTransition);
-
-  flashContainer.style.display = 'block';
-
-  if (addBodyClass) document.body.classList.add('flash-shown');
-
-  return flashContainer;
+  getCloseEl(flashEl).addEventListener('click', () => hideFlash(flashEl, fadeTransition));
 };
 
 /*
@@ -119,7 +72,7 @@ const deprecatedCreateFlash = function deprecatedCreateFlash(
  *  @param {String} options.message           Flash message text
  *  @param {String} options.type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
  *  @param {Object} options.parent            Reference to parent element under which Flash needs to appear
- *  @param {Object} options.actonConfig       Map of config to show action on banner
+ *  @param {Object} options.actionConfig      Map of config to show action on banner
  *    @param {String} href                    URL to which action config should point to (default: '#')
  *    @param {String} title                   Title of action
  *    @param {Function} clickHandler          Method to call when action is clicked on
@@ -151,7 +104,7 @@ const createFlash = function createFlash({
     if (actionConfig.clickHandler) {
       flashEl
         .querySelector('.flash-action')
-        .addEventListener('click', e => actionConfig.clickHandler(e));
+        .addEventListener('click', (e) => actionConfig.clickHandler(e));
     }
   }
 
@@ -163,7 +116,36 @@ const createFlash = function createFlash({
 
   if (captureError && error) Sentry.captureException(error);
 
+  flashContainer.close = () => {
+    getCloseEl(flashEl).click();
+  };
+
   return flashContainer;
+};
+
+/*
+ *  Flash banner supports different types of Flash configurations
+ *  along with ability to provide actionConfig which can be used to show
+ *  additional action or link on banner next to message
+ *
+ *  @param {String} message           Flash message text
+ *  @param {String} type              Type of Flash, it can be `notice`, `success`, `warning` or `alert` (default)
+ *  @param {Object} parent            Reference to parent element under which Flash needs to appear
+ *  @param {Object} actionConfig      Map of config to show action on banner
+ *    @param {String} href            URL to which action config should point to (default: '#')
+ *    @param {String} title           Title of action
+ *    @param {Function} clickHandler  Method to call when action is clicked on
+ *  @param {Boolean} fadeTransition   Boolean to determine whether to fade the alert out
+ */
+const deprecatedCreateFlash = function deprecatedCreateFlash(
+  message,
+  type,
+  parent,
+  actionConfig,
+  fadeTransition,
+  addBodyClass,
+) {
+  return createFlash({ message, type, parent, actionConfig, fadeTransition, addBodyClass });
 };
 
 export {

@@ -2,8 +2,6 @@
 
 module JiraImport
   class UsersImporter
-    attr_reader :user, :project, :start_at
-
     def initialize(user, project, start_at)
       @project = project
       @start_at = start_at
@@ -15,13 +13,15 @@ module JiraImport
 
       ServiceResponse.success(payload: mapped_users)
     rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, Errno::ECONNREFUSED, URI::InvalidURIError, JIRA::HTTPError, OpenSSL::SSL::SSLError => error
-      Gitlab::ErrorTracking.track_exception(error, project_id: project.id)
+      Gitlab::ErrorTracking.log_exception(error, project_id: project.id)
       ServiceResponse.error(message: "There was an error when communicating to Jira")
     rescue Projects::ImportService::Error => error
       ServiceResponse.error(message: error.message)
     end
 
     private
+
+    attr_reader :user, :project, :start_at
 
     def mapped_users
       users_mapper_service.execute
@@ -44,9 +44,9 @@ module JiraImport
       # TODO: use deployment_type enum from jira service when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37003 is merged
       case deployment_type.upcase
       when JiraService::DEPLOYMENT_TYPES[:server]
-        ServerUsersMapperService.new(project.jira_service, start_at)
+        ServerUsersMapperService.new(user, project, start_at)
       when JiraService::DEPLOYMENT_TYPES[:cloud]
-        CloudUsersMapperService.new(project.jira_service, start_at)
+        CloudUsersMapperService.new(user, project, start_at)
       else
         raise ArgumentError
       end

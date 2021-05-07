@@ -1,6 +1,6 @@
 <script>
-import Cookies from 'js-cookie';
 import { GlAlert } from '@gitlab/ui';
+import Cookies from 'js-cookie';
 import { __, sprintf } from '~/locale';
 
 export const COOKIE_NAME = 'dismissed_resolution_alerts';
@@ -41,7 +41,7 @@ export default {
       }
     },
     isAlreadyDismissed() {
-      return this.alreadyDismissedVulnerabilities().some(id => id === this.vulnerabilityId);
+      return this.alreadyDismissedVulnerabilities().some((id) => id === this.vulnerabilityId);
     },
     dismiss() {
       const dismissed = this.alreadyDismissedVulnerabilities().concat(this.vulnerabilityId);

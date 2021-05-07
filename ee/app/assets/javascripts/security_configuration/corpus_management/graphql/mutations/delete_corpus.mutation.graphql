@@ -1,0 +1,5 @@
+mutation deleteCorpus($projectPath: ID!, $name: String!) {
+  deleteCorpus(projectPath: $projectPath, name: $name) @client {
+    errors
+  }
+}

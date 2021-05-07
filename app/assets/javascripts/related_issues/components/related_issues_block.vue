@@ -1,13 +1,13 @@
 <script>
 import { GlLink, GlIcon, GlButton } from '@gitlab/ui';
-import AddIssuableForm from './add_issuable_form.vue';
-import RelatedIssuesList from './related_issues_list.vue';
 import {
   issuableIconMap,
   issuableQaClassMap,
   linkedIssueTypesMap,
   linkedIssueTypesTextMap,
 } from '../constants';
+import AddIssuableForm from './add_issuable_form.vue';
+import RelatedIssuesList from './related_issues_list.vue';
 
 export default {
   name: 'RelatedIssuesBlock',
@@ -90,11 +90,11 @@ export default {
     categorisedIssues() {
       if (this.showCategorizedIssues) {
         return Object.values(linkedIssueTypesMap)
-          .map(linkType => ({
+          .map((linkType) => ({
             linkType,
-            issues: this.relatedIssues.filter(issue => issue.linkType === linkType),
+            issues: this.relatedIssues.filter((issue) => issue.linkType === linkType),
           }))
-          .filter(obj => obj.issues.length > 0);
+          .filter((obj) => obj.issues.length > 0);
       }
 
       return [{ issues: this.relatedIssues }];
@@ -138,7 +138,7 @@ export default {
             href="#related-issues"
             aria-hidden="true"
           />
-          <slot name="headerText">{{ __('Linked issues') }}</slot>
+          <slot name="header-text">{{ __('Linked issues') }}</slot>
           <gl-link
             v-if="hasHelpPath"
             :href="helpPath"
@@ -146,7 +146,7 @@ export default {
             class="gl-display-flex gl-align-items-center gl-ml-2 gl-text-gray-500"
             :aria-label="__('Read more about related issues')"
           >
-            <gl-icon name="question" :size="12" role="text" />
+            <gl-icon name="question" :size="12" />
           </gl-link>
 
           <div class="gl-display-inline-flex">
@@ -167,7 +167,7 @@ export default {
             />
           </div>
         </h3>
-        <slot name="headerActions"></slot>
+        <slot name="header-actions"></slot>
       </div>
       <div
         class="linked-issues-card-body bg-gray-light"

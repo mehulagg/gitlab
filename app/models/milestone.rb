@@ -9,11 +9,15 @@ class Milestone < ApplicationRecord
 
   prepend_if_ee('::EE::Milestone') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
+  class Predefined
+    ALL = [::Timebox::None, ::Timebox::Any, ::Timebox::Started, ::Timebox::Upcoming].freeze
+  end
+
   has_many :milestone_releases
   has_many :releases, through: :milestone_releases
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) { s&.project&.milestones&.maximum(:iid) }
-  has_internal_id :iid, scope: :group, track_if: -> { !importing? }, init: ->(s) { s&.group&.milestones&.maximum(:iid) }
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
+  has_internal_id :iid, scope: :group, track_if: -> { !importing? }
 
   has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
@@ -29,6 +33,7 @@ class Milestone < ApplicationRecord
   scope :order_by_name_asc, -> { order(Arel::Nodes::Ascending.new(arel_table[:title].lower)) }
   scope :reorder_by_due_date_asc, -> { reorder(Gitlab::Database.nulls_last_order('due_date', 'ASC')) }
   scope :with_api_entity_associations, -> { preload(project: [:project_feature, :route, namespace: :route]) }
+  scope :order_by_dates_and_title, -> { order(due_date: :asc, start_date: :asc, title: :asc) }
 
   validates_associated :milestone_releases, message: -> (_, obj) { obj[:value].map(&:errors).map(&:full_messages).join(",") }
 
@@ -84,8 +89,12 @@ class Milestone < ApplicationRecord
       .order(:project_id, :group_id, :due_date).select('DISTINCT ON (project_id, group_id) id')
   end
 
+  def self.with_web_entity_associations
+    preload(:group, project: [:project_feature, group: [:parent], namespace: :route])
+  end
+
   def participants
-    User.joins(assigned_issues: :milestone).where("milestones.id = ?", id).distinct
+    User.joins(assigned_issues: :milestone).where(milestones: { id: id }).distinct
   end
 
   def self.sort_by_attribute(method)

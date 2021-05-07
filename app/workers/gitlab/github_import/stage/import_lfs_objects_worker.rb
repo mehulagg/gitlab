@@ -5,6 +5,8 @@ module Gitlab
     module Stage
       class ImportLfsObjectsWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include StageMethods
 
@@ -16,6 +18,8 @@ module Gitlab
 
         # project - An instance of Project.
         def import(project)
+          info(project.id, message: "starting importer", importer: 'Importer::LfsObjectsImporter')
+
           waiter = Importer::LfsObjectsImporter
             .new(project, nil)
             .execute

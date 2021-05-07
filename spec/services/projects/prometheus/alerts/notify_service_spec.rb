@@ -4,26 +4,28 @@ require 'spec_helper'
 
 RSpec.describe Projects::Prometheus::Alerts::NotifyService do
   include PrometheusHelpers
+  using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:project, reload: true) { create(:project) }
-
-  let(:service) { described_class.new(project, nil, payload) }
-  let(:token_input) { 'token' }
-
-  let!(:setting) do
+  let_it_be_with_reload(:project) { create(:project) }
+  let_it_be_with_refind(:setting) do
     create(:project_incident_management_setting, project: project, send_email: true, create_issue: true)
   end
 
-  let(:subject) { service.execute(token_input) }
+  let(:service) { described_class.new(project, payload) }
+  let(:token_input) { 'token' }
+
+  subject { service.execute(token_input) }
 
   context 'with valid payload' do
     let_it_be(:alert_firing) { create(:prometheus_alert, project: project) }
     let_it_be(:alert_resolved) { create(:prometheus_alert, project: project) }
-    let_it_be(:cluster) { create(:cluster, :provided_by_user, projects: [project]) }
+    let_it_be(:cluster, reload: true) { create(:cluster, :provided_by_user, projects: [project]) }
+
     let(:payload_raw) { prometheus_alert_payload(firing: [alert_firing], resolved: [alert_resolved]) }
     let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
     let(:payload_alert_firing) { payload_raw['alerts'].first }
     let(:token) { 'token' }
+    let(:source) { 'Prometheus' }
 
     context 'with environment specific clusters' do
       let(:prd_cluster) do
@@ -52,17 +54,15 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       context 'without token' do
         let(:token_input) { nil }
 
-        it_behaves_like 'Alert Notification Service sends notification email'
+        include_examples 'processes one firing and one resolved prometheus alerts'
       end
 
       context 'with token' do
-        it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+        it_behaves_like 'alerts service responds with an error and takes no actions', :unauthorized
       end
     end
 
     context 'with project specific cluster' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:cluster_enabled, :status, :configured_token, :token_input, :result) do
         true  | :installed | token | token | :success
         true  | :installed | nil   | nil   | :success
@@ -88,9 +88,9 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
 
         case result = params[:result]
         when :success
-          it_behaves_like 'Alert Notification Service sends notification email'
+          include_examples 'processes one firing and one resolved prometheus alerts'
         when :failure
-          it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+          it_behaves_like 'alerts service responds with an error and takes no actions', :unauthorized
         else
           raise "invalid result: #{result.inspect}"
         end
@@ -98,14 +98,12 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
     end
 
     context 'without project specific cluster' do
-      let!(:cluster) { create(:cluster, enabled: true) }
+      let_it_be(:cluster) { create(:cluster, enabled: true) }
 
-      it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+      it_behaves_like 'alerts service responds with an error and takes no actions', :unauthorized
     end
 
     context 'with manual prometheus installation' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:alerting_setting, :configured_token, :token_input, :result) do
         true  | token | token | :success
         true  | token | 'x'   | :failure
@@ -129,19 +127,17 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
 
         case result = params[:result]
         when :success
-          it_behaves_like 'Alert Notification Service sends notification email'
+          it_behaves_like 'processes one firing and one resolved prometheus alerts'
         when :failure
-          it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+          it_behaves_like 'alerts service responds with an error and takes no actions', :unauthorized
         else
           raise "invalid result: #{result.inspect}"
         end
       end
     end
 
-    context 'with generic alerts integration' do
-      using RSpec::Parameterized::TableSyntax
-
-      where(:alerts_service, :token, :result) do
+    context 'with HTTP integration' do
+      where(:active, :token, :result) do
         :active   | :valid    | :success
         :active   | :invalid  | :failure
         :active   | nil       | :failure
@@ -150,58 +146,58 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
       end
 
       with_them do
-        let(:valid) { project.alerts_service.token }
+        let(:valid) { integration.token }
         let(:invalid) { 'invalid token' }
         let(:token_input) { public_send(token) if token }
+        let(:integration) { create(:alert_management_http_integration, active, project: project) if active }
 
-        before do
-          if alerts_service
-            create(:alerts_service, alerts_service, project: project)
-          end
-        end
+        subject { service.execute(token_input, integration) }
 
         case result = params[:result]
         when :success
-          it_behaves_like 'Alert Notification Service sends notification email'
+          it_behaves_like 'processes one firing and one resolved prometheus alerts'
         when :failure
-          it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unauthorized
+          it_behaves_like 'alerts service responds with an error and takes no actions', :unauthorized
         else
           raise "invalid result: #{result.inspect}"
         end
       end
     end
 
-    context 'alert emails' do
+    context 'incident settings' do
       before do
         create(:prometheus_service, project: project)
         create(:project_alerting_setting, project: project, token: token)
       end
 
+      it_behaves_like 'processes one firing and one resolved prometheus alerts'
+
       context 'when incident_management_setting does not exist' do
-        let!(:setting) { nil }
-
-        it 'does not send notification email', :sidekiq_might_not_need_inline do
-          expect_any_instance_of(NotificationService)
-            .not_to receive(:async)
-
-          expect(subject).to be_success
+        before do
+          setting.destroy!
         end
-      end
 
-      context 'when incident_management_setting.send_email is true' do
-        it_behaves_like 'Alert Notification Service sends notification email'
+        it { is_expected.to be_success }
+        include_examples 'does not send alert notification emails'
+        include_examples 'does not process incident issues'
       end
 
       context 'incident_management_setting.send_email is false' do
-        let!(:setting) do
-          create(:project_incident_management_setting, send_email: false, project: project)
+        before do
+          setting.update!(send_email: false)
         end
 
-        it 'does not send notification' do
-          expect(NotificationService).not_to receive(:new)
+        it { is_expected.to be_success }
+        include_examples 'does not send alert notification emails'
+      end
 
-          expect(subject).to be_success
+      context 'incident_management_setting.create_issue is false' do
+        before do
+          setting.update!(create_issue: false)
         end
+
+        it { is_expected.to be_success }
+        include_examples 'does not process incident issues'
       end
     end
 
@@ -221,7 +217,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
         it 'processes Prometheus alerts' do
           expect(AlertManagement::ProcessPrometheusAlertService)
             .to receive(:new)
-            .with(project, nil, kind_of(Hash))
+            .with(project, kind_of(Hash))
             .exactly(3).times
             .and_return(process_service)
           expect(process_service).to receive(:execute).exactly(3).times
@@ -241,7 +237,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
           .and_return(false)
       end
 
-      it_behaves_like 'Alert Notification Service sends no notifications', http_status: :unprocessable_entity
+      it_behaves_like 'alerts service responds with an error and takes no actions', :unprocessable_entity
     end
 
     context 'when the payload is too big' do
@@ -252,14 +248,7 @@ RSpec.describe Projects::Prometheus::Alerts::NotifyService do
         allow(Gitlab::Utils::DeepSize).to receive(:new).and_return(deep_size_object)
       end
 
-      it_behaves_like 'Alert Notification Service sends no notifications', http_status: :bad_request
-
-      it 'does not process Prometheus alerts' do
-        expect(AlertManagement::ProcessPrometheusAlertService)
-          .not_to receive(:new)
-
-        subject
-      end
+      it_behaves_like 'alerts service responds with an error and takes no actions', :bad_request
     end
   end
 

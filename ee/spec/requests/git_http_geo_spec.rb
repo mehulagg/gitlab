@@ -17,8 +17,6 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
   let_it_be(:primary) { create(:geo_node, :primary, url: primary_url) }
   let_it_be(:secondary) { create(:geo_node, url: secondary_url) }
 
-  # Ensure the token always comes from the real time of the request
-  let(:auth_token) { Gitlab::Geo::BaseRequest.new(scope: project.full_path).authorization }
   let!(:user) { create(:user) }
   let!(:user_without_any_access) { create(:user) }
   let!(:user_without_push_access) { create(:user) }
@@ -54,7 +52,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       it 'returns an OK response with JSON data' do
         is_expected.to have_gitlab_http_status(:ok)
 
-        expect(response.content_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+        expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
         expect(json_response).to include('ShowAllRefs' => true)
       end
     end
@@ -70,7 +68,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       it 'returns an OK response with binary data' do
         is_expected.to have_gitlab_http_status(:ok)
 
-        expect(response.content_type).to eq('application/octet-stream')
+        expect(response.media_type).to eq('application/octet-stream')
       end
     end
   end
@@ -87,7 +85,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
       it 'returns a redirect response' do
         is_expected.to have_gitlab_http_status(:redirect)
 
-        expect(response.content_type).to eq('text/html')
+        expect(response.media_type).to eq('text/html')
         expect(response.headers['Location']).to eq(redirect_url)
       end
     end
@@ -130,6 +128,8 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
   context 'when current node is a secondary' do
     let(:current_node) { secondary }
+
+    let(:auth_token) { Gitlab::Geo::BaseRequest.new(scope: project.full_path).authorization }
 
     describe 'GET info_refs' do
       context 'git pull' do
@@ -453,6 +453,10 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
   end
 
   context 'when current node is the primary', :use_clean_rails_memory_store_caching do
+    let!(:geo_gl_id) { "key-#{key.id}" }
+
+    # Ensure the token always comes from the real time of the request
+    let(:auth_token) { Gitlab::Geo::BaseRequest.new(scope: project.full_path, gl_id: geo_gl_id).authorization }
     let(:current_node) { primary }
 
     describe 'POST git_receive_pack' do
@@ -503,27 +507,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
         let_it_be(:project) { project_with_repo }
         let(:endpoint_path) { "/#{project.full_path}.git/git-receive-pack" }
 
-        before do
-          env['Geo-GL-Id'] = geo_gl_id
-        end
-
-        context 'when gl_id is incorrectly provided via HTTP headers' do
-          where(:geo_gl_id) do
-            [
-              nil,
-              ''
-            ]
-          end
-
-          with_them do
-            it 'returns a 403' do
-              is_expected.to have_gitlab_http_status(:forbidden)
-              expect(response.body).to eql('You are not allowed to upload code for this project.')
-            end
-          end
-        end
-
-        context 'when gl_id is provided via HTTP headers' do
+        context 'when gl_id is provided in JWT token' do
           context 'but is invalid' do
             where(:geo_gl_id) do
               %w[
@@ -550,7 +534,7 @@ RSpec.describe "Git HTTP requests (Geo)", :geo do
 
               it 'returns a 404' do
                 is_expected.to have_gitlab_http_status(:not_found)
-                expect(response.body).to eql('The project you were looking for could not be found.')
+                expect(response.body).to eql("The project you were looking for could not be found or you don't have permission to view it.")
               end
             end
 

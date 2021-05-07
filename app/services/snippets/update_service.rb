@@ -7,6 +7,11 @@ module Snippets
     UpdateError = Class.new(StandardError)
 
     def execute(snippet)
+      # NOTE: disable_spam_action_service can be removed when the ':snippet_spam' feature flag is removed.
+      disable_spam_action_service = params.delete(:disable_spam_action_service) == true
+      @request = params.delete(:request)
+      @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
+
       return invalid_params_error(snippet) unless valid_params?
 
       if visibility_changed?(snippet) && !visibility_allowed?(snippet, visibility_level)
@@ -14,18 +19,28 @@ module Snippets
       end
 
       update_snippet_attributes(snippet)
-      spam_check(snippet, current_user, action: :update)
+
+      unless disable_spam_action_service
+        Spam::SpamActionService.new(
+          spammable: snippet,
+          request: request,
+          user: current_user,
+          action: :update
+        ).execute(spam_params: spam_params)
+      end
 
       if save_and_commit(snippet)
         Gitlab::UsageDataCounters::SnippetCounter.count(:update)
 
-        ServiceResponse.success(payload: { snippet: snippet } )
+        ServiceResponse.success(payload: { snippet: snippet })
       else
         snippet_error_response(snippet, 400)
       end
     end
 
     private
+
+    attr_reader :request, :spam_params
 
     def visibility_changed?(snippet)
       visibility_level && visibility_level.to_i != snippet.visibility_level
@@ -63,7 +78,7 @@ module Snippets
       create_commit(snippet)
 
       true
-    rescue => e
+    rescue StandardError => e
       # Restore old attributes but re-assign changes so they're not lost
       unless snippet.previous_changes.empty?
         snippet.previous_changes.each { |attr, value| snippet[attr] = value[0] }
@@ -74,7 +89,7 @@ module Snippets
 
       add_snippet_repository_error(snippet: snippet, error: e)
 
-      log_error(e.message)
+      Gitlab::ErrorTracking.log_exception(e, service: 'Snippets::UpdateService')
 
       # If the commit action failed we remove it because
       # we don't want to leave empty repositories

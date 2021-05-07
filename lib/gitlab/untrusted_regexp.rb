@@ -22,7 +22,7 @@ module Gitlab
 
       @regexp = RE2::Regexp.new(pattern, log_errors: false)
 
-      raise RegexpError.new(regexp.error) unless regexp.ok?
+      raise RegexpError, regexp.error unless regexp.ok?
     end
 
     def replace_all(text, rewrite)
@@ -33,6 +33,10 @@ module Gitlab
       matches = scan_regexp.scan(text).to_a
       matches.map!(&:first) if regexp.number_of_capturing_groups == 0
       matches
+    end
+
+    def match(text)
+      scan_regexp.match(text)
     end
 
     def match?(text)

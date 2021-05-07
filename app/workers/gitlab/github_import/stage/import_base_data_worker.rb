@@ -5,6 +5,8 @@ module Gitlab
     module Stage
       class ImportBaseDataWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include StageMethods
 
@@ -20,6 +22,7 @@ module Gitlab
         # project - An instance of Project.
         def import(client, project)
           IMPORTERS.each do |klass|
+            info(project.id, message: "starting importer", importer: klass.name)
             klass.new(project, client).execute
           end
 

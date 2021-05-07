@@ -1,12 +1,12 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/lfs/lfs/index.html'
 ---
 
-# Git Large File Storage (LFS)
+# Git Large File Storage (LFS) **(FREE)**
 
 Managing large files such as audio, video and graphics files has always been one
 of the shortcomings of Git. The general recommendation is to not have Git repositories
@@ -14,13 +14,13 @@ larger than 1GB to preserve performance.
 
 ![Git LFS tracking status](img/lfs-icon.png)
 
-An LFS icon is shown on files tracked by Git LFS to denote if a file is stored
-as a blob or as an LFS pointer.
+Files tracked by Git LFS display an icon to indicate if the file is stored as a
+blob or an LFS pointer.
 
 ## How it works
 
 Git LFS client talks with the GitLab server over HTTPS. It uses HTTP Basic Authentication
-to authorize client requests. Once the request is authorized, Git LFS client receives
+to authorize client requests. After the request is authorized, Git LFS client receives
 instructions from where to fetch or where to push the large file.
 
 ## GitLab server configuration
@@ -35,18 +35,18 @@ Documentation for GitLab instance administrators is under [LFS administration do
 
 ## Known limitations
 
-- Git LFS v1 original API is not supported since it was deprecated early in LFS
-  development
-- When SSH is set as a remote, Git LFS objects still go through HTTPS
-- Any Git LFS request will ask for HTTPS credentials to be provided so a good Git
-  credentials store is recommended
-- Git LFS always assumes HTTPS so if you have GitLab server on HTTP you will have
-  to add the URL to Git configuration manually (see [troubleshooting](#troubleshooting))
+- Git LFS v1 original API is not supported, because it was deprecated early in LFS
+  development.
+- When SSH is set as a remote, Git LFS objects still go through HTTPS.
+- Any Git LFS request asks for HTTPS credentials to be provided so a good Git
+  credentials store is recommended.
+- Git LFS always assumes HTTPS so if you have GitLab server on HTTP you must
+  [add the URL to Git configuration manually](#troubleshooting).
 
-NOTE: **Note:**
+NOTE:
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
 still goes over HTTP, but now the SSH client passes the correct credentials
-to the Git LFS client, so no action is required by the user.
+to the Git LFS client. No action is required by the user.
 
 ## Using Git LFS
 
@@ -60,8 +60,8 @@ git lfs install                       # initialize the Git LFS project
 git lfs track "*.iso"                 # select the file extensions that you want to treat as large files
 ```
 
-Once a certain file extension is marked for tracking as a LFS object you can use
-Git as usual without having to redo the command to track a file with the same extension:
+After you mark a file extension for tracking as a LFS object you can use
+Git as usual without redoing the command to track a file with the same extension:
 
 ```shell
 cp ~/tmp/debian.iso ./                # copy a large file into the current directory
@@ -71,7 +71,7 @@ git push origin master                # sync the git repo and large file to the 
 ```
 
 **Make sure** that `.gitattributes` is tracked by Git. Otherwise Git
-LFS will not be working properly for people cloning the project:
+LFS doesn't work properly for people cloning the project:
 
 ```shell
 git add .gitattributes
@@ -93,10 +93,10 @@ that are on the remote repository, such as for a branch from origin:
 git lfs fetch origin master
 ```
 
-Make sure your files aren't listed in `.gitignore`, otherwise, they will be ignored by Git thus will not
-be pushed to the remote repository.
+Make sure your files aren't listed in `.gitignore`, otherwise, they are ignored by Git
+and are not pushed to the remote repository.
 
-### Migrate an existing repo to Git LFS
+### Migrate an existing repository to Git LFS
 
 Read the documentation on how to [migrate an existing Git repository with Git LFS](migrate_to_git_lfs.md).
 
@@ -114,10 +114,13 @@ See the documentation on [File Locking](../../../user/project/file_lock.md).
 ## LFS objects in project archives
 
 > - Support for including Git LFS blobs inside [project source downloads](../../../user/project/repository/index.md) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15079) in GitLab 13.5.
-> - It's [deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-lfs-objects-in-project-archives). **(CORE ONLY)**
+> - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/268409) in GitLab 13.6.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-lfs-objects-in-project-archives).
 
-CAUTION: **Warning:**
+WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
 Prior to GitLab 13.5, [project source
@@ -139,10 +142,10 @@ Technical details about how this works can be found in the [development document
 
 ### Enable or disable LFS objects in project archives
 
-_LFS objects in project archives_ is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+_LFS objects in project archives_ is under development but ready for production use.
+It is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it.
+can opt to disable it.
 
 To enable it:
 
@@ -175,7 +178,7 @@ available to the project anymore. Probably the object was removed from the serve
 
 ### Invalid status for `<url>` : 501
 
-Git LFS will log the failures into a log file.
+Git LFS logs the failures into a log file.
 To view this log file, while in project directory:
 
 ```shell
@@ -198,12 +201,19 @@ If the status `error 501` is shown, it is because:
   remove the line and try to update your Git LFS client. Only version 1.0.1 and
   newer are supported.
 
+<!-- vale gitlab.Spelling = NO -->
+
 ### getsockopt: connection refused
 
-If you push a LFS object to a project and you receive an error similar to:
-`Post <URL>/info/lfs/objects/batch: dial tcp IP: getsockopt: connection refused`,
+<!-- vale gitlab.Spelling = YES -->
+
+If you push an LFS object to a project and receive an error like this,
 the LFS client is trying to reach GitLab through HTTPS. However, your GitLab
-instance is being served on HTTP.
+instance is being served on HTTP:
+
+```plaintext
+Post <URL>/info/lfs/objects/batch: dial tcp IP: getsockopt: connection refused
+```
 
 This behavior is caused by Git LFS using HTTPS connections by default when a
 `lfsurl` is not set in the Git configuration.
@@ -216,13 +226,13 @@ git config --add lfs.url "http://gitlab.example.com/group/project.git/info/lfs"
 
 ### Credentials are always required when pushing an object
 
-NOTE: **Note:**
+NOTE:
 With 8.12 GitLab added LFS support to SSH. The Git LFS communication
 still goes over HTTP, but now the SSH client passes the correct credentials
-to the Git LFS client, so no action is required by the user.
+to the Git LFS client. No action is required by the user.
 
-Given that Git LFS uses HTTP Basic Authentication to authenticate the user pushing
-the LFS object on every push for every object, user HTTPS credentials are required.
+Git LFS authenticates the user with HTTP Basic Authentication on every push for
+every object, so user HTTPS credentials are required.
 
 By default, Git has support for remembering the credentials for each repository
 you use. This is described in [Git credentials man pages](https://git-scm.com/docs/gitcredentials).
@@ -234,7 +244,7 @@ which you expect to push the objects:
 git config --global credential.helper 'cache --timeout=3600'
 ```
 
-This will remember the credentials for an hour after which Git operations will
+This remembers the credentials for an hour, after which Git operations
 require re-authentication.
 
 If you are using OS X you can use `osxkeychain` to store and encrypt your credentials.
@@ -255,7 +265,50 @@ If you are storing LFS files outside of GitLab you can disable LFS on the projec
 
 It is possible to host LFS objects externally by setting a custom LFS URL with `git config -f .lfsconfig lfs.url https://example.com/<project>.git/info/lfs`.
 
-You might choose to do this if you are using an appliance like a Sonatype Nexus to store LFS data. If you choose to use an external LFS store,
-GitLab will not be able to verify LFS objects which means that pushes will fail if you have GitLab LFS support enabled.
+You might choose to do this if you are using an appliance like a <!-- vale gitlab.Spelling = NO --> Sonatype Nexus <!-- vale gitlab.Spelling = YES --> to store LFS data. If you choose to use an external LFS store,
+GitLab can't verify LFS objects. Pushes then fail if you have GitLab LFS support enabled.
 
-To stop push failure, LFS support can be disabled in the [Project settings](../../../user/project/settings/index.md). This means you will lose GitLab LFS value-adds (Verifying LFS objects, UI integration for LFS).
+To stop push failure, LFS support can be disabled in the [Project settings](../../../user/project/settings/index.md), which also disables GitLab LFS value-adds (Verifying LFS objects, UI integration for LFS).
+
+### Missing LFS objects
+
+An error about a missing LFS object may occur in either of these situations:
+
+- When migrating LFS objects from disk to object storage, with error messages like:
+
+   ```plaintext
+   ERROR -- : Failed to transfer LFS object
+   006622269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+   with error: No such file or directory @ rb_sysopen -
+   /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+   ```
+
+   (Line breaks have been added for legibility.)
+
+- When running the
+  [integrity check for LFS objects](../../../administration/raketasks/check.md#uploaded-files-integrity)
+  with the `VERBOSE=1` parameter.
+
+The database can have records for LFS objects which are not on disk. The database entry may
+[prevent a new copy of the object being pushed](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49241).
+To delete these references:
+
+1. [Start a rails console](../../../administration/operations/rails_console.md).
+1. Query the object that's reported as missing in the rails console, to return a file path:
+
+   ```ruby
+   lfs_object = LfsObject.find_by(oid: '006622269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7')
+   lfs_object.file.path
+   ```
+
+1. Check on disk if it exists:
+
+   ```shell
+   ls -al /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
+   ```
+
+1. If the file is not present, remove the database record via the rails console:
+
+   ```ruby
+   lfs_object.destroy
+   ```

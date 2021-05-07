@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Manage', :requires_admin, :skip_live_env do
+  RSpec.describe 'Manage', :requires_admin, :skip_live_env do
     describe '2FA' do
       let(:owner_user) do
         Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_2fa_owner_username_1, Runtime::Env.gitlab_qa_2fa_owner_password_1)
@@ -29,6 +29,7 @@ module QA
       end
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, group: group)
         group.add_member(developer_user, Resource::Members::AccessLevel::DEVELOPER)
       end
 
@@ -81,7 +82,7 @@ module QA
 
             recovery_code = two_fa_auth.recovery_codes.sample
 
-            two_fa_auth.click_proceed_button
+            two_fa_auth.click_copy_and_proceed
 
             recovery_code
           end

@@ -7,14 +7,14 @@ module Clusters
 
       MissingRoleError = Class.new(StandardError)
 
-      def initialize(provision_role, provider: nil, region: nil)
+      def initialize(provision_role, provider: nil)
         @provision_role = provision_role
         @provider = provider
-        @region = provider&.region || region
+        @region = provider&.region || provision_role&.region || Clusters::Providers::Aws::DEFAULT_REGION
       end
 
       def execute
-        raise MissingRoleError.new('AWS provisioning role not configured') unless provision_role.present?
+        raise MissingRoleError, 'AWS provisioning role not configured' unless provision_role.present?
 
         ::Aws::AssumeRoleCredentials.new(
           client: client,
@@ -30,10 +30,17 @@ module Clusters
       attr_reader :provider, :region
 
       def client
-        ::Aws::STS::Client.new(credentials: gitlab_credentials, region: region)
+        ::Aws::STS::Client.new(**client_args)
+      end
+
+      def client_args
+        { region: region, credentials: gitlab_credentials }.compact
       end
 
       def gitlab_credentials
+        # These are not needed for IAM instance profiles
+        return unless access_key_id.present? && secret_access_key.present?
+
         ::Aws::Credentials.new(access_key_id, secret_access_key)
       end
 
@@ -47,7 +54,7 @@ module Clusters
 
       ##
       # If we haven't created a provider record yet,
-      # we restrict ourselves to read only access so
+      # we restrict ourselves to read-only access so
       # that we can safely expose credentials to the
       # frontend (to be used when populating the
       # creation form).

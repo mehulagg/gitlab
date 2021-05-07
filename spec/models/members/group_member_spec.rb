@@ -66,6 +66,12 @@ RSpec.describe GroupMember do
 
   it_behaves_like 'members notifications', :group
 
+  describe '#namespace_id' do
+    subject { build(:group_member, source_id: 1).namespace_id }
+
+    it { is_expected.to eq 1 }
+  end
+
   describe '#real_source_type' do
     subject { create(:group_member).real_source_type }
 
@@ -79,11 +85,11 @@ RSpec.describe GroupMember do
 
       expect(user).to receive(:update_two_factor_requirement)
 
-      group_member.save
+      group_member.save!
 
       expect(user).to receive(:update_two_factor_requirement)
 
-      group_member.destroy
+      group_member.destroy!
     end
   end
 
@@ -121,6 +127,18 @@ RSpec.describe GroupMember do
           let(:entity) { create(:group, parent: parent_entity) }
         end
       end
+    end
+  end
+
+  context 'when group member expiration date is updated' do
+    let_it_be(:group_member) { create(:group_member) }
+
+    it 'emails the user that their group membership expiry has changed' do
+      expect_next_instance_of(NotificationService) do |notification|
+        allow(notification).to receive(:updated_group_member_expiration).with(group_member)
+      end
+
+      group_member.update!(expires_at: 5.days.from_now)
     end
   end
 end

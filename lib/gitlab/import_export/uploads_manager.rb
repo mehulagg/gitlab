@@ -17,7 +17,7 @@ module Gitlab
         copy_project_uploads
 
         true
-      rescue => e
+      rescue StandardError => e
         @shared.error(e)
         false
       end
@@ -30,7 +30,7 @@ module Gitlab
         end
 
         true
-      rescue => e
+      rescue StandardError => e
         @shared.error(e)
         false
       end
@@ -76,7 +76,7 @@ module Gitlab
       def project_uploads_except_avatar(avatar_path)
         return @project.uploads unless avatar_path
 
-        @project.uploads.where("path != ?", avatar_path)
+        @project.uploads.where.not(path: avatar_path)
       end
 
       def download_and_copy(upload)
@@ -86,6 +86,10 @@ module Gitlab
         mkdir_p(File.join(uploads_export_path, secret))
 
         download_or_copy_upload(upload, upload_path)
+      rescue Errno::ENAMETOOLONG => e
+        # Do not fail entire project export if downloaded file has filename that exceeds 255 characters.
+        # Ignore raised exception, skip such upload, log the error and keep going with the export instead.
+        Gitlab::ErrorTracking.log_exception(e, project_id: @project.id)
       end
     end
   end

@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
-  let(:current_node) { create(:geo_node) }
+  let_it_be(:current_node) { create(:geo_node) }
+
   let(:geo_node_status) do
     build(:geo_node_status, :replicated_and_verified, geo_node: current_node)
   end
@@ -15,41 +16,97 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
       allow(Gitlab.config.geo.registry_replication).to receive(:enabled).and_return(true)
     end
 
-    it 'prints messages for all verification checks' do
-      checks = [
-        /Repositories: /,
-        /Verified Repositories: /,
-        /Wikis: /,
-        /Verified Wikis: /,
-        /LFS Objects: /,
-        /Attachments: /,
-        /CI job artifacts: /,
-        /Container repositories: /,
-        /Design repositories: /,
-        /Repositories Checked: /
-      ] + Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Checked:/ } +
-          Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+    context 'with legacy replication' do
+      before do
+        stub_feature_flags(geo_lfs_object_replication: false)
+      end
 
-      checks.each do |text|
-        expect { subject.print_replication_verification_status }.to output(text).to_stdout
+      it 'prints messages for all legacy replication and verification checks' do
+        checks = [
+          /Repositories: /,
+          /Verified Repositories: /,
+          /Wikis: /,
+          /Verified Wikis: /,
+          /LFS Objects: /,
+          /Attachments: /,
+          /CI job artifacts: /,
+          /Container repositories: /,
+          /Design repositories: /
+        ]
+
+        checks.each do |text|
+          expect { subject.print_replication_verification_status }.to output(text).to_stdout
+        end
+      end
+    end
+
+    context 'replicators' do
+      context 'replication' do
+        let(:replicators) { Gitlab::Geo.enabled_replicator_classes }
+        let(:checks) do
+          replicators.map { |k| /#{k.replicable_title_plural}:/ }
+        end
+
+        it 'prints messages for replication' do
+          checks.each do |text|
+            expect { subject.print_replication_verification_status }.to output(text).to_stdout
+          end
+        end
+      end
+
+      context 'verification' do
+        let(:replicators) { Gitlab::Geo.verification_enabled_replicator_classes }
+        let(:checks) do
+          replicators.map { |k| /#{k.replicable_title_plural} Verified:/ }
+        end
+
+        context 'when verification is enabled' do
+          it 'prints messages for verification checks' do
+            checks.each do |text|
+              expect { subject.print_replication_verification_status }.to output(text).to_stdout
+            end
+          end
+        end
+
+        context 'when verification is disabled' do
+          it 'does not print messages for verification checks' do
+            replicators.each do |replicator|
+              allow(replicator).to receive(:verification_enabled?).and_return(false)
+            end
+
+            checks.each do |text|
+              expect { subject.print_replication_verification_status }.not_to output(text).to_stdout
+            end
+          end
+        end
       end
     end
 
     context 'when replication is up-to-date' do
-      it 'returns true' do
+      before do
+        allow(Gitlab::CurrentSettings).to receive(:repository_checks_enabled).and_return(true)
+      end
+
+      it 'returns true when all replicables have data to sync' do
+        expect(subject.replication_verification_complete?).to be_truthy
+      end
+
+      it 'returns true when some replicables does not have data to sync' do
+        geo_node_status.update!(
+          container_repositories_count: 0,
+          lfs_objects_count: 0,
+          package_files_count: 0,
+          repositories_count: 0,
+          wikis_count: 0
+        )
+
         expect(subject.replication_verification_complete?).to be_truthy
       end
     end
 
     context 'when replication is not up-to-date' do
-      it 'returns false when repositories_checked_failed_count is positive' do
-        allow(geo_node_status).to receive(:repositories_checked_failed_count).and_return(1)
-
-        expect(subject.replication_verification_complete?).to be_falsy
-      end
-
-      it 'returns false when there are package files failed to sync' do
-        allow(::Geo::PackageFileReplicator).to receive(:failed_count).and_return(1)
+      it 'returns false when not all replicables were synced' do
+        geo_node_status.update!(repositories_synced_count: 5)
 
         expect(subject.replication_verification_complete?).to be_falsy
       end

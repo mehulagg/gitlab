@@ -93,6 +93,9 @@
 
 .tab-content {
   overflow: visible;
+  @include media-breakpoint-down(sm) {
+    isolation: isolate;
+  }
 }
 
 pre {
@@ -110,7 +113,7 @@ pre {
 }
 
 hr {
-  margin: 24px 0;
+  margin: 1.5rem 0;
   border-top: 1px solid $gray-darker;
 }
 
@@ -119,10 +122,6 @@ hr {
 
   &-30 {
     @include str-truncated(30%);
-  }
-
-  &-60 {
-    @include str-truncated(60%);
   }
 
   &-100 {
@@ -135,7 +134,6 @@ hr {
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  > div:not(.block):not(.select2-display-none),
   .str-truncated {
     display: inline;
   }
@@ -293,11 +291,6 @@ img.emoji {
   }
 }
 
-.search_box {
-  @extend .card.card-body;
-  text-align: center;
-}
-
 .dropzone .dz-preview .dz-progress {
   border-color: $border-color !important;
 
@@ -389,11 +382,7 @@ img.emoji {
   🚨 Do not use these classes — they are deprecated and being removed. 🚨
   See https://gitlab.com/gitlab-org/gitlab/-/issues/217418 for more details.
 **/
-.prepend-top-15 { margin-top: 15px; }
 .prepend-top-20 { margin-top: 20px; }
-.prepend-left-15 { margin-left: 15px; }
-.prepend-left-20 { margin-left: 20px; }
-.append-right-20 { margin-right: 20px; }
 .append-bottom-20 { margin-bottom: 20px; }
 .ml-10 { margin-left: 4.5rem; }
 .inline { display: inline-block; }
@@ -431,7 +420,6 @@ img.emoji {
 .mw-460 { max-width: 460px; }
 .mw-6em { max-width: 6em; }
 .mw-70p { max-width: 70%; }
-.mw-90p { max-width: 90%; }
 
 // By default flex items don't shrink below their minimum content size.
 // To change this, these clases set a min-width or min-height

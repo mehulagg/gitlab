@@ -4,6 +4,8 @@ module API
   class SystemHooks < ::API::Base
     include PaginationParams
 
+    feature_category :integrations
+
     before do
       authenticate!
       authenticated_as_admin!
@@ -45,7 +47,7 @@ module API
       params do
         requires :id, type: Integer, desc: 'The ID of the system hook'
       end
-      get ":id" do
+      post ":id" do
         hook = SystemHook.find(params[:id])
         data = {
           event_name: "project_create",

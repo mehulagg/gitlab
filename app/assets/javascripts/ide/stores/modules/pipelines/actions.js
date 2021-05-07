@@ -1,10 +1,10 @@
-import Visibility from 'visibilityjs';
 import axios from 'axios';
+import Visibility from 'visibilityjs';
 import httpStatus from '../../../../lib/utils/http_status';
-import { __ } from '../../../../locale';
 import Poll from '../../../../lib/utils/poll';
-import service from '../../../services';
+import { __ } from '../../../../locale';
 import { rightSidebarViews } from '../../../constants';
+import service from '../../../services';
 import * as types from './mutation_types';
 
 let eTagPoll;
@@ -47,7 +47,7 @@ export const receiveLatestPipelineSuccess = ({ rootGetters, commit }, { pipeline
 
   if (pipelines && pipelines.length) {
     const lastCommitHash = rootGetters.lastCommit && rootGetters.lastCommit.id;
-    lastCommitPipeline = pipelines.find(pipeline => pipeline.commit.id === lastCommitHash);
+    lastCommitPipeline = pipelines.find((pipeline) => pipeline.commit.id === lastCommitHash);
   }
 
   commit(types.RECEIVE_LASTEST_PIPELINE_SUCCESS, lastCommitPipeline);
@@ -63,7 +63,7 @@ export const fetchLatestPipeline = ({ dispatch, rootGetters }) => {
     method: 'lastCommitPipelines',
     data: { getters: rootGetters },
     successCallback: ({ data }) => dispatch('receiveLatestPipelineSuccess', data),
-    errorCallback: err => dispatch('receiveLatestPipelineError', err),
+    errorCallback: (err) => dispatch('receiveLatestPipelineError', err),
   });
 
   if (!Visibility.hidden()) {
@@ -85,7 +85,7 @@ export const receiveJobsError = ({ commit, dispatch }, stage) => {
     'setErrorMessage',
     {
       text: __('An error occurred while loading the pipelines jobs.'),
-      action: payload =>
+      action: (payload) =>
         dispatch('fetchJobs', payload).then(() =>
           dispatch('setErrorMessage', null, { root: true }),
         ),

@@ -7,25 +7,25 @@ module Resolvers
 
     argument :ids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'Array of global milestone IDs, e.g., "gid://gitlab/Milestone/1"'
+             description: 'Array of global milestone IDs, e.g., `"gid://gitlab/Milestone/1"`.'
 
     argument :state, Types::MilestoneStateEnum,
              required: false,
-             description: 'Filter milestones by state'
+             description: 'Filter milestones by state.'
 
     argument :title, GraphQL::STRING_TYPE,
              required: false,
-             description: 'The title of the milestone'
+             description: 'The title of the milestone.'
 
     argument :search_title, GraphQL::STRING_TYPE,
              required: false,
-             description: 'A search string for the title'
+             description: 'A search string for the title.'
 
     argument :containing_date, Types::TimeType,
              required: false,
-             description: 'A date that the milestone contains'
+             description: 'A date that the milestone contains.'
 
-    type Types::MilestoneType, null: true
+    type Types::MilestoneType.connection_type, null: true
 
     def resolve(**args)
       validate_timeframe_params!(args)
@@ -56,7 +56,7 @@ module Resolvers
     end
 
     def parent
-      synchronized_object
+      object
     end
 
     def parent_id_parameters(args)

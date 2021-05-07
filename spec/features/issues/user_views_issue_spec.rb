@@ -22,10 +22,12 @@ RSpec.describe "User views issue" do
 
   it_behaves_like 'page meta description', ' Description header Lorem ipsum dolor sit amet'
 
-  it 'shows the merge request and issue actions', :aggregate_failures do
-    expect(page).to have_link('New issue')
+  it 'shows the merge request and issue actions', :js, :aggregate_failures do
+    click_button 'Issue actions'
+
+    expect(page).to have_link('New issue', href: new_project_issue_path(project))
     expect(page).to have_button('Create merge request')
-    expect(page).to have_link('Close issue')
+    expect(page).to have_button('Close issue')
   end
 
   context 'when the project is archived' do

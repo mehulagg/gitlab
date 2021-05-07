@@ -99,31 +99,18 @@ RSpec.describe Issues::UpdateService, :mailer do
       context 'when issue type is incident' do
         let(:issue) { create(:incident, project: project) }
 
-        it 'changes updates the severity' do
+        before do
           update_issue(opts)
+        end
 
+        it_behaves_like 'incident issue'
+
+        it 'changes updates the severity' do
           expect(issue.severity).to eq('low')
         end
 
-        it_behaves_like 'incident issue' do
-          before do
-            update_issue(opts)
-          end
-        end
-
-        context 'with existing incident label' do
-          let_it_be(:incident_label) { create(:label, :incident, project: project) }
-
-          before do
-            opts.delete(:label_ids) # don't override but retain existing labels
-            issue.labels << incident_label
-          end
-
-          it_behaves_like 'incident issue' do
-            before do
-              update_issue(opts)
-            end
-          end
+        it 'does not apply incident labels' do
+          expect(issue.labels).to match_array [label]
         end
       end
 
@@ -155,7 +142,6 @@ RSpec.describe Issues::UpdateService, :mailer do
 
       context 'issue in incident type' do
         let(:current_user) { user }
-        let(:incident_label_attributes) { attributes_for(:label, :incident) }
 
         before do
           opts.merge!(issue_type: 'incident', confidential: true)
@@ -168,21 +154,6 @@ RSpec.describe Issues::UpdateService, :mailer do
         it_behaves_like 'incident issue' do
           before do
             subject
-          end
-        end
-
-        it 'does create an incident label' do
-          expect { subject }
-            .to change { Label.where(incident_label_attributes).count }.by(1)
-        end
-
-        context 'when invalid' do
-          before do
-            opts.merge!(title: '')
-          end
-
-          it 'does not create an incident label prematurely' do
-            expect { subject }.not_to change(Label, :count)
           end
         end
       end
@@ -311,7 +282,14 @@ RSpec.describe Issues::UpdateService, :mailer do
         end
 
         it 'filters out params that cannot be set without the :admin_issue permission' do
-          described_class.new(project, guest, opts.merge(confidential: true)).execute(issue)
+          described_class.new(
+            project,
+            guest,
+            opts.merge(
+              confidential: true,
+              issue_type: 'test_case'
+            )
+          ).execute(issue)
 
           expect(issue).to be_valid
           expect(issue.title).to eq 'New title'
@@ -322,6 +300,7 @@ RSpec.describe Issues::UpdateService, :mailer do
           expect(issue.due_date).to be_nil
           expect(issue.discussion_locked).to be_falsey
           expect(issue.confidential).to be_falsey
+          expect(issue.issue_type).to eql('issue')
         end
       end
 
@@ -740,7 +719,7 @@ RSpec.describe Issues::UpdateService, :mailer do
           }
           service = described_class.new(project, user, params)
 
-          expect(service).not_to receive(:spam_check)
+          expect(Spam::SpamActionService).not_to receive(:new)
 
           service.execute(issue)
         end
@@ -968,6 +947,46 @@ RSpec.describe Issues::UpdateService, :mailer do
       end
     end
 
+    context 'clone an issue' do
+      context 'valid project' do
+        let(:target_project) { create(:project) }
+
+        before do
+          target_project.add_maintainer(user)
+        end
+
+        it 'calls the move service with the proper issue and project' do
+          clone_stub = instance_double(Issues::CloneService)
+          allow(Issues::CloneService).to receive(:new).and_return(clone_stub)
+          allow(clone_stub).to receive(:execute).with(issue, target_project, with_notes: nil).and_return(issue)
+
+          expect(clone_stub).to receive(:execute).with(issue, target_project, with_notes: nil)
+
+          update_issue(target_clone_project: target_project)
+        end
+      end
+    end
+
+    context 'clone an issue with notes' do
+      context 'valid project' do
+        let(:target_project) { create(:project) }
+
+        before do
+          target_project.add_maintainer(user)
+        end
+
+        it 'calls the move service with the proper issue and project' do
+          clone_stub = instance_double(Issues::CloneService)
+          allow(Issues::CloneService).to receive(:new).and_return(clone_stub)
+          allow(clone_stub).to receive(:execute).with(issue, target_project, with_notes: true).and_return(issue)
+
+          expect(clone_stub).to receive(:execute).with(issue, target_project, with_notes: true)
+
+          update_issue(target_clone_project: target_project, clone_with_notes: true)
+        end
+      end
+    end
+
     context 'when moving an issue ' do
       it 'raises an error for invalid move ids within a project' do
         opts = { move_between_ids: [9000, non_existing_record_id] }
@@ -1003,13 +1022,15 @@ RSpec.describe Issues::UpdateService, :mailer do
 
       with_them do
         it 'broadcasts to the issues channel based on ActionCable and feature flag values' do
-          expect(Gitlab::ActionCable::Config).to receive(:in_app?).and_return(action_cable_in_app_enabled)
+          allow(Gitlab::ActionCable::Config).to receive(:in_app?).and_return(action_cable_in_app_enabled)
           stub_feature_flags(broadcast_issue_updates: feature_flag_enabled)
 
           if should_broadcast
             expect(IssuesChannel).to receive(:broadcast_to).with(issue, event: 'updated')
+            expect(GraphqlTriggers).to receive(:issuable_assignees_updated).with(issue)
           else
             expect(IssuesChannel).not_to receive(:broadcast_to)
+            expect(GraphqlTriggers).not_to receive(:issuable_assignees_updated).with(issue)
           end
 
           update_issue(update_params)

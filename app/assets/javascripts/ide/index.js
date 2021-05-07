@@ -1,15 +1,20 @@
+import { identity } from 'lodash';
 import Vue from 'vue';
 import { mapActions } from 'vuex';
-import { identity } from 'lodash';
+import PerformancePlugin from '~/performance/vue_performance_plugin';
 import Translate from '~/vue_shared/translate';
-import ide from './components/ide.vue';
-import { createStore } from './stores';
-import { createRouter } from './ide_router';
 import { parseBoolean } from '../lib/utils/common_utils';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
+import ide from './components/ide.vue';
+import { createRouter } from './ide_router';
 import { DEFAULT_THEME } from './lib/themes';
+import { createStore } from './stores';
 
 Vue.use(Translate);
+
+Vue.use(PerformancePlugin, {
+  components: ['FileTree'],
+});
 
 /**
  * Function that receives the default store and returns an extended one.
@@ -48,8 +53,8 @@ export function initIde(el, options = {}) {
         promotionSvgPath: el.dataset.promotionSvgPath,
       });
       this.setLinks({
-        ciHelpPagePath: el.dataset.ciHelpPagePath,
         webIDEHelpPagePath: el.dataset.webIdeHelpPagePath,
+        forkInfo: el.dataset.forkInfo ? JSON.parse(el.dataset.forkInfo) : null,
       });
       this.setInitialData({
         clientsidePreviewEnabled: parseBoolean(el.dataset.clientsidePreviewEnabled),
@@ -57,6 +62,10 @@ export function initIde(el, options = {}) {
         editorTheme: window.gon?.user_color_scheme || DEFAULT_THEME,
         codesandboxBundlerUrl: el.dataset.codesandboxBundlerUrl,
       });
+    },
+    beforeDestroy() {
+      // This helps tests do Singleton cleanups which we don't really have responsibility to know about here.
+      this.$emit('destroy');
     },
     methods: {
       ...mapActions(['setEmptyStateSvgs', 'setLinks', 'setInitialData']),

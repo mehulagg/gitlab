@@ -52,6 +52,14 @@ RSpec.describe MergeRequests::CreateFromIssueService do
         service.execute
       end
 
+      it 'tracks the mr creation when the mr is valid' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .to receive(:track_mr_create_from_issue)
+          .with(user: user)
+
+        service.execute
+      end
+
       it 'creates the new_issue_branch system note when the branch could be created but the merge_request cannot be created', :sidekiq_might_not_need_inline do
         expect_next_instance_of(MergeRequest) do |instance|
           expect(instance).to receive(:valid?).at_least(:once).and_return(false)
@@ -62,14 +70,26 @@ RSpec.describe MergeRequests::CreateFromIssueService do
         service.execute
       end
 
+      it 'does not track the mr creation when the Mr is invalid' do
+        expect_next_instance_of(MergeRequest) do |instance|
+          expect(instance).to receive(:valid?).at_least(:once).and_return(false)
+        end
+
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+          .not_to receive(:track_mr_create_from_issue)
+
+        service.execute
+      end
+
       it 'creates a merge request', :sidekiq_might_not_need_inline do
         expect { service.execute }.to change(target_project.merge_requests, :count).by(1)
       end
 
-      it 'sets the merge request author to current user', :sidekiq_might_not_need_inline do
+      it 'sets the merge request author to current user and assigns them', :sidekiq_might_not_need_inline do
         result = service.execute
 
         expect(result[:merge_request].author).to eq(user)
+        expect(result[:merge_request].assignees).to eq([user])
       end
 
       it 'sets the merge request source branch to the new issue branch', :sidekiq_might_not_need_inline do

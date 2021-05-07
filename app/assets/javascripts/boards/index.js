@@ -1,63 +1,70 @@
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import Vue from 'vue';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import VueApollo from 'vue-apollo';
+import { mapActions, mapGetters } from 'vuex';
 
 import 'ee_else_ce/boards/models/issue';
 import 'ee_else_ce/boards/models/list';
 import BoardSidebar from 'ee_else_ce/boards/components/board_sidebar';
 import initNewListDropdown from 'ee_else_ce/boards/components/new_list_dropdown';
-import boardConfigToggle from 'ee_else_ce/boards/config_toggle';
-import toggleLabels from 'ee_else_ce/boards/toggle_labels';
-import toggleEpicsSwimlanes from 'ee_else_ce/boards/toggle_epics_swimlanes';
 import {
-  setPromotionState,
   setWeightFetchingState,
   setEpicFetchingState,
   getMilestoneTitle,
-  getBoardsModalData,
 } from 'ee_else_ce/boards/ee_functions';
-
-import VueApollo from 'vue-apollo';
+import toggleEpicsSwimlanes from 'ee_else_ce/boards/toggle_epics_swimlanes';
+import toggleLabels from 'ee_else_ce/boards/toggle_labels';
+import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import BoardContent from '~/boards/components/board_content.vue';
-import BoardExtraActions from '~/boards/components/board_extra_actions.vue';
-import createDefaultClient from '~/lib/graphql';
-import { deprecatedCreateFlash as Flash } from '~/flash';
-import { __ } from '~/locale';
 import './models/label';
 import './models/assignee';
-
-import toggleFocusMode from '~/boards/toggle_focus';
-import FilteredSearchBoards from '~/boards/filtered_search_boards';
-import eventHub from '~/boards/eventhub';
-import sidebarEventHub from '~/sidebar/event_hub';
 import '~/boards/models/milestone';
 import '~/boards/models/project';
+import '~/boards/filters/due_date_filters';
+import { issuableTypes } from '~/boards/constants';
+import eventHub from '~/boards/eventhub';
+import FilteredSearchBoards from '~/boards/filtered_search_boards';
 import store from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
-import ModalStore from '~/boards/stores/modal_store';
-import modalMixin from '~/boards/mixins/modal_mixins';
-import '~/boards/filters/due_date_filters';
-import BoardAddIssuesModal from '~/boards/components/modal/index.vue';
+import toggleFocusMode from '~/boards/toggle_focus';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import createDefaultClient from '~/lib/graphql';
 import {
   NavigationType,
   convertObjectPropsToCamelCase,
   parseBoolean,
-  urlParamsToObject,
 } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
+import sidebarEventHub from '~/sidebar/event_hub';
+import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
+import { fullBoardId } from './boards_util';
+import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData,
+});
+
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      cacheConfig: {
+        fragmentMatcher,
+      },
+      assumeImmutableResults: true,
+    },
+  ),
 });
 
 let issueBoardsApp;
 
 export default () => {
   const $boardApp = document.getElementById('board-app');
-
   // check for browser back and trigger a hard reload to circumvent browser caching.
-  window.addEventListener('pageshow', event => {
+  window.addEventListener('pageshow', (event) => {
     const isNavTypeBackForward =
       window.performance && window.performance.navigation.type === NavigationType.TYPE_BACK_FORWARD;
 
@@ -70,26 +77,42 @@ export default () => {
     issueBoardsApp.$destroy(true);
   }
 
-  boardsStore.create();
-  boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
+  if (!gon?.features?.graphqlBoardLists) {
+    boardsStore.create();
+    boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
+  }
 
+  // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({
     el: $boardApp,
     components: {
       BoardContent,
-      Board: () => import('ee_else_ce/boards/components/board_column.vue'),
       BoardSidebar,
-      BoardAddIssuesModal,
       BoardSettingsSidebar: () => import('~/boards/components/board_settings_sidebar.vue'),
     },
     provide: {
       boardId: $boardApp.dataset.boardId,
       groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
-      canUpdate: $boardApp.dataset.canUpdate,
+      currentUserId: gon.current_user_id || null,
+      canUpdate: parseBoolean($boardApp.dataset.canUpdate),
+      canAdminList: parseBoolean($boardApp.dataset.canAdminList),
       labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
+      timeTrackingLimitToHours: parseBoolean($boardApp.dataset.timeTrackingLimitToHours),
+      epicFeatureAvailable: parseBoolean($boardApp.dataset.epicFeatureAvailable),
+      iterationFeatureAvailable: parseBoolean($boardApp.dataset.iterationFeatureAvailable),
+      weightFeatureAvailable: parseBoolean($boardApp.dataset.weightFeatureAvailable),
+      boardWeight: $boardApp.dataset.boardWeight
+        ? parseInt($boardApp.dataset.boardWeight, 10)
+        : null,
+      scopedLabelsAvailable: parseBoolean($boardApp.dataset.scopedLabels),
+      milestoneListsAvailable: parseBoolean($boardApp.dataset.milestoneListsAvailable),
+      assigneeListsAvailable: parseBoolean($boardApp.dataset.assigneeListsAvailable),
+      iterationListsAvailable: parseBoolean($boardApp.dataset.iterationListsAvailable),
+      issuableType: issuableTypes.issue,
+      emailsDisabled: parseBoolean($boardApp.dataset.emailsDisabled),
     },
     store,
     apolloProvider,
@@ -107,35 +130,47 @@ export default () => {
       };
     },
     computed: {
-      ...mapState(['isShowingEpicsSwimlanes']),
       ...mapGetters(['shouldUseGraphQL']),
       detailIssueVisible() {
         return Object.keys(this.detailIssue.issue).length;
       },
     },
     created() {
-      const endpoints = {
+      this.setInitialBoardData({
+        boardId: $boardApp.dataset.boardId,
+        fullBoardId: fullBoardId($boardApp.dataset.boardId),
+        fullPath: $boardApp.dataset.fullPath,
+        boardType: this.parent,
+        disabled: this.disabled,
+        issuableType: issuableTypes.issue,
+        boardConfig: {
+          milestoneId: parseInt($boardApp.dataset.boardMilestoneId, 10),
+          milestoneTitle: $boardApp.dataset.boardMilestoneTitle || '',
+          iterationId: parseInt($boardApp.dataset.boardIterationId, 10),
+          iterationTitle: $boardApp.dataset.boardIterationTitle || '',
+          assigneeId: $boardApp.dataset.boardAssigneeId,
+          assigneeUsername: $boardApp.dataset.boardAssigneeUsername,
+          labels: $boardApp.dataset.labels ? JSON.parse($boardApp.dataset.labels) : [],
+          labelIds: $boardApp.dataset.labelIds ? JSON.parse($boardApp.dataset.labelIds) : [],
+          weight: $boardApp.dataset.boardWeight
+            ? parseInt($boardApp.dataset.boardWeight, 10)
+            : null,
+        },
+      });
+      boardsStore.setEndpoints({
         boardsEndpoint: this.boardsEndpoint,
         recentBoardsEndpoint: this.recentBoardsEndpoint,
         listsEndpoint: this.listsEndpoint,
         bulkUpdatePath: this.bulkUpdatePath,
         boardId: $boardApp.dataset.boardId,
         fullPath: $boardApp.dataset.fullPath,
-      };
-      this.setInitialBoardData({
-        ...endpoints,
-        boardType: this.parent,
-        disabled: this.disabled,
-        showPromotion: parseBoolean($boardApp.getAttribute('data-show-promotion')),
       });
-      boardsStore.setEndpoints(endpoints);
       boardsStore.rootPath = this.boardsEndpoint;
 
       eventHub.$on('updateTokens', this.updateTokens);
       eventHub.$on('newDetailIssue', this.updateDetailIssue);
       eventHub.$on('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$on('toggleSubscription', this.toggleSubscription);
-      eventHub.$on('performSearch', this.performSearch);
       eventHub.$on('initialBoardLoad', this.initialBoardLoad);
     },
     beforeDestroy() {
@@ -143,11 +178,11 @@ export default () => {
       eventHub.$off('newDetailIssue', this.updateDetailIssue);
       eventHub.$off('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$off('toggleSubscription', this.toggleSubscription);
-      eventHub.$off('performSearch', this.performSearch);
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
       this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
+
       this.filterManager.setup();
 
       this.performSearch();
@@ -159,22 +194,13 @@ export default () => {
       }
     },
     methods: {
-      ...mapActions([
-        'setInitialBoardData',
-        'setFilters',
-        'fetchEpicsSwimlanes',
-        'resetIssues',
-        'resetEpics',
-        'fetchLists',
-      ]),
+      ...mapActions(['setInitialBoardData', 'performSearch']),
       initialBoardLoad() {
         boardsStore
           .all()
-          .then(res => res.data)
-          .then(lists => {
-            lists.forEach(list => boardsStore.addList(list));
-            boardsStore.addBlankState();
-            setPromotionState(boardsStore);
+          .then((res) => res.data)
+          .then((lists) => {
+            lists.forEach((list) => boardsStore.addList(list));
             this.loading = false;
           })
           .catch(() => {
@@ -184,17 +210,6 @@ export default () => {
       updateTokens() {
         this.filterManager.updateTokens();
       },
-      performSearch() {
-        this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
-        if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
-          this.resetEpics();
-          this.resetIssues();
-          this.fetchEpicsSwimlanes({});
-        } else if (gon.features.graphqlBoardLists && !this.isShowingEpicsSwimlanes) {
-          this.fetchLists();
-          this.resetIssues();
-        }
-      },
       updateDetailIssue(newIssue, multiSelect = false) {
         const { sidebarInfoEndpoint } = newIssue;
         if (sidebarInfoEndpoint && newIssue.subscribed === undefined) {
@@ -203,8 +218,8 @@ export default () => {
           setEpicFetchingState(newIssue, true);
           boardsStore
             .getIssueInfo(sidebarInfoEndpoint)
-            .then(res => res.data)
-            .then(data => {
+            .then((res) => res.data)
+            .then((data) => {
               const {
                 subscribed,
                 totalTimeSpent,
@@ -280,7 +295,7 @@ export default () => {
     },
   });
 
-  // eslint-disable-next-line no-new
+  // eslint-disable-next-line no-new, @gitlab/no-runtime-template-compiler
   new Vue({
     el: document.getElementById('js-add-list'),
     data: {
@@ -292,56 +307,33 @@ export default () => {
     },
   });
 
-  boardConfigToggle(boardsStore);
-
-  const issueBoardsModal = document.getElementById('js-add-issues-btn');
-
-  if (issueBoardsModal) {
+  const createColumnTriggerEl = document.querySelector('.js-create-column-trigger');
+  if (createColumnTriggerEl) {
     // eslint-disable-next-line no-new
     new Vue({
-      el: issueBoardsModal,
-      mixins: [modalMixin],
-      data() {
-        return {
-          modal: ModalStore.store,
-          store: boardsStore.state,
-          ...getBoardsModalData(),
-          canAdminList: this.$options.el.hasAttribute('data-can-admin-list'),
-        };
+      el: createColumnTriggerEl,
+      components: {
+        BoardAddNewColumnTrigger,
       },
-      computed: {
-        disabled() {
-          if (!this.store) {
-            return true;
-          }
-          return !this.store.lists.filter(list => !list.preset).length;
-        },
-      },
-      methods: {
-        openModal() {
-          if (!this.disabled) {
-            this.toggleModal(true);
-          }
-        },
-      },
+      store,
       render(createElement) {
-        return createElement(BoardExtraActions, {
-          props: {
-            canAdminList: this.$options.el.hasAttribute('data-can-admin-list'),
-            openModal: this.openModal,
-            disabled: this.disabled,
-          },
-        });
+        return createElement('board-add-new-column-trigger');
       },
     });
   }
 
-  toggleFocusMode(ModalStore, boardsStore);
+  boardConfigToggle(boardsStore);
+
+  toggleFocusMode();
   toggleLabels();
 
-  if (gon.features?.swimlanes) {
+  if (gon.licensed_features?.swimlanes) {
     toggleEpicsSwimlanes();
   }
 
-  mountMultipleBoardsSwitcher();
+  mountMultipleBoardsSwitcher({
+    fullPath: $boardApp.dataset.fullPath,
+    rootPath: $boardApp.dataset.boardsEndpoint,
+    recentBoardsEndpoint: $boardApp.dataset.recentBoardsEndpoint,
+  });
 };

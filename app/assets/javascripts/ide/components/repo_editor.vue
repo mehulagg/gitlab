@@ -1,32 +1,43 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
+import {
+  EDITOR_TYPE_DIFF,
+  EDITOR_CODE_INSTANCE_FN,
+  EDITOR_DIFF_INSTANCE_FN,
+} from '~/editor/constants';
+import EditorLite from '~/editor/editor_lite';
+import { EditorWebIdeExtension } from '~/editor/extensions/editor_lite_webide_ext';
 import { deprecatedCreateFlash as flash } from '~/flash';
-import ContentViewer from '~/vue_shared/components/content_viewer/content_viewer.vue';
-import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
+import ModelManager from '~/ide/lib/common/model_manager';
+import { defaultDiffEditorOptions, defaultEditorOptions } from '~/ide/lib/editor_options';
+import { __ } from '~/locale';
 import {
   WEBIDE_MARK_FILE_CLICKED,
-  WEBIDE_MARK_FILE_START,
+  WEBIDE_MARK_REPO_EDITOR_START,
+  WEBIDE_MARK_REPO_EDITOR_FINISH,
+  WEBIDE_MEASURE_REPO_EDITOR,
   WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
-  WEBIDE_MEASURE_FILE_FROM_REQUEST,
-} from '~/performance_constants';
-import { performanceMarkAndMeasure } from '~/performance_utils';
-import eventHub from '../eventhub';
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
+import ContentViewer from '~/vue_shared/components/content_viewer/content_viewer.vue';
+import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
+import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
 import {
   leftSidebarViews,
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
   FILE_VIEW_MODE_PREVIEW,
 } from '../constants';
-import Editor from '../lib/editor';
-import FileTemplatesBar from './file_templates/bar.vue';
-import { __ } from '~/locale';
-import { extractMarkdownImagesFromEntries } from '../stores/utils';
-import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
+import eventHub from '../eventhub';
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
+import { getFileEditorOrDefault } from '../stores/modules/editor/utils';
+import { extractMarkdownImagesFromEntries } from '../stores/utils';
+import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
+import FileTemplatesBar from './file_templates/bar.vue';
 
 export default {
+  name: 'RepoEditor',
   components: {
     ContentViewer,
     DiffViewer,
@@ -43,12 +54,16 @@ export default {
       content: '',
       images: {},
       rules: {},
+      globalEditor: null,
+      modelManager: new ModelManager(),
+      isEditorLoading: true,
     };
   },
   computed: {
     ...mapState('rightPane', {
       rightPaneIsOpen: 'isOpen',
     }),
+    ...mapState('editor', ['fileEditors']),
     ...mapState([
       'viewer',
       'panelResizing',
@@ -67,8 +82,14 @@ export default {
       'getJsonSchemaForPath',
     ]),
     ...mapGetters('fileTemplates', ['showFileTemplatesBar']),
+    fileEditor() {
+      return getFileEditorOrDefault(this.fileEditors, this.file.path);
+    },
+    isBinaryFile() {
+      return !isTextFile(this.file);
+    },
     shouldHideEditor() {
-      return this.file && !this.file.loading && !isTextFile(this.file);
+      return this.file && !this.file.loading && this.isBinaryFile;
     },
     showContentViewer() {
       return (
@@ -80,10 +101,10 @@ export default {
       return this.shouldHideEditor && this.file.mrChange && this.viewer === viewerTypes.mr;
     },
     isEditorViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_EDITOR;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_EDITOR;
     },
     isPreviewViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_PREVIEW;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_PREVIEW;
     },
     editTabCSS() {
       return {
@@ -122,11 +143,11 @@ export default {
 
       // Compare key to allow for files opened in review mode to be cached differently
       if (oldVal.key !== this.file.key) {
+        this.isEditorLoading = true;
         this.initEditor();
 
         if (this.currentActivityView !== leftSidebarViews.edit.name) {
-          this.setFileViewMode({
-            file: this.file,
+          this.updateEditor({
             viewMode: FILE_VIEW_MODE_EDITOR,
           });
         }
@@ -134,13 +155,13 @@ export default {
     },
     currentActivityView() {
       if (this.currentActivityView !== leftSidebarViews.edit.name) {
-        this.setFileViewMode({
-          file: this.file,
+        this.updateEditor({
           viewMode: FILE_VIEW_MODE_EDITOR,
         });
       }
     },
     viewer() {
+      this.isEditorLoading = false;
       if (!this.file.pending) {
         this.createEditorInstance();
       }
@@ -172,15 +193,12 @@ export default {
       }
     },
   },
-  beforeCreate() {
-    performanceMarkAndMeasure({ mark: WEBIDE_MARK_FILE_START });
-  },
   beforeDestroy() {
-    this.editor.dispose();
+    this.globalEditor.dispose();
   },
   mounted() {
-    if (!this.editor) {
-      this.editor = Editor.create(this.$store, this.editorOptions);
+    if (!this.globalEditor) {
+      this.globalEditor = new EditorLite();
     }
     this.initEditor();
 
@@ -195,19 +213,16 @@ export default {
       'getFileData',
       'getRawFileData',
       'changeFileContent',
-      'setFileLanguage',
-      'setEditorPosition',
-      'setFileViewMode',
       'removePendingTab',
       'triggerFilesChange',
       'addTempImage',
     ]),
+    ...mapActions('editor', ['updateFileEditor']),
     initEditor() {
+      performanceMarkAndMeasure({ mark: WEBIDE_MARK_REPO_EDITOR_START });
       if (this.shouldHideEditor && (this.file.content || this.file.raw)) {
         return;
       }
-
-      this.editor.clearEditor();
 
       this.registerSchemaForFile();
 
@@ -215,7 +230,7 @@ export default {
         .then(() => {
           this.createEditorInstance();
         })
-        .catch(err => {
+        .catch((err) => {
           flash(
             __('Error setting up editor. Please try again.'),
             'alert',
@@ -243,20 +258,49 @@ export default {
       );
     },
     createEditorInstance() {
-      this.editor.dispose();
+      if (this.isBinaryFile) {
+        return;
+      }
 
-      this.$nextTick(() => {
-        if (this.viewer === viewerTypes.edit) {
-          this.editor.createInstance(this.$refs.editor);
-        } else {
-          this.editor.createDiffInstance(this.$refs.editor);
-        }
+      const isDiff = this.viewer !== viewerTypes.edit;
+      const shouldDisposeEditor = isDiff !== (this.editor?.getEditorType() === EDITOR_TYPE_DIFF);
 
+      if (this.editor && !shouldDisposeEditor) {
         this.setupEditor();
-      });
+      } else {
+        if (this.editor && shouldDisposeEditor) {
+          this.editor.dispose();
+        }
+        const instanceOptions = isDiff ? defaultDiffEditorOptions : defaultEditorOptions;
+        const method = isDiff ? EDITOR_DIFF_INSTANCE_FN : EDITOR_CODE_INSTANCE_FN;
+
+        this.editor = this.globalEditor[method]({
+          el: this.$refs.editor,
+          blobPath: this.file.path,
+          blobGlobalId: this.file.key,
+          blobContent: this.content || this.file.content,
+          ...instanceOptions,
+          ...this.editorOptions,
+        });
+
+        this.editor.use(
+          new EditorWebIdeExtension({
+            instance: this.editor,
+            modelManager: this.modelManager,
+            store: this.$store,
+            file: this.file,
+            options: this.editorOptions,
+          }),
+        );
+
+        this.$nextTick(() => {
+          this.setupEditor();
+        });
+      }
     },
+
     setupEditor() {
-      if (!this.file || !this.editor.instance || this.file.loading) return;
+      if (!this.file || !this.editor || this.file.loading) return;
 
       const head = this.getStagedFile(this.file.path);
 
@@ -271,9 +315,11 @@ export default {
         this.editor.attachModel(this.model);
       }
 
+      this.isEditorLoading = false;
+
       this.model.updateOptions(this.rules);
 
-      this.model.onChange(model => {
+      this.model.onChange((model) => {
         const { file } = model;
         if (!file.active) return;
 
@@ -284,27 +330,39 @@ export default {
 
       // Handle Cursor Position
       this.editor.onPositionChange((instance, e) => {
-        this.setEditorPosition({
+        this.updateEditor({
           editorRow: e.position.lineNumber,
           editorColumn: e.position.column,
         });
       });
 
-      this.editor.setPosition({
-        lineNumber: this.file.editorRow,
-        column: this.file.editorColumn,
+      this.editor.setPos({
+        lineNumber: this.fileEditor.editorRow,
+        column: this.fileEditor.editorColumn,
       });
 
       // Handle File Language
-      this.setFileLanguage({
+      this.updateEditor({
         fileLanguage: this.model.language,
+      });
+
+      this.$nextTick(() => {
+        this.editor.updateDimensions();
       });
 
       this.$emit('editorSetup');
       if (performance.getEntriesByName(WEBIDE_MARK_FILE_CLICKED).length) {
         eventHub.$emit(WEBIDE_MEASURE_FILE_AFTER_INTERACTION);
       } else {
-        eventHub.$emit(WEBIDE_MEASURE_FILE_FROM_REQUEST);
+        performanceMarkAndMeasure({
+          mark: WEBIDE_MARK_REPO_EDITOR_FINISH,
+          measures: [
+            {
+              name: WEBIDE_MEASURE_REPO_EDITOR,
+              start: WEBIDE_MARK_REPO_EDITOR_START,
+            },
+          ],
+        });
       }
     },
     refreshEditorDimensions() {
@@ -313,7 +371,7 @@ export default {
       }
     },
     fetchEditorconfigRules() {
-      return getRulesWithTraversal(this.file.path, path => {
+      return getRulesWithTraversal(this.file.path, (path) => {
         const entry = this.entries[path];
         if (!entry) return Promise.resolve(null);
 
@@ -323,12 +381,12 @@ export default {
         return this.getFileData({ path: entry.path, makeFileActive: false }).then(() =>
           this.getRawFileData({ path: entry.path }),
         );
-      }).then(rules => {
+      }).then((rules) => {
         this.rules = mapRulesToMonaco(rules);
       });
     },
     onPaste(event) {
-      const editor = this.editor.instance;
+      const { editor } = this;
       const reImage = /^image\/(png|jpg|jpeg|gif)$/;
       const file = event.clipboardData.files[0];
 
@@ -337,7 +395,7 @@ export default {
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        return readFileAsDataURL(file).then(content => {
+        return readFileAsDataURL(file).then((content) => {
           const parentPath = getPathParent(this.file.path);
           const path = `${parentPath ? `${parentPath}/` : ''}${file.name}`;
 
@@ -354,6 +412,16 @@ export default {
       const schema = this.getJsonSchemaForPath(this.file.path);
       registerSchema(schema);
     },
+    updateEditor(data) {
+      // Looks like our model wrapper `.dispose` causes the monaco editor to emit some position changes after
+      // when disposing. We want to ignore these by only capturing editor changes that happen to the currently active
+      // file.
+      if (!this.file.active) {
+        return;
+      }
+
+      this.updateFileEditor({ path: this.file.path, data });
+    },
   },
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
@@ -369,7 +437,8 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_EDITOR })"
+            data-testid="edit-tab"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_EDITOR })"
           >
             {{ __('Edit') }}
           </a>
@@ -378,7 +447,8 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
+            data-testid="preview-tab"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
             >{{ previewMode.previewTitle }}</a
           >
         </li>
@@ -388,6 +458,7 @@ export default {
     <div
       v-show="showEditor"
       ref="editor"
+      :key="`content-editor`"
       :class="{
         'is-readonly': isCommitModeActive,
         'is-deleted': file.deleted,
@@ -395,6 +466,8 @@ export default {
       }"
       class="multi-file-editor-holder"
       data-qa-selector="editor_container"
+      data-testid="editor-container"
+      :data-editor-loading="isEditorLoading"
       @focusout="triggerFilesChange"
     ></div>
     <content-viewer

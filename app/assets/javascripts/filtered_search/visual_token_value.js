@@ -1,13 +1,13 @@
 import { escape } from 'lodash';
 import { USER_TOKEN_TYPES } from 'ee_else_ce/filtered_search/constants';
+import * as Emoji from '~/emoji';
 import FilteredSearchContainer from '~/filtered_search/container';
-import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
-import AjaxCache from '~/lib/utils/ajax_cache';
 import DropdownUtils from '~/filtered_search/dropdown_utils';
+import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import AjaxCache from '~/lib/utils/ajax_cache';
 import UsersCache from '~/lib/utils/users_cache';
 import { __ } from '~/locale';
-import * as Emoji from '~/emoji';
 
 export default class VisualTokenValue {
   constructor(tokenValue, tokenType, tokenOperator) {
@@ -40,7 +40,7 @@ export default class VisualTokenValue {
 
     return (
       UsersCache.retrieve(username)
-        .then(user => {
+        .then((user) => {
           if (!user) {
             return;
           }
@@ -68,9 +68,9 @@ export default class VisualTokenValue {
     );
 
     return AjaxCache.retrieve(labelsEndpointWithParams)
-      .then(labels => {
+      .then((labels) => {
         const matchingLabel = (labels || []).find(
-          label => `~${DropdownUtils.getEscapedText(label.title)}` === tokenValue,
+          (label) => `~${DropdownUtils.getEscapedText(label.title)}` === tokenValue,
         );
 
         if (!matchingLabel) {
@@ -96,8 +96,8 @@ export default class VisualTokenValue {
     );
 
     return AjaxCache.retrieve(epicsEndpointWithParams)
-      .then(epics => {
-        const matchingEpic = (epics || []).find(epic => epic.id === Number(tokenValue));
+      .then((epics) => {
+        const matchingEpic = (epics || []).find((epic) => epic.id === Number(tokenValue));
 
         if (!matchingEpic) {
           return;

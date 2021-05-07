@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'Group' do
-  let(:user) { create(:admin) }
+  let(:user) { create(:user) }
 
   before do
     sign_in(user)
@@ -21,8 +21,6 @@ RSpec.describe 'Group' do
     end
 
     describe 'as a non-admin' do
-      let(:user) { create(:user) }
-
       it 'creates a group and persists visibility radio selection', :js do
         stub_application_setting(default_group_visibility: :private)
 
@@ -35,6 +33,15 @@ RSpec.describe 'Group' do
         expect(group.visibility_level).to eq(Gitlab::VisibilityLevel::PUBLIC)
         expect(current_path).to eq(group_path(group))
         expect(page).to have_selector '.visibility-icon [data-testid="earth-icon"]'
+      end
+    end
+
+    describe 'with expected fields' do
+      it 'renders from as expected', :aggregate_failures do
+        expect(page).to have_field('name')
+        expect(page).to have_field('group_path')
+        expect(page).to have_field('group_visibility_level_0')
+        expect(page).not_to have_field('description')
       end
     end
 
@@ -134,23 +141,57 @@ RSpec.describe 'Group' do
         end
       end
     end
+
+    describe 'showing recaptcha on group creation when it is enabled' do
+      before do
+        stub_application_setting(recaptcha_enabled: true)
+        allow(Gitlab::Recaptcha).to receive(:load_configurations!)
+        visit new_group_path
+      end
+
+      it 'renders recaptcha' do
+        expect(page).to have_css('.recaptcha')
+      end
+    end
+
+    describe 'not showing recaptcha on group creation when it is disabled' do
+      before do
+        stub_feature_flags(recaptcha_on_top_level_group_creation: false)
+        stub_application_setting(recaptcha_enabled: true)
+        visit new_group_path
+      end
+
+      it 'does not render recaptcha' do
+        expect(page).not_to have_css('.recaptcha')
+      end
+    end
   end
 
-  describe 'create a nested group', :js do
-    let(:group) { create(:group, path: 'foo') }
+  describe 'create a nested group' do
+    let_it_be(:group) { create(:group, path: 'foo') }
 
     context 'as admin' do
+      let(:user) { create(:admin) }
+
       before do
         visit new_group_path(group, parent_id: group.id)
       end
 
-      it 'creates a nested group' do
-        fill_in 'Group name', with: 'bar'
-        fill_in 'Group URL', with: 'bar'
-        click_button 'Create group'
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'creates a nested group' do
+          fill_in 'Group name', with: 'bar'
+          fill_in 'Group URL', with: 'bar'
+          click_button 'Create group'
 
-        expect(current_path).to eq(group_path('foo/bar'))
-        expect(page).to have_content("Group 'bar' was successfully created.")
+          expect(current_path).to eq(group_path('foo/bar'))
+          expect(page).to have_content("Group 'bar' was successfully created.")
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'is not allowed' do
+          expect(page).to have_gitlab_http_status(:not_found)
+        end
       end
     end
 
@@ -172,6 +213,46 @@ RSpec.describe 'Group' do
         expect(page).to have_content("Group 'bar' was successfully created.")
       end
     end
+
+    context 'when recaptcha is enabled' do
+      before do
+        stub_application_setting(recaptcha_enabled: true)
+        allow(Gitlab::Recaptcha).to receive(:load_configurations!)
+      end
+
+      context 'when creating subgroup' do
+        let(:path) { new_group_path(group, parent_id: group.id) }
+
+        it 'does not render recaptcha' do
+          visit path
+
+          expect(page).not_to have_css('.recaptcha')
+        end
+      end
+    end
+
+    describe 'real-time group url validation', :js do
+      let_it_be(:subgroup) { create(:group, path: 'sub', parent: group) }
+
+      before do
+        group.add_owner(user)
+        visit new_group_path(parent_id: group.id)
+      end
+
+      it 'shows a message if group url is available' do
+        fill_in 'Group URL', with: group.path
+        wait_for_requests
+
+        expect(page).to have_content('Group path is available')
+      end
+
+      it 'shows an error if group url is taken' do
+        fill_in 'Group URL', with: subgroup.path
+        wait_for_requests
+
+        expect(page).to have_content('Group path is already taken')
+      end
+    end
   end
 
   it 'checks permissions to avoid exposing groups by parent_id' do
@@ -185,11 +266,14 @@ RSpec.describe 'Group' do
   end
 
   describe 'group edit', :js do
-    let(:group) { create(:group, :public) }
-    let(:path)  { edit_group_path(group) }
+    let_it_be(:group) { create(:group, :public) }
+
+    let(:path) { edit_group_path(group) }
     let(:new_name) { 'new-name' }
 
     before do
+      group.add_owner(user)
+
       visit path
     end
 
@@ -200,6 +284,8 @@ RSpec.describe 'Group' do
 
     it 'saves new settings' do
       page.within('.gs-general') do
+        # Have to reset it to '' so it overwrites rather than appends
+        fill_in('group_name', with: '')
         fill_in 'group_name', with: new_name
         click_button 'Save changes'
       end
@@ -226,8 +312,13 @@ RSpec.describe 'Group' do
   end
 
   describe 'group page with markdown description' do
-    let(:group) { create(:group) }
-    let(:path)  { group_path(group) }
+    let_it_be(:group) { create(:group) }
+
+    let(:path) { group_path(group) }
+
+    before do
+      group.add_owner(user)
+    end
 
     it 'parses Markdown' do
       group.update_attribute(:description, 'This is **my** group')
@@ -263,9 +354,13 @@ RSpec.describe 'Group' do
   end
 
   describe 'group page with nested groups', :js do
-    let!(:group) { create(:group) }
-    let!(:nested_group) { create(:group, parent: group) }
-    let!(:project) { create(:project, namespace: group) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:nested_group) { create(:group, parent: group) }
+    let_it_be(:project) { create(:project, namespace: group) }
+
+    before do
+      group.add_owner(user)
+    end
 
     it 'renders projects and groups on the page' do
       visit group_path(group)
@@ -273,14 +368,14 @@ RSpec.describe 'Group' do
 
       expect(page).to have_content(nested_group.name)
       expect(page).to have_content(project.name)
-      expect(page).to have_link('Group overview')
+      expect(page).to have_link('Group information')
     end
 
-    it 'renders subgroup page with the text "Subgroup overview"' do
+    it 'renders subgroup page with the text "Subgroup information"' do
       visit group_path(nested_group)
       wait_for_requests
 
-      expect(page).to have_link('Subgroup overview')
+      expect(page).to have_link('Subgroup information')
     end
 
     it 'renders project page with the text "Project overview"' do
@@ -292,37 +387,83 @@ RSpec.describe 'Group' do
   end
 
   describe 'new subgroup / project button' do
-    let(:group) { create(:group, project_creation_level: Gitlab::Access::NO_ONE_PROJECT_ACCESS, subgroup_creation_level: Gitlab::Access::OWNER_SUBGROUP_ACCESS) }
+    let_it_be(:group, reload: true) do
+      create(:group,
+             project_creation_level: Gitlab::Access::NO_ONE_PROJECT_ACCESS,
+             subgroup_creation_level: Gitlab::Access::OWNER_SUBGROUP_ACCESS)
+    end
 
-    it 'new subgroup button is displayed without project creation permission' do
-      visit group_path(group)
+    before do
+      group.add_owner(user)
+    end
 
-      page.within '.group-buttons' do
-        expect(page).to have_link('New subgroup')
+    context 'when user has subgroup creation permissions but not project creation permissions' do
+      it 'only displays "New subgroup" button' do
+        visit group_path(group)
+
+        page.within '[data-testid="group-buttons"]' do
+          expect(page).to have_link('New subgroup')
+          expect(page).not_to have_link('New project')
+        end
       end
     end
 
-    it 'new subgroup button is displayed together with new project button when having project creation permission' do
-      group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
-      visit group_path(group)
+    context 'when user has project creation permissions but not subgroup creation permissions' do
+      it 'only displays "New project" button' do
+        group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
+        user = create(:user)
 
-      page.within '.group-buttons' do
-        expect(page).to have_css("li[data-text='New subgroup']", visible: false)
-        expect(page).to have_css("li[data-text='New project']", visible: false)
+        group.add_maintainer(user)
+        sign_out(:user)
+        sign_in(user)
+
+        visit group_path(group)
+        page.within '[data-testid="group-buttons"]' do
+          expect(page).to have_link('New project')
+          expect(page).not_to have_link('New subgroup')
+        end
       end
     end
 
-    it 'new project button is displayed without subgroup creation permission' do
-      group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
-      user = create(:user)
+    context 'when user has project and subgroup creation permissions' do
+      it 'displays "New subgroup" and "New project" buttons' do
+        group.update!(project_creation_level: Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
 
-      group.add_maintainer(user)
-      sign_out(:user)
-      sign_in(user)
+        visit group_path(group)
+
+        page.within '[data-testid="group-buttons"]' do
+          expect(page).to have_link('New subgroup')
+          expect(page).to have_link('New project')
+        end
+      end
+    end
+  end
+
+  describe 'new_repo experiment' do
+    let_it_be(:group) { create_default(:group) }
+
+    it 'when in candidate renders "project/repository"' do
+      stub_experiments(new_repo: :candidate)
 
       visit group_path(group)
-      page.within '.group-buttons' do
-        expect(page).to have_link('New project')
+
+      find('li.header-new.dropdown').click
+
+      page.within('li.header-new.dropdown') do
+        expect(page).to have_selector('a', text: 'New project/repository')
+      end
+    end
+
+    it 'when in control renders "project/repository"' do
+      stub_experiments(new_repo: :control)
+
+      visit group_path(group)
+
+      find('li.header-new.dropdown').click
+
+      page.within('li.header-new.dropdown') do
+        expect(page).to have_selector('a', text: 'New project')
+        expect(page).to have_no_selector('a', text: 'New project/repository')
       end
     end
   end

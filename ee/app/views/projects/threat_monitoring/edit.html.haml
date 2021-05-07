@@ -1,10 +1,6 @@
 - add_to_breadcrumbs s_("ThreatMonitoring|Threat Monitoring"), project_threat_monitoring_path(@project)
 - breadcrumb_title @policy_name
 - page_title s_("NetworkPolicies|Policy editor")
+- policy_details = policy_details(@project, @policy, @environment)
 
-#js-policy-builder-app{ data: { network_policies_endpoint: project_security_network_policies_path(@project),
-  environments_endpoint: project_environments_path(@project),
-  threat_monitoring_path: project_threat_monitoring_path(@project),
-  policy: @policy.to_json,
-  environment_id: @environment.id,
-} }
+#js-policy-builder-app{ data: policy_details }

@@ -1,6 +1,6 @@
+import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import CodequalityReportApp from 'ee/codequality_report/codequality_report.vue';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { parsedIssues } from './mock_data';
 
 jest.mock('~/flash');
@@ -12,7 +12,7 @@ describe('Codequality report app', () => {
   let wrapper;
   let store;
 
-  const createComponent = (state = {}, issues = []) => {
+  const createComponent = (state = {}, issues = [], glFeatures = {}) => {
     store = new Vuex.Store({
       state: {
         pageInfo: {},
@@ -27,6 +27,9 @@ describe('Codequality report app', () => {
     wrapper = mount(CodequalityReportApp, {
       localVue,
       store,
+      provide: {
+        glFeatures,
+      },
     });
   };
 
@@ -68,7 +71,10 @@ describe('Codequality report app', () => {
       const expectedIssueTotal = parsedIssues.length;
 
       expect(findWarningIcon().exists()).toBe(true);
-      expect(findStatus().text()).toBe(`Found ${expectedIssueTotal} code quality issues`);
+      expect(findStatus().text()).toContain(`Found ${expectedIssueTotal} code quality issues`);
+      expect(findStatus().text()).toContain(
+        `This report contains all Code Quality issues in the source branch.`,
+      );
       expect(wrapper.findAll('.report-block-list-issue')).toHaveLength(expectedIssueTotal);
     });
 

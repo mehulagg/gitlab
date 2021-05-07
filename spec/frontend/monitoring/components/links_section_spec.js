@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
-import { createStore } from '~/monitoring/stores';
+import { shallowMount } from '@vue/test-utils';
 import LinksSection from '~/monitoring/components/links_section.vue';
+import { createStore } from '~/monitoring/stores';
 
 describe('Links Section component', () => {
   let store;
@@ -12,7 +12,7 @@ describe('Links Section component', () => {
       store,
     });
   };
-  const setState = links => {
+  const setState = (links) => {
     store.state.monitoringDashboard = {
       ...store.state.monitoringDashboard,
       emptyState: null,

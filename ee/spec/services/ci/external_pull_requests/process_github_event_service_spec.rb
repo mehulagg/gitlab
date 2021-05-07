@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::ExternalPullRequests::ProcessGithubEventService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:action) { 'opened' }
   let(:params) do
     {
@@ -165,7 +166,6 @@ RSpec.describe Ci::ExternalPullRequests::ProcessGithubEventService do
       let(:source_sha) { double }
 
       before do
-        project.clear_memoization(:licensed_feature_available)
         allow(project).to receive(:mirror?).and_return(true)
         stub_licensed_features(ci_cd_projects: false, github_project_service_integration: false)
       end

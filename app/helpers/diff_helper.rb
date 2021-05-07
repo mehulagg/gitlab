@@ -4,8 +4,8 @@ module DiffHelper
   def mark_inline_diffs(old_line, new_line)
     old_diffs, new_diffs = Gitlab::Diff::InlineDiff.new(old_line, new_line).inline_diffs
 
-    marked_old_line = Gitlab::Diff::InlineDiffMarker.new(old_line).mark(old_diffs, mode: :deletion)
-    marked_new_line = Gitlab::Diff::InlineDiffMarker.new(new_line).mark(new_diffs, mode: :addition)
+    marked_old_line = Gitlab::Diff::InlineDiffMarker.new(old_line).mark(old_diffs)
+    marked_new_line = Gitlab::Diff::InlineDiffMarker.new(new_line).mark(new_diffs)
 
     [marked_old_line, marked_new_line]
   end
@@ -23,14 +23,16 @@ module DiffHelper
     end
   end
 
+  def show_only_context_commits?
+    !!params[:only_context_commits] || @merge_request&.commits&.empty?
+  end
+
   def diff_options
     options = { ignore_whitespace_change: hide_whitespace?, expanded: diffs_expanded? }
 
     if action_name == 'diff_for_path'
       options[:expanded] = true
       options[:paths] = params.values_at(:old_path, :new_path)
-    elsif action_name == 'show'
-      options[:include_context_commits] = true unless @project.context_commits_enabled?
     end
 
     options
@@ -64,13 +66,15 @@ module DiffHelper
     else
       # `sub` and substring-ing would destroy HTML-safeness of `line`
       if line.start_with?('+', '-', ' ')
-        line.dup.tap do |line|
-          line[0] = ''
-        end
+        line[1, line.length]
       else
         line
       end
     end
+  end
+
+  def diff_link_number(line_type, match, text)
+    line_type == match ? " " : text
   end
 
   def parallel_diff_discussions(left, right, diff_file)
@@ -131,7 +135,7 @@ module DiffHelper
         ].join('').html_safe
 
       tooltip = _('Compare submodule commit revisions')
-      link = content_tag(:span, link_to(link_text, compare_url, class: 'btn has-tooltip', title: tooltip), class: 'submodule-compare')
+      link = content_tag(:span, link_to(link_text, compare_url, class: 'btn gl-button has-tooltip', title: tooltip), class: 'submodule-compare')
     end
 
     link
@@ -188,17 +192,33 @@ module DiffHelper
   def render_overflow_warning?(diffs_collection)
     diff_files = diffs_collection.raw_diff_files
 
-    if diff_files.any?(&:too_large?)
-      Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits)
-    end
-
     diff_files.overflow?.tap do |overflown|
-      Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if overflown
+      log_overflow_limits(diff_files)
     end
   end
 
   def apply_diff_view_cookie!
     set_secure_cookie(:diff_view, params.delete(:view), type: CookiesHelper::COOKIE_TYPE_PERMANENT) if params[:view].present?
+  end
+
+  def collapsed_diff_url(diff_file)
+    url_for(
+      safe_params.merge(
+        action: :diff_for_path,
+        old_path: diff_file.old_path,
+        new_path: diff_file.new_path,
+        file_identifier: diff_file.file_identifier
+      )
+    )
+  end
+
+  # As the fork suggestion button is identical every time, we cache it for a full page load
+  def render_fork_suggestion
+    return unless current_user
+
+    strong_memoize(:fork_suggestion) do
+      render partial: "projects/fork_suggestion"
+    end
   end
 
   private
@@ -210,7 +230,7 @@ module DiffHelper
     # Always use HTML to handle case where JSON diff rendered this button
     params_copy.delete(:format)
 
-    link_to url_for(params_copy), id: "#{name}-diff-btn", class: (selected ? 'btn active' : 'btn'), data: { view_type: name } do
+    link_to url_for(params_copy), id: "#{name}-diff-btn", class: (selected ? 'btn gl-button btn-default selected' : 'btn gl-button btn-default'), data: { view_type: name } do
       title
     end
   end
@@ -239,7 +259,7 @@ module DiffHelper
   end
 
   def toggle_whitespace_link(url, options)
-    options[:class] = [*options[:class], 'btn btn-default'].join(' ')
+    options[:class] = [*options[:class], 'btn gl-button btn-default'].join(' ')
     link_to "#{hide_whitespace? ? 'Show' : 'Hide'} whitespace changes", url, class: options[:class]
   end
 
@@ -249,5 +269,33 @@ module DiffHelper
     return path unless path.size > max && max > 3
 
     "...#{path[-(max - 3)..-1]}"
+  end
+
+  def code_navigation_path(diffs)
+    Gitlab::CodeNavigationPath.new(merge_request.project, merge_request.diff_head_sha)
+  end
+
+  def conflicts
+    return unless options[:merge_ref_head_diff]
+
+    conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request) # rubocop:disable CodeReuse/ServiceClass
+
+    return unless conflicts_service.can_be_resolved_in_ui?
+
+    conflicts_service.conflicts.files.index_by(&:our_path)
+  end
+
+  def log_overflow_limits(diff_files)
+    if diff_files.any?(&:too_large?)
+      Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits)
+    end
+
+    Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if diff_files.overflow?
+    Gitlab::Metrics.add_event(:diffs_overflow_max_bytes_limits) if diff_files.overflow_max_bytes?
+    Gitlab::Metrics.add_event(:diffs_overflow_max_files_limits) if diff_files.overflow_max_files?
+    Gitlab::Metrics.add_event(:diffs_overflow_max_lines_limits) if diff_files.overflow_max_lines?
+    Gitlab::Metrics.add_event(:diffs_overflow_collapsed_bytes_limits) if diff_files.collapsed_safe_bytes?
+    Gitlab::Metrics.add_event(:diffs_overflow_collapsed_files_limits) if diff_files.collapsed_safe_files?
+    Gitlab::Metrics.add_event(:diffs_overflow_collapsed_lines_limits) if diff_files.collapsed_safe_lines?
   end
 end

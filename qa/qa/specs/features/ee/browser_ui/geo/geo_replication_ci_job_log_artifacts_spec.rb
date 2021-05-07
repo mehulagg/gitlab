@@ -49,7 +49,7 @@ module QA
         @runner.remove_via_api!
       end
 
-      # Test code is based on qa/specs/features/ee/browser_ui/4_verify/locked_artifacts_spec.rb
+      # Test code is based on qa/specs/features/browser_ui/4_verify/locked_artifacts_spec.rb
       it 'replicates the job log to the secondary Geo site', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/908' do
         Runtime::Logger.debug('Visiting the secondary Geo site')
 
@@ -65,11 +65,7 @@ module QA
             dashboard.go_to_project(@project.name)
           end
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-          Page::Project::Pipeline::Index.perform do |index|
-            index.wait_for_latest_pipeline_replication
-            index.click_on_latest_pipeline
-          end
+          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'replicated')
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             pipeline.wait_for_pipeline_job_replication(@pipeline_job_name)
@@ -98,11 +94,7 @@ module QA
             dashboard.go_to_project(@project.name)
           end
 
-          Page::Project::Menu.perform(&:click_ci_cd_pipelines)
-          Page::Project::Pipeline::Index.perform do |index|
-            index.wait_for_latest_pipeline_replication
-            index.click_on_latest_pipeline
-          end
+          Flow::Pipeline.visit_latest_pipeline(pipeline_condition: 'replicated')
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             pipeline.wait_for_pipeline_job_replication(@pipeline_job_name)
@@ -114,7 +106,7 @@ module QA
             pipeline_job.click_browse_button
           end
 
-          EE::Page::Project::Artifact::Show.perform do |artifact|
+          Page::Project::Artifact::Show.perform do |artifact|
             artifact.go_to_directory(@directory_name)
             expect(artifact).to have_content(@file_name)
           end

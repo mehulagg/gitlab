@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, concepts
 ---
 
@@ -19,8 +22,8 @@ can select an older one from version dropdown.
 ![Merge request versions dropdown](img/versions_dropdown.png)
 
 Merge request versions are based on push not on commit. So, if you pushed 5
-commits in a single push, it will be a single option in the dropdown. If you
-pushed 5 times, that will count for 5 options.
+commits in a single push, it displays as a single option in the dropdown. If you
+pushed 5 times, that counts for 5 options.
 
 You can also compare the merge request version with an older one to see what has
 changed since then.
@@ -39,18 +42,18 @@ changes appears as a system note.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/2383) in GitLab 10.5.
 
-When viewing the commit details page, GitLab will link to the merge request (or
+When viewing the commit details page, GitLab links to the merge request (or
 merge requests, if it's in more than one) containing that commit.
 
 This only applies to commits that are in the most recent version of a merge
-request - if a commit was in a merge request, then rebased out of that merge
-request, they will not be linked.
+request - if commits were in a merge request, then rebased out of that merge
+request, they aren't linked.
 
-## `HEAD` comparison mode for Merge Requests
+## `HEAD` comparison mode for merge requests
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27008) in GitLab 12.10.
 
-Merge Requests, particularly the **Changes** tab, is where source code
+Merge requests, particularly the **Changes** tab, is where source code
 is reviewed and discussed. In circumstances where the target branch was
 merged into the source branch of the merge request, the changes in the
 source and target branch can be shown mixed together making it hard to
@@ -61,9 +64,10 @@ In GitLab 12.10, we added a comparison mode, which
 shows a diff calculated by simulating how it would look like once merged - a more accurate
 representation of the changes rather than using the base of the two
 branches. The new mode is available from the comparison target drop down
-by selecting **master (HEAD)**. In the future it will
-[replace](https://gitlab.com/gitlab-org/gitlab/-/issues/198458) the
-current default comparison.
+by selecting **master (HEAD)**. In GitLab 13.9, it
+[replaced](https://gitlab.com/gitlab-org/gitlab/-/issues/198458) the
+old default comparison. For technical details, additional information is available in the
+[developer documentation](../../../development/diffs.md#merge-request-diffs-against-the-head-of-the-target-branch).
 
 ![Merge request versions compare HEAD](img/versions_compare_head_v12_10.png)
 

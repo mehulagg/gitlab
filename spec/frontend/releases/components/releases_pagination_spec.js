@@ -10,7 +10,7 @@ localVue.use(Vuex);
 describe('~/releases/components/releases_pagination.vue', () => {
   let wrapper;
 
-  const createComponent = useGraphQLEndpoint => {
+  const createComponent = (useGraphQLEndpoint) => {
     const store = new Vuex.Store({
       getters: {
         useGraphQLEndpoint: () => useGraphQLEndpoint,
@@ -20,6 +20,10 @@ describe('~/releases/components/releases_pagination.vue', () => {
     wrapper = shallowMount(ReleasesPagination, { store, localVue });
   };
 
+  beforeEach(() => {
+    createComponent(true);
+  });
+
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
@@ -28,25 +32,8 @@ describe('~/releases/components/releases_pagination.vue', () => {
   const findRestPagination = () => wrapper.find(ReleasesPaginationRest);
   const findGraphQlPagination = () => wrapper.find(ReleasesPaginationGraphql);
 
-  describe('when one of necessary feature flags is disabled', () => {
-    beforeEach(() => {
-      createComponent(false);
-    });
-
-    it('renders the REST pagination component', () => {
-      expect(findRestPagination().exists()).toBe(true);
-      expect(findGraphQlPagination().exists()).toBe(false);
-    });
-  });
-
-  describe('when all the necessary feature flags are enabled', () => {
-    beforeEach(() => {
-      createComponent(true);
-    });
-
-    it('renders the GraphQL pagination component', () => {
-      expect(findGraphQlPagination().exists()).toBe(true);
-      expect(findRestPagination().exists()).toBe(false);
-    });
+  it('renders the GraphQL pagination component', () => {
+    expect(findGraphQlPagination().exists()).toBe(true);
+    expect(findRestPagination().exists()).toBe(false);
   });
 });

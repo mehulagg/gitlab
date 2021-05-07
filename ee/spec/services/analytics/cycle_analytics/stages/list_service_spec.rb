@@ -6,6 +6,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::ListService do
   let_it_be(:group, refind: true) { create(:group) }
   let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user) { create(:user) }
+
   let(:stages) { subject.payload[:stages] }
 
   subject { described_class.new(parent: group, current_user: user).execute }
@@ -18,7 +19,7 @@ RSpec.describe Analytics::CycleAnalytics::Stages::ListService do
     stub_licensed_features(cycle_analytics_for_groups: true)
   end
 
-  it_behaves_like 'permission check for cycle analytics stage services', :cycle_analytics_for_groups
+  it_behaves_like 'permission check for Value Stream Analytics Stage services', :cycle_analytics_for_groups
 
   it 'returns only the default stages' do
     expect(stages.size).to eq(Gitlab::Analytics::CycleAnalytics::DefaultStages.all.size)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :admin do
   resources :users, constraints: { id: %r{[a-zA-Z./0-9_\-]+} } do
     resources :keys, only: [:show, :destroy]
@@ -5,6 +7,12 @@ namespace :admin do
     resources :impersonation_tokens, only: [:index, :create] do
       member do
         put :revoke
+      end
+    end
+
+    collection do
+      scope '/-/' do
+        get :cohorts
       end
     end
 
@@ -18,6 +26,7 @@ namespace :admin do
       put :unlock
       put :confirm
       put :approve
+      delete :reject
       post :impersonate
       patch :disable_two_factor
       delete 'remove/:email_id', action: 'remove_email', as: 'remove_email'
@@ -92,7 +101,8 @@ namespace :admin do
 
   resources :projects, only: [:index]
 
-  resources :instance_statistics, only: :index
+  get '/instance_statistics', to: redirect('admin/usage_trends')
+  resources :usage_trends, only: :index
   resource :dev_ops_report, controller: 'dev_ops_report', only: :show
   resources :cohorts, only: :index
 
@@ -126,6 +136,7 @@ namespace :admin do
     resources :integrations, only: [:edit, :update] do
       member do
         put :test
+        post :reset
       end
     end
 
@@ -148,8 +159,8 @@ namespace :admin do
 
   resources :runners, only: [:index, :show, :update, :destroy] do
     member do
-      get :resume
-      get :pause
+      post :resume
+      post :pause
     end
 
     collection do

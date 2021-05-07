@@ -31,11 +31,15 @@ RSpec.describe 'Adding a Note' do
       project.add_developer(current_user)
     end
 
+    it_behaves_like 'a working GraphQL mutation'
+
     it_behaves_like 'a Note mutation that creates a Note'
 
     it_behaves_like 'a Note mutation when there are active record validation errors'
 
     it_behaves_like 'a Note mutation when the given resource id is not for a Noteable'
+
+    it_behaves_like 'a Note mutation when there are rate limit validation errors'
 
     it 'returns the note' do
       post_graphql_mutation(mutation, current_user: current_user)

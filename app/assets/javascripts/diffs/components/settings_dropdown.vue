@@ -1,23 +1,19 @@
 <script>
+import { GlButtonGroup, GlButton, GlDropdown, GlFormCheckbox } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlButtonGroup, GlButton, GlDropdown } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { SETTINGS_DROPDOWN } from '../i18n';
 
 export default {
+  i18n: SETTINGS_DROPDOWN,
   components: {
     GlButtonGroup,
     GlButton,
     GlDropdown,
+    GlFormCheckbox,
   },
   computed: {
     ...mapGetters('diffs', ['isInlineView', 'isParallelView']),
-    ...mapState('diffs', ['renderTreeList', 'showWhitespace']),
-  },
-  mounted() {
-    this.patchAriaLabel();
-  },
-  updated() {
-    this.patchAriaLabel();
+    ...mapState('diffs', ['renderTreeList', 'showWhitespace', 'viewDiffsFileByFile']),
   },
   methods: {
     ...mapActions('diffs', [
@@ -25,18 +21,26 @@ export default {
       'setParallelDiffViewType',
       'setRenderTreeList',
       'setShowWhitespace',
+      'setFileByFile',
     ]),
-    patchAriaLabel() {
-      this.$el
-        .querySelector('.js-show-diff-settings')
-        .setAttribute('aria-label', __('Diff view settings'));
+    toggleFileByFile() {
+      this.setFileByFile({ fileByFile: !this.viewDiffsFileByFile });
+    },
+    toggleWhitespace(updatedSetting) {
+      this.setShowWhitespace({ showWhitespace: updatedSetting, pushState: true });
     },
   },
 };
 </script>
 
 <template>
-  <gl-dropdown icon="settings" toggle-class="js-show-diff-settings" right>
+  <gl-dropdown
+    icon="settings"
+    :text="__('Diff view settings')"
+    :text-sr-only="true"
+    toggle-class="js-show-diff-settings"
+    right
+  >
     <div class="gl-px-3">
       <span class="gl-font-weight-bold gl-display-block gl-mb-2">{{ __('File browser') }}</span>
       <gl-button-group class="gl-display-flex">
@@ -79,16 +83,21 @@ export default {
         </gl-button>
       </gl-button-group>
     </div>
-    <div class="gl-mt-3 gl-px-3">
-      <label class="gl-mb-0">
-        <input
-          id="show-whitespace"
-          type="checkbox"
-          :checked="showWhitespace"
-          @change="setShowWhitespace({ showWhitespace: $event.target.checked, pushState: true })"
-        />
-        {{ __('Show whitespace changes') }}
-      </label>
-    </div>
+    <gl-form-checkbox
+      data-testid="show-whitespace"
+      class="gl-mt-3 gl-ml-3"
+      :checked="showWhitespace"
+      @input="toggleWhitespace"
+    >
+      {{ $options.i18n.whitespace }}
+    </gl-form-checkbox>
+    <gl-form-checkbox
+      data-testid="file-by-file"
+      class="gl-ml-3 gl-mb-0"
+      :checked="viewDiffsFileByFile"
+      @input="toggleFileByFile"
+    >
+      {{ $options.i18n.fileByFile }}
+    </gl-form-checkbox>
   </gl-dropdown>
 </template>

@@ -17,8 +17,8 @@ import {
   REQUEST_CREATE_CLUSTER,
   CREATE_CLUSTER_ERROR,
 } from '~/create_cluster/eks_cluster/store/mutation_types';
-import createState from '~/create_cluster/eks_cluster/store/state';
 import mutations from '~/create_cluster/eks_cluster/store/mutations';
+import createState from '~/create_cluster/eks_cluster/store/state';
 
 describe('Create EKS cluster store mutations', () => {
   let clusterName;
@@ -66,7 +66,7 @@ describe('Create EKS cluster store mutations', () => {
     ${SET_INSTANCE_TYPE}          | ${'selectedInstanceType'}  | ${{ instanceType }}         | ${instanceType}         | ${'selected instance type payload'}
     ${SET_NODE_COUNT}             | ${'nodeCount'}             | ${{ nodeCount }}            | ${nodeCount}            | ${'node count payload'}
     ${SET_GITLAB_MANAGED_CLUSTER} | ${'gitlabManagedCluster'}  | ${{ gitlabManagedCluster }} | ${gitlabManagedCluster} | ${'gitlab managed cluster'}
-  `(`$mutation sets $mutatedProperty to $expectedValueDescription`, data => {
+  `(`$mutation sets $mutatedProperty to $expectedValueDescription`, (data) => {
     const { mutation, mutatedProperty, payload, expectedValue } = data;
 
     mutations[mutation](state, payload);

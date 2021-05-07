@@ -21,15 +21,32 @@ module EE
           # "Hi, we don't have any more builds now,  but not everything is right anyway, so try again".
           # Runner will retry, but again, against replica, and again will check if replication lag did catch-up.
           if !db_all_caught_up && !result.build
+            metrics.increment_queue_operation(:queue_replication_lag)
+
             return ::Ci::RegisterJobService::Result.new(nil, false) # rubocop:disable Cop/AvoidReturnFromBlocks
           end
         end
       end
 
-      def builds_for_shared_runner
-        return super unless shared_runner_build_limits_feature_enabled?
+      def retrieve_queue(queue_query_proc)
+        if ::Feature.enabled?(:ci_runner_builds_queue_on_replicas, runner, default_enabled: :yaml)
+          ##
+          # We want to reset a load balancing session to discard the side
+          # effects of writes that could have happened prior to this moment.
+          #
+          ::Gitlab::Database::LoadBalancing::Session.clear_session
+        end
 
-        enforce_minutes_based_on_cost_factors(super)
+        super
+      end
+
+      def builds_for_shared_runner
+        # if disaster recovery is enabled, we disable quota
+        if ::Feature.enabled?(:ci_queueing_disaster_recovery, runner, type: :ops, default_enabled: :yaml)
+          super
+        else
+          enforce_minutes_based_on_cost_factors(super)
+        end
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -60,8 +77,14 @@ module EE
 
       # rubocop: disable CodeReuse/ActiveRecord
       def all_namespaces
-        namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
-        ::Gitlab::ObjectHierarchy.new(namespaces).roots
+        if traversal_ids_enabled?
+          ::Namespace
+            .where('namespaces.id = project_namespaces.traversal_ids[1]')
+            .joins('INNER JOIN namespaces as project_namespaces ON project_namespaces.id = projects.namespace_id')
+        else
+          namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')
+          ::Gitlab::ObjectHierarchy.new(namespaces, options: { skip_ordering: true }).roots
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -69,8 +92,9 @@ module EE
         ::Gitlab::CurrentSettings.shared_runners_minutes
       end
 
-      def shared_runner_build_limits_feature_enabled?
-        ENV['DISABLE_SHARED_RUNNER_BUILD_MINUTES_LIMIT'].to_s != 'true'
+      def traversal_ids_enabled?
+        ::Feature.enabled?(:sync_traversal_ids, default_enabled: :yaml) &&
+          ::Feature.enabled?(:traversal_ids_for_quota_calculation, type: :development, default_enabled: :yaml)
       end
 
       override :pre_assign_runner_checks

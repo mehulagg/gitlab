@@ -2,6 +2,8 @@
 
 class AuthorizedProjectsWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   prepend WaitableWorker
 
   feature_category :authentication_and_authorization
@@ -25,7 +27,7 @@ class AuthorizedProjectsWorker
   def perform(user_id)
     user = User.find_by(id: user_id)
 
-    user&.refresh_authorized_projects
+    user&.refresh_authorized_projects(source: self.class.name)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

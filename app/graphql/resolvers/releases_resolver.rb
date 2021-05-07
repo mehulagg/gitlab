@@ -6,7 +6,7 @@ module Resolvers
 
     argument :sort, Types::ReleaseSortEnum,
              required: false, default_value: :released_at_desc,
-             description: 'Sort releases by this criteria'
+             description: 'Sort releases by this criteria.'
 
     alias_method :project, :object
 
@@ -23,8 +23,6 @@ module Resolvers
     }.freeze
 
     def resolve(sort:)
-      return unless Feature.enabled?(:graphql_release_data, project, default_enabled: true)
-
       ReleasesFinder.new(
         project,
         current_user,

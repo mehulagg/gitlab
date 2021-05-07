@@ -2,13 +2,13 @@ import dateFormat from 'dateformat';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { dateFormats } from './constants';
 
-export const toYmd = date => dateFormat(date, dateFormats.isoDate);
+export const toYmd = (date) => dateFormat(date, dateFormats.isoDate);
 
 export default {
   toYmd,
 };
 
-export const formattedDate = d => dateFormat(d, dateFormats.defaultDate);
+export const formattedDate = (d) => dateFormat(d, dateFormats.defaultDate);
 
 /**
  * Creates a value stream object from a dataset. Returns null if no valueStreamId is present.
@@ -16,9 +16,20 @@ export const formattedDate = d => dateFormat(d, dateFormats.defaultDate);
  * @param {Object} dataset - The raw value stream object
  * @returns {Object} - A value stream object
  */
-export const buildValueStreamFromJson = valueStream => {
+export const buildValueStreamFromJson = (valueStream) => {
   const { id, name, is_custom: isCustom } = valueStream ? JSON.parse(valueStream) : {};
   return id ? { id, name, isCustom } : null;
+};
+
+/**
+ * Creates an array of stage objects from a json string. Returns an empty array if no stages are present.
+ *
+ * @param {String} stages - JSON encoded array of stages
+ * @returns {Array} - An array of stage objects
+ */
+const buildDefaultStagesFromJSON = (stages = '') => {
+  if (!stages.length) return [];
+  return JSON.parse(stages);
 };
 
 /**
@@ -27,7 +38,7 @@ export const buildValueStreamFromJson = valueStream => {
  * @param {Object} dataset - The container's dataset
  * @returns {Object} - A group object
  */
-export const buildGroupFromDataset = dataset => {
+export const buildGroupFromDataset = (dataset) => {
   const { groupId, groupName, groupFullPath, groupAvatarUrl, groupParentId } = dataset;
 
   if (groupId) {
@@ -49,7 +60,7 @@ export const buildGroupFromDataset = dataset => {
  * @param {Object} dataset - The container's dataset
  * @returns {Object} - A project object
  */
-export const buildProjectFromDataset = dataset => {
+export const buildProjectFromDataset = (dataset) => {
   const { projectGid, projectName, projectPathWithNamespace, projectAvatarUrl } = dataset;
 
   if (projectGid) {
@@ -70,13 +81,13 @@ export const buildProjectFromDataset = dataset => {
  * @param {String} data - JSON encoded array of projects
  * @returns {Array} - An array of project objects
  */
-const buildProjectsFromJSON = (projects = []) => {
+const buildProjectsFromJSON = (projects = '') => {
   if (!projects.length) return [];
   return JSON.parse(projects);
 };
 
 /**
- * Builds the initial data object for cycle analytics with data loaded from the backend
+ * Builds the initial data object for Value Stream Analytics with data loaded from the backend
  *
  * @param {Object} dataset - dataset object paseed to the frontend via data-* properties
  * @returns {Object} - The initial data to load the app with
@@ -93,6 +104,8 @@ export const buildCycleAnalyticsInitialData = ({
   groupAvatarUrl = null,
   labelsPath = '',
   milestonesPath = '',
+  defaultStages = null,
+  stage = null,
 } = {}) => ({
   selectedValueStream: buildValueStreamFromJson(valueStream),
   group: groupId
@@ -113,9 +126,13 @@ export const buildCycleAnalyticsInitialData = ({
     : [],
   labelsPath,
   milestonesPath,
+  defaultStageConfig: defaultStages
+    ? buildDefaultStagesFromJSON(defaultStages).map(convertObjectPropsToCamelCase)
+    : [],
+  stage: JSON.parse(stage),
 });
 
 export const filterBySearchTerm = (data = [], searchTerm = '', filterByKey = 'name') => {
   if (!searchTerm?.length) return data;
-  return data.filter(item => item[filterByKey].toLowerCase().includes(searchTerm.toLowerCase()));
+  return data.filter((item) => item[filterByKey].toLowerCase().includes(searchTerm.toLowerCase()));
 };

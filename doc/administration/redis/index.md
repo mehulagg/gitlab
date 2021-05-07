@@ -2,10 +2,10 @@
 type: index
 stage: Enablement
 group: Distribution
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Configuring Redis for scaling
+# Configuring Redis for scaling **(FREE SELF)**
 
 Based on your infrastructure setup and how you have installed GitLab, there are
 multiple ways to configure Redis.

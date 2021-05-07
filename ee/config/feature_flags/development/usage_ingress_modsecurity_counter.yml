@@ -2,6 +2,7 @@
 name: usage_ingress_modsecurity_counter
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28535
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/32358
-group: group::container security
+milestone: '13.1'
 type: development
+group: group::container security
 default_enabled: true

@@ -8,8 +8,9 @@ module EE
     prepended do
       BACKOFF_PERIOD = 24.seconds
       JITTER = 6.seconds
+      SSL_CERTIFICATE_PROBLEM = /SSL certificate problem/.freeze
 
-      delegate :mirror?, to: :project
+      delegate :mirror?, :mirror_with_content?, :archived, :pending_delete, to: :project
 
       before_validation :set_next_execution_to_now, on: :create
 
@@ -42,8 +43,13 @@ module EE
         before_transition started: :failed do |state, _|
           if state.mirror?
             state.last_update_at = Time.current
-            state.increment_retry_count
-            state.set_next_execution_timestamp
+
+            if state.unrecoverable_failure?
+              state.set_max_retry_count
+            else
+              state.increment_retry_count
+              state.set_next_execution_timestamp
+            end
           end
         end
 
@@ -78,7 +84,7 @@ module EE
     override :in_progress?
     def in_progress?
       # If we're importing while we do have a repository, we're simply updating the mirror.
-      super && !project.mirror_with_content?
+      super && !mirror_with_content?
     end
 
     def mirror_waiting_duration
@@ -94,13 +100,12 @@ module EE
     end
 
     def updating_mirror?
-      (scheduled? || started?) && project.mirror_with_content?
+      (scheduled? || started?) && mirror_with_content?
     end
 
     def mirror_update_due?
-      return false unless project.mirror_with_content?
+      return false unless project_eligible_for_mirroring?
       return false unless next_execution_timestamp?
-      return false if project.archived?
       return false if hard_failed?
       return false if updating_mirror?
 
@@ -137,6 +142,20 @@ module EE
       self.retry_count += 1
     end
 
+    def set_max_retry_count
+      self.retry_count = ::Gitlab::Mirror::MAX_RETRY + 1
+    end
+
+    def unrecoverable_failure?
+      last_update_failed? && unrecoverable_error_message?
+    end
+
+    def unrecoverable_error_message?
+      return false if last_error.blank?
+
+      last_error.match?(SSL_CERTIFICATE_PROBLEM)
+    end
+
     # We schedule the next sync time based on the duration of the
     # last mirroring period and add it a fixed backoff period with a random jitter
     def set_next_execution_timestamp
@@ -171,6 +190,10 @@ module EE
     alias_method :hard_failed?, :retry_limit_exceeded?
 
     private
+
+    def project_eligible_for_mirroring?
+      mirror_with_content? && !archived && !pending_delete
+    end
 
     def state_updated?
       mirror? && last_update_at

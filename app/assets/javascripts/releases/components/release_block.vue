@@ -1,10 +1,10 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { isEmpty } from 'lodash';
 import $ from 'jquery';
+import { isEmpty } from 'lodash';
+import { scrollToElement } from '~/lib/utils/common_utils';
 import { slugify } from '~/lib/utils/text_utility';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import { scrollToElement } from '~/lib/utils/common_utils';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import '~/behaviors/markdown/render_gfm';
 import EvidenceBlock from './evidence_block.vue';
@@ -87,9 +87,14 @@ export default {
     <release-block-header :release="release" />
     <div class="card-body">
       <div v-if="shouldRenderMilestoneInfo">
+        <!-- TODO: Switch open* links to opened* once fields have been updated in GraphQL -->
         <release-block-milestone-info
           :milestones="milestones"
-          :open-issues-path="release._links.issuesUrl"
+          :opened-issues-path="release._links.openedIssuesUrl"
+          :closed-issues-path="release._links.closedIssuesUrl"
+          :opened-merge-requests-path="release._links.openedMergeRequestsUrl"
+          :merged-merge-requests-path="release._links.mergedMergeRequestsUrl"
+          :closed-merge-requests-path="release._links.closedMergeRequestsUrl"
         />
         <hr class="mb-3 mt-0" />
       </div>

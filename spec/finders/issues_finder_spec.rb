@@ -13,7 +13,27 @@ RSpec.describe IssuesFinder do
       let(:scope) { 'all' }
 
       it 'returns all issues' do
-        expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+        expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
+      end
+
+      context 'user does not have read permissions' do
+        let(:search_user) { user2 }
+
+        context 'when filtering by project id' do
+          let(:params) { { project_id: project1.id } }
+
+          it 'returns no issues' do
+            expect(issues).to be_empty
+          end
+        end
+
+        context 'when filtering by group id' do
+          let(:params) { { group_id: group.id } }
+
+          it 'returns no issues' do
+            expect(issues).to be_empty
+          end
+        end
       end
 
       context 'assignee filtering' do
@@ -21,12 +41,19 @@ RSpec.describe IssuesFinder do
 
         it_behaves_like 'assignee ID filter' do
           let(:params) { { assignee_id: user.id } }
-          let(:expected_issuables) { [issue1, issue2] }
+          let(:expected_issuables) { [issue1, issue2, issue5] }
         end
 
         it_behaves_like 'assignee NOT ID filter' do
           let(:params) { { not: { assignee_id: user.id } } }
           let(:expected_issuables) { [issue3, issue4] }
+        end
+
+        context 'when assignee_id does not exist' do
+          it_behaves_like 'assignee NOT ID filter' do
+            let(:params) { { not: { assignee_id: -100 } } }
+            let(:expected_issuables) { [issue1, issue2, issue3, issue4, issue5] }
+          end
         end
 
         context 'filter by username' do
@@ -51,6 +78,17 @@ RSpec.describe IssuesFinder do
             let(:params) { { not: { assignee_username: [user.username, user2.username] } } }
             let(:expected_issuables) { [issue3, issue4] }
           end
+
+          context 'when assignee_username does not exist' do
+            it_behaves_like 'assignee NOT username filter' do
+              before do
+                issue2.assignees = [user2]
+              end
+
+              let(:params) { { not: { assignee_username: 'non_existent_username' } } }
+              let(:expected_issuables) { [issue1, issue2, issue3, issue4, issue5] }
+            end
+          end
         end
 
         it_behaves_like 'no assignee filter' do
@@ -59,7 +97,25 @@ RSpec.describe IssuesFinder do
         end
 
         it_behaves_like 'any assignee filter' do
-          let(:expected_issuables) { [issue1, issue2, issue3] }
+          let(:expected_issuables) { [issue1, issue2, issue3, issue5] }
+        end
+      end
+
+      context 'filtering by release' do
+        context 'when the release tag is none' do
+          let(:params) { { release_tag: 'none' } }
+
+          it 'returns issues without releases' do
+            expect(issues).to contain_exactly(issue2, issue3, issue4, issue5)
+          end
+        end
+
+        context 'when the release tag exists' do
+          let(:params) { { project_id: project1.id, release_tag: release.tag } }
+
+          it 'returns the issues associated with that release' do
+            expect(issues).to contain_exactly(issue1)
+          end
         end
       end
 
@@ -68,7 +124,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { projects: [project1.id] } }
 
           it 'returns the issue belonging to the projects' do
-            expect(issues).to contain_exactly(issue1)
+            expect(issues).to contain_exactly(issue1, issue5)
           end
         end
 
@@ -76,7 +132,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { projects: Project.id_in(project1.id) } }
 
           it 'returns the issue belonging to the projects' do
-            expect(issues).to contain_exactly(issue1)
+            expect(issues).to contain_exactly(issue1, issue5)
           end
         end
       end
@@ -86,7 +142,7 @@ RSpec.describe IssuesFinder do
 
         context 'when include_subgroup param not set' do
           it 'returns all group issues' do
-            expect(issues).to contain_exactly(issue1)
+            expect(issues).to contain_exactly(issue1, issue5)
           end
 
           context 'when projects outside the group are passed' do
@@ -101,7 +157,7 @@ RSpec.describe IssuesFinder do
             let(:params) { { group_id: group.id, projects: [project1.id] } }
 
             it 'returns the issue within the group and projects' do
-              expect(issues).to contain_exactly(issue1)
+              expect(issues).to contain_exactly(issue1, issue5)
             end
           end
 
@@ -109,7 +165,15 @@ RSpec.describe IssuesFinder do
             let(:params) { { group_id: group.id, projects: Project.id_in(project1.id) } }
 
             it 'returns the issue within the group and projects' do
-              expect(issues).to contain_exactly(issue1)
+              expect(issues).to contain_exactly(issue1, issue5)
+            end
+          end
+
+          context 'when release_tag is passed as a parameter' do
+            let(:params) { { group_id: group.id, release_tag: 'dne-release-tag' } }
+
+            it 'ignores the release_tag parameter' do
+              expect(issues).to contain_exactly(issue1, issue5)
             end
           end
         end
@@ -120,7 +184,7 @@ RSpec.describe IssuesFinder do
           end
 
           it 'returns all group and subgroup issues' do
-            expect(issues).to contain_exactly(issue1, issue4)
+            expect(issues).to contain_exactly(issue1, issue4, issue5)
           end
 
           context 'when mixed projects are passed' do
@@ -133,33 +197,54 @@ RSpec.describe IssuesFinder do
         end
       end
 
-      context 'filtering by author ID' do
-        let(:params) { { author_id: user2.id } }
+      context 'filtering by author' do
+        context 'by author ID' do
+          let(:params) { { author_id: user2.id } }
 
-        it 'returns issues created by that user' do
-          expect(issues).to contain_exactly(issue3)
-        end
-      end
-
-      context 'filtering by not author ID' do
-        let(:params) { { not: { author_id: user2.id } } }
-
-        it 'returns issues not created by that user' do
-          expect(issues).to contain_exactly(issue1, issue2, issue4)
-        end
-      end
-
-      context 'filtering by nonexistent author ID and issue term using CTE for search' do
-        let(:params) do
-          {
-            author_id: 'does-not-exist',
-            search: 'git',
-            attempt_group_search_optimizations: true
-          }
+          it 'returns issues created by that user' do
+            expect(issues).to contain_exactly(issue3)
+          end
         end
 
-        it 'returns no results' do
-          expect(issues).to be_empty
+        context 'using OR' do
+          let(:issue6) { create(:issue, project: project2) }
+          let(:params) { { or: { author_username: [issue3.author.username, issue6.author.username] } } }
+
+          it 'returns issues created by any of the given users' do
+            expect(issues).to contain_exactly(issue3, issue6)
+          end
+
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(or_issuable_queries: false)
+            end
+
+            it 'does not add any filter' do
+              expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, issue6)
+            end
+          end
+        end
+
+        context 'filtering by NOT author ID' do
+          let(:params) { { not: { author_id: user2.id } } }
+
+          it 'returns issues not created by that user' do
+            expect(issues).to contain_exactly(issue1, issue2, issue4, issue5)
+          end
+        end
+
+        context 'filtering by nonexistent author ID and issue term using CTE for search' do
+          let(:params) do
+            {
+              author_id: 'does-not-exist',
+              search: 'git',
+              attempt_group_search_optimizations: true
+            }
+          end
+
+          it 'returns no results' do
+            expect(issues).to be_empty
+          end
         end
       end
 
@@ -175,7 +260,7 @@ RSpec.describe IssuesFinder do
         let(:params) { { not: { milestone_title: milestone.title } } }
 
         it 'returns issues not assigned to that milestone' do
-          expect(issues).to contain_exactly(issue2, issue3, issue4)
+          expect(issues).to contain_exactly(issue2, issue3, issue4, issue5)
         end
       end
 
@@ -199,7 +284,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { not: { milestone_title: group_milestone.title } } }
 
           it 'returns issues not assigned to that group milestone' do
-            expect(issues).to contain_exactly(issue1, issue4)
+            expect(issues).to contain_exactly(issue1, issue4, issue5)
           end
         end
       end
@@ -208,13 +293,13 @@ RSpec.describe IssuesFinder do
         let(:params) { { milestone_title: 'None' } }
 
         it 'returns issues with no milestone' do
-          expect(issues).to contain_exactly(issue2, issue3, issue4)
+          expect(issues).to contain_exactly(issue2, issue3, issue4, issue5)
         end
 
         it 'returns issues with no milestone (deprecated)' do
           params[:milestone_title] = Milestone::None.title
 
-          expect(issues).to contain_exactly(issue2, issue3, issue4)
+          expect(issues).to contain_exactly(issue2, issue3, issue4, issue5)
         end
       end
 
@@ -343,7 +428,7 @@ RSpec.describe IssuesFinder do
             let(:params) { { not: { label_name: label.title } } }
 
             it 'returns issues that do not have that label' do
-              expect(issues).to contain_exactly(issue1, issue3, issue4)
+              expect(issues).to contain_exactly(issue1, issue3, issue4, issue5)
             end
 
             # IssuableFinder first filters using the outer params (the ones not inside the `not` key.)
@@ -383,7 +468,7 @@ RSpec.describe IssuesFinder do
             let(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
 
             it 'returns issues that do not have any of the labels provided' do
-              expect(issues).to contain_exactly(issue1, issue4)
+              expect(issues).to contain_exactly(issue1, issue4, issue5)
             end
           end
         end
@@ -405,7 +490,7 @@ RSpec.describe IssuesFinder do
             let(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
 
             it 'returns issues that do not have ANY ONE of the labels provided' do
-              expect(issues).to contain_exactly(issue1, issue4)
+              expect(issues).to contain_exactly(issue1, issue4, issue5)
             end
           end
         end
@@ -414,7 +499,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { label_name: described_class::Params::FILTER_NONE } }
 
           it 'returns issues with no labels' do
-            expect(issues).to contain_exactly(issue1, issue4)
+            expect(issues).to contain_exactly(issue1, issue4, issue5)
           end
         end
 
@@ -483,14 +568,14 @@ RSpec.describe IssuesFinder do
       end
 
       context 'filtering by issues iids' do
-        let(:params) { { iids: issue3.iid } }
+        let(:params) { { iids: [issue3.iid] } }
 
-        it 'returns issues with iids match' do
-          expect(issues).to contain_exactly(issue3)
+        it 'returns issues where iids match' do
+          expect(issues).to contain_exactly(issue3, issue5)
         end
 
         context 'using NOT' do
-          let(:params) { { not: { iids: issue3.iid } } }
+          let(:params) { { not: { iids: [issue3.iid] } } }
 
           it 'returns issues with no iids match' do
             expect(issues).to contain_exactly(issue1, issue2, issue4)
@@ -503,7 +588,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { state: 'opened' } }
 
           it 'returns only opened issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -519,7 +604,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { state: 'all' } }
 
           it 'returns all issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, closed_issue, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, closed_issue, issue4, issue5)
           end
         end
 
@@ -527,7 +612,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { state: 'invalid_state' } }
 
           it 'returns all issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, closed_issue, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, closed_issue, issue4, issue5)
           end
         end
       end
@@ -619,7 +704,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { my_reaction_emoji: 'None' } }
 
           it 'returns issues that the user did not react to' do
-            expect(issues).to contain_exactly(issue2, issue4)
+            expect(issues).to contain_exactly(issue2, issue4, issue5)
           end
         end
 
@@ -642,7 +727,7 @@ RSpec.describe IssuesFinder do
             let(:params) { { not: { my_reaction_emoji: 'thumbsup' } } }
 
             it 'returns issues that the user did not thumbsup to' do
-              expect(issues).to contain_exactly(issue2, issue3, issue4)
+              expect(issues).to contain_exactly(issue2, issue3, issue4, issue5)
             end
           end
         end
@@ -676,7 +761,7 @@ RSpec.describe IssuesFinder do
             let(:params) { { not: { my_reaction_emoji: 'thumbsdown' } } }
 
             it 'returns issues that the user thumbsdown to' do
-              expect(issues).to contain_exactly(issue1, issue2, issue4)
+              expect(issues).to contain_exactly(issue1, issue2, issue4, issue5)
             end
           end
         end
@@ -687,7 +772,7 @@ RSpec.describe IssuesFinder do
 
         context 'no filtering' do
           it 'returns all issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, confidential_issue)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5, confidential_issue)
           end
         end
 
@@ -703,7 +788,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { confidential: false } }
 
           it 'returns only confdential issues' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
           end
         end
       end
@@ -715,7 +800,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { issue_types: [] } }
 
           it 'returns all issues' do
-            expect(issues).to contain_exactly(incident_issue, issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(incident_issue, issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -731,7 +816,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { issue_types: ['issue'] } }
 
           it 'returns all issues with type issue' do
-            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -739,7 +824,7 @@ RSpec.describe IssuesFinder do
           let(:params) { { issue_types: %w(issue incident) } }
 
           it 'returns all issues' do
-            expect(issues).to contain_exactly(incident_issue, issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(incident_issue, issue1, issue2, issue3, issue4, issue5)
           end
         end
 
@@ -790,14 +875,14 @@ RSpec.describe IssuesFinder do
       let(:scope) { 'assigned_to_me' }
 
       it 'returns issue assigned to the user' do
-        expect(issues).to contain_exactly(issue1, issue2)
+        expect(issues).to contain_exactly(issue1, issue2, issue5)
       end
 
       context 'filtering by project' do
         let(:params) { { project_id: project1.id } }
 
         it 'returns issues assigned to the user in that project' do
-          expect(issues).to contain_exactly(issue1)
+          expect(issues).to contain_exactly(issue1, issue5)
         end
       end
     end
@@ -827,21 +912,71 @@ RSpec.describe IssuesFinder do
         let(:project_params) { { project_id: project.id } }
       end
     end
+
+    context 'filtering by due date' do
+      let_it_be(:issue_overdue) { create(:issue, project: project1, due_date: 2.days.ago) }
+      let_it_be(:issue_due_soon) { create(:issue, project: project1, due_date: 2.days.from_now) }
+
+      let(:scope) { 'all' }
+      let(:base_params) { { project_id: project1.id } }
+
+      context 'with param set to no due date' do
+        let(:params) { base_params.merge(due_date: Issue::NoDueDate.name) }
+
+        it 'returns issues with no due date' do
+          expect(issues).to contain_exactly(issue1, issue5)
+        end
+      end
+
+      context 'with param set to overdue' do
+        let(:params) { base_params.merge(due_date: Issue::Overdue.name) }
+
+        it 'returns overdue issues' do
+          expect(issues).to contain_exactly(issue_overdue)
+        end
+      end
+
+      context 'with param set to next month and previous two weeks' do
+        let(:params) { base_params.merge(due_date: Issue::DueNextMonthAndPreviousTwoWeeks.name) }
+
+        it 'returns issues from the previous two weeks and next month' do
+          expect(issues).to contain_exactly(issue_overdue, issue_due_soon)
+        end
+      end
+
+      context 'with invalid param' do
+        let(:params) { base_params.merge(due_date: 'foo') }
+
+        it 'returns no issues' do
+          expect(issues).to be_empty
+        end
+      end
+    end
   end
 
   describe '#row_count', :request_store do
     let_it_be(:admin) { create(:admin) }
 
-    it 'returns the number of rows for the default state' do
-      finder = described_class.new(admin)
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it 'returns the number of rows for the default state' do
+        finder = described_class.new(admin)
 
-      expect(finder.row_count).to eq(4)
+        expect(finder.row_count).to eq(5)
+      end
+
+      it 'returns the number of rows for a given state' do
+        finder = described_class.new(admin, state: 'closed')
+
+        expect(finder.row_count).to be_zero
+      end
     end
 
-    it 'returns the number of rows for a given state' do
-      finder = described_class.new(admin, state: 'closed')
+    context 'when admin mode is disabled' do
+      it 'returns no rows' do
+        finder = described_class.new(admin)
 
-      expect(finder.row_count).to be_zero
+        expect(finder.row_count).to be_zero
+      end
     end
 
     it 'returns -1 if the query times out' do
@@ -910,8 +1045,17 @@ RSpec.describe IssuesFinder do
 
         subject { described_class.new(admin_user, params).with_confidentiality_access_check }
 
-        it 'returns all issues' do
-          expect(subject).to include(public_issue, confidential_issue)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns all issues' do
+            expect(subject).to include(public_issue, confidential_issue)
+          end
+        end
+
+        context 'when admin mode is disabled' do
+          it 'returns only public issues' do
+            expect(subject).to include(public_issue)
+            expect(subject).not_to include(confidential_issue)
+          end
         end
       end
     end
@@ -983,14 +1127,27 @@ RSpec.describe IssuesFinder do
 
         subject { described_class.new(admin_user, params).with_confidentiality_access_check }
 
-        it 'returns all issues' do
-          expect(subject).to include(public_issue, confidential_issue)
+        context 'when admin mode is enabled', :enable_admin_mode do
+          it 'returns all issues' do
+            expect(subject).to include(public_issue, confidential_issue)
+          end
+
+          it 'does not filter by confidentiality' do
+            expect(Issue).not_to receive(:where).with(a_string_matching('confidential'), anything)
+
+            subject
+          end
         end
 
-        it 'does not filter by confidentiality' do
-          expect(Issue).not_to receive(:where).with(a_string_matching('confidential'), anything)
+        context 'when admin mode is disabled' do
+          it 'returns only public issues' do
+            expect(subject).to include(public_issue)
+            expect(subject).not_to include(confidential_issue)
+          end
 
-          subject
+          it 'filters by confidentiality' do
+            expect(subject.to_sql).to match("issues.confidential")
+          end
         end
       end
     end

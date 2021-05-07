@@ -33,14 +33,14 @@ RSpec.describe Projects::MilestonesController do
       view_milestone
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(response.content_type).to eq 'text/html'
+      expect(response.media_type).to eq 'text/html'
     end
 
     it 'returns milestone json' do
       view_milestone format: :json
 
       expect(response).to have_gitlab_http_status(:not_found)
-      expect(response.content_type).to eq 'application/json'
+      expect(response.media_type).to eq 'application/json'
     end
   end
 
@@ -105,7 +105,7 @@ RSpec.describe Projects::MilestonesController do
 
       context 'with a single group ancestor' do
         before do
-          project.update(namespace: group)
+          project.update!(namespace: group)
           get :index, params: { namespace_id: project.namespace.id, project_id: project.id }, format: :json
         end
 
@@ -122,7 +122,7 @@ RSpec.describe Projects::MilestonesController do
         let!(:subgroup_milestone) { create(:milestone, group: subgroup) }
 
         before do
-          project.update(namespace: subgroup)
+          project.update!(namespace: subgroup)
           get :index, params: { namespace_id: project.namespace.id, project_id: project.id }, format: :json
         end
 
@@ -158,7 +158,7 @@ RSpec.describe Projects::MilestonesController do
     let(:group) { create(:group) }
 
     before do
-      project.update(namespace: group)
+      project.update!(namespace: group)
     end
 
     context 'when user does not have permission to promote milestone' do
@@ -189,7 +189,7 @@ RSpec.describe Projects::MilestonesController do
           get :labels, params: { namespace_id: group.id, project_id: project.id, id: milestone.iid }, format: :json
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
 
           expect(json_response['html']).not_to include(label.title)
         end
@@ -200,7 +200,7 @@ RSpec.describe Projects::MilestonesController do
           get :labels, params: { namespace_id: group.id, project_id: project.id, id: milestone.iid }, format: :json
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
 
           expect(json_response['html']).to include(label.title)
         end
@@ -234,7 +234,7 @@ RSpec.describe Projects::MilestonesController do
       end
 
       it 'renders 404' do
-        project.update(namespace: user.namespace)
+        project.update!(namespace: user.namespace)
 
         post :promote, params: { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid }
 
@@ -253,7 +253,7 @@ RSpec.describe Projects::MilestonesController do
       before do
         project.add_guest(guest_user)
         sign_in(guest_user)
-        issue.update(assignee_ids: issue_assignee.id)
+        issue.update!(assignee_ids: issue_assignee.id)
       end
 
       context "when issue is not confidential" do
@@ -262,14 +262,14 @@ RSpec.describe Projects::MilestonesController do
           get :participants, params: params
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
           expect(json_response['html']).to include(issue_assignee.name)
         end
       end
 
       context "when issue is confidential" do
         before do
-          issue.update(confidential: true)
+          issue.update!(confidential: true)
         end
 
         it 'shows no milestone participants' do
@@ -277,7 +277,7 @@ RSpec.describe Projects::MilestonesController do
           get :participants, params: params
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(response.content_type).to eq 'application/json'
+          expect(response.media_type).to eq 'application/json'
           expect(json_response['html']).not_to include(issue_assignee.name)
         end
       end

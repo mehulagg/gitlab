@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { componentNames } from '~/reports/components/issue_body';
 import { s__, sprintf } from '~/locale';
+import { componentNames } from '~/reports/components/issue_body';
 import ReportSection from '~/reports/components/report_section.vue';
 import createStore from './store';
 
@@ -12,23 +12,15 @@ export default {
     ReportSection,
   },
   props: {
-    headPath: {
-      type: String,
-      required: true,
-    },
-    headBlobPath: {
-      type: String,
-      required: true,
-    },
     basePath: {
       type: String,
       required: false,
       default: null,
     },
-    baseBlobPath: {
+    codequalityReportsPath: {
       type: String,
       required: false,
-      default: null,
+      default: '',
     },
     codequalityHelpPath: {
       type: String,
@@ -37,7 +29,7 @@ export default {
   },
   componentNames,
   computed: {
-    ...mapState(['newIssues', 'resolvedIssues']),
+    ...mapState(['newIssues', 'resolvedIssues', 'hasError', 'statusReason']),
     ...mapGetters([
       'hasCodequalityIssues',
       'codequalityStatus',
@@ -48,9 +40,7 @@ export default {
   created() {
     this.setPaths({
       basePath: this.basePath,
-      headPath: this.headPath,
-      baseBlobPath: this.baseBlobPath,
-      headBlobPath: this.headBlobPath,
+      reportsPath: this.codequalityReportsPath,
       helpPath: this.codequalityHelpPath,
     });
 
@@ -78,6 +68,10 @@ export default {
     :has-issues="hasCodequalityIssues"
     :component="$options.componentNames.CodequalityIssueBody"
     :popover-options="codequalityPopover"
+    :show-report-section-status-icon="false"
+    track-action="users_expanding_testing_code_quality_report"
     class="js-codequality-widget mr-widget-border-top mr-report"
-  />
+  >
+    <template v-if="hasError" #sub-heading>{{ statusReason }}</template>
+  </report-section>
 </template>

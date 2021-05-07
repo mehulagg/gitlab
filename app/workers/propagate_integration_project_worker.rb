@@ -3,7 +3,10 @@
 class PropagateIntegrationProjectWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :integrations
+  tags :exclude_from_kubernetes
   idempotent!
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -12,7 +15,7 @@ class PropagateIntegrationProjectWorker
     return unless integration
 
     batch = Project.where(id: min_id..max_id).without_integration(integration)
-    batch = batch.in_namespace(integration.group.self_and_descendants) if integration.group_id
+    batch = batch.in_namespace(integration.group.self_and_descendants) if integration.group_level?
 
     return if batch.empty?
 

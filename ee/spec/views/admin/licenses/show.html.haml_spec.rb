@@ -15,6 +15,7 @@ RSpec.describe 'admin/licenses/show.html.haml' do
       render
 
       expect(rendered).to have_content('Buy License')
+      expect(rendered).not_to have_content('License overview')
     end
   end
 
@@ -28,7 +29,7 @@ RSpec.describe 'admin/licenses/show.html.haml' do
 
       expect(rendered).not_to have_content('Buy License')
       expect(rendered).to have_content('Licensed to')
-      expect(rendered).to have_content('Users in License:')
+      expect(rendered).to have_content('Users in License')
       expect(rendered).to have_content('Upload New License')
     end
   end
@@ -38,7 +39,7 @@ RSpec.describe 'admin/licenses/show.html.haml' do
       render
 
       expect(rendered).not_to have_content('Licensed to')
-      expect(rendered).not_to have_content('Users in License:')
+      expect(rendered).not_to have_content('Users in License')
       expect(rendered).to have_content('Upload New License')
     end
   end

@@ -2,8 +2,9 @@
 
 exports[`SplitButton renders actionItems 1`] = `
 <gl-dropdown-stub
-  category="tertiary"
+  category="primary"
   headertext=""
+  hideheaderborder="true"
   menu-class=""
   size="medium"
   split="true"
@@ -14,6 +15,7 @@ exports[`SplitButton renders actionItems 1`] = `
     avatarurl=""
     iconcolor=""
     iconname=""
+    iconrightarialabel=""
     iconrightname=""
     ischecked="true"
     ischeckitem="true"
@@ -33,6 +35,7 @@ exports[`SplitButton renders actionItems 1`] = `
     avatarurl=""
     iconcolor=""
     iconname=""
+    iconrightarialabel=""
     iconrightname=""
     ischeckitem="true"
     secondarytext=""

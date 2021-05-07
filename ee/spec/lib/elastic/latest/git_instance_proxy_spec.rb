@@ -56,7 +56,8 @@ RSpec.describe Elastic::Latest::GitInstanceProxy do
       {
         page: 2,
         per: 30,
-        options: { foo: :bar }
+        options: { foo: :bar },
+        preload_method: nil
       }
     end
 

@@ -1,16 +1,16 @@
 /* eslint-disable func-names, consistent-return, no-return-assign */
 
-import $ from 'jquery';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
+import $ from 'jquery';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { sanitize } from '~/lib/dompurify';
 import axios from '~/lib/utils/axios_utils';
-import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { spriteIcon } from '~/lib/utils/common_utils';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 
 // highlight text(awefwbwgtc -> <b>a</b>wefw<b>b</b>wgt<b>c</b> )
-const highlighter = function(element, text, matches) {
+const highlighter = function (element, text, matches) {
   let j = 0;
   let len = 0;
   let lastIndex = 0;
@@ -55,8 +55,9 @@ export default class ProjectFindFile {
   }
 
   initEvent() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.inputElement.off('keyup');
-    this.inputElement.on('keyup', event => {
+    this.inputElement.on('keyup', (event) => {
       const target = $(event.target);
       const value = target.val();
       const ref = target.data('oldValue');
@@ -64,11 +65,7 @@ export default class ProjectFindFile {
       if (value !== oldValue) {
         target.data('oldValue', value);
         this.findFile();
-        return this.element
-          .find('tr.tree-item')
-          .eq(0)
-          .addClass('selected')
-          .focus();
+        return this.element.find('tr.tree-item').eq(0).addClass('selected').focus();
       }
     });
   }
@@ -89,11 +86,7 @@ export default class ProjectFindFile {
         this.element.find('.loading').hide();
         this.filePaths = data;
         this.findFile();
-        this.element
-          .find('.files-slider tr.tree-item')
-          .eq(0)
-          .addClass('selected')
-          .focus();
+        this.element.find('.files-slider tr.tree-item').eq(0).addClass('selected').focus();
       })
       .catch(() => flash(__('An error occurred while loading filenames')));
   }

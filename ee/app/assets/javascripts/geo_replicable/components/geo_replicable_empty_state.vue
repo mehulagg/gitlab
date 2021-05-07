@@ -1,11 +1,13 @@
 <script>
+import { GlEmptyState, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
-import { GlEmptyState } from '@gitlab/ui';
 
 export default {
   name: 'GeoReplicableEmptyState',
   components: {
     GlEmptyState,
+    GlSprintf,
+    GlLink,
   },
   props: {
     geoReplicableEmptySvgPath: {

@@ -24,6 +24,8 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
     it 'does not perform Geo::ProjectSyncWorker when shard becomes unhealthy' do
       Gitlab::ShardHealthCache.update([])
 
+      log_data = { message: "Skipped scheduling syncs due to unhealthy shard", shard_name: shard_name }
+      expect(Gitlab::Geo::Logger).to receive(:error).with(a_hash_including(log_data))
       expect(Geo::ProjectSyncWorker).not_to receive(:perform_async)
 
       subject.perform(shard_name)
@@ -144,8 +146,8 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
         abandoned_project.update_column(:last_repository_updated_at, 1.year.ago)
 
         # Neither of these are needed for this spec
-        project_2.destroy
-        project_1.destroy
+        project_2.destroy!
+        project_1.destroy!
 
         allow_next_instance_of(described_class) do |instance|
           allow(instance).to receive(:db_retrieve_batch_size).and_return(2) # Must be >1 because of the Geo::BaseSchedulerWorker#interleave
@@ -189,8 +191,8 @@ RSpec.describe Geo::RepositoryShardSyncWorker, :geo, :clean_gitlab_redis_cache, 
 
       before do
         # Neither of these are needed for this spec
-        project_2.destroy
-        project_1.destroy
+        project_2.destroy!
+        project_1.destroy!
 
         allow_next_instance_of(described_class) do |instance|
           allow(instance).to receive(:db_retrieve_batch_size).and_return(2) # Must be >1 because of the Geo::BaseSchedulerWorker#interleave

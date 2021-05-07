@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Manage
 group: Import
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Migrating from CVS
@@ -62,14 +62,15 @@ Migrating to Git/GitLab will benefit you:
   an open source end-to-end software development platform with built-in version
   control, issue tracking, code review, CI/CD, and more.
 - **Support for many network protocols**. Git supports SSH, HTTP/HTTPS and rsync
-  among others, whereas CVS supports only SSH and its own insecure pserver
+  among others, whereas CVS supports only SSH and its own insecure `pserver`
   protocol with no user authentication.
 
 ## How to migrate
 
 Here's a few links to get you started with the migration:
 
-- [Migrate using the `cvs-fast-export` tool](http://www.catb.org/~esr/reposurgeon/dvcs-migration-guide.html) ([_source code_](https://gitlab.com/esr/cvs-fast-export))
-- [Stack Overflow post on importing the CVS repo](https://stackoverflow.com/a/11490134/974710)
+- [Migrate using the `cvs-fast-export` tool](https://gitlab.com/esr/cvs-fast-export)
+- [Stack Overflow post on importing the CVS repository](https://stackoverflow.com/a/11490134/974710)
 - [Convert a CVS repository to Git](https://www.techrepublic.com/blog/linux-and-open-source/convert-cvs-repositories-to-git/)
 - [Man page of the `git-cvsimport` tool](https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-cvsimport.html)
+- [Migrate using `reposurgeon`](http://www.catb.org/~esr/reposurgeon/repository-editing.html#conversion)

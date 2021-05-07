@@ -19,21 +19,55 @@ RSpec.describe Gitlab::CryptoHelper do
       expect(encrypted).to match %r{\A[A-Za-z0-9+/=]+\z}
       expect(encrypted).not_to include "\n"
     end
+
+    it 'encrypts using static iv' do
+      expect(Encryptor).to receive(:encrypt).with(described_class::AES256_GCM_OPTIONS.merge(value: 'some-value', iv: described_class::AES256_GCM_IV_STATIC)).and_return('hashed_value')
+
+      described_class.aes256_gcm_encrypt('some-value')
+    end
+
+    context 'with provided iv' do
+      let(:iv) { create_nonce }
+
+      it 'encrypts using provided iv' do
+        expect(Encryptor).to receive(:encrypt).with(described_class::AES256_GCM_OPTIONS.merge(value: 'some-value', iv: iv)).and_return('hashed_value')
+
+        described_class.aes256_gcm_encrypt('some-value', nonce: iv)
+      end
+    end
   end
 
   describe '.aes256_gcm_decrypt' do
-    let(:encrypted) { described_class.aes256_gcm_encrypt('some-value') }
+    context 'when token was encrypted using static nonce' do
+      let(:encrypted) { described_class.aes256_gcm_encrypt('some-value', nonce: described_class::AES256_GCM_IV_STATIC) }
 
-    it 'correctly decrypts encrypted string' do
-      decrypted = described_class.aes256_gcm_decrypt(encrypted)
+      it 'correctly decrypts encrypted string' do
+        decrypted = described_class.aes256_gcm_decrypt(encrypted)
 
-      expect(decrypted).to eq 'some-value'
+        expect(decrypted).to eq 'some-value'
+      end
+
+      it 'decrypts a value when it ends with a new line character' do
+        decrypted = described_class.aes256_gcm_decrypt(encrypted + "\n")
+
+        expect(decrypted).to eq 'some-value'
+      end
     end
 
-    it 'decrypts a value when it ends with a new line character' do
-      decrypted = described_class.aes256_gcm_decrypt(encrypted + "\n")
+    context 'when token was encrypted using random nonce' do
+      let(:value) { 'random-value' }
+      let(:iv) { create_nonce }
+      let(:encrypted) { described_class.aes256_gcm_encrypt(value, nonce: iv) }
 
-      expect(decrypted).to eq 'some-value'
+      it 'correctly decrypts encrypted string' do
+        decrypted = described_class.aes256_gcm_decrypt(encrypted, nonce: iv)
+
+        expect(decrypted).to eq value
+      end
     end
+  end
+
+  def create_nonce
+    ::Digest::SHA256.hexdigest('my-value').bytes.take(TokenAuthenticatableStrategies::EncryptionHelper::NONCE_SIZE).pack('c*')
   end
 end

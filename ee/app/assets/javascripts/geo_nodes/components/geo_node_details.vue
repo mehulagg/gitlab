@@ -3,9 +3,9 @@ import { GlLink } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
 import NodeDetailsSectionMain from './node_detail_sections/node_details_section_main.vue';
+import NodeDetailsSectionOther from './node_detail_sections/node_details_section_other.vue';
 import NodeDetailsSectionSync from './node_detail_sections/node_details_section_sync.vue';
 import NodeDetailsSectionVerification from './node_detail_sections/node_details_section_verification.vue';
-import NodeDetailsSectionOther from './node_detail_sections/node_details_section_other.vue';
 
 export default {
   components: {

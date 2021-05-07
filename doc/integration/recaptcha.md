@@ -1,4 +1,10 @@
-# reCAPTCHA
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
+# reCAPTCHA **(FREE)**
 
 GitLab leverages [Google's reCAPTCHA](https://www.google.com/recaptcha/about/)
 to protect against spam and abuse. GitLab displays the CAPTCHA form on the sign-up page
@@ -8,7 +14,7 @@ to confirm that a real user, not a bot, is attempting to create an account.
 
 To use reCAPTCHA, first you must create a site and private key.
 
-1. Go to the URL: <https://www.google.com/recaptcha/admin>.
+1. Go to the [Google reCAPTCHA page](https://www.google.com/recaptcha/admin).
 1. Fill out the form necessary to obtain reCAPTCHA v2 keys.
 1. Log in to your GitLab server, with administrator credentials.
 1. Go to Reporting Applications Settings in the Admin Area (`admin/application_settings/reporting`).
@@ -19,8 +25,8 @@ To use reCAPTCHA, first you must create a site and private key.
    to `return CONDITONAL_ALLOW` so that the spam check short-circuits and triggers the response to
    return `recaptcha_html`.
 
-NOTE: **Note:**
-Make sure you are viewing an issuable in a project that is public, and if you're working with an issue, the issue is public.
+NOTE:
+Make sure you are viewing an issuable in a project that is public. If you're working with an issue, the issue is public.
 
 ## Enabling reCAPTCHA for user logins via passwords
 

@@ -18,7 +18,7 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
     context 'without wiki and design repository' do
       let(:project) { create(:project, :repository, wiki_enabled: false) }
       let(:destination) { 'test_second_storage' }
-      let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, project: project, destination_storage_name: destination) }
+      let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, container: project, destination_storage_name: destination) }
       let!(:checksum) { project.repository.checksum }
       let(:project_repository_double) { double(:repository) }
       let(:original_project_repository_double) { double(:repository) }
@@ -36,7 +36,7 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
       end
 
       context 'when the move succeeds' do
-        it 'moves the repository to the new storage and unmarks the repository as read only' do
+        it 'moves the repository to the new storage and unmarks the repository as read-only' do
           old_path = Gitlab::GitalyClient::StorageSettings.allow_disk_access do
             project.repository.path_to_repo
           end
@@ -59,13 +59,18 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
       end
 
       context 'when the filesystems are the same' do
-        let(:destination) { project.repository_storage }
+        before do
+          expect(Gitlab::GitalyClient).to receive(:filesystem_id).twice.and_return(SecureRandom.uuid)
+        end
 
-        it 'bails out and does nothing' do
+        it 'updates the database without trying to move the repostory', :aggregate_failures do
           result = subject.execute
+          project.reload
 
-          expect(result).to be_error
-          expect(result.message).to match(/SameFilesystemError/)
+          expect(result).to be_success
+          expect(project).not_to be_repository_read_only
+          expect(project.repository_storage).to eq('test_second_storage')
+          expect(project.project_repository.shard_name).to eq('test_second_storage')
         end
       end
 
@@ -144,7 +149,7 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
       end
 
       context 'when the repository move is finished' do
-        let(:repository_storage_move) { create(:project_repository_storage_move, :finished, project: project, destination_storage_name: destination) }
+        let(:repository_storage_move) { create(:project_repository_storage_move, :finished, container: project, destination_storage_name: destination) }
 
         it 'is idempotent' do
           expect do
@@ -156,7 +161,7 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
       end
 
       context 'when the repository move is failed' do
-        let(:repository_storage_move) { create(:project_repository_storage_move, :failed, project: project, destination_storage_name: destination) }
+        let(:repository_storage_move) { create(:project_repository_storage_move, :failed, container: project, destination_storage_name: destination) }
 
         it 'is idempotent' do
           expect do
@@ -168,12 +173,30 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
       end
     end
 
+    context 'project with no repositories' do
+      let(:project) { create(:project) }
+      let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, container: project, destination_storage_name: 'test_second_storage') }
+
+      it 'updates the database' do
+        allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
+        allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
+
+        result = subject.execute
+        project.reload
+
+        expect(result).to be_success
+        expect(project).not_to be_repository_read_only
+        expect(project.repository_storage).to eq('test_second_storage')
+        expect(project.project_repository.shard_name).to eq('test_second_storage')
+      end
+    end
+
     context 'with wiki repository' do
       include_examples 'moves repository to another storage', 'wiki' do
         let(:project) { create(:project, :repository, wiki_enabled: true) }
         let(:repository) { project.wiki.repository }
         let(:destination) { 'test_second_storage' }
-        let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, project: project, destination_storage_name: destination) }
+        let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, container: project, destination_storage_name: destination) }
 
         before do
           project.create_wiki
@@ -186,7 +209,7 @@ RSpec.describe Projects::UpdateRepositoryStorageService do
         let(:project) { create(:project, :repository) }
         let(:repository) { project.design_repository }
         let(:destination) { 'test_second_storage' }
-        let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, project: project, destination_storage_name: destination) }
+        let(:repository_storage_move) { create(:project_repository_storage_move, :scheduled, container: project, destination_storage_name: destination) }
 
         before do
           project.design_repository.create_if_not_exists

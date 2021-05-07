@@ -1,19 +1,37 @@
 import $ from 'jquery';
 import Mousetrap from 'mousetrap';
-import Sidebar from '../../right_sidebar';
-import Shortcuts from './shortcuts';
-import { CopyAsGFM } from '../markdown/copy_as_gfm';
+import { clickCopyToClipboardButton } from '~/behaviors/copy_to_clipboard';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
+import { isElementVisible } from '~/lib/utils/dom_utils';
+import Sidebar from '../../right_sidebar';
+import { CopyAsGFM } from '../markdown/copy_as_gfm';
+import {
+  keysFor,
+  ISSUE_MR_CHANGE_ASSIGNEE,
+  ISSUE_MR_CHANGE_MILESTONE,
+  ISSUABLE_CHANGE_LABEL,
+  ISSUABLE_COMMENT_OR_REPLY,
+  ISSUABLE_EDIT_DESCRIPTION,
+  MR_COPY_SOURCE_BRANCH_NAME,
+} from './keybindings';
+import Shortcuts from './shortcuts';
 
 export default class ShortcutsIssuable extends Shortcuts {
   constructor() {
     super();
 
-    Mousetrap.bind('a', () => ShortcutsIssuable.openSidebarDropdown('assignee'));
-    Mousetrap.bind('m', () => ShortcutsIssuable.openSidebarDropdown('milestone'));
-    Mousetrap.bind('l', () => ShortcutsIssuable.openSidebarDropdown('labels'));
-    Mousetrap.bind('r', ShortcutsIssuable.replyWithSelectedText);
-    Mousetrap.bind('e', ShortcutsIssuable.editIssue);
+    Mousetrap.bind(keysFor(ISSUE_MR_CHANGE_ASSIGNEE), () =>
+      ShortcutsIssuable.openSidebarDropdown('assignee'),
+    );
+    Mousetrap.bind(keysFor(ISSUE_MR_CHANGE_MILESTONE), () =>
+      ShortcutsIssuable.openSidebarDropdown('milestone'),
+    );
+    Mousetrap.bind(keysFor(ISSUABLE_CHANGE_LABEL), () =>
+      ShortcutsIssuable.openSidebarDropdown('labels'),
+    );
+    Mousetrap.bind(keysFor(ISSUABLE_COMMENT_OR_REPLY), ShortcutsIssuable.replyWithSelectedText);
+    Mousetrap.bind(keysFor(ISSUABLE_EDIT_DESCRIPTION), ShortcutsIssuable.editIssue);
+    Mousetrap.bind(keysFor(MR_COPY_SOURCE_BRANCH_NAME), ShortcutsIssuable.copyBranchName);
   }
 
   static replyWithSelectedText() {
@@ -36,7 +54,7 @@ export default class ShortcutsIssuable extends Shortcuts {
     // ... Or come from a message
     if (!foundMessage) {
       if (documentFragment.originalNodes) {
-        documentFragment.originalNodes.forEach(e => {
+        documentFragment.originalNodes.forEach((e) => {
           let node = e;
           do {
             // Text nodes don't define the `matches` method
@@ -59,7 +77,7 @@ export default class ShortcutsIssuable extends Shortcuts {
     const blockquoteEl = document.createElement('blockquote');
     blockquoteEl.appendChild(el);
     CopyAsGFM.nodeToGFM(blockquoteEl)
-      .then(text => {
+      .then((text) => {
         if (text.trim() === '') {
           return false;
         }
@@ -97,5 +115,19 @@ export default class ShortcutsIssuable extends Shortcuts {
   static openSidebarDropdown(name) {
     Sidebar.instance.openDropdown(name);
     return false;
+  }
+
+  static copyBranchName() {
+    // There are two buttons - one that is shown when the sidebar
+    // is expanded, and one that is shown when it's collapsed.
+    const allCopyBtns = Array.from(document.querySelectorAll('.js-sidebar-source-branch button'));
+
+    // Select whichever button is currently visible so that
+    // the "Copied" tooltip is shown when a click is simulated.
+    const visibleBtn = allCopyBtns.find(isElementVisible);
+
+    if (visibleBtn) {
+      clickCopyToClipboardButton(visibleBtn);
+    }
   }
 }

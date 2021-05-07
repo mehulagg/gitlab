@@ -1,12 +1,12 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { GlAlert, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { uniq } from 'lodash';
-import { GlAlert, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import Vue from 'vue';
+import Vuex from 'vuex';
 import Api from '~/api';
-import { parseUserIds, stringifyUserIds } from '~/user_lists/store/utils';
-import createStore from '~/user_lists/store/show';
 import UserList from '~/user_lists/components/user_list.vue';
+import createStore from '~/user_lists/store/show';
+import { parseUserIds, stringifyUserIds } from '~/user_lists/store/utils';
 import { userList } from '../../feature_flags/mock_data';
 
 jest.mock('~/api');
@@ -16,7 +16,7 @@ Vue.use(Vuex);
 describe('User List', () => {
   let wrapper;
 
-  const click = testId => wrapper.find(`[data-testid="${testId}"]`).trigger('click');
+  const click = (testId) => wrapper.find(`[data-testid="${testId}"]`).trigger('click');
 
   const findUserIds = () => wrapper.findAll('[data-testid="user-id"]');
 
@@ -38,7 +38,7 @@ describe('User List', () => {
 
     beforeEach(() => {
       Api.fetchFeatureFlagUserList.mockReturnValue(
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveFn = resolve;
         }),
       );
@@ -110,15 +110,15 @@ describe('User List', () => {
       });
 
       it('should add user IDs to the user list', () => {
-        newIds.forEach(id => expect(receivedUserIds).toContain(id));
+        newIds.forEach((id) => expect(receivedUserIds).toContain(id));
       });
 
       it('should not remove existing user ids', () => {
-        userIds.forEach(id => expect(receivedUserIds).toContain(id));
+        userIds.forEach((id) => expect(receivedUserIds).toContain(id));
       });
 
       it('should not submit empty IDs', () => {
-        parsedReceivedUserIds.forEach(id => expect(id).not.toBe(''));
+        parsedReceivedUserIds.forEach((id) => expect(id).not.toBe(''));
       });
 
       it('should not create duplicate entries', () => {
@@ -127,8 +127,8 @@ describe('User List', () => {
 
       it('should display the new IDs', () => {
         const userIdWrappers = findUserIds();
-        newIds.forEach(id => {
-          const userIdWrapper = userIdWrappers.wrappers.find(w => w.text() === id);
+        newIds.forEach((id) => {
+          const userIdWrapper = userIdWrappers.wrappers.find((w) => w.text() === id);
           expect(userIdWrapper.exists()).toBe(true);
         });
       });
@@ -150,7 +150,7 @@ describe('User List', () => {
 
       it('should not display the deleted user', () => {
         const userIdWrappers = findUserIds();
-        const userIdWrapper = userIdWrappers.wrappers.find(w => w.text() === userIds[0]);
+        const userIdWrapper = userIdWrappers.wrappers.find((w) => w.text() === userIds[0]);
         expect(userIdWrapper).toBeUndefined();
       });
     });

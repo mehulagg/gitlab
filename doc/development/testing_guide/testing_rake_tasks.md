@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Testing Rake tasks
 
 To make testing Rake tasks a little easier, there is a helper that can be included
@@ -5,7 +11,7 @@ in lieu of the standard Spec helper. Instead of `require 'spec_helper'`, use
 `require 'rake_helper'`. The helper includes `spec_helper` for you, and configures
 a few other things to make testing Rake tasks easier.
 
-At a minimum, requiring the Rake helper will redirect `stdout`, include the
+At a minimum, requiring the Rake helper redirects `stdout`, include the
 runtime task helpers, and include the `RakeHelpers` Spec support module.
 
 The `RakeHelpers` module exposes a `run_rake_task(<task>)` method to make

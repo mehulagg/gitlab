@@ -1,6 +1,6 @@
 <script>
-import { mapGetters } from 'vuex';
 import { GlBadge } from '@gitlab/ui';
+import { mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -12,7 +12,7 @@ export default {
 };
 </script>
 <template>
-  <gl-badge size="sm" variant="success">
+  <gl-badge size="sm" variant="info" class="gl-ml-2">
     {{ draftsCount }}
     <span class="sr-only"> {{ n__('draft', 'drafts', draftsCount) }} </span>
   </gl-badge>

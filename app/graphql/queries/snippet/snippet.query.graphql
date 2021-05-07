@@ -1,4 +1,4 @@
-query GetSnippetQuery($ids: [ID!]) {
+query GetSnippetQuery($ids: [SnippetID!]) {
   snippets(ids: $ids) {
     __typename
     nodes {
@@ -59,6 +59,11 @@ query GetSnippetQuery($ids: [ID!]) {
         name
         username
         webUrl
+        status {
+          __typename
+          emoji
+          message
+        }
       }
     }
   }

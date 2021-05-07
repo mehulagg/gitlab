@@ -7,6 +7,7 @@ RSpec.describe IssueSidebarExtrasEntity do
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:user) { create(:user) }
   let_it_be(:issue, reload: true) { create(:issue, :confidential, project: project) }
+
   let(:request) { double('request', current_user: user) }
 
   subject { described_class.new(issue, request: request).as_json }

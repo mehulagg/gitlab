@@ -1,0 +1,5 @@
+%p
+  = _("%{user_name} (%{user_username}) was removed from %{rotation} in %{schedule} in %{project}. ") % { user_name: @user.name, user_username: @user.username, rotation: @rotation.name, schedule: @rotation.schedule.name, project: @project.name }
+
+%p
+  = html_escape(_("%{rotation} has been recalculated with the remaining participants. Please review the new setup for %{rotation_link}. It is recommended that you reach out to the current on-call responder to ensure continuity of on-call coverage.")) % { rotation: @rotation.name, rotation_link: link_to(@rotation.name, project_incident_management_oncall_schedules_url(@project).html_safe) }

@@ -4,9 +4,9 @@ module Elastic
   module Latest
     class ProjectClassProxy < ApplicationClassProxy
       def elastic_search(query, options: {})
-        options[:in] = %w(name^10 name_with_namespace^2 path_with_namespace path^9 description)
+        options[:in] = %w[name^10 name_with_namespace^2 path_with_namespace path^9 description]
 
-        query_hash = basic_query_hash(options[:in], query)
+        query_hash = basic_query_hash(options[:in], query, count_only: options[:count_only])
 
         filters = [{ terms: { _name: context.name(:doc, :is_a, es_type), type: [es_type] } }]
 
@@ -44,11 +44,17 @@ module Elastic
             }
           end
 
-          query_hash[:query][:bool][:filter] = filters
+          query_hash[:query][:bool][:filter] += filters
         end
 
         search(query_hash, options)
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def preload_indexing_data(relation)
+        relation.includes(:project_feature, :route)
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

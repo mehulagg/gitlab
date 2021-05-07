@@ -1,20 +1,22 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Applications API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8160) in GitLab 10.5.
 
-Applications API operates on OAuth applications for:
+The Applications API operates on instance-wide OAuth applications for:
 
 - [Using GitLab as an authentication provider](../integration/oauth_provider.md).
 - [Allowing access to GitLab resources on a user's behalf](oauth2.md).
 
-NOTE: **Note:**
-Only admin users can use the Applications API.
+The Applications API cannot be used to manage group applications or applications of individual users.
+
+NOTE:
+Only administrator users can use the Applications API.
 
 ## Create an application
 
@@ -33,7 +35,7 @@ Parameters:
 | `name`         | string  | yes      | Name of the application.         |
 | `redirect_uri` | string  | yes      | Redirect URI of the application. |
 | `scopes`       | string  | yes      | Scopes of the application.       |
-| `confidential` | boolean | no       | The application will be used where the client secret can be kept confidential. Native mobile apps and Single Page Apps are considered non-confidential. Defaults to `true` if not supplied |
+| `confidential` | boolean | no       | The application is used where the client secret can be kept confidential. Native mobile apps and Single Page Apps are considered non-confidential. Defaults to `true` if not supplied |
 
 Example request:
 
@@ -82,8 +84,8 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-The `secret` value will not be exposed by this API.
+NOTE:
+The `secret` value is not exposed by this API.
 
 ## Delete an application
 

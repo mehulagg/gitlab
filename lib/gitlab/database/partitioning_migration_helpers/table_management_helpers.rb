@@ -9,7 +9,7 @@ module Gitlab
         include ::Gitlab::Database::MigrationHelpers
         include ::Gitlab::Database::Migrations::BackgroundMigrationHelpers
 
-        ALLOWED_TABLES = %w[audit_events].freeze
+        ALLOWED_TABLES = %w[audit_events web_hook_logs].freeze
         ERROR_SCOPE = 'table partitioning'
 
         MIGRATION_CLASS_NAME = "::#{module_parent_name}::BackfillPartitionedTable"
@@ -164,8 +164,8 @@ module Gitlab
               "this could indicate the previous partitioning migration has been rolled back."
           end
 
-          Gitlab::BackgroundMigration.steal(MIGRATION_CLASS_NAME) do |raw_arguments|
-            JobArguments.from_array(raw_arguments).source_table_name == table_name.to_s
+          Gitlab::BackgroundMigration.steal(MIGRATION_CLASS_NAME) do |background_job|
+            JobArguments.from_array(background_job.args.second).source_table_name == table_name.to_s
           end
 
           primary_key = connection.primary_key(table_name)
@@ -179,7 +179,8 @@ module Gitlab
         # Replaces a non-partitioned table with its partitioned copy. This is the final step in a partitioning
         # migration, which makes the partitioned table ready for use by the application. The partitioned copy should be
         # replaced with the original table in such a way that it appears seamless to any database clients. The replaced
-        # table will be renamed to "#{replaced_table}_archived"
+        # table will be renamed to "#{replaced_table}_archived". Partitions and primary key constraints will also be
+        # renamed to match the naming scheme of the parent table.
         #
         # **NOTE** This method should only be used after all other migration steps have completed successfully.
         # There are several limitations to this method that MUST be handled before, or during, the swap migration:
@@ -220,6 +221,28 @@ module Gitlab
           primary_key_name = connection.primary_key(archived_table_name)
 
           replace_table(table_name, archived_table_name, partitioned_table_name, primary_key_name)
+        end
+
+        def drop_nonpartitioned_archive_table(table_name)
+          assert_table_is_allowed(table_name)
+
+          archived_table_name = make_archived_table_name(table_name)
+
+          with_lock_retries do
+            drop_sync_trigger(table_name)
+          end
+
+          drop_table(archived_table_name)
+        end
+
+        def create_trigger_to_sync_tables(source_table_name, partitioned_table_name, unique_key)
+          function_name = make_sync_function_name(source_table_name)
+          trigger_name = make_sync_trigger_name(source_table_name)
+
+          create_sync_function(function_name, partitioned_table_name, unique_key)
+          create_comment('FUNCTION', function_name, "Partitioning migration: table sync for #{source_table_name} table")
+
+          create_sync_trigger(source_table_name, trigger_name, function_name)
         end
 
         private
@@ -315,16 +338,6 @@ module Gitlab
           create_range_partition(partition_name, table_name, lower_bound, upper_bound)
         end
 
-        def create_trigger_to_sync_tables(source_table_name, partitioned_table_name, unique_key)
-          function_name = make_sync_function_name(source_table_name)
-          trigger_name = make_sync_trigger_name(source_table_name)
-
-          create_sync_function(function_name, partitioned_table_name, unique_key)
-          create_comment('FUNCTION', function_name, "Partitioning migration: table sync for #{source_table_name} table")
-
-          create_sync_trigger(source_table_name, trigger_name, function_name)
-        end
-
         def drop_sync_trigger(source_table_name)
           trigger_name = make_sync_trigger_name(source_table_name)
           drop_trigger(source_table_name, trigger_name)
@@ -415,7 +428,7 @@ module Gitlab
         end
 
         def replace_table(original_table_name, replacement_table_name, replaced_table_name, primary_key_name)
-          replace_table = Gitlab::Database::Partitioning::ReplaceTable.new(original_table_name,
+          replace_table = Gitlab::Database::Partitioning::ReplaceTable.new(original_table_name.to_s,
               replacement_table_name, replaced_table_name, primary_key_name)
 
           with_lock_retries do

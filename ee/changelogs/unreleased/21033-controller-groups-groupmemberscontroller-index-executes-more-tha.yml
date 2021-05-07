@@ -1,0 +1,5 @@
+---
+title: Resolve created_by and oncall_schedule n+1's in group member index
+merge_request: 59756
+author:
+type: performance

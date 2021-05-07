@@ -1,8 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import IdeSidebarNav from '~/ide/components/ide_sidebar_nav.vue';
 import { SIDE_RIGHT, SIDE_LEFT } from '~/ide/constants';
+import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 
 const TEST_TABS = [
   {
@@ -48,7 +49,7 @@ describe('ide/components/ide_sidebar_nav', () => {
 
   const findButtons = () => wrapper.findAll('li button');
   const findButtonsData = () =>
-    findButtons().wrappers.map(button => {
+    findButtons().wrappers.map((button) => {
       return {
         title: button.attributes('title'),
         ariaLabel: button.attributes('aria-label'),
@@ -58,10 +59,7 @@ describe('ide/components/ide_sidebar_nav', () => {
         tooltip: getBinding(button.element, 'tooltip').value,
       };
     });
-  const clickTab = () =>
-    findButtons()
-      .at(TEST_CURRENT_INDEX)
-      .trigger('click');
+  const clickTab = () => findButtons().at(TEST_CURRENT_INDEX).trigger('click');
 
   describe.each`
     isOpen   | side          | otherSide     | classes         | classesObj                              | emitEvent  | emitArg
@@ -77,7 +75,7 @@ describe('ide/components/ide_sidebar_nav', () => {
         createComponent({ isOpen, side });
 
         bsTooltipHide = jest.fn();
-        wrapper.vm.$root.$on('bv::hide::tooltip', bsTooltipHide);
+        wrapper.vm.$root.$on(BV_HIDE_TOOLTIP, bsTooltipHide);
       });
 
       it('renders buttons', () => {

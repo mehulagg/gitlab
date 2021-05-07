@@ -1,16 +1,19 @@
 <script>
-import { __ } from '~/locale';
+import { mapGetters } from 'vuex';
 import ListLabel from '~/boards/models/label';
+import { __ } from '~/locale';
 import BoardLabelsSelect from '~/vue_shared/components/sidebar/labels_select/base.vue';
+import AssigneeSelect from './assignee_select.vue';
+import BoardScopeCurrentIteration from './board_scope_current_iteration.vue';
 import BoardMilestoneSelect from './milestone_select.vue';
 import BoardWeightSelect from './weight_select.vue';
-import AssigneeSelect from './assignee_select.vue';
 
 export default {
   components: {
     AssigneeSelect,
     BoardLabelsSelect,
     BoardMilestoneSelect,
+    BoardScopeCurrentIteration,
     BoardWeightSelect,
   },
 
@@ -64,6 +67,7 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['isIssueBoard']),
     expandButtonText() {
       return this.expanded ? __('Collapse') : __('Expand');
     },
@@ -72,8 +76,10 @@ export default {
   methods: {
     handleLabelClick(label) {
       if (label.isAny) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.board.labels = [];
-      } else if (!this.board.labels.find(l => l.id === label.id)) {
+      } else if (!this.board.labels.find((l) => l.id === label.id)) {
+        // eslint-disable-next-line vue/no-mutating-props
         this.board.labels.push(
           new ListLabel({
             id: label.id,
@@ -84,7 +90,8 @@ export default {
         );
       } else {
         let { labels } = this.board;
-        labels = labels.filter(selected => selected.id !== label.id);
+        labels = labels.filter((selected) => selected.id !== label.id);
+        // eslint-disable-next-line vue/no-mutating-props
         this.board.labels = labels;
       }
     },
@@ -105,10 +112,18 @@ export default {
     </p>
     <div v-if="!collapseScope || expanded">
       <board-milestone-select
+        v-if="isIssueBoard"
         :board="board"
         :group-id="groupId"
         :project-id="projectId"
         :can-edit="canAdminBoard"
+      />
+
+      <board-scope-current-iteration
+        v-if="isIssueBoard"
+        :can-admin-board="canAdminBoard"
+        :iteration-id="board.iteration_id"
+        @set-iteration="$emit('set-iteration', $event)"
       />
 
       <board-labels-select
@@ -125,6 +140,7 @@ export default {
       >
 
       <assignee-select
+        v-if="isIssueBoard"
         :board="board"
         :selected="board.assignee"
         :can-edit="canAdminBoard"
@@ -137,12 +153,15 @@ export default {
         wrapper-class="assignee"
       />
 
+      <!-- eslint-disable vue/no-mutating-props -->
       <board-weight-select
+        v-if="isIssueBoard"
         v-model="board.weight"
         :board="board"
         :weights="weights"
         :can-edit="canAdminBoard"
       />
+      <!-- eslint-enable vue/no-mutating-props -->
     </div>
   </div>
 </template>

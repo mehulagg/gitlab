@@ -19,7 +19,7 @@ class DiffNote < Note
   # EE might have added a type when the module was prepended
   validates :noteable_type, inclusion: { in: -> (_note) { noteable_types } }
   validate :positions_complete
-  validate :verify_supported
+  validate :verify_supported, unless: :importing?
 
   before_validation :set_line_code, if: :on_text?, unless: :importing?
   after_save :keep_around_commits, unless: :importing?
@@ -111,6 +111,10 @@ class DiffNote < Note
     super.merge(suggestions_filter_enabled: true)
   end
 
+  def multiline?
+    position&.multiline?
+  end
+
   private
 
   def enqueue_diff_file_creation_job
@@ -149,7 +153,7 @@ class DiffNote < Note
   end
 
   def supported?
-    for_commit? || for_design? || self.noteable.has_complete_diff_refs?
+    for_commit? || for_design? || self.noteable&.has_complete_diff_refs?
   end
 
   def set_line_code

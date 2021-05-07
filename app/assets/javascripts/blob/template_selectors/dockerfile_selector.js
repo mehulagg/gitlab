@@ -1,6 +1,6 @@
-import FileTemplateSelector from '../file_template_selector';
-import { __ } from '~/locale';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { __ } from '~/locale';
+import FileTemplateSelector from '../file_template_selector';
 
 export default class DockerfileSelector extends FileTemplateSelector {
   constructor({ mediator }) {
@@ -24,8 +24,8 @@ export default class DockerfileSelector extends FileTemplateSelector {
       search: {
         fields: ['name'],
       },
-      clicked: options => this.reportSelectionName(options),
-      text: item => item.name,
+      clicked: (options) => this.reportSelectionName(options),
+      text: (item) => item.name,
     });
   }
 }

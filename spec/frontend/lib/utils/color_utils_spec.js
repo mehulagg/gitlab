@@ -1,4 +1,9 @@
-import { textColorForBackground, hexToRgb } from '~/lib/utils/color_utils';
+import {
+  textColorForBackground,
+  hexToRgb,
+  validateHexColor,
+  darkModeEnabled,
+} from '~/lib/utils/color_utils';
 
 describe('Color utils', () => {
   describe('Converting hex code to rgb', () => {
@@ -31,5 +36,40 @@ describe('Color utils', () => {
       expect(textColorForBackground('#FFF')).toEqual('#333333');
       expect(textColorForBackground('#000')).toEqual('#FFFFFF');
     });
+  });
+
+  describe('Validate hex color', () => {
+    it.each`
+      color        | output
+      ${undefined} | ${null}
+      ${null}      | ${null}
+      ${''}        | ${null}
+      ${'ABC123'}  | ${false}
+      ${'#ZZZ'}    | ${false}
+      ${'#FF0'}    | ${true}
+      ${'#FF0000'} | ${true}
+    `('returns $output when $color is given', ({ color, output }) => {
+      expect(validateHexColor(color)).toEqual(output);
+    });
+  });
+
+  describe('darkModeEnabled', () => {
+    it.each`
+      page                     | bodyClass     | ideTheme           | expected
+      ${'ide:index'}           | ${'gl-dark'}  | ${'monokai-light'} | ${false}
+      ${'ide:index'}           | ${'ui-light'} | ${'monokai'}       | ${true}
+      ${'groups:issues:index'} | ${'ui-light'} | ${'monokai'}       | ${false}
+      ${'groups:issues:index'} | ${'gl-dark'}  | ${'monokai-light'} | ${true}
+    `(
+      'is $expected on $page with $bodyClass body class and $ideTheme IDE theme',
+      async ({ page, bodyClass, ideTheme, expected }) => {
+        document.body.outerHTML = `<body class="${bodyClass}" data-page="${page}"></body>`;
+        window.gon = {
+          user_color_scheme: ideTheme,
+        };
+
+        expect(darkModeEnabled()).toBe(expected);
+      },
+    );
   });
 });

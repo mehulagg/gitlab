@@ -7,7 +7,11 @@ describe('Integration form state factory', () => {
       customState: {},
       isSaving: false,
       isTesting: false,
+      isResetting: false,
       override: false,
+      isLoadingJiraIssueTypes: false,
+      jiraIssueTypes: [],
+      loadingJiraIssueTypesErrorMessage: '',
     });
   });
 

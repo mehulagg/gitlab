@@ -1,18 +1,19 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import Mousetrap from 'mousetrap';
-import { escape } from 'lodash';
 import {
   GlButton,
   GlDropdown,
   GlDropdownSectionHeader,
   GlDropdownItem,
   GlTooltipDirective,
+  GlModalDirective,
 } from '@gitlab/ui';
-import { n__, s__, sprintf } from '~/locale';
+import { escape } from 'lodash';
 import { mergeUrlParams, webIDEUrl } from '~/lib/utils/url_utility';
+import { n__, s__, sprintf } from '~/locale';
 import clipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
+import MrWidgetHowToMergeModal from './mr_widget_how_to_merge_modal.vue';
 import MrWidgetIcon from './mr_widget_icon.vue';
 
 export default {
@@ -21,6 +22,7 @@ export default {
     clipboardButton,
     TooltipOnTruncate,
     MrWidgetIcon,
+    MrWidgetHowToMergeModal,
     GlButton,
     GlDropdown,
     GlDropdownSectionHeader,
@@ -28,6 +30,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModalDirective,
   },
   props: {
     mr: {
@@ -83,16 +86,8 @@ export default {
           )
         : '';
     },
-  },
-  mounted() {
-    Mousetrap.bind('b', this.copyBranchName);
-  },
-  beforeDestroy() {
-    Mousetrap.unbind('b');
-  },
-  methods: {
-    copyBranchName() {
-      this.$refs.copyBranchNameButton.$el.click();
+    isFork() {
+      return this.mr.sourceProjectFullPath !== this.mr.targetProjectFullPath;
     },
   },
 };
@@ -110,7 +105,6 @@ export default {
             class="label-branch label-truncate js-source-branch"
             v-html="mr.sourceBranchLink"
           /><clipboard-button
-            ref="copyBranchNameButton"
             data-testid="mr-widget-copy-clipboard"
             :text="branchNameClipboardData"
             :title="__('Copy branch name')"
@@ -139,27 +133,34 @@ export default {
             v-gl-tooltip
             :title="ideButtonTitle"
             class="gl-display-none d-md-inline-block gl-mr-3"
-            :tabindex="!mr.canPushToSourceBranch ? 0 : null"
+            :tabindex="ideButtonTitle ? 0 : null"
           >
             <gl-button
               :href="webIdePath"
               :disabled="!mr.canPushToSourceBranch"
               class="js-web-ide"
-              tabindex="0"
-              role="button"
               data-qa-selector="open_in_web_ide_button"
             >
               {{ s__('mrWidget|Open in Web IDE') }}
             </gl-button>
           </span>
           <gl-button
+            v-gl-modal-directive="'modal-merge-info'"
             :disabled="mr.sourceBranchRemoved"
-            data-target="#modal_merge_info"
-            data-toggle="modal"
             class="js-check-out-branch gl-mr-3"
           >
             {{ s__('mrWidget|Check out branch') }}
           </gl-button>
+          <mr-widget-how-to-merge-modal
+            :is-fork="isFork"
+            :can-merge="mr.canMerge"
+            :source-branch="mr.sourceBranch"
+            :source-project="mr.sourceProject"
+            :source-project-path="mr.sourceProjectFullPath"
+            :target-branch="mr.targetBranch"
+            :source-project-default-url="mr.sourceProjectDefaultUrl"
+            :reviewing-docs-path="mr.reviewingDocsPath"
+          />
         </template>
         <gl-dropdown
           v-gl-tooltip
@@ -174,7 +175,7 @@ export default {
             :href="mr.emailPatchesPath"
             class="js-download-email-patches"
             download
-            data-qa-selector="download_email_patches"
+            data-qa-selector="download_email_patches_menu_item"
           >
             {{ s__('mrWidget|Email patches') }}
           </gl-dropdown-item>
@@ -182,7 +183,7 @@ export default {
             :href="mr.plainDiffPath"
             class="js-download-plain-diff"
             download
-            data-qa-selector="download_plain_diff"
+            data-qa-selector="download_plain_diff_menu_item"
           >
             {{ s__('mrWidget|Plain diff') }}
           </gl-dropdown-item>

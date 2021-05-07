@@ -47,7 +47,7 @@ RSpec.describe DeployToken do
   describe '#ensure_token' do
     it 'ensures a token' do
       deploy_token.token = nil
-      deploy_token.save
+      deploy_token.save!
 
       expect(deploy_token.token).not_to be_empty
     end
@@ -120,6 +120,39 @@ RSpec.describe DeployToken do
 
       it 'returns true' do
         expect(deploy_token.active?).to be_truthy
+      end
+    end
+  end
+
+  # override the default PolicyActor implementation that always returns false
+  describe "#deactivated?" do
+    context "when it has been revoked" do
+      it 'returns true' do
+        deploy_token.revoke!
+
+        expect(deploy_token.deactivated?).to be_truthy
+      end
+    end
+
+    context "when it hasn't been revoked and is not expired" do
+      it 'returns false' do
+        expect(deploy_token.deactivated?).to be_falsy
+      end
+    end
+
+    context "when it hasn't been revoked and is expired" do
+      it 'returns false' do
+        deploy_token.update_attribute(:expires_at, Date.today - 5.days)
+
+        expect(deploy_token.deactivated?).to be_truthy
+      end
+    end
+
+    context "when it hasn't been revoked and has no expiry" do
+      let(:deploy_token) { create(:deploy_token, expires_at: nil) }
+
+      it 'returns false' do
+        expect(deploy_token.deactivated?).to be_falsy
       end
     end
   end

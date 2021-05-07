@@ -1,4 +1,3 @@
-import { buildRule, ruleSpec } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   RuleTypeEndpoint,
   RuleTypeEntity,
@@ -10,6 +9,7 @@ import {
   PortMatchModePortProtocol,
   EntityTypes,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import { buildRule, ruleSpec } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 
 describe('buildRule', () => {
   const oldRule = {
@@ -20,7 +20,7 @@ describe('buildRule', () => {
 
   describe.each([RuleTypeEndpoint, RuleTypeEntity, RuleTypeCIDR, RuleTypeFQDN])(
     'buildRule $ruleType',
-    ruleType => {
+    (ruleType) => {
       it('builds correct instance', () => {
         const rule = buildRule(ruleType);
         expect(rule).toMatchObject({
@@ -77,8 +77,14 @@ describe('ruleSpec', () => {
       rule = buildRule(RuleTypeEndpoint);
     });
 
-    it('returns empty spec', () => {
-      expect(ruleSpec(rule)).toEqual({});
+    it('returns empty matchLabels', () => {
+      expect(ruleSpec(rule)).toEqual({
+        fromEndpoints: [
+          {
+            matchLabels: {},
+          },
+        ],
+      });
     });
 
     testPortMatchers();

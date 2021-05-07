@@ -3,6 +3,8 @@
 class LdapGroupSyncWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :authentication_and_authorization
   worker_has_external_dependencies!
   weight 2

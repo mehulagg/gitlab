@@ -1,0 +1,37 @@
+#import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
+#import "../fragments/vulnerability.fragment.graphql"
+
+query instanceVulnerabilities(
+  $after: String
+  $first: Int
+  $projectId: [ID!]
+  $severity: [VulnerabilitySeverity!]
+  $reportType: [VulnerabilityReportType!]
+  $scanner: [String!]
+  $scannerId: [VulnerabilitiesScannerID!]
+  $state: [VulnerabilityState!]
+  $sort: VulnerabilitySort
+  $hasIssues: Boolean
+  $hasResolution: Boolean
+) {
+  vulnerabilities(
+    after: $after
+    first: $first
+    severity: $severity
+    reportType: $reportType
+    state: $state
+    projectId: $projectId
+    scanner: $scanner
+    scannerId: $scannerId
+    sort: $sort
+    hasIssues: $hasIssues
+    hasResolution: $hasResolution
+  ) {
+    nodes {
+      ...Vulnerability
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}

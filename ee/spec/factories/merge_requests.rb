@@ -121,36 +121,24 @@ FactoryBot.define do
       end
     end
 
-    trait :with_sast_reports do
-      after(:build) do |merge_request|
-        merge_request.head_pipeline = build(
-          :ee_ci_pipeline,
-          :success,
-          :with_sast_report,
-          project: merge_request.source_project,
-          ref: merge_request.source_branch,
-          sha: merge_request.diff_head_sha)
-      end
-    end
-
-    trait :with_secret_detection_reports do
-      after(:build) do |merge_request|
-        merge_request.head_pipeline = build(
-          :ee_ci_pipeline,
-          :success,
-          :with_secret_detection_report,
-          project: merge_request.source_project,
-          ref: merge_request.source_branch,
-          sha: merge_request.diff_head_sha)
-      end
-    end
-
     trait :with_coverage_fuzzing_reports do
       after(:build) do |merge_request|
         merge_request.head_pipeline = build(
           :ee_ci_pipeline,
           :success,
           :with_coverage_fuzzing_report,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
+    trait :with_api_fuzzing_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ee_ci_pipeline,
+          :success,
+          :with_api_fuzzing_report,
           project: merge_request.source_project,
           ref: merge_request.source_branch,
           sha: merge_request.diff_head_sha)

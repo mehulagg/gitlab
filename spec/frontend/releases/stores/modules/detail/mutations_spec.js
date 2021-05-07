@@ -1,13 +1,13 @@
 import { getJSONFixture } from 'helpers/fixtures';
-import createState from '~/releases/stores/modules/detail/state';
-import mutations from '~/releases/stores/modules/detail/mutations';
-import * as types from '~/releases/stores/modules/detail/mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { ASSET_LINK_TYPE, DEFAULT_ASSET_LINK_TYPE } from '~/releases/constants';
+import * as types from '~/releases/stores/modules/edit_new/mutation_types';
+import mutations from '~/releases/stores/modules/edit_new/mutations';
+import createState from '~/releases/stores/modules/edit_new/state';
 
 const originalRelease = getJSONFixture('api/releases/release.json');
 
-describe('Release detail mutations', () => {
+describe('Release edit/new mutations', () => {
   let state;
   let release;
 
@@ -18,7 +18,6 @@ describe('Release detail mutations', () => {
       releasesPagePath: 'path/to/releases/page',
       markdownDocsPath: 'path/to/markdown/docs',
       markdownPreviewPath: 'path/to/markdown/preview',
-      updateReleaseApiDocsPath: 'path/to/api/docs',
     });
     release = convertObjectPropsToCamelCase(originalRelease);
   });

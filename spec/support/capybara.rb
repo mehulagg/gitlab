@@ -33,7 +33,7 @@ Capybara.register_server :puma_via_workhorse do |app, port, host, **options|
   socket_path = file.path
   file.close! # We just want the filename
 
-  TestEnv.with_workhorse(TestEnv.workhorse_dir, host, port, socket_path) do
+  TestEnv.with_workhorse(host, port, socket_path) do
     Capybara.servers[:puma].call(app, nil, socket_path, **options)
   end
 end
@@ -79,8 +79,30 @@ Capybara.register_driver :chrome do |app|
   )
 end
 
+Capybara.register_driver :firefox do |app|
+  capabilities = Selenium::WebDriver::Remote::Capabilities.firefox(
+    log: {
+      level: :trace
+    }
+  )
+
+  options = Selenium::WebDriver::Firefox::Options.new(log_level: :trace)
+
+  options.add_argument("--window-size=#{CAPYBARA_WINDOW_SIZE.join(',')}")
+
+  # Run headless by default unless WEBDRIVER_HEADLESS specified
+  options.add_argument("--headless") unless ENV['WEBDRIVER_HEADLESS'] =~ /^(false|no|0)$/i
+
+  Capybara::Selenium::Driver.new(
+    app,
+    browser: :firefox,
+    desired_capabilities: capabilities,
+    options: options
+  )
+end
+
 Capybara.server = :puma_via_workhorse
-Capybara.javascript_driver = :chrome
+Capybara.javascript_driver = ENV.fetch('WEBDRIVER', :chrome).to_sym
 Capybara.default_max_wait_time = timeout
 Capybara.ignore_hidden_elements = true
 Capybara.default_normalize_ws = true
@@ -135,7 +157,7 @@ RSpec.configure do |config|
     unless session.current_window.size == CAPYBARA_WINDOW_SIZE
       begin
         session.current_window.resize_to(*CAPYBARA_WINDOW_SIZE)
-      rescue # ?
+      rescue StandardError # ?
       end
     end
   end

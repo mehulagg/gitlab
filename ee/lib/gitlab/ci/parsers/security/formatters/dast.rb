@@ -6,7 +6,7 @@ module Gitlab
       module Security
         module Formatters
           class Dast
-            FORMAT_VERSION = '2.0'.freeze
+            FORMAT_VERSION = '2.0'
 
             def initialize(report)
               @report = report

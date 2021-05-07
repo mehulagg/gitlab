@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+RSpec::Matchers.define_negated_matcher :be_nullable, :be_non_null
+
 RSpec::Matchers.define :require_graphql_authorizations do |*expected|
   match do |klass|
     permissions = if klass.respond_to?(:required_permissions)
@@ -28,11 +30,13 @@ RSpec::Matchers.define :have_graphql_fields do |*expected|
   end
 
   match do |kls|
-    if @allow_extra
-      expect(kls.fields.keys).to include(*expected_field_names)
-    else
-      expect(kls.fields.keys).to contain_exactly(*expected_field_names)
-    end
+    keys   = kls.fields.keys.to_set
+    fields = expected_field_names.to_set
+
+    next true if fields == keys
+    next true if @allow_extra && fields.proper_subset?(keys)
+
+    false
   end
 
   failure_message do |kls|
@@ -90,7 +94,7 @@ RSpec::Matchers.define :have_graphql_arguments do |*expected|
     @names ||= Array.wrap(expected).map { |name| GraphqlHelpers.fieldnamerize(name) }
 
     if field.type.try(:ancestors)&.include?(GraphQL::Types::Relay::BaseConnection)
-      @names | %w(after before first last)
+      @names | %w[after before first last]
     else
       @names
     end
@@ -103,21 +107,89 @@ RSpec::Matchers.define :have_graphql_arguments do |*expected|
   end
 
   failure_message do |field|
-    names = expected_names(field)
+    names = expected_names(field).inspect
+    args = field.arguments.keys.inspect
 
-    "expected that #{field.name} would have the following fields: #{names.inspect}, but it has #{field.arguments.keys.inspect}."
+    "expected #{field.name} to have the following arguments: #{names}, but it has #{args}."
   end
 end
 
-RSpec::Matchers.define :have_graphql_type do |expected|
-  match do |field|
-    expect(field.type).to eq(expected)
+module GraphQLTypeHelpers
+  def message(object, expected, **opts)
+    non_null = expected.non_null? || (opts.key?(:null) && !opts[:null])
+
+    actual = object.type
+    actual_type = actual.unwrap.graphql_name
+    actual_type += '!' if actual.non_null?
+
+    expected_type = expected.unwrap.graphql_name
+    expected_type += '!' if non_null
+
+    "expected #{describe_object(object)} to have GraphQL type #{expected_type}, but got #{actual_type}"
+  end
+
+  def describe_object(object)
+    case object
+    when Types::BaseField
+      "#{describe_object(object.owner_type)}.#{object.graphql_name}"
+    when Types::BaseArgument
+      "#{describe_object(object.owner)}.#{object.graphql_name}"
+    when Class
+      object.try(:graphql_name) || object.name
+    else
+      object.to_s
+    end
+  end
+
+  def nullified(type, can_be_nil)
+    return type if can_be_nil.nil? # unknown!
+    return type if can_be_nil
+
+    type.to_non_null_type
+  end
+end
+
+RSpec::Matchers.define :have_graphql_type do |expected, opts = {}|
+  include GraphQLTypeHelpers
+
+  match do |object|
+    expect(object.type).to eq(nullified(expected, opts[:null]))
+  end
+
+  failure_message do |object|
+    message(object, expected, **opts)
+  end
+end
+
+RSpec::Matchers.define :have_nullable_graphql_type do |expected|
+  include GraphQLTypeHelpers
+
+  match do |object|
+    expect(object).to have_graphql_type(expected.unwrap, { null: true })
+  end
+
+  description do
+    "have nullable GraphQL type #{expected.graphql_name}"
+  end
+
+  failure_message do |object|
+    message(object, expected, null: true)
   end
 end
 
 RSpec::Matchers.define :have_non_null_graphql_type do |expected|
-  match do |field|
-    expect(field.type.to_graphql).to eq(!expected.to_graphql)
+  include GraphQLTypeHelpers
+
+  match do |object|
+    expect(object).to have_graphql_type(expected, { null: false })
+  end
+
+  description do
+    "have non-null GraphQL type #{expected.graphql_name}"
+  end
+
+  failure_message do |object|
+    message(object, expected, null: false)
   end
 end
 

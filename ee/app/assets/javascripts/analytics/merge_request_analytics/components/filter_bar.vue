@@ -1,21 +1,21 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
-import UrlSync from '~/vue_shared/components/url_sync.vue';
-import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import BranchToken from '~/vue_shared/components/filtered_search_bar/tokens/branch_token.vue';
-import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
-import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import {
   DEFAULT_LABEL_NONE,
   DEFAULT_LABEL_ANY,
 } from '~/vue_shared/components/filtered_search_bar/constants';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
   prepareTokens,
   processFilters,
   filterToQueryObject,
 } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import BranchToken from '~/vue_shared/components/filtered_search_bar/tokens/branch_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 
 export default {
   name: 'FilterBar',
@@ -26,17 +26,17 @@ export default {
   inject: ['fullPath', 'type'],
   computed: {
     ...mapState('filters', {
-      selectedSourceBranch: state => state.branches.source.selected,
-      selectedTargetBranch: state => state.branches.target.selected,
-      selectedMilestone: state => state.milestones.selected,
-      selectedAuthor: state => state.authors.selected,
-      selectedAssignee: state => state.assignees.selected,
-      selectedLabelList: state => state.labels.selectedList,
-      milestonesData: state => state.milestones.data,
-      labelsData: state => state.labels.data,
-      assigneesData: state => state.assignees.data,
-      authorsData: state => state.authors.data,
-      branchesData: state => state.branches.data,
+      selectedSourceBranch: (state) => state.branches.source.selected,
+      selectedTargetBranch: (state) => state.branches.target.selected,
+      selectedMilestone: (state) => state.milestones.selected,
+      selectedAuthor: (state) => state.authors.selected,
+      selectedAssignee: (state) => state.assignees.selected,
+      selectedLabelList: (state) => state.labels.selectedList,
+      milestonesData: (state) => state.milestones.data,
+      labelsData: (state) => state.labels.data,
+      assigneesData: (state) => state.assignees.data,
+      authorsData: (state) => state.authors.data,
+      branchesData: (state) => state.branches.data,
     }),
     tokens() {
       return [
@@ -169,6 +169,7 @@ export default {
       :search-input-placeholder="__('Filter results')"
       :tokens="tokens"
       :initial-filter-value="initialFilterValue"
+      suggestions-list-class="gl-z-index-9999"
       @onFilter="handleFilter"
     />
     <url-sync :query="query" />

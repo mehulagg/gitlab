@@ -14,7 +14,7 @@ module Gitlab
           ALLOWED_KEYS = %i[tags script type image services start_in artifacts
                             cache dependencies before_script after_script
                             environment coverage retry parallel interruptible timeout
-                            resource_group release secrets].freeze
+                            release secrets].freeze
 
           REQUIRED_BY_NEEDS = %i[stage].freeze
 
@@ -24,14 +24,13 @@ module Gitlab
             validates :script, presence: true
 
             with_options allow_nil: true do
-              validates :allow_failure, boolean: true
               validates :when, inclusion: {
                 in: ALLOWED_WHEN,
                 message: "should be one of: #{ALLOWED_WHEN.join(', ')}"
               }
 
               validates :dependencies, array_of_strings: true
-              validates :resource_group, type: String
+              validates :allow_failure, hash_or_boolean: true
             end
 
             validates :start_in, duration: { limit: '1 week' }, if: :delayed?
@@ -65,7 +64,7 @@ module Gitlab
             description: 'Commands that will be executed when finishing job.',
             inherit: true
 
-          entry :cache, Entry::Cache,
+          entry :cache, Entry::Caches,
             description: 'Cache definition for this job.',
             inherit: true
 
@@ -118,9 +117,14 @@ module Gitlab
             description: 'Parallel configuration for this job.',
             inherit: false
 
-          attributes :script, :tags, :allow_failure, :when, :dependencies,
+          entry :allow_failure, ::Gitlab::Ci::Config::Entry::AllowFailure,
+            description: 'Indicates whether this job is allowed to fail or not.',
+            inherit: false
+
+          attributes :script, :tags, :when, :dependencies,
                      :needs, :retry, :parallel, :start_in,
-                     :interruptible, :timeout, :resource_group, :release
+                     :interruptible, :timeout,
+                     :release, :allow_failure
 
           def self.matching?(name, config)
             !name.to_s.start_with?('.') &&
@@ -141,16 +145,8 @@ module Gitlab
             end
           end
 
-          def manual_action?
-            self.when == 'manual'
-          end
-
           def delayed?
             self.when == 'delayed'
-          end
-
-          def ignored?
-            allow_failure.nil? ? manual_action? : allow_failure
           end
 
           def value
@@ -175,10 +171,28 @@ module Gitlab
               release: release_value,
               after_script: after_script_value,
               ignore: ignored?,
+              allow_failure_criteria: allow_failure_criteria,
               needs: needs_defined? ? needs_value : nil,
-              resource_group: resource_group,
               scheduling_type: needs_defined? ? :dag : :stage
             ).compact
+          end
+
+          def ignored?
+            allow_failure_defined? ? static_allow_failure : manual_action?
+          end
+
+          private
+
+          def allow_failure_criteria
+            if allow_failure_defined? && allow_failure_value.is_a?(Hash)
+              allow_failure_value
+            end
+          end
+
+          def static_allow_failure
+            return false if allow_failure_value.is_a?(Hash)
+
+            allow_failure_value
           end
         end
       end

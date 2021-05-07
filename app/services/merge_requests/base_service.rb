@@ -52,13 +52,17 @@ module MergeRequests
       "#<#{self.class} #{merge_request.to_reference(full: true)}>"
     end
 
+    def merge_request_activity_counter
+      Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter
+    end
+
     private
 
     def enqueue_jira_connect_messages_for(merge_request)
       return unless project.jira_subscription_exists?
 
       if Atlassian::JiraIssueKeyExtractor.has_keys?(merge_request.title, merge_request.description)
-        JiraConnect::SyncMergeRequestWorker.perform_async(merge_request.id)
+        JiraConnect::SyncMergeRequestWorker.perform_async(merge_request.id, Atlassian::JiraConnect::Client.generate_update_sequence_id)
       end
     end
 
@@ -104,7 +108,7 @@ module MergeRequests
     def filter_reviewer(merge_request)
       return if params[:reviewer_ids].blank?
 
-      unless can_admin_issuable?(merge_request) && merge_request.allows_reviewers?
+      unless can_admin_issuable?(merge_request)
         params.delete(:reviewer_ids)
 
         return
@@ -139,8 +143,12 @@ module MergeRequests
         merge_request, merge_request.project, current_user, old_reviewers)
     end
 
-    def create_pipeline_for(merge_request, user)
-      MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
+    def create_pipeline_for(merge_request, user, async: false)
+      if async
+        MergeRequests::CreatePipelineWorker.perform_async(project.id, user.id, merge_request.id)
+      else
+        MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
+      end
     end
 
     def abort_auto_merge(merge_request, reason)
@@ -160,7 +168,7 @@ module MergeRequests
 
     def pipeline_merge_requests(pipeline)
       pipeline.all_merge_requests.opened.each do |merge_request|
-        next unless pipeline == merge_request.head_pipeline
+        next unless pipeline.id == merge_request.head_pipeline_id
 
         yield merge_request
       end
@@ -177,7 +185,7 @@ module MergeRequests
       }
 
       if exception
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception, data)
         end
 
@@ -190,6 +198,12 @@ module MergeRequests
       Gitlab::GitLogger.error(data)
 
       merge_request.update(merge_error: message) if save_message_on_model
+    end
+
+    def delete_milestone_total_merge_requests_counter_cache(milestone)
+      return unless milestone
+
+      Milestones::MergeRequestsCountService.new(milestone).delete_cache
     end
   end
 end

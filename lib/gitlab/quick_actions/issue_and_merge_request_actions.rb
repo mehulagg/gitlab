@@ -26,7 +26,7 @@ module Gitlab
         end
         types Issue, MergeRequest
         condition do
-          current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+          quick_action_target.supports_assignee? && current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
         end
         parse_params do |assignee_param|
           extract_users(assignee_param)
@@ -182,7 +182,7 @@ module Gitlab
         parse_params do |raw_time_date|
           Gitlab::QuickActions::SpendTimeAndDateSeparator.new(raw_time_date).execute
         end
-        command :spend do |time_spent, time_spent_date|
+        command :spend, :spent do |time_spent, time_spent_date|
           if time_spent
             @updates[:spend_time] = {
               duration: time_spent,

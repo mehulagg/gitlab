@@ -3,6 +3,7 @@
 exports[`Alert integration settings form should match the default snapshot 1`] = `
 <gl-tab-stub
   title="Incident settings"
+  titlelinkclass=""
 >
   <gl-form-stub
     class="gl-pt-3"
@@ -11,7 +12,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
       class="gl-line-height-20"
     >
       
-      You may choose to introduce a countdown timer in incident issues to better track Service Level Agreements (SLAs). The timer is automatically started when the incident is created, and sets a time limit for the incident to be resolved in. When activated, "time to SLA" countdown will appear on all new incidents.
+      Introduce a countdown timer in incident issues to better track Service Level Agreements (SLAs). The timer starts automatically when the incident is created, and sets a time limit for resolving the incident. When activated, the time to SLA countdown appears on all new incidents.
     
     </p>
      
@@ -29,7 +30,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
         textvariant="muted"
       >
         
-        When activated, this will apply to all new incidents within the project
+        When activated, this applies to all new incidents in the project.
       
       </gl-form-text-stub>
     </gl-form-checkbox-stub>
@@ -58,16 +59,6 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
           value="minutes"
         />
       </div>
-       
-      <gl-form-text-stub
-        class="gl-font-base gl-text-gray-400!"
-        tag="small"
-        textvariant="muted"
-      >
-        
-          Time limit must be a multiple of 15 minutes
-        
-      </gl-form-text-stub>
     </gl-form-group-stub>
      
     <gl-button-stub

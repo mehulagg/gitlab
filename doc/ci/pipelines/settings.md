@@ -1,12 +1,12 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/settings.html'
 type: reference, howto
 ---
 
-# Pipeline settings
+# Pipeline settings **(FREE)**
 
 To reach the pipelines settings navigate to your project's
 **Settings > CI/CD**.
@@ -17,6 +17,11 @@ The following settings can be configured per project.
 For an overview, watch the video [GitLab CI Pipeline, Artifacts, and Environments](https://www.youtube.com/watch?v=PCKDICEe10s).
 Watch also [GitLab CI pipeline tutorial for beginners](https://www.youtube.com/watch?v=Jav4vbUrqII).
 
+You can use the pipeline status to determine if a merge request can be merged:
+
+- [Merge when pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md).
+- [Only allow merge requests to be merged if the pipeline succeeds](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#only-allow-merge-requests-to-be-merged-if-the-pipeline-succeeds).
+
 ## Git strategy
 
 With Git strategy, you can choose the default way your repository is fetched
@@ -24,12 +29,13 @@ from GitLab in a job.
 
 There are two options. Using:
 
-- `git clone`, which is slower since it clones the repository from scratch
+- `git clone`, which is slower because it clones the repository from scratch
   for every job, ensuring that the local working copy is always pristine.
-- `git fetch`, which is faster as it re-uses the local working copy (falling
+- `git fetch`, which is default in GitLab and faster as it re-uses the local working copy (falling
   back to clone if it doesn't exist).
+  This is recommended, especially for [large repositories](../large_repositories/index.md#git-strategy).
 
-The default Git strategy can be overridden by the [GIT_STRATEGY variable](../yaml/README.md#git-strategy)
+The configured Git strategy can be overridden by the [`GIT_STRATEGY` variable](../runners/README.md#git-strategy)
 in `.gitlab-ci.yml`.
 
 ## Git shallow clone
@@ -62,27 +68,26 @@ if the job surpasses the threshold, it is marked as failed.
 Project defined timeout (either specific timeout set by user or the default
 60 minutes timeout) may be [overridden for runners](../runners/README.md#set-maximum-job-timeout-for-a-runner).
 
-## Maximum artifacts size **(CORE ONLY)**
+## Maximum artifacts size **(FREE SELF)**
 
 For information about setting a maximum artifact size for a project, see
 [Maximum artifacts size](../../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size).
 
-## Custom CI configuration path
+## Custom CI/CD configuration path
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12509) in GitLab 9.4.
-> - [Support for external `.gitlab-ci.yml` locations](https://gitlab.com/gitlab-org/gitlab/-/issues/14376) introduced in GitLab 12.6.
+> [Support for external `.gitlab-ci.yml` locations](https://gitlab.com/gitlab-org/gitlab/-/issues/14376) introduced in GitLab 12.6.
 
 By default we look for the `.gitlab-ci.yml` file in the project's root
 directory. If needed, you can specify an alternate path and filename, including locations outside the project.
 
 To customize the path:
 
-1. Go to the project's **Settings > CI / CD**.
+1. Go to the project's **Settings > CI/CD**.
 1. Expand the **General pipelines** section.
-1. Provide a value in the **Custom CI configuration path** field.
+1. Provide a value in the **CI/CD configuration file** field.
 1. Click **Save changes**.
 
-If the CI configuration is stored within the repository in a non-default
+If the CI configuration is stored in the repository in a non-default
 location, the path must be relative to the root directory. Examples of valid
 paths and file names include:
 
@@ -95,7 +100,7 @@ If hosting the CI configuration on an external site, the URL link must end with 
 
 - `http://example.com/generate/ci/config.yml`
 
-If hosting the CI configuration in a different project within GitLab, the path must be relative
+If hosting the CI configuration in a different project in GitLab, the path must be relative
 to the root directory in the other project. Include the group and project name at the end:
 
 - `.gitlab-ci.yml@mygroup/another-project`
@@ -113,10 +118,10 @@ able to edit it.
 ## Test coverage parsing
 
 If you use test coverage in your code, GitLab can capture its output in the
-job log using a regular expression. In the pipelines settings, search for the
-"Test coverage parsing" section.
+job log using a regular expression.
 
-![Pipelines settings test coverage](img/pipelines_settings_test_coverage.png)
+In your project, go to **Settings > CI/CD** and expand the **General pipelines**
+section. Enter the regular expression in the **Test coverage parsing** field.
 
 Leave blank if you want to disable it or enter a Ruby regular expression. You
 can use <https://rubular.com> to test your regex. The regex returns the **last**
@@ -130,8 +135,23 @@ averaged.
 
 ![Build status coverage](img/pipelines_test_coverage_build.png)
 
-A few examples of known coverage tools for a variety of languages can be found
-in the pipelines settings page.
+<!-- vale gitlab.Spelling = NO -->
+
+- Simplecov (Ruby). Example: `\(\d+.\d+\%\) covered`.
+- pytest-cov (Python). Example: `^TOTAL.+?(\d+\%)$`.
+- Scoverage (Scala). Example: `Statement coverage[A-Za-z\.*]\s*:\s*([^%]+)`.
+- `phpunit --coverage-text --colors=never` (PHP). Example: `^\s*Lines:\s*\d+.\d+\%`.
+- gcovr (C/C++). Example: `^TOTAL.*\s+(\d+\%)$`.
+- `tap --coverage-report=text-summary` (NodeJS). Example: `^Statements\s*:\s*([^%]+)`.
+- `nyc npm test` (NodeJS). Example: `All files[^|]*\|[^|]*\s+([\d\.]+)`.
+- excoveralls (Elixir). Example: `\[TOTAL\]\s+(\d+\.\d+)%`.
+- `mix test --cover` (Elixir). Example: `\d+.\d+\%\s+\|\s+Total`.
+- JaCoCo (Java/Kotlin). Example: `Total.*?([0-9]{1,3})%`.
+- `go test -cover` (Go). Example: `coverage: \d+.\d+% of statements`.
+- .Net (OpenCover). Example: `(Visited Points).*\((.*)\)`.
+- .Net (`dotnet test` line coverage). Example: `Total\s*\|\s*(\d+\.?\d+)`.
+
+<!-- vale gitlab.Spelling = YES -->
 
 ### Code Coverage history
 
@@ -141,10 +161,12 @@ in the pipelines settings page.
 To see the evolution of your project code coverage over time,
 you can view a graph or download a CSV file with this data. From your project:
 
-1. Go to **{chart}** **Project Analytics > Repository** to see the historic data for each job listed in the dropdown above the graph.
-1. If you want a CSV file of that data, click **Download raw data (.csv)**
+1. Go to **Project Analytics > Repository** to see the historic data for each job listed in the dropdown above the graph.
+1. If you want a CSV file of that data, click **Download raw data (`.csv`)**
 
 ![Code coverage graph of a project over time](img/code_coverage_graph_v13_1.png)
+
+Code coverage data is also [available at the group level](../../user/group/repositories_analytics/index.md).
 
 ### Removing color codes
 
@@ -169,7 +191,7 @@ Pipeline visibility is determined by:
 - Your current [user access level](../../user/permissions.md).
 - The **Public pipelines** project setting under your project's **Settings > CI/CD > General pipelines**.
 
-NOTE: **Note:**
+NOTE:
 If the project visibility is set to **Private**, the [**Public pipelines** setting has no effect](../enable_or_disable_ci.md#per-project-user-setting).
 
 This also determines the visibility of these related features:
@@ -183,7 +205,7 @@ Job logs and artifacts are [not visible for guest users and non-project members]
 If **Public pipelines** is enabled (default):
 
 - For **public** projects, anyone can view the pipelines and related features.
-- For **internal** projects, any logged in user can view the pipelines
+- For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines
   and related features.
 - For **private** projects, any project member (guest or higher) can view the pipelines
   and related features.
@@ -192,42 +214,51 @@ If **Public pipelines** is disabled:
 
 - For **public** projects, anyone can view the pipelines, but only members
   (reporter or higher) can access the related features.
-- For **internal** projects, any logged in user can view the pipelines.
+- For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines.
   However, only members (reporter or higher) can access the job related features.
 - For **private** projects, only project members (reporter or higher)
   can view the pipelines or access the related features.
 
-## Auto-cancel pending pipelines
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9362) in GitLab 9.1.
+## Auto-cancel redundant pipelines
 
 You can set pending or running pipelines to cancel automatically when a new pipeline runs on the same branch. You can enable this in the project settings:
 
-1. Go to **Settings > CI / CD**.
+1. Go to **Settings > CI/CD**.
 1. Expand **General Pipelines**.
-1. Check the **Auto-cancel redundant, pending pipelines** checkbox.
+1. Check the **Auto-cancel redundant pipelines** checkbox.
 1. Click **Save changes**.
 
-Note that only jobs with [interruptible](../yaml/README.md#interruptible) set to `true` are cancelled.
+Use the [`interruptible`](../yaml/README.md#interruptible) keyword to indicate if a
+running job can be cancelled before it completes.
 
 ## Skip outdated deployment jobs
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25276) in GitLab 12.9.
 
 Your project may have multiple concurrent deployment jobs that are
-scheduled to run within the same time frame.
+scheduled to run in the same time frame.
 
 This can lead to a situation where an older deployment job runs after a
 newer one, which may not be what you want.
 
 To avoid this scenario:
 
-1. Go to **Settings > CI / CD**.
+1. Go to **Settings > CI/CD**.
 1. Expand **General pipelines**.
 1. Check the **Skip outdated deployment jobs** checkbox.
 1. Click **Save changes**.
 
 When enabled, any older deployments job are skipped when a new deployment starts.
+
+For more information, see [Deployment safety](../environments/deployment_safety.md).
+
+## Retry outdated jobs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211339) in GitLab 13.6.
+
+A deployment job can fail because a newer one has run. If you retry the failed deployment job, the
+environment could be overwritten with older source code. If you click **Retry**, a modal warns you
+about this and asks for confirmation.
 
 For more information, see [Deployment safety](../environments/deployment_safety.md).
 
@@ -245,15 +276,15 @@ pages.
 
 ### Pipeline status badge
 
-Depending on the status of your job, a badge can have the following values:
+Depending on the status of your pipeline, a badge can have the following values:
 
-- pending
-- running
-- passed
-- failed
-- skipped
-- canceled
-- unknown
+- `pending`
+- `running`
+- `passed`
+- `failed`
+- `skipped`
+- `canceled`
+- `unknown`
 
 You can access a pipeline status badge image using the following link:
 
@@ -294,39 +325,33 @@ into your `README.md`:
 
 Pipeline badges can be rendered in different styles by adding the `style=style_name` parameter to the URL. Two styles are available:
 
-#### Flat (default)
+- Flat (default):
 
-```plaintext
-https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?style=flat
-```
+  ```plaintext
+  https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?style=flat
+  ```
 
-![Badge flat style](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage&style=flat)
+  ![Badge flat style](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage&style=flat)
 
-#### Flat square
+- Flat square ([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30120) in GitLab 11.8):
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30120) in GitLab 11.8.
+  ```plaintext
+  https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?style=flat-square
+  ```
 
-```plaintext
-https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?style=flat-square
-```
-
-![Badge flat square style](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage&style=flat-square)
+  ![Badge flat square style](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage&style=flat-square)
 
 ### Custom badge text
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17555) in GitLab 13.1.
 
-The text for a badge can be customized. This can be useful to differentiate between multiple coverage jobs that run in the same pipeline. Customize the badge text and width by adding the `key_text=custom_text` and `key_width=custom_key_width` parameters to the URL:
+The text for a badge can be customized to differentiate between multiple coverage jobs that run in the same pipeline. Customize the badge text and width by adding the `key_text=custom_text` and `key_width=custom_key_width` parameters to the URL:
 
 ```plaintext
 https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130
 ```
 
 ![Badge with custom text and width](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130)
-
-## Environment Variables
-
-[Environment variables](../variables/README.md#gitlab-cicd-environment-variables) can be set in an environment to be available to a runner.
 
 <!-- ## Troubleshooting
 

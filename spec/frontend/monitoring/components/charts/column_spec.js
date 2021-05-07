@@ -1,6 +1,6 @@
+import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import { shallowMount } from '@vue/test-utils';
 import timezoneMock from 'timezone-mock';
-import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import ColumnChart from '~/monitoring/components/charts/column.vue';
 
 jest.mock('~/lib/utils/icon_utils', () => ({
@@ -30,6 +30,7 @@ describe('Column component', () => {
           },
           metrics: [
             {
+              label: 'Mock data',
               result: [
                 {
                   metric: {},
@@ -44,7 +45,7 @@ describe('Column component', () => {
     });
   };
   const findChart = () => wrapper.find(GlColumnChart);
-  const chartProps = prop => findChart().props(prop);
+  const chartProps = (prop) => findChart().props(prop);
 
   beforeEach(() => {
     createWrapper();
@@ -57,7 +58,7 @@ describe('Column component', () => {
   describe('xAxisLabel', () => {
     const mockDate = Date.UTC(2020, 4, 26, 20); // 8:00 PM in GMT
 
-    const useXAxisFormatter = date => {
+    const useXAxisFormatter = (date) => {
       const { xAxis } = chartProps('option');
       const { formatter } = xAxis.axisLabel;
       return formatter(date);
@@ -96,7 +97,7 @@ describe('Column component', () => {
   describe('wrapped components', () => {
     describe('GitLab UI column chart', () => {
       it('receives data properties needed for proper chart render', () => {
-        expect(chartProps('data').values).toEqual(dataValues);
+        expect(chartProps('bars')).toEqual([{ name: 'Mock data', data: dataValues }]);
       });
 
       it('passes the y axis name correctly', () => {

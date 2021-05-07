@@ -8,10 +8,10 @@ module Releases
     attr_accessor :project, :current_user, :params
 
     def initialize(project, user = nil, params = {})
-      @project, @current_user, @params = project, user, params.dup
+      @project = project
+      @current_user = user
+      @params = params.dup
     end
-
-    delegate :repository, to: :project
 
     def tag_name
       params[:tag]
@@ -39,19 +39,15 @@ module Releases
       end
     end
 
-    def existing_tag
-      strong_memoize(:existing_tag) do
-        repository.find_tag(tag_name)
-      end
-    end
-
-    def tag_exist?
-      existing_tag.present?
-    end
-
     def repository
       strong_memoize(:repository) do
         project.repository
+      end
+    end
+
+    def existing_tag
+      strong_memoize(:existing_tag) do
+        repository.find_tag(tag_name)
       end
     end
 
@@ -78,7 +74,11 @@ module Releases
     end
 
     def param_for_milestone_titles_provided?
-      params.key?(:milestones)
+      !!params[:milestones]
+    end
+
+    def execute_hooks(release, action = 'create')
+      release.execute_hooks(action)
     end
 
     # overridden in EE

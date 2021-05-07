@@ -30,7 +30,7 @@ module API
                   ]
 
     allow_access_with_scope :api
-    allow_access_with_scope :read_api, if: -> (request) { request.get? }
+    allow_access_with_scope :read_api, if: -> (request) { request.get? || request.head? }
     prefix :api
 
     version 'v3', using: :path do
@@ -58,13 +58,19 @@ module API
         user: -> { @current_user },
         project: -> { @project },
         namespace: -> { @group },
-        caller_id: route.origin,
+        runner: -> { @current_runner || @runner },
+        caller_id: api_endpoint.endpoint_id,
+        remote_ip: request.ip,
         feature_category: feature_category
       )
     end
 
     before do
       set_peek_enabled_for_current_request
+    end
+
+    after do
+      Gitlab::UsageDataCounters::VSCodeExtensionActivityUniqueCounter.track_api_request_when_trackable(user_agent: request&.user_agent, user: @current_user)
     end
 
     # The locale is set to the current user's locale when `current_user` is loaded
@@ -122,14 +128,7 @@ module API
 
     format :json
     formatter :json, Gitlab::Json::GrapeFormatter
-
-    # There is a small chance some users depend on the old behavior.
-    # We this change under a feature flag to see if affects GitLab.com users.
-    if Gitlab::Database.cached_table_exists?('features') && Feature.enabled?(:api_json_content_type)
-      content_type :json, 'application/json'
-    else
-      content_type :txt, 'text/plain'
-    end
+    content_type :json, 'application/json'
 
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
@@ -145,6 +144,7 @@ module API
       mount ::API::AccessRequests
       mount ::API::Admin::Ci::Variables
       mount ::API::Admin::InstanceClusters
+      mount ::API::Admin::PlanLimits
       mount ::API::Admin::Sidekiq
       mount ::API::Appearance
       mount ::API::Applications
@@ -161,6 +161,8 @@ module API
       mount ::API::Commits
       mount ::API::CommitStatuses
       mount ::API::ContainerRegistryEvent
+      mount ::API::ContainerRepositories
+      mount ::API::DependencyProxy
       mount ::API::DeployKeys
       mount ::API::DeployTokens
       mount ::API::Deployments
@@ -185,6 +187,7 @@ module API
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
       mount ::API::IssueLinks
+      mount ::API::Invitations
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -208,7 +211,8 @@ module API
       mount ::API::ProjectPackages
       mount ::API::GroupPackages
       mount ::API::PackageFiles
-      mount ::API::NugetPackages
+      mount ::API::NugetProjectPackages
+      mount ::API::NugetGroupPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
       mount ::API::ConanProjectPackages
@@ -216,7 +220,8 @@ module API
       mount ::API::DebianGroupPackages
       mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
-      mount ::API::NpmPackages
+      mount ::API::NpmProjectPackages
+      mount ::API::NpmInstancePackages
       mount ::API::GenericPackages
       mount ::API::GoProxy
       mount ::API::Pages
@@ -236,16 +241,20 @@ module API
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
       mount ::API::Terraform::StateVersion
+      mount ::API::PersonalAccessTokens
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
       mount ::API::Release::Links
       mount ::API::RemoteMirrors
       mount ::API::Repositories
+      mount ::API::ResourceAccessTokens
+      mount ::API::RubygemPackages
       mount ::API::Search
       mount ::API::Services
       mount ::API::Settings
       mount ::API::SidekiqMetrics
+      mount ::API::SnippetRepositoryStorageMoves
       mount ::API::Snippets
       mount ::API::Statistics
       mount ::API::Submodules
@@ -258,6 +267,8 @@ module API
       mount ::API::Triggers
       mount ::API::Unleash
       mount ::API::UsageData
+      mount ::API::UsageDataQueries
+      mount ::API::UsageDataNonSqlMetrics
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables
@@ -280,10 +291,10 @@ module API
       end
     end
 
-    route :any, '*path' do
+    route :any, '*path', feature_category: :not_owned do
       error!('404 Not Found', 404)
     end
   end
 end
 
-API::API.prepend_if_ee('::EE::API::API')
+API::API.prepend_ee_mod

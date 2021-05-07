@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # rubocop:disable Rails/Output
 if Gitlab::Runtime.console?
   # note that this will not print out when using `spring`
@@ -20,4 +22,15 @@ if Gitlab::Runtime.console?
   end
 
   puts '-' * 80
+
+  # Stop irb from writing a history file by default.
+  module IrbNoHistory
+    def init_config(*)
+      super
+
+      IRB.conf[:SAVE_HISTORY] = false
+    end
+  end
+
+  IRB.singleton_class.prepend(IrbNoHistory)
 end

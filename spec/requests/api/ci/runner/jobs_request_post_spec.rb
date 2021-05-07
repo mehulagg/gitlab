@@ -17,9 +17,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
   end
 
   describe '/api/v4/jobs' do
-    let(:root_namespace) { create(:namespace) }
-    let(:namespace) { create(:namespace, parent: root_namespace) }
-    let(:project) { create(:project, namespace: namespace, shared_runners_enabled: false) }
+    let(:group) { create(:group, :nested) }
+    let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master') }
     let(:runner) { create(:ci_runner, :project, projects: [project]) }
     let(:user) { create(:user) }
@@ -144,7 +143,8 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
         context 'when there is a pending job' do
           let(:expected_job_info) do
-            { 'name' => job.name,
+            { 'id' => job.id,
+              'name' => job.name,
               'stage' => job.stage,
               'project_id' => job.project.id,
               'project_name' => job.project.name }
@@ -156,7 +156,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
               'sha' => job.sha,
               'before_sha' => job.before_sha,
               'ref_type' => 'branch',
-              'refspecs' => ["+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+              'refspecs' => ["+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                              "+refs/heads/#{job.ref}:refs/remotes/origin/#{job.ref}"],
               'depth' => project.ci_default_git_depth }
           end
@@ -198,7 +198,12 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
                'when' => 'on_success' }]
           end
 
-          let(:expected_features) { { 'trace_sections' => true } }
+          let(:expected_features) do
+            {
+              'trace_sections' => true,
+              'failure_reasons' => include('script_failure')
+            }
+          end
 
           it 'picks a job' do
             request_job info: { platform: :darwin }
@@ -220,7 +225,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
             expect(json_response['artifacts']).to eq(expected_artifacts)
             expect(json_response['cache']).to eq(expected_cache)
             expect(json_response['variables']).to include(*expected_variables)
-            expect(json_response['features']).to eq(expected_features)
+            expect(json_response['features']).to match(expected_features)
           end
 
           it 'creates persistent ref' do
@@ -284,7 +289,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
                 expect(response).to have_gitlab_http_status(:created)
                 expect(json_response['git_info']['refspecs'])
-                  .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+                  .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                       '+refs/tags/*:refs/tags/*',
                                       '+refs/heads/*:refs/remotes/origin/*')
               end
@@ -346,7 +351,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
                 expect(response).to have_gitlab_http_status(:created)
                 expect(json_response['git_info']['refspecs'])
-                  .to contain_exactly("+refs/pipelines/#{pipeline.id}:refs/pipelines/#{pipeline.id}",
+                  .to contain_exactly("+#{pipeline.sha}:refs/pipelines/#{pipeline.id}",
                                       '+refs/tags/*:refs/tags/*',
                                       '+refs/heads/*:refs/remotes/origin/*')
               end
@@ -485,6 +490,36 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
               expect(json_response['dependencies']).to include(
                 { 'id' => job.id, 'name' => job.name, 'token' => job.token },
                 { 'id' => job2.id, 'name' => job2.name, 'token' => job2.token })
+            end
+
+            describe 'preloading job_artifacts_archive' do
+              context 'when the feature flag is disabled' do
+                before do
+                  stub_feature_flags(preload_associations_jobs_request_api_endpoint: false)
+                end
+
+                it 'queries the ci_job_artifacts table multiple times' do
+                  expect { request_job }.to exceed_all_query_limit(1).for_model(::Ci::JobArtifact)
+                end
+
+                it 'queries the ci_builds table more than three times' do
+                  expect { request_job }.to exceed_all_query_limit(3).for_model(::Ci::Build)
+                end
+              end
+
+              context 'when the feature flag is enabled' do
+                before do
+                  stub_feature_flags(preload_associations_jobs_request_api_endpoint: true)
+                end
+
+                it 'queries the ci_job_artifacts table once only' do
+                  expect { request_job }.not_to exceed_all_query_limit(1).for_model(::Ci::JobArtifact)
+                end
+
+                it 'queries the ci_builds table five times' do
+                  expect { request_job }.not_to exceed_all_query_limit(5).for_model(::Ci::Build)
+                end
+              end
             end
           end
 
@@ -790,6 +825,50 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
             expect(response).to have_gitlab_http_status(:created)
             expect(json_response.dig('artifacts').first).not_to have_key('exclude')
+          end
+        end
+
+        describe 'setting the application context' do
+          subject { request_job }
+
+          context 'when triggered by a user' do
+            let(:job) { create(:ci_build, user: user, project: project) }
+
+            subject { request_job(id: job.id) }
+
+            it_behaves_like 'storing arguments in the application context' do
+              let(:expected_params) { { user: user.username, project: project.full_path, client_id: "user/#{user.id}" } }
+            end
+
+            it_behaves_like 'not executing any extra queries for the application context', 3 do
+              # Extra queries: User, Project, Route
+              let(:subject_proc) { proc { request_job(id: job.id) } }
+            end
+          end
+
+          context 'when the runner is of project type' do
+            it_behaves_like 'storing arguments in the application context' do
+              let(:expected_params) { { project: project.full_path, client_id: "runner/#{runner.id}" } }
+            end
+
+            it_behaves_like 'not executing any extra queries for the application context', 2 do
+              # Extra queries: Project, Route
+              let(:subject_proc) { proc { request_job } }
+            end
+          end
+
+          context 'when the runner is of group type' do
+            let(:group) { create(:group) }
+            let(:runner) { create(:ci_runner, :group, groups: [group]) }
+
+            it_behaves_like 'storing arguments in the application context' do
+              let(:expected_params) { { root_namespace: group.full_path_components.first, client_id: "runner/#{runner.id}" } }
+            end
+
+            it_behaves_like 'not executing any extra queries for the application context', 2 do
+              # Extra queries: Group, Route
+              let(:subject_proc) { proc { request_job } }
+            end
           end
         end
 

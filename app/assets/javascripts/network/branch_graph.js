@@ -1,8 +1,8 @@
 /* eslint-disable func-names, consistent-return */
 
 import $ from 'jquery';
-import { __ } from '../locale';
 import axios from '../lib/utils/axios_utils';
+import { __ } from '../locale';
 import Raphael from './raphael';
 
 export default class BranchGraph {
@@ -66,12 +66,12 @@ export default class BranchGraph {
   collectParents() {
     const ref = this.commits;
     const results = [];
-    ref.forEach(c => {
+    ref.forEach((c) => {
       this.mtime = Math.max(this.mtime, c.time);
       this.mspace = Math.max(this.mspace, c.space);
       const ref1 = c.parents;
       const results1 = [];
-      ref1.forEach(p => {
+      ref1.forEach((p) => {
         this.parents[p[0]] = true;
         results1.push((this.mspace = Math.max(this.mspace, p[1])));
       });
@@ -234,8 +234,7 @@ export default class BranchGraph {
 
   appendAnchor(x, y, commit) {
     const { r, top, options } = this;
-    const anchor = r
-      .circle(x, y, 10)
+    r.circle(x, y, 10)
       .attr({
         fill: '#000',
         opacity: 0,
@@ -243,15 +242,16 @@ export default class BranchGraph {
       })
       .click(() => window.open(options.commit_url.replace('%s', commit.id), '_blank'))
       .hover(
-        function() {
+        function () {
           this.tooltip = r.commitTooltip(x + 5, y, commit);
-          return top.push(this.tooltip.insertBefore(this));
+          top.push(this.tooltip.insertBefore(this));
+          return this.tooltip.toFront();
         },
-        function() {
+        function () {
+          top.remove(this.tooltip);
           return this.tooltip && this.tooltip.remove() && delete this.tooltip;
         },
       );
-    return top.push(anchor);
   }
 
   drawDot(x, y, commit) {

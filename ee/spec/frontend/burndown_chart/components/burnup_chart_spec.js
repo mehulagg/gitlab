@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLineChart } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import { day1, day2, day3 } from '../mock_data';
@@ -25,6 +25,18 @@ describe('Burnup chart', () => {
       },
     });
   };
+
+  it('hides chart while loading', () => {
+    createComponent({ loading: true });
+
+    expect(findChart().exists()).toBe(false);
+  });
+
+  it('shows chart when not loading', () => {
+    createComponent({ loading: false });
+
+    expect(findChart().exists()).toBe(true);
+  });
 
   it('renders the lineChart correctly', () => {
     const burnupData = [day1, day2, day3];

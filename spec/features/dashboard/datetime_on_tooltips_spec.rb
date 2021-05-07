@@ -13,7 +13,7 @@ RSpec.describe 'Tooltips on .timeago dates', :js do
 
   context 'on the activity tab' do
     before do
-      Event.create( project: project, author_id: user.id, action: :joined,
+      Event.create!( project: project, author_id: user.id, action: :joined,
                     updated_at: created_date, created_at: created_date)
 
       sign_in user
@@ -49,7 +49,7 @@ RSpec.describe 'Tooltips on .timeago dates', :js do
   end
 
   def datetime_in_tooltip
-    datetime_text = page.find('.local-timeago').text
+    datetime_text = page.find('.tooltip').text
     DateTime.parse(datetime_text)
   end
 end

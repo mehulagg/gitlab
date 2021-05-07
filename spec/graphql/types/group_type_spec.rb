@@ -17,7 +17,8 @@ RSpec.describe GitlabSchema.types['Group'] do
       subgroup_creation_level require_two_factor_authentication
       two_factor_grace_period auto_devops_enabled emails_disabled
       mentions_disabled parent boards milestones group_members
-      merge_requests
+      merge_requests container_repositories container_repositories_count
+      packages
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -38,5 +39,7 @@ RSpec.describe GitlabSchema.types['Group'] do
     it { is_expected.to have_graphql_resolver(Resolvers::GroupMembersResolver) }
   end
 
-  it_behaves_like 'a GraphQL type with labels'
+  it_behaves_like 'a GraphQL type with labels' do
+    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :includeDescendantGroups, :onlyGroupLabels] }
+  end
 end

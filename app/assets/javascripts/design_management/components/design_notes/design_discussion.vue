@@ -1,20 +1,20 @@
 <script>
-import { ApolloMutation } from 'vue-apollo';
 import { GlTooltipDirective, GlIcon, GlLoadingIcon, GlLink, GlBadge } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { ApolloMutation } from 'vue-apollo';
 import createFlash from '~/flash';
+import { s__ } from '~/locale';
 import ReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import allVersionsMixin from '../../mixins/all_versions';
+import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../../constants';
 import createNoteMutation from '../../graphql/mutations/create_note.mutation.graphql';
 import toggleResolveDiscussionMutation from '../../graphql/mutations/toggle_resolve_discussion.mutation.graphql';
 import activeDiscussionQuery from '../../graphql/queries/active_discussion.query.graphql';
-import DesignNote from './design_note.vue';
-import DesignReplyForm from './design_reply_form.vue';
-import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../../constants';
-import ToggleRepliesWidget from './toggle_replies_widget.vue';
+import allVersionsMixin from '../../mixins/all_versions';
 import { hasErrors } from '../../utils/cache_update';
 import { ADD_DISCUSSION_COMMENT_ERROR } from '../../utils/error_messages';
+import DesignNote from './design_note.vue';
+import DesignReplyForm from './design_reply_form.vue';
+import ToggleRepliesWidget from './toggle_replies_widget.vue';
 
 export default {
   components: {
@@ -171,7 +171,7 @@ export default {
             this.$emit('resolve-discussion-error', data.errors[0]);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           this.$emit('resolve-discussion-error', err);
         })
         .finally(() => {
@@ -210,7 +210,7 @@ export default {
         :class="{ 'gl-bg-blue-50': isDiscussionActive }"
         @error="$emit('update-note-error', $event)"
       >
-        <template v-if="discussion.resolvable" #resolveDiscussion>
+        <template v-if="discussion.resolvable" #resolve-discussion>
           <button
             v-gl-tooltip
             :class="{ 'is-active': discussion.resolved }"
@@ -224,7 +224,7 @@ export default {
             <gl-loading-icon v-else inline />
           </button>
         </template>
-        <template v-if="discussion.resolved" #resolvedStatus>
+        <template v-if="discussion.resolved" #resolved-status>
           <p class="gl-text-gray-500 gl-font-sm gl-m-0 gl-mt-5" data-testid="resolved-message">
             {{ __('Resolved by') }}
             <gl-link
@@ -253,12 +253,12 @@ export default {
         :class="{ 'gl-bg-blue-50': isDiscussionActive }"
         @error="$emit('update-note-error', $event)"
       />
-      <li v-show="isReplyPlaceholderVisible" class="reply-wrapper">
+      <li v-show="isReplyPlaceholderVisible" class="reply-wrapper discussion-reply-holder">
         <reply-placeholder
           v-if="!isFormVisible"
           class="qa-discussion-reply"
-          :button-text="__('Reply...')"
-          @onClick="showForm"
+          :placeholder-text="__('Reply…')"
+          @focus="showForm"
         />
         <apollo-mutation
           v-else
@@ -277,7 +277,7 @@ export default {
             @submit-form="mutate"
             @cancel-form="hideForm"
           >
-            <template v-if="discussion.resolvable" #resolveCheckbox>
+            <template v-if="discussion.resolvable" #resolve-checkbox>
               <label data-testid="resolve-checkbox">
                 <input v-model="shouldChangeResolvedStatus" type="checkbox" />
                 {{ resolveCheckboxText }}

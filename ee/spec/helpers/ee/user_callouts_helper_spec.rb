@@ -3,6 +3,7 @@
 require "spec_helper"
 
 RSpec.describe EE::UserCalloutsHelper do
+  include Devise::Test::ControllerHelpers
   using RSpec::Parameterized::TableSyntax
 
   describe '.render_enable_hashed_storage_warning' do
@@ -131,53 +132,13 @@ RSpec.describe EE::UserCalloutsHelper do
     end
   end
 
-  describe '.show_canary_deployment_callout?' do
-    let(:project) { build(:project) }
-
-    subject { helper.show_canary_deployment_callout?(project) }
-
-    before do
-      allow(helper).to receive(:show_promotions?).and_return(true)
-    end
-
-    context 'when user needs to upgrade to canary deployments' do
-      before do
-        allow(project).to receive(:feature_available?).with(:deploy_board).and_return(false)
-      end
-
-      context 'when user has dismissed' do
-        before do
-          allow(helper).to receive(:user_dismissed?).and_return(true)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when user has not dismissed' do
-        before do
-          allow(helper).to receive(:user_dismissed?).and_return(false)
-        end
-
-        it { is_expected.to be_truthy }
-      end
-    end
-
-    context 'when user already has access to canary deployments' do
-      before do
-        allow(project).to receive(:feature_available?).with(:deploy_board).and_return(true)
-        allow(helper).to receive(:user_dismissed?).and_return(false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#render_dashboard_gold_trial' do
+  describe '#render_dashboard_ultimate_trial' do
     let_it_be(:namespace) { create(:namespace) }
-    let_it_be(:gold_plan) { create(:gold_plan) }
+    let_it_be(:ultimate_plan) { create(:ultimate_plan) }
+
     let(:user) { namespace.owner }
 
-    where(:any_namespace_without_trial?, :show_gold_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do
+    where(:any_namespace_without_trial?, :show_ultimate_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do
       true  | true  | true  | true  | true
       true  | true  | true  | false | false
       true  | true  | false | true  | false
@@ -198,74 +159,23 @@ RSpec.describe EE::UserCalloutsHelper do
 
     with_them do
       before do
-        allow(helper).to receive(:show_gold_trial?) { show_gold_trial? }
+        allow(helper).to receive(:show_ultimate_trial?) { show_ultimate_trial? }
         allow(helper).to receive(:user_default_dashboard?) { user_default_dashboard? }
         allow(user).to receive(:any_namespace_without_trial?) { any_namespace_without_trial? }
 
         unless has_no_trial_or_paid_plan?
-          create(:gitlab_subscription, hosted_plan: gold_plan, namespace: namespace)
+          create(:gitlab_subscription, hosted_plan: ultimate_plan, namespace: namespace)
         end
       end
 
       it do
         if should_render?
-          expect(helper).to receive(:render).with('shared/gold_trial_callout_content')
+          expect(helper).to receive(:render).with('shared/ultimate_trial_callout_content')
         else
           expect(helper).not_to receive(:render)
         end
 
-        helper.render_dashboard_gold_trial(user)
-      end
-    end
-  end
-
-  describe '#render_billings_gold_trial' do
-    let(:namespace) { create(:namespace) }
-    let_it_be(:free_plan) { create(:free_plan) }
-    let_it_be(:silver_plan) { create(:silver_plan) }
-    let_it_be(:gold_plan) { create(:gold_plan) }
-    let(:user) { namespace.owner }
-
-    where(:never_had_trial?, :show_gold_trial?, :gold_plan?, :free_plan?, :should_render?) do
-      true  | true  | false | false | true
-      true  | true  | false | true  | true
-      true  | true  | true  | true  | false
-      true  | true  | true  | false | false
-      true  | false | true  | true  | false
-      true  | false | false | true  | false
-      true  | false | true  | false | false
-      true  | false | false | false | false
-      false | true  | false | false | false
-      false | true  | false | true  | false
-      false | true  | true  | true  | false
-      false | true  | true  | false | false
-      false | false | true  | true  | false
-      false | false | false | true  | false
-      false | false | true  | false | false
-      false | false | false | false | false
-    end
-
-    with_them do
-      before do
-        allow(helper).to receive(:show_gold_trial?) { show_gold_trial? }
-
-        if !never_had_trial?
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: free_plan, trial_ends_on: Date.yesterday)
-        elsif gold_plan?
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
-        elsif !free_plan?
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: silver_plan)
-        end
-      end
-
-      it do
-        if should_render?
-          expect(helper).to receive(:render).with('shared/gold_trial_callout_content', is_dismissable: !free_plan?, callout: UserCalloutsHelper::GOLD_TRIAL_BILLINGS)
-        else
-          expect(helper).not_to receive(:render)
-        end
-
-        helper.render_billings_gold_trial(user, namespace)
+        helper.render_dashboard_ultimate_trial(user)
       end
     end
   end
@@ -303,28 +213,6 @@ RSpec.describe EE::UserCalloutsHelper do
 
         helper.render_account_recovery_regular_check
       end
-    end
-  end
-
-  describe '.show_threat_monitoring_info?' do
-    subject { helper.show_threat_monitoring_info? }
-
-    let(:user) { create(:user) }
-
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-    end
-
-    context 'when the threat monitoring info has not been dismissed' do
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when the threat monitoring info was dismissed' do
-      before do
-        create(:user_callout, user: user, feature_name: described_class::THREAT_MONITORING_INFO)
-      end
-
-      it { is_expected.to be_falsy }
     end
   end
 
@@ -366,6 +254,118 @@ RSpec.describe EE::UserCalloutsHelper do
           expect(subject).to be false
         end
       end
+    end
+  end
+
+  describe '.show_new_user_signups_cap_reached?' do
+    subject { helper.show_new_user_signups_cap_reached? }
+
+    let(:user) { create(:user) }
+    let(:admin) { create(:user, admin: true) }
+
+    context 'when user is anonymous' do
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when user is not an admin' do
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+      end
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when feature flag is enabled' do
+      where(:new_user_signups_cap, :active_user_count, :result) do
+        nil | 10 | false
+        10  | 9  | false
+        0   | 10 | true
+        1   | 1  | true
+      end
+
+      with_them do
+        before do
+          allow(helper).to receive(:current_user).and_return(admin)
+          allow(User.billable).to receive(:count).and_return(active_user_count)
+          allow(Gitlab::CurrentSettings.current_application_settings)
+            .to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+        end
+
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
+
+  describe '#show_eoa_bronze_plan_banner?' do
+    let_it_be(:user) { create(:user) }
+
+    shared_examples 'shows and hides the banner depending on circumstances' do
+      where(:show_billing_eoa_banner, :actual_plan_name, :dismissed_callout, :travel_to_date, :result) do
+        true  | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date - 1.day | true
+        true  | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date         | false
+        true  | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date + 1.day | false
+        true  | ::Plan::BRONZE     | true  | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::SILVER     | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::PREMIUM    | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::GOLD       | false | eoa_bronze_plan_end_date - 1.day | false
+        true  | ::Plan::ULTIMATE   | false | eoa_bronze_plan_end_date - 1.day | false
+        false | ::Plan::BRONZE     | false | eoa_bronze_plan_end_date - 1.day | false
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(show_billing_eoa_banner: show_billing_eoa_banner)
+          allow(namespace).to receive(:actual_plan_name).and_return(actual_plan_name)
+          allow(user).to receive(:dismissed_callout?).and_return(dismissed_callout)
+        end
+
+        it do
+          travel_to(travel_to_date) do
+            expect(helper.show_eoa_bronze_plan_banner?(namespace)).to eq(result)
+          end
+        end
+      end
+    end
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'with group namespace' do
+      let(:group) { create(:group) }
+      let(:current_user) { user }
+
+      before do
+        group.add_owner(current_user.id)
+        allow(group).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+        allow(helper).to receive(:current_user).and_return(current_user)
+      end
+
+      it_behaves_like 'shows and hides the banner depending on circumstances' do
+        let(:namespace) { group }
+      end
+    end
+
+    context 'with personal namespace' do
+      let(:current_user) { user }
+
+      before do
+        allow(current_user.namespace).to receive(:actual_plan_name).and_return(::Plan::BRONZE)
+      end
+
+      it_behaves_like 'shows and hides the banner depending on circumstances' do
+        let(:namespace) { current_user.namespace }
+      end
+    end
+  end
+
+  describe '#eoa_bronze_plan_end_date' do
+    it 'returns a date type value' do
+      expect(helper.send(:eoa_bronze_plan_end_date).is_a?(Date)).to eq(true)
     end
   end
 end

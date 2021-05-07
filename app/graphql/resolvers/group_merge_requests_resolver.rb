@@ -4,7 +4,9 @@ module Resolvers
   class GroupMergeRequestsResolver < MergeRequestsResolver
     include GroupIssuableResolver
 
-    alias_method :group, :synchronized_object
+    alias_method :group, :object
+
+    type Types::MergeRequestType.connection_type, null: true
 
     include_subgroups 'merge requests'
     accept_assignee

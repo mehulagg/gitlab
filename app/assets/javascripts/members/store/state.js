@@ -1,0 +1,23 @@
+export default ({
+  members,
+  pagination,
+  tableFields,
+  tableAttrs,
+  tableSortableFields,
+  memberPath,
+  requestFormatter,
+  filteredSearchBar,
+}) => ({
+  members,
+  pagination,
+  tableFields,
+  tableAttrs,
+  tableSortableFields,
+  memberPath,
+  requestFormatter,
+  filteredSearchBar,
+  showError: false,
+  errorMessage: '',
+  removeGroupLinkModalVisible: false,
+  groupLinkToRemove: null,
+});

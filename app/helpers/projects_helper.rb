@@ -84,18 +84,8 @@ module ProjectsHelper
   end
 
   def project_title(project)
-    namespace_link =
-      if project.group
-        group_title(project.group, nil, nil)
-      else
-        owner = project.namespace.owner
-        link_to(simple_sanitize(owner.name), user_path(owner))
-      end
-
-    project_link = link_to project_path(project) do
-      icon = project_icon(project, alt: project.name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
-      [icon, content_tag("span", simple_sanitize(project.name), class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
-    end
+    namespace_link = build_namespace_breadcrumb_link(project)
+    project_link = build_project_breadcrumb_link(project)
 
     namespace_link = breadcrumb_list_item(namespace_link) unless project.group
     project_link = breadcrumb_list_item project_link
@@ -149,6 +139,10 @@ module ProjectsHelper
     project_nav_tabs.include? name
   end
 
+  def any_project_nav_tab?(tabs)
+    tabs.any? { |tab| project_nav_tab?(tab) }
+  end
+
   def project_for_deploy_key(deploy_key)
     if deploy_key.has_access_to?(@project)
       @project
@@ -160,13 +154,7 @@ module ProjectsHelper
   end
 
   def can_change_visibility_level?(project, current_user)
-    return false unless can?(current_user, :change_visibility_level, project)
-
-    if project.fork_source
-      project.fork_source.visibility_level > Gitlab::VisibilityLevel::PRIVATE
-    else
-      true
-    end
+    can?(current_user, :change_visibility_level, project)
   end
 
   def can_disable_emails?(project, current_user)
@@ -283,10 +271,6 @@ module ProjectsHelper
     "xcode://clone?repo=#{CGI.escape(default_url_to_repo(project))}"
   end
 
-  def link_to_filter_repo
-    link_to 'git filter-repo', 'https://github.com/newren/git-filter-repo', target: '_blank', rel: 'noopener noreferrer'
-  end
-
   def explore_projects_tab?
     current_page?(explore_projects_path) ||
       current_page?(trending_explore_projects_path) ||
@@ -299,10 +283,6 @@ module ProjectsHelper
 
   def show_issue_count?(disabled: false, compact_mode: false)
     !disabled && !compact_mode
-  end
-
-  def settings_operations_available?
-    can?(current_user, :read_environment, @project)
   end
 
   def error_tracking_setting_project_json
@@ -394,6 +374,7 @@ module ProjectsHelper
 
   private
 
+  # rubocop:disable Metrics/CyclomaticComplexity
   def get_project_nav_tabs(project, current_user)
     nav_tabs = [:home]
 
@@ -410,17 +391,13 @@ module ProjectsHelper
       nav_tabs << :container_registry
     end
 
+    if Feature.enabled?(:infrastructure_registry_page)
+      nav_tabs << :infrastructure_registry
+    end
+
     # Pipelines feature is tied to presence of builds
     if can?(current_user, :read_build, project)
       nav_tabs << :pipelines
-    end
-
-    if can_view_operations_tab?(current_user, project)
-      nav_tabs << :operations
-    end
-
-    if can_view_product_analytics?(current_user, project)
-      nav_tabs << :product_analytics
     end
 
     tab_ability_map.each do |tab, ability|
@@ -433,8 +410,11 @@ module ProjectsHelper
 
     nav_tabs += package_nav_tabs(project, current_user)
 
+    nav_tabs << :learn_gitlab if learn_gitlab_experiment_enabled?(project)
+
     nav_tabs
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def package_nav_tabs(project, current_user)
     [].tap do |tabs|
@@ -465,6 +445,7 @@ module ProjectsHelper
       builds:             :read_build,
       clusters:           :read_cluster,
       serverless:         :read_cluster,
+      terraform:          :read_terraform_state,
       error_tracking:     :read_sentry_issue,
       alert_management:   :read_alert_management_alert,
       incidents:          :read_issue,
@@ -472,27 +453,9 @@ module ProjectsHelper
       issues:             :read_issue,
       project_members:    :read_project_member,
       wiki:               :read_wiki,
-      feature_flags:      :read_feature_flag
+      feature_flags:      :read_feature_flag,
+      analytics:          :read_analytics
     }
-  end
-
-  def can_view_operations_tab?(current_user, project)
-    [
-      :metrics_dashboard,
-      :read_alert_management_alert,
-      :read_environment,
-      :read_issue,
-      :read_sentry_issue,
-      :read_cluster,
-      :read_feature_flag
-    ].any? do |ability|
-      can?(current_user, ability, project)
-    end
-  end
-
-  def can_view_product_analytics?(current_user, project)
-    Feature.enabled?(:product_analytics, project) &&
-      can?(current_user, :read_product_analytics, project)
   end
 
   def search_tab_ability_map
@@ -562,14 +525,6 @@ module ProjectsHelper
     end
   end
 
-  def sidebar_operations_link_path(project = @project)
-    if can?(current_user, :read_environment, project)
-      metrics_project_environments_path(project)
-    else
-      project_feature_flags_path(project)
-    end
-  end
-
   def project_last_activity(project)
     if project.last_activity_at
       time_ago_with_tooltip(project.last_activity_at, placement: 'bottom', html_class: 'last_activity_time_ago')
@@ -614,6 +569,7 @@ module ProjectsHelper
 
   def project_permissions_settings(project)
     feature = project.project_feature
+
     {
       packagesEnabled: !!project.packages_enabled,
       visibilityLevel: project.visibility_level,
@@ -626,11 +582,15 @@ module ProjectsHelper
       wikiAccessLevel: feature.wiki_access_level,
       snippetsAccessLevel: feature.snippets_access_level,
       pagesAccessLevel: feature.pages_access_level,
+      analyticsAccessLevel: feature.analytics_access_level,
       containerRegistryEnabled: !!project.container_registry_enabled,
       lfsEnabled: !!project.lfs_enabled,
       emailsDisabled: project.emails_disabled?,
       metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
-      showDefaultAwardEmojis: project.show_default_award_emojis?
+      operationsAccessLevel: feature.operations_access_level,
+      showDefaultAwardEmojis: project.show_default_award_emojis?,
+      allowEditingCommitMessages: project.allow_editing_commit_messages?,
+      securityAndComplianceAccessLevel: project.security_and_compliance_access_level
     }
   end
 
@@ -702,50 +662,6 @@ module ProjectsHelper
     "#{request.path}?#{options.to_param}"
   end
 
-  def sidebar_projects_paths
-    %w[
-      projects#show
-      projects#activity
-      releases#index
-    ]
-  end
-
-  def sidebar_settings_paths
-    %w[
-      projects#edit
-      integrations#show
-      services#edit
-      hooks#index
-      hooks#edit
-      access_tokens#index
-      hook_logs#show
-      repository#show
-      ci_cd#show
-      operations#show
-      badges#index
-      pages#show
-    ]
-  end
-
-  def sidebar_repository_paths
-    %w[
-      tree
-      blob
-      blame
-      edit_tree
-      new_tree
-      find_file
-      commit
-      commits
-      compare
-      projects/repositories
-      tags
-      branches
-      graphs
-      network
-    ]
-  end
-
   def sidebar_operations_paths
     %w[
       environments
@@ -762,6 +678,7 @@ module ProjectsHelper
       metrics_dashboard
       feature_flags
       tracings
+      terraform
     ]
   end
 
@@ -777,12 +694,42 @@ module ProjectsHelper
   end
 
   def settings_container_registry_expiration_policy_available?(project)
+    Feature.disabled?(:sidebar_refactor, current_user) &&
+      can_destroy_container_registry_image?(current_user, project)
+  end
+
+  def settings_packages_and_registries_enabled?(project)
+    Feature.enabled?(:sidebar_refactor, current_user) &&
+      can_destroy_container_registry_image?(current_user, project)
+  end
+
+  def can_destroy_container_registry_image?(current_user, project)
     Gitlab.config.registry.enabled &&
       can?(current_user, :destroy_container_image, project)
   end
 
-  def project_access_token_available?(project)
-    can?(current_user, :admin_resource_access_tokens, project)
+  def build_project_breadcrumb_link(project)
+    project_name = simple_sanitize(project.name)
+
+    push_to_schema_breadcrumb(project_name, project_path(project))
+
+    link_to project_path(project) do
+      icon = project_icon(project, alt: project_name, class: 'avatar-tile', width: 15, height: 15) if project.avatar_url && !Rails.env.test?
+      [icon, content_tag("span", project_name, class: "breadcrumb-item-text js-breadcrumb-item-text")].join.html_safe
+    end
+  end
+
+  def build_namespace_breadcrumb_link(project)
+    if project.group
+      group_title(project.group, nil, nil)
+    else
+      owner = project.namespace.owner
+      name = simple_sanitize(owner.name)
+      url = user_path(owner)
+
+      push_to_schema_breadcrumb(name, url)
+      link_to(name, url)
+    end
   end
 end
 

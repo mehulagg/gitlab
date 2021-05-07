@@ -25,7 +25,7 @@ module Security
 
     def execute
       findings = requested_reports.each_with_object([]) do |(type, report), findings|
-        raise ParseError, 'JSON parsing failed' if report.error.is_a?(Gitlab::Ci::Parsers::Security::Common::SecurityReportParserError)
+        raise ParseError, 'JSON parsing failed' if report.errored?
 
         normalized_findings = normalize_report_findings(
           report.findings,
@@ -58,12 +58,12 @@ module Security
 
     def vulnerabilities_by_finding_fingerprint(report_type, report)
       Vulnerabilities::Finding
-        .with_vulnerabilities_for_state(
-          project: pipeline.project,
-          report_type: report_type,
-          project_fingerprints: report.findings.map(&:project_fingerprint))
+        .by_project_fingerprints(report.findings.map(&:project_fingerprint))
+        .by_projects(pipeline.project)
+        .by_report_types(report_type)
+        .select(:vulnerability_id, :project_fingerprint)
        .each_with_object({}) do |finding, hash|
-        hash[finding.project_fingerprint] = finding.vulnerability
+        hash[finding.project_fingerprint] = finding.vulnerability_id
       end
     end
 
@@ -75,17 +75,23 @@ module Security
     def normalize_report_findings(report_findings, vulnerabilities)
       report_findings.map do |report_finding|
         finding_hash = report_finding.to_hash
-          .except(:compare_key, :identifiers, :location, :scanner)
+          .except(:compare_key, :identifiers, :location, :scanner, :links, :signatures)
 
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
         finding.location_fingerprint = report_finding.location.fingerprint
-        finding.vulnerability = vulnerabilities[finding.project_fingerprint]
+        finding.vulnerability_id = vulnerabilities[finding.project_fingerprint]
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
+        finding.finding_links = report_finding.links.map do |link|
+          Vulnerabilities::FindingLink.new(link.to_hash)
+        end
         finding.identifiers = report_finding.identifiers.map do |identifier|
           Vulnerabilities::Identifier.new(identifier.to_hash)
+        end
+        finding.signatures = report_finding.signatures.map do |signature|
+          Vulnerabilities::FindingSignature.new(signature.to_hash)
         end
 
         finding
@@ -108,16 +114,34 @@ module Security
     end
 
     def dismissal_feedback?(finding)
-      dismissal_feedback_by_fingerprint[finding.project_fingerprint]
+      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, pipeline.project) && pipeline.project.licensed_feature_available?(:vulnerability_finding_signatures) && !finding.signatures.empty?
+        dismissal_feedback_by_finding_signatures(finding)
+      else
+        dismissal_feedback_by_project_fingerprint(finding)
+      end
+    end
+
+    def all_dismissal_feedbacks
+      strong_memoize(:all_dismissal_feedbacks) do
+        pipeline.project
+          .vulnerability_feedback
+          .for_dismissal
+      end
+    end
+
+    def dismissal_feedback_by_finding_signatures(finding)
+      potential_uuids = Set.new([*finding.signature_uuids, finding.uuid].compact)
+      all_dismissal_feedbacks.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
     end
 
     def dismissal_feedback_by_fingerprint
       strong_memoize(:dismissal_feedback_by_fingerprint) do
-        pipeline.project
-                .vulnerability_feedback
-                .for_dismissal
-                .group_by(&:project_fingerprint)
+        all_dismissal_feedbacks.group_by(&:project_fingerprint)
       end
+    end
+
+    def dismissal_feedback_by_project_fingerprint(finding)
+      dismissal_feedback_by_fingerprint[finding.project_fingerprint]
     end
 
     def confidence_levels

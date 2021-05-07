@@ -13,18 +13,17 @@ module Ci
         @namespace = namespace
       end
 
+      def enabled?
+        namespace_eligible? && total_minutes.nonzero?
+      end
+
       # Status of the monthly allowance being used.
       def monthly_minutes_report
-        if namespace.shared_runners_minutes_limit_enabled? # TODO: try to refactor this
-          status = monthly_minutes_used_up? ? :over_quota : :under_quota
-          Report.new(monthly_minutes_used, monthly_minutes, status)
-        else
-          Report.new(monthly_minutes_used, 'Unlimited', :disabled)
-        end
+        Report.new(monthly_minutes_used, minutes_limit, report_status)
       end
 
       def monthly_percent_used
-        return 0 unless namespace.shared_runners_minutes_limit_enabled?
+        return 0 unless enabled?
         return 0 if monthly_minutes == 0
 
         100 * monthly_minutes_used.to_i / monthly_minutes
@@ -37,41 +36,84 @@ module Ci
       end
 
       def purchased_percent_used
-        return 0 unless namespace.shared_runners_minutes_limit_enabled?
+        return 0 unless enabled?
         return 0 if purchased_minutes == 0
 
         100 * purchased_minutes_used.to_i / purchased_minutes
       end
 
+      def minutes_used_up?
+        enabled? && total_minutes_used >= total_minutes
+      end
+
+      def total_minutes
+        @total_minutes ||= monthly_minutes + purchased_minutes
+      end
+
+      def total_minutes_used
+        @total_minutes_used ||= namespace.shared_runners_seconds.to_i / 60
+      end
+
+      def percent_total_minutes_remaining
+        return 0 if total_minutes == 0
+
+        100 * total_minutes_remaining.to_i / total_minutes
+      end
+
+      def namespace_eligible?
+        namespace.root? && namespace.any_project_with_shared_runners_enabled?
+      end
+
+      def current_balance
+        total_minutes.to_i - total_minutes_used
+      end
+
       private
 
-      # TODO: maps to Namespace#shared_runners_minutes_used?
+      def minutes_limit
+        return monthly_minutes if enabled?
+
+        if namespace_eligible?
+          _('Unlimited')
+        else
+          _('Not supported')
+        end
+      end
+
+      def report_status
+        return :disabled unless enabled?
+
+        monthly_minutes_used_up? ? :over_quota : :under_quota
+      end
+
+      def total_minutes_remaining
+        [current_balance, 0].max
+      end
+
       def monthly_minutes_used_up?
-        namespace.shared_runners_minutes_limit_enabled? &&
-          monthly_minutes_used >= monthly_minutes
+        return false unless enabled?
+
+        monthly_minutes_used >= monthly_minutes
       end
 
-      # TODO: maps to Namespace#extra_shared_runners_minutes_used?
       def purchased_minutes_used_up?
-        namespace.shared_runners_minutes_limit_enabled? &&
-          any_minutes_purchased? &&
-          purchased_minutes_used >= purchased_minutes
+        return false unless enabled?
+
+        any_minutes_purchased? && purchased_minutes_used >= purchased_minutes
       end
 
-      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: false)
       def monthly_minutes_used
-        minutes_used - purchased_minutes_used
+        total_minutes_used - purchased_minutes_used
       end
 
       def monthly_minutes_available?
-        minutes_used <= monthly_minutes
+        total_minutes_used <= monthly_minutes
       end
 
-      # TODO: maps to NamespaceStatistics#extra_shared_runners_minutes
       def purchased_minutes_used
         return 0 if no_minutes_purchased? || monthly_minutes_available?
 
-        minutes_used - monthly_minutes
+        total_minutes_used - monthly_minutes
       end
 
       def no_minutes_purchased?
@@ -82,12 +124,6 @@ module Ci
         purchased_minutes > 0
       end
 
-      # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
-      def minutes_used
-        @minutes_used ||= namespace.shared_runners_seconds.to_i / 60
-      end
-
-      # TODO: maps to Namespace#actual_shared_runners_minuts_limit(include_extra: false)
       def monthly_minutes
         @monthly_minutes ||= (namespace.shared_runners_minutes_limit || ::Gitlab::CurrentSettings.shared_runners_minutes).to_i
       end

@@ -6,50 +6,19 @@ require 'rspec-parameterized'
 RSpec.describe Gitlab::InstrumentationHelper do
   using RSpec::Parameterized::TableSyntax
 
-  describe '.keys' do
-    it 'returns all available payload keys' do
-      expected_keys = [
-        :gitaly_calls,
-        :gitaly_duration_s,
-        :rugged_calls,
-        :rugged_duration_s,
-        :elasticsearch_calls,
-        :elasticsearch_duration_s,
-        :redis_calls,
-        :redis_duration_s,
-        :redis_read_bytes,
-        :redis_write_bytes,
-        :redis_action_cable_calls,
-        :redis_action_cable_duration_s,
-        :redis_action_cable_read_bytes,
-        :redis_action_cable_write_bytes,
-        :redis_cache_calls,
-        :redis_cache_duration_s,
-        :redis_cache_read_bytes,
-        :redis_cache_write_bytes,
-        :redis_queues_calls,
-        :redis_queues_duration_s,
-        :redis_queues_read_bytes,
-        :redis_queues_write_bytes,
-        :redis_shared_state_calls,
-        :redis_shared_state_duration_s,
-        :redis_shared_state_read_bytes,
-        :redis_shared_state_write_bytes
-      ]
-
-      expect(described_class.keys).to eq(expected_keys)
-    end
-  end
-
   describe '.add_instrumentation_data', :request_store do
     let(:payload) { {} }
 
     subject { described_class.add_instrumentation_data(payload) }
 
-    it 'adds nothing' do
+    before do
+      described_class.init_instrumentation_data
+    end
+
+    it 'includes DB counts' do
       subject
 
-      expect(payload).to eq({})
+      expect(payload).to include(db_count: 0, db_cached_count: 0, db_write_count: 0)
     end
 
     context 'when Gitaly calls are made' do
@@ -95,6 +64,57 @@ RSpec.describe Gitlab::InstrumentationHelper do
         # Gitaly
         expect(payload[:gitaly_calls]).to be_nil
         expect(payload[:gitaly_duration]).to be_nil
+      end
+    end
+
+    context 'when the request matched a Rack::Attack safelist' do
+      it 'logs the safelist name' do
+        Gitlab::Instrumentation::Throttle.safelist = 'foobar'
+
+        subject
+
+        expect(payload[:throttle_safelist]).to eq('foobar')
+      end
+    end
+
+    it 'logs cpu_s duration' do
+      subject
+
+      expect(payload).to include(:cpu_s)
+    end
+
+    context 'when logging memory allocations' do
+      include MemoryInstrumentationHelper
+
+      before do
+        skip_memory_instrumentation!
+      end
+
+      it 'logs memory usage metrics' do
+        subject
+
+        expect(payload).to include(
+          :mem_objects,
+          :mem_bytes,
+          :mem_mallocs
+        )
+      end
+
+      context 'when trace_memory_allocations is disabled' do
+        before do
+          stub_feature_flags(trace_memory_allocations: false)
+          Gitlab::Memory::Instrumentation.ensure_feature_flag!
+        end
+
+        it 'does not log memory usage metrics' do
+          subject
+
+          expect(payload).not_to include(
+            :mem_objects,
+            :mem_bytes,
+            :mem_mallocs
+          )
+        end
       end
     end
   end

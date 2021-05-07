@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import AuditEventsExportButton from 'ee/audit_events/components/audit_events_export_button.vue';
 

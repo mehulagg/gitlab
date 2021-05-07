@@ -73,46 +73,34 @@ RSpec.describe OperationsHelper, :routing do
   end
 
   describe '#alerts_settings_data' do
-    subject { helper.alerts_settings_data }
+    subject(:alerts_settings_data) { helper.alerts_settings_data }
 
-    describe 'Opsgenie MVC attributes' do
-      let_it_be(:alerts_service) do
-        create(:alerts_service,
-          project: project,
-          opsgenie_mvc_enabled: false,
-          opsgenie_mvc_target_url: 'https://appname.app.opsgenie.com/alert/list'
-        )
-      end
-
-      let_it_be(:prometheus_service) { build_stubbed(:prometheus_service) }
-
+    describe 'Multiple Integrations Support' do
       before do
-        allow(helper).to receive(:alerts_service).and_return(alerts_service)
-        allow(helper).to receive(:prometheus_service).and_return(prometheus_service)
-        allow(alerts_service).to receive(:opsgenie_mvc_available?).and_return(opsgenie_available)
+        stub_licensed_features(multiple_alert_http_integrations: multi_integrations)
       end
 
       context 'when available' do
-        let(:opsgenie_available) { true }
+        let(:multi_integrations) { true }
 
-        it do
-          is_expected.to include(
-            'opsgenie_mvc_available' => 'true',
-            'opsgenie_mvc_form_path' => project_service_path(project, alerts_service),
-            'opsgenie_mvc_enabled' => 'false',
-            'opsgenie_mvc_target_url' => 'https://appname.app.opsgenie.com/alert/list'
+        it { is_expected.to include('multi_integrations' => 'true') }
+
+        it 'has the correct list of fields', :aggregate_failures do
+          fields = Gitlab::Json.parse(alerts_settings_data['alert_fields'])
+
+          expect(fields.count).to eq(10)
+          expect(fields.first.keys).to eq(%w[name label types])
+          expect(fields.map { |f| f['name'] }).to match_array(
+            %w[title description start_time end_time service monitoring_tool hosts severity fingerprint gitlab_environment_name]
           )
         end
       end
 
       context 'when not available' do
-        let(:opsgenie_keys) do
-          %w[opsgenie_mvc_available opsgenie_mvc_enabled opsgenie_mvc_form_path opsgenie_mvc_target_url]
-        end
+        let(:multi_integrations) { false }
 
-        let(:opsgenie_available) { false }
-
-        it { is_expected.not_to include(opsgenie_keys) }
+        it { is_expected.to include('multi_integrations' => 'false') }
+        it { is_expected.not_to have_key('alert_fields') }
       end
     end
   end

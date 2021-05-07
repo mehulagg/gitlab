@@ -25,7 +25,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'relates and unrelates one issue to/from another', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/541' do
+      it 'relates and unrelates one issue to/from another', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1172' do
         issue_1.visit!
 
         Page::Project::Issue::Show.perform do |show|
@@ -37,7 +37,7 @@ module QA
 
           show.click_remove_related_issue_button
 
-          expect(show).to have_no_text(issue_2.title, wait: max_wait)
+          expect(show).not_to have_text(issue_2.title, wait: max_wait)
         end
       end
     end

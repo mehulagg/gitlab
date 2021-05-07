@@ -1,7 +1,8 @@
-import DropdownUser from '~/filtered_search/dropdown_user';
-import DropdownNonUser from '~/filtered_search/dropdown_non_user';
-import DropdownWeight from './dropdown_weight';
 import AvailableDropdownMappingsCE from '~/filtered_search/available_dropdown_mappings';
+import DropdownAjaxFilter from '~/filtered_search/dropdown_ajax_filter';
+import DropdownNonUser from '~/filtered_search/dropdown_non_user';
+import DropdownUser from '~/filtered_search/dropdown_user';
+import DropdownWeight from './dropdown_weight';
 
 export default class AvailableDropdownMappings {
   constructor({
@@ -9,6 +10,7 @@ export default class AvailableDropdownMappings {
     runnerTagsEndpoint,
     labelsEndpoint,
     milestonesEndpoint,
+    iterationsEndpoint,
     epicsEndpoint,
     releasesEndpoint,
     environmentsEndpoint,
@@ -20,6 +22,7 @@ export default class AvailableDropdownMappings {
     this.runnerTagsEndpoint = runnerTagsEndpoint;
     this.labelsEndpoint = labelsEndpoint;
     this.milestonesEndpoint = milestonesEndpoint;
+    this.iterationsEndpoint = iterationsEndpoint;
     this.epicsEndpoint = epicsEndpoint;
     this.releasesEndpoint = releasesEndpoint;
     this.environmentsEndpoint = environmentsEndpoint;
@@ -63,6 +66,16 @@ export default class AvailableDropdownMappings {
         symbol: '&',
       },
       element: this.container.querySelector('#js-dropdown-epic'),
+    };
+
+    ceMappings.iteration = {
+      reference: null,
+      gl: DropdownAjaxFilter,
+      extraArguments: {
+        endpoint: this.iterationsEndpoint,
+        symbol: '',
+      },
+      element: this.container.querySelector('#js-dropdown-iteration'),
     };
 
     return this.ceAvailableMappings.buildMappings(supportedTokens, ceMappings);

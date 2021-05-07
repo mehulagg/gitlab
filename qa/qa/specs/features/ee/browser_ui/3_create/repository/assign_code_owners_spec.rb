@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
-    describe 'Codeowners' do
+  RSpec.describe 'Create' do
+    # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+    describe 'Codeowners', :requires_admin do
       # Create one user to be the assigned approver and another user who will not be an approver
       let(:approver) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
       let(:non_approver) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2) }
@@ -17,6 +18,7 @@ module QA
       let(:branch_name) { 'protected-branch' }
 
       before do
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
         project.add_member(approver, Resource::Members::AccessLevel::DEVELOPER)
         project.add_member(non_approver, Resource::Members::AccessLevel::DEVELOPER)
 
@@ -26,7 +28,7 @@ module QA
       end
 
       it 'merge request assigns code owners as approvers', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/605' do
-        # Commit CODEOWNERS to master
+        # Commit CODEOWNERS to default branch
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add CODEOWNERS and test files'
@@ -43,9 +45,10 @@ module QA
         end
 
         # Create a projected branch that requires approval from code owners
-        Resource::ProtectedBranch.fabricate! do |protected_branch|
+        Resource::ProtectedBranch.fabricate_via_browser_ui! do |protected_branch|
           protected_branch.branch_name = branch_name
           protected_branch.project = project
+          protected_branch.require_code_owner_approval = true
         end
 
         # Push a new CODEOWNERS file
@@ -68,7 +71,7 @@ module QA
         end.visit!
 
         # Check that the merge request assigns the original code owner as an
-        # approver (because the current CODEOWNERS file in the master branch
+        # approver (because the current CODEOWNERS file in the default branch
         # doesn't have the new owner yet)
         Page::MergeRequest::Show.perform do |show|
           show.edit!

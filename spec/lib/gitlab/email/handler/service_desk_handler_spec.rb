@@ -11,13 +11,13 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
   end
 
   let(:email_raw) { email_fixture('emails/service_desk.eml') }
-  let_it_be(:namespace) { create(:namespace, name: "email") }
+  let_it_be(:group) { create(:group, :private, name: "email") }
   let(:expected_description) do
     "Service desk stuff!\n\n```\na = b\n```\n\n`/label ~label1`\n`/assign @user1`\n`/close`\n![image](uploads/image.png)"
   end
 
   context 'service desk is enabled for the project' do
-    let_it_be(:project) { create(:project, :repository, :public, namespace: namespace, path: 'test', service_desk_enabled: true) }
+    let_it_be(:project) { create(:project, :repository, :private, group: group, path: 'test', service_desk_enabled: true) }
 
     before do
       allow(Gitlab::ServiceDesk).to receive(:supported?).and_return(true)
@@ -36,8 +36,15 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
         expect(new_issue.author).to eql(User.support_bot)
         expect(new_issue.confidential?).to be true
         expect(new_issue.all_references.all).to be_empty
-        expect(new_issue.title).to eq("Service Desk (from jake@adventuretime.ooo): The message subject! @all")
+        expect(new_issue.title).to eq("The message subject! @all")
         expect(new_issue.description).to eq(expected_description.strip)
+      end
+
+      it 'creates an issue_email_participant' do
+        receiver.execute
+        new_issue = Issue.last
+
+        expect(new_issue.issue_email_participants.first.email).to eq("jake@adventuretime.ooo")
       end
 
       it 'sends thank you email' do
@@ -83,11 +90,6 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
           context 'when quick actions are present' do
             let(:label) { create(:label, project: project, title: 'label1') }
             let(:milestone) { create(:milestone, project: project) }
-            let!(:user) { create(:user, username: 'user1') }
-
-            before do
-              project.add_developer(user)
-            end
 
             it 'applies quick action commands present on templates' do
               file_content = %(Text from template \n/label ~#{label.title} \n/milestone %"#{milestone.name}"")
@@ -99,6 +101,18 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
               expect(issue.description).to include('Text from template')
               expect(issue.label_ids).to include(label.id)
               expect(issue.milestone).to eq(milestone)
+            end
+
+            it 'applies group labels using quick actions' do
+              group_label = create(:group_label, group: project.group, title: 'label2')
+              file_content = %(Text from template \n/label ~#{group_label.title}"")
+              set_template_file('with_group_labels', file_content)
+
+              receiver.execute
+
+              issue = Issue.last
+              expect(issue.description).to include('Text from template')
+              expect(issue.label_ids).to include(group_label.id)
             end
 
             it 'redacts quick actions present on user email body' do
@@ -179,16 +193,6 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
             expect { receiver.execute }.to raise_error(Gitlab::Email::ProjectNotFound)
           end
         end
-
-        context 'when service_desk_custom_address feature is disabled' do
-          before do
-            stub_feature_flags(service_desk_custom_address: false)
-          end
-
-          it 'bounces the email' do
-            expect { receiver.execute }.to raise_error(Gitlab::Email::ProjectNotFound)
-          end
-        end
       end
     end
 
@@ -242,7 +246,7 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
 
         new_issue = Issue.last
 
-        expect(new_issue.service_desk_reply_to).to eq('finn@adventuretime.ooo')
+        expect(new_issue.external_author).to eq('finn@adventuretime.ooo')
       end
     end
 
@@ -289,7 +293,8 @@ RSpec.describe Gitlab::Email::Handler::ServiceDeskHandler do
   end
 
   context 'service desk is disabled for the project' do
-    let(:project) { create(:project, :public, namespace: namespace, path: 'test', service_desk_enabled: false) }
+    let(:group) { create(:group)}
+    let(:project) { create(:project, :public, group: group, path: 'test', service_desk_enabled: false) }
 
     it 'bounces the email' do
       expect { receiver.execute }.to raise_error(Gitlab::Email::ProcessingError)

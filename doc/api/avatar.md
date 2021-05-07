@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Avatar API
@@ -10,15 +10,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## Get a single avatar URL
 
-Get a single [avatar](../user/profile/index.md#profile-settings) URL for a user with the given email address.
+Get a single [avatar](../user/profile/index.md#access-your-user-settings) URL for a user with the given email address.
 
 If:
 
 - No user with the given public email address is found, results from external avatar services are
   returned.
-- Public visibility is restricted, response will be `403 Forbidden` when unauthenticated.
+- Public visibility is restricted, response is `403 Forbidden` when unauthenticated.
 
-NOTE: **Note:**
+NOTE:
 This endpoint can be accessed without authentication.
 
 ```plaintext
@@ -30,7 +30,7 @@ Parameters:
 | Attribute | Type    | Required | Description                                                                                                                             |
 |:----------|:--------|:---------|:----------------------------------------------------------------------------------------------------------------------------------------|
 | `email`   | string  | yes      | Public email address of the user.                                                                                                       |
-| `size`    | integer | no       | Single pixel dimension (since images are squares). Only used for avatar lookups at `Gravatar` or at the configured `Libravatar` server. |
+| `size`    | integer | no       | Single pixel dimension (because images are squares). Only used for avatar lookups at `Gravatar` or at the configured `Libravatar` server. |
 
 Example request:
 

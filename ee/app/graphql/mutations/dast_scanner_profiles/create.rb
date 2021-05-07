@@ -3,18 +3,18 @@
 module Mutations
   module DastScannerProfiles
     class Create < BaseMutation
-      include AuthorizesProject
+      include FindsProject
 
       graphql_name 'DastScannerProfileCreate'
 
-      field :id, GraphQL::ID_TYPE,
+      field :id, ::Types::GlobalIDType[::DastScannerProfile],
             null: true,
-            description: 'ID of the scanner profile.',
-            deprecated: { reason: 'Use `global_id`', milestone: '13.4' }
+            description: 'ID of the scanner profile.'
 
       field :global_id, ::Types::GlobalIDType[::DastScannerProfile],
             null: true,
-            description: 'ID of the scanner profile.'
+            description: 'ID of the scanner profile.',
+            deprecated: { reason: 'Use `id`', milestone: '13.6' }
 
       argument :full_path, GraphQL::ID_TYPE,
                required: true,
@@ -53,9 +53,9 @@ module Mutations
       authorize :create_on_demand_dast_scan
 
       def resolve(full_path:, profile_name:, spider_timeout: nil, target_timeout: nil, scan_type:, use_ajax_spider:, show_debug_messages:)
-        project = authorized_find_project!(full_path: full_path)
+        project = authorized_find!(full_path)
 
-        service = ::DastScannerProfiles::CreateService.new(project, current_user)
+        service = ::AppSec::Dast::ScannerProfiles::CreateService.new(project, current_user)
         result = service.execute(
           name: profile_name,
           spider_timeout: spider_timeout,

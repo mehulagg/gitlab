@@ -1,10 +1,10 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlSprintf } from '@gitlab/ui';
-import eventHub from '~/clusters/event_hub';
-import { APPLICATION_STATUS, ELASTIC_STACK } from '~/clusters/constants';
+import { shallowMount } from '@vue/test-utils';
 import ApplicationRow from '~/clusters/components/application_row.vue';
 import UninstallApplicationConfirmationModal from '~/clusters/components/uninstall_application_confirmation_modal.vue';
 import UpdateApplicationConfirmationModal from '~/clusters/components/update_application_confirmation_modal.vue';
+import { APPLICATION_STATUS, ELASTIC_STACK } from '~/clusters/constants';
+import eventHub from '~/clusters/event_hub';
 
 import { DEFAULT_APPLICATION_STATE } from '../services/mock_data';
 
@@ -15,7 +15,7 @@ describe('Application Row', () => {
     wrapper.destroy();
   });
 
-  const mountComponent = data => {
+  const mountComponent = (data) => {
     wrapper = shallowMount(ApplicationRow, {
       stubs: { GlSprintf },
       propsData: {
@@ -87,6 +87,12 @@ describe('Application Row', () => {
       mountComponent({ status: APPLICATION_STATUS.UNINSTALLED });
 
       checkButtonState('Install', false, true);
+    });
+
+    it('has disabled "Externally installed" when APPLICATION_STATUS.EXTERNALLY_INSTALLED', () => {
+      mountComponent({ status: APPLICATION_STATUS.EXTERNALLY_INSTALLED });
+
+      checkButtonState('Externally installed', false, true);
     });
 
     it('has disabled "Installed" when application is installed and not uninstallable', () => {

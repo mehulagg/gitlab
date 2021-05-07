@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
   include ProjectForksHelper
+  include AfterNextHelpers
 
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be_with_refind(:project_with_repo) { create(:project, :repository) }
@@ -84,6 +85,7 @@ RSpec.describe ProjectsHelper do
 
   describe "can_change_visibility_level?" do
     let_it_be(:user) { create(:project_member, :reporter, user: create(:user), project: project).user }
+
     let(:forked_project) { fork_project(project, user) }
 
     it "returns false if there are no appropriate permissions" do
@@ -92,36 +94,10 @@ RSpec.describe ProjectsHelper do
       expect(helper.can_change_visibility_level?(project, user)).to be_falsey
     end
 
-    it "returns true if there are permissions and it is not fork" do
+    it "returns true if there are permissions" do
       allow(helper).to receive(:can?) { true }
 
       expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    it 'allows visibility level to be changed if the project is forked' do
-      allow(helper).to receive(:can?).with(user, :change_visibility_level, project) { true }
-      project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-      fork_project(project)
-
-      expect(helper.can_change_visibility_level?(project, user)).to be_truthy
-    end
-
-    context "forks" do
-      it "returns false if there are permissions and origin project is PRIVATE" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_falsey
-      end
-
-      it "returns true if there are permissions and origin project is INTERNAL" do
-        allow(helper).to receive(:can?) { true }
-
-        project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
-
-        expect(helper.can_change_visibility_level?(forked_project, user)).to be_truthy
-      end
     end
   end
 
@@ -416,6 +392,7 @@ RSpec.describe ProjectsHelper do
 
   describe '#get_project_nav_tabs' do
     before do
+      allow(helper).to receive(:current_user).and_return(user)
       allow(helper).to receive(:can?) { true }
     end
 
@@ -458,6 +435,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has external wiki' do
       it 'includes external wiki tab' do
         project.create_external_wiki_service(active: true, properties: { 'external_wiki_url' => 'https://gitlab.com' })
+        project.reload
 
         is_expected.to include(:external_wiki)
       end
@@ -483,28 +461,18 @@ RSpec.describe ProjectsHelper do
       it { is_expected.not_to include(:confluence) }
       it { is_expected.to include(:wiki) }
     end
-  end
 
-  describe '#can_view_operations_tab?' do
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-    end
+    context 'learn gitlab experiment' do
+      context 'when it is enabled' do
+        before do
+          expect(helper).to receive(:learn_gitlab_experiment_enabled?).with(project).and_return(true)
+        end
 
-    subject { helper.send(:can_view_operations_tab?, user, project) }
+        it { is_expected.to include(:learn_gitlab) }
+      end
 
-    [
-      :metrics_dashboard,
-      :read_alert_management_alert,
-      :read_environment,
-      :read_issue,
-      :read_sentry_issue,
-      :read_cluster
-    ].each do |ability|
-      it 'includes operations tab' do
-        allow(helper).to receive(:can?).and_return(false)
-        allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
-
-        is_expected.to be(true)
+      context 'when it is not enabled' do
+        it { is_expected.not_to include(:learn_gitlab) }
       end
     end
   end
@@ -664,31 +632,6 @@ RSpec.describe ProjectsHelper do
         allow(helper).to receive(:browser).and_return(Browser.new(mac_ua))
 
         expect(helper.show_xcode_link?(project)).to eq(false)
-      end
-    end
-  end
-
-  describe 'link_to_filter_repo' do
-    subject { helper.link_to_filter_repo }
-
-    it 'generates a hardcoded link to git filter-repo' do
-      result = helper.link_to_filter_repo
-      doc = Nokogiri::HTML.fragment(result)
-
-      expect(doc.children.size).to eq(1)
-
-      link = doc.children.first
-
-      aggregate_failures do
-        expect(result).to be_html_safe
-
-        expect(link.name).to eq('a')
-        expect(link[:target]).to eq('_blank')
-        expect(link[:rel]).to eq('noopener noreferrer')
-        expect(link[:href]).to eq('https://github.com/newren/git-filter-repo')
-        expect(link.inner_html).to eq('git filter-repo')
-
-        expect(result).to be_html_safe
       end
     end
   end
@@ -865,16 +808,36 @@ RSpec.describe ProjectsHelper do
   end
 
   describe '#can_import_members?' do
-    let(:owner) { project.owner }
+    context 'when user is project owner' do
+      before do
+        allow(helper).to receive(:current_user) { project.owner }
+      end
 
-    it 'returns false if user cannot admin_project_member' do
-      allow(helper).to receive(:current_user) { user }
-      expect(helper.can_import_members?).to eq false
+      it 'returns true for owner of project' do
+        expect(helper.can_import_members?).to eq true
+      end
     end
 
-    it 'returns true if user can admin_project_member' do
-      allow(helper).to receive(:current_user) { owner }
-      expect(helper.can_import_members?).to eq true
+    context 'when user is not a project owner' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:user_project_role, :can_import) do
+        :maintainer | true
+        :developer | false
+        :reporter | false
+        :guest | false
+      end
+
+      with_them do
+        before do
+          project.add_role(user, user_project_role)
+          allow(helper).to receive(:current_user) { user }
+        end
+
+        it 'resolves if the user can import members' do
+          expect(helper.can_import_members?).to eq can_import
+        end
+      end
     end
   end
 
@@ -996,6 +959,47 @@ RSpec.describe ProjectsHelper do
         let(:exception) { GRPC::DeadlineExceeded }
 
         it_behaves_like 'returns nil and tracks exception'
+      end
+    end
+  end
+
+  describe '#project_title' do
+    subject { helper.project_title(project) }
+
+    it 'enqueues the elements in the breadcrumb schema list' do
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.namespace.name, user_path(project.owner))
+      expect(helper).to receive(:push_to_schema_breadcrumb).with(project.name, project_path(project))
+
+      subject
+    end
+  end
+
+  describe '#project_permissions_settings' do
+    context 'with no project_setting associated' do
+      it 'includes a value for edit commit messages' do
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_falsy
+      end
+    end
+
+    context 'when commits are allowed to be edited' do
+      it 'includes the edit commit message value' do
+        project.create_project_setting(allow_editing_commit_messages: true)
+
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_truthy
+      end
+    end
+
+    context 'when commits are not allowed to be edited' do
+      it 'returns false to the edit commit message value' do
+        project.create_project_setting(allow_editing_commit_messages: false)
+
+        settings = project_permissions_settings(project)
+
+        expect(settings[:allowEditingCommitMessages]).to be_falsy
       end
     end
   end

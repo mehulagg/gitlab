@@ -1,7 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
-import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import { EntityTypes } from 'ee/threat_monitoring/components/policy_editor/constants';
+import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
 
 describe('PolicyRuleEntity component', () => {
   let wrapper;
@@ -31,7 +31,7 @@ describe('PolicyRuleEntity component', () => {
 
     it('selects all items', () => {
       const dropdown = findDropdown();
-      const selectedItems = dropdown.findAll(GlDropdownItem).filter(el => el.props('isChecked'));
+      const selectedItems = dropdown.findAll(GlDropdownItem).filter((el) => el.props('isChecked'));
       expect(selectedItems.length).toEqual(Object.keys(EntityTypes).length);
       expect(dropdown.props('text')).toEqual('All selected');
     });
@@ -40,8 +40,8 @@ describe('PolicyRuleEntity component', () => {
   describe('when all entities are selected', () => {
     beforeEach(() => {
       const value = Object.keys(EntityTypes)
-        .map(key => EntityTypes[key])
-        .filter(entity => entity !== EntityTypes.ALL && entity !== EntityTypes.HOST);
+        .map((key) => EntityTypes[key])
+        .filter((entity) => entity !== EntityTypes.ALL && entity !== EntityTypes.HOST);
       factory({ value });
     });
 
@@ -49,7 +49,7 @@ describe('PolicyRuleEntity component', () => {
       const dropdown = findDropdown();
       dropdown
         .findAll(GlDropdownItem)
-        .filter(el => el.text() === EntityTypes.HOST)
+        .filter((el) => el.text() === EntityTypes.HOST)
         .at(0)
         .vm.$emit('click');
 

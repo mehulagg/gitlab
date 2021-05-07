@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import Approval from 'ee/compliance_dashboard/components/merge_requests/statuses/approval.vue';
 
@@ -9,7 +9,7 @@ describe('ApprovalStatus component', () => {
   const findIcon = () => wrapper.find('.ci-icon');
   const findLink = () => wrapper.find(GlLink);
 
-  const createComponent = status => {
+  const createComponent = (status) => {
     return shallowMount(Approval, {
       propsData: { status },
       stubs: {

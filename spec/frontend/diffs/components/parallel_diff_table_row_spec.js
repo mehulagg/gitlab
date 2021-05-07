@@ -1,13 +1,25 @@
-import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { createStore } from '~/mr_notes/stores';
-import ParallelDiffTableRow from '~/diffs/components/parallel_diff_table_row.vue';
-import diffFileMockData from '../mock_data/diff_file';
 import DiffGutterAvatars from '~/diffs/components/diff_gutter_avatars.vue';
+import { mapParallel } from '~/diffs/components/diff_row_utils';
+import ParallelDiffTableRow from '~/diffs/components/parallel_diff_table_row.vue';
+import { createStore } from '~/mr_notes/stores';
+import { findInteropAttributes } from '../find_interop_attributes';
 import discussionsMockData from '../mock_data/diff_discussions';
+import diffFileMockData from '../mock_data/diff_file';
 
 describe('ParallelDiffTableRow', () => {
+  const mockDiffContent = {
+    diffFile: diffFileMockData,
+    shouldRenderDraftRow: jest.fn(),
+    hasParallelDraftLeft: jest.fn(),
+    hasParallelDraftRight: jest.fn(),
+    draftForLine: jest.fn(),
+  };
+
+  const applyMap = mapParallel(mockDiffContent);
+
   describe('when one side is empty', () => {
     let wrapper;
     let vm;
@@ -18,7 +30,7 @@ describe('ParallelDiffTableRow', () => {
       wrapper = shallowMount(ParallelDiffTableRow, {
         store: createStore(),
         propsData: {
-          line: thisLine,
+          line: applyMap(thisLine),
           fileHash: diffFileMockData.file_hash,
           filePath: diffFileMockData.file_path,
           contextLinesPath: 'contextLinesPath',
@@ -29,7 +41,7 @@ describe('ParallelDiffTableRow', () => {
       vm = wrapper.vm;
     });
 
-    it('does not highlight non empty line content when line does not match highlighted row', done => {
+    it('does not highlight non empty line content when line does not match highlighted row', (done) => {
       vm.$nextTick()
         .then(() => {
           expect(vm.$el.querySelector('.line_content.right-side').classList).not.toContain('hll');
@@ -38,7 +50,7 @@ describe('ParallelDiffTableRow', () => {
         .catch(done.fail);
     });
 
-    it('highlights nonempty line content when line is the highlighted row', done => {
+    it('highlights nonempty line content when line is the highlighted row', (done) => {
       vm.$nextTick()
         .then(() => {
           vm.$store.state.diffs.highlightedRow = rightLine.line_code;
@@ -67,7 +79,7 @@ describe('ParallelDiffTableRow', () => {
 
     beforeEach(() => {
       vm = createComponentWithStore(Vue.extend(ParallelDiffTableRow), createStore(), {
-        line: thisLine,
+        line: applyMap(thisLine),
         fileHash: diffFileMockData.file_hash,
         filePath: diffFileMockData.file_path,
         contextLinesPath: 'contextLinesPath',
@@ -75,7 +87,7 @@ describe('ParallelDiffTableRow', () => {
       }).$mount();
     });
 
-    it('does not highlight  either line when line does not match highlighted row', done => {
+    it('does not highlight  either line when line does not match highlighted row', (done) => {
       vm.$nextTick()
         .then(() => {
           expect(vm.$el.querySelector('.line_content.right-side').classList).not.toContain('hll');
@@ -85,7 +97,7 @@ describe('ParallelDiffTableRow', () => {
         .catch(done.fail);
     });
 
-    it('adds hll class to lineContent when line is the highlighted row', done => {
+    it('adds hll class to lineContent when line is the highlighted row', (done) => {
       vm.$nextTick()
         .then(() => {
           vm.$store.state.diffs.highlightedRow = rightLine.line_code;
@@ -101,7 +113,7 @@ describe('ParallelDiffTableRow', () => {
     });
 
     describe('sets coverage title and class', () => {
-      it('for lines with coverage', done => {
+      it('for lines with coverage', (done) => {
         vm.$nextTick()
           .then(() => {
             const name = diffFileMockData.file_path;
@@ -121,7 +133,7 @@ describe('ParallelDiffTableRow', () => {
           .catch(done.fail);
       });
 
-      it('for lines without coverage', done => {
+      it('for lines without coverage', (done) => {
         vm.$nextTick()
           .then(() => {
             const name = diffFileMockData.file_path;
@@ -141,7 +153,7 @@ describe('ParallelDiffTableRow', () => {
           .catch(done.fail);
       });
 
-      it('for unknown lines', done => {
+      it('for unknown lines', (done) => {
         vm.$nextTick()
           .then(() => {
             vm.$store.state.diffs.coverageFiles = {};
@@ -243,7 +255,10 @@ describe('ParallelDiffTableRow', () => {
         ${{ ...thisLine, left: { type: 'old-nonewline', discussions: [] } }} | ${false}
         ${{ ...thisLine, left: { discussions: [{}] } }}                      | ${false}
       `('visible is $expectation - line ($line)', async ({ line, expectation }) => {
-        createComponent({ line }, store, { isLeftHover: true, isCommentButtonRendered: true });
+        createComponent({ line: applyMap(line) }, store, {
+          isLeftHover: true,
+          isCommentButtonRendered: true,
+        });
 
         expect(findNoteButton().isVisible()).toBe(expectation);
       });
@@ -320,7 +335,7 @@ describe('ParallelDiffTableRow', () => {
               Object.assign(thisLine.left, lineProps);
               Object.assign(thisLine.right, lineProps);
               createComponent({
-                line: { ...thisLine },
+                line: applyMap({ ...thisLine }),
               });
             });
 
@@ -357,7 +372,7 @@ describe('ParallelDiffTableRow', () => {
       beforeEach(() => {
         jest.spyOn(store, 'dispatch').mockImplementation();
 
-        line = {
+        line = applyMap({
           left: {
             line_code: TEST_LINE_CODE,
             type: 'new',
@@ -369,7 +384,7 @@ describe('ParallelDiffTableRow', () => {
             rich_text: '+<span id="LC1" class="line" lang="plaintext">  - Bad dates</span>\n',
             meta_data: null,
           },
-        };
+        });
       });
 
       describe('with showCommentButton', () => {
@@ -384,7 +399,7 @@ describe('ParallelDiffTableRow', () => {
 
         it('does notrender if line has no discussions', () => {
           line.left.discussions = [];
-          createComponent({ line });
+          createComponent({ line: applyMap(line) });
 
           expect(findAvatars().exists()).toEqual(false);
         });
@@ -401,6 +416,28 @@ describe('ParallelDiffTableRow', () => {
             fileHash: TEST_FILE_HASH,
             expanded: !line.left.discussionsExpanded,
           });
+        });
+      });
+    });
+
+    describe('interoperability', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
+      it('adds old side interoperability data attributes', () => {
+        expect(findInteropAttributes(wrapper, '.line_content.left-side')).toEqual({
+          type: 'old',
+          line: thisLine.left.old_line.toString(),
+          oldLine: thisLine.left.old_line.toString(),
+        });
+      });
+
+      it('adds new side interoperability data attributes', () => {
+        expect(findInteropAttributes(wrapper, '.line_content.right-side')).toEqual({
+          type: 'new',
+          line: thisLine.right.new_line.toString(),
+          newLine: thisLine.right.new_line.toString(),
         });
       });
     });

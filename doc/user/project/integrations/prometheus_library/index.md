@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Prometheus Metrics library
+# Prometheus Metrics library **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8935) in GitLab 9.0.
 
@@ -21,8 +21,8 @@ Currently supported exporters are:
 - [HAProxy](haproxy.md)
 - [Amazon Cloud Watch](cloudwatch.md)
 
-We have tried to surface the most important metrics for each exporter, and will
-be continuing to add support for additional exporters in future releases. If you
+We have tried to surface the most important metrics for each exporter, and
+continue to add support for additional exporters in future releases. If you
 would like to add support for other official exporters, contributions are welcome.
 
 ## Identifying Environments
@@ -35,6 +35,6 @@ In order to isolate and only display relevant metrics for a given environment,
 GitLab needs a method to detect which labels are associated. To do that,
 GitLab uses the defined queries and fills in the environment specific variables.
 Typically this involves looking for the
-[`$CI_ENVIRONMENT_SLUG`](../../../../ci/variables/README.md#predefined-environment-variables),
+[`$CI_ENVIRONMENT_SLUG`](../../../../ci/variables/README.md#predefined-cicd-variables),
 but may also include other information such as the project's Kubernetes namespace.
 Each search query is defined in the [exporter specific documentation](#exporters).

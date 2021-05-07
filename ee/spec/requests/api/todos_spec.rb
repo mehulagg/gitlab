@@ -88,6 +88,8 @@ RSpec.describe API::Todos do
       end
 
       it 'returns 304 there already exist a todo on that epic' do
+        stub_feature_flags(multiple_todos: false)
+
         create(:todo, project: nil, group: group, user: user, target: epic)
 
         subject
@@ -104,7 +106,7 @@ RSpec.describe API::Todos do
       end
 
       it 'returns an error if the epic is not accessible' do
-        group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        group.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
         subject
 

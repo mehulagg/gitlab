@@ -30,9 +30,11 @@ class Admin::GroupsController < Admin::ApplicationController
 
   def new
     @group = Group.new
+    @group.build_admin_note
   end
 
   def edit
+    @group.build_admin_note unless @group.admin_note
   end
 
   def create
@@ -41,6 +43,7 @@ class Admin::GroupsController < Admin::ApplicationController
 
     if @group.save
       @group.add_owner(current_user)
+      @group.create_namespace_settings
       redirect_to [:admin, @group], notice: _('Group %{group_name} was successfully created.') % { group_name: @group.name }
     else
       render "new"
@@ -48,6 +51,8 @@ class Admin::GroupsController < Admin::ApplicationController
   end
 
   def update
+    @group.build_admin_note unless @group.admin_note
+
     if @group.update(group_params)
       redirect_to [:admin, @group], notice: _('Group was successfully updated.')
     else
@@ -57,7 +62,7 @@ class Admin::GroupsController < Admin::ApplicationController
 
   def members_update
     member_params = params.permit(:user_ids, :access_level, :expires_at)
-    result = Members::CreateService.new(current_user, member_params.merge(limit: -1)).execute(@group)
+    result = Members::CreateService.new(current_user, member_params.merge(limit: -1, source: @group)).execute
 
     if result[:status] == :success
       redirect_to [:admin, @group], notice: _('Users were successfully added.')
@@ -104,7 +109,10 @@ class Admin::GroupsController < Admin::ApplicationController
       :require_two_factor_authentication,
       :two_factor_grace_period,
       :project_creation_level,
-      :subgroup_creation_level
+      :subgroup_creation_level,
+      admin_note_attributes: [
+        :note
+      ]
     ]
   end
 end

@@ -1,58 +1,76 @@
-import Vue from 'vue';
-import emptyStateComp from '~/pipelines/components/pipelines_list/empty_state.vue';
-import mountComponent from '../helpers/vue_mount_component_helper';
+import { mount } from '@vue/test-utils';
+import EmptyState from '~/pipelines/components/pipelines_list/empty_state.vue';
 
 describe('Pipelines Empty State', () => {
-  let component;
-  let EmptyStateComponent;
+  let wrapper;
 
-  beforeEach(() => {
-    EmptyStateComponent = Vue.extend(emptyStateComp);
+  const findIllustration = () => wrapper.find('img');
+  const findButton = () => wrapper.find('a');
 
-    component = mountComponent(EmptyStateComponent, {
-      helpPagePath: 'foo',
-      emptyStateSvgPath: 'foo',
-      canSetCi: true,
+  const createWrapper = (props = {}) => {
+    wrapper = mount(EmptyState, {
+      propsData: {
+        emptyStateSvgPath: 'foo.svg',
+        canSetCi: true,
+        ...props,
+      },
+    });
+  };
+
+  describe('when user can configure CI', () => {
+    beforeEach(() => {
+      createWrapper({}, mount);
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      wrapper = null;
+    });
+
+    it('should render empty state SVG', () => {
+      expect(findIllustration().attributes('src')).toBe('foo.svg');
+    });
+
+    it('should render empty state header', () => {
+      expect(wrapper.text()).toContain('Build with confidence');
+    });
+
+    it('should render empty state information', () => {
+      expect(wrapper.text()).toContain(
+        'GitLab CI/CD can automatically build, test, and deploy your code. Let GitLab take care of time',
+        'consuming tasks, so you can spend more time creating',
+      );
+    });
+
+    it('should render button with help path', () => {
+      expect(findButton().attributes('href')).toBe('/help/ci/quick_start/index.md');
+    });
+
+    it('should render button text', () => {
+      expect(findButton().text()).toBe('Get started with CI/CD');
     });
   });
 
-  afterEach(() => {
-    component.$destroy();
-  });
+  describe('when user cannot configure CI', () => {
+    beforeEach(() => {
+      createWrapper({ canSetCi: false }, mount);
+    });
 
-  it('should render empty state SVG', () => {
-    expect(component.$el.querySelector('.svg-content svg')).toBeDefined();
-  });
+    afterEach(() => {
+      wrapper.destroy();
+      wrapper = null;
+    });
 
-  it('should render empty state information', () => {
-    expect(component.$el.querySelector('h4').textContent).toContain('Build with confidence');
+    it('should render empty state SVG', () => {
+      expect(findIllustration().attributes('src')).toBe('foo.svg');
+    });
 
-    expect(
-      component.$el
-        .querySelector('p')
-        .innerHTML.trim()
-        .replace(/\n+\s+/m, ' ')
-        .replace(/\s\s+/g, ' '),
-    ).toContain('Continuous Integration can help catch bugs by running your tests automatically,');
+    it('should render empty state header', () => {
+      expect(wrapper.text()).toBe('This project is not currently set up to run pipelines.');
+    });
 
-    expect(
-      component.$el
-        .querySelector('p')
-        .innerHTML.trim()
-        .replace(/\n+\s+/m, ' ')
-        .replace(/\s\s+/g, ' '),
-    ).toContain(
-      'while Continuous Deployment can help you deliver code to your product environment',
-    );
-  });
-
-  it('should render a link with provided help path', () => {
-    expect(component.$el.querySelector('.js-get-started-pipelines').getAttribute('href')).toEqual(
-      'foo',
-    );
-
-    expect(component.$el.querySelector('.js-get-started-pipelines').textContent).toContain(
-      'Get started with Pipelines',
-    );
+    it('should not render a link', () => {
+      expect(findButton().exists()).toBe(false);
+    });
   });
 });

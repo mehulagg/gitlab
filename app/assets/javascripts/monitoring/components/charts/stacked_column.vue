@@ -2,11 +2,11 @@
 import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlStackedColumnChart } from '@gitlab/ui/dist/charts';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
-import { chartHeight, legendLayoutTypes } from '../../constants';
 import { s__ } from '~/locale';
+import { chartHeight, legendLayoutTypes } from '../../constants';
+import { formats, timezones } from '../../format_date';
 import { graphDataValidatorForValues } from '../../utils';
 import { getTimeAxisOptions, axisTypes } from './options';
-import { formats, timezones } from '../../format_date';
 
 export default {
   components: {
@@ -61,14 +61,16 @@ export default {
   },
   computed: {
     chartData() {
-      return this.graphData.metrics.map(({ result }) => {
-        // This needs a fix. Not only metrics[0] should be shown.
-        // See https://gitlab.com/gitlab-org/gitlab/-/issues/220492
-        if (!result || result.length === 0) {
-          return [];
-        }
-        return result[0].values.map(val => val[1]);
-      });
+      return this.graphData.metrics
+        .map(({ label: name, result }) => {
+          // This needs a fix. Not only metrics[0] should be shown.
+          // See https://gitlab.com/gitlab-org/gitlab/-/issues/220492
+          if (!result || result.length === 0) {
+            return [];
+          }
+          return { name, data: result[0].values.map((val) => val[1]) };
+        })
+        .slice(0, 1);
     },
     xAxisTitle() {
       return this.graphData.x_label !== undefined ? this.graphData.x_label : '';
@@ -87,7 +89,7 @@ export default {
       if (!result || result.length === 0) {
         return [];
       }
-      return result[0].values.map(val => val[0]);
+      return result[0].values.map((val) => val[0]);
     },
     dataZoomConfig() {
       const handleIcon = this.svgs['scroll-handle'];
@@ -104,7 +106,7 @@ export default {
       };
     },
     seriesNames() {
-      return this.graphData.metrics.map(metric => metric.label);
+      return this.graphData.metrics.map((metric) => metric.label);
     },
   },
   created() {
@@ -113,12 +115,12 @@ export default {
   methods: {
     setSvg(name) {
       getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
           console.error('SVG could not be rendered correctly: ', e);
         });
@@ -136,7 +138,7 @@ export default {
     <gl-stacked-column-chart
       ref="chart"
       v-bind="$attrs"
-      :data="chartData"
+      :bars="chartData"
       :option="chartOptions"
       :x-axis-title="xAxisTitle"
       :y-axis-title="yAxisTitle"
@@ -144,7 +146,6 @@ export default {
       :group-by="groupBy"
       :width="width"
       :height="height"
-      :series-names="seriesNames"
       :legend-layout="legendLayout"
       :legend-average-text="legendAverageText"
       :legend-current-text="legendCurrentText"

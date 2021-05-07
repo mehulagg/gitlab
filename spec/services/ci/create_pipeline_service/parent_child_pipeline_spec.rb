@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:ref_name) { 'master' }
 
   let(:service) do
@@ -74,6 +75,57 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
             ]
           }
         }
+      end
+    end
+
+    context 'with resource group' do
+      let(:config) do
+        <<~YAML
+        instrumentation_test:
+          stage: test
+          resource_group: iOS
+          trigger:
+            include: path/to/child.yml
+            strategy: depend
+        YAML
+      end
+
+      it 'creates bridge job with resource group', :aggregate_failures do
+        pipeline = create_pipeline!
+        Ci::InitialPipelineProcessWorker.new.perform(pipeline.id)
+
+        test = pipeline.statuses.find_by(name: 'instrumentation_test')
+        expect(pipeline).to be_created_successfully
+        expect(pipeline.triggered_pipelines).not_to be_exist
+        expect(project.resource_groups.count).to eq(1)
+        expect(test).to be_a Ci::Bridge
+        expect(test).to be_waiting_for_resource
+        expect(test.resource_group.key).to eq('iOS')
+      end
+
+      context 'when sidekiq processes the job', :sidekiq_inline do
+        it 'transitions to pending status and triggers a downstream pipeline' do
+          pipeline = create_pipeline!
+
+          test = pipeline.statuses.find_by(name: 'instrumentation_test')
+          expect(test).to be_pending
+          expect(pipeline.triggered_pipelines.count).to eq(1)
+        end
+
+        context 'when the resource is occupied by the other bridge' do
+          before do
+            resource_group = create(:ci_resource_group, project: project, key: 'iOS')
+            resource_group.assign_resource_to(create(:ci_build, project: project))
+          end
+
+          it 'stays waiting for resource' do
+            pipeline = create_pipeline!
+
+            test = pipeline.statuses.find_by(name: 'instrumentation_test')
+            expect(test).to be_waiting_for_resource
+            expect(pipeline.triggered_pipelines.count).to eq(0)
+          end
+        end
       end
     end
   end
@@ -276,6 +328,40 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
         it_behaves_like 'creation failure' do
           let(:expected_error) do
             /include config must specify the file where to fetch the config from/
+          end
+        end
+      end
+
+      context 'when specifying multiple files' do
+        let(:config) do
+          <<~YAML
+          test:
+            script: rspec
+          deploy:
+            variables:
+              CROSS: downstream
+            stage: deploy
+            trigger:
+              include:
+                - project: my-namespace/my-project
+                  file:
+                    - 'path/to/child1.yml'
+                    - 'path/to/child2.yml'
+          YAML
+        end
+
+        it_behaves_like 'successful creation' do
+          let(:expected_bridge_options) do
+            {
+              'trigger' => {
+                'include' => [
+                  {
+                    'file' => ["path/to/child1.yml", "path/to/child2.yml"],
+                    'project' => 'my-namespace/my-project'
+                  }
+                ]
+              }
+            }
           end
         end
       end

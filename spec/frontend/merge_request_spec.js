@@ -1,5 +1,5 @@
-import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
 import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import MergeRequest from '~/merge_request';
@@ -9,7 +9,6 @@ describe('MergeRequest', () => {
   describe('task lists', () => {
     let mock;
 
-    preloadFixtures('merge_requests/merge_request_with_task_list.html');
     beforeEach(() => {
       loadFixtures('merge_requests/merge_request_with_task_list.html');
 
@@ -28,34 +27,28 @@ describe('MergeRequest', () => {
       mock.restore();
     });
 
-    it('modifies the Markdown field', done => {
+    it('modifies the Markdown field', (done) => {
       jest.spyOn($, 'ajax').mockImplementation();
       const changeEvent = document.createEvent('HTMLEvents');
       changeEvent.initEvent('change', true, true);
-      $('input[type=checkbox]')
-        .first()
-        .attr('checked', true)[0]
-        .dispatchEvent(changeEvent);
+      $('input[type=checkbox]').first().attr('checked', true)[0].dispatchEvent(changeEvent);
       setImmediate(() => {
         expect($('.js-task-list-field').val()).toBe(
-          '- [x] Task List Item\n- [ ]   \n- [ ] Task List Item 2\n',
+          '- [x] Task List Item\n- [ ]\n- [ ] Task List Item 2\n',
         );
         done();
       });
     });
 
-    it('ensure that task with only spaces does not get checked incorrectly', done => {
+    it('ensure that task with only spaces does not get checked incorrectly', (done) => {
       // fixed in 'deckar01-task_list', '2.2.1' gem
       jest.spyOn($, 'ajax').mockImplementation();
       const changeEvent = document.createEvent('HTMLEvents');
       changeEvent.initEvent('change', true, true);
-      $('input[type=checkbox]')
-        .last()
-        .attr('checked', true)[0]
-        .dispatchEvent(changeEvent);
+      $('input[type=checkbox]').last().attr('checked', true)[0].dispatchEvent(changeEvent);
       setImmediate(() => {
         expect($('.js-task-list-field').val()).toBe(
-          '- [ ] Task List Item\n- [ ]   \n- [x] Task List Item 2\n',
+          '- [ ] Task List Item\n- [ ]\n- [x] Task List Item 2\n',
         );
         done();
       });
@@ -67,7 +60,7 @@ describe('MergeRequest', () => {
       const index = 3;
       const checked = true;
 
-      it('submits an ajax request on tasklist:changed', done => {
+      it('submits an ajax request on tasklist:changed', (done) => {
         $('.js-task-list-field').trigger({
           type: 'tasklist:changed',
           detail: { lineNumber, lineSource, index, checked },
@@ -78,7 +71,7 @@ describe('MergeRequest', () => {
             `${TEST_HOST}/frontend-fixtures/merge-requests-project/-/merge_requests/1.json`,
             {
               merge_request: {
-                description: '- [ ] Task List Item\n- [ ]   \n- [ ] Task List Item 2\n',
+                description: '- [ ] Task List Item\n- [ ]\n- [ ] Task List Item 2\n',
                 lock_version: 0,
                 update_task: { line_number: lineNumber, line_source: lineSource, index, checked },
               },
@@ -89,7 +82,7 @@ describe('MergeRequest', () => {
         });
       });
 
-      it('shows an error notification when tasklist update failed', done => {
+      it('shows an error notification when tasklist update failed', (done) => {
         mock
           .onPatch(`${TEST_HOST}/frontend-fixtures/merge-requests-project/-/merge_requests/1.json`)
           .reply(409, {});

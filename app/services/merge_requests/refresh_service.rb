@@ -44,6 +44,7 @@ module MergeRequests
         notify_about_push(mr)
         mark_mr_as_draft_from_commits(mr)
         execute_mr_web_hooks(mr)
+        merge_request_activity_counter.track_mr_including_ci_config(user: mr.author, merge_request: mr)
       end
 
       true
@@ -74,7 +75,8 @@ module MergeRequests
     def post_merge_manually_merged
       commit_ids = @commits.map(&:id)
       merge_requests = @project.merge_requests.opened
-        .preload(:latest_merge_request_diff)
+        .preload_project_and_latest_diff
+        .preload_latest_diff_commit
         .where(target_branch: @push.branch_name).to_a
         .select(&:diff_head_commit)
         .select do |merge_request|
@@ -116,11 +118,14 @@ module MergeRequests
     # Note: we should update merge requests from forks too
     def reload_merge_requests
       merge_requests = @project.merge_requests.opened
-        .by_source_or_target_branch(@push.branch_name).to_a
+        .by_source_or_target_branch(@push.branch_name)
+        .preload_project_and_latest_diff
 
-      merge_requests += merge_requests_for_forks.to_a
+      merge_requests_from_forks = merge_requests_for_forks
+        .preload_project_and_latest_diff
 
-      filter_merge_requests(merge_requests).each do |merge_request|
+      merge_requests_array = merge_requests.to_a + merge_requests_from_forks.to_a
+      filter_merge_requests(merge_requests_array).each do |merge_request|
         if branch_and_project_match?(merge_request) || @push.force_push?
           merge_request.reload_diff(current_user)
           # Clear existing merge error if the push were directed at the
@@ -157,9 +162,7 @@ module MergeRequests
     end
 
     def refresh_pipelines_on_merge_requests(merge_request)
-      create_pipeline_for(merge_request, current_user)
-
-      UpdateHeadPipelineForMergeRequestWorker.perform_async(merge_request.id)
+      create_pipeline_for(merge_request, current_user, async: true)
     end
 
     def abort_auto_merges(merge_request)
@@ -210,7 +213,7 @@ module MergeRequests
           # If the a commit no longer exists in this repo, gitlab_git throws
           # a Rugged::OdbError. This is fixed in https://gitlab.com/gitlab-org/gitlab_git/merge_requests/52
           @commits = @project.repository.commits_between(common_ref, @push.newrev) if common_ref
-        rescue
+        rescue StandardError
         end
       elsif @push.branch_removed?
         # No commits for a deleted branch.

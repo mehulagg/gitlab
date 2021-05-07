@@ -1,4 +1,3 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import {
   GlDropdown,
   GlDropdownItem,
@@ -6,6 +5,7 @@ import {
   GlLoadingIcon,
   GlIcon,
 } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import SelectProjectsDropdown from 'ee/analytics/repository_analytics/components/select_projects_dropdown.vue';
 
 const localVue = createLocalVue();
@@ -14,9 +14,9 @@ describe('Select projects dropdown component', () => {
   let wrapper;
 
   const findSelectAllProjects = () => wrapper.find('[data-testid="select-all-projects"]');
-  const findProjectById = id => wrapper.find(`[data-testid="select-project-${id}"]`);
+  const findProjectById = (id) => wrapper.find(`[data-testid="select-project-${id}"]`);
   const selectAllProjects = () => findSelectAllProjects().trigger('click');
-  const selectProjectById = id => findProjectById(id).trigger('click');
+  const selectProjectById = (id) => findProjectById(id).trigger('click');
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
@@ -69,11 +69,9 @@ describe('Select projects dropdown component', () => {
       selectAllProjects();
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findProjectById(initialData.groupProjects[0].id)
-            .find(GlIcon)
-            .classes(),
-        ).toContain('gl-visibility-hidden');
+        expect(findProjectById(initialData.groupProjects[0].id).find(GlIcon).classes()).toContain(
+          'gl-visibility-hidden',
+        );
       });
     });
 
@@ -104,11 +102,9 @@ describe('Select projects dropdown component', () => {
       selectProjectById(project.id);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findProjectById(project.id)
-            .find(GlIcon)
-            .classes(),
-        ).not.toContain('gl-visibility-hidden');
+        expect(findProjectById(project.id).find(GlIcon).classes()).not.toContain(
+          'gl-visibility-hidden',
+        );
       });
     });
 
@@ -116,11 +112,7 @@ describe('Select projects dropdown component', () => {
       selectProjectById(initialData.groupProjects[0].id);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(
-          findSelectAllProjects()
-            .find(GlIcon)
-            .classes(),
-        ).toContain('gl-visibility-hidden');
+        expect(findSelectAllProjects().find(GlIcon).classes()).toContain('gl-visibility-hidden');
       });
     });
 

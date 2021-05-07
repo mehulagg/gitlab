@@ -1,7 +1,7 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
-import sum from 'lodash/sum';
 import { GlButton, GlCard, GlIcon } from '@gitlab/ui';
+import sum from 'lodash/sum';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { n__ } from '~/locale';
 import { monitoringDashboard } from '~/monitoring/stores';
 import MetricEmbed from './metric_embed.vue';
@@ -17,7 +17,7 @@ export default {
     urls: {
       type: Array,
       required: true,
-      validator: urls => urls.length > 0,
+      validator: (urls) => urls.length > 0,
     },
   },
   data() {
@@ -73,7 +73,7 @@ export default {
 <template>
   <gl-card
     v-show="numCharts > 0"
-    class="collapsible-card border p-0 mb-3"
+    class="collapsible-card border p-0 gl-mb-5"
     header-class="d-flex align-items-center border-bottom-0 py-2"
     :body-class="bodyClass"
   >

@@ -12,7 +12,7 @@ export const getLicenseKey = ({ id }) => {
  * Maps an individual license response entity into the license object we'll store in our Vuex state
  * @param {Object} license
  */
-export const toLicenseObject = license => ({
+export const toLicenseObject = (license) => ({
   ...license,
   key: getLicenseKey(license),
 });

@@ -68,7 +68,7 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
       todo_path: group_todos_path(group),
       lock_version: epic.lock_version,
       state: epic.state,
-      scoped_labels: group.feature_available?(:scoped_labels)
+      scoped_labels: group.licensed_feature_available?(:scoped_labels)
     }
   end
 

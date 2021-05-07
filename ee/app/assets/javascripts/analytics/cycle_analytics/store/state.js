@@ -1,5 +1,8 @@
+import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from '../constants';
+
 export default () => ({
   featureFlags: {},
+  defaultStageConfig: [],
 
   startDate: null,
   endDate: null,
@@ -22,6 +25,7 @@ export default () => ({
 
   isLoadingValueStreams: false,
   isCreatingValueStream: false,
+  isEditingValueStream: false,
   isDeletingValueStream: false,
 
   createValueStreamErrors: {},
@@ -32,4 +36,11 @@ export default () => ({
   summary: [],
   medians: {},
   valueStreams: [],
+
+  pagination: {
+    page: null,
+    hasNextPage: false,
+    sort: PAGINATION_SORT_FIELD_END_EVENT,
+    direction: PAGINATION_SORT_DIRECTION_DESC,
+  },
 });

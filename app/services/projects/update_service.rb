@@ -49,16 +49,30 @@ module Projects
 
     def validate!
       unless valid_visibility_level_change?(project, params[:visibility_level])
-        raise ValidationError.new(s_('UpdateProject|New visibility level not allowed!'))
+        raise ValidationError, s_('UpdateProject|New visibility level not allowed!')
       end
 
       if renaming_project_with_container_registry_tags?
-        raise ValidationError.new(s_('UpdateProject|Cannot rename project because it contains container registry tags!'))
+        raise ValidationError, s_('UpdateProject|Cannot rename project because it contains container registry tags!')
       end
 
-      if changing_default_branch?
-        raise ValidationError.new(s_("UpdateProject|Could not set the default branch")) unless project.change_head(params[:default_branch])
+      validate_default_branch_change
+    end
+
+    def validate_default_branch_change
+      return unless changing_default_branch?
+
+      previous_default_branch = project.default_branch
+
+      if project.change_head(params[:default_branch])
+        after_default_branch_change(previous_default_branch)
+      else
+        raise ValidationError, s_("UpdateProject|Could not set the default branch")
       end
+    end
+
+    def after_default_branch_change(previous_default_branch)
+      # overridden by EE module
     end
 
     def remove_unallowed_params
@@ -85,11 +99,6 @@ module Projects
         after_rename_service(project).execute
       else
         system_hook_service.execute_hooks_for(project, :update)
-      end
-
-      if project.visibility_level_decreased? && project.unlink_forks_upon_visibility_decrease_enabled?
-        # It's a system-bounded operation, so no extra authorization check is required.
-        Projects::UnlinkForkService.new(project, current_user).execute
       end
 
       update_pages_config if changing_pages_related_config?

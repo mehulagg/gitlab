@@ -1,4 +1,4 @@
-- return if !group.feature_available?(:group_allowed_email_domains) || group.parent_id.present?
+- return if !group.licensed_feature_available?(:group_allowed_email_domains) || group.parent_id.present?
 - hidden_input_id = 'group_allowed_email_domains_list'
 - label_id = "#{hidden_input_id}_label"
 
@@ -11,7 +11,7 @@
     disallowed_values: AllowedEmailDomain::RESERVED_DOMAINS.to_json } }
   = f.hidden_field :allowed_email_domains_list, id: hidden_input_id
   .form-text.text-muted
-    - read_more_link = link_to(_('Read more'), help_page_path('user/group/index', anchor: 'allowed-domain-restriction'))
+    - read_more_link = link_to(_('Read more'), help_page_path('user/group/index', anchor: 'restrict-group-access-by-domain'))
     = _('Only verified users with an email address in any of these domains can be added to the group.')
     %br
     = _('Multiple domains are supported.')

@@ -1,8 +1,7 @@
-import Vue from 'vue';
-import { head } from 'lodash';
-
 import { GlSearchBoxByType, GlInfiniteScroll } from '@gitlab/ui';
 import { mount, createLocalVue } from '@vue/test-utils';
+import { head } from 'lodash';
+import Vue from 'vue';
 import { trimText } from 'helpers/text_helper';
 import ProjectListItem from '~/vue_shared/components/project_selector/project_list_item.vue';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
@@ -18,6 +17,13 @@ describe('ProjectSelector component', () => {
   selected = selected.concat(allProjects.slice(0, 3)).concat(allProjects.slice(5, 8));
 
   const findSearchInput = () => wrapper.find(GlSearchBoxByType).find('input');
+  const findLegendText = () => wrapper.find('[data-testid="legend-text"]').text();
+  const search = (query) => {
+    const searchInput = findSearchInput();
+
+    searchInput.setValue(query);
+    searchInput.trigger('input');
+  };
 
   beforeEach(() => {
     wrapper = mount(Vue.extend(ProjectSelector), {
@@ -31,7 +37,7 @@ describe('ProjectSelector component', () => {
         showSearchErrorMessage: false,
         totalResults: searchResults.length,
       },
-      attachToDocument: true,
+      attachTo: document.body,
     });
 
     ({ vm } = wrapper);
@@ -48,10 +54,7 @@ describe('ProjectSelector component', () => {
   it(`triggers a search when the search input value changes`, () => {
     jest.spyOn(vm, '$emit').mockImplementation(() => {});
     const query = 'my test query!';
-    const searchInput = findSearchInput();
-
-    searchInput.setValue(query);
-    searchInput.trigger('input');
+    search(query);
 
     expect(vm.$emit).toHaveBeenCalledWith('searched', query);
   });
@@ -121,15 +124,21 @@ describe('ProjectSelector component', () => {
     `(
       'is "$expected" given $count results are showing out of $total',
       ({ count, total, expected }) => {
+        search('gitlab ui');
+
         wrapper.setProps({
           projectSearchResults: searchResults.slice(0, count),
           totalResults: total,
         });
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.text()).toContain(expected);
+          expect(findLegendText()).toBe(expected);
         });
       },
     );
+
+    it('is not rendered without searching', () => {
+      expect(findLegendText()).toBe('');
+    });
   });
 });

@@ -60,7 +60,7 @@ RSpec.describe 'Merge request > User selects branches for new MR', :js do
     expect(page).to have_content "wm.png"
 
     fill_in "merge_request_title", with: "Orphaned MR test"
-    click_button "Submit merge request"
+    click_button "Create merge request"
 
     click_button "Check out branch"
 
@@ -121,14 +121,14 @@ RSpec.describe 'Merge request > User selects branches for new MR', :js do
 
     click_link 'Changes'
 
-    expect(page).to have_css('a.btn.active', text: 'Inline')
-    expect(page).not_to have_css('a.btn.active', text: 'Side-by-side')
+    expect(page).to have_css('a.btn.selected', text: 'Inline')
+    expect(page).not_to have_css('a.btn.selected', text: 'Side-by-side')
 
     click_link 'Side-by-side'
 
     within '.merge-request' do
-      expect(page).not_to have_css('a.btn.active', text: 'Inline')
-      expect(page).to have_css('a.btn.active', text: 'Side-by-side')
+      expect(page).not_to have_css('a.btn.selected', text: 'Inline')
+      expect(page).to have_css('a.btn.selected', text: 'Side-by-side')
     end
   end
 
@@ -200,7 +200,7 @@ RSpec.describe 'Merge request > User selects branches for new MR', :js do
 
       click_button "Compare branches"
 
-      expect(page).to have_button("Submit merge request")
+      expect(page).to have_button("Create merge request")
     end
   end
 end

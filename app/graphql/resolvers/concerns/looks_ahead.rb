@@ -4,6 +4,7 @@ module LooksAhead
   extend ActiveSupport::Concern
 
   included do
+    extras [:lookahead]
     attr_accessor :lookahead
   end
 
@@ -14,16 +15,11 @@ module LooksAhead
   end
 
   def apply_lookahead(query)
-    selection = node_selection
+    all_preloads = (unconditional_includes + filtered_preloads).uniq
 
-    includes = preloads.each.flat_map do |name, requirements|
-      selection&.selects?(name) ? requirements : []
-    end
-    preloads = (unconditional_includes + includes).uniq
+    return query if all_preloads.empty?
 
-    return query if preloads.empty?
-
-    query.preload(*preloads) # rubocop: disable CodeReuse/ActiveRecord
+    query.preload(*all_preloads) # rubocop: disable CodeReuse/ActiveRecord
   end
 
   private
@@ -34,6 +30,14 @@ module LooksAhead
 
   def preloads
     {}
+  end
+
+  def filtered_preloads
+    selection = node_selection
+
+    preloads.each.flat_map do |name, requirements|
+      selection&.selects?(name) ? requirements : []
+    end
   end
 
   def node_selection

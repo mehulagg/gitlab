@@ -46,16 +46,23 @@ scope(constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }) d
     get :contributed, as: :contributed_projects
     get :starred, as: :starred_projects
     get :snippets
+    get :followers
+    get :following
     get :exists
     get :suggests
     get :activity
+    post :follow
+    post :unfollow
     get '/', to: redirect('%{username}'), as: nil
   end
 end
 
 constraints(::Constraints::UserUrlConstrainer.new) do
-  # Get all keys of user
-  get ':username.keys' => 'profiles/keys#get_keys', constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }
+  # Get all SSH keys of user
+  get ':username.keys' => 'users#ssh_keys', constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }
+
+  # Get all GPG keys of user
+  get ':username.gpg' => 'users#gpg_keys', constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }
 
   scope(path: ':username',
         as: :user,

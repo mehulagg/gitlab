@@ -1,7 +1,7 @@
 /* eslint-disable func-names, no-param-reassign, operator-assignment, consistent-return */
 import $ from 'jquery';
-import { insertText } from '~/lib/utils/common_utils';
 import Shortcuts from '~/behaviors/shortcuts/shortcuts';
+import { insertText } from '~/lib/utils/common_utils';
 
 const LINK_TAG_PATTERN = '[{text}](url)';
 
@@ -14,18 +14,12 @@ function addBlockTags(blockTag, selected) {
 }
 
 function lineBefore(text, textarea) {
-  const split = text
-    .substring(0, textarea.selectionStart)
-    .trim()
-    .split('\n');
+  const split = text.substring(0, textarea.selectionStart).trim().split('\n');
   return split[split.length - 1];
 }
 
 function lineAfter(text, textarea) {
-  return text
-    .substring(textarea.selectionEnd)
-    .trim()
-    .split('\n')[0];
+  return text.substring(textarea.selectionEnd).trim().split('\n')[0];
 }
 
 function convertMonacoSelectionToAceFormat(sel) {
@@ -226,7 +220,7 @@ export function insertMarkdownText({
         : blockTagText(text, textArea, blockTag, selected);
     } else {
       textToInsert = selectedSplit
-        .map(val => {
+        .map((val) => {
           if (tag.indexOf(textPlaceholder) > -1) {
             return tag.replace(textPlaceholder, val);
           }
@@ -238,7 +232,7 @@ export function insertMarkdownText({
         .join('\n');
     }
   } else if (tag.indexOf(textPlaceholder) > -1) {
-    textToInsert = tag.replace(textPlaceholder, selected);
+    textToInsert = tag.replace(textPlaceholder, () => selected.replace(/\\n/g, '\n'));
   } else {
     textToInsert = String(startChar) + tag + selected + (wrap ? tag : '');
   }
@@ -289,9 +283,9 @@ function updateText({ textArea, tag, cursorOffset, blockTag, wrap, select, tagCo
 
 /* eslint-disable @gitlab/require-i18n-strings */
 export function keypressNoteText(e) {
-  if (this.selectionStart === this.selectionEnd) {
-    return;
-  }
+  if (!gon.markdown_surround_selection) return;
+  if (this.selectionStart === this.selectionEnd) return;
+
   const keys = {
     '*': '**{text}**', // wraps with bold character
     _: '_{text}_', // wraps with italic character
@@ -328,7 +322,7 @@ export function updateTextForToolbarBtn($toolbarBtn) {
     blockTag: $toolbarBtn.data('mdBlock'),
     wrap: !$toolbarBtn.data('mdPrepend'),
     select: $toolbarBtn.data('mdSelect'),
-    tagContent: $toolbarBtn.data('mdTagContent'),
+    tagContent: $toolbarBtn.attr('data-md-tag-content'),
   });
 }
 
@@ -339,9 +333,10 @@ export function addMarkdownListeners(form) {
       Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
     });
 
+  // eslint-disable-next-line @gitlab/no-global-event-off
   const $allToolbarBtns = $('.js-md', form)
     .off('click')
-    .on('click', function() {
+    .on('click', function () {
       const $toolbarBtn = $(this);
 
       return updateTextForToolbarBtn($toolbarBtn);
@@ -351,9 +346,10 @@ export function addMarkdownListeners(form) {
 }
 
 export function addEditorMarkdownListeners(editor) {
+  // eslint-disable-next-line @gitlab/no-global-event-off
   $('.js-md')
     .off('click')
-    .on('click', e => {
+    .on('click', (e) => {
       const { mdTag, mdBlock, mdPrepend, mdSelect } = $(e.currentTarget).data();
 
       insertMarkdownText({
@@ -376,5 +372,6 @@ export function removeMarkdownListeners(form) {
       Shortcuts.removeMarkdownEditorShortcuts($(this));
     });
 
+  // eslint-disable-next-line @gitlab/no-global-event-off
   return $('.js-md', form).off('click');
 }

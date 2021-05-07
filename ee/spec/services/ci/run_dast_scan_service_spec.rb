@@ -3,34 +3,41 @@
 require 'spec_helper'
 
 RSpec.describe Ci::RunDastScanService do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository, creator: user) }
-  let(:branch) { project.default_branch }
-  let(:target_url) { generate(:url) }
-  let(:use_ajax_spider) { true }
-  let(:show_debug_messages) { false }
-  let(:full_scan_enabled) { true }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository, creator: user) }
+  let_it_be(:dast_profile) { create(:dast_profile) }
+  let_it_be(:branch) { project.default_branch }
+  let_it_be(:spider_timeout) { 42 }
+  let_it_be(:target_timeout) { 21 }
+  let_it_be(:target_url) { generate(:url) }
+  let_it_be(:use_ajax_spider) { true }
+  let_it_be(:show_debug_messages) { false }
+  let_it_be(:full_scan_enabled) { true }
+  let_it_be(:excluded_urls) { "#{target_url}/hello,#{target_url}/world" }
+  let_it_be(:auth_url) { "#{target_url}/login" }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
-  describe '.ci_template' do
-    it 'builds a hash' do
-      expect(described_class.ci_template).to be_a(Hash)
-    end
-
-    it 'has only one stage' do
-      expect(described_class.ci_template['stages']).to eq(['dast'])
-    end
-
-    it 'has has no rules' do
-      expect(described_class.ci_template['dast']['rules']).to be_nil
-    end
-  end
-
   describe '#execute' do
-    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21, use_ajax_spider: use_ajax_spider, show_debug_messages: show_debug_messages, full_scan_enabled: full_scan_enabled) }
+    subject do
+      described_class.new(project, user).execute(
+        branch: branch,
+        target_url: target_url,
+        spider_timeout: spider_timeout,
+        target_timeout: target_timeout,
+        use_ajax_spider: use_ajax_spider,
+        show_debug_messages: show_debug_messages,
+        full_scan_enabled: full_scan_enabled,
+        excluded_urls: excluded_urls,
+        auth_url: auth_url,
+        auth_username_field: 'session[username]',
+        auth_password_field: 'session[password]',
+        auth_username: 'tanuki',
+        dast_profile: dast_profile
+      )
+    end
 
     let(:status) { subject.status }
     let(:pipeline) { subject.payload }
@@ -91,8 +98,6 @@ RSpec.describe Ci::RunDastScanService do
             'name' => '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
           },
           'script' => [
-            'export DAST_WEBSITE=${DAST_WEBSITE:-$(cat environment_url.txt)}',
-            'if [ -z "$DAST_WEBSITE$DAST_API_SPECIFICATION" ]; then echo "Either DAST_WEBSITE or DAST_API_SPECIFICATION must be set. See https://docs.gitlab.com/ee/user/application_security/dast/#configuration for more details." && exit 1; fi',
             '/analyze'
           ],
           'artifacts' => {
@@ -106,52 +111,88 @@ RSpec.describe Ci::RunDastScanService do
 
       it 'creates a build with appropriate variables' do
         build = pipeline.builds.first
+
         expected_variables = [
           {
-            'key' => 'DAST_VERSION',
-            'value' => '1',
+            'key' => 'DAST_AUTH_URL',
+            'value' => auth_url,
             'public' => true
           }, {
-            'key' => 'SECURE_ANALYZERS_PREFIX',
-            'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+            'key' => 'DAST_DEBUG',
+            'value' => 'false',
+            'public' => true
+          }, {
+            'key' => 'DAST_EXCLUDE_URLS',
+            'value' => excluded_urls,
+            'public' => true
+          }, {
+            'key' => 'DAST_FULL_SCAN_ENABLED',
+            'value' => 'true',
+            'public' => true
+          }, {
+            'key' => 'DAST_PASSWORD_FIELD',
+            'value' => 'session[password]',
+            'public' => true
+          }, {
+            'key' => 'DAST_SPIDER_MINS',
+            'value' => spider_timeout.to_s,
+            'public' => true
+          }, {
+            'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
+            'value' => target_timeout.to_s,
+            'public' => true
+          }, {
+            'key' => 'DAST_USERNAME',
+            'value' => 'tanuki',
+            'public' => true
+          }, {
+            'key' => 'DAST_USERNAME_FIELD',
+            'value' => 'session[username]',
+            'public' => true
+          }, {
+            'key' => 'DAST_USE_AJAX_SPIDER',
+            'value' => 'true',
+            'public' => true
+          }, {
+            'key' => 'DAST_VERSION',
+            'value' => '1',
             'public' => true
           }, {
             'key' => 'DAST_WEBSITE',
             'value' => target_url,
             'public' => true
-          },
-          {
-            'key' => 'DAST_SPIDER_MINS',
-            'value' => '42',
-            'public' => true
-          }, {
-            'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-            'value' => '21',
-            'public' => true
-          }, {
-            'key' => "DAST_USE_AJAX_SPIDER",
-            'public' => true,
-            'value' => 'true'
-          }, {
-            'key' => "DAST_DEBUG",
-            'public' => true,
-            'value' => 'false'
-          }, {
-            'key' => "DAST_FULL_SCAN_ENABLED",
-            'public' => true,
-            'value' => 'true'
           }, {
             'key' => 'GIT_STRATEGY',
             'value' => 'none',
             'public' => true
+          }, {
+            'key' => 'SECURE_ANALYZERS_PREFIX',
+            'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+            'public' => true
           }
         ]
-        expect(build.yaml_variables).to eq(expected_variables)
+
+        expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
-      it 'enqueues a build' do
-        build = pipeline.builds.first
-        expect(build.queued_at).not_to be_nil
+      it 'associates the dast_profile with the pipeline' do
+        expect(pipeline.dast_profile).to eq(dast_profile)
+      end
+
+      context 'when no dast_profile is provided' do
+        let(:dast_profile) { nil }
+
+        it 'does not create a new association' do
+          expect(pipeline.dast_profile).to be_nil
+        end
+      end
+
+      context 'when creating the association betweeen the dast_profile and the pipeline fails' do
+        let_it_be(:dast_profile) { build(:dast_site_profile) }
+
+        it 'does not create a Ci::Pipeline' do
+          expect { subject }.to raise_error(ActiveRecord::AssociationTypeMismatch).and change { Ci::Pipeline.count }.by(0)
+        end
       end
 
       context 'when the pipeline fails to save' do
@@ -168,20 +209,6 @@ RSpec.describe Ci::RunDastScanService do
 
         it 'populates message' do
           expect(message).to eq(full_error_messages)
-        end
-      end
-
-      context 'when on demand scan feature is disabled' do
-        before do
-          stub_feature_flags(security_on_demand_scans_feature_flag: false)
-        end
-
-        it 'returns an error status' do
-          expect(status).to eq(:error)
-        end
-
-        it 'populates message' do
-          expect(message).to eq('Insufficient permissions')
         end
       end
 

@@ -1,7 +1,7 @@
 import Filter from '~/droplab/plugins/filter';
 import { __ } from '~/locale';
-import FilteredSearchDropdown from './filtered_search_dropdown';
 import DropdownUtils from './dropdown_utils';
+import FilteredSearchDropdown from './filtered_search_dropdown';
 import FilteredSearchDropdownManager from './filtered_search_dropdown_manager';
 import FilteredSearchVisualTokens from './filtered_search_visual_tokens';
 
@@ -50,7 +50,7 @@ export default class DropdownOperator extends FilteredSearchDropdown {
     ];
     const dropdownToken = this.tokenKeys.searchByKey(dropdownName.toLowerCase());
 
-    if (gon.features?.notIssuableQueries && !dropdownToken?.hideNotEqual) {
+    if (!dropdownToken?.hideNotEqual) {
       dropdownData.push({
         tag: 'not-equal',
         type: 'string',

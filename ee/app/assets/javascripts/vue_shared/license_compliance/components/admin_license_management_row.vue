@@ -1,5 +1,4 @@
 <script>
-import { mapActions } from 'vuex';
 import {
   GlTooltipDirective,
   GlDropdown,
@@ -7,9 +6,11 @@ import {
   GlLoadingIcon,
   GlIcon,
   GlButton,
+  GlModalDirective,
 } from '@gitlab/ui';
-import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
+import { mapActions } from 'vuex';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
 import { s__ } from '~/locale';
 import IssueStatusIcon from '~/reports/components/issue_status_icon.vue';
 
@@ -30,13 +31,14 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlModal: GlModalDirective,
   },
 
   props: {
     license: {
       type: Object,
       required: true,
-      validator: license =>
+      validator: (license) =>
         Boolean(license.name) &&
         Object.values(LICENSE_APPROVAL_STATUS).includes(license.approvalStatus),
     },
@@ -76,9 +78,12 @@ export default {
 };
 </script>
 <template>
-  <div data-qa-selector="admin_license_compliance_row">
+  <div
+    data-qa-selector="admin_license_compliance_container"
+    data-testid="admin-license-compliance-row"
+  >
     <issue-status-icon :status="status" class="float-left gl-mr-3" />
-    <span class="js-license-name" data-qa-selector="license_name_content">{{ license.name }}</span>
+    <span class="js-license-name">{{ license.name }}</span>
     <div class="float-right">
       <div class="d-flex">
         <gl-loading-icon v-if="loading" class="js-loading-icon d-flex align-items-center mr-2" />
@@ -97,8 +102,11 @@ export default {
             {{ $options[$options.LICENSE_APPROVAL_ACTION.DENY] }}
           </gl-dropdown-item>
         </gl-dropdown>
+
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <gl-button
           v-gl-tooltip
+          v-gl-modal.modal-license-delete-confirmation
           :title="__('Remove license')"
           :aria-label="__('Remove license')"
           :disabled="loading"
@@ -106,9 +114,9 @@ export default {
           class="js-remove-button gl-ml-3"
           category="tertiary"
           data-toggle="modal"
-          data-target="#modal-license-delete-confirmation"
           @click="setLicenseInModal(license)"
         />
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
       </div>
     </div>
   </div>

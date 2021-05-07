@@ -1,16 +1,15 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
-import { GlIcon } from '@gitlab/ui';
 import { n__ } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
 import ChangedFileIcon from '~/vue_shared/components/changed_file_icon.vue';
-import NewDropdown from './new_dropdown/index.vue';
 import MrFileIcon from './mr_file_icon.vue';
+import NewDropdown from './new_dropdown/index.vue';
 
 export default {
   name: 'FileRowExtra',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -70,7 +69,7 @@ export default {
     <span v-if="showTreeChangesCount" class="ide-tree-changes">
       {{ changesCount }}
       <gl-icon
-        v-tooltip
+        v-gl-tooltip.left.viewport
         :title="folderChangesTooltip"
         :size="12"
         data-container="body"

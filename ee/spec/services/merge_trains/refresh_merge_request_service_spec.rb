@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe MergeTrains::RefreshMergeRequestService do
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user) }
+
   let(:service) { described_class.new(project, maintainer, require_recreate: require_recreate) }
   let(:require_recreate) { false }
 
@@ -12,7 +13,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
     stub_feature_flags(disable_merge_trains: false)
     project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true) unless project.merge_pipelines_enabled == true && project.merge_trains_enabled == true
   end
 
   describe '#execute' do
@@ -90,9 +91,15 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
       it_behaves_like 'drops the merge request from the merge train' do
         let(:expected_reason) { 'project disabled merge trains' }
       end
+    end
 
-      after do
-        project.update!(merge_pipelines_enabled: true)
+    context 'when merge trains not enabled' do
+      before do
+        project.update!(merge_trains_enabled: false)
+      end
+
+      it_behaves_like 'drops the merge request from the merge train' do
+        let(:expected_reason) { 'project disabled merge trains' }
       end
     end
 
@@ -132,7 +139,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
       let(:previous_ref) { 'refs/tmp/test' }
 
       before do
-        allow(service).to receive(:previous_ref) { previous_ref }
+        allow(merge_request.merge_train).to receive(:previous_ref) { previous_ref }
       end
 
       it_behaves_like 'drops the merge request from the merge train' do
@@ -202,7 +209,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
           expect(merge_request).to receive(:cleanup_refs).with(only: :train)
           expect(merge_request.merge_train).to receive(:start_merge!).and_call_original
           expect(merge_request.merge_train).to receive(:finish_merge!).and_call_original
-          expect_next_instance_of(MergeRequests::MergeService, project, maintainer, anything) do |service|
+          expect_next_instance_of(MergeRequests::MergeService, project, maintainer, instance_of(HashWithIndifferentAccess)) do |service|
             expect(service).to receive(:execute).with(merge_request, skip_discussions_check: true).and_call_original
           end
 

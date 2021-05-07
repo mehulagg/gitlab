@@ -19,6 +19,8 @@ module QA
     autoload :Saml, 'qa/flow/saml'
     autoload :User, 'qa/flow/user'
     autoload :MergeRequest, 'qa/flow/merge_request'
+    autoload :Pipeline, 'qa/flow/pipeline'
+    autoload :SignUp, 'qa/flow/sign_up'
   end
 
   ##
@@ -66,6 +68,7 @@ module QA
     autoload :Sandbox, 'qa/resource/sandbox'
     autoload :Group, 'qa/resource/group'
     autoload :Issue, 'qa/resource/issue'
+    autoload :ProjectIssueNote, 'qa/resource/project_issue_note'
     autoload :Project, 'qa/resource/project'
     autoload :Label, 'qa/resource/label'
     autoload :MergeRequest, 'qa/resource/merge_request'
@@ -78,6 +81,7 @@ module QA
     autoload :CiVariable, 'qa/resource/ci_variable'
     autoload :Runner, 'qa/resource/runner'
     autoload :PersonalAccessToken, 'qa/resource/personal_access_token'
+    autoload :ProjectAccessToken, 'qa/resource/project_access_token'
     autoload :User, 'qa/resource/user'
     autoload :ProjectMilestone, 'qa/resource/project_milestone'
     autoload :GroupMilestone, 'qa/resource/group_milestone'
@@ -93,10 +97,18 @@ module QA
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
     autoload :Design, 'qa/resource/design'
+    autoload :RegistryRepository, 'qa/resource/registry_repository'
+    autoload :Package, 'qa/resource/package'
+    autoload :PipelineSchedules, 'qa/resource/pipeline_schedules'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
       autoload :ProjectCluster, 'qa/resource/kubernetes_cluster/project_cluster'
+    end
+
+    module Clusters
+      autoload :Agent, 'qa/resource/clusters/agent.rb'
+      autoload :AgentToken, 'qa/resource/clusters/agent_token.rb'
     end
 
     module Events
@@ -113,6 +125,7 @@ module QA
 
     module Wiki
       autoload :ProjectPage, 'qa/resource/wiki/project_page'
+      autoload :GroupPage, 'qa/resource/wiki/group_page'
     end
   end
 
@@ -149,6 +162,7 @@ module QA
         autoload :Mattermost, 'qa/scenario/test/integration/mattermost'
         autoload :ObjectStorage, 'qa/scenario/test/integration/object_storage'
         autoload :SMTP, 'qa/scenario/test/integration/smtp'
+        autoload :SSHTunnel, 'qa/scenario/test/integration/ssh_tunnel'
       end
 
       module Sanity
@@ -180,8 +194,12 @@ module QA
       autoload :Menu, 'qa/page/main/menu'
       autoload :OAuth, 'qa/page/main/oauth'
       autoload :TwoFactorAuth, 'qa/page/main/two_factor_auth'
-      autoload :SignUp, 'qa/page/main/sign_up'
       autoload :Terms, 'qa/page/main/terms'
+    end
+
+    module Registration
+      autoload :SignUp, 'qa/page/registration/sign_up'
+      autoload :Welcome, 'qa/page/registration/welcome'
     end
 
     module Settings
@@ -219,6 +237,7 @@ module QA
 
       module Settings
         autoload :General, 'qa/page/group/settings/general'
+        autoload :PackageRegistries, 'qa/page/group/settings/package_registries'
       end
     end
 
@@ -242,11 +261,14 @@ module QA
 
     module Project
       autoload :New, 'qa/page/project/new'
-      autoload :NewExperiment, 'qa/page/project/new_experiment'
       autoload :Show, 'qa/page/project/show'
       autoload :Activity, 'qa/page/project/activity'
       autoload :Menu, 'qa/page/project/menu'
       autoload :Members, 'qa/page/project/members'
+
+      module Artifact
+        autoload :Show, 'qa/page/project/artifact/show'
+      end
 
       module Branches
         autoload :Show, 'qa/page/project/branches/show'
@@ -281,6 +303,10 @@ module QA
         autoload :Show, 'qa/page/project/packages/show'
       end
 
+      module Registry
+        autoload :Show, 'qa/page/project/registry/show'
+      end
+
       module Settings
         autoload :Advanced, 'qa/page/project/settings/advanced'
         autoload :Main, 'qa/page/project/settings/main'
@@ -298,17 +324,16 @@ module QA
         autoload :MirroringRepositories, 'qa/page/project/settings/mirroring_repositories'
         autoload :ProtectedTags, 'qa/page/project/settings/protected_tags'
         autoload :VisibilityFeaturesPermissions, 'qa/page/project/settings/visibility_features_permissions'
+        autoload :AccessTokens, 'qa/page/project/settings/access_tokens'
 
         module Services
           autoload :Jira, 'qa/page/project/settings/services/jira'
+          autoload :Jenkins, 'qa/page/project/settings/services/jenkins'
+          autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
         end
         autoload :Operations, 'qa/page/project/settings/operations'
         autoload :Incidents, 'qa/page/project/settings/incidents'
         autoload :Integrations, 'qa/page/project/settings/integrations'
-
-        module Services
-          autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
-        end
       end
 
       module SubMenus
@@ -364,7 +389,6 @@ module QA
         autoload :Edit, 'qa/page/project/wiki/edit'
         autoload :Show, 'qa/page/project/wiki/show'
         autoload :GitAccess, 'qa/page/project/wiki/git_access'
-        autoload :Sidebar, 'qa/page/project/wiki/sidebar'
         autoload :List, 'qa/page/project/wiki/list'
       end
 
@@ -392,6 +416,10 @@ module QA
       end
     end
 
+    module User
+      autoload :Show, 'qa/page/user/show'
+    end
+
     module Issuable
       autoload :New, 'qa/page/issuable/new'
     end
@@ -402,6 +430,7 @@ module QA
 
     module Layout
       autoload :Banner, 'qa/page/layout/banner'
+      autoload :Flash, 'qa/page/layout/flash'
       autoload :PerformanceBar, 'qa/page/layout/performance_bar'
     end
 
@@ -429,6 +458,7 @@ module QA
           autoload :OutboundRequests, 'qa/page/admin/settings/component/outbound_requests'
           autoload :AccountAndLimit, 'qa/page/admin/settings/component/account_and_limit'
           autoload :PerformanceBar, 'qa/page/admin/settings/component/performance_bar'
+          autoload :SignUpRestrictions, 'qa/page/admin/settings/component/sign_up_restrictions'
         end
       end
 
@@ -477,6 +507,13 @@ module QA
       autoload :ProjectSelector, 'qa/page/component/project_selector'
       autoload :Snippet, 'qa/page/component/snippet'
       autoload :NewSnippet, 'qa/page/component/new_snippet'
+      autoload :InviteMembersModal, 'qa/page/component/invite_members_modal'
+      autoload :Wiki, 'qa/page/component/wiki'
+      autoload :WikiSidebar, 'qa/page/component/wiki_sidebar'
+      autoload :WikiPageForm, 'qa/page/component/wiki_page_form'
+      autoload :AccessTokens, 'qa/page/component/access_tokens'
+      autoload :CommitModal, 'qa/page/component/commit_modal'
+      autoload :VisibilitySetting, 'qa/page/component/visibility_setting'
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'
@@ -554,7 +591,9 @@ module QA
     autoload :LoopRunner, 'qa/specs/loop_runner'
 
     module Helpers
+      autoload :ContextSelector, 'qa/specs/helpers/context_selector'
       autoload :Quarantine, 'qa/specs/helpers/quarantine'
+      autoload :RSpec, 'qa/specs/helpers/rspec'
     end
   end
 

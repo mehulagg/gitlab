@@ -1,7 +1,8 @@
 <script>
 import { GlButton, GlModal } from '@gitlab/ui';
-import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
+import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 
 export default {
   name: 'DesignReplyForm',
@@ -60,6 +61,9 @@ export default {
         ? s__('DesignManagement|Comment')
         : s__('DesignManagement|Save comment');
     },
+    markdownDocsPath() {
+      return helpPagePath('user/markdown');
+    },
   },
   mounted() {
     this.focusInput();
@@ -89,7 +93,7 @@ export default {
       :can-attach-file="false"
       :enable-autocomplete="true"
       :textarea-value="value"
-      markdown-docs-path="/help/user/markdown"
+      :markdown-docs-path="markdownDocsPath"
       class="bordered-box"
     >
       <template #textarea>
@@ -110,13 +114,14 @@ export default {
         </textarea>
       </template>
     </markdown-field>
-    <slot name="resolveCheckbox"></slot>
-    <div class="note-form-actions gl-display-flex gl-justify-content-space-between">
+    <slot name="resolve-checkbox"></slot>
+    <div class="note-form-actions gl-display-flex">
       <gl-button
         ref="submitButton"
         :disabled="!hasValue || isSaving"
+        class="gl-mr-3 gl-w-auto!"
         category="primary"
-        variant="success"
+        variant="confirm"
         type="submit"
         data-track-event="click_button"
         data-qa-selector="save_comment_button"
@@ -124,9 +129,14 @@ export default {
       >
         {{ buttonText }}
       </gl-button>
-      <gl-button ref="cancelButton" variant="default" category="primary" @click="cancelComment">{{
-        __('Cancel')
-      }}</gl-button>
+      <gl-button
+        ref="cancelButton"
+        class="gl-w-auto!"
+        variant="default"
+        category="primary"
+        @click="cancelComment"
+        >{{ __('Cancel') }}</gl-button
+      >
     </div>
     <gl-modal
       ref="cancelCommentModal"

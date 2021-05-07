@@ -5,11 +5,11 @@ module Gitlab
   # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41091
   class UsageDataQueries < UsageData
     class << self
-      def count(relation, column = nil, *rest)
+      def count(relation, column = nil, *args, **kwargs)
         raw_sql(relation, column)
       end
 
-      def distinct_count(relation, column = nil, *rest)
+      def distinct_count(relation, column = nil, *args, **kwargs)
         raw_sql(relation, column, :distinct)
       end
 
@@ -21,8 +21,57 @@ module Gitlab
         end
       end
 
-      def sum(relation, column, *rest)
+      def sum(relation, column, *args, **kwargs)
         relation.select(relation.all.table[column].sum).to_sql
+      end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def histogram(relation, column, buckets:, bucket_size: buckets.size)
+        count_grouped = relation.group(column).select(Arel.star.count.as('count_grouped'))
+        cte = Gitlab::SQL::CTE.new(:count_cte, count_grouped)
+
+        bucket_segments = bucket_size - 1
+        width_bucket = Arel::Nodes::NamedFunction
+          .new('WIDTH_BUCKET', [cte.table[:count_grouped], buckets.first, buckets.last, bucket_segments])
+          .as('buckets')
+
+        query = cte
+          .table
+          .project(width_bucket, cte.table[:count])
+          .group('buckets')
+          .order('buckets')
+          .with(cte.to_arel)
+
+        query.to_sql
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      # For estimated distinct count use exact query instead of hll
+      # buckets query, because it can't be used to obtain estimations without
+      # supplementary ruby code present in Gitlab::Database::PostgresHll::BatchDistinctCounter
+      def estimate_batch_distinct_count(relation, column = nil, *args, **kwargs)
+        raw_sql(relation, column, :distinct)
+      end
+
+      def add(*args)
+        'SELECT ' + args.map {|arg| "(#{arg})" }.join(' + ')
+      end
+
+      def maximum_id(model, column = nil)
+      end
+
+      def minimum_id(model, column = nil)
+      end
+
+      def jira_service_data
+        {
+          projects_jira_server_active: 0,
+          projects_jira_cloud_active: 0
+        }
+      end
+
+      def epics_deepest_relationship_level
+        { epics_deepest_relationship_level: 0 }
       end
 
       private

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../qa'
-require 'net/protocol.rb'
+require 'net/protocol'
 # This script revokes all personal access tokens with the name of 'api-test-token' on the host specified by GITLAB_ADDRESS
 # Required environment variables: GITLAB_USERNAME, GITLAB_PASSWORD and GITLAB_ADDRESS
 # Run `rake revoke_personal_access_tokens`
@@ -27,7 +27,7 @@ module QA
 
         Runtime::Browser.visit(ENV['GITLAB_ADDRESS'], Page::Main::Login)
         Page::Main::Login.perform(&:sign_in_using_credentials)
-        Page::Main::Menu.perform(&:click_settings_link)
+        Page::Main::Menu.perform(&:click_edit_profile_link)
         Page::Profile::Menu.perform(&:click_access_tokens)
 
         token_name = 'api-test-token'

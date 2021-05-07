@@ -4,9 +4,9 @@ module Gitlab
   module Geo
     module LogCursor
       module Lease
-        NAMESPACE = 'geo:gitlab'.freeze
+        NAMESPACE = 'geo:gitlab'
         LEASE_TIMEOUT = 30.seconds.freeze
-        LEASE_KEY = 'geo_log_cursor_processed'.freeze
+        LEASE_KEY = 'geo_log_cursor_processed'
 
         def self.exclusive_lease
           @lease ||= Gitlab::ExclusiveLease.new(LEASE_KEY, timeout: LEASE_TIMEOUT)
@@ -38,7 +38,7 @@ module Gitlab
             logger.debug('Finished fetching events.')
 
             renew!
-          rescue => e
+          rescue StandardError => e
             logger.error("Lease canceled due to error: #{e.message}")
 
             Gitlab::ExclusiveLease.cancel(LEASE_KEY, lease[:uuid])

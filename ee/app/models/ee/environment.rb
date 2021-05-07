@@ -7,6 +7,8 @@ module EE
     include ::Gitlab::Utils::StrongMemoize
 
     prepended do
+      has_many :dora_daily_metrics, class_name: 'Dora::DailyMetrics'
+
       # Returns environments where its latest deployment is to a cluster
       scope :deployed_to_cluster, -> (cluster) do
         environments = model.arel_table
@@ -20,8 +22,7 @@ module EE
           .join(later_deployments, Arel::Nodes::OuterJoin)
           .on(join_conditions)
 
-        model
-          .joins(:successful_deployments)
+        joins(:successful_deployments)
           .joins(join.join_sources)
           .where(later_deployments[:id].eq(nil))
           .where(deployments[:cluster_id].eq(cluster.id))
@@ -65,26 +66,6 @@ module EE
 
     def protected_deployable_by_user?(user)
       project.protected_environment_accessible_to?(name, user)
-    end
-
-    def rollout_status
-      return unless rollout_status_available?
-
-      result = rollout_status_with_reactive_cache
-
-      result || ::Gitlab::Kubernetes::RolloutStatus.loading
-    end
-
-    private
-
-    def rollout_status_available?
-      has_terminals?
-    end
-
-    def rollout_status_with_reactive_cache
-      with_reactive_cache do |data|
-        deployment_platform.rollout_status(self, data)
-      end
     end
   end
 end

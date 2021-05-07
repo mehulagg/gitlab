@@ -3,30 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe DastSiteValidations::CreateService do
-  let(:project) { dast_site_token.project }
-  let(:dast_site_token) { create(:dast_site_token, project: create(:project)) }
-  let(:url_path) { SecureRandom.hex }
-  let(:params) { { dast_site_token: dast_site_token, url_path: url_path, validation_strategy: :text_file } }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:dast_site) { create(:dast_site, project: project) }
+  let_it_be(:dast_site_token) { create(:dast_site_token, project: project, url: dast_site.url) }
 
-  subject { described_class.new(container: project, params: params).execute }
+  let(:params) { { dast_site_token: dast_site_token, url_path: SecureRandom.hex, validation_strategy: :text_file } }
 
-  describe 'execute' do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: false)
+  subject { described_class.new(container: dast_site.project, params: params).execute }
 
-        aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('Insufficient permissions')
-        end
-      end
-    end
-
+  describe 'execute', :clean_gitlab_redis_shared_state do
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
 
         aggregate_failures do
           expect(subject.status).to eq(:error)
@@ -35,14 +23,17 @@ RSpec.describe DastSiteValidations::CreateService do
       end
     end
 
-    context 'when the feature is enabled' do
+    context 'when the feature is available' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
       end
 
       it 'communicates success' do
         expect(subject.status).to eq(:success)
+      end
+
+      it 'associates the dast_site_validation with the dast_site' do
+        expect(subject.payload).to eq(dast_site.reload.dast_site_validation)
       end
 
       it 'attempts to validate' do
@@ -83,7 +74,7 @@ RSpec.describe DastSiteValidations::CreateService do
       end
 
       context 'when the dast_site_token.project and container do not match' do
-        let(:project) { create(:project) }
+        let_it_be(:dast_site_token) { create(:dast_site_token, project: create(:project), url: dast_site.url) }
 
         it 'communicates failure' do
           aggregate_failures do
@@ -99,7 +90,7 @@ RSpec.describe DastSiteValidations::CreateService do
         end
 
         let(:dast_site_validation) do
-          DastSiteValidation.find_by!(dast_site_token: dast_site_token, url_path: url_path)
+          DastSiteValidation.find_by!(dast_site_token: dast_site_token, url_path: params[:url_path])
         end
 
         it 'communicates failure' do
@@ -121,6 +112,17 @@ RSpec.describe DastSiteValidations::CreateService do
           subject
 
           expect(Gitlab::AppLogger).to have_received(:error).with(message: 'Unable to validate dast_site_validation', dast_site_validation_id: dast_site_validation.id)
+        end
+      end
+
+      context 'when the dast_site_token does not have a related dast_site via its url' do
+        let_it_be(:dast_site_token) { create(:dast_site_token, project: project, url: generate(:url)) }
+
+        it 'communicates failure' do
+          aggregate_failures do
+            expect(subject.status).to eq(:error)
+            expect(subject.message).to eq('Site does not exist for profile')
+          end
         end
       end
     end

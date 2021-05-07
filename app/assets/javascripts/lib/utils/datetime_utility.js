@@ -1,8 +1,12 @@
+import dateFormat from 'dateformat';
 import $ from 'jquery';
 import { isString, mapValues, isNumber, reduce } from 'lodash';
 import * as timeago from 'timeago.js';
-import dateFormat from 'dateformat';
 import { languageCode, s__, __, n__ } from '../../locale';
+
+export const SECONDS_IN_DAY = 86400;
+
+const DAYS_IN_WEEK = 7;
 
 window.timeago = timeago;
 
@@ -12,7 +16,7 @@ window.timeago = timeago;
  *
  * @param {Date} date
  */
-export const newDate = date => (date instanceof Date ? new Date(date.getTime()) : new Date());
+export const newDate = (date) => (date instanceof Date ? new Date(date.getTime()) : new Date());
 
 /**
  * Returns i18n month names array.
@@ -21,7 +25,7 @@ export const newDate = date => (date instanceof Date ? new Date(date.getTime()) 
  *
  * @param {Boolean} abbreviated
  */
-export const getMonthNames = abbreviated => {
+export const getMonthNames = (abbreviated) => {
   if (abbreviated) {
     return [
       s__('Jan'),
@@ -74,7 +78,7 @@ export const getWeekdayNames = () => [
  * @param {date} date
  * @returns {String}
  */
-export const getDayName = date =>
+export const getDayName = (date) =>
   [
     __('Sunday'),
     __('Monday'),
@@ -206,10 +210,6 @@ export const localTimeAgo = ($timeagoEls, setTimeago = true) => {
     $timeagoEls.each((i, el) => {
       // Recreate with custom template
       el.setAttribute('title', formatDate(el.dateTime));
-      $(el).tooltip({
-        template:
-          '<div class="tooltip local-timeago" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>',
-      });
     });
   }
 
@@ -246,7 +246,7 @@ export const getDayDifference = (a, b) => {
  * @param  {Number} seconds
  * @return {String}
  */
-export const timeIntervalInWords = intervalInSeconds => {
+export const timeIntervalInWords = (intervalInSeconds) => {
   const secondsInteger = parseInt(intervalInSeconds, 10);
   const minutes = Math.floor(secondsInteger / 60);
   const seconds = secondsInteger - minutes * 60;
@@ -254,6 +254,37 @@ export const timeIntervalInWords = intervalInSeconds => {
   return minutes >= 1
     ? [n__('%d minute', '%d minutes', minutes), secondsText].join(' ')
     : secondsText;
+};
+
+/**
+ * Similar to `timeIntervalInWords`, but rounds the return value
+ * to 1/10th of the largest time unit. For example:
+ *
+ * 30 => 30 seconds
+ * 90 => 1.5 minutes
+ * 7200 => 2 hours
+ * 86400 => 1 day
+ * ... etc.
+ *
+ * The largest supported unit is "days".
+ *
+ * @param {Number} intervalInSeconds The time interval in seconds
+ * @returns {String} A humanized description of the time interval
+ */
+export const humanizeTimeInterval = (intervalInSeconds) => {
+  if (intervalInSeconds < 60 /* = 1 minute */) {
+    const seconds = Math.round(intervalInSeconds * 10) / 10;
+    return n__('%d second', '%d seconds', seconds);
+  } else if (intervalInSeconds < 3600 /* = 1 hour */) {
+    const minutes = Math.round(intervalInSeconds / 6) / 10;
+    return n__('%d minute', '%d minutes', minutes);
+  } else if (intervalInSeconds < 86400 /* = 1 day */) {
+    const hours = Math.round(intervalInSeconds / 360) / 10;
+    return n__('%d hour', '%d hours', hours);
+  }
+
+  const days = Math.round(intervalInSeconds / 8640) / 10;
+  return n__('%d day', '%d days', days);
 };
 
 export const dateInWords = (date, abbreviated = false, hideYear = false) => {
@@ -320,7 +351,7 @@ export const monthInWords = (date, abbreviated = false) => {
  *
  * @param {Date} date
  */
-export const totalDaysInMonth = date => {
+export const totalDaysInMonth = (date) => {
   if (!date) {
     return 0;
   }
@@ -333,7 +364,7 @@ export const totalDaysInMonth = date => {
  *
  * @param {Array} quarter
  */
-export const totalDaysInQuarter = quarter =>
+export const totalDaysInQuarter = (quarter) =>
   quarter.reduce((acc, month) => acc + totalDaysInMonth(month), 0);
 
 /**
@@ -342,7 +373,7 @@ export const totalDaysInQuarter = quarter =>
  *
  * @param {Date} date
  */
-export const getSundays = date => {
+export const getSundays = (date) => {
   if (!date) {
     return [];
   }
@@ -453,7 +484,7 @@ window.gl.utils = {
  * @param milliseconds
  * @returns {string}
  */
-export const formatTime = milliseconds => {
+export const formatTime = (milliseconds) => {
   const remainingSeconds = Math.floor(milliseconds / 1000) % 60;
   const remainingMinutes = Math.floor(milliseconds / 1000 / 60) % 60;
   const remainingHours = Math.floor(milliseconds / 1000 / 60 / 60);
@@ -472,7 +503,7 @@ export const formatTime = milliseconds => {
  * @param {String} dateString Date in yyyy-mm-dd format
  * @return {Date} UTC format
  */
-export const parsePikadayDate = dateString => {
+export const parsePikadayDate = (dateString) => {
   const parts = dateString.split('-');
   const year = parseInt(parts[0], 10);
   const month = parseInt(parts[1] - 1, 10);
@@ -486,7 +517,7 @@ export const parsePikadayDate = dateString => {
  * @param {Date} date UTC format
  * @return {String} Date formatted in yyyy-mm-dd
  */
-export const pikadayToString = date => {
+export const pikadayToString = (date) => {
   const day = pad(date.getDate());
   const month = pad(date.getMonth() + 1);
   const year = date.getFullYear();
@@ -527,7 +558,7 @@ export const parseSeconds = (
 
   let unorderedMinutes = Math.abs(seconds / SECONDS_PER_MINUTE);
 
-  return mapValues(timePeriodConstraints, minutesPerPeriod => {
+  return mapValues(timePeriodConstraints, (minutesPerPeriod) => {
     if (minutesPerPeriod === 0) {
       return 0;
     }
@@ -571,7 +602,7 @@ export const stringifyTime = (timeObject, fullNameFormat = false) => {
  * @param endDate date string that the time difference is calculated for
  * @return {Number} number of milliseconds remaining until the given date
  */
-export const calculateRemainingMilliseconds = endDate => {
+export const calculateRemainingMilliseconds = (endDate) => {
   const remainingMilliseconds = new Date(endDate).getTime() - Date.now();
   return Math.max(remainingMilliseconds, 0);
 };
@@ -602,7 +633,7 @@ export const getDateInFuture = (date, daysInFuture) =>
  * @param  {Date} date
  * @returns boolean
  */
-export const isValidDate = date => date instanceof Date && !Number.isNaN(date.getTime());
+export const isValidDate = (date) => date instanceof Date && !Number.isNaN(date.getTime());
 
 /*
  * Appending T00:00:00 makes JS assume local time and prevents it from shifting the date
@@ -610,7 +641,7 @@ export const isValidDate = date => date instanceof Date && !Number.isNaN(date.ge
  * be consistent with the "edit issue -> due date" UI.
  */
 
-export const newDateAsLocaleTime = date => {
+export const newDateAsLocaleTime = (date) => {
   const suffix = 'T00:00:00';
   return new Date(`${date}${suffix}`);
 };
@@ -624,7 +655,7 @@ export const endOfDayTime = 'T23:59:59Z';
  * @param {Function} formatter
  * @return {Any[]} an array of formatted dates between 2 given dates (including start&end date)
  */
-export const getDatesInRange = (d1, d2, formatter = x => x) => {
+export const getDatesInRange = (d1, d2, formatter = (x) => x) => {
   if (!(d1 instanceof Date) || !(d2 instanceof Date)) {
     return [];
   }
@@ -647,7 +678,7 @@ export const getDatesInRange = (d1, d2, formatter = x => x) => {
  * @param {Number} seconds
  * @return {Number} number of milliseconds
  */
-export const secondsToMilliseconds = seconds => seconds * 1000;
+export const secondsToMilliseconds = (seconds) => seconds * 1000;
 
 /**
  * Converts the supplied number of seconds to days.
@@ -655,25 +686,161 @@ export const secondsToMilliseconds = seconds => seconds * 1000;
  * @param {Number} seconds
  * @return {Number} number of days
  */
-export const secondsToDays = seconds => Math.round(seconds / 86400);
+export const secondsToDays = (seconds) => Math.round(seconds / 86400);
 
 /**
- * Returns the date n days after the date provided
+ * Converts a numeric utc offset in seconds to +/- hours
+ * ie -32400 => -9 hours
+ * ie -12600 => -3.5 hours
+ *
+ * @param {Number} offset UTC offset in seconds as a integer
+ *
+ * @return {String} the + or - offset in hours
+ */
+export const secondsToHours = (offset) => {
+  const parsed = parseInt(offset, 10);
+  if (Number.isNaN(parsed) || parsed === 0) {
+    return `0`;
+  }
+  const num = offset / 3600;
+  return parseInt(num, 10) !== num ? num.toFixed(1) : num;
+};
+
+/**
+ * Returns the date `n` days after the date provided
  *
  * @param {Date} date the initial date
  * @param {Number} numberOfDays number of days after
- * @return {Date} the date following the date provided
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ *
+ * @return {Date} A `Date` object `n` days after the provided `Date`
  */
-export const nDaysAfter = (date, numberOfDays) =>
-  new Date(newDate(date)).setDate(date.getDate() + numberOfDays);
+export const nDaysAfter = (date, numberOfDays, { utc = false } = {}) => {
+  const clone = newDate(date);
+
+  const cloneValue = utc
+    ? clone.setUTCDate(date.getUTCDate() + numberOfDays)
+    : clone.setDate(date.getDate() + numberOfDays);
+
+  return new Date(cloneValue);
+};
+
+/**
+ * Returns the date `n` days before the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfDays number of days before
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ * @return {Date} A `Date` object `n` days before the provided `Date`
+ */
+export const nDaysBefore = (date, numberOfDays, options) =>
+  nDaysAfter(date, -numberOfDays, options);
+
+/**
+ * Returns the date `n` weeks after the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfWeeks number of weeks after
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ *
+ * @return {Date} A `Date` object `n` weeks after the provided `Date`
+ */
+export const nWeeksAfter = (date, numberOfWeeks, options) =>
+  nDaysAfter(date, DAYS_IN_WEEK * numberOfWeeks, options);
+
+/**
+ * Returns the date `n` weeks before the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfWeeks number of weeks before
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ *
+ * @return {Date} A `Date` object `n` weeks before the provided `Date`
+ */
+export const nWeeksBefore = (date, numberOfWeeks, options) =>
+  nWeeksAfter(date, -numberOfWeeks, options);
+
+/**
+ * Returns the date `n` months after the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfMonths number of months after
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ *
+ * @return {Date} A `Date` object `n` months after the provided `Date`
+ */
+export const nMonthsAfter = (date, numberOfMonths, { utc = false } = {}) => {
+  const clone = newDate(date);
+
+  const cloneValue = utc
+    ? clone.setUTCMonth(date.getUTCMonth() + numberOfMonths)
+    : clone.setMonth(date.getMonth() + numberOfMonths);
+
+  return new Date(cloneValue);
+};
+
+/**
+ * Returns the date `n` years after the date provided.
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfYears number of years after
+ * @return {Date} A `Date` object `n` years after the provided `Date`
+ */
+export const nYearsAfter = (date, numberOfYears) => {
+  const clone = newDate(date);
+  clone.setFullYear(clone.getFullYear() + numberOfYears);
+  return clone;
+};
+
+/**
+ * Returns the date `n` months before the date provided
+ *
+ * @param {Date} date the initial date
+ * @param {Number} numberOfMonths number of months before
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ *
+ * @return {Date} A `Date` object `n` months before the provided `Date`
+ */
+export const nMonthsBefore = (date, numberOfMonths, options) =>
+  nMonthsAfter(date, -numberOfMonths, options);
 
 /**
  * Returns the date after the date provided
  *
  * @param {Date} date the initial date
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC dates.
+ * This will cause Daylight Saving Time to be ignored. Defaults to `false`
+ * if not provided, which causes the calculation to be performed in the
+ * user's timezone.
+ *
  * @return {Date} the date following the date provided
  */
-export const dayAfter = date => new Date(newDate(date).setDate(date.getDate() + 1));
+export const dayAfter = (date, options) => nDaysAfter(date, 1, options);
 
 /**
  * Mimics the behaviour of the rails distance_of_time_in_words function
@@ -781,7 +948,7 @@ export const differenceInMilliseconds = (startDate, endDate = Date.now()) => {
  *
  * @return {Date} the date at the first day of the month
  */
-export const dateAtFirstDayOfMonth = date => new Date(newDate(date).setDate(1));
+export const dateAtFirstDayOfMonth = (date) => new Date(newDate(date).setDate(1));
 
 /**
  * A utility function which checks if two dates match.
@@ -792,3 +959,149 @@ export const dateAtFirstDayOfMonth = date => new Date(newDate(date).setDate(1));
  * @return {Boolean} true if the dates match
  */
 export const datesMatch = (date1, date2) => differenceInMilliseconds(date1, date2) === 0;
+
+/**
+ * A utility function which computes a formatted 24 hour
+ * time string from a positive int in the range 0 - 24.
+ *
+ * @param {Int} time a positive Int between 0 and 24
+ *
+ * @returns {String} formatted 24 hour time String
+ */
+export const format24HourTimeStringFromInt = (time) => {
+  if (!Number.isInteger(time) || time < 0 || time > 24) {
+    return '';
+  }
+
+  const formatted24HourString = time > 9 ? `${time}:00` : `0${time}:00`;
+  return formatted24HourString;
+};
+
+/**
+ * A utility function that checks that the date is today
+ *
+ * @param {Date} date
+ *
+ * @return {Boolean} true if provided date is today
+ */
+export const isToday = (date) => {
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+};
+
+/**
+ * Checks whether the date is in the past.
+ *
+ * @param {Date} date
+ * @return {Boolean} Returns true if the date falls before today, otherwise false.
+ */
+export const isInPast = (date) => !isToday(date) && differenceInMilliseconds(date, Date.now()) > 0;
+
+/**
+ * Checks whether the date is in the future.
+ * .
+ * @param {Date} date
+ * @return {Boolean} Returns true if the date falls after today, otherwise false.
+ */
+export const isInFuture = (date) =>
+  !isToday(date) && differenceInMilliseconds(Date.now(), date) > 0;
+
+/**
+ * Checks whether dateA falls before dateB.
+ *
+ * @param {Date} dateA
+ * @param {Date} dateB
+ * @return {Boolean} Returns true if dateA falls before dateB, otherwise false
+ */
+export const fallsBefore = (dateA, dateB) => differenceInMilliseconds(dateA, dateB) > 0;
+
+/**
+ * Removes the time component of the date.
+ *
+ * @param {Date} date
+ * @return {Date} Returns a clone of the date with the time set to midnight
+ */
+export const removeTime = (date) => {
+  const clone = newDate(date);
+  clone.setHours(0, 0, 0, 0);
+  return clone;
+};
+
+/**
+ * Calculates the time remaining from today in words in the format
+ * `n days/weeks/months/years remaining`.
+ *
+ * @param {Date} date A date in future
+ * @return {String} The time remaining in the format `n days/weeks/months/years remaining`
+ */
+export const getTimeRemainingInWords = (date) => {
+  const today = removeTime(new Date());
+  const dateInFuture = removeTime(date);
+
+  const oneWeekFromNow = nWeeksAfter(today, 1);
+  const oneMonthFromNow = nMonthsAfter(today, 1);
+  const oneYearFromNow = nYearsAfter(today, 1);
+
+  if (fallsBefore(dateInFuture, oneWeekFromNow)) {
+    const days = getDayDifference(today, dateInFuture);
+    return n__('1 day remaining', '%d days remaining', days);
+  }
+
+  if (fallsBefore(dateInFuture, oneMonthFromNow)) {
+    const weeks = Math.floor(getDayDifference(today, dateInFuture) / 7);
+    return n__('1 week remaining', '%d weeks remaining', weeks);
+  }
+
+  if (fallsBefore(dateInFuture, oneYearFromNow)) {
+    const months = differenceInMonths(today, dateInFuture);
+    return n__('1 month remaining', '%d months remaining', months);
+  }
+
+  const years = dateInFuture.getFullYear() - today.getFullYear();
+  return n__('1 year remaining', '%d years remaining', years);
+};
+
+/**
+ * Returns the start of the provided day
+ *
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC time.
+ * If `true`, the time returned will be midnight UTC. If `false` (the default)
+ * the time returned will be midnight in the user's local time.
+ *
+ * @returns {Date} A new `Date` object that represents the start of the day
+ * of the provided date
+ */
+export const getStartOfDay = (date, { utc = false } = {}) => {
+  const clone = newDate(date);
+
+  const cloneValue = utc ? clone.setUTCHours(0, 0, 0, 0) : clone.setHours(0, 0, 0, 0);
+
+  return new Date(cloneValue);
+};
+
+/**
+ * Returns the start of the current week against the provide date
+ *
+ * @param {Date} date The current date instance to calculate against
+ * @param {Object} [options={}] Additional options for this calculation
+ * @param {boolean} [options.utc=false] Performs the calculation using UTC time.
+ * If `true`, the time returned will be midnight UTC. If `false` (the default)
+ * the time returned will be midnight in the user's local time.
+ *
+ * @returns {Date} A new `Date` object that represents the start of the current week
+ * of the provided date
+ */
+export const getStartOfWeek = (date, { utc = false } = {}) => {
+  const cloneValue = utc
+    ? new Date(date.setUTCHours(0, 0, 0, 0))
+    : new Date(date.setHours(0, 0, 0, 0));
+
+  const diff = cloneValue.getDate() - cloneValue.getDay() + (cloneValue.getDay() === 0 ? -6 : 1);
+
+  return new Date(date.setDate(diff));
+};

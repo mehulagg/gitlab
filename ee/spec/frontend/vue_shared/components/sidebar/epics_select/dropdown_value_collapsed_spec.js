@@ -1,7 +1,7 @@
+import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
 import DropdownValueCollapsed from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value_collapsed.vue';
-import { GlIcon } from '@gitlab/ui';
 
 import { mockEpic1 } from '../mock_data';
 

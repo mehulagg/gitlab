@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::AlertManagement::Payload::Base do
   let_it_be(:project) { create(:project) }
+
   let(:raw_payload) { {} }
   let(:payload_class) { described_class }
 
@@ -85,6 +86,12 @@ RSpec.describe Gitlab::AlertManagement::Payload::Base do
 
       context 'with an incompatible matching value' do
         let(:raw_payload) { { 'test' => 'bad time' } }
+
+        it { is_expected.to be_nil }
+      end
+
+      context 'with time in seconds' do
+        let(:raw_payload) { { 'test' => 1618877936 } }
 
         it { is_expected.to be_nil }
       end

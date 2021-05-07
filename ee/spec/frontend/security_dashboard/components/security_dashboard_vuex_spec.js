@@ -1,56 +1,58 @@
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'helpers/test_constants';
-
-import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import { merge } from 'lodash';
+import { nextTick } from 'vue';
+import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
-import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
-import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
-import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import VulnerabilityChart from 'ee/security_dashboard/components/vulnerability_chart.vue';
-import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list_vuex.vue';
-import VulnerabilitySeverity from 'ee/security_dashboard/components/vulnerability_severity.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
-
-import createStore from 'ee/security_dashboard/store';
-import { getParameterValues } from '~/lib/utils/url_utility';
+import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
+import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
+import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import { getStoreConfig } from 'ee/security_dashboard/store';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
+import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
+import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
+import { BV_HIDE_MODAL } from '~/lib/utils/constants';
 
 const pipelineId = 123;
 const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
-const vulnerabilitiesCountEndpoint = `${TEST_HOST}/vulnerabilities_summary`;
-const vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilities_history`;
-const vulnerableProjectsEndpoint = `${TEST_HOST}/vulnerable_projects`;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   getParameterValues: jest.fn().mockReturnValue([]),
 }));
 
+jest.mock('~/flash');
+
 describe('Security Dashboard component', () => {
   let wrapper;
   let mock;
-  let lockFilterSpy;
   let setPipelineIdSpy;
   let fetchPipelineJobsSpy;
   let store;
 
-  const createComponent = props => {
+  const createComponent = ({ props } = {}) => {
+    setPipelineIdSpy = jest.fn();
+    fetchPipelineJobsSpy = jest.fn();
+
+    const { actions, ...storeConfig } = getStoreConfig();
+    store = new Vuex.Store(
+      merge(storeConfig, {
+        modules: {
+          vulnerabilities: { actions: { setPipelineId: setPipelineIdSpy } },
+          pipelineJobs: { actions: { fetchPipelineJobs: fetchPipelineJobsSpy } },
+        },
+      }),
+    );
+
     wrapper = shallowMount(SecurityDashboard, {
       store,
       stubs: {
         SecurityDashboardLayout,
       },
-      methods: {
-        lockFilter: lockFilterSpy,
-        setPipelineId: setPipelineIdSpy,
-        fetchPipelineJobs: fetchPipelineJobsSpy,
-      },
       propsData: {
         dashboardDocumentation: '',
         vulnerabilitiesEndpoint,
-        vulnerabilitiesCountEndpoint,
-        vulnerabilitiesHistoryEndpoint,
-        vulnerableProjectsEndpoint,
         pipelineId,
         ...props,
       },
@@ -59,17 +61,12 @@ describe('Security Dashboard component', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    lockFilterSpy = jest.fn();
-    setPipelineIdSpy = jest.fn();
-    fetchPipelineJobsSpy = jest.fn();
-    store = createStore();
   });
 
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
     mock.restore();
-    jest.clearAllMocks();
   });
 
   describe('default', () => {
@@ -85,40 +82,12 @@ describe('Security Dashboard component', () => {
       expect(wrapper.find(SecurityDashboardTable).exists()).toBe(true);
     });
 
-    it('renders the vulnerability chart', () => {
-      expect(wrapper.find(VulnerabilityChart).exists()).toBe(true);
-    });
-
-    it('does not render the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(false);
-    });
-
-    it('does not lock to a project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(false);
-    });
-
-    it('does not lock project filters', () => {
-      expect(lockFilterSpy).not.toHaveBeenCalled();
-    });
-
     it('sets the pipeline id', () => {
-      expect(setPipelineIdSpy).toHaveBeenCalledWith(pipelineId);
+      expect(setPipelineIdSpy).toHaveBeenCalledWith(expect.any(Object), pipelineId);
     });
 
     it('fetchs the pipeline jobs', () => {
-      expect(fetchPipelineJobsSpy).toHaveBeenCalledWith();
-    });
-
-    describe('when the total number of vulnerabilities change', () => {
-      const newCount = 3;
-
-      beforeEach(() => {
-        store.state.vulnerabilities.pageInfo = { total: newCount };
-      });
-
-      it('emits a vulnerabilitiesCountChanged event', () => {
-        expect(wrapper.emitted('vulnerabilitiesCountChanged')).toEqual([[newCount]]);
-      });
+      expect(fetchPipelineJobsSpy).toHaveBeenCalledWith(expect.any(Object), undefined);
     });
 
     it('renders the issue modal', () => {
@@ -137,14 +106,14 @@ describe('Security Dashboard component', () => {
       ${'createNewIssue'}                    | ${undefined} | ${'vulnerabilities/createIssue'}                | ${{ vulnerability: 'bar' }}
       ${'dismissVulnerability'}              | ${'bar'}     | ${'vulnerabilities/dismissVulnerability'}       | ${{ comment: 'bar', vulnerability: 'bar' }}
       ${'openDismissalCommentBox'}           | ${undefined} | ${'vulnerabilities/openDismissalCommentBox'}    | ${undefined}
-      ${'revertDismissVulnerability'}        | ${undefined} | ${'vulnerabilities/undoDismiss'}                | ${{ vulnerability: 'bar' }}
+      ${'revertDismissVulnerability'}        | ${undefined} | ${'vulnerabilities/revertDismissVulnerability'} | ${{ vulnerability: 'bar' }}
       ${'downloadPatch'}                     | ${undefined} | ${'vulnerabilities/downloadPatch'}              | ${{ vulnerability: 'bar' }}
     `(
       'dispatches the "$expectedDispatchedAction" action when the modal emits a "$emittedModalEvent" event',
       ({ emittedModalEvent, eventPayload, expectedDispatchedAction, expectedActionPayload }) => {
-        wrapper.vm.$store.state.vulnerabilities.modal.vulnerability = 'bar';
+        store.state.vulnerabilities.modal.vulnerability = 'bar';
 
-        jest.spyOn(store, 'dispatch').mockImplementation();
+        jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
         wrapper.find(IssueModal).vm.$emit(emittedModalEvent, eventPayload);
 
         expect(store.dispatch).toHaveBeenCalledWith(
@@ -153,6 +122,12 @@ describe('Security Dashboard component', () => {
         );
       },
     );
+
+    it('emits a hide modal event when modal does not have an error and hideModal is called', async () => {
+      const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
+      wrapper.vm.hideModal();
+      expect(rootEmit).toHaveBeenCalledWith(BV_HIDE_MODAL, VULNERABILITY_MODAL_ID);
+    });
   });
 
   describe('issue modal', () => {
@@ -167,89 +142,40 @@ describe('Security Dashboard component', () => {
       ${{ isCreatingMergeRequest: true }}                                                          | ${expect.objectContaining({ isCreatingMergeRequest: true })}
     `(
       'passes right props to issue modal with state $givenState',
-      ({ givenState, expectedProps }) => {
-        Object.assign(store.state.vulnerabilities, givenState);
-
+      async ({ givenState, expectedProps }) => {
         createComponent();
+        Object.assign(store.state.vulnerabilities, givenState);
+        await nextTick();
 
         expect(wrapper.find(IssueModal).props()).toStrictEqual(expectedProps);
       },
     );
   });
 
-  describe('with project lock', () => {
-    const project = {
-      id: 123,
-    };
-    beforeEach(() => {
-      createComponent({
-        lockToProject: project,
-      });
-    });
-
-    it('renders the vulnerability count list', () => {
-      expect(wrapper.find(VulnerabilityCountList).exists()).toBe(true);
-    });
-
-    it('locks to a given project', () => {
-      expect(wrapper.vm.isLockedToProject).toBe(true);
-    });
-
-    it('locks the filters to a given project', () => {
-      expect(lockFilterSpy).toHaveBeenCalledWith({
-        filterId: 'project_id',
-        optionId: project.id,
-      });
-    });
-  });
-
-  describe.each`
-    endpointProp                        | Component
-    ${'vulnerabilitiesCountEndpoint'}   | ${VulnerabilityCountList}
-    ${'vulnerabilitiesHistoryEndpoint'} | ${VulnerabilityChart}
-    ${'vulnerableProjectsEndpoint'}     | ${VulnerabilitySeverity}
-  `('with an empty $endpointProp', ({ endpointProp, Component }) => {
-    beforeEach(() => {
-      createComponent({
-        [endpointProp]: '',
-      });
-    });
-
-    it(`does not show the ${Component.name}`, () => {
-      expect(wrapper.find(Component).exists()).toBe(false);
-    });
-  });
-
-  describe('dismissed vulnerabilities', () => {
-    it.each`
-      description                                                        | getParameterValuesReturnValue | expected
-      ${'hides dismissed vulnerabilities by default'}                    | ${[]}                         | ${true}
-      ${'shows dismissed vulnerabilities if scope param is "all"'}       | ${['all']}                    | ${false}
-      ${'hides dismissed vulnerabilities if scope param is "dismissed"'} | ${['dismissed']}              | ${true}
-    `('$description', ({ getParameterValuesReturnValue, expected }) => {
-      getParameterValues.mockImplementation(() => getParameterValuesReturnValue);
-      createComponent();
-      expect(wrapper.vm.$store.state.filters.hideDismissed).toBe(expected);
-    });
-  });
-
   describe('on error', () => {
     beforeEach(() => {
       createComponent();
-    });
-
-    it.each([401, 403])('displays an error on error %s', errorCode => {
-      store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.find(LoadingError).exists()).toBe(true);
+      store.dispatch('vulnerabilities/receiveDismissVulnerabilityError', {
+        flashError: 'Something went wrong',
       });
     });
 
-    it.each([404, 500])('does not display an error on error %s', errorCode => {
+    it('does not emit a hide modal event when modal has error', () => {
+      const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
+      wrapper.vm.hideModal();
+      expect(rootEmit).not.toHaveBeenCalled();
+    });
+
+    it.each([401, 403])('displays an error on error %s', async (errorCode) => {
       store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.find(LoadingError).exists()).toBe(false);
-      });
+      await nextTick();
+      expect(wrapper.find(LoadingError).exists()).toBe(true);
+    });
+
+    it.each([404, 500])('does not display an error on error %s', async (errorCode) => {
+      store.dispatch('vulnerabilities/receiveVulnerabilitiesError', errorCode);
+      await nextTick();
+      expect(wrapper.find(LoadingError).exists()).toBe(false);
     });
   });
 });

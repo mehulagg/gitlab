@@ -27,14 +27,13 @@ RSpec.describe 'User uses shortcuts', :js do
 
       open_modal_shortcut_keys
 
-      # modal-shortcuts still in the DOM, but hidden
-      expect(find('#modal-shortcuts', visible: false)).not_to be_visible
+      expect(page).not_to have_selector('[data-testid="modal-shortcuts"]')
 
       page.refresh
       open_modal_shortcut_keys
 
       # after reload, shortcuts modal doesn't exist at all until we add it
-      expect(page).not_to have_selector('#modal-shortcuts')
+      expect(page).not_to have_selector('[data-testid="modal-shortcuts"]')
     end
 
     it 're-enables shortcuts' do
@@ -47,7 +46,7 @@ RSpec.describe 'User uses shortcuts', :js do
       close_modal
 
       open_modal_shortcut_keys
-      expect(find('#modal-shortcuts')).to be_visible
+      expect(find('[data-testid="modal-shortcuts"]')).to be_visible
     end
 
     def open_modal_shortcut_keys
@@ -152,16 +151,16 @@ RSpec.describe 'User uses shortcuts', :js do
       find('body').native.send_key('g')
       find('body').native.send_key('m')
 
-      expect(page).to have_active_navigation('Merge Requests')
+      expect(page).to have_active_navigation('Merge requests')
     end
   end
 
-  context 'when navigating to the CI / CD pages' do
+  context 'when navigating to the CI/CD pages' do
     it 'redirects to the Jobs page' do
       find('body').native.send_key('g')
       find('body').native.send_key('j')
 
-      expect(page).to have_active_navigation('CI / CD')
+      expect(page).to have_active_navigation('CI/CD')
       expect(page).to have_active_sub_navigation('Jobs')
     end
   end
@@ -183,11 +182,25 @@ RSpec.describe 'User uses shortcuts', :js do
       expect(page).to have_active_sub_navigation('Environments')
     end
 
+    context 'when feature flag :sidebar_refactor is disabled' do
+      it 'redirects to the Kubernetes page with active Operations' do
+        stub_feature_flags(sidebar_refactor: false)
+
+        find('body').native.send_key('g')
+        find('body').native.send_key('k')
+
+        expect(page).to have_active_navigation('Operations')
+        expect(page).to have_active_sub_navigation('Kubernetes')
+      end
+    end
+  end
+
+  context 'when navigating to the Infrastructure pages' do
     it 'redirects to the Kubernetes page' do
       find('body').native.send_key('g')
       find('body').native.send_key('k')
 
-      expect(page).to have_active_navigation('Operations')
+      expect(page).to have_active_navigation('Infrastructure')
       expect(page).to have_active_sub_navigation('Kubernetes')
     end
   end

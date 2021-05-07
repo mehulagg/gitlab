@@ -3,7 +3,7 @@ type: reference, dev
 stage: none
 group: Development
 info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
-description: "Writing styles, markup, formatting, and other standards for GitLab's RESTful APIs."
+description: "Writing styles, markup, formatting, and other standards for the GitLab RESTful APIs."
 ---
 
 # RESTful API
@@ -38,11 +38,15 @@ The following can be used as a template to get started:
 ````markdown
 ## Descriptive title
 
+> Version history note.
+
 One or two sentence description of what endpoint does.
 
 ```plaintext
 METHOD /endpoint
 ```
+
+Supported attributes:
 
 | Attribute   | Type     | Required | Description           |
 |:------------|:---------|:---------|:----------------------|
@@ -64,6 +68,9 @@ Example response:
 ]
 ```
 ````
+
+Adjust the [version history note accordingly](styleguide/index.md#version-text-in-the-version-history)
+to describe the GitLab release that introduced the API call.
 
 ## Method description
 
@@ -100,13 +107,13 @@ Rendered example:
 
 ## cURL Examples
 
-The following sections include a set of [cURL](https://curl.haxx.se) examples
+The following sections include a set of [cURL](https://curl.se/) examples
 you can use in the API documentation.
 
-CAUTION: **Caution:**
+WARNING:
 Do not use information for real users, URLs, or tokens. For documentation, refer to our
-relevant style guide sections on [Fake user information](styleguide.md#fake-user-information),
-[Fake URLs](styleguide.md#fake-urls), and [Fake tokens](styleguide.md#fake-tokens).
+relevant style guide sections on [Fake user information](styleguide/index.md#fake-user-information),
+[Fake URLs](styleguide/index.md#fake-urls), and [Fake tokens](styleguide/index.md#fake-tokens).
 
 ### Simple cURL command
 
@@ -136,17 +143,29 @@ curl --data "name=foo" --header "PRIVATE-TOKEN: <your_access_token>" "https://gi
 
 ### Post data using JSON content
 
-NOTE: **Note:**
-In this example we create a new group. Watch carefully the single and double
-quotes.
+This example creates a new group. Be aware of the use of single (`'`) and double
+(`"`) quotes.
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data '{"path": "my-group", "name": "My group"}' "https://gitlab.example.com/api/v4/groups"
 ```
 
+For readability, you can also set up the `--data` by using the following format:
+
+```shell
+curl --request POST \
+--url "https://gitlab.example.com/api/v4/groups" \
+--header "content-type: application/json" \
+--header "PRIVATE-TOKEN: <your_access_token>" \
+--data '{
+  "path": "my-group",
+  "name": "My group"
+}'
+```
+
 ### Post data using form-data
 
-Instead of using JSON or urlencode you can use multipart/form-data which
+Instead of using JSON or URL-encoding data, you can use `multipart/form-data` which
 properly handles data encoding:
 
 ```shell
@@ -178,8 +197,3 @@ do something like this:
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --data "skip_users[]=<user_id>" --data "skip_users[]=<user_id>" "https://gitlab.example.com/api/v4/projects/<project_id>/users"
 ```
-
-## Include a changelog entry
-
-All client-facing changes **must** include a [changelog entry](../changelog.md).
-This does not include internal APIs.

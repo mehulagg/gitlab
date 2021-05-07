@@ -23,21 +23,39 @@ RSpec.describe Resolvers::BoardListIssuesResolver do
 
       it 'returns the issues in the correct order' do
         # by relative_position and then ID
-        issues = resolve_board_list_issues.items
+        issues = resolve_board_list_issues
 
         expect(issues.map(&:id)).to eq [issue3.id, issue1.id, issue2.id]
       end
 
       it 'finds only issues matching filters' do
-        result = resolve_board_list_issues(args: { filters: { label_name: label.title, not: { label_name: label2.title } } }).items
+        result = resolve_board_list_issues(args: { filters: { label_name: [label.title], not: { label_name: [label2.title] } } })
 
         expect(result).to match_array([issue1, issue3])
       end
 
       it 'finds only issues matching search param' do
-        result = resolve_board_list_issues(args: { filters: { search: issue1.title } }).items
+        result = resolve_board_list_issues(args: { filters: { search: issue1.title } })
 
         expect(result).to match_array([issue1])
+      end
+
+      it 'raises an exception if both assignee_username and assignee_wildcard_id are present' do
+        expect do
+          resolve_board_list_issues(args: { filters: { assignee_username: ['username'], assignee_wildcard_id: 'NONE' } })
+        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+      end
+
+      it 'accepts assignee wildcard id NONE' do
+        result = resolve_board_list_issues(args: { filters: { assignee_wildcard_id: 'NONE' } })
+
+        expect(result).to match_array([issue1, issue2, issue3])
+      end
+
+      it 'accepts assignee wildcard id ANY' do
+        result = resolve_board_list_issues(args: { filters: { assignee_wildcard_id: 'ANY' } })
+
+        expect(result).to match_array([])
       end
     end
   end

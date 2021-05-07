@@ -6,14 +6,14 @@ module MembersHelper
     text = 'Are you sure you want to'
 
     action =
-      if member.request?
+      if member.invite?
+        "revoke the invitation for #{member.invite_email} to join"
+      elsif member.request?
         if member.user == user
           'withdraw your access request for'
         else
           "deny #{member.user.name}'s request to join"
         end
-      elsif member.invite?
-        "revoke the invitation for #{member.invite_email} to join"
       else
         if member.user
           "remove #{member.user.name} from"
@@ -64,5 +64,15 @@ module MembersHelper
     return type if member.request? || member.invite? || type != 'group'
 
     'group and any subresources'
+  end
+
+  def members_pagination_data_json(members, pagination = {})
+    {
+      current_page: members.respond_to?(:current_page) ? members.current_page : nil,
+      per_page: members.respond_to?(:limit_value) ? members.limit_value : nil,
+      total_items: members.respond_to?(:total_count) ? members.total_count : members.count,
+      param_name: pagination[:param_name] || nil,
+      params: pagination[:params] || {}
+    }.to_json
   end
 end

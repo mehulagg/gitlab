@@ -6,10 +6,20 @@ module Elastic
   module InstanceProxyUtil
     extend ActiveSupport::Concern
 
-    def initialize(target)
+    def initialize(target, use_separate_indices: false)
       super(target)
 
-      config = version_namespace.const_get('Config', false)
+      const_name = if use_separate_indices
+                     if target.class.superclass.abstract_class?
+                       "#{target.class.name}Config"
+                     else
+                       "#{target.class.superclass.name}Config"
+                     end
+                   else
+                     'Config'
+                   end
+
+      config = version_namespace.const_get(const_name, false)
 
       @index_name = config.index_name
       @document_type = config.document_type
@@ -43,9 +53,27 @@ module Elastic
     def safely_read_attribute_for_elasticsearch(attr_name)
       result = target.send(attr_name) # rubocop:disable GitlabSecurity/PublicSend
       apply_field_limit(result)
-    rescue => err
+    rescue StandardError => err
       target.logger.warn("Elasticsearch failed to read #{attr_name} for #{target.class} #{target.id}: #{err}")
       nil
+    end
+
+    # protect against missing project and project_feature and set visibility to PRIVATE
+    # if the project_feature is missing on a project
+    def safely_read_project_feature_for_elasticsearch(feature)
+      return ProjectFeature::DISABLED unless target.project
+
+      if target.project.project_feature
+        target.project.project_feature.access_level(feature)
+      else
+        logger.warn(
+          message: 'Project is missing ProjectFeature',
+          project_id: target.project_id,
+          id: target.id,
+          class: target.class
+        )
+        ProjectFeature::PRIVATE
+      end
     end
 
     def apply_field_limit(result)

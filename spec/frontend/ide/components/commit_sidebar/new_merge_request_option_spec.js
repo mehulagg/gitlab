@@ -2,9 +2,12 @@ import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { projectData, branches } from 'jest/ide/mock_data';
 import NewMergeRequestOption from '~/ide/components/commit_sidebar/new_merge_request_option.vue';
-import { createStore } from '~/ide/stores';
 import { PERMISSION_CREATE_MR } from '~/ide/constants';
-import consts from '~/ide/stores/modules/commit/constants';
+import { createStore } from '~/ide/stores';
+import {
+  COMMIT_TO_CURRENT_BRANCH,
+  COMMIT_TO_NEW_BRANCH,
+} from '~/ide/stores/modules/commit/constants';
 
 describe('create new MR checkbox', () => {
   let store;
@@ -17,7 +20,7 @@ describe('create new MR checkbox', () => {
     ] = { foo: 'bar' };
   };
 
-  const setPermissions = permissions => {
+  const setPermissions = (permissions) => {
     store.state.projects[store.state.currentProjectId].userPermissions = permissions;
   };
 
@@ -27,13 +30,13 @@ describe('create new MR checkbox', () => {
     vm = createComponentWithStore(Component, store);
 
     vm.$store.state.commit.commitAction = createNewBranch
-      ? consts.COMMIT_TO_NEW_BRANCH
-      : consts.COMMIT_TO_CURRENT_BRANCH;
+      ? COMMIT_TO_NEW_BRANCH
+      : COMMIT_TO_CURRENT_BRANCH;
 
     vm.$store.state.currentBranchId = currentBranchId;
 
     store.state.projects.abcproject.branches[currentBranchId] = branches.find(
-      branch => branch.name === currentBranchId,
+      (branch) => branch.name === currentBranchId,
     );
 
     return vm.$mount();
@@ -69,7 +72,7 @@ describe('create new MR checkbox', () => {
         expect(vm.$el.textContent).not.toBe('');
       });
 
-      it('has new MR', done => {
+      it('has new MR', (done) => {
         setMR();
 
         vm.$nextTick()
@@ -93,7 +96,7 @@ describe('create new MR checkbox', () => {
         expect(vm.$el.textContent).toBe('');
       });
 
-      it('has new MR', done => {
+      it('has new MR', (done) => {
         setMR();
 
         vm.$nextTick()
@@ -118,7 +121,7 @@ describe('create new MR checkbox', () => {
         expect(vm.$el.textContent).not.toBe('');
       });
 
-      it('is rendered if MR exists', done => {
+      it('is rendered if MR exists', (done) => {
         setMR();
 
         vm.$nextTick()
@@ -141,7 +144,7 @@ describe('create new MR checkbox', () => {
         expect(vm.$el.textContent).not.toBe('');
       });
 
-      it('is hidden if MR exists', done => {
+      it('is hidden if MR exists', (done) => {
         setMR();
 
         vm.$nextTick()
@@ -165,7 +168,7 @@ describe('create new MR checkbox', () => {
       expect(vm.$el.textContent).not.toBe('');
     });
 
-    it('is hidden if MR exists', done => {
+    it('is hidden if MR exists', (done) => {
       setMR();
 
       vm.$nextTick()

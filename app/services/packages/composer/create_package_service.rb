@@ -10,12 +10,16 @@ module Packages
         composer_json
 
         ::Packages::Package.transaction do
-          ::Packages::Composer::Metadatum.upsert(
+          ::Packages::Composer::Metadatum.upsert({
             package_id: created_package.id,
             target_sha: target,
             composer_json: composer_json
-          )
+          })
         end
+
+        ::Packages::Composer::CacheUpdateWorker.perform_async(created_package.project_id, created_package.name, nil)
+
+        created_package
       end
 
       private

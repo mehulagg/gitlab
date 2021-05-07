@@ -3,14 +3,14 @@ import {
   extractDiscussions,
   findVersionId,
   designUploadOptimisticResponse,
-  updateImageDiffNoteOptimisticResponse,
+  repositionImageDiffNoteOptimisticResponse,
   isValidDesignFile,
   extractDesign,
   extractDesignNoteId,
 } from '~/design_management/utils/design_management_utils';
-import mockResponseNoDesigns from '../mock_data/no_designs';
-import mockResponseWithDesigns from '../mock_data/designs';
 import mockDesign from '../mock_data/design';
+import mockResponseWithDesigns from '../mock_data/designs';
+import mockResponseNoDesigns from '../mock_data/no_designs';
 
 jest.mock('lodash/uniqueId', () => () => 1);
 
@@ -112,7 +112,7 @@ describe('optimistic responses', () => {
     expect(designUploadOptimisticResponse([{ name: 'test' }])).toEqual(expectedResponse);
   });
 
-  it('correctly generated for updateImageDiffNoteOptimisticResponse', () => {
+  it('correctly generated for repositionImageDiffNoteOptimisticResponse', () => {
     const mockNote = {
       id: 'test-note-id',
     };
@@ -126,8 +126,8 @@ describe('optimistic responses', () => {
 
     const expectedResponse = {
       __typename: 'Mutation',
-      updateImageDiffNote: {
-        __typename: 'UpdateImageDiffNotePayload',
+      repositionImageDiffNote: {
+        __typename: 'RepositionImageDiffNotePayload',
         note: {
           ...mockNote,
           position: mockPosition,
@@ -135,7 +135,7 @@ describe('optimistic responses', () => {
         errors: [],
       },
     };
-    expect(updateImageDiffNoteOptimisticResponse(mockNote, { position: mockPosition })).toEqual(
+    expect(repositionImageDiffNoteOptimisticResponse(mockNote, { position: mockPosition })).toEqual(
       expectedResponse,
     );
   });

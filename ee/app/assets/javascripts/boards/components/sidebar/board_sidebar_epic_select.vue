@@ -1,72 +1,95 @@
 <script>
-import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
+import { GlLink } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
-import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import { UPDATE_ISSUE_BY_ID } from '~/boards/stores/mutation_types';
-import { RECEIVE_FIRST_EPICS_SUCCESS } from '../../stores/mutation_types';
+import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { __, s__ } from '~/locale';
+import { fullEpicId } from '../../boards_util';
 
 export default {
   components: {
     BoardEditableItem,
     EpicsSelect,
+    GlLink,
   },
-  data() {
-    return {
-      loading: false,
-    };
+  i18n: {
+    epic: __('Epic'),
+    updateEpicError: s__(
+      'IssueBoards|An error occurred while assigning the selected epic to the issue.',
+    ),
+    fetchEpicError: s__(
+      'IssueBoards|An error occurred while fetching the assigned epic of the selected issue.',
+    ),
   },
   inject: ['groupId'],
   computed: {
-    ...mapState(['epics']),
-    ...mapGetters({ getEpicById: 'getEpicById', issue: 'getActiveIssue' }),
-    storedEpic() {
-      const storedEpic = this.getEpicById(this.issue.epic?.id);
-      const epicId = getIdFromGraphQLId(storedEpic?.id);
-
-      return {
-        ...storedEpic,
-        id: Number(epicId),
-      };
+    ...mapState(['epics', 'epicsCacheById', 'epicFetchInProgress']),
+    ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
+    epic() {
+      return this.activeBoardItem.epic;
     },
-    projectPath() {
-      const { referencePath = '' } = this.issue;
-      return referencePath.slice(0, referencePath.indexOf('#'));
+    epicData() {
+      const hasEpic = this.epic !== null;
+      const epicFetched = !this.epicFetchInProgress;
+
+      return hasEpic && epicFetched ? this.epicsCacheById[this.epic.id] : {};
+    },
+    initialEpic() {
+      return this.epic
+        ? {
+            ...this.epicData,
+            id: getIdFromGraphQLId(this.epic.id),
+          }
+        : {};
+    },
+  },
+  watch: {
+    epic: {
+      deep: true,
+      immediate: true,
+      async handler() {
+        if (this.epic) {
+          try {
+            await this.fetchEpicForActiveIssue();
+          } catch (e) {
+            createFlash({
+              message: this.$options.i18n.fetchEpicError,
+              error: e,
+              captureError: true,
+            });
+          }
+        }
+      },
     },
   },
   methods: {
-    ...mapMutations({
-      updateIssueById: UPDATE_ISSUE_BY_ID,
-      receiveEpicsSuccess: RECEIVE_FIRST_EPICS_SUCCESS,
-    }),
-    ...mapActions(['setActiveIssueEpic']),
-    openEpicsDropdown() {
-      this.$refs.epicSelect.handleEditClick();
+    ...mapActions(['setActiveIssueEpic', 'fetchEpicForActiveIssue']),
+    handleOpen() {
+      if (!this.epicFetchInProgress) {
+        this.$refs.epicSelect.toggleFormDropdown();
+      } else {
+        this.$refs.sidebarItem.collapse();
+      }
+    },
+    handleClose() {
+      this.$refs.sidebarItem.collapse();
+      this.$refs.epicSelect.toggleFormDropdown();
     },
     async setEpic(selectedEpic) {
-      this.loading = true;
-      this.$refs.sidebarItem.collapse();
+      this.handleClose();
 
-      const epicId = selectedEpic?.id ? `gid://gitlab/Epic/${selectedEpic.id}` : null;
-      const input = {
-        epicId,
-        projectPath: this.projectPath,
-      };
+      const epicId = selectedEpic?.id ? fullEpicId(selectedEpic.id) : null;
+      const assignedEpicId = this.epic?.id ? fullEpicId(this.epic.id) : null;
+      if (epicId === assignedEpicId) {
+        return;
+      }
 
       try {
-        const epic = await this.setActiveIssueEpic(input);
-
-        if (epic && !this.getEpicById(epic.id)) {
-          this.receiveEpicsSuccess({ epics: [epic, ...this.epics] });
-        }
-
-        debounceByAnimationFrame(() => {
-          this.updateIssueById({ issueId: this.issue.id, prop: 'epic', value: epic });
-          this.loading = false;
-        })();
+        await this.setActiveIssueEpic(epicId);
       } catch (e) {
-        this.loading = false;
+        createFlash({ message: this.$options.i18n.updateEpicError, error: e, captureError: true });
       }
     },
   },
@@ -76,27 +99,29 @@ export default {
 <template>
   <board-editable-item
     ref="sidebarItem"
-    :title="__('Epic')"
-    :loading="loading"
-    @open="openEpicsDropdown"
+    :title="$options.i18n.epic"
+    :loading="epicFetchInProgress"
+    data-testid="sidebar-epic"
+    @open="handleOpen"
+    @close="handleClose"
   >
-    <template v-if="storedEpic.title" #collapsed>
-      <a class="gl-text-gray-900! gl-font-weight-bold" href="#">
-        {{ storedEpic.title }}
-      </a>
+    <template v-if="epicData.title" #collapsed>
+      <gl-link class="gl-text-gray-900! gl-font-weight-bold" :href="epicData.webPath">
+        {{ epicData.title }}
+      </gl-link>
     </template>
-    <template>
-      <epics-select
-        ref="epicSelect"
-        class="gl-w-full"
-        :group-id="groupId"
-        :can-edit="true"
-        :initial-epic="storedEpic"
-        :initial-epic-loading="false"
-        variant="standalone"
-        :show-header="false"
-        @onEpicSelect="setEpic"
-      />
-    </template>
+    <epics-select
+      v-if="!epicFetchInProgress"
+      ref="epicSelect"
+      class="gl-w-full"
+      :group-id="groupId"
+      :can-edit="true"
+      :initial-epic="initialEpic"
+      :initial-epic-loading="false"
+      variant="standalone"
+      :show-header="false"
+      @epicSelect="setEpic"
+      @hide="handleClose"
+    />
   </board-editable-item>
 </template>

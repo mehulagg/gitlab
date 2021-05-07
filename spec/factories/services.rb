@@ -27,12 +27,6 @@ FactoryBot.define do
     end
   end
 
-  factory :mock_deployment_service do
-    project
-    type { 'MockDeploymentService' }
-    active { true }
-  end
-
   factory :prometheus_service do
     project
     active { true }
@@ -41,20 +35,6 @@ FactoryBot.define do
         api_url: 'https://prometheus.example.com/',
         manual_configuration: true
       }
-    end
-  end
-
-  factory :alerts_service do
-    active
-    project
-    type { 'AlertsService' }
-
-    trait :active do
-      active { true }
-    end
-
-    trait :inactive do
-      active { false }
     end
   end
 
@@ -76,17 +56,24 @@ FactoryBot.define do
       api_url { nil }
       username { 'jira_username' }
       password { 'jira_password' }
+      jira_issue_transition_automatic { false }
       jira_issue_transition_id { '56-1' }
       issues_enabled { false }
       project_key { nil }
+      vulnerabilities_enabled { false }
+      vulnerabilities_issuetype { nil }
+      deployment_type { 'cloud' }
     end
 
     before(:create) do |service, evaluator|
       if evaluator.create_data
         create(:jira_tracker_data, service: service,
-               url: evaluator.url, api_url: evaluator.api_url, jira_issue_transition_id: evaluator.jira_issue_transition_id,
+               url: evaluator.url, api_url: evaluator.api_url,
+               jira_issue_transition_automatic: evaluator.jira_issue_transition_automatic,
+               jira_issue_transition_id: evaluator.jira_issue_transition_id,
                username: evaluator.username, password: evaluator.password, issues_enabled: evaluator.issues_enabled,
-               project_key: evaluator.project_key
+               project_key: evaluator.project_key, vulnerabilities_enabled: evaluator.vulnerabilities_enabled,
+               vulnerabilities_issuetype: evaluator.vulnerabilities_issuetype, deployment_type: evaluator.deployment_type
         )
       end
     end
@@ -170,12 +157,6 @@ FactoryBot.define do
     url { 'https://mysite.atlassian.net' }
     username { 'jira_user' }
     password { 'my-secret-password' }
-  end
-
-  factory :hipchat_service do
-    project
-    type { 'HipchatService' }
-    token { 'test_token' }
   end
 
   factory :slack_service do

@@ -1,13 +1,13 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton, GlLoadingIcon, GlIcon, GlPopover } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
-import AdminLicenseManagementRow from 'ee/vue_shared/license_compliance/components/admin_license_management_row.vue';
-import LicenseManagementRow from 'ee/vue_shared/license_compliance/components/license_management_row.vue';
-import AddLicenseForm from 'ee/vue_shared/license_compliance/components/add_license_form.vue';
-import DeleteConfirmationModal from 'ee/vue_shared/license_compliance/components/delete_confirmation_modal.vue';
 import LicenseComplianceApprovals from 'ee/approvals/components/license_compliance/index.vue';
+import AddLicenseForm from 'ee/vue_shared/license_compliance/components/add_license_form.vue';
+import AdminLicenseManagementRow from 'ee/vue_shared/license_compliance/components/admin_license_management_row.vue';
+import DeleteConfirmationModal from 'ee/vue_shared/license_compliance/components/delete_confirmation_modal.vue';
+import LicenseManagementRow from 'ee/vue_shared/license_compliance/components/license_management_row.vue';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import { approvedLicense, blacklistedLicense } from './mock_data';
 
 Vue.use(Vuex);
@@ -178,7 +178,7 @@ describe('License Management', () => {
 
       describe.each([true, false])(
         'when licenseComplianceDeniesMr feature flag is %p',
-        licenseComplianceDeniesMr => {
+        (licenseComplianceDeniesMr) => {
           it('should not show the developer only tooltip', () => {
             createComponent({
               state: { isLoadingManagedLicenses: false },
@@ -226,7 +226,7 @@ describe('License Management', () => {
           expect(wrapper.find(DeleteConfirmationModal).exists()).toBe(false);
         });
 
-        it('renders the read only row', () => {
+        it('renders the read-only row', () => {
           expect(wrapper.find(LicenseManagementRow).exists()).toBe(true);
           expect(wrapper.find(AdminLicenseManagementRow).exists()).toBe(false);
         });

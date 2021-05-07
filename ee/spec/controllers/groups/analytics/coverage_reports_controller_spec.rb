@@ -8,8 +8,8 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:ref_path) { 'refs/heads/master' }
 
-  let_it_be(:first_coverage) { create_daily_coverage('rspec', project, 79.0, '2020-03-09') }
-  let_it_be(:last_coverage) { create_daily_coverage('karma', project, 95.0, '2020-03-10') }
+  let_it_be(:first_coverage) { create_daily_coverage('rspec', project, 79.0, '2020-03-09', group) }
+  let_it_be(:last_coverage) { create_daily_coverage('karma', project, 95.0, '2020-03-10', group) }
 
   let_it_be(:valid_request_params) do
     {
@@ -77,20 +77,14 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
         ])
       end
 
-      context 'with a project_id filter' do
-        let(:params) { valid_request_params.merge(project_ids: [project.id]) }
+      context 'when ref_path is nil' do
+        let(:ref_path) { nil }
 
-        it 'responds 200 with CSV coverage data' do
-          expect(Ci::DailyBuildGroupReportResultsByGroupFinder).to receive(:new).with({
-            group: group,
-            current_user: user,
-            project_ids: [project.id.to_s],
-            start_date: Date.parse('2020-03-01'),
-            end_date: Date.parse('2020-03-31'),
-            ref_path: ref_path
-          }).and_call_original
+        it 'responds HTTP 200' do
+          get :index, params: valid_request_params
 
-          get :index, params: params
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(csv_response.size).to eq(3)
         end
       end
 
@@ -101,7 +95,7 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
 
         expect(CSV.parse(response.body).length).to eq(3)
 
-        create_daily_coverage('rspec', project, 79.0, '2020-03-10')
+        create_daily_coverage('rspec', project, 79.0, '2020-03-10', group)
 
         expect { get :index, params: valid_request_params }.not_to exceed_query_limit(control)
 
@@ -120,14 +114,15 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
 
   private
 
-  def create_daily_coverage(group_name, project, coverage, date)
+  def create_daily_coverage(group_name, project, coverage, date, group = nil)
     create(
       :ci_daily_build_group_report_result,
       project: project,
       ref_path: ref_path,
       group_name: group_name,
       data: { 'coverage' => coverage },
-      date: date
+      date: date,
+      group: group
     )
   end
 end

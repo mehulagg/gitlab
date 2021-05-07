@@ -1,7 +1,7 @@
 <script>
 import { s__ } from '~/locale';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import ReportItem from '~/reports/components/report_item.vue';
+import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 
 export default {
   components: {
@@ -13,6 +13,12 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    nestedLevel: {
+      type: Number,
+      required: false,
+      default: 0,
+      validator: (value) => [0, 1, 2].includes(value),
     },
     resolvedIssues: {
       type: Array,
@@ -41,7 +47,7 @@ export default {
   computed: {
     groups() {
       return this.$options.groups
-        .map(group => ({
+        .map((group) => ({
           name: group,
           issues: this[`${group}Issues`],
           heading: this[`${group}Heading`],
@@ -58,6 +64,12 @@ export default {
 
       return groupsCount + issuesCount;
     },
+    listClasses() {
+      return {
+        'gl-pl-9': this.nestedLevel === 1,
+        'gl-pl-11-5': this.nestedLevel === 2,
+      };
+    },
   },
 };
 </script>
@@ -67,6 +79,7 @@ export default {
     :length="listLength"
     :remain="$options.maxShownReportItems"
     :size="$options.typicalReportItemHeight"
+    :class="listClasses"
     class="report-block-container"
     wtag="ul"
     wclass="report-block-list"

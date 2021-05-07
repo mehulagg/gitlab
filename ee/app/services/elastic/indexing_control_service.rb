@@ -6,7 +6,7 @@ module Elastic
   # This class should only be used with sidekiq workers which extend Elastic::IndexingControl module
   class IndexingControlService
     LIMIT = 1000
-    PROJECT_CONTEXT_KEY = "#{Labkit::Context::LOG_KEY}.project"
+    PROJECT_CONTEXT_KEY = "#{Gitlab::ApplicationContext::LOG_KEY}.project"
 
     def initialize(klass)
       raise ArgumentError, "passed class must extend Elastic::IndexingControl" unless klass.include?(Elastic::IndexingControl)
@@ -93,7 +93,7 @@ module Elastic
     end
 
     def send_to_processing_queue(job)
-      Labkit::Context.with_context(job['context']) do
+      Gitlab::ApplicationContext.with_raw_context(job['context']) do
         klass.perform_async(*job['args'])
       end
     end

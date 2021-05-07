@@ -4,12 +4,8 @@ module BulkImports
   module Groups
     module Transformers
       class GroupAttributesTransformer
-        def initialize(options = {})
-          @options = options
-        end
-
         def transform(context, data)
-          import_entity = find_by_full_path(data['full_path'], context.entities)
+          import_entity = context.entity
 
           data
             .then { |data| transform_name(import_entity, data) }
@@ -39,12 +35,11 @@ module BulkImports
         end
 
         def transform_parent(context, import_entity, data)
-          current_user = context.current_user
-          namespace = Namespace.find_by_full_path(import_entity.destination_namespace)
+          unless import_entity.destination_namespace.blank?
+            namespace = Namespace.find_by_full_path(import_entity.destination_namespace)
+            data['parent_id'] = namespace.id
+          end
 
-          return data if namespace == current_user.namespace
-
-          data['parent_id'] = namespace.id
           data
         end
 
@@ -74,10 +69,6 @@ module BulkImports
 
           data['subgroup_creation_level'] = Gitlab::Access.subgroup_creation_string_options[subgroup_creation_level]
           data
-        end
-
-        def find_by_full_path(full_path, entities)
-          entities.find { |entity| entity.source_full_path == full_path }
         end
       end
     end

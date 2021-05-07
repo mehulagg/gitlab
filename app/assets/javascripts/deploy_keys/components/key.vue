@@ -1,6 +1,6 @@
 <script>
+import { GlIcon, GlLink, GlTooltipDirective, GlButton } from '@gitlab/ui';
 import { head, tail } from 'lodash';
-import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -9,7 +9,9 @@ import actionBtn from './action_btn.vue';
 export default {
   components: {
     actionBtn,
+    GlButton,
     GlIcon,
+    GlLink,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -48,7 +50,7 @@ export default {
 
       if (this.projectId !== null) {
         const indexOfCurrentProject = projects.findIndex(
-          project =>
+          (project) =>
             project &&
             project.project &&
             project.project.id &&
@@ -97,7 +99,7 @@ export default {
   methods: {
     projectTooltipTitle(project) {
       return project.can_push
-        ? s__('DeployKeys|Write access allowed')
+        ? s__('DeployKeys|Grant write permissions to this key')
         : s__('DeployKeys|Read access only');
     },
     toggleExpanded() {
@@ -111,9 +113,9 @@ export default {
   <div class="gl-responsive-table-row deploy-key">
     <div class="table-section section-40">
       <div role="rowheader" class="table-mobile-header">{{ s__('DeployKeys|Deploy key') }}</div>
-      <div class="table-mobile-content qa-key">
-        <strong class="title qa-key-title"> {{ deployKey.title }} </strong>
-        <div class="fingerprint" data-qa-selector="key_md5_fingerprint">
+      <div class="table-mobile-content" data-qa-selector="key_container">
+        <strong class="title" data-qa-selector="key_title_content"> {{ deployKey.title }} </strong>
+        <div class="fingerprint" data-qa-selector="key_md5_fingerprint_content">
           {{ __('MD5') }}:{{ deployKey.fingerprint }}
         </div>
         <div class="fingerprint">{{ __('SHA256') }}:{{ deployKey.fingerprint_sha256 }}</div>
@@ -123,15 +125,15 @@ export default {
       <div role="rowheader" class="table-mobile-header">{{ s__('DeployKeys|Project usage') }}</div>
       <div class="table-mobile-content deploy-project-list">
         <template v-if="projects.length > 0">
-          <a
+          <gl-link
             v-gl-tooltip
             :title="projectTooltipTitle(firstProject)"
             class="label deploy-project-label"
           >
             <span> {{ firstProject.project.full_name }} </span>
             <gl-icon :name="firstProject.can_push ? 'lock-open' : 'lock'" />
-          </a>
-          <a
+          </gl-link>
+          <gl-link
             v-if="isExpandable"
             v-gl-tooltip
             :title="restProjectsTooltip"
@@ -139,8 +141,8 @@ export default {
             @click="toggleExpanded"
           >
             <span>{{ restProjectsLabel }}</span>
-          </a>
-          <a
+          </gl-link>
+          <gl-link
             v-for="deployKeysProject in restProjects"
             v-else-if="isExpanded"
             :key="deployKeysProject.project.full_path"
@@ -151,7 +153,7 @@ export default {
           >
             <span> {{ deployKeysProject.project.full_name }} </span>
             <gl-icon :name="deployKeysProject.can_push ? 'lock-open' : 'lock'" />
-          </a>
+          </gl-link>
         </template>
         <span v-else class="text-secondary">{{ __('None') }}</span>
       </div>
@@ -166,41 +168,43 @@ export default {
     </div>
     <div class="table-section section-15 table-button-footer deploy-key-actions">
       <div class="btn-group table-action-buttons">
-        <action-btn v-if="!isEnabled" :deploy-key="deployKey" type="enable">
+        <action-btn v-if="!isEnabled" :deploy-key="deployKey" type="enable" category="secondary">
           {{ __('Enable') }}
         </action-btn>
-        <a
+        <gl-button
           v-if="deployKey.can_edit"
           v-gl-tooltip
           :href="editDeployKeyPath"
           :title="__('Edit')"
-          class="btn btn-default text-secondary"
+          :aria-label="__('Edit')"
           data-container="body"
-        >
-          <gl-icon name="pencil" />
-        </a>
+          icon="pencil"
+          category="secondary"
+        />
         <action-btn
           v-if="isRemovable"
           v-gl-tooltip
           :deploy-key="deployKey"
           :title="__('Remove')"
-          btn-css-class="btn-danger"
+          :aria-label="__('Remove')"
+          category="primary"
+          variant="danger"
+          icon="remove"
           type="remove"
           data-container="body"
-        >
-          <gl-icon name="remove" />
-        </action-btn>
+        />
         <action-btn
           v-else-if="isEnabled"
           v-gl-tooltip
           :deploy-key="deployKey"
           :title="__('Disable')"
-          btn-css-class="btn-warning"
+          :aria-label="__('Disable')"
           type="disable"
           data-container="body"
-        >
-          <gl-icon name="cancel" />
-        </action-btn>
+          icon="cancel"
+          category="primary"
+          variant="danger"
+        />
       </div>
     </div>
   </div>

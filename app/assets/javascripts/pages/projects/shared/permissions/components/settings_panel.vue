@@ -1,35 +1,61 @@
 <script>
-import { GlIcon, GlSprintf, GlLink, GlFormCheckbox } from '@gitlab/ui';
+import { GlIcon, GlSprintf, GlLink, GlFormCheckbox, GlToggle } from '@gitlab/ui';
 
 import settingsMixin from 'ee_else_ce/pages/projects/shared/permissions/mixins/settings_pannel_mixin';
 import { s__ } from '~/locale';
-import projectFeatureSetting from './project_feature_setting.vue';
-import projectFeatureToggle from '~/vue_shared/components/toggle_button.vue';
-import projectSettingRow from './project_setting_row.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   visibilityOptions,
   visibilityLevelDescriptions,
   featureAccessLevelMembers,
   featureAccessLevelEveryone,
   featureAccessLevel,
+  featureAccessLevelNone,
+  CVE_ID_REQUEST_BUTTON_I18N,
 } from '../constants';
 import { toggleHiddenClassBySelector } from '../external';
+import projectFeatureSetting from './project_feature_setting.vue';
+import projectSettingRow from './project_setting_row.vue';
 
 const PAGE_FEATURE_ACCESS_LEVEL = s__('ProjectSettings|Everyone');
 
 export default {
+  i18n: {
+    ...CVE_ID_REQUEST_BUTTON_I18N,
+    analyticsLabel: s__('ProjectSettings|Analytics'),
+    containerRegistryLabel: s__('ProjectSettings|Container registry'),
+    forksLabel: s__('ProjectSettings|Forks'),
+    issuesLabel: s__('ProjectSettings|Issues'),
+    lfsLabel: s__('ProjectSettings|Git Large File Storage (LFS)'),
+    mergeRequestsLabel: s__('ProjectSettings|Merge requests'),
+    operationsLabel: s__('ProjectSettings|Operations'),
+    packagesLabel: s__('ProjectSettings|Packages'),
+    pagesLabel: s__('ProjectSettings|Pages'),
+    ciCdLabel: s__('CI/CD'),
+    repositoryLabel: s__('ProjectSettings|Repository'),
+    requirementsLabel: s__('ProjectSettings|Requirements'),
+    securityAndComplianceLabel: s__('ProjectSettings|Security & Compliance'),
+    snippetsLabel: s__('ProjectSettings|Snippets'),
+    wikiLabel: s__('ProjectSettings|Wiki'),
+  },
+
   components: {
     projectFeatureSetting,
-    projectFeatureToggle,
     projectSettingRow,
     GlIcon,
     GlSprintf,
     GlLink,
     GlFormCheckbox,
+    GlToggle,
   },
-  mixins: [settingsMixin],
+  mixins: [settingsMixin, glFeatureFlagsMixin()],
 
   props: {
+    requestCveAvailable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     currentSettings: {
       type: Object,
       required: true,
@@ -68,6 +94,11 @@ export default {
       required: false,
       default: false,
     },
+    requirementsAvailable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     visibilityHelpPath: {
       type: String,
       required: false,
@@ -84,6 +115,11 @@ export default {
       default: false,
     },
     lfsObjectsRemovalHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    cveIdRequestHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -132,11 +168,16 @@ export default {
       snippetsAccessLevel: featureAccessLevel.EVERYONE,
       pagesAccessLevel: featureAccessLevel.EVERYONE,
       metricsDashboardAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
+      analyticsAccessLevel: featureAccessLevel.EVERYONE,
+      requirementsAccessLevel: featureAccessLevel.EVERYONE,
+      securityAndComplianceAccessLevel: featureAccessLevel.PROJECT_MEMBERS,
+      operationsAccessLevel: featureAccessLevel.EVERYONE,
       containerRegistryEnabled: true,
       lfsEnabled: true,
       requestAccessEnabled: true,
       highlightChangesClass: false,
       emailsDisabled: false,
+      cveIdRequestEnabled: true,
       featureAccessLevelEveryone,
       featureAccessLevelMembers,
     };
@@ -159,6 +200,14 @@ export default {
       );
     },
 
+    operationsFeatureAccessLevelOptions() {
+      if (!this.operationsEnabled) return [featureAccessLevelNone];
+
+      return this.featureAccessLevelOptions.filter(
+        ([value]) => value <= this.operationsAccessLevel,
+      );
+    },
+
     pagesFeatureAccessLevelOptions() {
       const options = [featureAccessLevelMembers];
 
@@ -178,8 +227,12 @@ export default {
       return options;
     },
 
-    metricsOptionsDropdownEnabled() {
-      return this.featureAccessLevelOptions.length < 2;
+    metricsOptionsDropdownDisabled() {
+      return this.operationsFeatureAccessLevelOptions.length < 2 || !this.operationsEnabled;
+    },
+
+    operationsEnabled() {
+      return this.operationsAccessLevel > featureAccessLevel.NOT_ENABLED;
     },
 
     repositoryEnabled() {
@@ -196,12 +249,15 @@ export default {
 
     repositoryHelpText() {
       if (this.visibilityLevel === visibilityOptions.PRIVATE) {
-        return s__('ProjectSettings|View and edit files in this project');
+        return s__('ProjectSettings|View and edit files in this project.');
       }
 
       return s__(
-        'ProjectSettings|View and edit files in this project. Non-project members will only have read access',
+        'ProjectSettings|View and edit files in this project. Non-project members will only have read access.',
       );
+    },
+    cveIdRequestIsDisabled() {
+      return this.visibilityLevel !== visibilityOptions.PUBLIC;
     },
   },
 
@@ -234,6 +290,22 @@ export default {
           featureAccessLevel.PROJECT_MEMBERS,
           this.metricsDashboardAccessLevel,
         );
+        this.analyticsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.analyticsAccessLevel,
+        );
+        this.requirementsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.requirementsAccessLevel,
+        );
+        this.securityAndComplianceAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.securityAndComplianceAccessLevel,
+        );
+        this.operationsAccessLevel = Math.min(
+          featureAccessLevel.PROJECT_MEMBERS,
+          this.operationsAccessLevel,
+        );
         if (this.pagesAccessLevel === featureAccessLevel.EVERYONE) {
           // When from Internal->Private narrow access for only members
           this.pagesAccessLevel = featureAccessLevel.PROJECT_MEMBERS;
@@ -255,8 +327,15 @@ export default {
           this.snippetsAccessLevel = featureAccessLevel.EVERYONE;
         if (this.pagesAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
           this.pagesAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.analyticsAccessLevel > featureAccessLevel.NOT_ENABLED)
+          this.analyticsAccessLevel = featureAccessLevel.EVERYONE;
         if (this.metricsDashboardAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
           this.metricsDashboardAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.requirementsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.requirementsAccessLevel = featureAccessLevel.EVERYONE;
+        if (this.operationsAccessLevel === featureAccessLevel.PROJECT_MEMBERS)
+          this.operationsAccessLevel = featureAccessLevel.EVERYONE;
+
         this.highlightChanges();
       }
     },
@@ -313,27 +392,34 @@ export default {
               <option
                 :value="visibilityOptions.PRIVATE"
                 :disabled="!visibilityAllowed(visibilityOptions.PRIVATE)"
-                >{{ s__('ProjectSettings|Private') }}</option
               >
+                {{ s__('ProjectSettings|Private') }}
+              </option>
               <option
                 :value="visibilityOptions.INTERNAL"
                 :disabled="!visibilityAllowed(visibilityOptions.INTERNAL)"
-                >{{ s__('ProjectSettings|Internal') }}</option
               >
+                {{ s__('ProjectSettings|Internal') }}
+              </option>
               <option
                 :value="visibilityOptions.PUBLIC"
                 :disabled="!visibilityAllowed(visibilityOptions.PUBLIC)"
-                >{{ s__('ProjectSettings|Public') }}</option
               >
+                {{ s__('ProjectSettings|Public') }}
+              </option>
             </select>
             <gl-icon
               name="chevron-down"
-              aria-hidden="true"
               data-hidden="true"
               class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
             />
           </div>
         </div>
+        <span v-if="!visibilityAllowed(visibilityLevel)" class="form-text text-muted">{{
+          s__(
+            'ProjectSettings|Visibility options for this fork are limited by the current visibility of the source project.',
+          )
+        }}</span>
         <span class="form-text text-muted">{{ visibilityLevelDescription }}</span>
         <label v-if="visibilityLevel !== visibilityOptions.PRIVATE" class="gl-line-height-28">
           <input
@@ -342,7 +428,7 @@ export default {
             name="project[request_access_enabled]"
           />
           <input v-model="requestAccessEnabled" type="checkbox" />
-          {{ s__('ProjectSettings|Allow users to request access') }}
+          {{ s__('ProjectSettings|Users can request access') }}
         </label>
       </project-setting-row>
     </div>
@@ -352,22 +438,39 @@ export default {
     >
       <project-setting-row
         ref="issues-settings"
-        :label="s__('ProjectSettings|Issues')"
-        :help-text="s__('ProjectSettings|Lightweight issue tracking system for this project')"
+        :label="$options.i18n.issuesLabel"
+        :help-text="s__('ProjectSettings|Lightweight issue tracking system.')"
       >
         <project-feature-setting
           v-model="issuesAccessLevel"
+          :label="$options.i18n.issuesLabel"
           :options="featureAccessLevelOptions"
           name="project[project_feature_attributes][issues_access_level]"
         />
+        <project-setting-row
+          v-if="requestCveAvailable"
+          :help-path="cveIdRequestHelpPath"
+          :help-text="$options.i18n.cve_request_toggle_label"
+        >
+          <gl-toggle
+            v-model="cveIdRequestEnabled"
+            class="gl-my-2"
+            :disabled="cveIdRequestIsDisabled"
+            :label="$options.i18n.cve_request_toggle_label"
+            label-position="hidden"
+            name="project[project_setting_attributes][cve_id_request_enabled]"
+            data-testid="cve_id_request_toggle"
+          />
+        </project-setting-row>
       </project-setting-row>
       <project-setting-row
         ref="repository-settings"
-        :label="s__('ProjectSettings|Repository')"
+        :label="$options.i18n.repositoryLabel"
         :help-text="repositoryHelpText"
       >
         <project-feature-setting
           v-model="repositoryAccessLevel"
+          :label="$options.i18n.repositoryLabel"
           :options="featureAccessLevelOptions"
           name="project[project_feature_attributes][repository_access_level]"
         />
@@ -375,11 +478,12 @@ export default {
       <div class="project-feature-setting-group gl-pl-7 gl-sm-pl-5">
         <project-setting-row
           ref="merge-request-settings"
-          :label="s__('ProjectSettings|Merge requests')"
-          :help-text="s__('ProjectSettings|Submit changes to be merged upstream')"
+          :label="$options.i18n.mergeRequestsLabel"
+          :help-text="s__('ProjectSettings|Submit changes to be merged upstream.')"
         >
           <project-feature-setting
             v-model="mergeRequestsAccessLevel"
+            :label="$options.i18n.mergeRequestsLabel"
             :options="repoFeatureAccessLevelOptions"
             :disabled-input="!repositoryEnabled"
             name="project[project_feature_attributes][merge_requests_access_level]"
@@ -387,35 +491,22 @@ export default {
         </project-setting-row>
         <project-setting-row
           ref="fork-settings"
-          :label="s__('ProjectSettings|Forks')"
-          :help-text="
-            s__('ProjectSettings|Allow users to make copies of your repository to a new project')
-          "
+          :label="$options.i18n.forksLabel"
+          :help-text="s__('ProjectSettings|Users can copy the repository to a new project.')"
         >
           <project-feature-setting
             v-model="forkingAccessLevel"
+            :label="$options.i18n.forksLabel"
             :options="featureAccessLevelOptions"
             :disabled-input="!repositoryEnabled"
             name="project[project_feature_attributes][forking_access_level]"
           />
         </project-setting-row>
         <project-setting-row
-          ref="pipeline-settings"
-          :label="s__('ProjectSettings|Pipelines')"
-          :help-text="s__('ProjectSettings|Build, test, and deploy your changes')"
-        >
-          <project-feature-setting
-            v-model="buildsAccessLevel"
-            :options="repoFeatureAccessLevelOptions"
-            :disabled-input="!repositoryEnabled"
-            name="project[project_feature_attributes][builds_access_level]"
-          />
-        </project-setting-row>
-        <project-setting-row
           v-if="registryAvailable"
           ref="container-registry-settings"
           :help-path="registryHelpPath"
-          :label="s__('ProjectSettings|Container registry')"
+          :label="$options.i18n.containerRegistryLabel"
           :help-text="
             s__('ProjectSettings|Every project can have its own space to store its Docker images')
           "
@@ -427,9 +518,12 @@ export default {
               )
             }}
           </div>
-          <project-feature-toggle
+          <gl-toggle
             v-model="containerRegistryEnabled"
-            :disabled-input="!repositoryEnabled"
+            class="gl-my-2"
+            :disabled="!repositoryEnabled"
+            :label="$options.i18n.containerRegistryLabel"
+            label-position="hidden"
             name="project[container_registry_enabled]"
           />
         </project-setting-row>
@@ -437,21 +531,24 @@ export default {
           v-if="lfsAvailable"
           ref="git-lfs-settings"
           :help-path="lfsHelpPath"
-          :label="s__('ProjectSettings|Git Large File Storage (LFS)')"
+          :label="$options.i18n.lfsLabel"
           :help-text="
-            s__('ProjectSettings|Manages large files such as audio, video, and graphics files')
+            s__('ProjectSettings|Manages large files such as audio, video, and graphics files.')
           "
         >
-          <project-feature-toggle
+          <gl-toggle
             v-model="lfsEnabled"
-            :disabled-input="!repositoryEnabled"
+            class="gl-my-2"
+            :disabled="!repositoryEnabled"
+            :label="$options.i18n.lfsLabel"
+            label-position="hidden"
             name="project[lfs_enabled]"
           />
           <p v-if="!lfsEnabled && lfsObjectsExist">
             <gl-sprintf
               :message="
                 s__(
-                  'ProjectSettings|LFS objects from this repository are still available to forks. %{linkStart}How do I remove them?%{linkEnd}',
+                  'ProjectSettings|LFS objects from this repository are available to forks. %{linkStart}How do I remove them?%{linkEnd}',
                 )
               "
             >
@@ -469,36 +566,90 @@ export default {
           v-if="packagesAvailable"
           ref="package-settings"
           :help-path="packagesHelpPath"
-          :label="s__('ProjectSettings|Packages')"
+          :label="$options.i18n.packagesLabel"
           :help-text="
-            s__('ProjectSettings|Every project can have its own space to store its packages')
+            s__('ProjectSettings|Every project can have its own space to store its packages.')
           "
         >
-          <project-feature-toggle
+          <gl-toggle
             v-model="packagesEnabled"
-            :disabled-input="!repositoryEnabled"
+            class="gl-my-2"
+            :disabled="!repositoryEnabled"
+            :label="$options.i18n.packagesLabel"
+            label-position="hidden"
             name="project[packages_enabled]"
           />
         </project-setting-row>
       </div>
       <project-setting-row
+        ref="pipeline-settings"
+        :label="$options.i18n.ciCdLabel"
+        :help-text="s__('ProjectSettings|Build, test, and deploy your changes.')"
+      >
+        <project-feature-setting
+          v-model="buildsAccessLevel"
+          :label="$options.i18n.ciCdLabel"
+          :options="repoFeatureAccessLevelOptions"
+          :disabled-input="!repositoryEnabled"
+          name="project[project_feature_attributes][builds_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
+        ref="analytics-settings"
+        :label="$options.i18n.analyticsLabel"
+        :help-text="s__('ProjectSettings|View project analytics.')"
+      >
+        <project-feature-setting
+          v-model="analyticsAccessLevel"
+          :label="$options.i18n.analyticsLabel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][analytics_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
+        v-if="requirementsAvailable"
+        ref="requirements-settings"
+        :label="$options.i18n.requirementsLabel"
+        :help-text="s__('ProjectSettings|Requirements management system.')"
+      >
+        <project-feature-setting
+          v-model="requirementsAccessLevel"
+          :label="$options.i18n.requirementsLabel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][requirements_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
+        :label="$options.i18n.securityAndComplianceLabel"
+        :help-text="s__('ProjectSettings|Security & Compliance for this project')"
+      >
+        <project-feature-setting
+          v-model="securityAndComplianceAccessLevel"
+          :label="$options.i18n.securityAndComplianceLabel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][security_and_compliance_access_level]"
+        />
+      </project-setting-row>
+      <project-setting-row
         ref="wiki-settings"
-        :label="s__('ProjectSettings|Wiki')"
-        :help-text="s__('ProjectSettings|Pages for project documentation')"
+        :label="$options.i18n.wikiLabel"
+        :help-text="s__('ProjectSettings|Pages for project documentation.')"
       >
         <project-feature-setting
           v-model="wikiAccessLevel"
+          :label="$options.i18n.wikiLabel"
           :options="featureAccessLevelOptions"
           name="project[project_feature_attributes][wiki_access_level]"
         />
       </project-setting-row>
       <project-setting-row
         ref="snippet-settings"
-        :label="s__('ProjectSettings|Snippets')"
-        :help-text="s__('ProjectSettings|Share code pastes with others out of Git repository')"
+        :label="$options.i18n.snippetsLabel"
+        :help-text="s__('ProjectSettings|Share code with others outside the project.')"
       >
         <project-feature-setting
           v-model="snippetsAccessLevel"
+          :label="$options.i18n.snippetsLabel"
           :options="featureAccessLevelOptions"
           name="project[project_feature_attributes][snippets_access_level]"
         />
@@ -507,54 +658,46 @@ export default {
         v-if="pagesAvailable && pagesAccessControlEnabled"
         ref="pages-settings"
         :help-path="pagesHelpPath"
-        :label="s__('ProjectSettings|Pages')"
+        :label="$options.i18n.pagesLabel"
         :help-text="
-          s__('ProjectSettings|With GitLab Pages you can host your static websites on GitLab')
+          s__('ProjectSettings|With GitLab Pages you can host your static websites on GitLab.')
         "
       >
         <project-feature-setting
           v-model="pagesAccessLevel"
+          :label="$options.i18n.pagesLabel"
           :options="pagesFeatureAccessLevelOptions"
           name="project[project_feature_attributes][pages_access_level]"
         />
       </project-setting-row>
       <project-setting-row
-        ref="metrics-visibility-settings"
-        :label="__('Metrics Dashboard')"
+        ref="operations-settings"
+        :label="$options.i18n.operationsLabel"
         :help-text="
-          s__(
-            'ProjectSettings|With Metrics Dashboard you can visualize this project performance metrics',
-          )
+          s__('ProjectSettings|Configure your project resources and monitor their health.')
         "
       >
-        <div class="project-feature-controls gl-display-flex gl-align-items-center gl-my-3 gl-mx-0">
-          <div class="select-wrapper gl-flex-fill-1">
-            <select
-              v-model="metricsDashboardAccessLevel"
-              :disabled="metricsOptionsDropdownEnabled"
-              name="project[project_feature_attributes][metrics_dashboard_access_level]"
-              class="form-control project-repo-select select-control"
-            >
-              <option
-                :value="featureAccessLevelMembers[0]"
-                :disabled="!visibilityAllowed(visibilityOptions.INTERNAL)"
-                >{{ featureAccessLevelMembers[1] }}</option
-              >
-              <option
-                :value="featureAccessLevelEveryone[0]"
-                :disabled="!visibilityAllowed(visibilityOptions.PUBLIC)"
-                >{{ featureAccessLevelEveryone[1] }}</option
-              >
-            </select>
-            <gl-icon
-              name="chevron-down"
-              aria-hidden="true"
-              data-hidden="true"
-              class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
-            />
-          </div>
-        </div>
+        <project-feature-setting
+          v-model="operationsAccessLevel"
+          :label="$options.i18n.operationsLabel"
+          :options="featureAccessLevelOptions"
+          name="project[project_feature_attributes][operations_access_level]"
+        />
       </project-setting-row>
+      <div class="project-feature-setting-group gl-pl-7 gl-sm-pl-5">
+        <project-setting-row
+          ref="metrics-visibility-settings"
+          :label="__('Metrics Dashboard')"
+          :help-text="s__('ProjectSettings|Visualize the project\'s performance metrics.')"
+        >
+          <project-feature-setting
+            v-model="metricsDashboardAccessLevel"
+            :show-toggle="false"
+            :options="operationsFeatureAccessLevelOptions"
+            name="project[project_feature_attributes][metrics_dashboard_access_level]"
+          />
+        </project-setting-row>
+      </div>
     </div>
     <project-setting-row v-if="canDisableEmails" ref="email-settings" class="mb-3">
       <label class="js-emails-disabled">
@@ -563,9 +706,7 @@ export default {
         {{ s__('ProjectSettings|Disable email notifications') }}
       </label>
       <span class="form-text text-muted">{{
-        s__(
-          'ProjectSettings|This setting will override user notification preferences for all project members.',
-        )
+        s__('ProjectSettings|Override user notification preferences for all project members.')
       }}</span>
     </project-setting-row>
     <project-setting-row class="mb-3">
@@ -581,8 +722,25 @@ export default {
         {{ s__('ProjectSettings|Show default award emojis') }}
         <template #help>{{
           s__(
-            'ProjectSettings|When enabled, issues, merge requests, and snippets will always show thumbs-up and thumbs-down award emoji buttons.',
+            'ProjectSettings|Always show thumbs-up and thumbs-down award emoji buttons on issues, merge requests, and snippets.',
           )
+        }}</template>
+      </gl-form-checkbox>
+    </project-setting-row>
+    <project-setting-row
+      v-if="glFeatures.allowEditingCommitMessages"
+      ref="allow-editing-commit-messages"
+      class="gl-mb-4"
+    >
+      <input
+        :value="allowEditingCommitMessages"
+        type="hidden"
+        name="project[project_setting_attributes][allow_editing_commit_messages]"
+      />
+      <gl-form-checkbox v-model="allowEditingCommitMessages">
+        {{ s__('ProjectSettings|Allow editing commit messages') }}
+        <template #help>{{
+          s__('ProjectSettings|Commit authors can edit commit messages on unprotected branches.')
         }}</template>
       </gl-form-checkbox>
     </project-setting-row>

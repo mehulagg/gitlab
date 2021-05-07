@@ -25,9 +25,6 @@ Your caret can stop touching a `rawReference` can happen in a variety of ways:
 */
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { __ } from '~/locale';
-import RelatedIssuesBlock from './related_issues_block.vue';
-import RelatedIssuesStore from '../stores/related_issues_store';
-import RelatedIssuesService from '../services/related_issues_service';
 import {
   relatedIssuesRemoveErrorMap,
   pathIndeterminateErrorMap,
@@ -35,6 +32,9 @@ import {
   issuableTypesMap,
   PathIdSeparator,
 } from '../constants';
+import RelatedIssuesService from '../services/related_issues_service';
+import RelatedIssuesStore from '../stores/related_issues_store';
+import RelatedIssuesBlock from './related_issues_block.vue';
 
 export default {
   name: 'RelatedIssuesRoot',
@@ -110,7 +110,7 @@ export default {
   },
   methods: {
     findRelatedIssueById(id) {
-      return this.state.relatedIssues.find(issue => issue.id === id);
+      return this.state.relatedIssues.find((issue) => issue.id === id);
     },
     onRelatedIssueRemoveRequest(idToRemove) {
       const issueToRemove = this.findRelatedIssueById(idToRemove);
@@ -120,7 +120,7 @@ export default {
           .then(({ data }) => {
             this.store.setRelatedIssues(data.issuables);
           })
-          .catch(res => {
+          .catch((res) => {
             if (res && res.status !== 404) {
               Flash(relatedIssuesRemoveErrorMap[this.issuableType]);
             }
@@ -204,13 +204,22 @@ export default {
     onInput({ untouchedRawReferences, touchedReference }) {
       this.store.addPendingReferences(untouchedRawReferences);
 
-      this.inputValue = `${touchedReference}`;
+      this.formatInput(touchedReference);
+    },
+    formatInput(touchedReference = '') {
+      const startsWithNumber = String(touchedReference).match(/^[0-9]/) !== null;
+
+      if (startsWithNumber) {
+        this.inputValue = `#${touchedReference}`;
+      } else {
+        this.inputValue = `${touchedReference}`;
+      }
     },
     onBlur(newValue) {
       this.processAllReferences(newValue);
     },
     processAllReferences(value = '') {
-      const rawReferences = value.split(/\s+/).filter(reference => reference.trim().length > 0);
+      const rawReferences = value.split(/\s+/).filter((reference) => reference.trim().length > 0);
 
       this.store.addPendingReferences(rawReferences);
       this.inputValue = '';

@@ -62,18 +62,24 @@ module ExtractsRef
   #
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def assign_ref_vars
-    @id = get_id
-    @ref, @path = extract_ref(@id)
+    @id, @ref, @path = extract_ref_path
     @repo = repository_container.repository
 
     raise InvalidPathError if @ref.match?(/\s/)
 
-    @commit = @repo.commit(@ref)
+    @commit = @repo.commit(@ref) if @ref.present?
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   def tree
     @tree ||= @repo.tree(@commit.id, @path) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+  end
+
+  def extract_ref_path
+    id = get_id
+    ref, path = extract_ref(id)
+
+    [id, ref, path]
   end
 
   private

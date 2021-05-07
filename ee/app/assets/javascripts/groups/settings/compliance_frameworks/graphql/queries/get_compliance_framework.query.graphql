@@ -1,0 +1,18 @@
+query getComplianceFramework(
+  $fullPath: ID!
+  $complianceFramework: ComplianceManagementFrameworkID
+) {
+  namespace(fullPath: $fullPath) {
+    id
+    name
+    complianceFrameworks(id: $complianceFramework) {
+      nodes {
+        id
+        name
+        description
+        color
+        pipelineConfigurationFullPath
+      }
+    }
+  }
+}

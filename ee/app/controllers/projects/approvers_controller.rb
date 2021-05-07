@@ -3,7 +3,7 @@
 class Projects::ApproversController < Projects::ApplicationController
   before_action :authorize_for_subject!
 
-  feature_category :code_review
+  feature_category :source_code_management
 
   # @deprecated
   def destroy

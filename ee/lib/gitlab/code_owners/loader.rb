@@ -5,8 +5,10 @@ module Gitlab
     class Loader
       include ::Gitlab::Utils::StrongMemoize
 
-      def initialize(project, ref, paths)
-        @project, @ref, @paths = project, ref, Array(paths)
+      def initialize(project, ref, paths = [])
+        @project = project
+        @ref = ref
+        @paths = Array(paths)
       end
 
       def entries
@@ -39,6 +41,14 @@ module Gitlab
 
       def code_owners_path
         code_owners_file&.path
+      end
+
+      def code_owners_sections
+        code_owners_file&.sections
+      end
+
+      def optional_section?(section)
+        code_owners_file&.optional_section?(section)
       end
 
       private

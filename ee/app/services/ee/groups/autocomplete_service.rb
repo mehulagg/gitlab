@@ -1,0 +1,24 @@
+# frozen_string_literal: true
+module EE
+  module Groups
+    module AutocompleteService
+      def epics(confidential_only: false)
+        finder_params = { group_id: group.id }
+        finder_params[:confidential] = true if confidential_only.present?
+
+        # TODO: use include_descendant_groups: true optional parameter once frontend supports epics from external groups.
+        # See https://gitlab.com/gitlab-org/gitlab/issues/6837
+        EpicsFinder.new(current_user, finder_params)
+          .execute
+          .select(:iid, :title, :group_id)
+      end
+
+      def vulnerabilities
+        ::Autocomplete::VulnerabilitiesAutocompleteFinder
+          .new(current_user, group, params)
+          .execute
+          .select([:id, :title, :project_id])
+      end
+    end
+  end
+end

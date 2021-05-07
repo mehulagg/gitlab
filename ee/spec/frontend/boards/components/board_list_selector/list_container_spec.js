@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import ListContainer from 'ee/boards/components/boards_list_selector/list_container.vue';
-import ListFilter from 'ee/boards/components/boards_list_selector/list_filter.vue';
 import ListContent from 'ee/boards/components/boards_list_selector/list_content.vue';
+import ListFilter from 'ee/boards/components/boards_list_selector/list_filter.vue';
 import { mockAssigneesList } from 'jest/boards/mock_data';
 
 describe('ListContainer', () => {

@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import MonitoringComponent from '~/environments/components/environment_monitoring.vue';
 
 describe('Monitoring Component', () => {
@@ -16,7 +16,8 @@ describe('Monitoring Component', () => {
   };
 
   const findButtons = () => wrapper.findAll(GlButton);
-  const findButtonsByIcon = icon => findButtons().filter(button => button.props('icon') === icon);
+  const findButtonsByIcon = (icon) =>
+    findButtons().filter((button) => button.props('icon') === icon);
 
   beforeEach(() => {
     createWrapper();

@@ -24,9 +24,9 @@ class Repository
 
   attr_accessor :full_path, :shard, :disk_path, :container, :repo_type
 
-  delegate :ref_name_for_sha, to: :raw_repository
-  delegate :bundle_to_disk, to: :raw_repository
   delegate :lfs_enabled?, to: :container
+
+  delegate_missing_to :raw_repository
 
   CreateTreeError = Class.new(StandardError)
   AmbiguousRefError = Class.new(StandardError)
@@ -39,11 +39,11 @@ class Repository
   #
   # For example, for entry `:commit_count` there's a method called `commit_count` which
   # stores its data in the `commit_count` cache key.
-  CACHED_METHODS = %i(size commit_count rendered_readme readme_path contribution_guide
+  CACHED_METHODS = %i(size commit_count readme_path contribution_guide
                       changelog license_blob license_key gitignore
                       gitlab_ci_yml branch_names tag_names branch_count
                       tag_count avatar exists? root_ref merged_branch_names
-                      has_visible_content? issue_template_names merge_request_template_names
+                      has_visible_content? issue_template_names_hash merge_request_template_names_hash
                       user_defined_metrics_dashboard_paths xcode_project? has_ambiguous_refs?).freeze
 
   # Methods that use cache_method but only memoize the value
@@ -53,15 +53,15 @@ class Repository
   # changed. This Hash maps file types (as returned by Gitlab::FileDetector) to
   # the corresponding methods to call for refreshing caches.
   METHOD_CACHES_FOR_FILE_TYPES = {
-    readme: %i(rendered_readme readme_path),
+    readme: %i(readme_path),
     changelog: :changelog,
     license: %i(license_blob license_key license),
     contributing: :contribution_guide,
     gitignore: :gitignore,
     gitlab_ci: :gitlab_ci_yml,
     avatar: :avatar,
-    issue_template: :issue_template_names,
-    merge_request_template: :merge_request_template_names,
+    issue_template: :issue_template_names_hash,
+    merge_request_template: :merge_request_template_names_hash,
     metrics_dashboard: :user_defined_metrics_dashboard_paths,
     xcode_config: :xcode_project?
   }.freeze
@@ -151,7 +151,8 @@ class Repository
       all: !!opts[:all],
       first_parent: !!opts[:first_parent],
       order: opts[:order],
-      literal_pathspec: opts.fetch(:literal_pathspec, true)
+      literal_pathspec: opts.fetch(:literal_pathspec, true),
+      trailers: opts[:trailers]
     }
 
     commits = Gitlab::Git::Commit.where(options)
@@ -287,6 +288,10 @@ class Repository
     false
   end
 
+  def search_branch_names(pattern)
+    redis_set_cache.search('branch_names', pattern) { branch_names }
+  end
+
   def languages
     return [] if empty?
 
@@ -384,10 +389,6 @@ class Repository
 
     expire_method_caches(%i(has_visible_content?))
     raw_repository.expire_has_local_branches_cache
-  end
-
-  def lookup_cache
-    @lookup_cache ||= {}
   end
 
   def expire_exists_cache
@@ -494,34 +495,14 @@ class Repository
     expire_branches_cache if expire_cache
   end
 
-  def method_missing(msg, *args, &block)
-    if msg == :lookup && !block_given?
-      lookup_cache[msg] ||= {}
-      lookup_cache[msg][args.join(":")] ||= raw_repository.__send__(msg, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
-    else
-      raw_repository.__send__(msg, *args, &block) # rubocop:disable GitlabSecurity/PublicSend
+  def lookup(sha)
+    strong_memoize("lookup_#{sha}") do
+      raw_repository.lookup(sha)
     end
-  end
-
-  def respond_to_missing?(method, include_private = false)
-    raw_repository.respond_to?(method, include_private) || super
   end
 
   def blob_at(sha, path)
-    blob = Blob.decorate(raw_repository.blob_at(sha, path), container)
-
-    # Don't attempt to return a special result if there is no blob at all
-    return unless blob
-
-    # Don't attempt to return a special result unless we're looking at HEAD
-    return blob unless head_commit&.sha == sha
-
-    case path
-    when head_tree&.readme_path
-      ReadmeBlob.new(blob, self)
-    else
-      blob
-    end
+    Blob.decorate(raw_repository.blob_at(sha, path), container)
   rescue Gitlab::Git::Repository::NoRepository
     nil
   end
@@ -595,15 +576,16 @@ class Repository
   end
   cache_method :avatar
 
-  def issue_template_names
-    Gitlab::Template::IssueTemplate.dropdown_names(project)
+  # store issue_template_names as hash
+  def issue_template_names_hash
+    Gitlab::Template::IssueTemplate.repository_template_names(project)
   end
-  cache_method :issue_template_names, fallback: []
+  cache_method :issue_template_names_hash, fallback: {}
 
-  def merge_request_template_names
-    Gitlab::Template::MergeRequestTemplate.dropdown_names(project)
+  def merge_request_template_names_hash
+    Gitlab::Template::MergeRequestTemplate.repository_template_names(project)
   end
-  cache_method :merge_request_template_names, fallback: []
+  cache_method :merge_request_template_names_hash, fallback: {}
 
   def user_defined_metrics_dashboard_paths
     Gitlab::Metrics::Dashboard::RepoDashboardFinder.list_dashboards(project)
@@ -615,18 +597,9 @@ class Repository
   end
 
   def readme_path
-    readme&.path
+    head_tree&.readme_path
   end
   cache_method :readme_path
-
-  def rendered_readme
-    return unless readme
-
-    context = { project: project }
-
-    MarkupHelper.markup_unsafe(readme.name, readme.data, context)
-  end
-  cache_method :rendered_readme
 
   def contribution_guide
     file_on_head(:contributing)
@@ -860,12 +833,6 @@ class Repository
     end
   end
 
-  def merge_to_ref(user, source_sha, merge_request, target_ref, message, first_parent_ref, allow_conflicts = false)
-    branch = merge_request.target_branch
-
-    raw.merge_to_ref(user, source_sha, branch, target_ref, message, first_parent_ref, allow_conflicts)
-  end
-
   def delete_refs(*ref_names)
     raw.delete_refs(*ref_names)
   end
@@ -1026,6 +993,18 @@ class Repository
     raw_repository.search_files_by_name(query, ref)
   end
 
+  def search_files_by_wildcard_path(path, ref = 'HEAD')
+    # We need to use RE2 to match Gitaly's regexp engine
+    regexp_string = RE2::Regexp.escape(path)
+
+    anything = '.*?'
+    anything_but_not_slash = '([^\/])*?'
+    regexp_string.gsub!('\*\*', anything)
+    regexp_string.gsub!('\*', anything_but_not_slash)
+
+    raw_repository.search_files_by_regexp("^#{regexp_string}$", ref)
+  end
+
   def copy_gitattributes(ref)
     actual_ref = ref || root_ref
     begin
@@ -1064,6 +1043,10 @@ class Repository
 
   def lfsconfig_for(sha)
     blob_data_at(sha, '.lfsconfig')
+  end
+
+  def changelog_config(ref = 'HEAD')
+    blob_data_at(ref, Gitlab::Changelog::Config::FILE_PATH)
   end
 
   def fetch_ref(source_repository, source_ref:, target_ref:)
@@ -1150,6 +1133,13 @@ class Repository
     end
   end
 
+  # Choose one of the available repository storage options based on a normalized weighted probability.
+  # We should always use the latest settings, to avoid picking a deleted shard.
+  def self.pick_storage_shard(expire: true)
+    Gitlab::CurrentSettings.expire_current_application_settings if expire
+    Gitlab::CurrentSettings.pick_repository_storage
+  end
+
   private
 
   # TODO Genericize finder, later split this on finders by Ref or Oid
@@ -1181,17 +1171,13 @@ class Repository
   end
 
   def tags_sorted_by_committed_date
-    tags.sort_by do |tag|
-      # Annotated tags can point to any object (e.g. a blob), but generally
-      # tags point to a commit. If we don't have a commit, then just default
-      # to putting the tag at the end of the list.
-      target = tag.dereferenced_target
+    # Annotated tags can point to any object (e.g. a blob), but generally
+    # tags point to a commit. If we don't have a commit, then just default
+    # to putting the tag at the end of the list.
+    default = Time.current
 
-      if target
-        target.committed_date
-      else
-        Time.current
-      end
+    tags.sort_by do |tag|
+      tag.dereferenced_target&.committed_date || default
     end
   end
 

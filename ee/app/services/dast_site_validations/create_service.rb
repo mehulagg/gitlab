@@ -8,6 +8,10 @@ module DastSiteValidations
 
       dast_site_validation = create_validation!
 
+      return ServiceResponse.error(message: 'Site does not exist for profile') unless dast_site_validation.dast_site
+
+      associate_dast_site!(dast_site_validation)
+
       perform_async_validation(dast_site_validation)
     rescue ActiveRecord::RecordInvalid => err
       ServiceResponse.error(message: err.record.errors.full_messages)
@@ -19,7 +23,6 @@ module DastSiteValidations
 
     def allowed?
       container.feature_available?(:security_on_demand_scans) &&
-        Feature.enabled?(:security_on_demand_scans_site_validation, container) &&
         dast_site_token.project == container
     end
 
@@ -41,6 +44,10 @@ module DastSiteValidations
 
     def url_base
       @url_base ||= DastSiteValidation.get_normalized_url_base(dast_site_token.url)
+    end
+
+    def associate_dast_site!(dast_site_validation)
+      dast_site_validation.dast_site.update!(dast_site_validation_id: dast_site_validation.id)
     end
 
     def find_latest_successful_dast_site_validation

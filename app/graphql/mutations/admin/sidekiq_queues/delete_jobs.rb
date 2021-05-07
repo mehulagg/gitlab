@@ -8,7 +8,7 @@ module Mutations
 
         ADMIN_MESSAGE = 'You must be an admin to use this mutation'
 
-        Labkit::Context::KNOWN_KEYS.each do |key|
+        Gitlab::ApplicationContext::KNOWN_KEYS.each do |key|
           argument key,
                    GraphQL::STRING_TYPE,
                    required: false,
@@ -18,12 +18,12 @@ module Mutations
         argument :queue_name,
                  GraphQL::STRING_TYPE,
                  required: true,
-                 description: 'The name of the queue to delete jobs from'
+                 description: 'The name of the queue to delete jobs from.'
 
         field :result,
               Types::Admin::SidekiqQueues::DeleteJobsResponseType,
               null: true,
-              description: 'Information about the status of the deletion request'
+              description: 'Information about the status of the deletion request.'
 
         def ready?(**args)
           unless current_user&.admin?
@@ -33,9 +33,9 @@ module Mutations
           super
         end
 
-        def resolve(args)
+        def resolve(queue_name:, **args)
           {
-            result: Gitlab::SidekiqQueue.new(args[:queue_name]).drop_jobs!(args, timeout: 30),
+            result: Gitlab::SidekiqQueue.new(queue_name).drop_jobs!(args, timeout: 30),
             errors: []
           }
         rescue Gitlab::SidekiqQueue::NoMetadataError
@@ -44,7 +44,7 @@ module Mutations
             errors: ['No metadata provided']
           }
         rescue Gitlab::SidekiqQueue::InvalidQueueError
-          raise Gitlab::Graphql::Errors::ResourceNotAvailable, "Queue #{args[:queue_name]} not found"
+          raise Gitlab::Graphql::Errors::ResourceNotAvailable, "Queue #{queue_name} not found"
         end
       end
     end

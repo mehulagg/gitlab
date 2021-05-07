@@ -1,10 +1,10 @@
 ---
 stage: Growth
-group: Product Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Product Intelligence
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Product Analytics **(CORE)**
+# Product Analytics **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225167) in GitLab 13.3.
 > - It's deployed behind a feature flag, disabled by default.
@@ -70,7 +70,7 @@ database from growing too quickly.
 
 Product Analytics stores events are stored in GitLab database.
 
-CAUTION: **Caution:**
+WARNING:
 This data storage is experimental, and GitLab is likely to remove this data during
 future development.
 

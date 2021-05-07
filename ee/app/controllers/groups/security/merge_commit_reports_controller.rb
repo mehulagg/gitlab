@@ -7,15 +7,21 @@ class Groups::Security::MergeCommitReportsController < Groups::ApplicationContro
   feature_category :compliance_management
 
   def index
-    csv_data = MergeCommits::ExportCsvService.new(current_user, group).csv_data
+    response = MergeCommits::ExportCsvService.new(current_user, group, filter_params).csv_data
 
     respond_to do |format|
       format.csv do
-        send_data(
-          csv_data,
-          type: 'text/csv; charset=utf-8; header=present',
-          filename: merge_commits_csv_filename
-        )
+        if response&.success?
+          send_data(
+            response.payload,
+            type: 'text/csv; charset=utf-8; header=present',
+            filename: merge_commits_csv_filename
+          )
+        else
+          flash[:alert] = _('An error occurred while trying to generate the report. Please try again later.')
+
+          redirect_to group_security_compliance_dashboard_path(group)
+        end
       end
     end
   end
@@ -24,5 +30,9 @@ class Groups::Security::MergeCommitReportsController < Groups::ApplicationContro
 
   def merge_commits_csv_filename
     "#{group.id}-merge-commits-#{Time.current.to_i}.csv"
+  end
+
+  def filter_params
+    params.permit(:commit_sha)
   end
 end

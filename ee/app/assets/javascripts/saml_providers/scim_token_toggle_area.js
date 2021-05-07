@@ -1,5 +1,5 @@
+import createFlash from '~/flash';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import SCIMTokenService from './scim_token_service';
 
 export default class SCIMTokenToggleArea {
@@ -68,11 +68,13 @@ export default class SCIMTokenToggleArea {
     this.toggleLoading();
 
     return this.fetchNewToken()
-      .then(response => {
+      .then((response) => {
         this.setTokenAndToggleSCIMForm(response.data);
       })
-      .catch(error => {
-        createFlash(error);
+      .catch((error) => {
+        createFlash({
+          message: error,
+        });
         this.toggleLoading();
         this.toggleFormVisibility(container);
 

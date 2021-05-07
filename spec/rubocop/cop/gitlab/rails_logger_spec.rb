@@ -1,38 +1,31 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'rubocop'
-require 'rubocop/rspec/support'
 require_relative '../../../../rubocop/cop/gitlab/rails_logger'
 
-RSpec.describe RuboCop::Cop::Gitlab::RailsLogger, type: :rubocop do
-  include CopHelper
-
+RSpec.describe RuboCop::Cop::Gitlab::RailsLogger do
   subject(:cop) { described_class.new }
 
   described_class::LOG_METHODS.each do |method|
     it "flags the use of Rails.logger.#{method} with a constant receiver" do
-      inspect_source("Rails.logger.#{method}('some error')")
+      node = "Rails.logger.#{method}('some error')"
 
-      expect(cop.offenses.size).to eq(1)
+      expect_offense(<<~CODE, node: node, msg: "Use a structured JSON logger instead of `Rails.logger`. [...]")
+        %{node}
+        ^{node} %{msg}
+      CODE
     end
   end
 
   it 'does not flag the use of Rails.logger with a constant that is not Rails' do
-    inspect_source("AppLogger.error('some error')")
-
-    expect(cop.offenses.size).to eq(0)
+    expect_no_offenses("AppLogger.error('some error')")
   end
 
   it 'does not flag the use of logger with a send receiver' do
-    inspect_source("file_logger.info('important info')")
-
-    expect(cop.offenses.size).to eq(0)
+    expect_no_offenses("file_logger.info('important info')")
   end
 
   it 'does not flag the use of Rails.logger.level' do
-    inspect_source("Rails.logger.level")
-
-    expect(cop.offenses.size).to eq(0)
+    expect_no_offenses("Rails.logger.level")
   end
 end

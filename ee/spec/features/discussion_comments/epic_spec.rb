@@ -14,5 +14,5 @@ RSpec.describe 'Thread Comments Epic', :js do
     visit group_epic_path(epic.group, epic)
   end
 
-  it_behaves_like 'thread comments', 'epic'
+  it_behaves_like 'thread comments for issue, epic and merge request', 'epic'
 end

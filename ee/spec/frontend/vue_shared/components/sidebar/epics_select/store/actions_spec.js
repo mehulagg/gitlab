@@ -1,11 +1,10 @@
 import Api from 'ee/api';
 
-import testAction from 'helpers/vuex_action_helper';
-
-import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 import * as actions from 'ee/vue_shared/components/sidebar/epics_select/store/actions';
 import * as types from 'ee/vue_shared/components/sidebar/epics_select/store/mutation_types';
+import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
 import { noneEpic } from 'ee/vue_shared/constants';
+import testAction from 'helpers/vuex_action_helper';
 import boardsStore from '~/boards/stores/boards_store';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -16,7 +15,7 @@ describe('EpicsSelect', () => {
   describe('store', () => {
     describe('actions', () => {
       let state;
-      const normalizedEpics = mockEpics.map(rawEpic =>
+      const normalizedEpics = mockEpics.map((rawEpic) =>
         convertObjectPropsToCamelCase(Object.assign(rawEpic, { url: rawEpic.web_edit_url }), {
           dropKeys: ['web_edit_url'],
         }),
@@ -27,7 +26,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('setInitialData', () => {
-        it('should set initial data on state', done => {
+        it('should set initial data on state', (done) => {
           const mockInitialConfig = {
             groupId: mockEpic1.group_id,
             issueId: mockIssue.id,
@@ -47,7 +46,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('setIssueId', () => {
-        it('should set `issueId` on state', done => {
+        it('should set `issueId` on state', (done) => {
           const issueId = mockIssue.id;
 
           testAction(
@@ -62,7 +61,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('setSearchQuery', () => {
-        it('should set `searchQuery` param on state', done => {
+        it('should set `searchQuery` param on state', (done) => {
           const searchQuery = 'foo';
 
           testAction(
@@ -77,7 +76,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('setSelectedEpic', () => {
-        it('should set `selectedEpic` param on state', done => {
+        it('should set `selectedEpic` param on state', (done) => {
           testAction(
             actions.setSelectedEpic,
             mockEpic1,
@@ -90,7 +89,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('setSelectedEpicIssueId', () => {
-        it('should set `selectedEpicIssueId` param on state', done => {
+        it('should set `selectedEpicIssueId` param on state', (done) => {
           testAction(
             actions.setSelectedEpicIssueId,
             mockIssue.epic_issue_id,
@@ -103,13 +102,13 @@ describe('EpicsSelect', () => {
       });
 
       describe('requestEpics', () => {
-        it('should set `state.epicsFetchInProgress` to true', done => {
+        it('should set `state.epicsFetchInProgress` to true', (done) => {
           testAction(actions.requestEpics, {}, state, [{ type: types.REQUEST_EPICS }], [], done);
         });
       });
 
       describe('receiveEpicsSuccess', () => {
-        it('should set processed Epics array to `state.epics`', done => {
+        it('should set processed Epics array to `state.epics`', (done) => {
           state.groupId = mockEpic1.group_id;
 
           testAction(
@@ -138,7 +137,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should set `state.epicsFetchInProgress` to false', done => {
+        it('should set `state.epicsFetchInProgress` to false', (done) => {
           testAction(
             actions.receiveEpicsFailure,
             {},
@@ -155,7 +154,7 @@ describe('EpicsSelect', () => {
           state.groupId = mockEpic1.group_id;
         });
 
-        it('should dispatch `requestEpics` & call `Api.groupEpics` and then dispatch `receiveEpicsSuccess` on request success', done => {
+        it('should dispatch `requestEpics` & call `Api.groupEpics` and then dispatch `receiveEpicsSuccess` on request success', (done) => {
           jest.spyOn(Api, 'groupEpics').mockReturnValue(
             Promise.resolve({
               data: mockEpics,
@@ -180,7 +179,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should dispatch `requestEpics` & call `Api.groupEpics` and then dispatch `receiveEpicsFailure` on request failure', done => {
+        it('should dispatch `requestEpics` & call `Api.groupEpics` and then dispatch `receiveEpicsFailure` on request failure', (done) => {
           jest.spyOn(Api, 'groupEpics').mockReturnValue(Promise.reject());
 
           testAction(
@@ -225,7 +224,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('requestIssueUpdate', () => {
-        it('should set `state.epicSelectInProgress` to true', done => {
+        it('should set `state.epicSelectInProgress` to true', (done) => {
           testAction(
             actions.requestIssueUpdate,
             {},
@@ -238,7 +237,7 @@ describe('EpicsSelect', () => {
       });
 
       describe('receiveIssueUpdateSuccess', () => {
-        it('should set updated selectedEpic with passed Epic instance to state when payload has matching Epic and Issue IDs', done => {
+        it('should set updated selectedEpic with passed Epic instance to state when payload has matching Epic and Issue IDs', (done) => {
           state.issueId = mockIssue.id;
 
           testAction(
@@ -262,7 +261,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should update the epic associated with the issue in BoardsStore if the update happened in Boards', done => {
+        it('should update the epic associated with the issue in BoardsStore if the update happened in Boards', (done) => {
           boardsStore.detail.issue.updateEpic = jest.fn(() => {});
           state.issueId = mockIssue.id;
           const mockApiData = { ...mockAssignRemoveRes };
@@ -291,7 +290,7 @@ describe('EpicsSelect', () => {
           expect(boardsStore.detail.issue.updateEpic).toHaveBeenCalled();
         });
 
-        it('should set updated selectedEpic with noneEpic to state when payload has matching Epic and Issue IDs and isRemoval param is true', done => {
+        it('should set updated selectedEpic with noneEpic to state when payload has matching Epic and Issue IDs and isRemoval param is true', (done) => {
           state.issueId = mockIssue.id;
 
           testAction(
@@ -316,7 +315,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should not do any mutation to the state whe payload does not have matching Epic and Issue IDs', done => {
+        it('should not do any mutation to the state whe payload does not have matching Epic and Issue IDs', (done) => {
           testAction(
             actions.receiveIssueUpdateSuccess,
             {
@@ -350,7 +349,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should set `state.epicSelectInProgress` to false', done => {
+        it('should set `state.epicSelectInProgress` to false', (done) => {
           testAction(
             actions.receiveIssueUpdateFailure,
             {},
@@ -367,7 +366,7 @@ describe('EpicsSelect', () => {
           state.issueId = mockIssue.id;
         });
 
-        it('should dispatch `requestIssueUpdate` & call `Api.addEpicIssue` and then dispatch `receiveIssueUpdateSuccess` on request success', done => {
+        it('should dispatch `requestIssueUpdate` & call `Api.addEpicIssue` and then dispatch `receiveIssueUpdateSuccess` on request success', (done) => {
           jest.spyOn(Api, 'addEpicIssue').mockReturnValue(
             Promise.resolve({
               data: mockAssignRemoveRes,
@@ -392,7 +391,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should dispatch `requestIssueUpdate` & call `Api.addEpicIssue` and then dispatch `receiveIssueUpdateFailure` on request failure', done => {
+        it('should dispatch `requestIssueUpdate` & call `Api.addEpicIssue` and then dispatch `receiveIssueUpdateFailure` on request failure', (done) => {
           jest.spyOn(Api, 'addEpicIssue').mockReturnValue(Promise.reject());
 
           testAction(
@@ -441,7 +440,7 @@ describe('EpicsSelect', () => {
           state.selectedEpicIssueId = mockIssue.epic_issue_id;
         });
 
-        it('should dispatch `requestIssueUpdate` & call `Api.removeEpicIssue` and then dispatch `receiveIssueUpdateSuccess` on request success', done => {
+        it('should dispatch `requestIssueUpdate` & call `Api.removeEpicIssue` and then dispatch `receiveIssueUpdateSuccess` on request success', (done) => {
           jest.spyOn(Api, 'removeEpicIssue').mockReturnValue(
             Promise.resolve({
               data: mockAssignRemoveRes,
@@ -466,7 +465,7 @@ describe('EpicsSelect', () => {
           );
         });
 
-        it('should dispatch `requestIssueUpdate` & call `Api.removeEpicIssue` and then dispatch `receiveIssueUpdateFailure` on request failure', done => {
+        it('should dispatch `requestIssueUpdate` & call `Api.removeEpicIssue` and then dispatch `receiveIssueUpdateFailure` on request failure', (done) => {
           jest.spyOn(Api, 'removeEpicIssue').mockReturnValue(Promise.reject());
 
           testAction(

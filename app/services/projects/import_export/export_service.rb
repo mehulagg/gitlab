@@ -86,11 +86,11 @@ module Projects
       end
 
       def repo_saver
-        Gitlab::ImportExport::RepoSaver.new(project: project, shared: shared)
+        Gitlab::ImportExport::RepoSaver.new(exportable: project, shared: shared)
       end
 
       def wiki_repo_saver
-        Gitlab::ImportExport::WikiRepoSaver.new(project: project, shared: shared)
+        Gitlab::ImportExport::WikiRepoSaver.new(exportable: project, shared: shared)
       end
 
       def lfs_saver
@@ -102,7 +102,7 @@ module Projects
       end
 
       def design_repo_saver
-        Gitlab::ImportExport::DesignRepoSaver.new(project: project, shared: shared)
+        Gitlab::ImportExport::DesignRepoSaver.new(exportable: project, shared: shared)
       end
 
       def cleanup
@@ -112,7 +112,7 @@ module Projects
       def notify_error!
         notify_error
 
-        raise Gitlab::ImportExport::Error.new(shared.errors.to_sentence)
+        raise Gitlab::ImportExport::Error, shared.errors.to_sentence
       end
 
       def notify_success

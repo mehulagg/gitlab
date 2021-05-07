@@ -1,8 +1,11 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
-# Protected paths **(CORE ONLY)**
+# Protected paths **(FREE SELF)**
 
 Rate limiting is a common technique used to improve the security and durability
 of a web application. For more details, see
@@ -25,11 +28,7 @@ GitLab rate limits the following paths with Rack Attack by default:
 GitLab responds with HTTP status code `429` to POST requests at protected paths
 that exceed 10 requests per minute per IP address.
 
-This header is included in responses to blocked requests:
-
-```plaintext
-Retry-After: 60
-```
+See [User and IP rate limits](../../admin_area/settings/user_and_ip_rate_limits.md#response-headers) for the headers responded to blocked requests.
 
 For example, the following are limited to a maximum 10 requests per minute:
 

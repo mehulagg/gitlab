@@ -10,12 +10,10 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
 
     let(:created_at) { 2.weeks.ago }
 
-    subject(:parser) { described_class.new }
-
     context "when parsing valid reports" do
-      where(:report_format, :scanner_length) do
-        :sast               | 4
-        :sast_deprecated    | 3
+      where(:report_format, :report_version, :scanner_length, :finding_length, :identifier_length, :file_path, :line) do
+        :sast               | '14.0.0' | 1 | 5  | 6  | 'groovy/src/main/java/com/gitlab/security_products/tests/App.groovy' | 47
+        :sast_deprecated    | '1.2'    | 3 | 33 | 17 | 'python/hardcoded/hardcoded-tmp.py'                                  | 1
       end
 
       with_them do
@@ -23,14 +21,12 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
         let(:artifact) { create(:ee_ci_job_artifact, report_format) }
 
         before do
-          artifact.each_blob do |blob|
-            parser.parse!(blob, report)
-          end
+          artifact.each_blob { |blob| described_class.parse!(blob, report) }
         end
 
         it "parses all identifiers and findings" do
-          expect(report.findings.length).to eq(33)
-          expect(report.identifiers.length).to eq(17)
+          expect(report.findings.length).to eq(finding_length)
+          expect(report.identifiers.length).to eq(identifier_length)
           expect(report.scanners.length).to eq(scanner_length)
         end
 
@@ -39,16 +35,14 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
 
           expect(location).to be_a(::Gitlab::Ci::Reports::Security::Locations::Sast)
           expect(location).to have_attributes(
-            file_path: 'python/hardcoded/hardcoded-tmp.py',
-            start_line: 1,
-            end_line: 1,
-            class_name: nil,
-            method_name: nil
+            file_path: file_path,
+            end_line: line,
+            start_line: line
           )
         end
 
         it "generates expected metadata_version" do
-          expect(report.findings.first.metadata_version).to eq('1.2')
+          expect(report.findings.first.metadata_version).to eq(report_version)
         end
       end
     end
@@ -57,7 +51,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
       let(:report) { Gitlab::Ci::Reports::Security::Report.new('sast', pipeline, created_at) }
       let(:blob) { Gitlab::Json.generate({}) }
 
-      it { expect(parser.parse!(blob, report)).to be_empty }
+      it { expect(described_class.parse!(blob, report)).to be_empty }
     end
   end
 end

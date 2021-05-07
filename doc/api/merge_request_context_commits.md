@@ -1,11 +1,11 @@
 ---
 stage: Create
-group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+group: Code Review
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
-# Merge request context commits API
+# Merge request context commits API **(FREE)**
 
 ## List MR context commits
 

@@ -12,12 +12,14 @@
     "started_at",
     "finished_at",
     "duration",
+    "queued_duration",
     "user",
     "commit",
     "pipeline",
     "web_url",
     "artifacts",
     "artifacts_expire_at",
+    "tag_list",
     "runner"
   ],
   "properties": {
@@ -33,6 +35,7 @@
     "started_at": { "type": ["null", "string"] },
     "finished_at": { "type": ["null", "string"] },
     "duration": { "type": ["null", "number"] },
+    "queued_duration": { "type": ["null", "number"] },
     "user": { "$ref": "user/basic.json" },
     "commit": {
       "oneOf": [
@@ -53,6 +56,9 @@
       ]
     },
     "artifacts_expire_at": { "type": ["null", "string"] },
+    "tag_list": {
+      "type": "array"
+    },
     "runner": {
       "oneOf": [
         { "type": "null" },

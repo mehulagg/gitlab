@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'CI Lint', :js do
+RSpec.describe 'CI Lint', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297782' do
   include Spec::Support::Helpers::Features::EditorLiteSpecHelpers
 
   let(:project) { create(:project, :repository) }
@@ -11,7 +11,6 @@ RSpec.describe 'CI Lint', :js do
   let(:content_selector) { '.content .view-lines' }
 
   before do
-    stub_feature_flags(ci_lint_vue: false)
     project.add_developer(user)
     sign_in(user)
 
@@ -26,7 +25,6 @@ RSpec.describe 'CI Lint', :js do
   describe 'YAML parsing' do
     shared_examples 'validates the YAML' do
       before do
-        stub_feature_flags(ci_lint_vue: false)
         click_on 'Validate'
       end
 
@@ -36,7 +34,7 @@ RSpec.describe 'CI Lint', :js do
         end
 
         it 'parses Yaml and displays the jobs' do
-          expect(page).to have_content('Status: syntax is correct')
+          expect(page).to have_content('Status: Syntax is correct')
 
           within "table" do
             aggregate_failures do
@@ -53,7 +51,7 @@ RSpec.describe 'CI Lint', :js do
         let(:yaml_content) { 'value: cannot have :' }
 
         it 'displays information about an error' do
-          expect(page).to have_content('Status: syntax is incorrect')
+          expect(page).to have_content('Status: Syntax is incorrect')
           expect(page).to have_selector(content_selector, text: yaml_content)
         end
       end
@@ -68,14 +66,6 @@ RSpec.describe 'CI Lint', :js do
 
       it_behaves_like 'validates the YAML'
     end
-
-    describe 'YAML revalidate' do
-      let(:yaml_content) { 'my yaml content' }
-
-      it 'loads previous YAML content after validation' do
-        expect(page).to have_field('content', with: 'my yaml content', visible: false, type: 'textarea')
-      end
-    end
   end
 
   describe 'YAML clearing' do
@@ -89,7 +79,7 @@ RSpec.describe 'CI Lint', :js do
       end
 
       it 'YAML content is cleared' do
-        expect(page).to have_field('content', with: '', visible: false, type: 'textarea')
+        expect(page).to have_field(class: 'inputarea', with: '', visible: false, type: 'textarea')
       end
     end
   end

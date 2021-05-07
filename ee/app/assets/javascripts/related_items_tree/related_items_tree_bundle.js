@@ -3,11 +3,10 @@ import Vuex from 'vuex';
 
 import { parseBoolean } from '~/lib/utils/common_utils';
 
-import createStore from './store';
-
 import RelatedItemsTreeApp from './components/related_items_tree_app.vue';
-import TreeRoot from './components/tree_root.vue';
 import TreeItem from './components/tree_item.vue';
+import TreeRoot from './components/tree_root.vue';
+import createStore from './store';
 
 Vue.use(Vuex);
 
@@ -21,7 +20,10 @@ export default () => {
   const {
     id,
     iid,
+    numericalId,
     fullPath,
+    groupId,
+    groupName,
     autoCompleteEpics,
     autoCompleteIssues,
     userSignedIn,
@@ -30,8 +32,8 @@ export default () => {
   } = el.dataset;
   const initialData = JSON.parse(el.dataset.initial);
 
-  Vue.component('tree-root', TreeRoot);
-  Vue.component('tree-item', TreeItem);
+  Vue.component('TreeRoot', TreeRoot);
+  Vue.component('TreeItem', TreeItem);
 
   return new Vue({
     el,
@@ -40,8 +42,11 @@ export default () => {
     created() {
       this.setInitialParentItem({
         fullPath,
+        numericalId: parseInt(numericalId, 10),
+        groupId: parseInt(groupId, 10),
+        groupName,
         id,
-        iid: Number(iid),
+        iid: parseInt(iid, 10),
         title: initialData.initialTitleText,
         confidential: initialData.confidential,
         reference: `${initialData.fullPath}${initialData.issuableRef}`,
@@ -65,6 +70,6 @@ export default () => {
     methods: {
       ...Vuex.mapActions(['setInitialParentItem', 'setInitialConfig']),
     },
-    render: createElement => createElement('related-items-tree-app'),
+    render: (createElement) => createElement('related-items-tree-app'),
   });
 };

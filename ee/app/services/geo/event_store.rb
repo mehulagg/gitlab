@@ -23,6 +23,13 @@ module Geo
 
     class << self
       attr_accessor :event_type
+
+      def can_create_event?
+        return false unless Gitlab::Geo.primary?
+        return false unless Gitlab::Geo.secondary_nodes.any? # no need to create an event if no one is listening
+
+        true
+      end
     end
 
     attr_reader :project, :params
@@ -33,8 +40,7 @@ module Geo
     end
 
     def create!
-      return unless Gitlab::Geo.primary?
-      return unless Gitlab::Geo.secondary_nodes.any? # no need to create an event if no one is listening
+      return unless self.class.can_create_event?
 
       event = build_event
       event.validate!

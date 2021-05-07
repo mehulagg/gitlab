@@ -6,26 +6,6 @@ RSpec.describe MergeRequestsHelper do
   include ActionView::Helpers::UrlHelper
   include ProjectForksHelper
 
-  describe 'ci_build_details_path' do
-    let(:project) { create(:project) }
-    let(:merge_request) { MergeRequest.new }
-    let(:ci_service) { CiService.new }
-    let(:last_commit) { Ci::Pipeline.new({}) }
-
-    before do
-      allow(merge_request).to receive(:source_project).and_return(project)
-      allow(merge_request).to receive(:last_commit).and_return(last_commit)
-      allow(project).to receive(:ci_service).and_return(ci_service)
-      allow(last_commit).to receive(:sha).and_return('12d65c')
-    end
-
-    it 'does not include api credentials in a link' do
-      allow(ci_service)
-        .to receive(:build_page).and_return("http://secretuser:secretpass@jenkins.example.com:8888/job/test1/scm/bySHA1/12d65c")
-      expect(helper.ci_build_details_path(merge_request)).not_to match("secret")
-    end
-  end
-
   describe '#state_name_with_icon' do
     using RSpec::Parameterized::TableSyntax
 
@@ -84,6 +64,82 @@ RSpec.describe MergeRequestsHelper do
 
       it 'removes the data-toggle attributes' do
         is_expected.not_to match(/data-toggle="tabvue"/)
+      end
+    end
+  end
+
+  describe '#user_merge_requests_counts' do
+    let(:user) do
+      double(
+        assigned_open_merge_requests_count: 1,
+        review_requested_open_merge_requests_count: 2
+      )
+    end
+
+    subject { helper.user_merge_requests_counts }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    it "returns assigned, review requested and total merge request counts" do
+      expect(subject).to eq(
+        assigned: user.assigned_open_merge_requests_count,
+        review_requested: user.review_requested_open_merge_requests_count,
+        total: user.assigned_open_merge_requests_count + user.review_requested_open_merge_requests_count
+      )
+    end
+  end
+
+  describe '#reviewers_label' do
+    let(:merge_request) { build_stubbed(:merge_request) }
+    let(:reviewer1) { build_stubbed(:user, name: 'Jane Doe') }
+    let(:reviewer2) { build_stubbed(:user, name: 'John Doe') }
+
+    before do
+      allow(merge_request).to receive(:reviewers).and_return(reviewers)
+    end
+
+    context 'when multiple reviewers exist' do
+      let(:reviewers) { [reviewer1, reviewer2] }
+
+      it 'returns reviewer label with reviewer names' do
+        expect(helper.reviewers_label(merge_request)).to eq("Reviewers: Jane Doe and John Doe")
+      end
+
+      it 'returns reviewer label only with include_value: false' do
+        expect(helper.reviewers_label(merge_request, include_value: false)).to eq("Reviewers")
+      end
+
+      context 'when the name contains a URL' do
+        let(:reviewers) { [build_stubbed(:user, name: 'www.gitlab.com')] }
+
+        it 'returns sanitized name' do
+          expect(helper.reviewers_label(merge_request)).to eq("Reviewer: www_gitlab_com")
+        end
+      end
+    end
+
+    context 'when one reviewer exists' do
+      let(:reviewers) { [reviewer1] }
+
+      it 'returns reviewer label with no names' do
+        expect(helper.reviewers_label(merge_request)).to eq("Reviewer: Jane Doe")
+      end
+
+      it 'returns reviewer label only with include_value: false' do
+        expect(helper.reviewers_label(merge_request, include_value: false)).to eq("Reviewer")
+      end
+    end
+
+    context 'when no reviewers exist' do
+      let(:reviewers) { [] }
+
+      it 'returns reviewer label with no names' do
+        expect(helper.reviewers_label(merge_request)).to eq("Reviewers: ")
+      end
+      it 'returns reviewer label only with include_value: false' do
+        expect(helper.reviewers_label(merge_request, include_value: false)).to eq("Reviewers")
       end
     end
   end

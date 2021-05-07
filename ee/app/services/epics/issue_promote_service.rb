@@ -4,9 +4,9 @@ module Epics
   class IssuePromoteService < ::Issuable::Clone::BaseService
     PromoteError = Class.new(StandardError)
 
-    def execute(issue)
+    def execute(issue, epic_group = nil)
       @issue = issue
-      @parent_group = issue.project.group
+      @parent_group = epic_group || issue.project.group
 
       validate_promotion!
 
@@ -32,13 +32,10 @@ module Epics
     end
 
     def track_event
-      ::Gitlab::Tracking.event(
-        'epics', 'promote', property: 'issue_id', value: original_entity.id
-      )
+      ::Gitlab::Tracking.event('epics', 'promote', property: 'issue_id', value: original_entity.id,
+                               project: issue.project, user: current_user, namespace: parent_group, weight: issue.weight)
 
-      ::ProductAnalytics::Tracker.event(
-        'epics', 'promote', property: 'issue_id', value: original_entity.id
-      )
+      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_issue_promoted_to_epic(author: current_user)
     end
 
     def create_new_entity

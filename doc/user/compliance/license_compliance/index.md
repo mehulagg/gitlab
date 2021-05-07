@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Composition Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # License Compliance **(ULTIMATE)**
@@ -14,33 +14,33 @@ project's dependencies for their licenses. You can then decide whether to allow 
 each license. For example, if your application uses an external (open source) library whose license
 is incompatible with yours, then you can deny the use of that license.
 
-You can take advantage of License Compliance by either [including the job](#configuration)
-in your existing `.gitlab-ci.yml` file or by implicitly using
-[Auto License Compliance](../../../topics/autodevops/stages.md#auto-license-compliance)
-that is provided by [Auto DevOps](../../../topics/autodevops/index.md).
+You can take advantage of License Compliance by either:
 
-GitLab checks the License Compliance report, compares the licenses between the
-source and target branches, and shows the information right on the merge request.
-Denied licenses will be clearly visible with an `x` red icon next to them
-as well as new licenses which need a decision from you. In addition, you can
-[manually allow or deny](#policies)
-licenses in your project's license compliance policy section. If GitLab detects a denied license
-in a new commit, GitLab blocks any merge requests containing that commit and instructs the developer
-to remove the license.
+- [Including the job](#configuration)
+  in your existing `.gitlab-ci.yml` file.
+- Implicitly using
+  [Auto License Compliance](../../../topics/autodevops/stages.md#auto-license-compliance),
+  provided by [Auto DevOps](../../../topics/autodevops/index.md).
 
-NOTE: **Note:**
+The [License Finder](https://github.com/pivotal/LicenseFinder) scan tool runs as part of the CI/CD
+pipeline, and detects the licenses in use. GitLab checks the License Compliance report, compares the
+licenses between the source and target branches, and shows the information right on the merge
+request. Denied licenses are indicated by a `x` red icon next to them as well as new licenses that
+need a decision from you. In addition, you can [manually allow or deny](#policies) licenses in your
+project's license compliance policy section. If a denied license is detected in a new commit,
+GitLab blocks any merge requests containing that commit and instructs the developer to remove the
+license.
+
+NOTE:
 If the license compliance report doesn't have anything to compare to, no information
-will be displayed in the merge request area. That is the case when you add the
+is displayed in the merge request area. That is the case when you add the
 `license_scanning` job in your `.gitlab-ci.yml` for the first time.
-Consecutive merge requests will have something to compare to and the license
-compliance report will be shown properly.
+Consecutive merge requests have something to compare to and the license
+compliance report is shown properly.
 
 ![License Compliance Widget](img/license_compliance_v13_0.png)
 
-If you are a project or group Maintainer, you can click on a license to be given
-the choice to allow it or deny it.
-
-![License approval decision](img/license_compliance_decision_v13_0.png)
+You can click on a license to see more information.
 
 When GitLab detects a **Denied** license, you can view it in the [license list](#license-list).
 
@@ -54,36 +54,33 @@ You can view and modify existing policies from the [policies](#policies) tab.
 
 The following languages and package managers are supported.
 
-| Language   | Package managers | Notes | Scan Tool |
-|------------|------------------|-------|-----------|
-| JavaScript | [Bower](https://bower.io/), [npm](https://www.npmjs.com/) |  | [License Finder](https://github.com/pivotal/LicenseFinder) |
-| Go         | [Godep](https://github.com/tools/godep), [go mod](https://github.com/golang/go/wiki/Modules) |  | [License Finder](https://github.com/pivotal/LicenseFinder) |
-| Java       | [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) |  | [License Finder](https://github.com/pivotal/LicenseFinder) |
-| .NET       | [Nuget](https://www.nuget.org/) | The .NET Framework is supported via the [mono project](https://www.mono-project.com/). There are, however, some limitations. The scanner doesn't support Windows-specific dependencies and doesn't report dependencies of your project's listed dependencies. Also, the scanner always marks detected licenses for all dependencies as `unknown`. | [License Finder](https://github.com/pivotal/LicenseFinder) |
-| Python     | [pip](https://pip.pypa.io/en/stable/) | Python is supported through [requirements.txt](https://pip.pypa.io/en/stable/user_guide/#requirements-files) and [Pipfile.lock](https://github.com/pypa/pipfile#pipfilelock). | [License Finder](https://github.com/pivotal/LicenseFinder) |
-| Ruby       | [gem](https://rubygems.org/) |  | [License Finder](https://github.com/pivotal/LicenseFinder)|
-| Objective-C, Swift | [Carthage](https://github.com/Carthage/Carthage) |  | [License Finder](https://github.com/pivotal/LicenseFinder) |
+Java 8 and Gradle 1.x projects are not supported. The minimum supported version of Maven is 3.2.5.
 
-NOTE: **Note:**
-Java 8 and Gradle 1.x projects are not supported.
-The minimum supported version of Maven is 3.2.5.
+| Language   | Package managers                                                                             | Notes |
+|------------|----------------------------------------------------------------------------------------------|-------|
+| JavaScript | [Bower](https://bower.io/), [npm](https://www.npmjs.com/)                                    |       |
+| Go         | [Godep](https://github.com/tools/godep), [go mod](https://github.com/golang/go/wiki/Modules) |       |
+| Java       | [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/)                            |       |
+| .NET       | [NuGet](https://www.nuget.org/)                                                              | The .NET Framework is supported via the [mono project](https://www.mono-project.com/). There are, however, some limitations. The scanner doesn't support Windows-specific dependencies and doesn't report dependencies of your project's listed dependencies. Also, the scanner always marks detected licenses for all dependencies as `unknown`. |
+| Python     | [pip](https://pip.pypa.io/en/stable/)                                                        | Python is supported through [requirements.txt](https://pip.pypa.io/en/stable/user_guide/#requirements-files) and [Pipfile.lock](https://github.com/pypa/pipfile#pipfilelock). |
+| Ruby       | [gem](https://rubygems.org/) |  |
 
 ### Experimental support
 
-The following languages and package managers are [supported experimentally](https://github.com/pivotal/LicenseFinder#experimental-project-types),
-which means that the reported licenses might be incomplete or inaccurate.
+The following languages and package managers are [supported experimentally](https://github.com/pivotal/LicenseFinder#experimental-project-types).
+The reported licenses might be incomplete or inaccurate.
 
-| Language   | Package managers                                                  | Scan Tool                                                |
-|------------|-------------------------------------------------------------------|----------------------------------------------------------|
-| JavaScript | [Yarn](https://yarnpkg.com/)|[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Go         | go get, gvt, glide, dep, trash, govendor |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Erlang     | [Rebar](https://www.rebar3.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Objective-C, Swift | [CocoaPods](https://cocoapods.org/) v0.39 and below |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Elixir     | [Mix](https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| C++/C      | [Conan](https://conan.io/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Scala      | [sbt](https://www.scala-sbt.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| Rust       | [Cargo](https://crates.io) |[License Finder](https://github.com/pivotal/LicenseFinder)|
-| PHP        | [Composer](https://getcomposer.org/) |[License Finder](https://github.com/pivotal/LicenseFinder)|
+| Language   | Package managers                                                                                              |
+|------------|---------------------------------------------------------------------------------------------------------------|
+| JavaScript | [Yarn](https://yarnpkg.com/)                                                                                  |
+| Go         | `go get`, `gvt`, `glide`, `dep`, `trash`, `govendor`                                                          |
+| Erlang     | [Rebar](https://www.rebar3.org/)                                                                              |
+| Objective-C, Swift | [Carthage](https://github.com/Carthage/Carthage), [CocoaPods](https://cocoapods.org/) v0.39 and below |
+| Elixir     | [Mix](https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html)                               |
+| C++/C      | [Conan](https://conan.io/)                                                                                    |
+| Scala      | [sbt](https://www.scala-sbt.org/)                                                                             |
+| Rust       | [Cargo](https://crates.io)                                                                                   |
+| PHP        | [Composer](https://getcomposer.org/)                                                                          |
 
 ## Requirements
 
@@ -112,19 +109,19 @@ include:
 The included template creates a `license_scanning` job in your CI/CD pipeline and scans your
 dependencies to find their licenses.
 
-NOTE: **Note:**
+NOTE:
 Before GitLab 12.8, the `license_scanning` job was named `license_management`. GitLab 13.0 removes
 the `license_management` job, so you must migrate to the `license_scanning` job and use the new
 `License-Scanning.gitlab-ci.yml` template.
 
-The results will be saved as a
-[License Compliance report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportslicense_scanning)
+The results are saved as a
+[License Compliance report artifact](../../../ci/yaml/README.md#artifactsreportslicense_scanning)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest License Compliance artifact available. Behind the scenes, the
 [GitLab License Compliance Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/license-finder)
 is used to detect the languages/frameworks and in turn analyzes the licenses.
 
-The License Compliance settings can be changed through [environment variables](#available-variables) by using the
+The License Compliance settings can be changed through [CI/CD variables](#available-variables) by using the
 [`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
 
 ### When License Compliance runs
@@ -134,20 +131,20 @@ wait for other stages to complete.
 
 ### Available variables
 
-License Compliance can be configured using environment variables.
+License Compliance can be configured using CI/CD variables.
 
-| Environment variable        | Required | Description |
+| CI/CD variable              | Required | Description |
 |-----------------------------|----------|-------------|
-| `ADDITIONAL_CA_CERT_BUNDLE` | no       | Bundle of trusted CA certificates (currently supported in Pip, Pipenv, Maven, Gradle, Yarn, and NPM projects). |
+| `ADDITIONAL_CA_CERT_BUNDLE` | no       | Bundle of trusted CA certificates (currently supported in Pip, Pipenv, Maven, Gradle, Yarn, and npm projects). |
 | `ASDF_JAVA_VERSION`         | no       | Version of Java to use for the scan. |
 | `ASDF_NODEJS_VERSION`       | no       | Version of Node.js to use for the scan. |
 | `ASDF_PYTHON_VERSION`       | no       | Version of Python to use for the scan. |
 | `ASDF_RUBY_VERSION`         | no       | Version of Ruby to use for the scan. |
-| `GRADLE_CLI_OPTS`           | no       | Additional arguments for the gradle executable. If not supplied, defaults to `--exclude-task=test`. |
-| `LICENSE_FINDER_CLI_OPTS`   | no       | Additional arguments for the `license_finder` executable. For example, if your project has both Golang and Ruby code stored in different directories and you want to only scan the Ruby code, you can update your `.gitlab-ci-yml` template to specify which project directories to scan, like `LICENSE_FINDER_CLI_OPTS: '--debug --aggregate-paths=. ruby'`. |
+| `GRADLE_CLI_OPTS`           | no       | Additional arguments for the Gradle executable. If not supplied, defaults to `--exclude-task=test`. |
+| `LICENSE_FINDER_CLI_OPTS`   | no       | Additional arguments for the `license_finder` executable. For example, if you have multiple projects in nested directories, you can update your `.gitlab-ci-yml` template to specify a recursive scan, like `LICENSE_FINDER_CLI_OPTS: '--recursive'`. |
 | `LM_JAVA_VERSION`           | no       | Version of Java. If set to `11`, Maven and Gradle use Java 11 instead of Java 8. |
 | `LM_PYTHON_VERSION`         | no       | Version of Python. If set to `3`, dependencies are installed using Python 3 instead of Python 2.7. |
-| `MAVEN_CLI_OPTS`            | no       | Additional arguments for the mvn executable. If not supplied, defaults to `-DskipTests`. |
+| `MAVEN_CLI_OPTS`            | no       | Additional arguments for the `mvn` executable. If not supplied, defaults to `-DskipTests`. |
 | `PIP_INDEX_URL`             | no       | Base URL of Python Package Index (default: `https://pypi.org/simple/`). |
 | `SECURE_ANALYZERS_PREFIX`   | no       | Set the Docker registry base address to download the analyzer from. |
 | `SETUP_CMD`                 | no       | Custom setup for the dependency installation (experimental). |
@@ -160,10 +157,10 @@ The `license_management` image already embeds many auto-detection scripts, langu
 and packages. Nevertheless, it's almost impossible to cover all cases for all projects.
 That's why sometimes it's necessary to install extra packages, or to have extra steps
 in the project automated setup, like the download and installation of a certificate.
-For that, a `LICENSE_MANAGEMENT_SETUP_CMD` environment variable can be passed to the container,
+For that, a `SETUP_CMD` CI/CD variable can be passed to the container,
 with the required commands to run before the license detection.
 
-If present, this variable will override the setup step necessary to install all the packages
+If present, this variable overrides the setup step necessary to install all the packages
 of your application (e.g.: for a project with a `Gemfile`, the setup step could be
 `bundle install`).
 
@@ -174,7 +171,7 @@ include:
   - template: Security/License-Scanning.gitlab-ci.yml
 
 variables:
-  LICENSE_MANAGEMENT_SETUP_CMD: sh my-custom-install-script.sh
+  SETUP_CMD: sh my-custom-install-script.sh
 ```
 
 In this example, `my-custom-install-script.sh` is a shell script at the root
@@ -182,7 +179,7 @@ directory of your project.
 
 ### Overriding the template
 
-CAUTION: **Deprecation:**
+WARNING:
 Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 
@@ -201,7 +198,7 @@ license_scanning:
 
 ### Configuring Maven projects
 
-The License Compliance tool provides a `MAVEN_CLI_OPTS` environment variable which can hold
+The License Compliance tool provides a `MAVEN_CLI_OPTS` CI/CD variable which can hold
 the command line arguments to pass to the `mvn install` command which is executed under the hood.
 Feel free to use it for the customization of Maven execution. For example:
 
@@ -223,12 +220,12 @@ to explicitly add `-DskipTests` to your options.
 If you still need to run tests during `mvn install`, add `-DskipTests=false` to
 `MAVEN_CLI_OPTS`.
 
-#### Using private Maven repos
+#### Using private Maven repositories
 
 If you have a private Maven repository which requires login credentials,
-you can use the `MAVEN_CLI_OPTS` environment variable.
+you can use the `MAVEN_CLI_OPTS` CI/CD variable.
 
-Read more on [how to use private Maven repos](../../application_security/index.md#using-private-maven-repos).
+Read more on [how to use private Maven repositories](../../application_security/index.md#using-private-maven-repositories).
 
 You can also use `MAVEN_CLI_OPTS` to connect to a trusted Maven repository that uses a self-signed
 or internally trusted certificate. For example:
@@ -254,7 +251,7 @@ generate a key store file, see the
 
 License Compliance uses Python 3.8 and pip 19.1 by default.
 If your project requires Python 2, you can switch to Python 2.7 and pip 10.0
-by setting the `LM_PYTHON_VERSION` environment variable to `2`.
+by setting the `LM_PYTHON_VERSION` CI/CD variable to `2`.
 
 ```yaml
 include:
@@ -268,22 +265,22 @@ license_scanning:
 ### Custom root certificates for Python
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables).
 
-#### Using private Python repos
+#### Using private Python repositories
 
-If you have a private Python repository you can use the `PIP_INDEX_URL` [environment variable](#available-variables)
+If you have a private Python repository you can use the `PIP_INDEX_URL` [CI/CD variable](#available-variables)
 to specify its location.
 
-### Configuring NPM projects
+### Configuring npm projects
 
-You can configure NPM projects by using an [`.npmrc`](https://docs.npmjs.com/configuring-npm/npmrc.html)
+You can configure npm projects by using an [`.npmrc`](https://docs.npmjs.com/configuring-npm/npmrc.html/)
 file.
 
-#### Using private NPM registries
+#### Using private npm registries
 
-If you have a private NPM registry you can use the
-[`registry`](https://docs.npmjs.com/using-npm/config#registry)
+If you have a private npm registry you can use the
+[`registry`](https://docs.npmjs.com/using-npm/config/#registry)
 setting to specify its location.
 
 For example:
@@ -292,12 +289,12 @@ For example:
 registry = https://npm.example.com
 ```
 
-#### Custom root certificates for NPM
+#### Custom root certificates for npm
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables).
 
-To disable TLS verification you can provide the [`strict-ssl`](https://docs.npmjs.com/using-npm/config#strict-ssl)
+To disable TLS verification you can provide the [`strict-ssl`](https://docs.npmjs.com/using-npm/config/#strict-ssl)
 setting.
 
 For example:
@@ -326,7 +323,7 @@ npmRegistryServer: "https://npm.example.com"
 #### Custom root certificates for Yarn
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables).
 
 ### Configuring Bower projects
 
@@ -350,7 +347,7 @@ For example:
 #### Custom root certificates for Bower
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables), or by
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables), or by
 specifying a `ca` setting in a [`.bowerrc`](https://bower.io/docs/config/#bowerrc-specification)
 file.
 
@@ -371,9 +368,9 @@ source "https://gems.example.com"
 #### Custom root certificates for Bundler
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables), or by
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables), or by
 specifying a [`BUNDLE_SSL_CA_CERT`](https://bundler.io/v2.0/man/bundle-config.1.html)
-[environment variable](../../../ci/variables/README.md#custom-environment-variables)
+[variable](../../../ci/variables/README.md#custom-cicd-variables)
 in the job definition.
 
 ### Configuring Cargo projects
@@ -395,9 +392,9 @@ my-registry = { index = "https://my-intranet:8080/git/index" }
 
 To supply a custom root certificate to complete TLS verification, do one of the following:
 
-- Use the `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
+- Use the `ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables).
 - Specify a [`CARGO_HTTP_CAINFO`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)
-  [environment variable](../../../ci/variables/README.md#custom-environment-variables)
+  [variable](../../../ci/variables/README.md#custom-cicd-variables)
   in the job definition.
 
 ### Configuring Composer projects
@@ -428,9 +425,9 @@ For example:
 #### Custom root certificates for Composer
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables), or by
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables), or by
 specifying a [`COMPOSER_CAFILE`](https://getcomposer.org/doc/03-cli.md#composer-cafile)
-[environment variable](../../../ci/variables/README.md#custom-environment-variables)
+[variable](../../../ci/variables/README.md#custom-cicd-variables)
 in the job definition.
 
 ### Configuring Conan projects
@@ -444,7 +441,7 @@ documentation for a list of settings that you can apply.
 The `license_scanning` job runs in a [Debian 10](https://www.debian.org/releases/buster/) Docker
 image. The supplied image ships with some build tools such as [CMake](https://cmake.org/) and [GCC](https://gcc.gnu.org/).
 However, not all project types are supported by default. To install additional tools needed to
-compile dependencies, use a [`before_script`](../../../ci/yaml/README.md#before_script-and-after_script)
+compile dependencies, use a [`before_script`](../../../ci/yaml/README.md#before_script)
 to install the necessary build tools using the [`apt`](https://wiki.debian.org/PackageManagementTools)
 package manager. For a comprehensive list, consult [the Conan documentation](https://docs.conan.io/en/latest/introduction.html#all-platforms-all-build-systems-and-compilers).
 
@@ -457,7 +454,7 @@ if a GitLab remote is specified in the `.conan/remotes.json` file.
 To override the default credentials specify a [`CONAN_LOGIN_USERNAME_{REMOTE_NAME}`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-login-username-conan-login-username-remote-name)
 matching the name of the remote specified in the `.conan/remotes.json` file.
 
-NOTE: **Note:**
+NOTE:
 [MSBuild](https://github.com/mono/msbuild#microsoftbuild-msbuild) projects aren't supported. The
 `license_scanning` image ships with [Mono](https://www.mono-project.com/) and [MSBuild](https://github.com/mono/msbuild#microsoftbuild-msbuild).
 Additional setup may be required to build packages for this project configuration.
@@ -493,7 +490,7 @@ example:
 }
 ```
 
-If credentials are required to authenticate then you can configure a [protected variable](../../../ci/variables/README.md#protect-a-custom-variable)
+If credentials are required to authenticate then you can configure a [protected CI/CD variable](../../../ci/variables/README.md#protect-a-cicd-variable)
 following the naming convention described in the [`CONAN_LOGIN_USERNAME` documentation](https://docs.conan.io/en/latest/reference/env_vars.html#conan-login-username-conan-login-username-remote-name).
 
 #### Custom root certificates for Conan
@@ -502,14 +499,14 @@ You can provide custom certificates by adding a `.conan/cacert.pem` file to the 
 setting [`CA_CERT_PATH`](https://docs.conan.io/en/latest/reference/env_vars.html#conan-cacert-path)
 to `.conan/cacert.pem`.
 
-If you specify the `ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables), this
+If you specify the `ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables), this
 variable's X.509 certificates are installed in the Docker image's default trust store and Conan is
 configured to use this as the default `CA_CERT_PATH`.
 
 ### Configuring Go projects
 
 To configure [Go modules](https://github.com/golang/go/wiki/Modules)
-based projects, specify [environment variables](https://golang.org/pkg/cmd/go/#hdr-Environment_variables)
+based projects, specify [CI/CD variables](https://golang.org/pkg/cmd/go/#hdr-Environment_variables)
 in the `license_scanning` job's [variables](#available-variables) section in `.gitlab-ci.yml`.
 
 If a project has [vendored](https://golang.org/pkg/cmd/go/#hdr-Vendor_Directories) its modules,
@@ -559,18 +556,18 @@ For example:
 #### Custom root certificates for NuGet
 
 You can supply a custom root certificate to complete TLS verification by using the
-`ADDITIONAL_CA_CERT_BUNDLE` [environment variable](#available-variables).
+`ADDITIONAL_CA_CERT_BUNDLE` [CI/CD variable](#available-variables).
 
 ### Migration from `license_management` to `license_scanning`
 
 In GitLab 12.8 a new name for `license_management` job was introduced. This change was made to improve clarity around the purpose of the scan, which is to scan and collect the types of licenses present in a projects dependencies.
 GitLab 13.0 drops support for `license_management`.
 If you're using a custom setup for License Compliance, you're required
-to update your CI config accordingly:
+to update your CI configuration accordingly:
 
 1. Change the CI template to `License-Scanning.gitlab-ci.yml`.
 1. Change the job name to `license_scanning` (if you mention it in `.gitlab-ci.yml`).
-1. Change the artifact name to `license_scanning`, and the file name to `gl-license-scanning-report.json` (if you mention it in `.gitlab-ci.yml`).
+1. Change the artifact name to `license_scanning`, and the filename to `gl-license-scanning-report.json` (if you mention it in `.gitlab-ci.yml`).
 
 For example, the following `.gitlab-ci.yml`:
 
@@ -619,7 +616,7 @@ To use License Compliance in an offline environment, you need:
 - GitLab Runner with the [`docker` or `kubernetes` executor](#requirements).
 - Docker Container Registry with locally available copies of License Compliance [analyzer](https://gitlab.com/gitlab-org/security-products/analyzers) images.
 
-NOTE: **Note:**
+NOTE:
 GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
 copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
@@ -639,14 +636,14 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/license-finder:latest
 
 The process for importing Docker images into a local offline Docker registry depends on
 **your network security policy**. Please consult your IT staff to find an accepted and approved
-process by which external resources can be imported or temporarily accessed. Note that these scanners are [updated periodically](../../application_security/index.md#maintenance-and-update-of-the-vulnerabilities-database)
+process by which external resources can be imported or temporarily accessed. Note that these scanners are [updated periodically](../../application_security/vulnerabilities/index.md#vulnerability-scanner-maintenance)
 with new definitions, so consider if you are able to make periodic updates yourself.
 
 For details on saving and transporting Docker images as a file, see Docker's documentation on
 [`docker save`](https://docs.docker.com/engine/reference/commandline/save/), [`docker load`](https://docs.docker.com/engine/reference/commandline/load/),
 [`docker export`](https://docs.docker.com/engine/reference/commandline/export/), and [`docker import`](https://docs.docker.com/engine/reference/commandline/import/).
 
-### Set License Compliance CI job variables to use local License Compliance analyzers
+### Set License Compliance CI/CD variables to use local License Compliance analyzers
 
 Add the following configuration to your `.gitlab-ci.yml` file. You must replace `image` to refer to
 the License Compliance Docker image hosted on your local Docker container registry:
@@ -663,15 +660,16 @@ license_scanning:
 The License Compliance job should now use local copies of the License Compliance analyzers to scan
 your code and generate security reports, without requiring internet access.
 
-Additional configuration may be needed for connecting to
-[private Bower registries](#using-private-bower-registries),
-[private Bundler registries](#using-private-bundler-registries),
-[private Conan registries](#using-private-bower-registries),
-[private Go registries](#using-private-go-registries),
-[private Maven repositories](#using-private-maven-repos),
-[private NPM registries](#using-private-npm-registries),
-[private Python repositories](#using-private-python-repos),
-and [private Yarn registries](#using-private-yarn-registries).
+Additional configuration may be needed for connecting to private registries for:
+
+- [Bower](#using-private-bower-registries),
+- [Bundler](#using-private-bundler-registries),
+- [Conan](#using-private-bower-registries),
+- [Go](#using-private-go-registries),
+- [Maven repositories](#using-private-maven-repositories),
+- [npm](#using-private-npm-registries),
+- [Python repositories](#using-private-python-repositories),
+- [Yarn](#using-private-yarn-registries).
 
 ### SPDX license list name matching
 
@@ -698,7 +696,7 @@ requirements must be met:
    [supported languages and package managers](#supported-languages-and-package-managers).
 
 Once everything is set, navigate to **Security & Compliance > License Compliance**
-in your project's sidebar, and you'll see the licenses displayed, where:
+in your project's sidebar, and the licenses are displayed, where:
 
 - **Name:** The name of the license.
 - **Component:** The components which have this license.
@@ -711,8 +709,8 @@ in your project's sidebar, and you'll see the licenses displayed, where:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22465) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
 
 Policies allow you to specify licenses that are `allowed` or `denied` in a project. If a `denied`
-license is newly committed it will disallow a merge request and instruct the developer to remove it.
-Note, the merge request will not be able to be merged until the `denied` license is removed.
+license is newly committed it blocks the merge request and instructs the developer to remove it.
+Note, the merge request is not able to be merged until the `denied` license is removed.
 You may add a [`License-Check` approval rule](#enabling-license-approvals-within-a-project),
 which enables a designated approver that can approve and then merge a merge request with `denied` license.
 
@@ -761,6 +759,29 @@ An approval is optional when a license report:
 
 ## Troubleshooting
 
+### ASDF_PYTHON_VERSION does not automatically install the version
+
+Defining a non-latest Python version in ASDF_PYTHON_VERSION [doesn't have it automatically installed](https://gitlab.com/gitlab-org/gitlab/-/issues/325604). If your project requires a non-latest version of Python:
+
+1. Define the required version by setting the `ASDF_PYTHON_VERSION` CI/CD variable.
+1. Pass a custom script to the `SETUP_CMD` CI/CD variable to install the required version and dependencies.
+
+For example:
+
+```yaml
+include:
+  - template: Security/License-Scanning.gitlab-ci.yml
+
+license_scanning:
+    SETUP_CMD: ./setup.sh
+    ASDF_PYTHON_VERSION: "3.7.2"
+  before_script:
+    - echo "asdf install python 3.7.2 && pip install -r requirements.txt" > setup.sh
+    - chmod +x setup.sh
+    - apt-get -y update
+    - apt-get -y install build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+```
+
 ### `ERROR -- : asdf: No preset version installed for command`
 
 This error occurs when the version of the tools used by your project
@@ -774,7 +795,7 @@ specify the desired version by adding a
 or using the appropriate [`ASDF_<tool>_VERSION`](https://asdf-vm.com/#/core-configuration?id=environment-variables) environment variable to
 activate the appropriate version.
 
-For example, the following `.tool-versions` file will activate version `12.16.3` of [Node.js](https://nodejs.org/)
+For example, the following `.tool-versions` file activates version `12.16.3` of [Node.js](https://nodejs.org/)
 and version `2.7.2` of [Ruby](https://www.ruby-lang.org/).
 
 ```plaintext
@@ -782,7 +803,7 @@ nodejs 12.16.3
 ruby 2.7.2
 ```
 
-The next example shows how to activate the same versions of the tools mentioned above by using environment variables defined in your
+The next example shows how to activate the same versions of the tools mentioned above by using CI/CD variables defined in your
 project's `.gitlab-ci.yml` file.
 
 ```yaml
@@ -795,7 +816,7 @@ license_scanning:
     ASDF_RUBY_VERSION: '2.7.2'
 ```
 
-A full list of variables can be found in [environment variables](#available-variables).
+A full list of variables can be found in [CI/CD variables](#available-variables).
 
 To find out what tools are pre-installed in the `license_scanning` Docker image use the following command:
 
@@ -831,5 +852,5 @@ $ docker run -it --entrypoint='' registry.gitlab.com/gitlab-org/security-product
 root@6abb70e9f193:~#
 ```
 
-NOTE: **Note:**
+NOTE:
 Selecting a custom version of [Mono](https://www.mono-project.com/) or [.NET Core](https://dotnet.microsoft.com/download/dotnet-core) is currently not supported.

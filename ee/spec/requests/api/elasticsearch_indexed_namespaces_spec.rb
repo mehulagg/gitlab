@@ -11,9 +11,9 @@ RSpec.describe API::ElasticsearchIndexedNamespaces do
       using RSpec::Parameterized::TableSyntax
 
       where(:percentage, :plan) do
-        -1    | 'gold'
-        101   | 'gold'
-        nil   | 'gold'
+        -1    | 'ultimate'
+        101   | 'ultimate'
+        nil   | 'ultimate'
         1     | nil
         1     | 'foobar'
       end
@@ -27,7 +27,7 @@ RSpec.describe API::ElasticsearchIndexedNamespaces do
     end
 
     it 'prohibits non-admin' do
-      put api(path, non_admin), params: { plan: 'gold', percentage: 50 }
+      put api(path, non_admin), params: { plan: 'ultimate', percentage: 50 }
       expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
@@ -38,9 +38,9 @@ RSpec.describe API::ElasticsearchIndexedNamespaces do
     include_context 'rollout related'
 
     it 'invokes ElasticNamespaceRolloutWorker rollout' do
-      expect(ElasticNamespaceRolloutWorker).to receive(:perform_async).with('gold', 50, ElasticNamespaceRolloutWorker::ROLLOUT)
+      expect(ElasticNamespaceRolloutWorker).to receive(:perform_async).with('ultimate', 50, ElasticNamespaceRolloutWorker::ROLLOUT)
 
-      put api(path, admin), params: { plan: 'gold', percentage: 50 }
+      put api(path, admin), params: { plan: 'ultimate', percentage: 50 }
 
       expect(response).to have_gitlab_http_status(:ok)
     end
@@ -52,9 +52,9 @@ RSpec.describe API::ElasticsearchIndexedNamespaces do
     include_context 'rollout related'
 
     it 'invokes ElasticNamespaceRolloutWorker rollback' do
-      expect(ElasticNamespaceRolloutWorker).to receive(:perform_async).with('gold', 50, ElasticNamespaceRolloutWorker::ROLLBACK)
+      expect(ElasticNamespaceRolloutWorker).to receive(:perform_async).with('ultimate', 50, ElasticNamespaceRolloutWorker::ROLLBACK)
 
-      put api(path, admin), params: { plan: 'gold', percentage: 50 }
+      put api(path, admin), params: { plan: 'ultimate', percentage: 50 }
 
       expect(response).to have_gitlab_http_status(:ok)
     end

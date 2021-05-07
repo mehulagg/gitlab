@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "type": "object",
   "required": ["epic_id", "created", "author", "ancestors", "todo_exists", "todo_path", "lock_version",
@@ -79,7 +80,7 @@
     "lock_version": {
       "type": [
         "integer",
-        null
+        "null"
       ]
     },
     "state": {
@@ -109,7 +110,7 @@
     "start_date": {
       "type": [
         "string",
-        null
+        "null"
       ]
     },
     "start_date_is_fixed": {
@@ -118,13 +119,13 @@
     "start_date_fixed": {
       "type": [
         "string",
-        null
+        "null"
       ]
     },
     "start_date_from_milestones": {
       "type": [
         "string",
-        null
+        "null"
       ]
     },
     "start_date_sourcing_milestone_title": {
@@ -143,13 +144,13 @@
         "start_date": {
           "type": [
             "string",
-            null
+            "null"
           ]
         },
         "due_date": {
           "type": [
             "string",
-            null
+            "null"
           ]
         }
       }
@@ -157,7 +158,7 @@
     "due_date": {
       "type": [
         "string",
-        null
+        "null"
       ]
     },
     "due_date_is_fixed": {
@@ -166,13 +167,13 @@
     "due_date_fixed": {
       "type": [
         "string",
-        null
+        "null"
       ]
     },
     "due_date_from_milestones": {
       "type": [
         "string",
-        null
+        "null"
       ]
     },
     "due_date_sourcing_milestone_title": {
@@ -191,13 +192,13 @@
         "start_date": {
           "type": [
             "string",
-            null
+            "null"
           ]
         },
         "due_date": {
           "type": [
             "string",
-            null
+            "null"
           ]
         }
       }

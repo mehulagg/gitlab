@@ -25,6 +25,23 @@ RSpec.describe Gitlab::Auth::OAuth::User do
 
   let(:ldap_user) { Gitlab::Auth::Ldap::Person.new(Net::LDAP::Entry.new, 'ldapmain') }
 
+  describe '.find_by_uid_and_provider' do
+    let(:dn) { 'CN=John Åström, CN=Users, DC=Example, DC=com' }
+
+    it 'retrieves the correct user' do
+      special_info = {
+        name: 'John Åström',
+        email: 'john@example.com',
+        nickname: 'jastrom'
+      }
+      special_hash = OmniAuth::AuthHash.new(uid: dn, provider: 'ldapmain', info: special_info)
+      special_chars_user = described_class.new(special_hash)
+      user = special_chars_user.save
+
+      expect(described_class.find_by_uid_and_provider(dn, 'ldapmain')).to eq user
+    end
+  end
+
   describe '#persisted?' do
     let!(:existing_user) { create(:omniauth_user, extern_uid: 'my-uid', provider: 'my-provider') }
 
@@ -975,6 +992,23 @@ RSpec.describe Gitlab::Auth::OAuth::User do
       it 'does not create associated user synced attributes metadata' do
         expect(gl_user.user_synced_attributes_metadata).to be_nil
       end
+    end
+  end
+
+  context 'when gl_user is nil' do
+    # We can't use `allow_next_instance_of` here because the stubbed method is called inside `initialize`.
+    # When the class calls `gl_user` during `initialize`, the `nil` value is overwritten and we do not see expected results from the spec.
+    # So we use `allow_any_instance_of` to preserve the `nil` value to test the behavior when `gl_user` is nil.
+
+    # rubocop:disable RSpec/AnyInstanceOf
+    before do
+      allow_any_instance_of(described_class).to receive(:gl_user) { nil }
+      allow_any_instance_of(described_class).to receive(:sync_profile_from_provider?) { true } # to make the code flow proceed until gl_user.build_user_synced_attributes_metadata is called
+    end
+    # rubocop:enable RSpec/AnyInstanceOf
+
+    it 'does not raise NoMethodError' do
+      expect { oauth_user }.not_to raise_error
     end
   end
 

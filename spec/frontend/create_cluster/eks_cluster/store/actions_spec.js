@@ -1,7 +1,7 @@
-import testAction from 'helpers/vuex_action_helper';
-import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import MockAdapter from 'axios-mock-adapter';
-import createState from '~/create_cluster/eks_cluster/store/state';
+import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
+import testAction from 'helpers/vuex_action_helper';
+import { DEFAULT_REGION } from '~/create_cluster/eks_cluster/constants';
 import * as actions from '~/create_cluster/eks_cluster/store/actions';
 import {
   SET_CLUSTER_NAME,
@@ -23,9 +23,9 @@ import {
   REQUEST_CREATE_CLUSTER,
   CREATE_CLUSTER_ERROR,
 } from '~/create_cluster/eks_cluster/store/mutation_types';
-import { DEFAULT_REGION } from '~/create_cluster/eks_cluster/constants';
-import axios from '~/lib/utils/axios_utils';
+import createState from '~/create_cluster/eks_cluster/store/state';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 jest.mock('~/flash');
 
@@ -94,7 +94,7 @@ describe('EKS Cluster Store Actions', () => {
     ${'setNodeCount'}               | ${SET_NODE_COUNT}                | ${{ nodeCount }}           | ${'node count'}
     ${'setGitlabManagedCluster'}    | ${SET_GITLAB_MANAGED_CLUSTER}    | ${gitlabManagedCluster}    | ${'gitlab managed cluster'}
     ${'setNamespacePerEnvironment'} | ${SET_NAMESPACE_PER_ENVIRONMENT} | ${namespacePerEnvironment} | ${'namespace per environment'}
-  `(`$action commits $mutation with $payloadDescription payload`, data => {
+  `(`$action commits $mutation with $payloadDescription payload`, (data) => {
     const { action, mutation, payload } = data;
 
     testAction(actions[action], payload, state, [{ type: mutation, payload }]);
@@ -186,7 +186,7 @@ describe('EKS Cluster Store Actions', () => {
             role_external_id: payload.externalId,
             region: DEFAULT_REGION,
           })
-          .reply(400, error);
+          .reply(400, null);
       });
 
       it('dispatches createRoleError action', () =>
@@ -196,6 +196,32 @@ describe('EKS Cluster Store Actions', () => {
           state,
           [],
           [{ type: 'requestCreateRole' }, { type: 'createRoleError', payload: { error } }],
+        ));
+    });
+
+    describe('when request fails with a message', () => {
+      beforeEach(() => {
+        const errResp = { message: 'Something failed' };
+
+        mock
+          .onPost(state.createRolePath, {
+            role_arn: payload.roleArn,
+            role_external_id: payload.externalId,
+            region: DEFAULT_REGION,
+          })
+          .reply(4, errResp);
+      });
+
+      it('dispatches createRoleError action', () =>
+        testAction(
+          actions.createRole,
+          payload,
+          state,
+          [],
+          [
+            { type: 'requestCreateRole' },
+            { type: 'createRoleError', payload: { error: 'Something failed' } },
+          ],
         ));
     });
   });

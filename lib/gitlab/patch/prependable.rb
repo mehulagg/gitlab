@@ -21,7 +21,12 @@ module Gitlab
       def prepend_features(base)
         return false if prepended?(base)
 
-        super
+        # Rails 6.1 allows prepending of the modules, but it doesn't
+        # work well when both modules extend ActiveSupport::Concern
+        # https://github.com/rails/rails/pull/42067
+        #
+        # Let's keep our own implementation, until the issue is fixed
+        Module.instance_method(:prepend_features).bind(self).call(base)
 
         if const_defined?(:ClassMethods)
           klass_methods = const_get(:ClassMethods, false)
@@ -39,9 +44,14 @@ module Gitlab
       def class_methods
         super
 
+        class_methods_module = const_get(:ClassMethods, false)
+
         if instance_variable_defined?(:@_prepended_class_methods)
-          const_get(:ClassMethods, false).prepend @_prepended_class_methods
+          class_methods_module.prepend @_prepended_class_methods
         end
+
+        # Hack to resolve https://gitlab.com/gitlab-org/gitlab/-/issues/23932
+        extend class_methods_module if ENV['STATIC_VERIFICATION']
       end
 
       def prepended(base = nil, &block)

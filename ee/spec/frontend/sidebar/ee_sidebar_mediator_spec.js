@@ -1,8 +1,8 @@
 import SidebarMediator from 'ee/sidebar/sidebar_mediator';
 import waitForPromises from 'helpers/wait_for_promises';
+import SidebarService from '~/sidebar/services/sidebar_service';
 import CESidebarMediator from '~/sidebar/sidebar_mediator';
 import CESidebarStore from '~/sidebar/stores/sidebar_store';
-import SidebarService from '~/sidebar/services/sidebar_service';
 import Mock from './ee_mock_data';
 
 describe('EE Sidebar mediator', () => {

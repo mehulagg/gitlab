@@ -4,11 +4,10 @@ import { intersection } from 'lodash';
 
 import '~/smart_interval';
 
-import IssuableTimeTracker from './time_tracker.vue';
-
-import Store from '../../stores/sidebar_store';
-import Mediator from '../../sidebar_mediator';
 import eventHub from '../../event_hub';
+import Mediator from '../../sidebar_mediator';
+import Store from '../../stores/sidebar_store';
+import IssuableTimeTracker from './time_tracker.vue';
 
 export default {
   components: {
@@ -27,7 +26,7 @@ export default {
     listenForQuickActions() {
       $(document).on('ajax:success', '.gfm-form', this.quickActionListened);
 
-      eventHub.$on('timeTrackingUpdated', data => {
+      eventHub.$on('timeTrackingUpdated', (data) => {
         this.quickActionListened({ detail: [data] });
       });
     },
@@ -57,7 +56,6 @@ export default {
       :human-time-estimate="store.humanTimeEstimate"
       :human-time-spent="store.humanTotalTimeSpent"
       :limit-to-hours="store.timeTrackingLimitToHours"
-      :root-path="store.rootPath"
     />
   </div>
 </template>

@@ -8,6 +8,7 @@ RSpec.describe MergeRequestPollWidgetEntity do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create :project, :repository }
   let_it_be(:merge_request, reload: true) { create(:merge_request, source_project: project, target_project: project) }
+
   let(:request) { double('request', current_user: user) }
 
   before do
@@ -24,7 +25,7 @@ RSpec.describe MergeRequestPollWidgetEntity do
 
     before do
       stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update!(merge_pipelines_enabled: true)
+      project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     end
 
     it 'has merge train entity' do

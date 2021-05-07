@@ -1,9 +1,9 @@
 <script>
 import { GlButton, GlFormRadioGroup, GlFormRadio } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { LICENSE_APPROVAL_STATUS } from '../constants';
 import AddLicenseFormDropdown from './add_license_form_dropdown.vue';
-import { s__ } from '~/locale';
 
 export default {
   name: 'AddLicenseForm',
@@ -101,7 +101,7 @@ export default {
           :aria-describedby="`js-${option.value}-license-radio`"
           :class="{ 'mb-3': isDescriptionEnabled }"
         >
-          <template>{{ option.label }}</template>
+          {{ option.label }}
           <div v-if="isDescriptionEnabled" class="text-secondary">
             {{ option.description }}
           </div>

@@ -1,9 +1,9 @@
-import Vue from 'vue';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'jest/helpers/test_constants';
+import Vue from 'vue';
+import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
-import createStore from '~/notes/stores';
 import awardsNote from '~/notes/components/note_awards_list.vue';
+import createStore from '~/notes/stores';
 import { noteableDataMock, notesDataMock } from '../mock_data';
 
 describe('note_awards_list component', () => {
@@ -92,22 +92,21 @@ describe('note_awards_list component', () => {
       }).$mount();
     };
 
-    const findTooltip = () =>
-      vm.$el.querySelector('[data-original-title]').getAttribute('data-original-title');
+    const findTooltip = () => vm.$el.querySelector('[title]').getAttribute('title');
 
     it('should only escape & and " characters', () => {
       awardsMock = [...new Array(1)].map(createAwardEmoji);
       mountComponent();
       const escapedName = awardsMock[0].user.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
-      expect(vm.$el.querySelector('[data-original-title]').outerHTML).toContain(escapedName);
+      expect(vm.$el.querySelector('[title]').outerHTML).toContain(escapedName);
     });
 
     it('should not escape special HTML characters twice when only 1 person awarded', () => {
       awardsMock = [...new Array(1)].map(createAwardEmoji);
       mountComponent();
 
-      awardsMock.forEach(award => {
+      awardsMock.forEach((award) => {
         expect(findTooltip()).toContain(award.user.name);
       });
     });
@@ -116,7 +115,7 @@ describe('note_awards_list component', () => {
       awardsMock = [...new Array(2)].map(createAwardEmoji);
       mountComponent();
 
-      awardsMock.forEach(award => {
+      awardsMock.forEach((award) => {
         expect(findTooltip()).toContain(award.user.name);
       });
     });
@@ -126,7 +125,7 @@ describe('note_awards_list component', () => {
       mountComponent();
 
       // Testing only the first 10 awards since 11 onward will not be displayed.
-      awardsMock.slice(0, 10).forEach(award => {
+      awardsMock.slice(0, 10).forEach((award) => {
         expect(findTooltip()).toContain(award.user.name);
       });
     });

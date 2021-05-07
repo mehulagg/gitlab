@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
   include GraphqlHelpers
 
-  let_it_be(:dast_site_profile) { create(:dast_site_profile) }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, :with_dast_site_validation) }
   let_it_be(:project) { dast_site_profile.project }
   let_it_be(:current_user) { create(:user) }
 
@@ -13,12 +13,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
     %(
       query project($fullPath: ID!, $id: DastSiteProfileID!) {
         project(fullPath: $fullPath) {
-          dastSiteProfile(id: $id) {
-            id
-            profileName
-            targetUrl
-            validationStatus
-          }
+          dastSiteProfile(id: $id) { #{all_graphql_fields_for('DastSiteProfile')} }
         }
       }
     )
@@ -83,19 +78,19 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfile' do
       end
     end
 
-    context 'when on demand scan feature flag is disabled' do
-      it 'returns a null dast_site_profile' do
-        stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-        expect(dast_site_profile_response).to be_nil
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'returns a null dast_site_profile' do
         stub_licensed_features(security_on_demand_scans: false)
 
         expect(dast_site_profile_response).to be_nil
+      end
+    end
+
+    context 'when there is no associated dast_site_validation' do
+      it 'returns a none validation status' do
+        dast_site_profile.dast_site_validation.destroy!
+
+        expect(dast_site_profile_response['validationStatus']).to eq('NONE')
       end
     end
   end

@@ -78,7 +78,7 @@ module Ci
 
         def status_for_array(statuses, dag:)
           result = Gitlab::Ci::Status::Composite
-            .new(statuses, dag: dag)
+            .new(statuses, dag: dag, project: pipeline.project)
             .status
           result || 'success'
         end
@@ -91,17 +91,17 @@ module Ci
 
         def all_statuses_by_id
           strong_memoize(:all_statuses_by_id) do
-            all_statuses.map do |row|
+            all_statuses.to_h do |row|
               [row[:id], row]
-            end.to_h
+            end
           end
         end
 
         def all_statuses_by_name
           strong_memoize(:statuses_by_name) do
-            all_statuses.map do |row|
+            all_statuses.to_h do |row|
               [row[:name], row]
-            end.to_h
+            end
           end
         end
 

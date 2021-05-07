@@ -25,7 +25,7 @@ RSpec.describe 'Merge request > User selects branches for new MR', :js do
     context 'saving the MR' do
       it 'shows the saved MR' do
         fill_in 'merge_request_title', with: 'Test'
-        click_button 'Submit merge request'
+        click_button 'Create merge request'
 
         expect(page).to have_button('Close merge request')
       end

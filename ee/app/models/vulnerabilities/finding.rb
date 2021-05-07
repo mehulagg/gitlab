@@ -5,6 +5,7 @@ module Vulnerabilities
     include ShaAttribute
     include ::Gitlab::Utils::StrongMemoize
     include Presentable
+    include ::VulnerabilityFindingHelpers
 
     # https://gitlab.com/groups/gitlab-org/-/epics/3148
     # https://gitlab.com/gitlab-org/gitlab/-/issues/214563#note_370782508 is why the table names are not renamed
@@ -26,47 +27,26 @@ module Vulnerabilities
     has_many :finding_identifiers, class_name: 'Vulnerabilities::FindingIdentifier', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :identifiers, through: :finding_identifiers, class_name: 'Vulnerabilities::Identifier'
 
+    has_many :finding_links, class_name: 'Vulnerabilities::FindingLink', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
+    has_many :finding_remediations, class_name: 'Vulnerabilities::FindingRemediation', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+    has_many :remediations, through: :finding_remediations
+
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
+
+    has_many :signatures, class_name: 'Vulnerabilities::FindingSignature', inverse_of: :finding
+
+    has_many :finding_evidences, class_name: 'Vulnerabilities::FindingEvidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+
+    serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
     attr_accessor :scan
 
-    CONFIDENCE_LEVELS = {
-      # undefined: 0, no longer applicable
-      ignore: 1,
-      unknown: 2,
-      experimental: 3,
-      low: 4,
-      medium: 5,
-      high: 6,
-      confirmed: 7
-    }.with_indifferent_access.freeze
-
-    SEVERITY_LEVELS = {
-      # undefined: 0, no longer applicable
-      info: 1,
-      unknown: 2,
-      # experimental: 3, formerly used by confidence, no longer applicable
-      low: 4,
-      medium: 5,
-      high: 6,
-      critical: 7
-    }.with_indifferent_access.freeze
-
-    REPORT_TYPES = {
-      sast: 0,
-      dependency_scanning: 1,
-      container_scanning: 2,
-      dast: 3,
-      secret_detection: 4,
-      coverage_fuzzing: 5,
-      api_fuzzing: 6
-    }.with_indifferent_access.freeze
-
-    enum confidence: CONFIDENCE_LEVELS, _prefix: :confidence
-    enum report_type: REPORT_TYPES
-    enum severity: SEVERITY_LEVELS, _prefix: :severity
+    enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
+    enum report_type: ::Enums::Vulnerability.report_types
+    enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
 
     validates :scanner, presence: true
     validates :project, presence: true
@@ -85,6 +65,12 @@ module Vulnerabilities
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
+    validates :details, json_schema: { filename: 'vulnerability_finding_details', draft: 7 }
+
+    validates :description, length: { maximum: 15000 }
+    validates :message, length: { maximum: 3000 }
+    validates :solution, length: { maximum: 7000 }
+    validates :cve, length: { maximum: 48400 }
 
     delegate :name, :external_id, to: :scanner, prefix: true, allow_nil: true
 
@@ -93,8 +79,10 @@ module Vulnerabilities
 
     scope :by_report_types, -> (values) { where(report_type: values) }
     scope :by_projects, -> (values) { where(project_id: values) }
+    scope :by_scanners, -> (values) { where(scanner_id: values) }
     scope :by_severities, -> (values) { where(severity: values) }
     scope :by_confidences, -> (values) { where(confidence: values) }
+    scope :by_project_fingerprints, -> (values) { where(project_fingerprint: values) }
 
     scope :all_preloaded, -> do
       preload(:scanner, :identifiers, project: [:namespace, :project_feature])
@@ -115,20 +103,8 @@ module Vulnerabilities
 
     def self.counted_by_severity
       group(:severity).count.transform_keys do |severity|
-        SEVERITY_LEVELS[severity]
+        severities[severity]
       end
-    end
-
-    def self.with_vulnerabilities_for_state(project:, report_type:, project_fingerprints:)
-      Vulnerabilities::Finding
-        .joins(:vulnerability)
-        .where(
-          project: project,
-          report_type: report_type,
-          project_fingerprint: project_fingerprints
-        )
-        .select('vulnerability_occurrences.report_type, vulnerability_id, project_fingerprint, raw_metadata, '\
-                'vulnerabilities.id, vulnerabilities.state') # fetching only required attributes
     end
 
     # sha can be sourced from a joined pipeline or set from the report
@@ -139,7 +115,7 @@ module Vulnerabilities
     def state
       return 'dismissed' if dismissal_feedback.present?
 
-      if vulnerability.nil?
+      if vulnerability.nil? || vulnerability.detected?
         'detected'
       elsif vulnerability.resolved?
         'resolved'
@@ -240,15 +216,15 @@ module Vulnerabilities
     end
 
     def description
-      metadata.dig('description')
+      super.presence || metadata.dig('description')
     end
 
     def solution
-      metadata.dig('solution') || remediations&.first&.dig('summary')
+      super.presence || metadata.dig('solution') || remediations&.first&.dig('summary')
     end
 
     def location
-      metadata.fetch('location', {})
+      super.presence || metadata.fetch('location', {})
     end
 
     def file
@@ -256,11 +232,15 @@ module Vulnerabilities
     end
 
     def links
-      metadata.fetch('links', [])
+      return metadata.fetch('links', []) if finding_links.load.empty?
+
+      finding_links.as_json(only: [:name, :url])
     end
 
     def remediations
-      metadata.dig('remediations')
+      return metadata.dig('remediations') unless super.present?
+
+      super.as_json(only: [:summary], methods: [:diff])
     end
 
     def build_evidence_request(data)
@@ -328,11 +308,11 @@ module Vulnerabilities
     end
 
     def message
-      metadata.dig('message')
+      super.presence || metadata.dig('message')
     end
 
     def cve_value
-      identifiers.find(&:cve?)&.name
+      cve || identifiers.find(&:cve?)&.name
     end
 
     def cwe_value
@@ -353,12 +333,16 @@ module Vulnerabilities
       end
     end
 
-    alias_method :==, :eql? # eql? is necessary in some cases like array intersection
+    alias_method :==, :eql?
 
     def eql?(other)
-      other.report_type == report_type &&
-        other.location_fingerprint == location_fingerprint &&
-        other.first_fingerprint == first_fingerprint
+      return false unless other.report_type == report_type && other.primary_identifier_fingerprint == primary_identifier_fingerprint
+
+      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
+        matches_signatures(other.signatures, other.uuid)
+      else
+        other.location_fingerprint == location_fingerprint
+      end
     end
 
     # Array.difference (-) method uses hash and eql? methods to do comparison
@@ -369,7 +353,7 @@ module Vulnerabilities
       # when Finding is persisted and identifiers are not preloaded.
       return super if persisted? && !identifiers.loaded?
 
-      report_type.hash ^ location_fingerprint.hash ^ first_fingerprint.hash
+      report_type.hash ^ location_fingerprint.hash ^ primary_identifier_fingerprint.hash
     end
 
     def severity_value
@@ -380,9 +364,28 @@ module Vulnerabilities
       self.class.confidences[self.confidence]
     end
 
+    # We will eventually have only UUIDv5 values for the `uuid`
+    # attribute of the finding records.
+    def uuid_v5
+      if Gitlab::UUID.v5?(uuid)
+        uuid
+      else
+        ::Security::VulnerabilityUUID.generate(
+          report_type: report_type,
+          primary_identifier_fingerprint: primary_identifier.fingerprint,
+          location_fingerprint: location_fingerprint,
+          project_id: project_id
+        )
+      end
+    end
+
+    def pipeline_branch
+      pipelines&.last&.sha || project.default_branch
+    end
+
     protected
 
-    def first_fingerprint
+    def primary_identifier_fingerprint
       identifiers.first&.fingerprint
     end
 

@@ -156,7 +156,7 @@ RSpec.describe 'New/edit issue', :js do
 
       fill_in 'issue_weight', with: '1'
 
-      click_button 'Submit issue'
+      click_button 'Create issue'
 
       page.within '.issuable-sidebar' do
         page.within '.assignee' do

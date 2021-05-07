@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import createStore from 'ee/license_compliance/store';
-import LicensesTable from 'ee/license_compliance/components/licenses_table.vue';
-import { toLicenseObject } from 'ee/license_compliance/utils/mappers';
-import { LICENSE_LIST } from 'ee/license_compliance/store/constants';
 import DetectedLicensesTable from 'ee/license_compliance/components/detected_licenses_table.vue';
+import LicensesTable from 'ee/license_compliance/components/licenses_table.vue';
+import createStore from 'ee/license_compliance/store';
+import { LICENSE_LIST } from 'ee/license_compliance/store/constants';
+import { toLicenseObject } from 'ee/license_compliance/utils/mappers';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 import mockLicensesResponse from '../store/modules/list/data/mock_licenses.json';
 

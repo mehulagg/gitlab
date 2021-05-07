@@ -126,14 +126,14 @@ describe('lineCode', () => {
 
 describe('classNameMapCell', () => {
   it.each`
-    line               | hll      | loggedIn | hovered  | expectation
-    ${undefined}       | ${true}  | ${true}  | ${true}  | ${[]}
-    ${{ type: 'new' }} | ${false} | ${false} | ${false} | ${['new', { hll: false, 'is-over': false }]}
-    ${{ type: 'new' }} | ${true}  | ${true}  | ${false} | ${['new', { hll: true, 'is-over': false }]}
-    ${{ type: 'new' }} | ${true}  | ${false} | ${true}  | ${['new', { hll: true, 'is-over': false }]}
-    ${{ type: 'new' }} | ${true}  | ${true}  | ${true}  | ${['new', { hll: true, 'is-over': true }]}
-  `('should return $expectation', ({ line, hll, loggedIn, hovered, expectation }) => {
-    const classes = utils.classNameMapCell(line, hll, loggedIn, hovered);
+    line               | hll      | isLoggedIn | isHover  | expectation
+    ${undefined}       | ${true}  | ${true}    | ${true}  | ${[]}
+    ${{ type: 'new' }} | ${false} | ${false}   | ${false} | ${['new', { hll: false, 'is-over': false, new_line: true, old_line: false }]}
+    ${{ type: 'new' }} | ${true}  | ${true}    | ${false} | ${['new', { hll: true, 'is-over': false, new_line: true, old_line: false }]}
+    ${{ type: 'new' }} | ${true}  | ${false}   | ${true}  | ${['new', { hll: true, 'is-over': false, new_line: true, old_line: false }]}
+    ${{ type: 'new' }} | ${true}  | ${true}    | ${true}  | ${['new', { hll: true, 'is-over': true, new_line: true, old_line: false }]}
+  `('should return $expectation', ({ line, hll, isLoggedIn, isHover, expectation }) => {
+    const classes = utils.classNameMapCell({ line, hll, isLoggedIn, isHover });
     expect(classes).toEqual(expectation);
   });
 });
@@ -143,8 +143,19 @@ describe('addCommentTooltip', () => {
     'Commenting on symbolic links that replace or are replaced by files is currently not supported.';
   const brokenRealTooltip =
     'Commenting on files that replace or are replaced by symbolic links is currently not supported.';
+  const commentTooltip = 'Add a comment to this line';
+  const dragTooltip = 'Add a comment to this line or drag for multiple lines';
+
   it('should return default tooltip', () => {
     expect(utils.addCommentTooltip()).toBeUndefined();
+  });
+
+  it('should return comment tooltip', () => {
+    expect(utils.addCommentTooltip({})).toEqual(commentTooltip);
+  });
+
+  it('should return drag comment tooltip when dragging is enabled', () => {
+    expect(utils.addCommentTooltip({}, true)).toEqual(dragTooltip);
   });
 
   it('should return broken symlink tooltip', () => {
@@ -200,4 +211,77 @@ describe('shouldShowCommentButton', () => {
       expect(utils.shouldShowCommentButton(hover, context, meta, discussions)).toBe(expectation);
     },
   );
+});
+
+describe('mapParallel', () => {
+  it('should assign computed properties to the line object', () => {
+    const side = {
+      discussions: [{}],
+      discussionsExpanded: true,
+      hasForm: true,
+    };
+    const content = {
+      diffFile: {},
+      hasParallelDraftLeft: () => false,
+      hasParallelDraftRight: () => false,
+      draftForLine: () => ({}),
+    };
+    const line = { left: side, right: side };
+    const expectation = {
+      commentRowClasses: '',
+      draftRowClasses: 'js-temp-notes-holder',
+      hasDiscussionsLeft: true,
+      hasDiscussionsRight: true,
+      isContextLineLeft: false,
+      isContextLineRight: false,
+      isMatchLineLeft: false,
+      isMatchLineRight: false,
+      isMetaLineLeft: false,
+      isMetaLineRight: false,
+    };
+    const leftExpectation = {
+      renderDiscussion: true,
+      hasDraft: false,
+      lineDraft: {},
+      hasCommentForm: true,
+    };
+    const rightExpectation = {
+      renderDiscussion: false,
+      hasDraft: false,
+      lineDraft: {},
+      hasCommentForm: false,
+    };
+    const mapped = utils.mapParallel(content)(line);
+
+    expect(mapped).toMatchObject(expectation);
+    expect(mapped.left).toMatchObject(leftExpectation);
+    expect(mapped.right).toMatchObject(rightExpectation);
+  });
+});
+
+describe('mapInline', () => {
+  it('should assign computed properties to the line object', () => {
+    const content = {
+      diffFile: {},
+      shouldRenderDraftRow: () => false,
+    };
+    const line = {
+      discussions: [{}],
+      discussionsExpanded: true,
+      hasForm: true,
+    };
+    const expectation = {
+      commentRowClasses: '',
+      hasDiscussions: true,
+      isContextLine: false,
+      isMatchLine: false,
+      isMetaLine: false,
+      renderDiscussion: true,
+      hasDraft: false,
+      hasCommentForm: true,
+    };
+    const mapped = utils.mapInline(content)(line);
+
+    expect(mapped).toMatchObject(expectation);
+  });
 });

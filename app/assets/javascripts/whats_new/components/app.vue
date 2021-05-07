@@ -1,32 +1,35 @@
 <script>
+import { GlDrawer, GlInfiniteScroll, GlResizeObserverDirective } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { GlDrawer, GlBadge, GlIcon, GlLink } from '@gitlab/ui';
-import SkeletonLoader from './skeleton_loader.vue';
 import Tracking from '~/tracking';
+import { getDrawerBodyHeight } from '../utils/get_drawer_body_height';
+import Feature from './feature.vue';
+import SkeletonLoader from './skeleton_loader.vue';
 
 const trackingMixin = Tracking.mixin();
 
 export default {
   components: {
     GlDrawer,
-    GlBadge,
-    GlIcon,
-    GlLink,
+    GlInfiniteScroll,
     SkeletonLoader,
+    Feature,
+  },
+  directives: {
+    GlResizeObserver: GlResizeObserverDirective,
   },
   mixins: [trackingMixin],
   props: {
-    storageKey: {
+    versionDigest: {
       type: String,
       required: true,
-      default: null,
     },
   },
   computed: {
-    ...mapState(['open', 'features']),
+    ...mapState(['open', 'features', 'pageInfo', 'drawerBodyHeight', 'fetching']),
   },
   mounted() {
-    this.openDrawer(this.storageKey);
+    this.openDrawer(this.versionDigest);
     this.fetchItems();
 
     const body = document.querySelector('body');
@@ -35,65 +38,49 @@ export default {
     this.track('click_whats_new_drawer', { label: 'namespace_id', value: namespaceId });
   },
   methods: {
-    ...mapActions(['openDrawer', 'closeDrawer', 'fetchItems']),
+    ...mapActions(['openDrawer', 'closeDrawer', 'fetchItems', 'setDrawerBodyHeight']),
+    bottomReached() {
+      const page = this.pageInfo.nextPage;
+      if (page) {
+        this.fetchItems({ page });
+      }
+    },
+    handleResize() {
+      const height = getDrawerBodyHeight(this.$refs.drawer.$el);
+      this.setDrawerBodyHeight(height);
+    },
   },
 };
 </script>
 
 <template>
   <div>
-    <gl-drawer class="whats-new-drawer" :open="open" @close="closeDrawer">
+    <gl-drawer
+      ref="drawer"
+      v-gl-resize-observer="handleResize"
+      class="whats-new-drawer"
+      :z-index="700"
+      :open="open"
+      @close="closeDrawer"
+    >
       <template #header>
-        <h4 class="page-title my-2">{{ __("What's new at GitLab") }}</h4>
+        <h4 class="page-title gl-my-2">{{ __("What's new") }}</h4>
       </template>
-      <div class="pb-6">
-        <template v-if="features">
-          <div v-for="feature in features" :key="feature.title" class="mb-6">
-            <gl-link
-              :href="feature.url"
-              target="_blank"
-              data-testid="whats-new-title-link"
-              data-track-event="click_whats_new_item"
-              :data-track-label="feature.title"
-              :data-track-property="feature.url"
-            >
-              <h5 class="gl-font-base">{{ feature.title }}</h5>
-            </gl-link>
-            <div v-if="feature.packages" class="gl-mb-3">
-              <template v-for="package_name in feature.packages">
-                <gl-badge :key="package_name" size="sm" class="whats-new-item-badge gl-mr-2">
-                  <gl-icon name="license" />{{ package_name }}
-                </gl-badge>
-              </template>
-            </div>
-            <gl-link
-              :href="feature.url"
-              target="_blank"
-              data-track-event="click_whats_new_item"
-              :data-track-label="feature.title"
-              :data-track-property="feature.url"
-            >
-              <img
-                :alt="feature.title"
-                :src="feature.image_url"
-                class="img-thumbnail px-6 gl-py-3 whats-new-item-image"
-              />
-            </gl-link>
-            <p class="gl-pt-3">{{ feature.body }}</p>
-            <gl-link
-              :href="feature.url"
-              target="_blank"
-              data-track-event="click_whats_new_item"
-              :data-track-label="feature.title"
-              :data-track-property="feature.url"
-              >{{ __('Learn more') }}</gl-link
-            >
-          </div>
-        </template>
-        <div v-else class="gl-mt-5">
-          <skeleton-loader />
-          <skeleton-loader />
-        </div>
+      <template v-if="features.length">
+        <gl-infinite-scroll
+          :fetched-items="features.length"
+          :max-list-height="drawerBodyHeight"
+          class="gl-p-0"
+          @bottomReached="bottomReached"
+        >
+          <template #items>
+            <feature v-for="feature in features" :key="feature.title" :feature="feature" />
+          </template>
+        </gl-infinite-scroll>
+      </template>
+      <div v-else class="gl-mt-5">
+        <skeleton-loader />
+        <skeleton-loader />
       </div>
     </gl-drawer>
     <div v-if="open" class="whats-new-modal-backdrop modal-backdrop"></div>

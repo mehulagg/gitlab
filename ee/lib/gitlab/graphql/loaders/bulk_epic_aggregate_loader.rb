@@ -7,6 +7,7 @@ module Gitlab
         include ::Gitlab::Graphql::Aggregations::Epics::Constants
 
         MAXIMUM_LOADABLE = 100_001
+        EPIC_BATCH_SIZE = 1000
 
         attr_reader :target_epic_ids, :results
 
@@ -17,25 +18,26 @@ module Gitlab
           @target_epic_ids = epic_ids
         end
 
-        # rubocop: disable CodeReuse/ActiveRecord
         def execute
           return {} unless target_epic_ids
 
+          # the list of epics and epic decendants is intentionally loaded
+          # separately, the reason is that if number of epic_ids is over some
+          # limit (~200), then postgres uses a slow query plan and first does
+          # left join of epic_issues with issues which times out
+          epic_ids = ::Epic.ids_for_base_and_decendants(target_epic_ids)
+          raise ArgumentError, "There are too many epics to load. Please select fewer epics or contact your administrator." if epic_ids.count >= MAXIMUM_LOADABLE
+
           # We do a left outer join in order to capture epics with no issues
           # This is so we can aggregate the epic counts for every epic
-          raw_results = ::Gitlab::ObjectHierarchy.new(Epic.where(id: target_epic_ids)).base_and_descendants
-            .left_joins(epic_issues: :issue)
-            .group("issues.state_id", "epics.id", "epics.iid", "epics.parent_id", "epics.state_id")
-            .select("epics.id, epics.iid, epics.parent_id, epics.state_id AS epic_state_id, issues.state_id AS issues_state_id, COUNT(issues) AS issues_count, SUM(COALESCE(issues.weight, 0)) AS issues_weight_sum")
-            .limit(MAXIMUM_LOADABLE)
-
-          raw_results = raw_results.map { |record| record.attributes.with_indifferent_access }
-
-          raise ArgumentError.new("There are too many records to load. Please select fewer epics or contact your administrator.") if raw_results.count == MAXIMUM_LOADABLE
+          raw_results = []
+          epic_ids.in_groups_of(EPIC_BATCH_SIZE).each do |epic_batch_ids|
+            raw_results += ::Epic.issue_metadata_for_epics(epic_ids: epic_ids, limit: MAXIMUM_LOADABLE)
+            raise ArgumentError, "There are too many records to load. Please select fewer epics or contact your administrator." if raw_results.count >= MAXIMUM_LOADABLE
+          end
 
           @results = raw_results.group_by { |record| record[:id] }
         end
-        # rubocop: enable CodeReuse/ActiveRecord
       end
     end
   end

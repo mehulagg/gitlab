@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
+import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { TEST_HOST } from 'helpers/test_constants';
+import Vuex from 'vuex';
 import Insights from 'ee/insights/components/insights.vue';
 import { createStore } from 'ee/insights/stores';
 import { pageInfo } from 'ee_jest/insights/mock_data';
-import { GlAlert, GlDropdown, GlDropdownItem, GlEmptyState } from '@gitlab/ui';
+import { TEST_HOST } from 'helpers/test_constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -87,12 +87,7 @@ describe('Insights component', () => {
       it('has the correct nav tabs', async () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.find(GlDropdown).exists()).toBe(true);
-        expect(
-          wrapper
-            .find(GlDropdown)
-            .find(GlDropdownItem)
-            .text(),
-        ).toBe(title);
+        expect(wrapper.find(GlDropdown).find(GlDropdownItem).text()).toBe(title);
       });
 
       it('should not disable the tab selector', async () => {
@@ -118,12 +113,7 @@ describe('Insights component', () => {
       it('has the correct nav tabs', async () => {
         await wrapper.vm.$nextTick();
         expect(wrapper.find(GlDropdown).exists()).toBe(true);
-        expect(
-          wrapper
-            .find(GlDropdown)
-            .find(GlDropdownItem)
-            .text(),
-        ).toBe(title);
+        expect(wrapper.find(GlDropdown).find(GlDropdownItem).text()).toBe(title);
       });
 
       it('disables the tab selector', async () => {

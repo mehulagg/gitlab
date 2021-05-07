@@ -4,17 +4,21 @@ require "spec_helper"
 
 RSpec.describe "User deletes branch", :js do
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project, :repository) }
 
   before do
     project.add_developer(user)
     sign_in(user)
-
-    visit(project_branches_path(project))
   end
 
   it "deletes branch" do
-    fill_in("branch-search", with: "improve/awesome").native.send_keys(:enter)
+    visit(project_branches_path(project))
+
+    branch_search = find('input[data-testid="branch-search"]')
+
+    branch_search.set('improve/awesome')
+    branch_search.native.send_keys(:enter)
 
     page.within(".js-branch-improve\\/awesome") do
       accept_alert { find(".btn-danger").click }

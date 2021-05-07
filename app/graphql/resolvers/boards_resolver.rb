@@ -6,7 +6,7 @@ module Resolvers
 
     argument :id, ::Types::GlobalIDType[::Board],
              required: false,
-             description: 'Find a board by its ID'
+             description: 'Find a board by its ID.'
 
     def resolve(id: nil)
       # The project or group could have been loaded in batch by `BatchLoader`.
@@ -16,7 +16,7 @@ module Resolvers
 
       return Board.none unless parent
 
-      ::Boards::ListService.new(parent, context[:current_user], board_id: extract_board_id(id)).execute(create_default_board: false)
+      ::Boards::BoardsFinder.new(parent, context[:current_user], board_id: extract_board_id(id)).execute
     rescue ActiveRecord::RecordNotFound
       Board.none
     end

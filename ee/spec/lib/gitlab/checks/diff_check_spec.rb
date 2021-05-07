@@ -36,6 +36,18 @@ RSpec.describe Gitlab::Checks::DiffCheck do
       let(:protocol) { 'ssh' }
       let(:push_allowed) { false }
 
+      context 'when push_rules_supersede_code_owners is disabled' do
+        before do
+          stub_feature_flags(push_rules_supersede_code_owners: false)
+        end
+
+        it 'returns branch_requires_code_owner_approval?' do
+          expect(project).to receive(:branch_requires_code_owner_approval?).and_return(true)
+
+          expect(validate_code_owners).to eq(true)
+        end
+      end
+
       context 'when user can not push to the branch' do
         context 'when not updated from web' do
           it 'checks if the branch requires code owner approval' do
@@ -129,7 +141,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
       end
     end
 
-    describe "#path_validations" do
+    describe "#file_paths_validations" do
       include_context 'change access checks context'
 
       context "when the feature isn't enabled on the project" do
@@ -139,7 +151,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
         end
 
         it "returns an empty array" do
-          expect(subject.send(:path_validations)).to eq([])
+          expect(subject.send(:file_paths_validations)).to eq([])
         end
       end
 
@@ -152,7 +164,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
           end
 
           it "returns an array of Proc(s)" do
-            validations = subject.send(:path_validations)
+            validations = subject.send(:file_paths_validations)
 
             expect(validations.any?).to be_truthy
             expect(validations.any? { |v| !v.is_a? Proc }).to be_falsy
@@ -165,7 +177,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
           end
 
           it "returns an empty array" do
-            expect(subject.send(:path_validations)).to eq([])
+            expect(subject.send(:file_paths_validations)).to eq([])
           end
         end
       end
@@ -201,7 +213,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
             [
               'readme.txt', 'any/ida_rsa.pub', 'any/id_dsa.pub', 'any_2/id_ed25519.pub',
               'random_file.pdf', 'folder/id_ecdsa.pub', 'docs/aws/credentials.md', 'ending_withhistory'
-            ]
+          ]
 
           white_listed.each do |file_path|
             old_rev = 'be93687618e4b132087f430a4d8fc3a609c9b77c'
@@ -224,7 +236,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
               'aws/credentials', '.ssh/personal_rsa', 'config/server_rsa', '.ssh/id_rsa', '.ssh/id_dsa',
               '.ssh/personal_dsa', 'config/server_ed25519', 'any/id_ed25519', '.ssh/personal_ecdsa', 'config/server_ecdsa',
               'any_place/id_ecdsa', 'some_pLace/file.key', 'other_PlAcE/other_file.pem', 'bye_bug.history', 'pg_sql_history'
-            ]
+          ]
 
           black_listed.each do |file_path|
             old_rev = 'be93687618e4b132087f430a4d8fc3a609c9b77c'

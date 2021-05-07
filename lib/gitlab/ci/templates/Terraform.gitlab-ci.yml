@@ -17,6 +17,7 @@ variables:
 cache:
   paths:
     - .terraform
+    - .terraform.lock.hcl
 
 before_script:
   - alias convert_report="jq -r '([.resource_changes[]?.change.actions?]|flatten)|{\"create\":(map(select(.==\"create\"))|length),\"update\":(map(select(.==\"update\"))|length),\"delete\":(map(select(.==\"delete\"))|length)}'"
@@ -55,6 +56,6 @@ apply:
     - terraform apply -input=false $PLAN
   dependencies:
     - plan
-  when: manual
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual

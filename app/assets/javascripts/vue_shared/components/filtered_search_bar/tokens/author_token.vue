@@ -43,7 +43,10 @@ export default {
       return this.value.data.toLowerCase();
     },
     activeAuthor() {
-      return this.authors.find(author => author.username.toLowerCase() === this.currentValue);
+      return this.authors.find((author) => author.username.toLowerCase() === this.currentValue);
+    },
+    activeAuthorAvatar() {
+      return this.avatarUrl(this.activeAuthor);
     },
   },
   watch: {
@@ -63,7 +66,7 @@ export default {
         : this.config.fetchAuthors(searchTerm);
 
       fetchPromise
-        .then(res => {
+        .then((res) => {
           // We'd want to avoid doing this check but
           // users.json and /groups/:id/members & /projects/:id/users
           // return response differently.
@@ -73,6 +76,9 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    avatarUrl(author) {
+      return author.avatarUrl || author.avatar_url;
     },
     searchAuthors: debounce(function debouncedSearch({ data }) {
       this.fetchAuthorBySearchTerm(data);
@@ -92,7 +98,7 @@ export default {
       <gl-avatar
         v-if="activeAuthor"
         :size="16"
-        :src="activeAuthor.avatar_url"
+        :src="activeAuthorAvatar"
         shape="circle"
         class="gl-mr-2"
       />
@@ -115,7 +121,7 @@ export default {
           :value="author.username"
         >
           <div class="d-flex">
-            <gl-avatar :size="32" :src="author.avatar_url" />
+            <gl-avatar :size="32" :src="avatarUrl(author)" />
             <div>
               <div>{{ author.name }}</div>
               <div>@{{ author.username }}</div>

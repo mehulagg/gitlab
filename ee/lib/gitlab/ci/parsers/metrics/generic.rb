@@ -18,7 +18,7 @@ module Gitlab
             return if name.blank? || metric_values.empty?
 
             metrics_report.add_metric(name, metric_values.first)
-          rescue => e
+          rescue StandardError => e
             Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
             raise MetricsParserError, "Metrics parsing failed"
           end

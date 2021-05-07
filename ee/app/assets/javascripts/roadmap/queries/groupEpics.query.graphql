@@ -4,17 +4,22 @@ query groupEpics(
   $fullPath: ID!
   $state: EpicState
   $sort: EpicSort
+  $iid: ID
   $startDate: Time
   $dueDate: Time
   $labelName: [String!] = []
   $authorUsername: String = ""
   $milestoneTitle: String = ""
+  $myReactionEmoji: String
+  $confidential: Boolean
   $search: String = ""
+  $first: Int = 1001
 ) {
   group(fullPath: $fullPath) {
     id
     name
     epics(
+      iid: $iid
       state: $state
       sort: $sort
       startDate: $startDate
@@ -22,7 +27,10 @@ query groupEpics(
       labelName: $labelName
       authorUsername: $authorUsername
       milestoneTitle: $milestoneTitle
+      myReactionEmoji: $myReactionEmoji
+      confidential: $confidential
       search: $search
+      first: $first
     ) {
       edges {
         node {

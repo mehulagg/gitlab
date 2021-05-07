@@ -81,6 +81,6 @@ class Groups::HooksController < Groups::ApplicationController
   end
 
   def check_group_webhooks_available!
-    render_404 unless @group.feature_available?(:group_webhooks) || LicenseHelper.show_promotions?(current_user)
+    render_404 unless @group.licensed_feature_available?(:group_webhooks) || LicenseHelper.show_promotions?(current_user)
   end
 end

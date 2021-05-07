@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :ldap do
     desc 'GitLab | LDAP | Rename provider'
@@ -34,6 +36,24 @@ namespace :gitlab do
         plural_updated_count = ActionController::Base.helpers.pluralize(updated_count, 'user')
         puts 'Some user identities could not be updated'.color(:red)
         puts "Successfully updated #{plural_updated_count} out of #{plural_id_count} total"
+      end
+    end
+
+    namespace :secret do
+      desc 'GitLab | LDAP | Secret | Write LDAP secrets'
+      task write: [:environment] do
+        content = STDIN.tty? ? STDIN.gets : STDIN.read
+        Gitlab::EncryptedLdapCommand.write(content)
+      end
+
+      desc 'GitLab | LDAP | Secret | Edit LDAP secrets'
+      task edit: [:environment] do
+        Gitlab::EncryptedLdapCommand.edit
+      end
+
+      desc 'GitLab | LDAP | Secret | Show LDAP secrets'
+      task show: [:environment] do
+        Gitlab::EncryptedLdapCommand.show
       end
     end
   end

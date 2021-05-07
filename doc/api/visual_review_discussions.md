@@ -1,13 +1,14 @@
 ---
 stage: Verify
 group: Testing
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, api
 ---
 
-# Visual Review discussions API **(STARTER)**
+# Visual Review discussions API **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18710) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.5.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18710) in GitLab 12.5.
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab Premium in 13.9.
 
 Visual Review discussions are notes on Merge Requests sent as
 feedback from [Visual Reviews](../ci/review_apps/index.md#visual-reviews).

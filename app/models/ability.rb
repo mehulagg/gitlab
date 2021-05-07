@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_dependency 'declarative_policy'
-
 class Ability
   class << self
     # Given a list of users and a project this method returns the users that can
@@ -58,7 +56,8 @@ class Ability
 
     def allowed?(user, action, subject = :global, opts = {})
       if subject.is_a?(Hash)
-        opts, subject = subject, :global
+        opts = subject
+        subject = :global
       end
 
       policy = policy_for(user, subject)

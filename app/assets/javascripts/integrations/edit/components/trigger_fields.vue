@@ -1,7 +1,7 @@
 <script>
-import { mapGetters } from 'vuex';
-import { startCase } from 'lodash';
 import { GlFormGroup, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
+import { startCase } from 'lodash';
+import { mapGetters } from 'vuex';
 import { __ } from '~/locale';
 
 const typeWithPlaceholder = {
@@ -10,8 +10,8 @@ const typeWithPlaceholder = {
 };
 
 const placeholderForType = {
-  [typeWithPlaceholder.SLACK]: __('Slack channels (e.g. general, development)'),
-  [typeWithPlaceholder.MATTERMOST]: __('Channel handle (e.g. town-square)'),
+  [typeWithPlaceholder.SLACK]: __('general, development'),
+  [typeWithPlaceholder.MATTERMOST]: __('my-channel'),
 };
 
 export default {

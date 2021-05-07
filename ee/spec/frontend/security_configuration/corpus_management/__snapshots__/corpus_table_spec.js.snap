@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Corpus table corpus management renders with the correct columns 1`] = `
+<tr
+  class=""
+  role="row"
+>
+  <th
+    aria-colindex="1"
+    class="gl-bg-transparent! gl-border-gray-100! gl-border-b-solid! gl-border-b-1!"
+    role="columnheader"
+    scope="col"
+  >
+    <div>
+      Corpus name
+    </div>
+  </th>
+  <th
+    aria-colindex="2"
+    class="gl-bg-transparent! gl-border-gray-100! gl-border-b-solid! gl-border-b-1!"
+    role="columnheader"
+    scope="col"
+  >
+    <div>
+      Target
+    </div>
+  </th>
+  <th
+    aria-colindex="3"
+    class="gl-bg-transparent! gl-border-gray-100! gl-border-b-solid! gl-border-b-1!"
+    role="columnheader"
+    scope="col"
+  >
+    <div>
+      Last updated
+    </div>
+  </th>
+  <th
+    aria-colindex="4"
+    class="gl-bg-transparent! gl-border-gray-100! gl-border-b-solid! gl-border-b-1!"
+    role="columnheader"
+    scope="col"
+  >
+    <div>
+      Last used
+    </div>
+  </th>
+  <th
+    aria-colindex="5"
+    class="gl-bg-transparent! gl-border-gray-100! gl-border-b-solid! gl-border-b-1!"
+    role="columnheader"
+    scope="col"
+  >
+    <div>
+      Actions
+    </div>
+  </th>
+</tr>
+`;

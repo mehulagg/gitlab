@@ -9,7 +9,7 @@ module QA
             element :epic_details_cell
           end
 
-          view 'ee/app/assets/javascripts/roadmap/components/epic_item_timeline.vue' do
+          view 'ee/app/assets/javascripts/roadmap/components/epic_item.vue' do
             element :epic_timeline_cell
           end
 

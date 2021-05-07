@@ -6,8 +6,6 @@ import TimezoneDropdown, {
 } from '~/pages/projects/pipeline_schedules/shared/components/timezone_dropdown';
 
 describe('Timezone Dropdown', () => {
-  preloadFixtures('pipeline_schedules/edit.html');
-
   let $inputEl = null;
   let $dropdownEl = null;
   let $wrapper = null;
@@ -47,7 +45,7 @@ describe('Timezone Dropdown', () => {
         const data = $dropdownEl.data('data');
         const formatted = $wrapper.find(tzListSel).text();
 
-        data.forEach(item => {
+        data.forEach((item) => {
           expect(formatted).toContain(formatTimezone(item));
         });
       });
@@ -88,10 +86,7 @@ describe('Timezone Dropdown', () => {
           onSelectTimezone,
         });
 
-        $wrapper
-          .find(tzListSel)
-          .first()
-          .trigger('click');
+        $wrapper.find(tzListSel).first().trigger('click');
 
         expect(onSelectTimezone).toHaveBeenCalled();
       });
@@ -103,7 +98,7 @@ describe('Timezone Dropdown', () => {
         new TimezoneDropdown({
           $inputEl,
           $dropdownEl,
-          displayFormat: selectedItem => formatTimezone(selectedItem),
+          displayFormat: (selectedItem) => formatTimezone(selectedItem),
         });
 
         expect($wrapper.find(tzDropdownToggleText).html()).toEqual('[UTC - 2.5] Newfoundland');
@@ -118,10 +113,7 @@ describe('Timezone Dropdown', () => {
           displayFormat,
         });
 
-        $wrapper
-          .find(tzListSel)
-          .first()
-          .trigger('click');
+        $wrapper.find(tzListSel).first().trigger('click');
 
         expect(displayFormat).toHaveBeenCalled();
       });

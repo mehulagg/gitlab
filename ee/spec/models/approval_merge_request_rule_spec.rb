@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe ApprovalMergeRequestRule do
-  let(:merge_request) { create(:merge_request) }
+RSpec.describe ApprovalMergeRequestRule, factory_default: :keep do
+  let_it_be_with_reload(:project) { create_default(:project, :repository) }
+  let_it_be_with_reload(:merge_request) { create_default(:merge_request) }
 
   subject { create(:approval_merge_request_rule, merge_request: merge_request) }
 
@@ -27,7 +28,7 @@ RSpec.describe ApprovalMergeRequestRule do
     end
 
     context 'approval_project_rule is set' do
-      let(:approval_project_rule) { build(:approval_project_rule) }
+      let(:approval_project_rule) { build(:approval_project_rule, project: build(:project)) }
       let(:merge_request_rule) { build(:approval_merge_request_rule, merge_request: merge_request, approval_project_rule: approval_project_rule) }
 
       context 'when project of approval_project_rule and merge request matches' do

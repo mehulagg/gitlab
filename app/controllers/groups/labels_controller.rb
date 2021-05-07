@@ -2,7 +2,6 @@
 
 class Groups::LabelsController < Groups::ApplicationController
   include ToggleSubscriptionAction
-  include ShowInheritedLabelsChecker
 
   before_action :label, only: [:edit, :update, :destroy]
   before_action :authorize_admin_labels!, only: [:new, :create, :edit, :update, :destroy]
@@ -17,7 +16,8 @@ class Groups::LabelsController < Groups::ApplicationController
       format.html do
         # at group level we do not want to list project labels,
         # we only want `only_group_labels = false` when pulling labels for label filter dropdowns, fetched through json
-        @labels = available_labels(params.merge(only_group_labels: true)).page(params[:page])
+        @labels = available_labels(params.merge(only_group_labels: true)).page(params[:page]) # rubocop: disable CodeReuse/ActiveRecord
+        Preloaders::LabelsPreloader.new(@labels, current_user).preload_all
       end
       format.json do
         render json: LabelSerializer.new.represent_appearance(available_labels)
@@ -112,7 +112,7 @@ class Groups::LabelsController < Groups::ApplicationController
         current_user,
         group_id: @group.id,
         only_group_labels: options[:only_group_labels],
-        include_ancestor_groups: show_inherited_labels?(params[:include_ancestor_groups]),
+        include_ancestor_groups: true,
         sort: sort,
         subscribed: options[:subscribed],
         include_descendant_groups: options[:include_descendant_groups],

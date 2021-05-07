@@ -82,6 +82,30 @@ RSpec.describe Gitlab::Ci::Config do
     end
   end
 
+  describe '#included_templates' do
+    let(:yml) do
+      <<-EOS
+        include:
+          - template: Jobs/Deploy.gitlab-ci.yml
+          - template: Jobs/Build.gitlab-ci.yml
+          - remote: https://example.com/gitlab-ci.yml
+      EOS
+    end
+
+    before do
+      stub_request(:get, 'https://example.com/gitlab-ci.yml').to_return(status: 200, body: <<-EOS)
+        test:
+          script: [ 'echo hello world' ]
+      EOS
+    end
+
+    subject(:included_templates) do
+      config.included_templates
+    end
+
+    it { is_expected.to contain_exactly('Jobs/Deploy.gitlab-ci.yml', 'Jobs/Build.gitlab-ci.yml') }
+  end
+
   context 'when using extendable hash' do
     let(:yml) do
       <<-EOS
@@ -239,12 +263,40 @@ RSpec.describe Gitlab::Ci::Config do
         end
       end
     end
+
+    context 'when yaml uses circular !reference' do
+      let(:yml) do
+        <<~YAML
+        job-1:
+          script:
+            - !reference [job-2, before_script]
+
+        job-2:
+          before_script: !reference [job-1, script]
+        YAML
+      end
+
+      it 'raises error' do
+        expect { config }.to raise_error(
+          described_class::ConfigError,
+          /\!reference \["job-2", "before_script"\] is part of a circular chain/
+        )
+      end
+    end
   end
 
   context "when using 'include' directive" do
     let(:project) { create(:project, :repository) }
     let(:remote_location) { 'https://gitlab.com/gitlab-org/gitlab-foss/blob/1234/.gitlab-ci-1.yml' }
     let(:local_location) { 'spec/fixtures/gitlab/ci/external_files/.gitlab-ci-template-1.yml' }
+
+    let(:local_file_content) do
+      File.read(Rails.root.join(local_location))
+    end
+
+    let(:local_location_hash) do
+      YAML.safe_load(local_file_content).deep_symbolize_keys
+    end
 
     let(:remote_file_content) do
       <<~HEREDOC
@@ -256,8 +308,8 @@ RSpec.describe Gitlab::Ci::Config do
       HEREDOC
     end
 
-    let(:local_file_content) do
-      File.read(Rails.root.join(local_location))
+    let(:remote_file_hash) do
+      YAML.safe_load(remote_file_content).deep_symbolize_keys
     end
 
     let(:gitlab_ci_yml) do
@@ -283,22 +335,11 @@ RSpec.describe Gitlab::Ci::Config do
 
     context "when gitlab_ci_yml has valid 'include' defined" do
       it 'returns a composed hash' do
-        before_script_values = [
-          "apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev nodejs", "ruby -v",
-          "which ruby",
-          "bundle install --jobs $(nproc)  \"${FLAGS[@]}\""
-        ]
-        variables = {
-          POSTGRES_USER: "user",
-          POSTGRES_PASSWORD: "testing-password",
-          POSTGRES_ENABLED: "true",
-          POSTGRES_DB: "$CI_ENVIRONMENT_SLUG"
-        }
         composed_hash = {
-          before_script: before_script_values,
+          before_script: local_location_hash[:before_script],
           image: "ruby:2.7",
           rspec: { script: ["bundle exec rspec"] },
-          variables: variables
+          variables: remote_file_hash[:variables]
         }
 
         expect(config.to_hash).to eq(composed_hash)
@@ -573,6 +614,57 @@ RSpec.describe Gitlab::Ci::Config do
           described_class::ConfigError,
           'Including configs from artifacts is only allowed when triggering child pipelines'
         )
+      end
+    end
+
+    context "when including multiple files from a project" do
+      let(:other_file_location) { 'my_builds.yml' }
+
+      let(:other_file_content) do
+        <<~HEREDOC
+        build:
+          stage: build
+          script: echo hello
+
+        rspec:
+          stage: test
+          script: bundle exec rspec
+        HEREDOC
+      end
+
+      let(:gitlab_ci_yml) do
+        <<~HEREDOC
+        include:
+          - project: #{project.full_path}
+            file:
+              - #{local_location}
+              - #{other_file_location}
+
+        image: ruby:2.7
+        HEREDOC
+      end
+
+      before do
+        project.add_developer(user)
+
+        allow_next_instance_of(Repository) do |repository|
+          allow(repository).to receive(:blob_data_at).with(an_instance_of(String), local_location)
+                                                     .and_return(local_file_content)
+
+          allow(repository).to receive(:blob_data_at).with(an_instance_of(String), other_file_location)
+                                                     .and_return(other_file_content)
+        end
+      end
+
+      it 'returns a composed hash' do
+        composed_hash = {
+          before_script: local_location_hash[:before_script],
+          image: "ruby:2.7",
+          build: { stage: "build", script: "echo hello" },
+          rspec: { stage: "test", script: "bundle exec rspec" }
+        }
+
+        expect(config.to_hash).to eq(composed_hash)
       end
     end
   end

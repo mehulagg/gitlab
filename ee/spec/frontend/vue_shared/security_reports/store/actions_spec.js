@@ -4,13 +4,11 @@ import {
   setBaseBlobPath,
   setCanReadVulnerabilityFeedback,
   setVulnerabilityFeedbackPath,
-  setVulnerabilityFeedbackHelpPath,
   setPipelineId,
   requestContainerScanningDiff,
   requestDastDiff,
   requestDependencyScanningDiff,
   requestCoverageFuzzingDiff,
-  openModal,
   setModalData,
   requestDismissVulnerability,
   receiveDismissVulnerability,
@@ -29,7 +27,6 @@ import {
   updateDependencyScanningIssue,
   updateContainerScanningIssue,
   updateDastIssue,
-  updateSecretScanningIssue,
   updateCoverageFuzzingIssue,
   addDismissalComment,
   receiveAddDismissalCommentError,
@@ -53,10 +50,6 @@ import {
   receiveDastDiffSuccess,
   receiveDastDiffError,
   fetchDastDiff,
-  setSecretScanningDiffEndpoint,
-  receiveSecretScanningDiffSuccess,
-  receiveSecretScanningDiffError,
-  fetchSecretScanningDiff,
   setCoverageFuzzingDiffEndpoint,
   receiveCoverageFuzzingDiffSuccess,
   receiveCoverageFuzzingDiffError,
@@ -66,14 +59,13 @@ import * as types from 'ee/vue_shared/security_reports/store/mutation_types';
 import state from 'ee/vue_shared/security_reports/store/state';
 import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
+import toasted from '~/vue_shared/plugins/global_toast';
 import {
   dastFeedbacks,
   containerScanningFeedbacks,
   dependencyScanningFeedbacks,
-  secretScanningFeedbacks,
   coverageFuzzingFeedbacks,
 } from '../mock_data';
-import toasted from '~/vue_shared/plugins/global_toast';
 
 // Mock bootstrap modal implementation
 jest.mock('jquery', () => () => ({
@@ -85,11 +77,11 @@ jest.mock('~/lib/utils/url_utility', () => ({
 
 jest.mock('~/vue_shared/plugins/global_toast', () => jest.fn());
 
-const createVulnerability = options => ({
+const createVulnerability = (options) => ({
   ...options,
 });
 
-const createNonDismissedVulnerability = options =>
+const createNonDismissedVulnerability = (options) =>
   createVulnerability({
     ...options,
     isDismissed: false,
@@ -97,7 +89,7 @@ const createNonDismissedVulnerability = options =>
     dismissal_feedback: null,
   });
 
-const createDismissedVulnerability = options =>
+const createDismissedVulnerability = (options) =>
   createVulnerability({
     ...options,
     isDismissed: true,
@@ -122,7 +114,7 @@ describe('security reports actions', () => {
   });
 
   describe('setHeadBlobPath', () => {
-    it('should commit set head blob path', done => {
+    it('should commit set head blob path', (done) => {
       testAction(
         setHeadBlobPath,
         'path',
@@ -140,7 +132,7 @@ describe('security reports actions', () => {
   });
 
   describe('setBaseBlobPath', () => {
-    it('should commit set head blob path', done => {
+    it('should commit set head blob path', (done) => {
       testAction(
         setBaseBlobPath,
         'path',
@@ -158,7 +150,7 @@ describe('security reports actions', () => {
   });
 
   describe('setCanReadVulnerabilityFeedback', () => {
-    it('should commit set vulnerabulity feedback path', done => {
+    it('should commit set vulnerabulity feedback path', (done) => {
       testAction(
         setCanReadVulnerabilityFeedback,
         true,
@@ -176,7 +168,7 @@ describe('security reports actions', () => {
   });
 
   describe('setVulnerabilityFeedbackPath', () => {
-    it('should commit set vulnerabulity feedback path', done => {
+    it('should commit set vulnerabulity feedback path', (done) => {
       testAction(
         setVulnerabilityFeedbackPath,
         'path',
@@ -193,26 +185,8 @@ describe('security reports actions', () => {
     });
   });
 
-  describe('setVulnerabilityFeedbackHelpPath', () => {
-    it('should commit set vulnerabulity feedback help path', done => {
-      testAction(
-        setVulnerabilityFeedbackHelpPath,
-        'path',
-        mockedState,
-        [
-          {
-            type: types.SET_VULNERABILITY_FEEDBACK_HELP_PATH,
-            payload: 'path',
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
   describe('setPipelineId', () => {
-    it('should commit set vulnerability feedback path', done => {
+    it('should commit set vulnerability feedback path', (done) => {
       testAction(
         setPipelineId,
         123,
@@ -230,7 +204,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestContainerScanningDiff', () => {
-    it('should commit request mutation', done => {
+    it('should commit request mutation', (done) => {
       testAction(
         requestContainerScanningDiff,
         null,
@@ -247,7 +221,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestDastDiff', () => {
-    it('should commit request mutation', done => {
+    it('should commit request mutation', (done) => {
       testAction(
         requestDastDiff,
         null,
@@ -264,7 +238,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestDependencyScanningDiff', () => {
-    it('should commit request mutation', done => {
+    it('should commit request mutation', (done) => {
       testAction(
         requestDependencyScanningDiff,
         null,
@@ -281,7 +255,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestCoverageFuzzingDiff', () => {
-    it('should commit request mutation', done => {
+    it('should commit request mutation', (done) => {
       testAction(
         requestCoverageFuzzingDiff,
         null,
@@ -297,26 +271,8 @@ describe('security reports actions', () => {
     });
   });
 
-  describe('openModal', () => {
-    it('dispatches setModalData action', done => {
-      testAction(
-        openModal,
-        { issue: { id: 1 }, status: 'failed' },
-        mockedState,
-        [],
-        [
-          {
-            type: 'setModalData',
-            payload: { issue: { id: 1 }, status: 'failed' },
-          },
-        ],
-        done,
-      );
-    });
-  });
-
   describe('setModalData', () => {
-    it('commits set issue modal data', done => {
+    it('commits set issue modal data', (done) => {
       testAction(
         setModalData,
         { issue: { id: 1 }, status: 'success' },
@@ -334,7 +290,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestDismissVulnerability', () => {
-    it('commits request dismiss issue', done => {
+    it('commits request dismiss issue', (done) => {
       testAction(
         requestDismissVulnerability,
         null,
@@ -351,7 +307,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveDismissVulnerability', () => {
-    it(`should pass the payload to the ${types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS} mutation`, done => {
+    it(`should pass the payload to the ${types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS} mutation`, (done) => {
       const payload = createDismissedVulnerability();
 
       testAction(
@@ -371,7 +327,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveDismissVulnerabilityError', () => {
-    it('commits receive dismiss issue error with payload', done => {
+    it('commits receive dismiss issue error with payload', (done) => {
       testAction(
         receiveDismissVulnerabilityError,
         'error',
@@ -405,7 +361,7 @@ describe('security reports actions', () => {
         mockedState.createVulnerabilityFeedbackDismissalPath = 'dismiss_vulnerability_path';
       });
 
-      it(`should dispatch receiveDismissVulnerability`, done => {
+      it(`should dispatch receiveDismissVulnerability`, (done) => {
         testAction(
           dismissVulnerability,
           payload,
@@ -427,7 +383,7 @@ describe('security reports actions', () => {
         );
       });
 
-      it('show dismiss vulnerability toast message', done => {
+      it('show dismiss vulnerability toast message', (done) => {
         const checkToastMessage = () => {
           expect(toasted).toHaveBeenCalledTimes(1);
           done();
@@ -455,7 +411,7 @@ describe('security reports actions', () => {
       });
     });
 
-    it('with error should dispatch `receiveDismissVulnerabilityError`', done => {
+    it('with error should dispatch `receiveDismissVulnerabilityError`', (done) => {
       mock.onPost('dismiss_vulnerability_path').reply(500, {});
       mockedState.vulnerabilityFeedbackPath = 'dismiss_vulnerability_path';
       mockedState.canReadVulnerabilityFeedback = true;
@@ -494,7 +450,7 @@ describe('security reports actions', () => {
         mock.onPatch(url).replyOnce(200, data);
       });
 
-      it('should dispatch the request and success actions', done => {
+      it('should dispatch the request and success actions', (done) => {
         testAction(
           addDismissalComment,
           { comment },
@@ -512,7 +468,7 @@ describe('security reports actions', () => {
         );
       });
 
-      it('should show added dismissal comment toast message', done => {
+      it('should show added dismissal comment toast message', (done) => {
         const checkToastMessage = () => {
           expect(toasted).toHaveBeenCalledTimes(1);
           done();
@@ -541,7 +497,7 @@ describe('security reports actions', () => {
         mock.onPatch(url).replyOnce(404);
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           addDismissalComment,
           { comment },
@@ -560,7 +516,7 @@ describe('security reports actions', () => {
     });
 
     describe('receiveAddDismissalCommentSuccess', () => {
-      it('should commit the success mutation', done => {
+      it('should commit the success mutation', (done) => {
         testAction(
           receiveAddDismissalCommentSuccess,
           { data },
@@ -573,7 +529,7 @@ describe('security reports actions', () => {
     });
 
     describe('receiveAddDismissalCommentError', () => {
-      it('should commit the error mutation', done => {
+      it('should commit the error mutation', (done) => {
         testAction(
           receiveAddDismissalCommentError,
           {},
@@ -591,7 +547,7 @@ describe('security reports actions', () => {
     });
 
     describe('requestAddDismissalComment', () => {
-      it('should commit the request mutation', done => {
+      it('should commit the request mutation', (done) => {
         testAction(
           requestAddDismissalComment,
           {},
@@ -619,7 +575,7 @@ describe('security reports actions', () => {
         mock.onPatch(url).replyOnce(200, data);
       });
 
-      it('should dispatch the request and success actions', done => {
+      it('should dispatch the request and success actions', (done) => {
         testAction(
           deleteDismissalComment,
           { comment },
@@ -637,7 +593,7 @@ describe('security reports actions', () => {
         );
       });
 
-      it('should show deleted dismissal comment toast message', done => {
+      it('should show deleted dismissal comment toast message', (done) => {
         const checkToastMessage = () => {
           expect(toasted).toHaveBeenCalledTimes(1);
           done();
@@ -666,7 +622,7 @@ describe('security reports actions', () => {
         mock.onPatch(url).replyOnce(404);
       });
 
-      it('should dispatch the request and error actions', done => {
+      it('should dispatch the request and error actions', (done) => {
         testAction(
           deleteDismissalComment,
           { comment },
@@ -685,7 +641,7 @@ describe('security reports actions', () => {
     });
 
     describe('receiveDeleteDismissalCommentSuccess', () => {
-      it('should commit the success mutation', done => {
+      it('should commit the success mutation', (done) => {
         testAction(
           receiveDeleteDismissalCommentSuccess,
           { data },
@@ -698,7 +654,7 @@ describe('security reports actions', () => {
     });
 
     describe('receiveDeleteDismissalCommentError', () => {
-      it('should commit the error mutation', done => {
+      it('should commit the error mutation', (done) => {
         testAction(
           receiveDeleteDismissalCommentError,
           {},
@@ -716,7 +672,7 @@ describe('security reports actions', () => {
     });
 
     describe('requestDeleteDismissalComment', () => {
-      it('should commit the request mutation', done => {
+      it('should commit the request mutation', (done) => {
         testAction(
           requestDeleteDismissalComment,
           {},
@@ -730,7 +686,7 @@ describe('security reports actions', () => {
   });
 
   describe('showDismissalDeleteButtons', () => {
-    it('commits show dismissal delete buttons', done => {
+    it('commits show dismissal delete buttons', (done) => {
       testAction(
         showDismissalDeleteButtons,
         null,
@@ -747,7 +703,7 @@ describe('security reports actions', () => {
   });
 
   describe('hideDismissalDeleteButtons', () => {
-    it('commits hide dismissal delete buttons', done => {
+    it('commits hide dismissal delete buttons', (done) => {
       testAction(
         hideDismissalDeleteButtons,
         null,
@@ -776,7 +732,7 @@ describe('security reports actions', () => {
         payload = createNonDismissedVulnerability({ ...mockedState.modal.vulnerability });
       });
 
-      it('should dispatch `receiveDismissVulnerability`', done => {
+      it('should dispatch `receiveDismissVulnerability`', (done) => {
         testAction(
           revertDismissVulnerability,
           payload,
@@ -796,7 +752,7 @@ describe('security reports actions', () => {
       });
     });
 
-    it('with error should dispatch `receiveDismissVulnerabilityError`', done => {
+    it('with error should dispatch `receiveDismissVulnerabilityError`', (done) => {
       mock.onDelete('dismiss_vulnerability_path/123').reply(500, {});
       mockedState.modal.vulnerability.dismissalFeedback = { id: 123 };
       mockedState.createVulnerabilityFeedbackDismissalPath = 'dismiss_vulnerability_path';
@@ -821,7 +777,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestCreateIssue', () => {
-    it('commits request create issue', done => {
+    it('commits request create issue', (done) => {
       testAction(
         requestCreateIssue,
         null,
@@ -838,7 +794,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveCreateIssue', () => {
-    it('commits receive create issue', done => {
+    it('commits receive create issue', (done) => {
       testAction(
         receiveCreateIssue,
         null,
@@ -855,7 +811,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveCreateIssueError', () => {
-    it('commits receive create issue error with payload', done => {
+    it('commits receive create issue error with payload', (done) => {
       testAction(
         receiveCreateIssueError,
         'error',
@@ -873,7 +829,7 @@ describe('security reports actions', () => {
   });
 
   describe('createNewIssue', () => {
-    it('with success should dispatch `requestCreateIssue` and `receiveCreateIssue`', done => {
+    it('with success should dispatch `requestCreateIssue` and `receiveCreateIssue`', (done) => {
       mock.onPost('create_issue_path').reply(200, { issue_path: 'new_issue' });
       mockedState.createVulnerabilityFeedbackIssuePath = 'create_issue_path';
 
@@ -894,7 +850,7 @@ describe('security reports actions', () => {
       );
     });
 
-    it('with error should dispatch `receiveCreateIssueError`', done => {
+    it('with error should dispatch `receiveCreateIssueError`', (done) => {
       mock.onPost('create_issue_path').reply(500, {});
       mockedState.vulnerabilityFeedbackPath = 'create_issue_path';
       mockedState.canReadVulnerabilityFeedback = true;
@@ -946,7 +902,7 @@ describe('security reports actions', () => {
   });
 
   describe('requestCreateMergeRequest', () => {
-    it('commits request create merge request', done => {
+    it('commits request create merge request', (done) => {
       testAction(
         requestCreateMergeRequest,
         null,
@@ -963,7 +919,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveCreateMergeRequestSuccess', () => {
-    it('commits receive create merge request', done => {
+    it('commits receive create merge request', (done) => {
       const data = { foo: 'bar' };
 
       testAction(
@@ -983,7 +939,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveCreateMergeRequestError', () => {
-    it('commits receive create merge request error', done => {
+    it('commits receive create merge request error', (done) => {
       testAction(
         receiveCreateMergeRequestError,
         '',
@@ -1000,7 +956,7 @@ describe('security reports actions', () => {
   });
 
   describe('createMergeRequest', () => {
-    it('with success should dispatch `receiveCreateMergeRequestSuccess`', done => {
+    it('with success should dispatch `receiveCreateMergeRequestSuccess`', (done) => {
       const data = { merge_request_path: 'fakepath.html' };
       mockedState.createVulnerabilityFeedbackMergeRequestPath = 'create_merge_request_path';
       mock.onPost('create_merge_request_path').reply(200, data);
@@ -1023,7 +979,7 @@ describe('security reports actions', () => {
       );
     });
 
-    it('with error should dispatch `receiveCreateMergeRequestError`', done => {
+    it('with error should dispatch `receiveCreateMergeRequestError`', (done) => {
       mock.onPost('create_merge_request_path').reply(500, {});
       mockedState.vulnerabilityFeedbackPath = 'create_merge_request_path';
       mockedState.canReadVulnerabilityFeedback = true;
@@ -1048,7 +1004,7 @@ describe('security reports actions', () => {
   });
 
   describe('updateDependencyScanningIssue', () => {
-    it('commits update dependency scanning issue', done => {
+    it('commits update dependency scanning issue', (done) => {
       const payload = { foo: 'bar' };
 
       testAction(
@@ -1068,7 +1024,7 @@ describe('security reports actions', () => {
   });
 
   describe('updateContainerScanningIssue', () => {
-    it('commits update container scanning issue', done => {
+    it('commits update container scanning issue', (done) => {
       const payload = { foo: 'bar' };
 
       testAction(
@@ -1087,28 +1043,8 @@ describe('security reports actions', () => {
     });
   });
 
-  describe('updateSecretScanningIssue', () => {
-    it('commits update secret scanning issue', done => {
-      const payload = { foo: 'bar' };
-
-      testAction(
-        updateSecretScanningIssue,
-        payload,
-        mockedState,
-        [
-          {
-            type: types.UPDATE_SECRET_SCANNING_ISSUE,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
   describe('updateDastIssue', () => {
-    it('commits update dast issue', done => {
+    it('commits update dast issue', (done) => {
       const payload = { foo: 'bar' };
 
       testAction(
@@ -1128,7 +1064,7 @@ describe('security reports actions', () => {
   });
 
   describe('updateCoverageFuzzingIssue', () => {
-    it('commits update coverageFuzzing issue', done => {
+    it('commits update coverageFuzzing issue', (done) => {
       const payload = { foo: 'bar' };
 
       testAction(
@@ -1148,7 +1084,7 @@ describe('security reports actions', () => {
   });
 
   describe('setContainerScanningDiffEndpoint', () => {
-    it('should pass down the endpoint to the mutation', done => {
+    it('should pass down the endpoint to the mutation', (done) => {
       const payload = '/container_scanning_endpoint.json';
 
       testAction(
@@ -1168,7 +1104,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveContainerScanningDiffSuccess', () => {
-    it('should pass down the response to the mutation', done => {
+    it('should pass down the response to the mutation', (done) => {
       const payload = { data: 'Effort yields its own rewards.' };
 
       testAction(
@@ -1188,7 +1124,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveContainerScanningDiffError', () => {
-    it('should commit container diff error mutation', done => {
+    it('should commit container diff error mutation', (done) => {
       testAction(
         receiveContainerScanningDiffError,
         undefined,
@@ -1215,7 +1151,7 @@ describe('security reports actions', () => {
     });
 
     describe('on success', () => {
-      it('should dispatch `receiveContainerScanningDiffSuccess`', done => {
+      it('should dispatch `receiveContainerScanningDiffSuccess`', (done) => {
         mock.onGet(endpoint).reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1253,7 +1189,7 @@ describe('security reports actions', () => {
         mock.onGet(endpoint).reply(200, diff);
       });
 
-      it('should dispatch `receiveContainerScanningDiffSuccess`', done => {
+      it('should dispatch `receiveContainerScanningDiffSuccess`', (done) => {
         testAction(
           fetchContainerScanningDiff,
           null,
@@ -1277,7 +1213,7 @@ describe('security reports actions', () => {
     });
 
     describe('when vulnerabilities path errors', () => {
-      it('should dispatch `receiveContainerScanningError`', done => {
+      it('should dispatch `receiveContainerScanningError`', (done) => {
         mock.onGet(endpoint).reply(500);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1306,7 +1242,7 @@ describe('security reports actions', () => {
     });
 
     describe('when feedback path errors', () => {
-      it('should dispatch `receiveContainerScanningError`', done => {
+      it('should dispatch `receiveContainerScanningError`', (done) => {
         mock.onGet(endpoint).reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1336,7 +1272,7 @@ describe('security reports actions', () => {
   });
 
   describe('setDependencyScanningDiffEndpoint', () => {
-    it('should pass down the endpoint to the mutation', done => {
+    it('should pass down the endpoint to the mutation', (done) => {
       const payload = '/dependency_scanning_endpoint.json';
 
       testAction(
@@ -1356,7 +1292,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveDependencyScanningDiffSuccess', () => {
-    it('should pass down the response to the mutation', done => {
+    it('should pass down the response to the mutation', (done) => {
       const payload = { data: 'Effort yields its own rewards.' };
 
       testAction(
@@ -1376,7 +1312,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveDependencyScanningDiffError', () => {
-    it('should commit dependency scanning diff error mutation', done => {
+    it('should commit dependency scanning diff error mutation', (done) => {
       testAction(
         receiveDependencyScanningDiffError,
         undefined,
@@ -1402,7 +1338,7 @@ describe('security reports actions', () => {
     });
 
     describe('on success', () => {
-      it('should dispatch `receiveDependencyScanningDiffSuccess`', done => {
+      it('should dispatch `receiveDependencyScanningDiffSuccess`', (done) => {
         mock.onGet('dependency_scanning_diff.json').reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1440,7 +1376,7 @@ describe('security reports actions', () => {
         mock.onGet('dependency_scanning_diff.json').reply(200, diff);
       });
 
-      it('should dispatch `receiveDependencyScanningDiffSuccess`', done => {
+      it('should dispatch `receiveDependencyScanningDiffSuccess`', (done) => {
         testAction(
           fetchDependencyScanningDiff,
           null,
@@ -1464,7 +1400,7 @@ describe('security reports actions', () => {
     });
 
     describe('when vulnerabilities path errors', () => {
-      it('should dispatch `receiveDependencyScanningError`', done => {
+      it('should dispatch `receiveDependencyScanningError`', (done) => {
         mock.onGet('dependency_scanning_diff.json').reply(500);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1493,7 +1429,7 @@ describe('security reports actions', () => {
     });
 
     describe('when feedback path errors', () => {
-      it('should dispatch `receiveDependencyScanningError`', done => {
+      it('should dispatch `receiveDependencyScanningError`', (done) => {
         mock.onGet('dependency_scanning_diff.json').reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1523,7 +1459,7 @@ describe('security reports actions', () => {
   });
 
   describe('setDastDiffEndpoint', () => {
-    it('should pass down the endpoint to the mutation', done => {
+    it('should pass down the endpoint to the mutation', (done) => {
       const payload = '/dast_endpoint.json';
 
       testAction(
@@ -1543,7 +1479,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveDastDiffSuccess', () => {
-    it('should pass down the response to the mutation', done => {
+    it('should pass down the response to the mutation', (done) => {
       const payload = { data: 'Effort yields its own rewards.' };
 
       testAction(
@@ -1563,7 +1499,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveDastDiffError', () => {
-    it('should commit dast diff error mutation', done => {
+    it('should commit dast diff error mutation', (done) => {
       testAction(
         receiveDastDiffError,
         undefined,
@@ -1589,7 +1525,7 @@ describe('security reports actions', () => {
     });
 
     describe('on success', () => {
-      it('should dispatch `receiveDastDiffSuccess`', done => {
+      it('should dispatch `receiveDastDiffSuccess`', (done) => {
         mock.onGet('dast_diff.json').reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1627,7 +1563,7 @@ describe('security reports actions', () => {
         mock.onGet('dast_diff.json').reply(200, diff);
       });
 
-      it('should dispatch `receiveDastDiffSuccess`', done => {
+      it('should dispatch `receiveDastDiffSuccess`', (done) => {
         testAction(
           fetchDastDiff,
           null,
@@ -1651,7 +1587,7 @@ describe('security reports actions', () => {
     });
 
     describe('when vulnerabilities path errors', () => {
-      it('should dispatch `receiveDastError`', done => {
+      it('should dispatch `receiveDastError`', (done) => {
         mock.onGet('dast_diff.json').reply(500);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1680,7 +1616,7 @@ describe('security reports actions', () => {
     });
 
     describe('when feedback path errors', () => {
-      it('should dispatch `receiveDastError`', done => {
+      it('should dispatch `receiveDastError`', (done) => {
         mock.onGet('dast_diff.json').reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1709,196 +1645,8 @@ describe('security reports actions', () => {
     });
   });
 
-  describe('setSecretScanningDiffEndpoint', () => {
-    it('should pass down the endpoint to the mutation', done => {
-      const payload = '/secret_scanning_endpoint.json';
-
-      testAction(
-        setSecretScanningDiffEndpoint,
-        payload,
-        mockedState,
-        [
-          {
-            type: types.SET_SECRET_SCANNING_DIFF_ENDPOINT,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveSecretScanningDiffSuccess', () => {
-    it('should pass down the response to the mutation', done => {
-      const payload = { data: 'Effort yields its own rewards.' };
-
-      testAction(
-        receiveSecretScanningDiffSuccess,
-        payload,
-        mockedState,
-        [
-          {
-            type: types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS,
-            payload,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('receiveSecretScanningDiffError', () => {
-    it('should commit secret diff error mutation', done => {
-      testAction(
-        receiveSecretScanningDiffError,
-        undefined,
-        mockedState,
-        [
-          {
-            type: types.RECEIVE_SECRET_SCANNING_DIFF_ERROR,
-          },
-        ],
-        [],
-        done,
-      );
-    });
-  });
-
-  describe('fetchSecretScanningDiff', () => {
-    const diff = { vulnerabilities: [] };
-    const endpoint = 'secret_scanning_diff.json';
-
-    beforeEach(() => {
-      mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_feedback';
-      mockedState.canReadVulnerabilityFeedback = true;
-      mockedState.secretScanning.paths.diffEndpoint = endpoint;
-    });
-
-    describe('on success', () => {
-      it('should dispatch `receiveSecretScanningDiffSuccess`', done => {
-        mock.onGet(endpoint).reply(200, diff);
-        mock
-          .onGet('vulnerabilities_feedback', {
-            params: {
-              category: 'secret_detection',
-            },
-          })
-          .reply(200, secretScanningFeedbacks);
-
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffSuccess',
-              payload: {
-                diff,
-                enrichData: secretScanningFeedbacks,
-              },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('when diff endpoint responds successfully and fetching vulnerability feedback is not authorized', () => {
-      beforeEach(() => {
-        mockedState.canReadVulnerabilityFeedback = false;
-        mock.onGet(endpoint).reply(200, diff);
-      });
-
-      it('should dispatch `secret_scanning`', done => {
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffSuccess',
-              payload: {
-                diff,
-                enrichData: [],
-              },
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('when vulnerabilities path errors', () => {
-      it('should dispatch `receiveSecretScanningError`', done => {
-        mock.onGet(endpoint).reply(500);
-        mock
-          .onGet('vulnerabilities_feedback', {
-            params: {
-              category: 'secret_scanning',
-            },
-          })
-          .reply(200, secretScanningFeedbacks);
-
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffError',
-            },
-          ],
-          done,
-        );
-      });
-    });
-
-    describe('when feedback path errors', () => {
-      it('should dispatch `receiveSecretScanningError`', done => {
-        mock.onGet(endpoint).reply(200, diff);
-        mock
-          .onGet('vulnerabilities_feedback', {
-            params: {
-              category: 'secret_scanning',
-            },
-          })
-          .reply(500);
-
-        testAction(
-          fetchSecretScanningDiff,
-          null,
-          mockedState,
-          [],
-          [
-            {
-              type: 'requestSecretScanningDiff',
-            },
-            {
-              type: 'receiveSecretScanningDiffError',
-            },
-          ],
-          done,
-        );
-      });
-    });
-  });
-
   describe('setCoverageFuzzingDiffEndpoint', () => {
-    it('should pass down the endpoint to the mutation', done => {
+    it('should pass down the endpoint to the mutation', (done) => {
       const payload = '/coverage_fuzzing_endpoint.json';
 
       testAction(
@@ -1918,7 +1666,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveCoverageFuzzingDiffSuccess', () => {
-    it('should pass down the response to the mutation', done => {
+    it('should pass down the response to the mutation', (done) => {
       const payload = { data: 'Effort yields its own rewards.' };
 
       testAction(
@@ -1938,7 +1686,7 @@ describe('security reports actions', () => {
   });
 
   describe('receiveCoverageFuzzingDiffError', () => {
-    it('should commit coverage fuzzing diff error mutation', done => {
+    it('should commit coverage fuzzing diff error mutation', (done) => {
       testAction(
         receiveCoverageFuzzingDiffError,
         undefined,
@@ -1963,7 +1711,7 @@ describe('security reports actions', () => {
     });
 
     describe('on success', () => {
-      it('should dispatch `receiveCoverageFuzzingDiffSuccess`', done => {
+      it('should dispatch `receiveCoverageFuzzingDiffSuccess`', (done) => {
         mock.onGet('coverage_fuzzing_diff.json').reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -1996,7 +1744,7 @@ describe('security reports actions', () => {
     });
 
     describe('when vulnerabilities path errors', () => {
-      it('should dispatch `receiveCoverageFuzzingError`', done => {
+      it('should dispatch `receiveCoverageFuzzingError`', (done) => {
         mock.onGet('coverage_fuzzing_diff.json').reply(500);
         mock
           .onGet('vulnerabilities_feedback', {
@@ -2025,7 +1773,7 @@ describe('security reports actions', () => {
     });
 
     describe('when feedback path errors', () => {
-      it('should dispatch `receiveCoverageFuzzingError`', done => {
+      it('should dispatch `receiveCoverageFuzzingError`', (done) => {
         mock.onGet('coverage_fuzzing_diff.json').reply(200, diff);
         mock
           .onGet('vulnerabilities_feedback', {

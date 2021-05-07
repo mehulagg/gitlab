@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe 'Requirements list', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:user_guest) { create(:user) }
-  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:requirement1) { create(:requirement, project: project, title: 'Some requirement-1', description: 'Sample description', author: user, created_at: 5.days.ago, updated_at: 2.days.ago) }
   let_it_be(:requirement2) { create(:requirement, project: project, title: 'Some requirement-2', description: 'Sample description', author: user, created_at: 6.days.ago, updated_at: 2.days.ago) }
   let_it_be(:requirement3) { create(:requirement, project: project, title: 'Some requirement-3', description: 'Sample description', author: user, created_at: 7.days.ago, updated_at: 2.days.ago) }
@@ -16,8 +17,8 @@ RSpec.describe 'Requirements list', :js do
       find('button.js-new-requirement').click
     end
 
-    page.within('.requirements-list-container') do
-      find('textarea#requirementTitle').native.send_keys title
+    page.within('.requirement-form-drawer') do
+      find('input#issuable-title').native.send_keys title
       find('button.js-requirement-save').click
 
       wait_for_all_requests
@@ -44,18 +45,54 @@ RSpec.describe 'Requirements list', :js do
     end
 
     it 'shows requirements tabs for each status type' do
-      page.within('.requirements-state-filters') do
-        expect(page).to have_selector('li > a#state-opened')
-        expect(find('li > a#state-opened')[:title]).to eq('Filter by requirements that are currently opened.')
-        expect(find('li > a#state-opened .badge')).to have_content('3')
+      page.within('.gl-tabs') do
+        expect(page).to have_selector('li > a[data-testid="state-opened"]')
+        expect(find('li > a[data-testid="state-opened"] .badge')).to have_content('3')
 
-        expect(page).to have_selector('li > a#state-archived')
-        expect(find('li > a#state-archived')[:title]).to eq('Filter by requirements that are currently archived.')
-        expect(find('li > a#state-archived .badge')).to have_content('1')
+        expect(page).to have_selector('li > a[data-testid="state-archived"]')
+        expect(find('li > a[data-testid="state-archived"] .badge')).to have_content('1')
 
-        expect(page).to have_selector('li > a#state-all')
-        expect(find('li > a#state-all')[:title]).to eq('Show all requirements.')
-        expect(find('li > a#state-all .badge')).to have_content('4')
+        expect(page).to have_selector('li > a[data-testid="state-all"]')
+        expect(find('li > a[data-testid="state-all"] .badge')).to have_content('4')
+      end
+    end
+
+    it 'shows filtered search input' do
+      page.within('.requirements-list-container .vue-filtered-search-bar-container') do
+        expect(page).to have_selector('.gl-search-box-by-click')
+        expect(page.find('.gl-filtered-search-term-input')[:placeholder]).to eq('Search requirements')
+
+        expect(page).to have_selector('.sort-dropdown-container')
+        page.find('.sort-dropdown-container button.gl-dropdown-toggle').click
+        expect(page.find('.sort-dropdown-container')).to have_selector('li', count: 2)
+      end
+    end
+
+    context 'filtered search input' do
+      it 'shows filter tokens author and status' do
+        page.within('.vue-filtered-search-bar-container .gl-search-box-by-click') do
+          page.find('input').click
+
+          expect(page.find('.gl-filtered-search-suggestion-list')).to have_selector('li', count: 2)
+          page.within('.gl-filtered-search-suggestion-list') do
+            expect(page.find('li:nth-child(1)')).to have_content('Author')
+            expect(page.find('li:nth-child(2)')).to have_content('Status')
+          end
+        end
+      end
+
+      it 'shows options `satisfied`, `failed` and `missing` for status token' do
+        page.within('.vue-filtered-search-bar-container .gl-search-box-by-click') do
+          page.find('input').click
+          page.find('.gl-filtered-search-suggestion-list li:nth-child(2)').click
+
+          expect(page.find('.gl-filtered-search-suggestion-list')).to have_selector('li', count: 3)
+          page.within('.gl-filtered-search-suggestion-list') do
+            expect(page.find('li:nth-child(1)')).to have_content('Satisfied')
+            expect(page.find('li:nth-child(2)')).to have_content('Failed')
+            expect(page.find('li:nth-child(3)')).to have_content('Missing')
+          end
+        end
       end
     end
 
@@ -66,7 +103,7 @@ RSpec.describe 'Requirements list', :js do
         end
 
         page.within('.requirements-list-container') do
-          expect(page).to have_selector('.requirement-form')
+          expect(page).to have_selector('.requirement-form-drawer')
         end
       end
 
@@ -91,16 +128,16 @@ RSpec.describe 'Requirements list', :js do
       end
 
       it 'updates requirements count in nav sidebar and opened and all tab badges' do
-        page.within('.requirements-state-filters') do
-          expect(find('li > a#state-opened .badge')).to have_content('3')
-          expect(find('li > a#state-all .badge')).to have_content('4')
+        page.within('.gl-tabs') do
+          expect(find('li > a[data-testid="state-opened"] .badge')).to have_content('3')
+          expect(find('li > a[data-testid="state-all"] .badge')).to have_content('4')
         end
 
         create_requirement('Foobar')
 
-        page.within('.requirements-state-filters') do
-          expect(find('li > a#state-opened .badge')).to have_content('4')
-          expect(find('li > a#state-all .badge')).to have_content('5')
+        page.within('.gl-tabs') do
+          expect(find('li > a[data-testid="state-opened"] .badge')).to have_content('4')
+          expect(find('li > a[data-testid="state-all"] .badge')).to have_content('5')
         end
       end
     end
@@ -137,7 +174,7 @@ RSpec.describe 'Requirements list', :js do
         page.within('.requirement-form-drawer') do
           expect(page.find('.title-container')).to have_content(requirement1.title)
           expect(page.find('.title-container')).to have_selector('button.btn-edit')
-          expect(page.find('.description-container')).to have_content(requirement1.description)
+          expect(page.find('.description')).to have_content(requirement1.description)
         end
       end
 
@@ -148,8 +185,8 @@ RSpec.describe 'Requirements list', :js do
 
         page.within('.requirement-form-drawer') do
           expect(page.find('.gl-drawer-header span', match: :first)).to have_content("REQ-#{requirement1.iid}")
-          expect(page.find('textarea#requirementTitle')['value']).to have_content("#{requirement1.title}")
-          expect(page.find('textarea#requirementDescription')['value']).to have_content("#{requirement1.description}")
+          expect(page.find('input#issuable-title')['value']).to have_content("#{requirement1.title}")
+          expect(page.find('textarea#issuable-description')['value']).to have_content("#{requirement1.description}")
           expect(page.find('input[type="checkbox"]')['checked']).to eq(requirement1.last_test_report_state)
           expect(page.find('.js-requirement-save')).to have_content('Save changes')
         end
@@ -164,8 +201,8 @@ RSpec.describe 'Requirements list', :js do
         end
 
         page.within('.requirement-form-drawer') do
-          find('textarea#requirementTitle').native.send_keys requirement_title
-          find('textarea#requirementDescription').native.send_keys requirement_description
+          find('input#issuable-title').native.send_keys requirement_title
+          find('textarea#issuable-description').native.send_keys requirement_description
           find('input[type="checkbox"]').click
 
           click_button 'Save changes'
@@ -187,16 +224,16 @@ RSpec.describe 'Requirements list', :js do
         end
 
         expect(page.find('.requirements-list-container')).to have_selector('li.requirement', count: 2)
-        page.within('.requirements-state-filters') do
-          expect(find('li > a#state-opened .badge')).to have_content('2')
-          expect(find('li > a#state-archived .badge')).to have_content('2')
+        page.within('.gl-tabs') do
+          expect(find('li > a[data-testid="state-opened"] .badge')).to have_content('2')
+          expect(find('li > a[data-testid="state-archived"] .badge')).to have_content('2')
         end
       end
     end
 
     context 'archived tab' do
       before do
-        find('li > a#state-archived').click
+        find('li > a[data-testid="state-archived"]').click
 
         wait_for_requests
       end
@@ -230,16 +267,16 @@ RSpec.describe 'Requirements list', :js do
         end
 
         expect(page.find('.requirements-list-container')).to have_selector('li.requirement', count: 0)
-        page.within('.requirements-state-filters') do
-          expect(find('li > a#state-opened .badge')).to have_content('4')
-          expect(find('li > a#state-archived .badge')).to have_content('0')
+        page.within('.gl-tabs') do
+          expect(find('li > a[data-testid="state-opened"] .badge')).to have_content('4')
+          expect(find('li > a[data-testid="state-archived"] .badge')).to have_content('0')
         end
       end
     end
 
     context 'all tab' do
       before do
-        find('li > a#state-all').click
+        find('li > a[data-testid="state-all"]').click
 
         wait_for_requests
       end
@@ -281,6 +318,19 @@ RSpec.describe 'Requirements list', :js do
 
     it 'open tab does not show button "New requirement"' do
       expect(page).not_to have_selector('.nav-controls button.js-new-requirement')
+    end
+  end
+
+  context 'when accessing project as logged out user' do
+    before do
+      sign_out user
+
+      visit project_requirements_management_requirements_path(public_project)
+      wait_for_requests
+    end
+
+    it 'renders the empty state' do
+      expect(page).to have_selector('.requirements-empty-state-container')
     end
   end
 end

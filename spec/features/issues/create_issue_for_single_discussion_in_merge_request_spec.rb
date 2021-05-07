@@ -14,10 +14,6 @@ RSpec.describe 'Resolve an open thread in a merge request by creating an issue',
     "a[title=\"#{title}\"][href=\"#{url}\"]"
   end
 
-  before do
-    stub_feature_flags(remove_resolve_note: false)
-  end
-
   describe 'As a user with access to the project' do
     before do
       project.add_maintainer(user)
@@ -31,14 +27,15 @@ RSpec.describe 'Resolve an open thread in a merge request by creating an issue',
         visit project_merge_request_path(project, merge_request)
       end
 
-      it 'does not show a link to create a new issue' do
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/285453
+      xit 'does not show a link to create a new issue' do
         expect(page).not_to have_css resolve_discussion_selector
       end
     end
 
     context 'resolving the thread' do
       before do
-        click_button 'Resolve thread'
+        find('button[data-qa-selector="resolve_discussion_button"]').click
       end
 
       it 'hides the link for creating a new issue' do
@@ -81,7 +78,7 @@ RSpec.describe 'Resolve an open thread in a merge request by creating an issue',
                                             discussion_to_resolve: discussion.id)
     end
 
-    it 'Shows a notice to ask someone else to resolve the threads' do
+    it 'shows a notice to ask someone else to resolve the threads' do
       expect(page).to have_content("The thread at #{merge_request.to_reference}"\
                                    " (discussion #{discussion.first_note.id}) will stay unresolved."\
                                    " Ask someone with permission to resolve it.")

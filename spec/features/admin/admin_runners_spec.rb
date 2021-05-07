@@ -9,7 +9,9 @@ RSpec.describe "Admin Runners" do
 
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    sign_in(create(:admin))
+    admin = create(:admin)
+    sign_in(admin)
+    gitlab_enable_admin_mode_sign_in(admin)
   end
 
   describe "Runners page" do
@@ -21,7 +23,7 @@ RSpec.describe "Admin Runners" do
         create(:ci_build, pipeline: pipeline, runner_id: runner.id)
         visit admin_runners_path
 
-        expect(page).to have_text "Set up a shared Runner manually"
+        expect(page).to have_text "Set up a shared runner manually"
         expect(page).to have_text "Runners currently online: 1"
       end
 
@@ -199,21 +201,21 @@ RSpec.describe "Admin Runners" do
 
         visit admin_runners_path
 
-        within '.runners-content .gl-responsive-table-row:nth-child(2)' do
+        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(2)' do
           expect(page).to have_content 'runner-2'
         end
 
-        within '.runners-content .gl-responsive-table-row:nth-child(3)' do
+        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(3)' do
           expect(page).to have_content 'runner-1'
         end
 
         sorting_by 'Last Contact'
 
-        within '.runners-content .gl-responsive-table-row:nth-child(2)' do
+        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(2)' do
           expect(page).to have_content 'runner-1'
         end
 
-        within '.runners-content .gl-responsive-table-row:nth-child(3)' do
+        within '[data-testid="runners-table"] .gl-responsive-table-row:nth-child(3)' do
           expect(page).to have_content 'runner-2'
         end
       end
@@ -225,7 +227,7 @@ RSpec.describe "Admin Runners" do
       end
 
       it 'has all necessary texts including no runner message' do
-        expect(page).to have_text "Set up a shared Runner manually"
+        expect(page).to have_text "Set up a shared runner manually"
         expect(page).to have_text "Runners currently online: 0"
         expect(page).to have_text 'No runners found'
       end
@@ -282,6 +284,20 @@ RSpec.describe "Admin Runners" do
       visit admin_runner_path(runner)
     end
 
+    describe 'runner page breadcrumbs' do
+      it 'contains the current runner token' do
+        page.within '[data-testid="breadcrumb-links"]' do
+          expect(page.find('h2')).to have_content(runner.short_sha)
+        end
+      end
+    end
+
+    describe 'runner page title', :js do
+      it 'contains the runner id' do
+        expect(find('.page-title')).to have_content("Runner ##{runner.id}")
+      end
+    end
+
     describe 'projects' do
       it 'contains project names' do
         expect(page).to have_content(@project1.full_name)
@@ -305,11 +321,11 @@ RSpec.describe "Admin Runners" do
     describe 'enable/create' do
       shared_examples 'assignable runner' do
         it 'enables a runner for a project' do
-          within '.unassigned-projects' do
+          within '[data-testid="unassigned-projects"]' do
             click_on 'Enable'
           end
 
-          assigned_project = page.find('.assigned-projects')
+          assigned_project = page.find('[data-testid="assigned-projects"]')
 
           expect(assigned_project).to have_content(@project2.path)
         end
@@ -339,7 +355,7 @@ RSpec.describe "Admin Runners" do
         let(:runner) { create(:ci_runner, :instance) }
 
         before do
-          @project1.destroy
+          @project1.destroy!
           visit admin_runner_path(runner)
         end
 
@@ -355,11 +371,11 @@ RSpec.describe "Admin Runners" do
       end
 
       it 'enables specific runner for project' do
-        within '.assigned-projects' do
+        within '[data-testid="assigned-projects"]' do
           click_on 'Disable'
         end
 
-        new_runner_project = page.find('.unassigned-projects')
+        new_runner_project = page.find('[data-testid="unassigned-projects"]')
 
         expect(new_runner_project).to have_content(@project1.path)
       end
@@ -381,7 +397,7 @@ RSpec.describe "Admin Runners" do
       let(:page_token) { find('#registration_token').text }
 
       before do
-        click_button 'Reset runners registration token'
+        click_button 'Reset registration token'
       end
 
       it 'changes registration token' do

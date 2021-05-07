@@ -3,6 +3,7 @@
 module API
   module Helpers
     include Gitlab::Utils
+    include Helpers::Caching
     include Helpers::Pagination
     include Helpers::PaginationStrategies
 
@@ -48,7 +49,11 @@ module API
     # Returns the job associated with the token provided for
     # authentication, if any
     def current_authenticated_job
-      @current_authenticated_job
+      if try(:namespace_inheritable, :authentication)
+        ci_build_from_namespace_inheritable
+      else
+        @current_authenticated_job # rubocop:disable Gitlab/ModuleWithInstanceVariables
+      end
     end
 
     # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -119,11 +124,20 @@ module API
     def find_project!(id)
       project = find_project(id)
 
-      if can?(current_user, :read_project, project)
-        project
-      else
-        not_found!('Project')
-      end
+      return forbidden! unless authorized_project_scope?(project)
+
+      return project if can?(current_user, :read_project, project)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Project')
+    end
+
+    def authorized_project_scope?(project)
+      return true unless job_token_authentication?
+      return true unless route_authentication_setting[:job_token_scope] == :project
+
+      ::Feature.enabled?(:ci_job_token_scope, project, default_enabled: :yaml) &&
+        current_authenticated_job.project == project
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -139,11 +153,10 @@ module API
     def find_group!(id)
       group = find_group(id)
 
-      if can?(current_user, :read_group, group)
-        group
-      else
-        not_found!('Group')
-      end
+      return group if can?(current_user, :read_group, group)
+      return unauthorized! if authenticate_non_public?
+
+      not_found!('Group')
     end
 
     def check_namespace_access(namespace)
@@ -220,6 +233,10 @@ module API
       user_project.builds.find(id.to_i)
     end
 
+    def find_job!(id)
+      user_project.processables.find(id.to_i)
+    end
+
     def authenticate!
       unauthorized! unless current_user
     end
@@ -271,6 +288,14 @@ module API
       authorize! :read_build, user_project
     end
 
+    def authorize_read_build_trace!(build)
+      authorize! :read_build_trace, build
+    end
+
+    def authorize_read_job_artifacts!(build)
+      authorize! :read_job_artifacts, build
+    end
+
     def authorize_destroy_artifacts!
       authorize! :destroy_artifacts, user_project
     end
@@ -293,7 +318,7 @@ module API
 
     def verify_workhorse_api!
       Gitlab::Workhorse.verify_api_request!(request.headers)
-    rescue => e
+    rescue StandardError => e
       Gitlab::ErrorTracking.track_exception(e)
 
       forbidden!
@@ -318,7 +343,7 @@ module API
     #   keys (required) - A hash consisting of keys that must be present
     def required_attributes!(keys)
       keys.each do |key|
-        bad_request!(key) unless params[key].present?
+        bad_request_missing_attribute!(key) unless params[key].present?
       end
     end
 
@@ -360,14 +385,18 @@ module API
 
     def forbidden!(reason = nil)
       message = ['403 Forbidden']
-      message << " - #{reason}" if reason
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 403)
     end
 
-    def bad_request!(attribute)
-      message = ["400 (Bad request)"]
-      message << "\"" + attribute.to_s + "\" not given" if attribute
+    def bad_request!(reason = nil)
+      message = ['400 Bad request']
+      message << "- #{reason}" if reason
       render_api_error!(message.join(' '), 400)
+    end
+
+    def bad_request_missing_attribute!(attribute)
+      bad_request!("\"#{attribute}\" not given")
     end
 
     def not_found!(resource = nil)
@@ -387,8 +416,8 @@ module API
       render_api_error!('401 Unauthorized', 401)
     end
 
-    def not_allowed!
-      render_api_error!('405 Method Not Allowed', 405)
+    def not_allowed!(message = nil)
+      render_api_error!(message || '405 Method Not Allowed', :method_not_allowed)
     end
 
     def not_acceptable!
@@ -453,7 +482,7 @@ module API
     def handle_api_exception(exception)
       if report_exception?(exception)
         define_params_for_grape_middleware
-        Gitlab::ErrorTracking.with_context(current_user) do
+        Gitlab::ApplicationContext.with_context(user: current_user) do
           Gitlab::ErrorTracking.track_exception(exception)
         end
       end
@@ -505,7 +534,7 @@ module API
       case headers['X-Sendfile-Type']
       when 'X-Sendfile'
         header['X-Sendfile'] = path
-        body
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       else
         sendfile path
       end
@@ -521,19 +550,17 @@ module API
       else
         header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
-        body ""
+        body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
     end
 
-    def track_event(action = action_name, **args)
-      category = args.delete(:category) || self.options[:for].name
-      raise "invalid category" unless category
+    def increment_counter(event_name)
+      feature_name = "usage_data_#{event_name}"
+      return unless Feature.enabled?(feature_name)
 
-      ::Gitlab::Tracking.event(category, action.to_s, **args)
-    rescue => error
-      Gitlab::AppLogger.warn(
-        "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
-      )
+      Gitlab::UsageDataCounters.count(event_name)
+    rescue StandardError => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
 
     # @param event_name [String] the event name
@@ -541,11 +568,8 @@ module API
     def increment_unique_values(event_name, values)
       return unless values.present?
 
-      feature_name = "usage_data_#{event_name}"
-      return unless Feature.enabled?(feature_name)
-
-      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
-    rescue => error
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(event_name, values: values)
+    rescue StandardError => error
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
 
@@ -568,18 +592,26 @@ module API
 
     def project_finder_params_ce
       finder_params = project_finder_params_visibility_ce
+
+      finder_params.merge!(
+        params
+          .slice(:search,
+                 :custom_attributes,
+                 :last_activity_after,
+                 :last_activity_before,
+                 :repository_storage)
+          .symbolize_keys
+          .compact
+      )
+
       finder_params[:with_issues_enabled] = true if params[:with_issues_enabled].present?
       finder_params[:with_merge_requests_enabled] = true if params[:with_merge_requests_enabled].present?
       finder_params[:without_deleted] = true
-      finder_params[:search] = params[:search] if params[:search]
       finder_params[:search_namespaces] = true if params[:search_namespaces].present?
       finder_params[:user] = params.delete(:user) if params[:user]
-      finder_params[:custom_attributes] = params[:custom_attributes] if params[:custom_attributes]
       finder_params[:id_after] = sanitize_id_param(params[:id_after]) if params[:id_after]
       finder_params[:id_before] = sanitize_id_param(params[:id_before]) if params[:id_before]
-      finder_params[:last_activity_after] = params[:last_activity_after] if params[:last_activity_after]
-      finder_params[:last_activity_before] = params[:last_activity_before] if params[:last_activity_before]
-      finder_params[:repository_storage] = params[:repository_storage] if params[:repository_storage]
+      finder_params[:tag] = params[:topic] if params[:topic].present?
       finder_params
     end
 
@@ -629,6 +661,10 @@ module API
 
     def secret_token
       Gitlab::Shell.secret_token
+    end
+
+    def authenticate_non_public?
+      route_authentication_setting[:authenticate_non_public] && !current_user
     end
 
     def send_git_blob(repository, blob)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'batch comments in merge request' do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -32,13 +32,13 @@ module QA
           show.start_review
           show.submit_pending_reviews
 
-          expect(show).to have_content("I'm starting a new discussion")
-          expect(show).to have_content("Could you please check this?")
+          expect(show).to have_comment("I'm starting a new discussion")
+          expect(show).to have_comment("Could you please check this?")
           expect(show).to have_content("1 unresolved thread")
         end
       end
 
-      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638' do
+      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1776', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/297257', type: :investigating } do
         Flow::Login.sign_in
 
         merge_request.visit!
@@ -72,7 +72,7 @@ module QA
           show.click_discussions_tab
           show.resolve_discussion_at_index(0)
 
-          expect(show).to have_content("Can you check this line of code?")
+          expect(show).to have_comment("Can you check this line of code?")
           expect(show).to have_content("All threads resolved")
         end
       end

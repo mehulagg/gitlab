@@ -8,6 +8,8 @@ module EE
 
       prepend EE::API::BoardsResponses # rubocop: disable Cop/InjectEnterpriseEditionModule
 
+      feature_category :boards
+
       before do
         authenticate!
       end
@@ -32,22 +34,9 @@ module EE
             requires :name, type: String, desc: 'The board name'
           end
           post '/' do
-            authorize!(:admin_board, board_parent)
+            authorize!(:admin_issue_board, board_parent)
 
             create_board
-          end
-
-          desc 'Update a group board' do
-            detail 'This feature was introduced in 11.0'
-            success ::API::Entities::Board
-          end
-          params do
-            use :update_params
-          end
-          put '/:board_id' do
-            authorize!(:admin_board, board_parent)
-
-            update_board
           end
 
           desc 'Delete a group board' do
@@ -55,7 +44,7 @@ module EE
             success ::API::Entities::Board
           end
           delete '/:board_id' do
-            authorize!(:admin_board, board_parent)
+            authorize!(:admin_issue_board, board_parent)
 
             delete_board
           end

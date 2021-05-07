@@ -1,16 +1,16 @@
 ---
 stage: Create
 group: Editor
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, how-to
 ---
 
-# Web IDE
+# Web IDE **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4539) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Core in 10.7.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Free in 10.7.
 
-The Web IDE editor makes it faster and easier to contribute changes to your
+The Web Integrated Development Environment (IDE) editor makes it faster and easier to contribute changes to your
 projects by providing an advanced editor with commit staging.
 
 ## Open the Web IDE
@@ -22,16 +22,32 @@ and from merge requests.
 
 ## File finder
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18323) in [GitLab Core](https://about.gitlab.com/pricing/) 10.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18323) in [GitLab Free](https://about.gitlab.com/pricing/) 10.8.
 
 The file finder allows you to quickly open files in the current branch by
-searching. The file finder is launched using the keyboard shortcut `Command-p`,
-`Control-p`, or `t` (when editor is not in focus). Type the filename or
-file path fragments to start seeing results.
+searching for fragments of the file path. The file finder is launched using the keyboard shortcut
+<kbd>Command</kbd>+<kbd>p</kbd>, <kbd>Control</kbd>+<kbd>p</kbd>, or <kbd>t</kbd>
+(when editor is not in focus). Type the filename or file path fragments to
+start seeing results.
+
+## Command palette
+
+You can see all available commands for manipulating editor content by pressing
+the <kbd>F1</kbd> key when the editor is in focus. After that, the editor displays
+a complete list of available commands for
+manipulating editor content. The editor supports commands for multi-cursor
+editing, code block folding, commenting, searching and replacing, navigating
+editor warnings and suggestions, and more.
+
+Some commands have a keyboard shortcut assigned to them. The command palette
+displays this shortcut next to each command. You can use this shortcut to invoke
+the command without having to select it in the command palette.
+
+![Command palette](img/command_palette_v13_6.png)
 
 ## Syntax highlighting
 
-As expected from an IDE, syntax highlighting for many languages within
+As expected from an IDE, syntax highlighting for many languages in
 the Web IDE makes your direct editing even easier.
 
 The Web IDE currently provides:
@@ -50,24 +66,24 @@ Monaco uses the [Monarch](https://microsoft.github.io/monaco-editor/monarch.html
 
 If you are missing Syntax Highlighting support for any language, we prepared a short guide on how to [add support for a missing language Syntax Highlighting.](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/ide/lib/languages/README.md)
 
-NOTE: **Note:**
-Single file editing is based on the [Ace Editor](https://ace.c9.io).
-
 ### Themes
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in GitLab in 13.0.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2389) in GitLab 13.0.
 > - Full Solarized Dark Theme [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/219228) in GitLab 13.1.
+> - Full [Solarized Light](https://gitlab.com/gitlab-org/gitlab/-/issues/221035) and [Monokai](https://gitlab.com/gitlab-org/gitlab/-/issues/221034) Themes introduced in GitLab 13.6.
 
-All the themes GitLab supports for syntax highlighting are added to the Web IDE's code editor.
+All the themes GitLab supports for syntax highlighting are applied to the Web IDE's entire screen.
 You can pick a theme from your [profile preferences](../../profile/preferences.md).
 
-The themes are available only in the Web IDE file editor, except for the [dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/209808) and
-the [solarized dark theme](https://gitlab.com/gitlab-org/gitlab/-/issues/219228),
-which apply to the entire Web IDE screen.
+| Solarized Dark Theme                                        | Dark Theme                              |
+|-------------------------------------------------------------|-----------------------------------------|
+| ![Solarized Dark Theme](img/solarized_dark_theme_v13_1.png) | ![Dark Theme](img/dark_theme_v13_0.png) |
 
-| Solarized Light Theme                                         | Solarized Dark Theme                                        | Dark Theme                              |
-|---------------------------------------------------------------|-------------------------------------------------------------|-----------------------------------------|
-| ![Solarized Light Theme](img/solarized_light_theme_v13_0.png) | ![Solarized Dark Theme](img/solarized_dark_theme_v13_1.png) | ![Dark Theme](img/dark_theme_v13_0.png) |
+## Highlight lines
+
+WebIDE is built with the [Web Editor](../repository/web_editor.md). This enables WebIDE to share the
+same core features for highlighting and linking to particular lines in the edited files
+[described for the Web Editor](../repository/web_editor.md#highlight-lines).
 
 ## Schema based validation
 
@@ -86,7 +102,7 @@ based on the [JSON Schema Store](https://www.schemastore.org/json/).
 The Web IDE has validation for certain files built in. This feature is only supported for
 the `*.gitlab-ci.yml` files.
 
-#### Enable or disable validation based on predefined schemas **(CORE ONLY)**
+#### Enable or disable validation based on predefined schemas **(FREE SELF)**
 
 Validation based on predefined schemas is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default** for self-managed instances,
@@ -128,16 +144,17 @@ schemas:
 
 Each schema entry supports two properties:
 
-- `uri`: please provide an absolute URL for the schema definition file here. The schema from this URL
-is loaded when a matching file is open.
-- `match`: a list of matching paths or glob expressions. If a schema matches a particular path pattern,
-it will be applied to that file. Please enclose the pattern in quotes if it begins with an asterisk (`*`),
-it's be applied to that file. If a pattern begins with an asterisk (`*`), enclose it in quotation
-marks. Otherwise, the configuration file is not valid YAML.
+- `uri`: please provide an absolute URL for the schema definition file here.
+  The schema from this URL is loaded when a matching file is open.
+- `match`: a list of matching paths or glob expressions. If a schema matches a
+  particular path pattern, it is applied to that file. Please enclose the pattern
+  in quotes if it begins with an asterisk (`*`), it's be applied to that file.
+  If a pattern begins with an asterisk (`*`), enclose it in quotation marks.
+  Otherwise, the configuration file is not valid YAML.
 
 ## Configure the Web IDE
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23352) in [GitLab Core](https://about.gitlab.com/pricing/) 13.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23352) in [GitLab Free](https://about.gitlab.com/pricing/) 13.1.
 
 The Web IDE supports configuration of certain editor settings by using
 [`.editorconfig` files](https://editorconfig.org/). When opening a file, the
@@ -157,14 +174,14 @@ The Web IDE currently supports the following `.editorconfig` settings:
 ## Commit changes
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4539) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Core in 10.7.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/44157) to GitLab Free in 10.7.
 > - From [GitLab 12.7 onward](https://gitlab.com/gitlab-org/gitlab/-/issues/33441), files were automatically staged.
 > - From [GitLab 12.9 onward](https://gitlab.com/gitlab-org/gitlab/-/issues/196609), support for staging files was removed to prevent loss of unstaged data. All your current changes necessarily have to be committed or discarded.
 
 After making your changes, click the **Commit** button on the bottom-left to
 review the list of changed files.
 
-Once you have finalized your changes, you can add a commit message, commit the
+After you have finalized your changes, you can add a commit message, commit the
 changes and directly create a merge request. In case you don't have write
 access to the selected branch, you see a warning, but can still create
 a new branch and start a merge request.
@@ -173,7 +190,7 @@ To discard a change in a particular file, click the **Discard changes** button o
 file in the changes tab. To discard all the changes, click the trash icon on the
 top-right corner of the changes sidebar.
 
-![Commit changes](img/commit_changes_v12_9.png)
+![Commit changes](img/commit_changes_v13_11.png)
 
 ## Reviewing changes
 
@@ -185,7 +202,7 @@ shows you a preview of the merge request diff if you commit your changes.
 
 ## View CI job logs
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19279) in [GitLab Core](https://about.gitlab.com/pricing/) 11.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19279) in [GitLab Free](https://about.gitlab.com/pricing/) 11.0.
 
 You can use the Web IDE to quickly fix failing tests by opening
 the branch or merge request in the Web IDE and opening the logs of the failed
@@ -198,7 +215,7 @@ left.
 
 ## Switching merge requests
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19318) in [GitLab Core](https://about.gitlab.com/pricing/) 11.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19318) in [GitLab Free](https://about.gitlab.com/pricing/) 11.0.
 
 To switch between your authored and assigned merge requests, click the
 dropdown in the top of the sidebar to open a list of merge requests. You need to commit or discard all your changes before switching to a different merge
@@ -206,7 +223,7 @@ request.
 
 ## Switching branches
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20850) in [GitLab Core](https://about.gitlab.com/pricing/) 11.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20850) in [GitLab Free](https://about.gitlab.com/pricing/) 11.2.
 
 To switch between branches of the current project repository, click the dropdown
 in the top of the sidebar to open a list of branches.
@@ -215,12 +232,12 @@ different branch.
 
 ## Markdown editing
 
-> - Markdown preview [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18059) in [GitLab Core](https://about.gitlab.com/pricing/) 10.7.
-> - Support for pasting images [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/22822) in [GitLab Core](https://about.gitlab.com/pricing/) 13.1.
+> - Markdown preview [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18059) in [GitLab Free](https://about.gitlab.com/pricing/) 10.7.
+> - Support for pasting images [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/22822) in [GitLab Free](https://about.gitlab.com/pricing/) 13.1.
 
 When you edit Markdown files in the Web IDE, you can preview your changes by
 clicking the **Preview Markdown** tab above the file editor. The Markdown preview
-supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown-gfm).
+supports [GitLab Flavored Markdown](../../markdown.md#gitlab-flavored-markdown).
 
 You can also upload any local images by pasting them directly in the Markdown file.
 The image is uploaded to the same directory and is named `image.png` by default.
@@ -229,7 +246,7 @@ added to the filename.
 
 ## Live Preview
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19764) in [GitLab Core](https://about.gitlab.com/pricing/) 11.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/19764) in [GitLab Free](https://about.gitlab.com/pricing/) 11.2.
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/issues/213853) from _Client Side Evaluation_ to _Live Preview_ in GitLab 13.0.
 
 You can use the Web IDE to preview JavaScript projects right in the browser.
@@ -244,13 +261,15 @@ quickly share your project with others.
 
 ### Enabling Live Preview
 
-The Live Preview feature needs to be enabled in the GitLab instances
-admin settings. Live Preview is enabled for all projects on
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/268288) in GitLab 12.9, third-party assets and libraries required for Live Preview are hosted at `https://sandbox-prod.gitlab-static.net` when it is enabled. However, some libraries are still served from other third-party services which may or may not be desirable in your environment.
+
+The Live Preview feature needs to be enabled in the GitLab instance's
+Admin Area. Live Preview is enabled for all projects on
 GitLab.com
 
 ![Administrator Live Preview setting](img/admin_live_preview_v13_0.png)
 
-Once you have done that, you can preview projects with a `package.json` file and
+After you have done that, you can preview projects with a `package.json` file and
 a `main` entry point inside the Web IDE. An example `package.json` is shown
 below.
 
@@ -266,11 +285,11 @@ below.
 ## Interactive Web Terminals for the Web IDE
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5426) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/211685) to GitLab Core in 13.1.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/211685) to GitLab Free in 13.1.
 
-CAUTION: **Warning:**
+WARNING:
 Interactive Web Terminals for the Web IDE is currently in **Beta**.
-Shared runners [do not yet support Interactive Web Terminals](https://gitlab.com/gitlab-org/gitlab/-/issues/24674),
+GitLab.com shared runners [do not yet support Interactive Web Terminals](https://gitlab.com/gitlab-org/gitlab/-/issues/24674),
 so you would need to use your own private runner to make use of this feature.
 
 [Interactive Web Terminals](../../../ci/interactive_web_terminal/index.md)
@@ -288,14 +307,14 @@ to work:
   This section requires at least a `session_timeout` value (which defaults to 1800
   seconds) and a `listen_address` value. If `advertise_address` is not defined, `listen_address` is used.
 - If you are using a reverse proxy with your GitLab instance, web terminals need to be
-  [enabled](../../../administration/integration/terminal.md#enabling-and-disabling-terminal-support). **(ULTIMATE ONLY)**
+  [enabled](../../../administration/integration/terminal.md#enabling-and-disabling-terminal-support). **(ULTIMATE SELF)**
 
 If you have the terminal open and the job has finished with its tasks, the
 terminal blocks the job from finishing for the duration configured in
 [`[session_server].session_timeout`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-session_server-section)
 until you close the terminal window.
 
-NOTE: **Note:**
+NOTE:
 Not all executors are
 [supported](https://docs.gitlab.com/runner/executors/#compatibility-chart).
 The [File Sync](#file-syncing-to-web-terminal) feature is supported on Kubernetes runners only.
@@ -307,7 +326,7 @@ In order to enable the Web IDE terminals you need to create the file
 file is fairly similar to the [CI configuration file](../../../ci/yaml/README.md)
 syntax but with some restrictions:
 
-- No global blocks can be defined (i.e., `before_script` or `after_script`)
+- No global blocks (such as `before_script` or `after_script`) can be defined.
 - Only one job named `terminal` can be added to this file.
 - Only the keywords `image`, `services`, `tags`, `before_script`, `script`, and
   `variables` are allowed to be used to configure the job.
@@ -325,14 +344,14 @@ terminal:
   # This can be any image that has the necessary runtime environment for your project.
   image: node:10-alpine
   before_script:
-    - apt-get update
+    - apk update
   script: sleep 60
   variables:
     RAILS_ENV: "test"
     NODE_ENV: "test"
 ```
 
-Once the terminal has started, the console is displayed and we could access
+After the terminal has started, the console is displayed and we could access
 the project repository files.
 
 **Important**. The terminal job is branch dependent. This means that the
@@ -346,7 +365,7 @@ If there is no configuration file in a branch, an error message is shown.
 If Interactive Terminals are available for the current user, the **Terminal** button is visible in the right sidebar of the Web IDE. Click this button to open
 or close the terminal tab.
 
-Once open, the tab shows the **Start Web Terminal** button. This button may
+After opening, the tab shows the **Start Web Terminal** button. This button may
 be disabled if the environment is not configured correctly. If so, a status
 message describes the issue. Here are some reasons why **Start Web Terminal**
 may be disabled:
@@ -360,7 +379,7 @@ can be closed and reopened and the state of the terminal is not affected.
 
 When the terminal is started and is successfully connected to the runner, then the
 runner's shell prompt appears in the terminal. From here, you can enter
-commands executed within the runner's environment. This is similar
+commands executed in the runner's environment. This is similar
 to running commands in a local terminal or through SSH.
 
 While the terminal is running, it can be stopped by clicking **Stop Terminal**.
@@ -370,13 +389,13 @@ click **Restart Terminal** to start a new terminal session.
 ### File syncing to web terminal
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5276) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/211686) to GitLab Core in 13.1.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/211686) to GitLab Free in 13.1.
 
 File changes in the Web IDE can be synced to a running web terminal.
 This enables users to test their code changes in a preconfigured terminal
 environment.
 
-NOTE: **Note:**
+NOTE:
 Only file changes in the Web IDE are synced to the terminal.
 Changes made in the terminal are **not** synced to the Web IDE.
 This feature is only available for Kubernetes runners.
@@ -405,10 +424,10 @@ terminal:
   See [this issue](https://gitlab.com/gitlab-org/webide-file-sync/-/issues/7) for
   more information.
 - `$CI_PROJECT_DIR` is a
-  [predefined environment variable](../../../ci/variables/predefined_variables.md)
+  [predefined CI/CD variable](../../../ci/variables/predefined_variables.md)
   for GitLab Runners. This is where your project's repository resides.
 
-Once you have configured the web terminal for file syncing, then when the web
+After you have configured the web terminal for file syncing, then when the web
 terminal is started, a **Terminal** status is visible in the status bar.
 
 ![Web IDE Client Side Evaluation](img/terminal_status.png)
@@ -416,7 +435,7 @@ terminal is started, a **Terminal** status is visible in the status bar.
 Changes made to your files via the Web IDE sync to the running terminal
 when:
 
-- <kbd>Ctrl</kbd> + <kbd>S</kbd> (or <kbd>Cmd</kbd> + <kbd>S</kbd> on Mac)
+- <kbd>Control</kbd> + <kbd>S</kbd> (or <kbd>Command</kbd> + <kbd>S</kbd> on Mac)
   is pressed while editing a file.
 - Anything outside the file editor is clicked after editing a file.
 - A file or folder is created, deleted, or renamed.
@@ -428,7 +447,7 @@ The Web IDE has a few limitations:
 - Interactive Terminals is in a beta phase and continues to be improved in upcoming releases. In the meantime, please note that the user is limited to having only one
   active terminal at a time.
 
-- LFS files can be rendered and displayed but they cannot be updated and committed using the Web IDE. If an LFS file is modified and pushed to the repository, the LFS pointer in the repository will be overwritten with the modified LFS file content.
+- LFS files can be rendered and displayed but they cannot be updated and committed using the Web IDE. If an LFS file is modified and pushed to the repository, the LFS pointer in the repository is overwritten with the modified LFS file content.
 
 ### Troubleshooting
 

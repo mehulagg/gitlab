@@ -19,20 +19,19 @@ FactoryBot.define do
       create(:jira_import_state, :finished, project: projects[1], label: jira_label, imported_issues_count: 3)
       create(:jira_import_state, :scheduled, project: projects[1], label: jira_label)
       create(:prometheus_service, project: projects[1])
+      create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:service, project: projects[0], type: 'SlackSlashCommandsService', active: true)
       create(:service, project: projects[1], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'SlackService', active: true)
       create(:service, project: projects[2], type: 'MattermostService', active: false)
       create(:service, group: group, project: nil, type: 'MattermostService', active: true)
       create(:service, :template, type: 'MattermostService', active: true)
-      matermost_instance = create(:service, :instance, type: 'MattermostService', active: true)
-      create(:service, project: projects[1], type: 'MattermostService', active: true, inherit_from_id: matermost_instance.id)
-      create(:service, group: group, project: nil, type: 'SlackService', active: true, inherit_from_id: matermost_instance.id)
+      mattermost_instance = create(:service, :instance, type: 'MattermostService', active: true)
+      create(:service, project: projects[1], type: 'MattermostService', active: true, inherit_from_id: mattermost_instance.id)
+      create(:service, group: group, project: nil, type: 'SlackService', active: true, inherit_from_id: mattermost_instance.id)
       create(:service, project: projects[2], type: 'CustomIssueTrackerService', active: true)
       create(:project_error_tracking_setting, project: projects[0])
       create(:project_error_tracking_setting, project: projects[1], enabled: false)
-      create(:alerts_service, project: projects[0])
-      create(:alerts_service, :inactive, project: projects[1])
       alert_bot_issues = create_list(:incident, 2, project: projects[0], author: User.alert_bot)
       create_list(:incident, 2, project: projects[1], author: User.alert_bot)
       issues = create_list(:issue, 4, project: projects[0])
@@ -51,6 +50,11 @@ FactoryBot.define do
       create(:sentry_issue, issue: projects[0].issues[0])
       create(:protected_branch, project: projects[0])
       create(:protected_branch, name: 'main', project: projects[0])
+
+      # Alert Management
+      create(:alert_management_http_integration, project: projects[0], name: 'DataDog')
+      create(:alert_management_http_integration, project: projects[0], name: 'DataCat')
+      create(:alert_management_http_integration, :inactive, project: projects[1], name: 'DataFox')
 
       # Tracing
       create(:project_tracing_setting, project: projects[0])
@@ -115,8 +119,8 @@ FactoryBot.define do
       env = create(:environment, project: projects[3])
       [3, 31].each do |n|
         deployment_options = { created_at: n.days.ago, project: env.project, environment: env }
-        create(:deployment, :failed, deployment_options)
-        create(:deployment, :success, deployment_options)
+        create(:deployment, :failed, **deployment_options)
+        create(:deployment, :success, **deployment_options)
         create_list(:project_snippet, 2, project: projects[0], created_at: n.days.ago)
         create(:personal_snippet, created_at: n.days.ago)
       end

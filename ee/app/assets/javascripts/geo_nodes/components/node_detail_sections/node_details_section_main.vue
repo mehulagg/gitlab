@@ -2,9 +2,9 @@
 import { GlLink, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
+import GeoNodeActions from '../geo_node_actions.vue';
 import GeoNodeHealthStatus from '../geo_node_health_status.vue';
 import GeoNodeReplicationStatus from '../geo_node_replication_status.vue';
-import GeoNodeActions from '../geo_node_actions.vue';
 
 export default {
   components: {
@@ -61,7 +61,7 @@ export default {
 
       if (selectiveSyncType === 'namespaces') {
         return sprintf(__('Groups (%{groups})'), {
-          groups: this.nodeDetails.namespaces.map(n => n.full_path).join(', '),
+          groups: this.nodeDetails.namespaces.map((n) => n.full_path).join(', '),
         });
       }
 

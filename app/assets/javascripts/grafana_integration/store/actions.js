@@ -1,7 +1,7 @@
-import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 
 export const setGrafanaUrl = ({ commit }, url) => commit(mutationTypes.SET_GRAFANA_URL, url);
@@ -24,7 +24,7 @@ export const updateGrafanaIntegration = ({ state, dispatch }) =>
       },
     })
     .then(() => dispatch('receiveGrafanaIntegrationUpdateSuccess'))
-    .catch(error => dispatch('receiveGrafanaIntegrationUpdateError', error));
+    .catch((error) => dispatch('receiveGrafanaIntegrationUpdateError', error));
 
 export const receiveGrafanaIntegrationUpdateSuccess = () => {
   /**

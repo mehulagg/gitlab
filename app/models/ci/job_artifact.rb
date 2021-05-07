@@ -7,19 +7,20 @@ module Ci
     include UpdateProjectStatistics
     include UsageStatistics
     include Sortable
-    include IgnorableColumns
     include Artifactable
     include FileStoreMounter
+    include EachBatch
     extend Gitlab::Ci::Model
-
-    ignore_columns :locked, remove_after: '2020-07-22', remove_with: '13.4'
 
     TEST_REPORT_FILE_TYPES = %w[junit].freeze
     COVERAGE_REPORT_FILE_TYPES = %w[cobertura].freeze
+    CODEQUALITY_REPORT_FILE_TYPES = %w[codequality].freeze
     ACCESSIBILITY_REPORT_FILE_TYPES = %w[accessibility].freeze
     NON_ERASABLE_FILE_TYPES = %w[trace].freeze
     TERRAFORM_REPORT_FILE_TYPES = %w[terraform].freeze
     UNSUPPORTED_FILE_TYPES = %i[license_management].freeze
+    SAST_REPORT_TYPES = %w[sast].freeze
+    SECRET_DETECTION_REPORT_TYPES = %w[secret_detection].freeze
     DEFAULT_FILE_NAMES = {
       archive: nil,
       metadata: nil,
@@ -130,10 +131,10 @@ module Ci
     update_project_statistics project_statistics_name: :build_artifacts_size
 
     scope :not_expired, -> { where('expire_at IS NULL OR expire_at > ?', Time.current) }
-    scope :with_files_stored_locally, -> { where(file_store: ::JobArtifactUploader::Store::LOCAL) }
-    scope :with_files_stored_remotely, -> { where(file_store: ::JobArtifactUploader::Store::REMOTE) }
     scope :for_sha, ->(sha, project_id) { joins(job: :pipeline).where(ci_pipelines: { sha: sha, project_id: project_id }) }
     scope :for_job_name, ->(name) { joins(:job).where(ci_builds: { name: name }) }
+
+    scope :with_job, -> { joins(:job).includes(:job) }
 
     scope :with_file_types, -> (file_types) do
       types = self.file_types.select { |file_type| file_types.include?(file_type) }.values
@@ -143,6 +144,14 @@ module Ci
 
     scope :with_reports, -> do
       with_file_types(REPORT_TYPES.keys.map(&:to_s))
+    end
+
+    scope :sast_reports, -> do
+      with_file_types(SAST_REPORT_TYPES)
+    end
+
+    scope :secret_detection_reports, -> do
+      with_file_types(SECRET_DETECTION_REPORT_TYPES)
     end
 
     scope :test_reports, -> do
@@ -157,6 +166,10 @@ module Ci
       with_file_types(COVERAGE_REPORT_FILE_TYPES)
     end
 
+    scope :codequality_reports, -> do
+      with_file_types(CODEQUALITY_REPORT_FILE_TYPES)
+    end
+
     scope :terraform_reports, -> do
       with_file_types(TERRAFORM_REPORT_FILE_TYPES)
     end
@@ -168,7 +181,8 @@ module Ci
     end
 
     scope :downloadable, -> { where(file_type: DOWNLOADABLE_TYPES) }
-    scope :unlocked, -> { joins(job: :pipeline).merge(::Ci::Pipeline.unlocked).order(expire_at: :desc) }
+    scope :unlocked, -> { joins(job: :pipeline).merge(::Ci::Pipeline.unlocked) }
+    scope :order_expired_desc, -> { order(expire_at: :desc) }
     scope :with_destroy_preloads, -> { includes(project: [:route, :statistics]) }
 
     scope :scoped_project, -> { where('ci_job_artifacts.project_id = projects.id') }
@@ -276,8 +290,12 @@ module Ci
         end
     end
 
+    def archived_trace_exists?
+      file&.file&.exists?
+    end
+
     def self.archived_trace_exists_for?(job_id)
-      where(job_id: job_id).trace.take&.file&.file&.exists?
+      where(job_id: job_id).trace.take&.archived_trace_exists?
     end
 
     def self.max_artifact_size(type:, project:)
@@ -291,12 +309,12 @@ module Ci
       max_size&.megabytes.to_i
     end
 
-    def to_deleted_object_attrs
+    def to_deleted_object_attrs(pick_up_at = nil)
       {
         file_store: file_store,
         store_dir: file.store_dir.to_s,
         file: file_identifier,
-        pick_up_at: expire_at || Time.current
+        pick_up_at: pick_up_at || expire_at || Time.current
       }
     end
 

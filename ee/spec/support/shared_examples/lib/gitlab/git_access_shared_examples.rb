@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'a read-only GitLab instance' do
+RSpec.shared_examples 'git access for a read-only GitLab instance' do
   it 'denies push access' do
     project.add_maintainer(user)
 

@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash';
 
-const isVulnerabilityLike = object =>
+const isVulnerabilityLike = (object) =>
   Boolean(object && object.location && object.identifiers && object.identifiers[0]);
 
 /**

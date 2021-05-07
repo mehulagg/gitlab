@@ -167,7 +167,64 @@ RSpec.describe API::ComposerPackages do
 
   describe 'GET /api/v4/group/:id/-/packages/composer/*package_name.json' do
     let(:package_name) { 'foobar' }
-    let(:url) { "/group/#{group.id}/-/packages/composer/#{package_name}.json" }
+    let(:sha) { '$1234' }
+    let(:url) { "/group/#{group.id}/-/packages/composer/#{package_name}#{sha}.json" }
+
+    subject { get api(url), headers: headers }
+
+    context 'with no packages' do
+      include_context 'Composer user type', :developer, true do
+        it_behaves_like 'returning response status', :not_found
+      end
+    end
+
+    context 'with valid project' do
+      let!(:package) { create(:composer_package, :with_metadatum, name: package_name, project: project) }
+
+      where(:project_visibility_level, :user_role, :member, :user_token, :shared_examples_name, :expected_status) do
+        'PUBLIC'  | :developer  | true  | true  | 'Composer package api request' | :success
+        'PUBLIC'  | :developer  | true  | false | 'process Composer api request' | :unauthorized
+        'PUBLIC'  | :developer  | false | true  | 'Composer package api request' | :success
+        'PUBLIC'  | :developer  | false | false | 'process Composer api request' | :unauthorized
+        'PUBLIC'  | :guest      | true  | true  | 'Composer package api request' | :success
+        'PUBLIC'  | :guest      | true  | false | 'process Composer api request' | :unauthorized
+        'PUBLIC'  | :guest      | false | true  | 'Composer package api request' | :success
+        'PUBLIC'  | :guest      | false | false | 'process Composer api request' | :unauthorized
+        'PUBLIC'  | :anonymous  | false | true  | 'Composer package api request' | :success
+        'PRIVATE' | :developer  | true  | true  | 'Composer package api request' | :success
+        'PRIVATE' | :developer  | true  | false | 'process Composer api request' | :unauthorized
+        'PRIVATE' | :developer  | false | true  | 'process Composer api request' | :not_found
+        'PRIVATE' | :developer  | false | false | 'process Composer api request' | :unauthorized
+        'PRIVATE' | :guest      | true  | true  | 'process Composer api request' | :not_found
+        'PRIVATE' | :guest      | true  | false | 'process Composer api request' | :unauthorized
+        'PRIVATE' | :guest      | false | true  | 'process Composer api request' | :not_found
+        'PRIVATE' | :guest      | false | false | 'process Composer api request' | :unauthorized
+        'PRIVATE' | :anonymous  | false | true  | 'process Composer api request' | :not_found
+      end
+
+      with_them do
+        include_context 'Composer api group access', params[:project_visibility_level], params[:user_role], params[:user_token] do
+          it_behaves_like params[:shared_examples_name], params[:user_role], params[:expected_status], params[:member]
+        end
+      end
+
+      context 'without a sha' do
+        let(:sha) { '' }
+
+        include_context 'Composer api group access', 'PRIVATE', :developer, true do
+          include_context 'Composer user type', :developer, true do
+            it_behaves_like 'process Composer api request', :developer, :not_found, true
+          end
+        end
+      end
+    end
+
+    it_behaves_like 'rejects Composer access with unknown group id'
+  end
+
+  describe 'GET /api/v4/group/:id/-/packages/composer/p2/*package_name.json' do
+    let(:package_name) { 'foobar' }
+    let(:url) { "/group/#{group.id}/-/packages/composer/p2/#{package_name}.json" }
 
     subject { get api(url), headers: headers }
 
@@ -377,6 +434,7 @@ RSpec.describe API::ComposerPackages do
           end
 
           it_behaves_like 'process Composer api request', params[:user_role], params[:expected_status], params[:member]
+          it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
         end
       end
     end

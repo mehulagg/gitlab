@@ -1,8 +1,9 @@
 import { format } from 'timeago.js';
 import getStateKey from 'ee_else_ce/vue_merge_request_widget/stores/get_state_key';
-import { stateKey } from './state_maps';
+import { statusBoxState } from '~/issuable/components/status_box.vue';
 import { formatDate } from '../../lib/utils/datetime_utility';
 import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY, MWPS_MERGE_STRATEGY } from '../constants';
+import { stateKey } from './state_maps';
 
 export default class MergeRequestStore {
   constructor(data) {
@@ -21,6 +22,8 @@ export default class MergeRequestStore {
 
   setData(data, isRebased) {
     this.initApprovals();
+
+    this.updateStatusState(data.state);
 
     if (isRebased) {
       this.sha = data.diff_head_sha;
@@ -59,6 +62,7 @@ export default class MergeRequestStore {
     this.rebaseInProgress = data.rebase_in_progress;
     this.mergeRequestDiffsPath = data.diffs_path;
     this.approvalsWidgetType = data.approvals_widget_type;
+    this.mergeRequestWidgetPath = data.merge_request_widget_path;
 
     if (data.issues_links) {
       const links = data.issues_links;
@@ -158,7 +162,9 @@ export default class MergeRequestStore {
 
   setGraphqlData(project) {
     const { mergeRequest } = project;
-    const pipeline = mergeRequest.pipelines?.nodes?.[0];
+    const pipeline = mergeRequest.headPipeline;
+
+    this.updateStatusState(mergeRequest.state);
 
     this.projectArchived = project.archived;
     this.onlyAllowMergeIfPipelineSucceeds = project.onlyAllowMergeIfPipelineSucceeds;
@@ -167,6 +173,11 @@ export default class MergeRequestStore {
     this.canBeMerged = mergeRequest.mergeStatus === 'can_be_merged';
     this.canMerge = mergeRequest.userPermissions.canMerge;
     this.ciStatus = pipeline?.status.toLowerCase();
+
+    if (pipeline?.warnings && this.ciStatus === 'success') {
+      this.ciStatus = `${this.ciStatus}-with-warnings`;
+    }
+
     this.commitsCount = mergeRequest.commitCount;
     this.branchMissing = !mergeRequest.sourceBranchExists || !mergeRequest.targetBranchExists;
     this.hasConflicts = mergeRequest.conflicts;
@@ -177,8 +188,15 @@ export default class MergeRequestStore {
     this.isSHAMismatch = this.sha !== mergeRequest.diffHeadSha;
     this.shouldBeRebased = mergeRequest.shouldBeRebased;
     this.workInProgress = mergeRequest.workInProgress;
+    this.mergeRequestState = mergeRequest.state;
 
     this.setState();
+  }
+
+  updateStatusState(state) {
+    if (this.mergeRequestState !== state && statusBoxState.updateStatus) {
+      statusBoxState.updateStatus();
+    }
   }
 
   setState() {
@@ -220,8 +238,10 @@ export default class MergeRequestStore {
     this.sourceProjectFullPath = data.source_project_full_path;
     this.mergeRequestPipelinesHelpPath = data.merge_request_pipelines_docs_path;
     this.conflictsDocsPath = data.conflicts_docs_path;
+    this.reviewingDocsPath = data.reviewing_and_managing_merge_requests_docs_path;
     this.ciEnvironmentsStatusPath = data.ci_environments_status_path;
     this.securityApprovalsHelpPagePath = data.security_approvals_help_page_path;
+    this.licenseComplianceDocsPath = data.license_compliance_docs_path;
     this.eligibleApproversDocsPath = data.eligible_approvers_docs_path;
     this.mergeImmediatelyDocsPath = data.merge_immediately_docs_path;
     this.approvalsHelpPath = data.approvals_help_path;
@@ -229,17 +249,23 @@ export default class MergeRequestStore {
     this.pipelinesEmptySvgPath = data.pipelines_empty_svg_path;
     this.humanAccess = data.human_access;
     this.newPipelinePath = data.new_project_pipeline_path;
+    this.sourceProjectDefaultUrl = data.source_project_default_url;
     this.userCalloutsPath = data.user_callouts_path;
     this.suggestPipelineFeatureId = data.suggest_pipeline_feature_id;
     this.isDismissedSuggestPipeline = data.is_dismissed_suggest_pipeline;
     this.securityReportsDocsPath = data.security_reports_docs_path;
 
-    // codeclimate
+    // code quality
     const blobPath = data.blob_path || {};
     this.headBlobPath = blobPath.head_path || '';
     this.baseBlobPath = blobPath.base_path || '';
+    this.codequalityReportsPath = data.codequality_reports_path;
     this.codequalityHelpPath = data.codequality_help_path;
     this.codeclimate = data.codeclimate;
+
+    // Security reports
+    this.sastComparisonPath = data.sast_comparison_path;
+    this.secretScanningComparisonPath = data.secret_scanning_comparison_path;
   }
 
   get isNothingToMergeState() {

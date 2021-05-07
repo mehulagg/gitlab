@@ -7,7 +7,7 @@ module Gitlab
       class Host
         attr_reader :pool, :last_checked_at, :intervals, :load_balancer, :host, :port
 
-        delegate :connection, :release_connection, to: :pool
+        delegate :connection, :release_connection, :enable_query_cache!, :disable_query_cache!, :query_cache_enabled, to: :pool
 
         CONNECTION_ERRORS =
           if defined?(PG)
@@ -163,6 +163,16 @@ module Gitlab
           load_balancer.release_primary_connection
         end
 
+        def database_replica_location
+          row = query_and_release(<<-SQL.squish)
+            SELECT pg_last_wal_replay_lsn()::text AS location
+          SQL
+
+          row['location'] if row.any?
+        rescue *CONNECTION_ERRORS
+          nil
+        end
+
         # Returns true if this host has caught up to the given transaction
         # write location.
         #
@@ -188,7 +198,7 @@ module Gitlab
 
         def query_and_release(sql)
           connection.select_all(sql).first || {}
-        rescue
+        rescue StandardError
           {}
         ensure
           release_connection

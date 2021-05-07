@@ -2,7 +2,7 @@
 
 module Groups
   class VariablesController < Groups::ApplicationController
-    before_action :authorize_admin_build!
+    before_action :authorize_admin_group!
 
     skip_cross_project_access_check :show, :update
 
@@ -56,3 +56,5 @@ module Groups
     end
   end
 end
+
+Groups::VariablesController.prepend_if_ee('EE::Groups::VariablesController')

@@ -61,7 +61,7 @@ Consider adding checkboxes and expectations of users with certain levels of memb
 
 <!-- See the Feature Change Documentation Workflow https://docs.gitlab.com/ee/development/documentation/workflow.html#for-a-product-change
 
-* Add all known Documentation Requirements in this section. See https://docs.gitlab.com/ee/development/documentation/feature-change-workflow.html#documentation-requirements
+* Add all known Documentation Requirements in this section. See https://docs.gitlab.com/ee/development/documentation/workflow.html
 * If this feature requires changing permissions, update the permissions document. See https://docs.gitlab.com/ee/user/permissions.html -->
 
 ### Availability & Testing
@@ -77,6 +77,15 @@ Please list the test areas (unit, integration and end-to-end) that needs to be a
 
 See the test engineering planning process and reach out to your counterpart Software Engineer in Test for assistance: https://about.gitlab.com/handbook/engineering/quality/test-engineering/#test-planning -->
 
+### Available Tier
+
+<!-- This section should be used for setting the appropriate tier that this feature will belong to. Pricing can be found here: https://about.gitlab.com/pricing/
+
+* Free
+* Premium/Silver
+* Ultimate/Gold
+-->
+
 ### What does success look like, and how can we measure that?
 
 <!--
@@ -88,7 +97,7 @@ Create tracking issue using the the Snowplow event tracking template. See https:
 ### What is the type of buyer?
 
 <!-- What is the buyer persona for this feature? See https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/buyer-persona/
-In which enterprise tier should this feature go? See https://about.gitlab.com/handbook/product/pricing/#four-tiers -->
+In which enterprise tier should this feature go? See https://about.gitlab.com/handbook/product/pricing/#three-tiers -->
 
 ### Is this a cross-stage feature?
 
@@ -96,7 +105,13 @@ In which enterprise tier should this feature go? See https://about.gitlab.com/ha
 
 ### Links / references
 
-<!--  Label reminders - you should have one of each of the following labels if you can figure out the correct ones -->
+<!-- Label reminders - you should have one of each of the following labels.
+Use the following resources to find the appropriate labels:
+- https://gitlab.com/gitlab-org/gitlab/-/labels
+- https://about.gitlab.com/handbook/product/categories/features/
+-->
 /label ~devops:: ~group: ~Category:
-
+/label  ~"GitLab Core"/~"GitLab Premium"/~"GitLab Ultimate"
 /label ~feature
+/label ~documentation
+/label ~direction

@@ -9,13 +9,12 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
-    MIRROR_REMOTE = "upstream".freeze
+    MIRROR_REMOTE = "upstream"
 
     prepended do
       include Elastic::RepositoriesSearch
 
       delegate :checksum, :find_remote_root_ref, to: :raw_repository
-      delegate :pull_mirror_branch_prefix, to: :project
     end
 
     # Transiently sets a configuration variable
@@ -34,22 +33,10 @@ module EE
       expire_content_cache
     end
 
-    def upstream_branch_name(branch_name)
-      return branch_name unless ::Feature.enabled?(:pull_mirror_branch_prefix, project)
-      return branch_name unless pull_mirror_branch_prefix
-
-      # when pull_mirror_branch_prefix is set, a branch not starting with it
-      # is a local branch that doesn't tracking upstream
-      if branch_name.start_with?(pull_mirror_branch_prefix)
-        branch_name.delete_prefix(pull_mirror_branch_prefix)
-      else
-        nil
-      end
-    end
-
-    def fetch_upstream(url, forced: false)
+    def fetch_upstream(url, forced: false, check_tags_changed: false)
       add_remote(MIRROR_REMOTE, url)
-      fetch_remote(MIRROR_REMOTE, ssh_auth: project&.import_data, forced: forced)
+
+      fetch_remote(MIRROR_REMOTE, ssh_auth: project&.import_data, forced: forced, check_tags_changed: check_tags_changed)
     end
 
     def upstream_branches
@@ -57,10 +44,7 @@ module EE
     end
 
     def diverged_from_upstream?(branch_name)
-      upstream_branch = upstream_branch_name(branch_name)
-      return false unless upstream_branch
-
-      diverged?(branch_name, MIRROR_REMOTE, upstream_branch_name: upstream_branch) do |branch_commit, upstream_commit|
+      diverged?(branch_name, MIRROR_REMOTE) do |branch_commit, upstream_commit|
         !raw_repository.ancestor?(branch_commit.id, upstream_commit.id)
       end
     end
@@ -72,10 +56,7 @@ module EE
     end
 
     def up_to_date_with_upstream?(branch_name)
-      upstream_branch = upstream_branch_name(branch_name)
-      return false unless upstream_branch
-
-      diverged?(branch_name, MIRROR_REMOTE, upstream_branch_name: upstream_branch) do |branch_commit, upstream_commit|
+      diverged?(branch_name, MIRROR_REMOTE) do |branch_commit, upstream_commit|
         ancestor?(branch_commit.id, upstream_commit.id)
       end
     end
@@ -100,7 +81,7 @@ module EE
       ::Geo::RepositoryUpdatedService.new(self).execute
     end
 
-    def code_owners_blob(ref: 'HEAD')
+    def code_owners_blob(ref:)
       possible_code_owner_blobs = ::Gitlab::CodeOwners::FILE_PATHS.map { |path| [ref, path] }
       blobs_at(possible_code_owner_blobs).compact.first
     end
@@ -111,9 +92,9 @@ module EE
 
     private
 
-    def diverged?(branch_name, remote_ref, upstream_branch_name: branch_name)
+    def diverged?(branch_name, remote_ref)
       branch_commit = commit("refs/heads/#{branch_name}")
-      upstream_commit = commit("refs/remotes/#{remote_ref}/#{upstream_branch_name}")
+      upstream_commit = commit("refs/remotes/#{remote_ref}/#{branch_name}")
 
       if branch_commit && upstream_commit
         yield branch_commit, upstream_commit

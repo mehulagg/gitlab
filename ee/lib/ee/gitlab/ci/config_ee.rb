@@ -15,11 +15,17 @@ module EE
 
         override :build_config
         def build_config(config)
-          process_required_includes(super)
+          super
+            .then(&method(:process_required_includes))
+            .then(&method(:process_security_orchestration_policy_includes))
         end
 
         def process_required_includes(config)
           ::Gitlab::Ci::Config::Required::Processor.new(config).perform
+        end
+
+        def process_security_orchestration_policy_includes(config)
+          ::Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor.new(config, context.project, ref, source).perform
         end
       end
     end

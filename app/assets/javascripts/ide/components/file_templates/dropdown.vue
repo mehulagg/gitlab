@@ -1,7 +1,7 @@
 <script>
+import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import $ from 'jquery';
 import { mapActions, mapState } from 'vuex';
-import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import DropdownButton from '~/vue_shared/components/dropdown/dropdown_button.vue';
 
 export default {
@@ -44,7 +44,7 @@ export default {
   computed: {
     ...mapState('fileTemplates', ['templates', 'isLoading']),
     outputData() {
-      return (this.isAsyncData ? this.templates : this.data).filter(t => {
+      return (this.isAsyncData ? this.templates : this.data).filter((t) => {
         if (!this.searchable) return true;
 
         return t.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0;
@@ -86,7 +86,7 @@ export default {
           type="search"
           class="dropdown-input-field qa-dropdown-filter-input"
         />
-        <gl-icon name="search" class="dropdown-input-search" aria-hidden="true" />
+        <gl-icon name="search" class="dropdown-input-search" />
       </div>
       <div class="dropdown-content">
         <gl-loading-icon v-if="showLoading" size="lg" />

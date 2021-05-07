@@ -1,4 +1,3 @@
 ---
 extends: ../../../spec/frontend/.eslintrc.yml
-rules:
-  jest/valid-describe: off
+

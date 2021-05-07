@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab-defined metrics dashboards **(CORE)**
+# GitLab-defined metrics dashboards **(FREE)**
 
 GitLab provides some dashboards out-of-the-box for any project with
 [Prometheus available](../../../user/project/integrations/prometheus.md). You can

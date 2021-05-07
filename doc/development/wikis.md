@@ -1,25 +1,25 @@
 ---
 type: reference, dev
-stage: none
-group: Development
-info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+stage: Create
+group: Editor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: "GitLab's development guidelines for Wikis"
 ---
 
-# Wikis development guide
+# Wikis development guide **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227027) in GitLab 13.5.
 
 ## Overview
 
-The wiki functionality in GitLab is based on [Gollum 4.x](https://github.com/gollum/gollum/),
-which is used in [Gitaly's](gitaly.md) Ruby service and accessed from the Rails app through Gitaly RPC calls.
+The wiki functionality in GitLab is based on [Gollum 4.x](https://github.com/gollum/gollum/).
+It's used in [Gitaly's](gitaly.md) Ruby service, and accessed from the Rails app through Gitaly RPC calls.
 
 Wikis use Git repositories as storage backend, and can be accessed through:
 
 - The [Web UI](../user/project/wiki/index.md)
 - The [REST API](../api/wikis.md)
-- [Git itself](../user/project/wiki/#adding-and-editing-wiki-pages-locally)
+- [Git itself](../user/project/wiki/index.md#create-or-edit-wiki-pages-locally)
 
 [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2214) in GitLab 13.5, wikis are also available
 for groups, in addition to projects.
@@ -43,7 +43,7 @@ When rendering wiki pages, we don't use Gollum at all and instead go through a
 [custom Banzai pipeline](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/banzai/pipeline/wiki_pipeline.rb).
 This adds some [wiki-specific markup](../user/markdown.md#wiki-specific-markdown), such as Gollum's `[[link]]` syntax.
 
-Since we do not make use of most of Gollum's features, we plan to move away from it entirely at some point.
+Because we do not make use of most of Gollum's features, we plan to move away from it entirely at some point.
 [See this epic](https://gitlab.com/groups/gitlab-org/-/epics/2381) for reference.
 
 ## Model classes
@@ -92,3 +92,7 @@ Only some data is persisted in the database:
 The web UI uploads attachments through the REST API, which stores the files as commits in the wiki repository.
 
 Prior to GitLab 11.3 attachments were stored outside of the repository, [see this issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475).
+
+## Related topics
+
+- [Gollum installation instructions](https://github.com/gollum/gollum/wiki/Installation)

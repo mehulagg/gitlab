@@ -6,8 +6,12 @@ import {
   GlTooltipDirective,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
+  i18n: {
+    editTitleAndDescription: __('Edit title and description'),
+  },
   components: {
     GlIcon,
     GlButton,
@@ -54,11 +58,12 @@ export default {
 <template>
   <div>
     <div class="title-container">
-      <h2 v-safe-html="issuable.titleHtml" class="title qa-title" dir="auto"></h2>
+      <h2 v-safe-html="issuable.titleHtml || issuable.title" class="title qa-title" dir="auto"></h2>
       <gl-button
         v-if="enableEdit"
         v-gl-tooltip.bottom
-        :title="__('Edit title and description')"
+        :title="$options.i18n.editTitleAndDescription"
+        :aria-label="$options.i18n.editTitleAndDescription"
         icon="pencil"
         class="btn-edit js-issuable-edit qa-edit-button"
         @click="$emit('edit-issuable', $event)"

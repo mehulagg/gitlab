@@ -46,6 +46,10 @@ class GroupPolicy < BasePolicy
     group_projects_for(user: @user, group: @subject, only_owned: false).any? { |p| p.design_management_enabled? }
   end
 
+  condition(:dependency_proxy_available) do
+    @subject.dependency_proxy_feature_available?
+  end
+
   desc "Deploy token with read_package_registry scope"
   condition(:read_package_registry_deploy_token) do
     @user.is_a?(DeployToken) && @user.groups.include?(@subject) && @user.read_package_registry
@@ -57,9 +61,13 @@ class GroupPolicy < BasePolicy
   end
 
   with_scope :subject
-  condition(:resource_access_token_available) { resource_access_token_available? }
+  condition(:resource_access_token_feature_available) { resource_access_token_feature_available? }
+  condition(:resource_access_token_creation_allowed) { resource_access_token_creation_allowed? }
 
-  rule { design_management_enabled }.policy do
+  with_scope :subject
+  condition(:has_project_with_service_desk_enabled) { @subject.has_project_with_service_desk_enabled? }
+
+  rule { can?(:read_group) & design_management_enabled }.policy do
     enable :read_design_activity
   end
 
@@ -90,10 +98,11 @@ class GroupPolicy < BasePolicy
 
   rule { can?(:read_group) }.policy do
     enable :read_milestone
-    enable :read_list
+    enable :read_issue_board_list
     enable :read_label
-    enable :read_board
+    enable :read_issue_board
     enable :read_group_member
+    enable :read_custom_emoji
   end
 
   rule { ~can?(:read_group) }.policy do
@@ -107,17 +116,22 @@ class GroupPolicy < BasePolicy
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation
+    enable :create_custom_emoji
+    enable :create_package_settings
   end
 
   rule { reporter }.policy do
     enable :reporter_access
     enable :read_container_image
+    enable :admin_issue_board
     enable :admin_label
-    enable :admin_list
+    enable :admin_issue_board_list
     enable :admin_issue
     enable :read_metrics_dashboard_annotation
     enable :read_prometheus
     enable :read_package
+    enable :read_package_settings
+    enable :read_group_timelogs
   end
 
   rule { maintainer }.policy do
@@ -176,7 +190,10 @@ class GroupPolicy < BasePolicy
   rule { developer & developer_maintainer_access }.enable :create_projects
   rule { create_projects_disabled }.prevent :create_projects
 
-  rule { owner | admin }.enable :read_statistics
+  rule { owner | admin }.policy do
+    enable :owner_access
+    enable :read_statistics
+  end
 
   rule { maintainer & can?(:create_projects) }.enable :transfer_projects
 
@@ -187,11 +204,28 @@ class GroupPolicy < BasePolicy
 
   rule { write_package_registry_deploy_token }.policy do
     enable :create_package
+    enable :read_package
     enable :read_group
   end
 
-  rule { resource_access_token_available & can?(:admin_group) }.policy do
-    enable :admin_resource_access_tokens
+  rule { can?(:read_group) & dependency_proxy_available }
+    .enable :read_dependency_proxy
+
+  rule { developer & dependency_proxy_available }
+    .enable :admin_dependency_proxy
+
+  rule { can?(:admin_group) & resource_access_token_feature_available }.policy do
+    enable :read_resource_access_tokens
+    enable :destroy_resource_access_tokens
+    enable :admin_setting_to_allow_project_access_token_creation
+  end
+
+  rule { resource_access_token_creation_allowed & can?(:read_resource_access_tokens) }.policy do
+    enable :create_resource_access_tokens
+  end
+
+  rule { support_bot & has_project_with_service_desk_enabled }.policy do
+    enable :read_label
   end
 
   def access_level
@@ -215,8 +249,12 @@ class GroupPolicy < BasePolicy
     @subject
   end
 
-  def resource_access_token_available?
+  def resource_access_token_feature_available?
     true
+  end
+
+  def resource_access_token_creation_allowed?
+    resource_access_token_feature_available? && group.root_ancestor.namespace_settings.resource_access_token_creation_allowed?
   end
 end
 

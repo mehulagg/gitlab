@@ -1,13 +1,18 @@
 import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
-import httpStatus from '~/lib/utils/http_status';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import httpStatus from '~/lib/utils/http_status';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
+import {
+  DEFAULT_VALUE_STREAM_ID,
+  OVERVIEW_STAGE_CONFIG,
+  PAGINATION_TYPE,
+  OVERVIEW_STAGE_ID,
+} from '../constants';
 import { transformStagesForPathNavigation } from '../utils';
-import { DEFAULT_VALUE_STREAM_ID } from '../constants';
 
-export const hasNoAccessError = state => state.errorCode === httpStatus.FORBIDDEN;
+export const hasNoAccessError = (state) => state.errorCode === httpStatus.FORBIDDEN;
 
 export const currentValueStreamId = ({ selectedValueStream }) =>
   selectedValueStream?.id || DEFAULT_VALUE_STREAM_ID;
@@ -44,6 +49,13 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
   };
 };
 
+export const paginationParams = ({ pagination: { page, sort, direction } }) => ({
+  pagination: PAGINATION_TYPE,
+  sort,
+  direction,
+  page,
+});
+
 const filterStagesByHiddenStatus = (stages = [], isHidden = true) =>
   stages.filter(({ hidden = false }) => hidden === isHidden);
 
@@ -51,10 +63,13 @@ export const hiddenStages = ({ stages }) => filterStagesByHiddenStatus(stages);
 export const activeStages = ({ stages }) => filterStagesByHiddenStatus(stages, false);
 
 export const enableCustomOrdering = ({ stages, errorSavingStageOrder }) =>
-  stages.some(stage => isNumber(stage.id)) && !errorSavingStageOrder;
+  stages.some((stage) => isNumber(stage.id)) && !errorSavingStageOrder;
 
 export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomStage }) =>
   Boolean(isCreatingCustomStage || isEditingCustomStage);
+
+export const isOverviewStageSelected = ({ selectedStage }) =>
+  selectedStage?.id === OVERVIEW_STAGE_ID;
 
 /**
  * Until there are controls in place to edit stages outside of the stage table,
@@ -64,7 +79,7 @@ export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomSt
  */
 export const pathNavigationData = ({ stages, medians, selectedStage }) =>
   transformStagesForPathNavigation({
-    stages: filterStagesByHiddenStatus(stages, false),
+    stages: [OVERVIEW_STAGE_CONFIG, ...filterStagesByHiddenStatus(stages, false)],
     medians,
     selectedStage,
   });

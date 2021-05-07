@@ -2,9 +2,7 @@
 
 module Packages
   class GroupPackagesFinder
-    attr_reader :current_user, :group, :params
-
-    InvalidPackageTypeError = Class.new(StandardError)
+    include ::Packages::FinderHelper
 
     def initialize(current_user, group, params = { exclude_subgroups: false, order_by: 'created_at', sort: 'asc' })
       @current_user = current_user
@@ -20,31 +18,32 @@ module Packages
 
     private
 
+    attr_reader :current_user, :group, :params
+
     def packages_for_group_projects
       packages = ::Packages::Package
         .including_build_info
         .including_project_route
         .including_tags
-        .for_projects(group_projects_visible_to_current_user)
+        .for_projects(group_projects_visible_to_current_user.select(:id))
         .processed
-        .has_version
         .sort_by_attribute("#{params[:order_by]}_#{params[:sort]}")
 
+      packages = filter_with_version(packages)
       packages = filter_by_package_type(packages)
       packages = filter_by_package_name(packages)
-      packages
+      filter_by_status(packages)
     end
 
     def group_projects_visible_to_current_user
+      # according to project_policy.rb
+      # access to packages is ruled by:
+      # - project is public or the current user has access to it with at least the reporter level
+      # - the repository feature is available to the current_user
       ::Project
         .in_namespace(groups)
         .public_or_visible_to_user(current_user, Gitlab::Access::REPORTER)
-        .with_project_feature
-        .select { |project| Ability.allowed?(current_user, :read_package, project) }
-    end
-
-    def package_type
-      params[:package_type].presence
+        .with_feature_available_for_user(:repository, current_user)
     end
 
     def groups
@@ -55,19 +54,6 @@ module Packages
 
     def exclude_subgroups?
       params[:exclude_subgroups]
-    end
-
-    def filter_by_package_type(packages)
-      return packages unless package_type
-      raise InvalidPackageTypeError unless Package.package_types.key?(package_type)
-
-      packages.with_package_type(package_type)
-    end
-
-    def filter_by_package_name(packages)
-      return packages unless params[:package_name].present?
-
-      packages.search_by_name(params[:package_name])
     end
   end
 end

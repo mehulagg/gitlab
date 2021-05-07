@@ -2,7 +2,7 @@
 type: reference, dev
 stage: none
 group: Development
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Merge requests workflow
@@ -65,13 +65,14 @@ request is as follows:
       template already provided in the "Description" field.
    1. If you are contributing documentation, choose `Documentation` from the
       "Choose a template" menu and fill in the description according to the template.
-   1. Mention the issue(s) your merge request solves, using the `Solves #XXX` or
-      `Closes #XXX` syntax to [auto-close](../../user/project/issues/managing_issues.md#closing-issues-automatically)
-      the issue(s) once the merge request is merged.
+   1. Use the syntax `Solves #XXX`, `Closes #XXX`, or `Refs #XXX` to mention the issue(s) your merge
+      request addresses. Referenced issues do not [close automatically](../../user/project/issues/managing_issues.md#closing-issues-automatically).
+      You must close them manually once the merge request is merged.
+   1. The MR must include *Before* and *After* screenshots if UI changes are made.
+   1. Include any steps or setup required to ensure reviewers can view the changes you've made (e.g. include any information about feature flags).
 1. If you're allowed to, set a relevant milestone and [labels](issue_workflow.md).
 1. UI changes should use available components from the GitLab Design System,
-   [Pajamas](https://design.gitlab.com/). The MR must include *Before* and
-   *After* screenshots.
+   [Pajamas](https://design.gitlab.com/).
 1. If the MR changes CSS classes, please include the list of affected pages, which
    can be found by running `grep css-class ./app -R`.
 1. If your MR touches code that executes shell commands, reads or opens files, or
@@ -123,24 +124,37 @@ document from the Kubernetes team also has some great points regarding this.
 
 ### Commit messages guidelines
 
-When writing commit messages, please follow the guidelines below:
+Commit messages should follow the guidelines below, for reasons explained by Chris Beams in [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/):
 
-- The commit subject must contain at least 3 words.
-- The commit subject must not be longer than 72 characters.
-- The commit subject must start with a capital letter.
-- The commit subject must not end with a period.
 - The commit subject and body must be separated by a blank line.
+- The commit subject must start with a capital letter.
+- The commit subject must not be longer than 72 characters.
+- The commit subject must not end with a period.
 - The commit body must not contain more than 72 characters per line.
-- Commits that change 30 or more lines across at least 3 files must
-  describe these changes in the commit body.
 - The commit subject or body must not contain Emojis.
+- Commits that change 30 or more lines across at least 3 files should
+  describe these changes in the commit body.
 - Use issues and merge requests' full URLs instead of short references,
   as they are displayed as plain text outside of GitLab.
-- The merge request must not contain more than 10 commit messages.
+- The merge request should not contain more than 10 commit messages.
+- The commit subject should contain at least 3 words.
 
-If the guidelines are not met, the MR will not pass the
-[Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
-For more information see [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/).
+**Important notes:**
+
+- If the guidelines are not met, the MR may not pass the [Danger checks](https://gitlab.com/gitlab-org/gitlab/blob/master/danger/commit_messages/Dangerfile).
+- Consider enabling [Squash and merge](../../user/project/merge_requests/squash_and_merge.md#squash-and-merge)
+  if your merge request includes "Applied suggestion to X files" commits, so that Danger can ignore those.
+- The prefixes in the form of `[prefix]` and `prefix:` are allowed (they can be all lowercase, as long
+  as the message itself is capitalized). For instance, `danger: Improve Danger behavior` and
+  `[API] Improve the labels endpoint` are valid commit messages.
+
+#### Why these standards matter
+
+1. Consistent commit messages that follow these guidelines make the history more readable.
+1. Concise standard commit messages helps to identify [breaking changes](index.md#breaking-changes) for a deployment or ~"master:broken" quicker when
+   reviewing commits between two points in time.
+
+#### Commit message template
 
 Example commit message template that can be used on your machine that embodies the above (guide for [how to apply template](https://codeinthehole.com/tips/a-useful-template-for-commit-messages/)):
 
@@ -164,7 +178,7 @@ Example commit message template that can be used on your machine that embodies t
 #    Do not end the subject line with a period
 #    Subject must contain at least 3 words
 #    Separate subject from body with a blank line
-#    Commits that change 30 or more lines across at least 3 files must
+#    Commits that change 30 or more lines across at least 3 files should
 #    describe these changes in the commit body
 #    Do not use Emojis
 #    Use the body to explain what and why vs. how
@@ -199,14 +213,14 @@ the contribution acceptance criteria below:
 1. Changes do not degrade performance:
    - Avoid repeated polling of endpoints that require a significant amount of overhead.
    - Check for N+1 queries via the SQL log or [`QueryRecorder`](../merge_request_performance_guidelines.md).
-   - Avoid repeated access of the filesystem.
+   - Avoid repeated access of the file system.
    - Use [polling with ETag caching](../polling.md) if needed to support real-time features.
 1. If the merge request adds any new libraries (gems, JavaScript libraries, etc.),
    they should conform to our [Licensing guidelines](../licensing.md). See those
    instructions for help if the "license-finder" test fails with a
    `Dependencies that need approval` error. Also, make the reviewer aware of the new
    library and explain why you need it.
-1. The merge request meets GitLab's [definition of done](#definition-of-done), below.
+1. The merge request meets the GitLab [definition of done](#definition-of-done), below.
 
 ## Definition of done
 
@@ -228,13 +242,14 @@ requirements.
 1. Reviewed by relevant reviewers and all concerns are addressed for Availability, Regressions, Security. Documentation reviews should take place as soon as possible, but they should not block a merge request.
 1. Merged by a project maintainer.
 1. Create an issue in the [infrastructure issue tracker](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues) to inform the Infrastructure department when your contribution is changing default settings or introduces a new setting, if relevant.
-1. Confirmed to be working in the [Canary stage](https://about.gitlab.com/handbook/engineering/#canary-testing) or on GitLab.com once the contribution is deployed.
+1. Confirmed to be working in the [Canary stage](https://about.gitlab.com/handbook/engineering/#canary-testing) with no new [Sentry](https://about.gitlab.com/handbook/engineering/#sentry) errors or on GitLab.com once the contribution is deployed.
 1. Added to the [release post](https://about.gitlab.com/handbook/marketing/blog/release-posts/),
    if relevant.
 1. Added to [the website](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/features.yml), if relevant.
 1. [Black-box tests/end-to-end tests](../testing_guide/testing_levels.md#black-box-tests-at-the-system-level-aka-end-to-end-tests)
    added if required. Please contact [the quality team](https://about.gitlab.com/handbook/engineering/quality/#teams)
    with any questions.
+1. The new feature does not degrade the user experience of the product.
 
 ## Dependencies
 

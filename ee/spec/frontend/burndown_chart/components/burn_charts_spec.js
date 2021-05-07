@@ -1,15 +1,16 @@
+import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { shallowMount } from '@vue/test-utils';
-import { GlButton } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
+import OpenTimeboxSummary from 'ee/burndown_chart/components/open_timebox_summary.vue';
+import TimeboxSummaryCards from 'ee/burndown_chart/components/timebox_summary_cards.vue';
 import { useFakeDate } from 'helpers/fake_date';
-import waitForPromises from 'helpers/wait_for_promises';
-import { day1, day2, day3, day4, legacyBurndownEvents } from '../mock_data';
+import { day1, day2, day3, day4 } from '../mock_data';
 
-function fakeDate({ date }) {
+function useFakeDateFromDay({ date }) {
   const [year, month, day] = date.split('-');
 
   useFakeDate(year, month - 1, day);
@@ -19,17 +20,18 @@ describe('burndown_chart', () => {
   let wrapper;
   let mock;
 
-  const findChartsTitle = () => wrapper.find({ ref: 'chartsTitle' });
+  const findFilterLabel = () => wrapper.find({ ref: 'filterLabel' });
   const findIssuesButton = () => wrapper.find({ ref: 'totalIssuesButton' });
   const findWeightButton = () => wrapper.find({ ref: 'totalWeightButton' });
   const findActiveButtons = () =>
-    wrapper.findAll(GlButton).filter(button => button.attributes().category === 'primary');
+    wrapper.findAll(GlButton).filter((button) => button.attributes().category === 'primary');
   const findBurndownChart = () => wrapper.find(BurndownChart);
   const findBurnupChart = () => wrapper.find(BurnupChart);
   const findOldBurndownChartButton = () => wrapper.find({ ref: 'oldBurndown' });
   const findNewBurndownChartButton = () => wrapper.find({ ref: 'newBurndown' });
 
   const defaultProps = {
+    fullPath: 'gitlab-org/subgroup',
     startDate: '2020-08-07',
     dueDate: '2020-09-09',
     openIssuesCount: [],
@@ -37,17 +39,23 @@ describe('burndown_chart', () => {
     burndownEventsPath: '/api/v4/projects/1234/milestones/1/burndown_events',
   };
 
-  const createComponent = ({ props = {}, featureEnabled = false, data = {} } = {}) => {
+  const createComponent = ({ props = {}, data = {}, loading = false } = {}) => {
     wrapper = shallowMount(BurnCharts, {
       propsData: {
         ...defaultProps,
         ...props,
       },
+      mocks: {
+        $apollo: {
+          queries: {
+            report: {
+              loading,
+            },
+          },
+        },
+      },
       data() {
         return data;
-      },
-      provide: {
-        glFeatures: { burnupCharts: featureEnabled },
       },
     });
   };
@@ -58,6 +66,21 @@ describe('burndown_chart', () => {
 
   afterEach(() => {
     mock.restore();
+    wrapper.destroy();
+  });
+
+  it('passes loading=true through to charts', () => {
+    createComponent({ loading: true });
+
+    expect(findBurndownChart().props('loading')).toBe(true);
+    expect(findBurnupChart().props('loading')).toBe(true);
+  });
+
+  it('passes loading=false through to charts', () => {
+    createComponent({ loading: false });
+
+    expect(findBurndownChart().props('loading')).toBe(false);
+    expect(findBurnupChart().props('loading')).toBe(false);
   });
 
   it('includes Issues and Issue weight buttons', () => {
@@ -71,11 +94,7 @@ describe('burndown_chart', () => {
     createComponent();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issues');
+    expect(findActiveButtons().at(0).text()).toBe('Issues');
     expect(findBurndownChart().props('issuesSelected')).toBe(true);
   });
 
@@ -87,144 +106,104 @@ describe('burndown_chart', () => {
     await wrapper.vm.$nextTick();
 
     expect(findActiveButtons()).toHaveLength(1);
-    expect(
-      findActiveButtons()
-        .at(0)
-        .text(),
-    ).toBe('Issue weight');
+    expect(findActiveButtons().at(0).text()).toBe('Issue weight');
     expect(findBurndownChart().props('issuesSelected')).toBe(false);
   });
 
-  describe('feature disabled', () => {
-    beforeEach(() => {
-      fakeDate(day4);
-      mock.onGet(defaultProps.burndownEventsPath).reply(200, legacyBurndownEvents);
-      createComponent({ featureEnabled: false });
-    });
+  it('reduces width of burndown chart', () => {
+    createComponent();
 
-    it('calls fetchLegacyBurndownEvents when mounted', async () => {
-      await waitForPromises();
+    expect(findBurndownChart().classes()).toContain('col-md-6');
+  });
 
-      await wrapper.vm.$nextTick();
-      await wrapper.vm.$nextTick();
+  it('sets section title and chart title correctly', () => {
+    createComponent();
 
-      expect(findBurndownChart().props().openIssuesCount).toEqual([
-        [defaultProps.startDate, 0],
-        [day1.date, 1],
-        [day2.date, 2],
-        [day3.date, 3],
-        [day4.date, 2],
-      ]);
+    expect(findFilterLabel().text()).toBe('Filter by');
+    expect(findBurndownChart().props().showTitle).toBe(true);
+  });
 
-      expect(findBurndownChart().props().openIssuesWeight).toEqual([
-        [defaultProps.startDate, 0],
-        [day1.date, 2],
-        [day2.date, 3],
-        [day3.date, 4],
-        [day4.date, 2],
-      ]);
-    });
+  it('sets weight prop of burnup chart', async () => {
+    createComponent();
 
-    it('does not reduce width of burndown chart', () => {
-      expect(findBurndownChart().classes()).toEqual([]);
-    });
+    findWeightButton().vm.$emit('click');
 
-    it('sets section title and chart title correctly', () => {
-      expect(findChartsTitle().text()).toBe('Burndown chart');
-      expect(findBurndownChart().props().showTitle).toBe(false);
-    });
+    await wrapper.vm.$nextTick();
 
-    it('does not show old/new burndown buttons', () => {
-      expect(findOldBurndownChartButton().exists()).toBe(false);
-      expect(findNewBurndownChartButton().exists()).toBe(false);
-    });
+    expect(findBurnupChart().props('issuesSelected')).toBe(false);
+  });
 
-    it('uses count and weight from data', () => {
-      const expectedCount = [day2.date, day2.scopeCount];
-      const expectedWeight = [day2.date, day2.scopeWeight];
-
-      createComponent({
-        data: {
-          burnupData: [day1],
-          openIssuesCount: [expectedCount],
-          openIssuesWeight: [expectedWeight],
+  it('renders IterationReportSummaryOpen for open iteration', () => {
+    createComponent({
+      data: {
+        report: {
+          stats: {},
         },
-        props: {
-          milestoneId: '1234',
-        },
-        featureEnabled: false,
-      });
+      },
+      props: {
+        iterationState: 'open',
+        iterationId: 'gid://gitlab/Iteration/11',
+      },
+    });
 
-      const { openIssuesCount, openIssuesWeight } = findBurndownChart().props();
-
-      expect(openIssuesCount).toEqual([expectedCount]);
-      expect(openIssuesWeight).toEqual([expectedWeight]);
+    expect(wrapper.find(OpenTimeboxSummary).props()).toEqual({
+      iterationId: 'gid://gitlab/Iteration/11',
+      displayValue: 'count',
+      namespaceType: 'group',
+      fullPath: defaultProps.fullPath,
     });
   });
 
-  describe('feature enabled', () => {
-    beforeEach(() => {
-      createComponent({ featureEnabled: true });
+  it('renders TimeboxSummaryCards for closed iterations', () => {
+    createComponent({
+      data: {
+        report: {
+          stats: {},
+        },
+      },
+      props: {
+        iterationState: 'closed',
+        iterationId: 'gid://gitlab/Iteration/1',
+      },
     });
 
-    it('reduces width of burndown chart', () => {
-      expect(findBurndownChart().classes()).toContain('col-md-6');
-    });
+    expect(wrapper.find(TimeboxSummaryCards).exists()).toBe(true);
+  });
 
-    it('sets section title and chart title correctly', () => {
-      expect(findChartsTitle().text()).toBe('Charts');
-      expect(findBurndownChart().props().showTitle).toBe(true);
-    });
-
-    it('sets weight prop of burnup chart', async () => {
-      findWeightButton().vm.$emit('click');
-
-      await wrapper.vm.$nextTick();
-
-      expect(findBurnupChart().props('issuesSelected')).toBe(false);
-    });
-
-    it('uses burndown data computed from burnup data', () => {
-      createComponent({
-        data: {
+  it('uses burndown data computed from burnup data', () => {
+    createComponent({
+      data: {
+        report: {
           burnupData: [day1],
         },
-        featureEnabled: true,
-      });
-      const { openIssuesCount, openIssuesWeight } = findBurndownChart().props();
-
-      const expectedCount = [day1.date, day1.scopeCount - day1.completedCount];
-      const expectedWeight = [day1.date, day1.scopeWeight - day1.completedWeight];
-
-      expect(openIssuesCount).toEqual([expectedCount]);
-      expect(openIssuesWeight).toEqual([expectedWeight]);
+      },
     });
+    const { openIssuesCount, openIssuesWeight } = findBurndownChart().props();
+
+    const expectedCount = [day1.date, day1.scopeCount - day1.completedCount];
+    const expectedWeight = [day1.date, day1.scopeWeight - day1.completedWeight];
+
+    expect(openIssuesCount).toEqual([expectedCount]);
+    expect(openIssuesWeight).toEqual([expectedWeight]);
   });
 
   describe('showNewOldBurndownToggle', () => {
-    it('hides old/new burndown buttons if feature disabled', () => {
-      createComponent({ featureEnabled: false, props: { showNewOldBurndownToggle: true } });
-
-      expect(findOldBurndownChartButton().exists()).toBe(false);
-      expect(findNewBurndownChartButton().exists()).toBe(false);
-    });
-
     it('hides old/new burndown buttons if props is false', () => {
-      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: false } });
+      createComponent({ props: { showNewOldBurndownToggle: false } });
 
       expect(findOldBurndownChartButton().exists()).toBe(false);
       expect(findNewBurndownChartButton().exists()).toBe(false);
     });
 
     it('shows old/new burndown buttons if prop true', () => {
-      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
+      createComponent({ props: { showNewOldBurndownToggle: true } });
 
       expect(findOldBurndownChartButton().exists()).toBe(true);
       expect(findNewBurndownChartButton().exists()).toBe(true);
     });
 
     it('calls fetchLegacyBurndownEvents, but only once', () => {
-      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
+      createComponent({ props: { showNewOldBurndownToggle: true } });
       jest.spyOn(wrapper.vm, 'fetchLegacyBurndownEvents');
       mock.onGet(defaultProps.burndownEventsPath).reply(200, []);
 
@@ -236,13 +215,12 @@ describe('burndown_chart', () => {
 
   // some separate tests for the update function since it has a bunch of logic
   describe('padSparseBurnupData function', () => {
+    useFakeDateFromDay(day4);
+
     beforeEach(() => {
       createComponent({
         props: { startDate: day1.date, dueDate: day4.date },
-        featureEnabled: true,
       });
-
-      fakeDate(day4);
     });
 
     it('pads data from startDate if no startDate values', () => {
@@ -272,15 +250,18 @@ describe('burndown_chart', () => {
       });
     });
 
-    it('if dueDate is in the future, pad data up to current date using last existing value', () => {
-      fakeDate(day3);
+    describe('when dueDate is in the future', () => {
+      // day3 is before the day4 we set to dueDate in the beforeEach
+      useFakeDateFromDay(day3);
 
-      const result = wrapper.vm.padSparseBurnupData([day1, day2]);
+      it('pad data up to current date using last existing value', () => {
+        const result = wrapper.vm.padSparseBurnupData([day1, day2]);
 
-      expect(result.length).toBe(3);
-      expect(result[2]).toEqual({
-        ...day2,
-        date: day3.date,
+        expect(result.length).toBe(3);
+        expect(result[2]).toEqual({
+          ...day2,
+          date: day3.date,
+        });
       });
     });
 

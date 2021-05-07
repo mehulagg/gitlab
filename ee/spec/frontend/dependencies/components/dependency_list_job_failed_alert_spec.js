@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import DependencyListJobFailedAlert from 'ee/dependencies/components/dependency_list_job_failed_alert.vue';
 
 const NO_BUTTON_PROPS = {
@@ -43,7 +43,7 @@ describe('DependencyListJobFailedAlert component', () => {
 
   it.each([undefined, null, ''])(
     'does not include a button if "jobPath" is given but empty',
-    jobPath => {
+    (jobPath) => {
       factory({ propsData: { jobPath } });
 
       expect(wrapper.find(GlAlert).props()).toMatchObject(NO_BUTTON_PROPS);

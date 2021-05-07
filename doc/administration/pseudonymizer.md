@@ -1,18 +1,18 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Pseudonymizer **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5532) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.1.
 
-As GitLab's database hosts sensitive information, using it unfiltered for analytics
+As the GitLab database hosts sensitive information, using it unfiltered for analytics
 implies high security requirements. To help alleviate this constraint, the Pseudonymizer
-service is used to export GitLab's data in a pseudonymized way.
+service is used to export GitLab data in a pseudonymized way.
 
-CAUTION: **Warning:**
+WARNING:
 This process is not impervious. If the source data is available, it's possible for
 a user to correlate data to the pseudonymized version.
 
@@ -24,11 +24,11 @@ be textually exported. This ensures that:
 
 ## Configuration
 
-To configure the pseudonymizer, you need to:
+To configure the Pseudonymizer, you need to:
 
 - Provide a manifest file that describes which fields should be included or
   pseudonymized ([example `manifest.yml` file](https://gitlab.com/gitlab-org/gitlab/tree/master/config/pseudonymizer.yml)).
-  A default manifest is provided with the GitLab installation. Using a relative file path will be resolved from the Rails root.
+  A default manifest is provided with the GitLab installation, using a relative file path that resolves from the Rails root.
   Alternatively, you can use an absolute file path.
 - Use an object storage and specify the connection parameters in the `pseudonymizer.upload.connection` configuration option.
 
@@ -50,7 +50,6 @@ To configure the pseudonymizer, you need to:
    }
    ```
 
-   NOTE: **Note:**
    If you are using AWS IAM profiles, be sure to omit the AWS access key and secret access key/value pairs.
 
    ```ruby
@@ -88,7 +87,7 @@ To configure the pseudonymizer, you need to:
 
 ## Usage
 
-You can optionally run the pseudonymizer using the following environment variables:
+You can optionally run the Pseudonymizer using the following environment variables:
 
 - `PSEUDONYMIZER_OUTPUT_DIR` - where to store the output CSV files (defaults to `/tmp`)
 - `PSEUDONYMIZER_BATCH` - the batch size when querying the DB (defaults to `100000`)
@@ -101,7 +100,7 @@ sudo gitlab-rake gitlab:db:pseudonymizer
 sudo -u git -H bundle exec rake gitlab:db:pseudonymizer RAILS_ENV=production
 ```
 
-This will produce some CSV files that might be very large, so make sure the
+This produces some CSV files that might be very large, so make sure the
 `PSEUDONYMIZER_OUTPUT_DIR` has sufficient space. As a rule of thumb, at least
 10% of the database size is recommended.
 

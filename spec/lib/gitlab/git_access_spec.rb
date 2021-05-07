@@ -5,13 +5,13 @@ require 'spec_helper'
 RSpec.describe Gitlab::GitAccess do
   include TermsHelper
   include GitHelpers
+  include AdminModeHelper
 
   let(:user) { create(:user) }
 
   let(:actor) { user }
   let(:project) { create(:project, :repository) }
-  let(:project_path) { project&.path }
-  let(:namespace_path) { project&.namespace&.path }
+  let(:repository_path) { "#{project.full_path}.git" }
   let(:protocol) { 'ssh' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
@@ -210,10 +210,9 @@ RSpec.describe Gitlab::GitAccess do
       end
     end
 
-    context 'when the project is nil' do
+    context 'when the project does not exist' do
       let(:project) { nil }
-      let(:project_path) { "new-project" }
-      let(:namespace_path) { user.namespace.path }
+      let(:repository_path) { "#{user.namespace.path}/new-project.git" }
 
       it 'blocks push and pull with "not found"' do
         aggregate_failures do
@@ -452,9 +451,8 @@ RSpec.describe Gitlab::GitAccess do
 
       context 'when project is public' do
         let(:public_project) { create(:project, :public, :repository) }
-        let(:project_path) { public_project.path }
-        let(:namespace_path) { public_project.namespace.path }
-        let(:access) { access_class.new(nil, public_project, 'web', authentication_abilities: [:download_code], repository_path: project_path, namespace_path: namespace_path) }
+        let(:repository_path) { "#{public_project.full_path}.git" }
+        let(:access) { access_class.new(nil, public_project, 'web', authentication_abilities: [:download_code], repository_path: repository_path) }
 
         context 'when repository is enabled' do
           it 'give access to download code' do
@@ -556,19 +554,19 @@ RSpec.describe Gitlab::GitAccess do
             context 'when the repository is public' do
               let(:options) { %i[repository_enabled] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
 
             context 'when the repository is private' do
               let(:options) { %i[repository_private] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
 
             context 'when the repository is disabled' do
               let(:options) { %i[repository_disabled] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
           end
         end
@@ -598,13 +596,13 @@ RSpec.describe Gitlab::GitAccess do
             context 'when the repository is private' do
               let(:options) { %i[repository_private] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
 
             context 'when the repository is disabled' do
               let(:options) { %i[repository_disabled] }
 
-              it { expect { pull_access_check }.to raise_error('The project you were looking for could not be found.') }
+              it { expect { pull_access_check }.to raise_error("The project you were looking for could not be found or you don't have permission to view it.") }
             end
           end
         end
@@ -670,19 +668,39 @@ RSpec.describe Gitlab::GitAccess do
       describe 'admin user' do
         let(:user) { create(:admin) }
 
-        context 'when member of the project' do
-          before do
-            project.add_reporter(user)
+        context 'when admin mode enabled', :enable_admin_mode do
+          context 'when member of the project' do
+            before do
+              project.add_reporter(user)
+            end
+
+            context 'pull code' do
+              it { expect { pull_access_check }.not_to raise_error }
+            end
           end
 
-          context 'pull code' do
-            it { expect { pull_access_check }.not_to raise_error }
+          context 'when is not member of the project' do
+            context 'pull code' do
+              it { expect { pull_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:download]) }
+            end
           end
         end
 
-        context 'when is not member of the project' do
-          context 'pull code' do
-            it { expect { pull_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:download]) }
+        context 'when admin mode disabled' do
+          context 'when member of the project' do
+            before do
+              project.add_reporter(user)
+            end
+
+            context 'pull code' do
+              it { expect { pull_access_check }.not_to raise_error }
+            end
+          end
+
+          context 'when is not member of the project' do
+            context 'pull code' do
+              it { expect { pull_access_check }.to raise_not_found }
+            end
           end
         end
       end
@@ -771,8 +789,13 @@ RSpec.describe Gitlab::GitAccess do
         # Expectations are given a custom failure message proc so that it's
         # easier to identify which check(s) failed.
         it "has the correct permissions for #{role}s" do
-          if role == :admin
+          if role == :admin_without_admin_mode
+            skip("All admins are allowed to perform actions https://gitlab.com/gitlab-org/gitlab/-/issues/296509")
+          end
+
+          if [:admin_with_admin_mode, :admin_without_admin_mode].include?(role)
             user.update_attribute(:admin, true)
+            enable_admin_mode!(user) if role == :admin_with_admin_mode
             project.add_guest(user)
           else
             project.add_role(user, role)
@@ -798,7 +821,7 @@ RSpec.describe Gitlab::GitAccess do
     end
 
     permissions_matrix = {
-      admin: {
+      admin_with_admin_mode: {
         any: true,
         push_new_branch: true,
         push_master: true,
@@ -808,6 +831,18 @@ RSpec.describe Gitlab::GitAccess do
         push_new_tag: true,
         push_all: true,
         merge_into_protected_branch: true
+      },
+
+      admin_without_admin_mode: {
+        any: false,
+        push_new_branch: false,
+        push_master: false,
+        push_protected_branch: false,
+        push_remove_protected_branch: false,
+        push_tag: false,
+        push_new_tag: false,
+        push_all: false,
+        merge_into_protected_branch: false
       },
 
       maintainer: {
@@ -910,7 +945,7 @@ RSpec.describe Gitlab::GitAccess do
 
         run_permission_checks(permissions_matrix.deep_merge(developer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
                                                             maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
-                                                            admin: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false }))
+                                                            admin_with_admin_mode: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false }))
       end
     end
 
@@ -999,7 +1034,7 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
-  context 'when the repository is read only' do
+  context 'when the repository is read-only' do
     let(:project) { create(:project, :repository, :read_only) }
 
     it 'denies push access' do
@@ -1169,7 +1204,7 @@ RSpec.describe Gitlab::GitAccess do
   def access
     access_class.new(actor, project, protocol,
                         authentication_abilities: authentication_abilities,
-                        namespace_path: namespace_path, repository_path: project_path,
+                        repository_path: repository_path,
                         redirected_path: redirected_path, auth_result_type: auth_result_type)
   end
 

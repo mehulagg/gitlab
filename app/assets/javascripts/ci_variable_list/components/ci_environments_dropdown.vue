@@ -20,7 +20,7 @@ export default {
   },
   data() {
     return {
-      searchTerm: this.value || '',
+      searchTerm: '',
     };
   },
   computed: {
@@ -33,14 +33,9 @@ export default {
     },
     filteredResults() {
       const lowerCasedSearchTerm = this.searchTerm.toLowerCase();
-      return this.joinedEnvironments.filter(resultString =>
+      return this.joinedEnvironments.filter((resultString) =>
         resultString.toLowerCase().includes(lowerCasedSearchTerm),
       );
-    },
-  },
-  watch: {
-    value(newVal) {
-      this.searchTerm = newVal;
     },
   },
   methods: {
@@ -55,12 +50,15 @@ export default {
     isSelected(env) {
       return this.value === env;
     },
+    clearSearch() {
+      this.searchTerm = '';
+    },
   },
 };
 </script>
 <template>
-  <gl-dropdown :text="value">
-    <gl-search-box-by-type v-model.trim="searchTerm" />
+  <gl-dropdown :text="value" @show="clearSearch">
+    <gl-search-box-by-type v-model.trim="searchTerm" data-testid="ci-environment-search" />
     <gl-dropdown-item
       v-for="environment in filteredResults"
       :key="environment"
@@ -75,7 +73,7 @@ export default {
     }}</gl-dropdown-item>
     <template v-if="shouldRenderCreateButton">
       <gl-dropdown-divider />
-      <gl-dropdown-item @click="createClicked">
+      <gl-dropdown-item data-testid="create-wildcard-button" @click="createClicked">
         {{ composedCreateButtonLabel }}
       </gl-dropdown-item>
     </template>

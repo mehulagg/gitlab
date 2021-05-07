@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :praefect do
     def int?(string)
@@ -42,7 +44,7 @@ namespace :gitlab do
 
         row = [project.name] << replicas_resp.primary.checksum
         row.concat(sorted_replicas.map {|r| r.checksum})
-      rescue
+      rescue StandardError
         puts 'Something went wrong when getting replicas.'
         next
       end

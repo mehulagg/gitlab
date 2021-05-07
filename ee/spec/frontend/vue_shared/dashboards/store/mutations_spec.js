@@ -1,9 +1,9 @@
-import state from 'ee/vue_shared/dashboards/store/state';
-import mutations from 'ee/vue_shared/dashboards/store/mutations';
 import * as types from 'ee/vue_shared/dashboards/store/mutation_types';
+import mutations from 'ee/vue_shared/dashboards/store/mutations';
+import state from 'ee/vue_shared/dashboards/store/state';
 import { mockProjectData } from 'ee_jest/vue_shared/dashboards/mock_data';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 
 jest.mock('~/flash');
@@ -12,7 +12,7 @@ describe('mutations', () => {
   useLocalStorageSpy();
 
   const projects = mockProjectData(3);
-  const projectIds = projects.map(p => p.id);
+  const projectIds = projects.map((p) => p.id);
   const mockEndpoint = 'https://mock-endpoint';
   let localState;
 
@@ -61,10 +61,10 @@ describe('mutations', () => {
 
       mutations[types.SET_PROJECTS](localState, projects);
 
-      expect(createFlash).toHaveBeenCalledWith(
-        'Project order will not be saved as local storage is not available.',
-        'warning',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'Project order will not be saved as local storage is not available.',
+        type: 'warning',
+      });
     });
   });
 
@@ -135,7 +135,7 @@ describe('mutations', () => {
     });
 
     it('orders the projects from localstorage', () => {
-      jest.spyOn(window.localStorage, 'getItem').mockImplementation(key => {
+      jest.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
         if (key === projectListEndpoint) {
           return '2,0,1';
         }
@@ -149,7 +149,7 @@ describe('mutations', () => {
     });
 
     it('places unsorted projects after sorted ones', () => {
-      jest.spyOn(window.localStorage, 'getItem').mockImplementation(key => {
+      jest.spyOn(window.localStorage, 'getItem').mockImplementation((key) => {
         if (key === projectListEndpoint) {
           return '1,2';
         }

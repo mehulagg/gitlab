@@ -10,13 +10,17 @@ RSpec.describe Ci::BuildReportResultService do
       let(:build) { create(:ci_build, :success, :test_reports) }
 
       it 'creates a build report result entry', :aggregate_failures do
+        expect { build_report_result }.to change { Ci::BuildReportResult.count }.by(1)
         expect(build_report_result.tests_name).to eq("test")
         expect(build_report_result.tests_success).to eq(2)
         expect(build_report_result.tests_failed).to eq(2)
         expect(build_report_result.tests_errored).to eq(0)
         expect(build_report_result.tests_skipped).to eq(0)
         expect(build_report_result.tests_duration).to eq(0.010284)
-        expect(Ci::BuildReportResult.count).to eq(1)
+      end
+
+      it 'tracks unique test cases parsed' do
+        build_report_result
 
         unique_test_cases_parsed = Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(
           event_names: described_class::EVENT_NAME,
@@ -26,15 +30,29 @@ RSpec.describe Ci::BuildReportResultService do
         expect(unique_test_cases_parsed).to eq(4)
       end
 
-      context 'when feature flag for tracking is disabled' do
-        before do
-          stub_feature_flags(track_unique_test_cases_parsed: false)
+      context 'and build has test report parsing errors' do
+        let(:build) { create(:ci_build, :success, :broken_test_reports) }
+
+        it 'creates a build report result entry with suite error', :aggregate_failures do
+          expect { build_report_result }.to change { Ci::BuildReportResult.count }.by(1)
+          expect(build_report_result.tests_name).to eq("test")
+          expect(build_report_result.tests_success).to eq(0)
+          expect(build_report_result.tests_failed).to eq(0)
+          expect(build_report_result.tests_errored).to eq(0)
+          expect(build_report_result.tests_skipped).to eq(0)
+          expect(build_report_result.tests_duration).to eq(0)
+          expect(build_report_result.suite_error).to be_present
         end
 
-        it 'creates the report but does not track the event' do
-          expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
-          expect(build_report_result.tests_name).to eq("test")
-          expect(Ci::BuildReportResult.count).to eq(1)
+        it 'does not track unique test cases parsed' do
+          build_report_result
+
+          unique_test_cases_parsed = Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(
+            event_names: described_class::EVENT_NAME,
+            start_date: 2.weeks.ago,
+            end_date: 2.weeks.from_now
+          )
+          expect(unique_test_cases_parsed).to eq(0)
         end
       end
 

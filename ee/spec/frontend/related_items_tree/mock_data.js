@@ -1,5 +1,5 @@
-import { TEST_HOST } from 'spec/test_constants';
 import { ChildState } from 'ee/related_items_tree/constants';
+import { TEST_HOST } from 'spec/test_constants';
 
 export const mockInitialConfig = {
   epicsEndpoint: `${TEST_HOST}/epics`,
@@ -15,9 +15,12 @@ export const mockParentItem = {
   id: 'gid://gitlab/Epic/42',
   iid: 1,
   fullPath: 'gitlab-org',
+  groupName: 'GitLab Org',
   title: 'Some sample epic',
   reference: 'gitlab-org&1',
   type: 'Epic',
+  hasChildren: true,
+  hasIssues: true,
   userPermissions: {
     adminEpic: true,
     createEpic: true,
@@ -357,3 +360,45 @@ export const mockEpicTreeReorderInput = {
     moveAfterId: 'gid://gitlab/Epic/3',
   },
 };
+
+export const mockFrequentlyUsedProjects = [
+  {
+    id: 1,
+    name: 'Project 1',
+    namespace: 'Gitlab / Project 1',
+    webUrl: '/gitlab-org/project1',
+    avatarUrl: null,
+    lastAccessedOn: 123,
+    frequency: 4,
+  },
+  {
+    id: 2,
+    name: 'Project 2',
+    namespace: 'Gitlab / Project 2',
+    webUrl: '/gitlab-org/project2',
+    avatarUrl: null,
+    lastAccessedOn: 124,
+    frequency: 3,
+  },
+];
+
+export const mockMixedFrequentlyUsedProjects = [
+  {
+    id: 1,
+    name: 'Project 1',
+    namespace: 'Gitlab / Project 1',
+    webUrl: '/gitlab-org/project1',
+    avatarUrl: null,
+    lastAccessedOn: 123,
+    frequency: 4,
+  },
+  {
+    id: 2,
+    name: 'Project 2',
+    namespace: 'Gitlab.com / Project 2',
+    webUrl: '/gitlab-com/project2',
+    avatarUrl: null,
+    lastAccessedOn: 124,
+    frequency: 3,
+  },
+];

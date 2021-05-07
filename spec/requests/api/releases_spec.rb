@@ -16,12 +16,9 @@ RSpec.describe API::Releases do
     project.add_reporter(reporter)
     project.add_guest(guest)
     project.add_developer(developer)
-
-    project.repository.add_tag(maintainer, 'v0.1', commit.id)
-    project.repository.add_tag(maintainer, 'v0.2', commit.id)
   end
 
-  describe 'GET /projects/:id/releases' do
+  describe 'GET /projects/:id/releases', :use_clean_rails_redis_caching do
     context 'when there are two releases' do
       let!(:release_1) do
         create(:release,
@@ -110,22 +107,6 @@ RSpec.describe API::Releases do
         expect(json_response.second['commit_path']).to eq("/#{release_1.project.full_path}/-/commit/#{release_1.commit.id}")
         expect(json_response.second['tag_path']).to eq("/#{release_1.project.full_path}/-/tags/#{release_1.tag}")
       end
-
-      it 'returns the merge requests and issues links, with correct query' do
-        get api("/projects/#{project.id}/releases", maintainer)
-
-        links = json_response.first['_links']
-        release = json_response.first['tag_name']
-        expected_query = "release_tag=#{release}&scope=all&state=opened"
-        path_base = "/#{project.namespace.path}/#{project.path}"
-        mr_uri = URI.parse(links['merge_requests_url'])
-        issue_uri = URI.parse(links['issues_url'])
-
-        expect(mr_uri.path).to eq("#{path_base}/-/merge_requests")
-        expect(issue_uri.path).to eq("#{path_base}/-/issues")
-        expect(mr_uri.query).to eq(expected_query)
-        expect(issue_uri.query).to eq(expected_query)
-      end
     end
 
     it 'returns an upcoming_release status for a future release' do
@@ -148,19 +129,76 @@ RSpec.describe API::Releases do
       expect(json_response.first['upcoming_release']).to eq(false)
     end
 
-    it 'avoids N+1 queries' do
+    it 'avoids N+1 queries', :use_sql_query_cache do
       create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create(:release_link, release: project.releases.first)
 
-      control_count = ActiveRecord::QueryRecorder.new do
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
         get api("/projects/#{project.id}/releases", maintainer)
       end.count
 
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, project: project)
+      create_list(:release_link, 2, release: project.releases.first)
+      create_list(:release_link, 2, release: project.releases.last)
 
       expect do
         get api("/projects/#{project.id}/releases", maintainer)
-      end.not_to exceed_query_limit(control_count)
+      end.not_to exceed_all_query_limit(control_count)
+    end
+
+    it 'serializes releases for the first time and read cached data from the second time' do
+      create_list(:release, 2, project: project)
+
+      expect(API::Entities::Release)
+        .to receive(:represent).with(instance_of(Release), any_args)
+        .twice
+
+      5.times { get api("/projects/#{project.id}/releases", maintainer) }
+    end
+
+    it 'increments the cache key when link is updated' do
+      releases = create_list(:release, 2, project: project)
+
+      expect(API::Entities::Release)
+        .to receive(:represent).with(instance_of(Release), any_args)
+        .exactly(4).times
+
+      2.times { get api("/projects/#{project.id}/releases", maintainer) }
+
+      releases.each { |release| create(:release_link, release: release) }
+
+      3.times { get api("/projects/#{project.id}/releases", maintainer) }
+    end
+
+    it 'increments the cache key when evidence is updated' do
+      releases = create_list(:release, 2, project: project)
+
+      expect(API::Entities::Release)
+        .to receive(:represent).with(instance_of(Release), any_args)
+        .exactly(4).times
+
+      2.times { get api("/projects/#{project.id}/releases", maintainer) }
+
+      releases.each { |release| create(:evidence, release: release) }
+
+      3.times { get api("/projects/#{project.id}/releases", maintainer) }
+    end
+
+    context 'when api_caching_releases feature flag is disabled' do
+      before do
+        stub_feature_flags(api_caching_releases: false)
+      end
+
+      it 'serializes releases everytime' do
+        create_list(:release, 2, project: project)
+
+        expect(API::Entities::Release)
+          .to receive(:represent).with(kind_of(ActiveRecord::Relation), any_args)
+          .exactly(5).times
+
+        5.times { get api("/projects/#{project.id}/releases", maintainer) }
+      end
     end
 
     context 'when tag does not exist in git repository' do
@@ -246,6 +284,20 @@ RSpec.describe API::Releases do
         end
       end
     end
+
+    context 'when releases are public and request user is absent' do
+      let(:project) { create(:project, :repository, :public) }
+
+      it 'returns the releases' do
+        create(:release, project: project, tag: 'v0.1')
+
+        get api("/projects/#{project.id}/releases")
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.count).to eq(1)
+        expect(json_response.first['tag_name']).to eq('v0.1')
+      end
+    end
   end
 
   describe 'GET /projects/:id/releases/:tag_name' do
@@ -307,6 +359,25 @@ RSpec.describe API::Releases do
 
             expect(json_response['evidences'].first['collected_at'].to_datetime.to_i).to be_within(1.minute).of(release.evidences.first.created_at.to_i)
           end
+        end
+      end
+
+      context 'when release is associated to mutiple milestones' do
+        context 'milestones order' do
+          let_it_be(:project) { create(:project, :repository, :public) }
+          let_it_be_with_reload(:release_with_milestones) { create(:release, tag: 'v3.14', project: project) }
+
+          let(:actual_milestone_title_order) do
+            get api("/projects/#{project.id}/releases/#{release_with_milestones.tag}", non_project_member)
+
+            json_response['milestones'].map { |m| m['title'] }
+          end
+
+          before do
+            release_with_milestones.update!(milestones: [milestone_2, milestone_1])
+          end
+
+          it_behaves_like 'correct release milestone order'
         end
       end
 
@@ -475,6 +546,10 @@ RSpec.describe API::Releases do
           ]
         }
       }
+    end
+
+    before do
+      initialize_tags
     end
 
     it 'accepts the request' do
@@ -874,6 +949,10 @@ RSpec.describe API::Releases do
              description: 'Super nice release')
     end
 
+    before do
+      initialize_tags
+    end
+
     it 'accepts the request' do
       put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
 
@@ -1014,6 +1093,17 @@ RSpec.describe API::Releases do
           end
         end
 
+        context 'without milestones parameter' do
+          let(:params) { { name: 'some new name' } }
+
+          it 'does not change the milestone' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(returned_milestones).to match_array(['v1.0'])
+          end
+        end
+
         context 'multiple milestones' do
           context 'with one new' do
             let!(:milestone2) { create(:milestone, project: project, title: 'milestone2') }
@@ -1112,5 +1202,35 @@ RSpec.describe API::Releases do
         end
       end
     end
+  end
+
+  describe 'Track API events', :snowplow do
+    context 'when tracking event with labels from User-Agent' do
+      it 'adds the tracked User-Agent to the label of the tracked event' do
+        get api("/projects/#{project.id}/releases", maintainer), headers: { 'User-Agent' => described_class::RELEASE_CLI_USER_AGENT }
+
+        assert_snowplow_event('get_releases', true)
+      end
+
+      it 'skips label when User-Agent is invalid' do
+        get api("/projects/#{project.id}/releases", maintainer), headers: { 'User-Agent' => 'invalid_user_agent' }
+        assert_snowplow_event('get_releases', false)
+      end
+    end
+  end
+
+  def initialize_tags
+    project.repository.add_tag(maintainer, 'v0.1', commit.id)
+    project.repository.add_tag(maintainer, 'v0.2', commit.id)
+  end
+
+  def assert_snowplow_event(action, release_cli, user = maintainer)
+    expect_snowplow_event(
+      category: described_class.name,
+      action: action,
+      project: project,
+      user: user,
+      release_cli: release_cli
+    )
   end
 end

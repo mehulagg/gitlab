@@ -57,7 +57,7 @@ module Gitlab
 
         begin
           route = endpoint.route
-        rescue
+        rescue StandardError
           # endpoint.route is calling env[Grape::Env::GRAPE_ROUTING_ARGS][:route_info]
           # but env[Grape::Env::GRAPE_ROUTING_ARGS] is nil in the case of a 405 response
           # so we're rescuing exceptions and bailing out
@@ -66,9 +66,10 @@ module Gitlab
         if route
           path = endpoint_paths_cache[route.request_method][route.path]
 
-          # Feature categories will be added for grape endpoints in
-          # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/462
-          { controller: 'Grape', action: "#{route.request_method} #{path}", feature_category: '' }
+          grape_class = endpoint.options[:for]
+          feature_category = grape_class.try(:feature_category_for_app, endpoint).to_s
+
+          { controller: 'Grape', action: "#{route.request_method} #{path}", feature_category: feature_category }
         end
       end
 

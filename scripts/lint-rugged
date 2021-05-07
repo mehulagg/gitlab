@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 ALLOWED = [
   # https://gitlab.com/gitlab-org/gitaly/issues/760
@@ -18,11 +19,17 @@ ALLOWED = [
   # Needed to detect Rugged enabled: https://gitlab.com/gitlab-org/gitlab/issues/35371
   'lib/gitlab/config_checker/puma_rugged_checker.rb',
 
+  # Needed for GPG/X509 commit signature API
+  #
+  'app/models/commit.rb',
+  'lib/api/entities/commit_signature.rb',
+
   # Needed for logging
   'config/initializers/peek.rb',
   'config/initializers/lograge.rb',
   'lib/gitlab/grape_logging/loggers/perf_logger.rb',
   'lib/gitlab/instrumentation_helper.rb',
+  'lib/gitlab/sidekiq_middleware/instrumentation_logger.rb',
   'lib/gitlab/rugged_instrumentation.rb',
   'lib/peek/views/rugged.rb'
 ].freeze

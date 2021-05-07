@@ -4,6 +4,8 @@ module API
   class Iterations < ::API::Base
     include PaginationParams
 
+    feature_category :issue_tracking
+
     helpers do
       params :list_params do
         optional :state, type: String, values: %w[opened upcoming started closed all], default: 'all',
@@ -17,7 +19,7 @@ module API
       def list_iterations_for(parent)
         iterations = IterationsFinder.new(current_user, iterations_finder_params(parent)).execute
 
-        present paginate(iterations), with: EE::API::Entities::Iteration
+        present paginate(iterations), with: Entities::Iteration
       end
 
       def iterations_finder_params(parent)
@@ -34,7 +36,7 @@ module API
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Get a list of project iterations' do
         detail 'This feature was introduced in GitLab 13.5'
-        success EE::API::Entities::Iteration
+        success Entities::Iteration
       end
       params do
         use :list_params
@@ -52,7 +54,7 @@ module API
     resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Get a list of group iterations' do
         detail 'This feature was introduced in GitLab 13.5'
-        success EE::API::Entities::Iteration
+        success Entities::Iteration
       end
       params do
         use :list_params

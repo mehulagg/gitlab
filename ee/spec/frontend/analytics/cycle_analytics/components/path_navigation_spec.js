@@ -6,7 +6,7 @@ import { transformedStagePathData, issueStage } from '../mock_data';
 describe('PathNavigation', () => {
   let wrapper = null;
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     return mount(Component, {
       propsData: {
         stages: transformedStagePathData,
@@ -17,14 +17,16 @@ describe('PathNavigation', () => {
     });
   };
 
-  const pathNavigationItems = () => {
+  const pathNavigationTitles = () => {
     return wrapper.findAll('.gl-path-button');
   };
 
-  const clickItemAt = index => {
-    pathNavigationItems()
-      .at(index)
-      .trigger('click');
+  const pathNavigationItems = () => {
+    return wrapper.findAll('.gl-path-nav-list-item');
+  };
+
+  const clickItemAt = (index) => {
+    pathNavigationTitles().at(index).trigger('click');
   };
 
   beforeEach(() => {
@@ -44,7 +46,7 @@ describe('PathNavigation', () => {
     it('contains all the expected stages', () => {
       const html = wrapper.find(GlPath).html();
 
-      transformedStagePathData.forEach(stage => {
+      transformedStagePathData.forEach((stage) => {
         expect(html).toContain(stage.title);
       });
     });
@@ -57,6 +59,46 @@ describe('PathNavigation', () => {
 
         it('hides the gl-skeleton-loading component', () => {
           expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
+        });
+
+        it('matches the snapshot', () => {
+          expect(wrapper.element).toMatchSnapshot();
+        });
+
+        describe('popovers', () => {
+          beforeEach(() => {
+            wrapper = createComponent({ stages: transformedStagePathData });
+          });
+
+          it('renders popovers for all stages except for the overview stage', () => {
+            const pathItemContent = pathNavigationItems().wrappers;
+            const [overviewStage, ...popoverStages] = pathItemContent;
+
+            expect(overviewStage.text()).toContain('Overview');
+            expect(overviewStage.find('[data-testid="stage-item-popover"]').exists()).toBe(false);
+
+            popoverStages.forEach((stage) => {
+              expect(stage.find('[data-testid="stage-item-popover"]').exists()).toBe(true);
+            });
+          });
+
+          it('shows the sanitized start event description for the first stage item', () => {
+            const firstPopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            const expectedStartEventDescription = 'Issue created';
+            expect(firstPopover.text()).toContain(expectedStartEventDescription);
+          });
+
+          it('shows the sanitized end event description for the first stage item', () => {
+            const firstPopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            const expectedStartEventDescription =
+              'Issue first associated with a milestone or issue first added to a board';
+            expect(firstPopover.text()).toContain(expectedStartEventDescription);
+          });
+
+          it('shows the median stage time for the first stage item', () => {
+            const firstPopover = wrapper.findAll('[data-testid="stage-item-popover"]').at(0);
+            expect(firstPopover.text()).toContain('Stage time (median)');
+          });
         });
       });
 

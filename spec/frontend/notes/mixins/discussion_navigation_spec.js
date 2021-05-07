@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { setHTMLFixture } from 'helpers/fixtures';
-import * as utils from '~/lib/utils/common_utils';
-import discussionNavigation from '~/notes/mixins/discussion_navigation';
-import eventHub from '~/notes/event_hub';
 import createEventHub from '~/helpers/event_hub_factory';
+import * as utils from '~/lib/utils/common_utils';
+import eventHub from '~/notes/event_hub';
+import discussionNavigation from '~/notes/mixins/discussion_navigation';
 import notesModule from '~/notes/stores/modules';
 
 const discussion = (id, index) => ({
@@ -34,7 +34,7 @@ describe('Discussion navigation mixin', () => {
     setHTMLFixture(
       [...'abcde']
         .map(
-          id =>
+          (id) =>
             `<ul class="notes" data-discussion-id="${id}"></ul>
             <div class="discussion" data-discussion-id="${id}"></div>`,
         )
@@ -42,6 +42,7 @@ describe('Discussion navigation mixin', () => {
     );
 
     jest.spyOn(utils, 'scrollToElementWithContext');
+    jest.spyOn(utils, 'scrollToElement');
 
     expandDiscussion = jest.fn();
     const { actions, ...notesRest } = notesModule();
@@ -133,7 +134,7 @@ describe('Discussion navigation mixin', () => {
         });
 
         it('scrolls to element', () => {
-          expect(utils.scrollToElementWithContext).toHaveBeenCalledWith(
+          expect(utils.scrollToElement).toHaveBeenCalledWith(
             findDiscussion('div.discussion', expected),
           );
         });
@@ -200,7 +201,7 @@ describe('Discussion navigation mixin', () => {
           });
 
           it('scrolls to discussion', () => {
-            expect(utils.scrollToElementWithContext).toHaveBeenCalledWith(
+            expect(utils.scrollToElement).toHaveBeenCalledWith(
               findDiscussion('div.discussion', expected),
             );
           });

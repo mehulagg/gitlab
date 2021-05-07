@@ -8,7 +8,7 @@ module Geo
       FILE_SERVICE_OBJECT_TYPE = :lfs
 
       def registry_finder
-        @registry_finder ||= Geo::LfsObjectRegistryFinder.new
+        @registry_finder ||= Geo::LfsObjectLegacyRegistryFinder.new
       end
     end
   end

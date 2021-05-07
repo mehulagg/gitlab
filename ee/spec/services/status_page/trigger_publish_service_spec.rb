@@ -30,6 +30,7 @@ RSpec.describe StatusPage::TriggerPublishService do
 
     describe 'triggered by issue' do
       let_it_be(:triggered_by, reload: true) { create(:issue, :published, project: project) }
+
       let(:issue_id) { triggered_by.id }
 
       using RSpec::Parameterized::TableSyntax
@@ -230,6 +231,7 @@ RSpec.describe StatusPage::TriggerPublishService do
 
     context 'with eligable triggered_by' do
       let_it_be(:triggered_by) { create(:issue, :published, project: project) }
+
       let(:issue_id) { triggered_by.id }
 
       context 'when eligable' do

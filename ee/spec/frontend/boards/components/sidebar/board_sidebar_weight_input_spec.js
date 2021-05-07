@@ -1,9 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlFormInput, GlForm } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import BoardSidebarWeightInput from 'ee/boards/components/sidebar/board_sidebar_weight_input.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import createFlash from '~/flash';
 import { createStore } from '~/boards/stores';
+import createFlash from '~/flash';
 
 const TEST_WEIGHT = 1;
 const TEST_ISSUE = { id: 'gid://gitlab/Issue/1', iid: 9, weight: 0, referencePath: 'h/b#2' };
@@ -22,7 +22,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
 
   const createWrapper = ({ weight = 0 } = {}) => {
     store = createStore();
-    store.state.issues = { [TEST_ISSUE.id]: { ...TEST_ISSUE, weight } };
+    store.state.boardItems = { [TEST_ISSUE.id]: { ...TEST_ISSUE, weight } };
     store.state.activeId = TEST_ISSUE.id;
 
     wrapper = shallowMount(BoardSidebarWeightInput, {
@@ -58,7 +58,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
       jest.spyOn(wrapper.vm, 'setActiveIssueWeight');
       findWeightInput().vm.$emit('input', TEST_WEIGHT);
       findWeightForm().vm.$emit('submit', { preventDefault: () => {} });
-      store.state.issues[TEST_ISSUE.id].weight = TEST_WEIGHT;
+      store.state.boardItems[TEST_ISSUE.id].weight = TEST_WEIGHT;
       await wrapper.vm.$nextTick();
     });
 
@@ -82,7 +82,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
       jest.spyOn(wrapper.vm, 'setActiveIssueWeight');
       findWeightInput().vm.$emit('input', 0);
       findWeightForm().vm.$emit('submit', { preventDefault: () => {} });
-      store.state.issues[TEST_ISSUE.id].weight = 0;
+      store.state.boardItems[TEST_ISSUE.id].weight = 0;
       await wrapper.vm.$nextTick();
     });
 
@@ -98,7 +98,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
       createWrapper({ weight: TEST_WEIGHT });
       jest.spyOn(wrapper.vm, 'setActiveIssueWeight');
       findResetButton().vm.$emit('click');
-      store.state.issues[TEST_ISSUE.id].weight = 0;
+      store.state.boardItems[TEST_ISSUE.id].weight = 0;
       await wrapper.vm.$nextTick();
     });
 

@@ -3,7 +3,9 @@
 class CreateNoteDiffFileWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
-  feature_category :source_code_management
+  sidekiq_options retry: 3
+
+  feature_category :code_review
 
   def perform(diff_note_id)
     diff_note = DiffNote.find(diff_note_id)

@@ -18,7 +18,7 @@ describe('NoteHeader component', () => {
     username: 'root',
   };
 
-  const createComponent = props => {
+  const createComponent = (props) => {
     wrapper = shallowMount(NoteHeader, {
       localVue,
       store: new Vuex.Store(),

@@ -1,6 +1,6 @@
 import { deprecatedCreateFlash as flash } from '~/flash';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 import * as types from './mutation_types';
 
 export const setInitialState = ({ commit }, props) => commit(types.SET_INITIAL_STATE, props);
@@ -20,7 +20,7 @@ export const receiveLabelsFailure = ({ commit }) => {
 };
 export const fetchLabels = ({ state, dispatch }) => {
   dispatch('requestLabels');
-  axios
+  return axios
     .get(state.labelsFetchPath)
     .then(({ data }) => {
       dispatch('receiveLabelsSuccess', data);

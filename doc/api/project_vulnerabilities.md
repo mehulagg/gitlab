@@ -1,7 +1,7 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
@@ -9,7 +9,7 @@ type: reference, api
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10242) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
 
-CAUTION: **Caution:**
+WARNING:
 This API is in an alpha stage and considered unstable.
 The response payload may be subject to change or breakage
 across GitLab releases.
@@ -18,7 +18,7 @@ Every API call to vulnerabilities must be [authenticated](README.md#authenticati
 
 Vulnerability permissions inherit permissions from their project. If a project is
 private, and a user isn't a member of the project to which the vulnerability
-belongs, requests to that project will return a `404 Not Found` status code.
+belongs, requests to that project returns a `404 Not Found` status code.
 
 ## Vulnerabilities pagination
 
@@ -32,7 +32,7 @@ List all of a project's vulnerabilities.
 
 If an authenticated user does not have permission to
 [use the Project Security Dashboard](../user/permissions.md#project-members-permissions),
-`GET` requests for vulnerabilities of this project will result in a `403` status code.
+`GET` requests for vulnerabilities of this project result in a `403` status code.
 
 ```plaintext
 GET /projects/:id/vulnerabilities
@@ -109,7 +109,7 @@ Creates a new vulnerability.
 
 If an authenticated user does not have a permission to
 [create a new vulnerability](../user/permissions.md#project-members-permissions),
-this request will result in a `403` status code.
+this request results in a `403` status code.
 
 ```plaintext
 POST /projects/:id/vulnerabilities?finding_id=<your_finding_id>
@@ -118,7 +118,7 @@ POST /projects/:id/vulnerabilities?finding_id=<your_finding_id>
 | Attribute           | Type              | Required   | Description                                                                                                                  |
 | ------------------- | ----------------- | ---------- | -----------------------------------------------------------------------------------------------------------------------------|
 | `id`                | integer or string | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) which the authenticated user is a member of  |
-| `finding_id`        | integer or string | yes        | The ID of a Vulnerability Finding from which the new Vulnerability will be created |
+| `finding_id`        | integer or string | yes        | The ID of a Vulnerability Finding to create the new Vulnerability from |
 
 The other attributes of a newly created Vulnerability are populated from
 its source Vulnerability Finding, or with these default values:

@@ -5,9 +5,9 @@ module Admin
     include PropagateService
 
     def propagate
-      if integration.instance?
+      if integration.instance_level?
         update_inherited_integrations
-        create_integration_for_groups_without_integration if Feature.enabled?(:group_level_integrations)
+        create_integration_for_groups_without_integration
         create_integration_for_projects_without_integration
       else
         update_inherited_descendant_integrations

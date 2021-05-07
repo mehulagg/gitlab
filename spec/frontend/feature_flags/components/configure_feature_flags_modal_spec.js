@@ -1,7 +1,6 @@
+import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlModal, GlSprintf } from '@gitlab/ui';
 import Component from '~/feature_flags/components/configure_feature_flags_modal.vue';
-import Callout from '~/vue_shared/components/callout.vue';
 
 describe('Configure Feature Flags Modal', () => {
   const mockEvent = { preventDefault: jest.fn() };
@@ -33,28 +32,29 @@ describe('Configure Feature Flags Modal', () => {
     });
   };
 
-  const findGlModal = () => wrapper.find(GlModal);
+  const findGlModal = () => wrapper.findComponent(GlModal);
   const findPrimaryAction = () => findGlModal().props('actionPrimary');
+  const findSecondaryAction = () => findGlModal().props('actionSecondary');
   const findProjectNameInput = () => wrapper.find('#project_name_verification');
-  const findDangerCallout = () =>
-    wrapper.findAll(Callout).filter(c => c.props('category') === 'danger');
+  const findDangerGlAlert = () =>
+    wrapper.findAll(GlAlert).filter((c) => c.props('variant') === 'danger');
 
   describe('idle', () => {
     afterEach(() => wrapper.destroy());
     beforeEach(factory);
 
-    it('should have Primary and Cancel actions', () => {
-      expect(findGlModal().props('actionCancel').text).toBe('Close');
-      expect(findPrimaryAction().text).toBe('Regenerate instance ID');
+    it('should have Primary and Secondary actions', () => {
+      expect(findPrimaryAction().text).toBe('Close');
+      expect(findSecondaryAction().text).toBe('Regenerate instance ID');
     });
 
-    it('should default disable the primary action', async () => {
-      const [{ disabled }] = findPrimaryAction().attributes;
+    it('should default disable the primary action', () => {
+      const [{ disabled }] = findSecondaryAction().attributes;
       expect(disabled).toBe(true);
     });
 
     it('should emit a `token` event when clicking on the Primary action', async () => {
-      findGlModal().vm.$emit('primary', mockEvent);
+      findGlModal().vm.$emit('secondary', mockEvent);
       await wrapper.vm.$nextTick();
       expect(wrapper.emitted('token')).toEqual([[]]);
       expect(mockEvent.preventDefault).toHaveBeenCalled();
@@ -86,10 +86,10 @@ describe('Configure Feature Flags Modal', () => {
       );
     });
 
-    it('should display one and only one danger callout', () => {
-      const dangerCallout = findDangerCallout();
-      expect(dangerCallout.length).toBe(1);
-      expect(dangerCallout.at(0).props('message')).toMatch(/Regenerating the instance ID/);
+    it('should display one and only one danger alert', () => {
+      const dangerGlAlert = findDangerGlAlert();
+      expect(dangerGlAlert.length).toBe(1);
+      expect(dangerGlAlert.at(0).text()).toMatch(/Regenerating the instance ID/);
     });
 
     it('should display a message asking to fill the project name', () => {
@@ -99,13 +99,13 @@ describe('Configure Feature Flags Modal', () => {
     });
 
     it('should display the api URL in an input box', () => {
-      const input = wrapper.find('#api_url');
-      expect(input.element.value).toBe('/api/url');
+      const input = wrapper.find('#api-url');
+      expect(input.attributes('value')).toBe('/api/url');
     });
 
     it('should display the instance ID in an input box', () => {
       const input = wrapper.find('#instance_id');
-      expect(input.element.value).toBe('instance-id-token');
+      expect(input.attributes('value')).toBe('instance-id-token');
     });
   });
 
@@ -113,10 +113,10 @@ describe('Configure Feature Flags Modal', () => {
     afterEach(() => wrapper.destroy());
     beforeEach(factory);
 
-    it('should enable the primary action', async () => {
+    it('should enable the secondary action', async () => {
       findProjectNameInput().vm.$emit('input', provide.projectName);
       await wrapper.vm.$nextTick();
-      const [{ disabled }] = findPrimaryAction().attributes;
+      const [{ disabled }] = findSecondaryAction().attributes;
       expect(disabled).toBe(false);
     });
   });
@@ -125,12 +125,12 @@ describe('Configure Feature Flags Modal', () => {
     afterEach(() => wrapper.destroy());
     beforeEach(factory.bind(null, { canUserRotateToken: false }));
 
-    it('should not display the primary action', async () => {
-      expect(findPrimaryAction()).toBe(null);
+    it('should not display the primary action', () => {
+      expect(findSecondaryAction()).toBe(null);
     });
 
-    it('shold not display regenerating instance ID', async () => {
-      expect(findDangerCallout().exists()).toBe(false);
+    it('should not display regenerating instance ID', async () => {
+      expect(findDangerGlAlert().exists()).toBe(false);
     });
 
     it('should disable the project name input', async () => {

@@ -1,8 +1,8 @@
-import { merge } from 'lodash';
-import { mount } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import OnDemandScansProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
-import { scannerProfiles } from '../../mock_data';
+import { scannerProfiles } from '../../mocks/mock_data';
 
 describe('OnDemandScansProfileSelector', () => {
   let wrapper;
@@ -13,23 +13,32 @@ describe('OnDemandScansProfileSelector', () => {
     profiles: [],
   };
 
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
-  const findProfilesLibraryPathLink = () => findByTestId('manage-profiles-link');
+  const defaultDropdownItems = [
+    {
+      text: 'Create new profile',
+      isChecked: false,
+    },
+    {
+      text: 'Manage scanner profiles',
+      isChecked: false,
+    },
+  ];
+
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
+  const findCreateProfileOption = () => findByTestId('create-profile-option');
+  const findManageProfilesOption = () => findByTestId('manage-profiles-option');
   const findProfilesDropdown = () => findByTestId('profiles-dropdown');
   const findCreateNewProfileLink = () => findByTestId('create-profile-link');
   const findSelectedProfileSummary = () => findByTestId('selected-profile-summary');
   const parseDropdownItems = () =>
     findProfilesDropdown()
       .findAll(GlDropdownItem)
-      .wrappers.map(x => ({
+      .wrappers.map((x) => ({
         text: x.text(),
         isChecked: x.props('isChecked'),
       }));
-
   const selectFirstProfile = () => {
-    return findProfilesDropdown()
-      .find(GlDropdownItem)
-      .vm.$emit('click');
+    return findProfilesDropdown().find(GlDropdownItem).vm.$emit('click');
   };
 
   const createFullComponent = (options = {}) => {
@@ -41,11 +50,10 @@ describe('OnDemandScansProfileSelector', () => {
           slots: {
             title: 'Section title',
             label: 'Use existing scanner profile',
+            summary: `<div>Profile's summary</div>`,
             'no-profiles': 'No profile yet',
-            'new-profile': 'Create a new profile',
-          },
-          scopedSlots: {
-            summary: "<div>{{ props.profile.profileName }}'s summary</div>",
+            'new-profile': 'Create new profile',
+            'manage-profile': 'Manage scanner profiles',
           },
         },
         options,
@@ -68,8 +76,8 @@ describe('OnDemandScansProfileSelector', () => {
       createFullComponent();
     });
 
-    it('disables the link to profiles library', () => {
-      expect(findProfilesLibraryPathLink().props('disabled')).toBe(true);
+    it('do not show profile selector', () => {
+      expect(findProfilesDropdown().exists()).toBe(false);
     });
 
     it('shows a help text and a link to create a new profile', () => {
@@ -78,7 +86,7 @@ describe('OnDemandScansProfileSelector', () => {
       expect(wrapper.text()).toContain('No profile yet');
       expect(link.exists()).toBe(true);
       expect(link.attributes('href')).toBe('/path/to/new/profile/form');
-      expect(link.text()).toBe('Create a new profile');
+      expect(link.text()).toBe('Create new profile');
     });
   });
 
@@ -87,11 +95,6 @@ describe('OnDemandScansProfileSelector', () => {
       createFullComponent({
         propsData: { profiles: scannerProfiles },
       });
-    });
-
-    it('enables link to profiles management', () => {
-      expect(findProfilesLibraryPathLink().props('disabled')).toBe(false);
-      expect(findProfilesLibraryPathLink().attributes('href')).toBe('/path/to/profiles/library');
     });
 
     it('shows a dropdown containing the profiles', () => {
@@ -109,12 +112,21 @@ describe('OnDemandScansProfileSelector', () => {
     });
 
     it('shows dropdown items for each profile', () => {
-      expect(parseDropdownItems()).toEqual(
-        scannerProfiles.map(x => ({
+      expect(parseDropdownItems()).toEqual([
+        ...scannerProfiles.map((x) => ({
           text: x.profileName,
           isChecked: false,
         })),
-      );
+        ...defaultDropdownItems,
+      ]);
+    });
+
+    it('show options for profiles management', () => {
+      expect(findCreateProfileOption().exists()).toBe(true);
+      expect(findCreateProfileOption().attributes('href')).toBe('/path/to/new/profile/form');
+
+      expect(findManageProfilesOption().exists()).toBe(true);
+      expect(findManageProfilesOption().attributes('href')).toBe('/path/to/profiles/library');
     });
 
     it('does not show summary', () => {
@@ -139,16 +151,17 @@ describe('OnDemandScansProfileSelector', () => {
       const summary = findSelectedProfileSummary();
 
       expect(summary.exists()).toBe(true);
-      expect(summary.text()).toContain(`${scannerProfiles[0].profileName}'s summary`);
+      expect(summary.text()).toContain(`Profile's summary`);
     });
 
     it('displays item as checked', () => {
-      expect(parseDropdownItems()).toEqual(
-        scannerProfiles.map((x, i) => ({
+      expect(parseDropdownItems()).toEqual([
+        ...scannerProfiles.map((x, i) => ({
           text: x.profileName,
           isChecked: i === 0,
         })),
-      );
+        ...defaultDropdownItems,
+      ]);
     });
   });
 });

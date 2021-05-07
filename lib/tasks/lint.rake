@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 unless Rails.env.production?
   namespace :lint do
     task :static_verification_env do
@@ -31,7 +33,6 @@ unless Rails.env.production?
       tasks = %w[
         config_lint
         lint:haml
-        scss_lint
         gettext:lint
         lint:static_verification
         gitlab:sidekiq:all_queues_yml:check

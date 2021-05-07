@@ -37,9 +37,10 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
             </span>
              
             <gl-dropdown-stub
-              category="tertiary"
+              category="primary"
               class="w-100 metric-col"
               headertext=""
+              hideheaderborder="true"
               menu-class="w-100 mw-100"
               size="medium"
               text="Time from first comment to last commit"
@@ -52,6 +53,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                 class="w-100"
                 iconcolor=""
                 iconname=""
+                iconrightarialabel=""
                 iconrightname=""
                 secondarytext=""
               >
@@ -74,6 +76,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                 class="w-100"
                 iconcolor=""
                 iconname=""
+                iconrightarialabel=""
                 iconrightname=""
                 secondarytext=""
               >
@@ -96,6 +99,7 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                 class="w-100"
                 iconcolor=""
                 iconname=""
+                iconrightarialabel=""
                 iconrightname=""
                 secondarytext=""
               >

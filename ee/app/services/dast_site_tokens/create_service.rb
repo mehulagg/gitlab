@@ -29,8 +29,7 @@ module DastSiteTokens
     private
 
     def allowed?
-      container.feature_available?(:security_on_demand_scans) &&
-        Feature.enabled?(:security_on_demand_scans_site_validation, container)
+      container.feature_available?(:security_on_demand_scans)
     end
 
     def normalize_target_url(target_url)
@@ -44,7 +43,7 @@ module DastSiteTokens
     end
 
     def calculate_status(dast_site_validation)
-      dast_site_validation&.state || DastSiteValidation::INITIAL_STATE.to_s
+      dast_site_validation&.state || DastSiteValidation::INITIAL_STATE
     end
   end
 end

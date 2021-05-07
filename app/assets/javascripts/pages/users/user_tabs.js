@@ -1,11 +1,10 @@
-import $ from 'jquery';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
-import axios from '~/lib/utils/axios_utils';
+import $ from 'jquery';
 import Activities from '~/activities';
-import { localTimeAgo } from '~/lib/utils/datetime_utility';
 import AjaxCache from '~/lib/utils/ajax_cache';
+import axios from '~/lib/utils/axios_utils';
+import { localTimeAgo } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as flash } from '~/flash';
 import ActivityCalendar from './activity_calendar';
 import UserOverviewBlock from './user_overview_block';
 
@@ -63,9 +62,9 @@ import UserOverviewBlock from './user_overview_block';
  */
 
 const CALENDAR_TEMPLATE = `
-  <div class="clearfix calendar">
+  <div class="calendar">
     <div class="js-contrib-calendar"></div>
-    <div class="calendar-hint bottom-right"></div>
+    <div class="calendar-hint"></div>
   </div>
 `;
 
@@ -101,8 +100,8 @@ export default class UserTabs {
   bindEvents() {
     this.$parentEl
       .off('shown.bs.tab', '.nav-links a[data-toggle="tab"]')
-      .on('shown.bs.tab', '.nav-links a[data-toggle="tab"]', event => this.tabShown(event))
-      .on('click', '.gl-pagination a', event => this.changeProjectsPage(event));
+      .on('shown.bs.tab', '.nav-links a[data-toggle="tab"]', (event) => this.tabShown(event))
+      .on('click', '.gl-pagination a', (event) => this.changeProjectsPage(event));
 
     window.addEventListener('resize', () => this.onResize());
   }
@@ -142,7 +141,15 @@ export default class UserTabs {
       this.loadOverviewTab();
     }
 
-    const loadableActions = ['groups', 'contributed', 'projects', 'starred', 'snippets'];
+    const loadableActions = [
+      'groups',
+      'contributed',
+      'projects',
+      'starred',
+      'snippets',
+      'followers',
+      'following',
+    ];
     if (loadableActions.indexOf(action) > -1) {
       this.loadTab(action, endpoint);
     }
@@ -213,8 +220,20 @@ export default class UserTabs {
     const calendarPath = $calendarWrap.data('calendarPath');
 
     AjaxCache.retrieve(calendarPath)
-      .then(data => UserTabs.renderActivityCalendar(data, $calendarWrap))
-      .catch(() => flash(__('There was an error loading users activity calendar.')));
+      .then((data) => UserTabs.renderActivityCalendar(data, $calendarWrap))
+      .catch(() => {
+        const cWrap = $calendarWrap[0];
+        cWrap.querySelector('.gl-spinner').classList.add('invisible');
+        cWrap.querySelector('.user-calendar-error').classList.remove('invisible');
+        cWrap
+          .querySelector('.user-calendar-error .js-retry-load')
+          .addEventListener('click', (e) => {
+            e.preventDefault();
+            cWrap.querySelector('.user-calendar-error').classList.add('invisible');
+            cWrap.querySelector('.gl-spinner').classList.remove('invisible');
+            this.loadActivityCalendar();
+          });
+      });
   }
 
   static renderActivityCalendar(data, $calendarWrap) {

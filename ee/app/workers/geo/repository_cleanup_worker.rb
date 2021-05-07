@@ -3,6 +3,8 @@
 module Geo
   class RepositoryCleanupWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+
+    sidekiq_options retry: 3
     include GeoQueue
     include ::Gitlab::Geo::LogHelpers
     include ::Gitlab::Utils::StrongMemoize

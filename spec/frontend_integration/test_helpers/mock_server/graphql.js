@@ -1,7 +1,11 @@
 import { buildSchema, graphql } from 'graphql';
-import gitlabSchemaStr from '../../../../doc/api/graphql/reference/gitlab_schema.graphql';
+import { memoize } from 'lodash';
 
-const graphqlSchema = buildSchema(gitlabSchemaStr.loc.source.body);
+// The graphql schema is dynamically generated in CI
+// during the `graphql-schema-dump` job.
+// eslint-disable-next-line global-require, import/no-unresolved
+const getGraphqlSchema = () => require('../../../../tmp/tests/graphql/gitlab_schema.graphql');
+
 const graphqlResolvers = {
   project({ fullPath }, schema) {
     const result = schema.projects.findBy({ path_with_namespace: fullPath });
@@ -15,6 +19,7 @@ const graphqlResolvers = {
     };
   },
 };
+const buildGraphqlSchema = memoize(() => buildSchema(getGraphqlSchema().loc.source.body));
 
 export const graphqlQuery = (query, variables, schema) =>
-  graphql(graphqlSchema, query, graphqlResolvers, schema, variables);
+  graphql(buildGraphqlSchema(), query, graphqlResolvers, schema, variables);

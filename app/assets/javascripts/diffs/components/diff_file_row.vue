@@ -3,9 +3,9 @@
  * This component is an iterative step towards refactoring and simplifying `vue_shared/components/file_row.vue`
  * https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23720
  */
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import FileRow from '~/vue_shared/components/file_row.vue';
 import ChangedFileIcon from '~/vue_shared/components/changed_file_icon.vue';
+import FileRow from '~/vue_shared/components/file_row.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import FileRowStats from './file_row_stats.vue';
 
 export default {
@@ -41,10 +41,6 @@ export default {
       return !this.hideFileStats && this.file.type === 'blob';
     },
     fileClasses() {
-      if (!this.glFeatures.highlightCurrentDiffRow) {
-        return '';
-      }
-
       return this.file.type === 'blob' && !this.viewedFiles[this.file.fileHash]
         ? 'gl-font-weight-bold'
         : '';
@@ -62,6 +58,7 @@ export default {
     v-bind="$attrs"
     :class="{ 'is-active': isActive }"
     class="diff-file-row"
+    truncate-middle
     :file-classes="fileClasses"
     v-on="$listeners"
   >

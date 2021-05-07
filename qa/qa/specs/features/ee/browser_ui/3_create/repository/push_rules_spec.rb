@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     context 'Push Rules' do
-      describe 'using non signed commits' do
+      # TODO: Remove :requires_admin meta when the `Runtime::Feature.enable` method call is removed
+      describe 'using non signed commits', :requires_admin do
         before(:context) do
+          Runtime::Feature.enable(:invite_members_group_modal)
+
           prepare
 
           @file_name_limitation = 'denied_file'
           @file_size_limitation = 1
           @authors_email_limitation = %{(#{Regexp.escape(@creator.email)}|#{@root.email})}
-          @branch_name_limitation = 'master'
+          @branch_name_limitation = @project.default_branch
           @needed_phrase_limitation = 'allowed commit'
           @deny_message_phrase_limitation = 'denied commit'
 
@@ -89,8 +92,8 @@ module QA
         it 'restricts removal of tag', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/650' do
           tag = Resource::Tag.fabricate_via_api! do |tag|
             tag.project = @project
-            tag.ref = 'master'
-            tag.name = 'test_tag'
+            tag.ref = @project.default_branch
+            tag.name = "test_tag_#{SecureRandom.hex(8)}"
           end
 
           expect_error_on_push(file: standard_file, tag: tag.name,
@@ -110,7 +113,7 @@ module QA
           end
         end
 
-        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/879', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
+        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1778', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
           non_member_user = Resource::User.new.tap do |user|
             user.username = ''
             user.password = ''
@@ -173,7 +176,7 @@ module QA
         Resource::Repository::ProjectPush.fabricate! do |push|
           push.project = @project
           push.commit_message = commit_message
-          push.new_branch = branch != 'master'
+          push.new_branch = branch != @project.default_branch
           push.branch_name = branch
           push.user = user if user != @root
           push.files = file if tag.nil?
@@ -182,13 +185,13 @@ module QA
         end
       end
 
-      def expect_no_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: @creator, tag: nil, gpg: nil)
+      def expect_no_error_on_push(commit_message: 'allowed commit', branch: @project.default_branch, file:, user: @creator, tag: nil, gpg: nil)
         expect do
           push commit_message: commit_message, branch: branch, file: file, user: user, tag: tag, gpg: gpg
         end.not_to raise_error
       end
 
-      def expect_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: @creator, tag: nil, gpg: nil, error: nil)
+      def expect_error_on_push(commit_message: 'allowed commit', branch: @project.default_branch, file:, user: @creator, tag: nil, gpg: nil, error: nil)
         expect do
           push commit_message: commit_message, branch: branch, file: file, user: user, tag: tag, gpg: gpg
         end.to raise_error(QA::Support::Run::CommandError, /#{error}/)

@@ -5,9 +5,9 @@ require 'spec_helper'
 RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Activity do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
-  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
-  let(:plan_limits) { create(:plan_limits, plan: gold_plan) }
-  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+  let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
+  let(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
   subject { described_class.new(namespace, project) }
 
@@ -83,7 +83,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Activity do
 
       it 'returns info about pipeline activity limit exceeded' do
         expect(subject.message)
-          .to eq "Active pipelines limit exceeded by 2 pipelines!"
+          .to eq "Project has too many active pipelines! There are 3 active pipelines, but the limit is 1."
       end
     end
   end

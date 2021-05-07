@@ -9,8 +9,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
 
   let(:processor) { described_class.new(pipeline, config) }
 
-  describe '#build_attributes' do
-    subject { processor.build_attributes }
+  describe '#attributes' do
+    subject { processor.attributes }
 
     context 'with cache:key' do
       let(:config) do
@@ -20,7 +20,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
         }
       end
 
-      it { is_expected.to include(options: { cache: config }) }
+      it { is_expected.to include(config) }
     end
 
     context 'with cache:key as a symbol' do
@@ -31,7 +31,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
         }
       end
 
-      it { is_expected.to include(options: { cache: config.merge(key: "a_key") }) }
+      it { is_expected.to include(config.merge(key: "a_key")) }
     end
 
     context 'with cache:key:files' do
@@ -41,7 +41,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
         end
 
         it 'uses default key' do
-          expected = { options: { cache: { key: 'default' } } }
+          expected = { key: 'default' }
 
           is_expected.to include(expected)
         end
@@ -59,13 +59,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
 
         it 'builds a string key' do
           expected = {
-            options: {
-              cache: {
                 key: '703ecc8fef1635427a1f86a8a1a308831c122392',
                 paths: ['vendor/ruby']
-              }
             }
-          }
 
           is_expected.to include(expected)
         end
@@ -112,11 +108,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
           end
 
           it 'builds a string key' do
-            expected = {
-              options: {
-                cache: { key: '74bf43fb1090f161bdd4e265802775dbda2f03d1' }
-              }
-            }
+            expected = { key: '74bf43fb1090f161bdd4e265802775dbda2f03d1' }
 
             is_expected.to include(expected)
           end
@@ -155,13 +147,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
 
         it 'adds prefix to default key' do
           expected = {
-            options: {
-              cache: {
                 key: 'a-prefix-default',
                 paths: ['vendor/ruby']
               }
-            }
-          }
 
           is_expected.to include(expected)
         end
@@ -180,13 +168,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
 
         it 'adds prefix key' do
           expected = {
-            options: {
-              cache: {
                 key: 'a-prefix-703ecc8fef1635427a1f86a8a1a308831c122392',
                 paths: ['vendor/ruby']
               }
-            }
-          }
 
           is_expected.to include(expected)
         end
@@ -205,13 +189,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
 
         it 'adds prefix to default key' do
           expected = {
-            options: {
-              cache: {
                 key: 'a-prefix-default',
                 paths: ['vendor/ruby']
               }
-            }
-          }
 
           is_expected.to include(expected)
         end
@@ -229,7 +209,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
         }
       end
 
-      it { is_expected.to include(options: { cache: config }) }
+      it { is_expected.to include(config) }
     end
 
     context 'with unknown cache option keys' do
@@ -241,12 +221,6 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build::Cache do
       end
 
       it { expect { subject }.to raise_error(ArgumentError, /unknown_key/) }
-    end
-
-    context 'with empty config' do
-      let(:config) { {} }
-
-      it { is_expected.to include(options: {}) }
     end
   end
 end

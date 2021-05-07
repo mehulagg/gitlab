@@ -5,9 +5,9 @@ require 'spec_helper'
 RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
-  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
-  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: gold_plan) }
-  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
+  let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
+  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: ultimate_plan) }
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 
   subject { described_class.new(namespace, project) }
 
@@ -119,7 +119,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
 
       it 'returns info about pipeline activity limit exceeded' do
         expect(subject.message)
-          .to eq "Active jobs limit exceeded by 2 jobs in the past 24 hours!"
+          .to eq "Project has too many active jobs created in the last 24 hours! There are 3 active jobs, but the limit is 1."
       end
     end
   end

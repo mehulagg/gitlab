@@ -1,6 +1,6 @@
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlSprintf, GlLink, GlIcon } from '@gitlab/ui';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { s__ } from '~/locale';
 
 import gkeDropdownMixin from './gke_dropdown_mixin';
@@ -99,16 +99,14 @@ export default {
   created() {
     this.isLoading = true;
 
-    this.fetchProjects()
-      .then(this.fetchSuccessHandler)
-      .catch(this.fetchFailureHandler);
+    this.fetchProjects().then(this.fetchSuccessHandler).catch(this.fetchFailureHandler);
   },
   methods: {
     ...mapActions(['fetchProjects', 'setIsValidatingProjectBilling', 'validateProjectBilling']),
     ...mapActions({ setItem: 'setProject' }),
     fetchSuccessHandler() {
       if (this.defaultValue) {
-        const projectToSelect = this.items.find(item => item.projectId === this.defaultValue);
+        const projectToSelect = this.items.find((item) => item.projectId === this.defaultValue);
 
         if (projectToSelect) {
           this.setItem(projectToSelect);
@@ -175,17 +173,15 @@ export default {
       <gl-sprintf :message="helpText">
         <template #linkToBilling="{ content }">
           <gl-link
-            :href="
-              'https://console.cloud.google.com/freetrial?utm_campaign=2018_cpanel&utm_source=gitlab&utm_medium=referral'
-            "
+            :href="'https://console.cloud.google.com/freetrial?utm_campaign=2018_cpanel&utm_source=gitlab&utm_medium=referral'"
             target="_blank"
-            >{{ content }} <gl-icon name="external-link" aria-hidden="true"
+            >{{ content }} <gl-icon name="external-link"
           /></gl-link>
         </template>
 
         <template #docsLink="{ content }">
           <gl-link :href="docsUrl" target="_blank"
-            >{{ content }} <gl-icon name="external-link" aria-hidden="true"
+            >{{ content }} <gl-icon name="external-link"
           /></gl-link>
         </template>
 

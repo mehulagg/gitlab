@@ -79,7 +79,7 @@ module ObjectStorage
           Provider: 'AWS',
           S3Config: {
             Bucket: bucket_name,
-            Region: credentials[:region],
+            Region: credentials[:region] || ::Fog::AWS::Storage::DEFAULT_REGION,
             Endpoint: credentials[:endpoint],
             PathStyle: config.use_path_style?,
             UseIamProfile: config.use_iam_profile?,
@@ -184,15 +184,20 @@ module ObjectStorage
     private
 
     def rounded_multipart_part_size
-      # round multipart_part_size up to minimum_mulitpart_size
+      # round multipart_part_size up to minimum_multipart_size
       (multipart_part_size + MINIMUM_MULTIPART_SIZE - 1) / MINIMUM_MULTIPART_SIZE * MINIMUM_MULTIPART_SIZE
     end
 
     def multipart_part_size
+      return MINIMUM_MULTIPART_SIZE if maximum_size == 0
+
       maximum_size / number_of_multipart_parts
     end
 
     def number_of_multipart_parts
+      # If we don't have max length, we can only assume the file is as large as possible.
+      return MAXIMUM_MULTIPART_PARTS if maximum_size == 0
+
       [
         # round maximum_size up to minimum_mulitpart_size
         (maximum_size + MINIMUM_MULTIPART_SIZE - 1) / MINIMUM_MULTIPART_SIZE,

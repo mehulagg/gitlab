@@ -1,54 +1,95 @@
 <script>
-import { mapState, mapActions } from 'vuex';
-import { GlPagination, GlResizeObserverDirective } from '@gitlab/ui';
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
+import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { joinPaths } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';
+import DeleteImage from '../components/delete_image.vue';
 import DeleteAlert from '../components/details_page/delete_alert.vue';
-import PartialCleanupAlert from '../components/details_page/partial_cleanup_alert.vue';
 import DeleteModal from '../components/details_page/delete_modal.vue';
 import DetailsHeader from '../components/details_page/details_header.vue';
+import EmptyState from '../components/details_page/empty_state.vue';
+import PartialCleanupAlert from '../components/details_page/partial_cleanup_alert.vue';
+import StatusAlert from '../components/details_page/status_alert.vue';
 import TagsList from '../components/details_page/tags_list.vue';
 import TagsLoader from '../components/details_page/tags_loader.vue';
-import EmptyTagsState from '../components/details_page/empty_tags_state.vue';
 
-import { decodeAndParse } from '../utils';
 import {
   ALERT_SUCCESS_TAG,
   ALERT_DANGER_TAG,
   ALERT_SUCCESS_TAGS,
   ALERT_DANGER_TAGS,
+  ALERT_DANGER_IMAGE,
+  FETCH_IMAGES_LIST_ERROR_MESSAGE,
+  UNFINISHED_STATUS,
+  MISSING_OR_DELETED_IMAGE_BREADCRUMB,
+  ROOT_IMAGE_TEXT,
 } from '../constants/index';
+import deleteContainerRepositoryTagsMutation from '../graphql/mutations/delete_container_repository_tags.mutation.graphql';
+import getContainerRepositoryDetailsQuery from '../graphql/queries/get_container_repository_details.query.graphql';
 
 export default {
+  name: 'RegistryDetailsPage',
   components: {
     DeleteAlert,
     PartialCleanupAlert,
     DetailsHeader,
-    GlPagination,
     DeleteModal,
     TagsList,
     TagsLoader,
-    EmptyTagsState,
+    EmptyState,
+    StatusAlert,
+    DeleteImage,
   },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
   },
   mixins: [Tracking.mixin()],
+  inject: ['breadCrumbState', 'config'],
+  apollo: {
+    image: {
+      query: getContainerRepositoryDetailsQuery,
+      variables() {
+        return this.queryVariables;
+      },
+      update(data) {
+        return data.containerRepository;
+      },
+      result() {
+        this.updateBreadcrumb();
+      },
+      error() {
+        createFlash({ message: FETCH_IMAGES_LIST_ERROR_MESSAGE });
+      },
+    },
+  },
   data() {
     return {
+      image: {},
       itemsToBeDeleted: [],
-      isDesktop: true,
+      isMobile: false,
+      mutationLoading: false,
       deleteAlertType: null,
-      dismissPartialCleanupWarning: false,
+      hidePartialCleanupWarning: false,
+      deleteImageAlert: false,
     };
   },
   computed: {
-    ...mapState(['tagsPagination', 'isLoading', 'config', 'tags']),
-    queryParameters() {
-      return decodeAndParse(this.$route.params.id);
+    queryVariables() {
+      return {
+        id: joinPaths(this.config.gidPrefix, `${this.$route.params.id}`),
+      };
+    },
+    isLoading() {
+      return this.$apollo.queries.image.loading || this.mutationLoading;
     },
     showPartialCleanupWarning() {
-      return this.queryParameters.cleanup_policy_started_at && !this.dismissPartialCleanupWarning;
+      return (
+        this.config.showUnfinishedTagCleanupCallout &&
+        this.image?.expirationPolicyCleanupStatus === UNFINISHED_STATUS &&
+        !this.hidePartialCleanupWarning
+      );
     },
     tracking() {
       return {
@@ -56,61 +97,82 @@ export default {
           this.itemsToBeDeleted?.length > 1 ? 'bulk_registry_tag_delete' : 'registry_tag_delete',
       };
     },
-    currentPage: {
-      get() {
-        return this.tagsPagination.page;
-      },
-      set(page) {
-        this.requestTagsList({ pagination: { page }, params: this.$route.params.id });
-      },
+    pageActionsAreDisabled() {
+      return Boolean(this.image?.status);
     },
   },
-  mounted() {
-    this.requestTagsList({ params: this.$route.params.id });
-  },
   methods: {
-    ...mapActions(['requestTagsList', 'requestDeleteTag', 'requestDeleteTags']),
+    updateBreadcrumb() {
+      const name = this.image?.id
+        ? this.image?.name || ROOT_IMAGE_TEXT
+        : MISSING_OR_DELETED_IMAGE_BREADCRUMB;
+      this.breadCrumbState.updateName(name);
+    },
     deleteTags(toBeDeleted) {
-      this.itemsToBeDeleted = this.tags.filter(tag => toBeDeleted[tag.name]);
+      this.deleteImageAlert = false;
+      this.itemsToBeDeleted = toBeDeleted;
       this.track('click_button');
       this.$refs.deleteModal.show();
     },
-    handleSingleDelete() {
-      const [itemToDelete] = this.itemsToBeDeleted;
-      this.itemsToBeDeleted = [];
-      return this.requestDeleteTag({ tag: itemToDelete, params: this.$route.params.id })
-        .then(() => {
-          this.deleteAlertType = ALERT_SUCCESS_TAG;
-        })
-        .catch(() => {
-          this.deleteAlertType = ALERT_DANGER_TAG;
-        });
-    },
-    handleMultipleDelete() {
-      const { itemsToBeDeleted } = this;
-      this.itemsToBeDeleted = [];
-
-      return this.requestDeleteTags({
-        ids: itemsToBeDeleted.map(x => x.name),
-        params: this.$route.params.id,
-      })
-        .then(() => {
-          this.deleteAlertType = ALERT_SUCCESS_TAGS;
-        })
-        .catch(() => {
-          this.deleteAlertType = ALERT_DANGER_TAGS;
-        });
-    },
-    onDeletionConfirmed() {
-      this.track('confirm_delete');
-      if (this.itemsToBeDeleted.length > 1) {
-        this.handleMultipleDelete();
+    confirmDelete() {
+      if (this.deleteImageAlert) {
+        this.$refs.deleteImage.doDelete();
       } else {
-        this.handleSingleDelete();
+        this.handleDeleteTag();
       }
     },
+    async handleDeleteTag() {
+      this.track('confirm_delete');
+      const { itemsToBeDeleted } = this;
+      this.itemsToBeDeleted = [];
+      this.mutationLoading = true;
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: deleteContainerRepositoryTagsMutation,
+          variables: {
+            id: this.queryVariables.id,
+            tagNames: itemsToBeDeleted.map((i) => i.name),
+          },
+          awaitRefetchQueries: true,
+          refetchQueries: [
+            {
+              query: getContainerRepositoryDetailsQuery,
+              variables: this.queryVariables,
+            },
+          ],
+        });
+
+        if (data?.destroyContainerRepositoryTags?.errors[0]) {
+          throw new Error();
+        }
+        this.deleteAlertType =
+          itemsToBeDeleted.length === 0 ? ALERT_SUCCESS_TAG : ALERT_SUCCESS_TAGS;
+      } catch (e) {
+        this.deleteAlertType = itemsToBeDeleted.length === 0 ? ALERT_DANGER_TAG : ALERT_DANGER_TAGS;
+      }
+
+      this.mutationLoading = false;
+    },
     handleResize() {
-      this.isDesktop = GlBreakpointInstance.isDesktop();
+      this.isMobile = GlBreakpointInstance.getBreakpointSize() === 'xs';
+    },
+    dismissPartialCleanupWarning() {
+      this.hidePartialCleanupWarning = true;
+      axios.post(this.config.userCalloutsPath, {
+        feature_name: this.config.userCalloutId,
+      });
+    },
+    deleteImage() {
+      this.deleteImageAlert = true;
+      this.itemsToBeDeleted = [{ path: this.image.path }];
+      this.$refs.deleteModal.show();
+    },
+    deleteImageError() {
+      this.deleteAlertType = ALERT_DANGER_IMAGE;
+    },
+    deleteImageIniit() {
+      this.itemsToBeDeleted = [];
+      this.mutationLoading = true;
     },
   },
 };
@@ -118,43 +180,57 @@ export default {
 
 <template>
   <div v-gl-resize-observer="handleResize" class="gl-my-3">
-    <delete-alert
-      v-model="deleteAlertType"
-      :garbage-collection-help-page-path="config.garbageCollectionHelpPagePath"
-      :is-admin="config.isAdmin"
-      class="gl-my-2"
-    />
+    <template v-if="image">
+      <delete-alert
+        v-model="deleteAlertType"
+        :garbage-collection-help-page-path="config.garbageCollectionHelpPagePath"
+        :is-admin="config.isAdmin"
+        class="gl-my-2"
+      />
 
-    <partial-cleanup-alert
-      v-if="showPartialCleanupWarning"
-      :run-cleanup-policies-help-page-path="config.runCleanupPoliciesHelpPagePath"
-      :cleanup-policies-help-page-path="config.cleanupPoliciesHelpPagePath"
-      @dismiss="dismissPartialCleanupWarning = true"
-    />
+      <partial-cleanup-alert
+        v-if="showPartialCleanupWarning"
+        :run-cleanup-policies-help-page-path="config.runCleanupPoliciesHelpPagePath"
+        :cleanup-policies-help-page-path="config.cleanupPoliciesHelpPagePath"
+        @dismiss="dismissPartialCleanupWarning"
+      />
 
-    <details-header :image-name="queryParameters.name" />
+      <status-alert v-if="image.status" :status="image.status" />
 
-    <tags-loader v-if="isLoading" />
-    <template v-else>
-      <empty-tags-state v-if="tags.length === 0" :no-containers-image="config.noContainersImage" />
-      <tags-list v-else :tags="tags" :is-desktop="isDesktop" @delete="deleteTags" />
+      <details-header
+        :image="image"
+        :metadata-loading="isLoading"
+        :disabled="pageActionsAreDisabled"
+        @delete="deleteImage"
+      />
+
+      <tags-loader v-if="isLoading" />
+      <tags-list
+        v-else
+        :id="$route.params.id"
+        :is-image-loading="isLoading"
+        :is-mobile="isMobile"
+        :disabled="pageActionsAreDisabled"
+        @delete="deleteTags"
+      />
+
+      <delete-image
+        :id="image.id"
+        ref="deleteImage"
+        use-update-fn
+        @start="deleteImageIniit"
+        @error="deleteImageError"
+        @end="mutationLoading = false"
+      />
+
+      <delete-modal
+        ref="deleteModal"
+        :items-to-be-deleted="itemsToBeDeleted"
+        :delete-image="deleteImageAlert"
+        @confirmDelete="confirmDelete"
+        @cancel="track('cancel_delete')"
+      />
     </template>
-
-    <gl-pagination
-      v-if="!isLoading"
-      ref="pagination"
-      v-model="currentPage"
-      :per-page="tagsPagination.perPage"
-      :total-items="tagsPagination.total"
-      align="center"
-      class="gl-w-full gl-mt-3"
-    />
-
-    <delete-modal
-      ref="deleteModal"
-      :items-to-be-deleted="itemsToBeDeleted"
-      @confirmDelete="onDeletionConfirmed"
-      @cancel="track('cancel_delete')"
-    />
+    <empty-state v-else is-empty-image :no-containers-image="config.noContainersImage" />
   </div>
 </template>

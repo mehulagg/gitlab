@@ -16,6 +16,8 @@ import {
   transformedStagePathData,
   issueStage,
   stageMedians,
+  basePaginationResult,
+  initialPaginationState,
 } from '../mock_data';
 
 let state = null;
@@ -28,7 +30,7 @@ const milestoneValues = getFilterValues(filterMilestones);
 const labelValues = getFilterValues(filterLabels);
 const userValues = getFilterValues(filterUsers, { prop: 'name' });
 
-describe('Cycle analytics getters', () => {
+describe('Value Stream Analytics getters', () => {
   describe('hasNoAccessError', () => {
     beforeEach(() => {
       state = {
@@ -80,7 +82,7 @@ describe('Cycle analytics getters', () => {
     });
 
     describe('without a currentGroup set', () => {
-      it.each([[''], [{}], [null]])('given "%s" will return null', value => {
+      it.each([[''], [{}], [null]])('given "%s" will return null', (value) => {
         state = { currentGroup: value };
         expect(getters.currentGroupPath(state)).toEqual(null);
       });
@@ -216,6 +218,26 @@ describe('Cycle analytics getters', () => {
       };
 
       expect(getters.pathNavigationData(state)).toEqual(transformedStagePathData);
+    });
+  });
+
+  describe('paginationParams', () => {
+    beforeEach(() => {
+      state = { pagination: initialPaginationState };
+    });
+
+    it('returns the `pagination` type', () => {
+      expect(getters.paginationParams(state)).toEqual(basePaginationResult);
+    });
+
+    it('returns the `sort` type', () => {
+      expect(getters.paginationParams(state)).toEqual(basePaginationResult);
+    });
+
+    it('with page=10, sets the `page` property', () => {
+      const page = 10;
+      state = { pagination: { ...initialPaginationState, page } };
+      expect(getters.paginationParams(state)).toEqual({ ...basePaginationResult, page });
     });
   });
 });

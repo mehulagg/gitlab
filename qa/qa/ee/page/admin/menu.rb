@@ -13,6 +13,7 @@ module QA
             base.class_eval do
               view 'app/views/layouts/nav/sidebar/_admin.html.haml' do
                 element :admin_settings_template_item
+                element :admin_settings_advanced_search
               end
 
               view 'ee/app/views/layouts/nav/ee/admin/_geo_sidebar.html.haml' do
@@ -49,6 +50,14 @@ module QA
             hover_element(:admin_settings_item) do
               within_submenu(:admin_sidebar_settings_submenu_content) do
                 click_element :admin_settings_template_item
+              end
+            end
+          end
+
+          def go_to_advanced_search
+            hover_element(:admin_settings_item) do
+              within_submenu(:admin_sidebar_settings_submenu_content) do
+                click_element :admin_settings_advanced_search
               end
             end
           end

@@ -4,16 +4,40 @@ require 'spec_helper'
 
 RSpec.describe 'Groups > Members > Manage members' do
   include Select2Helper
-  include Spec::Support::Helpers::Features::ListRowsHelpers
+  include Spec::Support::Helpers::Features::MembersHelpers
+  include Spec::Support::Helpers::Features::InviteMembersModalHelper
 
   let(:user1) { create(:user, name: 'John Doe') }
   let(:user2) { create(:user, name: 'Mary Jane') }
   let(:group) { create(:group) }
 
   before do
-    stub_feature_flags(vue_group_members_list: false)
-
     sign_in(user1)
+  end
+
+  shared_examples 'includes the correct Invite link' do |should_include, should_not_include|
+    it 'includes either the form or the modal trigger' do
+      group.add_owner(user1)
+
+      visit group_group_members_path(group)
+
+      expect(page).to have_selector(should_include)
+      expect(page).not_to have_selector(should_not_include)
+    end
+  end
+
+  context 'when Invite Members modal is enabled' do
+    it_behaves_like 'includes the correct Invite link', '.js-invite-members-trigger', '.invite-users-form'
+    it_behaves_like 'includes the correct Invite link', '.js-invite-group-trigger', '.invite-group-form'
+  end
+
+  context 'when Invite Members modal is disabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: false)
+    end
+
+    it_behaves_like 'includes the correct Invite link', '.invite-users-form', '.js-invite-members-trigger'
+    it_behaves_like 'includes the correct Invite link', '.invite-group-form', '.js-invite-group-trigger'
   end
 
   it 'update user to owner level', :js do
@@ -24,7 +48,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     page.within(second_row) do
       click_button('Developer')
-      click_link('Owner')
+      click_button('Owner')
 
       expect(page).to have_button('Owner')
     end
@@ -35,7 +59,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    add_user(user2.id, 'Reporter')
+    invite_member(user2.name, role: 'Reporter')
 
     page.within(second_row) do
       expect(page).to have_content(user2.name)
@@ -49,19 +73,44 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    find('.select2-container').click
-    select_input = find('.select2-input')
+    click_on 'Invite members'
+    fill_in 'Select members or type email addresses', with: '@gitlab.com'
 
-    select_input.send_keys('@gitlab.com')
     wait_for_requests
 
     expect(page).to have_content('No matches found')
 
-    select_input.native.clear
-    select_input.send_keys('undisclosed_email@gitlab.com')
+    fill_in 'Select members or type email addresses', with: 'undisclosed_email@gitlab.com'
     wait_for_requests
 
     expect(page).to have_content("Jane 'invisible' Doe")
+  end
+
+  context 'when Invite Members modal is disabled' do
+    before do
+      stub_feature_flags(invite_members_group_modal: false)
+    end
+
+    it 'do not disclose email addresses', :js do
+      group.add_owner(user1)
+      create(:user, email: 'undisclosed_email@gitlab.com', name: "Jane 'invisible' Doe")
+
+      visit group_group_members_path(group)
+
+      find('.select2-container').click
+      select_input = find('.select2-input')
+
+      select_input.send_keys('@gitlab.com')
+      wait_for_requests
+
+      expect(page).to have_content('No matches found')
+
+      select_input.native.clear
+      select_input.send_keys('undisclosed_email@gitlab.com')
+      wait_for_requests
+
+      expect(page).to have_content("Jane 'invisible' Doe")
+    end
   end
 
   it 'remove user from group', :js do
@@ -71,11 +120,14 @@ RSpec.describe 'Groups > Members > Manage members' do
     visit group_group_members_path(group)
 
     # Open modal
-    find(:css, '.project-members-page li', text: user2.name).find(:css, 'button.btn-danger').click
+    page.within(second_row) do
+      click_button 'Remove member'
+    end
 
-    expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
-
-    click_on('Remove member')
+    page.within('[role="dialog"]') do
+      expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
+      click_button('Remove member')
+    end
 
     wait_for_requests
 
@@ -88,7 +140,7 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    add_user(user1.id, 'Reporter')
+    invite_member(user1.name, role: 'Reporter')
 
     page.within(first_row) do
       expect(page).to have_content(user1.name)
@@ -101,18 +153,19 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    add_user('test@example.com', 'Reporter')
+    invite_member('test@example.com', role: 'Reporter')
 
-    click_link('Invited')
+    expect(page).to have_link 'Invited'
+    click_link 'Invited'
 
-    page.within('.content-list.members-list') do
+    page.within(members_table) do
       expect(page).to have_content('test@example.com')
       expect(page).to have_content('Invited')
       expect(page).to have_button('Reporter')
     end
   end
 
-  it 'guest can not manage other users' do
+  it 'guest can not manage other users', :js do
     group.add_guest(user1)
     group.add_developer(user2)
 
@@ -120,21 +173,15 @@ RSpec.describe 'Groups > Members > Manage members' do
 
     expect(page).not_to have_selector '.invite-users-form'
     expect(page).not_to have_selector '.invite-group-form'
+    expect(page).not_to have_selector '.js-invite-members-modal'
+    expect(page).not_to have_selector '.js-invite-group-modal'
 
     page.within(second_row) do
       # Can not modify user2 role
       expect(page).not_to have_button 'Developer'
 
       # Can not remove user2
-      expect(page).not_to have_css('a.btn-danger')
-    end
-  end
-
-  def add_user(id, role)
-    page.within ".invite-users-form" do
-      select2(id, from: "#user_ids", multiple: true)
-      select(role, from: "access_level")
-      click_button "Invite"
+      expect(page).not_to have_selector 'button[title="Remove member"]'
     end
   end
 end

@@ -1,8 +1,9 @@
 import Store from 'ee_else_ce/sidebar/stores/sidebar_store';
-import { visitUrl } from '../lib/utils/url_utility';
-import { deprecatedCreateFlash as Flash } from '../flash';
-import Service from './services/sidebar_service';
 import { __ } from '~/locale';
+import toast from '~/vue_shared/plugins/global_toast';
+import { deprecatedCreateFlash as Flash } from '../flash';
+import { visitUrl } from '../lib/utils/url_utility';
+import Service from './services/sidebar_service';
 
 export default class SidebarMediator {
   constructor(options) {
@@ -21,6 +22,7 @@ export default class SidebarMediator {
       projectsAutocompleteEndpoint: options.projectsAutocompleteEndpoint,
       fullPath: options.fullPath,
       iid: options.iid,
+      issuableType: options.issuableType,
     });
     SidebarMediator.singleton = this;
   }
@@ -30,7 +32,7 @@ export default class SidebarMediator {
   }
 
   saveAssignees(field) {
-    const selected = this.store.assignees.map(u => u.id);
+    const selected = this.store.assignees.map((u) => u.id);
 
     // If there are no ids, that means we have to unassign (which is id = 0)
     // And it only accepts an array, hence [0]
@@ -41,7 +43,7 @@ export default class SidebarMediator {
   }
 
   saveReviewers(field) {
-    const selected = this.store.reviewers.map(u => u.id);
+    const selected = this.store.reviewers.map((u) => u.id);
 
     // If there are no ids, that means we have to unassign (which is id = 0)
     // And it only accepts an array, hence [0]
@@ -49,6 +51,17 @@ export default class SidebarMediator {
     const data = { reviewer_ids: reviewers };
 
     return this.service.update(field, data);
+  }
+
+  requestReview({ userId, callback }) {
+    return this.service
+      .requestReview(userId)
+      .then(() => {
+        this.store.updateReviewer(userId);
+        toast(__('Requested review'));
+        callback(userId, true);
+      })
+      .catch(() => callback(userId, false));
   }
 
   setMoveToProjectId(projectId) {
@@ -80,7 +93,7 @@ export default class SidebarMediator {
         this.store.setSubscribedState(!this.store.subscribed);
         this.store.setFetchingState('subscriptions', false);
       })
-      .catch(err => {
+      .catch((err) => {
         this.store.setFetchingState('subscriptions', false);
         throw err;
       });

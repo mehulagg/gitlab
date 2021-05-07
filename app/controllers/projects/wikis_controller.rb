@@ -7,6 +7,7 @@ class Projects::WikisController < Projects::ApplicationController
 
   feature_category :wiki
 
-  def git_access
+  before_action do
+    push_frontend_feature_flag(:wiki_content_editor, project, default_enabled: :yaml)
   end
 end

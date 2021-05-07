@@ -1,32 +1,28 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 
+import eventHub from '~/blob/components/eventhub';
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { __, sprintf } from '~/locale';
-import TitleField from '~/vue_shared/components/form/title.vue';
 import { redirectTo, joinPaths } from '~/lib/utils/url_utility';
-import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.vue';
+import { __, sprintf } from '~/locale';
 import {
   SNIPPET_MARK_EDIT_APP_START,
   SNIPPET_MEASURE_BLOBS_CONTENT,
-} from '~/performance_constants';
-import eventHub from '~/blob/components/eventhub';
-import { performanceMarkAndMeasure } from '~/performance_utils';
+} from '~/performance/constants';
+import { performanceMarkAndMeasure } from '~/performance/utils';
+import FormFooterActions from '~/vue_shared/components/form/form_footer_actions.vue';
+import TitleField from '~/vue_shared/components/form/title.vue';
 
-import UpdateSnippetMutation from '../mutations/updateSnippet.mutation.graphql';
-import CreateSnippetMutation from '../mutations/createSnippet.mutation.graphql';
+import { SNIPPET_CREATE_MUTATION_ERROR, SNIPPET_UPDATE_MUTATION_ERROR } from '../constants';
 import { getSnippetMixin } from '../mixins/snippets';
-import {
-  SNIPPET_CREATE_MUTATION_ERROR,
-  SNIPPET_UPDATE_MUTATION_ERROR,
-  SNIPPET_VISIBILITY_PRIVATE,
-} from '../constants';
-import defaultVisibilityQuery from '../queries/snippet_visibility.query.graphql';
+import CreateSnippetMutation from '../mutations/createSnippet.mutation.graphql';
+import UpdateSnippetMutation from '../mutations/updateSnippet.mutation.graphql';
 import { markBlobPerformance } from '../utils/blob';
+import { getErrorMessage } from '../utils/error';
 
 import SnippetBlobActionsEdit from './snippet_blob_actions_edit.vue';
-import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
 import SnippetDescriptionEdit from './snippet_description_edit.vue';
+import SnippetVisibilityEdit from './snippet_visibility_edit.vue';
 
 eventHub.$on(SNIPPET_MEASURE_BLOBS_CONTENT, markBlobPerformance);
 
@@ -41,15 +37,7 @@ export default {
     GlLoadingIcon,
   },
   mixins: [getSnippetMixin],
-  apollo: {
-    defaultVisibility: {
-      query: defaultVisibilityQuery,
-      manual: true,
-      result({ data: { selectedLevel } }) {
-        this.selectedLevelDefault = selectedLevel;
-      },
-    },
-  },
+  inject: ['selectedLevel'],
   props: {
     markdownPreviewPath: {
       type: String,
@@ -73,17 +61,29 @@ export default {
   data() {
     return {
       isUpdating: false,
-      newSnippet: false,
       actions: [],
-      selectedLevelDefault: SNIPPET_VISIBILITY_PRIVATE,
+      snippet: {
+        title: '',
+        description: '',
+        visibilityLevel: this.selectedLevel,
+      },
     };
   },
   computed: {
     hasBlobChanges() {
       return this.actions.length > 0;
     },
+    hasNoChanges() {
+      return (
+        this.actions.every(
+          (action) => !action.content && !action.filePath && !action.previousPath,
+        ) &&
+        !this.snippet.title &&
+        !this.snippet.description
+      );
+    },
     hasValidBlobs() {
-      return this.actions.every(x => x.content);
+      return this.actions.every((x) => x.content);
     },
     updatePrevented() {
       return this.snippet.title === '' || !this.hasValidBlobs || this.isUpdating;
@@ -112,13 +112,6 @@ export default {
       }
       return this.snippet.webUrl;
     },
-    newSnippetSchema() {
-      return {
-        title: '',
-        description: '',
-        visibilityLevel: this.selectedLevelDefault,
-      };
-    },
   },
   beforeCreate() {
     performanceMarkAndMeasure({ mark: SNIPPET_MARK_EDIT_APP_START });
@@ -133,7 +126,7 @@ export default {
     onBeforeUnload(e = {}) {
       const returnValue = __('Are you sure you want to lose unsaved changes?');
 
-      if (!this.hasBlobChanges || this.isUpdating) return undefined;
+      if (!this.hasBlobChanges || this.hasNoChanges || this.isUpdating) return undefined;
 
       Object.assign(e, { returnValue });
       return returnValue;
@@ -145,23 +138,9 @@ export default {
       Flash(sprintf(defaultErrorMsg, { err }));
       this.isUpdating = false;
     },
-    onNewSnippetFetched() {
-      this.newSnippet = true;
-      this.snippet = this.newSnippetSchema;
-    },
-    onExistingSnippetFetched() {
-      this.newSnippet = false;
-    },
-    onSnippetFetch(snippetRes) {
-      if (snippetRes.data.snippets.nodes.length === 0) {
-        this.onNewSnippetFetched();
-      } else {
-        this.onExistingSnippetFetched();
-      }
-    },
     getAttachedFiles() {
       const fileInputs = Array.from(this.$el.querySelectorAll('[name="files[]"]'));
-      return fileInputs.map(node => node.value);
+      return fileInputs.map((node) => node.value);
     },
     createMutation() {
       return {
@@ -185,20 +164,24 @@ export default {
     },
     handleFormSubmit() {
       this.isUpdating = true;
+
       this.$apollo
         .mutate(this.newSnippet ? this.createMutation() : this.updateMutation())
         .then(({ data }) => {
           const baseObj = this.newSnippet ? data?.createSnippet : data?.updateSnippet;
 
           const errors = baseObj?.errors;
-          if (errors.length) {
+          if (errors?.length) {
             this.flashAPIFailure(errors[0]);
           } else {
             redirectTo(baseObj.snippet.webUrl);
           }
         })
-        .catch(e => {
-          this.flashAPIFailure(e);
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error('[gitlab] unexpected error while updating snippet', e);
+
+          this.flashAPIFailure(getErrorMessage(e));
         });
     },
     updateActions(actions) {
@@ -209,7 +192,7 @@ export default {
 </script>
 <template>
   <form
-    class="snippet-form js-requires-input js-quick-submit common-note-form"
+    class="snippet-form js-quick-submit common-note-form"
     :data-snippet-type="isProjectSnippet ? 'project' : 'personal'"
     data-testid="snippet-edit-form"
     @submit.prevent="handleFormSubmit"

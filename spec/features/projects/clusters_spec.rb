@@ -58,7 +58,7 @@ RSpec.describe 'Clusters', :js do
         before do
           click_link 'default-cluster'
           fill_in 'cluster_environment_scope', with: 'production/*'
-          within '.js-cluster-integration-form' do
+          within '.js-cluster-details-form' do
             click_button 'Save changes'
           end
         end
@@ -110,7 +110,7 @@ RSpec.describe 'Clusters', :js do
         visit project_clusters_path(project)
       end
 
-      it 'user sees a add cluster button ' do
+      it 'user sees a add cluster button' do
         expect(page).to have_selector('.js-add-cluster:not(.readonly)')
       end
 
@@ -149,7 +149,7 @@ RSpec.describe 'Clusters', :js do
         before do
           click_link 'default-cluster'
           fill_in 'cluster_environment_scope', with: 'production/*'
-          within ".js-cluster-integration-form" do
+          within ".js-cluster-details-form" do
             click_button 'Save changes'
           end
         end

@@ -1,13 +1,12 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import List from './pages/list.vue';
-import Details from './pages/details.vue';
-import { decodeAndParse } from './utils';
 import { CONTAINER_REGISTRY_TITLE } from './constants/index';
+import Details from './pages/details.vue';
+import List from './pages/list.vue';
 
 Vue.use(VueRouter);
 
-export default function createRouter(base) {
+export default function createRouter(base, breadCrumbState) {
   const router = new VueRouter({
     base,
     mode: 'history',
@@ -26,7 +25,7 @@ export default function createRouter(base) {
         path: '/:id',
         component: Details,
         meta: {
-          nameGenerator: route => decodeAndParse(route.params.id).name,
+          nameGenerator: () => breadCrumbState.name,
         },
       },
     ],

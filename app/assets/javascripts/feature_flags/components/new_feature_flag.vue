@@ -1,22 +1,16 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlAlert } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import axios from '~/lib/utils/axios_utils';
-import FeatureFlagForm from './form.vue';
-import {
-  LEGACY_FLAG,
-  NEW_VERSION_FLAG,
-  NEW_FLAG_ALERT,
-  ROLLOUT_STRATEGY_ALL_USERS,
-} from '../constants';
-import { createNewEnvironmentScope } from '../store/helpers';
-
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { NEW_VERSION_FLAG, ROLLOUT_STRATEGY_ALL_USERS } from '../constants';
+import { createNewEnvironmentScope } from '../store/helpers';
+import FeatureFlagForm from './form.vue';
 
 export default {
   components: {
-    GlAlert,
     FeatureFlagForm,
+    GlAlert,
   },
   mixins: [featureFlagsMixin()],
   inject: {
@@ -33,9 +27,6 @@ export default {
       userShouldSeeNewFlagAlert: this.showUserCallout,
     };
   },
-  translations: {
-    newFlagAlert: NEW_FLAG_ALERT,
-  },
   computed: {
     ...mapState(['error', 'path']),
     scopes() {
@@ -50,13 +41,7 @@ export default {
       ];
     },
     version() {
-      return this.hasNewVersionFlags ? NEW_VERSION_FLAG : LEGACY_FLAG;
-    },
-    hasNewVersionFlags() {
-      return this.glFeatures.featureFlagsNewVersion;
-    },
-    shouldShowNewFlagAlert() {
-      return !this.hasNewVersionFlags && this.userShouldSeeNewFlagAlert;
+      return NEW_VERSION_FLAG;
     },
     strategies() {
       return [{ name: ROLLOUT_STRATEGY_ALL_USERS, parameters: {}, scopes: [] }];
@@ -75,19 +60,11 @@ export default {
 </script>
 <template>
   <div>
-    <gl-alert
-      v-if="shouldShowNewFlagAlert"
-      variant="warning"
-      class="gl-my-5"
-      @dismiss="dismissNewVersionFlagAlert"
-    >
-      {{ $options.translations.newFlagAlert }}
-    </gl-alert>
     <h3 class="page-title">{{ s__('FeatureFlags|New feature flag') }}</h3>
 
-    <div v-if="error.length" class="alert alert-danger">
-      <p v-for="(message, index) in error" :key="index" class="mb-0">{{ message }}</p>
-    </div>
+    <gl-alert v-if="error.length" variant="warning" class="gl-mb-5" :dismissible="false">
+      <p v-for="(message, index) in error" :key="index" class="gl-mb-0">{{ message }}</p>
+    </gl-alert>
 
     <feature-flag-form
       :cancel-path="path"
@@ -95,7 +72,7 @@ export default {
       :scopes="scopes"
       :strategies="strategies"
       :version="version"
-      @handleSubmit="data => createFeatureFlag(data)"
+      @handleSubmit="(data) => createFeatureFlag(data)"
     />
   </div>
 </template>

@@ -9,7 +9,7 @@ class DastScannerProfilesFinder
     relation = DastScannerProfile.all
     relation = by_id(relation)
     relation = by_project(relation)
-    relation
+    by_name(relation)
   end
 
   private
@@ -26,5 +26,11 @@ class DastScannerProfilesFinder
     return relation unless params[:project_ids]
 
     relation.project_id_in(params[:project_ids])
+  end
+
+  def by_name(relation)
+    return relation unless params[:name]
+
+    relation.with_name(params[:name])
   end
 end

@@ -53,9 +53,7 @@ RSpec.describe Geo::DeletedProject, :geo, type: :model do
     end
 
     it 'picks storage from ApplicationSetting when value is not initialized' do
-      allow_next_instance_of(ApplicationSetting) do |instance|
-        allow(instance).to receive(:pick_repository_storage).and_return('bar')
-      end
+      stub_application_setting(pick_repository_storage: 'bar')
 
       subject = described_class.new(id: 1, name: 'sample', disk_path: 'root/sample', repository_storage: nil)
 

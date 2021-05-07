@@ -1,11 +1,11 @@
+import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
-import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
-import Agents from 'ee/clusters_list/components/agents.vue';
 import AgentEmptyState from 'ee/clusters_list/components/agent_empty_state.vue';
 import AgentTable from 'ee/clusters_list/components/agent_table.vue';
+import Agents from 'ee/clusters_list/components/agents.vue';
 import getAgentsQuery from 'ee/clusters_list/graphql/queries/get_agents.query.graphql';
+import createMockApollo from 'helpers/mock_apollo_helper';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -19,12 +19,12 @@ describe('Agents', () => {
     projectPath: 'path/to/project',
   };
 
-  const createWrapper = ({ agents }) => {
+  const createWrapper = ({ agents = [], pageInfo = null, trees = [] }) => {
     const apolloQueryResponse = {
       data: {
         project: {
-          clusterAgents: { nodes: agents },
-          repository: { tree: { trees: { nodes: [] } } },
+          clusterAgents: { nodes: agents, pageInfo },
+          repository: { tree: { trees: { nodes: trees, pageInfo } } },
         },
       },
     };
@@ -42,6 +42,10 @@ describe('Agents', () => {
     return wrapper.vm.$nextTick();
   };
 
+  const findAgentTable = () => wrapper.find(AgentTable);
+  const findEmptyState = () => wrapper.find(AgentEmptyState);
+  const findPaginationButtons = () => wrapper.find(GlKeysetPagination);
+
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
@@ -54,20 +58,74 @@ describe('Agents', () => {
       {
         id: '1',
         name: 'agent-1',
+        webPath: '/agent-1',
       },
       {
         id: '2',
         name: 'agent-2',
+        webPath: '/agent-2',
+      },
+    ];
+
+    const trees = [
+      {
+        name: 'agent-2',
+        path: '.gitlab/agents/agent-2',
+        webPath: '/project/path/.gitlab/agents/agent-2',
       },
     ];
 
     beforeEach(() => {
-      return createWrapper({ agents });
+      return createWrapper({ agents, trees });
     });
 
     it('should render agent table', () => {
-      expect(wrapper.find(AgentTable).exists()).toBe(true);
-      expect(wrapper.find(AgentEmptyState).exists()).toBe(false);
+      expect(findAgentTable().exists()).toBe(true);
+      expect(findEmptyState().exists()).toBe(false);
+    });
+
+    it('should pass agent and folder info to table component', () => {
+      expect(findAgentTable().props('agents')).toEqual([
+        { id: '1', name: 'agent-1', webPath: '/agent-1', configFolder: undefined },
+        {
+          id: '2',
+          name: 'agent-2',
+          configFolder: {
+            name: 'agent-2',
+            path: '.gitlab/agents/agent-2',
+            webPath: '/project/path/.gitlab/agents/agent-2',
+          },
+          webPath: '/agent-2',
+        },
+      ]);
+    });
+
+    it('should not render pagination buttons when there are no additional pages', () => {
+      expect(findPaginationButtons().exists()).toBe(false);
+    });
+
+    describe('when the list has additional pages', () => {
+      const pageInfo = {
+        hasNextPage: true,
+        hasPreviousPage: false,
+        startCursor: 'prev',
+        endCursor: 'next',
+      };
+
+      beforeEach(() => {
+        return createWrapper({
+          agents,
+          pageInfo,
+        });
+      });
+
+      it('should render pagination buttons', () => {
+        expect(findPaginationButtons().exists()).toBe(true);
+      });
+
+      it('should pass pageInfo to the pagination component', () => {
+        expect(findPaginationButtons().props()).toMatchObject(pageInfo);
+      });
     });
   });
 
@@ -77,8 +135,8 @@ describe('Agents', () => {
     });
 
     it('should render empty state', () => {
-      expect(wrapper.find(AgentTable).exists()).toBe(false);
-      expect(wrapper.find(AgentEmptyState).exists()).toBe(true);
+      expect(findAgentTable().exists()).toBe(false);
+      expect(findEmptyState().exists()).toBe(true);
     });
   });
 

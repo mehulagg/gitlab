@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: index, concepts, howto
 ---
 
@@ -23,7 +23,7 @@ On the left side we have the events that can trigger a pipeline based on various
 
 - A `git push` is the most common event that triggers a pipeline.
 - The [Web API](../../api/pipelines.md#create-a-new-pipeline).
-- A user clicking the "Run Pipeline" button in the UI.
+- A user clicking the "Run pipeline" button in the UI.
 - When a [merge request is created or updated](../../ci/merge_request_pipelines/index.md#pipelines-for-merge-requests).
 - When an MR is added to a [Merge Train](../../ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md#merge-trains).
 - A [scheduled pipeline](../../ci/pipelines/schedules.md#pipeline-schedules).
@@ -32,8 +32,8 @@ On the left side we have the events that can trigger a pipeline based on various
 - When GitHub integration is used with [external pull requests](../../ci/ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).
 - When an upstream pipeline contains a [bridge job](../../ci/yaml/README.md#trigger) which triggers a downstream pipeline.
 
-Triggering any of these events will invoke the [`CreatePipelineService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/ci/create_pipeline_service.rb)
-which takes as input event data and the user triggering it, then will attempt to create a pipeline.
+Triggering any of these events invokes the [`CreatePipelineService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/ci/create_pipeline_service.rb)
+which takes as input event data and the user triggering it, then attempts to create a pipeline.
 
 The `CreatePipelineService` relies heavily on the [`YAML Processor`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/yaml_processor.rb)
 component, which is responsible for taking in a YAML blob as input and returns the abstract data structure of a
@@ -65,20 +65,20 @@ the `Runner API Gateway`.
 
 We can register, delete, and verify runners, which also causes read/write queries to the database. After a runner is connected,
 it keeps asking for the next job to execute. This invokes the [`RegisterJobService`](https://gitlab.com/gitlab-org/gitlab/blob/master/app/services/ci/register_job_service.rb)
-which will pick the next job and assign it to the runner. At this point the job will transition to a
+which picks the next job and assigns it to the runner. At this point the job transitions to a
 `running` state, which again triggers `ProcessPipelineService` due to the status change.
 For more details read [Job scheduling](#job-scheduling)).
 
 While a job is being executed, the runner sends logs back to the server as well any possible artifacts
 that need to be stored. Also, a job may depend on artifacts from previous jobs in order to run. In this
-case the runner will download them using a dedicated API endpoint.
+case the runner downloads them using a dedicated API endpoint.
 
 Artifacts are stored in object storage, while metadata is kept in the database. An important example of artifacts
 are reports (JUnit, SAST, DAST, etc.) which are parsed and rendered in the merge request.
 
 Job status transitions are not all automated. A user may run [manual jobs](../../ci/yaml/README.md#whenmanual), cancel a pipeline, retry
 specific failed jobs or the entire pipeline. Anything that
-causes a job to change status will trigger `ProcessPipelineService`, as it's responsible for
+causes a job to change status triggers `ProcessPipelineService`, as it's responsible for
 tracking the status of the entire pipeline.
 
 A special type of job is the [bridge job](../../ci/yaml/README.md#trigger) which is executed server-side
@@ -90,7 +90,7 @@ from the `CreatePipelineService` every time a downstream pipeline is triggered.
 
 When a Pipeline is created all its jobs are created at once for all stages, with an initial state of `created`. This makes it possible to visualize the full content of a pipeline.
 
-A job with the `created` state won't be seen by the runner yet. To make it possible to assign a job to a runner, the job must transition first into the `pending` state, which can happen if:
+A job with the `created` state isn't seen by the runner yet. To make it possible to assign a job to a runner, the job must transition first into the `pending` state, which can happen if:
 
 1. The job is created in the very first stage of the pipeline.
 1. The job required a manual start and it has been triggered.
@@ -99,7 +99,7 @@ A job with the `created` state won't be seen by the runner yet. To make it possi
 
 When the runner is connected, it requests the next `pending` job to run by polling the server continuously.
 
-NOTE: **Note:**
+NOTE:
 API endpoints used by the runner to interact with GitLab are defined in [`lib/api/ci/runner.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/api/ci/runner.rb)
 
 After the server receives the request it selects a `pending` job based on the [`Ci::RegisterJobService` algorithm](#ciregisterjobservice), then assigns and sends the job to the runner.
@@ -134,8 +134,8 @@ There are 3 top level queries that this service uses to gather the majority of t
 
 This list of jobs is then filtered further by matching tags between job and runner tags.
 
-NOTE: **Note:**
-If a job contains tags, the runner will not pick the job if it does not match **all** the tags.
+NOTE:
+If a job contains tags, the runner doesn't pick the job if it does not match **all** the tags.
 The runner may have more tags than defined for the job, but not vice-versa.
 
 Finally if the runner can only pick jobs that are tagged, all untagged jobs are filtered out.
@@ -143,3 +143,56 @@ Finally if the runner can only pick jobs that are tagged, all untagged jobs are 
 At this point we loop through remaining `pending` jobs and we try to assign the first job that the runner "can pick" based on additional policies. For example, runners marked as `protected` can only pick jobs that run against protected branches (such as production deployments).
 
 As we increase the number of runners in the pool we also increase the chances of conflicts which would arise if assigning the same job to different runners. To prevent that we gracefully rescue conflict errors and assign the next job in the list.
+
+## The definition of "Job" in GitLab CI/CD
+
+"Job" in GitLab CI context refers a task to drive Continuous Integration, Delivery and Deployment.
+Typically, a pipeline contains multiple stages, and a stage contains multiple jobs.
+
+In Active Record modeling, Job is defined as `CommitStatus` class.
+On top of that, we have the following types of jobs:
+
+- `Ci::Build` ... The job to be executed by runners.
+- `Ci::Bridge` ... The job to trigger a downstream pipeline.
+- `GenericCommitStatus` ... The job to be executed in an external CI/CD system e.g. Jenkins.
+
+Please note that, when you use the "Job" terminology in codebase, readers would
+assume that the class/object is any type of above.
+If you specifically refer `Ci::Build` class, you should not name the object/class
+as "job" as this could cause some confusions. In documentation,
+we should use "Job" in general, instead of "Build".
+
+We have a few inconsistencies in our codebase that should be refactored.
+For example, `CommitStatus` should be `Ci::Job` and `Ci::JobArtifact` should be `Ci::BuildArtifact`.
+See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/16111) for the full refactoring plan.
+
+## CI Minutes
+
+This diagram shows how the [CI minutes](../../subscriptions/gitlab_com/index.md#ci-pipeline-minutes)
+feature and its components work.
+
+![CI Minutes architecture](img/ci_minutes.png)
+<!-- Editable diagram available at https://app.diagrams.net/?libs=general;flowchart#G1XjLPvJXbzMofrC3eKRyDEk95clV6ypOb -->
+
+Watch a walkthrough of this feature in details in the video below.
+
+<div class="video-fallback">
+  See the video: <a href="https://www.youtube.com/watch?v=NmdWRGT8kZg">CI Minutes - architectural overview</a>.
+</div>
+<figure class="video-container">
+  <iframe src="https://www.youtube.com/embed/NmdWRGT8kZg" frameborder="0" allowfullscreen="true"> </iframe>
+</figure>
+
+## External pipeline validation service
+
+The [external CI/CD pipeline validation service](../../administration/external_pipeline_validation.md)
+is available for use on self-managed GitLab instances, but is not in use on GitLab.com.
+It is configured with [environment variables](../../administration/environment_variables.md)
+on the instance.
+
+To enable the feature on GitLab.com, enable the `ci_external_validation_service`
+[feature flag](../feature_flags/index.md). The valid "Not accepted" response code
+for GitLab.com is `406` only.
+
+For more details, see the linked issues and MRs in the
+[feature flag rollout issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325982).

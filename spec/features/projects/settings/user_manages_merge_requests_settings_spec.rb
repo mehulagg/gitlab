@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Projects > Settings > User manages merge request settings' do
+  include ProjectForksHelper
+
   let(:user) { create(:user) }
   let(:project) { create(:project, :public, namespace: user.namespace, path: 'gitlab', name: 'sample') }
 
@@ -51,7 +53,7 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
         expect(page).to have_content 'All discussions must be resolved'
 
         within('.sharing-permissions-form') do
-          find('.project-feature-controls[data-for="project[project_feature_attributes][merge_requests_access_level]"] .project-feature-toggle').click
+          find('.project-feature-controls[data-for="project[project_feature_attributes][merge_requests_access_level]"] .gl-toggle').click
           find('input[value="Save changes"]').send_keys(:return)
         end
 
@@ -71,7 +73,7 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
         expect(page).to have_content 'All discussions must be resolved'
 
         within('.sharing-permissions-form') do
-          find('.project-feature-controls[data-for="project[project_feature_attributes][builds_access_level]"] .project-feature-toggle').click
+          find('.project-feature-controls[data-for="project[project_feature_attributes][builds_access_level]"] .gl-toggle').click
           find('input[value="Save changes"]').send_keys(:return)
         end
 
@@ -92,7 +94,7 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
       expect(page).not_to have_content 'All discussions must be resolved'
 
       within('.sharing-permissions-form') do
-        find('.project-feature-controls[data-for="project[project_feature_attributes][merge_requests_access_level]"] .project-feature-toggle').click
+        find('.project-feature-controls[data-for="project[project_feature_attributes][merge_requests_access_level]"] .gl-toggle').click
         find('input[value="Save changes"]').send_keys(:return)
       end
 
@@ -133,7 +135,7 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
     it 'when unchecked sets :remove_source_branch_after_merge to false' do
       uncheck('project_remove_source_branch_after_merge')
       within('.merge-request-settings-form') do
-        find('.qa-save-merge-request-changes')
+        find('.rspec-save-merge-request-changes')
         click_on('Save changes')
       end
 
@@ -157,11 +159,12 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
       choose('project_project_setting_attributes_squash_option_default_on')
 
       within('.merge-request-settings-form') do
-        find('.qa-save-merge-request-changes')
+        find('.rspec-save-merge-request-changes')
         click_on('Save changes')
       end
 
-      find('.flash-notice')
+      wait_for_requests
+
       radio = find_field('project_project_setting_attributes_squash_option_default_on')
 
       expect(radio).to be_checked
@@ -172,11 +175,12 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
       choose('project_project_setting_attributes_squash_option_always')
 
       within('.merge-request-settings-form') do
-        find('.qa-save-merge-request-changes')
+        find('.rspec-save-merge-request-changes')
         click_on('Save changes')
       end
 
-      find('.flash-notice')
+      wait_for_requests
+
       radio = find_field('project_project_setting_attributes_squash_option_always')
 
       expect(radio).to be_checked
@@ -187,15 +191,49 @@ RSpec.describe 'Projects > Settings > User manages merge request settings' do
       choose('project_project_setting_attributes_squash_option_never')
 
       within('.merge-request-settings-form') do
-        find('.qa-save-merge-request-changes')
+        find('.rspec-save-merge-request-changes')
         click_on('Save changes')
       end
 
-      find('.flash-notice')
+      wait_for_requests
+
       radio = find_field('project_project_setting_attributes_squash_option_never')
 
       expect(radio).to be_checked
       expect(project.reload.project_setting.squash_option).to eq('never')
+    end
+  end
+
+  describe 'target project settings' do
+    context 'when project is a fork' do
+      let_it_be(:upstream) { create(:project, :public) }
+
+      let(:project) { fork_project(upstream, user) }
+
+      it 'allows to change merge request target project behavior' do
+        expect(page).to have_content 'The default target project for merge requests'
+
+        radio = find_field('project_project_setting_attributes_mr_default_target_self_false')
+        expect(radio).to be_checked
+
+        choose('project_project_setting_attributes_mr_default_target_self_true')
+
+        within('.merge-request-settings-form') do
+          find('.rspec-save-merge-request-changes')
+          click_on('Save changes')
+        end
+
+        wait_for_requests
+
+        radio = find_field('project_project_setting_attributes_mr_default_target_self_true')
+
+        expect(radio).to be_checked
+        expect(project.reload.project_setting.mr_default_target_self).to be_truthy
+      end
+    end
+
+    it 'does not show target project section' do
+      expect(page).not_to have_content 'The default target project for merge requests'
     end
   end
 end

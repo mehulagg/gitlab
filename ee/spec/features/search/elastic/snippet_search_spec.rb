@@ -109,19 +109,39 @@ RSpec.describe 'Snippet elastic search', :js, :elastic, :aggregate_failures, :si
     context 'as administrator' do
       let(:current_user) { create(:admin) }
 
-      it 'finds all snippets' do
-        within('.results') do
-          expect(page).to have_content('public personal snippet')
-          expect(page).to have_content('public project snippet')
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'finds all snippets' do
+          within('.results') do
+            expect(page).to have_content('public personal snippet')
+            expect(page).to have_content('public project snippet')
 
-          expect(page).to have_content('internal personal snippet')
-          expect(page).to have_content('internal project snippet')
+            expect(page).to have_content('internal personal snippet')
+            expect(page).to have_content('internal project snippet')
 
-          expect(page).to have_content('private personal snippet')
-          expect(page).to have_content('private project snippet')
+            expect(page).to have_content('private personal snippet')
+            expect(page).to have_content('private project snippet')
 
-          expect(page).to have_content('authorized personal snippet')
-          expect(page).to have_content('authorized project snippet')
+            expect(page).to have_content('authorized personal snippet')
+            expect(page).to have_content('authorized project snippet')
+          end
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'finds only public and internal snippets' do
+          within('.results') do
+            expect(page).to have_content('public personal snippet')
+            expect(page).not_to have_content('public project snippet')
+
+            expect(page).to have_content('internal personal snippet')
+            expect(page).not_to have_content('internal project snippet')
+
+            expect(page).not_to have_content('private personal snippet')
+            expect(page).not_to have_content('private project snippet')
+
+            expect(page).not_to have_content('authorized personal snippet')
+            expect(page).not_to have_content('authorized project snippet')
+          end
         end
       end
     end

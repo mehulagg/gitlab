@@ -1,24 +1,15 @@
-import Vue from 'vue';
 import Cookies from 'js-cookie';
-import Poll from '~/lib/utils/poll';
-import axios from '~/lib/utils/axios_utils';
-import httpStatusCodes from '~/lib/utils/http_status';
+import Vue from 'vue';
+import api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __, s__ } from '~/locale';
+import { diffViewerModes } from '~/ide/constants';
+import axios from '~/lib/utils/axios_utils';
 import { handleLocationHash, historyPushState, scrollToElement } from '~/lib/utils/common_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
+import Poll from '~/lib/utils/poll';
 import { mergeUrlParams, getLocationHash } from '~/lib/utils/url_utility';
-import TreeWorker from '../workers/tree_worker';
-import eventHub from '../../notes/event_hub';
-import {
-  getDiffPositionByLineCode,
-  getNoteFormData,
-  convertExpandLines,
-  idleCallback,
-  allDiscussionWrappersExpanded,
-  prepareDiffData,
-  prepareLineForRenamedFile,
-} from './utils';
-import * as types from './mutation_types';
+import { __, s__ } from '~/locale';
+import notesEventHub from '../../notes/event_hub';
 import {
   PARALLEL_DIFF_VIEW_TYPE,
   INLINE_DIFF_VIEW_TYPE,
@@ -29,22 +20,50 @@ import {
   OLD_LINE_KEY,
   NEW_LINE_KEY,
   TYPE_KEY,
-  LEFT_LINE_KEY,
   MAX_RENDERING_DIFF_LINES,
   MAX_RENDERING_BULK_ROWS,
   MIN_RENDERING_MS,
   START_RENDERING_INDEX,
   INLINE_DIFF_LINES_KEY,
-  PARALLEL_DIFF_LINES_KEY,
   DIFFS_PER_PAGE,
   DIFF_WHITESPACE_COOKIE_NAME,
   SHOW_WHITESPACE,
   NO_SHOW_WHITESPACE,
   DIFF_FILE_MANUAL_COLLAPSE,
   DIFF_FILE_AUTOMATIC_COLLAPSE,
+  EVT_PERF_MARK_FILE_TREE_START,
+  EVT_PERF_MARK_FILE_TREE_END,
+  EVT_PERF_MARK_DIFF_FILES_START,
+  DIFF_VIEW_FILE_BY_FILE,
+  DIFF_VIEW_ALL_FILES,
+  DIFF_FILE_BY_FILE_COOKIE_NAME,
+  TRACKING_CLICK_DIFF_VIEW_SETTING,
+  TRACKING_DIFF_VIEW_INLINE,
+  TRACKING_DIFF_VIEW_PARALLEL,
+  TRACKING_CLICK_FILE_BROWSER_SETTING,
+  TRACKING_FILE_BROWSER_TREE,
+  TRACKING_FILE_BROWSER_LIST,
+  TRACKING_CLICK_WHITESPACE_SETTING,
+  TRACKING_WHITESPACE_SHOW,
+  TRACKING_WHITESPACE_HIDE,
+  TRACKING_CLICK_SINGLE_FILE_SETTING,
+  TRACKING_SINGLE_FILE_MODE,
+  TRACKING_MULTIPLE_FILES_MODE,
 } from '../constants';
-import { diffViewerModes } from '~/ide/constants';
-import { isCollapsed } from '../diff_file';
+import eventHub from '../event_hub';
+import { isCollapsed } from '../utils/diff_file';
+import { markFileReview, setReviewsForMergeRequest } from '../utils/file_reviews';
+import { getDerivedMergeRequestInformation } from '../utils/merge_request';
+import TreeWorker from '../workers/tree_worker';
+import * as types from './mutation_types';
+import {
+  getDiffPositionByLineCode,
+  getNoteFormData,
+  convertExpandLines,
+  idleCallback,
+  allDiscussionWrappersExpanded,
+  prepareLineForRenamedFile,
+} from './utils';
 
 export const setBaseConfig = ({ commit }, options) => {
   const {
@@ -52,37 +71,57 @@ export const setBaseConfig = ({ commit }, options) => {
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
+    endpointUpdateUser,
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
+    viewDiffsFileByFile,
+    mrReviews,
   } = options;
   commit(types.SET_BASE_CONFIG, {
     endpoint,
     endpointMetadata,
     endpointBatch,
     endpointCoverage,
+    endpointUpdateUser,
     projectPath,
     dismissEndpoint,
     showSuggestPopover,
+    defaultSuggestionCommitMessage,
+    viewDiffsFileByFile,
+    mrReviews,
   });
 };
 
 export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
+  const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
+  let perPage = DIFFS_PER_PAGE;
+  let increaseAmount = 1.4;
+
+  if (diffsGradualLoad) {
+    perPage = state.viewDiffsFileByFile ? 1 : 5;
+  }
+
+  const startPage = diffsGradualLoad ? 0 : 1;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
   const urlParams = {
-    per_page: DIFFS_PER_PAGE,
     w: state.showWhitespace ? '0' : '1',
-    view: window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType,
+    view: 'inline',
   };
+  let totalLoaded = 0;
 
   commit(types.SET_BATCH_LOADING, true);
   commit(types.SET_RETRIEVING_BATCHES, true);
+  eventHub.$emit(EVT_PERF_MARK_DIFF_FILES_START);
 
-  const getBatch = (page = 1) =>
+  const getBatch = (page = startPage) =>
     axios
-      .get(mergeUrlParams({ ...urlParams, page }, state.endpointBatch))
+      .get(mergeUrlParams({ ...urlParams, page, per_page: perPage }, state.endpointBatch))
       .then(({ data: { pagination, diff_files } }) => {
+        totalLoaded += diff_files.length;
+
         commit(types.SET_DIFF_DATA_BATCH, { diff_files });
         commit(types.SET_BATCH_LOADING, false);
 
@@ -94,13 +133,17 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           dispatch('setCurrentDiffFileIdFromNote', id.split('_').pop());
         }
 
-        if (!pagination.next_page) {
+        if (
+          (diffsGradualLoad &&
+            (totalLoaded === pagination.total_pages || pagination.total_pages === null)) ||
+          (!diffsGradualLoad && !pagination.next_page)
+        ) {
           commit(types.SET_RETRIEVING_BATCHES, false);
 
           // We need to check that the currentDiffFileId points to a file that exists
           if (
             state.currentDiffFileId &&
-            !state.diffFiles.some(f => f.file_hash === state.currentDiffFileId) &&
+            !state.diffFiles.some((f) => f.file_hash === state.currentDiffFileId) &&
             !isNoteLink
           ) {
             commit(types.VIEW_DIFF_FILE, state.diffFiles[0].file_hash);
@@ -108,11 +151,11 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 
           if (state.diffFiles?.length) {
             // eslint-disable-next-line promise/catch-or-return,promise/no-nesting
-            import('~/code_navigation').then(m =>
+            import('~/code_navigation').then((m) =>
               m.default({
                 blobs: state.diffFiles
-                  .filter(f => f.code_navigation_path)
-                  .map(f => ({
+                  .filter((f) => f.code_navigation_path)
+                  .map((f) => ({
                     path: f.new_path,
                     codeNavigationPath: f.code_navigation_path,
                   })),
@@ -120,11 +163,29 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
               }),
             );
           }
+
+          return null;
+        }
+
+        if (diffsGradualLoad) {
+          const nextPage = page + perPage;
+          perPage = Math.min(Math.ceil(perPage * increaseAmount), 30);
+          increaseAmount = Math.min(increaseAmount + 0.2, 2);
+
+          return nextPage;
         }
 
         return pagination.next_page;
       })
-      .then(nextPage => nextPage && getBatch(nextPage))
+      .then((nextPage) => {
+        dispatch('startRenderDiffsQueue');
+
+        if (nextPage) {
+          return getBatch(nextPage);
+        }
+
+        return null;
+      })
       .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
 
   return getBatch()
@@ -135,13 +196,15 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
 export const fetchDiffFilesMeta = ({ commit, state }) => {
   const worker = new TreeWorker();
   const urlParams = {
-    view: window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType,
+    view: 'inline',
   };
 
   commit(types.SET_LOADING, true);
+  eventHub.$emit(EVT_PERF_MARK_FILE_TREE_START);
 
   worker.addEventListener('message', ({ data }) => {
     commit(types.SET_TREE_DATA, data);
+    eventHub.$emit(EVT_PERF_MARK_FILE_TREE_END);
 
     worker.terminate();
   });
@@ -150,13 +213,13 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
     .get(mergeUrlParams(urlParams, state.endpointMetadata))
     .then(({ data }) => {
       const strippedData = { ...data };
-
       delete strippedData.diff_files;
+
       commit(types.SET_LOADING, false);
       commit(types.SET_MERGE_REQUEST_DIFFS, data.merge_request_diffs || []);
-      commit(types.SET_DIFF_DATA, strippedData);
+      commit(types.SET_DIFF_METADATA, strippedData);
 
-      worker.postMessage(prepareDiffData(data, state.diffFiles));
+      worker.postMessage(data.diff_files);
 
       return data;
     })
@@ -166,7 +229,7 @@ export const fetchDiffFilesMeta = ({ commit, state }) => {
 export const fetchCoverageFiles = ({ commit, state }) => {
   const coveragePoll = new Poll({
     resource: {
-      getCoverageReports: endpoint => axios.get(endpoint),
+      getCoverageReports: (endpoint) => axios.get(endpoint),
     },
     data: state.endpointCoverage,
     method: 'getCoverageReports',
@@ -201,8 +264,8 @@ export const assignDiscussionsToDiff = (
   const hash = getLocationHash();
 
   discussions
-    .filter(discussion => discussion.diff_discussion)
-    .forEach(discussion => {
+    .filter((discussion) => discussion.diff_discussion)
+    .forEach((discussion) => {
       commit(types.SET_LINE_DISCUSSIONS_FOR_FILE, {
         discussion,
         diffPositionByLineCode,
@@ -215,7 +278,7 @@ export const assignDiscussionsToDiff = (
   }
 
   Vue.nextTick(() => {
-    eventHub.$emit('scrollToDiscussion');
+    notesEventHub.$emit('scrollToDiscussion');
   });
 };
 
@@ -229,10 +292,10 @@ export const toggleLineDiscussions = ({ commit }, options) => {
 };
 
 export const renderFileForDiscussionId = ({ commit, rootState, state }, discussionId) => {
-  const discussion = rootState.notes.discussions.find(d => d.id === discussionId);
+  const discussion = rootState.notes.discussions.find((d) => d.id === discussionId);
 
   if (discussion && discussion.diff_file) {
-    const file = state.diffFiles.find(f => f.file_hash === discussion.diff_file.file_hash);
+    const file = state.diffFiles.find((f) => f.file_hash === discussion.diff_file.file_hash);
 
     if (file) {
       if (!file.renderIt) {
@@ -240,7 +303,7 @@ export const renderFileForDiscussionId = ({ commit, rootState, state }, discussi
       }
 
       if (file.viewer.automaticallyCollapsed) {
-        eventHub.$emit(`loadCollapsedDiff/${file.file_hash}`);
+        notesEventHub.$emit(`loadCollapsedDiff/${file.file_hash}`);
         scrollToElement(document.getElementById(file.file_hash));
       } else if (file.viewer.manuallyCollapsed) {
         commit(types.SET_FILE_COLLAPSED, {
@@ -248,41 +311,50 @@ export const renderFileForDiscussionId = ({ commit, rootState, state }, discussi
           collapsed: false,
           trigger: DIFF_FILE_AUTOMATIC_COLLAPSE,
         });
-        eventHub.$emit('scrollToDiscussion');
+        notesEventHub.$emit('scrollToDiscussion');
       } else {
-        eventHub.$emit('scrollToDiscussion');
+        notesEventHub.$emit('scrollToDiscussion');
       }
     }
   }
 };
 
 export const startRenderDiffsQueue = ({ state, commit }) => {
-  const checkItem = () =>
-    new Promise(resolve => {
-      const nextFile = state.diffFiles.find(
-        file =>
-          !file.renderIt &&
-          (file.viewer && (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text)),
-      );
+  const diffFilesToRender = state.diffFiles.filter(
+    (file) =>
+      !file.renderIt &&
+      file.viewer &&
+      (!isCollapsed(file) || file.viewer.name !== diffViewerModes.text),
+  );
+  let currentDiffFileIndex = 0;
 
-      if (nextFile) {
-        requestAnimationFrame(() => {
-          commit(types.RENDER_FILE, nextFile);
+  const checkItem = () => {
+    const nextFile = diffFilesToRender[currentDiffFileIndex];
+
+    if (nextFile) {
+      let retryCount = 0;
+      currentDiffFileIndex += 1;
+      commit(types.RENDER_FILE, nextFile);
+
+      const requestIdle = () =>
+        requestIdleCallback((idleDeadline) => {
+          // Wait for at least 5ms before trying to render
+          // or for 5 tries and then force render the file
+          if (idleDeadline.timeRemaining() >= 5 || retryCount > 4) {
+            checkItem();
+          } else {
+            requestIdle();
+            retryCount += 1;
+          }
         });
-        requestIdleCallback(
-          () => {
-            checkItem()
-              .then(resolve)
-              .catch(() => {});
-          },
-          { timeout: 1000 },
-        );
-      } else {
-        resolve();
-      }
-    });
 
-  return checkItem();
+      requestIdle();
+    }
+  };
+
+  if (diffFilesToRender.length) {
+    checkItem();
+  }
 };
 
 export const setRenderIt = ({ commit }, file) => commit(types.RENDER_FILE, file);
@@ -293,6 +365,11 @@ export const setInlineDiffViewType = ({ commit }) => {
   Cookies.set(DIFF_VIEW_COOKIE_NAME, INLINE_DIFF_VIEW_TYPE);
   const url = mergeUrlParams({ view: INLINE_DIFF_VIEW_TYPE }, window.location.href);
   historyPushState(url);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_DIFF_VIEW_SETTING);
+    api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_INLINE);
+  }
 };
 
 export const setParallelDiffViewType = ({ commit }) => {
@@ -301,6 +378,11 @@ export const setParallelDiffViewType = ({ commit }) => {
   Cookies.set(DIFF_VIEW_COOKIE_NAME, PARALLEL_DIFF_VIEW_TYPE);
   const url = mergeUrlParams({ view: PARALLEL_DIFF_VIEW_TYPE }, window.location.href);
   historyPushState(url);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_DIFF_VIEW_SETTING);
+    api.trackRedisHllUserEvent(TRACKING_DIFF_VIEW_PARALLEL);
+  }
 };
 
 export const showCommentForm = ({ commit }, { lineCode, fileHash }) => {
@@ -316,7 +398,7 @@ export const loadMoreLines = ({ commit }, options) => {
 
   params.from_merge_request = true;
 
-  return axios.get(endpoint, { params }).then(res => {
+  return axios.get(endpoint, { params }).then((res) => {
     const contextLines = res.data || [];
 
     commit(types.ADD_CONTEXT_LINES, {
@@ -357,16 +439,12 @@ export const loadCollapsedDiff = ({ commit, getters, state }, file) =>
         w: state.showWhitespace ? '0' : '1',
       },
     })
-    .then(res => {
+    .then((res) => {
       commit(types.ADD_COLLAPSED_DIFFS, {
         file,
         data: res.data,
       });
     });
-
-export const expandAllFiles = ({ commit }) => {
-  commit(types.EXPAND_ALL_FILES);
-};
 
 /**
  * Toggles the file discussions after user clicked on the toggle discussions button.
@@ -384,7 +462,7 @@ export const toggleFileDiscussions = ({ getters, dispatch }, diff) => {
   const shouldCloseAll = getters.diffHasAllExpandedDiscussions(diff);
   const shouldExpandAll = getters.diffHasAllCollapsedDiscussions(diff);
 
-  discussions.forEach(discussion => {
+  discussions.forEach((discussion) => {
     const data = { discussionId: discussion.id };
 
     if (shouldCloseAll) {
@@ -398,18 +476,13 @@ export const toggleFileDiscussions = ({ getters, dispatch }, diff) => {
 export const toggleFileDiscussionWrappers = ({ commit }, diff) => {
   const discussionWrappersExpanded = allDiscussionWrappersExpanded(diff);
   const lineCodesWithDiscussions = new Set();
-  const { parallel_diff_lines: parallelLines, highlighted_diff_lines: inlineLines } = diff;
-  const allLines = inlineLines.concat(
-    parallelLines.map(line => line.left),
-    parallelLines.map(line => line.right),
-  );
-  const lineHasDiscussion = line => Boolean(line?.discussions.length);
-  const registerDiscussionLine = line => lineCodesWithDiscussions.add(line.line_code);
+  const lineHasDiscussion = (line) => Boolean(line?.discussions.length);
+  const registerDiscussionLine = (line) => lineCodesWithDiscussions.add(line.line_code);
 
-  allLines.filter(lineHasDiscussion).forEach(registerDiscussionLine);
+  diff[INLINE_DIFF_LINES_KEY].filter(lineHasDiscussion).forEach(registerDiscussionLine);
 
   if (lineCodesWithDiscussions.size) {
-    Array.from(lineCodesWithDiscussions).forEach(lineCode => {
+    Array.from(lineCodesWithDiscussions).forEach((lineCode) => {
       commit(types.TOGGLE_LINE_DISCUSSIONS, {
         fileHash: diff.file_hash,
         expanded: !discussionWrappersExpanded,
@@ -427,8 +500,8 @@ export const saveDiffDiscussion = ({ state, dispatch }, { note, formData }) => {
   });
 
   return dispatch('saveNote', postData, { root: true })
-    .then(result => dispatch('updateDiscussion', result.discussion, { root: true }))
-    .then(discussion => dispatch('assignDiscussionsToDiff', [discussion]))
+    .then((result) => dispatch('updateDiscussion', result.discussion, { root: true }))
+    .then((discussion) => dispatch('assignDiscussionsToDiff', [discussion]))
     .then(() => dispatch('updateResolvableDiscussionsCounts', null, { root: true }))
     .then(() => dispatch('closeDiffFileCommentForm', formData.diffFile.file_hash))
     .catch(() => createFlash(s__('MergeRequests|Saving the comment failed')));
@@ -451,11 +524,11 @@ export const scrollToFile = ({ state, commit }, path) => {
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
 
-export const toggleShowTreeList = ({ commit, state }, saving = true) => {
-  commit(types.TOGGLE_SHOW_TREE_LIST);
+export const setShowTreeList = ({ commit }, { showTreeList, saving = true }) => {
+  commit(types.SET_SHOW_TREE_LIST, showTreeList);
 
   if (saving) {
-    localStorage.setItem(MR_TREE_SHOW_KEY, state.showTreeList);
+    localStorage.setItem(MR_TREE_SHOW_KEY, showTreeList);
   }
 };
 
@@ -477,6 +550,16 @@ export const setRenderTreeList = ({ commit }, renderTreeList) => {
   commit(types.SET_RENDER_TREE_LIST, renderTreeList);
 
   localStorage.setItem(TREE_LIST_STORAGE_KEY, renderTreeList);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_FILE_BROWSER_SETTING);
+
+    if (renderTreeList) {
+      api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_TREE);
+    } else {
+      api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_LIST);
+    }
+  }
 };
 
 export const setShowWhitespace = ({ commit }, { showWhitespace, pushState = false }) => {
@@ -489,7 +572,17 @@ export const setShowWhitespace = ({ commit }, { showWhitespace, pushState = fals
     historyPushState(mergeUrlParams({ w }, window.location.href));
   }
 
-  eventHub.$emit('refetchDiffData');
+  notesEventHub.$emit('refetchDiffData');
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_WHITESPACE_SETTING);
+
+    if (showWhitespace) {
+      api.trackRedisHllUserEvent(TRACKING_WHITESPACE_SHOW);
+    } else {
+      api.trackRedisHllUserEvent(TRACKING_WHITESPACE_HIDE);
+    }
+  }
 };
 
 export const toggleFileFinder = ({ commit }, visible) => {
@@ -505,68 +598,38 @@ export const receiveFullDiffError = ({ commit }, filePath) => {
   createFlash(s__('MergeRequest|Error loading full diff. Please try again.'));
 };
 
-export const setExpandedDiffLines = ({ commit, state }, { file, data }) => {
-  const expandedDiffLines = {
-    highlighted_diff_lines: convertExpandLines({
-      diffLines: file.highlighted_diff_lines,
-      typeKey: TYPE_KEY,
-      oldLineKey: OLD_LINE_KEY,
-      newLineKey: NEW_LINE_KEY,
-      data,
-      mapLine: ({ line, oldLine, newLine }) =>
-        Object.assign(line, {
-          old_line: oldLine,
-          new_line: newLine,
-          line_code: `${file.file_hash}_${oldLine}_${newLine}`,
-        }),
-    }),
-    parallel_diff_lines: convertExpandLines({
-      diffLines: file.parallel_diff_lines,
-      typeKey: [LEFT_LINE_KEY, TYPE_KEY],
-      oldLineKey: [LEFT_LINE_KEY, OLD_LINE_KEY],
-      newLineKey: [LEFT_LINE_KEY, NEW_LINE_KEY],
-      data,
-      mapLine: ({ line, oldLine, newLine }) => ({
-        left: {
-          ...line,
-          old_line: oldLine,
-          line_code: `${file.file_hash}_${oldLine}_${newLine}`,
-        },
-        right: {
-          ...line,
-          new_line: newLine,
-          line_code: `${file.file_hash}_${newLine}_${oldLine}`,
-        },
+export const setExpandedDiffLines = ({ commit }, { file, data }) => {
+  const expandedDiffLines = convertExpandLines({
+    diffLines: file[INLINE_DIFF_LINES_KEY],
+    typeKey: TYPE_KEY,
+    oldLineKey: OLD_LINE_KEY,
+    newLineKey: NEW_LINE_KEY,
+    data,
+    mapLine: ({ line, oldLine, newLine }) =>
+      Object.assign(line, {
+        old_line: oldLine,
+        new_line: newLine,
+        line_code: `${file.file_hash}_${oldLine}_${newLine}`,
       }),
-    }),
-  };
-  const currentDiffLinesKey =
-    state.diffViewType === INLINE_DIFF_VIEW_TYPE ? INLINE_DIFF_LINES_KEY : PARALLEL_DIFF_LINES_KEY;
-  const hiddenDiffLinesKey =
-    state.diffViewType === INLINE_DIFF_VIEW_TYPE ? PARALLEL_DIFF_LINES_KEY : INLINE_DIFF_LINES_KEY;
-
-  commit(types.SET_HIDDEN_VIEW_DIFF_FILE_LINES, {
-    filePath: file.file_path,
-    lines: expandedDiffLines[hiddenDiffLinesKey],
   });
 
-  if (expandedDiffLines[currentDiffLinesKey].length > MAX_RENDERING_DIFF_LINES) {
+  if (expandedDiffLines.length > MAX_RENDERING_DIFF_LINES) {
     let index = START_RENDERING_INDEX;
     commit(types.SET_CURRENT_VIEW_DIFF_FILE_LINES, {
       filePath: file.file_path,
-      lines: expandedDiffLines[currentDiffLinesKey].slice(0, index),
+      lines: expandedDiffLines.slice(0, index),
     });
     commit(types.TOGGLE_DIFF_FILE_RENDERING_MORE, file.file_path);
 
-    const idleCb = t => {
+    const idleCb = (t) => {
       const startIndex = index;
 
       while (
         t.timeRemaining() >= MIN_RENDERING_MS &&
-        index !== expandedDiffLines[currentDiffLinesKey].length &&
+        index !== expandedDiffLines.length &&
         index - startIndex !== MAX_RENDERING_BULK_ROWS
       ) {
-        const line = expandedDiffLines[currentDiffLinesKey][index];
+        const line = expandedDiffLines[index];
 
         if (line) {
           commit(types.ADD_CURRENT_VIEW_DIFF_FILE_LINES, { filePath: file.file_path, line });
@@ -574,7 +637,7 @@ export const setExpandedDiffLines = ({ commit, state }, { file, data }) => {
         }
       }
 
-      if (index !== expandedDiffLines[currentDiffLinesKey].length) {
+      if (index !== expandedDiffLines.length) {
         idleCallback(idleCb);
       } else {
         commit(types.TOGGLE_DIFF_FILE_RENDERING_MORE, file.file_path);
@@ -585,7 +648,7 @@ export const setExpandedDiffLines = ({ commit, state }, { file, data }) => {
   } else {
     commit(types.SET_CURRENT_VIEW_DIFF_FILE_LINES, {
       filePath: file.file_path,
-      lines: expandedDiffLines[currentDiffLinesKey],
+      lines: expandedDiffLines,
     });
   }
 };
@@ -606,7 +669,7 @@ export const fetchFullDiff = ({ commit, dispatch }, file) =>
     .catch(() => dispatch('receiveFullDiffError', file.file_path));
 
 export const toggleFullDiff = ({ dispatch, commit, getters, state }, filePath) => {
-  const file = state.diffFiles.find(f => f.file_path === filePath);
+  const file = state.diffFiles.find((f) => f.file_path === filePath);
 
   commit(types.REQUEST_FULL_DIFF, filePath);
 
@@ -619,7 +682,7 @@ export const toggleFullDiff = ({ dispatch, commit, getters, state }, filePath) =
   }
 };
 
-export function switchToFullDiffFromRenamedFile({ commit, dispatch, state }, { diffFile }) {
+export function switchToFullDiffFromRenamedFile({ commit, dispatch }, { diffFile }) {
   return axios
     .get(diffFile.context_lines_path, {
       params: {
@@ -630,7 +693,7 @@ export function switchToFullDiffFromRenamedFile({ commit, dispatch, state }, { d
     .then(({ data }) => {
       const lines = data.map((line, index) =>
         prepareLineForRenamedFile({
-          diffViewType: state.diffViewType,
+          diffViewType: 'inline',
           line,
           diffFile,
           index,
@@ -642,6 +705,7 @@ export function switchToFullDiffFromRenamedFile({ commit, dispatch, state }, { d
         viewer: {
           ...diffFile.alternate_viewer,
           automaticallyCollapsed: false,
+          manuallyCollapsed: false,
         },
       });
       commit(types.SET_CURRENT_VIEW_DIFF_FILE_LINES, { filePath: diffFile.file_path, lines });
@@ -716,7 +780,7 @@ export const setCurrentDiffFileIdFromNote = ({ commit, state, rootGetters }, not
 
   const fileHash = rootGetters.getDiscussion(note.discussion_id).diff_file?.file_hash;
 
-  if (fileHash && state.diffFiles.some(f => f.file_hash === fileHash)) {
+  if (fileHash && state.diffFiles.some((f) => f.file_hash === fileHash)) {
     commit(types.VIEW_DIFF_FILE, fileHash);
   }
 };
@@ -727,3 +791,39 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
 
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
+
+export const setFileByFile = ({ state, commit }, { fileByFile }) => {
+  const fileViewMode = fileByFile ? DIFF_VIEW_FILE_BY_FILE : DIFF_VIEW_ALL_FILES;
+  commit(types.SET_FILE_BY_FILE, fileByFile);
+  Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fileViewMode);
+
+  if (window.gon?.features?.diffSettingsUsageData) {
+    api.trackRedisHllUserEvent(TRACKING_CLICK_SINGLE_FILE_SETTING);
+
+    if (fileByFile) {
+      api.trackRedisHllUserEvent(TRACKING_SINGLE_FILE_MODE);
+    } else {
+      api.trackRedisHllUserEvent(TRACKING_MULTIPLE_FILES_MODE);
+    }
+  }
+
+  return axios
+    .put(state.endpointUpdateUser, {
+      view_diffs_file_by_file: fileByFile,
+    })
+    .then(() => {
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/326961
+      // We can't even do a simple console warning here because
+      // the pipeline will fail. However, the issue above will
+      // eventually handle errors appropriately.
+      // console.warn('Saving the file-by-fil user preference failed.');
+    });
+};
+
+export function reviewFile({ commit, state }, { file, reviewed = true }) {
+  const { mrPath } = getDerivedMergeRequestInformation({ endpoint: file.load_collapsed_diff_url });
+  const reviews = markFileReview(state.mrReviews, file, reviewed);
+
+  setReviewsForMergeRequest(mrPath, reviews);
+  commit(types.SET_MR_FILE_REVIEWS, reviews);
+}

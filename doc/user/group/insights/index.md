@@ -1,8 +1,8 @@
 ---
 type: reference, howto
 stage: Manage
-group: Analytics
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Optimize
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Insights **(ULTIMATE)**
@@ -13,14 +13,12 @@ Configure the Insights that matter for your groups to explore data such as
 triage hygiene, issues created/closed per a given period, average time for merge
 requests to be merged and much more.
 
-![Insights example stacked bar chart](img/insights_example_stacked_bar_chart.png)
+![Insights example stacked bar chart](img/insights_example_stacked_bar_chart_v13_11.png)
 
 ## View your group's Insights
 
 You can access your group's Insights by clicking the **Analytics > Insights**
-link in the left sidebar:
-
-![Insights sidebar link](img/insights_sidebar_link_v12_8.png)
+link in the left sidebar.
 
 ## Configure your Insights
 
@@ -40,7 +38,7 @@ more details about the `.gitlab/insights.yml` configuration file.
 
 If you have access to view a group, then you have access to view their Insights.
 
-NOTE: **Note:**
+NOTE:
 Issues or merge requests that you don't have access to (because you don't have
 access to the project they belong to, or because they are confidential) are
 filtered out of the Insights charts.

@@ -21,7 +21,7 @@ RSpec.describe Resolvers::BoardListsResolver do
     end
 
     it 'does not create the backlog list' do
-      lists = resolve_board_lists.items
+      lists = resolve_board_lists
 
       expect(lists.count).to eq 1
       expect(lists[0].list_type).to eq 'closed'
@@ -29,9 +29,7 @@ RSpec.describe Resolvers::BoardListsResolver do
 
     context 'with unauthorized user' do
       it 'raises an error' do
-        expect do
-          resolve_board_lists(current_user: unauth_user)
-        end.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        expect(resolve_board_lists(current_user: unauth_user)).to be_nil
       end
     end
 
@@ -40,7 +38,7 @@ RSpec.describe Resolvers::BoardListsResolver do
       let!(:backlog_list) { create(:backlog_list, board: board) }
 
       it 'returns a list of board lists' do
-        lists = resolve_board_lists.items
+        lists = resolve_board_lists
 
         expect(lists.count).to eq 3
         expect(lists.map(&:list_type)).to eq %w(backlog label closed)
@@ -52,7 +50,7 @@ RSpec.describe Resolvers::BoardListsResolver do
         end
 
         it 'returns the complete list of board lists for this user' do
-          lists = resolve_board_lists.items
+          lists = resolve_board_lists
 
           expect(lists.count).to eq 3
         end
@@ -60,7 +58,7 @@ RSpec.describe Resolvers::BoardListsResolver do
 
       context 'when querying for a single list' do
         it 'returns specified list' do
-          list = resolve_board_lists(args: { id: global_id_of(label_list) }).items
+          list = resolve_board_lists(args: { id: global_id_of(label_list) })
 
           expect(list).to eq [label_list]
         end
@@ -71,13 +69,13 @@ RSpec.describe Resolvers::BoardListsResolver do
           external_label = create(:group_label, group: group)
           external_list = create(:list, board: external_board, label: external_label)
 
-          list = resolve_board_lists(args: { id: global_id_of(external_list) }).items
+          list = resolve_board_lists(args: { id: global_id_of(external_list) })
 
           expect(list).to eq List.none
         end
 
         it 'raises an argument error if list ID is not valid' do
-          expect { resolve_board_lists(args: { id: 'test' }).items }
+          expect { resolve_board_lists(args: { id: 'test' }) }
             .to raise_error(Gitlab::Graphql::Errors::ArgumentError)
         end
       end
@@ -101,12 +99,6 @@ RSpec.describe Resolvers::BoardListsResolver do
   end
 
   def resolve_board_lists(args: {}, current_user: user)
-    context = GraphQL::Query::Context.new(
-      query: OpenStruct.new(schema: nil),
-      values: { current_user: current_user },
-      object: nil
-    )
-
-    resolve(described_class, obj: board, args: args, ctx: context )
+    resolve(described_class, obj: board, args: args, ctx: { current_user: current_user })
   end
 end

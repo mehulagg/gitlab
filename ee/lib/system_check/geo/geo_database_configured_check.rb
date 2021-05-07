@@ -6,12 +6,12 @@ module SystemCheck
       set_name 'GitLab Geo secondary database is correctly configured'
       set_skip_reason 'not a secondary node'
 
-      DATABASE_DOCS = 'doc/gitlab-geo/database.md'.freeze
-      TROUBLESHOOTING_DOCS = 'doc/gitlab-geo/troubleshooting.md'.freeze
-      WRONG_CONFIGURATION_MESSAGE = 'Check if you enabled the `geo_secondary_role` or `geo_postgresql` in the gitlab.rb config file.'.freeze
-      UNHEALTHY_CONNECTION_MESSAGE = 'Check the tracking database configuration as the connection could not be established'.freeze
-      NO_TABLES_MESSAGE = 'Run the tracking database migrations: gitlab-rake geo:db:migrate'.freeze
-      REUSING_EXISTING_DATABASE_MESSAGE = 'If you are reusing an existing tracking database, make sure you have reset it.'.freeze
+      DATABASE_DOCS = 'doc/gitlab-geo/database.md'
+      TROUBLESHOOTING_DOCS = 'doc/gitlab-geo/troubleshooting.md'
+      WRONG_CONFIGURATION_MESSAGE = 'Check if you enabled the `geo_secondary_role` or `geo_postgresql` in the gitlab.rb config file.'
+      UNHEALTHY_CONNECTION_MESSAGE = 'Check the tracking database configuration as the connection could not be established'
+      NO_TABLES_MESSAGE = 'Run the tracking database migrations: gitlab-rake geo:db:migrate'
+      REUSING_EXISTING_DATABASE_MESSAGE = 'If you are reusing an existing tracking database, make sure you have reset it.'
 
       def skip?
         !Gitlab::Geo.secondary?

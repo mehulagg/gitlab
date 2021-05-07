@@ -7,11 +7,12 @@ RSpec.describe Security::StoreFindingsMetadataService do
   let_it_be(:project) { security_scan.project }
   let_it_be(:security_finding_1) { build(:ci_reports_security_finding) }
   let_it_be(:security_finding_2) { build(:ci_reports_security_finding) }
+  let_it_be(:security_finding_3) { build(:ci_reports_security_finding, uuid: nil) }
   let_it_be(:security_scanner) { build(:ci_reports_security_scanner) }
   let_it_be(:report) do
     build(
       :ci_reports_security_report,
-      findings: [security_finding_1, security_finding_2],
+      findings: [security_finding_1, security_finding_2, security_finding_3],
       scanners: [security_scanner]
     )
   end
@@ -40,9 +41,10 @@ RSpec.describe Security::StoreFindingsMetadataService do
         expect { store_findings }.to change { security_scan.findings.count }.by(2)
                                  .and change { security_scan.findings.first&.severity }.to(security_finding_1.severity.to_s)
                                  .and change { security_scan.findings.first&.confidence }.to(security_finding_1.confidence.to_s)
+                                 .and change { security_scan.findings.first&.uuid }.to(security_finding_1.uuid)
                                  .and change { security_scan.findings.first&.project_fingerprint }.to(security_finding_1.project_fingerprint)
-                                 .and change { security_scan.findings.first&.position }.to(0)
-                                 .and change { security_scan.findings.last&.position }.to(1)
+                                 .and change { security_scan.findings.first&.uuid }.to(security_finding_1.uuid)
+                                 .and change { security_scan.findings.last&.uuid }.to(security_finding_2.uuid)
       end
 
       context 'when the scanners already exist in the database' do

@@ -12,7 +12,6 @@ RSpec.describe('shared/credentials_inventory/personal_access_tokens/_personal_ac
 
     allow(view).to receive(:user_detail_path).and_return('abcd')
     allow(view).to receive(:personal_access_token_revoke_path).and_return('revoke')
-    allow(view).to receive(:revoke_button_available?).and_return(false)
 
     render 'shared/credentials_inventory/personal_access_tokens/personal_access_token', personal_access_token: personal_access_token
   end
@@ -36,61 +35,31 @@ RSpec.describe('shared/credentials_inventory/personal_access_tokens/_personal_ac
   context 'revoked date' do
     let_it_be(:updated_at_date) { 10.days.ago }
 
-    context 'without revoke button available' do
-      context 'when revoked is set' do
-        let_it_be(:personal_access_token) { build_stubbed(:personal_access_token, user: user, updated_at: updated_at_date, revoked: true)}
+    before do
+      render 'shared/credentials_inventory/personal_access_tokens/personal_access_token', personal_access_token: personal_access_token
+    end
 
-        it 'shows the revoked on date' do
-          expect(rendered).to have_text(updated_at_date.to_date.to_s)
-        end
+    context 'when revoked is set' do
+      let_it_be(:personal_access_token) { build_stubbed(:personal_access_token, user: user, updated_at: updated_at_date, revoked: true)}
 
-        it 'does not show the revoke button' do
-          expect(rendered).not_to have_css('a.btn', text: 'Revoke')
-        end
+      it 'shows the revoked on date' do
+        expect(rendered).to have_text(updated_at_date.to_date.to_s)
       end
 
-      context 'when revoked is not set' do
-        let_it_be(:personal_access_token) { build_stubbed(:personal_access_token, user: user, updated_at: updated_at_date)}
-
-        it 'does not show the revoked on date' do
-          expect(rendered).not_to have_text(updated_at_date.to_date.to_s)
-        end
-
-        it 'does not show the revoke button' do
-          expect(rendered).not_to have_css('a.btn', text: 'Revoke')
-        end
+      it 'does not show the revoke button' do
+        expect(rendered).not_to have_css('a.btn', text: 'Revoke')
       end
     end
 
-    context 'with revoke button available' do
-      before do
-        allow(view).to receive(:revoke_button_available?).and_return(true)
+    context 'when revoked is not set' do
+      let_it_be(:personal_access_token) { build_stubbed(:personal_access_token, user: user, updated_at: updated_at_date)}
 
-        render 'shared/credentials_inventory/personal_access_tokens/personal_access_token', personal_access_token: personal_access_token
+      it 'does not show the revoked on date' do
+        expect(rendered).not_to have_text(updated_at_date.to_date.to_s)
       end
 
-      context 'when revoked is set' do
-        let_it_be(:personal_access_token) { build_stubbed(:personal_access_token, user: user, updated_at: updated_at_date, revoked: true)}
-
-        it 'shows the revoked on date' do
-          expect(rendered).to have_text(updated_at_date.to_date.to_s)
-        end
-
-        it 'does not show the revoke button' do
-          expect(rendered).not_to have_css('a.btn', text: 'Revoke')
-        end
-      end
-
-      context 'when revoked is not set' do
-        let_it_be(:personal_access_token) { build_stubbed(:personal_access_token, user: user, updated_at: updated_at_date)}
-
-        it 'does not show the revoked on date' do
-          expect(rendered).not_to have_text(updated_at_date.to_date.to_s)
-        end
-
-        it 'shows the revoke button' do
-          expect(rendered).to have_css('a.btn', text: 'Revoke')
-        end
+      it 'shows the revoke button' do
+        expect(rendered).to have_css('a.btn', text: 'Revoke')
       end
     end
   end

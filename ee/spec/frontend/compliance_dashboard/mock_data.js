@@ -1,4 +1,4 @@
-const createUser = id => ({
+const createUser = (id) => ({
   id,
   avatar_url: `https://${id}`,
   name: `User ${id}`,
@@ -16,8 +16,8 @@ export const mergedAt = () => {
   return date.toISOString();
 };
 
-export const createPipelineStatus = status => ({
-  details_path: '/h5bp/html5-boilerplate/pipelines/58',
+export const createPipelineStatus = (status) => ({
+  details_path: '/h5bp/html5-boilerplate/-/pipelines/58',
   favicon: '',
   group: status,
   has_details: true,
@@ -45,7 +45,7 @@ export const createMergeRequest = ({ id = 1, props } = {}) => {
   return { ...mergeRequest, ...props };
 };
 
-export const createApprovers = count => {
+export const createApprovers = (count) => {
   return Array(count)
     .fill(null)
     .map((_, id) => createUser(id));

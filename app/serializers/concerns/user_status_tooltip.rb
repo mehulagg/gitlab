@@ -8,12 +8,22 @@ module UserStatusTooltip
   include UsersHelper
 
   included do
-    expose :user_status_if_loaded, as: :status_tooltip_html
+    expose :status_tooltip_html, if: -> (*) { status_loaded? } do |user|
+      user_status(user)
+    end
 
-    def user_status_if_loaded
-      return unless object.association(:status).loaded?
+    expose :show_status do |user|
+      status_loaded? && show_status_emoji?(user.status)
+    end
 
-      user_status(object)
+    expose :availability, if: -> (*) { status_loaded? } do |user|
+      user.status&.availability
+    end
+
+    private
+
+    def status_loaded?
+      object.association(:status).loaded?
     end
   end
 end

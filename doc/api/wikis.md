@@ -1,15 +1,16 @@
 ---
 stage: Create
-group: Knowledge
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
-# Project wikis API
+# Project wikis API **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/13372) in GitLab 10.0.
 
-Available only in APIv4.
+The project [wikis](../user/project/wiki/index.md) API is available only in APIv4.
+An API for [group wikis](group_wikis.md) is also available.
 
 ## List wiki pages
 
@@ -175,9 +176,9 @@ POST /projects/:id/wikis/attachments
 | `file` | string | yes | The attachment to be uploaded |
 | `branch` | string | no | The name of the branch. Defaults to the wiki repository default branch |
 
-To upload a file from your filesystem, use the `--form` argument. This causes
+To upload a file from your file system, use the `--form` argument. This causes
 cURL to post data using the header `Content-Type: multipart/form-data`.
-The `file=` parameter must point to a file on your filesystem and be preceded
+The `file=` parameter must point to a file on your file system and be preceded
 by `@`. For example:
 
 ```shell

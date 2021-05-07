@@ -30,7 +30,7 @@ RSpec.describe Clusters::EnvironmentEntity do
         end
 
         it 'matches expected schema' do
-          expect(subject.with_indifferent_access).to match_schema('clusters/environment', dir: 'ee')
+          expect(subject.to_json).to match_schema('clusters/environment', dir: 'ee')
         end
 
         it 'exposes rollout_status' do
@@ -44,7 +44,7 @@ RSpec.describe Clusters::EnvironmentEntity do
         end
 
         it 'matches expected schema' do
-          expect(subject.with_indifferent_access).to match_schema('clusters/environment', dir: 'ee')
+          expect(subject.to_json).to match_schema('clusters/environment', dir: 'ee')
         end
 
         it 'does not expose rollout_status' do

@@ -1,15 +1,14 @@
 import { mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import GroupedCodequalityReportsApp from '~/reports/codequality_report/grouped_codequality_reports_app.vue';
 import CodequalityIssueBody from '~/reports/codequality_report/components/codequality_issue_body.vue';
+import GroupedCodequalityReportsApp from '~/reports/codequality_report/grouped_codequality_reports_app.vue';
 import { getStoreConfig } from '~/reports/codequality_report/store';
-import { mockParsedHeadIssues, mockParsedBaseIssues } from './mock_data';
+import { parsedReportIssues } from './mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('Grouped code quality reports app', () => {
-  const Component = localVue.extend(GroupedCodequalityReportsApp);
   let wrapper;
   let mockStore;
 
@@ -22,7 +21,7 @@ describe('Grouped code quality reports app', () => {
   };
 
   const mountComponent = (props = {}) => {
-    wrapper = mount(Component, {
+    wrapper = mount(GroupedCodequalityReportsApp, {
       store: mockStore,
       localVue,
       propsData: {
@@ -81,7 +80,7 @@ describe('Grouped code quality reports app', () => {
     describe('with issues', () => {
       describe('with new issues', () => {
         beforeEach(() => {
-          mockStore.state.newIssues = [mockParsedHeadIssues[0]];
+          mockStore.state.newIssues = parsedReportIssues.newIssues;
           mockStore.state.resolvedIssues = [];
         });
 
@@ -90,14 +89,14 @@ describe('Grouped code quality reports app', () => {
         });
 
         it('renders custom codequality issue body', () => {
-          expect(findIssueBody().props('issue')).toEqual(mockParsedHeadIssues[0]);
+          expect(findIssueBody().props('issue')).toEqual(parsedReportIssues.newIssues[0]);
         });
       });
 
       describe('with resolved issues', () => {
         beforeEach(() => {
           mockStore.state.newIssues = [];
-          mockStore.state.resolvedIssues = [mockParsedBaseIssues[0]];
+          mockStore.state.resolvedIssues = parsedReportIssues.resolvedIssues;
         });
 
         it('renders summary text', () => {
@@ -105,14 +104,14 @@ describe('Grouped code quality reports app', () => {
         });
 
         it('renders custom codequality issue body', () => {
-          expect(findIssueBody().props('issue')).toEqual(mockParsedBaseIssues[0]);
+          expect(findIssueBody().props('issue')).toEqual(parsedReportIssues.resolvedIssues[0]);
         });
       });
 
       describe('with new and resolved issues', () => {
         beforeEach(() => {
-          mockStore.state.newIssues = [mockParsedHeadIssues[0]];
-          mockStore.state.resolvedIssues = [mockParsedBaseIssues[0]];
+          mockStore.state.newIssues = parsedReportIssues.newIssues;
+          mockStore.state.resolvedIssues = parsedReportIssues.resolvedIssues;
         });
 
         it('renders summary text', () => {
@@ -122,7 +121,7 @@ describe('Grouped code quality reports app', () => {
         });
 
         it('renders custom codequality issue body', () => {
-          expect(findIssueBody().props('issue')).toEqual(mockParsedHeadIssues[0]);
+          expect(findIssueBody().props('issue')).toEqual(parsedReportIssues.newIssues[0]);
         });
       });
     });
@@ -135,15 +134,11 @@ describe('Grouped code quality reports app', () => {
     });
 
     it('renders error text', () => {
-      expect(findWidget().text()).toEqual('Failed to load codeclimate report');
+      expect(findWidget().text()).toContain('Failed to load codeclimate report');
     });
 
     it('renders a help icon with more information', () => {
-      expect(
-        findWidget()
-          .find('[data-testid="question-icon"]')
-          .exists(),
-      ).toBe(true);
+      expect(findWidget().find('[data-testid="question-icon"]').exists()).toBe(true);
     });
   });
 
@@ -157,11 +152,7 @@ describe('Grouped code quality reports app', () => {
     });
 
     it('does not render a help icon', () => {
-      expect(
-        findWidget()
-          .find('[data-testid="question-icon"]')
-          .exists(),
-      ).toBe(false);
+      expect(findWidget().find('[data-testid="question-icon"]').exists()).toBe(false);
     });
   });
 });

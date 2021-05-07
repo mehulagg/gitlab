@@ -4,7 +4,12 @@ module Gitlab
   module Geo
     module Replication
       class BlobDownloader
-        TEMP_PREFIX = 'tmp_'.freeze
+        TEMP_PREFIX = 'tmp_'
+        DOWNLOAD_TIMEOUT = {
+          connect: 60,
+          write: 60,
+          read: 60
+        }.freeze
 
         attr_reader :replicator
 
@@ -127,7 +132,7 @@ module Gitlab
 
           begin
             FileUtils.mkdir_p(dir)
-          rescue => e
+          rescue StandardError => e
             log_error("Unable to create directory #{dir}: #{e}")
 
             return false
@@ -143,7 +148,17 @@ module Gitlab
           file_size = -1
 
           # Make the request
-          response = ::HTTP.follow.get(url, headers: req_headers)
+          response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
+
+          if response.status.redirect?
+            # ::HTTP.follow passes through all headers (including our
+            # `Authorization: Gl-Geo ...` header) when the primary uses object
+            # storage with direct download.
+            # https://gitlab.com/gitlab-org/gitlab/-/issues/323495
+            #
+            # So we manually follow the redirect instead.
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(response['Location'])
+          end
 
           # Check for failures
           unless response.status.success?
@@ -200,7 +215,7 @@ module Gitlab
           temp.chmod(default_permissions)
           temp.binmode
           temp
-        rescue => e
+        rescue StandardError => e
           details = { error: e }
           details.merge({ absolute_path: absolute_path }) if absolute_path
 

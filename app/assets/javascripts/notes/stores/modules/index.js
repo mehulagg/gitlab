@@ -1,7 +1,7 @@
+import { ASC } from '../../constants';
 import * as actions from '../actions';
 import * as getters from '../getters';
 import mutations from '../mutations';
-import { ASC } from '../../constants';
 
 export default () => ({
   state: {
@@ -15,7 +15,7 @@ export default () => ({
     batchSuggestionsInfo: [],
     currentlyFetchingDiscussions: false,
     /**
-     * selectedCommentPosition & selectedCommentPosition structures are the same as `position.line_range`:
+     * selectedCommentPosition & selectedCommentPositionHover structures are the same as `position.line_range`:
      * {
      *  start: { line_code: string, new_line: number, old_line:number, type: string },
      *  end: { line_code: string, new_line: number, old_line:number, type: string },
@@ -26,7 +26,6 @@ export default () => ({
 
     // View layer
     isToggleStateButtonLoading: false,
-    isToggleBlockedIssueWarning: false,
     isNotesFetched: false,
     isLoading: true,
     isLoadingDescriptionVersion: false,
@@ -42,11 +41,13 @@ export default () => ({
       current_user: {},
       preview_note_path: 'path/to/preview',
     },
+    isResolvingDiscussion: false,
     commentsDisabled: false,
     resolvableDiscussionsCount: 0,
     unresolvedDiscussionsCount: 0,
     descriptionVersions: {},
     isTimelineEnabled: false,
+    isFetching: false,
   },
   actions,
   getters,

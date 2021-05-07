@@ -1,11 +1,11 @@
+import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { GlToast } from '@gitlab/ui';
-import CycleAnalytics from './components/base.vue';
-import createStore from './store';
-import { buildCycleAnalyticsInitialData } from '../shared/utils';
 import createDefaultClient from '~/lib/graphql';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import { buildCycleAnalyticsInitialData } from '../shared/utils';
+import CycleAnalytics from './components/base.vue';
+import createStore from './store';
 
 Vue.use(GlToast);
 Vue.use(VueApollo);
@@ -22,7 +22,6 @@ export default () => {
   const {
     cycleAnalyticsScatterplotEnabled: hasDurationChart = false,
     valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
-    valueStreamAnalyticsCreateMultipleValueStreams: hasCreateMultipleValueStreams = false,
   } = gon?.features;
 
   const {
@@ -30,6 +29,8 @@ export default () => {
     milestone_title = null,
     assignee_username = [],
     label_name = [],
+    sort,
+    direction,
   } = urlQueryToFilter(window.location.search);
 
   store.dispatch('initializeCycleAnalytics', {
@@ -38,11 +39,8 @@ export default () => {
     selectedMilestone: milestone_title,
     selectedAssigneeList: assignee_username,
     selectedLabelList: label_name,
-    featureFlags: {
-      hasDurationChart,
-      hasPathNavigation,
-      hasCreateMultipleValueStreams,
-    },
+    featureFlags: { hasDurationChart, hasPathNavigation },
+    pagination: { sort: sort?.value || null, direction: direction?.value || null },
   });
 
   return new Vue({
@@ -50,7 +48,7 @@ export default () => {
     name: 'CycleAnalyticsApp',
     apolloProvider,
     store,
-    render: createElement =>
+    render: (createElement) =>
       createElement(CycleAnalytics, {
         props: {
           emptyStateSvgPath,

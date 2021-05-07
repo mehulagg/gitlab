@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop: disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Security::MergeReportsService, '#execute' do
   let(:scanner_1) { build(:ci_reports_security_scanner, external_id: 'scanner-1', name: 'Scanner 1') }
   let(:scanner_2) { build(:ci_reports_security_scanner, external_id: 'scanner-2', name: 'Scanner 2') }
@@ -31,6 +32,15 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   end
 
   let(:finding_id_2_loc_1) do
+    build(:ci_reports_security_finding,
+          identifiers: [identifier_2_primary, identifier_2_cve],
+          location: build(:ci_reports_security_locations_sast, start_line: 32, end_line: 34),
+          scanner: scanner_2,
+          severity: :medium
+         )
+  end
+
+  let(:finding_id_2_loc_1_extra) do
     build(:ci_reports_security_finding,
           identifiers: [identifier_2_primary, identifier_2_cve],
           location: build(:ci_reports_security_locations_sast, start_line: 32, end_line: 34),
@@ -80,7 +90,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
          )
   end
 
-  let(:report_1_findings) { [finding_id_1, finding_id_2_loc_1, finding_cwe_2, finding_wasc_1] }
+  let(:report_1_findings) { [finding_id_1, finding_id_2_loc_1, finding_id_2_loc_1_extra, finding_cwe_2, finding_wasc_1] }
 
   let(:scanned_resource) do
     ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com'), 'GET')
@@ -133,14 +143,25 @@ RSpec.describe Security::MergeReportsService, '#execute' do
 
   let(:merge_service) { described_class.new(report_1, report_2, report_3) }
 
-  subject { merge_service.execute }
+  subject(:merged_report) { merge_service.execute }
+
+  describe 'errors on target report' do
+    subject { merged_report.errors }
+
+    before do
+      report_1.add_error('foo', 'bar')
+      report_2.add_error('zoo', 'baz')
+    end
+
+    it { is_expected.to eq([{ type: 'foo', message: 'bar' }, { type: 'zoo', message: 'baz' }]) }
+  end
 
   it 'copies scanners into target report and eliminates duplicates' do
-    expect(subject.scanners.values).to contain_exactly(scanner_1, scanner_2, scanner_3)
+    expect(merged_report.scanners.values).to contain_exactly(scanner_1, scanner_2, scanner_3)
   end
 
   it 'copies identifiers into target report and eliminates duplicates' do
-    expect(subject.identifiers.values).to(
+    expect(merged_report.identifiers.values).to(
       contain_exactly(
         identifier_1_primary,
         identifier_1_cve,
@@ -153,7 +174,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   end
 
   it 'deduplicates (except cwe and wasc) and sorts the vulnerabilities by severity (desc) then by compare key' do
-    expect(subject.findings).to(
+    expect(merged_report.findings).to(
       eq([
           finding_cwe_2,
           finding_wasc_2,
@@ -167,7 +188,7 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   end
 
   it 'deduplicates scanned resources' do
-    expect(subject.scanned_resources).to(
+    expect(merged_report.scanned_resources).to(
       eq([
         scanned_resource,
         scanned_resource_1,
@@ -230,20 +251,112 @@ RSpec.describe Security::MergeReportsService, '#execute' do
     end
 
     context 'when reports are gathered in an unprioritized order' do
-      subject { described_class.new(gemnasium_report, retirejs_report, bundler_audit_report).execute }
+      subject(:ds_merged_report) { described_class.new(gemnasium_report, retirejs_report, bundler_audit_report).execute }
 
-      specify { expect(subject.scanners.values).to eql([bundler_audit_scanner, retire_js_scaner, gemnasium_scanner]) }
-      specify { expect(subject.findings.count).to eq(2) }
-      specify { expect(subject.findings.first.identifiers).to contain_exactly(identifier_cve) }
-      specify { expect(subject.findings.last.identifiers).to contain_exactly(identifier_npm) }
+      specify { expect(ds_merged_report.scanners.values).to eql([bundler_audit_scanner, retire_js_scaner, gemnasium_scanner]) }
+      specify { expect(ds_merged_report.findings.count).to eq(2) }
+      specify { expect(ds_merged_report.findings.first.identifiers).to contain_exactly(identifier_cve) }
+      specify { expect(ds_merged_report.findings.last.identifiers).to contain_exactly(identifier_npm) }
     end
 
     context 'when a custom analyzer is completed before the known analyzers' do
-      subject { described_class.new(custom_analyzer_report, retirejs_report, bundler_audit_report).execute }
+      subject(:ds_merged_report) { described_class.new(custom_analyzer_report, retirejs_report, bundler_audit_report).execute }
 
-      specify { expect(subject.scanners.values).to eql([bundler_audit_scanner, retire_js_scaner, scanner_2]) }
-      specify { expect(subject.findings.count).to eq(3) }
-      specify { expect(subject.findings.last.identifiers).to match_array(finding_id_2_loc_1.identifiers) }
+      specify { expect(ds_merged_report.scanners.values).to eql([bundler_audit_scanner, retire_js_scaner, scanner_2]) }
+      specify { expect(ds_merged_report.findings.count).to eq(3) }
+      specify { expect(ds_merged_report.findings.last.identifiers).to match_array(finding_id_2_loc_1.identifiers) }
+    end
+
+    context 'merging reports step by step' do # rubocop:disable RSpec/MultipleMemoizedHelpers
+      let(:gitlab_identifier) { build(:ci_reports_security_identifier, external_id: 'GL-01', external_type: 'gitlab') }
+      let(:finding_id_4) { build(:ci_reports_security_finding, identifiers: [identifier_cwe, gitlab_identifier], scanner: gemnasium_scanner, report_type: :dependency_scanning) }
+      let(:finding_id_5) { build(:ci_reports_security_finding, identifiers: [identifier_cwe, gitlab_identifier], scanner: retire_js_scaner, report_type: :dependency_scanning) }
+      let(:pre_merged_report) { described_class.new(bundler_audit_report, gemnasium_report).execute }
+
+      let(:gemnasium_report) do
+        build( :ci_reports_security_report,
+          type: :dependency_scanning,
+          scanners: [gemnasium_scanner],
+          findings: [finding_id_1, finding_id_4],
+          identifiers: [finding_id_1.identifiers, finding_id_4.identifiers].flatten
+        )
+      end
+
+      let(:retirejs_report) do
+        build(
+          :ci_reports_security_report,
+          type: :dependency_scanning,
+          scanners: [retire_js_scaner],
+          findings: [finding_id_3, finding_id_5],
+          identifiers: [finding_id_3.identifiers, finding_id_5.identifiers].flatten
+        )
+      end
+
+      subject(:merged_report) { described_class.new(pre_merged_report, retirejs_report).execute }
+
+      it 'keeps the finding from `retirejs` as it has higher priority' do
+        expect(merged_report.findings).to include(finding_id_5)
+      end
+    end
+  end
+
+  context 'ordering reports for sast analyzers' do
+    let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }
+    let(:semgrep_scanner) { build(:ci_reports_security_scanner, external_id: 'semgrep', name: 'Semgrep') }
+
+    let(:identifier_bandit) { build(:ci_reports_security_identifier, external_id: 'B403', external_type: 'bandit_test_id') }
+    let(:identifier_cve) { build(:ci_reports_security_identifier, external_id: 'CVE-2019-123', external_type: 'cve') }
+    let(:identifier_semgrep) { build(:ci_reports_security_identifier, external_id: 'rules.bandit.B105', external_type: 'semgrep_id') }
+
+    let(:finding_id_1) { build(:ci_reports_security_finding, identifiers: [identifier_bandit, identifier_cve], scanner: bandit_scanner, report_type: :sast) }
+    let(:finding_id_2) { build(:ci_reports_security_finding, identifiers: [identifier_cve], scanner: semgrep_scanner, report_type: :sast) }
+    let(:finding_id_3) { build(:ci_reports_security_finding, identifiers: [identifier_semgrep], scanner: semgrep_scanner, report_type: :sast ) }
+
+    let(:bandit_report) do
+      build( :ci_reports_security_report,
+        type: :sast,
+        scanners: [bandit_scanner],
+        findings: [finding_id_1],
+        identifiers: finding_id_1.identifiers
+      )
+    end
+
+    let(:semgrep_report) do
+      build(
+        :ci_reports_security_report,
+        type: :sast,
+        scanners: [semgrep_scanner],
+        findings: [finding_id_2, finding_id_3],
+        identifiers: finding_id_2.identifiers + finding_id_3.identifiers
+      )
+    end
+
+    let(:custom_analyzer_report) do
+      build(
+        :ci_reports_security_report,
+        type: :sast,
+        scanners: [scanner_2],
+        findings: [finding_id_2_loc_1],
+        identifiers: finding_id_2_loc_1.identifiers
+      )
+    end
+
+    context 'when reports are gathered in an unprioritized order' do
+      subject(:sast_merged_report) { described_class.new(semgrep_report, bandit_report).execute }
+
+      specify { expect(sast_merged_report.scanners.values).to eql([bandit_scanner, semgrep_scanner]) }
+      specify { expect(sast_merged_report.findings.count).to eq(2) }
+      specify { expect(sast_merged_report.findings.first.identifiers).to eql([identifier_bandit, identifier_cve]) }
+      specify { expect(sast_merged_report.findings.last.identifiers).to contain_exactly(identifier_semgrep) }
+    end
+
+    context 'when a custom analyzer is completed before the known analyzers' do
+      subject(:sast_merged_report) { described_class.new(custom_analyzer_report, semgrep_report, bandit_report).execute }
+
+      specify { expect(sast_merged_report.scanners.values).to eql([bandit_scanner, semgrep_scanner, scanner_2]) }
+      specify { expect(sast_merged_report.findings.count).to eq(3) }
+      specify { expect(sast_merged_report.findings.last.identifiers).to match_array(finding_id_2_loc_1.identifiers) }
     end
   end
 end
+# rubocop: enable RSpec/MultipleMemoizedHelpers

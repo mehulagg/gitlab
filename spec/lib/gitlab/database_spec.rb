@@ -176,7 +176,7 @@ RSpec.describe Gitlab::Database do
 
           closed_pool = pool
 
-          raise error.new('boom')
+          raise error, 'boom'
         end
       rescue error
       end
@@ -395,25 +395,25 @@ RSpec.describe Gitlab::Database do
       allow(ActiveRecord::Base.connection).to receive(:execute).and_call_original
     end
 
-    it 'detects a read only database' do
+    it 'detects a read-only database' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with('SELECT pg_is_in_recovery()').and_return([{ "pg_is_in_recovery" => "t" }])
 
       expect(described_class.db_read_only?).to be_truthy
     end
 
-    it 'detects a read only database' do
+    it 'detects a read-only database' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with('SELECT pg_is_in_recovery()').and_return([{ "pg_is_in_recovery" => true }])
 
       expect(described_class.db_read_only?).to be_truthy
     end
 
-    it 'detects a read write database' do
+    it 'detects a read-write database' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with('SELECT pg_is_in_recovery()').and_return([{ "pg_is_in_recovery" => "f" }])
 
       expect(described_class.db_read_only?).to be_falsey
     end
 
-    it 'detects a read write database' do
+    it 'detects a read-write database' do
       allow(ActiveRecord::Base.connection).to receive(:execute).with('SELECT pg_is_in_recovery()').and_return([{ "pg_is_in_recovery" => false }])
 
       expect(described_class.db_read_only?).to be_falsey
@@ -438,6 +438,114 @@ RSpec.describe Gitlab::Database do
 
       it 'returns MAX_TIMESTAMP_VALUE' do
         expect(subject).to eq(max_timestamp)
+      end
+    end
+  end
+
+  describe 'ActiveRecordBaseTransactionMetrics' do
+    def subscribe_events
+      events = []
+
+      begin
+        subscriber = ActiveSupport::Notifications.subscribe('transaction.active_record') do |e|
+          events << e
+        end
+
+        yield
+      ensure
+        ActiveSupport::Notifications.unsubscribe(subscriber) if subscriber
+      end
+
+      events
+    end
+
+    context 'without a transaction block' do
+      it 'does not publish a transaction event' do
+        events = subscribe_events do
+          User.first
+        end
+
+        expect(events).to be_empty
+      end
+    end
+
+    context 'within a transaction block' do
+      it 'publishes a transaction event' do
+        events = subscribe_events do
+          ActiveRecord::Base.transaction do
+            User.first
+          end
+        end
+
+        expect(events.length).to be(1)
+
+        event = events.first
+        expect(event).not_to be_nil
+        expect(event.duration).to be > 0.0
+        expect(event.payload).to a_hash_including(
+          connection: be_a(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+        )
+      end
+    end
+
+    context 'within an empty transaction block' do
+      it 'publishes a transaction event' do
+        events = subscribe_events do
+          ActiveRecord::Base.transaction {}
+        end
+
+        expect(events.length).to be(1)
+
+        event = events.first
+        expect(event).not_to be_nil
+        expect(event.duration).to be > 0.0
+        expect(event.payload).to a_hash_including(
+          connection: be_a(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+        )
+      end
+    end
+
+    context 'within a nested transaction block' do
+      it 'publishes multiple transaction events' do
+        events = subscribe_events do
+          ActiveRecord::Base.transaction do
+            ActiveRecord::Base.transaction do
+              ActiveRecord::Base.transaction do
+                User.first
+              end
+            end
+          end
+        end
+
+        expect(events.length).to be(3)
+
+        events.each do |event|
+          expect(event).not_to be_nil
+          expect(event.duration).to be > 0.0
+          expect(event.payload).to a_hash_including(
+            connection: be_a(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+          )
+        end
+      end
+    end
+
+    context 'within a cancelled transaction block' do
+      it 'publishes multiple transaction events' do
+        events = subscribe_events do
+          ActiveRecord::Base.transaction do
+            User.first
+            raise ActiveRecord::Rollback
+          end
+        end
+
+        expect(events.length).to be(1)
+
+        event = events.first
+        expect(event).not_to be_nil
+        expect(event.duration).to be > 0.0
+        expect(event.payload).to a_hash_including(
+          connection: be_a(ActiveRecord::ConnectionAdapters::AbstractAdapter)
+        )
       end
     end
   end

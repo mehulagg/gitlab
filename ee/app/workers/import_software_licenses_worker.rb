@@ -3,6 +3,8 @@
 class ImportSoftwareLicensesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   queue_namespace :cronjob
   feature_category :license_compliance
 

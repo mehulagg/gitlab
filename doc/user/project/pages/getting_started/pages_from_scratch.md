@@ -1,12 +1,12 @@
 ---
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Create a GitLab Pages website from scratch
 
-This tutorial shows you how to create a Pages site from scratch. You will start with
+This tutorial shows you how to create a Pages site from scratch. You start with
 a blank project and create your own CI file, which gives instruction to
 a [runner](https://docs.gitlab.com/runner/). When your CI/CD
 [pipeline](../../../../ci/pipelines/index.md) runs, the Pages site is created.
@@ -152,15 +152,14 @@ pages:
 ```
 
 Now save and commit the `.gitlab-ci.yml` file. You can watch the pipeline run
-by going to **CI / CD > Pipelines**.
+by going to **CI/CD > Pipelines**.
 
 When it succeeds, go to **Settings > Pages** to view the URL where your site
 is now available.
 
 If you want to do more advanced tasks, you can update your `.gitlab-ci.yml` file
-with [any of the available settings](../../../../ci/yaml/README.md). See
-[Validate the `.gitlab-ci.yml`](../../../../ci/yaml/README.md#validate-the-gitlab-ciyml)
-for instructions on validating your YAML file with the Lint tool included with GitLab.
+with [any of the available settings](../../../../ci/yaml/README.md). You can validate
+your `.gitlab-ci.yml` file with the [CI Lint](../../../../ci/lint.md) tool that's included with GitLab.
 
 After successful execution of this `pages` job, a special `pages:deploy` job appears in the
 pipeline view. It prepares the content of the website for GitLab Pages daemon. GitLab executes it in
@@ -219,7 +218,7 @@ There are three default stages for GitLab CI/CD: build, test,
 and deploy.
 
 If you want to test your script and check the built site before deploying
-to production, you can run the test exactly as it will run when you
+to production, you can run the test exactly as it runs when you
 push to `master`.
 
 To specify a stage for your job to run in,
@@ -377,7 +376,7 @@ test:
 
 In this case, you need to exclude the `/vendor`
 directory from the list of folders Jekyll builds. Otherwise, Jekyll
-will try to build the directory contents along with the site.
+tries to build the directory contents along with the site.
 
 In the root directory, create a file called `_config.yml`
 and add this content:
@@ -397,7 +396,7 @@ but also pushes with **continuous tests** to feature-branches,
 For more information, see the following blog posts.
 
 - [Use GitLab CI/CD `environments` to deploy your
-  web app to staging and production](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/).
+  web app to staging and production](https://about.gitlab.com/blog/2021/02/05/ci-deployment-and-environments/).
 - Learn [how to run jobs sequentially,
   in parallel, or build a custom pipeline](https://about.gitlab.com/blog/2016/07/29/the-basics-of-gitlab-ci/).
 - Learn [how to pull specific directories from different projects](https://about.gitlab.com/blog/2016/12/07/building-a-new-gitlab-docs-site-with-nanoc-gitlab-ci-and-gitlab-pages/)

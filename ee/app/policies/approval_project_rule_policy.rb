@@ -8,4 +8,6 @@ class ApprovalProjectRulePolicy < BasePolicy
   end
 
   rule { editable }.enable :edit_approval_rule
+
+  rule { can?(:read_project) }.enable :read_approval_rule
 end

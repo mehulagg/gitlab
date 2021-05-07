@@ -9,13 +9,15 @@ module Search
     attr_accessor :current_user, :params
 
     def initialize(user, params)
-      @current_user, @params = user, params.dup
+      @current_user = user
+      @params = params.dup
     end
 
     def execute
       Gitlab::SearchResults.new(current_user,
                                 params[:search],
                                 projects,
+                                order_by: params[:order_by],
                                 sort: params[:sort],
                                 filters: { state: params[:state], confidential: params[:confidential] })
     end

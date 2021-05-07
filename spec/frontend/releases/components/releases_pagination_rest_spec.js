@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlPagination } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
+import * as commonUtils from '~/lib/utils/common_utils';
 import ReleasesPaginationRest from '~/releases/components/releases_pagination_rest.vue';
 import createStore from '~/releases/stores';
-import createListModule from '~/releases/stores/modules/list';
-import * as commonUtils from '~/lib/utils/common_utils';
+import createIndexModule from '~/releases/stores/modules/index';
 
 commonUtils.historyPushState = jest.fn();
 
@@ -13,21 +13,21 @@ localVue.use(Vuex);
 
 describe('~/releases/components/releases_pagination_rest.vue', () => {
   let wrapper;
-  let listModule;
+  let indexModule;
 
   const projectId = 19;
 
-  const createComponent = pageInfo => {
-    listModule = createListModule({ projectId });
+  const createComponent = (pageInfo) => {
+    indexModule = createIndexModule({ projectId });
 
-    listModule.state.restPageInfo = pageInfo;
+    indexModule.state.restPageInfo = pageInfo;
 
-    listModule.actions.fetchReleases = jest.fn();
+    indexModule.actions.fetchReleases = jest.fn();
 
     wrapper = mount(ReleasesPaginationRest, {
       store: createStore({
         modules: {
-          list: listModule,
+          index: indexModule,
         },
         featureFlags: {},
       }),
@@ -58,7 +58,7 @@ describe('~/releases/components/releases_pagination_rest.vue', () => {
     });
 
     it('calls fetchReleases with the correct page', () => {
-      expect(listModule.actions.fetchReleases.mock.calls).toEqual([
+      expect(indexModule.actions.fetchReleases.mock.calls).toEqual([
         [expect.anything(), { page: newPage }],
       ]);
     });

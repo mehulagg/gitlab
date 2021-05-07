@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Navigating GitLab via Rails console
@@ -12,7 +12,7 @@ Thanks to this, we also get access to the amazing tools built right into Rails.
 In this guide, we'll introduce the [Rails console](../operations/rails_console.md#starting-a-rails-console-session)
 and the basics of interacting with your GitLab instance from the command line.
 
-CAUTION: **Caution:**
+WARNING:
 The Rails console interacts directly with your GitLab instance. In many cases,
 there are no handrails to prevent you from permanently modifying, corrupting
 or destroying production data. If you would like to explore the Rails console
@@ -107,7 +107,7 @@ Up to now, we've been using `.find` or `.find_by`, which are designed to return
 only a single object (notice the `LIMIT 1` in the generated SQL query?).
 `.where` is used when it is desirable to get a collection of objects.
 
-Let's get a collection of non-admin users and see what we can do with it:
+Let's get a collection of non-administrator users and see what we can do with it:
 
 ```ruby
 users = User.where.not(admin: true)
@@ -364,7 +364,7 @@ StateMachines::InvalidTransition (Cannot transition state via :block from :activ
 We see that a validation error from what feels like a completely separate
 attribute comes back to haunt us when we try to update the user in any way.
 
-In practical terms, we sometimes see this happen with GitLab admin settings --
+In practical terms, we sometimes see this happen with GitLab administration settings --
 validations are sometimes added or changed in a GitLab update, resulting in
 previously saved settings now failing validation. Because you can only update
 a subset of settings at once through the UI, in this case the only way to get
@@ -385,16 +385,16 @@ User.find_by(username: 'root')
 User.find_by_any_email('user@example.com')
 ```
 
-Note: `find_by_any_email` is a custom method added by GitLab developers rather
+The `find_by_any_email` method is a custom method added by GitLab developers rather
 than a Rails-provided default method.
 
-**Get a collection of admin users:**
+**Get a collection of administrator users:**
 
 ```ruby
 User.admins
 ```
 
-Note: `admins` is a [scope convenience method](https://guides.rubyonrails.org/active_record_querying.html#scopes)
+`admins` is a [scope convenience method](https://guides.rubyonrails.org/active_record_querying.html#scopes)
 which does `where(admin: true)` under the hood.
 
 **Get a project by its path:**
@@ -403,7 +403,7 @@ which does `where(admin: true)` under the hood.
 Project.find_by_full_path('group/subgroup/project')
 ```
 
-Note: `find_by_full_path` is a custom method added by GitLab developers rather
+`find_by_full_path` is a custom method added by GitLab developers rather
 than a Rails-provided default method.
 
 **Get a project's issue or merge request by its numeric ID:**
@@ -414,7 +414,7 @@ project.issues.find_by(iid: 42)
 project.merge_requests.find_by(iid: 42)
 ```
 
-Note: `iid` means "internal ID" and is how we keep issue and merge request IDs
+`iid` means "internal ID" and is how we keep issue and merge request IDs
 scoped to each GitLab project.
 
 **Get a group by its path:**
@@ -443,7 +443,7 @@ group = Group.find_by_full_path('group/subgroup')
 # Get group's immediate child projects
 group.projects
 
-# Get group's child projects, including those in sub-groups
+# Get group's child projects, including those in subgroups
 group.all_projects
 ```
 
@@ -454,7 +454,7 @@ Ci::Pipeline.find(4151)
 Ci::Build.find(66124)
 ```
 
-Note: The pipeline and job #ID numbers increment globally across your GitLab
+The pipeline and job ID numbers increment globally across your GitLab
 instance, so there's no need to use an internal ID attribute to look them up,
 unlike with issues or merge requests.
 

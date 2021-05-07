@@ -11,6 +11,7 @@ RSpec.describe RemoveUnreferencedLfsObjectsWorker do
       let_it_be(:secondary) { create(:geo_node) }
 
       it 'logs an event to the Geo event log for every unreferenced LFS objects' do
+        stub_feature_flags(geo_lfs_object_replication: false)
         stub_current_geo_node(primary)
         unreferenced_lfs_object_1 = create(:lfs_object, :with_file)
         unreferenced_lfs_object_2 = create(:lfs_object, :with_file)

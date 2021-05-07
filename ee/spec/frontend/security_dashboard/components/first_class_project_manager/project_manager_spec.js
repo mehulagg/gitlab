@@ -1,12 +1,12 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
-import ProjectManager from 'ee/security_dashboard/components/first_class_project_manager/project_manager.vue';
 import ProjectList from 'ee/security_dashboard/components/first_class_project_manager/project_list.vue';
-import getProjects from 'ee/security_dashboard/graphql/get_projects.query.graphql';
+import ProjectManager from 'ee/security_dashboard/components/first_class_project_manager/project_manager.vue';
+import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
 import waitForPromises from 'helpers/wait_for_promises';
+import createFlash from '~/flash';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -33,8 +33,7 @@ describe('Project Manager component', () => {
   };
 
   const defaultProps = {
-    isManipulatingProjects: false,
-    projects: [],
+    isAuditor: false,
   };
 
   const createWrapper = ({ data = {}, mocks = {}, props = {} }) => {
@@ -88,6 +87,7 @@ describe('Project Manager component', () => {
           after: '',
           searchNamespaces: true,
           sort: 'similarity',
+          membership: true,
         },
       });
     });
@@ -163,9 +163,10 @@ describe('Project Manager component', () => {
       findAddProjectsButton().vm.$emit('click');
       return waitForPromises().then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Unable to add Sample Project 1: Project was not found or you do not have permission to add this project to Security Dashboards.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message:
+            'Unable to add Sample Project 1: Project was not found or you do not have permission to add this project to Security Dashboards.',
+        });
       });
     });
 
@@ -179,9 +180,10 @@ describe('Project Manager component', () => {
       findAddProjectsButton().vm.$emit('click');
       return waitForPromises().then(() => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(
-          'Unable to add Sample Project 2 and Sample Project 3: Project was not found or you do not have permission to add this project to Security Dashboards.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message:
+            'Unable to add Sample Project 2 and Sample Project 3: Project was not found or you do not have permission to add this project to Security Dashboards.',
+        });
       });
     });
   });
@@ -218,6 +220,20 @@ describe('Project Manager component', () => {
       createWrapper({ data: { pageInfo: { hasNextPage: false, endCursor: '' } } });
       findProjectSelector().vm.$emit('bottomReached');
       expect(spyQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('membership prop', () => {
+    it.each([true, false])('calls the expected query when membership prop is $s', (isAuditor) => {
+      createWrapper({ props: { isAuditor } });
+      findProjectSelector().vm.$emit('searched', 'test');
+
+      expect(spyQuery).toHaveBeenCalledTimes(1);
+      expect(spyQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: expect.objectContaining({ membership: !isAuditor }),
+        }),
+      );
     });
   });
 });

@@ -3,9 +3,9 @@ import {
   mapApprovalSettingsResponse,
   mapApprovalFallbackRuleRequest,
 } from 'ee/approvals/mappers';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { __ } from '~/locale';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+import { __ } from '~/locale';
 import * as types from '../base/mutation_types';
 
 export const receiveRulesSuccess = ({ commit }, approvalSettings) => {
@@ -20,8 +20,12 @@ export const fetchRules = ({ rootState, dispatch, commit }) => {
 
   return axios
     .get(settingsPath)
-    .then(response => dispatch('receiveRulesSuccess', mapApprovalSettingsResponse(response.data)))
-    .catch(() => createFlash(__('An error occurred fetching the approval rules.')));
+    .then((response) => dispatch('receiveRulesSuccess', mapApprovalSettingsResponse(response.data)))
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred fetching the approval rules.'),
+      }),
+    );
 };
 
 export const postRule = ({ rootState, dispatch }, rule) => {
@@ -30,7 +34,11 @@ export const postRule = ({ rootState, dispatch }, rule) => {
   return axios
     .post(rulesPath, mapApprovalRuleRequest(rule))
     .then(() => dispatch('fetchRules'))
-    .catch(() => createFlash(__('An error occurred while adding approvers')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while adding approvers'),
+      }),
+    );
 };
 
 export const putRule = ({ rootState, dispatch }, { id, ...newRule }) => {
@@ -39,7 +47,11 @@ export const putRule = ({ rootState, dispatch }, { id, ...newRule }) => {
   return axios
     .put(`${rulesPath}/${id}`, mapApprovalRuleRequest(newRule))
     .then(() => dispatch('fetchRules'))
-    .catch(() => createFlash(__('An error occurred while updating approvers')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while updating approvers'),
+      }),
+    );
 };
 
 export const deleteRule = ({ rootState, dispatch }, id) => {
@@ -48,7 +60,11 @@ export const deleteRule = ({ rootState, dispatch }, id) => {
   return axios
     .delete(`${rulesPath}/${id}`)
     .then(() => dispatch('fetchRules'))
-    .catch(() => createFlash(__('An error occurred while deleting the approvers group')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while deleting the approvers group'),
+      }),
+    );
 };
 
 export const putFallbackRule = ({ rootState, dispatch }, fallback) => {
@@ -57,5 +73,9 @@ export const putFallbackRule = ({ rootState, dispatch }, fallback) => {
   return axios
     .put(projectPath, mapApprovalFallbackRuleRequest(fallback))
     .then(() => dispatch('fetchRules'))
-    .catch(() => createFlash(__('An error occurred while deleting the approvers group')));
+    .catch(() =>
+      createFlash({
+        message: __('An error occurred while deleting the approvers group'),
+      }),
+    );
 };

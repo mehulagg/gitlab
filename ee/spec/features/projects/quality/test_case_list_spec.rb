@@ -55,6 +55,16 @@ RSpec.describe 'Test Cases', :js do
       end
     end
 
+    it 'shows filter tokens author and label' do
+      page.within('.vue-filtered-search-bar-container .gl-search-box-by-click') do
+        page.find('input').click
+
+        expect(page.find('.gl-filtered-search-suggestion-list')).to have_selector('li', count: 2)
+        expect(page.find('.gl-filtered-search-suggestion-list li:nth-child(1)')).to have_content('Author')
+        expect(page.find('.gl-filtered-search-suggestion-list li:nth-child(2)')).to have_content('Label')
+      end
+    end
+
     context 'open tab' do
       it 'shows list of all open test cases' do
         page.within('.issuable-list-container .issuable-list') do

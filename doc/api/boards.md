@@ -1,15 +1,15 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Project Issue Boards API
 
 Every API call to boards must be authenticated.
 
-If a user is not a member of a project and the project is private, a `GET`
-request on that project will result to a `404` status code.
+If a user is not a member of a private project,
+a `GET` request on that project results in a `404` status code.
 
 ## List project issue boards
 
@@ -33,6 +33,7 @@ Example response:
 [
   {
     "id" : 1,
+    "name": "board1",
     "project": {
       "id": 5,
       "name": "Diaspora Project Site",
@@ -171,7 +172,7 @@ Example response:
   }
 ```
 
-## Create an issue board **(STARTER)**
+## Create an issue board
 
 Creates a project issue board.
 
@@ -203,54 +204,18 @@ Example response:
       "web_url": "http://example.com/diaspora/diaspora-project-site"
     },
     "name": "newboard",
-    "milestone":   {
-      "id": 12
-      "title": "10.0"
-    },
-    "lists" : [
-      {
-        "id" : 1,
-        "label" : {
-          "name" : "Testing",
-          "color" : "#F0AD4E",
-          "description" : null
-        },
-        "position" : 1,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      },
-      {
-        "id" : 2,
-        "label" : {
-          "name" : "Ready",
-          "color" : "#FF0000",
-          "description" : null
-        },
-        "position" : 2,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      },
-      {
-        "id" : 3,
-        "label" : {
-          "name" : "Production",
-          "color" : "#FF5F00",
-          "description" : null
-        },
-        "position" : 3,
-        "max_issue_count": 0,
-        "max_issue_weight": 0,
-        "limit_metric":  null
-      }
-    ]
+    "lists" : [],
+    "group": null,
+    "milestone": null,
+    "assignee" : null,
+    "labels" : [],
+    "weight" : null
   }
 ```
 
-## Update an issue board **(STARTER)**
+## Update an issue board
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in GitLab 11.1.
 
 Updates a project issue board.
 
@@ -258,15 +223,15 @@ Updates a project issue board.
 PUT /projects/:id/boards/:board_id
 ```
 
-| Attribute           | Type           | Required | Description |
-| ------------------- | -------------- | -------- | ----------- |
-| `id`                | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
-| `board_id`          | integer        | yes      | The ID of a board |
-| `name`              | string         | no       | The new name of the board |
-| `assignee_id`       | integer        | no       | The assignee the board should be scoped to |
-| `milestone_id`      | integer        | no       | The milestone the board should be scoped to |
-| `labels`            | string         | no       | Comma-separated list of label names which the board should be scoped to |
-| `weight`            | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
+| Attribute                    | Type           | Required | Description |
+| ---------------------------- | -------------- | -------- | ----------- |
+| `id`                         | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `board_id`                   | integer        | yes      | The ID of a board |
+| `name`                       | string         | no       | The new name of the board |
+| `assignee_id` **(PREMIUM)**  | integer        | no       | The assignee the board should be scoped to |
+| `milestone_id` **(PREMIUM)** | integer        | no       | The milestone the board should be scoped to |
+| `labels` **(PREMIUM)**       | string         | no       | Comma-separated list of label names which the board should be scoped to |
+| `weight` **(PREMIUM)**       | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1?name=new_name&milestone_id=43&assignee_id=1&labels=Doing&weight=4"
@@ -329,7 +294,7 @@ Example response:
   }
 ```
 
-## Delete an issue board **(STARTER)**
+## Delete an issue board
 
 Deletes a project issue board.
 
@@ -458,10 +423,10 @@ POST /projects/:id/boards/:board_id/lists
 | `assignee_id` **(PREMIUM)** | integer | no | The ID of a user |
 | `milestone_id` **(PREMIUM)** | integer | no | The ID of a milestone |
 
-NOTE: **Note:**
+NOTE:
 Label, assignee and milestone arguments are mutually exclusive,
 that is, only one of them are accepted in a request.
-Check the [Issue Board docs](../user/project/issue_board.md)
+Check the [Issue Board documentation](../user/project/issue_board.md)
 for more information regarding the required license for each list type.
 
 ```shell
@@ -523,7 +488,7 @@ Example response:
 
 ## Delete a board list from a board
 
-Only for admins and project owners. Deletes the board list in question.
+Only for administrators and project owners. Deletes a board list.
 
 ```plaintext
 DELETE /projects/:id/boards/:board_id/lists/:list_id

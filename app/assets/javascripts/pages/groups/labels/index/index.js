@@ -1,3 +1,5 @@
+import initDeleteLabelModal from '~/delete_label_modal';
 import initLabels from '~/init_labels';
 
-document.addEventListener('DOMContentLoaded', initLabels);
+initLabels();
+initDeleteLabelModal();

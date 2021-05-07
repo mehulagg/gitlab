@@ -44,7 +44,7 @@ RSpec.describe Notify do
     end
   end
 
-  let_it_be(:user) { create(:user) }
+  let_it_be(:user, reload: true) { create(:user) }
   let_it_be(:current_user) { create(:user, email: "current@email.com") }
   let_it_be(:assignee) { create(:user, email: 'assignee@example.com', name: 'John Doe') }
   let_it_be(:assignee2) { create(:user, email: 'assignee2@example.com', name: 'Jane Doe') }
@@ -93,8 +93,8 @@ RSpec.describe Notify do
         subject { described_class.approved_merge_request_email(recipient.id, merge_request.id, last_approver.id) }
 
         before do
-          merge_request.approvals.create(user: assignee)
-          merge_request.approvals.create(user: last_approver)
+          merge_request.approvals.create!(user: assignee)
+          merge_request.approvals.create!(user: last_approver)
         end
 
         it_behaves_like 'a multiple recipients email'
@@ -106,9 +106,7 @@ RSpec.describe Notify do
         it_behaves_like 'an unsubscribeable thread'
 
         it 'is sent as the last approver' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(last_approver.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(last_approver)
         end
 
         it 'has the correct subject' do
@@ -143,7 +141,7 @@ RSpec.describe Notify do
 
         context 'when merge request has no assignee' do
           before do
-            merge_request.update(assignees: [])
+            merge_request.update!(assignees: [])
           end
 
           it 'does not show the assignee' do
@@ -158,7 +156,7 @@ RSpec.describe Notify do
         subject { described_class.unapproved_merge_request_email(recipient.id, merge_request.id, last_unapprover.id) }
 
         before do
-          merge_request.approvals.create(user: assignee)
+          merge_request.approvals.create!(user: assignee)
         end
 
         it_behaves_like 'a multiple recipients email'
@@ -170,9 +168,7 @@ RSpec.describe Notify do
         it_behaves_like 'an unsubscribeable thread'
 
         it 'is sent as the last unapprover' do
-          sender = subject.header[:from].addrs[0]
-          expect(sender.display_name).to eq(last_unapprover.name)
-          expect(sender.address).to eq(gitlab_sender)
+          expect_sender(last_unapprover)
         end
 
         it 'has the correct subject' do
@@ -213,10 +209,6 @@ RSpec.describe Notify do
 
         subject { described_class.unapproved_merge_request_email(recipient.id, merge_request_without_assignee.id, last_unapprover.id) }
 
-        before do
-          merge_request_without_assignee.approvals.create(user: merge_request_without_assignee.assignees.first)
-        end
-
         it 'contains the new status' do
           is_expected.to have_body_text('unapproved')
         end
@@ -250,6 +242,16 @@ RSpec.describe Notify do
           end
         end
 
+        it 'contains a link to epic author' do
+          is_expected.to have_body_text(epic.author_name)
+          is_expected.to have_body_text 'created an epic:'
+          is_expected.to have_link(epic.to_reference, href: group_epic_url(group, epic))
+        end
+
+        it 'contains a link to the epic' do
+          is_expected.to have_body_text(epic.to_reference)
+        end
+
         context 'got deleted before notification' do
           subject { described_class.new_epic_email(recipient.id, 0) }
 
@@ -271,6 +273,7 @@ RSpec.describe Notify do
 
       context 'for epic notes' do
         let_it_be(:note) { create(:note, project: nil, noteable: epic) }
+
         let(:note_author) { note.author }
 
         subject { described_class.note_epic_email(recipient.id, note.id) }
@@ -368,5 +371,39 @@ RSpec.describe Notify do
       unsubscribe_link = "http://localhost/unsubscribes/#{Base64.urlsafe_encode64(user.email)}"
       is_expected.to have_body_text(unsubscribe_link)
     end
+  end
+
+  describe 'new user was created via saml' do
+    let(:group_member) { create(:group_member, user: create(:user, :unconfirmed)) }
+    let(:group) { group_member.source }
+    let(:recipient) { group_member.user }
+
+    subject { described_class.provisioned_member_access_granted_email(group_member.id) }
+
+    it_behaves_like 'an email sent from GitLab'
+    it_behaves_like 'it should not have Gmail Actions links'
+    it_behaves_like 'a user cannot unsubscribe through footer link'
+    it_behaves_like 'appearance header and footer enabled'
+    it_behaves_like 'appearance header and footer not enabled'
+
+    it 'delivers mail to user email' do
+      expect(subject).to deliver_to(recipient.email)
+    end
+
+    it 'contains all the useful information' do
+      is_expected.to have_subject 'Welcome to GitLab'
+      is_expected.to have_body_text group.name
+      is_expected.to have_body_text group.web_url
+      is_expected.to have_body_text recipient.username
+      is_expected.to have_body_text recipient.email
+      is_expected.to have_body_text 'To get started, click the link below to confirm your account'
+      is_expected.to have_body_text recipient.confirmation_token
+    end
+  end
+
+  def expect_sender(user)
+    sender = subject.header[:from].addrs[0]
+    expect(sender.display_name).to eq("#{user.name} (@#{user.username})")
+    expect(sender.address).to eq(gitlab_sender)
   end
 end

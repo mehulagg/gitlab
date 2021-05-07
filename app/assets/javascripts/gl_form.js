@@ -1,9 +1,9 @@
-import $ from 'jquery';
 import autosize from 'autosize';
+import $ from 'jquery';
 import GfmAutoComplete, { defaultAutocompleteConfig } from 'ee_else_ce/gfm_auto_complete';
+import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 import dropzoneInput from './dropzone_input';
 import { addMarkdownListeners, removeMarkdownListeners } from './lib/utils/text_markdown';
-import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 
 export default class GLForm {
   /**
@@ -20,7 +20,7 @@ export default class GLForm {
 
     // Disable autocomplete for keywords which do not have dataSources available
     const dataSources = (gl.GfmAutoComplete && gl.GfmAutoComplete.dataSources) || {};
-    Object.keys(this.enableGFM).forEach(item => {
+    Object.keys(this.enableGFM).forEach((item) => {
       if (item !== 'emojis' && !dataSources[item]) {
         this.enableGFM[item] = false;
       }
@@ -67,11 +67,14 @@ export default class GLForm {
     addMarkdownListeners(this.form);
     this.form.show();
     if (this.isAutosizeable) this.setupAutosize();
+    if (this.textarea.data('autofocus') === true) this.textarea.focus();
   }
 
   setupAutosize() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.textarea.off('autosize:resized').on('autosize:resized', this.setHeightData.bind(this));
 
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.textarea.off('mouseup.autosize').on('mouseup.autosize', this.destroyAutosize.bind(this));
 
     setTimeout(() => {
@@ -97,21 +100,19 @@ export default class GLForm {
   }
 
   clearEventListeners() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.textarea.off('focus');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     this.textarea.off('blur');
     removeMarkdownListeners(this.form);
   }
 
   addEventListeners() {
     this.textarea.on('focus', function focusTextArea() {
-      $(this)
-        .closest('.md-area')
-        .addClass('is-focused');
+      $(this).closest('.md-area').addClass('is-focused');
     });
     this.textarea.on('blur', function blurTextArea() {
-      $(this)
-        .closest('.md-area')
-        .removeClass('is-focused');
+      $(this).closest('.md-area').removeClass('is-focused');
     });
   }
 

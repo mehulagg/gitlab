@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Style guide for writing end-to-end tests
 
 This document describes the conventions used at GitLab for writing End-to-end (E2E) tests using the GitLab QA project.
@@ -13,7 +19,7 @@ E.g.:
 ```ruby
 def click_ci_cd_pipelines
   within_sidebar do
-    click_element :link_pipelines
+    click_element(:link_pipelines)
   end
 end
 ```
@@ -68,7 +74,8 @@ We follow a simple formula roughly based on Hungarian notation.
   - `_tab`
   - `_menu_item`
 
-*Note: If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.*
+NOTE:
+If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.
 
 ### Examples
 
@@ -115,7 +122,7 @@ avoid confusion or make the code more readable. For example, if a page object is
 named `New`, it could be confusing to name the block argument `new` because that
 is used to instantiate objects, so `new_page` would be acceptable.
 
-We chose not to simply use `page` because that would shadow the
+We chose not to use `page` because that would shadow the
 Capybara DSL, potentially leading to confusion and bugs.
 
 ### Examples

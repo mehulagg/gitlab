@@ -75,7 +75,7 @@ RSpec.describe 'User searches for issues', :js do
         expect(page.all('.search-result-row').last).to have_link(issue1.title)
       end
 
-      find('.reverse-sort-btn').click
+      find('[data-testid="sort-highest-icon"]').click
 
       page.within('.results') do
         expect(page.all('.search-result-row').first).to have_link(issue1.title)
@@ -85,10 +85,12 @@ RSpec.describe 'User searches for issues', :js do
 
     context 'when on a project page' do
       it 'finds an issue' do
-        find('.js-search-project-dropdown').click
+        find('[data-testid="project-filter"]').click
 
-        page.within('.project-filter') do
-          click_link(project.full_name)
+        wait_for_requests
+
+        page.within('[data-testid="project-filter"]') do
+          click_on(project.full_name)
         end
 
         search_for_issue(issue1.title)

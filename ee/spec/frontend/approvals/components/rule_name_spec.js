@@ -1,6 +1,6 @@
+import { GlLink, GlPopover, GlIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlLink, GlPopover, GlIcon } from '@gitlab/ui';
 import RuleName from 'ee/approvals/components/rule_name.vue';
 
 const localVue = createLocalVue();

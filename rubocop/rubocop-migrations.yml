@@ -19,21 +19,28 @@ Migration/UpdateLargeTable:
     - :merge_request_diffs
     - :merge_request_metrics
     - :merge_requests
+    - :namespace_settings
     - :namespaces
     - :note_diff_files
     - :notes
     - :project_authorizations
     - :projects
     - :project_ci_cd_settings
+    - :project_settings
     - :project_features
+    - :protected_branches
     - :push_event_payloads
     - :resource_label_events
     - :routes
+    - :security_findings
     - :sent_notifications
     - :system_note_metadata
     - :taggings
     - :todos
     - :users
+    - :user_preferences
+    - :user_details
+    - :vulnerability_occurrences
     - :web_hook_logs
   DeniedMethods:
     - :change_column_type_concurrently

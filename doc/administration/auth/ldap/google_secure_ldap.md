@@ -2,10 +2,10 @@
 type: reference
 stage: Manage
 group: Access
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Google Secure LDAP **(CORE ONLY)**
+# Google Secure LDAP **(FREE SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/46391) in GitLab 11.9.
 
@@ -20,7 +20,7 @@ The steps below cover:
 
 ## Configuring Google LDAP client
 
-1. Navigate to <https://admin.google.com/Dashboard> and sign in as a GSuite domain administrator.
+1. Go to <https://admin.google.com/Dashboard> and sign in as a Google Workspace domain administrator.
 
 1. Go to **Apps > LDAP > Add Client**.
 
@@ -34,7 +34,7 @@ The steps below cover:
    'Entire domain (GitLab)' or 'Selected organizational units' for both 'Verify user
    credentials' and 'Read user information'. Select 'Add LDAP Client'
 
-   TIP: **Tip:**
+   NOTE:
    If you plan to use GitLab [LDAP Group Sync](index.md#group-sync)
    , turn on 'Read group information'.
 
@@ -209,6 +209,11 @@ values obtained during the LDAP client configuration earlier:
    ```
 
 1. Save the file and [restart](../../restart_gitlab.md#installations-from-source) GitLab for the changes to take effect.
+
+## Using encrypted credentials
+
+You can optionally store the `bind_dn` and `password` in a separate encrypted configuration file using the
+[same steps as the regular LDAP integration](index.md#using-encrypted-credentials).
 
 <!-- ## Troubleshooting
 

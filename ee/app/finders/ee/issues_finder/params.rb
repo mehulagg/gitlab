@@ -19,7 +19,7 @@ module EE
       end
 
       def weights?
-        params[:weight].present? && params[:weight] != ::Issue::WEIGHT_ALL
+        params[:weight].present? && params[:weight].to_s.casecmp(::Issue::WEIGHT_ALL) != 0
       end
 
       def filter_by_no_weight?
@@ -45,14 +45,30 @@ module EE
 
       def epics
         if params[:include_subepics]
-          ::Gitlab::ObjectHierarchy.new(::Epic.for_ids(params[:epic_id])).base_and_descendants.select(:id)
+          ::Gitlab::ObjectHierarchy.new(::Epic.id_in(params[:epic_id])).base_and_descendants.select(:id)
         else
           params[:epic_id]
         end
       end
 
-      def iterations
-        params[:iteration_id]
+      def by_iteration?
+        params[:iteration_id].present? || params[:iteration_title].present?
+      end
+
+      def filter_by_no_iteration?
+        params[:iteration_id].to_s.downcase == ::IssuableFinder::Params::FILTER_NONE
+      end
+
+      def filter_by_any_iteration?
+        params[:iteration_id].to_s.downcase == ::IssuableFinder::Params::FILTER_ANY
+      end
+
+      def filter_by_current_iteration?
+        params[:iteration_id].to_s.casecmp(::Iteration::Predefined::Current.title) == 0
+      end
+
+      def filter_by_iteration_title?
+        params[:iteration_title].present?
       end
     end
   end

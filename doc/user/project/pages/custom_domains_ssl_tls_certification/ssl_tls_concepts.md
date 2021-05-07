@@ -1,8 +1,8 @@
 ---
 type: concepts
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # SSL/TLS Certificates
@@ -10,14 +10,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 _Read this document for a brief overview of SSL/TLS certificates in
 the scope of GitLab Pages, for beginners in web development._
 
-Every GitLab Pages project on GitLab.com will be available under
+Every GitLab Pages project on GitLab.com is available under
 HTTPS for the default Pages domain (`*.gitlab.io`). Once you set
 up your Pages project with your custom (sub)domain, if you want
-it secured by HTTPS, you will have to issue a certificate for that
+it secured by HTTPS, you must issue a certificate for that
 (sub)domain and install it on your project.
 
-NOTE: **Note:**
-Certificates are NOT required to add to your custom
+NOTE:
+Certificates are **not** required to add to your custom
 (sub)domain on your GitLab Pages project, though they are
 highly recommendable.
 
@@ -32,17 +32,16 @@ nor credit card transactions, then why do we need secure connections?
 Back in the 1990s, where HTTPS came out, [SSL](https://en.wikipedia.org/wiki/Transport_Layer_Security#SSL_1.0.2C_2.0_and_3.0) was considered a "special"
 security measure, necessary just for big companies like banks and shopping sites
 with financial transactions.
+<!-- vale gitlab.Spelling = NO -->
 Now we have a different picture. [According to Josh Aas](https://letsencrypt.org/2015/10/29/phishing-and-malware.html), Executive Director at [ISRG](https://en.wikipedia.org/wiki/Internet_Security_Research_Group):
+<!-- vale gitlab.rulename = YES -->
 
-> _We’ve since come to realize that HTTPS is important for almost all websites. It’s important for any website that allows people to log in with a password, any website that [tracks its users](https://www.washingtonpost.com/news/the-switch/wp/2013/12/10/nsa-uses-google-cookies-to-pinpoint-targets-for-hacking/) in any way, any website that [doesn’t want its content altered](https://arstechnica.com/tech-policy/2014/09/why-comcasts-javascript-ad-injections-threaten-security-net-neutrality/), and for any site that offers content people might not want others to know they are consuming. We’ve also learned that any site not secured by HTTPS [can be used to attack other sites](https://krebsonsecurity.com/2015/04/dont-be-fodder-for-chinas-great-cannon/)._
+> _We've since come to realize that HTTPS is important for almost all websites. It's important for any website that allows people to log in with a password, any website that [tracks its users](https://www.washingtonpost.com/news/the-switch/wp/2013/12/10/nsa-uses-google-cookies-to-pinpoint-targets-for-hacking/) in any way, any website that [doesn't want its content altered](https://arstechnica.com/tech-policy/2014/09/why-comcasts-javascript-ad-injections-threaten-security-net-neutrality/), and for any site that offers content people might not want others to know they are consuming. We've also learned that any site not secured by HTTPS [can be used to attack other sites](https://krebsonsecurity.com/2015/04/dont-be-fodder-for-chinas-great-cannon/)._
 
 Therefore, the reason why certificates are so important is that they encrypt
 the connection between the **client** (you, me, your visitors)
 and the **server** (where you site lives), through a keychain of
 authentications and validations.
-
-How about taking Josh's advice and protecting our sites too? We will be
-well supported, and we'll contribute to a safer internet.
 
 ## Organizations supporting HTTPS
 
@@ -56,14 +55,14 @@ reiterating the importance of HTTPS.
 
 ## Issuing Certificates
 
-GitLab Pages accepts certificates provided in the [PEM](https://knowledge.digicert.com/quovadis) format, issued by
+GitLab Pages accepts certificates provided in the [PEM](https://knowledge.digicert.com/quovadis.html) format, issued by
 [Certificate Authorities](https://en.wikipedia.org/wiki/Certificate_authority) or as
 [self-signed certificates](https://en.wikipedia.org/wiki/Self-signed_certificate). Note that [self-signed certificates are typically not used](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/self-signed-certificates-secure-so-why-ban/)
 for public websites for security reasons and to ensure that browsers trust your site's certificate.
 
 There are various kinds of certificates, each one
-with a certain security level. A static personal website will
-not require the same security level as an online banking web app,
+with a certain security level. A static personal website doesn't
+require the same security level as an online banking web app,
 for instance.
 
 There are some certificate authorities that

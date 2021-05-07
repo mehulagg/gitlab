@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'User sees new onboarding flow', :js do
   before do
     stub_const('Gitlab::QueryLimiting::Transaction::THRESHOLD', 200)
-    stub_experiment_for_user(onboarding_issues: true)
+    stub_feature_flags(registration_group_invite: false)
     allow(Gitlab).to receive(:com?).and_return(true)
     gitlab_sign_in(:user)
     visit users_sign_up_welcome_path
@@ -43,22 +43,9 @@ RSpec.describe 'User sees new onboarding flow', :js do
 
     Sidekiq::Worker.drain_all
 
-    click_on 'Show me everything'
+    click_on 'Show me the basics'
 
     expect(page).to have_content('Learn GitLab')
-    expect(page).to have_css('.popover', text: 'Here are all your projects in your group, including the one you just created. To start, let’s take a look at your personalized learning project which will help you learn about GitLab at your own pace. 1 / 2')
-
-    click_on 'Learn GitLab'
-
-    expect(page).to have_content('We prepared tutorials to help you set up GitLab in a way to support your complete software development life cycle.')
-    expect(page).to have_css('.popover', text: 'Go to Issues > Boards to access your personalized learning issue board. 2 / 2')
-
-    page.find('.nav-item-name', text: 'Issues').click
-
-    expect(page).to have_css('.popover', text: 'Go to Issues > Boards to access your personalized learning issue board. 2 / 2')
-
-    click_on 'Boards'
-
     expect(page).to have_css('.selectable', text: 'Label = ~Novice')
   end
 end

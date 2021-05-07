@@ -4,8 +4,8 @@ module ResourceEvents
   class ChangeIterationService < ::ResourceEvents::BaseChangeTimeboxService
     attr_reader :iteration, :old_iteration_id
 
-    def initialize(resource, user, created_at: Time.current, old_iteration_id:)
-      super(resource, user, created_at: created_at)
+    def initialize(resource, user, old_iteration_id:)
+      super(resource, user)
 
       @iteration = resource&.iteration
       @old_iteration_id = old_iteration_id

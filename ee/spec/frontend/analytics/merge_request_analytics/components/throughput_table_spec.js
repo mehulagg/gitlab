@@ -1,12 +1,12 @@
-import Vuex from 'vuex';
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline, GlPagination } from '@gitlab/ui';
-import store from 'ee/analytics/merge_request_analytics/store';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
 import {
   THROUGHPUT_TABLE_STRINGS,
   THROUGHPUT_TABLE_TEST_IDS as TEST_IDS,
 } from 'ee/analytics/merge_request_analytics/constants';
+import store from 'ee/analytics/merge_request_analytics/store';
 import {
   throughputTableData,
   startDate,
@@ -57,7 +57,7 @@ describe('ThroughputTable', () => {
     expect(wrapper.find(component).exists()).toBe(visible);
   };
 
-  const additionalData = data => {
+  const additionalData = (data) => {
     wrapper.setData({
       throughputTableData: {
         list: [{ ...throughputTableData[0], ...data }],
@@ -68,7 +68,7 @@ describe('ThroughputTable', () => {
 
   const findTable = () => wrapper.find(GlTable);
 
-  const findCol = testId => findTable().find(`[data-testid="${testId}"]`);
+  const findCol = (testId) => findTable().find(`[data-testid="${testId}"]`);
 
   const findColSubItem = (colTestId, childTetestId) =>
     findCol(colTestId).find(`[data-testid="${childTetestId}"]`);
@@ -78,15 +78,9 @@ describe('ThroughputTable', () => {
 
   const findPagination = () => wrapper.find(GlPagination);
 
-  const findPrevious = () =>
-    findPagination()
-      .findAll('.page-item')
-      .at(0);
+  const findPrevious = () => findPagination().findAll('.page-item').at(0);
 
-  const findNext = () =>
-    findPagination()
-      .findAll('.page-item')
-      .at(1);
+  const findNext = () => findPagination().findAll('.page-item').at(1);
 
   afterEach(() => {
     wrapper.destroy();
@@ -472,7 +466,10 @@ describe('ThroughputTable', () => {
         selectedAssignee: { value: assigneeUsername, operator },
         selectedAuthor: { value: authorUsername, operator },
         selectedMilestone: { value: milestoneTitle, operator },
-        selectedLabelList: [{ value: labels[0], operator }, { value: labels[1], operator }],
+        selectedLabelList: [
+          { value: labels[0], operator },
+          { value: labels[1], operator },
+        ],
       });
       await wrapper.vm.$nextTick();
       expect(

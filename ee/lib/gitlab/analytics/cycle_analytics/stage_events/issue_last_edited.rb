@@ -17,8 +17,8 @@ module Gitlab
             Issue
           end
 
-          def timestamp_projection
-            issue_table[:last_edited_at]
+          def column_list
+            [issue_table[:last_edited_at]]
           end
         end
       end

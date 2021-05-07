@@ -1,0 +1,20 @@
+- text_style = 'font-size:16px; text-align:center;  line-height:30px;'
+
+%p{ style: text_style }
+  = _('Your CSV import for project')
+  %a{ href: project_url(@project), style: "color:#3777b0; text-decoration:none;" }
+    = @project.full_name
+  = _('has been completed.')
+
+%p{ style: text_style }
+  #{pluralize(@results[:success], 'requirement')} imported.
+
+- if @results[:error_lines].present?
+  %p{ style: text_style }
+    = _('Errors found on line %{line_number}: %{error_lines}. Please check if these lines have a requirement title.') % { line_number: 'number'.pluralize(@results[:error_lines].size), error_lines: @results[:error_lines].join(', ') }
+
+- if @results[:parse_error]
+  %p{ style: text_style }
+    = _('Error parsing CSV file. Please make sure it has')
+    %a{ href: help_page_url('user/project/requirements/index.md', anchor: 'imported-csv-file-format') }
+      = _('the correct format.')

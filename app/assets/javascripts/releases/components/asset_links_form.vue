@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlSprintf,
   GlLink,
@@ -10,8 +9,9 @@ import {
   GlFormInput,
   GlFormSelect,
 } from '@gitlab/ui';
-import { DEFAULT_ASSET_LINK_TYPE, ASSET_LINK_TYPE } from '../constants';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { s__ } from '~/locale';
+import { DEFAULT_ASSET_LINK_TYPE, ASSET_LINK_TYPE } from '../constants';
 
 export default {
   name: 'AssetLinksForm',
@@ -26,14 +26,14 @@ export default {
   },
   directives: { GlTooltip: GlTooltipDirective },
   computed: {
-    ...mapState('detail', ['release', 'releaseAssetsDocsPath']),
-    ...mapGetters('detail', ['validationErrors']),
+    ...mapState('editNew', ['release', 'releaseAssetsDocsPath']),
+    ...mapGetters('editNew', ['validationErrors']),
   },
   created() {
     this.ensureAtLeastOneLink();
   },
   methods: {
-    ...mapActions('detail', [
+    ...mapActions('editNew', [
       'addEmptyAssetLink',
       'updateAssetLinkUrl',
       'updateAssetLinkName',
@@ -141,6 +141,7 @@ export default {
           :value="link.url"
           type="text"
           class="form-control"
+          name="asset-url"
           :state="isUrlValid(link)"
           @change="updateUrl(link, $event)"
           @keydown.ctrl.enter="updateUrl(link, $event.target.value)"
@@ -180,6 +181,7 @@ export default {
           :value="link.name"
           type="text"
           class="form-control"
+          name="asset-link-name"
           :state="isNameValid(link)"
           @change="updateName(link, $event)"
           @keydown.ctrl.enter="updateName(link, $event.target.value)"
@@ -202,6 +204,7 @@ export default {
           ref="typeSelect"
           :value="link.linkType || $options.defaultTypeOptionValue"
           class="form-control pr-4"
+          name="asset-type"
           :options="$options.typeOptions"
           @change="updateAssetLinkType({ linkIdToUpdate: link.id, newType: $event })"
         />

@@ -6,11 +6,8 @@ import { GlIcon } from '@gitlab/ui';
  *
  * Receives status object containing:
  * status: {
- *   details_path: "/gitlab-org/gitlab-foss/pipelines/8150156" // url
  *   group:"running" // used for CSS class
  *   icon: "icon_status_running" // used to render the icon
- *   label:"running" // used for potential tooltip
- *   text:"running" // text rendered
  * }
  *
  * Used in:
@@ -66,5 +63,13 @@ export default {
 };
 </script>
 <template>
-  <span :class="cssClass"> <gl-icon :name="icon" :size="size" :class="cssClasses" /> </span>
+  <span :class="cssClass">
+    <gl-icon
+      :name="icon"
+      :size="size"
+      :class="cssClasses"
+      :aria-label="status.icon"
+      use-deprecated-sizes
+    />
+  </span>
 </template>

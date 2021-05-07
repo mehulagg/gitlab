@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Merge Request Performance Guidelines
 
 Each new introduced merge request **should be performant by default**.
@@ -12,7 +18,7 @@ To measure the impact of a merge request you can use
 the following guides:
 
 - [Performance Guidelines](performance.md)
-- [What requires downtime?](what_requires_downtime.md)
+- [Avoiding downtime in migrations](avoiding_downtime_in_migrations.md)
 
 ## Definition
 
@@ -40,8 +46,8 @@ and running.
 
 Can the queries used potentially take down any critical services and result in
 engineers being woken up in the night? Can a malicious user abuse the code to
-take down a GitLab instance? Will my changes simply make loading a certain page
-slower? Will execution time grow exponentially given enough load or data in the
+take down a GitLab instance? Do my changes simply make loading a certain page
+slower? Does execution time grow exponentially given enough load or data in the
 database?
 
 These are all questions one should ask themselves before submitting a merge
@@ -61,14 +67,14 @@ in turn can request a performance specialist to review the changes.
 
 ## Think outside of the box
 
-Everyone has their own perception how the new feature is going to be used.
+Everyone has their own perception of how to use the new feature.
 Always consider how users might be using the feature instead. Usually,
 users test our features in a very unconventional way,
 like by brute forcing or abusing edge conditions that we have.
 
 ## Data set
 
-The data set that will be processed by the merge request should be known
+The data set the merge request processes should be known
 and documented. The feature should clearly document what the expected
 data set is for this feature to process, and what problems it might cause.
 
@@ -80,8 +86,8 @@ from the repository and perform search for the set of files.
 As an author you should in context of that problem consider
 the following:
 
-1. What repositories are going to be supported?
-1. How long it will take for big repositories like Linux kernel?
+1. What repositories are planned to be supported?
+1. How long it do big repositories like Linux kernel take?
 1. Is there something that we can do differently to not process such a
    big data set?
 1. Should we build some fail-safe mechanism to contain
@@ -90,28 +96,28 @@ the following:
 
 ## Query plans and database structure
 
-The query plan can tell us if we will need additional
+The query plan can tell us if we need additional
 indexes, or expensive filtering (such as using sequential scans).
 
 Each query plan should be run against substantial size of data set.
 For example, if you look for issues with specific conditions,
 you should consider validating a query against
 a small number (a few hundred) and a big number (100_000) of issues.
-See how the query will behave if the result will be a few
+See how the query behaves if the result is a few
 and a few thousand.
 
 This is needed as we have users using GitLab for very big projects and
 in a very unconventional way. Even if it seems that it's unlikely
-that such a big data set will be used, it's still plausible that one
-of our customers will encounter a problem with the feature.
+that such a big data set is used, it's still plausible that one
+of our customers could encounter a problem with the feature.
 
-Understanding ahead of time how it's going to behave at scale, even if we accept it,
-is the desired outcome. We should always have a plan or understanding of what it will take
+Understanding ahead of time how it behaves at scale, even if we accept it,
+is the desired outcome. We should always have a plan or understanding of what is needed
 to optimize the feature for higher usage patterns.
 
 Every database structure should be optimized and sometimes even over-described
 in preparation for easy extension. The hardest part after some point is
-data migration. Migrating millions of rows will always be troublesome and
+data migration. Migrating millions of rows is always troublesome and
 can have a negative impact on the application.
 
 To better understand how to get help with the query plan reviews
@@ -119,12 +125,12 @@ read this section on [how to prepare the merge request for a database review](da
 
 ## Query Counts
 
-**Summary:** a merge request **should not** increase the number of executed SQL
+**Summary:** a merge request **should not** increase the total number of executed SQL
 queries unless absolutely necessary.
 
-The number of queries executed by the code modified or added by a merge request
+The total number of queries executed by the code modified or added by a merge request
 must not increase unless absolutely necessary. When building features it's
-entirely possible you will need some extra queries, but you should try to keep
+entirely possible you need some extra queries, but you should try to keep
 this at a minimum.
 
 As an example, say you introduce a feature that updates a number of database
@@ -138,10 +144,10 @@ objects_to_update.each do |object|
 end
 ```
 
-This will end up running one query for every object to update. This code can
+This means running one query for every object to update. This code can
 easily overload a database given enough rows to update or many instances of this
 code running in parallel. This particular problem is known as the
-["N+1 query problem"](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations). You can write a test with [QueryRecoder](query_recorder.md) to detect this and prevent regressions.
+["N+1 query problem"](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations). You can write a test with [QueryRecorder](query_recorder.md) to detect this and prevent regressions.
 
 In this particular case the workaround is fairly easy:
 
@@ -151,6 +157,104 @@ objects_to_update.update_all(some_field: some_value)
 
 This uses ActiveRecord's `update_all` method to update all rows in a single
 query. This in turn makes it much harder for this code to overload a database.
+
+## Use read replicas when possible
+
+In a DB cluster we have many read replicas and one primary. A classic use of scaling the DB is to have read-only actions be performed by the replicas. We use [load balancing](../administration/database_load_balancing.md) to distribute this load. This allows for the replicas to grow as the pressure on the DB grows.
+
+By default, queries use read-only replicas, but due to
+[primary sticking](../administration/database_load_balancing.md#primary-sticking), GitLab uses the
+primary for some time and reverts to secondaries after they have either caught up or after 30 seconds.
+Doing this can lead to a considerable amount of unnecessary load on the primary.
+To prevent switching to the primary [merge request 56849](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56849) introduced the
+`without_sticky_writes` block. Typically, this method can be applied to prevent primary stickiness
+after a trivial or insignificant write which doesn't affect the following queries in the same session.
+
+To learn when a usage timestamp update can lead the session to stick to the primary and how to
+prevent it by using `without_sticky_writes`, see [merge request 57328](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57328)
+
+As a counterpart of the `without_sticky_writes` utility,
+[merge request 59167](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59167) introduced
+`use_replicas_for_read_queries`. This method forces all read-only queries inside its block to read
+replicas regardless of the current primary stickiness.
+This utility is reserved for cases where queries can tolerate replication lag.
+
+Internally, our database load balancer classifies the queries based on their main statement (`select`, `update`, `delete`, etc.). When in doubt, it redirects the queries to the primary database. Hence, there are some common cases the load balancer sends the queries to the primary unnecessarily:
+
+- Custom queries (via `exec_query`, `execute_statement`, `execute`, etc.)
+- Read-only transactions
+- In-flight connection configuration set
+- Sidekiq background jobs
+
+After the above queries are executed, GitLab
+[sticks to the primary](../administration/database_load_balancing.md#primary-sticking).
+To make the inside queries prefer using the replicas,
+[merge request 59086](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59086) introduced
+`fallback_to_replicas_for_ambiguous_queries`. This MR is also an example of how we redirected a
+costly, time-consuming query to the replicas.
+
+## Use CTEs wisely
+
+Read about [complex queries on the relation object](iterating_tables_in_batches.md#complex-queries-on-the-relation-object) for considerations on how to use CTEs. We have found in some situations that CTEs can become problematic in use (similar to the n+1 problem above). In particular, hierarchical recursive CTE queries such as the CTE in [AuthorizedProjectsWorker](https://gitlab.com/gitlab-org/gitlab/-/issues/325688) are very difficult to optimize and don't scale. We should avoid them when implementing new features that require any kind of hierarchical structure.
+
+However, in many simpler cases, such as this [example](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/43242#note_61416277), CTEs can be quite effective as an optimization fence.
+
+## Cached Queries
+
+**Summary:** a merge request **should not** execute duplicated cached queries.
+
+Rails provides an [SQL Query Cache](cached_queries.md#cached-queries-guidelines),
+used to cache the results of database queries for the duration of the request.
+
+See [why cached queries are considered bad](cached_queries.md#why-cached-queries-are-considered-bad) and
+[how to detect them](cached_queries.md#how-to-detect-cached-queries).
+
+The code introduced by a merge request, should not execute multiple duplicated cached queries.
+
+The total number of the queries (including cached ones) executed by the code modified or added by a merge request
+should not increase unless absolutely necessary.
+The number of executed queries (including cached queries) should not depend on
+collection size.
+You can write a test by passing the `skip_cached` variable to [QueryRecorder](query_recorder.md) to detect this and prevent regressions.
+
+As an example, say you have a CI pipeline. All pipeline builds belong to the same pipeline,
+thus they also belong to the same project (`pipeline.project`):
+
+```ruby
+pipeline_project = pipeline.project
+# Project Load (0.6ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+build = pipeline.builds.first
+
+build.project == pipeline_project
+# CACHE Project Load (0.0ms)  SELECT "projects".* FROM "projects" WHERE "projects"."id" = $1 LIMIT $2
+# => true
+```
+
+When we call `build.project`, it doesn't hit the database, it uses the cached result, but it re-instantiates
+the same pipeline project object. It turns out that associated objects do not point to the same in-memory object.
+
+If we try to serialize each build:
+
+```ruby
+pipeline.builds.each do |build|
+  build.to_json(only: [:name], include: [project: { only: [:name]}])
+end
+```
+
+It re-instantiates project object for each build, instead of using the same in-memory object.
+
+In this particular case the workaround is fairly easy:
+
+```ruby
+pipeline.builds.each do |build|
+  build.project = pipeline.project
+  build.to_json(only: [:name], include: [project: { only: [:name]}])
+end
+```
+
+We can assign `pipeline.project` to each `build.project`, since we know it should point to the same project.
+This allows us that each build point to the same in-memory project,
+avoiding the cached SQL query and re-instantiation of the project object for each build.
 
 ## Executing Queries in Loops
 
@@ -260,7 +364,7 @@ Certain UI elements may not always be needed. For example, when hovering over a
 diff line there's a small icon displayed that can be used to create a new
 comment. Instead of always rendering these kind of elements they should only be
 rendered when actually needed. This ensures we don't spend time generating
-Haml/HTML when it's not going to be used.
+Haml/HTML when it's not used.
 
 ## Instrumenting New Code
 
@@ -322,6 +426,8 @@ Take into consideration the following when choosing a pagination strategy:
    The database has to sort and iterate all previous items, and this operation usually
    can result in substantial load put on database.
 
+You can find useful tips related to pagination in the [pagination guidelines](database/pagination_guidelines.md).
+
 ## Badge counters
 
 Counters should always be truncated. It means that we don't want to present
@@ -348,8 +454,8 @@ The quota should be optimised to a level that we consider the feature to
 be performant and usable for the user, but **not limiting**.
 
 **We want the features to be fully usable for the users.**
-**However, we want to ensure that the feature will continue to perform well if used at its limit**
-**and it won't cause availability issues.**
+**However, we want to ensure that the feature continues to perform well if used at its limit**
+**and it doesn't cause availability issues.**
 
 Consider that it's always better to start with some kind of limitation,
 instead of later introducing a breaking change that would result in some
@@ -370,11 +476,11 @@ The intent of quotas could be different:
 
 Examples:
 
-1. Pipeline Schedules: It's very unlikely that user will want to create
+1. Pipeline Schedules: It's very unlikely that user wants to create
    more than 50 schedules.
    In such cases it's rather expected that this is either misuse
    or abuse of the feature. Lack of the upper limit can result
-   in service degradation as the system will try to process all schedules
+   in service degradation as the system tries to process all schedules
    assigned the project.
 
 1. GitLab CI/CD includes: We started with the limit of maximum of 50 nested includes.
@@ -396,7 +502,7 @@ Performance deficiencies should be addressed right away after we merge initial
 changes.
 
 Read more about when and how feature flags should be used in
-[Feature flags in GitLab development](feature_flags/process.md#feature-flags-in-gitlab-development).
+[Feature flags in GitLab development](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#feature-flags-in-gitlab-development).
 
 ## Storage
 
@@ -414,7 +520,7 @@ We can consider the following types of storages:
   for most of our implementations. Even though this allows the above limit to be significantly larger,
   it does not really mean that you can use more. The shared temporary storage is shared by
   all nodes. Thus, the job that uses significant amount of that space or performs a lot
-  of operations will create a contention on execution of all other jobs and request
+  of operations creates a contention on execution of all other jobs and request
   across the whole application, this can easily impact stability of the whole GitLab.
   Be respectful of that.
 
@@ -464,7 +570,7 @@ end
 
 The usage of shared temporary storage is required if your intent
 is to persistent file for a disk-based storage, and not Object Storage.
-[Workhorse direct_upload](./uploads.md#direct-upload) when accepting file
+[Workhorse direct_upload](uploads.md#direct-upload) when accepting file
 can write it to shared storage, and later GitLab Rails can perform a move operation.
 The move operation on the same destination is instantaneous.
 The system instead of performing `copy` operation just re-attaches file into a new place.
@@ -488,7 +594,7 @@ that implements a seamless support for Shared and Object Storage-based persisten
 #### Data access
 
 Each feature that accepts data uploads or allows to download them needs to use
-[Workhorse direct_upload](./uploads.md#direct-upload). It means that uploads needs to be
+[Workhorse direct_upload](uploads.md#direct-upload). It means that uploads needs to be
 saved directly to Object Storage by Workhorse, and all downloads needs to be served
 by Workhorse.
 
@@ -500,5 +606,5 @@ can time out, which is especially problematic for slow clients. If clients take 
 to upload/download the processing slot might be killed due to request processing
 timeout (usually between 30s-60s).
 
-For the above reasons it is required that [Workhorse direct_upload](./uploads.md#direct-upload) is implemented
+For the above reasons it is required that [Workhorse direct_upload](uploads.md#direct-upload) is implemented
 for all file uploads and downloads.

@@ -6,9 +6,13 @@ module EE
 
     override :display_cluster_agents?
     def display_cluster_agents?(clusterable)
-      return unless ::Feature.enabled?(:cluster_agent_list, default_enabled: true)
+      clusterable.is_a?(Project) && clusterable.feature_available?(:cluster_agents) && included_in_gitlab_com_rollout?(clusterable)
+    end
 
-      clusterable.is_a?(Project) && clusterable.feature_available?(:cluster_agents)
+    private
+
+    def included_in_gitlab_com_rollout?(project)
+      ::Gitlab::Kas.included_in_gitlab_com_rollout?(project)
     end
   end
 end

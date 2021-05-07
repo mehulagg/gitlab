@@ -1,18 +1,18 @@
-import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlLoadingIcon } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import { getJSONFixture } from 'helpers/fixtures';
-import { TEST_HOST } from 'jest/helpers/test_constants';
-import axios from '~/lib/utils/axios_utils';
+import { TEST_HOST } from 'helpers/test_constants';
+import EmptyState from '~/jobs/components/empty_state.vue';
+import EnvironmentsBlock from '~/jobs/components/environments_block.vue';
+import ErasedBlock from '~/jobs/components/erased_block.vue';
 import JobApp from '~/jobs/components/job_app.vue';
 import Sidebar from '~/jobs/components/sidebar.vue';
 import StuckBlock from '~/jobs/components/stuck_block.vue';
 import UnmetPrerequisitesBlock from '~/jobs/components/unmet_prerequisites_block.vue';
-import EnvironmentsBlock from '~/jobs/components/environments_block.vue';
-import ErasedBlock from '~/jobs/components/erased_block.vue';
-import EmptyState from '~/jobs/components/empty_state.vue';
 import createStore from '~/jobs/store';
+import axios from '~/lib/utils/axios_utils';
 import job from '../mock_data';
 
 describe('Job App', () => {
@@ -34,7 +34,6 @@ describe('Job App', () => {
 
   const props = {
     artifactHelpUrl: 'help/artifact',
-    runnerHelpUrl: 'help/runner',
     deploymentHelpUrl: 'help/deployment',
     runnerSettingsUrl: 'settings/ci-cd/runners',
     variablesSettingsUrl: 'settings/ci-cd/variables',
@@ -133,13 +132,9 @@ describe('Job App', () => {
         });
 
         it('should render provided job information', () => {
-          expect(
-            wrapper
-              .find('.header-main-content')
-              .text()
-              .replace(/\s+/g, ' ')
-              .trim(),
-          ).toContain('passed Job #4757 triggered 1 year ago by Root');
+          expect(wrapper.find('.header-main-content').text().replace(/\s+/g, ' ').trim()).toContain(
+            'passed Job #4757 triggered 1 year ago by Root',
+          );
         });
 
         it('should render new issue link', () => {
@@ -151,11 +146,7 @@ describe('Job App', () => {
         it('should render created key', () =>
           setupAndMount().then(() => {
             expect(
-              wrapper
-                .find('.header-main-content')
-                .text()
-                .replace(/\s+/g, ' ')
-                .trim(),
+              wrapper.find('.header-main-content').text().replace(/\s+/g, ' ').trim(),
             ).toContain('passed Job #4757 created 3 weeks ago by Root');
           }));
       });
@@ -383,7 +374,7 @@ describe('Job App', () => {
     });
 
     describe('sidebar', () => {
-      it('has no blank blocks', done => {
+      it('has no blank blocks', (done) => {
         setupAndMount({
           jobData: {
             duration: null,
@@ -400,7 +391,7 @@ describe('Job App', () => {
             const blocks = wrapper.findAll('.blocks-container > *').wrappers;
             expect(blocks.length).toBeGreaterThan(0);
 
-            blocks.forEach(block => {
+            blocks.forEach((block) => {
               expect(block.text().trim()).not.toBe('');
             });
           })

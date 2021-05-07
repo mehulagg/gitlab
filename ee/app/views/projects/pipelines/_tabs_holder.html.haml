@@ -12,7 +12,7 @@
       = _("Licenses")
       %span.badge.badge-pill.js-licenses-counter.hidden{ data: { qa_selector: 'licenses_counter' } }
 
-- if pipeline.downloadable_path_for_report_type(:codequality)
+- if project.feature_available?(:full_codequality_report) && pipeline.downloadable_path_for_report_type(:codequality)
   %li.js-codequality-tab-link
     = link_to codequality_report_project_pipeline_path(project, pipeline), data: { target: '#js-tab-codequality', action: 'codequality_report', toggle: 'tab', 'track-event': 'click_button', 'track-label': 'get_codequality_report' }, class: 'codequality-tab' do
       = _('Code Quality')

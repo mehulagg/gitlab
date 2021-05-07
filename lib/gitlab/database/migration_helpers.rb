@@ -4,6 +4,7 @@ module Gitlab
   module Database
     module MigrationHelpers
       include Migrations::BackgroundMigrationHelpers
+      include DynamicModelHelpers
 
       # https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
       MAX_IDENTIFIER_NAME_LENGTH = 63
@@ -50,7 +51,7 @@ module Gitlab
               allow_null: options[:null]
             )
           else
-            add_column(table_name, column_name, :datetime_with_timezone, options)
+            add_column(table_name, column_name, :datetime_with_timezone, **options)
           end
         end
       end
@@ -70,6 +71,62 @@ module Gitlab
         end
       end
 
+      #
+      # Creates a new table, optionally allowing the caller to add check constraints to the table.
+      # Aside from that addition, this method should behave identically to Rails' `create_table` method.
+      #
+      # Example:
+      #
+      #     create_table_with_constraints :some_table do |t|
+      #       t.integer :thing, null: false
+      #       t.text :other_thing
+      #
+      #       t.check_constraint :thing_is_not_null, 'thing IS NOT NULL'
+      #       t.text_limit :other_thing, 255
+      #     end
+      #
+      # See Rails' `create_table` for more info on the available arguments.
+      def create_table_with_constraints(table_name, **options, &block)
+        helper_context = self
+
+        with_lock_retries do
+          check_constraints = []
+
+          create_table(table_name, **options) do |t|
+            t.define_singleton_method(:check_constraint) do |name, definition|
+              helper_context.send(:validate_check_constraint_name!, name) # rubocop:disable GitlabSecurity/PublicSend
+
+              check_constraints << { name: name, definition: definition }
+            end
+
+            t.define_singleton_method(:text_limit) do |column_name, limit, name: nil|
+              # rubocop:disable GitlabSecurity/PublicSend
+              name = helper_context.send(:text_limit_name, table_name, column_name, name: name)
+              helper_context.send(:validate_check_constraint_name!, name)
+              # rubocop:enable GitlabSecurity/PublicSend
+
+              column_name = helper_context.quote_column_name(column_name)
+              definition = "char_length(#{column_name}) <= #{limit}"
+
+              check_constraints << { name: name, definition: definition }
+            end
+
+            t.instance_eval(&block) unless block.nil?
+          end
+
+          next if check_constraints.empty?
+
+          constraint_clauses = check_constraints.map do |constraint|
+            "ADD CONSTRAINT #{quote_table_name(constraint[:name])} CHECK (#{constraint[:definition]})"
+          end
+
+          execute(<<~SQL)
+            ALTER TABLE #{quote_table_name(table_name)}
+            #{constraint_clauses.join(",\n")}
+          SQL
+        end
+      end
+
       # Creates a new index, concurrently
       #
       # Example:
@@ -86,13 +143,13 @@ module Gitlab
 
         options = options.merge({ algorithm: :concurrently })
 
-        if index_exists?(table_name, column_name, options)
+        if index_exists?(table_name, column_name, **options)
           Gitlab::AppLogger.warn "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
         disable_statement_timeout do
-          add_index(table_name, column_name, options)
+          add_index(table_name, column_name, **options)
         end
       end
 
@@ -112,13 +169,13 @@ module Gitlab
 
         options = options.merge({ algorithm: :concurrently })
 
-        unless index_exists?(table_name, column_name, options)
+        unless index_exists?(table_name, column_name, **options)
           Gitlab::AppLogger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
         disable_statement_timeout do
-          remove_index(table_name, options.merge({ column: column_name }))
+          remove_index(table_name, **options.merge({ column: column_name }))
         end
       end
 
@@ -148,7 +205,7 @@ module Gitlab
         end
 
         disable_statement_timeout do
-          remove_index(table_name, options.merge({ name: index_name }))
+          remove_index(table_name, **options.merge({ name: index_name }))
         end
       end
 
@@ -508,7 +565,7 @@ module Gitlab
 
         check_trigger_permissions!(table)
 
-        remove_rename_triggers_for_postgresql(table, trigger_name)
+        remove_rename_triggers(table, trigger_name)
 
         remove_column(table, new)
       end
@@ -519,18 +576,19 @@ module Gitlab
       # table - The name of the table to install the trigger in.
       # old_column - The name of the old column.
       # new_column - The name of the new column.
-      def install_rename_triggers(table, old_column, new_column)
-        trigger_name = rename_trigger_name(table, old_column, new_column)
-        quoted_table = quote_table_name(table)
-        quoted_old = quote_column_name(old_column)
-        quoted_new = quote_column_name(new_column)
+      # trigger_name - The name of the trigger to use (optional).
+      def install_rename_triggers(table, old, new, trigger_name: nil)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).create(old, new, trigger_name: trigger_name)
+      end
 
-        install_rename_triggers_for_postgresql(
-          trigger_name,
-          quoted_table,
-          quoted_old,
-          quoted_new
-        )
+      # Removes the triggers used for renaming a column concurrently.
+      def remove_rename_triggers(table, trigger)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).drop(trigger)
+      end
+
+      # Returns the (base) name to use for triggers when renaming columns.
+      def rename_trigger_name(table, old, new)
+        Gitlab::Database::UnidirectionalCopyTrigger.on_table(table).name(old, new)
       end
 
       # Changes the type of a column concurrently.
@@ -578,7 +636,7 @@ module Gitlab
       # type_cast_function - Required if the conversion back to the original type is not automatic
       # batch_column_name - option for tables without a primary key, in this case
       #            another unique integer column can be used. Example: :user_id
-      def undo_cleanup_concurrent_column_type_change(table, column, old_type, type_cast_function: nil, batch_column_name: :id)
+      def undo_cleanup_concurrent_column_type_change(table, column, old_type, type_cast_function: nil, batch_column_name: :id, limit: nil)
         temp_column = "#{column}_for_type_change"
 
         # Using a descriptive name that includes orinal column's name risks
@@ -604,7 +662,8 @@ module Gitlab
             temp_undo_cleanup_column,
             type: old_type,
             batch_column_name: batch_column_name,
-            type_cast_function: type_cast_function
+            type_cast_function: type_cast_function,
+            limit: limit
           )
 
           transaction do
@@ -615,7 +674,7 @@ module Gitlab
 
             install_rename_triggers(table, column, temp_column)
           end
-        rescue
+        rescue StandardError
           # create_column_from can not run inside a transaction, which means
           #  that there is a risk that if any of the operations that follow it
           #  fail, we'll be left with an inconsistent schema
@@ -642,7 +701,7 @@ module Gitlab
 
         check_trigger_permissions!(table)
 
-        remove_rename_triggers_for_postgresql(table, trigger_name)
+        remove_rename_triggers(table, trigger_name)
 
         remove_column(table, old)
       end
@@ -857,44 +916,178 @@ module Gitlab
         end
       end
 
-      # Performs a concurrent column rename when using PostgreSQL.
-      def install_rename_triggers_for_postgresql(trigger, table, old, new)
-        execute <<-EOF.strip_heredoc
-        CREATE OR REPLACE FUNCTION #{trigger}()
-        RETURNS trigger AS
-        $BODY$
-        BEGIN
-          NEW.#{new} := NEW.#{old};
-          RETURN NEW;
-        END;
-        $BODY$
-        LANGUAGE 'plpgsql'
-        VOLATILE
-        EOF
-
-        execute <<-EOF.strip_heredoc
-        DROP TRIGGER IF EXISTS #{trigger}
-        ON #{table}
-        EOF
-
-        execute <<-EOF.strip_heredoc
-        CREATE TRIGGER #{trigger}
-        BEFORE INSERT OR UPDATE
-        ON #{table}
-        FOR EACH ROW
-        EXECUTE FUNCTION #{trigger}()
-        EOF
+      def convert_to_bigint_column(column)
+        "#{column}_convert_to_bigint"
       end
 
-      # Removes the triggers used for renaming a PostgreSQL column concurrently.
-      def remove_rename_triggers_for_postgresql(table, trigger)
-        execute("DROP TRIGGER IF EXISTS #{trigger} ON #{table}")
-        execute("DROP FUNCTION IF EXISTS #{trigger}()")
+      # Initializes the conversion of a set of integer columns to bigint
+      #
+      # It can be used for converting both a Primary Key and any Foreign Keys
+      # that may reference it or any other integer column that we may want to
+      # upgrade (e.g. columns that store IDs, but are not set as FKs).
+      #
+      # - For primary keys and Foreign Keys (or other columns) defined as NOT NULL,
+      #    the new bigint column is added with a hardcoded NOT NULL DEFAULT 0
+      #    which allows us to skip a very costly verification step once we
+      #    are ready to switch it.
+      #   This is crucial for Primary Key conversions, because setting a column
+      #    as the PK converts even check constraints to NOT NULL constraints
+      #    and forces an inline re-verification of the whole table.
+      # - It sets up a trigger to keep the two columns in sync.
+      #
+      #   Note: this helper is intended to be used in a regular (pre-deployment) migration.
+      #
+      #   This helper is part 1 of a multi-step migration process:
+      #   1. initialize_conversion_of_integer_to_bigint to create the new columns and database trigger
+      #   2. backfill_conversion_of_integer_to_bigint to copy historic data using background migrations
+      #   3. remaining steps TBD, see #288005
+      #
+      # table - The name of the database table containing the column
+      # columns - The name, or array of names, of the column(s) that we want to convert to bigint.
+      # primary_key - The name of the primary key column (most often :id)
+      def initialize_conversion_of_integer_to_bigint(table, columns, primary_key: :id)
+        unless table_exists?(table)
+          raise "Table #{table} does not exist"
+        end
+
+        unless column_exists?(table, primary_key)
+          raise "Column #{primary_key} does not exist on #{table}"
+        end
+
+        columns = Array.wrap(columns)
+        columns.each do |column|
+          next if column_exists?(table, column)
+
+          raise ArgumentError, "Column #{column} does not exist on #{table}"
+        end
+
+        check_trigger_permissions!(table)
+
+        conversions = columns.to_h { |column| [column, convert_to_bigint_column(column)] }
+
+        with_lock_retries do
+          conversions.each do |(source_column, temporary_name)|
+            column = column_for(table, source_column)
+
+            if (column.name.to_s == primary_key.to_s) || !column.null
+              # If the column to be converted is either a PK or is defined as NOT NULL,
+              # set it to `NOT NULL DEFAULT 0` and we'll copy paste the correct values bellow
+              # That way, we skip the expensive validation step required to add
+              #  a NOT NULL constraint at the end of the process
+              add_column(table, temporary_name, :bigint, default: column.default || 0, null: false)
+            else
+              add_column(table, temporary_name, :bigint, default: column.default)
+            end
+          end
+
+          install_rename_triggers(table, conversions.keys, conversions.values)
+        end
       end
 
-      # Returns the (base) name to use for triggers when renaming columns.
-      def rename_trigger_name(table, old, new)
-        'trigger_' + Digest::SHA256.hexdigest("#{table}_#{old}_#{new}").first(12)
+      # Reverts `initialize_conversion_of_integer_to_bigint`
+      #
+      # table - The name of the database table containing the columns
+      # columns - The name, or array of names, of the column(s) that we're converting to bigint.
+      def revert_initialize_conversion_of_integer_to_bigint(table, columns)
+        columns = Array.wrap(columns)
+        temporary_columns = columns.map { |column| convert_to_bigint_column(column) }
+
+        trigger_name = rename_trigger_name(table, columns, temporary_columns)
+        remove_rename_triggers(table, trigger_name)
+
+        temporary_columns.each { |column| remove_column(table, column) }
+      end
+
+      # Backfills the new columns used in an integer-to-bigint conversion using background migrations.
+      #
+      # - This helper should be called from a post-deployment migration.
+      # - In order for this helper to work properly,  the new columns must be first initialized with
+      #   the `initialize_conversion_of_integer_to_bigint` helper.
+      # - It tracks the scheduled background jobs through Gitlab::Database::BackgroundMigration::BatchedMigration,
+      #   which allows a more thorough check that all jobs succeeded in the
+      #   cleanup migration and is way faster for very large tables.
+      #
+      #   Note: this helper is intended to be used in a post-deployment migration, to ensure any new code is
+      #   deployed (including background job changes) before we begin processing the background migration.
+      #
+      #   This helper is part 2 of a multi-step migration process:
+      #   1. initialize_conversion_of_integer_to_bigint to create the new columns and database trigger
+      #   2. backfill_conversion_of_integer_to_bigint to copy historic data using background migrations
+      #   3. remaining steps TBD, see #288005
+      #
+      # table - The name of the database table containing the column
+      # columns - The name, or an array of names, of the column(s) we want to convert to bigint.
+      # primary_key - The name of the primary key column (most often :id)
+      # batch_size - The number of rows to schedule in a single background migration
+      # sub_batch_size - The smaller batches that will be used by each scheduled job
+      #   to update the table. Useful to keep each update at ~100ms while executing
+      #   more updates per interval (2.minutes)
+      #   Note that each execution of a sub-batch adds a constant 100ms sleep
+      #    time in between the updates, which must be taken into account
+      #    while calculating the batch, sub_batch and interval values.
+      # interval - The time interval between every background migration
+      #
+      # example:
+      # Assume that we have figured out that updating 200 records of the events
+      #  table takes ~100ms on average.
+      # We can set the sub_batch_size to 200, leave the interval to the default
+      #  and set the batch_size to 50_000 which will require
+      #  ~50s = (50000 / 200) * (0.1 + 0.1) to complete and leaves breathing space
+      #  between the scheduled jobs
+      def backfill_conversion_of_integer_to_bigint(
+        table,
+        columns,
+        primary_key: :id,
+        batch_size: 20_000,
+        sub_batch_size: 1000,
+        interval: 2.minutes
+      )
+
+        unless table_exists?(table)
+          raise "Table #{table} does not exist"
+        end
+
+        unless column_exists?(table, primary_key)
+          raise "Column #{primary_key} does not exist on #{table}"
+        end
+
+        conversions = Array.wrap(columns).to_h do |column|
+          raise ArgumentError, "Column #{column} does not exist on #{table}" unless column_exists?(table, column)
+
+          temporary_name = convert_to_bigint_column(column)
+          raise ArgumentError, "Column #{temporary_name} does not exist on #{table}" unless column_exists?(table, temporary_name)
+
+          [column, temporary_name]
+        end
+
+        queue_batched_background_migration(
+          'CopyColumnUsingBackgroundMigrationJob',
+          table,
+          primary_key,
+          conversions.keys,
+          conversions.values,
+          job_interval: interval,
+          batch_size: batch_size,
+          sub_batch_size: sub_batch_size)
+      end
+
+      # Reverts `backfill_conversion_of_integer_to_bigint`
+      #
+      # table - The name of the database table containing the column
+      # columns - The name, or an array of names, of the column(s) we want to convert to bigint.
+      # primary_key - The name of the primary key column (most often :id)
+      def revert_backfill_conversion_of_integer_to_bigint(table, columns, primary_key: :id)
+        columns = Array.wrap(columns)
+
+        conditions = ActiveRecord::Base.sanitize_sql([
+          'job_class_name = :job_class_name AND table_name = :table_name AND column_name = :column_name AND job_arguments = :job_arguments',
+          job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+          table_name: table,
+          column_name: primary_key,
+          job_arguments: [columns, columns.map { |column| convert_to_bigint_column(column) }].to_json
+        ])
+
+        execute("DELETE FROM batched_background_migrations WHERE #{conditions}")
       end
 
       # Returns an Array containing the indexes for the given column
@@ -995,14 +1188,14 @@ module Gitlab
         Arel::Nodes::SqlLiteral.new(replace.to_sql)
       end
 
-      def remove_foreign_key_if_exists(*args)
-        if foreign_key_exists?(*args)
-          remove_foreign_key(*args)
+      def remove_foreign_key_if_exists(...)
+        if foreign_key_exists?(...)
+          remove_foreign_key(...)
         end
       end
 
-      def remove_foreign_key_without_error(*args)
-        remove_foreign_key(*args)
+      def remove_foreign_key_without_error(*args, **kwargs)
+        remove_foreign_key(*args, **kwargs)
       rescue ArgumentError
       end
 
@@ -1489,12 +1682,13 @@ into similar problems in the future (e.g. when new tables are created).
         "ON DELETE #{on_delete.upcase}"
       end
 
-      def create_column_from(table, old, new, type: nil, batch_column_name: :id, type_cast_function: nil)
+      def create_column_from(table, old, new, type: nil, batch_column_name: :id, type_cast_function: nil, limit: nil)
         old_col = column_for(table, old)
         new_type = type || old_col.type
+        new_limit = limit || old_col.limit
 
         add_column(table, new, new_type,
-                   limit: old_col.limit,
+                   limit: new_limit,
                    precision: old_col.precision,
                    scale: old_col.scale)
 

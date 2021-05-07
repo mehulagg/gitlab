@@ -1,23 +1,19 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import Sortable from 'sortablejs';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import EmptyComponent from '~/vue_shared/components/empty_component';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { isListDraggable } from '../boards_util';
 import BoardList from './board_list.vue';
-import BoardListNew from './board_list_new.vue';
-import boardsStore from '../stores/boards_store';
-import eventHub from '../eventhub';
-import { getBoardSortableDefaultOptions, sortableEnd } from '../mixins/sortable_default_options';
-import { ListType } from '../constants';
 
 export default {
   components: {
-    BoardPromotionState: EmptyComponent,
     BoardListHeader,
-    BoardList: gon.features?.graphqlBoardLists ? BoardListNew : BoardList,
+    BoardList,
   },
-  mixins: [glFeatureFlagMixin()],
+  inject: {
+    boardId: {
+      default: '',
+    },
+  },
   props: {
     list: {
       type: Object,
@@ -34,86 +30,49 @@ export default {
       default: false,
     },
   },
-  inject: {
-    boardId: {
-      default: '',
-    },
-  },
-  data() {
-    return {
-      detailIssue: boardsStore.detail,
-      filter: boardsStore.filter,
-    };
-  },
   computed: {
-    ...mapGetters(['getIssues']),
-    showBoardListAndBoardInfo() {
-      return this.list.type !== ListType.promotion;
+    ...mapState(['filterParams', 'highlightedLists']),
+    ...mapGetters(['getBoardItemsByList']),
+    highlighted() {
+      return this.highlightedLists.includes(this.list.id);
     },
-    uniqueKey() {
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      return `boards.${this.boardId}.${this.list.type}.${this.list.id}`;
+    listItems() {
+      return this.getBoardItemsByList(this.list.id);
     },
-    listIssues() {
-      if (!this.glFeatures.graphqlBoardLists) {
-        return this.list.issues;
-      }
-      return this.getIssues(this.list.id);
-    },
-    shouldFetchIssues() {
-      return this.glFeatures.graphqlBoardLists && this.list.type !== ListType.blank;
+    isListDraggable() {
+      return isListDraggable(this.list);
     },
   },
   watch: {
-    filter: {
+    filterParams: {
       handler() {
-        if (this.shouldFetchIssues) {
-          this.fetchIssuesForList({ listId: this.list.id });
-        } else {
-          this.list.page = 1;
-          this.list.getIssues(true).catch(() => {
-            // TODO: handle request error
-          });
+        if (this.list.id) {
+          this.fetchItemsForList({ listId: this.list.id });
         }
       },
       deep: true,
+      immediate: true,
     },
-  },
-  mounted() {
-    if (this.shouldFetchIssues) {
-      this.fetchIssuesForList({ listId: this.list.id });
-    }
-
-    const instance = this;
-
-    const sortableOptions = getBoardSortableDefaultOptions({
-      disabled: this.disabled,
-      group: 'boards',
-      draggable: '.is-draggable',
-      handle: '.js-board-handle',
-      onEnd(e) {
-        sortableEnd();
-
-        const sortable = this;
-
-        if (e.newIndex !== undefined && e.oldIndex !== e.newIndex) {
-          const order = sortable.toArray();
-          const list = boardsStore.findList('id', parseInt(e.item.dataset.id, 10));
-
-          instance.$nextTick(() => {
-            boardsStore.moveList(list, order);
+    'list.id': {
+      handler(id) {
+        if (id) {
+          this.fetchItemsForList({ listId: this.list.id });
+        }
+      },
+    },
+    highlighted: {
+      handler(highlighted) {
+        if (highlighted) {
+          this.$nextTick(() => {
+            this.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
         }
       },
-    });
-
-    Sortable.create(this.$el.parentNode, sortableOptions);
+      immediate: true,
+    },
   },
   methods: {
-    ...mapActions(['fetchIssuesForList']),
-    showListNewIssueForm(listId) {
-      eventHub.$emit('showForm', listId);
-    },
+    ...mapActions(['fetchItemsForList']),
   },
 };
 </script>
@@ -121,29 +80,26 @@ export default {
 <template>
   <div
     :class="{
-      'is-draggable': !list.preset,
-      'is-expandable': list.isExpandable,
-      'is-collapsed': !list.isExpanded,
-      'board-type-assignee': list.type === 'assignee',
+      'is-draggable': isListDraggable,
+      'is-collapsed': list.collapsed,
+      'board-type-assignee': list.listType === 'assignee',
     }"
     :data-id="list.id"
-    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal"
+    class="board gl-display-inline-block gl-h-full gl-px-3 gl-vertical-align-top gl-white-space-normal is-expandable"
     data-qa-selector="board_list"
   >
     <div
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
+      :class="{ 'board-column-highlighted': highlighted }"
     >
       <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
       <board-list
-        v-if="showBoardListAndBoardInfo"
         ref="board-list"
         :disabled="disabled"
-        :issues="listIssues"
+        :board-items="listItems"
         :list="list"
+        :can-admin-list="canAdminList"
       />
-
-      <!-- Will be only available in EE -->
-      <board-promotion-state v-if="list.id === 'promotion'" />
     </div>
   </div>
 </template>

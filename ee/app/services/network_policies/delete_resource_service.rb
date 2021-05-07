@@ -23,7 +23,7 @@ module NetworkPolicies
 
       ServiceResponse.success
     rescue Kubeclient::HttpError => e
-      kubernetes_error_response(e)
+      kubernetes_error_response(e.message)
     end
   end
 end

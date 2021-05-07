@@ -15,6 +15,10 @@ module EE
         prevent :create_design
         prevent :create_note
       end
+
+      rule { can_be_promoted_to_epic }.policy do
+        enable :promote_to_epic
+      end
     end
   end
 end

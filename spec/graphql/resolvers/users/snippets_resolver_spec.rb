@@ -51,34 +51,43 @@ RSpec.describe Resolvers::Users::SnippetsResolver do
       end
 
       it 'returns the snippets by single gid' do
-        snippets = resolve_snippets(args: { ids: private_personal_snippet.to_global_id })
+        snippets = resolve_snippets(args: { ids: [global_id_of(private_personal_snippet)] })
 
         expect(snippets).to contain_exactly(private_personal_snippet)
       end
 
       it 'returns the snippets by array of gid' do
-        args = {
-          ids: [private_personal_snippet.to_global_id, public_personal_snippet.to_global_id]
-        }
+        snippets = [private_personal_snippet, public_personal_snippet]
+        args = { ids: snippets.map { |s| global_id_of(s) } }
 
-        snippets = resolve_snippets(args: args)
+        found = resolve_snippets(args: args)
 
-        expect(snippets).to contain_exactly(private_personal_snippet, public_personal_snippet)
+        expect(found).to match_array(snippets)
       end
 
       it 'returns an error if the gid is invalid' do
         args = {
-          ids: [private_personal_snippet.to_global_id, 'foo']
+          ids: [global_id_of(private_personal_snippet), 'foo']
         }
 
         expect do
           resolve_snippets(args: args)
-        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+        end.to raise_error(GraphQL::CoercionError)
+      end
+    end
+
+    context 'when user profile is private' do
+      it 'does not return snippets for that user' do
+        expect(resolve_snippets(obj: other_user)).to contain_exactly(other_personal_snippet, other_project_snippet)
+
+        other_user.update!(private_profile: true)
+
+        expect(resolve_snippets(obj: other_user)).to be_empty
       end
     end
   end
 
-  def resolve_snippets(args: {})
-    resolve(described_class, args: args, ctx: { current_user: current_user }, obj: current_user)
+  def resolve_snippets(args: {}, context_user: current_user, obj: current_user)
+    resolve(described_class, args: args, ctx: { current_user: context_user }, obj: obj)
   end
 end

@@ -16,6 +16,35 @@ RSpec.describe Operations::FeatureFlag do
     it { is_expected.to have_many(:scopes) }
   end
 
+  describe '.reference_pattern' do
+    subject { described_class.reference_pattern }
+
+    it { is_expected.to match('[feature_flag:123]') }
+    it { is_expected.to match('[feature_flag:gitlab-org/gitlab/123]') }
+  end
+
+  describe '.link_reference_pattern' do
+    subject { described_class.link_reference_pattern }
+
+    it { is_expected.to match("#{Gitlab.config.gitlab.url}/gitlab-org/gitlab/-/feature_flags/123/edit") }
+    it { is_expected.not_to match("#{Gitlab.config.gitlab.url}/gitlab-org/gitlab/issues/123/edit") }
+    it { is_expected.not_to match("gitlab-org/gitlab/-/feature_flags/123/edit") }
+  end
+
+  describe '#to_reference' do
+    let(:namespace) { build(:namespace, path: 'sample-namespace') }
+    let(:project) { build(:project, name: 'sample-project', namespace: namespace) }
+    let(:feature_flag) { build(:operations_feature_flag, iid: 1, project: project) }
+
+    it 'returns feature flag id' do
+      expect(feature_flag.to_reference).to eq '[feature_flag:1]'
+    end
+
+    it 'returns complete path to the feature flag with full: true' do
+      expect(feature_flag.to_reference(full: true)).to eq '[feature_flag:sample-namespace/sample-project/1]'
+    end
+  end
+
   describe 'validations' do
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:name) }
@@ -259,6 +288,40 @@ RSpec.describe Operations::FeatureFlag do
       flags = described_class.for_unleash_client(project, 'production')
 
       expect(flags.map(&:id)).to eq([feature_flag.id, feature_flag_b.id])
+    end
+  end
+
+  describe '#hook_attrs' do
+    it 'includes expected attributes' do
+      hook_attrs = {
+        id: subject.id,
+        name: subject.name,
+        description: subject.description,
+        active: subject.active
+      }
+      expect(subject.hook_attrs).to eq(hook_attrs)
+    end
+  end
+
+  describe "#execute_hooks" do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:feature_flag) { create(:operations_feature_flag, project: project) }
+
+    it 'does not execute the hook when feature_flag event is disabled' do
+      create(:project_hook, project: project, feature_flag_events: false)
+      expect(WebHookWorker).not_to receive(:perform_async)
+
+      feature_flag.execute_hooks(user)
+      feature_flag.touch
+    end
+
+    it 'executes hook when feature_flag event is enabled' do
+      hook = create(:project_hook, project: project, feature_flag_events: true)
+      expect(WebHookWorker).to receive(:perform_async).with(hook.id, an_instance_of(Hash), 'feature_flag_hooks')
+
+      feature_flag.execute_hooks(user)
+      feature_flag.touch
     end
   end
 end

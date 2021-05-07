@@ -1,18 +1,23 @@
 ---
 stage: Plan
-group: Portfolio Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Product Planning
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Epic Issues API **(PREMIUM)**
 
 Every API call to epic_issues must be authenticated.
 
-If a user is not a member of a group and the group is private, a `GET` request on that group will
-result in a `404` status code.
+If a user is not a member of a group and the group is private, a `GET` request on that group
+results in a `404` status code.
 
 Epics are available only in GitLab [Premium and higher](https://about.gitlab.com/pricing/).
-If the Epics feature is not available, a `403` status code will be returned.
+If the Epics feature is not available, a `403` status code is returned.
+
+## Epic Issues pagination
+
+API results [are paginated](README.md#pagination). Requests that return
+multiple issues default to returning 20 results at a time.
 
 ## List issues for an epic
 
@@ -102,7 +107,6 @@ Example response:
       "award_emoji": "http://localhost:3001/api/v4/projects/8/issues/6/award_emoji",
       "project": "http://localhost:3001/api/v4/projects/8"
     },
-    "subscribed": true,
     "epic_issue_id": 2
   }
 ]

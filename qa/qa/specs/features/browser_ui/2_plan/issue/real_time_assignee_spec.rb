@@ -14,6 +14,7 @@ module QA
       before do
         Runtime::Feature.enable('real_time_issue_sidebar', project: project)
         Runtime::Feature.enable('broadcast_issue_updates', project: project)
+        Runtime::Feature.enable(:invite_members_group_modal, project: project)
 
         Flow::Login.sign_in
 
@@ -40,12 +41,12 @@ module QA
           issue.set_issue_assignees(assignee_ids: [user2.id])
 
           expect(show).to have_assignee(user2.name)
-          expect(show).to have_no_assignee_named(user1.name)
+          expect(show).not_to have_assignee(user1.name)
 
           issue.set_issue_assignees(assignee_ids: [])
 
-          expect(show).to have_no_assignee_named(user1.name)
-          expect(show).to have_no_assignee_named(user2.name)
+          expect(show).not_to have_assignee(user1.name)
+          expect(show).not_to have_assignee(user2.name)
         end
       end
     end

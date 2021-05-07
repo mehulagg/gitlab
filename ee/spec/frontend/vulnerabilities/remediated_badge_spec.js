@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlIcon, GlPopover, GlBadge } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import RemediatedBadge from 'ee/vulnerabilities/components/remediated_badge.vue';
 
 const POPOVER_TITLE = 'Vulnerability remediated. Review before resolving.';
@@ -27,8 +27,8 @@ describe('Remediated badge component', () => {
   });
 
   it('should link the badge and the popover', () => {
-    const { popover } = wrapper.vm.$refs;
-    expect(popover.$attrs.target()).toEqual(findBadge().element);
+    const popover = wrapper.find({ ref: 'popover' });
+    expect(popover.props('target')()).toEqual(findBadge().element);
   });
 
   it('should pass down the data to the popover', () => {

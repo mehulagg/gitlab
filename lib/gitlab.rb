@@ -19,6 +19,10 @@ module Gitlab
     Settings
   end
 
+  def self.host_with_port
+    "#{self.config.gitlab.host}:#{self.config.gitlab.port}"
+  end
+
   def self.revision
     @_revision ||= begin
       if File.exist?(root.join("REVISION"))
@@ -46,6 +50,10 @@ module Gitlab
   def self.com?
     # Check `gl_subdomain?` as well to keep parity with gitlab.com
     Gitlab.config.gitlab.url == COM_URL || gl_subdomain?
+  end
+
+  def self.com
+    yield if com?
   end
 
   def self.staging?
@@ -84,6 +92,16 @@ module Gitlab
     Rails.env.development? || Rails.env.test?
   end
 
+  def self.extensions
+    if jh?
+      %w[ee jh]
+    elsif ee?
+      %w[ee]
+    else
+      %w[]
+    end
+  end
+
   def self.ee?
     @is_ee ||=
       # We use this method when the Rails environment is not loaded. This
@@ -100,8 +118,19 @@ module Gitlab
         !%w[true 1].include?(ENV['FOSS_ONLY'].to_s)
   end
 
+  def self.jh?
+    @is_jh ||=
+      ee? &&
+        root.join('jh').exist? &&
+        !%w[true 1].include?(ENV['EE_ONLY'].to_s)
+  end
+
   def self.ee
     yield if ee?
+  end
+
+  def self.jh
+    yield if jh?
   end
 
   def self.http_proxy_env?
@@ -114,5 +143,21 @@ module Gitlab
     return 'test' if Rails.env.test?
 
     'web'
+  end
+
+  def self.maintenance_mode?
+    return false unless ::Gitlab::CurrentSettings.current_application_settings?
+
+    # `maintenance_mode` column was added to the `current_settings` table in 13.2
+    # When upgrading from < 13.2 to >=13.8 `maintenance_mode` will not be
+    # found in settings.
+    # `Gitlab::CurrentSettings#uncached_application_settings` in
+    # lib/gitlab/current_settings.rb is expected to handle such cases, and use
+    # the default value for the setting instead, but in this case, it doesn't,
+    # see https://gitlab.com/gitlab-org/gitlab/-/issues/321836
+    # As a work around, we check if the setting method is available
+    return false unless ::Gitlab::CurrentSettings.respond_to?(:maintenance_mode)
+
+    ::Gitlab::CurrentSettings.maintenance_mode
   end
 end

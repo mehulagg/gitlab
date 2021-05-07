@@ -1,11 +1,11 @@
 <script>
-import { toNumber, omit } from 'lodash';
 import {
   GlEmptyState,
   GlPagination,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import { toNumber, omit } from 'lodash';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import {
@@ -14,9 +14,9 @@ import {
   historyPushState,
   getParameterByName,
 } from '~/lib/utils/common_utils';
+import { setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import initManualOrdering from '~/manual_ordering';
-import Issuable from './issuable.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
   sortOrderMap,
@@ -26,10 +26,13 @@ import {
   PAGE_SIZE_MANUAL,
   LOADING_LIST_ITEMS_LENGTH,
 } from '../constants';
-import { setUrlParams } from '~/lib/utils/url_utility';
 import issueableEventHub from '../eventhub';
 import { emptyStateHelper } from '../service_desk_helper';
+import Issuable from './issuable.vue';
 
+/**
+ * @deprecated Use app/assets/javascripts/issuable_list/components/issuable_list_root.vue instead
+ */
 export default {
   LOADING_LIST_ITEMS_LENGTH,
   directives: {
@@ -208,13 +211,14 @@ export default {
   },
   mounted() {
     if (this.canBulkEdit) {
-      this.unsubscribeToggleBulkEdit = issueableEventHub.$on('issuables:toggleBulkEdit', val => {
+      this.unsubscribeToggleBulkEdit = issueableEventHub.$on('issuables:toggleBulkEdit', (val) => {
         this.isBulkEditing = val;
       });
     }
     this.fetchIssuables();
   },
   beforeDestroy() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     issueableEventHub.$off('issuables:toggleBulkEdit');
   },
   methods: {
@@ -222,7 +226,7 @@ export default {
       return Boolean(this.selection[issuableId]);
     },
     setSelection(ids) {
-      ids.forEach(id => {
+      ids.forEach((id) => {
         this.select(id, true);
       });
     },
@@ -253,7 +257,7 @@ export default {
             per_page: this.itemsPerPage,
           },
         })
-        .then(response => {
+        .then((response) => {
           this.loading = false;
           this.issuables = response.data;
           this.totalItems = Number(response.headers['x-total']);
@@ -332,15 +336,19 @@ export default {
       this.fetchIssuables();
     },
     handleFilter(filters) {
-      let search = null;
+      const searchTokens = [];
 
-      filters.forEach(filter => {
-        if (typeof filter === 'string') {
-          search = filter;
+      filters.forEach((filter) => {
+        if (filter.type === 'filtered-search-term') {
+          if (filter.value.data) {
+            searchTokens.push(filter.value.data);
+          }
         }
       });
 
-      this.filters.search = search;
+      if (searchTokens.length) {
+        this.filters.search = searchTokens.join(' ');
+      }
       this.page = 1;
 
       this.refetchIssuables();

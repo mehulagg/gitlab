@@ -1,10 +1,10 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Repository storage Rake tasks **(CORE ONLY)**
+# Repository storage Rake tasks **(FREE SELF)**
 
 This is a collection of Rake tasks to help you list and migrate
 existing projects and their attachments to the new
@@ -74,16 +74,17 @@ To have a summary and then a list of projects and their attachments using hashed
 
 ## Migrate to hashed storage
 
-NOTE: **Note:**
+WARNING:
 In GitLab 13.0, [hashed storage](../repository_storage_types.md#hashed-storage)
 is enabled by default and the legacy storage is deprecated.
-Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
+GitLab 14.0 eliminates support for legacy storage. If you're on GitLab
 13.0 and later, switching new projects to legacy storage is not possible.
 The option to choose between hashed and legacy storage in the admin area has
 been disabled.
 
-This task will schedule all your existing projects and attachments associated
-with it to be migrated to the **Hashed** storage type:
+This task must be run on any machine that has Rails/Sidekiq configured and will
+schedule all your existing projects and attachments associated with it to be
+migrated to the **Hashed** storage type:
 
 - **Omnibus installation**
 
@@ -113,26 +114,25 @@ There is a specific queue you can watch to see how long it will take to finish:
 After it reaches zero, you can confirm every project has been migrated by running the commands above.
 If you find it necessary, you can run this migration script again to schedule missing projects.
 
-Any error or warning will be logged in Sidekiq's log file.
+Any error or warning is logged in Sidekiq's log file.
 
-NOTE: **Note:**
 If [Geo](../geo/index.md) is enabled, each project that is successfully migrated
 generates an event to replicate the changes on any **secondary** nodes.
 
-You only need the `gitlab:storage:migrate_to_hashed` Rake task to migrate your repositories, but we have additional
-commands below that helps you inspect projects and attachments in both legacy and hashed storage.
+You only need the `gitlab:storage:migrate_to_hashed` Rake task to migrate your repositories, but there are
+[additional commands(#list-projects-and-attachments) to help you inspect projects and attachments in both legacy and hashed storage.
 
 ## Rollback from hashed storage to legacy storage
 
-NOTE: **Deprecated:**
+WARNING:
 In GitLab 13.0, [hashed storage](../repository_storage_types.md#hashed-storage)
 is enabled by default and the legacy storage is deprecated.
-Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
+GitLab 14.0 eliminates support for legacy storage. If you're on GitLab
 13.0 and later, switching new projects to legacy storage is not possible.
 The option to choose between hashed and legacy storage in the admin area has
 been disabled.
 
-This task will schedule all your existing projects and associated attachments to be rolled back to the
+This task schedules all your existing projects and associated attachments to be rolled back to the
 legacy storage type.
 
 - **Omnibus installation**
@@ -161,7 +161,7 @@ On the **Queues** tab, you can watch the `hashed_storage:hashed_storage_project_
 
 After it reaches zero, you can confirm every project has been rolled back by running the commands above.
 If some projects weren't rolled back, you can run this rollback script again to schedule further rollbacks.
-Any error or warning will be logged in Sidekiq's log file.
+Any error or warning is logged in Sidekiq's log file.
 
 If you have a Geo setup, the rollback will not be reflected automatically
 on the **secondary** node. You may need to wait for a backfill operation to kick-in and remove

@@ -18,23 +18,25 @@ RSpec.describe 'User uses search filters', :js do
     it 'shows group projects' do
       visit search_path
 
-      find('.js-search-group-dropdown').click
+      find('[data-testid="group-filter"]').click
 
       wait_for_requests
 
-      page.within('.search-page-form') do
-        click_link(group.name)
+      page.within('[data-testid="group-filter"]') do
+        click_on(group.name)
       end
 
-      expect(find('.js-search-group-dropdown')).to have_content(group.name)
+      expect(find('[data-testid="group-filter"]')).to have_content(group.name)
 
-      page.within('.project-filter') do
-        find('.js-search-project-dropdown').click
+      find('[data-testid="project-filter"]').click
 
-        wait_for_requests
+      wait_for_requests
 
-        expect(page).to have_link(group_project.full_name)
+      page.within('[data-testid="project-filter"]') do
+        click_on(group_project.full_name)
       end
+
+      expect(find('[data-testid="project-filter"]')).to have_content(group_project.full_name)
     end
 
     context 'when the group filter is set' do
@@ -44,10 +46,11 @@ RSpec.describe 'User uses search filters', :js do
 
       describe 'clear filter button' do
         it 'removes Group and Project filters' do
-          link = find('[data-testid="group-filter"] .js-search-clear')
-          params = CGI.parse(URI.parse(link[:href]).query)
+          find('[data-testid="group-filter"] [data-testid="clear-icon"]').click
 
-          expect(params).not_to include(:group_id, :project_id)
+          wait_for_requests
+
+          expect(page).to have_current_path(search_path(search: "test"))
         end
       end
     end
@@ -57,15 +60,15 @@ RSpec.describe 'User uses search filters', :js do
     it 'shows a project' do
       visit search_path
 
-      page.within('.project-filter') do
-        find('.js-search-project-dropdown').click
+      find('[data-testid="project-filter"]').click
 
-        wait_for_requests
+      wait_for_requests
 
-        click_link(project.full_name)
+      page.within('[data-testid="project-filter"]') do
+        click_on(project.full_name)
       end
 
-      expect(find('.js-search-project-dropdown')).to have_content(project.full_name)
+      expect(find('[data-testid="project-filter"]')).to have_content(project.full_name)
     end
 
     context 'when the project filter is set' do
@@ -77,10 +80,10 @@ RSpec.describe 'User uses search filters', :js do
 
       describe 'clear filter button' do
         it 'removes Project filters' do
-          link = find('.project-filter .js-search-clear')
-          params = CGI.parse(URI.parse(link[:href]).query)
+          find('[data-testid="project-filter"] [data-testid="clear-icon"]').click
+          wait_for_requests
 
-          expect(params).not_to include(:project_id)
+          expect(page).to have_current_path(search_path(search: "test"))
         end
       end
     end

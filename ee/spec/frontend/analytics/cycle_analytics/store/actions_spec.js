@@ -1,10 +1,11 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import * as getters from 'ee/analytics/cycle_analytics/store/getters';
+import { OVERVIEW_STAGE_CONFIG } from 'ee/analytics/cycle_analytics/constants';
 import * as actions from 'ee/analytics/cycle_analytics/store/actions';
+import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
   currentGroup,
@@ -15,6 +16,13 @@ import {
   endpoints,
   valueStreams,
 } from '../mock_data';
+
+const mockStartEventIdentifier = 'issue_first_mentioned_in_commit';
+const mockEndEventIdentifier = 'issue_first_added_to_board';
+const mockEvents = {
+  startEventIdentifier: mockStartEventIdentifier,
+  endEventIdentifier: mockEndEventIdentifier,
+};
 
 const group = { fullPath: 'fake_group_full_path' };
 const milestonesPath = 'fake_milestones_path';
@@ -42,14 +50,9 @@ const stageEndpoint = ({ stageId }) =>
 
 jest.mock('~/flash');
 
-describe('Cycle analytics actions', () => {
+describe('Value Stream Analytics actions', () => {
   let state;
   let mock;
-
-  const shouldFlashAMessage = (msg, type = null) => {
-    const args = type ? [msg, type] : [msg];
-    expect(createFlash).toHaveBeenCalledWith(...args);
-  };
 
   beforeEach(() => {
     state = {
@@ -75,7 +78,6 @@ describe('Cycle analytics actions', () => {
     action                   | type                       | stateKey                | payload
     ${'setFeatureFlags'}     | ${'SET_FEATURE_FLAGS'}     | ${'featureFlags'}       | ${{ hasDurationChart: true }}
     ${'setSelectedProjects'} | ${'SET_SELECTED_PROJECTS'} | ${'selectedProjectIds'} | ${[10, 20, 30, 40]}
-    ${'setSelectedStage'}    | ${'SET_SELECTED_STAGE'}    | ${'selectedStage'}      | ${{ id: 'someStageId' }}
   `('$action should set $stateKey with $payload and type $type', ({ action, type, payload }) => {
     return testAction(
       actions[action],
@@ -91,10 +93,22 @@ describe('Cycle analytics actions', () => {
     );
   });
 
+  describe('setSelectedStage', () => {
+    const data = { id: 'someStageId' };
+    const payload = { hasNextPage: null, page: 1 };
+
+    it(`dispatches the ${types.SET_SELECTED_STAGE} and ${types.SET_PAGINATION} actions`, () => {
+      return testAction(actions.setSelectedStage, data, { ...state, selectedValueStream: {} }, [
+        { type: types.SET_SELECTED_STAGE, payload: data },
+        { type: types.SET_PAGINATION, payload },
+      ]);
+    });
+  });
+
   describe('setSelectedValueStream', () => {
     const vs = { id: 'vs-1', name: 'Value stream 1' };
 
-    it('refetches the cycle analytics data', () => {
+    it('refetches the Value Stream Analytics data', () => {
       return testAction(
         actions.setSelectedValueStream,
         vs,
@@ -126,41 +140,63 @@ describe('Cycle analytics actions', () => {
     });
   });
 
-  describe('setDateRange', () => {
-    const payload = { startDate, endDate };
-
-    it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(
-        actions.setDateRange,
-        payload,
-        state,
-        [{ type: types.SET_DATE_RANGE, payload: { startDate, endDate } }],
-        [{ type: 'fetchCycleAnalyticsData' }],
-      );
-    });
-  });
-
   describe('fetchStageData', () => {
+    const headers = {
+      'X-Next-Page': 2,
+      'X-Page': 1,
+    };
+
     beforeEach(() => {
       state = { ...state, currentGroup };
       mock = new MockAdapter(axios);
-      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, { events: [] });
+      mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, stageData, headers);
     });
 
-    it('dispatches receiveStageDataSuccess with received data on success', () => {
+    it(`commits ${types.RECEIVE_STAGE_DATA_SUCCESS} with received data and headers on success`, () => {
       return testAction(
         actions.fetchStageData,
         selectedStageSlug,
         state,
-        [],
         [
-          { type: 'requestStageData' },
           {
-            type: 'receiveStageDataSuccess',
-            payload: { events: [] },
+            type: types.RECEIVE_STAGE_DATA_SUCCESS,
+            payload: stageData,
+          },
+          {
+            type: types.SET_PAGINATION,
+            payload: { page: headers['X-Page'], hasNextPage: true },
           },
         ],
+        [{ type: 'requestStageData' }],
       );
+    });
+
+    describe('without a next page', () => {
+      beforeEach(() => {
+        mock = new MockAdapter(axios);
+        mock
+          .onGet(endpoints.stageData)
+          .reply(httpStatusCodes.OK, { events: [] }, { ...headers, 'X-Next-Page': null });
+      });
+
+      it('sets hasNextPage to false', () => {
+        return testAction(
+          actions.fetchStageData,
+          selectedStageSlug,
+          state,
+          [
+            {
+              type: types.RECEIVE_STAGE_DATA_SUCCESS,
+              payload: { events: [] },
+            },
+            {
+              type: types.SET_PAGINATION,
+              payload: { page: headers['X-Page'], hasNextPage: false },
+            },
+          ],
+          [{ type: 'requestStageData' }],
+        );
+      });
     });
 
     describe('with a failing request', () => {
@@ -187,18 +223,6 @@ describe('Cycle analytics actions', () => {
         );
       });
     });
-
-    describe('receiveStageDataSuccess', () => {
-      it(`commits the ${types.RECEIVE_STAGE_DATA_SUCCESS} mutation`, () => {
-        return testAction(
-          actions.receiveStageDataSuccess,
-          { ...stageData },
-          state,
-          [{ type: types.RECEIVE_STAGE_DATA_SUCCESS, payload: { events: [] } }],
-          [],
-        );
-      });
-    });
   });
 
   describe('receiveStageDataError', () => {
@@ -221,7 +245,9 @@ describe('Cycle analytics actions', () => {
 
     it('will flash an error message', () => {
       actions.receiveStageDataError({ commit: () => {} }, {});
-      shouldFlashAMessage('There was an error fetching data for the selected stage');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching data for the selected stage',
+      });
     });
   });
 
@@ -288,7 +314,9 @@ describe('Cycle analytics actions', () => {
           commit: () => {},
         })
         .then(() => {
-          shouldFlashAMessage('There was an error fetching median data for stages');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching median data for stages',
+          });
         });
     });
 
@@ -312,15 +340,15 @@ describe('Cycle analytics actions', () => {
           commit: () => {},
         })
         .then(() => {
-          shouldFlashAMessage('There was an error fetching value stream analytics stages.');
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching value stream analytics stages.',
+          });
         });
     });
   });
 
   describe('receiveCycleAnalyticsDataError', () => {
-    beforeEach(() => {});
-
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a 403 response`, () => {
+    it(`commits the ${types.RECEIVE_VALUE_STREAM_DATA_ERROR} mutation on a 403 response`, () => {
       const response = { status: 403 };
       return testAction(
         actions.receiveCycleAnalyticsDataError,
@@ -328,7 +356,7 @@ describe('Cycle analytics actions', () => {
         state,
         [
           {
-            type: types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR,
+            type: types.RECEIVE_VALUE_STREAM_DATA_ERROR,
             payload: response.status,
           },
         ],
@@ -336,7 +364,7 @@ describe('Cycle analytics actions', () => {
       );
     });
 
-    it(`commits the ${types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR} mutation on a non 403 error response`, () => {
+    it(`commits the ${types.RECEIVE_VALUE_STREAM_DATA_ERROR} mutation on a non 403 error response`, () => {
       const response = { status: 500 };
       return testAction(
         actions.receiveCycleAnalyticsDataError,
@@ -344,7 +372,7 @@ describe('Cycle analytics actions', () => {
         state,
         [
           {
-            type: types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR,
+            type: types.RECEIVE_VALUE_STREAM_DATA_ERROR,
             payload: response.status,
           },
         ],
@@ -361,63 +389,145 @@ describe('Cycle analytics actions', () => {
         { response },
       );
 
-      shouldFlashAMessage(flashErrorMessage);
+      expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
     });
   });
 
   describe('receiveGroupStagesSuccess', () => {
-    beforeEach(() => {});
-
-    it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage'`, () => {
-      return testAction(
-        actions.receiveGroupStagesSuccess,
-        { ...customizableStagesAndEvents.stages },
-        state,
-        [
-          {
-            type: types.RECEIVE_GROUP_STAGES_SUCCESS,
-            payload: { ...customizableStagesAndEvents.stages },
+    describe('when the `hasPathNavigation` feature flag is enabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: true,
           },
-        ],
-        [{ type: 'setDefaultSelectedStage' }],
-      );
+        };
+      });
+
+      it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation'`, () => {
+        return testAction(
+          actions.receiveGroupStagesSuccess,
+          { ...customizableStagesAndEvents.stages },
+          state,
+          [
+            {
+              type: types.RECEIVE_GROUP_STAGES_SUCCESS,
+              payload: { ...customizableStagesAndEvents.stages },
+            },
+          ],
+          [],
+        );
+      });
+    });
+
+    describe('when the `hasPathNavigation` feature flag is disabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: false,
+          },
+        };
+      });
+
+      it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage`, () => {
+        return testAction(
+          actions.receiveGroupStagesSuccess,
+          { ...customizableStagesAndEvents.stages },
+          state,
+          [
+            {
+              type: types.RECEIVE_GROUP_STAGES_SUCCESS,
+              payload: { ...customizableStagesAndEvents.stages },
+            },
+          ],
+          [{ type: 'setDefaultSelectedStage' }],
+        );
+      });
     });
   });
 
   describe('setDefaultSelectedStage', () => {
-    it("dispatches the 'fetchStageData' action", () => {
-      return testAction(
-        actions.setDefaultSelectedStage,
-        null,
-        state,
-        [],
-        [
-          { type: 'setSelectedStage', payload: selectedStage },
-          { type: 'fetchStageData', payload: selectedStageSlug },
-        ],
-      );
+    describe('when the `hasPathNavigation` feature flag is enabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: true,
+          },
+        };
+      });
+
+      afterEach(() => {
+        mock.restore();
+      });
+
+      it("dispatches the 'setSelectedStage' with the overview stage", () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [{ type: 'setSelectedStage', payload: OVERVIEW_STAGE_CONFIG }],
+        );
+      });
     });
 
-    it.each`
-      data
-      ${[]}
-      ${null}
-    `('with $data will flash an error', ({ data }) => {
-      actions.setDefaultSelectedStage({ getters: { activeStages: data }, dispatch: () => {} }, {});
-      shouldFlashAMessage(flashErrorMessage);
-    });
+    describe('when the `hasPathNavigation` feature flag is disabled', () => {
+      beforeEach(() => {
+        state = {
+          ...state,
+          featureFlags: {
+            ...state.featureFlags,
+            hasPathNavigation: false,
+          },
+        };
+      });
 
-    it('will select the first active stage', () => {
-      return testAction(
-        actions.setDefaultSelectedStage,
-        null,
-        state,
-        [],
-        [
-          { type: 'setSelectedStage', payload: stages[1] },
-          { type: 'fetchStageData', payload: stages[1].slug },
-        ],
-      );
+      afterEach(() => {
+        mock.restore();
+      });
+
+      it("dispatches the 'fetchStageData' action", () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [
+            { type: 'setSelectedStage', payload: selectedStage },
+            { type: 'fetchStageData', payload: selectedStageSlug },
+          ],
+        );
+      });
+
+      it.each`
+        data
+        ${[]}
+        ${null}
+      `('with $data will flash an error', ({ data }) => {
+        actions.setDefaultSelectedStage(
+          { state, getters: { activeStages: data }, dispatch: () => {} },
+          {},
+        );
+        expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
+      });
+
+      it('will select the first active stage', () => {
+        return testAction(
+          actions.setDefaultSelectedStage,
+          null,
+          state,
+          [],
+          [
+            { type: 'setSelectedStage', payload: stages[1] },
+            { type: 'fetchStageData', payload: stages[1].slug },
+          ],
+        );
+      });
     });
   });
 
@@ -499,7 +609,9 @@ describe('Cycle analytics actions', () => {
             },
           )
           .then(() => {
-            shouldFlashAMessage(`'${stageId}' stage already exists`);
+            expect(createFlash).toHaveBeenCalledWith({
+              message: `'${stageId}' stage already exists`,
+            });
           });
       });
 
@@ -514,7 +626,9 @@ describe('Cycle analytics actions', () => {
             { status: httpStatusCodes.BAD_REQUEST },
           )
           .then(() => {
-            shouldFlashAMessage('There was a problem saving your custom stage, please try again');
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'There was a problem saving your custom stage, please try again',
+            });
           });
       });
     });
@@ -546,7 +660,10 @@ describe('Cycle analytics actions', () => {
             response,
           )
           .then(() => {
-            shouldFlashAMessage('Stage data updated', 'notice');
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Stage data updated',
+              type: 'notice',
+            });
           });
       });
 
@@ -561,7 +678,9 @@ describe('Cycle analytics actions', () => {
               response,
             )
             .then(() => {
-              shouldFlashAMessage('There was a problem refreshing the data, please try again');
+              expect(createFlash).toHaveBeenCalledWith({
+                message: 'There was a problem refreshing the data, please try again',
+              });
             }));
       });
     });
@@ -613,7 +732,9 @@ describe('Cycle analytics actions', () => {
 
       it('flashes an error message', () => {
         actions.receiveRemoveStageError({ commit: () => {}, state }, {});
-        shouldFlashAMessage('There was an error removing your custom stage, please try again');
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error removing your custom stage, please try again',
+        });
       });
     });
   });
@@ -646,7 +767,9 @@ describe('Cycle analytics actions', () => {
           },
           {},
         )
-        .then(() => shouldFlashAMessage('Stage removed', 'notice'));
+        .then(() =>
+          expect(createFlash).toHaveBeenCalledWith({ message: 'Stage removed', type: 'notice' }),
+        );
     });
   });
 
@@ -746,7 +869,9 @@ describe('Cycle analytics actions', () => {
 
     it('will flash an error message', () => {
       actions.receiveStageMedianValuesError({ commit: () => {} });
-      shouldFlashAMessage('There was an error fetching median data for stages');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching median data for stages',
+      });
     });
   });
 
@@ -755,9 +880,19 @@ describe('Cycle analytics actions', () => {
     let mockCommit;
     let store;
 
+    const selectedAuthor = 'Noam Chomsky';
+    const selectedMilestone = '13.6';
+    const selectedAssigneeList = ['nchom'];
+    const selectedLabelList = ['label 1', 'label 2'];
     const initialData = {
       group: currentGroup,
       projectIds: [1, 2],
+      milestonesPath,
+      labelsPath,
+      selectedAuthor,
+      selectedMilestone,
+      selectedAssigneeList,
+      selectedLabelList,
     };
 
     beforeEach(() => {
@@ -772,9 +907,9 @@ describe('Cycle analytics actions', () => {
     });
 
     describe('with only group in initialData', () => {
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+      it('commits "INITIALIZE_VSA"', async () => {
         await actions.initializeCycleAnalytics(store, { group });
-        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', { group });
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', { group });
       });
 
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
@@ -784,26 +919,61 @@ describe('Cycle analytics actions', () => {
     });
 
     describe('with initialData', () => {
+      it.each`
+        action                        | args
+        ${'setPaths'}                 | ${{ milestonesPath, labelsPath, groupPath: currentGroup.fullPath }}
+        ${'filters/initialize'}       | ${{ selectedAuthor, selectedMilestone, selectedAssigneeList, selectedLabelList }}
+        ${'durationChart/setLoading'} | ${true}
+        ${'typeOfWork/setLoading'}    | ${true}
+      `('dispatches $action', async ({ action, args }) => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockDispatch).toHaveBeenCalledWith(action, args);
+      });
+
       it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
         expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
         expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
       });
 
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+      describe('with a selected stage', () => {
+        it('dispatches "setSelectedStage" and "fetchStageData"', async () => {
+          const stage = { id: 2, title: 'plan' };
+          await actions.initializeCycleAnalytics(store, {
+            ...initialData,
+            stage,
+          });
+          expect(mockDispatch).toHaveBeenCalledWith('setSelectedStage', stage);
+          expect(mockDispatch).toHaveBeenCalledWith('fetchStageData', stage.id);
+        });
+      });
+
+      describe('without a selected stage', () => {
+        it('dispatches "setDefaultSelectedStage"', async () => {
+          await actions.initializeCycleAnalytics(store, {
+            ...initialData,
+            stage: null,
+          });
+          expect(mockDispatch).not.toHaveBeenCalledWith('setSelectedStage');
+          expect(mockDispatch).not.toHaveBeenCalledWith('fetchStageData');
+          expect(mockDispatch).toHaveBeenCalledWith('setDefaultSelectedStage');
+        });
+      });
+
+      it('commits "INITIALIZE_VSA"', async () => {
         await actions.initializeCycleAnalytics(store, initialData);
-        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', initialData);
       });
     });
   });
 
   describe('initializeCycleAnalyticsSuccess', () => {
-    it(`commits the ${types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS} mutation`, () =>
+    it(`commits the ${types.INITIALIZE_VALUE_STREAM_SUCCESS} mutation`, () =>
       testAction(
         actions.initializeCycleAnalyticsSuccess,
         null,
         state,
-        [{ type: types.INITIALIZE_CYCLE_ANALYTICS_SUCCESS }],
+        [{ type: types.INITIALIZE_VALUE_STREAM_SUCCESS }],
         [],
       ));
   });
@@ -863,9 +1033,9 @@ describe('Cycle analytics actions', () => {
         ],
         [],
       ).then(() => {
-        shouldFlashAMessage(
-          'There was an error updating the stage order. Please try reloading the page.',
-        );
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error updating the stage order. Please try reloading the page.',
+        });
       });
     });
   });
@@ -883,7 +1053,19 @@ describe('Cycle analytics actions', () => {
   });
 
   describe('createValueStream', () => {
-    const payload = { name: 'cool value stream' };
+    const payload = {
+      name: 'cool value stream',
+      stages: [
+        {
+          ...selectedStage,
+          ...mockEvents,
+          id: null,
+        },
+        { ...hiddenStage, ...mockEvents },
+      ],
+    };
+
+    const createResp = { id: 'new value stream', is_custom: true, ...payload };
 
     beforeEach(() => {
       state = { currentGroup };
@@ -891,7 +1073,7 @@ describe('Cycle analytics actions', () => {
 
     describe('with no errors', () => {
       beforeEach(() => {
-        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, {});
+        mock.onPost(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, createResp);
       });
 
       it(`commits the ${types.REQUEST_CREATE_VALUE_STREAM} and ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} actions`, () => {
@@ -904,7 +1086,7 @@ describe('Cycle analytics actions', () => {
               type: types.REQUEST_CREATE_VALUE_STREAM,
             },
           ],
-          [{ type: 'receiveCreateValueStreamSuccess' }],
+          [{ type: 'receiveCreateValueStreamSuccess', payload: createResp }],
         );
       });
     });
@@ -926,11 +1108,68 @@ describe('Cycle analytics actions', () => {
             { type: types.REQUEST_CREATE_VALUE_STREAM },
             {
               type: types.RECEIVE_CREATE_VALUE_STREAM_ERROR,
-              payload: { message, errors },
+              payload: { message, data: payload, errors },
             },
           ],
           [],
         );
+      });
+    });
+  });
+
+  describe('updateValueStream', () => {
+    const payload = {
+      name: 'cool value stream',
+      stages: [
+        {
+          ...selectedStage,
+          ...mockEvents,
+          id: 'stage-1',
+        },
+        { ...hiddenStage, ...mockEvents },
+      ],
+    };
+    const updateResp = { id: 'new value stream', is_custom: true, ...payload };
+
+    beforeEach(() => {
+      state = { currentGroup };
+    });
+
+    describe('with no errors', () => {
+      beforeEach(() => {
+        mock.onPut(endpoints.valueStreamData).replyOnce(httpStatusCodes.OK, updateResp);
+      });
+
+      it(`commits the ${types.REQUEST_UPDATE_VALUE_STREAM} and ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} actions`, () => {
+        return testAction(
+          actions.updateValueStream,
+          payload,
+          state,
+          [
+            { type: types.REQUEST_UPDATE_VALUE_STREAM },
+            { type: types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS, payload: updateResp },
+          ],
+          [{ type: 'fetchCycleAnalyticsData' }],
+        );
+      });
+    });
+
+    describe('with errors', () => {
+      const errors = { name: ['is taken'] };
+      const message = { message: 'error' };
+      const resp = { message, payload: { errors } };
+      beforeEach(() => {
+        mock.onPut(endpoints.valueStreamData).replyOnce(httpStatusCodes.NOT_FOUND, resp);
+      });
+
+      it(`commits the ${types.REQUEST_UPDATE_VALUE_STREAM} and ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR} actions `, () => {
+        return testAction(actions.updateValueStream, payload, state, [
+          { type: types.REQUEST_UPDATE_VALUE_STREAM },
+          {
+            type: types.RECEIVE_UPDATE_VALUE_STREAM_ERROR,
+            payload: { message, data: payload, errors },
+          },
+        ]);
       });
     });
   });
@@ -998,7 +1237,6 @@ describe('Cycle analytics actions', () => {
         currentGroup,
         featureFlags: {
           ...state.featureFlags,
-          hasCreateMultipleValueStreams: true,
         },
       };
       mock = new MockAdapter(axios);
@@ -1080,21 +1318,6 @@ describe('Cycle analytics actions', () => {
         );
       });
     });
-
-    describe('with hasCreateMultipleValueStreams disabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasCreateMultipleValueStreams: false,
-          },
-        };
-      });
-
-      it(`will dispatch the 'fetchGroupStagesAndEvents' request`, () =>
-        testAction(actions.fetchValueStreams, null, state, [], [{ type: 'fetchValueStreamData' }]));
-    });
   });
 
   describe('fetchValueStreamData', () => {
@@ -1105,7 +1328,6 @@ describe('Cycle analytics actions', () => {
         currentGroup,
         featureFlags: {
           ...state.featureFlags,
-          hasCreateMultipleValueStreams: true,
         },
       };
       mock = new MockAdapter(axios);
@@ -1127,9 +1349,34 @@ describe('Cycle analytics actions', () => {
     });
   });
 
-  describe('setFilters', () => {
+  describe.each`
+    targetAction            | payload                   | mutations
+    ${actions.setDateRange} | ${{ startDate, endDate }} | ${[{ type: 'SET_DATE_RANGE', payload: { startDate, endDate } }]}
+    ${actions.setFilters}   | ${''}                     | ${[]}
+  `('$action', ({ targetAction, payload, mutations }) => {
+    let stateWithOverview = null;
+
+    beforeEach(() => {
+      stateWithOverview = { ...state, isOverviewStageSelected: () => true };
+    });
+
     it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(actions.setFilters, null, state, [], [{ type: 'fetchCycleAnalyticsData' }]);
+      return testAction(targetAction, payload, stateWithOverview, mutations, [
+        { type: 'fetchCycleAnalyticsData' },
+      ]);
+    });
+
+    describe('with a stage selected', () => {
+      beforeEach(() => {
+        stateWithOverview = { ...state, selectedStage };
+      });
+
+      it('dispatches the fetchStageData action', () => {
+        return testAction(targetAction, payload, stateWithOverview, mutations, [
+          { type: 'fetchStageData', payload: selectedStage.id },
+          { type: 'fetchCycleAnalyticsData' },
+        ]);
+      });
     });
   });
 });

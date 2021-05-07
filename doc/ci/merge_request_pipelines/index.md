@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, index
 last_update: 2019-07-03
 ---
@@ -18,6 +18,12 @@ you can use *pipelines for merge requests*.
 
 In the UI, these pipelines are labeled as `detached`. Otherwise, these pipelines appear the same
 as other pipelines.
+
+Pipelines for merge requests can run when you:
+
+- Create a new merge request.
+- Commit changes to the source branch for the merge request.
+- Select the **Run pipeline** button from the **Pipelines** tab in the merge request.
 
 Any user who has developer [permissions](../../user/permissions.md)
 can run a pipeline for merge requests.
@@ -57,7 +63,7 @@ When you use this method, you have to specify `only: - merge_requests` for each 
 example, the pipeline contains a `test` job that is configured to run on merge requests.
 
 The `build` and `deploy` jobs don't have the `only: - merge_requests` keyword,
-so they will not run on merge requests.
+so they don't run on merge requests.
 
 ```yaml
 build:
@@ -82,7 +88,7 @@ deploy:
 #### Excluding certain jobs
 
 The behavior of the `only: [merge_requests]` keyword is such that _only_ jobs with
-that keyword are run in the context of a merge request; no other jobs will be run.
+that keyword are run in the context of a merge request; no other jobs run.
 
 However, you can invert this behavior and have all of your jobs run _except_
 for one or two.
@@ -120,8 +126,8 @@ C:
 
 Therefore:
 
-- Since `A` and `B` are getting the `only:` rule to execute in all cases, they will always run.
-- Since `C` specifies that it should only run for merge requests, it will not run for any pipeline
+- Since `A` and `B` are getting the `only:` rule to execute in all cases, they always run.
+- Since `C` specifies that it should only run for merge requests, it doesn't run for any pipeline
   except a merge request pipeline.
 
 This helps you avoid having to add the `only:` rule to all of your jobs to make
@@ -166,9 +172,10 @@ Read the [documentation on Pipelines for Merged Results](pipelines_for_merged_re
 
 Read the [documentation on Merge Trains](pipelines_for_merged_results/merge_trains/index.md).
 
-## Run pipelines in the parent project for merge requests from a forked project **(STARTER)**
+## Run pipelines in the parent project for merge requests from a forked project **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217451) in GitLab 13.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217451) in GitLab 13.3.
+> - [Moved](https://about.gitlab.com/blog/2021/01/26/new-gitlab-product-subscription-model/) to GitLab Premium in 13.9.
 
 By default, external contributors working from forks can't create pipelines in the
 parent project. When a pipeline for merge requests is triggered by a merge request
@@ -176,6 +183,10 @@ coming from a fork:
 
 - It's created and runs in the fork (source) project, not the parent (target) project.
 - It uses the fork project's CI/CD configuration and resources.
+
+If a pipeline runs in a fork, the **fork** icon appears for the pipeline in the merge request.
+
+![Pipeline ran in fork](img/pipeline-fork_v13_7.png)
 
 Sometimes parent project members want the pipeline to run in the parent
 project. This could be to ensure that the post-merge pipeline passes in the parent project.
@@ -186,9 +197,9 @@ could mistakenly trust the merge request because it passed a faked pipeline.
 Parent project members with at least [Developer permissions](../../user/permissions.md)
 can create pipelines in the parent project for merge requests
 from a forked project. In the merge request, go to the **Pipelines** and click
-**Run Pipeline** button.
+**Run pipeline** button.
 
-CAUTION: **Caution:**
+WARNING:
 Fork merge requests could contain malicious code that tries to steal secrets in the
 parent project when the pipeline runs, even before merge. Reviewers must carefully
 check the changes in the merge request before triggering the pipeline. GitLab shows
@@ -208,8 +219,8 @@ The variable names begin with the `CI_MERGE_REQUEST_` prefix.
 ### Two pipelines created when pushing to a merge request
 
 If you are experiencing duplicated pipelines when using `rules`, take a look at
-the [important differences between `rules` and `only`/`except`](../yaml/README.md#prevent-duplicate-pipelines),
-which will help you get your starting configuration correct.
+the [important differences between `rules` and `only`/`except`](../yaml/README.md#avoid-duplicate-pipelines),
+which helps you get your starting configuration correct.
 
 If you are seeing two pipelines when using `only/except`, please see the caveats
 related to using `only/except` above (or, consider moving to `rules`).

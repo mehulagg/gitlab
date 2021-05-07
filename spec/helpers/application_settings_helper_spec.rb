@@ -130,20 +130,15 @@ RSpec.describe ApplicationSettingsHelper do
     before do
       helper.instance_variable_set(:@application_setting, application_setting)
       stub_storage_settings({ 'default': {}, 'storage_1': {}, 'storage_2': {} })
-      allow(ApplicationSetting).to receive(:repository_storages_weighted_attributes).and_return(
-        [:repository_storages_weighted_default,
-         :repository_storages_weighted_storage_1,
-         :repository_storages_weighted_storage_2])
-
       stub_application_setting(repository_storages_weighted: { 'default' => 100, 'storage_1' => 50, 'storage_2' => nil })
     end
 
     it 'returns storages correctly' do
-      expect(helper.storage_weights).to eq([
-          { name: :repository_storages_weighted_default, label: 'default', value: 100 },
-          { name: :repository_storages_weighted_storage_1, label: 'storage_1', value: 50 },
-          { name: :repository_storages_weighted_storage_2, label: 'storage_2', value: 0 }
-        ])
+      expect(helper.storage_weights).to eq(OpenStruct.new(
+                                             default: 100,
+                                             storage_1: 50,
+                                             storage_2: 0
+                                           ))
     end
   end
 
@@ -164,6 +159,63 @@ RSpec.describe ApplicationSettingsHelper do
       let(:feature_flag) { false }
 
       it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '.signup_enabled?' do
+    subject { helper.signup_enabled? }
+
+    context 'when signup is enabled' do
+      before do
+        stub_application_setting(signup_enabled: true)
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context 'when signup is disabled' do
+      before do
+        stub_application_setting(signup_enabled: false)
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when `signup_enabled` is nil' do
+      before do
+        stub_application_setting(signup_enabled: nil)
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
+  describe '.kroki_available_formats' do
+    let(:application_setting) { build(:application_setting) }
+
+    before do
+      helper.instance_variable_set(:@application_setting, application_setting)
+      stub_application_setting(kroki_formats: { 'blockdiag' => true, 'bpmn' => false, 'excalidraw' => false })
+    end
+
+    it 'returns available formats correctly' do
+      expect(helper.kroki_available_formats).to eq([
+                                             {
+                                               name: 'kroki_formats_blockdiag',
+                                               label: 'BlockDiag (includes BlockDiag, SeqDiag, ActDiag, NwDiag, PacketDiag and RackDiag)',
+                                               value: true
+                                             },
+                                             {
+                                               name: 'kroki_formats_bpmn',
+                                               label: 'BPMN',
+                                               value: false
+                                             },
+                                             {
+                                               name: 'kroki_formats_excalidraw',
+                                               label: 'Excalidraw',
+                                               value: false
+                                             }
+                                           ])
     end
   end
 end

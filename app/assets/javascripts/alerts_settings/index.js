@@ -1,67 +1,43 @@
+import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import AlertSettingsForm from './components/alerts_settings_form.vue';
+import AlertSettingsWrapper from './components/alerts_settings_wrapper.vue';
+import apolloProvider from './graphql';
+import getCurrentIntegrationQuery from './graphql/queries/get_current_integration.query.graphql';
 
-export default el => {
+apolloProvider.clients.defaultClient.cache.writeQuery({
+  query: getCurrentIntegrationQuery,
+  data: {
+    currentIntegration: null,
+  },
+});
+
+Vue.use(GlToast);
+
+export default (el) => {
   if (!el) {
     return null;
   }
 
-  const {
-    prometheusActivated,
-    prometheusUrl,
-    prometheusAuthorizationKey,
-    prometheusFormPath,
-    prometheusResetKeyPath,
-    prometheusApiUrl,
-    activated: activatedStr,
-    alertsSetupUrl,
-    alertsUsageUrl,
-    formPath,
-    authorizationKey,
-    url,
-    opsgenieMvcAvailable,
-    opsgenieMvcFormPath,
-    opsgenieMvcEnabled,
-    opsgenieMvcTargetUrl,
-  } = el.dataset;
-
-  const genericActivated = parseBoolean(activatedStr);
-  const prometheusIsActivated = parseBoolean(prometheusActivated);
-  const opsgenieMvcActivated = parseBoolean(opsgenieMvcEnabled);
-  const opsgenieMvcIsAvailable = parseBoolean(opsgenieMvcAvailable);
+  const { alertsUsageUrl, projectPath, multiIntegrations, alertFields } = el.dataset;
 
   return new Vue({
     el,
-    provide: {
-      prometheus: {
-        activated: prometheusIsActivated,
-        prometheusUrl,
-        authorizationKey: prometheusAuthorizationKey,
-        prometheusFormPath,
-        prometheusResetKeyPath,
-        prometheusApiUrl,
-      },
-      generic: {
-        alertsSetupUrl,
-        alertsUsageUrl,
-        activated: genericActivated,
-        formPath,
-        authorizationKey,
-        url,
-      },
-      opsgenie: {
-        formPath: opsgenieMvcFormPath,
-        activated: opsgenieMvcActivated,
-        opsgenieMvcTargetUrl,
-        opsgenieMvcIsAvailable,
-      },
-    },
     components: {
-      AlertSettingsForm,
+      AlertSettingsWrapper,
     },
+    provide: {
+      alertsUsageUrl,
+      projectPath,
+      multiIntegrations: parseBoolean(multiIntegrations),
+    },
+    apolloProvider,
     render(createElement) {
-      return createElement('alert-settings-form');
+      return createElement('alert-settings-wrapper', {
+        props: {
+          alertFields: parseBoolean(multiIntegrations) ? JSON.parse(alertFields) : null,
+        },
+      });
     },
   });
 };

@@ -9,46 +9,53 @@ module Types
 
     authorize :read_iteration
 
-    implements ::Types::TimeboxBurnupTimeSeriesInterface
+    implements ::Types::TimeboxReportInterface
 
     field :id, GraphQL::ID_TYPE, null: false,
-          description: 'ID of the iteration'
+          description: 'ID of the iteration.'
 
     field :iid, GraphQL::ID_TYPE, null: false,
-          description: 'Internal ID of the iteration'
+          description: 'Internal ID of the iteration.'
 
     field :title, GraphQL::STRING_TYPE, null: false,
-          description: 'Title of the iteration'
+          description: 'Title of the iteration.'
 
     field :description, GraphQL::STRING_TYPE, null: true,
-          description: 'Description of the iteration'
+          description: 'Description of the iteration.'
     markdown_field :description_html, null: true
 
     field :state, Types::IterationStateEnum, null: false,
-          description: 'State of the iteration'
+          description: 'State of the iteration.'
 
     field :web_path, GraphQL::STRING_TYPE, null: false, method: :iteration_path,
-          description: 'Web path of the iteration'
+          description: 'Web path of the iteration.'
 
     field :web_url, GraphQL::STRING_TYPE, null: false, method: :iteration_url,
-          description: 'Web URL of the iteration'
+          description: 'Web URL of the iteration.'
 
     field :scoped_path, GraphQL::STRING_TYPE, null: true, method: :scoped_iteration_path, extras: [:parent],
-          description: 'Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts'
+          description: 'Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts.'
 
     field :scoped_url, GraphQL::STRING_TYPE, null: true, method: :scoped_iteration_url, extras: [:parent],
-          description: 'Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts'
+          description: 'Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts.'
 
     field :due_date, Types::TimeType, null: true,
-          description: 'Timestamp of the iteration due date'
+          description: 'Timestamp of the iteration due date.'
 
     field :start_date, Types::TimeType, null: true,
-          description: 'Timestamp of the iteration start date'
+          description: 'Timestamp of the iteration start date.'
 
     field :created_at, Types::TimeType, null: false,
-          description: 'Timestamp of iteration creation'
+          description: 'Timestamp of iteration creation.'
 
     field :updated_at, Types::TimeType, null: false,
-          description: 'Timestamp of last iteration update'
+          description: 'Timestamp of last iteration update.'
+
+    field :iteration_cadence, Types::Iterations::CadenceType, null: false,
+          description: 'Cadence of the iteration.'
+
+    def iteration_cadence
+      ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Iterations::Cadence, object.iterations_cadence_id).find
+    end
   end
 end

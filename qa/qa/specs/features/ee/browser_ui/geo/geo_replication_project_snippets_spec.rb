@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Geo', :orchestrated, :geo, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/262103', type: :bug } do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'Project snippet' do
       let(:snippet_title) { "Geo project snippet-#{SecureRandom.hex(8)}" }
       let(:snippet_description) { 'Geo snippet description' }
@@ -50,8 +50,8 @@ module QA
               expect(snippet).to have_file_name(file_name)
               expect(snippet).to have_file_content('Geo snippet heading')
               expect(snippet).to have_file_content('GitLab link')
-              expect(snippet).to have_no_file_content('###')
-              expect(snippet).to have_no_file_content('https://gitlab.com/')
+              expect(snippet).not_to have_file_content('###')
+              expect(snippet).not_to have_file_content('https://gitlab.com/')
             end
           end
         end

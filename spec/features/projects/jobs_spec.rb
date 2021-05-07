@@ -20,77 +20,91 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
   end
 
   before do
+    stub_feature_flags(jobs_table_vue: false)
     project.add_role(user, user_access_level)
     sign_in(user)
   end
 
   describe "GET /:project/jobs" do
-    let!(:job) { create(:ci_build, pipeline: pipeline) }
-
-    context "Pending scope" do
+    context 'with no jobs' do
       before do
-        visit project_jobs_path(project, scope: :pending)
-      end
-
-      it "shows Pending tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Pending')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
-      end
-    end
-
-    context "Running scope" do
-      before do
-        job.run!
-        visit project_jobs_path(project, scope: :running)
-      end
-
-      it "shows Running tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Running')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
-      end
-    end
-
-    context "Finished scope" do
-      before do
-        job.run!
-        visit project_jobs_path(project, scope: :finished)
-      end
-
-      it "shows Finished tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'Finished')
-        expect(page).to have_content 'No jobs to show'
-      end
-    end
-
-    context "All jobs" do
-      before do
-        project.builds.running_or_pending.each(&:success)
         visit project_jobs_path(project)
       end
 
-      it "shows All tab jobs" do
-        expect(page).to have_selector('.nav-links li.active', text: 'All')
-        expect(page).to have_content job.short_sha
-        expect(page).to have_content job.ref
-        expect(page).to have_content job.name
+      it 'shows the empty state page' do
+        expect(page).to have_content('Use jobs to automate your tasks')
+        expect(page).to have_link('Create CI/CD configuration file', href: project_ci_pipeline_editor_path(project))
       end
     end
 
-    context "when visiting old URL" do
-      let(:jobs_url) do
-        project_jobs_path(project)
+    context 'with a job' do
+      let!(:job) { create(:ci_build, pipeline: pipeline) }
+
+      context "Pending scope" do
+        before do
+          visit project_jobs_path(project, scope: :pending)
+        end
+
+        it "shows Pending tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Pending')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
       end
 
-      before do
-        visit jobs_url.sub('/-/jobs', '/builds')
+      context "Running scope" do
+        before do
+          job.run!
+          visit project_jobs_path(project, scope: :running)
+        end
+
+        it "shows Running tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Running')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
       end
 
-      it "redirects to new URL" do
-        expect(page.current_path).to eq(jobs_url)
+      context "Finished scope" do
+        before do
+          job.run!
+          visit project_jobs_path(project, scope: :finished)
+        end
+
+        it "shows Finished tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'Finished')
+          expect(page).to have_content('Use jobs to automate your tasks')
+        end
+      end
+
+      context "All jobs" do
+        before do
+          project.builds.running_or_pending.each(&:success)
+          visit project_jobs_path(project)
+        end
+
+        it "shows All tab jobs" do
+          expect(page).to have_selector('.nav-links li.active', text: 'All')
+          expect(page).to have_content job.short_sha
+          expect(page).to have_content job.ref
+          expect(page).to have_content job.name
+        end
+      end
+
+      context "when visiting old URL" do
+        let(:jobs_url) do
+          project_jobs_path(project)
+        end
+
+        before do
+          visit jobs_url.sub('/-/jobs', '/builds')
+        end
+
+        it "redirects to new URL" do
+          expect(page.current_path).to eq(jobs_url)
+        end
       end
     end
   end
@@ -492,10 +506,10 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
             expect(page).to have_content('Trigger token')
             expect(page).to have_content('Trigger variables')
 
-            expect(page).not_to have_css('.js-reveal-variables')
+            expect(page).not_to have_selector('[data-testid="trigger-reveal-values-button"]')
 
-            expect(page).to have_selector('.js-build-variable', text: 'TRIGGER_KEY_1')
-            expect(page).to have_selector('.js-build-value', text: '••••••')
+            expect(page).to have_selector('[data-testid="trigger-build-key"]', text: 'TRIGGER_KEY_1')
+            expect(page).to have_selector('[data-testid="trigger-build-value"]', text: '••••••')
           end
         end
 
@@ -530,17 +544,17 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
             expect(page).to have_content('Trigger token')
             expect(page).to have_content('Trigger variables')
 
-            expect(page).to have_css('.js-reveal-variables')
+            expect(page).to have_selector('[data-testid="trigger-reveal-values-button"]')
 
-            expect(page).to have_selector('.js-build-variable', text: 'TRIGGER_KEY_1')
-            expect(page).to have_selector('.js-build-value', text: '••••••')
+            expect(page).to have_selector('[data-testid="trigger-build-key"]', text: 'TRIGGER_KEY_1')
+            expect(page).to have_selector('[data-testid="trigger-build-value"]', text: '••••••')
           end
 
           it 'reveals values on button click', :js do
             click_button 'Reveal values'
 
-            expect(page).to have_selector('.js-build-variable', text: 'TRIGGER_KEY_1')
-            expect(page).to have_selector('.js-build-value', text: 'TRIGGER_VALUE_1')
+            expect(page).to have_selector('[data-testid="trigger-build-key"]', text: 'TRIGGER_KEY_1')
+            expect(page).to have_selector('[data-testid="trigger-build-value"]', text: 'TRIGGER_VALUE_1')
           end
         end
 
@@ -1013,7 +1027,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       before do
         job.run!
         visit project_job_path(project, job)
-        find('.js-cancel-job').click
+        find('[data-testid="cancel-button"]').click
       end
 
       it 'loads the page and shows all needed controls' do
@@ -1030,7 +1044,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
         visit project_job_path(project, job)
         wait_for_requests
 
-        find('.js-retry-button').click
+        find('[data-testid="retry-button"]').click
       end
 
       it 'shows the right status and buttons' do
@@ -1044,7 +1058,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       before do
         job.run!
         job.cancel!
-        project.update(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
 
         sign_out(:user)
         sign_in(create(:user))
@@ -1054,6 +1068,31 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
       it 'does not show the Retry button' do
         page.within('aside.right-sidebar') do
           expect(page).not_to have_content 'Retry'
+        end
+      end
+    end
+
+    context "Job that failed because of a forward deployment failure" do
+      let(:job) { create(:ci_build, :forward_deployment_failure, pipeline: pipeline) }
+
+      before do
+        visit project_job_path(project, job)
+        wait_for_requests
+
+        find('[data-testid="retry-button"]').click
+      end
+
+      it 'shows a modal to warn the user' do
+        page.within('.modal-header') do
+          expect(page).to have_content 'Are you sure you want to retry this job?'
+        end
+      end
+
+      it 'retries the job' do
+        find('[data-testid="retry-button-modal"]').click
+
+        within '[data-testid="ci-header-content"]' do
+          expect(page).to have_content('pending')
         end
       end
     end
@@ -1146,9 +1185,11 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
   end
 
   describe "GET /:project/jobs/:id/trace.json" do
+    let(:build) { create(:ci_build, :trace_artifact, pipeline: pipeline) }
+
     context "Job from project" do
       before do
-        visit trace_project_job_path(project, job, format: :json)
+        visit trace_project_job_path(project, build, format: :json)
       end
 
       it { expect(page.status_code).to eq(200) }

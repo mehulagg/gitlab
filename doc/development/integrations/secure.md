@@ -1,7 +1,13 @@
+---
+stage: Protect
+group: Container Security
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Security scanner integration
 
 Integrating a security scanner into GitLab consists of providing end users
-with a [CI job definition](../../ci/yaml/README.md#introduction)
+with a [CI job definition](../../ci/yaml/README.md)
 they can add to their CI configuration files to scan their GitLab projects.
 This CI job should then output its results in a GitLab-specified format. These results are then
 automatically presented in various places in GitLab, such as the Pipeline view, Merge Request
@@ -40,12 +46,12 @@ Because the `script` entry can't be left empty, it must be set to the command th
 It is not possible to rely on the predefined `ENTRYPOINT` and `CMD` of the Docker image
 to perform the scan automatically, without passing any command.
 
-The [`before_script`](../../ci/yaml/README.md#before_script-and-after_script)
+The [`before_script`](../../ci/yaml/README.md#before_script)
 should not be used in the job definition because users may rely on this to prepare their projects before performing the scan.
 For instance, it is common practice to use `before_script` to install system libraries
 a particular project needs before performing SAST or Dependency Scanning.
 
-Similarly, [`after_script`](../../ci/yaml/README.md#before_script-and-after_script)
+Similarly, [`after_script`](../../ci/yaml/README.md#after_script)
 should not be used in the job definition, because it may be overridden by users.
 
 ### Stage
@@ -62,7 +68,7 @@ so the [`allow_failure`](../../ci/yaml/README.md#allow_failure) parameter should
 ### Artifacts
 
 Scanning jobs must declare a report that corresponds to the type of scanning they perform,
-using the [`artifacts:reports`](../../ci/pipelines/job_artifacts.md#artifactsreports) keyword.
+using the [`artifacts:reports`](../../ci/yaml/README.md#artifactsreports) keyword.
 Valid reports are: `dependency_scanning`, `container_scanning`, `dast`, and `sast`.
 
 For example, here is the definition of a SAST job that generates a file named `gl-sast-report.json`,
@@ -76,14 +82,14 @@ mysec_sast:
       sast: gl-sast-report.json
 ```
 
-Note that `gl-sast-report.json` is an example file path but any other file name can be used. See
+Note that `gl-sast-report.json` is an example file path but any other filename can be used. See
 [the Output file section](#output-file) for more details. It's processed as a SAST report because
-it's declared under the `reports:sast` key in the job definition, not because of the file name.
+it's declared under the `reports:sast` key in the job definition, not because of the filename.
 
 ### Policies
 
 Certain GitLab workflows, such as [AutoDevOps](../../topics/autodevops/customize.md#disable-jobs),
-define variables to indicate that given scans should be disabled. You can check for this by looking
+define CI/CD variables to indicate that given scans should be disabled. You can check for this by looking
 for variables such as `DEPENDENCY_SCANNING_DISABLED`, `CONTAINER_SCANNING_DISABLED`,
 `SAST_DISABLED`, and `DAST_DISABLED`. If appropriate based on the scanner type, you should then
 disable running the custom scanner.
@@ -91,7 +97,7 @@ disable running the custom scanner.
 GitLab also defines a `CI_PROJECT_REPOSITORY_LANGUAGES` variable, which provides the list of
 languages in the repository. Depending on this value, your scanner may or may not do something different.
 Language detection currently relies on the [`linguist`](https://github.com/github/linguist) Ruby gem.
-See [GitLab CI/CD predefined variables](../../ci/variables/predefined_variables.md).
+See the [predefined CI/CD variables](../../ci/variables/predefined_variables.md).
 
 #### Policy checking example
 
@@ -164,21 +170,23 @@ It also generates text output on the standard output and standard error streams,
 
 ### Variables
 
-All CI variables are passed to the scanner as environment variables.
-The scanned project is described by the [predefined CI variables](../../ci/variables/README.md).
+All CI/CD variables are passed to the scanner as environment variables.
+The scanned project is described by the [predefined CI/CD variables](../../ci/variables/README.md).
 
 #### SAST and Dependency Scanning
 
-SAST and Dependency Scanning scanners must scan the files in the project directory, given by the `CI_PROJECT_DIR` variable.
+SAST and Dependency Scanning scanners must scan the files in the project directory, given by the `CI_PROJECT_DIR` CI/CD variable.
 
 #### Container Scanning
 
 In order to be consistent with the official Container Scanning for GitLab,
 scanners must scan the Docker image whose name and tag are given by
-`CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG`, respectively.
+`CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG`, respectively. If the `DOCKER_IMAGE`
+CI/CD variable is provided, then the `CI_APPLICATION_REPOSITORY` and `CI_APPLICATION_TAG` variables
+are ignored, and the image specified in the `DOCKER_IMAGE` variable is scanned instead.
 
 If not provided, `CI_APPLICATION_REPOSITORY` should default to
-`$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG`, which is a combination of predefined CI variables.
+`$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG`, which is a combination of predefined CI/CD variables.
 `CI_APPLICATION_TAG` should default to `CI_COMMIT_SHA`.
 
 The scanner should sign in the Docker registry
@@ -189,27 +197,27 @@ If these are not defined, then the scanner should use
 #### Configuration files
 
 While scanners may use `CI_PROJECT_DIR` to load specific configuration files,
-it is recommended to expose configuration as environment variables, not files.
+it is recommended to expose configuration as CI/CD variables, not files.
 
 ### Output file
 
-Like any artifact uploaded to the GitLab CI/CD,
+Like any artifact uploaded to GitLab CI/CD,
 the Secure report generated by the scanner must be written in the project directory,
-given by the `CI_PROJECT_DIR` environment variable.
+given by the `CI_PROJECT_DIR` CI/CD variable.
 
 It is recommended to name the output file after the type of scanning, and to use `gl-` as a prefix.
 Since all Secure reports are JSON files, it is recommended to use `.json` as a file extension.
-For instance, a suggested file name for a Dependency Scanning report is `gl-dependency-scanning.json`.
+For instance, a suggested filename for a Dependency Scanning report is `gl-dependency-scanning.json`.
 
-The [`artifacts:reports`](../../ci/pipelines/job_artifacts.md#artifactsreports) keyword
+The [`artifacts:reports`](../../ci/yaml/README.md#artifactsreports) keyword
 of the job definition must be consistent with the file path where the Security report is written.
 For instance, if a Dependency Scanning analyzer writes its report to the CI project directory,
-and if this report file name is `depscan.json`,
+and if this report filename is `depscan.json`,
 then `artifacts:reports:dependency_scanning` must be set to `depscan.json`.
 
 ### Exit code
 
-Following the POSIX exit code standard, the scanner will exit with 0 for success and any number from 1 to 255 for anything else.
+Following the POSIX exit code standard, the scanner exits with 0 for success and any number from 1 to 255 for anything else.
 Success also includes the case when vulnerabilities are found.
 
 When executing a scanning job using the [Docker-in-Docker privileged mode](../../user/application_security/sast/index.md#requirements),
@@ -234,7 +242,7 @@ Also, we recommend prefixing error messages with `[ERRO]`, warnings with `[WARN]
 #### Logging level
 
 The scanner should filter out a log message if its log level is lower than the
-one set in the `SECURE_LOG_LEVEL` variable. For instance, `info` and `warn`
+one set in the `SECURE_LOG_LEVEL` CI/CD variable. For instance, `info` and `warn`
 messages should be skipped when `SECURE_LOG_LEVEL` is set to `error`. Accepted
 values are as follows, listed from highest to lowest:
 
@@ -248,14 +256,21 @@ It is recommended to use the `debug` level for verbose logging that could be
 useful when debugging. The default value for `SECURE_LOG_LEVEL` should be set
 to `info`.
 
-#### common logutil package
+When executing command lines, scanners should use the `debug` level to log the command line and its output.
+For instance, the [bundler-audit](https://gitlab.com/gitlab-org/security-products/analyzers/bundler-audit) scanner
+uses the `debug` level to log the command line `bundle audit check --quiet`,
+and what `bundle audit` writes to the standard output.
+If the command line fails, then it should be logged with the `error` log level;
+this makes it possible to debug the problem without having to change the log level to `debug` and rerun the scanning job.
+
+#### common `logutil` package
 
 If you are using [go](https://golang.org/) and
 [common](https://gitlab.com/gitlab-org/security-products/analyzers/common),
-then it is suggested that you use [logrus](https://github.com/Sirupsen/logrus)
-and [common's logutil package](https://gitlab.com/gitlab-org/security-products/analyzers/common/-/tree/master/logutil)
-to configure the formatter for [logrus](https://github.com/Sirupsen/logrus).
-See the [logutil README.md](https://gitlab.com/gitlab-org/security-products/analyzers/common/-/tree/master/logutil/README.md)
+then it is suggested that you use [Logrus](https://github.com/Sirupsen/logrus)
+and [common's `logutil` package](https://gitlab.com/gitlab-org/security-products/analyzers/common/-/tree/master/logutil)
+to configure the formatter for [Logrus](https://github.com/Sirupsen/logrus).
+See the [`logutil` README](https://gitlab.com/gitlab-org/security-products/analyzers/common/-/tree/master/logutil/README.md)
 
 ## Report
 
@@ -278,8 +293,7 @@ You can find the schemas for these scanners here:
 
 ### Version
 
-This field specifies the version of the report schema you are using. Please reference individual scanner
-pages for the specific versions to use.
+This field specifies the version of the [Security Report Schemas](https://gitlab.com/gitlab-org/security-products/security-report-schemas) you are using. Please refer to the [releases](https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/releases) of the schemas for the specific versions to use.
 
 ### Vulnerabilities
 
@@ -287,7 +301,7 @@ The `vulnerabilities` field of the report is an array of vulnerability objects.
 
 #### ID
 
-The `id` field is the unique identifier of the vulnerability.
+The `id` field is the unique identifier of the vulnerability.
 It is used to reference a fixed vulnerability from a [remediation objects](#remediations).
 We recommend that you generate a UUID and use it as the `id` field's value.
 
@@ -312,7 +326,7 @@ whereas the `message` may repeat the location.
 As a visual example, this screenshot highlights where these fields are used when viewing a
 vulnerability as part of a pipeline view.
 
-![Example Vulnerability](example_vuln.png)
+![Example Vulnerability](img/example_vuln.png)
 
 For instance, a `message` for a vulnerability
 reported by Dependency Scanning gives information on the vulnerable dependency,
@@ -385,7 +399,9 @@ Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. A
 isn't a stable identifier and you shouldn't assume it as such when tracking vulnerabilities.
 
 The maximum number of identifiers for a vulnerability is set as 20. If a vulnerability has more than 20 identifiers,
-the system will save only the first 20 of them.
+the system saves only the first 20 of them. Note that vulnerabilities in the [Pipeline
+Security](../../user/application_security/security_dashboard/#pipeline-security)
+tab do not enforce this limit and all identifiers present in the report artifact are displayed.
 
 ### Location
 
@@ -532,7 +548,7 @@ of the available SAST Analyzers and what data is currently available.
 
 The `remediations` field of the report is an array of remediation objects.
 Each remediation describes a patch that can be applied to
-[automatically fix](../../user/application_security/#automatic-remediation-for-vulnerabilities)
+[automatically fix](../../user/application_security/vulnerabilities/index.md#remediate-a-vulnerability-automatically)
 a set of vulnerabilities.
 
 Here is an example of a report that contains remediations.

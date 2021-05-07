@@ -1,15 +1,17 @@
 import { shallowMount } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
 import Api from 'ee/api';
+import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
+import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
 import VulnerabilityFooter from 'ee/vulnerabilities/components/footer.vue';
+import GenericReportSection from 'ee/vulnerabilities/components/generic_report/report_section.vue';
 import HistoryEntry from 'ee/vulnerabilities/components/history_entry.vue';
 import RelatedIssues from 'ee/vulnerabilities/components/related_issues.vue';
+import RelatedJiraIssues from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import StatusDescription from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
-import SolutionCard from 'ee/vue_shared/security_reports/components/solution_card.vue';
-import MergeRequestNote from 'ee/vue_shared/security_reports/components/merge_request_note.vue';
-import MockAdapter from 'axios-mock-adapter';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import initUserPopovers from '~/user_popovers';
 
 const mockAxios = new MockAdapter(axios);
@@ -21,21 +23,22 @@ describe('Vulnerability Footer', () => {
 
   const vulnerability = {
     id: 1,
-    discussions_url: '/discussions',
-    notes_url: '/notes',
+    discussionsUrl: '/discussions',
+    notesUrl: '/notes',
     project: {
-      full_path: '/root/security-reports',
-      full_name: 'Administrator / Security Reports',
+      fullPath: '/root/security-reports',
+      fullName: 'Administrator / Security Reports',
     },
-    can_modify_related_issues: true,
-    related_issues_help_path: 'help/path',
-    has_mr: false,
+    canModifyRelatedIssues: true,
+    relatedIssuesHelpPath: 'help/path',
+    hasMr: false,
     pipeline: {},
   };
 
-  const createWrapper = (properties = {}) => {
+  const createWrapper = (properties = {}, mountOptions = {}) => {
     wrapper = shallowMount(VulnerabilityFooter, {
       propsData: { vulnerability: { ...vulnerability, ...properties } },
+      ...mountOptions,
     });
   };
 
@@ -67,7 +70,7 @@ describe('Vulnerability Footer', () => {
         solution: properties.solution,
         remediation: properties.remediations[0],
         hasDownload: true,
-        hasMr: vulnerability.has_mr,
+        hasMr: vulnerability.hasMr,
       });
     });
 
@@ -89,14 +92,14 @@ describe('Vulnerability Footer', () => {
       // The object itself does not matter, we just want to make sure it's passed to the issue note.
       const mergeRequestFeedback = {};
 
-      createWrapper({ merge_request_feedback: mergeRequestFeedback });
+      createWrapper({ mergeRequestFeedback });
       expect(mergeRequestNote().exists()).toBe(true);
       expect(mergeRequestNote().props('feedback')).toBe(mergeRequestFeedback);
     });
   });
 
   describe('state history', () => {
-    const discussionUrl = vulnerability.discussions_url;
+    const discussionUrl = vulnerability.discussionsUrl;
 
     const historyList = () => wrapper.find({ ref: 'historyList' });
     const historyEntries = () => wrapper.findAll(HistoryEntry);
@@ -110,7 +113,10 @@ describe('Vulnerability Footer', () => {
     it('renders the history list if there are history items', () => {
       // The shape of this object doesn't matter for this test, we just need to verify that it's passed to the history
       // entry.
-      const historyItems = [{ id: 1, note: 'some note' }, { id: 2, note: 'another note' }];
+      const historyItems = [
+        { id: 1, note: 'some note' },
+        { id: 2, note: 'another note' },
+      ];
       mockAxios.onGet(discussionUrl).replyOnce(200, historyItems, { date: Date.now() });
       createWrapper();
 
@@ -152,7 +158,7 @@ describe('Vulnerability Footer', () => {
       const createNotesRequest = (...notes) =>
         mockAxios
           .onGet(vulnerability.notes_url)
-          .replyOnce(200, { notes, last_fetched_at: Date.now() });
+          .replyOnce(200, { notes, lastFetchedAt: Date.now() });
 
       // Following #217184 the vulnerability polling uses an initial timeout
       // which we need to run and then wait for the subsequent request.
@@ -268,9 +274,41 @@ describe('Vulnerability Footer', () => {
       expect(relatedIssues().exists()).toBe(true);
       expect(relatedIssues().props()).toMatchObject({
         endpoint,
-        canModifyRelatedIssues: vulnerability.can_modify_related_issues,
-        projectPath: vulnerability.project.full_path,
-        helpPath: vulnerability.related_issues_help_path,
+        canModifyRelatedIssues: vulnerability.canModifyRelatedIssues,
+        projectPath: vulnerability.project.fullPath,
+        helpPath: vulnerability.relatedIssuesHelpPath,
+      });
+    });
+  });
+
+  describe('related jira issues', () => {
+    const relatedJiraIssues = () => wrapper.find(RelatedJiraIssues);
+
+    describe('with `createJiraIssueUrl` not provided', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not show related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(false);
+      });
+    });
+
+    describe('with `createJiraIssueUrl` provided', () => {
+      beforeEach(() => {
+        createWrapper(
+          {},
+          {
+            provide: {
+              createJiraIssueUrl: 'http://foo',
+              glFeatures: { jiraForVulnerabilities: true },
+            },
+          },
+        );
+      });
+
+      it('shows related jira issues', () => {
+        expect(relatedJiraIssues().exists()).toBe(true);
       });
     });
   });
@@ -280,13 +318,48 @@ describe('Vulnerability Footer', () => {
     const statusDescription = () => wrapper.find(StatusDescription);
     const vulnerabilityStates = Object.keys(VULNERABILITY_STATES);
 
-    it.each(vulnerabilityStates)(`shows detection note when vulnerability state is '%s'`, state => {
-      createWrapper({ state });
+    it.each(vulnerabilityStates)(
+      `shows detection note when vulnerability state is '%s'`,
+      (state) => {
+        createWrapper({ state });
 
-      expect(detectionNote().exists()).toBe(true);
-      expect(statusDescription().props('vulnerability')).toEqual({
-        state: 'detected',
-        pipeline: vulnerability.pipeline,
+        expect(detectionNote().exists()).toBe(true);
+        expect(statusDescription().props('vulnerability')).toEqual({
+          state: 'detected',
+          pipeline: vulnerability.pipeline,
+        });
+      },
+    );
+  });
+
+  describe('generic report', () => {
+    const mockDetails = { foo: { type: 'bar' } };
+
+    const genericReportSection = () => wrapper.findComponent(GenericReportSection);
+
+    describe('when a vulnerability contains a details property', () => {
+      beforeEach(() => {
+        createWrapper({ details: mockDetails });
+      });
+
+      it('renders the report section', () => {
+        expect(genericReportSection().exists()).toBe(true);
+      });
+
+      it('passes the correct props to the report section', () => {
+        expect(genericReportSection().props()).toMatchObject({
+          details: mockDetails,
+        });
+      });
+    });
+
+    describe('when a vulnerability does not contain a details property', () => {
+      beforeEach(() => {
+        createWrapper();
+      });
+
+      it('does not render the report section', () => {
+        expect(genericReportSection().exists()).toBe(false);
       });
     });
   });

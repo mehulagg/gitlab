@@ -1,6 +1,6 @@
-import { escape as esc } from 'lodash';
-import { mount } from '@vue/test-utils';
 import { GlFormInputGroup } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { escape as esc } from 'lodash';
 import { TEST_HOST } from 'helpers/test_constants';
 import EmbedDropdown from '~/snippets/components/embed_dropdown.vue';
 
@@ -26,7 +26,7 @@ describe('snippets/components/embed_dropdown', () => {
     const sections = [];
     let current = {};
 
-    wrapper.findAll('[data-testid="header"],[data-testid="input"]').wrappers.forEach(x => {
+    wrapper.findAll('[data-testid="header"],[data-testid="input"]').wrappers.forEach((x) => {
       const type = x.attributes('data-testid');
 
       if (type === 'header') {

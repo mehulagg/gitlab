@@ -14,13 +14,21 @@ module QA
             element :file_holder_container
           end
 
+          view 'app/assets/javascripts/blob/components/blob_edit_header.vue' do
+            element :delete_file_button
+          end
+
+          view 'app/assets/javascripts/snippets/components/snippet_visibility_edit.vue' do
+            element :visibility_content
+          end
+
           def add_to_file_content(content)
             text_area.set content
             text_area.has_text?(content) # wait for changes to take effect
           end
 
           def change_visibility_to(visibility_type)
-            choose(visibility_type)
+            click_element(:visibility_content, visibility: visibility_type)
           end
 
           def click_add_file
@@ -44,6 +52,12 @@ module QA
               end
             else
               text_area.set(content)
+            end
+          end
+
+          def click_delete_file(file_number)
+            within_element_by_index(:file_holder_container, file_number - 1) do
+              click_element(:delete_file_button)
             end
           end
 

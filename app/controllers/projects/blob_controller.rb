@@ -32,14 +32,13 @@ class Projects::BlobController < Projects::ApplicationController
   before_action :validate_diff_params, only: :diff
   before_action :set_last_commit_sha, only: [:edit, :update]
 
-  before_action only: :show do
-    push_frontend_experiment(:suggest_pipeline)
-    push_frontend_feature_flag(:gitlab_ci_yml_preview, @project, default_enabled: false)
-  end
-
-  track_redis_hll_event :create, :update, name: 'g_edit_by_sfe', feature: :track_editor_edit_actions, feature_default_enabled: true
+  track_redis_hll_event :create, :update, name: 'g_edit_by_sfe'
 
   feature_category :source_code_management
+
+  before_action do
+    push_frontend_feature_flag(:refactor_blob_viewer, @project, default_enabled: :yaml)
+  end
 
   def new
     commit unless @repository.empty?
@@ -218,7 +217,7 @@ class Projects::BlobController < Projects::ApplicationController
   def show_html
     environment_params = @repository.branch_exists?(@ref) ? { ref: @ref } : { commit: @commit }
     environment_params[:find_latest] = true
-    @environment = EnvironmentsFinder.new(@project, current_user, environment_params).execute.last
+    @environment = ::Environments::EnvironmentsByDeploymentsFinder.new(@project, current_user, environment_params).execute.last
     @last_commit = @repository.last_commit_for_path(@commit.id, @blob.path, literal_pathspec: true)
     @code_navigation_path = Gitlab::CodeNavigationPath.new(@project, @blob.commit_id).full_json_path_for(@blob.path)
 

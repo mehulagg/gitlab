@@ -1,11 +1,11 @@
-import state from '~/deploy_freeze/store/state';
-import mutations from '~/deploy_freeze/store/mutations';
 import * as types from '~/deploy_freeze/store/mutation_types';
+import mutations from '~/deploy_freeze/store/mutations';
+import state from '~/deploy_freeze/store/state';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { findTzByName, formatTz, freezePeriodsFixture, timezoneDataFixture } from '../helpers';
 
 describe('Deploy freeze mutations', () => {
   let stateCopy;
-  const timezoneDataFixture = getJSONFixture('/api/freeze-periods/timezone_data.json');
 
   beforeEach(() => {
     stateCopy = state({
@@ -28,13 +28,15 @@ describe('Deploy freeze mutations', () => {
   describe('RECEIVE_FREEZE_PERIODS_SUCCESS', () => {
     it('should set freeze periods and format timezones from identifiers to names', () => {
       const timezoneNames = ['Berlin', 'UTC', 'Eastern Time (US & Canada)'];
-      const freezePeriodsFixture = getJSONFixture('/api/freeze-periods/freeze_periods.json');
 
       mutations[types.RECEIVE_FREEZE_PERIODS_SUCCESS](stateCopy, freezePeriodsFixture);
 
       const expectedFreezePeriods = freezePeriodsFixture.map((freezePeriod, index) => ({
         ...convertObjectPropsToCamelCase(freezePeriod),
-        cronTimezone: timezoneNames[index],
+        cronTimezone: {
+          formattedTimezone: timezoneNames[index],
+          identifier: freezePeriod.cronTimezone,
+        },
       }));
 
       expect(stateCopy.freezePeriods).toMatchObject(expectedFreezePeriods);
@@ -43,9 +45,10 @@ describe('Deploy freeze mutations', () => {
 
   describe('SET_SELECTED_TIMEZONE', () => {
     it('should set the cron timezone', () => {
+      const selectedTz = findTzByName('Pacific Time (US & Canada)');
       const timezone = {
-        formattedTimezone: '[UTC -7] Pacific Time (US & Canada)',
-        identifier: 'America/Los_Angeles',
+        formattedTimezone: formatTz(selectedTz),
+        identifier: selectedTz.identifier,
       };
       mutations[types.SET_SELECTED_TIMEZONE](stateCopy, timezone);
 
@@ -62,11 +65,19 @@ describe('Deploy freeze mutations', () => {
     });
   });
 
-  describe('SET_FREEZE_ENDT_CRON', () => {
+  describe('SET_FREEZE_END_CRON', () => {
     it('should set freezeEndCron', () => {
       mutations[types.SET_FREEZE_END_CRON](stateCopy, '5 0 * 8 *');
 
       expect(stateCopy.freezeEndCron).toBe('5 0 * 8 *');
+    });
+  });
+
+  describe('SET_SELECTED_ID', () => {
+    it('should set selectedId', () => {
+      mutations[types.SET_SELECTED_ID](stateCopy, 5);
+
+      expect(stateCopy.selectedId).toBe(5);
     });
   });
 });

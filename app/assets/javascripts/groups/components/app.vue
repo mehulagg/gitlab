@@ -1,23 +1,20 @@
 <script>
 /* global Flash */
 
-import $ from 'jquery';
-import 'vendor/jquery.scrollTo';
-import { GlLoadingIcon } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
-import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
-import { HIDDEN_CLASS } from '~/lib/utils/constants';
+import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { getParameterByName } from '~/lib/utils/common_utils';
+import { HIDDEN_CLASS } from '~/lib/utils/constants';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { __, s__, sprintf } from '~/locale';
 
-import eventHub from '../event_hub';
 import { COMMON_STR, CONTENT_LIST_CLASS } from '../constants';
+import eventHub from '../event_hub';
 import groupsComponent from './groups.vue';
 
 export default {
   components: {
-    DeprecatedModal,
     groupsComponent,
+    GlModal,
     GlLoadingIcon,
   },
   props: {
@@ -49,13 +46,30 @@ export default {
       isLoading: true,
       isSearchEmpty: false,
       searchEmptyMessage: '',
-      showModal: false,
-      groupLeaveConfirmationMessage: '',
       targetGroup: null,
       targetParentGroup: null,
     };
   },
   computed: {
+    primaryProps() {
+      return {
+        text: __('Leave group'),
+        attributes: [{ variant: 'warning' }, { category: 'primary' }],
+      };
+    },
+    cancelProps() {
+      return {
+        text: __('Cancel'),
+      };
+    },
+    groupLeaveConfirmationMessage() {
+      if (!this.targetGroup) {
+        return '';
+      }
+      return sprintf(s__('GroupsTree|Are you sure you want to leave the "%{fullName}" group?'), {
+        fullName: this.targetGroup.fullName,
+      });
+    },
     groups() {
       return this.store.getGroups();
     },
@@ -92,7 +106,7 @@ export default {
     fetchGroups({ parentId, page, filterGroupsBy, sortBy, archived, updatePagination }) {
       return this.service
         .getGroups(parentId, page, filterGroupsBy, sortBy, archived)
-        .then(res => {
+        .then((res) => {
           if (updatePagination) {
             this.updatePagination(res.headers);
           }
@@ -100,7 +114,7 @@ export default {
         })
         .catch(() => {
           this.isLoading = false;
-          $.scrollTo(0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
 
           Flash(COMMON_STR.FAILURE);
         });
@@ -119,7 +133,7 @@ export default {
         sortBy,
         archived,
         updatePagination: true,
-      }).then(res => {
+      }).then((res) => {
         this.isLoading = false;
         this.updateGroups(res, Boolean(filterGroupsBy));
       });
@@ -133,9 +147,9 @@ export default {
         sortBy,
         archived,
         updatePagination: true,
-      }).then(res => {
+      }).then((res) => {
         this.isLoading = false;
-        $.scrollTo(0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         const currentPath = mergeUrlParams({ page }, window.location.href);
         window.history.replaceState(
@@ -157,7 +171,7 @@ export default {
           this.fetchGroups({
             parentId: parentGroup.id,
           })
-            .then(res => {
+            .then((res) => {
               this.store.setGroupChildren(parentGroup, res);
             })
             .catch(() => {
@@ -171,29 +185,19 @@ export default {
       }
     },
     showLeaveGroupModal(group, parentGroup) {
-      const { fullName } = group;
       this.targetGroup = group;
       this.targetParentGroup = parentGroup;
-      this.showModal = true;
-      this.groupLeaveConfirmationMessage = sprintf(
-        s__('GroupsTree|Are you sure you want to leave the "%{fullName}" group?'),
-        { fullName },
-      );
-    },
-    hideLeaveGroupModal() {
-      this.showModal = false;
     },
     leaveGroup() {
-      this.showModal = false;
       this.targetGroup.isBeingRemoved = true;
       this.service
         .leaveGroup(this.targetGroup.leavePath)
-        .then(res => {
-          $.scrollTo(0);
+        .then((res) => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           this.store.removeGroup(this.targetGroup, this.targetParentGroup);
-          Flash(res.data.notice, 'notice');
+          this.$toast.show(res.data.notice);
         })
-        .catch(err => {
+        .catch((err) => {
           let message = COMMON_STR.FAILURE;
           if (err.status === 403) {
             message = COMMON_STR.LEAVE_FORBIDDEN;
@@ -245,21 +249,21 @@ export default {
       class="loading-animation prepend-top-20"
     />
     <groups-component
-      v-if="!isLoading"
+      v-else
       :groups="groups"
       :search-empty="isSearchEmpty"
       :search-empty-message="searchEmptyMessage"
       :page-info="pageInfo"
       :action="action"
     />
-    <deprecated-modal
-      v-show="showModal"
-      :primary-button-label="__('Leave')"
+    <gl-modal
+      modal-id="leave-group-modal"
       :title="__('Are you sure?')"
-      :text="groupLeaveConfirmationMessage"
-      kind="warning"
-      @cancel="hideLeaveGroupModal"
-      @submit="leaveGroup"
-    />
+      :action-primary="primaryProps"
+      :action-cancel="cancelProps"
+      @primary="leaveGroup"
+    >
+      {{ groupLeaveConfirmationMessage }}
+    </gl-modal>
   </div>
 </template>

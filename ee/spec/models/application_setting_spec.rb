@@ -29,18 +29,6 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(subject.mirror_max_capacity + 1).for(:mirror_capacity_threshold) }
     it { is_expected.to allow_value(nil).for(:custom_project_templates_group_id) }
 
-    it { is_expected.to allow_value(10).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(nil).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(0).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_shards) }
-    it { is_expected.not_to allow_value(-1).for(:elasticsearch_shards) }
-
-    it { is_expected.to allow_value(10).for(:elasticsearch_replicas) }
-    it { is_expected.to allow_value(0).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(nil).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(-1).for(:elasticsearch_replicas) }
-
     it { is_expected.to allow_value(10).for(:elasticsearch_indexed_file_size_limit_kb) }
     it { is_expected.not_to allow_value(0).for(:elasticsearch_indexed_file_size_limit_kb) }
     it { is_expected.not_to allow_value(nil).for(:elasticsearch_indexed_file_size_limit_kb) }
@@ -85,6 +73,25 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(-5).for(:max_personal_access_token_lifetime) }
     it { is_expected.not_to allow_value(366).for(:max_personal_access_token_lifetime) }
 
+    it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value(1).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value(10).for(:new_user_signups_cap) }
+    it { is_expected.to allow_value("").for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value("value").for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value(-1).for(:new_user_signups_cap) }
+    it { is_expected.not_to allow_value(2.5).for(:new_user_signups_cap) }
+
+    it { is_expected.to allow_value(1).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10079).for(:git_two_factor_session_expiry) }
+    it { is_expected.to allow_value(10080).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(nil).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value("value").for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(2.5).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(-5).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(0).for(:git_two_factor_session_expiry) }
+    it { is_expected.not_to allow_value(10081).for(:git_two_factor_session_expiry) }
+
     describe 'when additional email text is enabled' do
       before do
         stub_licensed_features(email_additional_text: true)
@@ -92,6 +99,19 @@ RSpec.describe ApplicationSetting do
 
       it { is_expected.to allow_value("a" * subject.email_additional_text_character_limit).for(:email_additional_text) }
       it { is_expected.not_to allow_value("a" * (subject.email_additional_text_character_limit + 1)).for(:email_additional_text) }
+    end
+
+    describe 'when secret detection token revocation is enabled' do
+      before do
+        stub_application_setting(secret_detection_token_revocation_enabled: true)
+      end
+
+      it { is_expected.to allow_value("http://test.com").for(:secret_detection_token_revocation_url) }
+      it { is_expected.to allow_value("AKVD34#$%56").for(:secret_detection_token_revocation_token) }
+      it { is_expected.to allow_value("http://test.com").for(:secret_detection_revocation_token_types_url) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_token_revocation_url) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_token_revocation_token) }
+      it { is_expected.not_to allow_value(nil).for(:secret_detection_revocation_token_types_url) }
     end
 
     context 'when validating allowed_ips' do
@@ -158,6 +178,19 @@ RSpec.describe ApplicationSetting do
           expect(setting.valid?).to eq(is_valid)
         end
       end
+    end
+
+    context 'when license presented' do
+      let_it_be(:max_active_user_count) { 20 }
+
+      before_all do
+        create_current_license({ restrictions: { active_user_count: max_active_user_count } })
+      end
+
+      it { is_expected.to allow_value(max_active_user_count - 1).for(:new_user_signups_cap) }
+      it { is_expected.to allow_value(max_active_user_count).for(:new_user_signups_cap) }
+      it { is_expected.to allow_value(nil).for(:new_user_signups_cap) }
+      it { is_expected.not_to allow_value(max_active_user_count + 1).for(:new_user_signups_cap) }
     end
   end
 
@@ -323,24 +356,31 @@ RSpec.describe ApplicationSetting do
       end
 
       context 'namespaces' do
-        let(:namespaces) { create_list(:namespace, 2) }
-        let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
+        context 'with personal namespaces' do
+          let(:namespaces) { create_list(:namespace, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: namespaces.last }
 
-        it 'tells you if a namespace is allowed to be indexed' do
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
-          expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          it 'tells you if a namespace is allowed to be indexed' do
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.last)).to be_truthy
+            expect(setting.elasticsearch_indexes_namespace?(namespaces.first)).to be_falsey
+          end
         end
 
-        it 'returns namespaces that are allowed to be indexed' do
-          child_namespace = create(:namespace, parent: namespaces.first)
-          create :elasticsearch_indexed_namespace, namespace: child_namespace
+        context 'with groups' do
+          let(:groups) { create_list(:group, 2) }
+          let!(:indexed_namespace) { create :elasticsearch_indexed_namespace, namespace: groups.last }
 
-          child_namespace_indexed_through_parent = create(:namespace, parent: namespaces.last)
+          it 'returns groups that are allowed to be indexed' do
+            child_group = create(:group, parent: groups.first)
+            create :elasticsearch_indexed_namespace, namespace: child_group
 
-          expect(setting.elasticsearch_limited_namespaces).to match_array(
-            [namespaces.last, child_namespace, child_namespace_indexed_through_parent])
-          expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
-            [namespaces.last, child_namespace])
+            child_group_indexed_through_parent = create(:group, parent: groups.last)
+
+            expect(setting.elasticsearch_limited_namespaces).to match_array(
+              [groups.last, child_group, child_group_indexed_through_parent])
+            expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
+              [groups.last, child_group])
+          end
         end
 
         describe '#elasticsearch_indexes_project?' do
@@ -405,6 +445,15 @@ RSpec.describe ApplicationSetting do
       expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:delete).with(:namespace)
 
       setting.invalidate_elasticsearch_indexes_cache!
+    end
+  end
+
+  describe '#invalidate_elasticsearch_indexes_cache_for_project!' do
+    it 'deletes the ElasticsearchEnabledCache for a single project' do
+      project_id = 1
+      expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:delete_record).with(:project, project_id)
+
+      setting.invalidate_elasticsearch_indexes_cache_for_project!(project_id)
     end
   end
 
@@ -706,6 +755,32 @@ RSpec.describe ApplicationSetting do
       setting.compliance_frameworks = [""]
 
       expect(setting.compliance_frameworks).to eq([])
+    end
+  end
+
+  describe '#should_apply_user_signup_cap?' do
+    subject { setting.should_apply_user_signup_cap? }
+
+    before do
+      allow(Gitlab::CurrentSettings).to receive(:new_user_signups_cap).and_return(new_user_signups_cap)
+    end
+
+    context 'when new_user_signups_cap setting is nil' do
+      let(:new_user_signups_cap) { nil }
+
+      it { is_expected.to be false }
+    end
+
+    context 'when new_user_signups_cap setting is set to any number' do
+      let(:new_user_signups_cap) { 10 }
+
+      it { is_expected.to be true }
+    end
+  end
+
+  describe 'maintenance mode setting' do
+    it 'defaults to false' do
+      expect(subject.maintenance_mode).to be false
     end
   end
 end

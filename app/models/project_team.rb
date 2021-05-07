@@ -130,7 +130,7 @@ class ProjectTeam
     end
 
     true
-  rescue
+  rescue StandardError
     false
   end
 
@@ -172,6 +172,10 @@ class ProjectTeam
              .group(:user_id)
              .maximum(:access_level)
     end
+  end
+
+  def write_member_access_for_user_id(user_id, project_access_level)
+    merge_value_to_request_store(User, user_id, project.id, project_access_level)
   end
 
   def max_member_access(user_id)

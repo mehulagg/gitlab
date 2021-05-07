@@ -1,5 +1,4 @@
 <script>
-import { debounce } from 'lodash';
 import {
   GlIcon,
   GlLoadingIcon,
@@ -9,11 +8,12 @@ import {
   GlDropdownItem,
   GlSearchBoxByType,
 } from '@gitlab/ui';
-import { n__, s__, __ } from '~/locale';
+import { debounce } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { n__, s__, __ } from '~/locale';
 import { DATA_REFETCH_DELAY } from '../constants';
-import { filterBySearchTerm } from '../utils';
 import getProjects from '../graphql/projects.query.graphql';
+import { filterBySearchTerm } from '../utils';
 
 export default {
   name: 'ProjectsDropdownFilter',
@@ -85,7 +85,7 @@ export default {
       return this.selectedProjects.length === 1;
     },
     selectedProjectIds() {
-      return this.selectedProjects.map(p => p.id);
+      return this.selectedProjects.map((p) => p.id);
     },
     availableProjects() {
       return filterBySearchTerm(this.projects, this.searchTerm);
@@ -110,7 +110,7 @@ export default {
     getSelectedProjects(selectedProject, isMarking) {
       return isMarking
         ? this.selectedProjects.concat([selectedProject])
-        : this.selectedProjects.filter(project => project.id !== selectedProject.id);
+        : this.selectedProjects.filter((project) => project.id !== selectedProject.id);
     },
     singleSelectedProject(selectedObj, isMarking) {
       return isMarking ? [selectedObj] : [];
@@ -136,7 +136,7 @@ export default {
             ...this.queryParams,
           },
         })
-        .then(response => {
+        .then((response) => {
           const {
             data: {
               group: {

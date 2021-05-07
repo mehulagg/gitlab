@@ -7,10 +7,11 @@ module Rouge
 
       # Creates a new <tt>Rouge::Formatter::HTMLGitlab</tt> instance.
       #
-      # [+tag+]     The tag (language) of the lexer used to generate the formatted tokens
-      def initialize(tag: nil)
-        @line_number = 1
-        @tag = tag
+      # [+tag+]          The tag (language) of the lexer used to generate the formatted tokens
+      # [+line_number+]  The line number used to populate line IDs
+      def initialize(options = {})
+        @tag = options[:tag]
+        @line_number = options[:line_number] || 1
       end
 
       def stream(tokens)
@@ -20,7 +21,7 @@ module Rouge
           is_first = false
 
           yield %(<span id="LC#{@line_number}" class="line" lang="#{@tag}">)
-          line.each { |token, value| yield span(token, value.chomp) }
+          line.each { |token, value| yield span(token, value.chomp! || value) }
           yield %(</span>)
 
           @line_number += 1

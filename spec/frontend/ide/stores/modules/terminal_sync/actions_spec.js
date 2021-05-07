@@ -1,6 +1,6 @@
 import testAction from 'helpers/vuex_action_helper';
-import * as actions from '~/ide/stores/modules/terminal_sync/actions';
 import mirror, { canConnect, SERVICE_NAME } from '~/ide/lib/mirror';
+import * as actions from '~/ide/stores/modules/terminal_sync/actions';
 import * as types from '~/ide/stores/modules/terminal_sync/mutation_types';
 
 jest.mock('~/ide/lib/mirror');
@@ -22,7 +22,7 @@ describe('ide/stores/modules/terminal_sync/actions', () => {
   });
 
   describe('upload', () => {
-    it('uploads to mirror and sets success', done => {
+    it('uploads to mirror and sets success', (done) => {
       mirror.upload.mockReturnValue(Promise.resolve());
 
       testAction(
@@ -38,7 +38,7 @@ describe('ide/stores/modules/terminal_sync/actions', () => {
       );
     });
 
-    it('sets error when failed', done => {
+    it('sets error when failed', (done) => {
       const err = { message: 'it failed!' };
       mirror.upload.mockReturnValue(Promise.reject(err));
 
@@ -54,7 +54,7 @@ describe('ide/stores/modules/terminal_sync/actions', () => {
   });
 
   describe('stop', () => {
-    it('disconnects from mirror', done => {
+    it('disconnects from mirror', (done) => {
       testAction(actions.stop, null, rootState, [{ type: types.STOP }], [], () => {
         expect(mirror.disconnect).toHaveBeenCalled();
         done();
@@ -83,7 +83,7 @@ describe('ide/stores/modules/terminal_sync/actions', () => {
         };
       });
 
-      it('connects to mirror and sets success', done => {
+      it('connects to mirror and sets success', (done) => {
         mirror.connect.mockReturnValue(Promise.resolve());
 
         testAction(

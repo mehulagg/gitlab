@@ -1,6 +1,6 @@
+import { GlLink, GlLabel, GlIcon, GlFormCheckbox } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import { GlLink, GlLabel } from '@gitlab/ui';
-
+import { useFakeDate } from 'helpers/fake_date';
 import IssuableItem from '~/issuable_list/components/issuable_item.vue';
 import IssuableAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 
@@ -12,18 +12,25 @@ const createComponent = ({ issuableSymbol = '#', issuable = mockIssuable, slots 
       issuableSymbol,
       issuable,
       enableLabelPermalinks: true,
+      showDiscussions: true,
+      showCheckbox: false,
     },
     slots,
   });
 
+const MOCK_GITLAB_URL = 'http://0.0.0.0:3000';
+
 describe('IssuableItem', () => {
+  // The mock data is dependent that this is after our default date
+  useFakeDate(2020, 11, 11);
+
   const mockLabels = mockIssuable.labels.nodes;
   const mockAuthor = mockIssuable.author;
   const originalUrl = gon.gitlab_url;
   let wrapper;
 
   beforeEach(() => {
-    gon.gitlab_url = 'http://0.0.0.0:3000';
+    gon.gitlab_url = MOCK_GITLAB_URL;
     wrapper = createComponent();
   });
 
@@ -68,11 +75,11 @@ describe('IssuableItem', () => {
 
     describe('isIssuableUrlExternal', () => {
       it.each`
-        issuableWebUrl                                             | urlType                    | returnValue
-        ${'/gitlab-org/gitlab-test/-/issues/2'}                    | ${'relative'}              | ${false}
-        ${'http://0.0.0.0:3000/gitlab-org/gitlab-test/-/issues/1'} | ${'absolute and internal'} | ${false}
-        ${'http://jira.atlassian.net/browse/IG-1'}                 | ${'external'}              | ${true}
-        ${'https://github.com/gitlabhq/gitlabhq/issues/1'}         | ${'external'}              | ${true}
+        issuableWebUrl                                            | urlType                    | returnValue
+        ${'/gitlab-org/gitlab-test/-/issues/2'}                   | ${'relative'}              | ${false}
+        ${`${MOCK_GITLAB_URL}/gitlab-org/gitlab-test/-/issues/1`} | ${'absolute and internal'} | ${false}
+        ${'http://jira.atlassian.net/browse/IG-1'}                | ${'external'}              | ${true}
+        ${'https://github.com/gitlabhq/gitlabhq/issues/1'}        | ${'external'}              | ${true}
       `(
         'returns $returnValue when `issuable.webUrl` is $urlType',
         async ({ issuableWebUrl, returnValue }) => {
@@ -141,6 +148,31 @@ describe('IssuableItem', () => {
         expect(wrapper.vm.updatedAt).toContain('ago');
       });
     });
+
+    describe('showDiscussions', () => {
+      it.each`
+        userDiscussionsCount | returnValue
+        ${0}                 | ${true}
+        ${1}                 | ${true}
+        ${undefined}         | ${false}
+        ${null}              | ${false}
+      `(
+        'returns $returnValue when issuable.userDiscussionsCount is $userDiscussionsCount',
+        ({ userDiscussionsCount, returnValue }) => {
+          const wrapperWithDiscussions = createComponent({
+            issuableSymbol: '#',
+            issuable: {
+              ...mockIssuable,
+              userDiscussionsCount,
+            },
+          });
+
+          expect(wrapperWithDiscussions.vm.showDiscussions).toBe(returnValue);
+
+          wrapperWithDiscussions.destroy();
+        },
+      );
+    });
   });
 
   describe('methods', () => {
@@ -170,7 +202,7 @@ describe('IssuableItem', () => {
     describe('labelTarget', () => {
       it('returns target string for a provided label param when `enableLabelPermalinks` is true', () => {
         expect(wrapper.vm.labelTarget(mockRegularLabel)).toBe(
-          '?label_name%5B%5D=Documentation%20Update',
+          '?label_name[]=Documentation%20Update',
         );
       });
 
@@ -187,13 +219,50 @@ describe('IssuableItem', () => {
   });
 
   describe('template', () => {
-    it('renders issuable title', () => {
-      const titleEl = wrapper.find('[data-testid="issuable-title"]');
+    it.each`
+      gitlabWebUrl           | webUrl                        | expectedHref                  | expectedTarget
+      ${undefined}           | ${`${MOCK_GITLAB_URL}/issue`} | ${`${MOCK_GITLAB_URL}/issue`} | ${undefined}
+      ${undefined}           | ${'https://jira.com/issue'}   | ${'https://jira.com/issue'}   | ${'_blank'}
+      ${'/gitlab-org/issue'} | ${'https://jira.com/issue'}   | ${'/gitlab-org/issue'}        | ${undefined}
+    `(
+      'renders issuable title correctly when `gitlabWebUrl` is `$gitlabWebUrl` and webUrl is `$webUrl`',
+      async ({ webUrl, gitlabWebUrl, expectedHref, expectedTarget }) => {
+        wrapper.setProps({
+          issuable: {
+            ...mockIssuable,
+            webUrl,
+            gitlabWebUrl,
+          },
+        });
 
-      expect(titleEl.exists()).toBe(true);
-      expect(titleEl.find(GlLink).attributes('href')).toBe(mockIssuable.webUrl);
-      expect(titleEl.find(GlLink).attributes('target')).not.toBeDefined();
-      expect(titleEl.find(GlLink).text()).toBe(mockIssuable.title);
+        await wrapper.vm.$nextTick();
+
+        const titleEl = wrapper.find('[data-testid="issuable-title"]');
+
+        expect(titleEl.exists()).toBe(true);
+        expect(titleEl.find(GlLink).attributes('href')).toBe(expectedHref);
+        expect(titleEl.find(GlLink).attributes('target')).toBe(expectedTarget);
+        expect(titleEl.find(GlLink).text()).toBe(mockIssuable.title);
+      },
+    );
+
+    it('renders checkbox when `showCheckbox` prop is true', async () => {
+      wrapper.setProps({
+        showCheckbox: true,
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlFormCheckbox).exists()).toBe(true);
+      expect(wrapper.find(GlFormCheckbox).attributes('checked')).not.toBeDefined();
+
+      wrapper.setProps({
+        checked: true,
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlFormCheckbox).attributes('checked')).toBe('true');
     });
 
     it('renders issuable title with `target` set as "_blank" when issuable.webUrl is external', async () => {
@@ -206,12 +275,36 @@ describe('IssuableItem', () => {
 
       await wrapper.vm.$nextTick();
 
-      expect(
-        wrapper
-          .find('[data-testid="issuable-title"]')
-          .find(GlLink)
-          .attributes('target'),
-      ).toBe('_blank');
+      expect(wrapper.find('[data-testid="issuable-title"]').find(GlLink).attributes('target')).toBe(
+        '_blank',
+      );
+    });
+
+    it('renders issuable confidential icon when issuable is confidential', async () => {
+      wrapper.setProps({
+        issuable: {
+          ...mockIssuable,
+          confidential: true,
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      const confidentialEl = wrapper.find('[data-testid="issuable-title"]').find(GlIcon);
+
+      expect(confidentialEl.exists()).toBe(true);
+      expect(confidentialEl.props('name')).toBe('eye-slash');
+      expect(confidentialEl.attributes()).toMatchObject({
+        title: 'Confidential',
+        arialabel: 'Confidential',
+      });
+    });
+
+    it('renders task status', () => {
+      const taskStatus = wrapper.find('[data-testid="task-status"]');
+      const expected = `${mockIssuable.taskCompletionStatus.completedCount} of ${mockIssuable.taskCompletionStatus.count} tasks completed`;
+
+      expect(taskStatus.text()).toBe(expected);
     });
 
     it('renders issuable reference', () => {
@@ -261,6 +354,42 @@ describe('IssuableItem', () => {
       expect(authorEl.text()).toBe(mockAuthor.name);
     });
 
+    it('renders issuable author info via slot', () => {
+      const wrapperWithAuthorSlot = createComponent({
+        issuableSymbol: '#',
+        issuable: mockIssuable,
+        slots: {
+          reference: `
+            <span class="js-author">${mockAuthor.name}</span>
+          `,
+        },
+      });
+      const authorEl = wrapperWithAuthorSlot.find('.js-author');
+
+      expect(authorEl.exists()).toBe(true);
+      expect(authorEl.text()).toBe(mockAuthor.name);
+
+      wrapperWithAuthorSlot.destroy();
+    });
+
+    it('renders timeframe via slot', () => {
+      const wrapperWithTimeframeSlot = createComponent({
+        issuableSymbol: '#',
+        issuable: mockIssuable,
+        slots: {
+          timeframe: `
+            <b class="js-timeframe">Jan 1, 2020 - Mar 31, 2020</b>
+          `,
+        },
+      });
+      const timeframeEl = wrapperWithTimeframeSlot.find('.js-timeframe');
+
+      expect(timeframeEl.exists()).toBe(true);
+      expect(timeframeEl.text()).toBe('Jan 1, 2020 - Mar 31, 2020');
+
+      wrapperWithTimeframeSlot.destroy();
+    });
+
     it('renders gl-label component for each label present within `issuable` prop', () => {
       const labelsEl = wrapper.findAll(GlLabel);
 
@@ -294,6 +423,18 @@ describe('IssuableItem', () => {
       wrapperWithStatusSlot.destroy();
     });
 
+    it('renders discussions count', () => {
+      const discussionsEl = wrapper.find('[data-testid="issuable-discussions"]');
+
+      expect(discussionsEl.exists()).toBe(true);
+      expect(discussionsEl.find(GlLink).attributes()).toMatchObject({
+        title: 'Comments',
+        href: `${mockIssuable.webUrl}#notes`,
+      });
+      expect(discussionsEl.find(GlIcon).props('name')).toBe('comments');
+      expect(discussionsEl.find(GlLink).text()).toContain('2');
+    });
+
     it('renders issuable-assignees component', () => {
       const assigneesEl = wrapper.find(IssuableAssignees);
 
@@ -311,6 +452,32 @@ describe('IssuableItem', () => {
       expect(updatedAtEl.exists()).toBe(true);
       expect(updatedAtEl.find('span').attributes('title')).toBe('Sep 10, 2020 11:41am GMT+0000');
       expect(updatedAtEl.text()).toBe(wrapper.vm.updatedAt);
+    });
+
+    describe('when issuable is closed', () => {
+      it('renders issuable card with a closed style', () => {
+        wrapper = createComponent({ issuable: { ...mockIssuable, closedAt: '2020-12-10' } });
+
+        expect(wrapper.classes()).toContain('closed');
+      });
+    });
+
+    describe('when issuable was created within the past 24 hours', () => {
+      it('renders issuable card with a recently-created style', () => {
+        wrapper = createComponent({
+          issuable: { ...mockIssuable, createdAt: '2020-12-10T12:34:56' },
+        });
+
+        expect(wrapper.classes()).toContain('today');
+      });
+    });
+
+    describe('when issuable was created earlier than the past 24 hours', () => {
+      it('renders issuable card without a recently-created style', () => {
+        wrapper = createComponent({ issuable: { ...mockIssuable, createdAt: '2020-12-09' } });
+
+        expect(wrapper.classes()).not.toContain('today');
+      });
     });
   });
 });

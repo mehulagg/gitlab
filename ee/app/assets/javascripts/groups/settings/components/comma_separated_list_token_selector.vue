@@ -71,7 +71,7 @@ export default {
   },
   watch: {
     selectedTokens(newValue) {
-      this.$options.hiddenInput.value = newValue.map(token => token.name).join(',');
+      this.$options.hiddenInput.value = newValue.map((token) => token.name).join(',');
 
       // Dispatch `input` event so form submit button becomes active
       this.$options.hiddenInput.dispatchEvent(

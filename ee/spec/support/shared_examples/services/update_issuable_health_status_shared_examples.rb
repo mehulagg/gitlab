@@ -17,14 +17,6 @@ RSpec.shared_examples 'updating issuable health status' do
         stub_licensed_features(issuable_health_status: true, epics: true)
       end
 
-      context 'when feature flag is disabled' do
-        it 'does not update issuable' do
-          stub_feature_flags(save_issuable_health_status: false)
-
-          expect { service.execute(issuable) }.not_to change { issuable.health_status }
-        end
-      end
-
       context 'when user has reporter permissions' do
         before do
           issuable.resource_parent.add_reporter(current_user)

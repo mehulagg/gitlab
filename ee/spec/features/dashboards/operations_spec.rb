@@ -30,34 +30,34 @@ RSpec.describe 'Dashboard operations', :js do
     it 'masks projects without valid license' do
       user = create(:user)
 
-      gold_group = create(:group)
+      ultimate_group = create(:group)
       bronze_group = create(:group)
 
-      create(:gitlab_subscription, :gold, namespace: gold_group)
+      create(:gitlab_subscription, :ultimate, namespace: ultimate_group)
       create(:gitlab_subscription, :bronze, namespace: bronze_group)
 
-      gold_project = create(:project, :repository, namespace: gold_group, name: 'Gold Project')
+      ultimate_project = create(:project, :repository, namespace: ultimate_group, name: 'Ultimate Project')
       bronze_project = create(:project, :repository, namespace: bronze_group, name: 'Bronze Project')
       public_project = create(:project, :repository, :public, namespace: bronze_group, name: 'Public Bronze Project')
 
-      gold_pipeline = create(:ci_pipeline, project: gold_project, sha: gold_project.commit.sha, status: :running)
+      ultimate_pipeline = create(:ci_pipeline, project: ultimate_project, sha: ultimate_project.commit.sha, status: :running)
       bronze_pipeline = create(:ci_pipeline, project: bronze_project, sha: bronze_project.commit.sha, status: :running)
       public_pipeline = create(:ci_pipeline, project: public_project, sha: public_project.commit.sha, status: :running)
 
-      gold_project.add_developer(user)
+      ultimate_project.add_developer(user)
       bronze_group.add_developer(user)
 
-      user.update!(ops_dashboard_projects: [gold_project, bronze_project, public_project])
+      user.update!(ops_dashboard_projects: [ultimate_project, bronze_project, public_project])
       sign_in(user)
 
       visit operations_path
 
       bronze_card = project_card(bronze_project)
-      gold_card = project_card(gold_project)
+      ultimate_card = project_card(ultimate_project)
       public_card = project_card(public_project)
 
       assert_masked(bronze_card, bronze_project, bronze_pipeline, bronze_group)
-      assert_available(gold_card, gold_project, gold_pipeline)
+      assert_available(ultimate_card, ultimate_project, ultimate_pipeline)
       assert_available(public_card, public_project, public_pipeline)
     end
 

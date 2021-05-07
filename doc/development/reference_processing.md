@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 description: 'An introduction to reference parsers and reference filters, and a guide to their implementation.'
 ---
 
@@ -10,7 +13,6 @@ abstractions in the `Banzai` pipeline: `ReferenceFilter` and `ReferenceParser`.
 This page explains what these are, how they are used, and how you would
 implement a new filter/parser pair.
 
-NOTE: **Note:**
 Each `ReferenceFilter` must have a corresponding `ReferenceParser`.
 
 It is possible to share reference parsers between filters - if two filters find
@@ -39,7 +41,7 @@ For example, the class
 is responsible for handling references to issues, such as
 `gitlab-org/gitlab#123` and `https://gitlab.com/gitlab-org/gitlab/-/issues/200048`.
 
-All reference filters are instances of [`HTML::Pipeline::Filter`](https://www.rubydoc.info/github/jch/html-pipeline/v1.11.0/HTML/Pipeline/Filter),
+All reference filters are instances of [`HTML::Pipeline::Filter`](https://www.rubydoc.info/github/jch/html-pipeline/HTML/Pipeline/Filter),
 and inherit (often indirectly) from [`Banzai::Filter::ReferenceFilter`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/banzai/filter/reference_filter.rb).
 
 `HTML::Pipeline::Filter` has a simple interface consisting of `#call`, a void
@@ -99,7 +101,7 @@ format the reference as:
 
 This default implementation is not very efficient, because we need to call
 `#find_object` for each reference, which may require issuing a DB query every
-time. For this reason, most reference filter implementations will instead use an
+time. For this reason, most reference filter implementations instead use an
 optimization included in `AbstractReferenceFilter`:
 
 > `AbstractReferenceFilter` provides a lazily initialized value
@@ -138,7 +140,7 @@ We are skipping:
 
 To avoid filtering such nodes for each `ReferenceFilter`, we do it only once and store the result in the result Hash of the pipeline as `result[:reference_filter_nodes]`.
 
-Pipeline `result` is passed to each filter for modification, so every time when `ReferenceFilter` replaces text or link tag, filtered list (`reference_filter_nodes`) will be updated for the next filter to use.
+Pipeline `result` is passed to each filter for modification, so every time when `ReferenceFilter` replaces text or link tag, filtered list (`reference_filter_nodes`) are updated for the next filter to use.
 
 ## Reference parsers
 
@@ -196,6 +198,5 @@ In practice, all reference parsers inherit from [`BaseParser`](https://gitlab.co
   - `#references_relation` an active record relation for objects by ID.
   - `#nodes_user_can_reference(user, nodes)` to filter nodes directly.
 
-NOTE: **Note:**
 A failure to implement this class for each reference type means that the
-application will raise exceptions during Markdown processing.
+application raises exceptions during Markdown processing.

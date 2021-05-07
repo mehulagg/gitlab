@@ -14,7 +14,13 @@ module Ci
     EXPIRATION_DATE = 1.week.freeze
 
     DEFAULT_FILE_NAMES = {
-      code_coverage: 'code_coverage.json'
+      code_coverage: 'code_coverage.json',
+      code_quality_mr_diff: 'code_quality_mr_diff.json'
+    }.freeze
+
+    REPORT_TYPES = {
+      code_coverage: :raw,
+      code_quality_mr_diff: :raw
     }.freeze
 
     belongs_to :project, class_name: "Project", inverse_of: :pipeline_artifacts
@@ -30,15 +36,22 @@ module Ci
     update_project_statistics project_statistics_name: :pipeline_artifacts_size
 
     enum file_type: {
-      code_coverage: 1
+      code_coverage: 1,
+      code_quality_mr_diff: 2
     }
 
-    def self.has_code_coverage?
-      where(file_type: :code_coverage).exists?
-    end
+    scope :unlocked, -> { joins(:pipeline).merge(::Ci::Pipeline.unlocked) }
 
-    def self.find_with_code_coverage
-      find_by(file_type: :code_coverage)
+    class << self
+      def report_exists?(file_type)
+        return false unless REPORT_TYPES.key?(file_type)
+
+        where(file_type: file_type).exists?
+      end
+
+      def find_by_file_type(file_type)
+        find_by(file_type: file_type)
+      end
     end
 
     def present
@@ -46,3 +59,5 @@ module Ci
     end
   end
 end
+
+Ci::PipelineArtifact.prepend_ee_mod

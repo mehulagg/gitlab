@@ -1,12 +1,11 @@
 import { mount } from '@vue/test-utils';
 
-import createStore from 'ee/roadmap/store';
 import EpicItem from 'ee/roadmap/components/epic_item.vue';
 import EpicItemContainer from 'ee/roadmap/components/epic_item_container.vue';
 
-import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
-
 import { PRESET_TYPES } from 'ee/roadmap/constants';
+import createStore from 'ee/roadmap/store';
+import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import {
   mockTimeframeInitialDate,
@@ -25,7 +24,7 @@ const createComponent = ({
   children = [],
   childLevel = 0,
   childrenEpics = {},
-  childrenFlags = { '1': { itemExpanded: false } },
+  childrenFlags = { 1: { itemExpanded: false } },
   hasFiltersApplied = false,
 } = {}) => {
   return mount(EpicItemContainer, {
@@ -67,8 +66,8 @@ describe('EpicItemContainer', () => {
       wrapper = createComponent({
         children: [mockFormattedChildEpic1],
         childrenFlags: {
-          '1': { itemExpanded: true },
-          '50': { itemExpanded: false },
+          1: { itemExpanded: true },
+          50: { itemExpanded: false },
         },
       });
       expect(wrapper.find(EpicItem).exists()).toBe(true);

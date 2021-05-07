@@ -8,17 +8,20 @@
 
 <!-- What is the user problem you are trying to solve with this issue? -->
 
-
 ### Proposal 
 
 <!-- Use this section to explain the feature and how it will work. It can be helpful to add technical details, design proposals, and links to related epics or issues. -->
 
 
 
-/label ~"feature" ~"group::" ~"section::"  ~"Category::" ~"GitLab Core"/~"GitLab Starter"/~"GitLab Premium"/~"GitLab Ultimate"
+/label ~"feature" ~"group::" ~"section::"  ~"Category::" ~"GitLab Core"/~"GitLab Premium"/~"GitLab Ultimate"
 
 
-<!-- Consider adding related issues and epics to this issue. You can also reference the Feature Proposal Template (https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20proposal.md) for additional details to consider adding to this issue. Additionally, as a data oriented organization, when your feature exits planning breakdown, consider adding the `What does success look like, and how can we measure that?` section.
+<!--- Use the following resources to find the appropriate labels:
+- https://gitlab.com/gitlab-org/gitlab/-/labels
+- https://about.gitlab.com/handbook/product/categories/features/
+
+Consider adding related issues and epics to this issue. You can also reference the Feature Proposal Template (https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20proposal.md) for additional details to consider adding to this issue. Additionally, as a data oriented organization, when your feature exits planning breakdown, consider adding the `What does success look like, and how can we measure that?` section.
 
 Other sections to consider adding: 
 
@@ -46,14 +49,14 @@ Personas are described at https://about.gitlab.com/handbook/marketing/product-ma
 
 ### User experience goal
 
- What is the single user experience workflow this problem addresses? 
+What is the single user experience workflow this problem addresses? 
 For example, "The user should be able to use the UI/API/.gitlab-ci.yml with GitLab to <perform a specific task>"
 https://about.gitlab.com/handbook/engineering/ux/ux-research-training/user-story-mapping/ 
 
 
 ### Further details
 
-nclude use cases, benefits, goals, or any other details that will help us understand the problem better. 
+Include use cases, benefits, goals, or any other details that will help us understand the problem better. 
 
 ### Permissions and Security
 
@@ -70,12 +73,12 @@ Consider adding checkboxes and expectations of users with certain levels of memb
 
  See the Feature Change Documentation Workflow https://docs.gitlab.com/ee/development/documentation/workflow.html#for-a-product-change
 
-* Add all known Documentation Requirements in this section. See https://docs.gitlab.com/ee/development/documentation/feature-change-workflow.html#documentation-requirements
+* Add all known Documentation Requirements in this section. See https://docs.gitlab.com/ee/development/documentation/workflow.html
 * If this feature requires changing permissions, update the permissions document. See https://docs.gitlab.com/ee/user/permissions.html 
 
 ### Availability & Testing
 
-his section needs to be retained and filled in during the workflow planning breakdown phase of this feature proposal, if not earlier.
+This section needs to be retained and filled in during the workflow planning breakdown phase of this feature proposal, if not earlier.
 
 What risks does this change pose to our availability? How might it affect the quality of the product? What additional test coverage or changes to tests will be needed? Will it require cross-browser testing?
 
@@ -93,11 +96,11 @@ Define both the success metrics and acceptance criteria. Note that success metri
 ### What is the type of buyer?
 
 What is the buyer persona for this feature? See https://about.gitlab.com/handbook/marketing/product-marketing/roles-personas/buyer-persona/
-In which enterprise tier should this feature go? See https://about.gitlab.com/handbook/product/pricing/#four-tiers
+In which enterprise tier should this feature go? See https://about.gitlab.com/handbook/product/pricing/#three-tiers
 
 ### Is this a cross-stage feature?
 
 Communicate if this change will affect multiple Stage Groups or product areas. We recommend always start with the assumption that a feature request will have an impact into another Group. Loop in the most relevant PM and Product Designer from that Group to provide strategic support to help align the Group's broader plan and vision, as well as to avoid UX and technical debt. https://about.gitlab.com/handbook/product/#cross-stage-features -->
 
-
-
+/label ~documentation
+/label ~direction

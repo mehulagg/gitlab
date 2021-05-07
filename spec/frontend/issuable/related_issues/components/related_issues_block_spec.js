@@ -1,5 +1,5 @@
-import { shallowMount, mount } from '@vue/test-utils';
 import { GlButton, GlIcon } from '@gitlab/ui';
+import { shallowMount, mount } from '@vue/test-utils';
 import {
   issuable1,
   issuable2,
@@ -56,7 +56,7 @@ describe('RelatedIssuesBlock', () => {
           pathIdSeparator: PathIdSeparator.Issue,
           issuableType: 'issue',
         },
-        slots: { headerText },
+        slots: { 'header-text': headerText },
       });
 
       expect(wrapper.find('.card-title').html()).toContain(headerText);
@@ -72,7 +72,7 @@ describe('RelatedIssuesBlock', () => {
           pathIdSeparator: PathIdSeparator.Issue,
           issuableType: 'issue',
         },
-        slots: { headerActions },
+        slots: { 'header-actions': headerActions },
       });
 
       expect(wrapper.find('[data-testid="custom-button"]').html()).toBe(headerActions);
@@ -130,11 +130,8 @@ describe('RelatedIssuesBlock', () => {
   describe('showCategorizedIssues prop', () => {
     const issueList = () => wrapper.findAll('.js-related-issues-token-list-item');
     const categorizedHeadings = () => wrapper.findAll('h4');
-    const headingTextAt = index =>
-      categorizedHeadings()
-        .at(index)
-        .text();
-    const mountComponent = showCategorizedIssues => {
+    const headingTextAt = (index) => categorizedHeadings().at(index).text();
+    const mountComponent = (showCategorizedIssues) => {
       wrapper = mount(RelatedIssuesBlock, {
         propsData: {
           pathIdSeparator: PathIdSeparator.Issue,

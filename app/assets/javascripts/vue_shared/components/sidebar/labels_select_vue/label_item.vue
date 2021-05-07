@@ -1,11 +1,8 @@
 <script>
-import { GlIcon, GlLink } from '@gitlab/ui';
+import { GlLink, GlIcon } from '@gitlab/ui';
 
 export default {
-  components: {
-    GlIcon,
-    GlLink,
-  },
+  functional: true,
   props: {
     label: {
       type: Object,
@@ -21,46 +18,65 @@ export default {
       default: false,
     },
   },
-  data() {
-    return {
-      isSet: this.isLabelSet,
-    };
-  },
-  computed: {
-    labelBoxStyle() {
-      return {
-        backgroundColor: this.label.color,
-      };
-    },
-  },
-  watch: {
-    /**
-     * This watcher assures that if user used
-     * `Enter` key to set/unset label, changes
-     * are reflected here too.
-     */
-    isLabelSet(value) {
-      this.isSet = value;
-    },
-  },
-  methods: {
-    handleClick() {
-      this.isSet = !this.isSet;
-      this.$emit('clickLabel', this.label);
-    },
+  render(h, { props, listeners }) {
+    const { label, highlight, isLabelSet } = props;
+
+    const labelColorBox = h('span', {
+      class: 'dropdown-label-box gl-flex-shrink-0 gl-top-0 gl-mr-3',
+      style: {
+        backgroundColor: label.color,
+      },
+      attrs: {
+        'data-testid': 'label-color-box',
+      },
+    });
+
+    const checkedIcon = h(GlIcon, {
+      class: {
+        'gl-mr-3 gl-flex-shrink-0': true,
+        hidden: !isLabelSet,
+      },
+      props: {
+        name: 'mobile-issue-close',
+      },
+    });
+
+    const noIcon = h('span', {
+      class: {
+        'gl-mr-5 gl-pr-3': true,
+        hidden: isLabelSet,
+      },
+      attrs: {
+        'data-testid': 'no-icon',
+      },
+    });
+
+    const labelTitle = h('span', label.title);
+
+    const labelLink = h(
+      GlLink,
+      {
+        class: 'gl-display-flex gl-align-items-center label-item gl-text-black-normal',
+        on: {
+          click: () => {
+            listeners.clickLabel(label);
+          },
+        },
+      },
+      [noIcon, checkedIcon, labelColorBox, labelTitle],
+    );
+
+    return h(
+      'li',
+      {
+        class: {
+          'gl-display-block': true,
+          'gl-text-left': true,
+          'is-focused': highlight,
+        },
+      },
+      [labelLink],
+    );
   },
 };
 </script>
-
-<template>
-  <gl-link
-    class="d-flex align-items-baseline text-break-word label-item"
-    :class="{ 'is-focused': highlight }"
-    @click="handleClick"
-  >
-    <gl-icon v-show="isSet" name="mobile-issue-close" class="mr-2 align-self-center" />
-    <span v-show="!isSet" data-testid="no-icon" class="mr-3 pr-2"></span>
-    <span class="dropdown-label-box" data-testid="label-color-box" :style="labelBoxStyle"></span>
-    <span>{{ label.title }}</span>
-  </gl-link>
-</template>

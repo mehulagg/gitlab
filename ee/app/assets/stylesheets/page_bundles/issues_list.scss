@@ -1,15 +1,5 @@
 @import '../../../../../app/assets/stylesheets/page_bundles/issues_list';
 
-.issuable-list-root {
-  .gl-label-link {
-    text-decoration: none;
-
-    &:hover {
-      color: inherit;
-    }
-  }
-}
-
 .svg-container.jira-logo-container {
   svg {
     vertical-align: text-bottom;

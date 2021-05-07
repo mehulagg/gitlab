@@ -11,26 +11,22 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { s__, __ } from '~/locale';
+import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { fetchPolicies } from '~/lib/graphql';
+import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
-import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
+import { s__, __ } from '~/locale';
+import AlertStatus from '~/vue_shared/alert_details/components/alert_status.vue';
 import {
   tdClass,
   thClass,
   bodyTrClass,
   initialPaginationState,
 } from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
+import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
-import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import getAlerts from '../graphql/queries/get_alerts.query.graphql';
+import { ALERTS_STATUS_TABS, SEVERITY_LEVELS, trackAlertListViewsOptions } from '../constants';
 import getAlertsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
-import {
-  ALERTS_STATUS_TABS,
-  ALERTS_SEVERITY_LABELS,
-  trackAlertListViewsOptions,
-} from '../constants';
-import AlertStatus from './alert_status.vue';
 
 const TH_TEST_ID = { 'data-testid': 'alert-management-severity-sort' };
 
@@ -46,6 +42,7 @@ export default {
       "AlertManagement|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
     ),
     unassigned: __('Unassigned'),
+    closed: __('closed'),
   },
   fields: [
     {
@@ -79,7 +76,7 @@ export default {
     {
       key: 'issue',
       label: s__('AlertManagement|Incident'),
-      thClass: 'gl-w-12 gl-pointer-events-none',
+      thClass: 'gl-w-15p gl-pointer-events-none',
       tdClass,
     },
     {
@@ -96,7 +93,7 @@ export default {
       sortable: true,
     },
   ],
-  severityLabels: ALERTS_SEVERITY_LABELS,
+  severityLabels: SEVERITY_LEVELS,
   statusTabs: ALERTS_STATUS_TABS,
   components: {
     GlAlert,
@@ -119,7 +116,7 @@ export default {
   apollo: {
     alerts: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getAlerts,
+      query: getAlertsQuery,
       variables() {
         return {
           searchTerm: this.searchTerm,
@@ -138,7 +135,7 @@ export default {
           data.project || {};
         const now = new Date();
 
-        const listWithData = list.map(alert => {
+        const listWithData = list.map((alert) => {
           const then = new Date(alert.startedAt);
           const diff = now - then;
 
@@ -225,8 +222,11 @@ export default {
     hasAssignees(assignees) {
       return Boolean(assignees.nodes?.length);
     },
-    getIssueLink(item) {
-      return joinPaths('/', this.projectPath, '-', 'issues', item.issueIid);
+    getIssueMeta({ issue: { iid, state } }) {
+      return {
+        state: state === 'closed' ? `(${this.$options.i18n.closed})` : '',
+        link: joinPaths('/', this.projectPath, '-', 'issues/incident', iid),
+      };
     },
     tbodyTrClass(item) {
       return {
@@ -347,8 +347,14 @@ export default {
           </template>
 
           <template #cell(issue)="{ item }">
-            <gl-link v-if="item.issueIid" data-testid="issueField" :href="getIssueLink(item)">
-              #{{ item.issueIid }}
+            <gl-link
+              v-if="item.issue"
+              v-gl-tooltip
+              :title="item.issue.title"
+              data-testid="issueField"
+              :href="getIssueMeta(item).link"
+            >
+              #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
             </gl-link>
             <div v-else data-testid="issueField">{{ s__('AlertManagement|None') }}</div>
           </template>

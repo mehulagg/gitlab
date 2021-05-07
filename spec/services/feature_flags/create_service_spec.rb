@@ -6,6 +6,7 @@ RSpec.describe FeatureFlags::CreateService do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:reporter) { create(:user) }
+
   let(:user) { developer }
 
   before_all do
@@ -34,6 +35,12 @@ RSpec.describe FeatureFlags::CreateService do
       it 'does not create audit log' do
         expect { subject }.not_to change { AuditEvent.count }
       end
+
+      it 'does not sync the feature flag to Jira' do
+        expect(::JiraConnect::SyncFeatureFlagsWorker).not_to receive(:perform_async)
+
+        subject
+      end
     end
 
     context 'when feature flag is saved correctly' do
@@ -52,6 +59,12 @@ RSpec.describe FeatureFlags::CreateService do
 
       it 'creates feature flag' do
         expect { subject }.to change { Operations::FeatureFlag.count }.by(1)
+      end
+
+      it 'syncs the feature flag to Jira' do
+        expect(::JiraConnect::SyncFeatureFlagsWorker).to receive(:perform_async).with(Integer, Integer)
+
+        subject
       end
 
       it 'creates audit event' do

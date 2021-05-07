@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+module SidekiqLogArguments
+  def self.enabled?
+    Gitlab::Utils.to_boolean(ENV['SIDEKIQ_LOG_ARGUMENTS'], default: true)
+  end
+end
 
 def enable_reliable_fetch?
   return true unless Feature::FlipperFeature.table_exists?
@@ -26,20 +31,22 @@ Sidekiq.configure_server do |config|
     Sidekiq.logger.formatter = Gitlab::SidekiqLogging::JSONFormatter.new
     config.options[:job_logger] = Gitlab::SidekiqLogging::StructuredLogger
 
-    # Remove the default-provided handler
+    # Remove the default-provided handler. The exception is logged inside
+    # Gitlab::SidekiqLogging::StructuredLogger
     config.error_handlers.reject! { |handler| handler.is_a?(Sidekiq::ExceptionHandler::Logger) }
-    config.error_handlers << Gitlab::SidekiqLogging::ExceptionHandler.new
   end
 
   config.redis = queues_config_hash
 
   config.server_middleware(&Gitlab::SidekiqMiddleware.server_configurator({
     metrics: Settings.monitoring.sidekiq_exporter,
-    arguments_logger: ENV['SIDEKIQ_LOG_ARGUMENTS'] && !enable_json_logs,
+    arguments_logger: SidekiqLogArguments.enabled? && !enable_json_logs,
     memory_killer: enable_sidekiq_memory_killer && use_sidekiq_legacy_memory_killer
   }))
 
   config.client_middleware(&Gitlab::SidekiqMiddleware.client_configurator)
+
+  config.death_handlers << Gitlab::SidekiqDeathHandler.method(:handler)
 
   config.on :startup do
     # Clear any connections that might have been obtained before starting

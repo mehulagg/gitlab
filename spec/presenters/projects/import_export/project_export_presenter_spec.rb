@@ -45,6 +45,14 @@ RSpec.describe Projects::ImportExport::ProjectExportPresenter do
     end
   end
 
+  describe '#protected_branches' do
+    it 'returns the project exported protected branches' do
+      expect(project).to receive(:exported_protected_branches)
+
+      subject.protected_branches
+    end
+  end
+
   describe '#project_members' do
     let(:user2) { create(:user, email: 'group@member.com') }
     let(:member_emails) do
@@ -78,14 +86,22 @@ RSpec.describe Projects::ImportExport::ProjectExportPresenter do
     context 'as admin' do
       let(:user) { create(:admin) }
 
-      it 'exports group members as admin' do
-        expect(member_emails).to include('group@member.com')
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'exports group members as admin' do
+          expect(member_emails).to include('group@member.com')
+        end
+
+        it 'exports group members as project members' do
+          member_types = subject.project_members.map { |pm| pm.source_type }
+
+          expect(member_types).to all(eq('Project'))
+        end
       end
 
-      it 'exports group members as project members' do
-        member_types = subject.project_members.map { |pm| pm.source_type }
-
-        expect(member_types).to all(eq('Project'))
+      context 'when admin mode is disabled' do
+        it 'does not export group members' do
+          expect(member_emails).not_to include('group@member.com')
+        end
       end
     end
   end

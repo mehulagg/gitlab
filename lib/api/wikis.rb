@@ -4,6 +4,8 @@ module API
   class Wikis < ::API::Base
     helpers ::API::Helpers::WikisHelpers
 
+    feature_category :wiki
+
     helpers do
       attr_reader :container
 
@@ -109,7 +111,7 @@ module API
           if response.success?
             no_content!
           else
-            render_api_error!(reponse.message)
+            unprocessable_entity!(response.message)
           end
         end
 

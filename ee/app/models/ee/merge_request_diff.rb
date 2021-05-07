@@ -24,8 +24,8 @@ module EE
       scope :has_external_diffs, -> { with_files.where(stored_externally: true) }
       scope :project_id_in, ->(ids) { where(merge_request_id: ::MergeRequest.where(target_project_id: ids)) }
 
-      scope :checksummed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
-      scope :checksum_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksum_failed) }
+      scope :verification_succeeded, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.verification_succeeded) }
+      scope :verification_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.verification_failed) }
       scope :available_replicables, -> { has_external_diffs }
     end
 
@@ -57,10 +57,6 @@ module EE
 
     def merge_request_diff_detail
       super || build_merge_request_diff_detail
-    end
-
-    def local?
-      stored_externally? && external_diff_store == ExternalDiffUploader::Store::LOCAL
     end
 
     def log_geo_deleted_event

@@ -10,6 +10,9 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
+      # After destroy callbacks are often skipped because of FastDestroyAll.
+      # All destroy callbacks should be implemented in `Ci::JobArtifacts::DestroyBatchService`
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/297472
       after_destroy :log_geo_deleted_event
 
       SECURITY_REPORT_FILE_TYPES = %w[sast secret_detection dependency_scanning container_scanning dast coverage_fuzzing api_fuzzing].freeze
@@ -17,16 +20,11 @@ module EE
       DEPENDENCY_LIST_REPORT_FILE_TYPES = %w[dependency_scanning].freeze
       METRICS_REPORT_FILE_TYPES = %w[metrics].freeze
       CONTAINER_SCANNING_REPORT_TYPES = %w[container_scanning].freeze
-      SAST_REPORT_TYPES = %w[sast].freeze
-      SECRET_DETECTION_REPORT_TYPES = %w[secret_detection].freeze
       DAST_REPORT_TYPES = %w[dast].freeze
       REQUIREMENTS_REPORT_FILE_TYPES = %w[requirements].freeze
       COVERAGE_FUZZING_REPORT_TYPES = %w[coverage_fuzzing].freeze
       API_FUZZING_REPORT_TYPES = %w[api_fuzzing].freeze
       BROWSER_PERFORMANCE_REPORT_FILE_TYPES = %w[browser_performance performance].freeze
-
-      scope :project_id_in, ->(ids) { where(project_id: ids) }
-      scope :with_files_stored_remotely, -> { where(file_store: ::JobArtifactUploader::Store::REMOTE) }
 
       scope :security_reports, -> (file_types: SECURITY_REPORT_FILE_TYPES) do
         requested_file_types = *file_types
@@ -46,14 +44,6 @@ module EE
         with_file_types(CONTAINER_SCANNING_REPORT_TYPES)
       end
 
-      scope :sast_reports, -> do
-        with_file_types(SAST_REPORT_TYPES)
-      end
-
-      scope :secret_detection_reports, -> do
-        with_file_types(SECRET_DETECTION_REPORT_TYPES)
-      end
-
       scope :dast_reports, -> do
         with_file_types(DAST_REPORT_TYPES)
       end
@@ -69,6 +59,8 @@ module EE
       scope :api_fuzzing_reports, -> do
         with_file_types(API_FUZZING_REPORT_TYPES)
       end
+
+      delegate :validate_schema?, to: :job
     end
 
     class_methods do
@@ -81,29 +73,6 @@ module EE
 
         super
       end
-
-      # @param primary_key_in [Range, Ci::JobArtifact] arg to pass to primary_key_in scope
-      # @return [ActiveRecord::Relation<Ci::JobArtifact>] everything that should be synced to this node, restricted by primary key
-      def replicables_for_current_secondary(primary_key_in)
-        node = ::Gitlab::Geo.current_node
-
-        not_expired
-          .primary_key_in(primary_key_in)
-          .merge(selective_sync_scope(node))
-          .merge(object_storage_scope(node))
-      end
-
-      def object_storage_scope(node)
-        return all if node.sync_object_storage?
-
-        with_files_stored_locally
-      end
-
-      def selective_sync_scope(node)
-        return all unless node.selective_sync?
-
-        project_id_in(node.projects)
-      end
     end
 
     def log_geo_deleted_event
@@ -114,14 +83,16 @@ module EE
     # parsed report regardless of the `file_type` but this will
     # require more effort so we can have this security reports
     # specific method here for now.
-    def security_report
+    def security_report(validate: false)
       strong_memoize(:security_report) do
         next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
 
-        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
+        report = ::Gitlab::Ci::Reports::Security::Report.new(file_type, job.pipeline, nil).tap do |report|
           each_blob do |blob|
-            ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
+            ::Gitlab::Ci::Parsers.fabricate!(file_type, blob, report, validate: (validate && validate_schema?)).parse!
           end
+        rescue StandardError
+          report.add_error('ParsingError')
         end
 
         # This will remove the duplicated findings within the artifact itself

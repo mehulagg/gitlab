@@ -9,7 +9,7 @@ module EE
 
         private
 
-        def path_validations
+        def file_paths_validations
           validations = [super].flatten
 
           if validate_code_owners?
@@ -20,7 +20,8 @@ module EE
         end
 
         def validate_code_owners?
-          return false if updated_from_web? || user_access.can_push_to_branch?(branch_name)
+          return false if updated_from_web?
+          return false if ::Feature.enabled?(:push_rules_supersede_code_owners, project, default_enabled: true) && user_access.can_push_to_branch?(branch_name)
 
           project.branch_requires_code_owner_approval?(branch_name)
         end
@@ -47,8 +48,8 @@ module EE
           push_rule.file_name_regex.present? || push_rule.prevent_secrets
         end
 
-        override :validations_for_diff
-        def validations_for_diff
+        override :validations_for_path
+        def validations_for_path
           super.tap do |validations|
             validations.push(path_locks_validation) if validate_path_locks?
             validations.push(file_name_validation) if push_rule_checks_commit?
@@ -56,13 +57,8 @@ module EE
         end
 
         def path_locks_validation
-          lambda do |diff|
-            path = if diff.renamed_file?
-                     diff.old_path
-                   else
-                     diff.new_path || diff.old_path
-                   end
-
+          lambda do |changed_path|
+            path = changed_path.path
             lock_info = project.find_path_lock(path)
 
             if lock_info && lock_info.user != user_access.user
@@ -72,11 +68,11 @@ module EE
         end
 
         def file_name_validation
-          lambda do |diff|
-            if (diff.renamed_file || diff.new_file) && blacklisted_regex = push_rule.filename_denylisted?(diff.new_path)
-              return unless blacklisted_regex.present?
+          lambda do |changed_path|
+            if changed_path.new_file? && denylisted_regex = push_rule.filename_denylisted?(changed_path.path)
+              return unless denylisted_regex.present?
 
-              "File name #{diff.new_path} was blacklisted by the pattern #{blacklisted_regex}."
+              "File name #{changed_path.path} was blacklisted by the pattern #{denylisted_regex}."
             end
           rescue ::PushRule::MatchError => e
             raise ::Gitlab::GitAccess::ForbiddenError, e.message

@@ -180,6 +180,138 @@ RSpec.describe Gitlab::CustomFileTemplates do
           it 'returns nil for an unknown key' do
             expect(templates.find('unknown')).to be_nil
           end
+
+          context 'when subgroup template names overlap with ancestor' do
+            let(:subgroup_template_project) { create(:project, :custom_repo, namespace: subgroup, files: template_files('group')) }
+
+            before do
+              subgroup.update!(file_template_project: subgroup_template_project)
+            end
+
+            it 'returns a template from the subgroup' do
+              expect(templates.find(group_key)).to be_template(group_key, "Group #{subgroup.full_name}")
+            end
+
+            it 'finds a template from the parent group with specified project' do
+              expect(templates.find(group_key, group_template_project.id)).to be_template(group_key, "Group #{group.full_name}")
+            end
+          end
+        end
+
+        context 'when looking for template for a specific project' do
+          let(:target_project) { project }
+
+          let_it_be(:another_project) { create(:project, :custom_repo, namespace: group, files: template_files('group')) }
+
+          it 'finds a valid template when looking into group template project' do
+            templates_find = templates.find(group_key, group_template_project.id)
+
+            expect(templates_find).to be_template(group_key, "Group #{group.full_name}")
+          end
+
+          it 'finds a valid template when looking into instance template project' do
+            templates_find = templates.find(instance_key, instance_template_project.id)
+
+            expect(templates_find).to be_template(instance_key, "Instance")
+          end
+
+          it 'does not find a template when given project does not have the template' do
+            expect(templates.find(group_key, another_project.id)).to be_nil
+          end
+        end
+      end
+    end
+  end
+
+  describe '#all_template_names' do
+    RSpec.shared_examples 'does not list an empty category' do
+      it 'misses subgroup category' do
+        expect(template_categories).to eq(["Group #{group.full_name}", "Instance"])
+      end
+
+      it 'misses subgroup templates' do
+        expect(template_file_names).to eq(["group_#{type}", "instance_#{type}"])
+      end
+    end
+
+    where(:template_finder, :type) do
+      Gitlab::Template::CustomDockerfileTemplate  | :dockerfile
+      Gitlab::Template::CustomGitignoreTemplate   | :gitignore
+      Gitlab::Template::CustomGitlabCiYmlTemplate | :gitlab_ci_yml
+      Gitlab::Template::CustomLicenseTemplate     | :license
+    end
+
+    with_them do
+      let(:result) { templates.all_template_names }
+      let(:template_file_names) { result.values.flatten.map { |el| el[:name] } }
+      let(:template_categories) { result.keys }
+
+      before do
+        stub_ee_application_setting(file_template_project: instance_template_project)
+        group.update_columns(file_template_project_id: group_template_project.id)
+      end
+
+      context 'unlicensed' do
+        let(:target_project) { project }
+
+        it { expect(result).to be_empty }
+      end
+
+      context 'licensed' do
+        before do
+          stub_licensed_features(custom_file_templates: true, custom_file_templates_for_namespace: true)
+        end
+
+        context 'in a toplevel group' do
+          let(:target_project) { project }
+
+          it 'has the group names and instance as category' do
+            expect(template_categories).to eq(["Group #{group.full_name}", "Instance"])
+          end
+
+          it 'orders results from most specific to least specific' do
+            expect(template_file_names).to eq(["group_#{type}", "instance_#{type}"])
+          end
+        end
+
+        context 'in a subgroup' do
+          let_it_be_with_reload(:subgroup) { create(:group, parent: group) }
+          let_it_be_with_reload(:subproject) { create(:project, namespace: subgroup) }
+          let_it_be(:subgroup_template_project) { create(:project, :custom_repo, namespace: subgroup, files: template_files('subgroup')) }
+
+          let(:target_project) { subproject }
+
+          context 'with nested group templates' do
+            before do
+              subgroup.update_columns(file_template_project_id: subgroup_template_project.id)
+            end
+
+            it 'has the group names and instance as category' do
+              expect(template_categories).to eq(["Group #{subgroup.full_name}", "Group #{group.full_name}", "Instance"])
+            end
+
+            it 'orders results from most specific to least specific' do
+              expect(template_file_names).to eq(["subgroup_#{type}", "group_#{type}", "instance_#{type}"])
+            end
+          end
+
+          context 'with templates missing for a nested group' do
+            context 'when subgroup template config points to a project that has no templates' do
+              before do
+                subgroup.update_columns(file_template_project_id: subproject.id)
+              end
+
+              it_behaves_like 'does not list an empty category'
+            end
+
+            context 'when subgroup template config is not setup' do
+              before do
+                subgroup.update_columns(file_template_project_id: nil)
+              end
+
+              it_behaves_like 'does not list an empty category'
+            end
+          end
         end
       end
     end

@@ -7,10 +7,12 @@ module API
 
     before { authenticate! }
 
+    feature_category :issue_tracking
+
     params do
       requires :id, type: String, desc: 'The ID of a group'
     end
-    resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+    resource :groups, requirements: ::API::Labels::LABEL_ENDPOINT_REQUIREMENTS do
       desc 'Get all labels of the group' do
         detail 'This feature was added in GitLab 11.8'
         success Entities::GroupLabel
@@ -64,7 +66,7 @@ module API
         success Entities::GroupLabel
       end
       params do
-        optional :label_id, type: Integer, desc: 'The id of the label to be updated'
+        optional :label_id, type: Integer, desc: 'The ID of the label to be updated'
         optional :name, type: String, desc: 'The name of the label to be updated'
         use :group_label_update_params
         exactly_one_of :label_id, :name

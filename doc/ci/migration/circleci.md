@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Continuous Integration
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 comments: false
 type: index, howto
 ---
@@ -10,12 +10,12 @@ type: index, howto
 
 If you are currently using CircleCI, you can migrate your CI/CD pipelines to [GitLab CI/CD](../introduction/index.md),
 and start making use of all its powerful features. Check out our
-[CircleCI vs GitLab](https://about.gitlab.com/devops-tools/circle-ci-vs-gitlab.html)
+[CircleCI vs GitLab](https://about.gitlab.com/devops-tools/circle-ci-vs-gitlab/)
 comparison to see what's different.
 
 We have collected several resources that you may find useful before starting to migrate.
 
-The [Quick Start Guide](../quick_start/README.md) is a good overview of how GitLab CI/CD works. You may also be interested in [Auto DevOps](../../topics/autodevops/index.md) which can be used to build, test, and deploy your applications with little to no configuration needed at all.
+The [Quick Start Guide](../quick_start/index.md) is a good overview of how GitLab CI/CD works. You may also be interested in [Auto DevOps](../../topics/autodevops/index.md) which can be used to build, test, and deploy your applications with little to no configuration needed at all.
 
 For advanced CI/CD teams, [custom project templates](../../user/admin_area/custom_project_templates.md) can enable the reuse of pipeline configurations.
 
@@ -27,7 +27,7 @@ CircleCI's `config.yml` configuration file defines scripts, jobs, and workflows 
 
 ### Jobs
 
-In CircleCI, jobs are a collection of steps to perform a specific task. In GitLab, [jobs](../yaml/README.md#introduction) are also a fundamental element in the configuration file. The `checkout` keyword is not necessary in GitLab CI/CD as the repository is automatically fetched.
+In CircleCI, jobs are a collection of steps to perform a specific task. In GitLab, [jobs](../jobs/index.md) are also a fundamental element in the configuration file. The `checkout` keyword is not necessary in GitLab CI/CD as the repository is automatically fetched.
 
 CircleCI example job definition:
 
@@ -200,7 +200,7 @@ deploy_prod:
 
 ### Filter job by branch
 
-[Rules](../yaml/README.md#rules) are a mechanism to determine if the job will or will not run for a specific branch.
+[Rules](../yaml/README.md#rules) are a mechanism to determine if the job runs for a specific branch.
 
 CircleCI example of a job filtered by branch:
 
@@ -265,14 +265,14 @@ test_async:
 
 ## Contexts and variables
 
-CircleCI provides [Contexts](https://circleci.com/docs/2.0/contexts/) to securely pass environment variables across project pipelines. In GitLab, a [Group](../../user/group/index.md) can be created to assemble related projects together. At the group level, [variables](../variables/README.md#group-level-environment-variables) can be stored outside the individual projects, and securely passed into pipelines across multiple projects.
+CircleCI provides [Contexts](https://circleci.com/docs/2.0/contexts/) to securely pass environment variables across project pipelines. In GitLab, a [Group](../../user/group/index.md) can be created to assemble related projects together. At the group level, [CI/CD variables](../variables/README.md#group-cicd-variables) can be stored outside the individual projects, and securely passed into pipelines across multiple projects.
 
 ## Orbs
 
 There are two GitLab issues open addressing CircleCI Orbs and how GitLab can achieve similar functionality.
 
-- <https://gitlab.com/gitlab-com/Product/-/issues/1151>
-- <https://gitlab.com/gitlab-org/gitlab/-/issues/195173>
+- [issue #1151](https://gitlab.com/gitlab-com/Product/-/issues/1151)
+- [issue #195173](https://gitlab.com/gitlab-org/gitlab/-/issues/195173)
 
 ## Build environments
 

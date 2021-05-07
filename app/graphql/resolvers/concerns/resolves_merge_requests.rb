@@ -40,6 +40,8 @@ module ResolvesMergeRequests
   def preloads
     {
       assignees: [:assignees],
+      reviewers: [:reviewers],
+      participants: MergeRequest.participant_includes,
       labels: [:labels],
       author: [:author],
       merged_at: [:metrics],
@@ -47,7 +49,9 @@ module ResolvesMergeRequests
       diff_stats_summary: [:metrics],
       approved_by: [:approved_by_users],
       milestone: [:milestone],
-      head_pipeline: [:merge_request_diff, { head_pipeline: [:merge_request] }]
+      security_auto_fix: [:author],
+      head_pipeline: [:merge_request_diff, { head_pipeline: [:merge_request] }],
+      timelogs: [:timelogs]
     }
   end
 end

@@ -1,21 +1,22 @@
 ---
 stage: Package
 group: Package
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab Dependency Proxy administration **(PREMIUM ONLY)**
+# GitLab Dependency Proxy administration **(FREE SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/273655) to [GitLab Free](https://about.gitlab.com/pricing/) in GitLab 13.6.
 
-GitLab can be utilized as a dependency proxy for a variety of common package managers.
+GitLab can be used as a dependency proxy for a variety of common package managers.
 
 This is the administration documentation. If you want to learn how to use the
 dependency proxies, see the [user guide](../../user/packages/dependency_proxy/index.md).
 
 ## Enabling the Dependency Proxy feature
 
-NOTE: **Note:**
+NOTE:
 Dependency proxy requires the Puma web server to be enabled.
 
 To enable the dependency proxy feature:
@@ -33,7 +34,7 @@ To enable the dependency proxy feature:
 
 **Installations from source**
 
-1. After the installation is complete, you will have to configure the `dependency_proxy`
+1. After the installation is complete, configure the `dependency_proxy`
    section in `config/gitlab.yml`. Set to `true` to enable it:
 
    ```yaml
@@ -45,6 +46,10 @@ To enable the dependency proxy feature:
 
 Since Puma is already the default web server for installations from source as of GitLab 12.9,
 no further changes are needed.
+
+**Multi-node GitLab installations**
+
+Follow the steps for **Omnibus GitLab installation** for each Web and Sidekiq nodes.
 
 ## Changing the storage path
 
@@ -87,7 +92,7 @@ store the blobs of the dependency proxy.
 
 [Read more about using object storage with GitLab](../object_storage.md).
 
-NOTE: **Note:**
+NOTE:
 In GitLab 13.2 and later, we recommend using the
 [consolidated object storage settings](../object_storage.md#consolidated-object-storage-configuration).
 This section describes the earlier configuration format.
@@ -160,3 +165,22 @@ This section describes the earlier configuration format.
    ```
 
 1. [Restart GitLab](../restart_gitlab.md#installations-from-source "How to restart GitLab") for the changes to take effect.
+
+## Disabling Authentication
+
+Authentication was introduced in 13.7 as part of [enabling private groups to use the
+Dependency Proxy](https://gitlab.com/gitlab-org/gitlab/-/issues/11582). If you
+previously used the Dependency Proxy without authentication and need to disable
+this feature while you update your workflow to [authenticate with the Dependency
+Proxy](../../user/packages/dependency_proxy/index.md#authenticate-with-the-dependency-proxy),
+the following commands can be issued in a Rails console:
+
+```ruby
+# Disable the authentication
+Feature.disable(:dependency_proxy_for_private_groups)
+
+# Re-enable the authentication
+Feature.enable(:dependency_proxy_for_private_groups)
+```
+
+The ability to disable this feature will be [removed in 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/276777).

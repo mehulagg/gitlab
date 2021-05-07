@@ -27,19 +27,6 @@ class IssuableFinder
       params.present?
     end
 
-    def author_id?
-      params[:author_id].present? && params[:author_id] != NONE
-    end
-
-    def author_username?
-      params[:author_username].present? && params[:author_username] != NONE
-    end
-
-    def no_author?
-      # author_id takes precedence over author_username
-      params[:author_id] == NONE || params[:author_username] == NONE
-    end
-
     def filter_by_no_assignee?
       params[:assignee_id].to_s.downcase == FILTER_NONE
     end
@@ -108,16 +95,8 @@ class IssuableFinder
       project_id.present?
     end
 
-    def group
-      strong_memoize(:group) do
-        if params[:group_id].is_a?(Group)
-          params[:group_id]
-        elsif params[:group_id].present?
-          Group.find(params[:group_id])
-        else
-          nil
-        end
-      end
+    def group?
+      group_id.present?
     end
 
     def related_groups
@@ -143,8 +122,23 @@ class IssuableFinder
       end
     end
 
+    def group
+      strong_memoize(:group) do
+        next nil unless group?
+
+        group = group_id.is_a?(Group) ? group_id : Group.find(group_id)
+        group = nil unless Ability.allowed?(current_user, :read_group, group)
+
+        group
+      end
+    end
+
     def project_id
       params[:project_id]
+    end
+
+    def group_id
+      params[:group_id]
     end
 
     def projects
@@ -161,20 +155,6 @@ class IssuableFinder
         projects.with_feature_available_for_user(klass, current_user).reorder(nil) # rubocop: disable CodeReuse/ActiveRecord
       end
     end
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def author
-      strong_memoize(:author) do
-        if author_id?
-          User.find_by(id: params[:author_id])
-        elsif author_username?
-          User.find_by_username(params[:author_username])
-        else
-          nil
-        end
-      end
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     # rubocop: disable CodeReuse/ActiveRecord
     def assignees
@@ -216,14 +196,14 @@ class IssuableFinder
       strong_memoize(:milestones) do
         if milestones?
           if project?
-            group_id = project.group&.id
+            project_group_id = project.group&.id
             project_id = project.id
           end
 
-          group_id = group.id if group
+          project_group_id = group.id if group
 
           search_params =
-            { title: params[:milestone_title], project_ids: project_id, group_ids: group_id }
+            { title: params[:milestone_title], project_ids: project_id, group_ids: project_group_id }
 
           MilestonesFinder.new(search_params).execute # rubocop: disable CodeReuse/Finder
         else
@@ -255,6 +235,10 @@ class IssuableFinder
     # Just for symmetry, and in case someone tries to use it
     def merge!(other)
       params.merge!(other)
+    end
+
+    def parent
+      project || group
     end
 
     private

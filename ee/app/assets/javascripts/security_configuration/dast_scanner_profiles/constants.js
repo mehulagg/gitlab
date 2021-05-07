@@ -5,13 +5,18 @@ export const SCAN_TYPE = {
   PASSIVE: 'PASSIVE',
 };
 
+export const SCAN_TYPE_LABEL = {
+  [SCAN_TYPE.ACTIVE]: s__('DastProfiles|Active'),
+  [SCAN_TYPE.PASSIVE]: s__('DastProfiles|Passive'),
+};
+
 export const SCAN_TYPE_OPTIONS = [
   {
     value: SCAN_TYPE.ACTIVE,
-    text: s__('DastProfiles|Active'),
+    text: SCAN_TYPE_LABEL[SCAN_TYPE.ACTIVE],
   },
   {
     value: SCAN_TYPE.PASSIVE,
-    text: s__('DastProfiles|Passive'),
+    text: SCAN_TYPE_LABEL[SCAN_TYPE.PASSIVE],
   },
 ];

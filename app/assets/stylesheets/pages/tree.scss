@@ -1,8 +1,11 @@
+.project-last-commit {
+  min-height: 4.75rem;
+}
+
 .tree-holder {
   .nav-block {
     margin: 16px 0;
 
-    .btn .fa,
     .btn svg {
       color: $gl-text-color-secondary;
     }
@@ -19,7 +22,7 @@
 
         .control {
           float: left;
-          margin-left: 10px;
+          margin-left: 8px;
         }
       }
 
@@ -46,8 +49,6 @@
       position: relative;
 
       .dropdown-menu {
-        min-width: 100%;
-        width: 100%;
         left: inherit;
         right: 0;
       }
@@ -62,14 +63,14 @@
     .tree-controls {
       margin-bottom: 10px;
 
-      .btn,
+      .btn:not(.dropdown-toggle-split),
       .dropdown,
       .btn-group {
         width: 100%;
       }
 
       .btn {
-        margin: 10px 0 0;
+        margin-top: 10px;
       }
     }
   }
@@ -95,6 +96,7 @@
 
   .tree-table {
     margin-bottom: 0;
+    table-layout: fixed;
 
     tr {
       border-bottom: 1px solid $white-normal;
@@ -110,7 +112,7 @@
       }
 
       th {
-        border-top-color: $gray-light;
+        border: 0;
       }
 
       td {

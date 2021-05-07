@@ -1,7 +1,7 @@
-import { stateAndPropsFromDataset } from '~/monitoring/utils';
-import { mapToDashboardViewModel } from '~/monitoring/stores/utils';
-import { metricStates } from '~/monitoring/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { metricStates } from '~/monitoring/constants';
+import { mapToDashboardViewModel } from '~/monitoring/stores/utils';
+import { stateAndPropsFromDataset } from '~/monitoring/utils';
 
 import { metricsResult } from './mock_data';
 
@@ -35,7 +35,7 @@ const firstPanel = metricsDashboardViewModel.panelGroups[0].panels[0];
 
 export const graphData = {
   ...firstPanel,
-  metrics: firstPanel.metrics.map(metric => ({
+  metrics: firstPanel.metrics.map((metric) => ({
     ...metric,
     result: metricsResult,
     state: metricStates.OK,
@@ -44,7 +44,7 @@ export const graphData = {
 
 export const graphDataEmpty = {
   ...firstPanel,
-  metrics: firstPanel.metrics.map(metric => ({
+  metrics: firstPanel.metrics.map((metric) => ({
     ...metric,
     result: [],
     state: metricStates.NO_DATA,

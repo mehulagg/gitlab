@@ -3,12 +3,21 @@
 function retrieve_tests_metadata() {
   mkdir -p knapsack/ rspec_flaky/ rspec_profiling/
 
+  # ${CI_DEFAULT_BRANCH} might not be master in other forks but we want to
+  # always target the canonical project here, so the branch must be hardcoded
+  local project_path="gitlab-org/gitlab"
+  local artifact_branch="master"
+  local test_metadata_job_id
+
+  # Ruby
+  test_metadata_job_id=$(scripts/api/get_job_id.rb --project "${project_path}" -q "status=success" -q "ref=${artifact_branch}" -q "username=gitlab-bot" -Q "scope=success" --job-name "update-tests-metadata")
+
   if [[ ! -f "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ]]; then
-    wget -O "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "http://${TESTS_METADATA_S3_BUCKET}.s3.amazonaws.com/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
+    scripts/api/download_job_artifact.rb --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
   fi
 
   if [[ ! -f "${FLAKY_RSPEC_SUITE_REPORT_PATH}" ]]; then
-    wget -O "${FLAKY_RSPEC_SUITE_REPORT_PATH}" "http://${TESTS_METADATA_S3_BUCKET}.s3.amazonaws.com/${FLAKY_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
+    scripts/api/download_job_artifact.rb --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${FLAKY_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
   fi
 }
 
@@ -16,29 +25,11 @@ function update_tests_metadata() {
   echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
 
   scripts/merge-reports "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" knapsack/rspec*.json
-  if [[ -n "${TESTS_METADATA_S3_BUCKET}" ]]; then
-    if [[ "$CI_PIPELINE_SOURCE" == "schedule" ]]; then
-      scripts/sync-reports put "${TESTS_METADATA_S3_BUCKET}" "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
-    else
-      echo "Not uplaoding report to S3 as the pipeline is not a scheduled one."
-    fi
-  fi
-
   rm -f knapsack/rspec*.json
 
-  scripts/merge-reports "${FLAKY_RSPEC_SUITE_REPORT_PATH}" rspec_flaky/all_*.json
-
   export FLAKY_RSPEC_GENERATE_REPORT="true"
+  scripts/merge-reports "${FLAKY_RSPEC_SUITE_REPORT_PATH}" rspec_flaky/all_*.json
   scripts/flaky_examples/prune-old-flaky-examples "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
-
-  if [[ -n ${TESTS_METADATA_S3_BUCKET} ]]; then
-    if [[ "$CI_PIPELINE_SOURCE" == "schedule" ]]; then
-      scripts/sync-reports put "${TESTS_METADATA_S3_BUCKET}" "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
-    else
-      echo "Not uploading report to S3 as the pipeline is not a scheduled one."
-    fi
-  fi
-
   rm -f rspec_flaky/all_*.json rspec_flaky/new_*.json
 
   if [[ "$CI_PIPELINE_SOURCE" == "schedule" ]]; then
@@ -48,12 +39,56 @@ function update_tests_metadata() {
   fi
 }
 
+function retrieve_tests_mapping() {
+  mkdir -p crystalball/
+
+  # ${CI_DEFAULT_BRANCH} might not be master in other forks but we want to
+  # always target the canonical project here, so the branch must be hardcoded
+  local project_path="gitlab-org/gitlab"
+  local artifact_branch="master"
+  local test_metadata_with_mapping_job_id
+
+  test_metadata_with_mapping_job_id=$(scripts/api/get_job_id.rb --project "${project_path}" -q "status=success" -q "ref=${artifact_branch}" -q "username=gitlab-bot" -Q "scope=success" --job-name "update-tests-metadata" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz")
+
+  if [[ ! -f "${RSPEC_PACKED_TESTS_MAPPING_PATH}" ]]; then
+   (scripts/api/download_job_artifact.rb --project "${project_path}" --job-id "${test_metadata_with_mapping_job_id}" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz" && gzip -d "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz") || echo "{}" > "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+  fi
+
+  scripts/unpack-test-mapping "${RSPEC_PACKED_TESTS_MAPPING_PATH}" "${RSPEC_TESTS_MAPPING_PATH}"
+}
+
+function update_tests_mapping() {
+  if ! crystalball_rspec_data_exists; then
+    echo "No crystalball rspec data found."
+    return 0
+  fi
+
+  scripts/generate-test-mapping "${RSPEC_TESTS_MAPPING_PATH}" crystalball/rspec*.yml
+  scripts/pack-test-mapping "${RSPEC_TESTS_MAPPING_PATH}" "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+  gzip "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+  rm -f crystalball/rspec*.yml "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
+}
+
+function crystalball_rspec_data_exists() {
+  compgen -G "crystalball/rspec*.yml" >/dev/null
+}
+
 function rspec_simple_job() {
   local rspec_opts="${1}"
 
   export NO_KNAPSACK="1"
 
-  bin/rspec --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}
+  bin/rspec -Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}
+}
+
+function rspec_db_library_code() {
+  local db_files="spec/lib/gitlab/database/ spec/support/helpers/database/"
+
+  if [[ -d "ee/" ]]; then
+    db_files="${db_files} ee/spec/lib/gitlab/database/ ee/spec/lib/ee/gitlab/database_spec.rb"
+  fi
+
+  rspec_simple_job "-- ${db_files}"
 }
 
 function rspec_paralellized_job() {
@@ -68,6 +103,10 @@ function rspec_paralellized_job() {
     spec_folder_prefix="ee/"
   fi
 
+  if [[ "${test_tool}" =~ "-jh" ]]; then
+    spec_folder_prefix="jh/"
+  fi
+
   export KNAPSACK_LOG_LEVEL="debug"
   export KNAPSACK_REPORT_PATH="knapsack/${report_name}_report.json"
 
@@ -80,7 +119,7 @@ function rspec_paralellized_job() {
   cp "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "${KNAPSACK_REPORT_PATH}"
 
   if [[ -z "${KNAPSACK_TEST_FILE_PATTERN}" ]]; then
-    pattern=$(ruby -r./lib/quality/test_level.rb -e "puts Quality::TestLevel.new(%(${spec_folder_prefix})).pattern(:${test_level})")
+    pattern=$(ruby -r./tooling/quality/test_level.rb -e "puts Quality::TestLevel.new(%(${spec_folder_prefix})).pattern(:${test_level})")
     export KNAPSACK_TEST_FILE_PATTERN="${pattern}"
   fi
 
@@ -106,7 +145,13 @@ function rspec_paralellized_job() {
 
   export MEMORY_TEST_PATH="tmp/memory_test/${report_name}_memory.csv"
 
-  knapsack rspec "-Ispec --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}"
+  local rspec_args="-Ispec -rspec_helper --color --format documentation --format RspecJunitFormatter --out junit_rspec.xml ${rspec_opts}"
+
+  if [[ -n $RSPEC_TESTS_MAPPING_ENABLED ]]; then
+    tooling/bin/parallel_rspec --rspec_args "${rspec_args}" --filter "tmp/matching_tests.txt"
+  else
+    tooling/bin/parallel_rspec --rspec_args "${rspec_args}"
+  fi
 
   date
 }

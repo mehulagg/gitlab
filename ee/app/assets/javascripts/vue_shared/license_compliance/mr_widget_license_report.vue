@@ -1,13 +1,12 @@
 <script>
+import { GlLink, GlIcon, GlButton } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { GlLink, GlIcon } from '@gitlab/ui';
-import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
-import SetLicenseApprovalModal from 'ee/vue_shared/license_compliance/components/set_approval_status_modal.vue';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import ReportItem from '~/reports/components/report_item.vue';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
+import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import createStore from './store';
 
 const store = createStore();
@@ -17,10 +16,10 @@ export default {
   componentNames,
   store,
   components: {
+    GlButton,
     GlLink,
     ReportItem,
     ReportSection,
-    SetLicenseApprovalModal,
     SmartVirtualList,
     GlIcon,
   },
@@ -64,7 +63,7 @@ export default {
       required: false,
       default: false,
     },
-    securityApprovalsHelpPagePath: {
+    licenseComplianceDocsPath: {
       type: String,
       required: false,
       default: '',
@@ -121,7 +120,6 @@ export default {
 </script>
 <template>
   <div>
-    <set-license-approval-modal />
     <report-section
       :status="licenseReportStatus"
       :loading-text="licenseSummaryText"
@@ -170,33 +168,36 @@ export default {
         <div class="pr-3">
           {{ licenseSummaryText }}
           <gl-link
-            v-if="reportContainsBlacklistedLicense && securityApprovalsHelpPagePath"
-            :href="securityApprovalsHelpPagePath"
-            class="js-security-approval-help-link"
+            v-if="reportContainsBlacklistedLicense && licenseComplianceDocsPath"
+            :href="licenseComplianceDocsPath"
+            data-testid="security-approval-help-link"
             target="_blank"
           >
             <gl-icon :size="12" name="question" />
           </gl-link>
         </div>
       </template>
-      <div v-if="showActionButtons" slot="actionButtons" class="gl-mr-3">
-        <a
-          v-if="licenseManagementSettingsPath"
-          :class="{ 'gl-mr-3': fullReportPath }"
-          :href="licenseManagementSettingsPath"
-          class="btn btn-default btn-sm js-manage-licenses"
-        >
-          {{ s__('ciReport|Manage licenses') }}
-        </a>
-        <a
+      <template v-if="showActionButtons" #action-buttons="{ isCollapsible }">
+        <gl-button
           v-if="fullReportPath"
           :href="fullReportPath"
           target="_blank"
-          class="btn btn-default btn-sm js-full-report"
+          data-testid="full-report-button"
+          class="gl-mr-3"
+          icon="external-link"
         >
-          {{ s__('ciReport|View full report') }} <gl-icon :size="16" name="external-link" />
-        </a>
-      </div>
+          {{ s__('ciReport|View full report') }}
+        </gl-button>
+        <gl-button
+          v-if="licenseManagementSettingsPath"
+          data-testid="manage-licenses-button"
+          :class="{ 'gl-mr-3': isCollapsible }"
+          :href="licenseManagementSettingsPath"
+          data-qa-selector="manage_licenses_button"
+        >
+          {{ s__('ciReport|Manage licenses') }}
+        </gl-button>
+      </template>
     </report-section>
   </div>
 </template>

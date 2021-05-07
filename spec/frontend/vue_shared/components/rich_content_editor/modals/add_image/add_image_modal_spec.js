@@ -1,8 +1,8 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlTabs } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { IMAGE_TABS } from '~/vue_shared/components/rich_content_editor/constants';
 import AddImageModal from '~/vue_shared/components/rich_content_editor/modals/add_image/add_image_modal.vue';
 import UploadImageTab from '~/vue_shared/components/rich_content_editor/modals/add_image/upload_image_tab.vue';
-import { IMAGE_TABS } from '~/vue_shared/components/rich_content_editor/constants';
 
 describe('Add Image Modal', () => {
   let wrapper;
@@ -15,10 +15,7 @@ describe('Add Image Modal', () => {
   const findDescriptionInput = () => wrapper.find({ ref: 'descriptionInput' });
 
   beforeEach(() => {
-    wrapper = shallowMount(AddImageModal, {
-      provide: { glFeatures: { sseImageUploads: true } },
-      propsData,
-    });
+    wrapper = shallowMount(AddImageModal, { propsData });
   });
 
   describe('when content is loaded', () => {

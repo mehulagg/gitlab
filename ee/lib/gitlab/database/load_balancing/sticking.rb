@@ -27,7 +27,7 @@ module Gitlab
           stick(namespace, id) if Session.current.performed_write?
         end
 
-        # Checks if we were able to caught-up with all the work
+        # Checks if we are caught-up with all the work
         def self.all_caught_up?(namespace, id)
           location = last_write_location_for(namespace, id)
 
@@ -38,10 +38,36 @@ module Gitlab
           end
         end
 
+        # Selects hosts that have caught up with the primary. This ensures
+        # atomic selection of the host to prevent the host list changing
+        # in another thread.
+        #
+        # Returns true if one host was selected.
+        def self.select_caught_up_replicas(namespace, id)
+          location = last_write_location_for(namespace, id)
+
+          # Unlike all_caught_up?, we return false if no write location exists.
+          # We want to be sure we talk to a replica that has caught up for a specific
+          # write location. If no such location exists, err on the side of caution.
+          return false unless location
+
+          load_balancer.select_caught_up_hosts(location).tap do |selected|
+            unstick(namespace, id) if selected
+          end
+        end
+
         # Sticks to the primary if necessary, otherwise unsticks an object (if
         # it was previously stuck to the primary).
         def self.unstick_or_continue_sticking(namespace, id)
           Session.current.use_primary! unless all_caught_up?(namespace, id)
+        end
+
+        # Select a replica that has caught up with the primary. If one has not been
+        # found, stick to the primary.
+        def self.select_valid_host(namespace, id)
+          replica_selected = select_caught_up_replicas(namespace, id)
+
+          Session.current.use_primary! unless replica_selected
         end
 
         # Starts sticking to the primary for the given namespace and id, using

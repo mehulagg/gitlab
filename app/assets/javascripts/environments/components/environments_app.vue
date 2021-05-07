@@ -2,14 +2,14 @@
 import { GlBadge, GlButton, GlModalDirective, GlTab, GlTabs } from '@gitlab/ui';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { s__ } from '~/locale';
-import emptyState from './empty_state.vue';
 import eventHub from '../event_hub';
 import environmentsMixin from '../mixins/environments_mixin';
-import CIPaginationMixin from '~/vue_shared/mixins/ci_pagination_api_mixin';
+import EnvironmentsPaginationApiMixin from '../mixins/environments_pagination_api_mixin';
+import ConfirmRollbackModal from './confirm_rollback_modal.vue';
+import DeleteEnvironmentModal from './delete_environment_modal.vue';
+import emptyState from './empty_state.vue';
 import EnableReviewAppModal from './enable_review_app_modal.vue';
 import StopEnvironmentModal from './stop_environment_modal.vue';
-import DeleteEnvironmentModal from './delete_environment_modal.vue';
-import ConfirmRollbackModal from './confirm_rollback_modal.vue';
 
 export default {
   i18n: {
@@ -33,16 +33,11 @@ export default {
   directives: {
     'gl-modal': GlModalDirective,
   },
-  mixins: [CIPaginationMixin, environmentsMixin],
+  mixins: [EnvironmentsPaginationApiMixin, environmentsMixin],
   props: {
     endpoint: {
       type: String,
       required: true,
-    },
-    canaryDeploymentFeatureId: {
-      type: String,
-      required: false,
-      default: '',
     },
     canCreateEnvironment: {
       type: Boolean,
@@ -56,34 +51,9 @@ export default {
       type: String,
       required: true,
     },
-    helpCanaryDeploymentsPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     helpPagePath: {
       type: String,
       required: true,
-    },
-    deployBoardsHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    lockPromotionSvgPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    showCanaryDeploymentCallout: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    userCalloutsPath: {
-      type: String,
-      required: false,
-      default: '',
     },
   },
 
@@ -93,7 +63,9 @@ export default {
   },
 
   beforeDestroy() {
+    // eslint-disable-next-line @gitlab/no-global-event-off
     eventHub.$off('toggleFolder');
+    // eslint-disable-next-line @gitlab/no-global-event-off
     eventHub.$off('toggleDeployBoard');
   },
 
@@ -113,8 +85,8 @@ export default {
       this.store.updateEnvironmentProp(folder, 'isLoadingFolderContent', showLoader);
 
       this.service
-        .getFolderContent(folder.folder_path)
-        .then(response => this.store.setfolderContent(folder, response.data.environments))
+        .getFolderContent(folder.folder_path, folder.state)
+        .then((response) => this.store.setfolderContent(folder, response.data.environments))
         .then(() => this.store.updateEnvironmentProp(folder, 'isLoadingFolderContent', false))
         .catch(() => {
           Flash(s__('Environments|An error occurred while fetching the environments.'));
@@ -128,7 +100,7 @@ export default {
       // We need to verify if any folder is open to also update it
       const openFolders = this.store.getOpenFolders();
       if (openFolders.length) {
-        openFolders.forEach(folder => this.fetchChildEnvironments(folder));
+        openFolders.forEach((folder) => this.fetchChildEnvironments(folder));
       }
     },
   },
@@ -141,13 +113,7 @@ export default {
     <confirm-rollback-modal :environment="environmentInRollbackModal" />
 
     <div class="gl-w-full">
-      <div
-        class="
-        gl-display-flex
-        gl-flex-direction-column
-        gl-mt-3
-        gl-display-md-none!"
-      >
+      <div class="gl-display-flex gl-flex-direction-column gl-mt-3 gl-md-display-none!">
         <gl-button
           v-if="state.reviewAppDetails.can_setup_review_app"
           v-gl-modal="$options.modal.id"
@@ -156,18 +122,16 @@ export default {
           category="secondary"
           type="button"
           class="gl-mb-3 gl-flex-fill-1"
+          >{{ $options.i18n.reviewAppButtonLabel }}</gl-button
         >
-          {{ $options.i18n.reviewAppButtonLabel }}
-        </gl-button>
         <gl-button
           v-if="canCreateEnvironment"
           :href="newEnvironmentPath"
           data-testid="new-environment"
           category="primary"
-          variant="success"
+          variant="confirm"
+          >{{ $options.i18n.newEnvironmentButtonLabel }}</gl-button
         >
-          {{ $options.i18n.newEnvironmentButtonLabel }}
-        </gl-button>
       </div>
       <gl-tabs content-class="gl-display-none">
         <gl-tab
@@ -183,14 +147,7 @@ export default {
         </gl-tab>
         <template #tabs-end>
           <div
-            class="
-            gl-display-none
-            gl-display-md-flex
-            gl-lg-align-items-center
-            gl-lg-flex-direction-row
-            gl-lg-flex-fill-1
-            gl-lg-justify-content-end
-            gl-lg-mt-0"
+            class="gl-display-none gl-md-display-flex gl-lg-align-items-center gl-lg-flex-direction-row gl-lg-flex-fill-1 gl-lg-justify-content-end gl-lg-mt-0"
           >
             <gl-button
               v-if="state.reviewAppDetails.can_setup_review_app"
@@ -200,18 +157,16 @@ export default {
               category="secondary"
               type="button"
               class="gl-mb-3 gl-lg-mr-3 gl-lg-mb-0"
+              >{{ $options.i18n.reviewAppButtonLabel }}</gl-button
             >
-              {{ $options.i18n.reviewAppButtonLabel }}
-            </gl-button>
             <gl-button
               v-if="canCreateEnvironment"
               :href="newEnvironmentPath"
               data-testid="new-environment"
               category="primary"
-              variant="success"
+              variant="confirm"
+              >{{ $options.i18n.newEnvironmentButtonLabel }}</gl-button
             >
-              {{ $options.i18n.newEnvironmentButtonLabel }}
-            </gl-button>
           </div>
         </template>
       </gl-tabs>
@@ -220,15 +175,9 @@ export default {
         :environments="state.environments"
         :pagination="state.paginationInformation"
         :can-read-environment="canReadEnvironment"
-        :canary-deployment-feature-id="canaryDeploymentFeatureId"
-        :show-canary-deployment-callout="showCanaryDeploymentCallout"
-        :user-callouts-path="userCalloutsPath"
-        :lock-promotion-svg-path="lockPromotionSvgPath"
-        :help-canary-deployments-path="helpCanaryDeploymentsPath"
-        :deploy-boards-help-path="deployBoardsHelpPath"
         @onChangePage="onChangePage"
       >
-        <template v-if="!isLoading && state.environments.length === 0" #emptyState>
+        <template v-if="!isLoading && state.environments.length === 0" #empty-state>
           <empty-state :help-path="helpPagePath" />
         </template>
       </container>

@@ -3,9 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe MergeRequests::PostMergeService do
-  let(:user) { create(:user) }
-  let(:merge_request) { create(:merge_request, assignees: [user]) }
-  let(:project) { merge_request.project }
+  include ProjectForksHelper
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:merge_request, reload: true) { create(:merge_request, assignees: [user]) }
+  let_it_be(:project) { merge_request.project }
 
   subject { described_class.new(project, user).execute(merge_request) }
 
@@ -15,11 +17,11 @@ RSpec.describe MergeRequests::PostMergeService do
 
   describe '#execute' do
     it_behaves_like 'cache counters invalidator'
+    it_behaves_like 'merge request reviewers cache counters invalidator'
 
     it 'refreshes the number of open merge requests for a valid MR', :use_clean_rails_memory_store_caching do
       # Cache the counter before the MR changed state.
       project.open_merge_requests_count
-      merge_request.update!(state: 'merged')
 
       expect { subject }.to change { project.open_merge_requests_count }.from(1).to(0)
     end
@@ -33,6 +35,14 @@ RSpec.describe MergeRequests::PostMergeService do
         .and_return(metrics_service)
 
       expect(metrics_service).to receive(:merge)
+
+      subject
+    end
+
+    it 'calls the merge request activity counter' do
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter)
+        .to receive(:track_merge_mr_action)
+        .with(user: user)
 
       subject
     end

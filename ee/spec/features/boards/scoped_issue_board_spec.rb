@@ -6,26 +6,29 @@ RSpec.describe 'Scoped issue boards', :js do
   include FilteredSearchHelpers
   include MobileHelpers
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group, :public) }
-  let(:project) { create(:project, :public, namespace: group) }
-  let(:project_2) { create(:project, :public, namespace: group) }
-  let!(:project_label) { create(:label, project: project, name: 'Planning') }
-  let!(:group_label) { create(:group_label, group: group, name: 'Group Label') }
-  let!(:milestone) { create(:milestone, project: project) }
-  let!(:board) { create(:board, project: project, name: 'Project board') }
-  let!(:group_board) { create(:board, group: group, name: 'Group board') }
-  let!(:filtered_board) { create(:board, project: project_2, name: 'Filtered board', milestone: milestone, assignee: user, weight: 2) }
-  let!(:issue) { create(:issue, project: project) }
-  let!(:issue_milestone) { create(:closed_issue, project: project, milestone: milestone) }
-  let!(:assigned_issue) { create(:issue, project: project, assignees: [user]) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group, :public) }
+  let_it_be(:project) { create(:project, :public, namespace: group) }
+  let_it_be(:project_2) { create(:project, :public, namespace: group) }
+  let_it_be(:project_label) { create(:label, project: project, name: 'Planning') }
+  let_it_be(:group_label) { create(:group_label, group: group, name: 'Group Label') }
+  let_it_be(:milestone) { create(:milestone, project: project) }
+  let_it_be(:board) { create(:board, project: project, name: 'Project board') }
+  let_it_be(:group_board) { create(:board, group: group, name: 'Group board') }
+  let_it_be(:filtered_board) { create(:board, project: project_2, name: 'Filtered board', milestone: milestone, assignee: user, weight: 2) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:issue_milestone) { create(:closed_issue, project: project, milestone: milestone) }
+  let_it_be(:assigned_issue) { create(:issue, project: project, assignees: [user]) }
 
   let(:edit_board) { find('.btn', text: 'Edit board') }
   let(:view_scope) { find('.btn', text: 'View scope') }
   let(:board_title) { find('.boards-selector-wrapper .dropdown-menu-toggle') }
 
   before do
-    allow_any_instance_of(ApplicationHelper).to receive(:collapsed_sidebar?).and_return(true)
+    allow_next_instance_of(ApplicationHelper) do |helper|
+      allow(helper).to receive(:collapsed_sidebar?).and_return(true)
+    end
+
     stub_licensed_features(scoped_issue_board: true)
   end
 
@@ -245,7 +248,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           find('.board-card', match: :first)
 
-          expect(page).to have_selector('.board', count: 4)
+          expect(page).to have_selector('.board', count: 2)
           expect(all('.board').first).to have_selector('.board-card', count: 2)
           expect(all('.board').last).to have_selector('.board-card', count: 1)
         end
@@ -267,6 +270,30 @@ RSpec.describe 'Scoped issue boards', :js do
           page.within('#js-dropdown-hint') do
             expect(page).to have_content('Label')
             expect(page).not_to have_content('Milestone')
+          end
+        end
+      end
+
+      context 'iteration' do
+        context 'board not scoped to iteration' do
+          it 'sets board to current iteration' do
+            expect(page).to have_selector('.board-card', count: 3)
+
+            update_board_scope('current_iteration', true)
+
+            expect(page).to have_selector('.board-card', count: 0)
+          end
+        end
+
+        context 'board scoped to current iteration' do
+          it 'removes current iteration from board' do
+            create_board_scope('current_iteration', true)
+
+            expect(page).to have_selector('.board-card', count: 0)
+
+            update_board_scope('current_iteration', false)
+
+            expect(page).to have_selector('.board-card', count: 3)
           end
         end
       end
@@ -297,6 +324,9 @@ RSpec.describe 'Scoped issue boards', :js do
           visit project_boards_path(project)
 
           update_board_label(label_title)
+
+          wait_for_all_requests
+
           update_board_label(label_2_title)
 
           expect(page).to have_css('.js-visual-token')
@@ -392,25 +422,6 @@ RSpec.describe 'Scoped issue boards', :js do
         end
       end
     end
-
-    context 'remove issue' do
-      let!(:issue) { create(:labeled_issue, project: project, labels: [project_label], milestone: milestone, assignees: [user]) }
-      let!(:list) { create(:list, board: board, label: project_label, position: 0) }
-
-      it 'removes issues milestone when removing from the board' do
-        board.update!(milestone: milestone, assignee: user)
-        visit project_boards_path(project)
-        wait_for_requests
-
-        find(".board-card[data-issue-id='#{issue.id}']").click
-
-        click_button 'Remove from board'
-        wait_for_requests
-
-        expect(issue.reload.milestone).to be_nil
-        expect(issue.reload.assignees).to be_empty
-      end
-    end
   end
 
   context 'user without edit permissions' do
@@ -455,7 +466,7 @@ RSpec.describe 'Scoped issue boards', :js do
     it "doesn't show the input when creating a board" do
       click_on_create_new_board
 
-      page.within '.js-boards-selector' do
+      page.within '.js-board-config-modal' do
         # To make sure the form is shown
         expect(page).to have_field('board-new-name')
 
@@ -469,14 +480,13 @@ RSpec.describe 'Scoped issue boards', :js do
   end
 
   def expect_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.btn-inverted')
+    button = first('.filter-dropdown-container .btn.gl-button.dot-highlight')
     expect(button.text).to include(button_title)
-    expect(button[:class]).to include('dot-highlight')
     expect(button['title']).to include('This board\'s scope is reduced')
   end
 
   def expect_no_dot_highlight(button_title)
-    button = first('.filter-dropdown-container .btn.btn-inverted')
+    button = first('.filter-dropdown-container .btn.gl-button')
     expect(button.text).to include(button_title)
     expect(button[:class]).not_to include('dot-highlight')
     expect(button['title']).not_to include('This board\'s scope is reduced')
@@ -524,27 +534,40 @@ RSpec.describe 'Scoped issue boards', :js do
 
     click_button 'Expand'
 
-    page.within(".#{filter}") do
-      click_button 'Edit'
-
-      if value.is_a?(Array)
-        value.each { |value| click_link value }
-      elsif filter == 'weight'
-        page.within(".dropdown-menu") do
-          click_button value
-        end
-      else
-        click_link value
-      end
-    end
+    click_value(filter, value)
 
     click_on_board_modal
 
-    click_button 'Create'
+    click_button 'Create board'
 
     wait_for_requests
 
     expect(page).not_to have_selector('.board-list-loading')
+  end
+
+  def click_value(filter, value)
+    if filter == 'current_iteration'
+      current_iteration_checkbox = 'Scope board to current iteration'
+      if value
+        check(current_iteration_checkbox)
+      else
+        uncheck(current_iteration_checkbox)
+      end
+    else
+      page.within(".#{filter}") do
+        click_button 'Edit'
+
+        if value.is_a?(Array)
+          value.each { |value| click_link value }
+        elsif filter == 'weight'
+          page.within(".dropdown-menu") do
+            click_button value
+          end
+        else
+          click_link value
+        end
+      end
+    end
   end
 
   def click_on_create_new_board
@@ -559,17 +582,11 @@ RSpec.describe 'Scoped issue boards', :js do
   def update_board_scope(filter, value)
     edit_board.click
 
-    page.within(".#{filter}") do
-      click_button 'Edit'
-
-      page.within(".dropdown-menu") do
-        filter == 'weight' ? click_button(value) : click_link(value)
-      end
-    end
+    click_value(filter, value)
 
     click_on_board_modal
 
-    click_button 'Save'
+    click_button 'Save changes'
 
     wait_for_requests
 
@@ -579,6 +596,6 @@ RSpec.describe 'Scoped issue boards', :js do
   # Click on modal to make sure the dropdown is closed (e.g. label scenario)
   #
   def click_on_board_modal
-    find('.board-config-modal').click
+    find('.board-config-modal .modal-content').click
   end
 end

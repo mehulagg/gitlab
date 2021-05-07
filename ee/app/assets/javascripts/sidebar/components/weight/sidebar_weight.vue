@@ -1,6 +1,6 @@
 <script>
+import createFlash from '~/flash';
 import { __ } from '~/locale';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import eventHub from '~/sidebar/event_hub';
 import weightComponent from './weight.vue';
 
@@ -29,7 +29,9 @@ export default {
   methods: {
     onUpdateWeight(newWeight) {
       this.mediator.updateWeight(newWeight).catch(() => {
-        Flash(__('Error occurred while updating the issue weight'));
+        createFlash({
+          message: __('Error occurred while updating the issue weight'),
+        });
       });
     },
   },

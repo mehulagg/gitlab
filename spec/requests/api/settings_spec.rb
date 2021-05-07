@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Settings, 'Settings' do
+RSpec.describe API::Settings, 'Settings', :do_not_mock_admin_mode_setting do
   let(:user) { create(:user) }
 
   let_it_be(:admin) { create(:admin) }
@@ -22,6 +22,8 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['default_ci_config_path']).to be_nil
       expect(json_response['sourcegraph_enabled']).to be_falsey
       expect(json_response['sourcegraph_url']).to be_nil
+      expect(json_response['secret_detection_token_revocation_url']).to be_nil
+      expect(json_response['secret_detection_revocation_token_types_url']).to be_nil
       expect(json_response['sourcegraph_public_only']).to be_truthy
       expect(json_response['default_project_visibility']).to be_a String
       expect(json_response['default_snippet_visibility']).to be_a String
@@ -39,7 +41,12 @@ RSpec.describe API::Settings, 'Settings' do
       expect(json_response['snippet_size_limit']).to eq(50.megabytes)
       expect(json_response['spam_check_endpoint_enabled']).to be_falsey
       expect(json_response['spam_check_endpoint_url']).to be_nil
+      expect(json_response['spam_check_api_key']).to be_nil
       expect(json_response['wiki_page_max_content_bytes']).to be_a(Integer)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
+      expect(json_response['personal_access_token_prefix']).to be_nil
+      expect(json_response['admin_mode']).to be(false)
+      expect(json_response['whats_new_variant']).to eq('all_tiers')
     end
   end
 
@@ -105,7 +112,7 @@ RSpec.describe API::Settings, 'Settings' do
             enforce_terms: true,
             terms: 'Hello world!',
             performance_bar_allowed_group_path: group.full_path,
-            diff_max_patch_bytes: 150_000,
+            diff_max_patch_bytes: 300_000,
             default_branch_protection: ::Gitlab::Access::PROTECTION_DEV_CAN_MERGE,
             local_markdown_version: 3,
             allow_local_requests_from_web_hooks_and_services: true,
@@ -116,10 +123,13 @@ RSpec.describe API::Settings, 'Settings' do
             issues_create_limit: 300,
             raw_blob_request_limit: 300,
             spam_check_endpoint_enabled: true,
-            spam_check_endpoint_url: 'https://example.com/spam_check',
+            spam_check_endpoint_url: 'grpc://example.com/spam_check',
+            spam_check_api_key: 'SPAM_CHECK_API_KEY',
             disabled_oauth_sign_in_sources: 'unknown',
             import_sources: 'github,bitbucket',
-            wiki_page_max_content_bytes: 12345
+            wiki_page_max_content_bytes: 12345,
+            personal_access_token_prefix: "GL-",
+            admin_mode: true
           }
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -148,7 +158,7 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['enforce_terms']).to be(true)
         expect(json_response['terms']).to eq('Hello world!')
         expect(json_response['performance_bar_allowed_group_id']).to eq(group.id)
-        expect(json_response['diff_max_patch_bytes']).to eq(150_000)
+        expect(json_response['diff_max_patch_bytes']).to eq(300_000)
         expect(json_response['default_branch_protection']).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
         expect(json_response['local_markdown_version']).to eq(3)
         expect(json_response['allow_local_requests_from_web_hooks_and_services']).to eq(true)
@@ -159,10 +169,13 @@ RSpec.describe API::Settings, 'Settings' do
         expect(json_response['issues_create_limit']).to eq(300)
         expect(json_response['raw_blob_request_limit']).to eq(300)
         expect(json_response['spam_check_endpoint_enabled']).to be_truthy
-        expect(json_response['spam_check_endpoint_url']).to eq('https://example.com/spam_check')
+        expect(json_response['spam_check_endpoint_url']).to eq('grpc://example.com/spam_check')
+        expect(json_response['spam_check_api_key']).to eq('SPAM_CHECK_API_KEY')
         expect(json_response['disabled_oauth_sign_in_sources']).to eq([])
         expect(json_response['import_sources']).to match_array(%w(github bitbucket))
         expect(json_response['wiki_page_max_content_bytes']).to eq(12345)
+        expect(json_response['personal_access_token_prefix']).to eq("GL-")
+        expect(json_response['admin_mode']).to be(true)
       end
     end
 
@@ -191,6 +204,14 @@ RSpec.describe API::Settings, 'Settings' do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['allow_local_requests_from_hooks_and_services']).to eq(true)
+    end
+
+    it 'supports legacy asset_proxy_whitelist' do
+      put api("/application/settings", admin),
+        params: { asset_proxy_whitelist: ['example.com', '*.example.com'] }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['asset_proxy_allowlist']).to eq(['example.com', '*.example.com', 'localhost'])
     end
 
     it 'disables ability to switch to legacy storage' do
@@ -356,62 +377,62 @@ RSpec.describe API::Settings, 'Settings' do
             asset_proxy_enabled: true,
             asset_proxy_url: 'http://assets.example.com',
             asset_proxy_secret_key: 'shared secret',
-            asset_proxy_whitelist: ['example.com', '*.example.com']
+            asset_proxy_allowlist: ['example.com', '*.example.com']
           }
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['asset_proxy_enabled']).to be(true)
         expect(json_response['asset_proxy_url']).to eq('http://assets.example.com')
         expect(json_response['asset_proxy_secret_key']).to be_nil
-        expect(json_response['asset_proxy_whitelist']).to eq(['example.com', '*.example.com', 'localhost'])
+        expect(json_response['asset_proxy_allowlist']).to eq(['example.com', '*.example.com', 'localhost'])
       end
 
-      it 'allows a string for asset_proxy_whitelist' do
+      it 'allows a string for asset_proxy_allowlist' do
         put api('/application/settings', admin),
           params: {
-            asset_proxy_whitelist: 'example.com, *.example.com'
+            asset_proxy_allowlist: 'example.com, *.example.com'
           }
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['asset_proxy_whitelist']).to eq(['example.com', '*.example.com', 'localhost'])
+        expect(json_response['asset_proxy_allowlist']).to eq(['example.com', '*.example.com', 'localhost'])
       end
     end
 
-    context 'domain_blacklist settings' do
-      it 'rejects domain_blacklist_enabled when domain_blacklist is empty' do
+    context 'domain_denylist settings' do
+      it 'rejects domain_denylist_enabled when domain_denylist is empty' do
         put api('/application/settings', admin),
           params: {
-            domain_blacklist_enabled: true,
-            domain_blacklist: []
+            domain_denylist_enabled: true,
+            domain_denylist: []
           }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         message = json_response["message"]
-        expect(message["domain_blacklist"]).to eq(["Domain blacklist cannot be empty if Blacklist is enabled."])
+        expect(message["domain_denylist"]).to eq(["Domain denylist cannot be empty if denylist is enabled."])
       end
 
-      it 'allows array for domain_blacklist' do
+      it 'allows array for domain_denylist' do
         put api('/application/settings', admin),
           params: {
-            domain_blacklist_enabled: true,
-            domain_blacklist: ['domain1.com', 'domain2.com']
+            domain_denylist_enabled: true,
+            domain_denylist: ['domain1.com', 'domain2.com']
           }
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['domain_blacklist_enabled']).to be(true)
-        expect(json_response['domain_blacklist']).to eq(['domain1.com', 'domain2.com'])
+        expect(json_response['domain_denylist_enabled']).to be(true)
+        expect(json_response['domain_denylist']).to eq(['domain1.com', 'domain2.com'])
       end
 
-      it 'allows a string for domain_blacklist' do
+      it 'allows a string for domain_denylist' do
         put api('/application/settings', admin),
           params: {
-            domain_blacklist_enabled: true,
-            domain_blacklist: 'domain3.com, *.domain4.com'
+            domain_denylist_enabled: true,
+            domain_denylist: 'domain3.com, *.domain4.com'
           }
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['domain_blacklist_enabled']).to be(true)
-        expect(json_response['domain_blacklist']).to eq(['domain3.com', '*.domain4.com'])
+        expect(json_response['domain_denylist_enabled']).to be(true)
+        expect(json_response['domain_denylist']).to eq(['domain3.com', '*.domain4.com'])
       end
     end
 
@@ -421,6 +442,14 @@ RSpec.describe API::Settings, 'Settings' do
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['abuse_notification_email']).to eq('test@example.com')
+    end
+
+    it 'supports setting require_admin_approval_after_user_signup' do
+      put api('/application/settings', admin),
+          params: { require_admin_approval_after_user_signup: true }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['require_admin_approval_after_user_signup']).to eq(true)
     end
 
     context "missing sourcegraph_url value when sourcegraph_enabled is true" do
@@ -434,10 +463,76 @@ RSpec.describe API::Settings, 'Settings' do
 
     context "missing spam_check_endpoint_url value when spam_check_endpoint_enabled is true" do
       it "returns a blank parameter error message" do
-        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true }
+        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true, spam_check_api_key: "SPAM_CHECK_API_KEY" }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq('spam_check_endpoint_url is missing')
+      end
+    end
+
+    context "missing spam_check_api_key value when spam_check_endpoint_enabled is true" do
+      it "returns a blank parameter error message" do
+        put api("/application/settings", admin), params: { spam_check_endpoint_enabled: true, spam_check_endpoint_url: "https://example.com/spam_check" }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('spam_check_api_key is missing')
+      end
+    end
+
+    context "overly long spam_check_api_key" do
+      it "fails to update the settings with too long spam_check_api_key" do
+        put api("/application/settings", admin), params: { spam_check_api_key: "0123456789" * 500 }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        message = json_response["message"]
+        expect(message["spam_check_api_key"]).to include(a_string_matching("is too long"))
+      end
+    end
+
+    context "personal access token prefix settings" do
+      context "handles validation errors" do
+        it "fails to update the settings with too long prefix" do
+          put api("/application/settings", admin), params: { personal_access_token_prefix: "prefix" * 10 }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          message = json_response["message"]
+          expect(message["personal_access_token_prefix"]).to include(a_string_matching("is too long"))
+        end
+
+        it "fails to update the settings with invalid characters in the prefix" do
+          put api("/application/settings", admin), params: { personal_access_token_prefix: "éñ" }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          message = json_response["message"]
+          expect(message["personal_access_token_prefix"]).to include(a_string_matching("can contain only letters of the Base64 alphabet"))
+        end
+      end
+    end
+
+    context 'whats_new_variant setting' do
+      before do
+        Gitlab::CurrentSettings.current_application_settings.whats_new_variant_disabled!
+      end
+
+      it 'updates setting' do
+        new_value = 'all_tiers'
+        put api("/application/settings", admin),
+        params: {
+          whats_new_variant: new_value
+        }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['whats_new_variant']).to eq(new_value)
+      end
+
+      it 'fails to update setting with invalid value' do
+        put api("/application/settings", admin),
+        params: {
+          whats_new_variant: 'invalid_value'
+        }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['error']).to eq('whats_new_variant does not have a valid value')
       end
     end
   end

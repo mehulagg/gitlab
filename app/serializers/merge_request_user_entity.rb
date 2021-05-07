@@ -1,26 +1,32 @@
 # frozen_string_literal: true
 
-class MergeRequestUserEntity < CurrentUserEntity
+class MergeRequestUserEntity < ::API::Entities::UserBasic
+  include UserStatusTooltip
   include RequestAwareEntity
-  include BlobHelper
-  include TreeHelper
 
-  expose :can_fork do |user|
-    can?(user, :fork_project, request.project) if project
+  def self.satisfies(*methods)
+    ->(_, options) { methods.all? { |m| options[:merge_request].try(m) } }
   end
 
-  expose :can_create_merge_request do |user|
-    project && can?(user, :create_merge_request_in, project)
+  expose :can_merge do |reviewer, options|
+    options[:merge_request]&.can_be_merged_by?(reviewer)
   end
 
-  expose :fork_path, if: -> (*) { project } do |user|
-    params = edit_blob_fork_params("Edit")
-    project_forks_path(project, namespace_key: user.namespace.id, continue: params)
+  expose :can_update_merge_request do |reviewer, options|
+    request.current_user&.can?(:update_merge_request, options[:merge_request])
   end
 
-  def project
-    return false unless request.respond_to?(:project) && request.project
+  expose :reviewed, if: satisfies(:present?, :allows_reviewers?) do |reviewer, options|
+    reviewer = options[:merge_request].find_reviewer(reviewer)
 
-    request.project
+    reviewer&.reviewed?
+  end
+
+  expose :approved, if: satisfies(:present?) do |user, options|
+    # This approach is preferred over MergeRequest#approved_by? since this
+    # makes one query per merge request, whereas #approved_by? makes one per user
+    options[:merge_request].approvals.any? { |app| app.user_id == user.id }
   end
 end
+
+MergeRequestUserEntity.prepend_if_ee('EE::MergeRequestUserEntity')

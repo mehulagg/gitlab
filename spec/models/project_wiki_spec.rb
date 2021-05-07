@@ -42,4 +42,11 @@ RSpec.describe ProjectWiki do
       end
     end
   end
+
+  it_behaves_like 'can housekeep repository' do
+    let_it_be(:resource) { create(:project_wiki) }
+
+    let(:resource_key) { 'project_wikis' }
+    let(:expected_worker_class) { Wikis::GitGarbageCollectWorker }
+  end
 end

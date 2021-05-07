@@ -2,7 +2,7 @@
 
 class BackfillVersionAuthorAndCreatedAt < ActiveRecord::Migration[5.2]
   DOWNTIME = false
-  MIGRATION = 'BackfillVersionDataFromGitaly'.freeze
+  MIGRATION = 'BackfillVersionDataFromGitaly'
   BATCH_SIZE = 500
 
   disable_ddl_transaction!
@@ -29,7 +29,7 @@ class BackfillVersionAuthorAndCreatedAt < ActiveRecord::Migration[5.2]
       issues = Issue.arel_table
       projects = Project.arel_table
 
-      Version.select(versions[:issue_id]).where(
+      select(versions[:issue_id]).where(
         versions[:author_id].eq(nil).or(
           versions[:created_at].eq(nil)
         ).and(

@@ -1,7 +1,7 @@
 ---
 stage: Manage
 group: Import
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
@@ -18,7 +18,7 @@ The **GitLab import/export** button is displayed if the project import option is
 See also:
 
 - [Project import/export API](../../../api/project_import_export.md)
-- [Project import/export administration Rake tasks](../../../administration/raketasks/project_import_export.md) **(CORE ONLY)**
+- [Project import/export administration Rake tasks](../../../administration/raketasks/project_import_export.md) **(FREE SELF)**
 - [Group import/export](../../group/settings/import_export.md)
 - [Group import/export API](../../../api/group_import_export.md)
 
@@ -32,24 +32,36 @@ To set up a project import/export:
 
 Note the following:
 
+- Before you can import a project, you need to export the data first.
+  See [Exporting a project and its data](#exporting-a-project-and-its-data)
+  for how you can export a project through the UI.
 - Imports from a newer version of GitLab are not supported.
   The Importing GitLab version must be greater than or equal to the Exporting GitLab version.
-- Imports will fail unless the import and export GitLab instances are
+- Imports fail unless the import and export GitLab instances are
   compatible as described in the [Version history](#version-history).
-- Exports are stored in a temporary [shared directory](../../../development/shared_files.md)
-  and are deleted every 24 hours by a specific worker.
+- Exports are generated in your configured `shared_path`, a temporary [shared directory](../../../development/shared_files.md)
+  and are moved to your configured `uploads_directory`. Every 24 hours, a specific worker deletes these export files.
 - Group members are exported as project members, as long as the user has
-  maintainer or admin access to the group where the exported project lives.
-- Project members with owner access will be imported as maintainers.
-- Using an admin account to import will map users by primary email address (self-managed only).
+  maintainer or administrator access to the group where the exported project lives.
+- Project members with owner access are imported as maintainers.
+- Imported users can be mapped by their primary email on self-managed instances, if an administrative user (not an owner) does the import.
   Otherwise, a supplementary comment is left to mention that the original author and
-  the MRs, notes, or issues will be owned by the importer.
+  the MRs, notes, or issues are owned by the importer.
 - If an imported project contains merge requests originating from forks,
-  then new branches associated with such merge requests will be created
+  then new branches associated with such merge requests are created
   within a project during the import/export. Thus, the number of branches
   in the exported project could be bigger than in the original project.
+- Deploy keys allowed to push to protected branches are not exported. Therefore,
+  you need to recreate this association by first enabling these deploy keys in your
+  imported project and then updating your protected branches accordingly.
 
 ## Version history
+
+### 14.0+
+
+In GitLab 14.0, the JSON format is no longer supported for project and group exports. To allow for a
+transitional period, you can still import any JSON exports. The new format for imports and exports
+is NDJSON.
 
 ### 13.0+
 
@@ -89,7 +101,7 @@ Prior to 13.0 this was a defined compatibility table:
 Projects can be exported and imported only between versions of GitLab with matching Import/Export versions.
 
 For example, 8.10.3 and 8.11 have the same Import/Export version (0.1.3)
-and the exports between them will be compatible.
+and the exports between them are compatible.
 
 ## Between CE and EE
 
@@ -100,7 +112,7 @@ If you're exporting a project from the Enterprise Edition to the Community Editi
 
 ## Exported contents
 
-The following items will be exported:
+The following items are exported:
 
 - Project and wiki repositories
 - Project uploads
@@ -111,23 +123,28 @@ The following items will be exported:
 - LFS objects
 - Issue boards
 - Pipelines history
-
-The following items will NOT be exported:
-
-- Build traces and artifacts
-- Container registry images
-- CI variables
-- Webhooks
-- Any encrypted tokens
-- Merge Request Approvers
 - Push Rules
 - Awards
 
-NOTE: **Note:**
+The following items are **not** exported:
+
+- Build traces and artifacts
+- Container registry images
+- CI/CD variables
+- Webhooks
+- Any encrypted tokens
+- Merge Request Approvers
+
+NOTE:
 For more details on the specific data persisted in a project export, see the
 [`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/project/import_export.yml) file.
 
 ## Exporting a project and its data
+
+Full project export functionality is limited to project maintainers and owners.
+You can configure such functionality through [project settings](index.md):
+
+To export a project and its data, follow these steps:
 
 1. Go to your project's homepage.
 
@@ -160,32 +177,34 @@ For more details on the specific data persisted in a project export, see the
    ![Select file](img/import_export_select_file.png)
 
 1. Click on **Import project** to begin importing. Your newly imported project
-   page will appear soon.
+   page appears shortly.
 
-NOTE: **Note:**
+NOTE:
 If use of the `Internal` visibility level
 [is restricted](../../../public_access/public_access.md#restricting-the-use-of-public-or-internal-projects),
 all imported projects are given the visibility of `Private`.
 
-NOTE: **Note:**
-The maximum import file size can be set by the Administrator, default is 50MB.
-As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md).
+NOTE:
+The maximum import file size can be set by the Administrator, default is `0` (unlimited).
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin Area UI](../../admin_area/settings/account_and_limit_settings.md). Default [modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to 0 in GitLab 13.8.
 
 ### Project import status
 
 You can query an import through the [Project import/export API](../../../api/project_import_export.md#import-status).
 As described in the API documentation, the query may return an import error or exceptions.
 
-### Import large projects **(CORE ONLY)**
+### Import large projects **(FREE SELF)**
 
 If you have a larger project, consider using a Rake task, as described in our [developer documentation](../../../development/import_project.md#importing-via-a-rake-task).
 
-## Rate limits
+## Rate Limits
 
-To help avoid abuse, users are rate limited to:
+To help avoid abuse, by default, users are rate limited to:
 
-| Request Type     | Limit                                     |
-| ---------------- | ----------------------------------------- |
-| Export           | 30 projects per 5 minutes                 |
-| Download export  | 10 downloads per project every 10 minutes |
-| Import           | 30 projects per 5 minutes                 |
+| Request Type     | Limit                                    |
+| ---------------- | ---------------------------------------- |
+| Export           | 6 projects per minute                |
+| Download export  | 1 download per group per minute  |
+| Import           | 6 projects per minute                |
+
+Please note that GitLab.com may have [different settings](../../gitlab_com/index.md#importexport) from the defaults.

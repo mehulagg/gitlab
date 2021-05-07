@@ -1,15 +1,18 @@
 <script>
-import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlButton, GlButtonGroup } from '@gitlab/ui';
 import dateFormat from 'dateformat';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { __ } from '~/locale';
+import BurnupQuery from 'shared_queries/burndown_chart/burnup.query.graphql';
+import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
+import { __ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import BurndownChartData from '../burn_chart_data';
+import { Namespace } from '../constants';
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
-import BurnupQuery from '../queries/burnup.query.graphql';
-import BurndownChartData from '../burn_chart_data';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import axios from '~/lib/utils/axios_utils';
+import OpenTimeboxSummary from './open_timebox_summary.vue';
+import TimeboxSummaryCards from './timebox_summary_cards.vue';
 
 export default {
   components: {
@@ -18,7 +21,8 @@ export default {
     GlButtonGroup,
     BurndownChart,
     BurnupChart,
-    GlSprintf,
+    OpenTimeboxSummary,
+    TimeboxSummaryCards,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -40,6 +44,21 @@ export default {
       required: false,
       default: '',
     },
+    iterationState: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    fullPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    namespaceType: {
+      type: String,
+      required: false,
+      default: Namespace.Group,
+    },
     burndownEventsPath: {
       type: String,
       required: false,
@@ -52,21 +71,30 @@ export default {
     },
   },
   apollo: {
-    burnupData: {
+    report: {
       skip() {
-        return !this.glFeatures.burnupCharts || (!this.milestoneId && !this.iterationId);
+        return !this.milestoneId && !this.iterationId;
       },
       query: BurnupQuery,
       variables() {
         return {
           id: this.iterationId || this.milestoneId,
           isIteration: Boolean(this.iterationId),
+          weight: !this.issuesSelected,
         };
       },
       update(data) {
-        const sparseBurnupData = data?.[this.parent]?.burnupTimeSeries || [];
+        const sparseBurnupData = data[this.parent]?.report.burnupTimeSeries || [];
+        const stats = data[this.parent]?.report?.stats || {};
 
-        return this.padSparseBurnupData(sparseBurnupData);
+        return {
+          burnupData: this.padSparseBurnupData(sparseBurnupData),
+          stats: {
+            complete: stats.complete?.[this.displayValue] || 0,
+            incomplete: stats.incomplete?.[this.displayValue] || 0,
+            total: stats.total?.[this.displayValue] || 0,
+          },
+        };
       },
       error() {
         this.error = __('Error fetching burnup chart data');
@@ -78,18 +106,42 @@ export default {
       openIssuesCount: [],
       openIssuesWeight: [],
       issuesSelected: true,
-      burnupData: [],
-      useLegacyBurndown: !this.glFeatures.burnupCharts,
-      showInfo: this.showNewOldBurndownToggle,
+      report: {
+        burnupData: [],
+        stats: {
+          complete: 0,
+          incomplete: 0,
+          total: 0,
+        },
+      },
+      useLegacyBurndown: false,
       error: '',
     };
   },
   computed: {
+    loading() {
+      return this.$apollo.queries.report.loading;
+    },
+    burnupData() {
+      return this.report.burnupData;
+    },
+    columns() {
+      return [
+        {
+          title: __('Completed'),
+          value: this.report.stats.complete,
+        },
+        {
+          title: __('Incomplete'),
+          value: this.report.stats.incomplete,
+        },
+      ];
+    },
+    displayValue() {
+      return this.issuesSelected ? 'count' : 'weight';
+    },
     parent() {
       return this.iterationId ? 'iteration' : 'milestone';
-    },
-    title() {
-      return this.glFeatures.burnupCharts ? __('Charts') : __('Burndown chart');
     },
     issueButtonCategory() {
       return this.issuesSelected ? 'primary' : 'secondary';
@@ -110,18 +162,13 @@ export default {
       return this.pluckBurnupDataProperties('scopeWeight', 'completedWeight');
     },
   },
-  mounted() {
-    if (!this.glFeatures.burnupCharts) {
-      this.fetchLegacyBurndownEvents();
-    }
-  },
   methods: {
     fetchLegacyBurndownEvents() {
       this.fetchedLegacyData = true;
 
       axios
         .get(this.burndownEventsPath)
-        .then(burndownResponse => {
+        .then((burndownResponse) => {
           const burndownEvents = burndownResponse.data;
           const burndownChartData = new BurndownChartData(
             burndownEvents,
@@ -129,16 +176,18 @@ export default {
             this.dueDate,
           ).generateBurndownTimeseries();
 
-          this.openIssuesCount = burndownChartData.map(d => [d[0], d[1]]);
-          this.openIssuesWeight = burndownChartData.map(d => [d[0], d[2]]);
+          this.openIssuesCount = burndownChartData.map((d) => [d[0], d[1]]);
+          this.openIssuesWeight = burndownChartData.map((d) => [d[0], d[2]]);
         })
         .catch(() => {
           this.fetchedLegacyData = false;
-          createFlash(__('Error loading burndown chart data'));
+          createFlash({
+            message: __('Error loading burndown chart data'),
+          });
         });
     },
     pluckBurnupDataProperties(total, completed) {
-      return this.burnupData.map(data => {
+      return this.burnupData.map((data) => {
         return [data.date, data[total] - data[completed]];
       });
     },
@@ -154,7 +203,7 @@ export default {
     padSparseBurnupData(sparseBurnupData) {
       // if we don't have data for the startDate, we still want to draw a point at 0
       // on the chart, so add an item to the start of the array
-      const hasDataForStartDate = sparseBurnupData.find(d => d.date === this.startDate);
+      const hasDataForStartDate = sparseBurnupData.find((d) => d.date === this.startDate);
       if (!hasDataForStartDate) {
         sparseBurnupData.unshift({
           date: this.startDate,
@@ -173,7 +222,7 @@ export default {
       // similar to the startDate padding, if we don't have a value for the
       // last item in the array, we should add one. If no events occur on
       // a day then we don't get any data for that day in the response
-      const hasDataForLastDate = sparseBurnupData.find(d => d.date === lastDate);
+      const hasDataForLastDate = sparseBurnupData.find((d) => d.date === lastDate);
       if (!hasDataForLastDate) {
         const lastItem = sparseBurnupData[sparseBurnupData.length - 1];
         sparseBurnupData.push({
@@ -230,26 +279,8 @@ export default {
 
 <template>
   <div>
-    <gl-alert
-      v-if="glFeatures.burnupCharts && showInfo"
-      variant="info"
-      class="col-12 gl-mt-3"
-      @dismiss="showInfo = false"
-    >
-      <gl-sprintf
-        :message="
-          __(
-            `Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button.`,
-          )
-        "
-      >
-        <template #strong="{ content }">
-          <strong>{{ content }}</strong>
-        </template>
-      </gl-sprintf>
-    </gl-alert>
     <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
-      <h3 ref="chartsTitle">{{ title }}</h3>
+      <strong ref="filterLabel">{{ __('Filter by') }}</strong>
       <gl-button-group>
         <gl-button
           ref="totalIssuesButton"
@@ -272,7 +303,7 @@ export default {
         </gl-button>
       </gl-button-group>
 
-      <gl-button-group v-if="glFeatures.burnupCharts && showNewOldBurndownToggle">
+      <gl-button-group v-if="showNewOldBurndownToggle">
         <gl-button
           ref="oldBurndown"
           :category="useLegacyBurndown ? 'primary' : 'secondary'"
@@ -293,8 +324,30 @@ export default {
         </gl-button>
       </gl-button-group>
     </div>
-    <div v-if="glFeatures.burnupCharts" class="row">
-      <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = ''">
+    <template v-if="iterationId">
+      <timebox-summary-cards
+        v-if="iterationState === 'closed'"
+        :columns="columns"
+        :loading="loading"
+        :total="report.stats.total"
+      />
+      <open-timebox-summary
+        v-else
+        :full-path="fullPath"
+        :iteration-id="iterationId"
+        :namespace-type="namespaceType"
+        :display-value="displayValue"
+      >
+        <timebox-summary-cards
+          slot-scope="{ columns: openColumns, loading: summaryLoading, total }"
+          :columns="openColumns"
+          :loading="summaryLoading"
+          :total="total"
+        />
+      </open-timebox-summary>
+    </template>
+    <div class="row">
+      <gl-alert v-if="error" variant="danger" class="col-12" @dismiss="error = null">
         {{ error }}
       </gl-alert>
       <burndown-chart
@@ -303,6 +356,7 @@ export default {
         :open-issues-count="issuesCount"
         :open-issues-weight="issuesWeight"
         :issues-selected="issuesSelected"
+        :loading="loading"
         class="col-md-6"
       />
       <burnup-chart
@@ -310,17 +364,9 @@ export default {
         :due-date="dueDate"
         :burnup-data="burnupData"
         :issues-selected="issuesSelected"
+        :loading="loading"
         class="col-md-6"
       />
     </div>
-    <burndown-chart
-      v-else
-      :show-title="false"
-      :start-date="startDate"
-      :due-date="dueDate"
-      :open-issues-count="openIssuesCount"
-      :open-issues-weight="openIssuesWeight"
-      :issues-selected="issuesSelected"
-    />
   </div>
 </template>

@@ -1,6 +1,10 @@
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import { s__ } from '~/locale';
 
+import { EXTEND_AS } from '../constants';
+import epicChildEpics from '../queries/epicChildEpics.query.graphql';
+import groupEpics from '../queries/groupEpics.query.graphql';
+import groupMilestones from '../queries/groupMilestones.query.graphql';
 import * as epicUtils from '../utils/epic_utils';
 import * as roadmapItemUtils from '../utils/roadmap_item_utils';
 import {
@@ -8,12 +12,6 @@ import {
   sortEpics,
   extendTimeframeForPreset,
 } from '../utils/roadmap_utils';
-
-import { EXTEND_AS } from '../constants';
-
-import groupEpics from '../queries/groupEpics.query.graphql';
-import epicChildEpics from '../queries/epicChildEpics.query.graphql';
-import groupMilestones from '../queries/groupMilestones.query.graphql';
 
 import * as types from './mutation_types';
 
@@ -45,7 +43,12 @@ const fetchGroupEpics = (
     variables = {
       ...variables,
       ...filterParams,
+      first: gon.roadmap_epics_limit + 1,
     };
+
+    if (filterParams?.epicIid) {
+      variables.iid = filterParams.epicIid;
+    }
   }
 
   return epicUtils.gqClient
@@ -58,7 +61,7 @@ const fetchGroupEpics = (
         ? data?.group?.epic?.children?.edges || []
         : data?.group?.epics?.edges || [];
 
-      return epicUtils.extractGroupEpics(edges);
+      return edges.map((e) => e.node);
     });
 };
 
@@ -73,20 +76,21 @@ export const fetchChildrenEpics = (state, { parentItem }) => {
     })
     .then(({ data }) => {
       const edges = data?.group?.epic?.children?.edges || [];
-      return epicUtils.extractGroupEpics(edges);
+      return edges.map((e) => e.node);
     });
 };
 
 export const receiveEpicsSuccess = (
-  { commit, dispatch, state, getters },
+  { commit, dispatch, state },
   { rawEpics, newEpic, timeframeExtended },
 ) => {
   const epicIds = [];
   const epics = rawEpics.reduce((filteredEpics, epic) => {
+    const { presetType, timeframe } = state;
     const formattedEpic = roadmapItemUtils.formatRoadmapItemDetails(
       epic,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
 
     formattedEpic.isChildEpic = false;
@@ -119,21 +123,24 @@ export const receiveEpicsSuccess = (
 };
 export const receiveEpicsFailure = ({ commit }) => {
   commit(types.RECEIVE_EPICS_FAILURE);
-  flash(s__('GroupRoadmap|Something went wrong while fetching epics'));
+  createFlash({
+    message: s__('GroupRoadmap|Something went wrong while fetching epics'),
+  });
 };
 
 export const requestChildrenEpics = ({ commit }, { parentItemId }) => {
   commit(types.REQUEST_CHILDREN_EPICS, { parentItemId });
 };
 export const receiveChildrenSuccess = (
-  { commit, dispatch, getters },
+  { commit, dispatch, state },
   { parentItemId, rawChildren },
 ) => {
   const children = rawChildren.reduce((filteredChildren, epic) => {
+    const { presetType, timeframe } = state;
     const formattedChild = roadmapItemUtils.formatRoadmapItemDetails(
       epic,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
 
     formattedChild.isChildEpic = true;
@@ -155,7 +162,7 @@ export const fetchEpics = ({ state, commit, dispatch }) => {
   commit(types.REQUEST_EPICS);
 
   fetchGroupEpics(state)
-    .then(rawEpics => {
+    .then((rawEpics) => {
       dispatch('receiveEpicsSuccess', { rawEpics });
     })
     .catch(() => dispatch('receiveEpicsFailure'));
@@ -165,7 +172,7 @@ export const fetchEpicsForTimeframe = ({ state, commit, dispatch }, { timeframe 
   commit(types.REQUEST_EPICS_FOR_TIMEFRAME);
 
   return fetchGroupEpics(state, timeframe)
-    .then(rawEpics => {
+    .then((rawEpics) => {
       dispatch('receiveEpicsSuccess', {
         rawEpics,
         newEpic: true,
@@ -180,13 +187,15 @@ export const fetchEpicsForTimeframe = ({ state, commit, dispatch }, { timeframe 
  *
  * @param extendAs An EXTEND_AS enum value
  */
-export const extendTimeframe = ({ commit, state, getters }, { extendAs }) => {
+export const extendTimeframe = ({ commit, state }, { extendAs }) => {
   const isExtendTypePrepend = extendAs === EXTEND_AS.PREPEND;
-
+  const { presetType, timeframe } = state;
   const timeframeToExtend = extendTimeframeForPreset({
     extendAs,
-    presetType: state.presetType,
-    initialDate: isExtendTypePrepend ? getters.timeframeStartDate : getters.timeframeEndDate,
+    presetType,
+    initialDate: isExtendTypePrepend
+      ? roadmapItemUtils.timeframeStartDate(presetType, timeframe)
+      : roadmapItemUtils.timeframeEndDate(presetType, timeframe),
   });
 
   if (isExtendTypePrepend) {
@@ -210,7 +219,7 @@ export const toggleEpic = ({ state, dispatch }, { parentItem }) => {
     if (!state.childrenEpics[parentItemId]) {
       dispatch('requestChildrenEpics', { parentItemId });
       fetchChildrenEpics(state, { parentItem })
-        .then(rawChildren => {
+        .then((rawChildren) => {
           dispatch('receiveChildrenSuccess', {
             parentItemId,
             rawChildren,
@@ -233,22 +242,24 @@ export const toggleEpic = ({ state, dispatch }, { parentItem }) => {
  * For epics that have no start or end date, this function updates their start and end dates
  * so that the epic bars get longer to appear infinitely scrolling.
  */
-export const refreshEpicDates = ({ commit, state, getters }) => {
-  const epics = state.epics.map(epic => {
+export const refreshEpicDates = ({ commit, state }) => {
+  const { presetType, timeframe } = state;
+
+  const epics = state.epics.map((epic) => {
     // Update child epic dates too
     if (epic.children?.edges?.length > 0) {
-      epic.children.edges.map(childEpic =>
+      epic.children.edges.map((childEpic) =>
         roadmapItemUtils.processRoadmapItemDates(
           childEpic,
-          getters.timeframeStartDate,
-          getters.timeframeEndDate,
+          roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+          roadmapItemUtils.timeframeEndDate(presetType, timeframe),
         ),
       );
     }
     return roadmapItemUtils.processRoadmapItemDates(
       epic,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
   });
 
@@ -291,22 +302,23 @@ export const fetchMilestones = ({ state, dispatch }) => {
   dispatch('requestMilestones');
 
   return fetchGroupMilestones(state)
-    .then(rawMilestones => {
+    .then((rawMilestones) => {
       dispatch('receiveMilestonesSuccess', { rawMilestones });
     })
     .catch(() => dispatch('receiveMilestonesFailure'));
 };
 
 export const receiveMilestonesSuccess = (
-  { commit, state, getters },
+  { commit, state },
   { rawMilestones, newMilestone }, // timeframeExtended
 ) => {
+  const { presetType, timeframe } = state;
   const milestoneIds = [];
   const milestones = rawMilestones.reduce((filteredMilestones, milestone) => {
     const formattedMilestone = roadmapItemUtils.formatRoadmapItemDetails(
       milestone,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     );
     // Exclude any Milestone that has invalid dates
     // or is already present in Roadmap timeline
@@ -329,15 +341,19 @@ export const receiveMilestonesSuccess = (
 
 export const receiveMilestonesFailure = ({ commit }) => {
   commit(types.RECEIVE_MILESTONES_FAILURE);
-  flash(s__('GroupRoadmap|Something went wrong while fetching milestones'));
+  createFlash({
+    message: s__('GroupRoadmap|Something went wrong while fetching milestones'),
+  });
 };
 
-export const refreshMilestoneDates = ({ commit, state, getters }) => {
-  const milestones = state.milestones.map(milestone =>
+export const refreshMilestoneDates = ({ commit, state }) => {
+  const { presetType, timeframe } = state;
+
+  const milestones = state.milestones.map((milestone) =>
     roadmapItemUtils.processRoadmapItemDates(
       milestone,
-      getters.timeframeStartDate,
-      getters.timeframeEndDate,
+      roadmapItemUtils.timeframeStartDate(presetType, timeframe),
+      roadmapItemUtils.timeframeEndDate(presetType, timeframe),
     ),
   );
 
@@ -352,6 +368,3 @@ export const setFilterParams = ({ commit }, filterParams) =>
   commit(types.SET_FILTER_PARAMS, filterParams);
 
 export const setSortedBy = ({ commit }, sortedBy) => commit(types.SET_SORTED_BY, sortedBy);
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

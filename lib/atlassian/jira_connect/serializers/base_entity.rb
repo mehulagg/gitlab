@@ -9,12 +9,18 @@ module Atlassian
 
         format_with(:string) { |value| value.to_s }
 
-        expose :monotonic_time, as: :updateSequenceId
+        expose :update_sequence_id, as: :updateSequenceId
+
+        def eql(other)
+          other.is_a?(self.class) && to_json == other.to_json
+        end
+
+        alias_method :==, :eql
 
         private
 
-        def monotonic_time
-          Gitlab::Metrics::System.monotonic_time.to_i
+        def update_sequence_id
+          options[:update_sequence_id] || Client.generate_update_sequence_id
         end
       end
     end

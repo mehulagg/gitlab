@@ -1,4 +1,7 @@
 ---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
@@ -37,7 +40,7 @@ To unlock a locked user:
    user.unlock_access!
    ```
 
-1. Exit the console with <kbd>Ctrl</kbd>+<kbd>d</kbd>
+1. Exit the console with <kbd>Control</kbd>+<kbd>d</kbd>
 
 The user should now be able to log in.
 

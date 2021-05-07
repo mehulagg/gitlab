@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlFormTextarea } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import component from 'ee/vue_shared/security_reports/components/dismissal_comment_box.vue';
 
 describe('DismissalCommentBox', () => {

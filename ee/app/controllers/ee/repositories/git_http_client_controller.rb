@@ -131,7 +131,7 @@ module EE
       end
 
       class GeoGitLFSHelper
-        MINIMUM_GIT_LFS_VERSION = '2.4.2'.freeze
+        MINIMUM_GIT_LFS_VERSION = '2.4.2'
 
         def initialize(project, geo_route_helper, operation, current_version)
           @project = project

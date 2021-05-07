@@ -3,8 +3,10 @@
 module Integrations
   module Jira
     class IssueEntity < Grape::Entity
-      expose :project_id do |_jira_issue, options|
-        options[:project].id
+      include RequestAwareEntity
+
+      expose :project_id do |_jira_issue|
+        project.id
       end
 
       expose :title do |jira_issue|
@@ -30,27 +32,22 @@ module Integrations
       expose :labels do |jira_issue|
         jira_issue.labels.map do |name|
           {
+            title: name,
             name: name,
-            color: '#EBECF0',
-            text_color: '#283856'
-
+            color: '#0052CC',
+            text_color: '#FFFFFF'
           }
         end
       end
 
       expose :author do |jira_issue|
-        {
-          name: jira_issue.reporter.displayName,
-          web_url: author_web_url(jira_issue)
-        }
+        jira_user(jira_issue.fields['reporter'])
       end
 
       expose :assignees do |jira_issue|
-        if jira_issue.assignee.present?
+        if jira_issue.fields['assignee']
           [
-            {
-              name: jira_issue.assignee.displayName
-            }
+            jira_user(jira_issue.fields['assignee'])
           ]
         else
           []
@@ -58,7 +55,11 @@ module Integrations
       end
 
       expose :web_url do |jira_issue|
-        "#{jira_issue.client.options[:site]}browse/#{jira_issue.key}"
+        "#{base_web_url}/browse/#{jira_issue.key}"
+      end
+
+      expose :gitlab_web_url do |jira_issue|
+        project_integrations_jira_issue_path(project, jira_issue.key)
       end
 
       expose :references do |jira_issue|
@@ -73,15 +74,31 @@ module Integrations
 
       private
 
-      def author_web_url(jira_issue)
+      def jira_user(user)
+        {
+          name: user['displayName'],
+          web_url: jira_web_url(user),
+          avatar_url: user['avatarUrls']['48x48']
+        }
+      end
+
+      def jira_web_url(user)
         # There are differences between Jira Cloud and Jira Server URLs and responses.
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
-        if jira_issue.reporter.try(:accountId)
-          "#{jira_issue.client.options[:site]}people/#{jira_issue.reporter.accountId}"
+        if user['accountId'].present?
+          "#{base_web_url}/people/#{user['accountId']}"
         else
-          "#{jira_issue.client.options[:site]}secure/ViewProfile.jspa?name=#{jira_issue.reporter.name}"
+          "#{base_web_url}/secure/ViewProfile.jspa?name=#{user['name']}"
         end
+      end
+
+      def base_web_url
+        @base_web_url ||= project.jira_service.url
+      end
+
+      def project
+        @project ||= options[:project]
       end
     end
   end

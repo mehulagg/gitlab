@@ -1,6 +1,6 @@
 import { GlDropdownItem, GlTruncate } from '@gitlab/ui';
-import FilterItem from 'ee/security_dashboard/components/filters/filter_item.vue';
 import { shallowMount } from '@vue/test-utils';
+import FilterItem from 'ee/security_dashboard/components/filters/filter_item.vue';
 
 describe('Filter Item component', () => {
   let wrapper;
@@ -38,7 +38,7 @@ describe('Filter Item component', () => {
     });
   });
 
-  it.each([true, false])('shows the expected checkmark when isSelected is %s', isChecked => {
+  it.each([true, false])('shows the expected checkmark when isSelected is %s', (isChecked) => {
     createWrapper({ isChecked });
     expect(dropdownItem().props('isChecked')).toBe(isChecked);
   });

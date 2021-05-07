@@ -64,7 +64,7 @@ module Gitlab
         end
 
         def with_cipher(auth_tag = nil)
-          cipher = OpenSSL::Cipher::AES256.new(:GCM)
+          cipher = OpenSSL::Cipher.new('AES-256-GCM')
 
           yield cipher
 

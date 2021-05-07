@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # The usage of the ReactiveCaching module is documented here:
-# https://docs.gitlab.com/ee/development/reactive_caching.md
+# https://docs.gitlab.com/ee/development/reactive_caching.html
+#
 module ReactiveCaching
   extend ActiveSupport::Concern
 
@@ -167,7 +168,7 @@ module ReactiveCaching
 
       data_deep_size = Gitlab::Utils::DeepSize.new(data, max_size: self.class.reactive_cache_hard_limit)
 
-      raise ExceededReactiveCacheLimit.new unless data_deep_size.valid?
+      raise ExceededReactiveCacheLimit unless data_deep_size.valid?
     end
   end
 end

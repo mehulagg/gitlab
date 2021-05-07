@@ -5,10 +5,10 @@ require 'spec_helper'
 RSpec.describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
-  let(:admin) { create(:admin) }
   let(:namespace) { create(:namespace, name: 'frontend-fixtures' )}
   let(:project) { create(:project, :repository, namespace: namespace, path: 'merge-requests-project') }
-  let(:merge_request) { create(:merge_request, :with_diffs, source_project: project, target_project: project, description: '- [ ] Task List Item') }
+  let(:user) { project.owner }
+  let(:merge_request) { create(:merge_request, source_project: project, target_project: project, description: '- [ ] Task List Item') }
   let(:path) { "files/ruby/popen.rb" }
   let(:position) do
     build(:text_diff_position, :added,
@@ -25,7 +25,11 @@ RSpec.describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)'
   end
 
   before do
-    sign_in(admin)
+    # Create a user that matches the project.commit author
+    # This is so that the "author" information will be populated
+    create(:user, email: project.commit.author_email, name: project.commit.author_name)
+
+    sign_in(user)
   end
 
   after do
@@ -33,29 +37,21 @@ RSpec.describe Projects::MergeRequests::DiffsController, '(JavaScript fixtures)'
   end
 
   it 'merge_request_diffs/with_commit.json' do
-    # Create a user that matches the project.commit author
-    # This is so that the "author" information will be populated
-    create(:user, email: project.commit.author_email, name: project.commit.author_name)
-
     render_merge_request(merge_request, commit_id: project.commit.sha)
   end
 
-  it 'merge_request_diffs/inline_changes_tab_with_comments.json' do
-    create(:diff_note_on_merge_request, project: project, author: admin, position: position, noteable: merge_request)
-    create(:note_on_merge_request, author: admin, project: project, noteable: merge_request)
-    render_merge_request(merge_request)
+  it 'merge_request_diffs/diffs_metadata.json' do
+    render_merge_request(merge_request, action: :diffs_metadata)
   end
 
-  it 'merge_request_diffs/parallel_changes_tab_with_comments.json' do
-    create(:diff_note_on_merge_request, project: project, author: admin, position: position, noteable: merge_request)
-    create(:note_on_merge_request, author: admin, project: project, noteable: merge_request)
-    render_merge_request(merge_request, view: 'parallel')
+  it 'merge_request_diffs/diffs_batch.json' do
+    render_merge_request(merge_request, action: :diffs_batch, page: 1, per_page: 30)
   end
 
   private
 
-  def render_merge_request(merge_request, view: 'inline', **extra_params)
-    get :show, params: {
+  def render_merge_request(merge_request, action: :show, view: 'inline', **extra_params)
+    get action, params: {
       namespace_id: project.namespace.to_param,
       project_id: project,
       id: merge_request.to_param,

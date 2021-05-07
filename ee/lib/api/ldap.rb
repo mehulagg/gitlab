@@ -8,6 +8,8 @@ module API
     # group.
     before { authenticated_with_ldap_admin_access! }
 
+    feature_category :authentication_and_authorization
+
     resource :ldap do
       helpers do
         def get_group_list(provider, search)

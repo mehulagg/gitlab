@@ -1,41 +1,75 @@
 - purchase_link = plan.purchase_link
-- is_current_plan = plan.code == current_plan&.code
+- plan_name = plan.name
+- show_deprecated_plan = ::Feature.enabled?(:hide_deprecated_billing_plans) && plan.deprecated?
+- has_upgrade = has_upgrade?(plan_offer_type)
+- if show_deprecated_plan
+  - plan_name      += ' (Legacy)'
+  - faq_link_url   = 'https://about.gitlab.com/pricing/faq-new-product-subscription-tiers'
+  - faq_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: faq_link_url }
 
-.col-md-6.col-lg-3
-  .card.mb-5{ class: ("card-active" if is_current_plan) }
-    .card-header.font-weight-bold.p-3
-      = plan.name
-      - if is_current_plan
-        .float-right.text-muted
-          = _("Current Plan")
+.card-wrapper{ class: ("card-wrapper-has-badge" if has_upgrade), data: { testid: "plan-card-#{plan.code}" } }
+  - if has_upgrade
+    .card-badge
+      %span.card-badge-text
+        - case plan_offer_type
+        - when :upgrade_for_free
+          = s_("BillingPlans|Free upgrade!")
+        - else
+          = _("Upgrade offers available!")
+  .card{ class: ("card-active" if is_current || show_deprecated_plan) }
+    .card-header.gl-line-height-normal.gl-py-5.gl-font-weight-bold
+      = plan_name
 
     .card-body
-      .price-per-month
-        .gl-mr-2
-          = number_to_plan_currency(plan.price_per_month)
+      - if show_deprecated_plan
+        = s_("The %{plan_name} is no longer available to purchase. For more information about how this will impact you, check our %{faq_link_start}frequently asked questions%{faq_link_end}.").html_safe % { plan_name: plan.name, faq_link_start: faq_link_start, faq_link_end: '</a>'.html_safe }
+      - else
+        .price-description
+          .gl-mr-2.gl-display-flex.gl-align-items-center
+            - case plan_offer_type
+            - when :upgrade_for_free
+              %span.gl-mr-3.price-rebate
+                = number_to_plan_currency(plan.price_per_month)
+              %span
+                = number_to_plan_currency(plan.upgrade_price_per_month)
+            - when :upgrade_for_offer
+              %span.price-cut
+                = number_to_plan_currency(plan.price_per_month)
+            - else
+              %span
+                = number_to_plan_currency(plan.price_per_month)
 
-        %ul.conditions.p-0.my-auto
-          %li= s_("BillingPlans|per user")
-          %li= s_("BillingPlans|monthly")
-      .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year > 0) }
-        - price_per_year = number_to_plan_currency(plan.price_per_year)
-        = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
+          %ul.conditions.gl-p-0.gl-my-auto
+            %li= s_("BillingPlans|per user")
+            %li= s_("BillingPlans|monthly")
+        .price-conclusion{ class: ("invisible" unless plan.price_per_year > 0) }
+          - case plan_offer_type
+          - when :upgrade_for_free
+            = s_("BillingPlans|for the remainder of your subscription")
+          - else
+            - price_per_year = number_to_plan_currency(plan.price_per_year)
+            = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
+        %hr.gl-my-3
 
-      %hr.mt-3.mb-3
+        %ul.unstyled-list
+          - plan_feature_list(plan).each do |feature|
+            - feature_class = "gl-p-0!"
+            - if feature.highlight
+              - feature_class += " gl-font-weight-bold"
+            %li{ class: "#{feature_class}" }
+              = feature.title
+          %li.gl-p-0.gl-pt-3
+            - if plan.about_page_href
+              = link_to s_("BillingPlans|See all %{plan_name} features") % { plan_name: plan.name }, EE::SUBSCRIPTIONS_COMPARISON_URL
 
-      %ul.unstyled-list
-        - plan_feature_short_list(plan).each do |feature|
-          %li.p-0{ class: ("font-weight-bold" if feature.highlight) }
-            = feature.title
-        %li.p-0.pt-3
-          - if plan.about_page_href
-            = link_to s_("BillingPlans|See all %{plan_name} features") % { plan_name: plan.name }, EE::SUBSCRIPTIONS_COMPARISON_URL
-
-    - if purchase_link
-      .card-footer.p-3
-        .float-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current_plan) }
-          - if show_contact_sales_button?(purchase_link.action)
-            = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success btn-inverted", data: { **experiment_tracking_data_for_button_click('contact_sales') }
-          - upgrade_button_class = "disabled" if is_current_plan && !namespace.trial_active?
-          - cta_class = '-new' if use_new_purchase_flow?(namespace)
-          = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan, current_plan), class: "btn btn-success #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }
+    .card-footer
+      - cta_class = '-new' if use_new_purchase_flow?(namespace)
+      - upgrade_button_classes = upgrade_button_css_classes(namespace, plan, is_current)
+      - upgrade_button_text = plan_offer_type === :upgrade_for_free ? s_('BillingPlan|Upgrade for free') : s_('BillingPlan|Upgrade')
+      - show_upgrade_button = show_upgrade_button?(purchase_link.action, plan_offer_type)
+      - show_contact_sales_button = show_contact_sales_button?(purchase_link.action, plan_offer_type)
+      .gl-min-h-7.gl-display-flex.gl-flex-wrap.gl-justify-content-end
+        - if show_contact_sales_button
+          = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: ["btn gl-button", show_upgrade_button ? "btn-success-secondary" : "btn-success"], data: { **experiment_tracking_data_for_button_click('contact_sales') }
+        - if show_upgrade_button
+          = link_to upgrade_button_text, plan_purchase_or_upgrade_url(namespace, plan), class: "#{upgrade_button_classes} billing-cta-purchase#{cta_class} gl-ml-3", data: { **experiment_tracking_data_for_button_click('upgrade') }

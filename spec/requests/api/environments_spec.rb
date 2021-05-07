@@ -3,28 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe API::Environments do
-  let(:user)          { create(:user) }
-  let(:non_member)    { create(:user) }
-  let(:project)       { create(:project, :private, :repository, namespace: user.namespace) }
-  let!(:environment)  { create(:environment, project: project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:non_member) { create(:user) }
+  let_it_be(:project) { create(:project, :private, :repository, namespace: user.namespace) }
+  let_it_be_with_reload(:environment) { create(:environment, project: project) }
 
   before do
     project.add_maintainer(user)
   end
 
-  describe 'GET /projects/:id/environments' do
+  describe 'GET /projects/:id/environments', :aggregate_failures do
     context 'as member of the project' do
       it 'returns project environments' do
-        project_data_keys = %w(
-          id description default_branch tag_list
-          ssh_url_to_repo http_url_to_repo web_url readme_url
-          name name_with_namespace
-          path path_with_namespace
-          star_count forks_count
-          created_at last_activity_at
-          avatar_url namespace
-        )
-
         get api("/projects/#{project.id}/environments", user)
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -33,12 +23,95 @@ RSpec.describe API::Environments do
         expect(json_response.size).to eq(1)
         expect(json_response.first['name']).to eq(environment.name)
         expect(json_response.first['external_url']).to eq(environment.external_url)
-        expect(json_response.first['project'].keys).to contain_exactly(*project_data_keys)
-        expect(json_response.first).not_to have_key("last_deployment")
+        expect(json_response.first['project']).to match_schema('public_api/v4/project')
+        expect(json_response.first['enable_advanced_logs_querying']).to eq(false)
+        expect(json_response.first).not_to have_key('last_deployment')
+        expect(json_response.first).not_to have_key('gitlab_managed_apps_logs_path')
+      end
+
+      context 'when the user can read pod logs' do
+        context 'with successful deployment on cluster' do
+          let_it_be(:deployment) { create(:deployment, :on_cluster, :success, environment: environment, project: project) }
+
+          it 'returns environment with enable_advanced_logs_querying and logs_api_path' do
+            get api("/projects/#{project.id}/environments", user)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to include_pagination_headers
+            expect(json_response).to be_an Array
+            expect(json_response.size).to eq(1)
+            expect(json_response.first['gitlab_managed_apps_logs_path']).to eq(
+              "/#{project.full_path}/-/logs/k8s.json?cluster_id=#{deployment.cluster_id}"
+            )
+          end
+        end
+
+        context 'when elastic stack is available' do
+          before do
+            allow_next_found_instance_of(Environment) do |env|
+              allow(env).to receive(:elastic_stack_available?).and_return(true)
+            end
+          end
+
+          it 'returns environment with enable_advanced_logs_querying and logs_api_path' do
+            get api("/projects/#{project.id}/environments", user)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to include_pagination_headers
+            expect(json_response).to be_an Array
+            expect(json_response.size).to eq(1)
+            expect(json_response.first['enable_advanced_logs_querying']).to eq(true)
+            expect(json_response.first['logs_api_path']).to eq(
+              "/#{project.full_path}/-/logs/elasticsearch.json?environment_name=#{environment.name}"
+            )
+          end
+        end
+
+        context 'when elastic stack is not available' do
+          before do
+            allow_next_found_instance_of(Environment) do |env|
+              allow(env).to receive(:elastic_stack_available?).and_return(false)
+            end
+          end
+
+          it 'returns environment with enable_advanced_logs_querying logs_api_path' do
+            get api("/projects/#{project.id}/environments", user)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to include_pagination_headers
+            expect(json_response).to be_an Array
+            expect(json_response.size).to eq(1)
+            expect(json_response.first['enable_advanced_logs_querying']).to eq(false)
+            expect(json_response.first['logs_api_path']).to eq(
+              "/#{project.full_path}/-/logs/k8s.json?environment_name=#{environment.name}"
+            )
+          end
+        end
+      end
+
+      context 'when the user cannot read pod logs' do
+        before do
+          allow_next_found_instance_of(User) do |user|
+            allow(user).to receive(:can?).and_call_original
+            allow(user).to receive(:can?).with(:read_pod_logs, project).and_return(false)
+          end
+        end
+
+        it 'does not contain enable_advanced_logs_querying' do
+          get api("/projects/#{project.id}/environments", user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.size).to eq(1)
+          expect(json_response.first).not_to have_key('enable_advanced_logs_querying')
+          expect(json_response.first).not_to have_key('logs_api_path')
+          expect(json_response.first).not_to have_key('gitlab_managed_apps_logs_path')
+        end
       end
 
       context 'when filtering' do
-        let!(:environment2) { create(:environment, project: project) }
+        let_it_be(:environment2) { create(:environment, project: project) }
 
         it 'returns environment by name' do
           get api("/projects/#{project.id}/environments?name=#{environment.name}", user)
@@ -214,7 +287,7 @@ RSpec.describe API::Environments do
     context 'as a maintainer' do
       context 'with a stoppable environment' do
         before do
-          environment.update(state: :available)
+          environment.update!(state: :available)
 
           post api("/projects/#{project.id}/environments/#{environment.id}/stop", user)
         end
@@ -260,6 +333,78 @@ RSpec.describe API::Environments do
     context 'as non member' do
       it 'returns a 404 status code' do
         get api("/projects/#{project.id}/environments/#{environment.id}", non_member)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "DELETE /projects/:id/environments/review_apps" do
+    shared_examples "delete stopped review environments" do
+      around do |example|
+        freeze_time { example.run }
+      end
+
+      it "deletes the old stopped review apps" do
+        old_stopped_review_env = create(:environment, :with_review_app, :stopped, created_at: 31.days.ago, project: project)
+        new_stopped_review_env = create(:environment, :with_review_app, :stopped, project: project)
+        old_active_review_env  = create(:environment, :with_review_app, :available, created_at: 31.days.ago, project: project)
+        old_stopped_other_env  = create(:environment, :stopped, created_at: 31.days.ago, project: project)
+        new_stopped_other_env  = create(:environment, :stopped, project: project)
+        old_active_other_env   = create(:environment, :available, created_at: 31.days.ago, project: project)
+
+        delete api("/projects/#{project.id}/environments/review_apps", current_user), params: { dry_run: false }
+        project.environments.reload
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response["scheduled_entries"].size).to eq(1)
+        expect(json_response["scheduled_entries"].first["id"]).to eq(old_stopped_review_env.id)
+        expect(json_response["unprocessable_entries"].size).to eq(0)
+
+        expect(old_stopped_review_env.reload.auto_delete_at).to eq(1.week.from_now)
+        expect(new_stopped_review_env.reload.auto_delete_at).to be_nil
+        expect(old_active_review_env.reload.auto_delete_at).to be_nil
+        expect(old_stopped_other_env.reload.auto_delete_at).to be_nil
+        expect(new_stopped_other_env.reload.auto_delete_at).to be_nil
+        expect(old_active_other_env.reload.auto_delete_at).to be_nil
+      end
+    end
+
+    context "as a maintainer" do
+      it_behaves_like "delete stopped review environments" do
+        let(:current_user) { user }
+      end
+    end
+
+    context "as a developer" do
+      let(:developer) { create(:user) }
+
+      before do
+        project.add_developer(developer)
+      end
+
+      it_behaves_like "delete stopped review environments" do
+        let(:current_user) { developer }
+      end
+    end
+
+    context "as a reporter" do
+      let(:reporter) { create(:user) }
+
+      before do
+        project.add_reporter(reporter)
+      end
+
+      it "rejects the request" do
+        delete api("/projects/#{project.id}/environments/review_apps", reporter)
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context "as a non member" do
+      it "rejects the request" do
+        delete api("/projects/#{project.id}/environments/review_apps", non_member)
 
         expect(response).to have_gitlab_http_status(:not_found)
       end

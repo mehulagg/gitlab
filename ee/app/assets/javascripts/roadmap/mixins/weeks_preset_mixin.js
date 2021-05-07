@@ -5,9 +5,9 @@ export default {
     /**
      * Check if current epic starts within current week (timeline cell)
      */
-    hasStartDateForWeek() {
-      const firstDayOfWeek = this.timeframeItem;
-      const lastDayOfWeek = newDate(this.timeframeItem);
+    hasStartDateForWeek(timeframeItem) {
+      const firstDayOfWeek = timeframeItem;
+      const lastDayOfWeek = newDate(timeframeItem);
       lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
 
       return (

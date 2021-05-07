@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::Integrations::Jira::IssuesFinder do
   let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:jira_service, reload: true) { create(:jira_service, project: project) }
+
   let(:params) { {} }
   let(:service) { described_class.new(project, params) }
 
@@ -114,7 +115,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
         context 'when pagination params used' do
           let(:params) { { page: '10', per_page: '20' } }
 
-          it 'passes them to JqlBuilderService ' do
+          it 'passes them to JqlBuilderService' do
             expect(::Jira::JqlBuilderService).to receive(:new)
               .with(jira_service.project_key, include({ page: '10', per_page: '20' }))
               .and_call_original

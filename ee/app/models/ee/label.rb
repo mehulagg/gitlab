@@ -7,6 +7,20 @@ module EE
     SCOPED_LABEL_SEPARATOR = '::'
     SCOPED_LABEL_PATTERN = /^.*#{SCOPED_LABEL_SEPARATOR}/.freeze
 
+    prepended do
+      has_many :epic_board_labels, class_name: 'Boards::EpicBoardLabel', inverse_of: :label
+      has_many :epic_lists, class_name: 'Boards::EpicList', inverse_of: :label
+
+      scope :on_epic_board, ->(epic_board_id) do
+        joins(epic_lists: :epic_board).merge(::Boards::EpicList.movable)
+          .where(boards_epic_boards: { id: epic_board_id })
+      end
+
+      def self.ids_on_epic_board(epic_board_id)
+        on_epic_board(epic_board_id).pluck(:label_id)
+      end
+    end
+
     def scoped_label?
       SCOPED_LABEL_PATTERN.match?(name)
     end

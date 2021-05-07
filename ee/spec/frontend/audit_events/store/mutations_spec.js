@@ -1,5 +1,5 @@
-import mutations from 'ee/audit_events/store/mutations';
 import * as types from 'ee/audit_events/store/mutation_types';
+import mutations from 'ee/audit_events/store/mutations';
 
 describe('Audit Event mutations', () => {
   let state = null;

@@ -31,17 +31,33 @@ module SnowplowHelpers
   #       )
   #     end
   #   end
-  def expect_snowplow_event(category:, action:, **kwargs)
-    # This check will no longer be needed with Ruby 2.7 which
-    # would not pass any arguments when using **kwargs.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/263430
-    if kwargs.present?
-      expect(Gitlab::Tracking).to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
-        .with(category, action, **kwargs).at_least(:once)
-    else
-      expect(Gitlab::Tracking).to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
-        .with(category, action).at_least(:once)
+  #
+  # Passing context:
+  #
+  #   Simply provide a hash that has the schema and data expected.
+  #
+  #   expect_snowplow_event(
+  #     category: 'Experiment',
+  #     action: 'created',
+  #     context: [
+  #       {
+  #         schema: 'iglu:com.gitlab/.../0-3-0',
+  #         data: { key: 'value' }
+  #       }
+  #     ]
+  #   )
+  def expect_snowplow_event(category:, action:, context: nil, **kwargs)
+    if context
+      kwargs[:context] = []
+      context.each do |c|
+        expect(SnowplowTracker::SelfDescribingJson).to have_received(:new)
+          .with(c[:schema], c[:data]).at_least(:once)
+        kwargs[:context] << an_instance_of(SnowplowTracker::SelfDescribingJson)
+      end
     end
+
+    expect(Gitlab::Tracking).to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+      .with(category, action, **kwargs).at_least(:once)
   end
 
   # Asserts that no call to `Gitlab::Tracking#event` was made.
@@ -55,7 +71,11 @@ module SnowplowHelpers
   #       expect_no_snowplow_event
   #     end
   #   end
-  def expect_no_snowplow_event
-    expect(Gitlab::Tracking).not_to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+  def expect_no_snowplow_event(category: nil, action: nil, **kwargs)
+    if category && action
+      expect(Gitlab::Tracking).not_to have_received(:event).with(category, action, **kwargs) # rubocop:disable RSpec/ExpectGitlabTracking
+    else
+      expect(Gitlab::Tracking).not_to have_received(:event) # rubocop:disable RSpec/ExpectGitlabTracking
+    end
   end
 end

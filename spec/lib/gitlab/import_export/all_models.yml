@@ -28,6 +28,7 @@ issues:
 - events
 - merge_requests_closing_issues
 - metrics
+- metric_images
 - timelogs
 - issuable_severity
 - issuable_sla
@@ -85,6 +86,8 @@ label:
 - issues
 - merge_requests
 - priorities
+- epic_board_labels
+- epic_lists
 milestone:
 - group
 - project
@@ -105,10 +108,12 @@ snippets:
 - user_mentions
 - snippet_repository
 - statistics
+- repository_storage_moves
 releases:
 - author
 - project
 - links
+- sorted_links
 - milestone_releases
 - milestones
 - evidences
@@ -142,6 +147,7 @@ merge_requests:
 - merge_user
 - merge_request_diffs
 - merge_request_diff
+- merge_head_diff
 - merge_request_context_commits
 - merge_request_context_commit_diff_files
 - events
@@ -179,6 +185,7 @@ merge_requests:
 - user_mentions
 - system_note_metadata
 - note_authors
+- cleanup_schedule
 external_pull_requests:
 - project
 merge_request_diff:
@@ -195,6 +202,8 @@ merge_request_diff_files:
 merge_request_context_commits:
 - merge_request
 - diff_files
+cleanup_schedule:
+- merge_request
 ci_pipelines:
 - project
 - user
@@ -240,6 +249,7 @@ ci_pipelines:
 - vulnerability_findings
 - pipeline_config
 - security_scans
+- security_findings
 - daily_build_group_report_results
 - latest_builds
 - daily_report_results
@@ -247,6 +257,8 @@ ci_pipelines:
 - messages
 - pipeline_artifacts
 - latest_statuses
+- dast_profile
+- dast_profiles_pipeline
 ci_refs:
 - project
 - ci_pipelines
@@ -260,6 +272,7 @@ stages:
 - builds
 - bridges
 - latest_statuses
+- retried_statuses
 statuses:
 - project
 - pipeline
@@ -317,6 +330,7 @@ push_access_levels:
 - protected_branch
 - user
 - group
+- deploy_key
 create_access_levels:
 - user
 - protected_tag
@@ -325,6 +339,7 @@ container_repositories:
 - project
 - name
 project:
+- external_approval_rules
 - taggings
 - base_tags
 - tag_taggings
@@ -344,6 +359,7 @@ project:
 - services
 - campfire_service
 - confluence_service
+- datadog_service
 - discord_service
 - drone_ci_service
 - emails_on_push_service
@@ -354,7 +370,6 @@ project:
 - packagist_service
 - pivotaltracker_service
 - prometheus_service
-- hipchat_service
 - flowdock_service
 - assembla_service
 - asana_service
@@ -515,7 +530,6 @@ project:
 - designs
 - project_aliases
 - external_pull_requests
-- alerts_service
 - grafana_integration
 - remove_source_branch_after_merge
 - deleting_user
@@ -535,6 +549,7 @@ project:
 - daily_build_group_report_results
 - jira_imports
 - compliance_framework_setting
+- compliance_management_framework
 - metrics_users_starred_dashboards
 - alert_management_alerts
 - repository_storage_moves
@@ -543,10 +558,18 @@ project:
 - build_report_results
 - vulnerability_statistic
 - vulnerability_historical_statistics
+- vulnerability_remediations
 - product_analytics_events
 - pipeline_artifacts
 - terraform_states
 - alert_management_http_integrations
+- exported_protected_branches
+- incident_management_oncall_schedules
+- incident_management_oncall_rotations
+- debian_distributions
+- merge_request_metrics
+- security_orchestration_policy_configuration
+- timelogs
 award_emoji:
 - awardable
 - user
@@ -575,6 +598,7 @@ lfs_file_locks:
 project_badges:
 - project
 metrics:
+- target_project
 - merge_request
 - latest_closed_by
 - merged_by
@@ -634,6 +658,7 @@ boards:
 - lists
 - destroyable_lists
 - milestone
+- iteration
 - board_labels
 - board_assignee
 - assignee
@@ -643,6 +668,7 @@ boards:
 lists:
 - user
 - milestone
+- iteration
 - board
 - label
 - list_user_preferences
@@ -652,6 +678,7 @@ milestone_releases:
 evidences:
 - release
 design: &design
+- authors
 - issue
 - actions
 - versions
@@ -706,6 +733,7 @@ epic:
 - user_mentions
 - note_authors
 - boards_epic_user_preferences
+- epic_board_positions
 epic_issue:
 - epic
 - issue
@@ -716,3 +744,7 @@ status_page_published_incident:
 - issue
 issuable_sla:
   - issue
+push_rule:
+  - group
+bulk_import_export:
+  - group

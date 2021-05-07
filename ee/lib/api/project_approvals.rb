@@ -2,6 +2,8 @@
 
 module API
   class ProjectApprovals < ::API::Base
+    feature_category :source_code_management
+
     before { authenticate! }
     before { authorize! :update_approvers, user_project }
 
@@ -13,7 +15,7 @@ module API
       def filter_params(params)
         params
           .then { |params| filter_forbidden_param(params, :modify_merge_request_committer_setting, :merge_requests_disable_committers_approval) }
-          .then { |params| filter_forbidden_param(params, :modify_overriding_approvers_per_merge_request_setting, :disable_overriding_approvers_per_merge_request) }
+          .then { |params| filter_forbidden_param(params, :modify_approvers_rules, :disable_overriding_approvers_per_merge_request) }
           .then { |params| filter_forbidden_param(params, :modify_merge_request_author_setting, :merge_requests_author_approval) }
       end
     end
@@ -54,24 +56,6 @@ module API
           else
             render_validation_error!(user_project)
           end
-        end
-      end
-
-      desc 'Update approvers and approver groups' do
-        detail 'This feature was introduced in 10.6'
-        success EE::API::Entities::ApprovalSettings
-      end
-      params do
-        requires :approver_ids, type: Array[Integer], coerce_with: Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of User IDs to set as approvers.'
-        requires :approver_group_ids, type: Array[Integer], coerce_with: Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of Group IDs to set as approvers.'
-      end
-      put ':id/approvers' do
-        result = ::Projects::UpdateService.new(user_project, current_user, declared(params, include_parent_namespaces: false).merge(remove_old_approvers: true)).execute
-
-        if result[:status] == :success
-          present user_project.present(current_user: current_user), with: EE::API::Entities::ApprovalSettings
-        else
-          render_validation_error!(user_project)
         end
       end
     end

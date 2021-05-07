@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Database
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Troubleshooting and Debugging Database
@@ -29,10 +29,10 @@ If you just want to delete everything and start over with sample data (approxima
 also does `db:reset` and runs DB-specific migrations:
 
 ```shell
-bundle exec rake dev:setup RAILS_ENV=development
+bundle exec rake db:setup RAILS_ENV=development
 ```
 
-If your test DB is giving you problems, it is safe to nuke it because it doesn't contain important
+If your test DB is giving you problems, it is safe to delete everything because it doesn't contain important
 data:
 
 ```shell
@@ -69,16 +69,14 @@ bundle exec rails db -e development
 Use these instructions for exploring the GitLab database while developing with the GDK:
 
 1. Install or open [Visual Studio Code](https://code.visualstudio.com/download).
-1. Install the [PostgreSQL VSCode Extension](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres) by Chris Kolkman.
+1. Install the [PostgreSQL VSCode Extension](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres).
 1. In Visual Studio Code click on the PostgreSQL Explorer button in the left toolbar.
 1. In the top bar of the new window, click on the `+` to **Add Database Connection**, and follow the prompts to fill in the details:
    1. **Hostname**: the path to the PostgreSQL folder in your GDK directory (for example `/dev/gitlab-development-kit/postgresql`).
    1. **PostgreSQL user to authenticate as**: usually your local username, unless otherwise specified during PostgreSQL installation.
    1. **Password of the PostgreSQL user**: the password you set when installing PostgreSQL.
    1. **Port number to connect to**: `5432` (default).
-   1. <!-- vale gitlab.Spelling = NO -->
-      **Use an ssl connection?**
-      <!-- vale gitlab.Spelling = YES --> This depends on your installation. Options are:
+   1. **Use an SSL connection?** This depends on your installation. Options are:
       - **Use Secure Connection**
       - **Standard Connection** (default)
    1. **(Optional) The database to connect to**: `gitlabhq_development`.

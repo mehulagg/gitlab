@@ -2,6 +2,8 @@
 
 module API
   class Dependencies < ::API::Base
+    feature_category :dependency_scanning
+
     helpers do
       def dependencies_by(params)
         pipeline = ::Security::ReportFetchService.new(user_project, ::Ci::JobArtifact.dependency_list_reports).pipeline
@@ -34,7 +36,7 @@ module API
       get ':id/dependencies' do
         authorize! :read_dependencies, user_project
 
-        track_event('view_dependencies')
+        ::Gitlab::Tracking.event(self.options[:for].name, 'view_dependencies')
 
         dependency_params = declared_params(include_missing: false).merge(project: user_project)
         dependencies = dependencies_by(dependency_params)

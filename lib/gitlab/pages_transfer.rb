@@ -7,13 +7,23 @@
 #
 module Gitlab
   class PagesTransfer < ProjectTransfer
-    class Async
-      METHODS = %w[move_namespace move_project rename_project rename_namespace].freeze
+    METHODS = %w[move_namespace move_project rename_project rename_namespace].freeze
 
+    class Async
       METHODS.each do |meth|
         define_method meth do |*args|
+          next unless Settings.pages.local_store.enabled
+
           PagesTransferWorker.perform_async(meth, args)
         end
+      end
+    end
+
+    METHODS.each do |meth|
+      define_method meth do |*args|
+        next unless Settings.pages.local_store.enabled
+
+        super(*args)
       end
     end
 

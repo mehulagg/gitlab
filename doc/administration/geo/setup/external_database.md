@@ -1,17 +1,17 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Geo with external PostgreSQL instances **(PREMIUM ONLY)**
+# Geo with external PostgreSQL instances **(PREMIUM SELF)**
 
 This document is relevant if you are using a PostgreSQL instance that is *not
 managed by Omnibus*. This includes cloud-managed instances like AWS RDS, or
 manually installed and configured PostgreSQL instances.
 
-NOTE: **Note:**
+NOTE:
 We strongly recommend running Omnibus-managed instances as they are actively
 developed and tested. We aim to be compatible with most external
 (not managed by Omnibus) databases but we do not guarantee compatibility.
@@ -49,7 +49,7 @@ developed and tested. We aim to be compatible with most external
 
 To set up an external database, you can either:
 
-- Set up streaming replication yourself (for example, in AWS RDS).
+- Set up [streaming replication](https://www.postgresql.org/docs/11/warm-standby.html#STREAMING-REPLICATION-SLOTS) yourself (for example AWS RDS, bare metal not managed by Omnibus, etc.).
 - Perform the Omnibus configuration manually as follows.
 
 #### Leverage your cloud provider's tools to replicate the primary database
@@ -186,7 +186,7 @@ to grant additional roles to your tracking database user (by default, this is
 If you have an external database ready to be used as the tracking database,
 follow the instructions below to use it:
 
-NOTE: **Note:**
+NOTE:
 If you want to use AWS RDS as a tracking database, make sure it has access to
 the secondary database. Unfortunately, just assigning the same security group is not enough as
 outbound rules do not apply to RDS PostgreSQL databases. Therefore, you need to explicitly add an inbound

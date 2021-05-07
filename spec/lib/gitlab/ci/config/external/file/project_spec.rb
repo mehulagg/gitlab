@@ -6,6 +6,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project do
   let_it_be(:context_project) { create(:project) }
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:context_user) { user }
   let(:parent_pipeline) { double(:parent_pipeline) }
   let(:context) { Gitlab::Ci::Config::External::Context.new(**context_params) }
@@ -16,7 +17,8 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project do
       project: context_project,
       sha: '12345',
       user: context_user,
-      parent_pipeline: parent_pipeline
+      parent_pipeline: parent_pipeline,
+      variables: project.predefined_variables.to_runner_variables
     }
   end
 
@@ -165,7 +167,8 @@ RSpec.describe Gitlab::Ci::Config::External::File::Project do
         user: user,
         project: project,
         sha: project.commit('master').id,
-        parent_pipeline: parent_pipeline)
+        parent_pipeline: parent_pipeline,
+        variables: project.predefined_variables.to_runner_variables)
     end
   end
 

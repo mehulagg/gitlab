@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::Alerting::NotificationsController do
   let_it_be(:project) { create(:project) }
   let_it_be(:environment) { create(:environment, project: project) }
+
   let(:params) { project_params }
 
   describe 'POST #create' do
@@ -38,7 +39,7 @@ RSpec.describe Projects::Alerting::NotificationsController do
 
           expect(notify_service_class)
             .to have_received(:new)
-            .with(project, nil, permitted_params)
+            .with(project, permitted_params)
         end
       end
 
@@ -68,6 +69,7 @@ RSpec.describe Projects::Alerting::NotificationsController do
             context 'with a corresponding integration' do
               context 'with integration parameters specified' do
                 let_it_be_with_reload(:integration) { create(:alert_management_http_integration, project: project) }
+
                 let(:params) { project_params(endpoint_identifier: integration.endpoint_identifier, name: integration.name) }
 
                 context 'the integration is active' do
@@ -81,18 +83,6 @@ RSpec.describe Projects::Alerting::NotificationsController do
                 context 'when the integration is inactive' do
                   before do
                     integration.update!(active: false)
-                  end
-
-                  it 'does not find an integration' do
-                    expect(notify_service).to receive(:execute).with('some token', nil)
-
-                    make_request
-                  end
-                end
-
-                context 'when multiple endpoints are disabled' do
-                  before do
-                    stub_feature_flags(multiple_http_integrations: false)
                   end
 
                   it 'does not find an integration' do

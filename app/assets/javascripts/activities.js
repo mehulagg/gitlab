@@ -2,19 +2,42 @@
 
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import Pager from './pager';
+import createFlash from '~/flash';
+import { s__ } from '~/locale';
 import { localTimeAgo } from './lib/utils/datetime_utility';
+import Pager from './pager';
 
 export default class Activities {
-  constructor(container = '') {
-    this.container = container;
+  constructor(containerSelector = '') {
+    this.containerSelector = containerSelector;
+    this.containerEl = this.containerSelector
+      ? document.querySelector(this.containerSelector)
+      : undefined;
+    this.$contentList = $('.content_list');
 
-    Pager.init(20, true, false, data => data, this.updateTooltips, this.container);
+    this.loadActivities();
 
-    $('.event-filter-link').on('click', e => {
+    $('.event-filter-link').on('click', (e) => {
       e.preventDefault();
       this.toggleFilter(e.currentTarget);
       this.reloadActivities();
+    });
+  }
+
+  loadActivities() {
+    Pager.init({
+      limit: 20,
+      preload: true,
+      prepareData: (data) => data,
+      successCallback: () => this.updateTooltips(),
+      errorCallback: () =>
+        createFlash({
+          message: s__(
+            'Activity|An error occured while retrieving activity. Reload the page to try again.',
+          ),
+          parent: this.containerEl,
+        }),
+      container: this.containerSelector,
     });
   }
 
@@ -23,8 +46,8 @@ export default class Activities {
   }
 
   reloadActivities() {
-    $('.content_list').html('');
-    Pager.init(20, true, false, data => data, this.updateTooltips, this.container);
+    this.$contentList.html('');
+    this.loadActivities();
   }
 
   toggleFilter(sender) {

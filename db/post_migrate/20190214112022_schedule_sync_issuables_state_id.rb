@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ScheduleSyncIssuablesStateId < ActiveRecord::Migration[5.0]
   # This migration schedules the sync of state_id for issues and merge requests
   # which are converting the state column from string to integer.
@@ -17,8 +19,8 @@ class ScheduleSyncIssuablesStateId < ActiveRecord::Migration[5.0]
   #
   BATCH_SIZE = 5000
   DELAY_INTERVAL = 120.seconds.to_i
-  ISSUES_MIGRATION = 'SyncIssuesStateId'.freeze
-  MERGE_REQUESTS_MIGRATION = 'SyncMergeRequestsStateId'.freeze
+  ISSUES_MIGRATION = 'SyncIssuesStateId'
+  MERGE_REQUESTS_MIGRATION = 'SyncMergeRequestsStateId'
 
   disable_ddl_transaction!
 

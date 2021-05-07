@@ -13,6 +13,8 @@ class Member < ApplicationRecord
   include FromUnion
   include UpdateHighestRole
 
+  AVATAR_SIZE = 40
+
   attr_accessor :raw_invite_token
 
   belongs_to :created_by, class_name: "User"
@@ -45,6 +47,19 @@ class Member < ApplicationRecord
     },
     if: :project_bot?
 
+  scope :in_hierarchy, ->(source) do
+    groups = source.root_ancestor.self_and_descendants
+    group_members = Member.default_scoped.where(source: groups)
+
+    projects = source.root_ancestor.all_projects
+    project_members = Member.default_scoped.where(source: projects)
+
+    Member.default_scoped.from_union([
+      group_members,
+      project_members
+    ]).merge(self)
+  end
+
   # This scope encapsulates (most of) the conditions a row in the member table
   # must satisfy if it is a valid permission. Of particular note:
   #
@@ -60,7 +75,19 @@ class Member < ApplicationRecord
 
     left_join_users
       .where(user_ok)
-      .where(requested_at: nil)
+      .non_request
+      .non_minimal_access
+      .reorder(nil)
+  end
+
+  scope :blocked, -> do
+    is_external_invite = arel_table[:user_id].eq(nil).and(arel_table[:invite_token].not_eq(nil))
+    user_is_blocked = User.arel_table[:state].eq(:blocked)
+
+    left_join_users
+      .where(user_is_blocked)
+      .where.not(is_external_invite)
+      .non_request
       .non_minimal_access
       .reorder(nil)
   end
@@ -77,12 +104,18 @@ class Member < ApplicationRecord
 
   scope :invite, -> { where.not(invite_token: nil) }
   scope :non_invite, -> { where(invite_token: nil) }
+
   scope :request, -> { where.not(requested_at: nil) }
   scope :non_request, -> { where(requested_at: nil) }
 
   scope :not_accepted_invitations, -> { invite.where(invite_accepted_at: nil) }
   scope :not_accepted_invitations_by_user, -> (user) { not_accepted_invitations.where(created_by: user) }
   scope :not_expired, -> (today = Date.current) { where(arel_table[:expires_at].gt(today).or(arel_table[:expires_at].eq(nil))) }
+
+  scope :created_today, -> do
+    now = Date.current
+    where(created_at: now.beginning_of_day..now.end_of_day)
+  end
   scope :last_ten_days_excluding_today, -> (today = Date.current) { where(created_at: (today - 10).beginning_of_day..(today - 1).end_of_day) }
 
   scope :has_access, -> { active.where('access_level > 0') }
@@ -96,10 +129,19 @@ class Member < ApplicationRecord
   scope :owners, -> { active.where(access_level: OWNER) }
   scope :owners_and_maintainers, -> { active.where(access_level: [OWNER, MAINTAINER]) }
   scope :with_user, -> (user) { where(user: user) }
+  scope :with_user_by_email, -> (email) { left_join_users.where(users: { email: email } ) }
+
   scope :preload_user_and_notification_settings, -> { preload(user: :notification_settings) }
 
   scope :with_source_id, ->(source_id) { where(source_id: source_id) }
   scope :including_source, -> { includes(:source) }
+
+  scope :distinct_on_user_with_max_access_level, -> do
+    distinct_members = select('DISTINCT ON (user_id, invite_email) *')
+                       .order('user_id, invite_email, access_level DESC, expires_at DESC, created_at ASC')
+
+    from(distinct_members, :members)
+  end
 
   scope :order_name_asc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'ASC')) }
   scope :order_name_desc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'DESC')) }
@@ -242,10 +284,16 @@ class Member < ApplicationRecord
       Gitlab::Access.sym_options
     end
 
+    def valid_email?(email)
+      Devise.email_regexp.match?(email)
+    end
+
     private
 
     def parse_users_list(source, list)
-      emails, user_ids, users = [], [], []
+      emails = []
+      user_ids = []
+      users = []
       existing_members = {}
 
       list.each do |item|
@@ -263,6 +311,7 @@ class Member < ApplicationRecord
 
       if user_ids.present?
         users.concat(User.where(id: user_ids))
+        # the below will automatically discard invalid user_ids
         existing_members = source.members_and_requesters.where(user_id: user_ids).index_by(&:user_id)
       end
 
@@ -415,6 +464,10 @@ class Member < ApplicationRecord
 
   def invite_to_unknown_user?
     invite? && user_id.nil?
+  end
+
+  def created_by_name
+    created_by&.name
   end
 
   private

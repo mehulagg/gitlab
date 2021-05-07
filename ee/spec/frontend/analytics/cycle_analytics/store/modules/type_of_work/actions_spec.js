@@ -1,24 +1,19 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
-import * as rootGetters from 'ee/analytics/cycle_analytics/store/getters';
-import * as getters from 'ee/analytics/cycle_analytics/store/modules/type_of_work/getters';
-import * as actions from 'ee/analytics/cycle_analytics/store/modules/type_of_work/actions';
-import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
 import {
   TASKS_BY_TYPE_FILTERS,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
 } from 'ee/analytics/cycle_analytics/constants';
-import { deprecatedCreateFlash } from '~/flash';
+import * as rootGetters from 'ee/analytics/cycle_analytics/store/getters';
+import * as actions from 'ee/analytics/cycle_analytics/store/modules/type_of_work/actions';
+import * as getters from 'ee/analytics/cycle_analytics/store/modules/type_of_work/getters';
+import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/mutation_types';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { groupLabels, endpoints, startDate, endDate, rawTasksByTypeData } from '../../../mock_data';
 
 jest.mock('~/flash');
-
-const shouldFlashAMessage = (msg, type = null) => {
-  const args = type ? [msg, type] : [msg];
-  expect(deprecatedCreateFlash).toHaveBeenCalledWith(...args);
-};
 
 const error = new Error(`Request failed with status code ${httpStatusCodes.NOT_FOUND}`);
 
@@ -147,7 +142,9 @@ describe('Type of work actions', () => {
           commit: () => {},
         });
 
-        shouldFlashAMessage('There was an error fetching the top labels for the selected group');
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error fetching the top labels for the selected group',
+        });
       });
     });
   });
@@ -217,7 +214,9 @@ describe('Type of work actions', () => {
           commit: () => {},
         });
 
-        shouldFlashAMessage('There was an error fetching data for the tasks by type chart');
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'There was an error fetching data for the tasks by type chart',
+        });
       });
     });
   });

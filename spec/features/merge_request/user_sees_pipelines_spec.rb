@@ -41,7 +41,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
       context 'with a detached merge request pipeline' do
         let(:merge_request) { create(:merge_request, :with_detached_merge_request_pipeline) }
 
-        it 'displays the Run Pipeline button' do
+        it 'displays the "Run pipeline" button' do
           visit project_merge_request_path(project, merge_request)
 
           page.within('.merge-request-tabs') do
@@ -50,14 +50,14 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
           wait_for_requests
 
-          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run Pipeline')
+          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run pipeline')
         end
       end
 
       context 'with a merged results pipeline' do
         let(:merge_request) { create(:merge_request, :with_merge_request_pipeline) }
 
-        it 'displays the Run Pipeline button' do
+        it 'displays the "Run pipeline" button' do
           visit project_merge_request_path(project, merge_request)
 
           page.within('.merge-request-tabs') do
@@ -66,7 +66,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
           wait_for_requests
 
-          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run Pipeline')
+          expect(page.find('[data-testid="run_pipeline_button"]')).to have_text('Run pipeline')
         end
       end
     end
@@ -131,7 +131,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
         visit project_merge_request_path(parent_project, merge_request)
 
         create_merge_request_pipeline
-        act_on_security_warning(action: 'Run Pipeline')
+        act_on_security_warning(action: 'Run pipeline')
 
         check_pipeline(expected_project: parent_project)
         check_head_pipeline(expected_project: parent_project)
@@ -175,7 +175,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
     def create_merge_request_pipeline
       page.within('.merge-request-tabs') { click_link('Pipelines') }
-      click_button('Run Pipeline')
+      click_button('Run pipeline')
     end
 
     def check_pipeline(expected_project:)
@@ -184,7 +184,7 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
 
         page.within(first('.commit')) do
           page.within('.pipeline-tags') do
-            expect(page.find('.js-pipeline-url-link')[:href]).to include(expected_project.full_path)
+            expect(page.find('[data-testid="pipeline-url-link"]')[:href]).to include(expected_project.full_path)
             expect(page).to have_content('detached')
           end
           page.within('.pipeline-triggerer') do
@@ -238,11 +238,15 @@ RSpec.describe 'Merge request > User sees pipelines', :js do
         threads = []
 
         threads << Thread.new do
-          @merge_request = MergeRequests::CreateService.new(project, user, merge_request_params).execute
+          Sidekiq::Worker.skipping_transaction_check do
+            @merge_request = MergeRequests::CreateService.new(project, user, merge_request_params).execute
+          end
         end
 
         threads << Thread.new do
-          @pipeline = Ci::CreatePipelineService.new(project, user, build_push_data).execute(:push)
+          Sidekiq::Worker.skipping_transaction_check do
+            @pipeline = Ci::CreatePipelineService.new(project, user, build_push_data).execute(:push)
+          end
         end
 
         threads.each { |thr| thr.join }

@@ -1,13 +1,13 @@
-import { mount } from '@vue/test-utils';
 import {
   GlLink,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import { capitalize } from 'lodash';
-import UsersMockHelper from 'helpers/user_mock_data_helper';
 import StatusText from 'ee/vulnerabilities/components/status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
+import UsersMockHelper from 'helpers/user_mock_data_helper';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
@@ -30,16 +30,16 @@ describe('Vulnerability status description component', () => {
   const statusEl = () => wrapper.find('[data-testid="status"]');
 
   // Create a date using the passed-in string, or just use the current time if nothing was passed in.
-  const createDate = value => (value ? new Date(value) : new Date()).toISOString();
+  const createDate = (value) => (value ? new Date(value) : new Date()).toISOString();
 
   const createWrapper = (props = {}) => {
     const vulnerability = props.vulnerability || { pipeline: {} };
     // Automatically create the ${v.state}_at property if it doesn't exist. Otherwise, every test would need to create
     // it manually for the component to mount properly.
     if (vulnerability.state === 'detected') {
-      vulnerability.pipeline.created_at = vulnerability.pipeline.created_at || createDate();
+      vulnerability.pipeline.createdAt = vulnerability.pipeline.createdAt || createDate();
     } else {
-      const propertyName = `${vulnerability.state}_at`;
+      const propertyName = `${vulnerability.state}At`;
       vulnerability[propertyName] = vulnerability[propertyName] || createDate();
     }
 
@@ -47,7 +47,7 @@ describe('Vulnerability status description component', () => {
   };
 
   describe('state text', () => {
-    it.each(ALL_STATES)('shows the correct string for the vulnerability state "%s"', state => {
+    it.each(ALL_STATES)('shows the correct string for the vulnerability state "%s"', (state) => {
       createWrapper({ vulnerability: { state, pipeline: {} } });
 
       expect(wrapper.text()).toMatch(new RegExp(`^${capitalize(state)}`));
@@ -59,7 +59,7 @@ describe('Vulnerability status description component', () => {
       ${'shows bolded state text'}         | ${true}
     `('$description if isStatusBolded is isStatusBolded', ({ isStatusBolded }) => {
       createWrapper({
-        vulnerability: { state: 'detected', pipeline: { created_at: createDate('2001') } },
+        vulnerability: { state: 'detected', pipeline: { createdAt: createDate('2001') } },
         isStatusBolded,
       });
 
@@ -71,22 +71,22 @@ describe('Vulnerability status description component', () => {
     it('uses the pipeline created date when the vulnerability state is "detected"', () => {
       const pipelineDateString = createDate('2001');
       createWrapper({
-        vulnerability: { state: 'detected', pipeline: { created_at: pipelineDateString } },
+        vulnerability: { state: 'detected', pipeline: { createdAt: pipelineDateString } },
       });
 
       expect(timeAgo().props('time')).toBe(pipelineDateString);
     });
 
     // The .map() is used to output the correct test name by doubling up the parameter, i.e. 'detected' -> ['detected', 'detected'].
-    it.each(NON_DETECTED_STATES.map(x => [x, x]))(
+    it.each(NON_DETECTED_STATES.map((x) => [x, x]))(
       'uses the "%s_at" property when the vulnerability state is "%s"',
-      state => {
+      (state) => {
         const expectedDate = createDate();
         createWrapper({
           vulnerability: {
             state,
-            pipeline: { created_at: 'pipeline_created_at' },
-            [`${state}_at`]: expectedDate,
+            pipeline: { createdAt: 'pipeline_created_at' },
+            [`${state}At`]: expectedDate,
           },
         });
 
@@ -106,7 +106,7 @@ describe('Vulnerability status description component', () => {
 
     it.each(NON_DETECTED_STATES)(
       'does not show the pipeline link when the vulnerability state is "%s"',
-      state => {
+      (state) => {
         createWrapper({
           vulnerability: { state, pipeline: { url: 'pipeline/url' } },
         });

@@ -1,8 +1,7 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlModal } from '@gitlab/ui';
-import { createStore } from '~/integrations/edit/store';
-
+import { shallowMount } from '@vue/test-utils';
 import ConfirmationModal from '~/integrations/edit/components/confirmation_modal.vue';
+import { createStore } from '~/integrations/edit/store';
 
 describe('ConfirmationModal', () => {
   let wrapper;
@@ -34,7 +33,7 @@ describe('ConfirmationModal', () => {
         'Saving will update the default settings for all projects that are not using custom settings.',
       );
       expect(findGlModal().text()).toContain(
-        'Projects using custom settings will not be impacted unless the project owner chooses to use instance-level defaults.',
+        'Projects using custom settings will not be impacted unless the project owner chooses to use parent level defaults.',
       );
     });
 

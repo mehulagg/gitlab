@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, api
 ---
 
-# Project templates API
+# Project templates API **(FREE)**
 
 This API is a project-specific version of these endpoints:
 
@@ -16,13 +16,13 @@ This API is a project-specific version of these endpoints:
 - [Issue and merge request templates](../user/project/description_templates.md)
   ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37890) in GitLab 13.3)
 
-It deprecates these endpoints, which will be removed for API version 5.
+It deprecates these endpoints, which are scheduled for removal in API version 5.
 
 In addition to templates common to the entire instance, project-specific
 templates are also available from this API endpoint.
 
-Support for [Group-level file templates](../user/group/index.md#group-file-templates)
-**(PREMIUM)** was [added](https://gitlab.com/gitlab-org/gitlab/-/issues/5987)
+Support for [Group-level file templates](../user/group/index.md#group-file-templates) **(PREMIUM)**
+was [added](https://gitlab.com/gitlab-org/gitlab/-/issues/5987)
 in GitLab 11.5
 
 ## Get all templates of a particular type
@@ -34,7 +34,7 @@ GET /projects/:id/templates/:type
 | Attribute  | Type   | Required | Description |
 | ---------- | ------ | -------- | ----------- |
 | `id`      | integer / string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
-| `type`     | string | yes| The type `(dockerfiles|gitignores|gitlab_ci_ymls|licenses|issues|merge_requests)` of the template |
+| `type`     | string | yes | The type of the template. Accepted values are: `dockerfiles`, `gitignores`, `gitlab_ci_ymls`, `licenses`, `issues`, `merge_requests` |
 
 Example response (licenses):
 
@@ -94,14 +94,15 @@ Example response (licenses):
 ## Get one template of a particular type
 
 ```plaintext
-GET /projects/:id/templates/:type/:key
+GET /projects/:id/templates/:type/:name
 ```
 
 | Attribute  | Type   | Required | Description |
 | ---------- | ------ | -------- | ----------- |
 | `id`      | integer / string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
-| `type`     | string | yes| The type `(dockerfiles|gitignores|gitlab_ci_ymls|licenses|issues|merge_requests)` of the template |
-| `key`      | string | yes      | The key of the template, as obtained from the collection endpoint |
+| `type`     | string | yes| The type of the template. One of: `dockerfiles`, `gitignores`, `gitlab_ci_ymls`, `licenses`, `issues`, or `merge_requests`. |
+| `name`     | string | yes      | The key of the template, as obtained from the collection endpoint |
+| `source_template_project_id`   | integer | no      | The project ID where a given template is being stored. This is useful when multiple templates from different projects have the same name. If multiple templates have the same name, the match from `closest ancestor` is returned if `source_template_project_id` is not specified |
 | `project`  | string | no       | The project name to use when expanding placeholders in the template. Only affects licenses |
 | `fullname` | string | no       | The full name of the copyright holder to use when expanding placeholders in the template. Only affects licenses |
 

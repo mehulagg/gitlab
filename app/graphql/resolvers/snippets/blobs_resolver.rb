@@ -5,28 +5,25 @@ module Resolvers
     class BlobsResolver < BaseResolver
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
+      type Types::Snippets::BlobType.connection_type, null: true
+      authorize :read_snippet
+      calls_gitaly!
+      authorizes_object!
+
       alias_method :snippet, :object
 
       argument :paths, [GraphQL::STRING_TYPE],
                required: false,
-               description: 'Paths of the blobs'
+               description: 'Paths of the blobs.'
 
-      def resolve(**args)
-        authorize!(snippet)
-
+      def resolve(paths: [])
         return [snippet.blob] if snippet.empty_repo?
-
-        paths = Array(args.fetch(:paths, []))
 
         if paths.empty?
           snippet.blobs
         else
           snippet.repository.blobs_at(transformed_blob_paths(paths))
         end
-      end
-
-      def authorized_resource?(snippet)
-        Ability.allowed?(context[:current_user], :read_snippet, snippet)
       end
 
       private

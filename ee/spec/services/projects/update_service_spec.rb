@@ -108,6 +108,25 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
     end
 
+    describe '#default_branch' do
+      include_examples 'audit event logging' do
+        let(:operation) { update_project(project, user, default_branch: 'feature') }
+        let(:fail_condition!) do
+          allow_next_instance_of(Project) do |project|
+            allow(project).to receive(:change_head).and_return(false)
+          end
+        end
+
+        let(:attributes) do
+          audit_event_params.tap do |param|
+            param[:details].merge!(
+              custom_message: "Default branch changed from master to feature"
+            )
+          end
+        end
+      end
+    end
+
     describe '#visibility' do
       include_examples 'audit event logging' do
         let(:operation) do
@@ -258,66 +277,43 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
   end
 
-  context 'when compliance frameworks is set' do
-    let(:project_setting) { create(:compliance_framework_project_setting) }
+  context 'custom compliance frameworks' do
+    let(:framework) { create(:compliance_framework, namespace: project.namespace) }
+    let(:opts) { { compliance_framework_setting_attributes: { framework: framework.id } } }
 
-    before do
-      stub_licensed_features(compliance_framework: true)
-      project.update!(compliance_framework_setting: project_setting)
-    end
-
-    context 'when framework is not blank' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
-
-      it 'saves the framework' do
-        update_project(project, user, opts)
-
-        expect(project.reload.compliance_framework_setting.framework).to eq(framework)
-      end
-    end
-
-    context 'when framework is blank' do
-      let(:opts) { { compliance_framework_setting_attributes: { framework: '' } } }
-
-      it 'removes the framework record' do
-        update_project(project, user, opts)
-
-        expect(project.reload.compliance_framework_setting).to be_nil
-      end
-    end
-  end
-
-  context 'when compliance framework feature is disabled' do
-    before do
-      stub_licensed_features(compliance_framework: false)
-    end
-
-    context 'the project had the feature before' do
-      let(:project_setting) { create(:compliance_framework_project_setting) }
-
+    context 'when current_user has :admin_compliance_framework ability' do
       before do
-        project.update!(compliance_framework_setting: project_setting)
+        stub_licensed_features(compliance_framework: true)
       end
 
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      it 'updates the framework' do
+        expect { update_project(project, user, opts) }.to change {
+          project
+            .reload
+            .compliance_management_framework
+        }.from(nil).to(framework)
+      end
 
-      it 'does not save the new framework and retains the old setting' do
-        update_project(project, user, opts)
+      it 'unassigns a framework from a project' do
+        project.compliance_management_framework = framework
 
-        expect(project.reload.compliance_framework_setting.framework).to eq(project_setting.framework)
+        expect { update_project(project, user, { compliance_framework_setting_attributes: { framework: nil } }) }.to change {
+          project
+            .reload
+            .compliance_management_framework
+        }.from(framework).to(nil)
       end
     end
 
-    context 'the project never had the feature' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+    context 'when current_user does not have :admin_compliance_framework ability' do
+      before do
+        stub_licensed_features(compliance_framework: false)
+      end
 
-      it 'does not save the framework' do
+      it 'does not set a framework' do
         update_project(project, user, opts)
 
-        expect(project.reload.compliance_framework_setting).to be_nil
+        expect(project.reload.compliance_management_framework).not_to be_present
       end
     end
   end

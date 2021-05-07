@@ -3,10 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe ::Integrations::Test::ProjectService do
-  let(:user) { double('user') }
-
   describe '#execute' do
     let(:project) { create(:project) }
+    let(:user) { project.owner }
     let(:event) { nil }
     let(:sample_data) { { data: 'sample' } }
     let(:success_result) { { success: true, result: {} } }

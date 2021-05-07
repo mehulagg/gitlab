@@ -2,7 +2,7 @@
 import { GlTooltip, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 
-const getTooltipTitle = element => {
+const getTooltipTitle = (element) => {
   return element.getAttribute('title') || element.dataset.title;
 };
 
@@ -37,8 +37,8 @@ export default {
     };
   },
   created() {
-    this.observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
+    this.observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
         mutation.removedNodes.forEach(this.dispose);
       });
     });
@@ -49,10 +49,11 @@ export default {
   methods: {
     addTooltips(elements, config) {
       const newTooltips = elements
-        .filter(element => !this.tooltipExists(element))
-        .map(element => newTooltip(element, config));
+        .filter((element) => !this.tooltipExists(element))
+        .map((element) => newTooltip(element, config))
+        .filter((tooltip) => tooltip.title);
 
-      newTooltips.forEach(tooltip => this.observe(tooltip));
+      newTooltips.forEach((tooltip) => this.observe(tooltip));
 
       this.tooltips.push(...newTooltips);
     },
@@ -81,17 +82,21 @@ export default {
     },
     triggerEvent(target, event) {
       const tooltip = this.findTooltipByTarget(target);
+      const tooltipRef = this.$refs[tooltip?.id];
 
-      if (tooltip) {
-        this.$refs[tooltip.id][0].$emit(event);
+      if (tooltipRef) {
+        tooltipRef[0].$emit(event);
       }
     },
     tooltipExists(element) {
       return Boolean(this.findTooltipByTarget(element));
     },
     findTooltipByTarget(element) {
-      return this.tooltips.find(tooltip => tooltip.target === element);
+      return this.tooltips.find((tooltip) => tooltip.target === element);
     },
+  },
+  safeHtmlConfig: {
+    ADD_TAGS: ['gl-emoji'],
   },
 };
 </script>
@@ -109,8 +114,9 @@ export default {
       :boundary="tooltip.boundary"
       :disabled="tooltip.disabled"
       :show="tooltip.show"
+      @hidden="$emit('hidden', tooltip)"
     >
-      <span v-if="tooltip.html" v-safe-html="tooltip.title"></span>
+      <span v-if="tooltip.html" v-safe-html:[$options.safeHtmlConfig]="tooltip.title"></span>
       <span v-else>{{ tooltip.title }}</span>
     </gl-tooltip>
   </div>

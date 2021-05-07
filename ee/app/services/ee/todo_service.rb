@@ -27,7 +27,7 @@ module EE
     end
 
     def update_epic(epic, current_user, skip_users = [])
-      create_mention_todos(nil, epic, current_user, nil, skip_users)
+      update_issuable(epic, current_user, skip_users)
     end
 
     # When a merge train is aborted for some reason, we should:

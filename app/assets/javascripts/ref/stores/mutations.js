@@ -1,9 +1,12 @@
-import * as types from './mutation_types';
-import { X_TOTAL_HEADER } from '../constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
+import { X_TOTAL_HEADER } from '../constants';
+import * as types from './mutation_types';
 
 export default {
+  [types.SET_ENABLED_REF_TYPES](state, refTypes) {
+    state.enabledRefTypes = refTypes;
+  },
   [types.SET_PROJECT_ID](state, projectId) {
     state.projectId = projectId;
   },
@@ -23,7 +26,7 @@ export default {
 
   [types.RECEIVE_BRANCHES_SUCCESS](state, response) {
     state.matches.branches = {
-      list: convertObjectPropsToCamelCase(response.data).map(b => ({
+      list: convertObjectPropsToCamelCase(response.data).map((b) => ({
         name: b.name,
         default: b.default,
       })),
@@ -41,7 +44,7 @@ export default {
 
   [types.RECEIVE_TAGS_SUCCESS](state, response) {
     state.matches.tags = {
-      list: convertObjectPropsToCamelCase(response.data).map(b => ({
+      list: convertObjectPropsToCamelCase(response.data).map((b) => ({
         name: b.name,
       })),
       totalCount: parseInt(response.headers[X_TOTAL_HEADER], 10),

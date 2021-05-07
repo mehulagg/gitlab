@@ -16,7 +16,7 @@ RSpec.describe BlobHelper do
     end
   end
 
-  describe "#edit_blob_link" do
+  describe "#edit_blob_button" do
     let(:namespace) { create(:namespace, name: 'gitlab') }
     let(:project) { create(:project, :repository, namespace: namespace) }
 
@@ -28,12 +28,13 @@ RSpec.describe BlobHelper do
       allow(helper).to receive(:can_collaborate_with_project?).and_return(true)
     end
 
-    it 'verifies blob is text' do
+    it 'does not render edit button when blob is not text' do
       expect(helper).not_to receive(:blob_text_viewable?)
 
-      button = helper.edit_blob_button(project, 'refs/heads/master', 'README.md')
+      # RADME.md is not a valid file.
+      button = helper.edit_blob_button(project, 'refs/heads/master', 'RADME.md')
 
-      expect(button).to start_with('<button')
+      expect(button).to eq(nil)
     end
 
     it 'uses the passed blob instead retrieve from repository' do
@@ -94,7 +95,7 @@ RSpec.describe BlobHelper do
   context 'viewer related' do
     include FakeBlobHelpers
 
-    let(:project) { build(:project, lfs_enabled: true) }
+    let_it_be(:project) { create(:project, lfs_enabled: true) }
 
     before do
       allow(Gitlab.config.lfs).to receive(:enabled).and_return(true)
@@ -236,57 +237,41 @@ RSpec.describe BlobHelper do
         let(:data) { File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci.yml')) }
         let(:blob) { fake_blob(path: Gitlab::FileDetector::PATTERNS[:gitlab_ci], data: data) }
 
-        context 'experiment enabled' do
-          before do
-            allow(helper).to receive(:experiment_enabled?).and_return(true)
-          end
+        it 'is true' do
+          expect(helper.show_suggest_pipeline_creation_celebration?).to be_truthy
+        end
 
-          it 'is true' do
-            expect(helper.show_suggest_pipeline_creation_celebration?).to be_truthy
-          end
+        context 'file is invalid format' do
+          let(:data) { 'foo' }
 
-          context 'file is invalid format' do
-            let(:data) { 'foo' }
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
-          end
-
-          context 'does not use the default ci config' do
-            before do
-              project.ci_config_path = 'something_bad'
-            end
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
-          end
-
-          context 'does not have the needed cookie' do
-            before do
-              helper.request.cookies.delete "suggest_gitlab_ci_yml_commit_#{project.id}"
-            end
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
-          end
-
-          context 'blob does not have auxiliary view' do
-            before do
-              allow(blob).to receive(:auxiliary_viewer).and_return(nil)
-            end
-
-            it 'is false' do
-              expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-            end
+          it 'is false' do
+            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
           end
         end
 
-        context 'experiment disabled' do
+        context 'does not use the default ci config' do
           before do
-            allow(helper).to receive(:experiment_enabled?).and_return(false)
+            project.ci_config_path = 'something_bad'
+          end
+
+          it 'is false' do
+            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
+          end
+        end
+
+        context 'does not have the needed cookie' do
+          before do
+            helper.request.cookies.delete "suggest_gitlab_ci_yml_commit_#{project.id}"
+          end
+
+          it 'is false' do
+            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
+          end
+        end
+
+        context 'blob does not have auxiliary view' do
+          before do
+            allow(blob).to receive(:auxiliary_viewer).and_return(nil)
           end
 
           it 'is false' do
@@ -298,14 +283,8 @@ RSpec.describe BlobHelper do
       context 'when file is not a pipeline config file' do
         let(:blob) { fake_blob(path: 'LICENSE') }
 
-        context 'experiment enabled' do
-          before do
-            allow(helper).to receive(:experiment_enabled?).and_return(true)
-          end
-
-          it 'is false' do
-            expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
-          end
+        it 'is false' do
+          expect(helper.show_suggest_pipeline_creation_celebration?).to be_falsey
         end
       end
     end
@@ -325,6 +304,7 @@ RSpec.describe BlobHelper do
     let_it_be(:namespace) { create(:namespace, name: 'gitlab') }
     let_it_be(:project) { create(:project, :repository, namespace: namespace) }
     let_it_be(:current_user) { create(:user) }
+
     let(:can_push_code) { true }
     let(:blob) { project.repository.blob_at('refs/heads/master', 'README.md') }
 
@@ -510,7 +490,16 @@ RSpec.describe BlobHelper do
 
       expect(uri.path).to eq("/#{project.namespace.path}/#{project.path}/-/forks")
       expect(params).to include("continue[to]=/-/ide/project/#{project.namespace.path}/#{project.path}/edit/master")
+      expect(params).to include("continue[notice]=#{edit_in_new_fork_notice}")
+      expect(params).to include("continue[notice_now]=#{edit_in_new_fork_notice_now}")
       expect(params).to include("namespace_key=#{current_user.namespace.id}")
+    end
+
+    it 'does not include notice params with_notice: false' do
+      uri = URI(helper.ide_fork_and_edit_path(project, "master", "", with_notice: false))
+
+      expect(uri.path).to eq("/#{project.namespace.path}/#{project.path}/-/forks")
+      expect(CGI.unescape(uri.query)).to eq("continue[to]=/-/ide/project/#{project.namespace.path}/#{project.path}/edit/master&namespace_key=#{current_user.namespace.id}")
     end
 
     context 'when user is not logged in' do

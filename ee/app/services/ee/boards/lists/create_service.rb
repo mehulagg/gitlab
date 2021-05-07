@@ -8,6 +8,33 @@ module EE
 
         include MaxLimits
 
+        override :execute
+        def execute(board)
+          return ServiceResponse.error(message: 'iteration_board_lists feature flag is disabled') if type == :iteration && ::Feature.disabled?(:iteration_board_lists, board.resource_parent, default_enabled: :yaml)
+          return license_validation_error unless valid_license?(board.resource_parent)
+
+          super
+        end
+
+        private
+
+        def valid_license?(parent)
+          List::LICENSED_LIST_TYPES.exclude?(type) || parent.feature_available?(:"board_#{type}_lists")
+        end
+
+        def license_validation_error
+          message = case type
+                    when :assignee
+                      _('Assignee lists not available with your current license')
+                    when :milestone
+                      _('Milestone lists not available with your current license')
+                    when :iteration
+                      _('Iteration lists not available with your current license')
+                    end
+
+          ServiceResponse.error(message: message)
+        end
+
         override :type
         def type
           # We don't ever expect to have more than one list
@@ -16,6 +43,8 @@ module EE
             :assignee
           elsif params.key?('milestone_id')
             :milestone
+          elsif params.key?('iteration_id')
+            :iteration
           else
             super
           end
@@ -29,6 +58,8 @@ module EE
               find_user(board)
             when :milestone
               find_milestone(board)
+            when :iteration
+              find_iteration(board)
             else
               super
             end
@@ -46,17 +77,20 @@ module EE
           )
         end
 
-        private
-
         def find_milestone(board)
           milestones = milestone_finder(board).execute
-          milestones.find(params['milestone_id'])
+          milestones.find_by(id: params['milestone_id']) # rubocop: disable CodeReuse/ActiveRecord
+        end
+
+        def find_iteration(board)
+          parent_params = ::IterationsFinder.params_for_parent(board.resource_parent, include_ancestors: true)
+          ::IterationsFinder.new(current_user, parent_params).find_by(id: params['iteration_id']) # rubocop: disable CodeReuse/ActiveRecord
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
         def find_user(board)
           user_ids = user_finder(board).execute.select(:user_id)
-          ::User.where(id: user_ids).find(params['assignee_id'])
+          ::User.where(id: user_ids).find_by(id: params['assignee_id'])
         end
         # rubocop: enable CodeReuse/ActiveRecord
 

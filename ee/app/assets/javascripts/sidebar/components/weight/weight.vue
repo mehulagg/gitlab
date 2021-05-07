@@ -1,9 +1,9 @@
 <script>
-import $ from 'jquery';
 import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import $ from 'jquery';
 import { __, s__ } from '~/locale';
-import Tracking from '~/tracking';
 import eventHub from '~/sidebar/event_hub';
+import Tracking from '~/tracking';
 import { MAX_DISPLAY_WEIGHT } from '../../constants';
 
 export default {
@@ -149,9 +149,7 @@ export default {
       <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
       <span v-else class="js-weight-collapsed-weight-label">
         {{ collapsedWeightLabel
-        }}<template v-if="weight > $options.maxDisplayWeight"
-          >&hellip;</template
-        >
+        }}<template v-if="weight > $options.maxDisplayWeight">&hellip;</template>
       </span>
     </div>
     <div class="title hide-collapsed">

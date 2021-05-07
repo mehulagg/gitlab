@@ -1,13 +1,13 @@
 ---
 stage: Plan
 group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Project milestones API
 
 This page describes the project milestones API.
-There's a separate [group milestones API](./group_milestones.md) page.
+There's a separate [group milestones API](group_milestones.md) page.
 
 ## List project milestones
 
@@ -159,9 +159,10 @@ Parameters:
 - `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
 - `milestone_id` (required) - The ID of a project milestone
 
-## Get all burndown chart events for a single milestone **(STARTER)**
+## Get all burndown chart events for a single milestone **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4737) in GitLab 12.1
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4737) in GitLab 12.1
+> - Moved to GitLab Premium in 13.9.
 
 Gets all burndown chart events for a single milestone.
 

@@ -8,6 +8,8 @@ const INTERVALS = {
 
 export const FILE_SYMLINK_MODE = '120000';
 
+export const SHORT_DATE_FORMAT = 'd mmm, yyyy';
+
 export const timeRanges = [
   {
     label: __('30 minutes'),
@@ -54,5 +56,6 @@ export const timeRanges = [
   },
 ];
 
-export const defaultTimeRange = timeRanges.find(tr => tr.default);
-export const getTimeWindow = timeWindowName => timeRanges.find(tr => tr.name === timeWindowName);
+export const defaultTimeRange = timeRanges.find((tr) => tr.default);
+export const getTimeWindow = (timeWindowName) =>
+  timeRanges.find((tr) => tr.name === timeWindowName);

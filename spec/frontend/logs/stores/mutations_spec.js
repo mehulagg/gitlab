@@ -1,5 +1,5 @@
-import mutations from '~/logs/stores/mutations';
 import * as types from '~/logs/stores/mutation_types';
+import mutations from '~/logs/stores/mutations';
 
 import logsPageState from '~/logs/stores/state';
 import {
@@ -23,7 +23,7 @@ describe('Logs Store Mutations', () => {
   });
 
   it('ensures mutation types are correctly named', () => {
-    Object.keys(types).forEach(k => {
+    Object.keys(types).forEach((k) => {
       expect(k).toEqual(types[k]);
     });
   });

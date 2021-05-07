@@ -1,18 +1,18 @@
 import $ from 'jquery';
 
 import Api from '~/api';
-import toast from '~/vue_shared/plugins/global_toast';
-import { __ } from '~/locale';
 import initPopover from '~/blob/suggest_gitlab_ci_yml';
+import { __ } from '~/locale';
+import toast from '~/vue_shared/plugins/global_toast';
 
 import { deprecatedCreateFlash as Flash } from '../flash';
 
-import FileTemplateTypeSelector from './template_selectors/type_selector';
 import BlobCiYamlSelector from './template_selectors/ci_yaml_selector';
 import DockerfileSelector from './template_selectors/dockerfile_selector';
 import GitignoreSelector from './template_selectors/gitignore_selector';
 import LicenseSelector from './template_selectors/license_selector';
 import MetricsDashboardSelector from './template_selectors/metrics_dashboard_selector';
+import FileTemplateTypeSelector from './template_selectors/type_selector';
 
 export default class FileTemplateMediator {
   constructor({ editor, currentAction, projectId }) {
@@ -36,21 +36,26 @@ export default class FileTemplateMediator {
       MetricsDashboardSelector,
       DockerfileSelector,
       LicenseSelector,
-    ].map(TemplateSelectorClass => new TemplateSelectorClass({ mediator: this }));
+    ].map((TemplateSelectorClass) => new TemplateSelectorClass({ mediator: this }));
   }
 
   initTemplateTypeSelector() {
     this.typeSelector = new FileTemplateTypeSelector({
       mediator: this,
-      dropdownData: this.templateSelectors.map(templateSelector => {
-        const cfg = templateSelector.config;
+      dropdownData: this.templateSelectors
+        .map((templateSelector) => {
+          const cfg = templateSelector.config;
 
-        return {
-          name: cfg.name,
-          key: cfg.key,
-          id: cfg.key,
-        };
-      }),
+          return {
+            name: cfg.name,
+            key: cfg.key,
+            id: cfg.key,
+          };
+        })
+        .reduce(
+          (acc, current) => (acc.find((item) => item.id === current.id) ? acc : [...acc, current]),
+          [],
+        ),
     });
   }
 
@@ -82,7 +87,6 @@ export default class FileTemplateMediator {
 
   initPageEvents() {
     this.listenForFilenameInput();
-    this.prepFileContentForSubmit();
     this.listenForPreviewMode();
   }
 
@@ -92,14 +96,8 @@ export default class FileTemplateMediator {
     });
   }
 
-  prepFileContentForSubmit() {
-    this.$commitForm.submit(() => {
-      this.$fileContent.val(this.editor.getValue());
-    });
-  }
-
   listenForPreviewMode() {
-    this.$navLinks.on('click', 'a', e => {
+    this.$navLinks.on('click', 'a', (e) => {
       const urlPieces = e.target.href.split('#');
       const hash = urlPieces[1];
       if (hash === 'preview') {
@@ -115,7 +113,7 @@ export default class FileTemplateMediator {
       e.preventDefault();
     }
 
-    this.templateSelectors.forEach(selector => {
+    this.templateSelectors.forEach((selector) => {
       if (selector.config.key === item.key) {
         selector.show();
       } else {
@@ -138,7 +136,7 @@ export default class FileTemplateMediator {
     selector.renderLoading();
 
     this.fetchFileTemplate(selector.config.type, query, data)
-      .then(file => {
+      .then((file) => {
         this.setEditorContent(file);
         this.setFilename(name);
         selector.renderLoaded();
@@ -157,12 +155,12 @@ export default class FileTemplateMediator {
           initPopover(suggestCommitChanges);
         }
       })
-      .catch(err => new Flash(`An error occurred while fetching the template: ${err}`));
+      .catch((err) => new Flash(`An error occurred while fetching the template: ${err}`));
   }
 
   displayMatchedTemplateSelector() {
     const currentInput = this.getFilename();
-    this.templateSelectors.forEach(selector => {
+    this.templateSelectors.forEach((selector) => {
       const match = selector.config.pattern.test(currentInput);
 
       if (match) {
@@ -174,8 +172,8 @@ export default class FileTemplateMediator {
   }
 
   fetchFileTemplate(type, query, data = {}) {
-    return new Promise(resolve => {
-      const resolveFile = file => resolve(file);
+    return new Promise((resolve) => {
+      const resolveFile = (file) => resolve(file);
 
       Api.projectTemplate(this.projectId, type, query, data, resolveFile);
     });
@@ -194,7 +192,7 @@ export default class FileTemplateMediator {
   }
 
   findTemplateSelectorByKey(key) {
-    return this.templateSelectors.find(selector => selector.config.key === key);
+    return this.templateSelectors.find((selector) => selector.config.key === key);
   }
 
   hideTemplateSelectorMenu() {
@@ -250,6 +248,6 @@ export default class FileTemplateMediator {
   }
 
   getSelected() {
-    return this.templateSelectors.find(selector => selector.selected);
+    return this.templateSelectors.find((selector) => selector.selected);
   }
 }

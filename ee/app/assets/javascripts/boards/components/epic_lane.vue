@@ -1,10 +1,10 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { __, n__, sprintf } from '~/locale';
 import createFlash from '~/flash';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import { __, n__, sprintf } from '~/locale';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { statusType } from '../../epic/constants';
 import IssuesLaneList from './issues_lane_list.vue';
 
@@ -13,7 +13,6 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
-    GlLoadingIcon,
     GlPopover,
     IssuesLaneList,
   },
@@ -50,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['epicsFlags', 'filterParams']),
+    ...mapState(['filterParams']),
     ...mapGetters(['getIssuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
@@ -72,7 +71,7 @@ export default {
     },
     epicTimeAgoString() {
       return this.isOpen
-        ? sprintf(__(`Opened %{epicTimeagoDate}`), {
+        ? sprintf(__(`Created %{epicTimeagoDate}`), {
             epicTimeagoDate: this.timeFormatted(this.epic.createdAt),
           })
         : sprintf(__(`Closed %{epicTimeagoDate}`), {
@@ -82,25 +81,12 @@ export default {
     epicDateString() {
       return formatDate(this.epic.createdAt);
     },
-    isLoading() {
-      return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
+    shouldDisplay() {
+      return this.issuesCount > 0;
     },
-  },
-  watch: {
-    filterParams: {
-      handler() {
-        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
-          this.fetchIssuesForEpic(this.epic.id);
-        }
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.fetchIssuesForEpic(this.epic.id);
   },
   methods: {
-    ...mapActions(['fetchIssuesForEpic', 'updateBoardEpicUserPreferences']),
+    ...mapActions(['updateBoardEpicUserPreferences']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
 
@@ -116,35 +102,36 @@ export default {
 </script>
 
 <template>
-  <div>
-    <div class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block">
-      <div class="gl-py-5 gl-px-3 gl-display-flex gl-align-items-center">
+  <div v-if="shouldDisplay">
+    <div
+      class="board-epic-lane gl-sticky gl-left-0 gl-display-inline-block"
+      data-testid="board-epic-lane"
+    >
+      <div class="gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
         <gl-button
           v-gl-tooltip.hover.right
           :aria-label="chevronTooltip"
           :title="chevronTooltip"
           :icon="chevronIcon"
           class="gl-mr-2 gl-cursor-pointer"
-          variant="link"
+          category="tertiary"
+          size="small"
           data-testid="epic-lane-chevron"
           @click="toggleCollapsed"
         />
         <h4
           ref="epicTitle"
-          class="gl-mr-3 gl-font-weight-bold gl-font-base gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
+          class="gl-my-0 gl-mr-3 gl-font-weight-bold gl-font-base gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
         >
           {{ epic.title }}
         </h4>
-        <gl-popover :target="() => $refs.epicTitle" triggers="hover" placement="top">
-          <template #title
-            >{{ epic.title }} &middot; {{ epic.reference }}</template
-          >
+        <gl-popover :target="() => $refs.epicTitle" placement="top">
+          <template #title>{{ epic.title }} &middot; {{ epic.reference }}</template>
           <div>{{ epicTimeAgoString }}</div>
           <div class="gl-mb-2">{{ epicDateString }}</div>
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
         </gl-popover>
         <span
-          v-if="!isLoading"
           v-gl-tooltip.hover
           :title="issuesCountTooltipText"
           class="gl-display-flex gl-align-items-center gl-text-gray-500"
@@ -152,13 +139,12 @@ export default {
           :aria-label="issuesCountTooltipText"
           data-testid="epic-lane-issue-count"
         >
-          <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
+          <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
-        <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="!isCollapsed" class="gl-display-flex" data-testid="board-epic-lane-issues">
+    <div v-if="!isCollapsed" class="gl-display-flex gl-pb-5" data-testid="board-epic-lane-issues">
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

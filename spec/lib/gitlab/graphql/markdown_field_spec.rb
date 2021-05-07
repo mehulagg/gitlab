@@ -22,6 +22,8 @@ RSpec.describe Gitlab::Graphql::MarkdownField do
           .to raise_error(expected_error)
       end
 
+      # TODO: remove as part of https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27536
+      # so that until that time, the developer check is there
       it 'raises when passing a resolve block' do
         expect { class_with_markdown_field(:test_html, null: true, resolve: -> (_, _, _) { 'not really' } ) }
           .to raise_error(expected_error)
@@ -55,6 +57,7 @@ RSpec.describe Gitlab::Graphql::MarkdownField do
 
       describe 'basic verification that references work' do
         let_it_be(:project) { create(:project, :public) }
+
         let(:issue) { create(:issue, project: project) }
         let(:note) { build(:note, note: "Referencing #{issue.to_reference(full: true)}") }
 

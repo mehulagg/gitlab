@@ -29,6 +29,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
         expect(subject.builds[1]).to eq(
@@ -42,6 +44,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
       end
@@ -63,6 +67,8 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
         expect(subject.builds[1]).to eq(
@@ -74,11 +80,13 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             bridge_needs: { pipeline: 'some/project' }
           },
           needs_attributes: [
-            { name: "build", artifacts: true }
+            { name: "build", artifacts: true, optional: false }
           ],
           when: "on_success",
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :stage
         )
       end
@@ -147,12 +155,14 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             ]
           },
           needs_attributes: [
-            { name: 'build', artifacts: true }
+            { name: 'build', artifacts: true, optional: false }
           ],
           only: { refs: %w[branches tags] },
           when: 'on_success',
           allow_failure: false,
           yaml_variables: [],
+          job_variables: [],
+          root_variables_inheritance: true,
           scheduling_type: :dag
         )
       end
@@ -199,6 +209,54 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
       it 'returns errors' do
         expect(subject.errors).to contain_exactly(
           'jobs:test:needs:need ref should be a string')
+      end
+    end
+
+    describe 'cross pipeline needs' do
+      context 'when job is not present' do
+        let(:config) do
+          {
+            rspec: {
+              stage: 'test',
+              script: 'rspec',
+              needs: [
+                { pipeline: '$UPSTREAM_PIPELINE_ID' }
+              ]
+            }
+          }
+        end
+
+        it 'returns an error' do
+          expect(subject).not_to be_valid
+          # This currently shows a confusing error message because a conflict of syntax
+          # with upstream pipeline status mirroring: https://gitlab.com/gitlab-org/gitlab/-/issues/280853
+          expect(subject.errors).to include(/:needs config uses invalid types: bridge/)
+        end
+      end
+    end
+
+    describe 'with cross project and cross pipeline needs' do
+      let(:config) do
+        {
+          rspec: {
+            stage: 'test',
+            script: 'rspec',
+            needs: [
+              { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'test' },
+              { project: 'org/the-project', ref: 'master', job: 'build', artifacts: true }
+            ]
+          }
+        }
+      end
+
+      it 'returns a valid specification' do
+        expect(subject).to be_valid
+
+        rspec = subject.builds.last
+        expect(rspec.dig(:options, :cross_dependencies)).to eq([
+          { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'test', artifacts: true },
+          { project: 'org/the-project', ref: 'master', job: 'build', artifacts: true }
+        ])
       end
     end
   end

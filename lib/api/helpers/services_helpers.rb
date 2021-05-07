@@ -161,7 +161,6 @@ module API
 
       def self.services
         {
-          'alerts' => [],
           'asana' => [
             {
               required: true,
@@ -304,6 +303,38 @@ module API
               desc: 'Project URL'
             }
           ],
+          'datadog' => [
+            {
+              required: true,
+              name: :api_key,
+              type: String,
+              desc: 'API key used for authentication with Datadog'
+            },
+            {
+              required: false,
+              name: :datadog_site,
+              type: String,
+              desc: 'Choose the Datadog site to send data to. Set to "datadoghq.eu" to send data to the EU site'
+            },
+            {
+              required: false,
+              name: :api_url,
+              type: String,
+              desc: '(Advanced) Define the full URL for your Datadog site directly'
+            },
+            {
+              required: false,
+              name: :datadog_service,
+              type: String,
+              desc: 'Name of this GitLab instance that all data will be tagged with'
+            },
+            {
+              required: false,
+              name: :datadog_env,
+              type: String,
+              desc: 'The environment tag that traces will be tagged with'
+            }
+          ],
           'discord' => [
             {
               required: true,
@@ -363,7 +394,7 @@ module API
               required: true,
               name: :external_wiki_url,
               type: String,
-              desc: 'The URL of the external Wiki'
+              desc: 'The URL of the external wiki'
             }
           ],
           'flowdock' => [
@@ -389,44 +420,6 @@ module API
             },
             chat_notification_events
           ].flatten,
-          'hipchat' => [
-            {
-              required: true,
-              name: :token,
-              type: String,
-              desc: 'The room token'
-            },
-            {
-              required: false,
-              name: :room,
-              type: String,
-              desc: 'The room name or ID'
-            },
-            {
-              required: false,
-              name: :color,
-              type: String,
-              desc: 'The room color'
-            },
-            {
-              required: false,
-              name: :notify,
-              type: Boolean,
-              desc: 'Enable notifications'
-            },
-            {
-              required: false,
-              name: :api_version,
-              type: String,
-              desc: 'Leave blank for default (v2)'
-            },
-            {
-              required: false,
-              name: :server,
-              type: String,
-              desc: 'Leave blank for default. https://hipchat.example.com'
-            }
-          ],
           'irker' => [
             {
               required: true,
@@ -459,6 +452,32 @@ module API
               desc: 'Colorize messages'
             }
           ],
+          'jenkins' => [
+            {
+              required: true,
+              name: :jenkins_url,
+              type: String,
+              desc: 'Jenkins root URL like https://jenkins.example.com'
+            },
+            {
+              required: true,
+              name: :project_name,
+              type: String,
+              desc: 'The URL-friendly project name. Example: my_project_name'
+            },
+            {
+              required: false,
+              name: :username,
+              type: String,
+              desc: 'A user with access to the Jenkins server, if applicable'
+            },
+            {
+              required: false,
+              name: :password,
+              type: String,
+              desc: 'The password of the user'
+            }
+          ],
           'jira' => [
             {
               required: true,
@@ -486,9 +505,15 @@ module API
             },
             {
               required: false,
+              name: :jira_issue_transition_automatic,
+              type: Boolean,
+              desc: 'Enable automatic issue transitions'
+            },
+            {
+              required: false,
               name: :jira_issue_transition_id,
               type: String,
-              desc: 'The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the **Transitions (id)** column ([see screenshot][trans]). By default, this ID is set to `2`'
+              desc: 'The ID of one or more transitions for custom issue transitions'
             },
             {
               required: false,
@@ -578,7 +603,7 @@ module API
               required: true,
               name: :google_iap_audience_client_id,
               type: String,
-              desc: 'Client ID of the IAP secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'
+              desc: 'Client ID of the IAP-secured resource (looks like IAP_CLIENT_ID.apps.googleusercontent.com)'
             },
             {
               required: true,
@@ -740,7 +765,7 @@ module API
               required: true,
               name: :webhook,
               type: String,
-              desc: 'The Webex Teams webhook. e.g. https://api.ciscospark.com/v1/webhooks/incoming/…'
+              desc: 'The Webex Teams webhook. For example, https://api.ciscospark.com/v1/webhooks/incoming/...'
             },
             chat_notification_events
           ].flatten
@@ -749,7 +774,6 @@ module API
 
       def self.service_classes
         [
-          ::AlertsService,
           ::AsanaService,
           ::AssemblaService,
           ::BambooService,
@@ -758,6 +782,7 @@ module API
           ::ConfluenceService,
           ::CampfireService,
           ::CustomIssueTrackerService,
+          ::DatadogService,
           ::DiscordService,
           ::DroneCiService,
           ::EmailsOnPushService,
@@ -765,8 +790,8 @@ module API
           ::ExternalWikiService,
           ::FlowdockService,
           ::HangoutsChatService,
-          ::HipchatService,
           ::IrkerService,
+          ::JenkinsService,
           ::JiraService,
           ::MattermostSlashCommandsService,
           ::SlackSlashCommandsService,
@@ -787,7 +812,6 @@ module API
       def self.development_service_classes
         [
           ::MockCiService,
-          ::MockDeploymentService,
           ::MockMonitoringService
         ]
       end

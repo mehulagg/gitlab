@@ -30,6 +30,7 @@ RSpec.describe NotificationSetting do
             :fixed_pipeline,
             :success_pipeline,
             :moved_project,
+            :merge_when_pipeline_succeeds,
             :new_epic
           ]
         )
@@ -59,7 +60,8 @@ RSpec.describe NotificationSetting do
             :failed_pipeline,
             :fixed_pipeline,
             :success_pipeline,
-            :moved_project
+            :moved_project,
+            :merge_when_pipeline_succeeds
           ]
         )
       end
@@ -89,6 +91,7 @@ RSpec.describe NotificationSetting do
             :fixed_pipeline,
             :success_pipeline,
             :moved_project,
+            :merge_when_pipeline_succeeds,
             :new_epic
           ]
         )

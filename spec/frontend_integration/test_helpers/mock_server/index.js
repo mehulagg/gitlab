@@ -1,12 +1,25 @@
 import { Server, Model, RestSerializer } from 'miragejs';
-import { getProject, getBranch, getMergeRequests, getRepositoryFiles } from 'test_helpers/fixtures';
-import setupRoutes from './routes';
+import setupRoutes from 'ee_else_ce_test_helpers/mock_server/routes';
+import {
+  getProject,
+  getEmptyProject,
+  getBranch,
+  getMergeRequests,
+  getMergeRequestWithChanges,
+  getMergeRequestVersions,
+  getRepositoryFiles,
+  getBlobReadme,
+  getBlobImage,
+  getBlobZip,
+} from 'test_helpers/fixtures';
 
 export const createMockServerOptions = () => ({
   models: {
     project: Model,
     branch: Model,
     mergeRequest: Model,
+    mergeRequestChange: Model,
+    mergeRequestVersion: Model,
     file: Model,
     userPermission: Model,
   },
@@ -17,10 +30,26 @@ export const createMockServerOptions = () => ({
   },
   seeds(schema) {
     schema.db.loadData({
-      files: getRepositoryFiles().map(path => ({ path })),
-      projects: [getProject()],
+      files: getRepositoryFiles().map((path) => ({ path })),
+      projects: [getProject(), getEmptyProject()],
       branches: [getBranch()],
       mergeRequests: getMergeRequests(),
+      mergeRequestChanges: [getMergeRequestWithChanges()],
+      mergeRequestVersions: getMergeRequestVersions(),
+      filesRaw: [
+        {
+          raw: getBlobReadme(),
+          path: 'README.md',
+        },
+        {
+          raw: getBlobZip(),
+          path: 'Gemfile.zip',
+        },
+        {
+          raw: getBlobImage(),
+          path: 'files/images/logo-white.png',
+        },
+      ],
       userPermissions: [
         {
           createMergeRequestIn: true,

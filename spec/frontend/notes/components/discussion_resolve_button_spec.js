@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import resolveDiscussionButton from '~/notes/components/discussion_resolve_button.vue';
 
 const buttonTitle = 'Resolve discussion';
@@ -7,7 +7,7 @@ const buttonTitle = 'Resolve discussion';
 describe('resolveDiscussionButton', () => {
   let wrapper;
 
-  const factory = options => {
+  const factory = (options) => {
     wrapper = shallowMount(resolveDiscussionButton, {
       ...options,
     });

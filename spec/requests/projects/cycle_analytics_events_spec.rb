@@ -50,7 +50,7 @@ RSpec.describe 'value stream analytics events' do
       expect(json_response['events'].first['iid']).to eq(first_mr_iid)
     end
 
-    it 'lists the test events', :sidekiq_might_not_need_inline do
+    it 'lists the test events', :sidekiq_inline do
       get project_cycle_analytics_test_path(project, format: :json)
 
       expect(json_response['events']).not_to be_empty
@@ -66,27 +66,16 @@ RSpec.describe 'value stream analytics events' do
       expect(json_response['events'].first['iid']).to eq(first_mr_iid)
     end
 
-    it 'lists the staging events', :sidekiq_might_not_need_inline do
+    it 'lists the staging events', :sidekiq_inline do
       get project_cycle_analytics_staging_path(project, format: :json)
 
       expect(json_response['events']).not_to be_empty
       expect(json_response['events'].first['date']).not_to be_empty
     end
 
-    context 'specific branch' do
-      it 'lists the test events', :sidekiq_might_not_need_inline do
-        branch = project.merge_requests.first.source_branch
-
-        get project_cycle_analytics_test_path(project, format: :json, branch: branch)
-
-        expect(json_response['events']).not_to be_empty
-        expect(json_response['events'].first['date']).not_to be_empty
-      end
-    end
-
     context 'with private project and builds' do
       before do
-        project.members.last.update(access_level: Gitlab::Access::GUEST)
+        project.members.last.update!(access_level: Gitlab::Access::GUEST)
       end
 
       it 'does not list the test events' do
@@ -111,7 +100,7 @@ RSpec.describe 'value stream analytics events' do
 
   def create_cycle
     milestone = create(:milestone, project: project)
-    issue.update(milestone: milestone)
+    issue.update!(milestone: milestone)
     mr = create_merge_request_closing_issue(user, project, issue, commit_message: "References #{issue.to_reference}")
 
     pipeline = create(:ci_empty_pipeline, status: 'created', project: project, ref: mr.source_branch, sha: mr.source_branch_sha, head_pipeline_of: mr)
@@ -123,5 +112,7 @@ RSpec.describe 'value stream analytics events' do
     merge_merge_requests_closing_issue(user, project, issue)
 
     ProcessCommitWorker.new.perform(project.id, user.id, mr.commits.last.to_hash)
+
+    mr.metrics.update!(latest_build_started_at: 1.hour.ago, latest_build_finished_at: Time.now)
   end
 end

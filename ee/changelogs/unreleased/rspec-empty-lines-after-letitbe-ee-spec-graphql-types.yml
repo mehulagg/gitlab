@@ -1,0 +1,5 @@
+---
+title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/graphql/types
+merge_request: 58385
+author: Abdul Wadood @abdulwd
+type: fixed

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Utils do
+  using RSpec::Parameterized::TableSyntax
+
   delegate :to_boolean, :boolean_to_yes_no, :slugify, :random_string, :which,
            :ensure_array_from_string, :to_exclusive_sentence, :bytes_to_megabytes,
            :append_path, :check_path_traversal!, :allowlisted?, :check_allowed_absolute_path!, :decode_path, :ms_to_round_sec, to: :described_class
@@ -49,6 +51,10 @@ RSpec.describe Gitlab::Utils do
       expect(check_path_traversal!('..test/foo')).to eq('..test/foo')
       expect(check_path_traversal!('dir/..foo.rb')).to eq('dir/..foo.rb')
       expect(check_path_traversal!('dir/.foo.rb')).to eq('dir/.foo.rb')
+    end
+
+    it 'does nothing for a non-string' do
+      expect(check_path_traversal!(nil)).to be_nil
     end
   end
 
@@ -110,8 +116,6 @@ RSpec.describe Gitlab::Utils do
   end
 
   describe '.ms_to_round_sec' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:original, :expected) do
       1999.8999     | 1.9999
       12384         | 12.384
@@ -158,13 +162,11 @@ RSpec.describe Gitlab::Utils do
 
   describe '.nlbr' do
     it 'replaces new lines with <br>' do
-      expect(described_class.nlbr("<b>hello</b>\n<i>world</i>".freeze)).to eq("hello<br>world")
+      expect(described_class.nlbr("<b>hello</b>\n<i>world</i>")).to eq("hello<br>world")
     end
   end
 
   describe '.remove_line_breaks' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:original, :expected) do
       "foo\nbar\nbaz"     | "foobarbaz"
       "foo\r\nbar\r\nbaz" | "foobarbaz"
@@ -190,6 +192,7 @@ RSpec.describe Gitlab::Utils do
       expect(to_boolean('YeS')).to be(true)
       expect(to_boolean('t')).to be(true)
       expect(to_boolean('1')).to be(true)
+      expect(to_boolean(1)).to be(true)
       expect(to_boolean('ON')).to be(true)
 
       expect(to_boolean('FaLse')).to be(false)
@@ -197,6 +200,7 @@ RSpec.describe Gitlab::Utils do
       expect(to_boolean('NO')).to be(false)
       expect(to_boolean('n')).to be(false)
       expect(to_boolean('0')).to be(false)
+      expect(to_boolean(0)).to be(false)
       expect(to_boolean('oFF')).to be(false)
     end
 
@@ -275,8 +279,6 @@ RSpec.describe Gitlab::Utils do
   end
 
   describe '.append_path' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:host, :path, :result) do
       'http://test/'  | '/foo/bar'  |  'http://test/foo/bar'
       'http://test/'  | '//foo/bar' |  'http://test/foo/bar'
@@ -386,6 +388,21 @@ RSpec.describe Gitlab::Utils do
     end
   end
 
+  describe ".safe_downcase!" do
+    where(:str, :result) do
+      "test" | "test"
+      "Test" | "test"
+      "test" | "test"
+      "Test" | "test"
+    end
+
+    with_them do
+      it "downcases the string" do
+        expect(described_class.safe_downcase!(str)).to eq(result)
+      end
+    end
+  end
+
   describe '.parse_url' do
     it 'returns Addressable::URI object' do
       expect(described_class.parse_url('http://gitlab.com')).to be_instance_of(Addressable::URI)
@@ -446,6 +463,31 @@ RSpec.describe Gitlab::Utils do
           { name: 'obj 3', priority: 3 }
         ])
       end
+    end
+  end
+
+  describe '.valid_brackets?' do
+    where(:input, :allow_nested, :valid) do
+      'no brackets'              | true  | true
+      'no brackets'              | false | true
+      'user[avatar]'             | true  | true
+      'user[avatar]'             | false | true
+      'user[avatar][friends]'    | true  | true
+      'user[avatar][friends]'    | false | true
+      'user[avatar[image[url]]]' | true  | true
+      'user[avatar[image[url]]]' | false | false
+      'user[avatar[]friends]'    | true  | true
+      'user[avatar[]friends]'    | false | false
+      'user[avatar]]'            | true  | false
+      'user[avatar]]'            | false | false
+      'user][avatar]]'           | true  | false
+      'user][avatar]]'           | false | false
+      'user[avatar'              | true  | false
+      'user[avatar'              | false | false
+    end
+
+    with_them do
+      it { expect(described_class.valid_brackets?(input, allow_nested: allow_nested)).to eq(valid) }
     end
   end
 end

@@ -11,7 +11,10 @@ RSpec.describe 'Project navbar' do
   let_it_be(:project) { create(:project, :repository) }
 
   before do
+    stub_feature_flags(sidebar_refactor: false)
     insert_package_nav(_('Operations'))
+    insert_infrastructure_registry_nav
+    stub_config(registry: { enabled: false })
 
     project.add_maintainer(user)
     sign_in(user)
@@ -34,20 +37,21 @@ RSpec.describe 'Project navbar' do
   end
 
   context 'when security dashboard is available' do
+    let(:security_and_compliance_nav_item) do
+      {
+        nav_item: _('Security & Compliance'),
+        nav_sub_items: [
+          _('Security Dashboard'),
+          _('Vulnerability Report'),
+          s_('OnDemandScans|On-demand Scans'),
+          _('Configuration'),
+          _('Audit Events')
+        ]
+      }
+    end
+
     before do
       stub_licensed_features(security_dashboard: true, security_on_demand_scans: true)
-
-      insert_after_nav_item(
-        _('CI / CD'),
-        new_nav_item: {
-          nav_item: _('Security & Compliance'),
-          nav_sub_items: [
-            _('Security Dashboard'),
-            s_('OnDemandScans|On-demand Scans'),
-            _('Configuration')
-          ]
-        }
-      )
 
       visit project_path(project)
     end
@@ -58,6 +62,7 @@ RSpec.describe 'Project navbar' do
   context 'when packages are available' do
     before do
       stub_config(packages: { enabled: true }, registry: { enabled: false })
+      stub_feature_flags(sidebar_refactor: false)
 
       visit project_path(project)
     end
@@ -66,11 +71,7 @@ RSpec.describe 'Project navbar' do
       before do
         stub_config(registry: { enabled: true })
 
-        insert_after_sub_nav_item(
-          _('Package Registry'),
-          within: _('Packages & Registries'),
-          new_sub_nav_item_name: _('Container Registry')
-        )
+        insert_container_nav
 
         visit project_path(project)
       end
@@ -82,18 +83,66 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-
-      insert_after_nav_item(
-        _('Merge Requests'),
-        new_nav_item: {
-          nav_item: _('Requirements'),
-          nav_sub_items: [_('List')]
-        }
-      )
-
-      visit project_path(project)
     end
 
-    it_behaves_like 'verified navigation bar'
+    context 'with flag disabled' do
+      before do
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: [_('List')]
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
+
+    context 'with flag enabled' do
+      let(:operations_menu_items) do
+        [
+          _('Metrics'),
+          _('Logs'),
+          _('Tracing'),
+          _('Error Tracking'),
+          _('Alerts'),
+          _('Incidents'),
+          _('Environments'),
+          _('Feature Flags'),
+          _('Product Analytics')
+        ]
+      end
+
+      before do
+        stub_feature_flags(sidebar_refactor: true)
+
+        insert_after_nav_item(
+          _('Merge requests'),
+          new_nav_item: {
+            nav_item: _('Requirements'),
+            nav_sub_items: []
+          }
+        )
+
+        insert_after_nav_item(
+          _('Operations'),
+          new_nav_item: {
+            nav_item: _('Infrastructure'),
+            nav_sub_items: [
+              _('Kubernetes clusters'),
+              _('Serverless platform'),
+              _('Terraform')
+            ]
+          }
+        )
+
+        visit project_path(project)
+      end
+
+      it_behaves_like 'verified navigation bar'
+    end
   end
 end

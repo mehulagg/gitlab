@@ -1,17 +1,16 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlSprintf, GlTooltipDirective, GlTruncate } from '@gitlab/ui';
-import PackageTags from './package_tags.vue';
-import PackagePath from './package_path.vue';
-import PublishMethod from './publish_method.vue';
-import { getPackageTypeLabel } from '../utils';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
+import { GlButton, GlLink, GlSprintf, GlTooltipDirective, GlTruncate } from '@gitlab/ui';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
+import { getPackageTypeLabel } from '../utils';
+import PackagePath from './package_path.vue';
+import PackageTags from './package_tags.vue';
+import PublishMethod from './publish_method.vue';
 
 export default {
   name: 'PackageListRow',
   components: {
     GlButton,
-    GlIcon,
     GlLink,
     GlSprintf,
     GlTruncate,
@@ -19,11 +18,23 @@ export default {
     PackagePath,
     PublishMethod,
     ListItem,
+    PackageIconAndName: () =>
+      import(/* webpackChunkName: 'package_registry_components' */ './package_icon_and_name.vue'),
+    InfrastructureIconAndName: () =>
+      import(
+        /* webpackChunkName: 'infrastructure_registry_components' */ '~/packages_and_registries/infrastructure_registry/components/infrastructure_icon_and_name.vue'
+      ),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [timeagoMixin],
+  inject: {
+    iconComponent: {
+      from: 'iconComponent',
+      default: 'PackageIconAndName',
+    },
+  },
   props: {
     packageEntity: {
       type: Object,
@@ -88,16 +99,15 @@ export default {
       <div class="gl-display-flex">
         <span>{{ packageEntity.version }}</span>
 
-        <div v-if="hasPipeline" class="gl-display-none gl-display-sm-flex gl-ml-2">
+        <div v-if="hasPipeline" class="gl-display-none gl-sm-display-flex gl-ml-2">
           <gl-sprintf :message="s__('PackageRegistry|published by %{author}')">
             <template #author>{{ packageEntity.pipeline.user.name }}</template>
           </gl-sprintf>
         </div>
 
-        <div v-if="showPackageType" class="d-flex align-items-center" data-testid="package-type">
-          <gl-icon name="package" class="gl-ml-3 gl-mr-2" />
-          <span>{{ packageType }}</span>
-        </div>
+        <component :is="iconComponent" v-if="showPackageType">
+          {{ packageType }}
+        </component>
 
         <package-path v-if="hasProjectLink" :path="packageEntity.project_path" />
       </div>
@@ -123,7 +133,7 @@ export default {
       <gl-button
         data-testid="action-delete"
         icon="remove"
-        category="primary"
+        category="secondary"
         variant="danger"
         :title="s__('PackageRegistry|Remove package')"
         :aria-label="s__('PackageRegistry|Remove package')"

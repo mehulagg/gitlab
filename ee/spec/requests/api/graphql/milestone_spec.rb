@@ -22,12 +22,14 @@ RSpec.describe 'Querying a Milestone' do
   context 'burnupTimeSeries' do
     let(:fields) do
       <<~FIELDS
-      burnupTimeSeries {
-        date
-        scopeCount
-        scopeWeight
-        completedCount
-        completedWeight
+      report {
+        burnupTimeSeries {
+          date
+          scopeCount
+          scopeWeight
+          completedCount
+          completedWeight
+        }
       }
       FIELDS
     end
@@ -38,32 +40,28 @@ RSpec.describe 'Querying a Milestone' do
       create(:resource_milestone_event, issue: issue, milestone: milestone, action: :add, created_at: '2020-01-05')
     end
 
-    context 'when feature flag is enabled' do
+    context 'with insufficient license' do
       before do
-        stub_feature_flags(burnup_charts: true)
+        stub_licensed_features(milestone_charts: false)
       end
 
-      context 'with insufficient license' do
-        before do
-          stub_licensed_features(milestone_charts: false)
-        end
+      it 'returns an error' do
+        post_graphql(query, current_user: current_user)
 
-        it 'returns an error' do
-          post_graphql(query, current_user: current_user)
+        expect(graphql_errors).to include(a_hash_including('message' => 'Milestone does not support burnup charts'))
+      end
+    end
 
-          expect(graphql_errors).to include(a_hash_including('message' => 'Milestone does not support burnup charts'))
-        end
+    context 'with correct license' do
+      before do
+        stub_licensed_features(milestone_charts: true, issue_weights: true)
       end
 
-      context 'with correct license' do
-        before do
-          stub_licensed_features(milestone_charts: true, issue_weights: true)
-        end
+      it 'returns burnup chart data' do
+        post_graphql(query, current_user: current_user)
 
-        it 'returns burnup chart data' do
-          post_graphql(query, current_user: current_user)
-
-          expect(subject).to eq({
+        expect(subject).to eq({
+          'report' => {
             'burnupTimeSeries' => [
               {
                 'date' => '2020-01-05',
@@ -73,21 +71,8 @@ RSpec.describe 'Querying a Milestone' do
                 'completedWeight' => 0
               }
             ]
-          })
-        end
-      end
-    end
-
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(burnup_charts: false)
-        stub_licensed_features(milestone_charts: true, issue_weights: true)
-      end
-
-      it 'returns empty results' do
-        post_graphql(query, current_user: current_user)
-
-        expect(subject).to eq({ 'burnupTimeSeries' => [] })
+          }
+        })
       end
     end
   end

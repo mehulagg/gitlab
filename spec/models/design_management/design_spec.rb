@@ -11,6 +11,14 @@ RSpec.describe DesignManagement::Design do
   let_it_be(:design3) { create(:design, :with_versions, issue: issue, versions_count: 1) }
   let_it_be(:deleted_design) { create(:design, :with_versions, deleted: true) }
 
+  it_behaves_like 'AtomicInternalId', validate_presence: true do
+    let(:internal_id_attribute) { :iid }
+    let(:instance) { build(:design, issue: issue) }
+    let(:scope) { :project }
+    let(:scope_attrs) { { project: instance.project } }
+    let(:usage) { :design_management_designs }
+  end
+
   it_behaves_like 'a class that supports relative positioning' do
     let_it_be(:relative_parent) { create(:issue) }
 
@@ -23,8 +31,20 @@ RSpec.describe DesignManagement::Design do
     it { is_expected.to belong_to(:issue) }
     it { is_expected.to have_many(:actions) }
     it { is_expected.to have_many(:versions) }
+    it { is_expected.to have_many(:authors) }
     it { is_expected.to have_many(:notes).dependent(:delete_all) }
     it { is_expected.to have_many(:user_mentions) }
+
+    describe '#authors' do
+      it 'returns unique version authors', :aggregate_failures do
+        author = create(:user)
+        create_list(:design_version, 2, designs: [design1], author: author)
+        version_authors = design1.versions.map(&:author)
+
+        expect(version_authors).to contain_exactly(issue.author, author, author)
+        expect(design1.authors).to contain_exactly(issue.author, author)
+      end
+    end
   end
 
   describe 'validations' do
@@ -326,6 +346,38 @@ RSpec.describe DesignManagement::Design do
     end
   end
 
+  describe '#participants' do
+    let_it_be_with_refind(:design) { create(:design, issue: issue) }
+    let_it_be(:current_user) { create(:user) }
+    let_it_be(:version_author) { create(:user) }
+    let_it_be(:note_author) { create(:user) }
+    let_it_be(:mentioned_user) { create(:user) }
+    let_it_be(:design_version) { create(:design_version, :committed, designs: [design], author: version_author) }
+    let_it_be(:note) do
+      create(:diff_note_on_design,
+        noteable: design,
+        issue: issue,
+        project: issue.project,
+        author: note_author,
+        note: mentioned_user.to_reference
+      )
+    end
+
+    subject { design.participants(current_user) }
+
+    it { is_expected.to be_empty }
+
+    context 'when participants can read the project' do
+      before do
+        design.project.add_guest(version_author)
+        design.project.add_guest(note_author)
+        design.project.add_guest(mentioned_user)
+      end
+
+      it { is_expected.to contain_exactly(version_author, note_author, mentioned_user) }
+    end
+  end
+
   describe "#new_design?" do
     let(:design) { design1 }
 
@@ -460,7 +512,7 @@ RSpec.describe DesignManagement::Design do
   end
 
   describe '#to_reference' do
-    let(:namespace) { build(:namespace, path: 'sample-namespace') }
+    let(:namespace) { build(:namespace, id: non_existing_record_id, path: 'sample-namespace') }
     let(:project)   { build(:project, name: 'sample-project', namespace: namespace) }
     let(:group)     { create(:group, name: 'Group', path: 'sample-group') }
     let(:issue)     { build(:issue, iid: 1, project: project) }
@@ -575,27 +627,6 @@ RSpec.describe DesignManagement::Design do
       let(:composite_ids) do
         all_results.map { |design| { issue_id: design.issue_id, filename: design.filename } }
       end
-    end
-  end
-
-  describe '#immediately_before' do
-    let_it_be(:design) { create(:design, issue: issue, relative_position: 100) }
-    let_it_be(:next_design) { create(:design, issue: issue, relative_position: 200) }
-
-    it 'is true when there is no element positioned between this item and the next' do
-      expect(design.immediately_before?(next_design)).to be true
-    end
-
-    it 'is false when there is an element positioned between this item and the next' do
-      create(:design, issue: issue, relative_position: 150)
-
-      expect(design.immediately_before?(next_design)).to be false
-    end
-
-    it 'is false when the next design is to the left of this design' do
-      further_left = create(:design, issue: issue, relative_position: 50)
-
-      expect(design.immediately_before?(further_left)).to be false
     end
   end
 end

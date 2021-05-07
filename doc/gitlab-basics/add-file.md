@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: howto
 ---
 
-# Add a file to a repository
+# Add a file to a repository **(FREE)**
 
 Adding files to a repository is a small, but key task. Bringing files in to a repository,
 such as code, images, or documents, allows them to be tracked by Git, even though they

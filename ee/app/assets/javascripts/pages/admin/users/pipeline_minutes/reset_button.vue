@@ -1,8 +1,8 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import statusCodes from '~/lib/utils/http_status';
+import { __ } from '~/locale';
 
 export default {
   components: {
@@ -17,7 +17,7 @@ export default {
     resetPipelineMinutes() {
       axios
         .post(this.resetMinutesPath)
-        .then(resp => {
+        .then((resp) => {
           if (resp.status === statusCodes.OK) {
             this.$toast.show(__('User pipeline minutes were successfully reset.'));
           }

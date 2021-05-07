@@ -15,7 +15,6 @@ module QA
       attr_writer :github_personal_access_token
       attr_writer :github_repository_path
 
-      attribute :default_branch
       attribute :id
       attribute :name
       attribute :add_name_uuid
@@ -84,7 +83,7 @@ module QA
           end
         end
 
-        Page::Project::NewExperiment.perform(&:click_blank_project_link) if Page::Project::NewExperiment.perform(&:shown?)
+        Page::Project::New.perform(&:click_blank_project_link)
 
         Page::Project::New.perform do |new_page|
           new_page.choose_test_namespace
@@ -152,6 +151,14 @@ module QA
         "#{api_get_path}/runners"
       end
 
+      def api_registry_repositories_path
+        "#{api_get_path}/registry/repositories"
+      end
+
+      def api_packages_path
+        "#{api_get_path}/packages"
+      end
+
       def api_commits_path
         "#{api_get_path}/repository/commits"
       end
@@ -170,6 +177,10 @@ module QA
 
       def api_pipelines_path
         "#{api_get_path}/pipelines"
+      end
+
+      def api_pipeline_schedules_path
+        "#{api_get_path}/pipeline_schedules"
       end
 
       def api_put_path
@@ -200,6 +211,10 @@ module QA
         post_body
       end
 
+      def api_delete_path
+        "/projects/#{id}"
+      end
+
       def change_repository_storage(new_storage)
         put_body = { repository_storage: new_storage }
         response = put Runtime::API::Request.new(api_client, api_put_path).url, put_body
@@ -215,6 +230,10 @@ module QA
 
       def commits
         parse_body(get(Runtime::API::Request.new(api_client, api_commits_path).url))
+      end
+
+      def default_branch
+        reload!.api_response[:default_branch] || Runtime::Env.default_branch
       end
 
       def import_status
@@ -249,6 +268,16 @@ module QA
         parse_body(response)
       end
 
+      def registry_repositories
+        response = get Runtime::API::Request.new(api_client, "#{api_registry_repositories_path}").url
+        parse_body(response)
+      end
+
+      def packages
+        response = get Runtime::API::Request.new(api_client, "#{api_packages_path}").url
+        parse_body(response)
+      end
+
       def repository_branches
         parse_body(get(Runtime::API::Request.new(api_client, api_repository_branches_path).url))
       end
@@ -265,8 +294,8 @@ module QA
         parse_body(get(Runtime::API::Request.new(api_client, api_pipelines_path).url))
       end
 
-      def share_with_group(invitee, access_level = Resource::Members::AccessLevel::DEVELOPER)
-        post Runtime::API::Request.new(api_client, "/projects/#{id}/share").url, { group_id: invitee.id, group_access: access_level }
+      def pipeline_schedules
+        parse_body(get(Runtime::API::Request.new(api_client, api_pipeline_schedules_path).url))
       end
 
       private

@@ -1,15 +1,15 @@
-import Vuex from 'vuex';
-import { mount, createLocalVue } from '@vue/test-utils';
 import { GlButton, GlFormSelect } from '@gitlab/ui';
+import { mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
+import SelectionSummary from 'ee/security_dashboard/components/selection_summary_vuex.vue';
+import createStore from 'ee/security_dashboard/store/index';
 import {
   SELECT_VULNERABILITY,
   RECEIVE_VULNERABILITIES_SUCCESS,
 } from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
-import SelectionSummary from 'ee/security_dashboard/components/selection_summary_vuex.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import createStore from 'ee/security_dashboard/store/index';
 import httpStatus from '~/lib/utils/http_status';
 import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
@@ -50,7 +50,7 @@ describe('Selection Summary', () => {
   const dismissMessage = () => wrapper.find('[data-testid="dismiss-message"]');
   const dismissButton = () => wrapper.find(GlButton);
 
-  const selectByIndex = index =>
+  const selectByIndex = (index) =>
     store.commit(`vulnerabilities/${SELECT_VULNERABILITY}`, mockDataVulnerabilities[index].id);
 
   it('renders the form', () => {
@@ -90,9 +90,7 @@ describe('Selection Summary', () => {
 
       selectByIndex(0);
 
-      const option = formSelect()
-        .findAll('option')
-        .at(1);
+      const option = formSelect().findAll('option').at(1);
       option.setSelected();
       formSelect().trigger('change');
 
@@ -108,9 +106,7 @@ describe('Selection Summary', () => {
       selectByIndex(0);
       selectByIndex(1);
 
-      const option = formSelect()
-        .findAll('option')
-        .at(1);
+      const option = formSelect().findAll('option').at(1);
       option.setSelected();
       formSelect().trigger('change');
 

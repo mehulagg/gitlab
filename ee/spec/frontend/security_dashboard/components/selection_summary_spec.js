@@ -1,36 +1,41 @@
-import { mount } from '@vue/test-utils';
+import { GlAlert } from '@gitlab/ui';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import SelectionSummary from 'ee/security_dashboard/components/selection_summary.vue';
-import { GlFormSelect, GlButton } from '@gitlab/ui';
+import StatusDropdown from 'ee/security_dashboard/components/status_dropdown.vue';
+import vulnerabilityStateMutations from 'ee/security_dashboard/graphql/mutate_vulnerability_state';
+import eventHub from 'ee/security_dashboard/utils/event_hub';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import createFlash from '~/flash';
 import toast from '~/vue_shared/plugins/global_toast';
 
-jest.mock('~/flash');
 jest.mock('~/vue_shared/plugins/global_toast');
+
+const localVue = createLocalVue();
+localVue.use(VueApollo);
 
 describe('Selection Summary component', () => {
   let wrapper;
-  let spyMutate;
 
   const defaultData = {
     dismissalReason: null,
   };
 
-  const defaultMocks = {
-    $apollo: {
-      mutate: jest.fn().mockResolvedValue(),
-    },
+  const createApolloProvider = (...queries) => {
+    return createMockApollo([...queries]);
   };
 
-  const dismissButton = () => wrapper.find(GlButton);
-  const dismissMessage = () => wrapper.find('[data-testid="dismiss-message"]');
-  const formSelect = () => wrapper.find(GlFormSelect);
-  const createComponent = ({ props = {}, data = defaultData, mocks = defaultMocks } = {}) => {
-    spyMutate = mocks.$apollo.mutate;
-    wrapper = mount(SelectionSummary, {
-      mocks: {
-        ...defaultMocks,
-        ...mocks,
+  const findForm = () => wrapper.find('form');
+  const findGlAlert = () => wrapper.findComponent(GlAlert);
+  const findCancelButton = () => wrapper.find('[type="button"]');
+  const findSubmitButton = () => wrapper.find('[type="submit"]');
+
+  const createComponent = ({ props = {}, data = defaultData, apolloProvider } = {}) => {
+    wrapper = shallowMount(SelectionSummary, {
+      localVue,
+      apolloProvider,
+      stubs: {
+        GlAlert,
       },
       propsData: {
         selectedVulnerabilities: [],
@@ -51,27 +56,36 @@ describe('Selection Summary component', () => {
     });
 
     it('renders correctly', () => {
-      expect(dismissMessage().text()).toBe('Dismiss 1 selected vulnerability as');
+      expect(findForm().text()).toBe('1 Selected');
     });
 
-    describe('dismiss button', () => {
-      it('should have the button disabled if an option is not selected', () => {
-        expect(dismissButton().attributes('disabled')).toBe('disabled');
+    describe('with selected state', () => {
+      beforeEach(async () => {
+        wrapper.find(StatusDropdown).vm.$emit('change', { action: 'confirm' });
+        await wrapper.vm.$nextTick();
       });
 
-      it('should have the button enabled if a vulnerability is selected and an option is selected', async () => {
-        expect(wrapper.vm.dismissalReason).toBe(null);
-        expect(wrapper.findAll('option')).toHaveLength(4);
+      it('displays the submit button when there is s state selected', () => {
+        expect(findSubmitButton().exists()).toBe(true);
+      });
 
-        const option = formSelect()
-          .findAll('option')
-          .at(1);
-        option.setSelected();
-        formSelect().trigger('change');
+      it('displays the cancel button when there is s state selected', () => {
+        expect(findCancelButton().exists()).toBe(true);
+      });
+    });
 
+    describe('with no selected state', () => {
+      beforeEach(async () => {
+        wrapper.find(StatusDropdown).vm.$emit('change', { action: null });
         await wrapper.vm.$nextTick();
-        expect(wrapper.vm.dismissalReason).toEqual(option.attributes('value'));
-        expect(dismissButton().attributes('disabled')).toBe(undefined);
+      });
+
+      it('does not display the submit button when there is s state selected', () => {
+        expect(findSubmitButton().exists()).toBe(false);
+      });
+
+      it('does not display the cancel button when there is s state selected', () => {
+        expect(findCancelButton().exists()).toBe(false);
       });
     });
   });
@@ -82,54 +96,103 @@ describe('Selection Summary component', () => {
     });
 
     it('renders correctly', () => {
-      expect(dismissMessage().text()).toBe('Dismiss 2 selected vulnerabilities as');
+      expect(findForm().text()).toBe('2 Selected');
     });
   });
 
-  describe('clicking the dismiss vulnerability button', () => {
-    let mutateMock;
+  describe.each`
+    action       | queryName                          | payload           | expected
+    ${'dismiss'} | ${'vulnerabilityDismiss'}          | ${undefined}      | ${'dismissed'}
+    ${'confirm'} | ${'vulnerabilityConfirm'}          | ${undefined}      | ${'confirmed'}
+    ${'resolve'} | ${'vulnerabilityResolve'}          | ${undefined}      | ${'resolved'}
+    ${'revert'}  | ${'vulnerabilityRevertToDetected'} | ${'Needs triage'} | ${'detected'}
+  `('state dropdown change', ({ action, queryName, payload, expected }) => {
+    const selectedVulnerabilities = [
+      { id: 'gid://gitlab/Vulnerability/54' },
+      { id: 'gid://gitlab/Vulnerability/56' },
+      { id: 'gid://gitlab/Vulnerability/58' },
+    ];
 
-    beforeEach(() => {
-      mutateMock = jest.fn(data =>
-        data.variables.id % 2 === 0 ? Promise.resolve() : Promise.reject(),
-      );
+    const submitForm = async () => {
+      wrapper.find(StatusDropdown).vm.$emit('change', { action, payload });
+      findForm().trigger('submit');
 
-      createComponent({
-        props: { selectedVulnerabilities: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }] },
-        data: { dismissalReason: 'Will Not Fix' },
-        mocks: { $apollo: { mutate: mutateMock } },
+      await waitForPromises();
+    };
+
+    describe('when API call fails', () => {
+      beforeEach(() => {
+        const apolloProvider = createApolloProvider([
+          vulnerabilityStateMutations[action],
+          jest.fn().mockRejectedValue({
+            data: {
+              [queryName]: {
+                errors: [
+                  {
+                    message: 'Something went wrong',
+                  },
+                ],
+              },
+            },
+          }),
+        ]);
+
+        createComponent({ apolloProvider, props: { selectedVulnerabilities } });
+      });
+
+      it(`does not emit vulnerability-updated event - ${action}`, async () => {
+        await submitForm();
+        expect(wrapper.emitted()['vulnerability-updated']).toBeUndefined();
+      });
+
+      it(`calls the toaster - ${action}`, async () => {
+        await submitForm();
+        expect(findGlAlert().text()).toBe(
+          'Failed updating vulnerabilities with the following IDs: 54, 56, 58',
+        );
       });
     });
 
-    it('should make an API request for each vulnerability', () => {
-      dismissButton().trigger('submit');
-      expect(spyMutate).toHaveBeenCalledTimes(5);
-    });
+    describe('when API call is successful', () => {
+      beforeEach(() => {
+        const apolloProvider = createApolloProvider([
+          vulnerabilityStateMutations[action],
+          jest.fn().mockResolvedValue({
+            data: {
+              [queryName]: {
+                errors: [],
+                vulnerability: {
+                  id: selectedVulnerabilities[0].id,
+                  [`${expected}At`]: '2020-09-16T11:13:26Z',
+                  state: expected.toUpperCase(),
+                },
+              },
+            },
+          }),
+        ]);
 
-    it('should show toast with the right message for the successful calls', async () => {
-      dismissButton().trigger('submit');
-      await waitForPromises();
-
-      expect(toast).toHaveBeenCalledWith('2 vulnerabilities dismissed');
-    });
-
-    it('should show flash with the right message for the failed calls', async () => {
-      dismissButton().trigger('submit');
-      await waitForPromises();
-
-      expect(createFlash).toHaveBeenCalledWith({
-        message: 'There was an error dismissing 3 vulnerabilities. Please try again later.',
+        createComponent({ apolloProvider, props: { selectedVulnerabilities } });
       });
-    });
-  });
 
-  describe('when vulnerabilities are not selected', () => {
-    beforeEach(() => {
-      createComponent();
-    });
+      it(`emits an update for each vulnerability - ${action}`, async () => {
+        await submitForm();
+        selectedVulnerabilities.forEach((v, i) => {
+          expect(wrapper.emitted()['vulnerability-updated'][i][0]).toBe(v.id);
+        });
+      });
 
-    it('should have the button disabled', () => {
-      expect(dismissButton().attributes('disabled')).toBe('disabled');
+      it(`calls the toaster - ${action}`, async () => {
+        await submitForm();
+        expect(toast).toHaveBeenLastCalledWith('3 vulnerabilities updated');
+      });
+
+      it(`emits an event for the event hub - ${action}`, async () => {
+        const spy = jest.fn();
+        eventHub.$on('vulnerabilities-updated', spy);
+
+        await submitForm();
+        expect(spy).toHaveBeenCalled();
+      });
     });
   });
 });

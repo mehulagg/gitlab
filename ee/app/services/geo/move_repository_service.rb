@@ -51,7 +51,7 @@ module Geo
       end
 
       true
-    rescue => ex
+    rescue StandardError => ex
       log_error('Repository cannot be moved', error: ex)
       false
     end

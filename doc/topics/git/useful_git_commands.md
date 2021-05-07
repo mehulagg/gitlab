@@ -1,14 +1,14 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference
 ---
 
-# Useful Git commands
+# Useful Git commands **(FREE)**
 
-Here are some useful Git commands collected by the GitLab support team. You may not
-need to use often, but they can come in handy when needed.
+The GitLab support team has collected these commands to help you. You may not
+need to use them often.
 
 ## Remotes
 
@@ -175,14 +175,14 @@ GIT_TRACE_PACKET=1 GIT_TRACE=2 GIT_CURL_VERBOSE=1 git clone <url>
 Git includes a complete set of [traces for debugging Git commands](https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables#_debugging), for example:
 
 - `GIT_TRACE_PERFORMANCE=1`: enables tracing of performance data, showing how long each particular `git` invocation takes.
-- `GIT_TRACE_SETUP=1`: enables tracing of what `git` is discovering about the repository and environment it’s interacting with.
+- `GIT_TRACE_SETUP=1`: enables tracing of what `git` is discovering about the repository and environment it's interacting with.
 - `GIT_TRACE_PACKET=1`: enables packet-level tracing for network operations.
 
 ## Rebasing
 
 ### Rebase your branch onto master
 
-The -i flag stands for 'interactive':
+The `-i` flag stands for 'interactive':
 
 ```shell
 git rebase -i master

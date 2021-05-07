@@ -24,17 +24,21 @@ namespace :admin do
       put :revoke
     end
   end
+  resources :user_permission_exports, controller: 'user_permission_exports', only: [:index]
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+    post :sync_seat_link, on: :collection
 
     resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
 
+  resource :cloud_license, only: [:show]
+
   # using `only: []` to keep duplicate routes from being created
   resource :application_settings, only: [] do
     get :seat_link_payload
-    match :templates, via: [:get, :patch]
+    match :templates, :advanced_search, via: [:get, :patch]
     get :geo, to: "geo/settings#show"
   end
 
@@ -47,6 +51,8 @@ namespace :admin do
     get '/designs', to: redirect(path: 'admin/geo/replication/designs')
 
     resources :nodes, only: [:index, :create, :new, :edit, :update]
+
+    resources :nodes_beta, only: [:index]
 
     scope '/replication' do
       get '/', to: redirect(path: 'admin/geo/replication/projects')
@@ -78,5 +84,6 @@ namespace :admin do
     post :enqueue_index
     post :trigger_reindexing
     post :cancel_index_deletion
+    post :retry_migration
   end
 end

@@ -29,6 +29,35 @@ RSpec.describe Admin::UsersController do
 
       expect(assigns(:users).first.association(:authorized_projects)).to be_loaded
     end
+
+    context 'pagination' do
+      context 'when number of users is over the pagination limit' do
+        before do
+          stub_const('Admin::UsersController::PAGINATION_WITH_COUNT_LIMIT', 5)
+          allow(Gitlab::Database::Count).to receive(:approximate_counts).with([User]).and_return({ User => 6 })
+        end
+
+        it 'marks the relation for pagination without counts' do
+          get :index
+
+          expect(assigns(:users)).to be_a(Kaminari::PaginatableWithoutCount)
+        end
+      end
+
+      context 'when number of users is below the pagination limit' do
+        it 'marks the relation for pagination with counts' do
+          get :index
+
+          expect(assigns(:users)).not_to be_a(Kaminari::PaginatableWithoutCount)
+        end
+      end
+    end
+  end
+
+  describe 'GET #cohorts' do
+    it_behaves_like 'tracking unique visits', :cohorts do
+      let(:target_id) { 'i_analytics_cohorts' }
+    end
   end
 
   describe 'GET :id' do
@@ -102,54 +131,96 @@ RSpec.describe Admin::UsersController do
     end
   end
 
+  describe 'DELETE #reject' do
+    subject { put :reject, params: { id: user.username } }
+
+    context 'when rejecting a pending user' do
+      let(:user) { create(:user, :blocked_pending_approval) }
+
+      it 'hard deletes the user', :sidekiq_inline do
+        subject
+
+        expect(User.exists?(user.id)).to be_falsy
+      end
+
+      it 'displays the rejection message' do
+        subject
+
+        expect(response).to redirect_to(admin_users_path)
+        expect(flash[:notice]).to eq("You've rejected #{user.name}")
+      end
+
+      it 'sends the user a rejection email' do
+        expect_next_instance_of(NotificationService) do |notification|
+          allow(notification).to receive(:user_admin_rejection).with(user.name, user.notification_email)
+        end
+
+        subject
+      end
+    end
+
+    context 'when user is not pending' do
+      let(:user) { create(:user, state: 'active') }
+
+      it 'does not reject and delete the user' do
+        subject
+
+        expect(User.exists?(user.id)).to be_truthy
+      end
+
+      it 'displays the error' do
+        subject
+
+        expect(flash[:alert]).to eq('This user does not have a pending request')
+      end
+
+      it 'does not email the user' do
+        expect(NotificationService).not_to receive(:new)
+
+        subject
+      end
+    end
+  end
+
   describe 'PUT #approve' do
     let(:user) { create(:user, :blocked_pending_approval) }
 
     subject { put :approve, params: { id: user.username } }
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(admin_approval_for_new_user_signups: false)
-      end
-
-      it 'responds with access denied' do
+    context 'when successful' do
+      it 'activates the user' do
         subject
 
-        expect(response).to have_gitlab_http_status(:not_found)
+        user.reload
+
+        expect(user).to be_active
+        expect(flash[:notice]).to eq('Successfully approved')
+      end
+
+      it 'emails the user on approval' do
+        expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
+        expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
       end
     end
 
-    context 'when feature is enabled' do
-      before do
-        stub_feature_flags(admin_approval_for_new_user_signups: true)
+    context 'when unsuccessful' do
+      let(:user) { create(:user, :blocked) }
+
+      it 'displays the error' do
+        subject
+
+        expect(flash[:alert]).to eq('The user you are trying to approve is not pending approval')
       end
 
-      context 'when successful' do
-        it 'activates the user' do
-          subject
+      it 'does not activate the user' do
+        subject
 
-          user.reload
-
-          expect(user).to be_active
-          expect(flash[:notice]).to eq('Successfully approved')
-        end
+        user.reload
+        expect(user).not_to be_active
       end
 
-      context 'when unsuccessful' do
-        let(:user) { create(:user, :blocked) }
-
-        it 'displays the error' do
-          subject
-
-          expect(flash[:alert]).to eq('The user you are trying to approve is not pending an approval')
-        end
-
-        it 'does not activate the user' do
-          subject
-
-          user.reload
-          expect(user).not_to be_active
-        end
+      it 'does not email the pending user' do
+        expect { subject }.not_to have_enqueued_mail(DeviseMailer, :user_admin_approval)
       end
     end
   end

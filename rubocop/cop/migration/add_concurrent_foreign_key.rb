@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../migration_helpers'
 
 module RuboCop
@@ -8,7 +10,7 @@ module RuboCop
       class AddConcurrentForeignKey < RuboCop::Cop::Cop
         include MigrationHelpers
 
-        MSG = '`add_foreign_key` requires downtime, use `add_concurrent_foreign_key` instead'.freeze
+        MSG = '`add_foreign_key` requires downtime, use `add_concurrent_foreign_key` instead'
 
         def_node_matcher :false_node?, <<~PATTERN
           (false)

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ProjectsHelper do
-  let(:project) { create(:project) }
+  let_it_be_with_refind(:project) { create(:project) }
 
   before do
     helper.instance_variable_set(:@project, project)
@@ -40,13 +40,11 @@ RSpec.describe ProjectsHelper do
 
   describe '#show_compliance_framework_badge?' do
     it 'returns false if compliance framework setting is not present' do
-      project = build(:project)
-
       expect(helper.show_compliance_framework_badge?(project)).to be_falsey
     end
 
     it 'returns true if compliance framework setting is present' do
-      project = build(:project, :with_compliance_framework)
+      project = build_stubbed(:project, :with_compliance_framework)
 
       expect(helper.show_compliance_framework_badge?(project)).to be_truthy
     end
@@ -102,7 +100,7 @@ RSpec.describe ProjectsHelper do
       allow(helper).to receive(:current_user).and_return(user)
     end
 
-    it do
+    specify do
       expect(helper.group_project_templates_count(parent_group.id)).to eq 1
     end
 
@@ -111,7 +109,7 @@ RSpec.describe ProjectsHelper do
         template_project.update!(marked_for_deletion_at: Date.current)
       end
 
-      it do
+      specify do
         expect(helper.group_project_templates_count(parent_group.id)).to eq 0
       end
     end
@@ -121,11 +119,13 @@ RSpec.describe ProjectsHelper do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, :repository, group: group) }
+    let_it_be(:jira_service) { create(:jira_service, project: project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
 
     subject { helper.project_security_dashboard_config(project) }
 
     before do
       group.add_owner(user)
+      stub_licensed_features(jira_vulnerabilities_integration: true)
       allow(helper).to receive(:current_user).and_return(user)
     end
 
@@ -133,8 +133,13 @@ RSpec.describe ProjectsHelper do
       let(:expected_value) do
         {
           has_vulnerabilities: 'false',
+          has_jira_vulnerabilities_integration_enabled: 'true',
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
-          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index'
+          survey_request_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
+          security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
+          project_full_path: project.full_path,
+          no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
+          security_configuration_path: end_with('/configuration')
         }
       end
 
@@ -145,22 +150,27 @@ RSpec.describe ProjectsHelper do
       let(:base_values) do
         {
           has_vulnerabilities: 'true',
+          has_jira_vulnerabilities_integration_enabled: 'true',
           project: { id: project.id, name: project.name },
           project_full_path: project.full_path,
           vulnerabilities_export_endpoint: "/api/v4/security/projects/#{project.id}/vulnerability_exports",
-          vulnerability_feedback_help_path: '/help/user/application_security/index#interacting-with-the-vulnerabilities',
           no_vulnerabilities_svg_path: start_with('/assets/illustrations/issues-'),
           empty_state_svg_path: start_with('/assets/illustrations/security-dashboard-empty-state'),
+          survey_request_svg_path: start_with('/assets/illustrations/security-dashboard_empty'),
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
-          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
+          auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix'),
+          scanners: '[{"id":123,"vendor":"Security Vendor","report_type":"SAST"}]'
         }
       end
 
       before do
         create(:vulnerability, project: project)
+        scanner = create(:vulnerabilities_scanner, project: project, id: 123)
+        create(:vulnerabilities_finding, project: project, scanner: scanner)
       end
 
       context 'without pipeline' do
@@ -199,101 +209,14 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe '#sidebar_security_paths' do
-    let(:expected_security_paths) do
-      %w[
-        projects/security/configuration#show
-        projects/security/sast_configuration#show
-        projects/security/vulnerabilities#show
-        projects/security/dashboard#index
-        projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
-        projects/dependencies#index
-        projects/licenses#index
-        projects/threat_monitoring#show
-        projects/threat_monitoring#new
-        projects/threat_monitoring#edit
-      ]
-    end
-
-    subject { helper.sidebar_security_paths }
-
-    it { is_expected.to eq(expected_security_paths) }
-  end
-
-  describe '#sidebar_on_demand_scans_paths' do
-    let(:expected_on_demand_scans_paths) do
-      %w[
-        projects/on_demand_scans#index
-        projects/dast_profiles#index
-        projects/dast_site_profiles#new
-        projects/dast_site_profiles#edit
-        projects/dast_scanner_profiles#new
-        projects/dast_scanner_profiles#edit
-      ]
-    end
-
-    subject { helper.sidebar_on_demand_scans_paths }
-
-    it { is_expected.to eq(expected_on_demand_scans_paths) }
-  end
-
-  describe '#get_project_nav_tabs' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:ability, :nav_tabs) do
-      :read_dependencies               | [:dependencies]
-      :read_feature_flag               | [:operations]
-      :read_licenses                   | [:licenses]
-      :read_project_security_dashboard | [:security, :security_configuration]
-      :read_threat_monitoring          | [:threat_monitoring]
-    end
-
-    with_them do
-      let(:project) { create(:project) }
-      let(:user)    { create(:user) }
-
-      before do
-        allow(helper).to receive(:can?) { false }
-      end
-
-      subject do
-        helper.send(:get_project_nav_tabs, project, user)
-      end
-
-      context 'when the feature is not available' do
-        before do
-          allow(helper).to receive(:can?).with(user, ability, project).and_return(false)
-        end
-
-        it 'does not include the nav tabs' do
-          is_expected.not_to include(*nav_tabs)
-        end
-      end
-
-      context 'when the feature is available' do
-        before do
-          allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
-        end
-
-        it 'includes the nav tabs' do
-          is_expected.to include(*nav_tabs)
-        end
-      end
-    end
-  end
-
   describe '#show_discover_project_security?' do
     using RSpec::Parameterized::TableSyntax
-    let(:user) { create(:user) }
+
+    let_it_be(:user) { create(:user) }
 
     where(
       gitlab_com?: [true, false],
-       user?: [true, false],
+      user?: [true, false],
       security_dashboard_feature_available?: [true, false],
       can_admin_namespace?: [true, false]
     )
@@ -322,7 +245,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has delayed deletion enabled' do
       let(:enabled) { true }
 
-      it do
+      specify do
         deletion_date = helper.permanent_deletion_date(Time.now.utc)
 
         expect(subject).to eq "Deleting a project places it into a read-only state until #{deletion_date}, at which point the project will be permanently deleted. Are you ABSOLUTELY sure?"
@@ -332,7 +255,7 @@ RSpec.describe ProjectsHelper do
     context 'when project has delayed deletion disabled' do
       let(:enabled) { false }
 
-      it do
+      specify do
         expect(subject).to eq "You are going to delete #{project.full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?"
       end
     end
@@ -347,6 +270,112 @@ RSpec.describe ProjectsHelper do
       let_it_be(:archived_project) { create(:project, :archived, marked_for_deletion_at: 10.minutes.ago) }
 
       it { expect(helper.scheduled_for_deletion?(archived_project)).to be true }
+    end
+  end
+
+  describe '#project_permissions_settings' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:expected_settings) { { requirementsAccessLevel: 20, securityAndComplianceAccessLevel: 10 } }
+
+    subject { helper.project_permissions_settings(project) }
+
+    it { is_expected.to include(expected_settings) }
+
+    context 'cveIdRequestEnabled' do
+      context "with cve_id_request_button feature flag" do
+        where(feature_flag_enabled: [true, false])
+        with_them do
+          before do
+            stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+          end
+
+          it 'includes cveIdRequestEnabled' do
+            expect(subject.key?(:cveIdRequestEnabled)).to eq(feature_flag_enabled)
+          end
+        end
+      end
+
+      where(:project_attrs, :cve_enabled, :expected) do
+        [:public]   | true  | true
+        [:public]   | false | false
+        [:internal] | true  | false
+        [:private]  | true  | false
+      end
+      with_them do
+        let(:project) { create(:project, :with_cve_request, *project_attrs, cve_request_enabled: cve_enabled) }
+        subject { helper.project_permissions_settings(project) }
+
+        it 'has the correct cveIdRequestEnabled value' do
+          expect(subject[:cveIdRequestEnabled]).to eq(expected)
+        end
+      end
+    end
+  end
+
+  describe '#project_permissions_panel_data' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:user) { instance_double(User, admin?: false) }
+    let(:expected_data) { { requirementsAvailable: false } }
+
+    subject { helper.project_permissions_panel_data(project) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(false)
+    end
+
+    it { is_expected.to include(expected_data) }
+
+    context "if in Gitlab.com" do
+      where(is_gitlab_com: [true, false])
+      with_them do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(is_gitlab_com)
+        end
+
+        it 'sets requestCveAvailable to the correct value' do
+          expect(subject[:requestCveAvailable]).to eq(is_gitlab_com)
+        end
+      end
+    end
+
+    context "with cve_id_request_button feature flag" do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(cve_id_request_button: feature_flag_enabled)
+        end
+
+        it 'includes requestCveAvailable' do
+          expect(subject.key?(:requestCveAvailable)).to eq(feature_flag_enabled)
+        end
+      end
+    end
+  end
+
+  describe '#approvals_app_data' do
+    subject { helper.approvals_app_data(project) }
+
+    let(:user) { instance_double(User, admin?: false) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(true)
+    end
+
+    context 'with the status check feature flag' do
+      where(feature_flag_enabled: [true, false])
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled)
+        end
+
+        it 'includes external_approval_rules_path only when enabled' do
+          expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
+        end
+      end
     end
   end
 end

@@ -10,7 +10,7 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
     class="settings-header"
   >
     <h4
-      class="gl-my-3! gl-py-1"
+      class="settings-title js-settings-toggle js-settings-toggle-trigger-only"
     >
       
       Incidents
@@ -43,6 +43,7 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
     >
       <gl-tab-stub
         title="Alert integration"
+        titlelinkclass=""
       >
         <alertssettingsform-stub
           class="gl-pt-3"
@@ -51,6 +52,7 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
       </gl-tab-stub>
       <gl-tab-stub
         title="PagerDuty integration"
+        titlelinkclass=""
       >
         <pagerdutysettingsform-stub
           class="gl-pt-3"

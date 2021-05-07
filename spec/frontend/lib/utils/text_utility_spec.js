@@ -300,13 +300,13 @@ describe('text_utility', () => {
     });
 
     it(`should return an empty string for invalid inputs`, () => {
-      [undefined, null, 4, {}, true, new Date()].forEach(input => {
+      [undefined, null, 4, {}, true, new Date()].forEach((input) => {
         expect(textUtils.truncateNamespace(input)).toBe('');
       });
     });
 
     it(`should not alter strings that aren't formatted as namespaces`, () => {
-      ['', ' ', '\t', 'a', 'a \\ b'].forEach(input => {
+      ['', ' ', '\t', 'a', 'a \\ b'].forEach((input) => {
         expect(textUtils.truncateNamespace(input)).toBe(input);
       });
     });
@@ -323,6 +323,44 @@ describe('text_utility', () => {
       ${'hello'}          | ${true}
     `('returns $result for input $txt', ({ result, txt }) => {
       expect(textUtils.hasContent(txt)).toEqual(result);
+    });
+  });
+
+  describe('isValidSha1Hash', () => {
+    const validSha1Hash = '92d10c15';
+    const stringOver40 = new Array(42).join('a');
+
+    it.each`
+      hash              | valid
+      ${validSha1Hash}  | ${true}
+      ${'__characters'} | ${false}
+      ${'abc'}          | ${false}
+      ${stringOver40}   | ${false}
+    `(`returns $valid for $hash`, ({ hash, valid }) => {
+      expect(textUtils.isValidSha1Hash(hash)).toBe(valid);
+    });
+  });
+
+  describe('insertFinalNewline', () => {
+    it.each`
+      input              | output
+      ${'some text'}     | ${'some text\n'}
+      ${'some text\n'}   | ${'some text\n'}
+      ${'some text\n\n'} | ${'some text\n\n'}
+      ${'some\n text'}   | ${'some\n text\n'}
+    `('adds a newline if it doesnt already exist for input: $input', ({ input, output }) => {
+      expect(textUtils.insertFinalNewline(input)).toBe(output);
+    });
+
+    it.each`
+      input                  | output
+      ${'some text'}         | ${'some text\r\n'}
+      ${'some text\r\n'}     | ${'some text\r\n'}
+      ${'some text\n'}       | ${'some text\n\r\n'}
+      ${'some text\r\n\r\n'} | ${'some text\r\n\r\n'}
+      ${'some\r\n text'}     | ${'some\r\n text\r\n'}
+    `('works with CRLF newline style; input: $input', ({ input, output }) => {
+      expect(textUtils.insertFinalNewline(input, '\r\n')).toBe(output);
     });
   });
 });

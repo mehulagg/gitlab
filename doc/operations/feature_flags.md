@@ -1,14 +1,13 @@
 ---
 stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Feature Flags **(CORE)**
+# Feature Flags **(FREE)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/7433) in GitLab 11.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to [GitLab Starter](https://about.gitlab.com/pricing/) in 13.4.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.5.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212318) to GitLab Free in 13.5.
 
 With Feature Flags, you can deploy your application's new features to production in smaller batches.
 You can toggle a feature on and off to subsets of users, helping you achieve Continuous Delivery.
@@ -18,7 +17,7 @@ delivery from customer launch.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an example of feature flags in action, see [GitLab for Deploys, Feature Flags, and Error Tracking](https://www.youtube.com/embed/5tw2p6lwXxo).
 
-NOTE: **Note:**
+NOTE:
 The Feature Flags GitLab offer as a feature (described in this document) is not the same method
 used for the [development of GitLab](../development/feature_flags/index.md).
 
@@ -61,14 +60,13 @@ next to any feature flag in the list.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254379) in GitLab 13.5.
 
 The maximum number of feature flags per project on self-managed GitLab instances
-is 200. On GitLab.com, the maximum number is determined by [GitLab.com tier](https://about.gitlab.com/pricing/):
+is 200. For GitLab SaaS, the maximum number is determined by [tier](https://about.gitlab.com/pricing/):
 
-| Tier     | Number of feature flags per project |
-|----------|-------------------------------------|
-| Free     | 50                                  |
-| Bronze   | 100                                 |
-| Silver   | 150                                 |
-| Gold     | 200                                 |
+| Tier     | Feature flags per project (SaaS) | Feature flags per project (self-managed) |
+|----------|----------------------------------|------------------------------------------|
+| Free     | 50                               | 200                                      |
+| Premium  | 150                              | 200                                      |
+| Ultimate | 200                              | 200                                      |
 
 ## Feature flag strategies
 
@@ -77,13 +75,12 @@ is 200. On GitLab.com, the maximum number is determined by [GitLab.com tier](htt
 > - It became [enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/214684) in GitLab 13.2.
 > - It's recommended for production use.
 > - It's enabled on GitLab.com.
-> - For GitLab self-managed instances, a GitLab administrator can choose to [disable it](#enable-or-disable-feature-flag-strategies). **(CORE ONLY)**
 
 You can apply a feature flag strategy across multiple environments, without defining
 the strategy multiple times.
 
-GitLab Feature Flags use [Unleash](https://unleash.github.io) as the feature flag
-engine. In Unleash, there are [strategies](https://unleash.github.io/docs/activation_strategy)
+GitLab Feature Flags use [Unleash](https://docs.getunleash.io/) as the feature flag
+engine. In Unleash, there are [strategies](https://docs.getunleash.io/docs/activation_strategy)
 for granular feature flag controls. GitLab Feature Flags can have multiple strategies,
 and the supported strategies are:
 
@@ -98,7 +95,7 @@ and clicking **{pencil}** (edit).
 
 ### All users
 
-Enables the feature for all users. It uses the [`default`](https://unleash.github.io/docs/activation_strategy#default)
+Enables the feature for all users. It uses the [`default`](https://docs.getunleash.io/docs/activation_strategy#default)
 Unleash activation strategy.
 
 ### Percent Rollout
@@ -107,7 +104,7 @@ Unleash activation strategy.
 
 Enables the feature for a percentage of page views, with configurable consistency
 of behavior. This consistency is also known as stickiness. It uses the
-[`flexibleRollout`](https://unleash.github.io/docs/activation_strategy#flexiblerollout)
+[`flexibleRollout`](https://docs.getunleash.io/docs/activation_strategy#flexiblerollout)
 Unleash activation strategy.
 
 You can configure the consistency to be based on:
@@ -130,13 +127,13 @@ The rollout percentage can be from 0% to 100%.
 
 Selecting a consistency based on User IDs functions the same as the [percent of Users](#percent-of-users) rollout.
 
-CAUTION: **Caution:**
+WARNING:
 Selecting **Random** provides inconsistent application behavior for individual users.
 
 ### Percent of Users
 
 Enables the feature for a percentage of authenticated users. It uses the Unleash activation strategy
-[`gradualRolloutUserId`](https://unleash.github.io/docs/activation_strategy#gradualrolloutuserid).
+[`gradualRolloutUserId`](https://docs.getunleash.io/docs/activation_strategy#gradualrolloutuserid).
 
 For example, set a value of 15% to enable the feature for 15% of authenticated users.
 
@@ -148,7 +145,7 @@ but not anonymous users.
 Note that [percent rollout](#percent-rollout) with a consistency based on **User IDs** has the same
 behavior. We recommend using percent rollout because it's more flexible than percent of users
 
-CAUTION: **Caution:**
+WARNING:
 If the percent of users strategy is selected, then the Unleash client **must** be given a user
 ID for the feature to be enabled. See the [Ruby example](#ruby-application-example) below.
 
@@ -158,14 +155,14 @@ ID for the feature to be enabled. See the [Ruby example](#ruby-application-examp
 > - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/34363) to be defined per environment in GitLab 12.6.
 
 Enables the feature for a list of target users. It is implemented
-using the Unleash [`userWithId`](https://unleash.github.io/docs/activation_strategy#userwithid)
+using the Unleash [`userWithId`](https://docs.getunleash.io/docs/activation_strategy#userwithid)
 activation strategy.
 
 Enter user IDs as a comma-separated list of values (for example,
 `user@example.com, user2@example.com`, or `username1,username2,username3`, and so on). Note that
 user IDs are identifiers for your application users. They do not need to be GitLab users.
 
-CAUTION: **Caution:**
+WARNING:
 The Unleash client **must** be given a user ID for the feature to be enabled for
 target users. See the [Ruby example](#ruby-application-example) below.
 
@@ -174,7 +171,7 @@ target users. See the [Ruby example](#ruby-application-example) below.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35930) in GitLab 13.1.
 
 Enables the feature for lists of users created [in the Feature Flags UI](#create-a-user-list), or with the [Feature Flag User List API](../api/feature_flag_user_lists.md).
-Similar to [User IDs](#user-ids), it uses the Unleash [`userWithId`](https://unleash.github.io/docs/activation_strategy#userwithid)
+Similar to [User IDs](#user-ids), it uses the Unleash [`userWithId`](https://docs.getunleash.io/docs/activation_strategy#userwithid)
 activation strategy.
 
 It's not possible to *disable* a feature for members of a user list, but you can achieve the same
@@ -222,33 +219,14 @@ To remove users from a user list:
 1. Click on the **{pencil}** (edit) button next to the list you want to change.
 1. Click on the **{remove}** (remove) button next to the ID you want to remove.
 
-### Enable or disable feature flag strategies
-
-This feature is under development, but is ready for production use. It's
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can disable it for your instance.
-
-To disable it:
-
-```ruby
-Feature.disable(:feature_flags_new_version)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:feature_flags_new_version)
-```
-
 ## Rollout strategy (legacy)
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8240) in GitLab 12.2.
 > - [Made read-only](https://gitlab.com/gitlab-org/gitlab/-/issues/220228) in GitLab 13.4.
 
-In GitLab 13.0 and earlier, the **Rollout strategy** setting affects which users will experience
-the feature as enabled. Choose the percentage of users that the feature will be enabled
-for. The rollout strategy will have no effect if the environment spec is disabled.
+In GitLab 13.0 and earlier, the **Rollout strategy** setting affects which users experience
+the feature as enabled. Choose the percentage of users that the feature is enabled
+for. The rollout strategy has no effect if the environment spec is disabled.
 
 It can be set to:
 
@@ -257,6 +235,18 @@ It can be set to:
   - Optionally, you can click the **Include additional user IDs** checkbox and add a list
     of specific users IDs to enable the feature for.
 - [User IDs](#user-ids)
+
+## Legacy feature flag migration
+
+Legacy feature flags became read-only in GitLab 13.4. GitLab 14.0 removes support for legacy feature
+flags. You must migrate your legacy feature flags to the new version. To do so, follow these steps:
+
+1. Take a screenshot of the legacy flag for tracking.
+1. Delete the flag through the API or UI (you don't need to alter the code).
+1. Create a new feature flag with the same name as the legacy flag you deleted. Make sure the
+   strategies and environments match the deleted flag.
+
+See [this video tutorial](https://www.youtube.com/watch?v=CAJY2IGep7Y) for help with this migration.
 
 ## Disable a feature flag for a specific environment
 
@@ -302,7 +292,7 @@ To get the access credentials that your application needs to communicate with Gi
      could be `production` or similar. This value is used for the environment spec evaluation.
 
 Note that the meaning of these fields might change over time. For example, we're not sure if
-**Instance ID** will be single token or multiple tokens, assigned to the **Environment**. Also,
+**Instance ID** is a single token or multiple tokens, assigned to the **Environment**. Also,
 **Application name** could describe the application version instead of the running environment.
 
 ### Choose a client library
@@ -404,4 +394,4 @@ end
 You can link related issues to a feature flag. In the **Linked issues** section,
 click the `+` button and input the issue reference number or the full URL of the issue.
 
-This feature is similar to the [related issues](../user/project/issues/related_issues.md) feature.
+This feature is similar to the [linked issues](../user/project/issues/related_issues.md) feature.

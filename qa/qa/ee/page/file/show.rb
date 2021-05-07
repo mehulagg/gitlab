@@ -24,22 +24,26 @@ module QA
           end
 
           def lock
-            click_element :lock_button
+            accept_confirm do
+              click_element :lock_button
+            end
 
             begin
               has_element? :lock_button, text: 'Unlock'
-            rescue
-              raise ElementNotFound, %q(Button did not show expected state)
+            rescue StandardError
+              raise QA::Page::Base::ElementNotFound, %q(Button did not show expected state)
             end
           end
 
           def unlock
-            click_element :lock_button
+            accept_confirm do
+              click_element :lock_button
+            end
 
             begin
               has_element? :lock_button, text: 'Lock'
-            rescue
-              raise ElementNotFound, %q(Button did not show expected state)
+            rescue StandardError
+              raise QA::Page::Base::ElementNotFound, %q(Button did not show expected state)
             end
           end
 

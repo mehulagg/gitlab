@@ -85,6 +85,7 @@ module UsageDataHelpers
       projects
       projects_imported_from_github
       projects_asana_active
+      projects_jenkins_active
       projects_jira_active
       projects_jira_server_active
       projects_jira_cloud_active
@@ -97,7 +98,7 @@ module UsageDataHelpers
       projects_prometheus_active
       projects_with_repositories_enabled
       projects_with_error_tracking_enabled
-      projects_with_alerts_service_enabled
+      projects_with_enabled_alert_integrations
       projects_with_prometheus_alerts
       projects_with_tracing_enabled
       projects_with_expiration_policy_enabled
@@ -160,7 +161,6 @@ module UsageDataHelpers
       git
       gitaly
       database
-      avg_cycle_analytics
       prometheus_metrics_enabled
       web_ide_clientside_preview_enabled
       ingress_modsecurity_enabled
@@ -171,6 +171,22 @@ module UsageDataHelpers
   def stub_usage_data_connections
     allow(ActiveRecord::Base.connection).to receive(:transaction_open?).and_return(false)
     allow(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(false)
+  end
+
+  def stub_prometheus_queries
+    stub_request(:get, %r{^https?://::1:9090/-/ready})
+      .to_return(
+        status: 200,
+        body: [{}].to_json,
+        headers: { 'Content-Type' => 'application/json' }
+      )
+
+    stub_request(:get, %r{^https?://::1:9090/api/v1/query\?query=.*})
+      .to_return(
+        status: 200,
+        body: [{}].to_json,
+        headers: { 'Content-Type' => 'application/json' }
+      )
   end
 
   def clear_memoized_values(values)
@@ -240,5 +256,13 @@ module UsageDataHelpers
         yield
       end
     end
+  end
+
+  def load_sample_metric_definition(filename: 'sample_metric.yml')
+    load_metric_yaml(fixture_file("lib/generators/gitlab/usage_metric_definition_generator/#{filename}"))
+  end
+
+  def load_metric_yaml(data)
+    ::Gitlab::Config::Loader::Yaml.new(data).load_raw!
   end
 end

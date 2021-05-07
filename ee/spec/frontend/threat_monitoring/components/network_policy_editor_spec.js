@@ -1,14 +1,20 @@
 import { shallowMount } from '@vue/test-utils';
 import NetworkPolicyEditor from 'ee/threat_monitoring/components/network_policy_editor.vue';
+import EditorLite from '~/vue_shared/components/editor_lite.vue';
 
 describe('NetworkPolicyEditor component', () => {
   let wrapper;
+
+  const findEditor = () => wrapper.findComponent(EditorLite);
 
   const factory = ({ propsData } = {}) => {
     wrapper = shallowMount(NetworkPolicyEditor, {
       propsData: {
         value: 'foo',
         ...propsData,
+      },
+      stubs: {
+        EditorLite,
       },
     });
   };
@@ -23,22 +29,20 @@ describe('NetworkPolicyEditor component', () => {
   });
 
   it('renders container element', () => {
-    expect(wrapper.find({ ref: 'editor' }).exists()).toBe(true);
+    expect(findEditor().exists()).toBe(true);
   });
 
   it('initializes monaco editor with yaml language and provided value', () => {
-    const {
-      vm: { editor },
-    } = wrapper;
-    expect(editor).not.toBe(null);
+    const editorComponent = findEditor();
+    expect(editorComponent.props('value')).toBe('foo');
+    const editor = editorComponent.vm.getEditor();
     expect(editor.getModel().getModeId()).toBe('yaml');
-    expect(editor.getValue()).toBe('foo');
   });
 
-  it('emits input event on file changes', () => {
-    wrapper.vm.editor.setValue('bar');
+  it("emits input event on editor's input", async () => {
+    const editor = findEditor();
+    editor.vm.$emit('input');
+    await wrapper.vm.$nextTick();
     expect(wrapper.emitted().input).toBeTruthy();
-    expect(wrapper.emitted().input.length).toBe(1);
-    expect(wrapper.emitted().input[0]).toEqual(['bar']);
   });
 });

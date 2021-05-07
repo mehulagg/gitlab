@@ -1,5 +1,8 @@
+import { getByRole } from '@testing-library/dom';
 import Vue from 'vue';
 import mountComponent from 'helpers/vue_mount_component_helper';
+import { OPEN_REVERT_MODAL, OPEN_CHERRY_PICK_MODAL } from '~/projects/commit/constants';
+import modalEventHub from '~/projects/commit/event_hub';
 import mergedComponent from '~/vue_merge_request_widget/components/states/mr_widget_merged.vue';
 import eventHub from '~/vue_merge_request_widget/event_hub';
 
@@ -16,6 +19,7 @@ describe('MRWidgetMerged', () => {
   };
 
   beforeEach(() => {
+    jest.spyOn(document, 'dispatchEvent');
     const Component = Vue.extend(mergedComponent);
     const mr = {
       isRemovingSourceBranch: false,
@@ -123,9 +127,9 @@ describe('MRWidgetMerged', () => {
 
   describe('methods', () => {
     describe('removeSourceBranch', () => {
-      it('should set flag and call service then request main component to update the widget', done => {
+      it('should set flag and call service then request main component to update the widget', (done) => {
         jest.spyOn(vm.service, 'removeSourceBranch').mockReturnValue(
-          new Promise(resolve => {
+          new Promise((resolve) => {
             resolve({
               data: {
                 message: 'Branch was deleted',
@@ -145,6 +149,26 @@ describe('MRWidgetMerged', () => {
         });
       });
     });
+  });
+
+  it('calls dispatchDocumentEvent to load in the modal component', () => {
+    expect(document.dispatchEvent).toHaveBeenCalledWith(new CustomEvent('merged:UpdateActions'));
+  });
+
+  it('emits event to open the revert modal on revert button click', () => {
+    const eventHubSpy = jest.spyOn(modalEventHub, '$emit');
+
+    getByRole(vm.$el, 'button', { name: /Revert/i }).click();
+
+    expect(eventHubSpy).toHaveBeenCalledWith(OPEN_REVERT_MODAL);
+  });
+
+  it('emits event to open the cherry-pick modal on cherry-pick button click', () => {
+    const eventHubSpy = jest.spyOn(modalEventHub, '$emit');
+
+    getByRole(vm.$el, 'button', { name: /Cherry-pick/i }).click();
+
+    expect(eventHubSpy).toHaveBeenCalledWith(OPEN_CHERRY_PICK_MODAL);
   });
 
   it('has merged by information', () => {
@@ -173,7 +197,7 @@ describe('MRWidgetMerged', () => {
     );
   });
 
-  it('hides button to copy commit SHA if SHA does not exist', done => {
+  it('hides button to copy commit SHA if SHA does not exist', (done) => {
     vm.mr.mergeCommitSha = null;
 
     Vue.nextTick(() => {
@@ -189,7 +213,7 @@ describe('MRWidgetMerged', () => {
     expect(selectors.mergeCommitShaLink.href).toBe(vm.mr.mergeCommitPath);
   });
 
-  it('should not show source branch deleted text', done => {
+  it('should not show source branch deleted text', (done) => {
     vm.mr.sourceBranchRemoved = false;
 
     Vue.nextTick(() => {
@@ -199,7 +223,7 @@ describe('MRWidgetMerged', () => {
     });
   });
 
-  it('should show source branch deleting text', done => {
+  it('should show source branch deleting text', (done) => {
     vm.mr.isRemovingSourceBranch = true;
     vm.mr.sourceBranchRemoved = false;
 

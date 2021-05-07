@@ -18,6 +18,7 @@ module EE
       include EpicTreeSorting
       include Presentable
       include IdInOrdered
+      include Todoable
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],
@@ -50,12 +51,13 @@ module EE
       has_many :children, class_name: "Epic", foreign_key: :parent_id
       has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
-      has_internal_id :iid, scope: :group, init: ->(s) { s&.group&.epics&.maximum(:iid) }
+      has_internal_id :iid, scope: :group
 
       has_many :epic_issues
       has_many :issues, through: :epic_issues
       has_many :user_mentions, class_name: "EpicUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :epic
+      has_many :epic_board_positions, class_name: 'Boards::EpicBoardPosition', inverse_of: :epic_board
 
       validates :group, presence: true
       validate :validate_parent, on: :create
@@ -65,11 +67,10 @@ module EE
       alias_attribute :parent_ids, :parent_id
       alias_method :issuing_parent, :group
 
-      scope :for_ids, -> (ids) { where(id: ids) }
       scope :in_parents, -> (parent_ids) { where(parent_id: parent_ids) }
       scope :inc_group, -> { includes(:group) }
       scope :in_selected_groups, -> (groups) { where(group_id: groups) }
-      scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }) }
+      scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }).distinct }
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
@@ -87,23 +88,39 @@ module EE
       end
 
       scope :order_start_date_asc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('start_date'), 'id DESC')
-      end
+        keyset_order = keyset_pagination_for(column_name: :start_date)
 
-      scope :order_end_date_asc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('end_date'), 'id DESC')
-      end
-
-      scope :order_end_date_desc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('end_date', 'DESC'), 'id DESC')
+        reorder(keyset_order)
       end
 
       scope :order_start_date_desc, -> do
-        reorder(::Gitlab::Database.nulls_last_order('start_date', 'DESC'), 'id DESC')
+        keyset_order = keyset_pagination_for(column_name: :start_date, direction: 'DESC')
+
+        reorder(keyset_order)
       end
+
+      scope :order_end_date_asc, -> do
+        keyset_order = keyset_pagination_for(column_name: :end_date)
+
+        reorder(keyset_order)
+      end
+
+      scope :order_end_date_desc, -> do
+        keyset_order = keyset_pagination_for(column_name: :end_date, direction: 'DESC')
+
+        reorder(keyset_order)
+      end
+
+      scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
 
       scope :order_relative_position, -> do
         reorder('relative_position ASC', 'id DESC')
+      end
+
+      scope :order_relative_position_on_board, ->(board_id) do
+        left_joins(:epic_board_positions)
+          .where(boards_epic_board_positions: { epic_board_id: [nil, board_id] })
+          .reorder(::Gitlab::Database.nulls_last_order('boards_epic_board_positions.relative_position', 'ASC'), 'epics.id DESC')
       end
 
       scope :with_api_entity_associations, -> { preload(:author, :labels, group: :route) }
@@ -118,7 +135,7 @@ module EE
         public_only.or(where(confidential: true, group_id: groups))
       end
 
-      MAX_HIERARCHY_DEPTH = 5
+      MAX_HIERARCHY_DEPTH = 7
 
       def etag_caching_enabled?
         true
@@ -126,6 +143,7 @@ module EE
 
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
+      after_create_commit :usage_ping_record_epic_creation
 
       def epic_tree_root?
         parent_id.nil?
@@ -137,6 +155,20 @@ module EE
         SELECT_LIST
 
         select(selection).in_parents(node.parent_ids)
+      end
+
+      # This is being overriden from Issuable to be able to use
+      # keyset pagination, allowing queries with these
+      # ordering statements to be reversible on GraphQL.
+      def self.sort_by_attribute(method, excluded_labels: [])
+        case method.to_s
+        when 'start_date_asc' then order_start_date_asc
+        when 'start_date_desc' then order_start_date_desc
+        when 'end_date_asc' then order_end_date_asc
+        when 'end_date_desc' then order_end_date_desc
+        else
+          super
+        end
       end
 
       private
@@ -151,6 +183,10 @@ module EE
         self.end_date = due_date_fixed
         self.due_date_sourcing_milestone = nil
         self.due_date_sourcing_epic = nil
+      end
+
+      def usage_ping_record_epic_creation
+        ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_created_action(author: author)
       end
     end
 
@@ -216,10 +252,10 @@ module EE
       def simple_sorts
         super.merge(
           {
-            'start_date_asc' => -> { order_start_date_asc.with_order_id_desc },
-            'start_date_desc' => -> { order_start_date_desc.with_order_id_desc },
-            'end_date_asc' => -> { order_end_date_asc.with_order_id_desc },
-            'end_date_desc' => -> { order_end_date_desc.with_order_id_desc }
+            'start_date_asc' => -> { order_start_date_asc },
+            'start_date_desc' => -> { order_start_date_desc },
+            'end_date_asc' => -> { order_end_date_asc },
+            'end_date_desc' => -> { order_end_date_desc }
           }
         )
       end
@@ -249,10 +285,7 @@ module EE
       end
 
       def related_issues(ids: nil, preload: nil)
-        items = ::Issue.select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id')
-          .joins(:epic_issue)
-          .preload(preload)
-          .order('epic_issues.relative_position, epic_issues.id')
+        items = ::Issue.preload(preload).sorted_by_epic_position
 
         return items unless ids
 
@@ -261,6 +294,40 @@ module EE
 
       def search(query)
         fuzzy_search(query, [:title, :description])
+      end
+
+      def ids_for_base_and_decendants(epic_ids)
+        ::Gitlab::ObjectHierarchy.new(self.id_in(epic_ids)).base_and_descendants.pluck(:id)
+      end
+
+      def issue_metadata_for_epics(epic_ids:, limit:)
+        records = self.id_in(epic_ids)
+          .left_joins(epic_issues: :issue)
+          .group("epics.id", "epics.iid", "epics.parent_id", "epics.state_id", "issues.state_id")
+          .select("epics.id, epics.iid, epics.parent_id, epics.state_id AS epic_state_id, issues.state_id AS issues_state_id, COUNT(issues) AS issues_count, SUM(COALESCE(issues.weight, 0)) AS issues_weight_sum")
+          .limit(limit)
+
+        records.map { |record| record.attributes.with_indifferent_access }
+      end
+
+      def keyset_pagination_for(column_name:, direction: 'ASC')
+        reverse_direction = direction == 'ASC' ? 'DESC' : 'ASC'
+
+        ::Gitlab::Pagination::Keyset::Order.build([
+          ::Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+            attribute_name: column_name.to_s,
+            column_expression: ::Epic.arel_table[column_name],
+            order_expression: ::Gitlab::Database.nulls_last_order(column_name, direction),
+            reversed_order_expression: ::Gitlab::Database.nulls_last_order(column_name, reverse_direction),
+            order_direction: direction,
+            distinct: false,
+            nullable: :nulls_last
+          ),
+          ::Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+            attribute_name: 'id',
+            order_expression: ::Epic.arel_table[:id].desc
+          )
+        ])
       end
     end
 

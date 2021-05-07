@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Codeowners' do
       context 'when the project is in a subgroup', :requires_admin do
         let(:approver) do
@@ -18,6 +18,8 @@ module QA
         end
 
         before do
+          Runtime::Feature.enable(:invite_members_group_modal)
+
           group_or_project.add_member(approver, Resource::Members::AccessLevel::MAINTAINER)
 
           Flow::Login.sign_in

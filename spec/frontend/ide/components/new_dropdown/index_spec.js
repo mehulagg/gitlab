@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
-import { createStore } from '~/ide/stores';
 import newDropdown from '~/ide/components/new_dropdown/index.vue';
+import { createStore } from '~/ide/stores';
 
 describe('new dropdown component', () => {
   let store;
@@ -57,7 +57,7 @@ describe('new dropdown component', () => {
   });
 
   describe('isOpen', () => {
-    it('scrolls dropdown into view', done => {
+    it('scrolls dropdown into view', (done) => {
       jest.spyOn(vm.$refs.dropdownMenu, 'scrollIntoView').mockImplementation(() => {});
 
       vm.isOpen = true;

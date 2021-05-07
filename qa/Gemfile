@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 gem 'gitlab-qa'
@@ -9,7 +11,7 @@ gem 'rspec', '~> 3.7'
 gem 'selenium-webdriver', '~> 3.12'
 gem 'airborne', '~> 0.3.4'
 gem 'rest-client', '~> 2.1.0'
-gem 'nokogiri', '~> 1.10.9'
+gem 'nokogiri', '~> 1.11.1'
 gem 'rspec-retry', '~> 0.6.1'
 gem 'rspec_junit_formatter', '~> 0.4.1'
 gem 'faker', '~> 1.6', '>= 1.6.6'
@@ -19,9 +21,9 @@ gem 'rotp', '~> 3.1.0'
 gem 'timecop', '~> 0.9.1'
 gem 'parallel', '~> 1.19'
 gem 'rspec-parameterized', '~> 0.4.2'
+gem 'github_api', '~> 0.18.2'
 
 group :development do
   gem 'pry-byebug', '~> 3.5.1', platform: :mri
   gem "ruby-debug-ide", "~> 0.7.0"
-  gem "debase", "~> 0.2.4.1"
 end

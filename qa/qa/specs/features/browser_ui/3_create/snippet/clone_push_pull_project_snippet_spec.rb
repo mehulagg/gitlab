@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitaly/-/issues/3143', type: :bug } do
+  RSpec.describe 'Create' do
     describe 'Version control for project snippets' do
       let(:new_file) { 'new_snippet_file' }
       let(:changed_content) { 'changes' }
       let(:commit_message) { 'Changes to snippets' }
       let(:added_content) { 'updated ' }
-      let(:branch_name) { 'master' }
+      let(:branch_name) { snippet.project.default_branch }
 
       let(:snippet) do
         Resource::ProjectSnippet.fabricate! do |snippet|
@@ -40,7 +40,7 @@ module QA
         ssh_key.remove_via_api!
       end
 
-      it 'clones, pushes, and pulls a project snippet over HTTP, edits via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/833' do
+      it 'clones, pushes, and pulls a project snippet over HTTP, edits via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1725' do
         Resource::Repository::Push.fabricate! do |push|
           push.repository_http_uri = repository_uri_http
           push.file_name = new_file
@@ -67,9 +67,11 @@ module QA
           expect(repository.commits.first).to include 'Update snippet'
           expect(repository.file_content(new_file)).to include "#{added_content}#{changed_content}"
         end
+
+        snippet.remove_via_api!
       end
 
-      it 'clones, pushes, and pulls a project snippet over SSH, deletes via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/832' do
+      it 'clones, pushes, and pulls a project snippet over SSH, deletes via UI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1794' do
         Resource::Repository::Push.fabricate! do |push|
           push.repository_ssh_uri = repository_uri_ssh
           push.ssh_key = ssh_key

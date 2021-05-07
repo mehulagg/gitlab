@@ -7,7 +7,9 @@ RSpec.describe "Admin::AbuseReports", :js do
 
   context 'as an admin' do
     before do
-      sign_in(create(:admin))
+      admin = create(:admin)
+      sign_in(admin)
+      gitlab_enable_admin_mode_sign_in(admin)
     end
 
     describe 'if a user has been reported for abuse' do
@@ -54,7 +56,7 @@ RSpec.describe "Admin::AbuseReports", :js do
 
     describe 'filtering by user' do
       let!(:user2) { create(:user) }
-      let!(:abuse_report)   { create(:abuse_report, user: user) }
+      let!(:abuse_report) { create(:abuse_report, user: user) }
       let!(:abuse_report_2) { create(:abuse_report, user: user2) }
 
       it 'shows only single user report' do

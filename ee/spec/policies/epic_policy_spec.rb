@@ -28,21 +28,21 @@ RSpec.describe EpicPolicy do
 
   shared_examples 'can only read epics' do
     it do
-      is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note)
+      is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note, :create_todo)
       is_expected.to be_disallowed(:update_epic, :destroy_epic, :admin_epic, :create_epic)
     end
   end
 
   shared_examples 'can manage epics' do
-    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note, :update_epic, :admin_epic, :create_epic) }
+    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note, :update_epic, :admin_epic, :create_epic, :create_todo) }
   end
 
   shared_examples 'all epic permissions disabled' do
-    it { is_expected.to be_disallowed(:read_epic, :read_epic_iid, :update_epic, :destroy_epic, :admin_epic, :create_epic, :create_note, :award_emoji, :read_note) }
+    it { is_expected.to be_disallowed(:read_epic, :read_epic_iid, :update_epic, :destroy_epic, :admin_epic, :create_epic, :create_note, :award_emoji, :read_note, :create_todo) }
   end
 
   shared_examples 'all reporter epic permissions enabled' do
-    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :update_epic, :admin_epic, :create_epic, :create_note, :award_emoji, :read_note) }
+    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :update_epic, :admin_epic, :create_epic, :create_note, :award_emoji, :read_note, :create_todo) }
   end
 
   shared_examples 'group member permissions' do
@@ -153,7 +153,8 @@ RSpec.describe EpicPolicy do
       context 'anonymous user' do
         let(:user) { nil }
 
-        it_behaves_like 'can only read epics'
+        it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note) }
+        it { is_expected.to be_disallowed(:create_todo) }
         it_behaves_like 'cannot comment on epics'
       end
 

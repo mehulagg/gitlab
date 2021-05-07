@@ -43,7 +43,7 @@ RSpec.describe Mutations::InstanceSecurityDashboard::AddProject do
 
           it 'does not add project to the security dashboard', :aggregate_failures do
             expect(subject[:project]).to be_nil
-            expect(subject[:errors]).to include('Only projects created under a Gold license are available in Security Dashboards.')
+            expect(subject[:errors]).to include('Only projects created under a Ultimate license are available in Security Dashboards.')
             expect(user.security_dashboard_projects).to include(already_added_project)
           end
         end
@@ -64,7 +64,18 @@ RSpec.describe Mutations::InstanceSecurityDashboard::AddProject do
           end
         end
 
-        context 'when project is not available to the user' do
+        context 'when user is auditor and project is not available to the user explicitly' do
+          let(:selected_project) { project }
+          let(:current_user) { create(:user, :auditor) }
+
+          it 'adds project to the security dashboard', :aggregate_failures do
+            expect(subject[:project]).to eq(project)
+            expect(subject[:errors]).to be_empty
+            expect(current_user.security_dashboard_projects).to include(project)
+          end
+        end
+
+        context 'when project is not available to the user and user is not auditor' do
           let(:selected_project) { project }
 
           it 'raises Gitlab::Graphql::Errors::ResourceNotAvailable error' do

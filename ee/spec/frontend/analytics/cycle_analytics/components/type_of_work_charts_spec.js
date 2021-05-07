@@ -1,8 +1,8 @@
-import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
+import Vuex from 'vuex';
 import TasksByTypeChart from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_chart.vue';
 import TasksByTypeFilters from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_filters.vue';
+import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import {
   TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST,
   TASKS_BY_TYPE_FILTERS,
@@ -51,9 +51,9 @@ describe('TypeOfWorkCharts', () => {
 
   let wrapper = null;
 
-  const findSubjectFilters = _wrapper => _wrapper.find(TasksByTypeFilters);
-  const findTasksByTypeChart = _wrapper => _wrapper.find(TasksByTypeChart);
-  const findLoader = _wrapper => _wrapper.find(ChartSkeletonLoader);
+  const findSubjectFilters = (_wrapper) => _wrapper.find(TasksByTypeFilters);
+  const findTasksByTypeChart = (_wrapper) => _wrapper.find(TasksByTypeChart);
+  const findLoader = (_wrapper) => _wrapper.find(ChartSkeletonLoader);
   const selectedFilterText =
     "Type of work Showing data for group 'Gitlab Org' from Dec 11, 2019 to Jan 10, 2020";
 
@@ -83,7 +83,7 @@ describe('TypeOfWorkCharts', () => {
     beforeEach(() => {
       wrapper = createComponent({
         initialGetters: {
-          tasksByTypeChartData: () => ({ groupBy: [], data: [], seriesNames: [] }),
+          tasksByTypeChartData: () => ({ groupBy: [], data: [] }),
         },
       });
     });
@@ -105,7 +105,7 @@ describe('TypeOfWorkCharts', () => {
 
     beforeEach(() => {
       wrapper = createComponent();
-      findSubjectFilters(wrapper).vm.$emit('updateFilter', payload);
+      findSubjectFilters(wrapper).vm.$emit('update-filter', payload);
       return wrapper.vm.$nextTick();
     });
 

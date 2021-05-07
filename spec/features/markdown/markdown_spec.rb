@@ -63,8 +63,8 @@ RSpec.describe 'GitLab Markdown', :aggregate_failures do
       end
 
       aggregate_failures 'parses fenced code blocks' do
-        expect(doc).to have_selector('pre.code.highlight.js-syntax-highlight.c')
-        expect(doc).to have_selector('pre.code.highlight.js-syntax-highlight.python')
+        expect(doc).to have_selector('pre.code.highlight.js-syntax-highlight.language-c')
+        expect(doc).to have_selector('pre.code.highlight.js-syntax-highlight.language-python')
       end
 
       aggregate_failures 'parses mermaid code block' do
@@ -206,6 +206,9 @@ RSpec.describe 'GitLab Markdown', :aggregate_failures do
     # `markdown` helper expects a `@project` and `@group` variable
     @project = @feat.project
     @group = @feat.group
+
+    stub_application_setting(plantuml_enabled: true, plantuml_url: 'http://localhost:8080')
+    stub_application_setting(kroki_enabled: true, kroki_url: 'http://localhost:8000')
   end
 
   let(:project) { @feat.project } # Shadow this so matchers can use it
@@ -265,6 +268,18 @@ RSpec.describe 'GitLab Markdown', :aggregate_failures do
       aggregate_failures 'ColorFilter' do
         expect(doc).to parse_colors
       end
+
+      aggregate_failures 'MermaidFilter' do
+        expect(doc).to parse_mermaid
+      end
+
+      aggregate_failures 'PlantumlFilter' do
+        expect(doc).to parse_plantuml
+      end
+
+      aggregate_failures 'KrokiFilter' do
+        expect(doc).to parse_kroki
+      end
     end
   end
 
@@ -273,9 +288,10 @@ RSpec.describe 'GitLab Markdown', :aggregate_failures do
       @wiki = @feat.wiki
       @wiki_page = @feat.wiki_page
 
-      path = 'images/example.jpg'
-      gitaly_wiki_file = Gitlab::GitalyClient::WikiFile.new(path: path)
-      expect(@wiki).to receive(:find_file).with(path).and_return(Gitlab::Git::WikiFile.new(gitaly_wiki_file))
+      name = 'example.jpg'
+      path = "images/#{name}"
+      blob = double(name: name, path: path, mime_type: 'image/jpeg', data: nil)
+      expect(@wiki).to receive(:find_file).with(path, load_content: false).and_return(Gitlab::Git::WikiFile.new(blob))
       allow(@wiki).to receive(:wiki_base_path) { '/namespace1/gitlabhq/wikis' }
 
       @html = markdown(@feat.raw_markdown, { pipeline: :wiki, wiki: @wiki, page_slug: @wiki_page.slug })
@@ -337,6 +353,18 @@ RSpec.describe 'GitLab Markdown', :aggregate_failures do
 
       aggregate_failures 'ColorFilter' do
         expect(doc).to parse_colors
+      end
+
+      aggregate_failures 'MermaidFilter' do
+        expect(doc).to parse_mermaid
+      end
+
+      aggregate_failures 'PlantumlFilter' do
+        expect(doc).to parse_plantuml
+      end
+
+      aggregate_failures 'KrokiFilter' do
+        expect(doc).to parse_kroki
       end
     end
   end

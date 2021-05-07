@@ -7,7 +7,7 @@ module EE
 
     override :board_params
     def board_params
-      params.require(:board).permit(:name, :weight, :milestone_id, :assignee_id, label_ids: [])
+      params.require(:board).permit(:name, :weight, :milestone_id, :iteration_id, :assignee_id, label_ids: [])
     end
 
     def authorize_read_parent

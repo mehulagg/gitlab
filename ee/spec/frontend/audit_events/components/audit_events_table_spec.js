@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils';
 import { GlPagination, GlTable } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 
 import AuditEventsTable from 'ee/audit_events/components/audit_events_table.vue';
 import createEvents from '../mock_data';
@@ -20,13 +20,7 @@ describe('AuditEventsTable component', () => {
   };
 
   const getCell = (trIdx, tdIdx) => {
-    return wrapper
-      .find(GlTable)
-      .find('tbody')
-      .findAll('tr')
-      .at(trIdx)
-      .findAll('td')
-      .at(tdIdx);
+    return wrapper.find(GlTable).find('tbody').findAll('tr').at(trIdx).findAll('td').at(tdIdx);
   };
 
   beforeEach(() => {

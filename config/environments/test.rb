@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'gitlab/testing/request_blocker_middleware'
 require 'gitlab/testing/robots_blocker_middleware'
 require 'gitlab/testing/request_inspector_middleware'
@@ -17,9 +19,7 @@ Rails.application.configure do
   # test suite. You never need to work with it otherwise. Remember that
   # your test database is "scratch space" for the test suite and is wiped
   # and recreated between test runs. Don't rely on the data there!
-
-  # Code doesn't change in CI so we don't need code-reloading
-  config.cache_classes = !!ENV['CI']
+  config.cache_classes = Gitlab::Utils.to_boolean(ENV['CACHE_CLASSES'], default: false)
 
   # Configure static asset server for tests with Cache-Control for performance
   config.assets.compile = false if ENV['CI']

@@ -10,7 +10,7 @@ RSpec.describe Profiles::BillingsController do
       sign_in(user)
       stub_application_setting(check_namespace_plan: true)
       allow(Gitlab).to receive(:com?) { true }
-      allow_next_instance_of(FetchSubscriptionPlansService) do |instance|
+      allow_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
         allow(instance).to receive(:execute)
       end
       allow(controller).to receive(:track_experiment_event)
@@ -31,7 +31,7 @@ RSpec.describe Profiles::BillingsController do
 
     it 'fetch subscription plans data from customers.gitlab.com' do
       data = double
-      expect_next_instance_of(FetchSubscriptionPlansService) do |instance|
+      expect_next_instance_of(GitlabSubscriptions::FetchSubscriptionPlansService) do |instance|
         expect(instance).to receive(:execute).and_return(data)
       end
 

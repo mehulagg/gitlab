@@ -18,7 +18,9 @@ class ProjectHook < WebHook
     :job_hooks,
     :pipeline_hooks,
     :wiki_page_hooks,
-    :deployment_hooks
+    :deployment_hooks,
+    :feature_flag_hooks,
+    :release_hooks
   ]
 
   belongs_to :project
@@ -26,6 +28,10 @@ class ProjectHook < WebHook
 
   def pluralized_name
     _('Webhooks')
+  end
+
+  def web_hooks_disable_failed?
+    Feature.enabled?(:web_hooks_disable_failed, project)
   end
 end
 

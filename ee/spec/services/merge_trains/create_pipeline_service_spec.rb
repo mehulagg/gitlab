@@ -3,17 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe MergeTrains::CreatePipelineService do
-  let(:project) { create(:project, :repository, :auto_devops) }
+  let_it_be(:project) { create(:project, :repository, :auto_devops, merge_pipelines_enabled: true, merge_trains_enabled: true) }
   let_it_be(:maintainer) { create(:user) }
+
   let(:service) { described_class.new(project, maintainer) }
   let(:previous_ref) { 'refs/heads/master' }
 
   before do
+    project.add_maintainer(maintainer)
     stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
-    project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true) unless project.merge_pipelines_enabled == true && project.merge_trains_enabled == true
   end
 
   describe '#execute' do
@@ -35,9 +36,19 @@ RSpec.describe MergeTrains::CreatePipelineService do
       end
     end
 
-    context 'when merge trains option is disabled' do
+    context 'when merge trains flag is disabled' do
       before do
         stub_feature_flags(disable_merge_trains: true)
+      end
+
+      it_behaves_like 'returns an error' do
+        let(:expected_reason) { 'merge trains is disabled' }
+      end
+    end
+
+    context 'when merge trains setting is disabled' do
+      before do
+        project.update!(merge_trains_enabled: false)
       end
 
       it_behaves_like 'returns an error' do
@@ -115,6 +126,10 @@ RSpec.describe MergeTrains::CreatePipelineService do
               expect(commit.parent_ids[1]).to eq(merge_request.diff_head_sha)
               expect(commit.parent_ids[0]).to eq(previous_ref_sha)
             end
+
+            after do
+              project.repository.delete_refs(previous_ref)
+            end
           end
 
           context 'when previous_ref does not exist' do
@@ -126,7 +141,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
           context 'when there is a conflict on merge ref creation' do
             before do
               allow(project.repository).to receive(:merge_to_ref) do
-                raise Gitlab::Git::CommandError.new('Failed to create merge commit')
+                raise Gitlab::Git::CommandError, 'Failed to create merge commit'
               end
             end
 

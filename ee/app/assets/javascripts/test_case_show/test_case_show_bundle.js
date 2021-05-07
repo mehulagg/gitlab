@@ -19,13 +19,17 @@ export default function initTestCaseShow({ mountPointSelector }) {
     defaultClient: createDefaultClient(),
   });
 
+  const sidebarOptions = JSON.parse(el.dataset.sidebarOptions);
+
   return new Vue({
     el,
     apolloProvider,
     provide: {
       ...el.dataset,
+      projectsFetchPath: sidebarOptions.projectsAutocompleteEndpoint,
       canEditTestCase: parseBoolean(el.dataset.canEditTestCase),
+      lockVersion: parseInt(el.dataset.lockVersion, 10),
     },
-    render: createElement => createElement(TestCaseShowApp),
+    render: (createElement) => createElement(TestCaseShowApp),
   });
 }

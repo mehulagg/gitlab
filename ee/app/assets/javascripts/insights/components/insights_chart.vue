@@ -5,8 +5,8 @@ import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 
-import InsightsChartError from './insights_chart_error.vue';
 import { CHART_TYPES } from '../constants';
+import InsightsChartError from './insights_chart_error.vue';
 
 const CHART_HEIGHT = 300;
 
@@ -100,12 +100,12 @@ export default {
   methods: {
     setSvg(name) {
       return getSvgIconPathContent(name)
-        .then(path => {
+        .then((path) => {
           if (path) {
             this.$set(this.svgs, name, `path://${path}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
           console.error('SVG could not be rendered correctly: ', e);
         });
@@ -134,7 +134,7 @@ export default {
       v-if="loaded && isColumnChart"
       v-bind="$attrs"
       :height="$options.height"
-      :data="data.datasets"
+      :bars="data.datasets"
       x-axis-type="category"
       :x-axis-title="data.xAxisTitle"
       :y-axis-title="data.yAxisTitle"
@@ -145,9 +145,8 @@ export default {
       v-else-if="loaded && isStackedColumnChart"
       v-bind="$attrs"
       :height="$options.height"
-      :data="data.datasets"
+      :bars="data.datasets"
       :group-by="data.labels"
-      :series-names="data.seriesNames"
       x-axis-type="category"
       :x-axis-title="data.xAxisTitle"
       :y-axis-title="data.yAxisTitle"

@@ -5,11 +5,12 @@ module Gitlab
     module OAuth
       class Provider
         LABELS = {
-          "github"            => "GitHub",
-          "gitlab"            => "GitLab.com",
-          "google_oauth2"     => "Google",
-          "azure_oauth2"      => "Azure AD",
-          'atlassian_oauth2'  => 'Atlassian'
+          "github"                   => "GitHub",
+          "gitlab"                   => "GitLab.com",
+          "google_oauth2"            => "Google",
+          "azure_oauth2"             => "Azure AD",
+          "azure_activedirectory_v2" => "Azure AD v2",
+          'atlassian_oauth2'         => 'Atlassian'
         }.freeze
 
         def self.authentication(user, provider)
@@ -18,6 +19,8 @@ module Gitlab
 
           authenticator =
             case provider
+            when /crowd/
+              Gitlab::Auth::Crowd::Authentication
             when /^ldap/
               Gitlab::Auth::Ldap::Authentication
             when 'database'

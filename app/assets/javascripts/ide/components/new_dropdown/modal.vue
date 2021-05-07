@@ -1,6 +1,6 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlModal, GlButton } from '@gitlab/ui';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, sprintf, s__ } from '~/locale';
 import { modalTypes } from '../../constants';
@@ -137,6 +137,7 @@ export default {
     ref="modal"
     modal-id="ide-new-entry"
     data-qa-selector="new_file_modal"
+    data-testid="ide-new-entry"
     :title="modalTitle"
     :ok-title="buttonLabel"
     ok-variant="success"

@@ -30,7 +30,15 @@
   - 1
 - - analytics_code_review_metrics
   - 1
+- - analytics_devops_adoption_create_snapshot
+  - 1
 - - analytics_instance_statistics_counter_job
+  - 1
+- - analytics_usage_trends_counter_job
+  - 1
+- - approval_rules_external_approval_rule_payload
+  - 1
+- - approve_blocked_pending_approval_users
   - 1
 - - authorized_keys
   - 2
@@ -46,6 +54,12 @@
   - 1
 - - bulk_import
   - 1
+- - bulk_imports_entity
+  - 1
+- - bulk_imports_pipeline
+  - 1
+- - bulk_imports_relation_export
+  - 1
 - - chaos
   - 2
 - - chat_notification
@@ -57,8 +71,6 @@
 - - container_repository
   - 1
 - - create_commit_signature
-  - 2
-- - create_evidence
   - 2
 - - create_github_webhook
   - 2
@@ -86,11 +98,17 @@
   - 1
 - - design_management_new_version
   - 1
+- - destroy_pages_deployments
+  - 1
 - - detect_repository_languages
   - 1
 - - disallow_two_factor_for_group
   - 1
 - - disallow_two_factor_for_subgroups
+  - 1
+- - dora_metrics
+  - 1
+- - elastic_association_indexer
   - 1
 - - elastic_commit_indexer
   - 1
@@ -110,9 +128,13 @@
   - 2
 - - emails_on_push
   - 2
+- - environments_canary_ingress_update
+  - 1
 - - epics
   - 2
 - - error_tracking_issue_link
+  - 1
+- - experiments_record_conversion_event
   - 1
 - - expire_build_instance_artifacts
   - 1
@@ -134,6 +156,8 @@
   - 1
 - - github_importer
   - 1
+- - gitlab_performance_bar_stats
+  - 1
 - - gitlab_shell
   - 2
 - - group_destroy
@@ -141,6 +165,16 @@
 - - group_export
   - 1
 - - group_import
+  - 1
+- - group_saml_group_sync
+  - 1
+- - group_wikis_git_garbage_collect
+  - 1
+- - groups_schedule_bulk_repository_shard_moves
+  - 1
+- - groups_update_repository_storage
+  - 1
+- - groups_update_statistics
   - 1
 - - hashed_storage
   - 1
@@ -150,11 +184,15 @@
   - 2
 - - incident_management_apply_incident_sla_exceeded_label
   - 1
+- - incident_management_oncall_rotations_persist_shifts_job
+  - 1
 - - invalid_gpg_signature_update
   - 2
 - - irker
   - 1
 - - issuable_export_csv
+  - 1
+- - issuables_clear_groups_issue_counter
   - 1
 - - issue_placement
   - 2
@@ -178,6 +216,16 @@
   - 1
 - - merge_request_reset_approvals
   - 1
+- - merge_requests_assignees_change
+  - 1
+- - merge_requests_delete_source_branch
+  - 1
+- - merge_requests_handle_assignees_change
+  - 1
+- - merge_requests_resolve_todos
+  - 1
+- - merge_requests_sync_code_owner_approval_rules
+  - 1
 - - metrics_dashboard_prune_old_annotations
   - 1
 - - metrics_dashboard_sync_dashboards
@@ -185,6 +233,14 @@
 - - migrate_external_diffs
   - 1
 - - namespaceless_project_destroy
+  - 1
+- - namespaces_onboarding_issue_created
+  - 1
+- - namespaces_onboarding_pipeline_created
+  - 1
+- - namespaces_onboarding_progress
+  - 1
+- - namespaces_onboarding_user_added
   - 1
 - - new_epic
   - 2
@@ -199,6 +255,8 @@
 - - object_storage
   - 1
 - - package_repositories
+  - 1
+- - packages_composer_cache_update
   - 1
 - - pages
   - 1
@@ -242,9 +300,21 @@
   - 1
 - - project_import_schedule
   - 1
+- - project_schedule_bulk_repository_shard_moves
+  - 1
 - - project_service
   - 1
+- - project_template_export
+  - 1
 - - project_update_repository_storage
+  - 1
+- - projects_git_garbage_collect
+  - 1
+- - projects_post_creation
+  - 1
+- - projects_schedule_bulk_repository_shard_moves
+  - 1
+- - projects_update_repository_storage
   - 1
 - - prometheus_create_default_alerts
   - 1
@@ -266,6 +336,8 @@
   - 2
 - - refresh_license_compliance_checks
   - 2
+- - releases_create_evidence
+  - 1
 - - remote_mirror_notification
   - 2
 - - repository_check
@@ -284,7 +356,11 @@
   - 1
 - - repository_update_remote_mirror
   - 1
+- - requirements_management_import_requirements_csv
+  - 1
 - - requirements_management_process_requirements_reports
+  - 1
+- - security_auto_fix
   - 1
 - - security_scans
   - 2
@@ -293,6 +369,16 @@
 - - self_monitoring_project_delete
   - 2
 - - service_desk_email_receiver
+  - 1
+- - set_user_status_based_on_user_cap_setting
+  - 1
+- - snippet_schedule_bulk_repository_shard_moves
+  - 1
+- - snippet_update_repository_storage
+  - 1
+- - snippets_schedule_bulk_repository_shard_moves
+  - 1
+- - snippets_update_repository_storage
   - 1
 - - status_page_publish
   - 1
@@ -316,6 +402,8 @@
   - 1
 - - upload_checksum
   - 1
+- - users_update_open_issue_count
+  - 1
 - - vulnerabilities_statistics_adjustment
   - 1
 - - vulnerability_exports_export
@@ -325,6 +413,8 @@
 - - web_hook
   - 1
 - - web_hooks_destroy
+  - 1
+- - wikis_git_garbage_collect
   - 1
 - - x509_certificate_revoke
   - 1

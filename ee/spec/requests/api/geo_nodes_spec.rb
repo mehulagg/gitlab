@@ -290,7 +290,7 @@ RSpec.describe API::GeoNodes, :request_store, :geo, :prometheus, api: true do
       end
 
       it 'enables the secondary node' do
-        secondary.update(enabled: false)
+        secondary.update!(enabled: false)
 
         put api("/geo_nodes/#{secondary.id}"), params: { enabled: true }, headers: geo_base_request.headers
 
@@ -299,7 +299,7 @@ RSpec.describe API::GeoNodes, :request_store, :geo, :prometheus, api: true do
       end
 
       it 'disables the secondary node' do
-        secondary.update(enabled: true)
+        secondary.update!(enabled: true)
 
         put api("/geo_nodes/#{secondary.id}"), params: { enabled: false }, headers: geo_base_request.headers
 

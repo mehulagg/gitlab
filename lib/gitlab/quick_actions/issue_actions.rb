@@ -102,6 +102,41 @@ module Gitlab
           @execution_message[:duplicate] = message
         end
 
+        desc _('Clone this issue')
+        explanation do |project = quick_action_target.project.full_path|
+          _("Clones this issue, without comments, to %{project}.") % { project: project }
+        end
+        params 'path/to/project [--with_notes]'
+        types Issue
+        condition do
+          quick_action_target.persisted? &&
+            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)
+        end
+        command :clone do |params = ''|
+          params = params.split(' ')
+          with_notes = params.delete('--with_notes').present?
+
+          # If we have more than 1 param, then the user supplied too many spaces, or mistyped `--with_notes`
+          if params.size > 1
+            @execution_message[:clone] = _('Failed to clone this issue: wrong parameters.')
+            next
+          end
+
+          target_project_path = params[0]
+          target_project = target_project_path.present? ? Project.find_by_full_path(target_project_path) : quick_action_target.project
+
+          if target_project.present?
+            @updates[:target_clone_project] = target_project
+            @updates[:clone_with_notes] = with_notes
+
+            message = _("Cloned this issue to %{path_to_project}.") % { path_to_project: target_project_path || quick_action_target.project.full_path }
+          else
+            message = _("Failed to clone this issue because target project doesn't exist.")
+          end
+
+          @execution_message[:clone] = message
+        end
+
         desc _('Move this issue to another project.')
         explanation do |path_to_project|
           _("Moves this issue to %{path_to_project}.") % { path_to_project: path_to_project }
@@ -135,7 +170,8 @@ module Gitlab
         end
         types Issue
         condition do
-          !quick_action_target.confidential? &&
+          quick_action_target.issue_type_supports?(:confidentiality) &&
+            !quick_action_target.confidential? &&
             current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
         end
         command :confidential do
@@ -197,6 +233,35 @@ module Gitlab
         command :remove_zoom do
           result = @zoom_service.remove_link
           @execution_message[:remove_zoom] = result.message
+        end
+
+        desc _('Add email participant(s)')
+        explanation _('Adds email participant(s)')
+        params 'email1@example.com email2@example.com (up to 6 emails)'
+        types Issue
+        condition do
+          Feature.enabled?(:issue_email_participants, parent) &&
+            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", quick_action_target)
+        end
+        command :invite_email do |emails = ""|
+          MAX_NUMBER_OF_EMAILS = 6
+
+          existing_emails = quick_action_target.email_participants_emails_downcase
+          emails_to_add = emails.split(' ').index_by { |email| [email.downcase, email] }.except(*existing_emails).each_value.first(MAX_NUMBER_OF_EMAILS)
+          added_emails = []
+
+          emails_to_add.each do |email|
+            new_participant = quick_action_target.issue_email_participants.create(email: email)
+            added_emails << email if new_participant.persisted?
+          end
+
+          if added_emails.any?
+            message = _("added %{emails}") % { emails: added_emails.to_sentence }
+            SystemNoteService.add_email_participants(quick_action_target, quick_action_target.project, current_user, message)
+            @execution_message[:invite_email] = message.upcase_first << "."
+          else
+            @execution_message[:invite_email] = _("No email participants were added. Either none were provided, or they already exist.")
+          end
         end
 
         private

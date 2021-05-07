@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Monitor your CI/CD environment's metrics **(CORE)**
+# Monitor your environment's metrics **(FREE)**
 
 GitLab helps your team monitor the health and performance of your applications
 and infrastructure by turning statistics and log files into charts and graphs
@@ -131,8 +131,7 @@ dashboard is visible to authenticated and non-authenticated users.
 
 ## Adding custom metrics
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3799) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.6.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28527) to [GitLab Core](https://about.gitlab.com/pricing/) 12.10.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28527) to GitLab Free in 12.10.
 
 Custom metrics can be monitored by adding them on the monitoring dashboard page.
 After saving them, they display on the environment metrics dashboard provided that either:
@@ -147,7 +146,7 @@ After saving them, they display on the environment metrics dashboard provided th
 A few fields are required:
 
 - **Name**: Chart title
-- **Type**: Type of metric. Metrics of the same type will be shown together.
+- **Type**: Type of metric. Metrics of the same type are shown together.
 - **Query**: Valid [PromQL query](https://prometheus.io/docs/prometheus/latest/querying/basics/).
 - **Y-axis label**: Y axis title to display on the dashboard.
 - **Unit label**: Query units, for example `req / sec`. Shown next to the value.

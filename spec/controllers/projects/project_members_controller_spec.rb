@@ -7,6 +7,14 @@ RSpec.describe Projects::ProjectMembersController do
   let(:group) { create(:group, :public) }
   let(:project) { create(:project, :public) }
 
+  before do
+    travel_to DateTime.new(2019, 4, 1)
+  end
+
+  after do
+    travel_back
+  end
+
   describe 'GET index' do
     it 'has the project_members address with a 200 status code' do
       get :index, params: { namespace_id: project.namespace, project_id: project }
@@ -14,32 +22,137 @@ RSpec.describe Projects::ProjectMembersController do
       expect(response).to have_gitlab_http_status(:ok)
     end
 
-    context 'when project belongs to group' do
-      let(:user_in_group) { create(:user) }
-      let(:project_in_group) { create(:project, :public, group: group) }
+    context 'project members' do
+      context 'when project belongs to group' do
+        let(:user_in_group) { create(:user) }
+        let(:project_in_group) { create(:project, :public, group: group) }
+
+        before do
+          group.add_owner(user_in_group)
+          project_in_group.add_maintainer(user)
+          sign_in(user)
+        end
+
+        it 'lists inherited project members by default' do
+          get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group }
+
+          expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id, user_in_group.id)
+        end
+
+        it 'lists direct project members only' do
+          get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'exclude' }
+
+          expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id)
+        end
+
+        it 'lists inherited project members only' do
+          get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'only' }
+
+          expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user_in_group.id)
+        end
+      end
+
+      context 'when invited members are present' do
+        let!(:invited_member) { create(:project_member, :invited, project: project) }
+
+        before do
+          project.add_maintainer(user)
+          sign_in(user)
+        end
+
+        it 'excludes the invited members from project members list' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:project_members).map(&:invite_email)).not_to contain_exactly(invited_member.invite_email)
+        end
+      end
+    end
+
+    context 'group links' do
+      let!(:project_group_link) { create(:project_group_link, project: project, group: group) }
+
+      it 'lists group links' do
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+
+        expect(assigns(:group_links).map(&:id)).to contain_exactly(project_group_link.id)
+      end
+
+      context 'when `search_groups` param is present' do
+        let(:group_2) { create(:group, :public, name: 'group_2') }
+        let!(:project_group_link_2) { create(:project_group_link, project: project, group: group_2) }
+
+        it 'lists group links that match search' do
+          get :index, params: { namespace_id: project.namespace, project_id: project, search_groups: 'group_2' }
+
+          expect(assigns(:group_links).map(&:id)).to contain_exactly(project_group_link_2.id)
+        end
+      end
+    end
+
+    context 'invited members' do
+      let!(:invited_member) { create(:project_member, :invited, project: project) }
 
       before do
-        group.add_owner(user_in_group)
-        project_in_group.add_maintainer(user)
+        project.add_maintainer(user)
         sign_in(user)
       end
 
-      it 'lists inherited project members by default' do
-        get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group }
+      context 'when user has `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(true)
+        end
 
-        expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id, user_in_group.id)
+        it 'lists invited members' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:invited_members).map(&:invite_email)).to contain_exactly(invited_member.invite_email)
+        end
       end
 
-      it 'lists direct project members only' do
-        get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'exclude' }
+      context 'when user does not have `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(false)
+        end
 
-        expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user.id)
+        it 'does not list invited members' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:invited_members)).to be_nil
+        end
+      end
+    end
+
+    context 'access requests' do
+      let(:access_requester_user) { create(:user) }
+
+      before do
+        project.request_access(access_requester_user)
+        project.add_maintainer(user)
+        sign_in(user)
       end
 
-      it 'lists inherited project members only' do
-        get :index, params: { namespace_id: project_in_group.namespace, project_id: project_in_group, with_inherited_permissions: 'only' }
+      context 'when user has `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(true)
+        end
 
-        expect(assigns(:project_members).map(&:user_id)).to contain_exactly(user_in_group.id)
+        it 'lists access requests' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:requesters).map(&:user_id)).to contain_exactly(access_requester_user.id)
+        end
+      end
+
+      context 'when user does not have `admin_project_member` permissions' do
+        before do
+          allow(controller.helpers).to receive(:can_manage_project_members?).with(project).and_return(false)
+        end
+
+        it 'does not list access requests' do
+          get :index, params: { namespace_id: project.namespace, project_id: project }
+
+          expect(assigns(:requesters)).to be_nil
+        end
       end
     end
   end
@@ -86,7 +199,7 @@ RSpec.describe Projects::ProjectMembersController do
                         access_level: Gitlab::Access::GUEST
                       }
 
-        expect(response).to set_flash.to 'Users were successfully added.'
+        expect(controller).to set_flash.to 'Users were successfully added.'
         expect(response).to redirect_to(project_project_members_path(project))
       end
 
@@ -102,7 +215,7 @@ RSpec.describe Projects::ProjectMembersController do
                         access_level: Gitlab::Access::GUEST
                       }
 
-        expect(response).to set_flash.to 'Message'
+        expect(controller).to set_flash.to 'Message'
         expect(response).to redirect_to(project_project_members_path(project))
       end
     end
@@ -163,7 +276,7 @@ RSpec.describe Projects::ProjectMembersController do
         it 'adds user to members' do
           subject
 
-          expect(response).to set_flash.to 'Users were successfully added.'
+          expect(controller).to set_flash.to 'Users were successfully added.'
           expect(response).to redirect_to(project_project_members_path(project))
           expect(project.users).to include project_user
         end
@@ -215,6 +328,18 @@ RSpec.describe Projects::ProjectMembersController do
           subject
 
           expect(requester.reload.expires_at).not_to eq(expires_at.to_date)
+        end
+
+        it 'returns error status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        end
+
+        it 'returns error message' do
+          subject
+
+          expect(json_response).to eq({ 'message' => 'Expires at cannot be a date in the past' })
         end
       end
 
@@ -364,7 +489,7 @@ RSpec.describe Projects::ProjectMembersController do
                            project_id: project
                          }
 
-          expect(response).to set_flash.to "You left the \"#{project.human_name}\" project."
+          expect(controller).to set_flash.to "You left the \"#{project.human_name}\" project."
           expect(response).to redirect_to(dashboard_projects_path)
           expect(project.users).not_to include user
         end
@@ -398,7 +523,7 @@ RSpec.describe Projects::ProjectMembersController do
                            project_id: project
                          }
 
-          expect(response).to set_flash.to 'Your access request to the project has been withdrawn.'
+          expect(controller).to set_flash.to 'Your access request to the project has been withdrawn.'
           expect(response).to redirect_to(project_path(project))
           expect(project.requesters).to be_empty
           expect(project.users).not_to include user
@@ -418,7 +543,7 @@ RSpec.describe Projects::ProjectMembersController do
                               project_id: project
                             }
 
-      expect(response).to set_flash.to 'Your request for access has been queued for review.'
+      expect(controller).to set_flash.to 'Your request for access has been queued for review.'
       expect(response).to redirect_to(
         project_path(project)
       )
@@ -514,7 +639,7 @@ RSpec.describe Projects::ProjectMembersController do
 
       it 'imports source project members' do
         expect(project.team_members).to include member
-        expect(response).to set_flash.to 'Successfully imported'
+        expect(controller).to set_flash.to 'Successfully imported'
         expect(response).to redirect_to(
           project_project_members_path(project)
         )

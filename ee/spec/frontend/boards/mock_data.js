@@ -1,9 +1,15 @@
-/* global ListIssue */
 /* global List */
 
 import Vue from 'vue';
 import '~/boards/models/list';
-import '~/boards/models/issue';
+
+export const mockLabel = {
+  id: 'gid://gitlab/GroupLabel/121',
+  title: 'To Do',
+  color: '#F0AD4E',
+  textColor: '#FFFFFF',
+  description: null,
+};
 
 export const mockLists = [
   {
@@ -24,21 +30,44 @@ export const mockLists = [
     position: 0,
     listType: 'label',
     collapsed: false,
-    label: {
-      id: 'gid://gitlab/GroupLabel/121',
-      title: 'To Do',
-      color: '#F0AD4E',
-      textColor: '#FFFFFF',
-      description: null,
-    },
+    label: mockLabel,
     maxIssueCount: 0,
     assignee: null,
     milestone: null,
     preset: false,
   },
+  {
+    id: 'gid://gitlab/List/3',
+    title: 'Assignee list',
+    position: 0,
+    listType: 'assignee',
+    collapsed: false,
+    label: null,
+    maxIssueCount: 0,
+    assignee: {
+      id: 'gid://gitlab/',
+    },
+    milestone: null,
+    preset: false,
+  },
+  {
+    id: 'gid://gitlab/List/4',
+    title: 'Milestone list',
+    position: 0,
+    listType: 'milestone',
+    collapsed: false,
+    label: null,
+    maxIssueCount: 0,
+    assignee: null,
+    milestone: {
+      id: 'gid://gitlab/Milestone/1',
+      title: 'A milestone',
+    },
+    preset: false,
+  },
 ];
 
-export const mockListsWithModel = mockLists.map(listMock =>
+export const mockListsWithModel = mockLists.map((listMock) =>
   Vue.observable(new List({ ...listMock, doNotFetchIssues: true })),
 );
 
@@ -47,7 +76,7 @@ const defaultDescendantCounts = {
   closedIssues: 0,
 };
 
-const assignees = [
+export const mockAssignees = [
   {
     id: 'gid://gitlab/User/2',
     username: 'angelina.herman',
@@ -55,9 +84,38 @@ const assignees = [
     avatar: 'https://www.gravatar.com/avatar/eb7b664b13a30ad9f9ba4b61d7075470?s=80&d=identicon',
     webUrl: 'http://127.0.0.1:3000/angelina.herman',
   },
+  {
+    id: 'gid://gitlab/User/118',
+    username: 'jacklyn.moore',
+    name: 'Brock Jaskolski',
+    avatar: 'https://www.gravatar.com/avatar/af29c072d9fcf315772cfd802c7a7d35?s=80&d=identicon',
+    webUrl: 'http://127.0.0.1:3000/jacklyn.moore',
+  },
 ];
 
-const labels = [
+export const mockMilestones = [
+  {
+    id: 'gid://gitlab/Milestone/1',
+    title: 'Milestone 1',
+  },
+  {
+    id: 'gid://gitlab/Milestone/2',
+    title: 'Milestone 2',
+  },
+];
+
+export const mockIterations = [
+  {
+    id: 'gid://gitlab/Iteration/1',
+    title: 'Iteration 1',
+  },
+  {
+    id: 'gid://gitlab/Iteration/2',
+    title: 'Iteration 2',
+  },
+];
+
+export const labels = [
   {
     id: 'gid://gitlab/GroupLabel/5',
     title: 'Cosync',
@@ -87,34 +145,37 @@ export const rawIssue = {
     ],
   },
   assignees: {
-    nodes: assignees,
+    nodes: mockAssignees,
   },
   epic: {
     id: 'gid://gitlab/Epic/41',
   },
 };
 
+export const mockIssueGroupPath = 'gitlab-org';
+export const mockIssueProjectPath = `${mockIssueGroupPath}/gitlab-test`;
+
 export const mockIssue = {
-  id: 'gid://gitlab/Issue/436',
-  iid: 27,
+  id: '436',
+  iid: '27',
   title: 'Issue 1',
-  referencePath: '#27',
+  referencePath: `${mockIssueProjectPath}#27`,
   dueDate: null,
   timeEstimate: 0,
   weight: null,
   confidential: false,
-  path: '/gitlab-org/gitlab-test/-/issues/27',
-  assignees,
+  path: `/${mockIssueProjectPath}/-/issues/27`,
+  assignees: mockAssignees,
   labels,
   epic: {
     id: 'gid://gitlab/Epic/41',
+    iid: 2,
+    group: { fullPath: mockIssueGroupPath },
   },
 };
 
-export const mockIssueWithModel = new ListIssue({ ...mockIssue, id: '436' });
-
 export const mockIssue2 = {
-  id: 'gid://gitlab/Issue/437',
+  id: '437',
   iid: 28,
   title: 'Issue 2',
   referencePath: '#28',
@@ -123,14 +184,14 @@ export const mockIssue2 = {
   weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: {
     id: 'gid://gitlab/Epic/40',
+    iid: 1,
+    group: { fullPath: 'gitlab-org' },
   },
 };
-
-export const mockIssue2WithModel = new ListIssue({ ...mockIssue2, id: '437' });
 
 export const mockIssue3 = {
   id: 'gid://gitlab/Issue/438',
@@ -142,7 +203,7 @@ export const mockIssue3 = {
   weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: null,
 };
@@ -157,7 +218,7 @@ export const mockIssue4 = {
   weight: null,
   confidential: false,
   path: '/gitlab-org/gitlab-test/-/issues/28',
-  assignees,
+  assignees: mockAssignees,
   labels,
   epic: null,
 };
@@ -166,16 +227,35 @@ export const mockIssues = [mockIssue, mockIssue2];
 
 export const mockEpic = {
   id: 'gid://gitlab/Epic/41',
-  iid: 1,
+  iid: '1',
   title: 'Epic title',
   state: 'opened',
   webUrl: '/groups/gitlab-org/-/epics/1',
+  group: { fullPath: 'gitlab-org' },
   descendantCounts: {
     openedIssues: 3,
     closedIssues: 2,
   },
   issues: [mockIssue],
+  labels: [],
 };
+
+export const mockEpic2 = {
+  id: 'gid://gitlab/Epic/42',
+  iid: '2',
+  group: { fullPath: 'gitlab-org' },
+  title: 'Epic title 2',
+};
+
+export const mockIssueWithEpic = {
+  ...mockIssue3,
+  epic: {
+    id: mockEpic.id,
+    iid: mockEpic.iid,
+    webPath: '/gitlab-org/-/epics/41',
+  },
+};
+export const mockAssignedEpic = { ...mockIssueWithEpic.epic, title: mockEpic.title };
 
 export const mockEpics = [
   {
@@ -194,6 +274,7 @@ export const mockEpics = [
     parent: {
       id: '40',
     },
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/40',
@@ -208,6 +289,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/marketing/-/epics/1',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/39',
@@ -222,6 +304,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/12',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/38',
@@ -236,6 +319,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/11',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
   {
     id: 'gid://gitlab/Epic/37',
@@ -250,6 +334,7 @@ export const mockEpics = [
     web_url: '/groups/gitlab-org/-/epics/10',
     descendantCounts: defaultDescendantCounts,
     hasParent: false,
+    labels: [],
   },
 ];
 

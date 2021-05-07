@@ -16,10 +16,11 @@ module ApplicationWorker
 
   included do
     set_queue
+    after_set_class_attribute { set_queue }
 
     def structured_payload(payload = {})
-      context = Labkit::Context.current.to_h.merge(
-        'class' => self.class,
+      context = Gitlab::ApplicationContext.current.merge(
+        'class' => self.class.name,
         'job_status' => 'running',
         'queue' => self.class.queue,
         'jid' => jid
@@ -47,20 +48,12 @@ module ApplicationWorker
   class_methods do
     def inherited(subclass)
       subclass.set_queue
+      subclass.after_set_class_attribute { subclass.set_queue }
     end
 
     def set_queue
-      queue_name = [queue_namespace, base_queue_name].compact.join(':')
-
+      queue_name = ::Gitlab::SidekiqConfig::WorkerRouter.global.route(self)
       sidekiq_options queue: queue_name # rubocop:disable Cop/SidekiqOptionsQueue
-    end
-
-    def base_queue_name
-      name
-        .sub(/\AGitlab::/, '')
-        .sub(/Worker\z/, '')
-        .underscore
-        .tr('/', '_')
     end
 
     def queue_namespace(new_namespace = nil)

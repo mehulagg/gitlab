@@ -6,7 +6,7 @@ class Projects::NotesController < Projects::ApplicationController
   include NotesHelper
   include ToggleAwardEmoji
 
-  before_action :whitelist_query_limiting, only: [:create, :update]
+  before_action :disable_query_limiting, only: [:create, :update]
   before_action :authorize_read_note!
   before_action :authorize_create_note!, only: [:create]
   before_action :authorize_resolve_note!, only: [:resolve, :unresolve]
@@ -60,7 +60,7 @@ class Projects::NotesController < Projects::ApplicationController
   def render_json_with_notes_serializer
     prepare_notes_for_rendering([note])
 
-    render json: note_serializer.represent(note)
+    render json: note_serializer.represent(note, render_truncated_diff_lines: true)
   end
 
   def note
@@ -87,7 +87,7 @@ class Projects::NotesController < Projects::ApplicationController
     access_denied! unless can?(current_user, :create_note, noteable)
   end
 
-  def whitelist_query_limiting
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42383')
+  def disable_query_limiting
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20800')
   end
 end

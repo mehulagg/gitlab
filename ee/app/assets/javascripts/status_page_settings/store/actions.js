@@ -1,7 +1,7 @@
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { refreshCurrentPage } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 
 export const setStatusPageEnabled = ({ commit }, { enabled }) =>
@@ -34,7 +34,7 @@ export const updateStatusPageSettings = ({ state, dispatch, commit }) => {
       },
     })
     .then(() => dispatch('receiveStatusPageSettingsUpdateSuccess'))
-    .catch(error => dispatch('receiveStatusPageSettingsUpdateError', error))
+    .catch((error) => dispatch('receiveStatusPageSettingsUpdateError', error))
     .finally(() => commit(mutationTypes.LOADING, false));
 };
 
@@ -50,5 +50,8 @@ export const receiveStatusPageSettingsUpdateError = (_, error) => {
   const { response } = error;
   const message = response?.data?.message || '';
 
-  createFlash(`${__('There was an error saving your changes.')} ${message}`, 'alert');
+  createFlash({
+    message: `${__('There was an error saving your changes.')} ${message}`,
+    type: 'alert',
+  });
 };

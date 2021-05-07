@@ -1,5 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlDaterangePicker } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DateRangeButtons from 'ee/audit_events/components/date_range_buttons.vue';
 import DateRangeField from 'ee/audit_events/components/date_range_field.vue';
@@ -40,31 +40,25 @@ describe('DateRangeField component', () => {
     it("sets the max selectable date to today's date on the date picker", () => {
       createComponent();
 
-      expect(
-        findDatePicker()
-          .props('defaultMaxDate')
-          .toDateString(),
-      ).toBe(CURRENT_DATE.toDateString());
+      expect(findDatePicker().props('defaultMaxDate').toDateString()).toBe(
+        CURRENT_DATE.toDateString(),
+      );
     });
 
     it('sets the default start date to the start of the month', () => {
       createComponent();
 
-      expect(
-        findDatePicker()
-          .props('defaultStartDate')
-          .toDateString(),
-      ).toBe(dateAtFirstDayOfMonth(CURRENT_DATE).toDateString());
+      expect(findDatePicker().props('defaultStartDate').toDateString()).toBe(
+        dateAtFirstDayOfMonth(CURRENT_DATE).toDateString(),
+      );
     });
 
     it("sets the default end date to today's date", () => {
       createComponent();
 
-      expect(
-        findDatePicker()
-          .props('defaultEndDate')
-          .toDateString(),
-      ).toBe(CURRENT_DATE.toDateString());
+      expect(findDatePicker().props('defaultEndDate').toDateString()).toBe(
+        CURRENT_DATE.toDateString(),
+      );
     });
 
     it('passes both startDate and endDate to the date picker as default dates', () => {

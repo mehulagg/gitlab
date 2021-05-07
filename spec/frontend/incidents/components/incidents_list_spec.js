@@ -1,18 +1,19 @@
-import { mount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon, GlTable, GlAvatar, GlEmptyState } from '@gitlab/ui';
-import Tracking from '~/tracking';
-import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
+import { mount } from '@vue/test-utils';
 import IncidentsList from '~/incidents/components/incidents_list.vue';
-import SeverityToken from '~/sidebar/components/severity/severity.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import {
   I18N,
   TH_CREATED_AT_TEST_ID,
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
+  TH_INCIDENT_SLA_TEST_ID,
   trackIncidentCreateNewOptions,
   trackIncidentListViewsOptions,
 } from '~/incidents/constants';
+import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
+import SeverityToken from '~/sidebar/components/severity/severity.vue';
+import Tracking from '~/tracking';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import mockIncidents from '../mocks/incidents.json';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -157,17 +158,11 @@ describe('Incidents List', () => {
 
     describe('Assignees', () => {
       it('shows Unassigned when there are no assignees', () => {
-        expect(
-          findAssignees()
-            .at(0)
-            .text(),
-        ).toBe(I18N.unassigned);
+        expect(findAssignees().at(0).text()).toBe(I18N.unassigned);
       });
 
       it('renders an avatar component when there is an assignee', () => {
-        const avatar = findAssignees()
-          .at(1)
-          .find(GlAvatar);
+        const avatar = findAssignees().at(1).find(GlAvatar);
         const { src, label } = avatar.attributes();
         const { name, avatarUrl } = mockIncidents[1].assignees.nodes[0];
 
@@ -188,9 +183,7 @@ describe('Incidents List', () => {
     });
 
     it('contains a link to the incident details page', async () => {
-      findTableRows()
-        .at(0)
-        .trigger('click');
+      findTableRows().at(0).trigger('click');
       expect(visitUrl).toHaveBeenCalledWith(
         joinPaths(`/project/issues/incident`, mockIncidents[0].iid),
       );
@@ -277,10 +270,11 @@ describe('Incidents List', () => {
     const noneSort = 'none';
 
     it.each`
-      selector                 | initialSort | firstSort   | nextSort
-      ${TH_CREATED_AT_TEST_ID} | ${descSort} | ${ascSort}  | ${descSort}
-      ${TH_SEVERITY_TEST_ID}   | ${noneSort} | ${descSort} | ${ascSort}
-      ${TH_PUBLISHED_TEST_ID}  | ${noneSort} | ${descSort} | ${ascSort}
+      selector                   | initialSort | firstSort   | nextSort
+      ${TH_CREATED_AT_TEST_ID}   | ${descSort} | ${ascSort}  | ${descSort}
+      ${TH_SEVERITY_TEST_ID}     | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_PUBLISHED_TEST_ID}    | ${noneSort} | ${descSort} | ${ascSort}
+      ${TH_INCIDENT_SLA_TEST_ID} | ${noneSort} | ${ascSort}  | ${descSort}
     `('updates sort with new direction', async ({ selector, initialSort, firstSort, nextSort }) => {
       const [[attr, value]] = Object.entries(selector);
       const columnHeader = () => wrapper.find(`[${attr}="${value}"]`);

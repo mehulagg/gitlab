@@ -3,14 +3,6 @@
 module Clusters
   module Concerns
     module ApplicationData
-      def uninstall_command
-        Gitlab::Kubernetes::Helm::DeleteCommand.new(
-          name: name,
-          rbac: cluster.platform_kubernetes_rbac?,
-          files: files
-        )
-      end
-
       def repository
         nil
       end

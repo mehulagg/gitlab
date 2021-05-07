@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_mock_admin_mode do
+RSpec.describe 'Admin Mode Login' do
   include TermsHelper
   include UserLoginHelper
   include LdapHelpers
@@ -86,7 +86,7 @@ RSpec.describe 'Admin Mode Login', :clean_gitlab_redis_shared_state, :do_not_moc
               expect(codes.size).to eq 10
 
               # Ensure the generated codes get saved
-              user.save
+              user.save!
             end
 
             context 'with valid code' do

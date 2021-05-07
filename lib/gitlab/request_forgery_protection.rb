@@ -9,14 +9,6 @@ module Gitlab
     class Controller < ActionController::Base
       protect_from_forgery with: :exception, prepend: true
 
-      rescue_from ActionController::InvalidAuthenticityToken do |e|
-        logger.warn "This CSRF token verification failure is handled internally by `GitLab::RequestForgeryProtection`"
-        logger.warn "Unlike the logs may suggest, this does not result in an actual 422 response to the user"
-        logger.warn "For API requests, the only effect is that `current_user` will be `nil` for the duration of the request"
-
-        raise e
-      end
-
       def index
         head :ok
       end
@@ -31,7 +23,9 @@ module Gitlab
     end
 
     def self.verified?(env)
-      call(env)
+      minimal_env = env.slice('REQUEST_METHOD', 'rack.session', 'HTTP_X_CSRF_TOKEN')
+                      .merge('rack.input' => '')
+      call(minimal_env)
 
       true
     rescue ActionController::InvalidAuthenticityToken

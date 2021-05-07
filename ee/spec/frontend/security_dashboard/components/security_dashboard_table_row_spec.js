@@ -1,10 +1,13 @@
-import Vuex from 'vuex';
 import { GlFormCheckbox } from '@gitlab/ui';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
 import createStore from 'ee/security_dashboard/store';
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
+import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
+import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { trimText } from 'helpers/text_helper';
+import { BV_SHOW_MODAL } from '~/lib/utils/constants';
 import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
@@ -35,10 +38,11 @@ describe('Security Dashboard Table Row', () => {
   });
 
   const findLoader = () => wrapper.find('.js-skeleton-loader');
-  const findContent = i => wrapper.findAll('.table-mobile-content').at(i);
+  const findContent = (i) => wrapper.findAll('.table-mobile-content').at(i);
   const findAllIssueCreated = () => wrapper.findAll('[data-testid="issues-icon"]');
   const hasSelectedClass = () => wrapper.classes('gl-bg-blue-50');
   const findCheckbox = () => wrapper.find(GlFormCheckbox);
+  const findSeverityBadge = () => wrapper.find(SeverityBadge);
 
   describe('when loading', () => {
     beforeEach(() => {
@@ -49,9 +53,8 @@ describe('Security Dashboard Table Row', () => {
       expect(findLoader().exists()).toBeTruthy();
     });
 
-    it('should render a ` ` for severity', () => {
-      expect(wrapper.vm.severity).toEqual(' ');
-      expect(findContent(0).text()).toEqual('');
+    it('should not render the severity', () => {
+      expect(findSeverityBadge().exists()).toBe(false);
     });
 
     it('should render a `` for the report type and scanner', () => {
@@ -76,11 +79,7 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the severity', () => {
-      expect(
-        findContent(0)
-          .text()
-          .toLowerCase(),
-      ).toContain(vulnerability.severity);
+      expect(findSeverityBadge().text().toLowerCase()).toBe(vulnerability.severity);
     });
 
     it('should render the identifier cell', () => {
@@ -90,11 +89,9 @@ describe('Security Dashboard Table Row', () => {
     });
 
     it('should render the report type', () => {
-      expect(
-        findContent(3)
-          .text()
-          .toLowerCase(),
-      ).toContain(vulnerability.report_type.toLowerCase());
+      expect(findContent(3).text().toLowerCase()).toContain(
+        vulnerability.report_type.toLowerCase(),
+      );
     });
 
     it('should render the scanner vendor if the scanner does exist', () => {
@@ -110,15 +107,17 @@ describe('Security Dashboard Table Row', () => {
         expect(findContent(1).text()).toContain(vulnerability.location.file);
       });
 
-      it('should fire the openModal action when clicked', () => {
+      it('should fire the setModalData action and open the modal when clicked', () => {
         jest.spyOn(store, 'dispatch').mockImplementation();
+        jest.spyOn(wrapper.vm.$root, '$emit');
 
         const el = wrapper.find({ ref: 'vulnerability-title' });
         el.trigger('click');
 
-        expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/openModal', {
+        expect(store.dispatch).toHaveBeenCalledWith('vulnerabilities/setModalData', {
           vulnerability,
         });
+        expect(wrapper.vm.$root.$emit).toHaveBeenCalledWith(BV_SHOW_MODAL, VULNERABILITY_MODAL_ID);
       });
     });
 

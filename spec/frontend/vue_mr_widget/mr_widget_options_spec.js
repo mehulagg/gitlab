@@ -1,221 +1,207 @@
-import Vue from 'vue';
+import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import mountComponent from 'helpers/vue_mount_component_helper';
-import { withGonExperiment } from 'helpers/experimentation_helper';
-import Api from '~/api';
+import Vue, { nextTick } from 'vue';
+import VueApollo from 'vue-apollo';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { securityReportDownloadPathsQueryResponse } from 'jest/vue_shared/security_reports/mock_data';
 import axios from '~/lib/utils/axios_utils';
-import mrWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
-import eventHub from '~/vue_merge_request_widget/event_hub';
+import { setFaviconOverlay } from '~/lib/utils/favicon';
 import notify from '~/lib/utils/notify';
 import SmartInterval from '~/smart_interval';
-import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
-import mockData from './mock_data';
-import { faviconDataUrl, overlayDataUrl } from '../lib/utils/mock_data';
 import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+import eventHub from '~/vue_merge_request_widget/event_hub';
+import MrWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
+import { stateKey } from '~/vue_merge_request_widget/stores/state_maps';
+import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
+import { faviconDataUrl, overlayDataUrl } from '../lib/utils/mock_data';
+import mockData from './mock_data';
 
 jest.mock('~/smart_interval');
 
-const returnPromise = data =>
-  new Promise(resolve => {
-    resolve({
-      data,
-    });
-  });
+jest.mock('~/lib/utils/favicon');
 
-describe('mrWidgetOptions', () => {
-  let vm;
+Vue.use(VueApollo);
+
+describe('MrWidgetOptions', () => {
+  let wrapper;
   let mock;
-  let MrWidgetOptions;
 
   const COLLABORATION_MESSAGE = 'Allows commits from members who can merge to the target branch';
 
   beforeEach(() => {
-    // Prevent component mounting
-    delete mrWidgetOptions.el;
-
     gl.mrWidgetData = { ...mockData };
     gon.features = { asyncMrWidget: true };
 
     mock = new MockAdapter(axios);
     mock.onGet(mockData.merge_request_widget_path).reply(() => [200, { ...mockData }]);
     mock.onGet(mockData.merge_request_cached_widget_path).reply(() => [200, { ...mockData }]);
-
-    MrWidgetOptions = Vue.extend(mrWidgetOptions);
   });
 
   afterEach(() => {
     mock.restore();
-    vm.$destroy();
-    vm = null;
+    wrapper.destroy();
+    wrapper = null;
 
     gl.mrWidgetData = {};
     gon.features = {};
   });
 
-  const createComponent = (mrData = mockData) => {
-    if (vm) {
-      vm.$destroy();
+  const createComponent = (mrData = mockData, options = {}) => {
+    if (wrapper) {
+      wrapper.destroy();
     }
 
-    vm = mountComponent(MrWidgetOptions, {
-      mrData: { ...mrData },
+    wrapper = mount(MrWidgetOptions, {
+      propsData: {
+        mrData: { ...mrData },
+      },
+      ...options,
     });
 
     return axios.waitForAll();
   };
 
-  const findSuggestPipeline = () => vm.$el.querySelector('[data-testid="mr-suggest-pipeline"]');
-  const findSuggestPipelineButton = () => findSuggestPipeline().querySelector('button');
-  const findSecurityMrWidget = () => vm.$el.querySelector('[data-testid="security-mr-widget"]');
+  const findSuggestPipeline = () => wrapper.find('[data-testid="mr-suggest-pipeline"]');
+  const findSuggestPipelineButton = () => findSuggestPipeline().find('button');
+  const findSecurityMrWidget = () => wrapper.find('[data-testid="security-mr-widget"]');
 
   describe('default', () => {
     beforeEach(() => {
+      jest.spyOn(document, 'dispatchEvent');
       return createComponent();
     });
 
     describe('data', () => {
       it('should instantiate Store and Service', () => {
-        expect(vm.mr).toBeDefined();
-        expect(vm.service).toBeDefined();
+        expect(wrapper.vm.mr).toBeDefined();
+        expect(wrapper.vm.service).toBeDefined();
       });
     });
 
     describe('computed', () => {
       describe('componentName', () => {
         it('should return merged component', () => {
-          expect(vm.componentName).toEqual('mr-widget-merged');
+          expect(wrapper.vm.componentName).toEqual('mr-widget-merged');
         });
 
         it('should return conflicts component', () => {
-          vm.mr.state = 'conflicts';
+          wrapper.vm.mr.state = 'conflicts';
 
-          expect(vm.componentName).toEqual('mr-widget-conflicts');
-        });
-      });
-
-      describe('shouldRenderMergeHelp', () => {
-        it('should return false for the initial merged state', () => {
-          expect(vm.shouldRenderMergeHelp).toBeFalsy();
-        });
-
-        it('should return true for a state which requires help widget', () => {
-          vm.mr.state = 'conflicts';
-
-          expect(vm.shouldRenderMergeHelp).toBeTruthy();
+          expect(wrapper.vm.componentName).toEqual('mr-widget-conflicts');
         });
       });
 
       describe('shouldRenderPipelines', () => {
         it('should return true when hasCI is true', () => {
-          vm.mr.hasCI = true;
+          wrapper.vm.mr.hasCI = true;
 
-          expect(vm.shouldRenderPipelines).toBeTruthy();
+          expect(wrapper.vm.shouldRenderPipelines).toBeTruthy();
         });
 
         it('should return false when hasCI is false', () => {
-          vm.mr.hasCI = false;
+          wrapper.vm.mr.hasCI = false;
 
-          expect(vm.shouldRenderPipelines).toBeFalsy();
+          expect(wrapper.vm.shouldRenderPipelines).toBeFalsy();
         });
       });
 
       describe('shouldRenderRelatedLinks', () => {
         it('should return false for the initial data', () => {
-          expect(vm.shouldRenderRelatedLinks).toBeFalsy();
+          expect(wrapper.vm.shouldRenderRelatedLinks).toBeFalsy();
         });
 
         it('should return true if there is relatedLinks in MR', () => {
-          Vue.set(vm.mr, 'relatedLinks', {});
+          Vue.set(wrapper.vm.mr, 'relatedLinks', {});
 
-          expect(vm.shouldRenderRelatedLinks).toBeTruthy();
+          expect(wrapper.vm.shouldRenderRelatedLinks).toBeTruthy();
         });
       });
 
       describe('shouldRenderSourceBranchRemovalStatus', () => {
         beforeEach(() => {
-          vm.mr.state = 'readyToMerge';
+          wrapper.vm.mr.state = 'readyToMerge';
         });
 
         it('should return true when cannot remove source branch and branch will be removed', () => {
-          vm.mr.canRemoveSourceBranch = false;
-          vm.mr.shouldRemoveSourceBranch = true;
+          wrapper.vm.mr.canRemoveSourceBranch = false;
+          wrapper.vm.mr.shouldRemoveSourceBranch = true;
 
-          expect(vm.shouldRenderSourceBranchRemovalStatus).toEqual(true);
+          expect(wrapper.vm.shouldRenderSourceBranchRemovalStatus).toEqual(true);
         });
 
         it('should return false when can remove source branch and branch will be removed', () => {
-          vm.mr.canRemoveSourceBranch = true;
-          vm.mr.shouldRemoveSourceBranch = true;
+          wrapper.vm.mr.canRemoveSourceBranch = true;
+          wrapper.vm.mr.shouldRemoveSourceBranch = true;
 
-          expect(vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
+          expect(wrapper.vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
         });
 
         it('should return false when cannot remove source branch and branch will not be removed', () => {
-          vm.mr.canRemoveSourceBranch = false;
-          vm.mr.shouldRemoveSourceBranch = false;
+          wrapper.vm.mr.canRemoveSourceBranch = false;
+          wrapper.vm.mr.shouldRemoveSourceBranch = false;
 
-          expect(vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
+          expect(wrapper.vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
         });
 
         it('should return false when in merged state', () => {
-          vm.mr.canRemoveSourceBranch = false;
-          vm.mr.shouldRemoveSourceBranch = true;
-          vm.mr.state = 'merged';
+          wrapper.vm.mr.canRemoveSourceBranch = false;
+          wrapper.vm.mr.shouldRemoveSourceBranch = true;
+          wrapper.vm.mr.state = 'merged';
 
-          expect(vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
+          expect(wrapper.vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
         });
 
         it('should return false when in nothing to merge state', () => {
-          vm.mr.canRemoveSourceBranch = false;
-          vm.mr.shouldRemoveSourceBranch = true;
-          vm.mr.state = 'nothingToMerge';
+          wrapper.vm.mr.canRemoveSourceBranch = false;
+          wrapper.vm.mr.shouldRemoveSourceBranch = true;
+          wrapper.vm.mr.state = 'nothingToMerge';
 
-          expect(vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
+          expect(wrapper.vm.shouldRenderSourceBranchRemovalStatus).toEqual(false);
         });
       });
 
       describe('shouldRenderCollaborationStatus', () => {
         describe('when collaboration is allowed', () => {
           beforeEach(() => {
-            vm.mr.allowCollaboration = true;
+            wrapper.vm.mr.allowCollaboration = true;
           });
 
           describe('when merge request is opened', () => {
-            beforeEach(done => {
-              vm.mr.isOpen = true;
-              vm.$nextTick(done);
+            beforeEach((done) => {
+              wrapper.vm.mr.isOpen = true;
+              nextTick(done);
             });
 
             it('should render collaboration status', () => {
-              expect(vm.$el.textContent).toContain(COLLABORATION_MESSAGE);
+              expect(wrapper.text()).toContain(COLLABORATION_MESSAGE);
             });
           });
 
           describe('when merge request is not opened', () => {
-            beforeEach(done => {
-              vm.mr.isOpen = false;
-              vm.$nextTick(done);
+            beforeEach((done) => {
+              wrapper.vm.mr.isOpen = false;
+              nextTick(done);
             });
 
             it('should not render collaboration status', () => {
-              expect(vm.$el.textContent).not.toContain(COLLABORATION_MESSAGE);
+              expect(wrapper.text()).not.toContain(COLLABORATION_MESSAGE);
             });
           });
         });
 
         describe('when collaboration is not allowed', () => {
           beforeEach(() => {
-            vm.mr.allowCollaboration = false;
+            wrapper.vm.mr.allowCollaboration = false;
           });
 
           describe('when merge request is opened', () => {
-            beforeEach(done => {
-              vm.mr.isOpen = true;
-              vm.$nextTick(done);
+            beforeEach((done) => {
+              wrapper.vm.mr.isOpen = true;
+              nextTick(done);
             });
 
             it('should not render collaboration status', () => {
-              expect(vm.$el.textContent).not.toContain(COLLABORATION_MESSAGE);
+              expect(wrapper.text()).not.toContain(COLLABORATION_MESSAGE);
             });
           });
         });
@@ -223,42 +209,56 @@ describe('mrWidgetOptions', () => {
 
       describe('showMergePipelineForkWarning', () => {
         describe('when the source project and target project are the same', () => {
-          beforeEach(done => {
-            Vue.set(vm.mr, 'mergePipelinesEnabled', true);
-            Vue.set(vm.mr, 'sourceProjectId', 1);
-            Vue.set(vm.mr, 'targetProjectId', 1);
-            vm.$nextTick(done);
+          beforeEach((done) => {
+            Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', true);
+            Vue.set(wrapper.vm.mr, 'sourceProjectId', 1);
+            Vue.set(wrapper.vm.mr, 'targetProjectId', 1);
+            nextTick(done);
           });
 
           it('should be false', () => {
-            expect(vm.showMergePipelineForkWarning).toEqual(false);
+            expect(wrapper.vm.showMergePipelineForkWarning).toEqual(false);
           });
         });
 
         describe('when merge pipelines are not enabled', () => {
-          beforeEach(done => {
-            Vue.set(vm.mr, 'mergePipelinesEnabled', false);
-            Vue.set(vm.mr, 'sourceProjectId', 1);
-            Vue.set(vm.mr, 'targetProjectId', 2);
-            vm.$nextTick(done);
+          beforeEach((done) => {
+            Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', false);
+            Vue.set(wrapper.vm.mr, 'sourceProjectId', 1);
+            Vue.set(wrapper.vm.mr, 'targetProjectId', 2);
+            nextTick(done);
           });
 
           it('should be false', () => {
-            expect(vm.showMergePipelineForkWarning).toEqual(false);
+            expect(wrapper.vm.showMergePipelineForkWarning).toEqual(false);
           });
         });
 
         describe('when merge pipelines are enabled _and_ the source project and target project are different', () => {
-          beforeEach(done => {
-            Vue.set(vm.mr, 'mergePipelinesEnabled', true);
-            Vue.set(vm.mr, 'sourceProjectId', 1);
-            Vue.set(vm.mr, 'targetProjectId', 2);
-            vm.$nextTick(done);
+          beforeEach((done) => {
+            Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', true);
+            Vue.set(wrapper.vm.mr, 'sourceProjectId', 1);
+            Vue.set(wrapper.vm.mr, 'targetProjectId', 2);
+            nextTick(done);
           });
 
           it('should be true', () => {
-            expect(vm.showMergePipelineForkWarning).toEqual(true);
+            expect(wrapper.vm.showMergePipelineForkWarning).toEqual(true);
           });
+        });
+      });
+
+      describe('formattedHumanAccess', () => {
+        it('when user is a tool admin but not a member of project', () => {
+          wrapper.vm.mr.humanAccess = null;
+
+          expect(wrapper.vm.formattedHumanAccess).toEqual('');
+        });
+
+        it('when user a member of the project', () => {
+          wrapper.vm.mr.humanAccess = 'Owner';
+
+          expect(wrapper.vm.formattedHumanAccess).toEqual('owner');
         });
       });
     });
@@ -269,9 +269,9 @@ describe('mrWidgetOptions', () => {
         let isCbExecuted;
 
         beforeEach(() => {
-          jest.spyOn(vm.service, 'checkStatus').mockReturnValue(returnPromise(mockData));
-          jest.spyOn(vm.mr, 'setData').mockImplementation(() => {});
-          jest.spyOn(vm, 'handleNotification').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm.service, 'checkStatus').mockResolvedValue({ data: mockData });
+          jest.spyOn(wrapper.vm.mr, 'setData').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'handleNotification').mockImplementation(() => {});
 
           isCbExecuted = false;
           cb = () => {
@@ -280,12 +280,12 @@ describe('mrWidgetOptions', () => {
         });
 
         it('should tell service to check status if document is visible', () => {
-          vm.checkStatus(cb);
+          wrapper.vm.checkStatus(cb);
 
-          return vm.$nextTick().then(() => {
-            expect(vm.service.checkStatus).toHaveBeenCalled();
-            expect(vm.mr.setData).toHaveBeenCalled();
-            expect(vm.handleNotification).toHaveBeenCalledWith(mockData);
+          return nextTick().then(() => {
+            expect(wrapper.vm.service.checkStatus).toHaveBeenCalled();
+            expect(wrapper.vm.mr.setData).toHaveBeenCalled();
+            expect(wrapper.vm.handleNotification).toHaveBeenCalledWith(mockData);
             expect(isCbExecuted).toBeTruthy();
           });
         });
@@ -293,11 +293,11 @@ describe('mrWidgetOptions', () => {
 
       describe('initPolling', () => {
         it('should call SmartInterval', () => {
-          vm.initPolling();
+          wrapper.vm.initPolling();
 
           expect(SmartInterval).toHaveBeenCalledWith(
             expect.objectContaining({
-              callback: vm.checkStatus,
+              callback: wrapper.vm.checkStatus,
             }),
           );
         });
@@ -305,11 +305,11 @@ describe('mrWidgetOptions', () => {
 
       describe('initDeploymentsPolling', () => {
         it('should call SmartInterval', () => {
-          vm.initDeploymentsPolling();
+          wrapper.vm.initDeploymentsPolling();
 
           expect(SmartInterval).toHaveBeenCalledWith(
             expect.objectContaining({
-              callback: vm.fetchPreMergeDeployments,
+              callback: wrapper.vm.fetchPreMergeDeployments,
             }),
           );
         });
@@ -318,15 +318,15 @@ describe('mrWidgetOptions', () => {
       describe('fetchDeployments', () => {
         it('should fetch deployments', () => {
           jest
-            .spyOn(vm.service, 'fetchDeployments')
-            .mockReturnValue(returnPromise([{ id: 1, status: SUCCESS }]));
+            .spyOn(wrapper.vm.service, 'fetchDeployments')
+            .mockResolvedValue({ data: [{ id: 1, status: SUCCESS }] });
 
-          vm.fetchPreMergeDeployments();
+          wrapper.vm.fetchPreMergeDeployments();
 
-          return vm.$nextTick().then(() => {
-            expect(vm.service.fetchDeployments).toHaveBeenCalled();
-            expect(vm.mr.deployments.length).toEqual(1);
-            expect(vm.mr.deployments[0].id).toBe(1);
+          return nextTick().then(() => {
+            expect(wrapper.vm.service.fetchDeployments).toHaveBeenCalled();
+            expect(wrapper.vm.mr.deployments.length).toEqual(1);
+            expect(wrapper.vm.mr.deployments[0].id).toBe(1);
           });
         });
       });
@@ -334,14 +334,17 @@ describe('mrWidgetOptions', () => {
       describe('fetchActionsContent', () => {
         it('should fetch content of Cherry Pick and Revert modals', () => {
           jest
-            .spyOn(vm.service, 'fetchMergeActionsContent')
-            .mockReturnValue(returnPromise('hello world'));
+            .spyOn(wrapper.vm.service, 'fetchMergeActionsContent')
+            .mockResolvedValue({ data: 'hello world' });
 
-          vm.fetchActionsContent();
+          wrapper.vm.fetchActionsContent();
 
-          return vm.$nextTick().then(() => {
-            expect(vm.service.fetchMergeActionsContent).toHaveBeenCalled();
+          return nextTick().then(() => {
+            expect(wrapper.vm.service.fetchMergeActionsContent).toHaveBeenCalled();
             expect(document.body.textContent).toContain('hello world');
+            expect(document.dispatchEvent).toHaveBeenCalledWith(
+              new CustomEvent('merged:UpdateActions'),
+            );
           });
         });
       });
@@ -349,46 +352,46 @@ describe('mrWidgetOptions', () => {
       describe('bindEventHubListeners', () => {
         it.each`
           event                        | method                   | methodArgs
-          ${'MRWidgetUpdateRequested'} | ${'checkStatus'}         | ${x => [x]}
-          ${'MRWidgetRebaseSuccess'}   | ${'checkStatus'}         | ${x => [x, true]}
+          ${'MRWidgetUpdateRequested'} | ${'checkStatus'}         | ${(x) => [x]}
+          ${'MRWidgetRebaseSuccess'}   | ${'checkStatus'}         | ${(x) => [x, true]}
           ${'FetchActionsContent'}     | ${'fetchActionsContent'} | ${() => []}
           ${'EnablePolling'}           | ${'resumePolling'}       | ${() => []}
           ${'DisablePolling'}          | ${'stopPolling'}         | ${() => []}
         `('should bind to $event', ({ event, method, methodArgs }) => {
-          jest.spyOn(vm, method).mockImplementation();
+          jest.spyOn(wrapper.vm, method).mockImplementation();
 
           const eventArg = {};
           eventHub.$emit(event, eventArg);
 
-          expect(vm[method]).toHaveBeenCalledWith(...methodArgs(eventArg));
+          expect(wrapper.vm[method]).toHaveBeenCalledWith(...methodArgs(eventArg));
         });
 
         it('should bind to SetBranchRemoveFlag', () => {
-          expect(vm.mr.isRemovingSourceBranch).toBe(false);
+          expect(wrapper.vm.mr.isRemovingSourceBranch).toBe(false);
 
           eventHub.$emit('SetBranchRemoveFlag', [true]);
 
-          expect(vm.mr.isRemovingSourceBranch).toBe(true);
+          expect(wrapper.vm.mr.isRemovingSourceBranch).toBe(true);
         });
 
         it('should bind to FailedToMerge', () => {
-          vm.mr.state = '';
-          vm.mr.mergeError = '';
+          wrapper.vm.mr.state = '';
+          wrapper.vm.mr.mergeError = '';
 
           const mergeError = 'Something bad happened!';
           eventHub.$emit('FailedToMerge', mergeError);
 
-          expect(vm.mr.state).toBe('failedToMerge');
-          expect(vm.mr.mergeError).toBe(mergeError);
+          expect(wrapper.vm.mr.state).toBe('failedToMerge');
+          expect(wrapper.vm.mr.mergeError).toBe(mergeError);
         });
 
         it('should bind to UpdateWidgetData', () => {
-          jest.spyOn(vm.mr, 'setData').mockImplementation();
+          jest.spyOn(wrapper.vm.mr, 'setData').mockImplementation();
 
           const data = { ...mockData };
           eventHub.$emit('UpdateWidgetData', data);
 
-          expect(vm.mr.setData).toHaveBeenCalledWith(data);
+          expect(wrapper.vm.mr.setData).toHaveBeenCalledWith(data);
         });
       });
 
@@ -408,26 +411,18 @@ describe('mrWidgetOptions', () => {
           document.body.removeChild(document.getElementById('favicon'));
         });
 
-        it('should call setFavicon method', done => {
-          vm.mr.ciStatusFaviconPath = overlayDataUrl;
-          vm.setFaviconHelper()
-            .then(() => {
-              /*
-            It would be better if we'd could mock commonUtils.setFaviconURL
-            with a spy and test that it was called. We are doing the following
-            tests as a proxy to show that the function has been called
-            */
-              expect(faviconElement.getAttribute('href')).not.toEqual(null);
-              expect(faviconElement.getAttribute('href')).not.toEqual(overlayDataUrl);
-              expect(faviconElement.getAttribute('href')).not.toEqual(faviconDataUrl);
-            })
-            .then(done)
-            .catch(done.fail);
+        it('should call setFavicon method', async () => {
+          wrapper.vm.mr.ciStatusFaviconPath = overlayDataUrl;
+
+          await wrapper.vm.setFaviconHelper();
+
+          expect(setFaviconOverlay).toHaveBeenCalledWith(overlayDataUrl);
         });
 
-        it('should not call setFavicon when there is no ciStatusFaviconPath', done => {
-          vm.mr.ciStatusFaviconPath = null;
-          vm.setFaviconHelper()
+        it('should not call setFavicon when there is no ciStatusFaviconPath', (done) => {
+          wrapper.vm.mr.ciStatusFaviconPath = null;
+          wrapper.vm
+            .setFaviconHelper()
             .then(() => {
               expect(faviconElement.getAttribute('href')).toEqual(null);
               done();
@@ -446,12 +441,12 @@ describe('mrWidgetOptions', () => {
         beforeEach(() => {
           jest.spyOn(notify, 'notifyMe').mockImplementation(() => {});
 
-          vm.mr.ciStatus = 'failed';
-          vm.mr.gitlabLogo = 'logo.png';
+          wrapper.vm.mr.ciStatus = 'failed';
+          wrapper.vm.mr.gitlabLogo = 'logo.png';
         });
 
         it('should call notifyMe', () => {
-          vm.handleNotification(data);
+          wrapper.vm.handleNotification(data);
 
           expect(notify.notifyMe).toHaveBeenCalledWith(
             'Pipeline running-label',
@@ -461,15 +456,15 @@ describe('mrWidgetOptions', () => {
         });
 
         it('should not call notifyMe if the status has not changed', () => {
-          vm.mr.ciStatus = data.ci_status;
+          wrapper.vm.mr.ciStatus = data.ci_status;
 
-          vm.handleNotification(data);
+          wrapper.vm.handleNotification(data);
 
           expect(notify.notifyMe).not.toHaveBeenCalled();
         });
 
         it('should not notify if no pipeline provided', () => {
-          vm.handleNotification({
+          wrapper.vm.handleNotification({
             ...data,
             pipeline: undefined,
           });
@@ -480,63 +475,65 @@ describe('mrWidgetOptions', () => {
 
       describe('resumePolling', () => {
         it('should call stopTimer on pollingInterval', () => {
-          jest.spyOn(vm.pollingInterval, 'resume').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm.pollingInterval, 'resume').mockImplementation(() => {});
 
-          vm.resumePolling();
+          wrapper.vm.resumePolling();
 
-          expect(vm.pollingInterval.resume).toHaveBeenCalled();
+          expect(wrapper.vm.pollingInterval.resume).toHaveBeenCalled();
         });
       });
 
       describe('stopPolling', () => {
         it('should call stopTimer on pollingInterval', () => {
-          jest.spyOn(vm.pollingInterval, 'stopTimer').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm.pollingInterval, 'stopTimer').mockImplementation(() => {});
 
-          vm.stopPolling();
+          wrapper.vm.stopPolling();
 
-          expect(vm.pollingInterval.stopTimer).toHaveBeenCalled();
+          expect(wrapper.vm.pollingInterval.stopTimer).toHaveBeenCalled();
         });
       });
     });
 
     describe('rendering relatedLinks', () => {
-      beforeEach(done => {
-        vm.mr.relatedLinks = {
-          assignToMe: null,
-          closing: `
-          <a class="close-related-link" href="#">
-            Close
-          </a>
-        `,
-          mentioned: '',
-        };
-        Vue.nextTick(done);
+      beforeEach(() => {
+        createComponent({
+          ...mockData,
+          issues_links: {
+            closing: `
+              <a class="close-related-link" href="#">
+                Close
+              </a>
+            `,
+          },
+        });
+
+        return nextTick();
       });
 
       it('renders if there are relatedLinks', () => {
-        expect(vm.$el.querySelector('.close-related-link')).toBeDefined();
+        expect(wrapper.find('.close-related-link').exists()).toBe(true);
       });
 
-      it('does not render if state is nothingToMerge', done => {
-        vm.mr.state = stateKey.nothingToMerge;
-        Vue.nextTick(() => {
-          expect(vm.$el.querySelector('.close-related-link')).toBeNull();
+      it('does not render if state is nothingToMerge', (done) => {
+        wrapper.vm.mr.state = stateKey.nothingToMerge;
+        nextTick(() => {
+          expect(wrapper.find('.close-related-link').exists()).toBe(false);
           done();
         });
       });
     });
 
     describe('rendering source branch removal status', () => {
-      it('renders when user cannot remove branch and branch should be removed', done => {
-        vm.mr.canRemoveSourceBranch = false;
-        vm.mr.shouldRemoveSourceBranch = true;
-        vm.mr.state = 'readyToMerge';
+      it('renders when user cannot remove branch and branch should be removed', (done) => {
+        wrapper.vm.mr.canRemoveSourceBranch = false;
+        wrapper.vm.mr.shouldRemoveSourceBranch = true;
+        wrapper.vm.mr.state = 'readyToMerge';
 
-        vm.$nextTick(() => {
-          const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
+        nextTick(() => {
+          const tooltip = wrapper.find('[data-testid="question-o-icon"]');
 
-          expect(vm.$el.textContent).toContain('Deletes source branch');
-          expect(tooltip.getAttribute('title')).toBe(
+          expect(wrapper.text()).toContain('Deletes source branch');
+          expect(tooltip.attributes('title')).toBe(
             'A user with write access to the source branch selected this option',
           );
 
@@ -544,14 +541,14 @@ describe('mrWidgetOptions', () => {
         });
       });
 
-      it('does not render in merged state', done => {
-        vm.mr.canRemoveSourceBranch = false;
-        vm.mr.shouldRemoveSourceBranch = true;
-        vm.mr.state = 'merged';
+      it('does not render in merged state', (done) => {
+        wrapper.vm.mr.canRemoveSourceBranch = false;
+        wrapper.vm.mr.shouldRemoveSourceBranch = true;
+        wrapper.vm.mr.state = 'merged';
 
-        vm.$nextTick(() => {
-          expect(vm.$el.textContent).toContain('The source branch has been deleted');
-          expect(vm.$el.textContent).not.toContain('Deletes source branch');
+        nextTick(() => {
+          expect(wrapper.text()).toContain('The source branch has been deleted');
+          expect(wrapper.text()).not.toContain('Deletes source branch');
 
           done();
         });
@@ -562,15 +559,15 @@ describe('mrWidgetOptions', () => {
       const changes = [
         {
           path: 'index.html',
-          external_url: 'http://root-master-patch-91341.volatile-watch.surge.sh/index.html',
+          external_url: 'http://root-main-patch-91341.volatile-watch.surge.sh/index.html',
         },
         {
           path: 'imgs/gallery.html',
-          external_url: 'http://root-master-patch-91341.volatile-watch.surge.sh/imgs/gallery.html',
+          external_url: 'http://root-main-patch-91341.volatile-watch.surge.sh/imgs/gallery.html',
         },
         {
           path: 'about/',
-          external_url: 'http://root-master-patch-91341.volatile-watch.surge.sh/about/',
+          external_url: 'http://root-main-patch-91341.volatile-watch.surge.sh/about/',
         },
       ];
       const deploymentMockData = {
@@ -588,8 +585,8 @@ describe('mrWidgetOptions', () => {
         status: SUCCESS,
       };
 
-      beforeEach(done => {
-        vm.mr.deployments.push(
+      beforeEach((done) => {
+        wrapper.vm.mr.deployments.push(
           {
             ...deploymentMockData,
           },
@@ -599,33 +596,32 @@ describe('mrWidgetOptions', () => {
           },
         );
 
-        vm.$nextTick(done);
+        nextTick(done);
       });
 
       it('renders multiple deployments', () => {
-        expect(vm.$el.querySelectorAll('.deploy-heading').length).toBe(2);
+        expect(wrapper.findAll('.deploy-heading').length).toBe(2);
       });
 
       it('renders dropdpown with multiple file changes', () => {
         expect(
-          vm.$el
-            .querySelector('.js-mr-wigdet-deployment-dropdown')
-            .querySelectorAll('.js-filtered-dropdown-result').length,
+          wrapper.find('.js-mr-wigdet-deployment-dropdown').findAll('.js-filtered-dropdown-result')
+            .length,
         ).toEqual(changes.length);
       });
     });
 
     describe('code quality widget', () => {
       it('renders the component', () => {
-        expect(vm.$el.querySelector('.js-codequality-widget')).toExist();
+        expect(wrapper.find('.js-codequality-widget').exists()).toBe(true);
       });
     });
 
     describe('pipeline for target branch after merge', () => {
       describe('with information for target branch pipeline', () => {
-        beforeEach(done => {
-          vm.mr.state = 'merged';
-          vm.mr.mergePipeline = {
+        beforeEach((done) => {
+          wrapper.vm.mr.state = 'merged';
+          wrapper.vm.mr.mergePipeline = {
             id: 127,
             user: {
               id: 1,
@@ -692,22 +688,22 @@ describe('mrWidgetOptions', () => {
               scheduled_actions: [],
             },
             ref: {
-              name: 'master',
-              path: '/root/ci-web-terminal/commits/master',
+              name: 'main',
+              path: '/root/ci-web-terminal/commits/main',
               tag: false,
               branch: true,
             },
             commit: {
               id: 'aa1939133d373c94879becb79d91828a892ee319',
               short_id: 'aa193913',
-              title: "Merge branch 'master-test' into 'master'",
+              title: "Merge branch 'main-test' into 'main'",
               created_at: '2018-10-22T11:41:33.000Z',
               parent_ids: [
                 '4622f4dd792468993003caf2e3be978798cbe096',
                 '76598df914cdfe87132d0c3c40f80db9fa9396a4',
               ],
               message:
-                "Merge branch 'master-test' into 'master'\n\nUpdate .gitlab-ci.yml\n\nSee merge request root/ci-web-terminal!1",
+                "Merge branch 'main-test' into 'main'\n\nUpdate .gitlab-ci.yml\n\nSee merge request root/ci-web-terminal!1",
               author_name: 'Administrator',
               author_email: 'admin@example.com',
               authored_date: '2018-10-22T11:41:33.000Z',
@@ -731,16 +727,16 @@ describe('mrWidgetOptions', () => {
             },
             cancel_path: '/root/ci-web-terminal/pipelines/127/cancel',
           };
-          vm.$nextTick(done);
+          nextTick(done);
         });
 
         it('renders pipeline block', () => {
-          expect(vm.$el.querySelector('.js-post-merge-pipeline')).not.toBeNull();
+          expect(wrapper.find('.js-post-merge-pipeline').exists()).toBe(true);
         });
 
         describe('with post merge deployments', () => {
-          beforeEach(done => {
-            vm.mr.postMergeDeployments = [
+          beforeEach((done) => {
+            wrapper.vm.mr.postMergeDeployments = [
               {
                 id: 15,
                 name: 'review/diplo',
@@ -755,155 +751,130 @@ describe('mrWidgetOptions', () => {
                 changes: [
                   {
                     path: 'index.html',
-                    external_url:
-                      'http://root-master-patch-91341.volatile-watch.surge.sh/index.html',
+                    external_url: 'http://root-main-patch-91341.volatile-watch.surge.sh/index.html',
                   },
                   {
                     path: 'imgs/gallery.html',
                     external_url:
-                      'http://root-master-patch-91341.volatile-watch.surge.sh/imgs/gallery.html',
+                      'http://root-main-patch-91341.volatile-watch.surge.sh/imgs/gallery.html',
                   },
                   {
                     path: 'about/',
-                    external_url: 'http://root-master-patch-91341.volatile-watch.surge.sh/about/',
+                    external_url: 'http://root-main-patch-91341.volatile-watch.surge.sh/about/',
                   },
                 ],
                 status: 'success',
               },
             ];
 
-            vm.$nextTick(done);
+            nextTick(done);
           });
 
           it('renders post deployment information', () => {
-            expect(vm.$el.querySelector('.js-post-deployment')).not.toBeNull();
+            expect(wrapper.find('.js-post-deployment').exists()).toBe(true);
           });
         });
       });
 
       describe('without information for target branch pipeline', () => {
-        beforeEach(done => {
-          vm.mr.state = 'merged';
+        beforeEach((done) => {
+          wrapper.vm.mr.state = 'merged';
 
-          vm.$nextTick(done);
+          nextTick(done);
         });
 
         it('does not render pipeline block', () => {
-          expect(vm.$el.querySelector('.js-post-merge-pipeline')).toBeNull();
+          expect(wrapper.find('.js-post-merge-pipeline').exists()).toBe(false);
         });
       });
 
       describe('when state is not merged', () => {
-        beforeEach(done => {
-          vm.mr.state = 'archived';
+        beforeEach((done) => {
+          wrapper.vm.mr.state = 'archived';
 
-          vm.$nextTick(done);
+          nextTick(done);
         });
 
         it('does not render pipeline block', () => {
-          expect(vm.$el.querySelector('.js-post-merge-pipeline')).toBeNull();
+          expect(wrapper.find('.js-post-merge-pipeline').exists()).toBe(false);
         });
 
         it('does not render post deployment information', () => {
-          expect(vm.$el.querySelector('.js-post-deployment')).toBeNull();
+          expect(wrapper.find('.js-post-deployment').exists()).toBe(false);
         });
       });
     });
 
     it('should not suggest pipelines when feature flag is not present', () => {
-      expect(findSuggestPipeline()).toBeNull();
+      expect(findSuggestPipeline().exists()).toBe(false);
     });
   });
 
   describe('security widget', () => {
     describe.each`
-      context                                  | hasPipeline | reportType | isFlagEnabled | shouldRender
-      ${'security report and flag enabled'}    | ${true}     | ${'sast'}  | ${true}       | ${true}
-      ${'security report and flag disabled'}   | ${true}     | ${'sast'}  | ${false}      | ${false}
-      ${'no security report and flag enabled'} | ${true}     | ${'foo'}   | ${true}       | ${false}
-      ${'no pipeline and flag enabled'}        | ${false}    | ${'sast'}  | ${true}       | ${false}
-    `('given $context', ({ hasPipeline, reportType, isFlagEnabled, shouldRender }) => {
+      context                  | hasPipeline | shouldRender
+      ${'there is a pipeline'} | ${true}     | ${true}
+      ${'no pipeline'}         | ${false}    | ${false}
+    `('given $context', ({ hasPipeline, shouldRender }) => {
       beforeEach(() => {
-        gon.features.coreSecurityMrWidget = isFlagEnabled;
-
-        if (hasPipeline) {
-          jest.spyOn(Api, 'pipelineJobs').mockResolvedValue({
-            data: [{ artifacts: [{ file_type: reportType }] }],
-          });
-        }
-
-        return createComponent({
+        const mrData = {
           ...mockData,
-          ...(hasPipeline ? {} : { pipeline: undefined }),
+          ...(hasPipeline ? {} : { pipeline: null }),
+        };
+
+        // Override top-level mocked requests, which always use a fresh copy of
+        // mockData, which always includes the full pipeline object.
+        mock.onGet(mockData.merge_request_widget_path).reply(() => [200, mrData]);
+        mock.onGet(mockData.merge_request_cached_widget_path).reply(() => [200, mrData]);
+
+        return createComponent(mrData, {
+          apolloProvider: createMockApollo([
+            [
+              securityReportDownloadPathsQuery,
+              async () => ({ data: securityReportDownloadPathsQueryResponse }),
+            ],
+          ]),
         });
       });
 
-      if (shouldRender) {
-        it('renders', () => {
-          expect(findSecurityMrWidget()).toEqual(expect.any(HTMLElement));
-        });
-      } else {
-        it('does not render', () => {
-          expect(findSecurityMrWidget()).toBeNull();
-        });
-      }
+      it(shouldRender ? 'renders' : 'does not render', () => {
+        expect(findSecurityMrWidget().exists()).toBe(shouldRender);
+      });
     });
   });
 
-  describe('suggestPipeline Experiment', () => {
+  describe('suggestPipeline', () => {
     beforeEach(() => {
       mock.onAny().reply(200);
-
-      // This is needed because some grandchildren Bootstrap components throw warnings
-      // https://gitlab.com/gitlab-org/gitlab/issues/208458
-      jest.spyOn(console, 'warn').mockImplementation();
     });
 
-    describe('given experiment is enabled', () => {
-      withGonExperiment('suggestPipeline');
-
+    describe('given feature flag is enabled', () => {
       beforeEach(() => {
         createComponent();
 
-        vm.mr.hasCI = false;
+        wrapper.vm.mr.hasCI = false;
       });
 
       it('should suggest pipelines when none exist', () => {
-        expect(findSuggestPipeline()).toEqual(expect.any(Element));
+        expect(findSuggestPipeline().exists()).toBe(true);
       });
 
       it.each([
         { isDismissedSuggestPipeline: true },
         { mergeRequestAddCiConfigPath: null },
         { hasCI: true },
-      ])('with %s, should not suggest pipeline', async obj => {
-        Object.assign(vm.mr, obj);
+      ])('with %s, should not suggest pipeline', async (obj) => {
+        Object.assign(wrapper.vm.mr, obj);
 
-        await vm.$nextTick();
+        await nextTick();
 
-        expect(findSuggestPipeline()).toBeNull();
+        expect(findSuggestPipeline().exists()).toBe(false);
       });
 
       it('should allow dismiss of the suggest pipeline message', async () => {
-        findSuggestPipelineButton().click();
+        await findSuggestPipelineButton().trigger('click');
 
-        await vm.$nextTick();
-
-        expect(findSuggestPipeline()).toBeNull();
-      });
-    });
-
-    describe('given suggestPipeline experiment is not enabled', () => {
-      withGonExperiment('suggestPipeline', false);
-
-      beforeEach(() => {
-        createComponent();
-
-        vm.mr.hasCI = false;
-      });
-
-      it('should not suggest pipelines when none exist', () => {
-        expect(findSuggestPipeline()).toBeNull();
+        expect(findSuggestPipeline().exists()).toBe(false);
       });
     });
   });

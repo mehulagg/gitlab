@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
   let_it_be(:project, reload: true) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:service) { described_class.new(project, user) }
 
   let(:merge_request) do
@@ -16,11 +17,11 @@ RSpec.describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
   let(:pipeline) { merge_request.reload.all_pipelines.first }
 
   before do
+    project.add_maintainer(user)
+    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
     stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
     stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_trains: true, merge_pipelines: true)
-    project.add_maintainer(user)
-    project.update!(merge_pipelines_enabled: true)
     allow(AutoMergeProcessWorker).to receive(:perform_async) { }
     merge_request.update_head_pipeline
   end

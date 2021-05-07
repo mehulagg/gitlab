@@ -1,10 +1,10 @@
 <script>
-import Visibility from 'visibilityjs';
 import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
-import ciIcon from '~/vue_shared/components/ci_icon.vue';
-import Poll from '~/lib/utils/poll';
+import Visibility from 'visibilityjs';
 import { deprecatedCreateFlash as Flash } from '~/flash';
+import Poll from '~/lib/utils/poll';
 import { __, s__, sprintf } from '~/locale';
+import ciIcon from '~/vue_shared/components/ci_icon.vue';
 import CommitPipelineService from '../services/commit_pipeline_service';
 
 export default {
@@ -63,7 +63,7 @@ export default {
       this.poll = new Poll({
         resource: this.service,
         method: 'fetchData',
-        successCallback: response => this.successCallback(response),
+        successCallback: (response) => this.successCallback(response),
         errorCallback: this.errorCallback,
       });
 
@@ -83,10 +83,7 @@ export default {
       });
     },
     fetchPipelineCommitData() {
-      this.service
-        .fetchData()
-        .then(this.successCallback)
-        .catch(this.errorCallback);
+      this.service.fetchData().then(this.successCallback).catch(this.errorCallback);
     },
   },
 };

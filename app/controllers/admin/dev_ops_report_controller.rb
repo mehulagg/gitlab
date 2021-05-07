@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 class Admin::DevOpsReportController < Admin::ApplicationController
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
-  track_unique_visits :show, target_id: 'i_analytics_dev_ops_score'
+  helper_method :show_adoption?
+
+  track_redis_hll_event :show, name: 'i_analytics_dev_ops_score', if: -> { should_track_devops_score? }
 
   feature_category :devops_reports
 
@@ -12,4 +14,14 @@ class Admin::DevOpsReportController < Admin::ApplicationController
     @metric = DevOpsReport::Metric.order(:created_at).last&.present
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def show_adoption?
+    false
+  end
+
+  def should_track_devops_score?
+    true
+  end
 end
+
+Admin::DevOpsReportController.prepend_if_ee('EE::Admin::DevOpsReportController')

@@ -1,8 +1,0 @@
-fragment ContainerExpirationPolicyFields on ContainerExpirationPolicy {
-  cadence
-  enabled
-  keepN
-  nameRegex
-  nameRegexKeep
-  olderThan
-}

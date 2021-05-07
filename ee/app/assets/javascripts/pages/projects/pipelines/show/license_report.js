@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import LicenseReportApp from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
-import Translate from '~/vue_shared/translate';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import Translate from '~/vue_shared/translate';
 import { updateBadgeCount } from './utils';
 
 Vue.use(Translate);
@@ -34,7 +34,7 @@ export default () => {
             reportSectionClass: 'split-report-section',
           },
           on: {
-            updateBadgeCount: count => {
+            updateBadgeCount: (count) => {
               updateBadgeCount('.js-licenses-counter', count);
             },
           },

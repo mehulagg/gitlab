@@ -1,0 +1,34 @@
+# Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/api_fuzzing/
+
+# Configure the scanning tool through the environment variables.
+# List of the variables: https://docs.gitlab.com/ee/user/application_security/api_fuzzing/#available-variables
+# How to set: https://docs.gitlab.com/ee/ci/yaml/#variables
+
+variables:
+    FUZZAPI_VERSION: "1"
+    SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
+    FUZZAPI_IMAGE: ${SECURE_ANALYZERS_PREFIX}/api-fuzzing:${FUZZAPI_VERSION}
+
+apifuzzer_fuzz:
+    stage: fuzz
+    image: $FUZZAPI_IMAGE
+    allow_failure: true
+    rules:
+        - if: $API_FUZZING_DISABLED
+          when: never
+        - if: $API_FUZZING_DISABLED_FOR_DEFAULT_BRANCH &&
+                $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
+          when: never
+        - if: $CI_COMMIT_BRANCH
+    script:
+        - /peach/analyzer-fuzz-api
+    artifacts:
+        when: always
+        paths:
+            - gl-assets
+            - gl-api-fuzzing-report.json
+            - gl-*.log
+        reports:
+            api_fuzzing: gl-api-fuzzing-report.json
+
+# end

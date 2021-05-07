@@ -1,13 +1,32 @@
-import Vuex from 'vuex';
+import { GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import Vuex from 'vuex';
 import { setTestTimeout } from 'helpers/timeout';
-import { GlDropdownItem } from '@gitlab/ui';
-import invalidUrl from '~/lib/utils/invalid_url';
 import axios from '~/lib/utils/axios_utils';
+import invalidUrl from '~/lib/utils/invalid_url';
 import AlertWidget from '~/monitoring/components/alert_widget.vue';
 
+import MonitorAnomalyChart from '~/monitoring/components/charts/anomaly.vue';
+import MonitorBarChart from '~/monitoring/components/charts/bar.vue';
+import MonitorColumnChart from '~/monitoring/components/charts/column.vue';
+import MonitorEmptyChart from '~/monitoring/components/charts/empty_chart.vue';
+import MonitorHeatmapChart from '~/monitoring/components/charts/heatmap.vue';
+import MonitorSingleStatChart from '~/monitoring/components/charts/single_stat.vue';
+import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_column.vue';
+import MonitorTimeSeriesChart from '~/monitoring/components/charts/time_series.vue';
 import DashboardPanel from '~/monitoring/components/dashboard_panel.vue';
+import { panelTypes } from '~/monitoring/constants';
+
+import { createStore, monitoringDashboard } from '~/monitoring/stores';
+import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
+import { dashboardProps, graphData, graphDataEmpty } from '../fixture_data';
+import {
+  anomalyGraphData,
+  singleStatGraphData,
+  heatmapGraphData,
+  barGraphData,
+} from '../graph_data';
 import {
   mockAlert,
   mockLogsHref,
@@ -16,27 +35,6 @@ import {
   mockNamespacedData,
   mockTimeRange,
 } from '../mock_data';
-import { dashboardProps, graphData, graphDataEmpty } from '../fixture_data';
-import {
-  anomalyGraphData,
-  singleStatGraphData,
-  heatmapGraphData,
-  barGraphData,
-} from '../graph_data';
-
-import { panelTypes } from '~/monitoring/constants';
-
-import MonitorEmptyChart from '~/monitoring/components/charts/empty_chart.vue';
-import MonitorTimeSeriesChart from '~/monitoring/components/charts/time_series.vue';
-import MonitorAnomalyChart from '~/monitoring/components/charts/anomaly.vue';
-import MonitorSingleStatChart from '~/monitoring/components/charts/single_stat.vue';
-import MonitorHeatmapChart from '~/monitoring/components/charts/heatmap.vue';
-import MonitorColumnChart from '~/monitoring/components/charts/column.vue';
-import MonitorBarChart from '~/monitoring/components/charts/bar.vue';
-import MonitorStackedColumnChart from '~/monitoring/components/charts/stacked_column.vue';
-
-import { createStore, monitoringDashboard } from '~/monitoring/stores';
-import { createStore as createEmbedGroupStore } from '~/monitoring/stores/embed_group';
 
 const mocks = {
   $toast: {
@@ -57,7 +55,7 @@ describe('Dashboard Panel', () => {
   const findTitle = () => wrapper.find({ ref: 'graphTitle' });
   const findCtxMenu = () => wrapper.find({ ref: 'contextualMenu' });
   const findMenuItems = () => wrapper.findAll(GlDropdownItem);
-  const findMenuItemByText = text => findMenuItems().filter(i => i.text() === text);
+  const findMenuItemByText = (text) => findMenuItems().filter((i) => i.text() === text);
   const findAlertsWidget = () => wrapper.find(AlertWidget);
 
   const createWrapper = (props, { mountFn = shallowMount, ...options } = {}) => {
@@ -82,7 +80,7 @@ describe('Dashboard Panel', () => {
     });
   };
 
-  const setMetricsSavedToDb = val =>
+  const setMetricsSavedToDb = (val) =>
     monitoringDashboard.getters.metricsSavedToDb.mockReturnValue(val);
 
   beforeEach(() => {
@@ -106,7 +104,7 @@ describe('Dashboard Panel', () => {
         {},
         {
           slots: {
-            topLeft: `<div class="top-left-content">OK</div>`,
+            'top-left': `<div class="top-left-content">OK</div>`,
           },
         },
       );
@@ -214,7 +212,7 @@ describe('Dashboard Panel', () => {
     });
 
     describe('Supports different panel types', () => {
-      const dataWithType = type => {
+      const dataWithType = (type) => {
         return {
           ...graphData,
           type,
@@ -777,11 +775,7 @@ describe('Dashboard Panel', () => {
         await wrapper.vm.$nextTick();
 
         expect(findRunbookLinks().length).toBe(1);
-        expect(
-          findRunbookLinks()
-            .at(0)
-            .attributes('href'),
-        ).toBe(invalidUrl);
+        expect(findRunbookLinks().at(0).attributes('href')).toBe(invalidUrl);
       });
     });
   });

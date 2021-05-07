@@ -1,5 +1,5 @@
-import mutations from '~/vue_shared/components/sidebar/labels_select_vue/store/mutations';
 import * as types from '~/vue_shared/components/sidebar/labels_select_vue/store/mutation_types';
+import mutations from '~/vue_shared/components/sidebar/labels_select_vue/store/mutations';
 
 describe('LabelsSelect Mutations', () => {
   describe(`${types.SET_INITIAL_STATE}`, () => {
@@ -93,14 +93,14 @@ describe('LabelsSelect Mutations', () => {
     });
 
     it('sets provided `labels` to `state.labels` along with `set` prop based on `state.selectedLabels`', () => {
-      const selectedLabelIds = selectedLabels.map(label => label.id);
+      const selectedLabelIds = selectedLabels.map((label) => label.id);
       const state = {
         selectedLabels,
         labelsFetchInProgress: true,
       };
       mutations[types.RECEIVE_SET_LABELS_SUCCESS](state, labels);
 
-      state.labels.forEach(label => {
+      state.labels.forEach((label) => {
         if (selectedLabelIds.includes(label.id)) {
           expect(label.set).toBe(true);
         }
@@ -162,7 +162,7 @@ describe('LabelsSelect Mutations', () => {
       };
       mutations[types.UPDATE_SELECTED_LABELS](state, { labels: [{ id: 2 }] });
 
-      state.labels.forEach(label => {
+      state.labels.forEach((label) => {
         if (updatedLabelIds.includes(label.id)) {
           expect(label.touched).toBe(true);
           expect(label.set).toBe(true);

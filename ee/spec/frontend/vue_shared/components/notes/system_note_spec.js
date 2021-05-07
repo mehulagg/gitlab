@@ -2,8 +2,8 @@ import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
-import IssueSystemNote from '~/vue_shared/components/notes/system_note.vue';
 import createStore from '~/notes/stores';
+import IssueSystemNote from '~/vue_shared/components/notes/system_note.vue';
 
 describe('system note component', () => {
   let wrapper;
@@ -76,7 +76,7 @@ describe('system note component', () => {
     expect(findDescriptionVersion().exists()).toBe(false);
   });
 
-  it('click on button to toggle description diff displays description diff with delete icon button', done => {
+  it('click on button to toggle description diff displays description diff with delete icon button', (done) => {
     mockFetchDiff();
     expect(findDescriptionVersion().exists()).toBe(false);
 

@@ -1,20 +1,34 @@
 <script>
-import { GlButton, GlIcon } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import permissionsQuery from 'shared_queries/design_management/design_permissions.query.graphql';
+import { __, s__, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import DesignNavigation from './design_navigation.vue';
-import DeleteButton from '../delete_button.vue';
-import permissionsQuery from '../../graphql/queries/design_permissions.query.graphql';
 import { DESIGNS_ROUTE_NAME } from '../../router/constants';
+import DeleteButton from '../delete_button.vue';
+import DesignNavigation from './design_navigation.vue';
 
 export default {
+  i18n: {
+    downloadButtonLabel: s__('DesignManagement|Download design'),
+  },
   components: {
     GlButton,
     GlIcon,
     DesignNavigation,
     DeleteButton,
   },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   mixins: [timeagoMixin],
+  inject: {
+    projectPath: {
+      default: '',
+    },
+    issueIid: {
+      default: '',
+    },
+  },
   props: {
     id: {
       type: String,
@@ -55,14 +69,6 @@ export default {
       },
     };
   },
-  inject: {
-    projectPath: {
-      default: '',
-    },
-    issueIid: {
-      default: '',
-    },
-  },
   apollo: {
     permissions: {
       query: permissionsQuery,
@@ -72,7 +78,7 @@ export default {
           iid: this.issueIid,
         };
       },
-      update: data => data.project.issue.userPermissions,
+      update: (data) => data.project.issue.userPermissions,
     },
   },
   computed: {
@@ -112,15 +118,23 @@ export default {
       </div>
     </div>
     <design-navigation :id="id" class="gl-ml-auto gl-flex-shrink-0" />
-    <gl-button :href="image" icon="download" />
+    <gl-button
+      v-gl-tooltip.bottom
+      :href="image"
+      icon="download"
+      :title="$options.i18n.downloadButtonLabel"
+      :aria-label="$options.i18n.downloadButtonLabel"
+    />
     <delete-button
       v-if="isLatestVersion && canDeleteDesign"
+      v-gl-tooltip.bottom
       class="gl-ml-3"
       :is-deleting="isDeleting"
       button-variant="warning"
       button-icon="archive"
       button-category="secondary"
-      @deleteSelectedDesigns="$emit('delete')"
+      :title="s__('DesignManagement|Archive design')"
+      @delete-selected-designs="$emit('delete')"
     />
   </header>
 </template>

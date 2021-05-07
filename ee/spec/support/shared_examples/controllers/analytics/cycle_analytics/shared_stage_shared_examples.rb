@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'cycle analytics stages controller' do
+RSpec.shared_examples 'Value Stream Analytics Stages controller' do
   before do
     stub_licensed_features(cycle_analytics_for_groups: true)
 
@@ -197,17 +197,58 @@ RSpec.shared_examples 'cycle analytics stages controller' do
       it 'matches the response schema' do
         subject
 
-        expect(response).to match_response_schema('analytics/cycle_analytics/median', dir: 'ee')
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
       end
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
+    end
+
+    describe 'GET #average' do
+      subject { get :average, params: params }
+
+      it 'matches the response schema' do
+        subject
+
+        expect(response).to match_response_schema('analytics/cycle_analytics/number_or_nil_value', dir: 'ee')
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
     end
 
     describe 'GET #records' do
       subject { get :records, params: params }
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
+
+      context 'sort params' do
+        before do
+          params.merge!(sort: 'duration', direction: 'asc')
+        end
+
+        it 'accepts sort params' do
+          expect_next_instance_of(Gitlab::Analytics::CycleAnalytics::Sorting) do |sort|
+            expect(sort).to receive(:apply).with(:duration, :asc).and_call_original
+          end
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+      end
+
+      context 'pagination' do
+        it 'exposes pagination headers' do
+          create_list(:merge_request, 3)
+          stub_const('Gitlab::Analytics::CycleAnalytics::RecordsFetcher::MAX_RECORDS', 2)
+          allow_any_instance_of(Gitlab::Analytics::CycleAnalytics::RecordsFetcher).to receive(:query).and_return(MergeRequest.join_metrics.all)
+
+          subject
+
+          expect(response.headers['X-Next-Page']).to eq('2')
+          expect(response.headers['Link']).to include('rel="next"')
+        end
+      end
     end
 
     describe 'GET #duration_chart' do
@@ -222,7 +263,37 @@ RSpec.shared_examples 'cycle analytics stages controller' do
         expect(response).to match_response_schema('analytics/cycle_analytics/duration_chart', dir: 'ee')
       end
 
-      include_examples 'cycle analytics data endpoint examples'
+      include_examples 'Value Stream Analytics data endpoint examples'
+      include_examples 'group permission check on the controller level'
+    end
+
+    describe 'GET #duration_chart' do
+      subject { get :average_duration_chart, params: params }
+
+      it 'matches the response schema' do
+        fake_result = [double(MergeRequest, average_duration_in_seconds: 10, date: Time.current.to_date)]
+        expect_any_instance_of(Gitlab::Analytics::CycleAnalytics::DataForDurationChart).to receive(:average_by_day).and_return(fake_result)
+
+        subject
+
+        expect(response).to match_response_schema('analytics/cycle_analytics/average_duration_chart', dir: 'ee')
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
+      include_examples 'group permission check on the controller level'
+    end
+
+    describe 'GET #count' do
+      subject { get :count, params: params }
+
+      it 'matches the response schema' do
+        subject
+
+        expect(response).to be_successful
+        expect(json_response['count']).to eq(0)
+      end
+
+      include_examples 'Value Stream Analytics data endpoint examples'
       include_examples 'group permission check on the controller level'
     end
   end
@@ -280,7 +351,7 @@ RSpec.shared_context 'when invalid stage parameters are given' do
   end
 end
 
-RSpec.shared_examples 'cycle analytics data endpoint examples' do
+RSpec.shared_examples 'Value Stream Analytics data endpoint examples' do
   before do
     params[:created_after] = '2019-01-01'
     params[:created_before] = '2019-04-01'

@@ -1,19 +1,23 @@
-# SCIM API **(SILVER ONLY)**
+---
+type: reference, howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in [GitLab Silver](https://about.gitlab.com/pricing/) 11.10.
+# SCIM API (SYSTEM ONLY) **(PREMIUM SAAS)**
 
-The SCIM API implements the [RFC7644 protocol](https://tools.ietf.org/html/rfc7644).
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in GitLab Premium 11.10.
 
-CAUTION: **Caution:**
-This API is for internal system use for connecting with a SCIM provider. While it can be used directly, it is subject to change without notice.
+The SCIM API implements the [RFC7644 protocol](https://tools.ietf.org/html/rfc7644). As this API is for
+**system** use for SCIM provider integration, it is subject to change without notice.
 
-NOTE: **Note:**
-[Group SSO](../user/group/saml_sso/index.md) must be enabled for the group. For more information, see [SCIM setup documentation](../user/group/saml_sso/scim_setup.md#requirements).
+To use this API, [Group SSO](../user/group/saml_sso/index.md) must be enabled for the group.
+This API is only in use where [SCIM for Group SSO](../user/group/saml_sso/scim_setup.md) is enabled. It's a prerequisite to the creation of SCIM identities.
 
-## Get a list of SAML users
+## Get a list of SCIM provisioned users
 
-NOTE: **Note:**
-This endpoint is used as part of the SCIM syncing mechanism and it only returns
+This endpoint is used as part of the SCIM syncing mechanism. It only returns
 a single user based on a unique ID which should match the `extern_uid` of the user.
 
 ```plaintext
@@ -29,13 +33,13 @@ Parameters:
 | `startIndex` | integer | no    | The 1-based index indicating where to start returning results from. A value of less than one will be interpreted as 1. |
 | `count` | integer | no    | Desired maximum number of query results. |
 
-NOTE: **Note:**
+NOTE:
 Pagination follows the [SCIM spec](https://tools.ietf.org/html/rfc7644#section-3.4.2.4) rather than GitLab pagination as used elsewhere. If records change between requests it is possible for a page to either be missing records that have moved to a different page or repeat records from a previous request.
 
 Example request:
 
 ```shell
-curl 'https://gitlab.example.com/api/scim/v2/groups/test_group/Users?filter=id%20eq%20"0b1d561c-21ff-4092-beab-8154b17f82f2"' --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
+curl "https://gitlab.example.com/api/scim/v2/groups/test_group/Users?filter=id%20eq%20%220b1d561c-21ff-4092-beab-8154b17f82f2%22" --header "Authorization: Bearer <your_scim_token>" --header "Content-Type: application/scim+json"
 ```
 
 Example response:
@@ -70,7 +74,7 @@ Example response:
 }
 ```
 
-## Get a single SAML user
+## Get a single SCIM provisioned user
 
 ```plaintext
 GET /api/scim/v2/groups/:group_path/Users/:id
@@ -111,7 +115,7 @@ Example response:
 }
 ```
 
-## Create a SAML user
+## Create a SCIM provisioned user
 
 ```plaintext
 POST /api/scim/v2/groups/:group_path/Users/
@@ -157,7 +161,7 @@ Example response:
 
 Returns a `201` status code if successful.
 
-## Update a single SAML user
+## Update a single SCIM provisioned user
 
 Fields that can be updated are:
 
@@ -189,7 +193,7 @@ curl --verbose --request PATCH "https://gitlab.example.com/api/scim/v2/groups/te
 
 Returns an empty response with a `204` status code if successful.
 
-## Remove a single SAML user
+## Remove a single SCIM provisioned user
 
 Removes the user's SSO identity and group membership.
 

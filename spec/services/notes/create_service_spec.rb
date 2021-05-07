@@ -78,23 +78,17 @@ RSpec.describe Notes::CreateService do
         end.to change { counter.unique_events(event_names: event, start_date: 1.day.ago, end_date: 1.day.from_now) }.by(1)
       end
 
+      it 'does not track merge request usage data' do
+        expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter).not_to receive(:track_create_comment_action)
+
+        described_class.new(project, user, opts).execute
+      end
+
       context 'in a merge request' do
         let_it_be(:project_with_repo) { create(:project, :repository) }
         let_it_be(:merge_request) do
           create(:merge_request, source_project: project_with_repo,
                  target_project: project_with_repo)
-        end
-
-        context 'issue comment usage data' do
-          let(:opts) do
-            { note: 'Awesome comment', noteable_type: 'MergeRequest', noteable_id: merge_request.id }
-          end
-
-          it 'does not track' do
-            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_comment_added_action)
-
-            described_class.new(project, user, opts).execute
-          end
         end
 
         context 'noteable highlight cache clearing' do
@@ -117,6 +111,18 @@ RSpec.describe Notes::CreateService do
           before do
             allow_any_instance_of(Gitlab::Diff::Position)
               .to receive(:unfolded_diff?) { true }
+          end
+
+          it 'does not track issue comment usage data' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_comment_added_action)
+
+            described_class.new(project_with_repo, user, new_opts).execute
+          end
+
+          it 'tracks merge request usage data' do
+            expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter).to receive(:track_create_comment_action).with(note: kind_of(Note))
+
+            described_class.new(project_with_repo, user, new_opts).execute
           end
 
           it 'clears noteable diff cache when it was unfolded for the note position' do
@@ -339,6 +345,24 @@ RSpec.describe Notes::CreateService do
 
           expect(note.errors[:commands_only]).to be_present
         end
+
+        it 'adds commands failed message to note errors' do
+          note_text = %(/reopen)
+          note = described_class.new(project, user, opts.merge(note: note_text)).execute
+
+          expect(note.errors[:commands_only]).to contain_exactly('Could not apply reopen command.')
+        end
+
+        it 'generates success and failed error messages' do
+          note_text = %(/close\n/reopen)
+          service = double(:service)
+          allow(Issues::UpdateService).to receive(:new).and_return(service)
+          expect(service).to receive(:execute)
+
+          note = described_class.new(project, user, opts.merge(note: note_text)).execute
+
+          expect(note.errors[:commands_only]).to contain_exactly('Closed this issue. Could not apply reopen command.')
+        end
       end
     end
 
@@ -451,6 +475,26 @@ RSpec.describe Notes::CreateService do
           existing_note.reload
         end.to change { existing_note.type }.from(nil).to('DiscussionNote')
             .and change { existing_note.updated_at }
+      end
+
+      context 'failure in when_saved' do
+        let(:service) { described_class.new(project, user, reply_opts) }
+
+        it 'converts existing note to DiscussionNote' do
+          expect do
+            existing_note
+
+            allow(service).to receive(:when_saved).and_raise(ActiveRecord::StatementInvalid)
+
+            travel_to(Time.current + 1.minute) do
+              service.execute
+            rescue ActiveRecord::StatementInvalid
+            end
+
+            existing_note.reload
+          end.to change { existing_note.type }.from(nil).to('DiscussionNote')
+            .and change { existing_note.updated_at }
+        end
       end
 
       it 'returns a DiscussionNote with its parent discussion refreshed correctly' do

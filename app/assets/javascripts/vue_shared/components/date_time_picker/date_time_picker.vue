@@ -1,8 +1,7 @@
 <script>
 import { GlIcon, GlButton, GlDropdown, GlDropdownItem, GlFormGroup } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-
 import { convertToFixedRange, isEqualTimeRanges, findTimeRange } from '~/lib/utils/datetime_range';
+import { __, sprintf } from '~/locale';
 
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import DateTimePickerInput from './date_time_picker_input.vue';
@@ -202,7 +201,7 @@ export default {
 <template>
   <tooltip-on-truncate
     :title="timeWindowText"
-    :truncate-target="elem => elem.querySelector('.gl-dropdown-toggle-text')"
+    :truncate-target="(elem) => elem.querySelector('.gl-dropdown-toggle-text')"
     placement="top"
     class="d-inline-block"
   >
@@ -219,7 +218,7 @@ export default {
         <span v-if="utc" class="gl-text-gray-500 gl-font-weight-bold gl-font-sm">{{
           __('UTC')
         }}</span>
-        <gl-icon class="gl-dropdown-caret" name="chevron-down" aria-hidden="true" />
+        <gl-icon class="gl-dropdown-caret" name="chevron-down" />
       </template>
 
       <div class="d-flex justify-content-between gl-p-2">

@@ -5,6 +5,8 @@ module Gitlab
     module Stage
       class FinishImportWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
+
+        sidekiq_options retry: 3
         include GithubImport::Queue
         include StageMethods
 
@@ -20,12 +22,15 @@ module Gitlab
 
         def report_import_time(project)
           duration = Time.zone.now - project.created_at
-          path = project.full_path
 
-          histogram.observe({ project: path }, duration)
+          histogram.observe({ project: project.full_path }, duration)
           counter.increment
 
-          logger.info("GitHub importer finished for #{path} in #{duration.round(2)} seconds")
+          info(
+            project.id,
+            message: "GitHub project import finished",
+            duration_s: duration.round(2)
+          )
         end
 
         def histogram

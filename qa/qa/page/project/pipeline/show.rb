@@ -26,6 +26,10 @@ module QA
             element :child_pipeline
           end
 
+          view 'app/assets/javascripts/reports/components/report_section.vue' do
+            element :expand_report_button
+          end
+
           view 'app/assets/javascripts/vue_shared/components/ci_icon.vue' do
             element :status_icon, 'ci-status-icon-${status}' # rubocop:disable QA/ElementWithPattern
           end
@@ -64,17 +68,37 @@ module QA
             end
           end
 
-          def has_child_pipeline?
-            has_element? :child_pipeline
+          def has_child_pipeline?(title: nil)
+            title ? find_child_pipeline_by_title(title) : has_element?(:child_pipeline)
+          end
+
+          def has_no_child_pipeline?
+            has_no_element?(:child_pipeline)
           end
 
           def click_job(job_name)
-            click_element(:job_link, text: job_name)
+            click_element(:job_link, Project::Job::Show, text: job_name)
           end
 
-          def expand_child_pipeline
-            within_element(:child_pipeline) do
+          def child_pipelines
+            all_elements(:child_pipeline, minimum: 1)
+          end
+
+          def find_child_pipeline_by_title(title)
+            child_pipelines.find { |pipeline| pipeline[:title].include?(title) }
+          end
+
+          def expand_child_pipeline(title: nil)
+            child_pipeline = title ? find_child_pipeline_by_title(title) : child_pipelines.first
+
+            within_element_by_index(:child_pipeline, child_pipelines.index(child_pipeline)) do
               click_element(:expand_pipeline_button)
+            end
+          end
+
+          def expand_license_report
+            within_element(:license_report_widget) do
+              click_element(:expand_report_button)
             end
           end
 
@@ -93,4 +117,4 @@ module QA
   end
 end
 
-QA::Page::Project::Pipeline::Show.prepend_if_ee('QA::EE::Page::Project::Pipeline::Show')
+QA::Page::Project::Pipeline::Show.prepend_if_ee('Page::Project::Pipeline::Show', namespace: QA)

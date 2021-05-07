@@ -89,7 +89,9 @@ export default {
           id: undefined,
         };
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee_id = assignee.id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.assignee = assignee;
     },
   },
@@ -105,7 +107,7 @@ export default {
       </button>
     </div>
     <div class="value">
-      <div v-if="hasValue" class="media">
+      <div v-if="hasValue" class="media gl-display-flex gl-align-items-center">
         <div class="align-center">
           <user-avatar-image :img-src="selected.avatar_url" :size="32" />
         </div>
@@ -117,8 +119,9 @@ export default {
       <div v-else class="text-secondary">{{ anyUserText }}</div>
     </div>
 
-    <div class="selectbox" style="display: none;">
+    <div class="selectbox" style="display: none">
       <div class="dropdown">
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <button
           ref="dropdown"
           :data-field-name="fieldName"
@@ -139,6 +142,8 @@ export default {
             :size="16"
           />
         </button>
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
+
         <div
           class="dropdown-menu dropdown-select dropdown-menu-paging dropdown-menu-user dropdown-menu-selectable dropdown-menu-author"
         >

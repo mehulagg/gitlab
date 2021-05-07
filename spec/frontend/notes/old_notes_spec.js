@@ -1,13 +1,13 @@
 /* eslint-disable import/no-commonjs, no-new */
 
-import $ from 'jquery';
 import MockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
 import { createSpyObj } from 'helpers/jest_helpers';
-import { setTestTimeoutOnce } from 'helpers/timeout';
 import { TEST_HOST } from 'helpers/test_constants';
-import * as urlUtility from '~/lib/utils/url_utility';
+import { setTestTimeoutOnce } from 'helpers/timeout';
 import axios from '~/lib/utils/axios_utils';
+import * as urlUtility from '~/lib/utils/url_utility';
 
 // These must be imported synchronously because they pull dependencies
 // from the DOM.
@@ -28,7 +28,7 @@ window.gl = window.gl || {};
 gl.utils = gl.utils || {};
 gl.utils.disableButtonIfEmptyField = () => {};
 
-// the following test is unreliable and failing in master 2-3 times a day
+// the following test is unreliable and failing in main 2-3 times a day
 // see https://gitlab.com/gitlab-org/gitlab/issues/206906#note_290602581
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip('Old Notes (~/notes.js)', () => {
@@ -82,9 +82,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
     it('modifies the Markdown field', () => {
       const changeEvent = document.createEvent('HTMLEvents');
       changeEvent.initEvent('change', true, true);
-      $('input[type=checkbox]')
-        .attr('checked', true)[0]
-        .dispatchEvent(changeEvent);
+      $('input[type=checkbox]').attr('checked', true)[0].dispatchEvent(changeEvent);
 
       expect($('.js-task-list-field.original-task-list').val()).toBe('- [x] Task List Item');
     });
@@ -129,7 +127,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
 
       jest.spyOn(notes, 'renderNote');
 
-      $('.js-comment-button').on('click', e => {
+      $('.js-comment-button').on('click', (e) => {
         const $form = $(this);
         e.preventDefault();
         notes.addNote($form, {});
@@ -552,7 +550,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       expect($notesContainer.find('.note.being-posted').length).toBeGreaterThan(0);
     });
 
-    it('should remove placeholder note when new comment is done posting', done => {
+    it('should remove placeholder note when new comment is done posting', (done) => {
       mockNotesPost();
 
       $('.js-comment-button').click();
@@ -564,7 +562,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
     });
 
     describe('postComment', () => {
-      it('disables the submit button', done => {
+      it('disables the submit button', (done) => {
         const $submitButton = $form.find('.js-comment-submit-button');
 
         expect($submitButton).not.toBeDisabled();
@@ -587,7 +585,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       });
     });
 
-    it('should show actual note element when new comment is done posting', done => {
+    it('should show actual note element when new comment is done posting', (done) => {
       mockNotesPost();
 
       $('.js-comment-button').click();
@@ -598,7 +596,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       });
     });
 
-    it('should reset Form when new comment is done posting', done => {
+    it('should reset Form when new comment is done posting', (done) => {
       mockNotesPost();
 
       $('.js-comment-button').click();
@@ -609,7 +607,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       });
     });
 
-    it('should show flash error message when new comment failed to be posted', done => {
+    it('should show flash error message when new comment failed to be posted', (done) => {
       mockNotesPostError();
       jest.spyOn(notes, 'addFlash');
 
@@ -660,7 +658,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       $form.find('textarea.js-note-text').val(sampleComment);
     });
 
-    it('should remove quick action placeholder when comment with quick actions is done posting', done => {
+    it('should remove quick action placeholder when comment with quick actions is done posting', (done) => {
       jest.spyOn(gl.awardsHandler, 'addAwardToEmojiBar');
       $('.js-comment-button').click();
 
@@ -695,7 +693,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       $form.find('textarea.js-note-text').val(sampleComment);
     });
 
-    it('should show message placeholder including lines starting with slash', done => {
+    it('should show message placeholder including lines starting with slash', (done) => {
       $('.js-comment-button').click();
 
       expect($notesContainer.find('.note.being-posted').length).toEqual(1); // Placeholder shown
@@ -733,7 +731,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       $form.find('textarea.js-note-text').html(sampleComment);
     });
 
-    it('should not render a script tag', done => {
+    it('should not render a script tag', (done) => {
       $('.js-comment-button').click();
 
       setImmediate(() => {
@@ -746,12 +744,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
           .find(`#note_${note.id}`)
           .find('.js-task-list-container');
 
-        expect(
-          $updatedNoteEl
-            .find('.note-text')
-            .text()
-            .trim(),
-        ).toEqual('');
+        expect($updatedNoteEl.find('.note-text').text().trim()).toEqual('');
 
         done();
       });
@@ -912,26 +905,15 @@ describe.skip('Old Notes (~/notes.js)', () => {
 
       expect($tempNote.find('.timeline-icon .avatar').attr('src')).toEqual(currentUserAvatar);
       expect($tempNote.find('.timeline-content').hasClass('discussion')).toBeFalsy();
-      expect(
-        $tempNoteHeader
-          .find('.d-none.d-sm-inline-block')
-          .text()
-          .trim(),
-      ).toEqual(currentUserFullname);
+      expect($tempNoteHeader.find('.d-none.d-sm-inline-block').text().trim()).toEqual(
+        currentUserFullname,
+      );
 
-      expect(
-        $tempNoteHeader
-          .find('.note-headline-light')
-          .text()
-          .trim(),
-      ).toEqual(`@${currentUsername}`);
+      expect($tempNoteHeader.find('.note-headline-light').text().trim()).toEqual(
+        `@${currentUsername}`,
+      );
 
-      expect(
-        $tempNote
-          .find('.note-body .note-text p')
-          .text()
-          .trim(),
-      ).toEqual(sampleComment);
+      expect($tempNote.find('.note-body .note-text p').text().trim()).toEqual(sampleComment);
     });
 
     it('should return constructed placeholder element for discussion note based on form contents', () => {
@@ -959,12 +941,9 @@ describe.skip('Old Notes (~/notes.js)', () => {
       });
       const $tempNoteHeader = $tempNote.find('.note-header');
 
-      expect(
-        $tempNoteHeader
-          .find('.d-none.d-sm-inline-block')
-          .text()
-          .trim(),
-      ).toEqual('Foo &lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
+      expect($tempNoteHeader.find('.d-none.d-sm-inline-block').text().trim()).toEqual(
+        'Foo &lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;',
+      );
     });
   });
 
@@ -987,12 +966,7 @@ describe.skip('Old Notes (~/notes.js)', () => {
       expect($tempNote.attr('id')).toEqual(uniqueId);
       expect($tempNote.hasClass('being-posted')).toBeTruthy();
       expect($tempNote.hasClass('fade-in-half')).toBeTruthy();
-      expect(
-        $tempNote
-          .find('.timeline-content i')
-          .text()
-          .trim(),
-      ).toEqual(sampleCommandDescription);
+      expect($tempNote.find('.timeline-content i').text().trim()).toEqual(sampleCommandDescription);
     });
   });
 

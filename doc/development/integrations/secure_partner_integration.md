@@ -1,19 +1,25 @@
+---
+stage: Secure
+group: Static Analysis
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Secure Partner Integration - Onboarding Process
 
 If you want to integrate your product with the [Secure Stage](https://about.gitlab.com/direction/secure/),
-this page will help you understand the developer workflow GitLab intends for
+this page describes the developer workflow GitLab intends for
 our users to follow with regards to security results. These should be used as
 guidelines so you can build an integration that fits with the workflow GitLab
 users are already familiar with.
 
 This page also provides resources for the technical work associated
-with [onboarding as a partner](https://about.gitlab.com/partners/integrate/).
+with [onboarding as a partner](https://about.gitlab.com/partners/technology-partners/integrate/).
 The steps below are a high-level view of what needs to be done to complete an
 integration as well as linking to more detailed resources for how to do so.
 
 ## Integration Tiers
 
-GitLab's security offerings are designed for GitLab Gold and GitLab Ultimate users, and the
+The security offerings in GitLab are designed for GitLab Ultimate users, and the
 [DevSecOps](https://about.gitlab.com/handbook/use-cases/#4-devsecops-shift-left-security)
 use case. All the features are in those tiers. This includes the APIs and standard reporting
 framework needed to provide a consistent experience for users to easily bring their preferred
@@ -23,7 +29,7 @@ tiers so that we can provide the most value to our mutual customers.
 ## What is the GitLab Developer Workflow?
 
 This workflow is how GitLab users interact with our product and expect it to
-function. Understanding how users use GitLab today will help you choose the
+function. Understanding how users use GitLab today helps you choose the
 best place to integrate your own product and its results into GitLab.
 
 - Developers want to write code without using a new tool to consume results
@@ -41,7 +47,7 @@ best place to integrate your own product and its results into GitLab.
   displays the results of the pipeline's security checks and the developer can
   review them. The developer can review both a summary and a detailed version
   of the results.
-- If certain policies (such as [merge request approvals](../../user/project/merge_requests/merge_request_approvals.md))
+- If certain policies (such as [merge request approvals](../../user/project/merge_requests/approvals/index.md))
   are in place for a project, developers must resolve specific findings or get
   an approval from a specific list of people.
 - The [security dashboard](../../user/application_security/security_dashboard/index.md)
@@ -65,19 +71,19 @@ best place to integrate your own product and its results into GitLab.
 This section describes the steps you need to complete to onboard as a partner
 and complete an integration with the Secure stage.
 
-1. Read about our [partnerships](https://about.gitlab.com/partners/integrate/).
+1. Read about our [partnerships](https://about.gitlab.com/partners/technology-partners/integrate/).
 1. [Create an issue](https://gitlab.com/gitlab-com/alliances/alliances/-/issues/new?issuable_template=new_partner)
    using our new partner issue template to begin the discussion.
 1. Get a test account to begin developing your integration. You can
-   request a [GitLab.com Gold Subscription Sandbox](https://about.gitlab.com/partners/integrate/#gitlabcom-gold-subscription-sandbox-request)
-   or an [EE Developer License](https://about.gitlab.com/partners/integrate/#requesting-ee-dev-license-for-rd).
+   request a [GitLab.com Subscription Sandbox](https://about.gitlab.com/partners/technology-partners/integrate/#gitlabcom-subscription-sandbox-request)
+   or an [EE Developer License](https://about.gitlab.com/partners/technology-partners/integrate/#requesting-ultimate-dev-license-for-rd).
 1. Provide a [pipeline job](../../development/pipelines.md)
    template that users could integrate into their own GitLab pipelines.
 1. Create a report artifact with your pipeline jobs.
 1. Ensure your pipeline jobs create a report artifact that GitLab can process
    to successfully display your own product's results with the rest of GitLab.
    - See detailed [technical directions](secure.md) for this step.
-   - Read more about [job report artifacts](../../ci/pipelines/job_artifacts.md#artifactsreports).
+   - Read more about [job report artifacts](../../ci/yaml/README.md#artifactsreports).
    - Read about [job artifacts](../../ci/pipelines/job_artifacts.md).
    - Your report artifact must be in one of our currently supported formats.
      For more information, see the [documentation on reports](secure.md#report).
@@ -93,22 +99,22 @@ and complete an integration with the Secure stage.
       - In the [Security Dashboard](../../user/application_security/security_dashboard/index.md) ([Dashboard data flow](https://gitlab.com/snippets/1910005#project-and-group-dashboards)).
 1. Optional: Provide a way to interact with results as Vulnerabilities:
    - Users can interact with the findings from your artifact within their workflow. They can dismiss the findings or accept them and create a backlog issue.
-   - To automatically create issues without user interaction, use the [issue API](../../api/issues.md). This will be replaced by [Standalone Vulnerabilities](https://gitlab.com/groups/gitlab-org/-/epics/634) in the future.
+   - To automatically create issues without user interaction, use the [issue API](../../api/issues.md).
 1. Optional: Provide auto-remediation steps:
-   - If you specified `remediations` in your artifact, it is proposed through our [auto-remediation](../../user/application_security/index.md#automatic-remediation-for-vulnerabilities)
+   - If you specified `remediations` in your artifact, it is proposed through our [automatic remediation](../../user/application_security/vulnerabilities/index.md#remediate-a-vulnerability-automatically)
      interface.
 1. Demo the integration to GitLab:
    - After you have tested and are ready to demo your integration please
-     [reach out](https://about.gitlab.com/partners/integrate/) to us. If you
-     skip this step you won’t be able to do supported marketing.
+     [reach out](https://about.gitlab.com/partners/technology-partners/integrate/) to us. If you
+     skip this step you won't be able to do supported marketing.
 1. Begin doing supported marketing of your GitLab integration.
-   - Work with our [partner team](https://about.gitlab.com/partners/integrate/)
+   - Work with our [partner team](https://about.gitlab.com/partners/technology-partners/integrate/)
      to support your go-to-market as appropriate.
    - Examples of supported marketing could include being listed on our [Security Partner page](https://about.gitlab.com/partners/#security),
      doing an [Unfiltered blog post](https://about.gitlab.com/handbook/marketing/blog/unfiltered/),
-     doing a co-branded webinar, or producing a co-branded whitepaper.
+     doing a co-branded webinar, or producing a co-branded white paper.
 
-We have a [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
+We have a <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [video playlist](https://www.youtube.com/playlist?list=PL05JrBw4t0KpMqYxJiOLz-uBIr5w-yP4A)
 that may be helpful as part of this process. This covers various topics related to integrating your
 tool.
 

@@ -12,8 +12,8 @@ RSpec.describe NullifyFeatureFlagPlaintextTokens do
   let!(:project1) { projects.create!(namespace_id: namespace.id, name: 'Project 1') }
   let!(:project2) { projects.create!(namespace_id: namespace.id, name: 'Project 2') }
 
-  let(:secret1_encrypted) { Gitlab::CryptoHelper.aes256_gcm_encrypt('secret1') }
-  let(:secret2_encrypted) { Gitlab::CryptoHelper.aes256_gcm_encrypt('secret2') }
+  let(:secret1_encrypted) { Gitlab::CryptoHelper.aes256_gcm_encrypt('secret1', nonce: Gitlab::CryptoHelper::AES256_GCM_IV_STATIC) }
+  let(:secret2_encrypted) { Gitlab::CryptoHelper.aes256_gcm_encrypt('secret2', nonce: Gitlab::CryptoHelper::AES256_GCM_IV_STATIC) }
 
   before do
     feature_flags_clients.create!(token: 'secret1', token_encrypted: secret1_encrypted, project_id: project1.id)
@@ -35,7 +35,7 @@ RSpec.describe NullifyFeatureFlagPlaintextTokens do
       }
 
       migration.after -> {
-        expect(feature_flags_clients.where('token IS NOT NULL').count).to eq(0)
+        expect(feature_flags_clients.where.not(token: nil).count).to eq(0)
 
         feature_flag1.reload
         expect(feature_flag1.token).to be_nil

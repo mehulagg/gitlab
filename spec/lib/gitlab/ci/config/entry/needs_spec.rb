@@ -6,7 +6,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
   subject(:needs) { described_class.new(config) }
 
   before do
-    needs.metadata[:allowed_needs] = %i[job]
+    needs.metadata[:allowed_needs] = %i[job cross_dependency]
   end
 
   describe 'validations' do
@@ -66,6 +66,27 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
         end
       end
     end
+
+    context 'with too many cross pipeline dependencies' do
+      let(:limit) { described_class::NEEDS_CROSS_PIPELINE_DEPENDENCIES_LIMIT }
+
+      let(:config) do
+        Array.new(limit.next) do |index|
+          { pipeline: "$UPSTREAM_PIPELINE_#{index}", job: 'job-1' }
+        end
+      end
+
+      describe '#valid?' do
+        it { is_expected.not_to be_valid }
+      end
+
+      describe '#errors' do
+        it 'returns error about incorrect type' do
+          expect(needs.errors).to contain_exactly(
+            "needs config must be less than or equal to #{limit}")
+        end
+      end
+    end
   end
 
   describe '.compose!' do
@@ -90,8 +111,8 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
         it 'returns key value' do
           expect(needs.value).to eq(
             job: [
-              { name: 'first_job_name',  artifacts: true },
-              { name: 'second_job_name', artifacts: true }
+              { name: 'first_job_name',  artifacts: true, optional: false },
+              { name: 'second_job_name', artifacts: true, optional: false }
             ]
           )
         end
@@ -103,8 +124,8 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
     context 'with complex job entries composed' do
       let(:config) do
         [
-          { job: 'first_job_name',  artifacts: true },
-          { job: 'second_job_name', artifacts: false }
+          { job: 'first_job_name',  artifacts: true, optional: false },
+          { job: 'second_job_name', artifacts: false, optional: false }
         ]
       end
 
@@ -116,8 +137,8 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
         it 'returns key value' do
           expect(needs.value).to eq(
             job: [
-              { name: 'first_job_name',  artifacts: true },
-              { name: 'second_job_name', artifacts: false }
+              { name: 'first_job_name',  artifacts: true, optional: false },
+              { name: 'second_job_name', artifacts: false, optional: false }
             ]
           )
         end
@@ -142,8 +163,8 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
         it 'returns key value' do
           expect(needs.value).to eq(
             job: [
-              { name: 'first_job_name',  artifacts: true },
-              { name: 'second_job_name', artifacts: false }
+              { name: 'first_job_name',  artifacts: true, optional: false },
+              { name: 'second_job_name', artifacts: false, optional: false }
             ]
           )
         end

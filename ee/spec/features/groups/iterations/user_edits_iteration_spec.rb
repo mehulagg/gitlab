@@ -7,7 +7,8 @@ RSpec.describe 'User views iteration' do
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group ).user }
   let_it_be(:guest_user) { create(:group_member, :guest, user: create(:user), group: group ).user }
-  let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, iid: 1, id: 2, group: group, title: 'Correct Iteration', description: 'Iteration description', start_date: now - 1.day, due_date: now) }
+  let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, group: group, title: 'Correct Iteration', description: 'Iteration description', start_date: now - 1.day, due_date: now) }
+
   dropdown_selector = '[data-testid="actions-dropdown"]'
 
   context 'with license' do
@@ -22,7 +23,7 @@ RSpec.describe 'User views iteration' do
 
       context 'load edit page directly', :js do
         before do
-          visit edit_group_iteration_path(group, iteration)
+          visit edit_group_iteration_path(group, iteration.id)
         end
 
         it 'prefills fields and allows updating all values' do
@@ -49,14 +50,14 @@ RSpec.describe 'User views iteration' do
             expect(page).to have_content(updated_desc)
             expect(page).to have_content(updated_start_date.strftime('%b %-d, %Y'))
             expect(page).to have_content(updated_due_date.strftime('%b %-d, %Y'))
-            expect(page).to have_current_path(group_iteration_path(group, iteration))
+            expect(page).to have_current_path(group_iteration_path(group, iteration.id))
           end
         end
       end
 
       context 'load edit page from report', :js do
         before do
-          visit group_iteration_path(iteration.group, iteration)
+          visit group_iteration_path(iteration.group, iteration.id)
         end
 
         it 'prefills fields and updates URL' do
@@ -68,7 +69,7 @@ RSpec.describe 'User views iteration' do
             expect(description_input.value).to eq(iteration.description)
             expect(start_date_input.value).to have_content(iteration.start_date)
             expect(due_date_input.value).to have_content(iteration.due_date)
-            expect(page).to have_current_path(edit_group_iteration_path(iteration.group, iteration))
+            expect(page).to have_current_path(edit_group_iteration_path(iteration.group, iteration.id))
           end
         end
       end
@@ -80,14 +81,14 @@ RSpec.describe 'User views iteration' do
       end
 
       it 'does not show edit dropdown', :js do
-        visit group_iteration_path(iteration.group, iteration)
+        visit group_iteration_path(iteration.group, iteration.id)
 
         expect(page).to have_content(iteration.title)
         expect(page).not_to have_selector(dropdown_selector)
       end
 
       it '404s when loading edit page directly' do
-        visit edit_group_iteration_path(iteration.group, iteration)
+        visit edit_group_iteration_path(iteration.group, iteration.id)
 
         expect(page).to have_gitlab_http_status(:not_found)
       end

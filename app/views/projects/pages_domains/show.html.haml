@@ -6,7 +6,7 @@
 
 - if verification_enabled && domain_presenter.unverified?
   = content_for :flash_message do
-    .alert.alert-warning
+    .gl-alert.gl-alert-warning
       .container-fluid.container-limited
         = _("This domain is not verified. You will need to verify ownership before access is enabled.")
 
@@ -17,5 +17,5 @@
   = form_for [@project, domain_presenter], html: { class: 'fieldset-form' } do |f|
     = render 'form', { f: f }
     .form-actions.d-flex.justify-content-between
-      = f.submit _('Save Changes'), class: "btn btn-success"
-      = link_to _('Cancel'), project_pages_path(@project), class: 'btn btn-default btn-inverse'
+      = f.submit _('Save Changes'), class: "gl-button btn btn-confirm"
+      = link_to _('Cancel'), project_pages_path(@project), class: 'gl-button btn btn-default btn-inverse'

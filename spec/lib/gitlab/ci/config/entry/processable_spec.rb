@@ -73,6 +73,15 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         end
       end
 
+      context 'when resource_group key is not a string' do
+        let(:config) { { resource_group: 123 } }
+
+        it 'returns error about wrong value type' do
+          expect(entry).not_to be_valid
+          expect(entry.errors).to include "job resource group should be a string"
+        end
+      end
+
       context 'when it uses both "when:" and "rules:"' do
         let(:config) do
           {
@@ -340,6 +349,26 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
       end
     end
 
+    context 'with resource group' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:resource_group, :result) do
+        'iOS'                         | 'iOS'
+        'review/$CI_COMMIT_REF_NAME'  | 'review/$CI_COMMIT_REF_NAME'
+        nil                           | nil
+      end
+
+      with_them do
+        let(:config) { { script: 'ls', resource_group: resource_group }.compact }
+
+        it do
+          entry.compose!(deps)
+
+          expect(entry.resource_group).to eq(result)
+        end
+      end
+    end
+
     context 'with inheritance' do
       context 'of variables' do
         let(:config) do
@@ -353,7 +382,9 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         context 'with only job variables' do
           it 'does return defined variables' do
             expect(entry.value).to include(
-              variables: { 'A' => 'job', 'B' => 'job' }
+              variables: { 'A' => 'job', 'B' => 'job' },
+              job_variables: { 'A' => 'job', 'B' => 'job' },
+              root_variables_inheritance: true
             )
           end
         end
@@ -361,13 +392,15 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
         context 'when root yaml variables are used' do
           let(:variables) do
             Gitlab::Ci::Config::Entry::Variables.new(
-              A: 'root', C: 'root', D: 'root'
+              { A: 'root', C: 'root', D: 'root' }
             ).value
           end
 
-          it 'does return all variables and overwrite them' do
+          it 'does return job and root variables' do
             expect(entry.value).to include(
-              variables: { 'A' => 'job', 'B' => 'job', 'C' => 'root', 'D' => 'root' }
+              variables: { 'A' => 'job', 'B' => 'job', 'C' => 'root', 'D' => 'root' },
+              job_variables: { 'A' => 'job', 'B' => 'job' },
+              root_variables_inheritance: true
             )
           end
 
@@ -379,9 +412,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
               }
             end
 
-            it 'does return only job variables' do
+            it 'does return job and root variables' do
               expect(entry.value).to include(
-                variables: { 'A' => 'job', 'B' => 'job' }
+                variables: { 'A' => 'job', 'B' => 'job' },
+                job_variables: { 'A' => 'job', 'B' => 'job' },
+                root_variables_inheritance: false
               )
             end
           end
@@ -394,9 +429,11 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
               }
             end
 
-            it 'does return only job variables' do
+            it 'does return job and root variables' do
               expect(entry.value).to include(
-                variables: { 'A' => 'job', 'B' => 'job', 'D' => 'root' }
+                variables: { 'A' => 'job', 'B' => 'job', 'D' => 'root' },
+                job_variables: { 'A' => 'job', 'B' => 'job' },
+                root_variables_inheritance: ['D']
               )
             end
           end
@@ -464,7 +501,9 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable do
             name: :rspec,
             stage: 'test',
             only: { refs: %w[branches tags] },
-            variables: {}
+            variables: {},
+            job_variables: {},
+            root_variables_inheritance: true
           )
         end
       end

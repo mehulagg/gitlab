@@ -1,6 +1,5 @@
 $system-note-icon-size: 32px;
 $system-note-svg-size: 16px;
-$note-form-margin-left: 72px;
 
 @mixin vertical-line($left) {
   &::before {
@@ -54,16 +53,6 @@ $note-form-margin-left: 72px;
     &.note-form {
       margin-left: 0;
 
-      @include notes-media('min', map-get($grid-breakpoints, md)) {
-        margin-left: $note-form-margin-left;
-      }
-
-      .timeline-icon {
-        @include notes-media('min', map-get($grid-breakpoints, sm)) {
-          margin-left: -$note-icon-gutter-width;
-        }
-      }
-
       .timeline-content {
         margin-left: 0;
       }
@@ -84,35 +73,16 @@ $note-form-margin-left: 72px;
   .replies-toggle {
     background-color: $gray-light;
     padding: $gl-padding-8 $gl-padding;
-    border-top: 1px solid $gray-50;
-    border-bottom: 1px solid $gray-50;
+    border-top: 1px solid $gray-100;
+    border-bottom: 1px solid $gray-100;
 
     .collapse-replies-btn:hover {
       color: $blue-600;
     }
 
-    &.expanded {
-      span {
-        cursor: pointer;
-      }
-
-      svg {
-        position: relative;
-        top: 3px;
-      }
-    }
-
     &.collapsed {
       color: $gl-text-color-secondary;
       border-radius: 0 0 $border-radius-default $border-radius-default;
-
-      svg {
-        float: left;
-        position: relative;
-        top: $gl-padding-4;
-        margin-right: $gl-padding-8;
-        cursor: pointer;
-      }
 
       img {
         margin: -2px 4px 0 0;
@@ -178,7 +148,6 @@ $note-form-margin-left: 72px;
   > li {
     display: block;
     position: relative;
-    border-bottom: 0;
 
     &.being-posted {
       pointer-events: none;
@@ -190,8 +159,7 @@ $note-form-margin-left: 72px;
         border: 1px solid darken($gray-100, 25%);
       }
 
-      .note-headline-light,
-      .fa-spinner {
+      .note-headline-light {
         margin-left: 3px;
       }
     }
@@ -249,16 +217,6 @@ $note-form-margin-left: 72px;
     .note-emoji-button {
       position: relative;
       line-height: 1;
-
-      .fa-spinner {
-        display: none;
-      }
-
-      &.is-loading {
-        .fa-spinner {
-          display: inline-block;
-        }
-      }
     }
   }
 
@@ -361,7 +319,7 @@ $note-form-margin-left: 72px;
             left: $gl-padding-24;
             right: 0;
             bottom: 0;
-            background: linear-gradient(rgba($white, 0.1) -100px, $white 100%);
+            background: linear-gradient(rgba($white, 0.1) -100px, $body-bg 100%);
           }
         }
       }
@@ -407,8 +365,6 @@ $note-form-margin-left: 72px;
 .discussion-body .diff-file {
   .file-title {
     cursor: default;
-    line-height: 42px;
-    padding: 0 $gl-padding;
     border-top: 1px solid $border-color;
     border-radius: 0;
 
@@ -453,6 +409,8 @@ $note-form-margin-left: 72px;
 }
 
 .diff-file {
+  .diff-grid-left:hover,
+  .diff-grid-right:hover,
   .is-over {
     .add-diff-note {
       display: inline-flex;
@@ -490,6 +448,7 @@ $note-form-margin-left: 72px;
   .notes_holder {
     font-family: $regular-font;
 
+    .diff-td,
     td {
       border: 1px solid $border-color;
       border-left: 0;
@@ -559,21 +518,6 @@ $note-form-margin-left: 72px;
 .code-commit .notes-content,
 .diff-viewer > .image ~ .note-container {
   background-color: $white;
-
-  .avatar-note-form-holder {
-    .user-avatar-link img {
-      margin: 13px $gl-padding $gl-padding;
-    }
-
-    form,
-    ~ .discussion-form-container {
-      padding: $gl-padding;
-
-      @include media-breakpoint-up(sm) {
-        margin-left: $note-icon-gutter-width;
-      }
-    }
-  }
 }
 
 .diff-viewer > .image ~ .note-container form.new-note {
@@ -788,23 +732,18 @@ $note-form-margin-left: 72px;
     outline: none;
     color: $blue-600;
   }
-
-  .fa {
-    margin-right: 3px;
-    font-size: 10px;
-    line-height: 18px;
-    vertical-align: top;
-  }
 }
 
 .note-role {
-  margin: 0 3px;
+  margin: 0 8px;
 }
 
 /**
  * Line note button on the side of diffs
  */
 
+.diff-grid-left:hover,
+.diff-grid-right:hover,
 .line_holder .is-over:not(.no-comment-btn) {
   .add-diff-note {
     opacity: 1;
@@ -829,6 +768,26 @@ $note-form-margin-left: 72px;
     border-color: $gray-200;
     color: $gray-300;
     cursor: not-allowed;
+  }
+}
+
+.unified-diff-components-diff-note-button {
+  &::before {
+    background-color: $blue-500;
+    mask-image: asset_url('icons-stacked.svg#comment');
+    mask-repeat: no-repeat;
+    mask-size: cover;
+    mask-position: center;
+    content: '';
+    width: 12px;
+    height: 12px;
+  }
+
+  &:hover,
+  &.inverted {
+    &::before {
+      background-color: $white;
+    }
   }
 }
 
@@ -887,6 +846,15 @@ $note-form-margin-left: 72px;
   outline: 0;
   transition: color $general-hover-transition-duration $general-hover-transition-curve;
 
+  &[disabled] {
+    padding: 0 8px !important;
+    box-shadow: none !important;
+
+    .gl-button-loading-indicator {
+      margin-right: 0 !important;
+    }
+  }
+
   &.is-disabled {
     cursor: default;
   }
@@ -894,16 +862,22 @@ $note-form-margin-left: 72px;
   &:not(.is-disabled) {
     &:hover,
     &:focus {
-      color: $green-600;
+      svg {
+        color: $green-600;
+      }
     }
   }
 
   &.is-active {
-    color: $green-600;
+    svg {
+      @include gl-text-green-500;
+    }
 
     &:hover,
     &:focus {
-      color: $green-700;
+      svg {
+        color: $green-700;
+      }
     }
   }
 
@@ -953,14 +927,6 @@ $note-form-margin-left: 72px;
 .discussion-filter-container {
   .dropdown-menu {
     margin-bottom: $gl-padding-4;
-
-    @include media-breakpoint-down(md) {
-      margin-left: $btn-side-margin + $contextual-sidebar-collapsed-width;
-    }
-
-    @include media-breakpoint-down(xs) {
-      margin-left: $btn-side-margin;
-    }
   }
 }
 

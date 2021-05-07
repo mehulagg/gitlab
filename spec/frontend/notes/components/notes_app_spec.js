@@ -1,18 +1,20 @@
-import $ from 'jquery';
-import AxiosMockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
 import { mount, shallowMount } from '@vue/test-utils';
+import AxiosMockAdapter from 'axios-mock-adapter';
+import $ from 'jquery';
+import Vue from 'vue';
 import { setTestTimeout } from 'helpers/timeout';
+import DraftNote from '~/batch_comments/components/draft_note.vue';
+import batchComments from '~/batch_comments/stores/modules/batch_comments';
 import axios from '~/lib/utils/axios_utils';
-import NotesApp from '~/notes/components/notes_app.vue';
+import * as urlUtility from '~/lib/utils/url_utility';
 import CommentForm from '~/notes/components/comment_form.vue';
-import createStore from '~/notes/stores';
+import NotesApp from '~/notes/components/notes_app.vue';
 import * as constants from '~/notes/constants';
+import createStore from '~/notes/stores';
 import '~/behaviors/markdown/render_gfm';
 // TODO: use generated fixture (https://gitlab.com/gitlab-org/gitlab-foss/issues/62491)
-import * as mockData from '../mock_data';
-import * as urlUtility from '~/lib/utils/url_utility';
 import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
+import * as mockData from '../mock_data';
 
 jest.mock('~/user_popovers', () => jest.fn());
 
@@ -33,19 +35,21 @@ describe('note_app', () => {
   let wrapper;
   let store;
 
+  const findCommentButton = () => wrapper.find('[data-testid="comment-button"]');
+
   const getComponentOrder = () => {
     return wrapper
       .findAll('#notes-list,.js-comment-form')
-      .wrappers.map(node => (node.is(CommentForm) ? TYPE_COMMENT_FORM : TYPE_NOTES_LIST));
+      .wrappers.map((node) => (node.is(CommentForm) ? TYPE_COMMENT_FORM : TYPE_NOTES_LIST));
   };
 
   /**
    * waits for fetchNotes() to complete
    */
   const waitForDiscussionsRequest = () =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       const { vm } = wrapper.find(NotesApp);
-      const unwatch = vm.$watch('isFetching', isFetching => {
+      const unwatch = vm.$watch('isFetching', (isFetching) => {
         if (isFetching) {
           return;
         }
@@ -129,25 +133,22 @@ describe('note_app', () => {
           '/gitlab-org/gitlab-foss/issues/26/discussions.json'
         ][0].notes[0];
 
-      expect(
-        wrapper
-          .find('.main-notes-list .note-header-author-name')
-          .text()
-          .trim(),
-      ).toEqual(note.author.name);
+      expect(wrapper.find('.main-notes-list .note-header-author-name').text().trim()).toEqual(
+        note.author.name,
+      );
 
       expect(wrapper.find('.main-notes-list .note-text').html()).toContain(note.note_html);
     });
 
     it('should render form', () => {
-      expect(wrapper.find('.js-main-target-form').name()).toEqual('form');
+      expect(wrapper.find('.js-main-target-form').element.tagName).toBe('FORM');
       expect(wrapper.find('.js-main-target-form textarea').attributes('placeholder')).toEqual(
         'Write a comment or drag your files here…',
       );
     });
 
     it('should render form comment button as disabled', () => {
-      expect(wrapper.find('.js-note-new-discussion').attributes('disabled')).toEqual('disabled');
+      expect(findCommentButton().props('disabled')).toEqual(true);
     });
 
     it('updates discussions badge', () => {
@@ -205,7 +206,7 @@ describe('note_app', () => {
     });
 
     it('should render form', () => {
-      expect(wrapper.find('.js-main-target-form').name()).toEqual('form');
+      expect(wrapper.find('.js-main-target-form').element.tagName).toBe('FORM');
       expect(wrapper.find('.js-main-target-form textarea').attributes('placeholder')).toEqual(
         'Write a comment or drag your files here…',
       );
@@ -272,23 +273,15 @@ describe('note_app', () => {
     it('should render markdown docs url', () => {
       const { markdownDocsPath } = mockData.notesDataMock;
 
-      expect(
-        wrapper
-          .find(`a[href="${markdownDocsPath}"]`)
-          .text()
-          .trim(),
-      ).toEqual('Markdown');
+      expect(wrapper.find(`a[href="${markdownDocsPath}"]`).text().trim()).toEqual('Markdown');
     });
 
     it('should render quick action docs url', () => {
       const { quickActionsDocsPath } = mockData.notesDataMock;
 
-      expect(
-        wrapper
-          .find(`a[href="${quickActionsDocsPath}"]`)
-          .text()
-          .trim(),
-      ).toEqual('quick actions');
+      expect(wrapper.find(`a[href="${quickActionsDocsPath}"]`).text().trim()).toEqual(
+        'quick actions',
+      );
     });
   });
 
@@ -304,12 +297,9 @@ describe('note_app', () => {
       const { markdownDocsPath } = mockData.notesDataMock;
 
       return Vue.nextTick().then(() => {
-        expect(
-          wrapper
-            .find(`.edit-note a[href="${markdownDocsPath}"]`)
-            .text()
-            .trim(),
-        ).toEqual('Markdown is supported');
+        expect(wrapper.find(`.edit-note a[href="${markdownDocsPath}"]`).text().trim()).toEqual(
+          'Markdown is supported',
+        );
       });
     });
 
@@ -410,6 +400,34 @@ describe('note_app', () => {
 
     it('finds CommentForm after notes list', () => {
       expect(getComponentOrder()).toStrictEqual([TYPE_NOTES_LIST, TYPE_COMMENT_FORM]);
+    });
+  });
+
+  describe('when multiple draft types are present', () => {
+    beforeEach(() => {
+      store = createStore();
+      store.registerModule('batchComments', batchComments());
+      store.state.batchComments.drafts = [
+        mockData.draftDiffDiscussion,
+        mockData.draftReply,
+        ...mockData.draftComments,
+      ];
+      store.state.isLoading = false;
+      wrapper = shallowMount(NotesApp, {
+        propsData,
+        store,
+        stubs: {
+          OrderedLayout,
+        },
+      });
+    });
+
+    it('correctly finds only draft comments', () => {
+      const drafts = wrapper.findAll(DraftNote).wrappers;
+
+      expect(drafts.map((x) => x.props('draft'))).toEqual(
+        mockData.draftComments.map(({ note }) => expect.objectContaining({ note })),
+      );
     });
   });
 });

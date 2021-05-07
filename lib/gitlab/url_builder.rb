@@ -18,6 +18,8 @@ module Gitlab
       def build(object, **options)
         # Objects are sometimes wrapped in a BatchLoader instance
         case object.itself
+        when Board
+          board_url(object, **options)
         when ::Ci::Build
           instance.project_job_url(object.project, object, **options)
         when Commit
@@ -32,6 +34,8 @@ module Gitlab
           instance.milestone_url(object, **options)
         when Note
           note_url(object, **options)
+        when Release
+          instance.release_url(object, **options)
         when Project
           instance.project_url(object, **options)
         when Snippet
@@ -45,10 +49,18 @@ module Gitlab
         when ::DesignManagement::Design
           design_url(object, **options)
         else
-          raise NotImplementedError.new("No URL builder defined for #{object.inspect}")
+          raise NotImplementedError, "No URL builder defined for #{object.inspect}"
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity
+
+      def board_url(board, **options)
+        if board.project_board?
+          instance.project_board_url(board.resource_parent, board, **options)
+        else
+          instance.group_board_url(board.resource_parent, board, **options)
+        end
+      end
 
       def commit_url(commit, **options)
         return '' unless commit.project

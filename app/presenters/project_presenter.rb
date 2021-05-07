@@ -10,14 +10,15 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   include BlobHelper
   include ChecksCollaboration
   include Gitlab::Utils::StrongMemoize
+  include Gitlab::Experiment::Dsl
 
   presents :project
 
-  AnchorData = Struct.new(:is_link, :label, :link, :class_modifier, :icon)
+  AnchorData = Struct.new(:is_link, :label, :link, :class_modifier, :icon, :itemprop, :data)
   MAX_TOPICS_TO_SHOW = 3
 
   def statistic_icon(icon_name = 'plus-square-o')
-    sprite_icon(icon_name, css_class: 'icon gl-mr-2')
+    sprite_icon(icon_name, css_class: 'icon gl-mr-2 gl-text-gray-500')
   end
 
   def statistics_anchors(show_auto_devops_callout:)
@@ -33,13 +34,15 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
 
   def statistics_buttons(show_auto_devops_callout:)
     [
+      upload_anchor_data,
       readme_anchor_data,
       license_anchor_data,
       changelog_anchor_data,
       contribution_guide_anchor_data,
       autodevops_anchor_data(show_auto_devops_callout: show_auto_devops_callout),
       kubernetes_cluster_anchor_data,
-      gitlab_ci_anchor_data
+      gitlab_ci_anchor_data,
+      integrations_anchor_data
     ].compact.reject(&:is_link).sort_by.with_index { |item, idx| [item.class_modifier ? 0 : 1, idx] }
   end
 
@@ -49,12 +52,14 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
 
   def empty_repo_statistics_buttons
     [
+      upload_anchor_data,
       new_file_anchor_data,
       readme_anchor_data,
       license_anchor_data,
       changelog_anchor_data,
       contribution_guide_anchor_data,
-      gitlab_ci_anchor_data
+      gitlab_ci_anchor_data,
+      integrations_anchor_data
     ].compact.reject { |item| item.is_link }
   end
 
@@ -77,19 +82,15 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def readme_path
-    filename_path(:readme)
+    filename_path(repository.readme_path)
   end
 
   def changelog_path
-    filename_path(:changelog)
+    filename_path(repository.changelog&.name)
   end
 
   def license_path
-    filename_path(:license_blob)
-  end
-
-  def ci_configuration_path
-    filename_path(:gitlab_ci_yml)
+    filename_path(repository.license_blob&.name)
   end
 
   def contribution_guide_path
@@ -107,7 +108,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def add_license_ide_path
-    ide_edit_path(project, default_branch_or_master, 'LICENSE')
+    ide_edit_path(project, default_branch_or_main, 'LICENSE')
   end
 
   def add_changelog_path
@@ -115,7 +116,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def add_changelog_ide_path
-    ide_edit_path(project, default_branch_or_master, 'CHANGELOG')
+    ide_edit_path(project, default_branch_or_main, 'CHANGELOG')
   end
 
   def add_contribution_guide_path
@@ -123,11 +124,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def add_contribution_guide_ide_path
-    ide_edit_path(project, default_branch_or_master, 'CONTRIBUTING.md')
-  end
-
-  def add_ci_yml_path
-    add_special_file_path(file_name: ci_config_path_or_default)
+    ide_edit_path(project, default_branch_or_main, 'CONTRIBUTING.md')
   end
 
   def add_readme_path
@@ -135,7 +132,11 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def add_readme_ide_path
-    ide_edit_path(project, default_branch_or_master, 'README.md')
+    ide_edit_path(project, default_branch_or_main, 'README.md')
+  end
+
+  def add_ci_yml_path
+    add_special_file_path(file_name: ci_config_path_or_default)
   end
 
   def license_short_name
@@ -154,6 +155,8 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def can_current_user_push_to_branch?(branch)
+    return false unless current_user
+
     user_access(project).can_push_to_branch?(branch)
   end
 
@@ -232,33 +235,64 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
                    empty_repo? ? nil : project_tags_path(project))
   end
 
+  def upload_anchor_data
+    strong_memoize(:upload_anchor_data) do
+      next unless can_current_user_push_to_default_branch?
+
+      experiment(:empty_repo_upload, project: project) do |e|
+        e.use {}
+        e.try do
+          AnchorData.new(false,
+                         statistic_icon('upload') + _('Upload file'),
+                         '#modal-upload-blob',
+                         'js-upload-file-experiment-trigger',
+                         nil,
+                         nil,
+                         {
+                           'target_branch' => default_branch_or_main,
+                           'original_branch' => default_branch_or_main,
+                           'can_push_code' => 'true',
+                           'path' => project_create_blob_path(project, default_branch_or_main),
+                           'project_path' => project.path
+                         }
+                        )
+        end
+        e.run
+      end
+    end
+  end
+
+  def empty_repo_upload_experiment?
+    upload_anchor_data.present?
+  end
+
   def new_file_anchor_data
-    if current_user && can_current_user_push_to_default_branch?
-      new_file_path = empty_repo? ? ide_edit_path(project, default_branch_or_master) : project_new_blob_path(project, default_branch_or_master)
+    if can_current_user_push_to_default_branch?
+      new_file_path = empty_repo? ? ide_edit_path(project, default_branch_or_main) : project_new_blob_path(project, default_branch_or_main)
 
       AnchorData.new(false,
                      statistic_icon + _('New file'),
                      new_file_path,
-                     'missing')
+                     'btn-dashed')
     end
   end
 
   def readme_anchor_data
-    if current_user && can_current_user_push_to_default_branch? && repository.readme.nil?
+    if can_current_user_push_to_default_branch? && readme_path.nil?
       AnchorData.new(false,
                      statistic_icon + _('Add README'),
                      empty_repo? ? add_readme_ide_path : add_readme_path)
-    elsif repository.readme
+    elsif readme_path
       AnchorData.new(false,
                      statistic_icon('doc-text') + _('README'),
                      default_view != 'readme' ? readme_path : '#readme',
-                    'default',
+                    'btn-default',
                     'doc-text')
     end
   end
 
   def changelog_anchor_data
-    if current_user && can_current_user_push_to_default_branch? && repository.changelog.blank?
+    if can_current_user_push_to_default_branch? && repository.changelog.blank?
       AnchorData.new(false,
                      statistic_icon + _('Add CHANGELOG'),
                      empty_repo? ? add_changelog_ide_path : add_changelog_path)
@@ -266,7 +300,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
       AnchorData.new(false,
                      statistic_icon('doc-text') + _('CHANGELOG'),
                      changelog_path,
-                    'default')
+                    'btn-default')
     end
   end
 
@@ -277,9 +311,11 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
       AnchorData.new(false,
                      icon + content_tag(:span, license_short_name, class: 'project-stat-value'),
                      license_path,
-                     'default')
+                     'btn-default',
+                     nil,
+                     'license')
     else
-      if current_user && can_current_user_push_to_default_branch?
+      if can_current_user_push_to_default_branch?
         AnchorData.new(false,
                        content_tag(:span, statistic_icon + _('Add LICENSE'), class: 'add-license-link d-flex'),
                        empty_repo? ? add_license_ide_path : add_license_path)
@@ -292,7 +328,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def contribution_guide_anchor_data
-    if current_user && can_current_user_push_to_default_branch? && repository.contribution_guide.blank?
+    if can_current_user_push_to_default_branch? && repository.contribution_guide.blank?
       AnchorData.new(false,
                      statistic_icon + _('Add CONTRIBUTING'),
                      empty_repo? ? add_contribution_guide_ide_path : add_contribution_guide_path)
@@ -300,7 +336,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
       AnchorData.new(false,
                      statistic_icon('doc-text') + _('CONTRIBUTING'),
                      contribution_guide_path,
-                     'default')
+                     'btn-default')
     end
   end
 
@@ -310,7 +346,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
         AnchorData.new(false,
                        statistic_icon('settings') + _('Auto DevOps enabled'),
                        project_settings_ci_cd_path(project, anchor: 'autodevops-settings'),
-                       'default')
+                       'btn-default')
       else
         AnchorData.new(false,
                        statistic_icon + _('Enable Auto DevOps'),
@@ -335,7 +371,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
         AnchorData.new(false,
                        _('Kubernetes'),
                        cluster_link,
-                      'default')
+                      'btn-default')
       end
     end
   end
@@ -344,26 +380,26 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     if cicd_missing?
       AnchorData.new(false,
                      statistic_icon + _('Set up CI/CD'),
-                     add_ci_yml_path)
+                     project_ci_pipeline_editor_path(project))
     elsif repository.gitlab_ci_yml.present?
       AnchorData.new(false,
                      statistic_icon('doc-text') + _('CI/CD configuration'),
-                     ci_configuration_path,
-                    'default')
+                     project_ci_pipeline_editor_path(project),
+                    'btn-default')
     end
   end
 
   def topics_to_show
-    project.tag_list.take(MAX_TOPICS_TO_SHOW) # rubocop: disable CodeReuse/ActiveRecord
+    project.topics.take(MAX_TOPICS_TO_SHOW) # rubocop: disable CodeReuse/ActiveRecord
   end
 
   def topics_not_shown
-    project.tag_list - topics_to_show
+    project.topics - topics_to_show
   end
 
   def count_of_extra_topics_not_shown
-    if project.tag_list.count > MAX_TOPICS_TO_SHOW
-      project.tag_list.count - MAX_TOPICS_TO_SHOW
+    if project.topics.count > MAX_TOPICS_TO_SHOW
+      project.topics.count - MAX_TOPICS_TO_SHOW
     else
       0
     end
@@ -387,6 +423,25 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
 
   private
 
+  def integrations_anchor_data
+    experiment(:repo_integrations_link, project: project) do |e|
+      e.exclude! unless can?(current_user, :admin_project, project)
+
+      e.use {} # nil control
+      e.try do
+        label = statistic_icon('settings') + _('Configure Integrations')
+        AnchorData.new(false, label, project_settings_integrations_path(project), nil, nil, nil, {
+          'track-event': 'click',
+          'track-experiment': e.name
+        })
+      end
+
+      e.run # call run so the return value will be the AnchorData (or nil)
+
+      e.track(:view, value: project.id) # track an event for the view, with project id
+    end
+  end
+
   def cicd_missing?
     current_user && can_current_user_push_code? && repository.gitlab_ci_yml.blank? && !auto_devops_enabled?
   end
@@ -395,13 +450,10 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     current_user && can?(current_user, :create_cluster, project)
   end
 
-  def filename_path(filename)
-    if blob = repository.public_send(filename) # rubocop:disable GitlabSecurity/PublicSend
-      project_blob_path(
-        project,
-        tree_join(default_branch, blob.name)
-      )
-    end
+  def filename_path(filepath)
+    return if filepath.blank?
+
+    project_blob_path(project, tree_join(default_branch, filepath))
   end
 
   def anonymous_project_view
@@ -420,7 +472,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     commit_message ||= s_("CommitMessage|Add %{file_name}") % { file_name: file_name }
     project_new_blob_path(
       project,
-      default_branch_or_master,
+      default_branch_or_main,
       file_name:      file_name,
       commit_message: commit_message,
       branch_name:    branch_name

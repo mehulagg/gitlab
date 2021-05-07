@@ -1,8 +1,8 @@
+import { DATA_TRIGGER } from './constants';
 import HookButton from './hook_button';
 import HookInput from './hook_input';
-import utils from './utils';
 import Keyboard from './keyboard';
-import { DATA_TRIGGER } from './constants';
+import utils from './utils';
 
 class DropLab {
   constructor() {
@@ -28,7 +28,7 @@ class DropLab {
   }
 
   destroy() {
-    this.hooks.forEach(hook => hook.destroy());
+    this.hooks.forEach((hook) => hook.destroy());
     this.hooks = [];
     this.removeEvents();
   }
@@ -51,7 +51,7 @@ class DropLab {
   }
 
   processData(trigger, data, methodName) {
-    this.hooks.forEach(hook => {
+    this.hooks.forEach((hook) => {
       if (Array.isArray(trigger)) hook.list[methodName](trigger);
 
       if (hook.trigger.id === trigger) hook.list[methodName](data);
@@ -60,21 +60,24 @@ class DropLab {
 
   addEvents() {
     this.eventWrapper.documentClicked = this.documentClicked.bind(this);
-    document.addEventListener('mousedown', this.eventWrapper.documentClicked);
+    document.addEventListener('click', this.eventWrapper.documentClicked);
   }
 
   documentClicked(e) {
-    let thisTag = e.target;
+    if (e.defaultPrevented) return;
 
-    if (thisTag.tagName !== 'UL') thisTag = utils.closest(thisTag, 'UL');
-    if (utils.isDropDownParts(thisTag, this.hooks)) return;
-    if (utils.isDropDownParts(e.target, this.hooks)) return;
+    if (utils.isDropDownParts(e.target)) return;
 
-    this.hooks.forEach(hook => hook.list.hide());
+    if (e.target.tagName !== 'UL') {
+      const closestUl = utils.closest(e.target, 'UL');
+      if (utils.isDropDownParts(closestUl)) return;
+    }
+
+    this.hooks.forEach((hook) => hook.list.hide());
   }
 
   removeEvents() {
-    document.removeEventListener('mousedown', this.eventWrapper.documentClicked);
+    document.removeEventListener('click', this.eventWrapper.documentClicked);
   }
 
   changeHookList(trigger, list, plugins, config) {
@@ -115,7 +118,7 @@ class DropLab {
   }
 
   addHooks(hooks, plugins, config) {
-    hooks.forEach(hook => this.addHook(hook, null, plugins, config));
+    hooks.forEach((hook) => this.addHook(hook, null, plugins, config));
     return this;
   }
 
@@ -147,7 +150,7 @@ class DropLab {
 
     this.fireReady();
 
-    this.queuedData.forEach(data => this.addData(data));
+    this.queuedData.forEach((data) => this.addData(data));
     this.queuedData = [];
 
     return this;

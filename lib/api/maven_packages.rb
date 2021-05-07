@@ -5,6 +5,8 @@ module API
       file_name: API::NO_SLASH_URL_PART_REGEX
     }.freeze
 
+    feature_category :package_registry
+
     content_type :md5, 'text/plain'
     content_type :sha1, 'text/plain'
     content_type :binary, 'application/octet-stream'
@@ -21,6 +23,15 @@ module API
     helpers ::API::Helpers::PackagesHelpers
 
     helpers do
+      def path_exists?(path)
+        # return true when FF disabled so that processing the request is not stopped
+        return true unless Feature.enabled?(:check_maven_path_first, default_enabled: :yaml)
+        return false if path.blank?
+
+        Packages::Maven::Metadatum.with_path(path)
+                                  .exists?
+      end
+
       def extract_format(file_name)
         name, _, format = file_name.rpartition('.')
 
@@ -75,6 +86,19 @@ module API
           request.head? &&
           file.fog_credentials[:provider] == 'AWS'
       end
+
+      def fetch_package(file_name:, project: nil, group: nil)
+        order_by_package_file = file_name.include?(::Packages::Maven::Metadata.filename) &&
+                                  !params[:path].include?(::Packages::Maven::FindOrCreatePackageService::SNAPSHOT_TERM)
+
+        ::Packages::Maven::PackageFinder.new(
+          params[:path],
+          current_user,
+          project: project,
+          group: group,
+          order_by_package_file: order_by_package_file
+        ).execute!
+      end
     end
 
     desc 'Download the maven package file at instance level' do
@@ -86,6 +110,9 @@ module API
     end
     route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
     get 'packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
+      # return a similar failure to authorize_read_package!(project)
+      forbidden! unless path_exists?(params[:path])
+
       file_name, format = extract_format(params[:file_name])
 
       # To avoid name collision we require project path and project package be the same.
@@ -95,8 +122,7 @@ module API
 
       authorize_read_package!(project)
 
-      package = ::Packages::Maven::PackageFinder
-        .new(params[:path], current_user, project: project).execute!
+      package = fetch_package(file_name: file_name, project: project)
 
       package_file = ::Packages::PackageFileFinder
         .new(package, file_name).execute!
@@ -125,14 +151,16 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       get ':id/-/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
+        # return a similar failure to group = find_group(params[:id])
+        not_found!('Group') unless path_exists?(params[:path])
+
         file_name, format = extract_format(params[:file_name])
 
         group = find_group(params[:id])
 
         not_found!('Group') unless can?(current_user, :read_group, group)
 
-        package = ::Packages::Maven::PackageFinder
-          .new(params[:path], current_user, group: group).execute!
+        package = fetch_package(file_name: file_name, group: group)
 
         authorize_read_package!(package.project)
 
@@ -165,12 +193,14 @@ module API
       end
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true
       get ':id/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
+        # return a similar failure to user_project
+        not_found!('Project') unless path_exists?(params[:path])
+
         authorize_read_package!(user_project)
 
         file_name, format = extract_format(params[:file_name])
 
-        package = ::Packages::Maven::PackageFinder
-          .new(params[:path], current_user, project: user_project).execute!
+        package = fetch_package(file_name: file_name, project: user_project)
 
         package_file = ::Packages::PackageFileFinder
           .new(package, file_name).execute!
@@ -218,8 +248,12 @@ module API
 
         file_name, format = extract_format(params[:file_name])
 
-        package = ::Packages::Maven::FindOrCreatePackageService
+        result = ::Packages::Maven::FindOrCreatePackageService
           .new(user_project, current_user, params.merge(build: current_authenticated_job)).execute
+
+        bad_request!(result.errors.first) if result.error?
+
+        package = result.payload[:package]
 
         case format
         when 'sha1'
@@ -244,7 +278,7 @@ module API
             file_md5:  params['file.md5']
           }
 
-          ::Packages::CreatePackageFileService.new(package, file_params).execute
+          ::Packages::CreatePackageFileService.new(package, file_params.merge(build: current_authenticated_job)).execute
         end
       end
     end

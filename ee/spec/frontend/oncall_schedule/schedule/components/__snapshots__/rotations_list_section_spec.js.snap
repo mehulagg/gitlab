@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RotationsListSectionComponent when the timeframe includes today renders component layout 1`] = `
+<div
+  class="list-section"
+>
+  <div>
+    <div
+      class="gl-clearfix"
+    >
+      <span
+        class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"
+      >
+        <span
+          aria-label="Rotation 242"
+          class="gl-text-truncate"
+          data-testid="rotation-name-gid://gitlab/IncidentManagement::OncallRotation/2"
+        >
+          Rotation 242
+        </span>
+         
+        <div
+          class="gl-px-2 btn-group"
+          role="group"
+        >
+          <button
+            aria-label="Edit rotation"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            title="Edit rotation"
+            type="button"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="pencil-icon"
+            >
+              <use
+                href="#pencil"
+              />
+            </svg>
+              
+            <!---->
+          </button>
+           
+          <button
+            aria-label="Delete rotation"
+            class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+            title="Delete rotation"
+            type="button"
+          >
+            <!---->
+             
+            <svg
+              aria-hidden="true"
+              class="gl-button-icon gl-icon s16"
+              data-testid="remove-icon"
+            >
+              <use
+                href="#remove"
+              />
+            </svg>
+              
+            <!---->
+          </button>
+        </div>
+      </span>
+       
+      <span
+        class="timeline-cell gl-border-b-solid gl-border-b-gray-100 gl-border-b-1 gl-overflow-hidden"
+        data-testid="timeline-cell"
+        style="width: calc(100% - 180px);"
+      >
+        <span
+          class="current-day-indicator"
+          data-testid="current-day-indicator"
+          style="left: 14.285714285714286%;"
+        />
+         
+        <div>
+          <div
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
+          >
+            <div
+              class="gl-h-6 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-2"
+              style="background-color: rgb(87, 114, 255);"
+            >
+              <div
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
+              >
+                <!---->
+                 
+                <!---->
+              </div>
+            </div>
+             
+            <div
+              class="gl-popover"
+            >
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-starts-at"
+              >
+                
+      Starts: January 12, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+               
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-ends-at"
+              >
+                
+      Ends: January 15, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+            </div>
+          </div>
+          <div
+            class="gl-absolute gl-h-7 gl-mt-3 gl-pr-1"
+            style="left: 0px; width: 0px;"
+          >
+            <div
+              class="gl-h-6 gl-display-flex gl-justify-content-center gl-align-items-center"
+              data-testid="rotation-assignee"
+              id="rotation-assignee-3"
+              style="background-color: rgb(209, 78, 0);"
+            >
+              <div
+                class="gl-text-white gl-display-flex gl-justify-content-center gl-align-items-center"
+              >
+                <!---->
+                 
+                <!---->
+              </div>
+            </div>
+             
+            <div
+              class="gl-popover"
+            >
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-starts-at"
+              >
+                
+      Starts: January 16, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+               
+              <p
+                class="gl-m-0"
+                data-testid="rotation-assignee-ends-at"
+              >
+                
+      Ends: January 18, 2021, 10:04 (UTC: +0000)
+    
+              </p>
+            </div>
+          </div>
+        </div>
+      </span>
+    </div>
+  </div>
+</div>
+`;

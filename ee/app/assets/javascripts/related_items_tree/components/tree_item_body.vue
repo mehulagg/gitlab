@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlTooltipDirective,
   GlModalDirective,
@@ -9,20 +8,20 @@ import {
   GlTooltip,
 } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
+import { mapState, mapActions } from 'vuex';
 
 import ItemWeight from 'ee/boards/components/issue_card_weight.vue';
+import ItemDueDate from '~/boards/components/issue_due_date.vue';
 import { __ } from '~/locale';
 
-import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
 import ItemAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
-import ItemDueDate from '~/boards/components/issue_due_date.vue';
+import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
 
+import { ChildType, ChildState, itemRemoveModalId } from '../constants';
 import EpicHealthStatus from './epic_health_status.vue';
 import IssueHealthStatus from './issue_health_status.vue';
 
 import StateTooltip from './state_tooltip.vue';
-
-import { ChildType, ChildState, itemRemoveModalId } from '../constants';
 
 export default {
   itemRemoveModalId,
@@ -80,7 +79,10 @@ export default {
       return this.isOpen ? __('Opened') : __('Closed');
     },
     stateIconName() {
-      return this.item.type === ChildType.Epic ? 'epic' : 'issues';
+      if (this.item.type === ChildType.Epic) {
+        return this.isOpen ? 'epic' : 'epic-closed';
+      }
+      return this.isOpen ? 'issues' : 'issue-closed';
     },
     stateIconClass() {
       return this.isOpen

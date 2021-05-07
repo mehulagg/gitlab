@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import store from './store';
 import CodeAnalyticsApp from './components/app.vue';
+import store from './store';
 
 export default () => {
   const container = document.getElementById('js-code-review-analytics');

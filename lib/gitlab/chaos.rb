@@ -43,9 +43,17 @@ module Gitlab
       Kernel.sleep(duration_s)
     end
 
-    # Kill will send a SIGKILL signal to the current process
-    def self.kill
-      Process.kill("KILL", Process.pid)
+    # Kill will send the given signal to the current process.
+    def self.kill(signal)
+      Process.kill(signal, Process.pid)
+    end
+
+    def self.run_gc
+      # Tenure any live objects from young-gen to old-gen
+      4.times { GC.start(full_mark: false) }
+      # Run a full mark-and-sweep collection
+      GC.start
+      GC.stat
     end
   end
 end

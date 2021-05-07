@@ -1,5 +1,4 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
 import {
   GlEmptyState,
   GlLoadingIcon,
@@ -10,13 +9,14 @@ import {
   GlBadge,
   GlAlert,
 } from '@gitlab/ui';
-import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import { getLocationHash } from '~/lib/utils/url_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { LICENSE_LIST } from '../store/constants';
 import DetectedLicensesTable from './detected_licenses_table.vue';
 import PipelineInfo from './pipeline_info.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { getLocationHash } from '~/lib/utils/url_utility';
 
 export default {
   name: 'LicenseComplianceApp',
@@ -96,15 +96,20 @@ export default {
   <gl-empty-state
     v-else-if="hasEmptyState"
     :title="s__('Licenses|View license details for your project')"
-    :description="
-      s__(
-        'Licenses|The license list details information about the licenses used within your project.',
-      )
-    "
     :svg-path="emptyStateSvgPath"
-    :primary-button-link="documentationPath"
-    :primary-button-text="s__('Licenses|Learn more about license compliance')"
-  />
+    data-qa-selector="license_compliance_empty_state_description_content"
+  >
+    <template #description>
+      {{
+        s__(
+          'Licenses|The license list details information about the licenses used within your project.',
+        )
+      }}
+      <gl-link target="_blank" :href="documentationPath">
+        {{ __('More Information') }}
+      </gl-link>
+    </template>
+  </gl-empty-state>
 
   <div v-else>
     <gl-alert v-if="hasPolicyViolations" class="mt-3" variant="warning" :dismissible="false">
@@ -135,7 +140,7 @@ export default {
       <gl-tab data-testid="licensesTab">
         <template #title>
           <span data-testid="licensesTabTitle">{{ s__('Licenses|Detected in Project') }}</span>
-          <gl-badge>{{ licenseCount }}</gl-badge>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ licenseCount }}</gl-badge>
         </template>
 
         <detected-licenses-table />
@@ -146,7 +151,7 @@ export default {
           <span data-qa-selector="policies_tab" data-testid="policiesTabTitle">{{
             s__('Licenses|Policies')
           }}</span>
-          <gl-badge>{{ policyCount }}</gl-badge>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ policyCount }}</gl-badge>
         </template>
 
         <license-management />

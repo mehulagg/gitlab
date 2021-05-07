@@ -5,11 +5,12 @@ require 'spec_helper'
 RSpec.describe Projects::RawController do
   include RepoHelpers
 
-  let(:project) { create(:project, :public, :repository) }
+  let_it_be(:project) { create(:project, :public, :repository) }
+
   let(:inline) { nil }
 
   describe 'GET #show' do
-    subject do
+    def get_show
       get(:show,
           params: {
             namespace_id: project.namespace,
@@ -17,6 +18,18 @@ RSpec.describe Projects::RawController do
             id: filepath,
             inline: inline
           })
+    end
+
+    subject { get_show }
+
+    shared_examples 'single Gitaly request' do
+      it 'makes a single Gitaly request', :request_store, :clean_gitlab_redis_cache do
+        # Warm up to populate repository cache
+        get_show
+        RequestStore.clear!
+
+        expect { get_show }.to change { Gitlab::GitalyClient.get_request_count }.by(1)
+      end
     end
 
     context 'regular filename' do
@@ -33,11 +46,7 @@ RSpec.describe Projects::RawController do
 
       it_behaves_like 'project cache control headers'
       it_behaves_like 'content disposition headers'
-      it_behaves_like 'uncached response' do
-        before do
-          subject
-        end
-      end
+      include_examples 'single Gitaly request'
     end
 
     context 'image header' do
@@ -53,6 +62,7 @@ RSpec.describe Projects::RawController do
 
       it_behaves_like 'project cache control headers'
       it_behaves_like 'content disposition headers'
+      include_examples 'single Gitaly request'
     end
 
     context 'with LFS files' do
@@ -61,6 +71,7 @@ RSpec.describe Projects::RawController do
 
       it_behaves_like 'a controller that can serve LFS files'
       it_behaves_like 'project cache control headers'
+      include_examples 'single Gitaly request'
     end
 
     context 'when the endpoint receives requests above the limit', :clean_gitlab_redis_cache do
@@ -222,6 +233,44 @@ RSpec.describe Projects::RawController do
             expect(response).to have_gitlab_http_status(:found)
             expect(response.location).to end_with('/users/sign_in')
           end
+        end
+      end
+    end
+
+    describe 'caching' do
+      def request_file
+        get(:show, params: { namespace_id: project.namespace, project_id: project, id: 'master/README.md' })
+      end
+
+      it 'sets appropriate caching headers' do
+        sign_in create(:user)
+        request_file
+
+        expect(response.cache_control[:public]).to eq(true)
+        expect(response.cache_control[:max_age]).to eq(60)
+        expect(response.cache_control[:no_store]).to be_nil
+      end
+
+      context 'when a public project has private repo' do
+        let(:project) { create(:project, :public, :repository, :repository_private) }
+        let(:user) { create(:user, maintainer_projects: [project]) }
+
+        it 'does not set public caching header' do
+          sign_in user
+          request_file
+
+          expect(response.header['Cache-Control']).to include('max-age=60, private')
+        end
+      end
+
+      context 'when If-None-Match header is set' do
+        it 'returns a 304 status' do
+          request_file
+
+          request.headers['If-None-Match'] = response.headers['ETag']
+          request_file
+
+          expect(response).to have_gitlab_http_status(:not_modified)
         end
       end
     end

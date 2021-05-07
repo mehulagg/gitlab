@@ -18,7 +18,7 @@ RSpec.describe Admin::ImpersonationsController do
           stub_licensed_features(extended_audit_events: true)
         end
 
-        it 'creates an audit log record' do
+        it 'creates an AuditEvent record' do
           expect { delete :destroy }.to change { AuditEvent.count }.by(1)
         end
       end

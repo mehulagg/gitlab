@@ -1,12 +1,12 @@
-import service from '../../services';
-import * as types from './mutation_types';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Poll from '~/lib/utils/poll';
 import { __ } from '~/locale';
+import service from '../../services';
+import * as types from './mutation_types';
 
 let stackTracePoll;
 
-const stopPolling = poll => {
+const stopPolling = (poll) => {
   if (poll) poll.stop();
 };
 

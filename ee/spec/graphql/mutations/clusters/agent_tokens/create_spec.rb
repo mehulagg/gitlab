@@ -7,6 +7,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
 
   let_it_be(:cluster_agent) { create(:cluster_agent) }
   let_it_be(:user) { create(:user) }
+
   let(:context) do
     GraphQL::Query::Context.new(
       query: OpenStruct.new(schema: nil),
@@ -18,7 +19,10 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
   specify { expect(described_class).to require_graphql_authorizations(:create_cluster) }
 
   describe '#resolve' do
-    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id) }
+    let(:description) { 'new token!' }
+    let(:name) { 'new name' }
+
+    subject { mutation.resolve(cluster_agent_id: cluster_agent.to_global_id, description: description, name: name) }
 
     context 'without token permissions' do
       it 'raises an error if the resource is not accessible to the user' do
@@ -44,8 +48,16 @@ RSpec.describe Mutations::Clusters::AgentTokens::Create do
 
       it 'creates a new token', :aggregate_failures do
         expect { subject }.to change { ::Clusters::AgentToken.count }.by(1)
-        expect(subject[:secret]).not_to be_nil
         expect(subject[:errors]).to eq([])
+      end
+
+      it 'returns token information', :aggregate_failures do
+        token = subject[:token]
+
+        expect(subject[:secret]).not_to be_nil
+        expect(token.created_by_user).to eq(user)
+        expect(token.description).to eq(description)
+        expect(token.name).to eq(name)
       end
 
       context 'invalid params' do

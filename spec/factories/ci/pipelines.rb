@@ -16,6 +16,7 @@ FactoryBot.define do
     transient { head_pipeline_of { nil } }
 
     transient { child_of { nil } }
+    transient { upstream_of { nil } }
 
     after(:build) do |pipeline, evaluator|
       if evaluator.child_of
@@ -30,10 +31,17 @@ FactoryBot.define do
 
       if evaluator.child_of
         bridge = create(:ci_bridge, pipeline: evaluator.child_of)
-        create(:ci_sources_pipeline,
-          source_job: bridge,
-          pipeline: pipeline)
+        create(:ci_sources_pipeline, source_job: bridge, pipeline: pipeline)
       end
+
+      if evaluator.upstream_of
+        bridge = create(:ci_bridge, pipeline: pipeline)
+        create(:ci_sources_pipeline, source_job: bridge, pipeline: evaluator.upstream_of)
+      end
+    end
+
+    trait :created do
+      status { :created }
     end
 
     factory :ci_pipeline do
@@ -47,10 +55,6 @@ FactoryBot.define do
         status { :failed }
         yaml_errors { 'invalid YAML' }
         failure_reason { :config_error }
-      end
-
-      trait :created do
-        status { :created }
       end
 
       trait :preparing do
@@ -77,6 +81,10 @@ FactoryBot.define do
         status { :failed }
       end
 
+      trait :unlocked do
+        locked { Ci::Pipeline.lockeds[:unlocked] }
+      end
+
       trait :protected do
         add_attribute(:protected) { true }
       end
@@ -94,6 +102,22 @@ FactoryBot.define do
 
         after(:build) do |pipeline, evaluator|
           pipeline.builds << build(:ci_build, :codequality_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_sast_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :sast_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_secret_detection_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :secret_detection_report, pipeline: pipeline, project: pipeline.project)
         end
       end
 
@@ -121,6 +145,14 @@ FactoryBot.define do
         end
       end
 
+      trait :with_test_reports_with_three_failures do
+        status { :failed }
+
+        after(:build) do |pipeline, _evaluator|
+          pipeline.builds << build(:ci_build, :failed, :test_reports_with_three_failures, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
       trait :with_accessibility_reports do
         status { :success }
 
@@ -137,9 +169,23 @@ FactoryBot.define do
         end
       end
 
+      trait :with_codequality_reports do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :codequality_reports, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
       trait :with_coverage_report_artifact do
         after(:build) do |pipeline, evaluator|
-          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, pipeline: pipeline, project: pipeline.project)
+          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, :with_coverage_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_codequality_mr_diff_report do
+        after(:build) do |pipeline, evaluator|
+          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, :with_codequality_mr_diff_report, pipeline: pipeline, project: pipeline.project)
         end
       end
 
@@ -195,7 +241,7 @@ FactoryBot.define do
       trait :merged_result_pipeline do
         detached_merge_request_pipeline
 
-        sha { 'test-merge-sha'}
+        sha { 'mergeSha' }
         ref { merge_request.merge_ref_path }
         source_sha { merge_request.source_branch_sha }
         target_sha { merge_request.target_branch_sha }

@@ -6,6 +6,7 @@ RSpec.describe FeatureFlags::UpdateService do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:reporter) { create(:user) }
+
   let(:user) { developer }
   let(:feature_flag) { create(:operations_feature_flag, project: project, active: true) }
 
@@ -24,6 +25,12 @@ RSpec.describe FeatureFlags::UpdateService do
 
     it 'returns success status' do
       expect(subject[:status]).to eq(:success)
+    end
+
+    it 'syncs the feature flag to Jira' do
+      expect(::JiraConnect::SyncFeatureFlagsWorker).to receive(:perform_async).with(Integer, Integer)
+
+      subject
     end
 
     it 'creates audit event with correct message' do
@@ -51,6 +58,12 @@ RSpec.describe FeatureFlags::UpdateService do
 
       it 'does not create audit event' do
         expect { subject }.not_to change { AuditEvent.count }
+      end
+
+      it 'does not sync the feature flag to Jira' do
+        expect(::JiraConnect::SyncFeatureFlagsWorker).not_to receive(:perform_async)
+
+        subject
       end
     end
 
@@ -99,6 +112,13 @@ RSpec.describe FeatureFlags::UpdateService do
         expect(audit_event_message).to(
           include('Updated active from <strong>"true"</strong> to <strong>"false"</strong>.')
         )
+      end
+
+      it 'executes hooks' do
+        hook = create(:project_hook, :all_events_enabled, project: project)
+        expect(WebHookWorker).to receive(:perform_async).with(hook.id, an_instance_of(Hash), 'feature_flag_hooks')
+
+        subject
       end
     end
 

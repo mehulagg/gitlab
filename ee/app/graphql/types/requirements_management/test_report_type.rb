@@ -9,17 +9,20 @@ module Types
       authorize :read_requirement
 
       field :id, GraphQL::ID_TYPE, null: false,
-            description: 'ID of the test report'
+            description: 'ID of the test report.'
 
       field :state, TestReportStateEnum, null: false,
-            description: 'State of the test report'
+            description: 'State of the test report.'
 
       field :author, UserType, null: true,
-            description: 'Author of the test report',
-            resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
+            description: 'Author of the test report.'
 
       field :created_at, TimeType, null: false,
-            description: 'Timestamp of when the test report was created'
+            description: 'Timestamp of when the test report was created.'
+
+      def author
+        Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find
+      end
     end
   end
 end

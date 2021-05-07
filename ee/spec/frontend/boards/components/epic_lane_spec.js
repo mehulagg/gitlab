@@ -1,10 +1,10 @@
-import Vuex from 'vuex';
+import { GlIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import EpicLane from 'ee/boards/components/epic_lane.vue';
 import IssuesLaneList from 'ee/boards/components/issues_lane_list.vue';
-import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import getters from 'ee/boards/stores/getters';
-import { mockEpic, mockListsWithModel, mockIssuesByListId, issues } from '../mock_data';
+import { mockEpic, mockLists, mockIssuesByListId, issues } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,33 +12,29 @@ localVue.use(Vuex);
 describe('EpicLane', () => {
   let wrapper;
 
-  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
 
   const updateBoardEpicUserPreferencesSpy = jest.fn();
 
-  const createStore = isLoading => {
+  const createStore = ({ boardItemsByListId = mockIssuesByListId }) => {
     return new Vuex.Store({
       actions: {
-        fetchIssuesForEpic: jest.fn(),
         updateBoardEpicUserPreferences: updateBoardEpicUserPreferencesSpy,
       },
       state: {
-        issuesByListId: mockIssuesByListId,
-        issues,
-        epicsFlags: {
-          [mockEpic.id]: { isLoading },
-        },
+        boardItemsByListId,
+        boardItems: issues,
       },
       getters,
     });
   };
 
-  const createComponent = ({ props = {}, isLoading = false } = {}) => {
-    const store = createStore(isLoading);
+  const createComponent = ({ props = {}, boardItemsByListId = mockIssuesByListId } = {}) => {
+    const store = createStore({ boardItemsByListId });
 
     const defaultProps = {
       epic: mockEpic,
-      lists: mockListsWithModel,
+      lists: mockLists,
       disabled: false,
     };
 
@@ -89,16 +85,6 @@ describe('EpicLane', () => {
       });
     });
 
-    it('does not display loading icon when issues are not loading', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-    });
-
-    it('displays loading icon and hides issues count when issues are loading', () => {
-      createComponent({ isLoading: true });
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
-      expect(findByTestId('epic-lane-issue-count').exists()).toBe(false);
-    });
-
     it('invokes `updateBoardEpicUserPreferences` method on collapse', () => {
       const collapsedValue = false;
 
@@ -118,6 +104,11 @@ describe('EpicLane', () => {
 
         expect(wrapper.vm.isCollapsed).toBe(true);
       });
+    });
+
+    it('does not render when issuesCount is 0', () => {
+      createComponent({ boardItemsByListId: {} });
+      expect(findByTestId('board-epic-lane').exists()).toBe(false);
     });
   });
 });

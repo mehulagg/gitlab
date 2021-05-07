@@ -1,8 +1,7 @@
 <script>
-import { mapActions } from 'vuex';
 import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 
-import { __ } from '~/locale';
 import {
   TRANSITION_LOAD_START,
   TRANSITION_LOAD_ERROR,
@@ -14,6 +13,7 @@ import {
   RENAMED_DIFF_TRANSITIONS,
 } from '~/diffs/constants';
 import { truncateSha } from '~/lib/utils/text_utility';
+import { __ } from '~/locale';
 
 export default {
   STATE_LOADING,
@@ -37,9 +37,11 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    state: STATE_IDLING,
-  }),
+  data() {
+    return {
+      state: STATE_IDLING,
+    };
+  },
   computed: {
     shortSha() {
       return truncateSha(this.diffFile.content_sha);

@@ -14,9 +14,8 @@ RSpec.describe 'Group navbar' do
   let(:structure) do
     [
       {
-        nav_item: _('Group overview'),
+        nav_item: _('Group information'),
         nav_sub_items: [
-          _('Details'),
           _('Activity')
         ]
       },
@@ -30,9 +29,10 @@ RSpec.describe 'Group navbar' do
         ]
       },
       {
-        nav_item: _('Merge Requests'),
+        nav_item: _('Merge requests'),
         nav_sub_items: []
       },
+      (security_and_compliance_nav_item if Gitlab.ee?),
       (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),
@@ -50,6 +50,8 @@ RSpec.describe 'Group navbar' do
     insert_package_nav(_('Kubernetes'))
 
     stub_feature_flags(group_iterations: false)
+    stub_config(dependency_proxy: { enabled: false })
+    stub_config(registry: { enabled: false })
     stub_group_wikis(false)
     group.add_maintainer(user)
     sign_in(user)
@@ -65,7 +67,7 @@ RSpec.describe 'Group navbar' do
     before do
       stub_config(registry: { enabled: true })
 
-      insert_container_nav(_('Kubernetes'))
+      insert_container_nav
 
       visit group_path(group)
     end
@@ -73,11 +75,15 @@ RSpec.describe 'Group navbar' do
     it_behaves_like 'verified navigation bar'
   end
 
-  context 'when invite team members is not available' do
-    it 'does not display the js-invite-members-trigger' do
-      visit group_path(group)
+  context 'when dependency proxy is available' do
+    before do
+      stub_config(dependency_proxy: { enabled: true })
 
-      expect(page).not_to have_selector('.js-invite-members-trigger')
+      insert_dependency_proxy_nav
+
+      visit group_path(group)
     end
+
+    it_behaves_like 'verified navigation bar'
   end
 end

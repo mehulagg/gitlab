@@ -9,9 +9,11 @@ RSpec.describe MarkupHelper do
     project.add_maintainer(user)
     user
   end
+
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
   let_it_be(:snippet) { create(:project_snippet, project: project) }
+
   let(:commit) { project.commit }
 
   before do
@@ -315,6 +317,7 @@ RSpec.describe MarkupHelper do
   describe '#render_wiki_content' do
     let(:wiki) { double('WikiPage', path: "file.#{extension}") }
     let(:wiki_repository) { double('Repository') }
+    let(:content) { 'wiki content' }
     let(:context) do
       {
         pipeline: :wiki, project: project, wiki: wiki,
@@ -324,9 +327,11 @@ RSpec.describe MarkupHelper do
     end
 
     before do
-      expect(wiki).to receive(:content).and_return('wiki content')
+      expect(wiki).to receive(:content).and_return(content)
       expect(wiki).to receive(:slug).and_return('nested/page')
       expect(wiki).to receive(:repository).and_return(wiki_repository)
+      allow(wiki).to receive(:container).and_return(project)
+
       helper.instance_variable_set(:@wiki, wiki)
     end
 
@@ -338,6 +343,34 @@ RSpec.describe MarkupHelper do
 
         helper.render_wiki_content(wiki)
       end
+
+      context 'when context has labels' do
+        let_it_be(:label) { create(:label, title: 'Bug', project: project) }
+
+        let(:content) { '~Bug' }
+
+        it 'renders label' do
+          result = helper.render_wiki_content(wiki)
+          doc = Nokogiri::HTML.parse(result)
+
+          expect(doc.css('.gl-label-link')).not_to be_empty
+        end
+      end
+
+      context 'when content has uploads' do
+        let(:upload_link) { '/uploads/test.png' }
+        let(:content) { "![ImageTest](#{upload_link})" }
+
+        before do
+          allow(wiki).to receive(:wiki_base_path).and_return(project.wiki.wiki_base_path)
+        end
+
+        it 'renders uploads relative to project' do
+          result = helper.render_wiki_content(wiki)
+
+          expect(result).to include("#{project.full_path}#{upload_link}")
+        end
+      end
     end
 
     context 'when file is Asciidoc' do
@@ -347,6 +380,27 @@ RSpec.describe MarkupHelper do
         expect(Gitlab::Asciidoc).to receive(:render)
 
         helper.render_wiki_content(wiki)
+      end
+    end
+
+    context 'when file is Kramdown' do
+      let(:extension) { 'rmd' }
+      let(:content) do
+        <<-EOF
+{::options parse_block_html="true" /}
+
+<div>
+FooBar
+</div>
+        EOF
+      end
+
+      it 'renders using #markdown_unsafe helper method' do
+        expect(helper).to receive(:markdown_unsafe).with(content, context)
+
+        result = helper.render_wiki_content(wiki)
+
+        expect(result).to be_empty
       end
     end
 
@@ -400,6 +454,7 @@ RSpec.describe MarkupHelper do
 
     let_it_be(:project_base) { create(:project, :repository) }
     let_it_be(:context) { { project: project_base } }
+
     let(:file_name) { 'foo.bar' }
     let(:text) { 'Noël' }
 
@@ -522,7 +577,7 @@ RSpec.describe MarkupHelper do
 
       it 'preserves code color scheme' do
         object = create_object("```ruby\ndef test\n  'hello world'\nend\n```")
-        expected = "<pre class=\"code highlight js-syntax-highlight ruby\">" \
+        expected = "<pre class=\"code highlight js-syntax-highlight language-ruby\">" \
           "<code><span class=\"line\"><span class=\"k\">def</span> <span class=\"nf\">test</span>...</span>\n" \
           "</code></pre>"
 

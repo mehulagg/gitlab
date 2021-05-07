@@ -14,7 +14,7 @@ RSpec.describe LooksAhead do
 
   # Simplified schema to test lookahead
   let_it_be(:schema) do
-    issues_resolver = Class.new(Resolvers::BaseResolver) do
+    issues_resolver = Class.new(GraphQL::Schema::Resolver) do
       include LooksAhead
 
       def resolve_with_lookahead(**args)
@@ -38,12 +38,8 @@ RSpec.describe LooksAhead do
     user = Class.new(GraphQL::Schema::Object) do
       graphql_name 'User'
       field :name, String, null: true
-      field :issues, issue.connection_type,
-        null: true
-      field :issues_with_lookahead, issue.connection_type,
-        extras: [:lookahead],
-        resolver: issues_resolver,
-        null: true
+      field :issues, issue.connection_type, null: true
+      field :issues_with_lookahead, issue.connection_type, resolver: issues_resolver, null: true
     end
 
     Class.new(GraphQL::Schema) do
@@ -102,7 +98,7 @@ RSpec.describe LooksAhead do
 
       expect(res['errors']).to be_blank
       expect(res.dig('data', 'findUser', 'name')).to eq(the_user.name)
-      %w(issues issuesWithLookahead).each do |field|
+      %w[issues issuesWithLookahead].each do |field|
         expect(all_issue_titles(res, field)).to match_array(issue_titles)
         expect(all_label_ids(res, field)).to match_array(expected_label_ids)
       end

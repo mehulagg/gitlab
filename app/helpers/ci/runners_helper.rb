@@ -2,18 +2,35 @@
 
 module Ci
   module RunnersHelper
-    def runner_status_icon(runner)
+    include IconsHelper
+
+    def runner_status_icon(runner, size: 16, icon_class: '')
       status = runner.status
+
+      title = ''
+      icon = 'warning-solid'
+      span_class = ''
+
       case status
       when :not_connected
-        content_tag :i, nil,
-                    class: "fa fa-warning",
-                    title: "New runner. Has not connected yet"
+        title = s_("Runners|New runner, has not connected yet")
+        icon = 'warning-solid'
+      when :online
+        title = s_("Runners|Runner is online, last contact was %{runner_contact} ago") % { runner_contact: time_ago_in_words(runner.contacted_at) }
+        icon = 'status-active'
+        span_class = 'gl-text-green-500'
+      when :offline
+        title = s_("Runners|Runner is offline, last contact was %{runner_contact} ago") % { runner_contact: time_ago_in_words(runner.contacted_at) }
+        icon = 'status-failed'
+        span_class = 'gl-text-red-500'
+      when :paused
+        title = s_("Runners|Runner is paused, last contact was %{runner_contact} ago") % { runner_contact: time_ago_in_words(runner.contacted_at) }
+        icon = 'status-paused'
+        span_class = 'gl-text-gray-600'
+      end
 
-      when :online, :offline, :paused
-        content_tag :i, nil,
-                    class: "fa fa-circle runner-status-#{status}",
-                    title: "Runner is #{status}, last contact was #{time_ago_in_words(runner.contacted_at)} ago"
+      content_tag(:span, class: span_class, title: title, data: { toggle: 'tooltip', container: 'body', testid: 'runner_status_icon', qa_selector: "runner_status_#{status}_content" }) do
+        sprite_icon(icon, size: size, css_class: icon_class)
       end
     end
 
@@ -45,6 +62,14 @@ module Ci
         update_path: api_v4_groups_path(id: group.id),
         shared_runners_availability: group.shared_runners_setting,
         parent_shared_runners_availability: group.parent&.shared_runners_setting
+      }
+    end
+
+    def toggle_shared_runners_settings_data(project)
+      {
+        is_enabled: "#{project.shared_runners_enabled?}",
+        is_disabled_and_unoverridable: "#{project.group&.shared_runners_setting == 'disabled_and_unoverridable'}",
+        update_path: toggle_shared_runners_project_runners_path(project)
       }
     end
   end

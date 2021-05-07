@@ -1,11 +1,11 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlSingleStat } from '@gitlab/ui/dist/charts';
+import { shallowMount } from '@vue/test-utils';
 import StatisticsSummary from 'ee/threat_monitoring/components/statistics_summary.vue';
 
 describe('StatisticsSummary component', () => {
   let wrapper;
 
-  const factory = options => {
+  const factory = (options) => {
     wrapper = shallowMount(StatisticsSummary, {
       ...options,
     });

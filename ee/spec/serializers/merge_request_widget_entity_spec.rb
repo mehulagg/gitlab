@@ -9,6 +9,7 @@ RSpec.describe MergeRequestWidgetEntity do
   let_it_be(:project, reload: true) { create :project, :repository }
   let_it_be(:merge_request, reload: true) { create(:merge_request, source_project: project, target_project: project) }
   let_it_be(:pipeline, reload: true) { create(:ci_empty_pipeline, project: project) }
+
   let(:request) { double('request', current_user: user) }
 
   before do
@@ -246,6 +247,28 @@ RSpec.describe MergeRequestWidgetEntity do
     expect(subject.as_json).to include(:create_vulnerability_feedback_dismissal_path)
   end
 
+  describe '#can_read_vulnerabilities' do
+    context 'when security dashboard feature is available' do
+      before do
+        stub_licensed_features(security_dashboard: true)
+      end
+
+      it 'is set to true' do
+        expect(subject.as_json[:can_read_vulnerabilities]).to eq(true)
+      end
+    end
+
+    context 'when security dashboard feature is not available' do
+      before do
+        stub_licensed_features(security_dashboard: false)
+      end
+
+      it 'is set to false' do
+        expect(subject.as_json[:can_read_vulnerabilities]).to eq(false)
+      end
+    end
+  end
+
   describe '#can_read_vulnerability_feedback' do
     context 'when user has permissions to read vulnerability feedback' do
       before do
@@ -270,6 +293,10 @@ RSpec.describe MergeRequestWidgetEntity do
 
   it 'has can_read_vulnerability_feedback property' do
     expect(subject.as_json).to include(:can_read_vulnerability_feedback)
+  end
+
+  it 'has discover project security path' do
+    expect(subject.as_json).to include(:discover_project_security_path)
   end
 
   it 'has pipeline id' do

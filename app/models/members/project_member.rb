@@ -5,6 +5,8 @@ class ProjectMember < Member
 
   belongs_to :project, foreign_key: 'source_id'
 
+  delegate :namespace_id, to: :project
+
   # Make sure project member points only to project as it source
   default_value_for :source_type, SOURCE_TYPE
   validates :source_type, format: { with: /\AProject\z/ }
@@ -14,7 +16,7 @@ class ProjectMember < Member
   scope :in_project, ->(project) { where(source_id: project.id) }
   scope :in_namespaces, ->(groups) do
     joins('INNER JOIN projects ON projects.id = members.source_id')
-      .where('projects.namespace_id in (?)', groups.select(:id))
+      .where(projects: { namespace_id: groups.select(:id) })
   end
 
   scope :without_project_bots, -> do
@@ -67,7 +69,7 @@ class ProjectMember < Member
       end
 
       true
-    rescue
+    rescue StandardError
       false
     end
 

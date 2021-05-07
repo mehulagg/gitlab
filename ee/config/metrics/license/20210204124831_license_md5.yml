@@ -1,0 +1,18 @@
+---
+key_path: license_md5
+description: The license key of the GitLab instance
+product_section: growth
+product_stage: growth
+product_group: group::product intelligence
+product_category: collection
+value_type: string
+status: data_available
+time_frame: none
+data_source:
+distribution:
+- ee
+tier:
+- free
+- premium
+- ultimate
+skip_validation: true

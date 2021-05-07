@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
 
@@ -13,18 +13,17 @@ and it may be useful for users with experience with Linux. If you are currently
 having an issue with GitLab, you may want to check your [support options](https://about.gitlab.com/support/)
 first, before attempting to use this information.
 
-CAUTION: **Caution:**
+WARNING:
 If you are administering GitLab you are expected to know these commands for your distribution
 of choice. If you are a GitLab Support Engineer, consider this a cross-reference to
 translate `yum` -> `apt-get` and the like.
 
-Note: **Note:**
 Most of the commands below have not been labeled as to which distribution they work
 on. Contributions are welcome to help add them.
 
 ## System Commands
 
-### Distro Information
+### Distribution Information
 
 ```shell
 # Debian/Ubuntu
@@ -56,7 +55,7 @@ chown root:git <file_or_dir>
 chmod u+x <file>
 ```
 
-### Files & Dirs
+### Files and directories
 
 ```shell
 # create a new directory and all subdirectories
@@ -201,9 +200,9 @@ or you can build it from source if you have the Rust compiler.
 
 #### How to use the tool
 
-First run the tool with no arguments other than the strace output file name to get
+First run the tool with no arguments other than the strace output filename to get
 a summary of the top processes sorted by time spent actively performing tasks. You
-can also sort based on total time, # of syscalls made, PID #, and # of child processes
+can also sort based on total time, # of system calls made, PID #, and # of child processes
 using the `-S` or `--sort` flag. The number of results defaults to 25 processes, but
 can be changed using the `-c`/`--count` option. See `--help` for full details.
 
@@ -221,7 +220,7 @@ Top 25 PIDs
 ...
 ```
 
-Based on the summary, you can then view the details of syscalls made by one or more
+Based on the summary, you can then view the details of system calls made by one or more
 processes using the `-p`/`--pid` for a specific process, or `-s`/`--stats` flags for
 a sorted list. `--stats` takes the same sorting and count options as summary.
 
@@ -267,7 +266,7 @@ Rough numbers for calls to `open` and `openat` (used to access files) on various
 Slow storage can cause the dreaded `DeadlineExceeded` error in Gitaly.
 
 Also [see this entry](../operations/filesystem_benchmarking.md)
-in the handbook for quick tests customers can perform to check their filesystem performance.
+in the handbook for quick tests customers can perform to check their file system performance.
 
 Keep in mind that timing information from `strace` is often somewhat inaccurate, so
 small differences should not be considered significant.
@@ -304,7 +303,25 @@ nslookup example.com 1.1.1.1
 whois <ip_address> | grep -i "orgname\|netname"
 
 # Curl headers with redirect
-curl --head --location https://example.com
+curl --head --location "https://example.com"
+
+# Test if a host is reachable on the network. `ping6` works on IPv6 networks.
+ping example.com
+
+# Show the route taken to a host. `traceroute6` works on IPv6 networks.
+traceroute example.com
+mtr example.com
+
+# List details of network interfaces
+ip address
+
+# Check local DNS settings
+cat /etc/hosts
+cat /etc/resolv.conf
+systemd-resolve --status
+
+# Capture traffic to/from a host
+sudo tcpdump host www.example.com
 ```
 
 ## Package Management

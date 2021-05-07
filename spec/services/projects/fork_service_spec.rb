@@ -116,6 +116,24 @@ RSpec.describe Projects::ForkService do
             expect(to_project.fork_network_member.forked_from_project).to eq(from_forked_project)
           end
 
+          context 'when the forked project has higher visibility than the root project' do
+            let(:root_project) { create(:project, :public) }
+
+            it 'successfully creates a fork of the fork with correct visibility' do
+              forked_project = fork_project(root_project, @to_user, using_service: true)
+
+              root_project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+
+              # Forked project visibility is not affected by root project visibility change
+              expect(forked_project).to have_attributes(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+
+              fork_of_the_fork = fork_project(forked_project, @to_user, namespace: other_namespace, using_service: true)
+
+              expect(fork_of_the_fork).to be_valid
+              expect(fork_of_the_fork).to have_attributes(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
+            end
+          end
+
           it_behaves_like 'forks count cache refresh' do
             let(:from_project) { from_forked_project }
             let(:to_user) { @to_user }
@@ -305,6 +323,50 @@ RSpec.describe Projects::ForkService do
         end
       end
     end
+
+    describe 'fork with optional attributes' do
+      let(:public_project) { create(:project, :public) }
+
+      it 'sets optional attributes to specified values' do
+        forked_project = fork_project(
+          public_project,
+          nil,
+          namespace: public_project.namespace,
+          path: 'forked',
+          name: 'My Fork',
+          description: 'Description',
+          visibility: 'internal',
+          using_service: true
+        )
+
+        expect(forked_project.path).to eq('forked')
+        expect(forked_project.name).to eq('My Fork')
+        expect(forked_project.description).to eq('Description')
+        expect(forked_project.visibility_level).to eq(Gitlab::VisibilityLevel::INTERNAL)
+      end
+
+      it 'sets visibility level to private if an unknown visibility is requested' do
+        forked_project = fork_project(public_project, nil, using_service: true, visibility: 'unknown')
+
+        expect(forked_project.visibility_level).to eq(Gitlab::VisibilityLevel::PRIVATE)
+      end
+
+      it 'sets visibility level to project visibility level if requested visibility is greater' do
+        private_project = create(:project, :private)
+
+        forked_project = fork_project(private_project, nil, using_service: true, visibility: 'public')
+
+        expect(forked_project.visibility_level).to eq(Gitlab::VisibilityLevel::PRIVATE)
+      end
+
+      it 'sets visibility level to target namespace visibility level if requested visibility is greater' do
+        private_group = create(:group, :private)
+
+        forked_project = fork_project(public_project, nil, namespace: private_group, using_service: true, visibility: 'public')
+
+        expect(forked_project.visibility_level).to eq(Gitlab::VisibilityLevel::PRIVATE)
+      end
+    end
   end
 
   context 'when a project is already forked' do
@@ -325,7 +387,7 @@ RSpec.describe Projects::ForkService do
       storage_move = create(
         :project_repository_storage_move,
         :scheduled,
-        project: project,
+        container: project,
         destination_storage_name: 'test_second_storage'
       )
       Projects::UpdateRepositoryStorageService.new(storage_move).execute
@@ -341,12 +403,8 @@ RSpec.describe Projects::ForkService do
   end
 
   context 'when forking with object pools' do
-    let(:fork_from_project) { create(:project, :public) }
+    let(:fork_from_project) { create(:project, :repository, :public) }
     let(:forker) { create(:user) }
-
-    before do
-      stub_feature_flags(object_pools: true)
-    end
 
     context 'when no pool exists' do
       it 'creates a new object pool' do

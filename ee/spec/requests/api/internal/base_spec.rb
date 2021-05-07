@@ -10,11 +10,11 @@ RSpec.describe API::Internal::Base do
   let_it_be(:primary_node, reload: true) { create(:geo_node, :primary, url: primary_url) }
   let_it_be(:secondary_node, reload: true) { create(:geo_node, url: secondary_url) }
   let_it_be(:user) { create(:user) }
+  let(:secret_token) { Gitlab::Shell.secret_token }
 
   describe 'POST /internal/post_receive', :geo do
     let(:key) { create(:key, user: user) }
     let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
-    let(:secret_token) { Gitlab::Shell.secret_token }
     let(:gl_repository) { "project-#{project.id}" }
     let(:reference_counter) { double('ReferenceCounter') }
 
@@ -74,7 +74,6 @@ RSpec.describe API::Internal::Base do
 
   describe "POST /internal/allowed" do
     let_it_be(:key) { create(:key, user: user) }
-    let(:secret_token) { Gitlab::Shell.secret_token }
 
     context "project alias" do
       let(:project) { create(:project, :public, :repository) }
@@ -248,7 +247,7 @@ RSpec.describe API::Internal::Base do
       let_it_be(:project) { create(:project, :repository) }
 
       before do
-        stub_application_setting(maintenance_mode: true)
+        stub_maintenance_mode_setting(true)
 
         project.add_developer(user)
       end
@@ -279,10 +278,10 @@ RSpec.describe API::Internal::Base do
 
   describe "POST /internal/lfs_authenticate", :geo do
     let(:project) { create(:project, :repository) }
-    let(:secret_token) { Gitlab::Shell.secret_token }
 
     context 'for a secondary node' do
       before do
+        stub_lfs_setting(enabled: true)
         stub_current_geo_node(secondary_node)
         project.add_developer(user)
       end
@@ -311,9 +310,7 @@ RSpec.describe API::Internal::Base do
 
   describe 'POST /internal/personal_access_token' do
     let_it_be(:key) { create(:key, user: user) }
-
     let(:instance_level_max_personal_access_token_lifetime) { nil }
-    let(:secret_token) { Gitlab::Shell.secret_token }
 
     before do
       stub_licensed_features(personal_access_token_expiration_policy: !!instance_level_max_personal_access_token_lifetime)
@@ -341,6 +338,7 @@ RSpec.describe API::Internal::Base do
 
       it 'returns a valid token when the expiry date does not exceed the max token lifetime' do
         expires_at = instance_level_max_personal_access_token_lifetime.days.from_now.to_date.to_s
+        token_size = (PersonalAccessToken.token_prefix || '').size + 20
 
         post api('/internal/personal_access_token'),
              params: {
@@ -353,10 +351,203 @@ RSpec.describe API::Internal::Base do
 
         aggregate_failures do
           expect(json_response['success']).to eq(true)
-          expect(json_response['token']).to match(/\A\S{20}\z/)
+          expect(json_response['token']).to match(/\A\S{#{token_size}}\z/)
           expect(json_response['scopes']).to match_array(%w(read_api read_repository))
           expect(json_response['expires_at']).to eq(expires_at)
         end
+      end
+    end
+  end
+
+  describe 'POST /internal/two_factor_otp_check' do
+    let_it_be(:key) { create(:key, user: user) }
+    let(:key_id) { key.id }
+    let(:otp) { '123456'}
+
+    before do
+      stub_feature_flags(two_factor_for_cli: true)
+      stub_licensed_features(git_two_factor_enforcement: true)
+    end
+
+    subject do
+      post api('/internal/two_factor_otp_check'),
+           params: {
+             secret_token: secret_token,
+             key_id: key_id,
+             otp_attempt: otp
+           }
+    end
+
+    it_behaves_like 'actor key validations'
+
+    context 'when the key is a deploy key' do
+      let(:key_id) { create(:deploy_key).id }
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq('Deploy keys cannot be used for Two Factor')
+      end
+    end
+
+    context 'when the two factor is enabled' do
+      before do
+        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(true) # rubocop:disable RSpec/AnyInstanceOf
+      end
+
+      context 'when the OTP is valid' do
+        it 'registers a new OTP session and returns success' do
+          allow_next_instance_of(Users::ValidateOtpService) do |service|
+            allow(service).to receive(:execute).with(otp).and_return(status: :success)
+          end
+
+          expect_next_instance_of(::Gitlab::Auth::Otp::SessionEnforcer) do |session_enforcer|
+            expect(session_enforcer).to receive(:update_session).once
+          end
+
+          subject
+
+          expect(json_response['success']).to be_truthy
+        end
+      end
+
+      context 'when the OTP is invalid' do
+        it 'is not success' do
+          allow_next_instance_of(Users::ValidateOtpService) do |service|
+            allow(service).to receive(:execute).with(otp).and_return(status: :error)
+          end
+
+          subject
+
+          expect(json_response['success']).to be_falsey
+        end
+      end
+    end
+
+    context 'when the two factor is disabled' do
+      before do
+        allow_any_instance_of(User).to receive(:two_factor_enabled?).and_return(false)  # rubocop:disable RSpec/AnyInstanceOf
+      end
+
+      it 'returns an error message' do
+        subject
+
+        expect(json_response['success']).to be_falsey
+        expect(json_response['message']).to eq 'Two-factor authentication is not enabled for this user'
+      end
+    end
+
+    context 'feature flag is disabled' do
+      before do
+        stub_feature_flags(two_factor_for_cli: false)
+      end
+
+      context 'when two-factor is enabled for the user' do
+        it 'returns user two factor config' do
+          allow_next_instance_of(User) do |instance|
+            allow(instance).to receive(:two_factor_enabled?).and_return(true)
+          end
+
+          subject
+
+          expect(json_response['success']).to be_falsey
+        end
+      end
+    end
+
+    context 'licensed feature is not available' do
+      before do
+        stub_licensed_features(git_two_factor_enforcement: false)
+      end
+
+      context 'when two-factor is enabled for the user' do
+        it 'returns user two factor config' do
+          allow_next_instance_of(User) do |instance|
+            allow(instance).to receive(:two_factor_enabled?).and_return(true)
+          end
+
+          subject
+
+          expect(json_response['success']).to be_falsey
+        end
+      end
+    end
+  end
+
+  describe 'GET /internal/geo_proxy' do
+    subject { get api('/internal/geo_proxy'), params: { secret_token: secret_token } }
+
+    context 'with valid auth' do
+      context 'when Geo is not being used' do
+        it 'returns empty data' do
+          allow(::Gitlab::Geo).to receive(:enabled?).and_return(false)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+
+      context 'when this is a primary site' do
+        it 'returns empty data' do
+          stub_current_geo_node(primary_node)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+
+      context 'when this is a secondary site' do
+        before do
+          stub_current_geo_node(secondary_node)
+        end
+
+        context 'when a primary exists' do
+          it 'returns the primary internal URL' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['geo_proxy_url']).to match(primary_node.internal_url)
+          end
+        end
+
+        context 'when a primary does not exist' do
+          it 'returns empty data' do
+            allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
+
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_empty
+          end
+        end
+      end
+
+      context 'when geo_secondary_proxy feature flag is disabled' do
+        before do
+          stub_feature_flags(geo_secondary_proxy: false)
+        end
+
+        it 'returns empty data' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+    end
+
+    context 'with invalid auth' do
+      let(:secret_token) { 'invalid_token' }
+
+      it 'returns unauthorized' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
   end

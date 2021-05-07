@@ -2,6 +2,8 @@
 
 module Git
   class BranchHooksService < ::Git::BaseHooksService
+    extend ::Gitlab::Utils::Override
+
     def execute
       execute_branch_hooks
 
@@ -41,14 +43,15 @@ module Git
       super
     end
 
+    override :invalidated_file_types
     def invalidated_file_types
       return super unless default_branch? && !creating_branch?
 
-      paths = limited_commits.each_with_object(Set.new) do |commit, set|
-        commit.raw_deltas.each do |diff|
-          set << diff.new_path
-        end
-      end
+      modified_file_types
+    end
+
+    def modified_file_types
+      paths = commit_paths.values.reduce(&:merge) || Set.new
 
       Gitlab::FileDetector.types_in_paths(paths)
     end
@@ -77,6 +80,7 @@ module Git
       enqueue_process_commit_messages
       enqueue_jira_connect_sync_messages
       enqueue_metrics_dashboard_sync
+      track_ci_config_change_event
     end
 
     def branch_remove_hooks
@@ -84,10 +88,21 @@ module Git
     end
 
     def enqueue_metrics_dashboard_sync
-      return unless Feature.enabled?(:sync_metrics_dashboards, project)
       return unless default_branch?
+      return unless modified_file_types.include?(:metrics_dashboard)
 
       ::Metrics::Dashboard::SyncDashboardsWorker.perform_async(project.id)
+    end
+
+    def track_ci_config_change_event
+      return unless Gitlab::CurrentSettings.usage_ping_enabled?
+      return unless default_branch?
+
+      commits_changing_ci_config.each do |commit|
+        Gitlab::UsageDataCounters::HLLRedisCounter.track_event(
+          'o_pipeline_authoring_unique_users_committing_ciconfigfile', values: commit.author&.id
+        )
+      end
     end
 
     # Schedules processing of commit messages
@@ -119,7 +134,7 @@ module Git
       commits_to_sync = limited_commits.select { |commit| Atlassian::JiraIssueKeyExtractor.has_keys?(commit.safe_message) }.map(&:sha)
 
       if branch_to_sync || commits_to_sync.any?
-        JiraConnect::SyncBranchWorker.perform_async(project.id, branch_to_sync, commits_to_sync)
+        JiraConnect::SyncBranchWorker.perform_async(project.id, branch_to_sync, commits_to_sync, Atlassian::JiraConnect::Client.generate_update_sequence_id)
       end
     end
 
@@ -190,6 +205,23 @@ module Git
       end
 
       set
+    end
+
+    def commits_changing_ci_config
+      commit_paths.select do |commit, paths|
+        next if commit.merge_commit?
+
+        paths.include?(project.ci_config_path_or_default)
+      end.keys
+    end
+
+    def commit_paths
+      strong_memoize(:commit_paths) do
+        limited_commits.to_h do |commit|
+          paths = Set.new(commit.raw_deltas.map(&:new_path))
+          [commit, paths]
+        end
+      end
     end
   end
 end

@@ -3,20 +3,13 @@
 class SearchController < ApplicationController
   include ControllerWithCrossProjectAccessCheck
   include SearchHelper
-  include RendersCommits
   include RedisTracking
 
-  SCOPE_PRELOAD_METHOD = {
-    projects: :with_web_entity_associations,
-    issues: :with_web_entity_associations,
-    epics: :with_web_entity_associations
-  }.freeze
-
-  track_redis_hll_event :show, name: 'i_search_total', feature: :search_track_unique_users, feature_default_enabled: true
+  track_redis_hll_event :show, name: 'i_search_total'
 
   around_action :allow_gitaly_ref_name_caching
 
-  before_action :block_anonymous_global_searches
+  before_action :block_anonymous_global_searches, except: :opensearch
   skip_before_action :authenticate_user!
   requires_cross_project_access if: -> do
     search_term_present = params[:search].present? || params[:term].present?
@@ -40,14 +33,12 @@ class SearchController < ApplicationController
     @search_term = params[:search]
     @sort = params[:sort] || default_sort
 
-    @scope = search_service.scope
-    @show_snippets = search_service.show_snippets?
-    @search_results = search_service.search_results
-    @search_objects = search_service.search_objects(preload_method)
-    @search_highlight = search_service.search_highlight
-
-    render_commits if @scope == 'commits'
-    eager_load_user_status if @scope == 'users'
+    @search_service = Gitlab::View::Presenter::Factory.new(search_service, current_user: current_user).fabricate!
+    @scope = @search_service.scope
+    @show_snippets = @search_service.show_snippets?
+    @search_results = @search_service.search_results
+    @search_objects = @search_service.search_objects
+    @search_highlight = @search_service.search_highlight
 
     increment_search_counters
   end
@@ -56,7 +47,17 @@ class SearchController < ApplicationController
     params.require([:search, :scope])
 
     scope = search_service.scope
-    count = search_service.search_results.formatted_count(scope)
+
+    count = 0
+    ApplicationRecord.with_fast_read_statement_timeout do
+      count = search_service.search_results.formatted_count(scope)
+    end
+
+    # Users switching tabs will keep fetching the same tab counts so it's a
+    # good idea to cache in their browser just for a short time. They can still
+    # clear cache if they are seeing an incorrect count but inaccurate count is
+    # not such a bad thing.
+    expires_in 1.minute
 
     render json: { count: count }
   end
@@ -76,11 +77,10 @@ class SearchController < ApplicationController
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  private
-
-  def preload_method
-    SCOPE_PRELOAD_METHOD[@scope.to_sym]
+  def opensearch
   end
+
+  private
 
   # overridden in EE
   def default_sort
@@ -99,14 +99,6 @@ class SearchController < ApplicationController
     end
 
     true
-  end
-
-  def render_commits
-    @search_objects = prepare_commits_for_rendering(@search_objects)
-  end
-
-  def eager_load_user_status
-    @search_objects = @search_objects.eager_load(:status) # rubocop:disable CodeReuse/ActiveRecord
   end
 
   def check_single_commit_result?
@@ -143,8 +135,7 @@ class SearchController < ApplicationController
     payload[:metadata] ||= {}
     payload[:metadata]['meta.search.group_id'] = params[:group_id]
     payload[:metadata]['meta.search.project_id'] = params[:project_id]
-    payload[:metadata]['meta.search.search'] = params[:search]
-    payload[:metadata]['meta.search.scope'] = params[:scope]
+    payload[:metadata]['meta.search.scope'] = params[:scope] || @scope
     payload[:metadata]['meta.search.filters.confidential'] = params[:confidential]
     payload[:metadata]['meta.search.filters.state'] = params[:state]
     payload[:metadata]['meta.search.force_search_results'] = params[:force_search_results]

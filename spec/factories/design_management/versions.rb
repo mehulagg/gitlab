@@ -3,19 +3,14 @@
 FactoryBot.define do
   factory :design_version, class: 'DesignManagement::Version' do
     sha
-    issue { designs.first&.issue || create(:issue) }
-    author { issue&.author || create(:user) }
+    issue { designs.first&.issue || association(:issue) }
+    author { issue&.author || association(:user) }
 
     transient do
       designs_count { 1 }
       created_designs { [] }
       modified_designs { [] }
       deleted_designs { [] }
-    end
-
-    # Warning: this will intentionally result in an invalid version!
-    trait :empty do
-      designs_count { 0 }
     end
 
     trait :importing do

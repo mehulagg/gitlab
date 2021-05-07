@@ -123,4 +123,45 @@ RSpec.describe EE::API::Helpers do
       end
     end
   end
+
+  describe '#find_project!' do
+    let_it_be(:project) { create(:project, :public) }
+    let_it_be(:job) { create(:ci_build, :running) }
+
+    let(:helper) do
+      Class.new do
+        include API::Helpers
+        include API::APIGuard::HelperMethods
+        include EE::API::Helpers
+      end
+    end
+
+    subject { helper.new }
+
+    context 'when current_user is from a job' do
+      before do
+        subject.instance_variable_set(:@current_authenticated_job, job)
+        subject.instance_variable_set(:@initial_current_user, job.user)
+        subject.instance_variable_set(:@current_user, job.user)
+      end
+
+      context 'public project' do
+        it 'returns requested project' do
+          expect(subject.find_project!(project.id)).to eq(project)
+        end
+      end
+
+      context 'private project without access' do
+        before do
+          project.update_column(:visibility_level, Gitlab::VisibilityLevel.level_value('private'))
+        end
+
+        it 'returns not found' do
+          expect(subject).to receive(:not_found!)
+
+          subject.find_project!(project.id)
+        end
+      end
+    end
+  end
 end

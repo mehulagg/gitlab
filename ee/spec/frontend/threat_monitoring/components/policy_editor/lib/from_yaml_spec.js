@@ -1,6 +1,3 @@
-import fromYaml from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
-import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
 import {
   EndpointMatchModeAny,
   EndpointMatchModeLabel,
@@ -14,19 +11,25 @@ import {
   RuleTypeFQDN,
   EntityTypes,
 } from 'ee/threat_monitoring/components/policy_editor/constants';
+import fromYaml, {
+  removeUnnecessaryDashes,
+} from 'ee/threat_monitoring/components/policy_editor/lib/from_yaml';
+import { buildRule } from 'ee/threat_monitoring/components/policy_editor/lib/rules';
+import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
 
 describe('fromYaml', () => {
   let policy;
 
   const cidrExample = '20.1.1.1/32 20.1.1.2/32';
   const portExample = '80 81/udp 82/tcp';
-
+  const labels = { 'app.gitlab.com/proj': '21' };
   beforeEach(() => {
     policy = {
       name: 'test-policy',
       endpointLabels: '',
       rules: [],
       isEnabled: true,
+      labels,
     };
   });
 
@@ -37,6 +40,7 @@ describe('fromYaml', () => {
       endpointMatchMode: EndpointMatchModeAny,
       endpointLabels: '',
       rules: [],
+      labels,
     });
   });
 
@@ -287,5 +291,57 @@ spec:
         ],
       });
     });
+  });
+
+  describe('when annotations is not empty', () => {
+    it('returns policy object', () => {
+      const manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  annotations:
+    app.gitlab.com/alert: 'true'
+spec:
+  endpointSelector:
+    matchLabels:
+      {}
+`;
+
+      expect(fromYaml(manifest)).toMatchObject({
+        annotations: { 'app.gitlab.com/alert': 'true' },
+      });
+    });
+  });
+
+  describe('unsupported attributes', () => {
+    const unsupportedYaml = [
+      'unsupportedPrimaryKey: test',
+      'apiVersion: 1\nunsupportedPrimaryKey: test',
+      'unsupportedPrimaryKey: test\nkind: test',
+      'metadata:\n  unsupportedMetaKey: test',
+      'spec:\n  unsupportedSpecKey: test',
+      'spec:\n  ingress:\n  - unsupportedRuleKey: test',
+      'spec:\n  engress:\n  - toPorts:\n      - unsupportedToPortKey: test',
+      'spec:\n  ingress:\n    - toPorts:\n      - ports:\n        - port: 80\n          unsupportedPortKey: test',
+    ];
+
+    it.each(unsupportedYaml)(
+      'returns the unsupported attributes object for YAML with unsupported attributes',
+      (manifest) => {
+        expect(fromYaml(manifest)).toStrictEqual({ error: true });
+      },
+    );
+  });
+});
+
+describe('removeUnnecessaryDashes', () => {
+  it.each`
+    input          | output
+    ${'---\none'}  | ${'one'}
+    ${'two'}       | ${'two'}
+    ${'--\nthree'} | ${'--\nthree'}
+    ${'four---\n'} | ${'four'}
+  `('returns $output when used on $input', ({ input, output }) => {
+    expect(removeUnnecessaryDashes(input)).toBe(output);
   });
 });

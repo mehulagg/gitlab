@@ -1,13 +1,13 @@
 ---
 stage: Monitor
-group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Embedding metric charts within GitLab-flavored Markdown **(CORE)**
+# Embedding metric charts within GitLab Flavored Markdown **(FREE)**
 
 You can display metrics charts within
-[GitLab Flavored Markdown](../../user/markdown.md#gitlab-flavored-markdown-gfm)
+[GitLab Flavored Markdown](../../user/markdown.md#gitlab-flavored-markdown)
 fields such as issue or merge request descriptions. The maximum number of embedded
 charts allowed in a GitLab Flavored Markdown field is 100.
 Embedding charts is useful when sharing an application incident or performance
@@ -19,7 +19,7 @@ metrics to others, and you want to have relevant information directly available.
 
 This feature requires [Kubernetes](../../user/project/integrations/prometheus_library/kubernetes.md) metrics.
 
-Note: **Note:**
+NOTE:
 In GitLab versions 13.3 and earlier, metrics dashboard links were in the form
 `https://<root_url>/<project>/-/environments/<environment_id>/metrics`. These links
 are still supported, and can be used to embed metric charts.

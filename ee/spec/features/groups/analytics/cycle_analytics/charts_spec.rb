@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Value stream analytics charts', :js do
+  include CycleAnalyticsHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, name: 'CA-test-group') }
   let_it_be(:group2) { create(:group, name: 'CA-bad-test-group') }
@@ -12,16 +14,6 @@ RSpec.describe 'Value stream analytics charts', :js do
 
   3.times do |i|
     let_it_be("issue_#{i}".to_sym) { create(:issue, title: "New Issue #{i}", project: project, created_at: 2.days.ago) }
-  end
-
-  def wait_for_stages_to_load
-    expect(page).to have_selector '.js-stage-table'
-  end
-
-  def select_group(target_group = group)
-    visit group_analytics_cycle_analytics_path(target_group)
-
-    wait_for_stages_to_load
   end
 
   def toggle_more_options(stage)
@@ -41,6 +33,7 @@ RSpec.describe 'Value stream analytics charts', :js do
   context 'Duration chart' do
     duration_stage_selector = '.js-dropdown-stages'
     stage_nav_selector = '.stage-nav'
+    stage_table_selector = '.js-stage-table'
 
     let(:duration_chart_dropdown) { page.find(duration_stage_selector) }
     let(:first_default_stage) { page.find('.stage-nav-item-cell', text: 'Issue').ancestor('.stage-nav-item') }
@@ -62,7 +55,8 @@ RSpec.describe 'Value stream analytics charts', :js do
     end
 
     before do
-      select_group
+      stub_feature_flags(value_stream_analytics_path_navigation: false)
+      select_group(group, stage_table_selector)
     end
 
     it 'has all the default stages' do
@@ -90,6 +84,8 @@ RSpec.describe 'Value stream analytics charts', :js do
   end
 
   describe 'Tasks by type chart', :js do
+    filters_selector = '.js-tasks-by-type-chart-filters'
+
     before do
       stub_licensed_features(cycle_analytics_for_groups: true, type_of_work_analytics: true)
 
@@ -102,12 +98,15 @@ RSpec.describe 'Value stream analytics charts', :js do
     context 'enabled' do
       context 'with data available' do
         before do
+          mr_issue = create(:labeled_issue, created_at: 5.days.ago, project: create(:project, group: group), labels: [group_label2])
+          create(:merge_request, iid: mr_issue.id, created_at: 3.days.ago, source_project: project, labels: [group_label1, group_label2])
+
           3.times do |i|
             create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [group_label1])
             create(:labeled_issue, created_at: i.days.ago, project: create(:project, group: group), labels: [group_label2])
           end
 
-          select_group
+          select_group(group)
         end
 
         it 'displays the chart' do
@@ -121,13 +120,30 @@ RSpec.describe 'Value stream analytics charts', :js do
         end
 
         it 'has chart filters' do
-          expect(page).to have_css('.js-tasks-by-type-chart-filters')
+          expect(page).to have_css(filters_selector)
+        end
+
+        it 'can update the filters' do
+          page.within filters_selector do
+            find('.dropdown-toggle').click
+            first_selected_label = all('[data-testid="type-of-work-filters-label"] .dropdown-item.active').first
+            first_selected_label.click
+          end
+
+          expect(page).to have_text('Showing Issues and 1 label')
+
+          page.within filters_selector do
+            find('.dropdown-toggle').click
+            find('[data-testid="type-of-work-filters-subject"] label', text: 'Merge Requests').click
+          end
+
+          expect(page).to have_text('Showing Merge Requests and 1 label')
         end
       end
 
       context 'no data available' do
         before do
-          select_group
+          select_group(group)
         end
 
         it 'shows the no data available message' do

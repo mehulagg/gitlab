@@ -26,13 +26,19 @@ export default {
     isTabActive(tabName) {
       return tabName === this.currentTab;
     },
+    isTabCountNumeric(tab) {
+      return Number.isInteger(this.tabCounts[tab.name]);
+    },
   },
 };
 </script>
 
 <template>
   <div class="top-area">
-    <gl-tabs class="nav-links mobile-separator issuable-state-filters">
+    <gl-tabs
+      class="gl-display-flex gl-flex-fill-1 gl-p-0 gl-m-0 mobile-separator issuable-state-filters"
+      nav-class="gl-border-b-0"
+    >
       <gl-tab
         v-for="tab in tabs"
         :key="tab.id"
@@ -41,9 +47,14 @@ export default {
       >
         <template #title>
           <span :title="tab.titleTooltip">{{ tab.title }}</span>
-          <gl-badge v-if="tabCounts" variant="neutral" size="sm" class="gl-px-2 gl-py-1!">{{
-            tabCounts[tab.name]
-          }}</gl-badge>
+          <gl-badge
+            v-if="tabCounts && isTabCountNumeric(tab)"
+            variant="neutral"
+            size="sm"
+            class="gl-tab-counter-badge"
+          >
+            {{ tabCounts[tab.name] }}
+          </gl-badge>
         </template>
       </gl-tab>
     </gl-tabs>

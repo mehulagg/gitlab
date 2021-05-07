@@ -7,6 +7,7 @@ module Ci
     include StripAttribute
     include Schedulable
     include Limitable
+    include EachBatch
 
     self.limit_name = 'ci_pipeline_schedules'
     self.limit_scope = :project
@@ -21,13 +22,14 @@ module Ci
     validates :cron_timezone, cron_timezone: true, presence: { unless: :importing? }
     validates :ref, presence: { unless: :importing? }
     validates :description, presence: true
-    validates :variables, variable_duplicates: true
+    validates :variables, nested_attributes_duplicates: true
 
     strip_attributes :cron
 
     scope :active, -> { where(active: true) }
     scope :inactive, -> { where(active: false) }
     scope :preloaded, -> { preload(:owner, project: [:route]) }
+    scope :owned_by, ->(user) { where(owner: user) }
 
     accepts_nested_attributes_for :variables, allow_destroy: true
 

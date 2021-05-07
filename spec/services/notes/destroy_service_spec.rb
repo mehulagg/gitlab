@@ -35,12 +35,21 @@ RSpec.describe Notes::DestroyService do
       end.to change { counter.unique_events(event_names: event, start_date: 1.day.ago, end_date: 1.day.from_now) }.by(1)
     end
 
+    it 'tracks merge request usage data' do
+      mr = create(:merge_request, source_project: project)
+      note = create(:note, project: project, noteable: mr)
+      expect(Gitlab::UsageDataCounters::MergeRequestActivityUniqueCounter).to receive(:track_remove_comment_action).with(note: note)
+
+      described_class.new(project, user).execute(note)
+    end
+
     context 'in a merge request' do
       let_it_be(:repo_project) { create(:project, :repository) }
       let_it_be(:merge_request) do
         create(:merge_request, source_project: repo_project,
                target_project: repo_project)
       end
+
       let_it_be(:note) do
         create(:diff_note_on_merge_request, project: repo_project,
                noteable: merge_request)

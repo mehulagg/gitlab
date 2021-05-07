@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :gitlab do
   namespace :db do
     desc 'GitLab | DB | Manually insert schema migration version'
@@ -76,22 +78,6 @@ namespace :gitlab do
       else
         puts "unattended_migrations_static"
       end
-    end
-
-    desc 'GitLab | DB | Checks if migrations require downtime or not'
-    task :downtime_check, [:ref] => :environment do |_, args|
-      abort 'You must specify a Git reference to compare with' unless args[:ref]
-
-      require 'shellwords'
-
-      ref = Shellwords.escape(args[:ref])
-
-      migrations = `git diff #{ref}.. --diff-filter=A --name-only -- db/migrate`.lines
-        .map { |file| Rails.root.join(file.strip).to_s }
-        .select { |file| File.file?(file) }
-        .select { |file| /\A[0-9]+.*\.rb\z/ =~ File.basename(file) }
-
-      Gitlab::DowntimeCheck.new.check_and_print(migrations)
     end
 
     desc 'GitLab | DB | Sets up EE specific database functionality'
@@ -192,16 +178,91 @@ namespace :gitlab do
         exit
       end
 
-      indexes = if args[:index_name]
-                  [Gitlab::Database::PostgresIndex.by_identifier(args[:index_name])]
-                else
-                  Gitlab::Database::Reindexing.candidate_indexes.random_few(2)
-                end
+      indexes = Gitlab::Database::Reindexing.candidate_indexes
+
+      if identifier = args[:index_name]
+        raise ArgumentError, "Index name is not fully qualified with a schema: #{identifier}" unless identifier =~ /^\w+\.\w+$/
+
+        indexes = indexes.where(identifier: identifier)
+
+        raise "Index not found or not supported: #{args[:index_name]}" if indexes.empty?
+      end
+
+      ActiveRecord::Base.logger = Logger.new(STDOUT) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
 
       Gitlab::Database::Reindexing.perform(indexes)
-    rescue => e
+    rescue StandardError => e
       Gitlab::AppLogger.error(e)
       raise
+    end
+
+    desc 'Check if there have been user additions to the database'
+    task active: :environment do
+      if ActiveRecord::Base.connection.migration_context.needs_migration?
+        puts "Migrations pending. Database not active"
+        exit 1
+      end
+
+      # A list of projects that GitLab creates automatically on install/upgrade
+      # gc = Gitlab::CurrentSettings.current_application_settings
+      seed_projects = [Gitlab::CurrentSettings.current_application_settings.self_monitoring_project]
+
+      if (Project.count - seed_projects.count {|x| !x.nil? }).eql?(0)
+        puts "No user created projects. Database not active"
+        exit 1
+      end
+
+      puts "Found user created projects. Database active"
+      exit 0
+    end
+
+    desc 'Run migrations with instrumentation'
+    task migration_testing: :environment do
+      result_dir = Gitlab::Database::Migrations::Instrumentation::RESULT_DIR
+      raise "Directory exists already, won't overwrite: #{result_dir}" if File.exist?(result_dir)
+
+      Dir.mkdir(result_dir)
+
+      verbose_was = ActiveRecord::Migration.verbose
+      ActiveRecord::Migration.verbose = true
+
+      ctx = ActiveRecord::Base.connection.migration_context
+      existing_versions = ctx.get_all_versions.to_set
+
+      pending_migrations = ctx.migrations.reject do |migration|
+        existing_versions.include?(migration.version)
+      end
+
+      instrumentation = Gitlab::Database::Migrations::Instrumentation.new
+
+      pending_migrations.each do |migration|
+        instrumentation.observe(migration.version) do
+          ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+        end
+      end
+    ensure
+      if instrumentation
+        File.open(File.join(result_dir, Gitlab::Database::Migrations::Instrumentation::STATS_FILENAME), 'wb+') do |io|
+          io << instrumentation.observations.to_json
+        end
+      end
+
+      ActiveRecord::Base.clear_cache!
+      ActiveRecord::Migration.verbose = verbose_was
+    end
+
+    desc 'Run all pending batched migrations'
+    task execute_batched_migrations: :environment do
+      Gitlab::Database::BackgroundMigration::BatchedMigration.active.queue_order.each do |migration|
+        Gitlab::AppLogger.info("Executing batched migration #{migration.id} inline")
+        Gitlab::Database::BackgroundMigration::BatchedMigrationRunner.new.run_entire_migration(migration)
+      end
+    end
+
+    # Only for development environments,
+    # we execute pending data migrations inline for convenience.
+    Rake::Task['db:migrate'].enhance do
+      Rake::Task['gitlab:db:execute_batched_migrations'].invoke if Rails.env.development?
     end
   end
 end

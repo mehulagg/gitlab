@@ -5,6 +5,9 @@ module Resolvers
     class PipelineStagesResolver < BaseResolver
       include LooksAhead
 
+      type Types::Ci::StageType.connection_type, null: true
+      extras [:lookahead]
+
       alias_method :pipeline, :object
 
       def resolve_with_lookahead
@@ -13,7 +16,7 @@ module Resolvers
 
       def preloads
         {
-          statuses: [:needs]
+          jobs: { latest_statuses: [:needs] }
         }
       end
     end

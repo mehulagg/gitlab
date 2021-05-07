@@ -202,10 +202,45 @@ RSpec.describe PipelineSerializer do
           # Existing numbers are high and require performance optimization
           # Ongoing issue:
           # https://gitlab.com/gitlab-org/gitlab/-/issues/225156
-          expected_queries = Gitlab.ee? ? 85 : 76
+          expected_queries = Gitlab.ee? ? 82 : 76
 
           expect(recorded.count).to be_within(2).of(expected_queries)
           expect(recorded.cached_count).to eq(0)
+        end
+      end
+
+      context 'with build environments' do
+        let(:ref) { 'feature' }
+
+        it 'verifies number of queries', :request_store do
+          stub_licensed_features(protected_environments: true)
+
+          env = create(:environment, project: project)
+          create(:ci_build, :scheduled, project: project, environment: env.name)
+          create(:ci_build, :scheduled, project: project, environment: env.name)
+          create(:ci_build, :scheduled, project: project, environment: env.name)
+
+          recorded = ActiveRecord::QueryRecorder.new { subject }
+          expected_queries = Gitlab.ee? ? 61 : 57
+
+          expect(recorded.count).to be_within(1).of(expected_queries)
+          expect(recorded.cached_count).to eq(0)
+        end
+      end
+
+      context 'with scheduled and manual builds' do
+        let(:ref) { 'feature' }
+
+        before do
+          create(:ci_build, :scheduled, pipeline: resource.first)
+          create(:ci_build, :scheduled, pipeline: resource.second)
+          create(:ci_build, :manual, pipeline: resource.first)
+          create(:ci_build, :manual, pipeline: resource.second)
+        end
+
+        it 'sends at most one metadata query for each type of build', :request_store do
+          # 1 for the existing failed builds and 2 for the added scheduled and manual builds
+          expect { subject }.not_to exceed_query_limit(1 + 2).for_query /SELECT "ci_builds_metadata".*/
         end
       end
 

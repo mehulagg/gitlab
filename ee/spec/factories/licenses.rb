@@ -15,6 +15,10 @@ FactoryBot.define do
       expires_at { 3.weeks.ago.to_date }
     end
 
+    trait :cloud do
+      type { 'cloud' }
+    end
+
     transient do
       plan { License::STARTER_PLAN }
     end
@@ -35,7 +39,8 @@ FactoryBot.define do
           'GitLab_FileLocks' => 1,
           'GitLab_Auditor_User' => 1
         },
-        plan: plan
+        plan: plan,
+        subscription_id: '0000'
       }
     end
   end
@@ -47,13 +52,17 @@ FactoryBot.define do
       trial { false }
     end
 
+    trait :cloud do
+      cloud { true }
+    end
+
     data do
       attrs = [:gitlab_license]
       attrs << :trial if trial
       attrs << :expired if expired
-      attrs << { plan: plan }
+      attrs << :cloud if cloud
 
-      build(*attrs).export
+      build(*attrs, plan: plan).export
     end
 
     # Disable validations when creating an expired license key

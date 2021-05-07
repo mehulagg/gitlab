@@ -23,6 +23,7 @@ class GlobalPolicy < BasePolicy
     prevent :receive_notifications
     prevent :use_quick_actions
     prevent :create_group
+    prevent :execute_graphql_mutation
   end
 
   rule { default }.policy do
@@ -32,6 +33,7 @@ class GlobalPolicy < BasePolicy
     enable :receive_notifications
     enable :use_quick_actions
     enable :use_slash_commands
+    enable :execute_graphql_mutation
   end
 
   rule { inactive }.policy do
@@ -48,7 +50,9 @@ class GlobalPolicy < BasePolicy
     prevent :use_slash_commands
   end
 
-  rule { blocked | (internal & ~migration_bot) }.policy do
+  rule { ~can?(:access_api) }.prevent :execute_graphql_mutation
+
+  rule { blocked | (internal & ~migration_bot & ~security_bot) }.policy do
     prevent :access_git
   end
 
@@ -99,6 +103,8 @@ class GlobalPolicy < BasePolicy
     enable :read_custom_attribute
     enable :update_custom_attribute
     enable :approve_user
+    enable :reject_user
+    enable :read_usage_trends_measurement
   end
 
   # We can't use `read_statistics` because the user may have different permissions for different projects

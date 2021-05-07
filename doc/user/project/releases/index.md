@@ -1,11 +1,11 @@
 ---
 type: reference, howto
 stage: Release
-group: Release Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Release
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Releases
+# Releases **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41766) in GitLab 11.7.
 
@@ -43,6 +43,13 @@ To view a list of releases:
   - On private projects, this number is visible to users with Reporter
     [permissions](../../permissions.md#project-members-permissions) or higher.
 
+### Sort Releases
+
+On the top right of the **Releases** page, you can use the sorting button to order releases by
+**Released date** or **Created date**. You can sort releases in ascending or descending order.
+
+![Sort Releases dropdown button](img/releases_sort_v13_6.png)
+
 ## Create a release
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32812) in GitLab 12.9. Releases can be created directly in the GitLab UI.
@@ -59,20 +66,27 @@ To create a new release through the GitLab UI:
 
 1. Navigate to **Project overview > Releases** and click the **New release**
    button.
-1. In the [**Tag name**](#tag-name) box, enter a name.
-
-   Creating a release based on an existing tag using the user
-   interface is not yet supported. However, this is possible using the
-   [Releases API](../../../api/releases/index.md#create-a-release).
-
-1. In the **Create from** list, select a branch, tag, or commit SHA to use when
-   creating the new tag.
+1. Open the [**Tag name**](#tag-name) dropdown. Select an existing tag or type
+   in a new tag name. Selecting an existing tag that is already associated with
+   a release will result in a validation error.
+1. If creating a new tag, open the **Create from** dropdown. Select a
+   branch, tag, or commit SHA to use when creating the new tag.
 1. Optionally, fill out any additional information about the release, such as its
    [title](#title), [milestones](#associate-milestones-with-a-release),
    [release notes](#release-notes-description), or [assets links](#links).
 1. Click **Create release**.
 
-### Schedule a future release
+### Create release from GitLab CI
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19298) in GitLab 12.7.
+
+You can [create a release directly from the GitLab CI pipeline](../../../ci/yaml/README.md#release)
+by using a `release` node in the job definition.
+
+The release is created only if the job processes without error. If the Rails API returns an error
+during release creation, the release job fails.
+
+### Upcoming releases
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38105) in GitLab 12.1.
 
@@ -130,6 +144,8 @@ In the interface, to add release notes to an existing Git tag:
 
 You can associate a release with one or more [project milestones](../milestones/index.md#project-milestones-and-group-milestones).
 
+[GitLab Premium](https://about.gitlab.com/pricing/) customers can specify [group milestones](../milestones/index.md#project-milestones-and-group-milestones) to associate with a release.
+
 You can do this in the user interface, or by including a `milestones` array in your request to
 the [Releases API](../../../api/releases/index.md#create-a-release).
 
@@ -181,7 +197,7 @@ If the job that's executing is within a freeze period, GitLab CI/CD creates an e
 variable named `$CI_DEPLOY_FREEZE`.
 
 To prevent the deployment job from executing, create a `rules` entry in your
-`gitlab-ci.yaml`, for example:
+`gitlab-ci.yml`, for example:
 
 ```yaml
 deploy_to_production:
@@ -195,17 +211,17 @@ To set a deploy freeze window in the UI, complete these steps:
 
 1. Sign in to GitLab as a user with project Maintainer [permissions](../../permissions.md).
 1. Navigate to **Project overview**.
-1. In the left navigation menu, navigate to **Settings > CI / CD**.
+1. In the left navigation menu, navigate to **Settings > CI/CD**.
 1. Scroll to **Deploy freezes**.
 1. Click **Expand** to see the deploy freeze table.
 1. Click **Add deploy freeze** to open the deploy freeze modal.
 1. Enter the start time, end time, and timezone of the desired deploy freeze period.
 1. Click **Add deploy freeze** in the modal.
+1. After the deploy freeze is saved, you can edit it by selecting the edit button (**{pencil}**).
+   ![Deploy freeze modal for setting a deploy freeze period](img/deploy_freeze_v13_10.png)
 
-![Deploy freeze modal for setting a deploy freeze period](img/deploy_freeze_v13_2.png)
-
-CAUTION: **Caution:**
-To edit or delete a deploy freeze, use the [Freeze Periods API](../../../api/freeze_periods.md).
+WARNING:
+To delete a deploy freeze, use the [Freeze Periods API](../../../api/freeze_periods.md).
 
 If a project contains multiple freeze periods, all periods apply. If they overlap, the freeze covers the
 complete overlapping period.
@@ -255,13 +271,10 @@ Release note descriptions are unrelated. Description supports [Markdown](../../m
 
 ### Release assets
 
-You can currently add the following types of assets to each release:
+You can add the following types of assets to each release:
 
 - [Source code](#source-code)
 - [Links](#links)
-
-GitLab will support more asset types in the future, including objects such
-as pre-built packages, compliance/security evidence, or container images.
 
 #### Permanent links to release assets
 
@@ -317,8 +330,8 @@ The four types of links are "Runbook," "Package," "Image," and "Other."
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26019) in GitLab 12.6.
 
 Each time a release is created, GitLab takes a snapshot of data that's related to it.
-This data is saved in a JSON file and called *release evidence*. The feature currently
-includes test artifacts and linked milestones (and will include issues) to facilitate
+This data is saved in a JSON file and called *release evidence*. The feature
+includes test artifacts and linked milestones to facilitate
 internal processes, like external audits.
 
 To access the release evidence, on the Releases page, click the link to the JSON file that's listed
@@ -391,7 +404,7 @@ Here is an example of a release evidence object:
 }
 ```
 
-### Collect release evidence **(PREMIUM ONLY)**
+### Collect release evidence **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/199065) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.10.
 
@@ -403,14 +416,14 @@ Evidence collection snapshots are visible on the Releases page, along with the t
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32773) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.2.
 
-When you create a release, if [job artifacts](../../../ci/pipelines/job_artifacts.md#artifactsreports) are included in the last pipeline that ran, they are automatically included in the release as release evidence.
+When you create a release, if [job artifacts](../../../ci/yaml/README.md#artifactsreports) are included in the last pipeline that ran, they are automatically included in the release as release evidence.
 
 Although job artifacts normally expire, artifacts included in release evidence do not expire.
 
 To enable job artifact collection you need to specify both:
 
 1. [`artifacts:paths`](../../../ci/yaml/README.md#artifactspaths)
-1. [`artifacts:reports`](../../../ci/pipelines/job_artifacts.md#artifactsreports)
+1. [`artifacts:reports`](../../../ci/yaml/README.md#artifactsreports)
 
 ```yaml
 ruby:
@@ -446,18 +459,28 @@ In the API:
 - If you do not specify a `released_at` date, release evidence is collected on the
   date the release is created.
 
-## GitLab Releaser
+## Release Command Line
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-releaser/-/merge_requests/6) in GitLab 12.10.
+> [Introduced](https://gitlab.com/gitlab-org/release-cli/-/merge_requests/6) in GitLab 12.10.
 
-GitLab Releaser is a CLI tool for managing GitLab Releases from the command line or from
-GitLab's CI/CD configuration file, `.gitlab-ci.yml`.
+The Release CLI is a command-line tool for managing GitLab Releases from the command line or from
+the GitLab CI/CD configuration file, `.gitlab-ci.yml`.
 
 With it, you can create, update, modify, and delete releases right through the
 terminal.
 
-Read the [GitLab Releaser documentation](https://gitlab.com/gitlab-org/gitlab-releaser/-/tree/master/docs/index.md)
+Read the [Release CLI documentation](https://gitlab.com/gitlab-org/release-cli/-/blob/master/docs/index.md)
 for details.
+
+## Release Metrics **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/259703) in GitLab Premium 13.9.
+
+Group-level release metrics are available by navigating to **Group > Analytics > CI/CD**.
+These metrics include:
+
+- Total number of releases in the group
+- Percentage of projects in the group that have at least one release
 
 <!-- ## Troubleshooting
 

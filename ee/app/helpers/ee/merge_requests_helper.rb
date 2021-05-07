@@ -2,6 +2,8 @@
 
 module EE
   module MergeRequestsHelper
+    extend ::Gitlab::Utils::Override
+
     def render_items_list(items, separator = "and")
       items_cnt = items.size
 
@@ -14,6 +16,13 @@ module EE
         last_item = items.pop
         "#{items.join(", ")} #{separator} #{last_item}"
       end
+    end
+
+    override :diffs_tab_pane_data
+    def diffs_tab_pane_data(project, merge_request, params)
+      super.merge(
+        endpoint_codequality: (codequality_mr_diff_reports_project_merge_request_path(@project, @merge_request, 'json') if project.licensed_feature_available?(:inline_codequality) && @merge_request.has_codequality_mr_diff_report?)
+      )
     end
   end
 end

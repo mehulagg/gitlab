@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::SidekiqMiddleware::AdminMode::Client, :do_not_mock_admin_mode, :request_store do
+RSpec.describe Gitlab::SidekiqMiddleware::AdminMode::Client, :request_store do
   include AdminModeHelper
 
   let(:worker) do
@@ -74,9 +74,9 @@ RSpec.describe Gitlab::SidekiqMiddleware::AdminMode::Client, :do_not_mock_admin_
     end
   end
 
-  context 'admin mode feature disabled' do
+  context 'admin mode setting disabled' do
     before do
-      stub_feature_flags(user_mode_in_session: false)
+      stub_application_setting(admin_mode: false)
     end
 
     it 'yields block' do

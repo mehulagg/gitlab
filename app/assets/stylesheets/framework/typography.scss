@@ -75,7 +75,9 @@
   code {
     font-family: $monospace-font;
     white-space: pre-wrap;
-    word-wrap: normal;
+    // Safari
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     word-break: keep-all;
   }
 
@@ -341,6 +343,9 @@
     // Multi-line code blocks should scroll horizontally
     code {
       white-space: pre;
+      // Safari
+      word-wrap: normal;
+      overflow-wrap: normal;
     }
 
     &.plain-readme {
@@ -427,18 +432,22 @@
     }
   }
 
+  a.with-attachment-icon,
   a[href*='/uploads/'],
   a[href*='storage.googleapis.com/google-code-attachments/'] {
     &::before {
       margin-right: 4px;
 
-      font: normal normal normal 14px/1 FontAwesome;
+      font-style: normal;
       font-size: inherit;
       text-rendering: auto;
       -webkit-font-smoothing: antialiased;
-      content: '\f0c6';
+      content: '📎';
     }
+  }
 
+  a[href*='/uploads/'],
+  a[href*='storage.googleapis.com/google-code-attachments/'] {
     &.no-attachment-icon {
       &::before {
         display: none;
@@ -455,7 +464,7 @@
   h6 {
     a.anchor {
       float: left;
-      margin-left: -16px;
+      margin-left: -20px;
       text-decoration: none;
       outline: none;
 
@@ -467,6 +476,11 @@
 
     &:hover > a.anchor::after {
       visibility: visible;
+    }
+
+    > a.anchor:focus::after {
+      visibility: visible;
+      outline: auto;
     }
   }
 
@@ -490,32 +504,56 @@
     text-decoration: line-through;
   }
 
+  // Custom Font Awesome styles that render emojis in asciidoc
+  .fa {
+    display: inline-block;
+    font-style: normal;
+    font-size: 14px;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .fa-2x,
+  .admonitionblock td.icon [class^='fa icon-'] {
+    font-size: 2em;
+  }
+
+  .fa-exclamation-triangle::before,
+  .admonitionblock td.icon .icon-warning::before {
+    content: '⚠';
+  }
+
+  .fa-exclamation-circle::before,
+  .admonitionblock td.icon .icon-important::before {
+    content: '❗';
+  }
+
+  .fa-lightbulb-o::before,
+  .admonitionblock td.icon .icon-tip::before {
+    content: '💡';
+  }
+
+  .fa-thumb-tack::before,
+  .admonitionblock td.icon .icon-note::before {
+    content: '📌';
+  }
+
+  .fa-fire::before,
+  .admonitionblock td.icon .icon-caution::before {
+    content: '🔥';
+  }
+
+  .fa-square-o::before {
+    content: '\2610';
+  }
+
+  .fa-check-square-o::before {
+    content: '\2611';
+  }
+
   .admonitionblock td.icon {
     width: 1%;
-
-    [class^='fa icon-'] {
-      @extend .fa-2x;
-    }
-
-    .icon-note {
-      @extend .fa-thumb-tack;
-    }
-
-    .icon-tip {
-      @extend .fa-lightbulb-o;
-    }
-
-    .icon-warning {
-      @extend .fa-exclamation-triangle;
-    }
-
-    .icon-caution {
-      @extend .fa-fire;
-    }
-
-    .icon-important {
-      @extend .fa-exclamation-circle;
-    }
   }
 
   .metrics-embed {
@@ -573,10 +611,6 @@ body {
   font-size: 1.25em;
   font-weight: $gl-font-weight-bold;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
   &.with-button {
     line-height: 34px;
   }
@@ -600,7 +634,7 @@ pre {
   display: block;
   padding: $gl-padding-8 $input-horizontal-padding;
   margin: 0 0 $gl-padding-8;
-  font-size: 13px;
+  font-size: $gl-font-size-monospace;
   word-break: break-all;
   word-wrap: break-word;
   color: $gl-text-color;
@@ -627,12 +661,13 @@ code {
 .commit-sha,
 .ref-name,
 .pipeline-number {
-  @extend .monospace;
+  font-family: $monospace-font;
   font-size: 95%;
 }
 
-.git-revision-dropdown .dropdown-content ul li a {
-  @extend .ref-name;
+.git-revision-dropdown .dropdown-content li:not(.dropdown-menu-empty-item) a {
+  font-family: $monospace-font;
+  font-size: 95%;
   word-break: break-all;
 }
 
@@ -642,7 +677,7 @@ code {
  */
 textarea.js-gfm-input {
   font-family: $monospace-font;
-  font-size: 13px;
+  font-size: $gl-font-size-monospace;
 }
 
 .strikethrough {
@@ -695,13 +730,11 @@ textarea {
     opacity: 1; // FF defaults to 0.54
   }
 
-  // scss-lint:disable PseudoElement
   // support Edge vendor prefix
   &::-ms-input-placeholder {
     color: $gl-text-color-tertiary;
   }
 
-  // scss-lint:disable PseudoElement
   // support IE vendor prefix
   &:-ms-input-placeholder {
     color: $gl-text-color-tertiary;

@@ -14,10 +14,12 @@ class HookButton extends Hook {
   }
 
   addPlugins() {
-    this.plugins.forEach(plugin => plugin.init(this));
+    this.plugins.forEach((plugin) => plugin.init(this));
   }
 
   clicked(e) {
+    e.preventDefault();
+
     const buttonEvent = new CustomEvent('click.dl', {
       detail: {
         hook: this,
@@ -44,7 +46,7 @@ class HookButton extends Hook {
   }
 
   removePlugins() {
-    this.plugins.forEach(plugin => plugin.destroy());
+    this.plugins.forEach((plugin) => plugin.destroy());
   }
 
   destroy() {

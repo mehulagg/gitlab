@@ -31,8 +31,7 @@ module API
       def access_checker_for(actor, protocol)
         access_checker_klass.new(actor.key_or_user, container, protocol,
           authentication_abilities: ssh_authentication_abilities,
-          namespace_path: namespace_path,
-          repository_path: project_path,
+          repository_path: repository_path,
           redirected_path: redirected_path)
       end
 
@@ -66,23 +65,27 @@ module API
         result = Gitlab::Redis::SharedState.with { |redis| redis.ping }
 
         result == 'PONG'
-      rescue => e
+      rescue StandardError => e
         Gitlab::AppLogger.warn("GitLab: An unexpected error occurred in pinging to Redis: #{e}")
         false
       end
 
-      def project_path
-        project&.path || project_path_match[:project_path]
-      end
-
-      def namespace_path
-        project&.namespace&.full_path || project_path_match[:namespace_path]
-      end
-
       private
 
-      def project_path_match
-        @project_path_match ||= params[:project].match(Gitlab::PathRegex.full_project_git_path_regex) || {}
+      def repository_path
+        if container
+          "#{container.full_path}.git"
+        elsif params[:project]
+          # When the project doesn't exist, we still need to pass on the path
+          # to support auto-creation in `GitAccessProject`.
+          #
+          # For consistency with the Git HTTP controllers, we normalize the path
+          # to remove a leading slash and ensure a trailing `.git`.
+          #
+          # NOTE: For GitLab Shell, `params[:project]` is the full repository path
+          # from the SSH command, with an optional trailing `.git`.
+          "#{params[:project].delete_prefix('/').delete_suffix('.git')}.git"
+        end
       end
 
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -96,7 +99,7 @@ module API
       end
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-      # Project id to pass between components that don't share/don't have
+      # Repository id to pass between components that don't share/don't have
       # access to the same filesystem mounts
       def gl_repository
         repo_type.identifier_for_container(container)
@@ -106,8 +109,9 @@ module API
         repository.full_path
       end
 
-      # Return the repository depending on whether we want the wiki or the
-      # regular repository
+      # Return the repository for the detected type and container
+      #
+      # @returns [Repository]
       def repository
         @repository ||= repo_type.repository_for(container)
       end
@@ -120,7 +124,7 @@ module API
           repository: repository.gitaly_repository.to_h,
           address: Gitlab::GitalyClient.address(repository.shard),
           token: Gitlab::GitalyClient.token(repository.shard),
-          features: Feature::Gitaly.server_feature_flags
+          features: Feature::Gitaly.server_feature_flags(repository.project)
         }
       end
     end

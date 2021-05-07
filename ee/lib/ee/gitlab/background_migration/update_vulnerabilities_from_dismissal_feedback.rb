@@ -42,7 +42,7 @@ module EE
             AND vf.feedback_type = #{VULNERABILITY_FEEDBACK_DISMISSAL_TYPE};
           SQL
           connection.execute(update_vulnerability_from_dismissal_feedback_sql)
-        rescue => e
+        rescue StandardError => e
           logger.warn(
             message: 'update_vulnerability_from_dismissal_feedback errored out',
             project_id: project_id,

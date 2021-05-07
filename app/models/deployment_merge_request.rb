@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class DeploymentMergeRequest < ApplicationRecord
+  extend SuppressCompositePrimaryKeyWarning
+
   belongs_to :deployment, optional: false
   belongs_to :merge_request, optional: false
 
@@ -10,11 +12,16 @@ class DeploymentMergeRequest < ApplicationRecord
   end
 
   def self.by_deployment_id(id)
-    where('deployments.id = ?', id)
+    where(deployments: { id: id })
   end
 
   def self.deployed_to(name)
-    where('environments.name = ?', name)
+    # We filter by project ID again so the query uses the index on
+    # (project_id, name), instead of using the index on
+    # (name varchar_pattern_ops). This results in better performance on
+    # GitLab.com.
+    where(environments: { name: name })
+      .where('environments.project_id = merge_requests.target_project_id')
   end
 
   def self.deployed_after(time)

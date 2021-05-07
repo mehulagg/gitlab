@@ -2,9 +2,9 @@
 
 class AuditEvent < ApplicationRecord
   include CreatedAtFilterable
-  include IgnorableColumns
   include BulkInsertSafe
   include EachBatch
+  include PartitionedTable
 
   PARALLEL_PERSISTENCE_COLUMNS = [
     :author_name,
@@ -14,7 +14,9 @@ class AuditEvent < ApplicationRecord
     :target_id
   ].freeze
 
-  ignore_column :type, remove_with: '13.6', remove_after: '2020-11-22'
+  self.primary_key = :id
+
+  partitioned_by :created_at, strategy: :monthly
 
   serialize :details, Hash # rubocop:disable Cop/ActiveRecordSerialize
 
@@ -37,14 +39,6 @@ class AuditEvent < ApplicationRecord
   # https://gitlab.com/groups/gitlab-org/-/epics/2765
   after_validation :parallel_persist
 
-  # Note: After loading records, do not attempt to type cast objects it finds.
-  # We are in the process of deprecating STI (i.e. SecurityEvent) out of AuditEvent.
-  #
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/216845
-  def self.inheritance_column
-    :_type_disabled
-  end
-
   def self.order_by(method)
     case method.to_s
     when 'created_asc'
@@ -61,15 +55,20 @@ class AuditEvent < ApplicationRecord
   end
 
   def author_name
-    lazy_author.name
+    author&.name
   end
 
   def formatted_details
     details.merge(details.slice(:from, :to).transform_values(&:to_s))
   end
 
+  def author
+    lazy_author&.itself.presence ||
+      ::Gitlab::Audit::NullAuthor.for(author_id, (self[:author_name] || details[:author_name]))
+  end
+
   def lazy_author
-    BatchLoader.for(author_id).batch(default_value: default_author_value, replace_methods: false) do |author_ids, loader|
+    BatchLoader.for(author_id).batch(replace_methods: false) do |author_ids, loader|
       User.select(:id, :name, :username).where(id: author_ids).find_each do |user|
         loader.call(user.id, user)
       end

@@ -2,6 +2,8 @@
 
 module API
   class GroupPushRule < ::API::Base
+    feature_category :source_code_management
+
     before { authenticate! }
     before { check_group_push_rule_access! }
     before { authorize_change_param(user_group, :commit_committer_check, :reject_unsigned_commits) }
@@ -14,6 +16,22 @@ module API
       helpers do
         def check_group_push_rule_access!
           not_found! unless can?(current_user, :change_push_rules, user_group)
+        end
+
+        def create_or_update_push_rule
+          service_response = PushRules::CreateOrUpdateService.new(
+            container: user_group,
+            current_user: current_user,
+            params: declared_params(include_missing: false)
+          ).execute
+
+          push_rule = service_response.payload[:push_rule]
+
+          if service_response.success?
+            present(push_rule, with: EE::API::Entities::GroupPushRule, user: current_user)
+          else
+            render_validation_error!(push_rule)
+          end
         end
 
         params :push_rule_params do
@@ -57,11 +75,8 @@ module API
         use :push_rule_params
       end
       post ":id/push_rule" do
-        render_api_error!(_('Group push rule exists, try updating'), 422) if user_group.push_rule
-
-        allowed_params = declared_params(include_missing: false)
-        user_group.update!(push_rule: PushRule.create!(allowed_params))
-        present user_group.push_rule, with: EE::API::Entities::GroupPushRule, user: current_user
+        unprocessable_entity!('Group push rule exists, try updating') if user_group.push_rule
+        create_or_update_push_rule
       end
 
       desc 'Edit push rule of a group' do
@@ -72,14 +87,8 @@ module API
         use :push_rule_params
       end
       put ":id/push_rule" do
-        push_rule = user_group.push_rule
-        not_found! unless push_rule
-
-        if push_rule.update(declared_params(include_missing: false))
-          present push_rule, with: EE::API::Entities::GroupPushRule, user: current_user
-        else
-          render_validation_error!(push_rule)
-        end
+        not_found!('Push Rule') unless user_group.push_rule
+        create_or_update_push_rule
       end
 
       desc 'Deletes group push rule' do

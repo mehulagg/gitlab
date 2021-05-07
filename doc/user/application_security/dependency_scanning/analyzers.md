@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Composition Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Dependency Scanning Analyzers **(ULTIMATE)**
@@ -34,8 +34,8 @@ maintained by GitLab, but users can also integrate their own **custom images**.
 
 ## Official default analyzers
 
-Any custom change to the official analyzers can be achieved by using an
-[environment variable in your `.gitlab-ci.yml`](index.md#customizing-the-dependency-scanning-settings).
+Any custom change to the official analyzers can be achieved by using a
+[CI/CD variable in your `.gitlab-ci.yml`](index.md#customizing-the-dependency-scanning-settings).
 
 ### Using a custom Docker mirror
 

@@ -10,6 +10,11 @@ module Elastic
       def search(query, search_options = {})
         es_options = routing_options(search_options)
 
+        # Counts need to be fast as we load one count per type of document
+        # on every page load. Fail early if they are slow since they don't
+        # need to be accurate.
+        es_options[:timeout] = '1s' if search_options[:count_only]
+
         # Calling elasticsearch-ruby method
         super(query, es_options)
       end
@@ -30,6 +35,12 @@ module Elastic
         options[:transform] = transform
 
         self.import(options)
+      end
+
+      # Should be overriden in *ClassProxy for specific model if data needs to
+      # be preloaded by #as_indexed_json method
+      def preload_indexing_data(relation)
+        relation
       end
 
       private
@@ -54,28 +65,45 @@ module Elastic
         }
       end
 
-      def basic_query_hash(fields, query)
+      def basic_query_hash(fields, query, count_only: false)
+        fields = CustomLanguageAnalyzers.add_custom_analyzers_fields(fields)
+
+        fields = remove_fields_boost(fields) if count_only
+
         query_hash =
           if query.present?
+            simple_query_string = {
+              simple_query_string: {
+                _name: context.name(self.es_type, :match, :search_terms),
+                fields: fields,
+                query: query,
+                lenient: true,
+                default_operator: default_operator
+              }
+            }
+
+            must = []
+
+            filter = [{
+              term: {
+                type: {
+                  _name: context.name(:doc, :is_a, self.es_type),
+                  value: self.es_type
+                }
+              }
+            }]
+
+            if count_only
+              filter << simple_query_string
+            else
+              must << simple_query_string
+            end
+
             {
               query: {
                 bool: {
-                  must: [{
-                    simple_query_string: {
-                      _name: context.name(self.es_type, :match, :search_terms),
-                      fields: fields,
-                      query: query,
-                      default_operator: default_operator
-                    }
-                  }],
-                  filter: [{
-                    term: {
-                      type: {
-                        _name: context.name(:doc, :is_a, self.es_type),
-                        value: self.es_type
-                      }
-                    }
-                  }]
+                  must: must,
+                  filter: filter
                 }
               }
             }
@@ -90,7 +118,11 @@ module Elastic
             }
           end
 
-        query_hash[:highlight] = highlight_options(fields)
+        if count_only
+          query_hash[:size] = 0
+        else
+          query_hash[:highlight] = highlight_options(fields)
+        end
 
         query_hash
       end
@@ -116,35 +148,59 @@ module Elastic
             options[:current_user],
             options[:project_ids],
             options[:public_and_internal_projects],
-            options[:features]
+            options[:features],
+            options[:no_join_project]
           )
 
           query_hash[:query][:bool][:filter] ||= []
-          query_hash[:query][:bool][:filter] << {
-            has_parent: {
-              _name: context.name,
-              parent_type: "project",
-              query: {
-                bool: project_query
-              }
-            }
-          }
+
+          query_hash[:query][:bool][:filter] << if options[:no_join_project]
+                                                  # Some models have denormalized project permissions into the
+                                                  # document so that we do not need to use joins
+                                                  {
+                                                    bool: project_query
+                                                  }
+                                                else
+                                                  {
+                                                    has_parent: {
+                                                      _name: context.name,
+                                                      parent_type: "project",
+                                                      query: {
+                                                        bool: project_query
+                                                      }
+                                                    }
+                                                  }
+                                                end
         end
 
         query_hash
       end
 
       def apply_sort(query_hash, options)
-        case options[:sort]
-        when 'created_asc'
+        # Due to different uses of sort param we prefer order_by when
+        # present
+        case ::Gitlab::Search::SortOptions.sort_and_direction(options[:order_by], options[:sort])
+        when :created_at_asc
           query_hash.merge(sort: {
             created_at: {
               order: 'asc'
             }
           })
-        when 'created_desc'
+        when :created_at_desc
           query_hash.merge(sort: {
             created_at: {
+              order: 'desc'
+            }
+          })
+        when :updated_at_asc
+          query_hash.merge(sort: {
+            updated_at: {
+              order: 'asc'
+            }
+          })
+        when :updated_at_desc
+          query_hash.merge(sort: {
+            updated_at: {
               order: 'desc'
             }
           })
@@ -153,20 +209,24 @@ module Elastic
         end
       end
 
+      def remove_fields_boost(fields)
+        fields.map { |m| m.split('^').first }
+      end
+
       # Builds an elasticsearch query that will select projects the user is
       # granted access to.
       #
       # If a project feature(s) is specified, it indicates interest in child
       # documents gated by that project feature - e.g., "issues". The feature's
       # visibility level must be taken into account.
-      def project_ids_query(user, project_ids, public_and_internal_projects, features = nil)
+      def project_ids_query(user, project_ids, public_and_internal_projects, features = nil, no_join_project = false)
         scoped_project_ids = scoped_project_ids(user, project_ids)
 
         # At least one condition must be present, so pick no projects for
         # anonymous users.
         # Pick private, internal and public projects the user is a member of.
         # Pick all private projects for admins & auditors.
-        conditions = pick_projects_by_membership(scoped_project_ids, user, features)
+        conditions = pick_projects_by_membership(scoped_project_ids, user, no_join_project, features)
 
         if public_and_internal_projects
           context.name(:visibility) do
@@ -194,12 +254,17 @@ module Elastic
       # Admins & auditors are given access to all private projects. Access to
       # internal or public projects where the project feature is private is not
       # granted here.
-      def pick_projects_by_membership(project_ids, user, features = nil)
+      def pick_projects_by_membership(project_ids, user, no_join_project, features = nil)
+        # This method is used to construct a query on the join as well as query
+        # on top level doc. When querying top level doc the project's ID is
+        # `project_id` . When joining it is just `id`.
+        id_field = no_join_project ? :project_id : :id
+
         if features.nil?
           if project_ids == :any
             return [{ term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }]
           else
-            return [{ terms: { _name: context.name(:membership, :id), id: project_ids } }]
+            return [{ terms: { _name: context.name(:membership, :id), id_field => project_ids } }]
           end
         end
 
@@ -208,7 +273,7 @@ module Elastic
             if project_ids == :any
               { term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }
             else
-              { terms: { _name: context.name(:membership, :id), id: filter_ids_by_feature(project_ids, user, feature) } }
+              { terms: { _name: context.name(:membership, :id), id_field => filter_ids_by_feature(project_ids, user, feature) } }
             end
 
           limit = {

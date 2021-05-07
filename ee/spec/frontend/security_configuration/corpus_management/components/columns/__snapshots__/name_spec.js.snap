@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Name component renders name with correct file size 1`] = `
+<div
+  class="gl-text-gray-900"
+  data-testid="corpus-name"
+>
+  
+    Test corpus 1 
+  <span
+    data-testid="file-size"
+  >
+    381.47 MiB
+  </span>
+  )
+  
+</div>
+`;
+
+exports[`Name component renders the latest job 1`] = `
+<div
+  class="gl-text-gray-900"
+  data-testid="corpus-name"
+>
+  
+    Test corpus 1 
+  <span
+    data-testid="file-size"
+  >
+    381.47 MiB
+  </span>
+  )
+  
+</div>
+`;
+
+exports[`Name component without job path renders a - string instead of a link 1`] = `
+<div
+  class="gl-text-gray-900"
+  data-testid="corpus-name"
+>
+  
+    Corpus-sample-2-1431-4425 
+  <span
+    data-testid="file-size"
+  >
+    306.13 MiB
+  </span>
+  )
+  
+</div>
+`;

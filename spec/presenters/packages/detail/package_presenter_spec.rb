@@ -16,19 +16,21 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
         created_at: file.created_at,
         download_path: file.download_path,
         file_name: file.file_name,
-        size: file.size
+        size: file.size,
+        file_md5: file.file_md5,
+        file_sha1: file.file_sha1,
+        file_sha256: file.file_sha256
       }
     end
   end
 
   let(:pipeline_info) do
-    pipeline = package.build_info.pipeline
+    pipeline = package.original_build_info.pipeline
     {
       created_at: pipeline.created_at,
       id: pipeline.id,
       sha: pipeline.sha,
       ref: pipeline.ref,
-      git_commit_message: pipeline.git_commit_message,
       user: user_info,
       project: {
         name: pipeline.project.name,
@@ -56,13 +58,41 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
     }
   end
 
-  context 'detail_view' do
+  describe '#detail_view' do
     context 'with build_info' do
       let_it_be(:package) { create(:npm_package, :with_build, project: project) }
-      let(:expected_package_details) { super().merge(pipeline: pipeline_info) }
+
+      let(:expected_package_details) do
+        super().merge(
+          pipeline: pipeline_info,
+          pipelines: [pipeline_info]
+        )
+      end
 
       it 'returns details with pipeline' do
         expect(presenter.detail_view).to match expected_package_details
+      end
+    end
+
+    context 'with multiple build_infos' do
+      let_it_be(:package) { create(:npm_package, :with_build, project: project) }
+      let_it_be(:build_info2) { create(:package_build_info, :with_pipeline, package: package) }
+
+      it 'returns details with two pipelines' do
+        expect(presenter.detail_view[:pipelines].size).to eq(2)
+      end
+    end
+
+    context 'with package_file_build_infos' do
+      let_it_be(:package) { create(:npm_package, :with_build, project: project) }
+
+      let_it_be(:package_file_build_info) do
+        create(:package_file_build_info, package_file: package.package_files.first,
+                                         pipeline: package.pipelines.first)
+      end
+
+      it 'returns details with package_file pipeline' do
+        expect(presenter.detail_view[:package_files].first[:pipelines].size).to eq(1)
       end
     end
 
@@ -95,6 +125,7 @@ RSpec.describe ::Packages::Detail::PackagePresenter do
     context 'with nuget_metadatum' do
       let_it_be(:package) { create(:nuget_package, project: project) }
       let_it_be(:nuget_metadatum) { create(:nuget_metadatum, package: package) }
+
       let(:expected_package_details) { super().merge(nuget_metadatum: nuget_metadatum) }
 
       it 'returns nuget_metadatum' do

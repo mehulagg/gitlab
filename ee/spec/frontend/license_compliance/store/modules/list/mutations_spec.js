@@ -1,8 +1,8 @@
+import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
 import * as types from 'ee/license_compliance/store/modules/list/mutation_types';
 import mutations from 'ee/license_compliance/store/modules/list/mutations';
-import { toLicenseObject } from 'ee/license_compliance/utils/mappers';
 import getInitialState from 'ee/license_compliance/store/modules/list/state';
-import { REPORT_STATUS } from 'ee/license_compliance/store/modules/list/constants';
+import { toLicenseObject } from 'ee/license_compliance/utils/mappers';
 import { TEST_HOST } from 'helpers/test_constants';
 
 describe('Licenses mutations', () => {

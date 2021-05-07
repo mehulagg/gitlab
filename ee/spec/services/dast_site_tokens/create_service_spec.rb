@@ -14,22 +14,9 @@ RSpec.describe DastSiteTokens::CreateService do
   end
 
   describe 'execute' do
-    context 'when on demand scan feature is disabled' do
-      it 'communicates failure' do
-        stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: false)
-
-        aggregate_failures do
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to eq('Insufficient permissions')
-        end
-      end
-    end
-
     context 'when on demand scan licensed feature is not available' do
       it 'communicates failure' do
         stub_licensed_features(security_on_demand_scans: false)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
 
         aggregate_failures do
           expect(subject.status).to eq(:error)
@@ -38,10 +25,9 @@ RSpec.describe DastSiteTokens::CreateService do
       end
     end
 
-    context 'when the feature is enabled' do
+    context 'when the feature is available' do
       before do
         stub_licensed_features(security_on_demand_scans: true)
-        stub_feature_flags(security_on_demand_scans_site_validation: true)
       end
 
       it 'communicates success' do

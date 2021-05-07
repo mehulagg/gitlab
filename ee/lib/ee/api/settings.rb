@@ -9,6 +9,7 @@ module EE
         helpers do
           extend ::Gitlab::Utils::Override
 
+          # rubocop:disable Metrics/CyclomaticComplexity
           override :filter_attributes_using_license
           def filter_attributes_using_license(attrs)
             unless ::License.feature_available?(:repository_mirrors)
@@ -47,12 +48,17 @@ module EE
               attrs = attrs.except(:group_owners_can_manage_default_branch_protection)
             end
 
-            unless ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+            unless License.feature_available?(:git_two_factor_enforcement) && ::Feature.enabled?(:two_factor_for_cli)
+              attrs = attrs.except(:git_two_factor_session_expiry)
+            end
+
+            unless ::Gitlab::Geo.license_allows?
               attrs = attrs.except(:maintenance_mode, :maintenance_mode_message)
             end
 
             attrs
           end
+          # rubocop:enable Metrics/CyclomaticComplexity
         end
       end
     end

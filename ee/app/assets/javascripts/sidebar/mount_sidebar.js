@@ -1,18 +1,20 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { IssuableType } from '~/issue_show/constants';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import { store } from '~/notes/stores';
+import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
+import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue';
 import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
+import SidebarIterationWidget from './components/sidebar_iteration_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
-import IterationSelect from './components/iteration_select.vue';
 import SidebarStore from './stores/sidebar_store';
-import createDefaultClient from '~/lib/graphql';
-import { store } from '~/notes/stores';
 
 Vue.use(VueApollo);
 
-const mountWeightComponent = mediator => {
+const mountWeightComponent = (mediator) => {
   const el = document.querySelector('.js-sidebar-weight-entry-point');
 
   if (!el) return false;
@@ -22,7 +24,7 @@ const mountWeightComponent = mediator => {
     components: {
       SidebarWeight,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-weight', {
         props: {
           mediator,
@@ -31,7 +33,7 @@ const mountWeightComponent = mediator => {
   });
 };
 
-const mountStatusComponent = mediator => {
+const mountStatusComponent = (mediator) => {
   const el = document.querySelector('.js-sidebar-status-entry-point');
 
   if (!el) {
@@ -44,7 +46,7 @@ const mountStatusComponent = mediator => {
     components: {
       SidebarStatus,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-status', {
         props: {
           mediator,
@@ -52,6 +54,26 @@ const mountStatusComponent = mediator => {
       }),
   });
 };
+
+function mountCveIdRequestComponent() {
+  const el = document.getElementById('js-sidebar-cve-id-request-entry-point');
+
+  if (!el) {
+    return false;
+  }
+
+  const { iid, fullPath } = CEMountSidebar.getSidebarOptions();
+
+  return new Vue({
+    store,
+    el,
+    provide: {
+      iid: String(iid),
+      fullPath,
+    },
+    render: (createElement) => createElement(CveIdRequest),
+  });
+}
 
 const mountEpicsSelect = () => {
   const el = document.querySelector('#js-vue-sidebar-item-epics-select');
@@ -66,7 +88,7 @@ const mountEpicsSelect = () => {
     components: {
       SidebarItemEpicsSelect,
     },
-    render: createElement =>
+    render: (createElement) =>
       createElement('sidebar-item-epics-select', {
         props: {
           sidebarStore,
@@ -86,24 +108,25 @@ function mountIterationSelect() {
     return false;
   }
 
-  const apolloProvider = new VueApollo({
-    defaultClient: createDefaultClient(),
-  });
   const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
 
   return new Vue({
     el,
     apolloProvider,
     components: {
-      IterationSelect,
+      SidebarIterationWidget,
     },
-    render: createElement =>
-      createElement('iteration-select', {
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
+    },
+    render: (createElement) =>
+      createElement('sidebar-iteration-widget', {
         props: {
-          groupPath,
-          canEdit,
-          projectPath,
-          issueIid,
+          iterationsWorkspacePath: groupPath,
+          workspacePath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
         },
       }),
   });
@@ -115,4 +138,8 @@ export default function mountSidebar(mediator) {
   mountStatusComponent(mediator);
   mountEpicsSelect();
   mountIterationSelect();
+
+  if (gon.features.cveIdRequestButton) {
+    mountCveIdRequestComponent();
+  }
 }

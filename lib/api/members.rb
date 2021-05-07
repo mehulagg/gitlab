@@ -6,6 +6,8 @@ module API
 
     before { authenticate! }
 
+    feature_category :authentication_and_authorization
+
     helpers ::API::Helpers::MembersHelpers
 
     %w[group project].each do |source_type|
@@ -60,7 +62,7 @@ module API
         get ":id/members/:user_id" do
           source = find_source(source_type, params[:id])
 
-          members = source.members
+          members = source_members(source)
           member = members.find_by!(user_id: params[:user_id])
 
           present_members member
@@ -98,9 +100,9 @@ module API
           authorize_admin_source!(source_type, source)
 
           if params[:user_id].to_s.include?(',')
-            create_service_params = params.except(:user_id).merge({ user_ids: params[:user_id] })
+            create_service_params = params.except(:user_id).merge({ user_ids: params[:user_id], source: source })
 
-            ::Members::CreateService.new(current_user, create_service_params).execute(source)
+            ::Members::CreateService.new(current_user, create_service_params).execute
           elsif params[:user_id].present?
             member = source.members.find_by(user_id: params[:user_id])
             conflict!('Member already exists') if member
@@ -134,13 +136,15 @@ module API
           source = find_source(source_type, params.delete(:id))
           authorize_admin_source!(source_type, source)
 
-          member = source.members.find_by!(user_id: params[:user_id])
-          updated_member =
-            ::Members::UpdateService
-              .new(current_user, declared_params(include_missing: false))
-              .execute(member)
+          member = source_members(source).find_by!(user_id: params[:user_id])
 
-          if updated_member.valid?
+          result = ::Members::UpdateService
+            .new(current_user, declared_params(include_missing: false))
+            .execute(member)
+
+          updated_member = result[:member]
+
+          if result[:status] == :success
             present_members updated_member
           else
             render_validation_error!(updated_member)
@@ -151,16 +155,18 @@ module API
         desc 'Removes a user from a group or project.'
         params do
           requires :user_id, type: Integer, desc: 'The user ID of the member'
+          optional :skip_subresources, type: Boolean, default: false,
+                   desc: 'Flag indicating if the deletion of direct memberships of the removed member in subgroups and projects should be skipped'
           optional :unassign_issuables, type: Boolean, default: false,
                    desc: 'Flag indicating if the removed member should be unassigned from any issues or merge requests within given group or project'
         end
         # rubocop: disable CodeReuse/ActiveRecord
         delete ":id/members/:user_id" do
           source = find_source(source_type, params[:id])
-          member = source.members.find_by!(user_id: params[:user_id])
+          member = source_members(source).find_by!(user_id: params[:user_id])
 
           destroy_conditionally!(member) do
-            ::Members::DestroyService.new(current_user).execute(member, unassign_issuables: params[:unassign_issuables])
+            ::Members::DestroyService.new(current_user).execute(member, skip_subresources: params[:skip_subresources], unassign_issuables: params[:unassign_issuables])
           end
         end
         # rubocop: enable CodeReuse/ActiveRecord

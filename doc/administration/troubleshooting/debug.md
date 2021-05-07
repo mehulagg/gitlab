@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Debugging Tips
@@ -126,7 +126,7 @@ an SMTP server, but you're not seeing mail delivered. Here's how to check the se
 
 For more advanced issues, `gdb` is a must-have tool for debugging issues.
 
-### The GNU Project Debugger (gdb)
+### The GNU Project Debugger (GDB)
 
 To install on Ubuntu/Debian:
 
@@ -140,9 +140,13 @@ On CentOS:
 sudo yum install gdb
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 ### rbtrace
 
-GitLab 11.2 ships with [rbtrace](https://github.com/tmm1/rbtrace), which
+<!-- vale gitlab.Spelling = YES -->
+
+GitLab 11.2 ships with [`rbtrace`](https://github.com/tmm1/rbtrace), which
 allows you to trace Ruby code, view all running threads, take memory dumps,
 and more. However, this is not enabled by default. To enable it, define the
 `ENABLE_RBTRACE` variable to the environment. For example, in Omnibus:
@@ -175,7 +179,7 @@ downtime. Otherwise skip to the next section.
 
 1. Load the problematic URL
 1. Run `sudo gdb -p <PID>` to attach to the Unicorn process.
-1. In the gdb window, type:
+1. In the GDB window, type:
 
    ```plaintext
    call (void) rb_backtrace()
@@ -210,7 +214,7 @@ downtime. Otherwise skip to the next section.
    ```
 
 Note that if the Unicorn process terminates before you are able to run these
-commands, gdb will report an error. To buy more time, you can always raise the
+commands, GDB will report an error. To buy more time, you can always raise the
 Unicorn timeout. For omnibus users, you can edit `/etc/gitlab/gitlab.rb` and
 increase it from 60 seconds to 300:
 
@@ -231,7 +235,7 @@ separate Rails process to debug the issue:
 
 1. Log in to your GitLab account.
 1. Copy the URL that is causing problems (e.g. `https://gitlab.com/ABC`).
-1. Create a Personal Access Token for your user (Profile Settings -> Access Tokens).
+1. Create a Personal Access Token for your user (User Settings -> Access Tokens).
 1. Bring up the [GitLab Rails console.](../operations/rails_console.md#starting-a-rails-console-session)
 1. At the Rails console, run:
 
@@ -246,12 +250,12 @@ separate Rails process to debug the issue:
    ```
 
 1. In a new window, run `top`. It should show this Ruby process using 100% CPU. Write down the PID.
-1. Follow step 2 from the previous section on using gdb.
+1. Follow step 2 from the previous section on using GDB.
 
 ### GitLab: API is not accessible
 
 This often occurs when GitLab Shell attempts to request authorization via the
-internal API (e.g., `http://localhost:8080/api/v4/internal/allowed`), and
+[internal API](../../development/internal_api.md) (e.g., `http://localhost:8080/api/v4/internal/allowed`), and
 something in the check fails. There are many reasons why this may happen:
 
 1. Timeout connecting to a database (e.g., PostgreSQL or Redis)
@@ -267,8 +271,8 @@ strace -ttTfyyy -s 1024 -p <PID of unicorn worker> -o /tmp/unicorn.txt
 ```
 
 If you cannot isolate which Unicorn worker is the issue, try to run `strace`
-on all the Unicorn workers to see where the `/internal/allowed` endpoint gets
-stuck:
+on all the Unicorn workers to see where the
+[`/internal/allowed`](../../development/internal_api.md) endpoint gets stuck:
 
 ```shell
 ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs  strace -ttTfyyy -s 1024 -o /tmp/unicorn.txt
@@ -279,4 +283,4 @@ The output in `/tmp/unicorn.txt` may help diagnose the root cause.
 ## More information
 
 - [Debugging Stuck Ruby Processes](https://blog.newrelic.com/engineering/debugging-stuck-ruby-processes-what-to-do-before-you-kill-9/)
-- [Cheatsheet of using gdb and Ruby processes](gdb-stuck-ruby.txt)
+- [Cheat sheet of using GDB and Ruby processes](gdb-stuck-ruby.txt)

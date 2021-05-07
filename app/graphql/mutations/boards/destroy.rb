@@ -8,13 +8,13 @@ module Mutations
       field :board,
             Types::BoardType,
             null: true,
-            description: 'The board after mutation'
+            description: 'The board after mutation.'
       argument :id,
                 ::Types::GlobalIDType[::Board],
                 required: true,
-                description: 'The global ID of the board to destroy'
+                description: 'The global ID of the board to destroy.'
 
-      authorize :admin_board
+      authorize :admin_issue_board
 
       def resolve(id:)
         board = authorized_find!(id: id)

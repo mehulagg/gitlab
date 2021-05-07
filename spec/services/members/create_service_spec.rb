@@ -2,60 +2,84 @@
 
 require 'spec_helper'
 
-RSpec.describe Members::CreateService do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
-  let(:project_user) { create(:user) }
+RSpec.describe Members::CreateService, :aggregate_failures, :clean_gitlab_redis_shared_state, :sidekiq_inline do
+  let_it_be(:source) { create(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:member) { create(:user) }
+  let_it_be(:user_ids) { member.id.to_s }
+  let_it_be(:access_level) { Gitlab::Access::GUEST }
+  let(:params) { { user_ids: user_ids, access_level: access_level } }
+
+  subject(:execute_service) { described_class.new(user, params.merge({ source: source })).execute }
 
   before do
-    project.add_maintainer(user)
+    if source.is_a?(Project)
+      source.add_maintainer(user)
+      OnboardingProgress.onboard(source.namespace)
+    else
+      source.add_owner(user)
+      OnboardingProgress.onboard(source)
+    end
   end
 
-  it 'adds user to members' do
-    params = { user_ids: project_user.id.to_s, access_level: Gitlab::Access::GUEST }
-    result = described_class.new(user, params).execute(project)
+  context 'when passing valid parameters' do
+    it 'adds a user to members' do
+      expect(execute_service[:status]).to eq(:success)
+      expect(source.users).to include member
+      expect(OnboardingProgress.completed?(source.namespace, :user_added)).to be(true)
+    end
 
-    expect(result[:status]).to eq(:success)
-    expect(project.users).to include project_user
+    context 'when executing on a group' do
+      let_it_be(:source) { create(:group) }
+
+      it 'adds a user to members' do
+        expect(execute_service[:status]).to eq(:success)
+        expect(source.users).to include member
+        expect(OnboardingProgress.completed?(source, :user_added)).to be(true)
+      end
+    end
   end
 
-  it 'adds no user to members' do
-    params = { user_ids: '', access_level: Gitlab::Access::GUEST }
-    result = described_class.new(user, params).execute(project)
+  context 'when passing no user ids' do
+    let(:user_ids) { '' }
 
-    expect(result[:status]).to eq(:error)
-    expect(result[:message]).to be_present
-    expect(project.users).not_to include project_user
+    it 'does not add a member' do
+      expect(execute_service[:status]).to eq(:error)
+      expect(execute_service[:message]).to be_present
+      expect(source.users).not_to include member
+      expect(OnboardingProgress.completed?(source.namespace, :user_added)).to be(false)
+    end
   end
 
-  it 'limits the number of users to 100' do
-    user_ids = 1.upto(101).to_a.join(',')
-    params = { user_ids: user_ids, access_level: Gitlab::Access::GUEST }
+  context 'when passing many user ids' do
+    let(:user_ids) { 1.upto(101).to_a.join(',') }
 
-    result = described_class.new(user, params).execute(project)
-
-    expect(result[:status]).to eq(:error)
-    expect(result[:message]).to be_present
-    expect(project.users).not_to include project_user
+    it 'limits the number of users to 100' do
+      expect(execute_service[:status]).to eq(:error)
+      expect(execute_service[:message]).to be_present
+      expect(source.users).not_to include member
+      expect(OnboardingProgress.completed?(source.namespace, :user_added)).to be(false)
+    end
   end
 
-  it 'does not add an invalid member' do
-    params = { user_ids: project_user.id.to_s, access_level: -1 }
-    result = described_class.new(user, params).execute(project)
+  context 'when passing an invalid access level' do
+    let(:access_level) { -1 }
 
-    expect(result[:status]).to eq(:error)
-    expect(result[:message]).to include("#{project_user.username}: Access level is not included in the list")
-    expect(project.users).not_to include project_user
+    it 'does not add a member' do
+      expect(execute_service[:status]).to eq(:error)
+      expect(execute_service[:message]).to include("#{member.username}: Access level is not included in the list")
+      expect(source.users).not_to include member
+      expect(OnboardingProgress.completed?(source.namespace, :user_added)).to be(false)
+    end
   end
 
-  it 'does not add a member with an existing invite' do
-    invited_member = create(:project_member, :invited, project: project)
+  context 'when passing an existing invite user id' do
+    let(:user_ids) { create(:project_member, :invited, project: source).invite_email }
 
-    params = { user_ids: invited_member.invite_email,
-               access_level: Gitlab::Access::GUEST }
-    result = described_class.new(user, params).execute(project)
-
-    expect(result[:status]).to eq(:error)
-    expect(result[:message]).to eq('Invite email has already been taken')
+    it 'does not add a member' do
+      expect(execute_service[:status]).to eq(:error)
+      expect(execute_service[:message]).to eq('Invite email has already been taken')
+      expect(OnboardingProgress.completed?(source.namespace, :user_added)).to be(false)
+    end
   end
 end

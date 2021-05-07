@@ -42,8 +42,7 @@
   .login-box,
   .omniauth-container {
     box-shadow: 0 0 0 1px $border-color;
-    border-bottom-right-radius: $border-radius;
-    border-bottom-left-radius: $border-radius;
+    border-radius: $border-radius;
     padding: 15px;
 
     .login-heading h3 {
@@ -105,17 +104,6 @@
 
       @include media-breakpoint-down(md) {
         width: 100%;
-      }
-    }
-
-    .omniauth-btn {
-      width: 100%;
-      padding: $gl-padding-8;
-
-      img {
-        width: $default-icon-size;
-        height: $default-icon-size;
-        margin-right: $gl-padding;
       }
     }
   }
@@ -191,8 +179,9 @@
   }
 
   input[type='submit'] {
-    @extend .btn-block;
     margin-bottom: 0;
+    display: block;
+    width: 100%;
   }
 
   .devise-errors {

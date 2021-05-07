@@ -2,6 +2,8 @@
 
 class StuckCiJobsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+
+  sidekiq_options retry: 3
   include CronjobQueue
 
   feature_category :continuous_integration
@@ -70,10 +72,10 @@ class StuckCiJobsWorker # rubocop:disable Scalability/IdempotentWorker
 
   def drop_build(type, build, status, timeout, reason)
     Gitlab::AppLogger.info "#{self.class}: Dropping #{type} build #{build.id} for runner #{build.runner_id} (status: #{status}, timeout: #{timeout}, reason: #{reason})"
-    Gitlab::OptimisticLocking.retry_lock(build, 3) do |b|
+    Gitlab::OptimisticLocking.retry_lock(build, 3, name: 'stuck_ci_jobs_worker_drop_build') do |b|
       b.drop(reason)
     end
-  rescue => ex
+  rescue StandardError => ex
     build.doom!
 
     track_exception_for_build(ex, build)

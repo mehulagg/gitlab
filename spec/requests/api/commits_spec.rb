@@ -1439,6 +1439,22 @@ RSpec.describe API::Commits do
           it_behaves_like 'ref comments'
         end
       end
+
+      context 'multiple notes' do
+        let!(:note) { create(:diff_note_on_commit, project: project) }
+        let(:commit) { note.commit }
+        let(:commit_id) { note.commit_id }
+
+        it 'are returned without N + 1' do
+          get api(route, current_user) # warm up the cache
+
+          control_count = ActiveRecord::QueryRecorder.new { get api(route, current_user) }.count
+
+          create(:diff_note_on_commit, project: project, author: create(:user))
+
+          expect { get api(route, current_user) }.not_to exceed_query_limit(control_count)
+        end
+      end
     end
 
     context 'when the commit is present on two projects' do
@@ -1898,8 +1914,12 @@ RSpec.describe API::Commits do
     let(:merged_mr) { create(:merge_request, source_project: project, source_branch: 'master', target_branch: 'feature') }
     let(:commit) { merged_mr.merge_request_diff.commits.last }
 
-    it 'returns the correct merge request' do
+    def perform_request(user)
       get api("/projects/#{project.id}/repository/commits/#{commit.id}/merge_requests", user)
+    end
+
+    it 'returns the correct merge request' do
+      perform_request(user)
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(response).to include_limited_pagination_headers
@@ -1910,7 +1930,7 @@ RSpec.describe API::Commits do
     it 'returns 403 for an unauthorized user' do
       project.add_guest(user)
 
-      get api("/projects/#{project.id}/repository/commits/#{commit.id}/merge_requests", user)
+      perform_request(user)
 
       expect(response).to have_gitlab_http_status(:forbidden)
     end
@@ -1926,10 +1946,20 @@ RSpec.describe API::Commits do
       let(:non_member) { create(:user) }
 
       it 'responds 403 when only members are allowed to read merge requests' do
-        get api("/projects/#{project.id}/repository/commits/#{commit.id}/merge_requests", non_member)
+        perform_request(non_member)
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
+    end
+
+    it 'returns multiple merge requests without N + 1' do
+      perform_request(user)
+
+      control_count = ActiveRecord::QueryRecorder.new { perform_request(user) }.count
+
+      create(:merge_request, :closed, source_project: project, source_branch: 'master', target_branch: 'feature')
+
+      expect { perform_request(user) }.not_to exceed_query_limit(control_count)
     end
   end
 
@@ -1991,6 +2021,17 @@ RSpec.describe API::Commits do
         expect(json_response['x509_certificate']['x509_issuer']['subject']).to eq(commit.signature.x509_certificate.x509_issuer.subject)
         expect(json_response['x509_certificate']['x509_issuer']['subject_key_identifier']).to eq(commit.signature.x509_certificate.x509_issuer.subject_key_identifier)
         expect(json_response['x509_certificate']['x509_issuer']['crl_url']).to eq(commit.signature.x509_certificate.x509_issuer.crl_url)
+        expect(json_response['commit_source']).to eq('gitaly')
+      end
+
+      context 'with Rugged enabled', :enable_rugged do
+        it 'returns correct JSON' do
+          get api(route, current_user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['signature_type']).to eq('PGP')
+          expect(json_response['commit_source']).to eq('rugged')
+        end
       end
     end
   end

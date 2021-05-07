@@ -5,10 +5,13 @@ module Resolvers
     class JiraProjectsResolver < BaseResolver
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
+      type Types::Projects::Services::JiraProjectType.connection_type, null: true
+      authorize :admin_project
+
       argument :name,
                GraphQL::STRING_TYPE,
                required: false,
-               description: 'Project name or key'
+               description: 'Project name or key.'
 
       def resolve(name: nil, **args)
         authorize!(project)
@@ -27,10 +30,6 @@ module Resolvers
         else
           raise Gitlab::Graphql::Errors::BaseError, response.message
         end
-      end
-
-      def authorized_resource?(project)
-        Ability.allowed?(context[:current_user], :admin_project, project)
       end
 
       private

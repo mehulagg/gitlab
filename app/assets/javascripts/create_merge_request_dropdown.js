@@ -1,16 +1,15 @@
-/* eslint-disable no-new */
 import { debounce } from 'lodash';
-import axios from './lib/utils/axios_utils';
-import { deprecatedCreateFlash as Flash } from './flash';
-import DropLab from './droplab/drop_lab';
-import ISetter from './droplab/plugins/input_setter';
-import { __, sprintf } from './locale';
 import {
   init as initConfidentialMergeRequest,
   isConfidentialIssue,
   canCreateConfidentialMergeRequest,
 } from './confidential_merge_request';
 import confidentialMergeRequestState from './confidential_merge_request/state';
+import DropLab from './droplab/drop_lab';
+import ISetter from './droplab/plugins/input_setter';
+import createFlash from './flash';
+import axios from './lib/utils/axios_utils';
+import { __, sprintf } from './locale';
 
 // Todo: Remove this when fixing issue in input_setter plugin
 const InputSetter = { ...ISetter };
@@ -36,13 +35,14 @@ export default class CreateMergeRequestDropdown {
     this.branchInput = this.wrapperEl.querySelector('.js-branch-name');
     this.branchMessage = this.wrapperEl.querySelector('.js-branch-message');
     this.createMergeRequestButton = this.wrapperEl.querySelector('.js-create-merge-request');
+    this.createMergeRequestLoading = this.createMergeRequestButton.querySelector('.js-spinner');
     this.createTargetButton = this.wrapperEl.querySelector('.js-create-target');
     this.dropdownList = this.wrapperEl.querySelector('.dropdown-menu');
     this.dropdownToggle = this.wrapperEl.querySelector('.js-dropdown-toggle');
     this.refInput = this.wrapperEl.querySelector('.js-ref');
     this.refMessage = this.wrapperEl.querySelector('.js-ref-message');
     this.unavailableButton = this.wrapperEl.querySelector('.unavailable');
-    this.unavailableButtonSpinner = this.unavailableButton.querySelector('.spinner');
+    this.unavailableButtonSpinner = this.unavailableButton.querySelector('.gl-spinner');
     this.unavailableButtonText = this.unavailableButton.querySelector('.text');
 
     this.branchCreated = false;
@@ -132,7 +132,9 @@ export default class CreateMergeRequestDropdown {
       .catch(() => {
         this.unavailable();
         this.disable();
-        Flash(__('Failed to check related branches.'));
+        createFlash({
+          message: __('Failed to check related branches.'),
+        });
       });
   }
 
@@ -147,7 +149,11 @@ export default class CreateMergeRequestDropdown {
         this.branchCreated = true;
         window.location.href = data.url;
       })
-      .catch(() => Flash(__('Failed to create a branch for this issue. Please try again.')));
+      .catch(() =>
+        createFlash({
+          message: __('Failed to create a branch for this issue. Please try again.'),
+        }),
+      );
   }
 
   createMergeRequest() {
@@ -163,14 +169,19 @@ export default class CreateMergeRequestDropdown {
         this.mergeRequestCreated = true;
         window.location.href = data.url;
       })
-      .catch(() => Flash(__('Failed to create Merge Request. Please try again.')));
+      .catch(() =>
+        createFlash({
+          message: __('Failed to create merge request. Please try again.'),
+        }),
+      );
   }
 
   disable() {
     this.disableCreateAction();
+  }
 
-    this.dropdownToggle.classList.add('disabled');
-    this.dropdownToggle.setAttribute('disabled', 'disabled');
+  setLoading(loading) {
+    this.createMergeRequestLoading.classList.toggle('gl-display-none', !loading);
   }
 
   disableCreateAction() {
@@ -189,15 +200,12 @@ export default class CreateMergeRequestDropdown {
 
     this.createTargetButton.classList.remove('disabled');
     this.createTargetButton.removeAttribute('disabled');
-
-    this.dropdownToggle.classList.remove('disabled');
-    this.dropdownToggle.removeAttribute('disabled');
   }
 
   static findByValue(objects, ref, returnFirstMatch = false) {
     if (!objects || !objects.length) return false;
     if (objects.indexOf(ref) > -1) return ref;
-    if (returnFirstMatch) return objects.find(item => new RegExp(`^${ref}`).test(item));
+    if (returnFirstMatch) return objects.find((item) => new RegExp(`^${ref}`).test(item));
 
     return false;
   }
@@ -262,7 +270,9 @@ export default class CreateMergeRequestDropdown {
       .catch(() => {
         this.unavailable();
         this.disable();
-        new Flash(__('Failed to get ref.'));
+        createFlash({
+          message: __('Failed to get ref.'),
+        });
 
         this.isGettingRef = false;
 
@@ -362,7 +372,7 @@ export default class CreateMergeRequestDropdown {
     event.preventDefault();
 
     if (isConfidentialIssue() && !event.target.classList.contains('js-create-target')) {
-      this.droplab.hooks.forEach(hook => hook.list.toggle());
+      this.droplab.hooks.forEach((hook) => hook.list.toggle());
 
       return;
     }
@@ -382,8 +392,10 @@ export default class CreateMergeRequestDropdown {
       this.isCreatingBranch = false;
 
       this.enable();
+      this.setLoading(false);
     });
 
+    this.setLoading(true);
     this.disable();
   }
 
@@ -410,8 +422,8 @@ export default class CreateMergeRequestDropdown {
     const inputClasses = ['gl-field-error-outline', 'gl-field-success-outline'];
     const messageClasses = ['text-muted', 'text-danger', 'text-success'];
 
-    inputClasses.forEach(cssClass => input.classList.remove(cssClass));
-    messageClasses.forEach(cssClass => message.classList.remove(cssClass));
+    inputClasses.forEach((cssClass) => input.classList.remove(cssClass));
+    messageClasses.forEach((cssClass) => message.classList.remove(cssClass));
     message.style.display = 'none';
   }
 

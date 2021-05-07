@@ -8,6 +8,8 @@ class Projects::RepositoriesController < Projects::ApplicationController
 
   prepend_before_action(only: [:archive]) { authenticate_sessionless_user!(:archive) }
 
+  skip_before_action :default_cache_headers, only: :archive
+
   # Authorize
   before_action :require_non_empty_project, except: :create
   before_action :archive_rate_limit!, only: :archive
@@ -33,7 +35,7 @@ class Projects::RepositoriesController < Projects::ApplicationController
     return if archive_not_modified?
 
     send_git_archive @repository, **repo_params
-  rescue => ex
+  rescue StandardError => ex
     logger.error("#{self.class.name}: #{ex}")
     git_not_found!
   end
@@ -51,7 +53,7 @@ class Projects::RepositoriesController < Projects::ApplicationController
   end
 
   def set_cache_headers
-    expires_in cache_max_age(archive_metadata['CommitId']), public: project.public?
+    expires_in cache_max_age(archive_metadata['CommitId']), public: Guest.can?(:download_code, project)
     fresh_when(etag: archive_metadata['ArchivePath'])
   end
 

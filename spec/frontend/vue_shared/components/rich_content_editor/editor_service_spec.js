@@ -1,3 +1,5 @@
+import buildCustomRenderer from '~/vue_shared/components/rich_content_editor/services/build_custom_renderer';
+import buildHTMLToMarkdownRenderer from '~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer';
 import {
   generateToolbarItem,
   addCustomEventListener,
@@ -8,8 +10,6 @@ import {
   getMarkdown,
   getEditorOptions,
 } from '~/vue_shared/components/rich_content_editor/services/editor_service';
-import buildHTMLToMarkdownRenderer from '~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer';
-import buildCustomRenderer from '~/vue_shared/components/rich_content_editor/services/build_custom_renderer';
 import sanitizeHTML from '~/vue_shared/components/rich_content_editor/services/sanitize_html';
 
 jest.mock('~/vue_shared/components/rich_content_editor/services/build_html_to_markdown_renderer');
@@ -20,7 +20,7 @@ describe('Editor Service', () => {
   let mockInstance;
   let event;
   let handler;
-  const parseHtml = str => {
+  const parseHtml = (str) => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = str;
     return wrapper.firstChild;
@@ -91,12 +91,25 @@ describe('Editor Service', () => {
   });
 
   describe('addImage', () => {
-    it('calls the exec method on the instance', () => {
-      const mockImage = { imageUrl: 'some/url.png', description: 'some description' };
+    const file = new File([], 'some-file.jpg');
+    const mockImage = { imageUrl: 'some/url.png', altText: 'some alt text' };
 
-      addImage(mockInstance, mockImage);
+    it('calls the insertElement method on the squire instance when in WYSIWYG mode', () => {
+      jest.spyOn(URL, 'createObjectURL');
+      mockInstance.editor.isWysiwygMode.mockReturnValue(true);
+      mockInstance.editor.getSquire.mockReturnValue({ insertElement: jest.fn() });
 
-      expect(mockInstance.editor.exec).toHaveBeenCalledWith('AddImage', mockImage);
+      addImage(mockInstance, mockImage, file);
+
+      expect(mockInstance.editor.getSquire().insertElement).toHaveBeenCalled();
+      expect(global.URL.createObjectURL).toHaveBeenLastCalledWith(file);
+    });
+
+    it('calls the insertText method on the instance when in Markdown mode', () => {
+      mockInstance.editor.isWysiwygMode.mockReturnValue(false);
+      addImage(mockInstance, mockImage, file);
+
+      expect(mockInstance.editor.insertText).toHaveBeenCalledWith('![some alt text](some/url.png)');
     });
   });
 

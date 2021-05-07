@@ -1,7 +1,7 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Plan
+group: Product Planning
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Epic Links API **(ULTIMATE)**
@@ -12,10 +12,11 @@ Manages parent-child [epic relationships](../user/group/epics/index.md#multi-lev
 
 Every API call to `epic_links` must be authenticated.
 
-If a user is not a member of a group and the group is private, a `GET` request on that group will result to a `404` status code.
+If a user is not a member of a private group, a `GET` request on that
+group results in a `404` status code.
 
-Multi-level Epics are available only in GitLab [Ultimate/Gold](https://about.gitlab.com/pricing/).
-If the Multi-level Epics feature is not available, a `403` status code will be returned.
+Multi-level Epics are available only in GitLab [Ultimate](https://about.gitlab.com/pricing/).
+If the Multi-level Epics feature is not available, a `403` status code is returned.
 
 ## List epics related to a given epic
 
@@ -76,7 +77,7 @@ Example response:
 Creates an association between two epics, designating one as the parent epic and the other as the child epic. A parent epic can have multiple child epics. If the new child epic already belonged to another epic, it is unassigned from that previous parent.
 
 ```plaintext
-POST /groups/:id/epics/:epic_iid/epics
+POST /groups/:id/epics/:epic_iid/epics/:child_epic_id
 ```
 
 | Attribute       | Type           | Required | Description                                                                                                        |
@@ -96,7 +97,7 @@ Example response:
   "id": 6,
   "iid": 38,
   "group_id": 1,
-  "parent_id": 5
+  "parent_id": 5,
   "title": "Accusamus iste et ullam ratione voluptatem omnis debitis dolor est.",
   "description": "Molestias dolorem eos vitae expedita impedit necessitatibus quo voluptatum.",
   "author": {
@@ -135,9 +136,9 @@ POST /groups/:id/epics/:epic_iid/epics
 | Attribute       | Type           | Required | Description                                                                                                        |
 | --------------- | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user      |
-| `epic_iid`      | integer        | yes      | The internal ID of the (future parent) epic.                                                                                       |
-| `title`         | string         | yes      | The title of a newly created epic. |
-| `confidential`  | boolean        | no       | Whether the epic should be confidential. Will be ignored if `confidential_epics` feature flag is disabled. Defaults to the confidentiality state of the parent epic.  |
+| `epic_iid`      | integer        | yes      | The internal ID of the (future parent) epic.                                                                       |
+| `title`         | string         | yes      | The title of a newly created epic.                                                                                 |
+| `confidential`  | boolean        | no       | Whether the epic should be confidential. Parameter is ignored if `confidential_epics` feature flag is disabled. Defaults to the confidentiality state of the parent epic.  |
 
 ```shell
 curl --request POST --header  "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/epics/5/epics?title=Newpic"

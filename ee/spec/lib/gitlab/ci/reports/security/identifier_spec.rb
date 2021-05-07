@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::Security::Identifier do
+  using RSpec::Parameterized::TableSyntax
+
   describe '#initialize' do
     subject { described_class.new(**params) }
 
@@ -52,6 +54,42 @@ RSpec.describe Gitlab::Ci::Reports::Security::Identifier do
     end
   end
 
+  describe '#type_identifier?' do
+    where(:external_type, :expected_result) do
+      'cve'  | false
+      'foo'  | false
+      'cwe'  | true
+      'wasc' | true
+    end
+
+    with_them do
+      let(:identifier) { create(:ci_reports_security_identifier, external_type: external_type) }
+
+      subject { identifier.type_identifier? }
+
+      it { is_expected.to be(expected_result) }
+    end
+  end
+
+  describe 'external type check methods' do
+    where(:external_type, :is_cve?, :is_cwe?, :is_wasc?) do
+      'Foo'  | false | false | false
+      'Cve'  | true  | false | false
+      'Cwe'  | false | true  | false
+      'Wasc' | false | false | true
+    end
+
+    with_them do
+      let(:identifier) { create(:ci_reports_security_identifier, external_type: external_type) }
+
+      it 'returns correct result for the type check method' do
+        expect(identifier.cve?).to be(is_cve?)
+        expect(identifier.cwe?).to be(is_cwe?)
+        expect(identifier.wasc?).to be(is_wasc?)
+      end
+    end
+  end
+
   describe '#to_hash' do
     let(:identifier) { create(:ci_reports_security_identifier) }
 
@@ -69,8 +107,6 @@ RSpec.describe Gitlab::Ci::Reports::Security::Identifier do
   end
 
   describe '#==' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:type_1, :id_1, :type_2, :id_2, :equal, :case_name) do
       'CVE' | '2018-1234' | 'CVE'           | '2018-1234' | true  | 'when external_type and external_id are equal'
       'CVE' | '2018-1234' | 'brakeman_code' | '2018-1234' | false | 'when external_type is different'

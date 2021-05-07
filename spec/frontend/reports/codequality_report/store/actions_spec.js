@@ -1,27 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'spec/test_constants';
 import testAction from 'helpers/vuex_action_helper';
+import { TEST_HOST } from 'spec/test_constants';
 import axios from '~/lib/utils/axios_utils';
+import createStore from '~/reports/codequality_report/store';
 import * as actions from '~/reports/codequality_report/store/actions';
 import * as types from '~/reports/codequality_report/store/mutation_types';
-import createStore from '~/reports/codequality_report/store';
-import { headIssues, baseIssues, mockParsedHeadIssues, mockParsedBaseIssues } from '../mock_data';
-
-// mock codequality comparison worker
-jest.mock('~/reports/codequality_report/workers/codequality_comparison_worker', () =>
-  jest.fn().mockImplementation(() => {
-    return {
-      addEventListener: (eventName, callback) => {
-        callback({
-          data: {
-            newIssues: [mockParsedHeadIssues[0]],
-            resolvedIssues: [mockParsedBaseIssues[0]],
-          },
-        });
-      },
-    };
-  }),
-);
+import { reportIssues, parsedReportIssues } from '../mock_data';
 
 describe('Codequality Reports actions', () => {
   let localState;
@@ -33,12 +17,10 @@ describe('Codequality Reports actions', () => {
   });
 
   describe('setPaths', () => {
-    it('should commit SET_PATHS mutation', done => {
+    it('should commit SET_PATHS mutation', (done) => {
       const paths = {
         basePath: 'basePath',
-        headPath: 'headPath',
-        baseBlobPath: 'baseBlobPath',
-        headBlobPath: 'headBlobPath',
+        reportsPath: 'reportsPath',
         helpPath: 'codequalityHelpPath',
       };
 
@@ -57,8 +39,8 @@ describe('Codequality Reports actions', () => {
     let mock;
 
     beforeEach(() => {
-      localState.headPath = `${TEST_HOST}/head.json`;
-      localState.basePath = `${TEST_HOST}/base.json`;
+      localState.reportsPath = `${TEST_HOST}/codequality_reports.json`;
+      localState.basePath = '/base/path';
       mock = new MockAdapter(axios);
     });
 
@@ -67,9 +49,8 @@ describe('Codequality Reports actions', () => {
     });
 
     describe('on success', () => {
-      it('commits REQUEST_REPORTS and dispatches receiveReportsSuccess', done => {
-        mock.onGet(`${TEST_HOST}/head.json`).reply(200, headIssues);
-        mock.onGet(`${TEST_HOST}/base.json`).reply(200, baseIssues);
+      it('commits REQUEST_REPORTS and dispatches receiveReportsSuccess', (done) => {
+        mock.onGet(`${TEST_HOST}/codequality_reports.json`).reply(200, reportIssues);
 
         testAction(
           actions.fetchReports,
@@ -78,10 +59,7 @@ describe('Codequality Reports actions', () => {
           [{ type: types.REQUEST_REPORTS }],
           [
             {
-              payload: {
-                newIssues: [mockParsedHeadIssues[0]],
-                resolvedIssues: [mockParsedBaseIssues[0]],
-              },
+              payload: parsedReportIssues,
               type: 'receiveReportsSuccess',
             },
           ],
@@ -91,22 +69,22 @@ describe('Codequality Reports actions', () => {
     });
 
     describe('on error', () => {
-      it('commits REQUEST_REPORTS and dispatches receiveReportsError', done => {
-        mock.onGet(`${TEST_HOST}/head.json`).reply(500);
+      it('commits REQUEST_REPORTS and dispatches receiveReportsError', (done) => {
+        mock.onGet(`${TEST_HOST}/codequality_reports.json`).reply(500);
 
         testAction(
           actions.fetchReports,
           null,
           localState,
           [{ type: types.REQUEST_REPORTS }],
-          [{ type: 'receiveReportsError' }],
+          [{ type: 'receiveReportsError', payload: expect.any(Error) }],
           done,
         );
       });
     });
 
     describe('with no base path', () => {
-      it('commits REQUEST_REPORTS and dispatches receiveReportsError', done => {
+      it('commits REQUEST_REPORTS and dispatches receiveReportsError', (done) => {
         localState.basePath = null;
 
         testAction(
@@ -122,7 +100,7 @@ describe('Codequality Reports actions', () => {
   });
 
   describe('receiveReportsSuccess', () => {
-    it('commits RECEIVE_REPORTS_SUCCESS', done => {
+    it('commits RECEIVE_REPORTS_SUCCESS', (done) => {
       const data = { issues: [] };
 
       testAction(
@@ -137,12 +115,12 @@ describe('Codequality Reports actions', () => {
   });
 
   describe('receiveReportsError', () => {
-    it('commits RECEIVE_REPORTS_ERROR', done => {
+    it('commits RECEIVE_REPORTS_ERROR', (done) => {
       testAction(
         actions.receiveReportsError,
         null,
         localState,
-        [{ type: types.RECEIVE_REPORTS_ERROR }],
+        [{ type: types.RECEIVE_REPORTS_ERROR, payload: null }],
         [],
         done,
       );

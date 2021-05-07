@@ -4,6 +4,12 @@ module API
   class License < ::API::Base
     before { authenticated_as_admin! }
 
+    feature_category :license
+
+    rescue_from Licenses::DestroyService::DestroyCloudLicenseError do |e|
+      render_api_error!(e.message, 422)
+    end
+
     resource :license do
       desc 'Get information on the currently active license' do
         success EE::API::Entities::GitlabLicenseWithActiveUsers
@@ -49,7 +55,7 @@ module API
       get do
         licenses = LicensesFinder.new(current_user).execute
 
-        present licenses, with: EE::API::Entities::GitlabLicense, current_active_users_count: ::License.current&.current_active_users_count
+        present licenses, with: EE::API::Entities::GitlabLicense, current_active_users_count: ::License.current&.daily_billable_users_count
       end
     end
   end

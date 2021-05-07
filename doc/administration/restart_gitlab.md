@@ -1,20 +1,13 @@
 ---
-stage: none
-group: unassigned
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# How to restart GitLab
+# How to restart GitLab **(FREE SELF)**
 
 Depending on how you installed GitLab, there are different methods to restart
 its service(s).
-
-If you want the TL;DR versions, jump to:
-
-- [Omnibus GitLab restart](#omnibus-gitlab-restart)
-- [Omnibus GitLab reconfigure](#omnibus-gitlab-reconfigure)
-- [Source installation restart](#installations-from-source)
-- [Helm chart installation restart](#helm-chart-installations)
 
 ## Omnibus installations
 
@@ -34,7 +27,7 @@ GitLab Rails application (Puma) as well as the other components, like:
 
 ### Omnibus GitLab restart
 
-There may be times in the documentation where you will be asked to _restart_
+There may be times in the documentation where you are asked to _restart_
 GitLab. In that case, you need to run the following command:
 
 ```shell
@@ -80,7 +73,7 @@ As a last resort, you can try to
 
 ### Omnibus GitLab reconfigure
 
-There may be times in the documentation where you will be asked to _reconfigure_
+There may be times in the documentation where you are asked to _reconfigure_
 GitLab. Remember that this method applies only for the Omnibus packages.
 
 Reconfigure Omnibus GitLab with:
@@ -93,15 +86,15 @@ Reconfiguring GitLab should occur in the event that something in its
 configuration (`/etc/gitlab/gitlab.rb`) has changed.
 
 When you run this command, [Chef](https://www.chef.io/products/chef-infra/), the underlying configuration management
-application that powers Omnibus GitLab, will make sure that all things like directories,
+application that powers Omnibus GitLab, makes sure that all things like directories,
 permissions, and services are in place and in the same shape that they were
 initially shipped.
 
-It will also restart GitLab components where needed, if any of their
+It also restarts GitLab components where needed, if any of their
 configuration files have changed.
 
 If you manually edit any files in `/var/opt/gitlab` that are managed by Chef,
-running reconfigure will revert the changes AND restart the services that
+running reconfigure reverts the changes AND restarts the services that
 depend on those files.
 
 ## Installations from source
@@ -140,7 +133,7 @@ your server in `/etc/init.d/gitlab`.
 
 ---
 
-If you are using other init systems, like systemd, you can check the
+If you are using other init systems, like `systemd`, you can check the
 [GitLab Recipes](https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init) repository for some unofficial services. These are
 **not** officially supported so use them at your own risk.
 

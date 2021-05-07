@@ -34,7 +34,7 @@ module Vulnerabilities
       vulnerability.assign_attributes(
         author: @author,
         project: @project,
-        title: finding.name,
+        title: finding.name.truncate(::Issuable::TITLE_LENGTH_MAX),
         state: finding.state,
         severity: finding.severity,
         severity_overridden: false,

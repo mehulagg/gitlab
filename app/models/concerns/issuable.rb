@@ -65,7 +65,7 @@ module Issuable
 
     has_many :label_links, as: :target, dependent: :destroy, inverse_of: :target # rubocop:disable Cop/ActiveRecordDependent
     has_many :labels, through: :label_links
-    has_many :todos, as: :target, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+    has_many :todos, as: :target
 
     has_one :metrics, inverse_of: model_name.singular.to_sym, autosave: true
 
@@ -84,9 +84,9 @@ module Issuable
     validate :description_max_length_for_new_records_is_valid, on: :update
 
     before_validation :truncate_description_on_import!
-    after_save :store_mentions!, if: :any_mentionable_attributes_changed?
 
     scope :authored, ->(user) { where(author_id: user) }
+    scope :not_authored, ->(user) { where.not(author_id: user) }
     scope :recent, -> { reorder(id: :desc) }
     scope :of_projects, ->(ids) { where(project_id: ids) }
     scope :opened, -> { with_state(:opened) }
@@ -136,6 +136,14 @@ module Issuable
     scope :inc_notes_with_associations, -> { includes(notes: [:project, :author, :award_emoji]) }
     scope :references_project, -> { references(:project) }
     scope :non_archived, -> { join_project.where(projects: { archived: false }) }
+
+    scope :includes_for_bulk_update, -> do
+      associations = %i[author assignees epic group labels metrics project source_project target_project].select do |association|
+        reflect_on_association(association)
+      end
+
+      includes(*associations)
+    end
 
     attr_mentionable :title, pipeline: :single_line
     attr_mentionable :description
@@ -197,8 +205,12 @@ module Issuable
       is_a?(Issue)
     end
 
+    def supports_assignee?
+      false
+    end
+
     def severity
-      return IssuableSeverity::DEFAULT unless incident?
+      return IssuableSeverity::DEFAULT unless supports_severity?
 
       issuable_severity&.severity || IssuableSeverity::DEFAULT
     end
@@ -217,6 +229,10 @@ module Issuable
   end
 
   class_methods do
+    def participant_includes
+      [:assignees, :author, { notes: [:author, :award_emoji] }]
+    end
+
     # Searches for records with a matching title.
     #
     # This method uses ILIKE on PostgreSQL.
@@ -305,20 +321,18 @@ module Issuable
     end
 
     def order_labels_priority(direction = 'ASC', excluded_labels: [], extra_select_columns: [], with_cte: false)
-      params = {
+      highest_priority = highest_label_priority(
         target_type: name,
         target_column: "#{table_name}.id",
         project_column: "#{table_name}.#{project_foreign_key}",
         excluded_labels: excluded_labels
-      }
-
-      highest_priority = highest_label_priority(params).to_sql
+      ).to_sql
 
       # When using CTE make sure to select the same columns that are on the group_by clause.
       # This prevents errors when ignored columns are present in the database.
       issuable_columns = with_cte ? issue_grouping_columns(use_cte: with_cte) : "#{table_name}.*"
 
-      extra_select_columns = extra_select_columns.unshift("(#{highest_priority}) AS highest_priority")
+      extra_select_columns.unshift("(#{highest_priority}) AS highest_priority")
 
       select(issuable_columns)
         .select(extra_select_columns)
@@ -347,12 +361,15 @@ module Issuable
     #
     # Returns an array of arel columns
     def grouping_columns(sort)
+      sort = sort.to_s
       grouping_columns = [arel_table[:id]]
 
       if %w(milestone_due_desc milestone_due_asc milestone).include?(sort)
         milestone_table = Milestone.arel_table
         grouping_columns << milestone_table[:id]
         grouping_columns << milestone_table[:due_date]
+      elsif %w(merged_at_desc merged_at_asc).include?(sort)
+        grouping_columns << MergeRequest::Metrics.arel_table[:merged_at]
       end
 
       grouping_columns
@@ -428,7 +445,7 @@ module Issuable
   end
 
   def subscribed_without_subscriptions?(user, project)
-    participants(user).include?(user)
+    participant?(user)
   end
 
   def can_assign_epic?(user)

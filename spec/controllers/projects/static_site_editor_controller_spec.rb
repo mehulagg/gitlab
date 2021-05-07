@@ -5,7 +5,23 @@ require 'spec_helper'
 RSpec.describe Projects::StaticSiteEditorController do
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:user) { create(:user) }
+
   let(:data) { { key: 'value' } }
+
+  describe 'GET index' do
+    let(:default_params) do
+      {
+        namespace_id: project.namespace,
+        project_id: project
+      }
+    end
+
+    it 'responds with 404 page' do
+      get :index, params: default_params
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+  end
 
   describe 'GET show' do
     render_views
@@ -86,7 +102,7 @@ RSpec.describe Projects::StaticSiteEditorController do
 
           it 'redirects to project page and flashes error message' do
             expect(response).to redirect_to(project_path(project))
-            expect(response).to set_flash[:alert].to('invalid')
+            expect(controller).to set_flash[:alert].to('invalid')
           end
         end
 

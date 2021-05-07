@@ -18,13 +18,14 @@ module Gitlab
         end
       end
 
-      def initialize(project:, current_user:)
+      def initialize(project:, current_user:, sha: nil)
         @project = project
         @current_user = current_user
+        @sha = sha || project.repository.commit&.sha
       end
 
       def validate(content, dry_run: false)
-        if dry_run && Gitlab::Ci::Features.lint_creates_pipeline_with_dry_run?(@project)
+        if dry_run
           simulate_pipeline_creation(content)
         else
           static_validation(content)
@@ -51,7 +52,7 @@ module Gitlab
           content,
           project: @project,
           user: @current_user,
-          sha: @project.repository.commit.sha
+          sha: @sha
         ).execute
 
         Result.new(
@@ -99,7 +100,8 @@ module Gitlab
               except: job[:except],
               environment: job[:environment],
               when: job[:when],
-              allow_failure: job[:allow_failure]
+              allow_failure: job[:allow_failure],
+              needs: job.dig(:needs_attributes)
             }
           end
         end

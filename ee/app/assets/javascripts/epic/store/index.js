@@ -8,12 +8,13 @@ import state from './state';
 
 Vue.use(Vuex);
 
-const createStore = () =>
-  new Vuex.Store({
-    state: state(),
-    actions,
-    getters,
-    mutations,
-  });
+export const getStoreConfig = () => ({
+  state: state(),
+  actions,
+  getters,
+  mutations,
+});
+
+const createStore = () => new Vuex.Store(getStoreConfig());
 
 export default createStore;

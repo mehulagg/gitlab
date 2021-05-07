@@ -1,22 +1,23 @@
 <script>
-import { GlLoadingIcon, GlSprintf, GlLink } from '@gitlab/ui';
-import gitlabLogo from 'images/cluster_app_logos/gitlab.png';
-import jupyterhubLogo from 'images/cluster_app_logos/jupyterhub.png';
-import kubernetesLogo from 'images/cluster_app_logos/kubernetes.png';
+import { GlLoadingIcon, GlSprintf, GlLink, GlAlert } from '@gitlab/ui';
 import certManagerLogo from 'images/cluster_app_logos/cert_manager.png';
 import crossplaneLogo from 'images/cluster_app_logos/crossplane.png';
-import knativeLogo from 'images/cluster_app_logos/knative.png';
-import prometheusLogo from 'images/cluster_app_logos/prometheus.png';
 import elasticStackLogo from 'images/cluster_app_logos/elastic_stack.png';
 import fluentdLogo from 'images/cluster_app_logos/fluentd.png';
-import applicationRow from './application_row.vue';
-import clipboardButton from '../../vue_shared/components/clipboard_button.vue';
-import KnativeDomainEditor from './knative_domain_editor.vue';
-import { CLUSTER_TYPE, PROVIDER_TYPE, APPLICATION_STATUS, INGRESS } from '../constants';
+import gitlabLogo from 'images/cluster_app_logos/gitlab.png';
+import helmLogo from 'images/cluster_app_logos/helm.png';
+import jupyterhubLogo from 'images/cluster_app_logos/jupyterhub.png';
+import knativeLogo from 'images/cluster_app_logos/knative.png';
+import kubernetesLogo from 'images/cluster_app_logos/kubernetes.png';
+import prometheusLogo from 'images/cluster_app_logos/prometheus.png';
 import eventHub from '~/clusters/event_hub';
+import clipboardButton from '../../vue_shared/components/clipboard_button.vue';
+import { CLUSTER_TYPE, PROVIDER_TYPE, APPLICATION_STATUS, INGRESS } from '../constants';
+import applicationRow from './application_row.vue';
 import CrossplaneProviderStack from './crossplane_provider_stack.vue';
-import IngressModsecuritySettings from './ingress_modsecurity_settings.vue';
 import FluentdOutputSettings from './fluentd_output_settings.vue';
+import IngressModsecuritySettings from './ingress_modsecurity_settings.vue';
+import KnativeDomainEditor from './knative_domain_editor.vue';
 
 export default {
   components: {
@@ -29,6 +30,7 @@ export default {
     CrossplaneProviderStack,
     IngressModsecuritySettings,
     FluentdOutputSettings,
+    GlAlert,
   },
   props: {
     type: {
@@ -42,6 +44,11 @@ export default {
       default: () => ({}),
     },
     helpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    helmHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -150,6 +157,7 @@ export default {
   },
   logos: {
     gitlabLogo,
+    helmLogo,
     jupyterhubLogo,
     kubernetesLogo,
     certManagerLogo,
@@ -172,6 +180,35 @@ export default {
     </p>
 
     <div class="cluster-application-list gl-mt-3">
+      <application-row
+        v-if="applications.helm.installed || applications.helm.uninstalling"
+        id="helm"
+        :logo-url="$options.logos.helmLogo"
+        :title="applications.helm.title"
+        :status="applications.helm.status"
+        :status-reason="applications.helm.statusReason"
+        :request-status="applications.helm.requestStatus"
+        :request-reason="applications.helm.requestReason"
+        :installed="applications.helm.installed"
+        :install-failed="applications.helm.installFailed"
+        :uninstallable="applications.helm.uninstallable"
+        :uninstall-successful="applications.helm.uninstallSuccessful"
+        :uninstall-failed="applications.helm.uninstallFailed"
+        title-link="https://v2.helm.sh/"
+      >
+        <template #description>
+          <p>
+            {{
+              s__(`ClusterIntegration|Can be safely removed. Prior to GitLab
+              13.2, GitLab used a remote Tiller server to manage the
+              applications. GitLab no longer uses this server.
+              Uninstalling this server will not affect your other
+              applications. This row will disappear afterwards.`)
+            }}
+            <gl-link :href="helmHelpPath">{{ __('More information') }}</gl-link>
+          </p>
+        </template>
+      </application-row>
       <application-row
         :id="ingressId"
         :logo-url="$options.logos.kubernetesLogo"
@@ -257,8 +294,8 @@ export default {
             </p>
           </template>
           <template v-else>
-            <div class="bs-callout bs-callout-info">
-              <strong data-testid="ingressCostWarning">
+            <gl-alert variant="info" :dismissible="false">
+              <span data-testid="ingressCostWarning">
                 <gl-sprintf
                   :message="
                     s__(
@@ -272,8 +309,8 @@ export default {
                     }}</gl-link>
                   </template>
                 </gl-sprintf>
-              </strong>
-            </div>
+              </span>
+            </gl-alert>
           </template>
         </template>
       </application-row>
@@ -312,6 +349,7 @@ export default {
               {{ s__('ClusterIntegration|Issuer Email') }}
             </label>
             <div class="input-group">
+              <!-- eslint-disable vue/no-mutating-props -->
               <input
                 id="cert-manager-issuer-email"
                 v-model="applications.cert_manager.email"
@@ -319,6 +357,7 @@ export default {
                 type="text"
                 class="form-control js-email"
               />
+              <!-- eslint-enable vue/no-mutating-props -->
             </div>
             <p class="form-text text-muted">
               {{
@@ -424,7 +463,7 @@ export default {
                 )
               "
             >
-              <template #code="{content}">
+              <template #code="{ content }">
                 <code>{{ content }}</code>
               </template>
               <template #link="{ content }">
@@ -467,6 +506,17 @@ export default {
                         notebooks to a class of students, a corporate data science group,
                         or a scientific research group.`)
             }}
+            <gl-sprintf
+              :message="
+                s__(
+                  'ClusterIntegration|%{boldStart}Note:%{boldEnd} Requires Ingress to be installed.',
+                )
+              "
+            >
+              <template #bold="{ content }">
+                <b>{{ content }}</b>
+              </template>
+            </gl-sprintf>
           </p>
 
           <template v-if="ingressExternalEndpoint">
@@ -474,6 +524,7 @@ export default {
               <label for="jupyter-hostname">{{ s__('ClusterIntegration|Jupyter Hostname') }}</label>
 
               <div class="input-group">
+                <!-- eslint-disable vue/no-mutating-props -->
                 <input
                   id="jupyter-hostname"
                   v-model="applications.jupyter.hostname"
@@ -481,6 +532,7 @@ export default {
                   type="text"
                   class="form-control js-hostname"
                 />
+                <!-- eslint-enable vue/no-mutating-props -->
                 <span class="input-group-append">
                   <clipboard-button
                     :text="jupyterHostname"
@@ -525,13 +577,13 @@ export default {
         title-link="https://github.com/knative/docs"
       >
         <template #description>
-          <p v-if="!rbac" class="rbac-notice bs-callout bs-callout-info">
+          <gl-alert v-if="!rbac" variant="info" class="rbac-notice gl-my-3" :dismissible="false">
             {{
               s__(`ClusterIntegration|You must have an RBAC-enabled cluster
             to install Knative.`)
             }}
             <gl-link :href="helpPath" target="_blank">{{ __('More information') }}</gl-link>
-          </p>
+          </gl-alert>
           <p>
             {{
               s__(`ClusterIntegration|Knative extends Kubernetes to provide
@@ -549,8 +601,8 @@ export default {
             @set="setKnativeDomain"
           />
         </template>
-        <template v-if="cloudRun" #installedVia>
-          <span data-testid="installedVia">
+        <template v-if="cloudRun" #installed-via>
+          <span data-testid="installed-via">
             <gl-sprintf
               :message="s__('ClusterIntegration|installed via %{linkStart}Cloud Run%{linkEnd}')"
             >

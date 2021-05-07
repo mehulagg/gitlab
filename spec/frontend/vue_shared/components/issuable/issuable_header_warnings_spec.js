@@ -1,8 +1,8 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import IssuableHeaderWarnings from '~/vue_shared/components/issuable/issuable_header_warnings.vue';
-import createIssueStore from '~/notes/stores';
 import { createStore as createMrStore } from '~/mr_notes/stores';
+import createIssueStore from '~/notes/stores';
+import IssuableHeaderWarnings from '~/vue_shared/components/issuable/issuable_header_warnings.vue';
 
 const ISSUABLE_TYPE_ISSUE = 'issue';
 const ISSUABLE_TYPE_MR = 'merge request';
@@ -17,13 +17,13 @@ describe('IssuableHeaderWarnings', () => {
   const findConfidentialIcon = () => wrapper.find('[data-testid="confidential"]');
   const findLockedIcon = () => wrapper.find('[data-testid="locked"]');
 
-  const renderTestMessage = renders => (renders ? 'renders' : 'does not render');
+  const renderTestMessage = (renders) => (renders ? 'renders' : 'does not render');
 
-  const setLock = locked => {
+  const setLock = (locked) => {
     store.getters.getNoteableData.discussion_locked = locked;
   };
 
-  const setConfidential = confidential => {
+  const setConfidential = (confidential) => {
     store.getters.getNoteableData.confidential = confidential;
   };
 

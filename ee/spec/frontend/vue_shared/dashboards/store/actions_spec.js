@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
+import * as actions from 'ee/vue_shared/dashboards/store/actions';
 import createStore from 'ee/vue_shared/dashboards/store/index';
 import * as types from 'ee/vue_shared/dashboards/store/mutation_types';
-import * as actions from 'ee/vue_shared/dashboards/store/actions';
-import testAction from 'helpers/vuex_action_helper';
 import { mockHeaders, mockText, mockProjectData } from 'ee_jest/vue_shared/dashboards/mock_data';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import clearState from '../helpers';
 
@@ -119,8 +119,8 @@ describe('actions', () => {
     });
 
     const errorMessage =
-      'This dashboard is available for public projects, and private projects in groups with a Silver plan.';
-    const selectProjects = count => {
+      'This dashboard is available for public projects, and private projects in groups with a Premium plan.';
+    const selectProjects = (count) => {
       for (let i = 0; i < count; i += 1) {
         store.dispatch('toggleSelectedProject', {
           id: i,
@@ -128,7 +128,7 @@ describe('actions', () => {
         });
       }
     };
-    const addInvalidProjects = invalid =>
+    const addInvalidProjects = (invalid) =>
       store.dispatch('receiveAddProjectsToDashboardSuccess', {
         added: [],
         invalid,
@@ -139,25 +139,27 @@ describe('actions', () => {
       selectProjects(1);
       addInvalidProjects([0]);
 
-      expect(createFlash).toHaveBeenCalledWith(`Unable to add mock-name. ${errorMessage}`);
+      expect(createFlash).toHaveBeenCalledWith({
+        message: `Unable to add mock-name. ${errorMessage}`,
+      });
     });
 
     it('displays an error when user tries to add two invalid projects to dashboard', () => {
       selectProjects(2);
       addInvalidProjects([0, 1]);
 
-      expect(createFlash).toHaveBeenCalledWith(
-        `Unable to add mock-name and mock-name. ${errorMessage}`,
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: `Unable to add mock-name and mock-name. ${errorMessage}`,
+      });
     });
 
     it('displays an error when user tries to add more than two invalid projects to dashboard', () => {
       selectProjects(3);
       addInvalidProjects([0, 1, 2]);
 
-      expect(createFlash).toHaveBeenCalledWith(
-        `Unable to add mock-name, mock-name, and mock-name. ${errorMessage}`,
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: `Unable to add mock-name, mock-name, and mock-name. ${errorMessage}`,
+      });
     });
   });
 
@@ -165,7 +167,9 @@ describe('actions', () => {
     it('shows error message', () => {
       store.dispatch('receiveAddProjectsToDashboardError');
 
-      expect(createFlash).toHaveBeenCalledWith(mockText.ADD_PROJECTS_ERROR);
+      expect(createFlash).toHaveBeenCalledWith({
+        message: mockText.ADD_PROJECTS_ERROR,
+      });
     });
   });
 
@@ -261,7 +265,9 @@ describe('actions', () => {
         [],
       );
 
-      expect(createFlash).toHaveBeenCalledWith(mockText.RECEIVE_PROJECTS_ERROR);
+      expect(createFlash).toHaveBeenCalledWith({
+        message: mockText.RECEIVE_PROJECTS_ERROR,
+      });
     });
   });
 
@@ -308,7 +314,9 @@ describe('actions', () => {
   describe('receiveRemoveProjectError', () => {
     it('displays project removal error', () => {
       return testAction(actions.receiveRemoveProjectError, null, null, [], []).then(() => {
-        expect(createFlash).toHaveBeenCalledWith(mockText.REMOVE_PROJECT_ERROR);
+        expect(createFlash).toHaveBeenCalledWith({
+          message: mockText.REMOVE_PROJECT_ERROR,
+        });
       });
     });
   });
@@ -318,7 +326,7 @@ describe('actions', () => {
       const searchQueries = [null, undefined, false, NaN];
 
       return Promise.all(
-        searchQueries.map(searchQuery => {
+        searchQueries.map((searchQuery) => {
           store.state.searchQuery = searchQuery;
 
           return testAction(

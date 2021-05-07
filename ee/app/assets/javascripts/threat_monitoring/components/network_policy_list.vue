@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlTable,
   GlEmptyState,
@@ -10,15 +9,18 @@ import {
   GlLink,
   GlToggle,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import EnvironmentPicker from './environment_picker.vue';
-import NetworkPolicyEditor from './network_policy_editor.vue';
-import PolicyDrawer from './policy_editor/policy_drawer.vue';
 import { CiliumNetworkPolicyKind } from './policy_editor/constants';
+import PolicyDrawer from './policy_editor/policy_drawer.vue';
 
 export default {
+  i18n: {
+    enforcementStatus: s__('NetworkPolicies|Enforcement status'),
+  },
   components: {
     GlTable,
     GlEmptyState,
@@ -29,7 +31,8 @@ export default {
     GlLink,
     GlToggle,
     EnvironmentPicker,
-    NetworkPolicyEditor,
+    NetworkPolicyEditor: () =>
+      import(/* webpackChunkName: 'network_policy_editor' */ './network_policy_editor.vue'),
     PolicyDrawer,
   },
   props: {
@@ -58,7 +61,7 @@ export default {
     selectedPolicy() {
       if (!this.hasSelectedPolicy) return null;
 
-      return this.policiesWithDefaults.find(policy => policy.name === this.selectedPolicyName);
+      return this.policiesWithDefaults.find((policy) => policy.name === this.selectedPolicyName);
     },
     hasPolicyChanges() {
       if (!this.hasSelectedPolicy) return false;
@@ -69,7 +72,7 @@ export default {
       );
     },
     hasAutoDevopsPolicy() {
-      return this.policiesWithDefaults.some(policy => policy.isAutodevops);
+      return this.policiesWithDefaults.some((policy) => policy.isAutodevops);
     },
     hasCiliumSelectedPolicy() {
       return this.hasSelectedPolicy
@@ -175,23 +178,22 @@ export default {
 
 <template>
   <div>
-    <div class="mb-2">
-      <gl-alert
-        v-if="hasAutoDevopsPolicy"
-        data-testid="autodevopsAlert"
-        variant="info"
-        :dismissible="false"
-      >
-        <gl-sprintf :message="$options.autodevopsNoticeDescription">
-          <template #monospaced="{ content }">
-            <span class="monospace">{{ content }}</span>
-          </template>
-          <template #link="{ content }">
-            <gl-link :href="documentationFullPath">{{ content }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </gl-alert>
-    </div>
+    <gl-alert
+      v-if="hasAutoDevopsPolicy"
+      data-testid="autodevopsAlert"
+      variant="info"
+      :dismissible="false"
+      class="gl-mb-3"
+    >
+      <gl-sprintf :message="$options.autodevopsNoticeDescription">
+        <template #monospaced="{ content }">
+          <span class="gl-font-monospace">{{ content }}</span>
+        </template>
+        <template #link="{ content }">
+          <gl-link :href="documentationFullPath">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
 
     <div class="pt-3 px-3 bg-gray-light">
       <div class="row justify-content-between align-items-center">
@@ -233,7 +235,7 @@ export default {
       </template>
 
       <template #empty>
-        <slot name="emptyState">
+        <slot name="empty-state">
           <gl-empty-state
             ref="tableEmptyState"
             :title="s__('NetworkPolicies|No policies detected')"
@@ -277,29 +279,31 @@ export default {
           </div>
         </div>
       </template>
-      <template>
-        <div v-if="hasSelectedPolicy">
-          <policy-drawer v-if="shouldShowCiliumDrawer" v-model="selectedPolicy.manifest" />
+      <div v-if="hasSelectedPolicy">
+        <policy-drawer v-if="shouldShowCiliumDrawer" v-model="selectedPolicy.manifest" />
 
-          <div v-else>
-            <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
-            <p>
-              {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
-            </p>
-            <div class="gl-p-3 gl-bg-gray-50">
-              <network-policy-editor
-                ref="policyEditor"
-                v-model="selectedPolicy.manifest"
-                class="network-policy-editor"
-              />
-            </div>
+        <div v-else>
+          <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
+          <p>
+            {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
+          </p>
+          <div class="gl-p-3 gl-bg-gray-50">
+            <network-policy-editor
+              ref="policyEditor"
+              v-model="selectedPolicy.manifest"
+              class="network-policy-editor"
+            />
           </div>
-
-          <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
-          <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
-          <gl-toggle v-model="selectedPolicy.isEnabled" data-testid="policyToggle" />
         </div>
-      </template>
+
+        <h5 class="gl-mt-6">{{ $options.i18n.enforcementStatus }}</h5>
+        <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
+        <gl-toggle
+          v-model="selectedPolicy.isEnabled"
+          :label="$options.i18n.enforcementStatus"
+          label-position="hidden"
+        />
+      </div>
     </gl-drawer>
   </div>
 </template>

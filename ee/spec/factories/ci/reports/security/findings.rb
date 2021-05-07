@@ -31,7 +31,15 @@ FactoryBot.define do
     scanner factory: :ci_reports_security_scanner
     severity { :high }
     scan factory: :ci_reports_security_scan
-    sequence(:uuid) { generate(:vulnerability_finding_uuid) }
+    sequence(:uuid) do |n|
+      ::Security::VulnerabilityUUID.generate(
+        report_type: report_type,
+        primary_identifier_fingerprint: identifiers.first&.fingerprint,
+        location_fingerprint: location.fingerprint,
+        project_id: n
+      )
+    end
+    vulnerability_finding_signatures_enabled { false }
 
     skip_create
 

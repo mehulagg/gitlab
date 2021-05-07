@@ -36,8 +36,12 @@ module Gitlab
         chain.add ::Gitlab::SidekiqMiddleware::DuplicateJobs::Client
         chain.add ::Gitlab::SidekiqStatus::ClientMiddleware
         chain.add ::Gitlab::SidekiqMiddleware::AdminMode::Client
+        # Size limiter should be placed at the bottom, but before the metrics midleware
+        chain.add ::Gitlab::SidekiqMiddleware::SizeLimiter::Client
         chain.add ::Gitlab::SidekiqMiddleware::ClientMetrics
       end
     end
   end
 end
+
+Gitlab::SidekiqMiddleware.singleton_class.prepend_if_ee('EE::Gitlab::SidekiqMiddleware')

@@ -1,7 +1,7 @@
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
 import getProjects from 'ee/analytics/shared/graphql/projects.query.graphql';
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 
 const projects = [
@@ -59,25 +59,24 @@ describe('ProjectsDropdownFilter component', () => {
   const findDropdownItems = () =>
     findDropdown()
       .findAll(GlDropdownItem)
-      .filter(w => w.text() !== 'No matching results');
+      .filter((w) => w.text() !== 'No matching results');
 
-  const findDropdownAtIndex = index => findDropdownItems().at(index);
+  const findDropdownAtIndex = (index) => findDropdownItems().at(index);
 
   const findDropdownButton = () => findDropdown().find('.dropdown-toggle');
   const findDropdownButtonAvatar = () => findDropdown().find('.gl-avatar');
-  const findDropdownButtonAvatarAtIndex = index => findDropdownAtIndex(index).find('img.gl-avatar');
-  const findDropdownButtonIdentIconAtIndex = index =>
+  const findDropdownButtonAvatarAtIndex = (index) =>
+    findDropdownAtIndex(index).find('img.gl-avatar');
+  const findDropdownButtonIdentIconAtIndex = (index) =>
     findDropdownAtIndex(index).find('div.gl-avatar-identicon');
 
-  const findDropdownNameAtIndex = index =>
+  const findDropdownNameAtIndex = (index) =>
     findDropdownAtIndex(index).find('[data-testid="project-name"');
-  const findDropdownFullPathAtIndex = index =>
+  const findDropdownFullPathAtIndex = (index) =>
     findDropdownAtIndex(index).find('[data-testid="project-full-path"]');
 
-  const selectDropdownItemAtIndex = index =>
-    findDropdownAtIndex(index)
-      .find('button')
-      .trigger('click');
+  const selectDropdownItemAtIndex = (index) =>
+    findDropdownAtIndex(index).find('button').trigger('click');
 
   describe('queryParams are applied when fetching data', () => {
     beforeEach(() => {

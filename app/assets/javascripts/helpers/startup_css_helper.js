@@ -20,26 +20,16 @@ const handleStartupEvents = () => {
   }
 };
 
-/* Wait for.... The methods can be used:
-  - with a callback (preferred),
-    waitFor(action)
-
-  - with then (discouraged),
-    await waitFor().then(action);
-
-  - with await,
-    await waitFor;
-    action();
--*/
+/* For `waitForCSSLoaded` methods, see docs.gitlab.com/ee/development/fe_guide/performance.html#important-considerations */
 export const waitForCSSLoaded = (action = () => {}) => {
-  if (!gon.features.startupCss || allLinksLoaded()) {
-    return new Promise(resolve => {
+  if (allLinksLoaded()) {
+    return new Promise((resolve) => {
       action();
       resolve();
     });
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     document.addEventListener(CSS_LOADED_EVENT, resolve, { once: true });
     document.addEventListener(STARTUP_LINK_LOADED_EVENT, handleStartupEvents);
   }).then(action);

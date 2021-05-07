@@ -1,12 +1,18 @@
-# GitLab.com settings
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
 
-In this page you will find information about the settings that are used on
+# GitLab.com settings **(FREE SAAS)**
+
+This page contains information about the settings that are used on
 [GitLab.com](https://about.gitlab.com/pricing/).
 
 ## SSH host keys fingerprints
 
 Below are the fingerprints for GitLab.com's SSH host keys. The first time you connect
-to a GitLab.com repository, you'll see one of these keys in the output.
+to a GitLab.com repository, one of these keys is displayed in the output.
 
 | Algorithm | MD5 (deprecated) | SHA256  |
 | --------- | --- | ------- |
@@ -31,7 +37,7 @@ gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAA
 GitLab.com sends emails from the `mg.gitlab.com` domain via [Mailgun](https://www.mailgun.com/) and has
 its own dedicated IP address (`192.237.158.143`).
 
-NOTE: **Note:**
+NOTE:
 The IP address for `mg.gitlab.com` is subject to change at any time.
 
 ## Backups
@@ -44,7 +50,7 @@ Projects can be backed up in their entirety by exporting them either [through th
 
 With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
 
-Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki will come with it [if they were uploaded after 2020-08-22](../project/wiki/index.md#creating-a-new-wiki-page).
+Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki are included [if they were uploaded after 2020-08-22](../project/wiki/index.md#create-a-new-wiki-page).
 
 ## Alternative SSH port
 
@@ -78,7 +84,7 @@ Below are the settings for [GitLab Pages](https://about.gitlab.com/stages-devops
 | TLS certificates support    | yes               | no            |
 | Maximum size (compressed) | 1G                | 100M          |
 
-NOTE: **Note:**
+NOTE:
 The maximum size of your Pages site is regulated by the artifacts maximum size
 which is part of [GitLab CI/CD](#gitlab-cicd).
 
@@ -91,12 +97,13 @@ Any settings or feature limits not listed here are using the defaults listed in 
 | -----------             | ----------------- | ------------- |
 | Artifacts maximum size (compressed) | 1G                | 100M          |
 | Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
-| Scheduled Pipeline Cron | `*/5 * * * *` | `19 * * * *` |
-| [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited
+| Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
+| [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited |
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
 | [Max pipeline schedules in projects](../../administration/instance_limits.md#number-of-pipeline-schedules) | `10` for Free tier, `50` for all paid tiers | Unlimited |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 | Max test cases per [unit test report](../../ci/unit_test_reports.md) | `500_000` | Unlimited |
+| [Max registered runners](../../administration/instance_limits.md#number-of-registered-runners-per-scope) | `50` per-project and per-group for Free tier,<br/>`1_000` per-group for all paid tiers / `1_000` per-project for all paid tiers | `1_000` per-group / `1_000` per-project |
 
 ## Account and limit settings
 
@@ -107,15 +114,16 @@ or over the repository size limit, you can [reduce your repository size with Git
 
 | Setting                       | GitLab.com  | Default       |
 | -----------                   | ----------- | ------------- |
-| Repository size including LFS | 10 GB       | Unlimited     |
-| Maximum import size           | 5 GB        | 50 MB         |
+| [Repository size including LFS](../admin_area/settings/account_and_limit_settings.md#repository-size-limit) | 10 GB       | Unlimited     |
+| Maximum import size           | 5 GB        | Unlimited ([Modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to unlimited in GitLab 13.8.    |
+| Maximum attachment size       | 10 MB      |     10 MB   | 
 
-NOTE: **Note:**
+NOTE:
 `git push` and GitLab project imports are limited to 5 GB per request through Cloudflare. Git LFS and imports other than a file upload are not affected by this limit.
 
 ## IP range
 
-GitLab.com is using the IP range `34.74.90.64/28` for traffic from its Web/API
+GitLab.com uses the IP ranges `34.74.90.64/28` and `34.74.226.0/24` for traffic from its Web/API
 fleet. This whole range is solely allocated to GitLab. You can expect connections from webhooks or repository mirroring to come
 from those IPs and allow them.
 
@@ -124,7 +132,24 @@ GitLab.com is fronted by Cloudflare. For incoming connections to GitLab.com you 
 For outgoing connections from CI/CD runners we are not providing static IP addresses.
 All our runners are deployed into Google Cloud Platform (GCP) - any IP based
 firewall can be configured by looking up all
-[IP address ranges or CIDR blocks for GCP](https://cloud.google.com/compute/docs/faq#where_can_i_find_product_name_short_ip_ranges).
+[IP address ranges or CIDR blocks for GCP](https://cloud.google.com/compute/docs/faq#find_ip_range).
+
+## Hostname list
+
+To configure allow-lists in local HTTP(S) proxies, or other
+web-blocking software that govern end-user machines,
+pages on GitLab.com will attempt to load content from
+the following hostnames:
+
+- `gitlab.com`
+- `*.gitlab.com`
+- `*.gitlab-static.net`
+- `*.gitlab.io`
+- `*.gitlab.net`
+
+Documentation and Company pages served over `docs.gitlab.com`
+and `about.gitlab.com` will attempt to also load certain page
+content directly from common public CDN hostnames.
 
 ## Webhooks
 
@@ -138,27 +163,26 @@ A limit of:
 
 GitLab offers Linux and Windows shared runners hosted on GitLab.com for executing your pipelines.
 
-NOTE: **Note:**
+NOTE:
 Shared runners provided by GitLab are **not** configurable. Consider [installing your own runner](https://docs.gitlab.com/runner/install/) if you have specific configuration needs.
 
 ### Linux shared runners
 
-Linux shared runners on GitLab.com run in [autoscale mode](https://docs.gitlab.com/runner/configuration/autoscale.html) and are powered by Google Cloud Platform.
-Autoscaling means reduced waiting times to spin up CI/CD jobs, and isolated VMs for each project,
-thus maximizing security. They're free to use for public open source projects and limited
-to 2000 CI minutes per month per group for private projects. More minutes
-[can be purchased](../../subscriptions/gitlab_com/index.md#purchase-additional-ci-minutes), if
-needed. Read about all [GitLab.com plans](https://about.gitlab.com/pricing/).
+Linux shared runners on GitLab.com run in autoscale mode and are powered by Google Cloud Platform.
+
+Autoscaling means reduced queue times to spin up CI/CD jobs, and isolated VMs for each project, thus maximizing security. These shared runners are available for users and customers on GitLab.com.
+
+GitLab offers Ultimate tier capabilities and included CI/CD minutes per group per month for our [Open Source](https://about.gitlab.com/solutions/open-source/join/), [Education](https://about.gitlab.com/solutions/education/), and [Startups](https://about.gitlab.com/solutions/startups/) programs. For private projects, GitLab offers various [plans](https://about.gitlab.com/pricing/), starting with a Free tier.
 
 All your CI/CD jobs run on [n1-standard-1 instances](https://cloud.google.com/compute/docs/machine-types) with 3.75GB of RAM, CoreOS and the latest Docker Engine
 installed. Instances provide 1 vCPU and 25GB of HDD disk space. The default
 region of the VMs is US East1.
 Each instance is used only for one job, this ensures any sensitive data left on the system can't be accessed by other people their CI jobs.
 
-The `gitlab-shared-runners-manager-X.gitlab.com` fleet of runners are dedicated for GitLab projects as well as community forks of them. They use a slightly larger machine type (n1-standard-2) and have a bigger SSD disk size. They will not run untagged jobs and unlike the general fleet of shared runners, the instances are re-used up to 40 times.
+The `gitlab-shared-runners-manager-X.gitlab.com` fleet of runners are dedicated for GitLab projects as well as community forks of them. They use a slightly larger machine type (n1-standard-2) and have a bigger SSD disk size. They don't run untagged jobs and unlike the general fleet of shared runners, the instances are re-used up to 40 times.
 
 Jobs handled by the shared runners on GitLab.com (`shared-runners-manager-X.gitlab.com`),
-**will be timed out after 3 hours**, regardless of the timeout configured in a
+**time out after 3 hours**, regardless of the timeout configured in a
 project. Check the issues [4010](https://gitlab.com/gitlab-com/infrastructure/-/issues/4010) and [4070](https://gitlab.com/gitlab-com/infrastructure/-/issues/4070) for the reference.
 
 Below are the shared runners settings.
@@ -183,7 +207,7 @@ can be used for:
 - Downloading assets from a CDN
 - Any other commands that must run before the `git init`
 
-To use this feature, define a [CI/CD variable](../../ci/variables/README.md#create-a-custom-variable-in-the-ui) called
+To use this feature, define a [CI/CD variable](../../ci/variables/README.md#custom-cicd-variables) called
 `CI_PRE_CLONE_SCRIPT` that contains a bash script.
 
 [This example](../../development/pipelines.md#pre-clone-step)
@@ -194,7 +218,7 @@ directory.
 
 The full contents of our `config.toml` are:
 
-NOTE: **Note:**
+NOTE:
 Settings that are not public are shown as `X`.
 
 **Google Cloud Platform**
@@ -288,7 +312,7 @@ You can follow our work towards this goal in the
 
 The full contents of our `config.toml` are:
 
-NOTE: **Note:**
+NOTE:
 Settings that aren't public are shown as `X`.
 
 ```toml
@@ -390,20 +414,20 @@ test:
 - The average provisioning time for a new Windows VM is 5 minutes.
   This means that you may notice slower build start times
   on the Windows shared runner fleet during the beta. In a future
-  release we will update the autoscaler to enable
-  the pre-provisioning of virtual machines. This will significantly reduce
+  release we intend to update the autoscaler to enable
+  the pre-provisioning of virtual machines. This is intended to significantly reduce
   the time it takes to provision a VM on the Windows fleet. You can
   follow along in the [related issue](https://gitlab.com/gitlab-org/ci-cd/custom-executor-drivers/autoscaler/-/issues/32).
 - The Windows shared runner fleet may be unavailable occasionally
   for maintenance or updates.
 - The Windows shared runner virtual machine instances do not use the
-  GitLab Docker executor. This means that you will not be able to specify
+  GitLab Docker executor. This means that you can't specify
   [`image`](../../ci/yaml/README.md#image) or [`services`](../../ci/yaml/README.md#services) in
   your pipeline configuration.
 - For the beta release, we have included a set of software packages in
   the base VM image. If your CI job requires additional software that's
-  not included in this list, then you will need to add installation
-  commands to [`before_script`](../../ci/yaml/README.md#before_script-and-after_script) or [`script`](../../ci/yaml/README.md#script) to install the required
+  not included in this list, then you must add installation
+  commands to [`before_script`](../../ci/yaml/README.md#before_script) or [`script`](../../ci/yaml/README.md#script) to install the required
   software. Note that each job runs on a new VM instance, so the
   installation of additional software packages needs to be repeated for
   each job in your pipeline.
@@ -426,9 +450,9 @@ and the following environment variables:
 | `SIDEKIQ_MEMORY_KILLER_CHECK_INTERVAL`     | -          | `3`       |
 | `SIDEKIQ_MEMORY_KILLER_GRACE_TIME`         | -          | `900`     |
 | `SIDEKIQ_MEMORY_KILLER_SHUTDOWN_WAIT`      | -          | `30`      |
-| `SIDEKIQ_LOG_ARGUMENTS`                    | `1`        | -         |
+| `SIDEKIQ_LOG_ARGUMENTS`                    | `1`        | `1`       |
 
-NOTE: **Note:**
+NOTE:
 The `SIDEKIQ_MEMORY_KILLER_MAX_RSS` setting is `16000000` on Sidekiq import
 nodes and Sidekiq export nodes.
 
@@ -500,54 +524,41 @@ Web front-ends:
 
 ## GitLab.com-specific rate limits
 
-NOTE: **Note:**
+NOTE:
 See [Rate limits](../../security/rate_limits.md) for administrator
 documentation.
 
-IP blocks usually happen when GitLab.com receives unusual traffic from a single
-IP address that the system views as potentially malicious based on rate limit
-settings. After the unusual traffic ceases, the IP address will be automatically
-released depending on the type of block, as described below.
+When a request is rate limited, GitLab responds with a `429` status
+code. The client should wait before attempting the request again. There
+are also informational headers with this response detailed in [rate
+limiting responses](#rate-limiting-responses).
 
-If you receive a `403 Forbidden` error for all requests to GitLab.com, please
-check for any automated processes that may be triggering a block. For
-assistance, contact [GitLab Support](https://support.gitlab.com/hc/en-us)
-with details, such as the affected IP address.
+The following table describes the rate limits for GitLab.com, both before and
+after the limits change in January, 2021:
 
-### HAProxy API throttle
+| Rate limit                                                                | Before 2021-01-18           | From 2021-01-18               | From 2021-02-12               |
+|:--------------------------------------------------------------------------|:----------------------------|:------------------------------|:------------------------------|
+| **Protected paths** (for a given **IP address**)                          | **10** requests per minute  | **10** requests per minute    | **10** requests per minute    |
+| **Raw endpoint** traffic (for a given **project, commit, and file path**) | **300** requests per minute | **300** requests per minute   | **300** requests per minute   |
+| **Unauthenticated** traffic (from a given **IP address**)                 | No specific limit           | **500** requests per minute   | **500** requests per minute   |
+| **Authenticated** API traffic (for a given **user**)                      | No specific limit           | **2,000** requests per minute | **2,000** requests per minute |
+| **Authenticated** non-API HTTP traffic (for a given **user**)             | No specific limit           | **1,000** requests per minute | **1,000** requests per minute |
+| **All** traffic (from a given **IP address**)                             | **600** requests per minute | **2,000** requests per minute | **2,000** requests per minute |
+| **Issue creation**                                                        |                             | **300** requests per minute   | **300** requests per minute   |
+| **Note creation** (on issues and merge requests)                          |                             | **300** requests per minute   | **60** requests per minute    |
 
-GitLab.com responds with HTTP status code `429` to API requests that exceed 10
-requests
-per second per IP address.
+More details are available on the rate limits for [protected
+paths](#protected-paths-throttle) and [raw
+endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md).
 
-The following example headers are included for all API requests:
+### Rate limiting responses
 
-```plaintext
-RateLimit-Limit: 600
-RateLimit-Observed: 6
-RateLimit-Remaining: 594
-RateLimit-Reset: 1563325137
-RateLimit-ResetTime: Wed, 17 Jul 2019 00:58:57 GMT
-```
+For information on rate limiting responses, see:
 
-Source:
+- [List of headers on responses to blocked requests](../admin_area/settings/user_and_ip_rate_limits.md#response-headers).
+- [Customizable response text](../admin_area/settings/user_and_ip_rate_limits.md#response-text).
 
-- Search for `rate_limit_http_rate_per_minute` and `rate_limit_sessions_per_second` in [GitLab.com's current HAProxy settings](https://gitlab.com/gitlab-cookbooks/gitlab-haproxy/blob/master/attributes/default.rb).
-
-### Pagination response headers
-
-For performance reasons, if a query returns more than 10,000 records, GitLab
-doesn't return the following headers:
-
-- `x-total`.
-- `x-total-pages`.
-- `rel="last"` `link`.
-
-### Rack Attack initializer
-
-Details of rate limits enforced by [Rack Attack](../../security/rack_attack.md).
-
-#### Protected paths throttle
+### Protected paths throttle
 
 GitLab.com responds with HTTP status code `429` to POST requests at protected
 paths that exceed 10 requests per **minute** per IP address.
@@ -555,13 +566,21 @@ paths that exceed 10 requests per **minute** per IP address.
 See the source below for which paths are protected. This includes user creation,
 user confirmation, user sign in, and password reset.
 
-This header is included in responses to blocked requests:
-
-```plaintext
-Retry-After: 60
-```
+[User and IP rate limits](../admin_area/settings/user_and_ip_rate_limits.md#response-headers) includes a list of the headers responded to blocked requests.
 
 See [Protected Paths](../admin_area/settings/protected_paths.md) for more details.
+
+### IP blocks
+
+IP blocks can occur when GitLab.com receives unusual traffic from a single
+IP address that the system views as potentially malicious, based on rate limit
+settings. After the unusual traffic ceases, the IP address is automatically
+released depending on the type of block, as described in a following section.
+
+If you receive a `403 Forbidden` error for all requests to GitLab.com,
+check for any automated processes that may be triggering a block. For
+assistance, contact [GitLab Support](https://support.gitlab.com/hc/en-us)
+with details, such as the affected IP address.
 
 #### Git and container registry failed authentication ban
 
@@ -580,13 +599,14 @@ This limit:
 
 No response headers are provided.
 
-### Admin Area settings
+### Pagination response headers
 
-GitLab.com:
+For performance reasons, if a query returns more than 10,000 records, GitLab
+doesn't return the following headers:
 
-- Has [rate limits on raw endpoints](../../user/admin_area/settings/rate_limits_on_raw_endpoints.md)
-  set to the default.
-- Does not have the user and IP rate limits settings enabled.
+- `x-total`.
+- `x-total-pages`.
+- `rel="last"` `link`.
 
 ### Visibility settings
 
@@ -616,7 +636,7 @@ rate limits that are not configurable, and therefore also used on GitLab.com.
 We use [Fluentd](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#fluentd) to parse our logs. Fluentd sends our logs to
 [Stackdriver Logging](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#stackdriver) and [Cloud Pub/Sub](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#cloud-pubsub).
 Stackdriver is used for storing logs long-term in Google Cold Storage (GCS). Cloud Pub/Sub
-is used to forward logs to an [Elastic cluster](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#elastic) using [pubsubbeat](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#pubsubbeat-vms).
+is used to forward logs to an [Elastic cluster](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#elastic) using [`pubsubbeat`](https://gitlab.com/gitlab-com/runbooks/tree/master/logging/doc#pubsubbeat-vms).
 
 You can view more information in our runbooks such as:
 
@@ -629,7 +649,7 @@ You can view more information in our runbooks such as:
 By default, GitLab does not expire job logs. Job logs are retained indefinitely,
 and can't be configured on GitLab.com to expire. You can erase job logs
 [manually with the Jobs API](../../api/jobs.md#erase-a-job) or by
-[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline). 
+[deleting a pipeline](../../ci/pipelines/index.md#delete-a-pipeline).
 
 ## GitLab.com at scale
 

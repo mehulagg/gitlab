@@ -1,10 +1,11 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
   components: {
     GlLoadingIcon,
+    GlIcon,
   },
   props: {
     isDisabled: {
@@ -27,6 +28,7 @@ export default {
 </script>
 
 <template>
+  <!-- eslint-disable @gitlab/vue-no-data-toggle -->
   <button
     :disabled="isDisabled || isLoading"
     class="dropdown-menu-toggle dropdown-menu-full-width"
@@ -35,12 +37,12 @@ export default {
     aria-expanded="false"
   >
     <gl-loading-icon v-show="isLoading" :inline="true" />
-    <template>
-      <slot v-if="$slots.default"></slot>
-      <span v-else class="dropdown-toggle-text"> {{ toggleText }} </span>
-    </template>
-    <span v-show="!isLoading" class="dropdown-toggle-icon">
-      <i class="fa fa-chevron-down" aria-hidden="true" data-hidden="true"></i>
-    </span>
+    <slot v-if="$slots.default"></slot>
+    <span v-else class="dropdown-toggle-text"> {{ toggleText }} </span>
+    <gl-icon
+      v-show="!isLoading"
+      class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+      name="chevron-down"
+    />
   </button>
 </template>

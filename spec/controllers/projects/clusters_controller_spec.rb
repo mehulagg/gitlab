@@ -500,7 +500,7 @@ RSpec.describe Projects::ClustersController do
         expect { post_create_aws }.not_to change { Clusters::Cluster.count }
 
         expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(response.content_type).to eq('application/json')
+        expect(response.media_type).to eq('application/json')
         expect(response.body).to include('is invalid')
       end
     end
@@ -674,21 +674,31 @@ RSpec.describe Projects::ClustersController do
   describe 'GET show' do
     let(:cluster) { create(:cluster, :provided_by_gcp, projects: [project]) }
 
-    def go
+    def go(tab: nil)
       get :show,
         params: {
           namespace_id: project.namespace,
           project_id: project,
-          id: cluster
+          id: cluster,
+          tab: tab
         }
     end
 
     describe 'functionality' do
+      render_views
+
       it "renders view" do
         go
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(assigns(:cluster)).to eq(cluster)
+      end
+
+      it 'renders integration tab view' do
+        go(tab: 'integrations')
+
+        expect(response).to render_template('clusters/clusters/_integrations')
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 

@@ -1,11 +1,11 @@
 ---
 stage: Enablement
 group: Geo
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
 
-# Troubleshooting Geo **(PREMIUM ONLY)**
+# Troubleshooting Geo **(PREMIUM SELF)**
 
 Setting up Geo requires careful attention to details and sometimes it's easy to
 miss a step.
@@ -35,7 +35,7 @@ to help identify if something is wrong:
 - Is the node's secondary tracking database connected?
 - Is the node's secondary tracking database up-to-date?
 
-![Geo health check](img/geo_node_healthcheck.png)
+![Geo health check](img/geo_node_dashboard.png)
 
 For information on how to resolve common errors reported from the UI, see
 [Fixing Common Errors](#fixing-common-errors).
@@ -219,7 +219,7 @@ sudo gitlab-rake gitlab:geo:check
    ```
 
    - Ensure that you have added the secondary node in the Admin Area of the **primary** node.
-   - Ensure that you entered the `external_url` or `gitlab_rails['geo_node_name']` when adding the secondary node in the admin are of the **primary** node.
+   - Ensure that you entered the `external_url` or `gitlab_rails['geo_node_name']` when adding the secondary node in the Admin Area of the **primary** node.
    - Prior to GitLab 12.4, edit the secondary node in the Admin Area of the **primary** node and ensure that there is a trailing `/` in the `Name` field.
 
 1. Check returns `Exception: PG::UndefinedTable: ERROR:  relation "geo_nodes" does not exist`
@@ -308,7 +308,8 @@ log data to build up in `pg_xlog`. Removing the unused slots can reduce the amou
    sudo gitlab-psql
    ```
 
-   Note: **Note:** Using `gitlab-rails dbconsole` will not work, because managing replication slots requires superuser permissions.
+   NOTE:
+   Using `gitlab-rails dbconsole` will not work, because managing replication slots requires superuser permissions.
 
 1. View your replication slots with:
 
@@ -395,6 +396,69 @@ In GitLab 13.4, a seed project is added when GitLab is first installed. This mak
 on a new Geo secondary node. There is an [issue to account for seed projects](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5618)
 when checking the database.
 
+### Message: `Synchronization failed - Error syncing repository`
+
+WARNING:
+If large repositories are affected by this problem,
+their resync may take a long time and cause significant load on your Geo nodes,
+storage and network systems.
+
+If you get the error `Synchronization failed - Error syncing repository` along with the following log messages, this indicates that the expected `geo` remote is not present in the `.git/config` file
+of a repository on the secondary Geo node's filesystem:
+
+```json
+{
+  "created": "@1603481145.084348757",
+  "description": "Error received from peer unix:/var/opt/gitlab/gitaly/gitaly.socket",
+  …
+  "grpc_message": "exit status 128",
+  "grpc_status": 13
+}
+{  …
+  "grpc.request.fullMethod": "/gitaly.RemoteService/FindRemoteRootRef",
+  "grpc.request.glProjectPath": "<namespace>/<project>",
+  …
+  "level": "error",
+  "msg": "fatal: 'geo' does not appear to be a git repository
+          fatal: Could not read from remote repository. …",
+}
+```
+
+To solve this:
+
+1. Log into the secondary Geo node.
+
+1. Back up [the `.git` folder](../../repository_storage_types.md#translate-hashed-storage-paths).
+
+1. Optional: [Spot-check](../../troubleshooting/log_parsing.md#find-all-projects-affected-by-a-fatal-git-problem))
+   a few of those IDs whether they indeed correspond
+   to a project with known Geo replication failures.
+   Use `fatal: 'geo'` as the `grep` term and the following API call:
+
+   ```shell
+   curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/<first_failed_geo_sync_ID>"
+   ```
+
+1. Enter the [Rails console](../../troubleshooting/navigating_gitlab_via_rails_console.md) and run:
+
+   ```ruby
+   failed_geo_syncs = Geo::ProjectRegistry.failed.pluck(:id)
+   failed_geo_syncs.each do |fgs|
+     puts Geo::ProjectRegistry.failed.find(fgs).project_id
+   end
+   ```
+
+1. Run the following commands to reset each project's
+   Geo-related attributes and execute a new sync:
+
+   ```ruby
+   failed_geo_syncs.each do |fgs|
+     registry = Geo::ProjectRegistry.failed.find(fgs)
+     registry.update(resync_repository: true, force_to_redownload_repository: false, repository_retry_count: 0)
+     Geo::RepositorySyncService.new(registry.project).execute
+   end
+   ```
+
 ### Very large repositories never successfully synchronize on the **secondary** node
 
 GitLab places a timeout on all repository clones, including project imports
@@ -424,6 +488,11 @@ GitLab you are running. GitLab versions 11.11.x or 12.0.x are affected by
 [a bug that results in new LFS objects not being replicated to Geo secondary nodes](https://gitlab.com/gitlab-org/gitlab/-/issues/32696).
 
 To resolve the issue, upgrade to GitLab 12.1 or newer.
+
+### Failures during backfill
+
+During a [backfill](../index.md#backfill), failures are scheduled to be retried at the end
+of the backfill queue, therefore these failures only clear up **after** the backfill completes.
 
 ### Resetting Geo **secondary** node replication
 
@@ -461,13 +530,13 @@ to start again from scratch, there are a few steps that can help you:
    chown git:git /var/opt/gitlab/git-data/repositories
    ```
 
-   TIP: **Tip:**
+   NOTE:
    You may want to remove the `/var/opt/gitlab/git-data/repositories.old` in the future
    as soon as you confirmed that you don't need it anymore, to save disk space.
 
 1. _(Optional)_ Rename other data folders and create new ones
 
-   CAUTION: **Caution:**
+   WARNING:
    You may still have files on the **secondary** node that have been removed from **primary** node but
    removal have not been reflected. If you skip this step, they will never be removed
    from this Geo node.
@@ -672,19 +741,19 @@ sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
 
 GitLab 12.9 and later are [unaffected by this error](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5147).
 
-### Two-factor authentication is broken after a failover
+### Message: `ERROR - Replication is not up-to-date` during `gitlab-ctl promotion-preflight-checks`
 
-The setup instructions for Geo prior to 10.5 failed to replicate the
-`otp_key_base` secret, which is used to encrypt the two-factor authentication
-secrets stored in the database. If it differs between **primary** and **secondary**
-nodes, users with two-factor authentication enabled won't be able to log in
-after a failover.
+In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+this command reports `ERROR - Replication is not up-to-date` even if
+replication is actually up-to-date. This bug was fixed in GitLab 13.8 and
+later.
 
-If you still have access to the old **primary** node, you can follow the
-instructions in the
-[Upgrading to GitLab 10.5](../replication/version_specific_updates.md#updating-to-gitlab-105)
-section to resolve the error. Otherwise, the secret is lost and you'll need to
-[reset two-factor authentication for all users](../../../security/two_factor_authentication.md#disabling-2fa-for-everyone).
+### Message: `ERROR - Replication is not up-to-date` during `gitlab-ctl promote-to-primary-node`
+
+In GitLab 13.7 and earlier, if you have a data type with zero items to sync,
+this command reports `ERROR - Replication is not up-to-date` even if
+replication is actually up-to-date. If replication and verification output
+shows that it is complete, you can add `--skip-preflight-checks` to make the command complete promotion. This bug was fixed in GitLab 13.8 and later.
 
 ## Expired artifacts
 
@@ -711,7 +780,7 @@ node's URL matches its external URL.
 
 ## Fixing common errors
 
-This section documents common errors reported in the Admin UI and how to fix them.
+This section documents common errors reported in the Admin Area and how to fix them.
 
 ### Geo database configuration file is missing
 
@@ -720,7 +789,8 @@ GitLab cannot find or doesn't have permission to access the `database_geo.yml` c
 In an Omnibus GitLab installation, the file should be in `/var/opt/gitlab/gitlab-rails/etc`.
 If it doesn't exist or inadvertent changes have been made to it, run `sudo gitlab-ctl reconfigure` to restore it to its correct state.
 
-If this path is mounted on a remote volume, please check your volume configuration and that it has correct permissions.
+If this path is mounted on a remote volume, ensure your volume configuration
+has the correct permissions.
 
 ### An existing tracking database cannot be reused
 
@@ -782,3 +852,19 @@ To resolve this issue:
   using IPv6 to send its status to the **primary** node. If it is, add an entry to
   the **primary** node using IPv4 in the `/etc/hosts` file. Alternatively, you should
   [enable IPv6 on the **primary** node](https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-address-or-addresses).
+
+### GitLab Pages return 404 errors after promoting
+
+This is due to [Pages data not being managed by Geo](datatypes.md#limitations-on-replicationverification).
+Find advice to resolve those errors in the
+[Pages administration documentation](../../../administration/pages/index.md#404-error-after-promoting-a-geo-secondary-to-a-primary-node).
+
+## Fixing client errors
+
+### Authorization errors from LFS HTTP(s) client requests
+
+You may have problems if you're running a version of [Git LFS](https://git-lfs.github.com/) before 2.4.2.
+As noted in [this authentication issue](https://github.com/git-lfs/git-lfs/issues/3025),
+requests redirected from the secondary to the primary node do not properly send the
+Authorization header. This may result in either an infinite `Authorization <-> Redirect`
+loop, or Authorization errors.

@@ -2,7 +2,7 @@
 type: reference, howto
 stage: Secure
 group: Static Analysis
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # Offline environments
@@ -34,7 +34,7 @@ must come in through physical media (USB drive, hard drive, writeable DVD, etc.)
 
 ## Overview
 
-GitLab scanners generally will connect to the internet to download the
+GitLab scanners usually connect to the internet to download the
 latest sets of signatures, rules, and patches. A few extra steps are necessary
 to configure the tools to function properly by using resources available on your local network.
 
@@ -53,27 +53,27 @@ internally-hosted registry or provide access to the individual scanner images.
 
 You must also ensure that your app has access to common package repositories
 that are not hosted on GitLab.com, such as npm, yarn, or Ruby gems. Packages
-from these repos can be obtained by temporarily connecting to a network or by
+from these repositories can be obtained by temporarily connecting to a network or by
 mirroring the packages inside your own offline network.
 
 ### Interacting with the vulnerabilities
 
 Once a vulnerability is found, you can interact with it. Read more on how to
-[interact with the vulnerabilities](../index.md#interacting-with-the-vulnerabilities).
+[address the vulnerabilities](../vulnerabilities/index.md).
 
 Please note that in some cases the reported vulnerabilities provide metadata that can contain
 external links exposed in the UI. These links might not be accessible within an offline environment.
 
 ### Automatic remediation for vulnerabilities
 
-The [automatic remediation for vulnerabilities](../index.md#automatic-remediation-for-vulnerabilities) feature is available for offline Dependency Scanning and Container Scanning, but may not work
+The [automatic remediation for vulnerabilities](../vulnerabilities/index.md#remediate-a-vulnerability-automatically) feature is available for offline Dependency Scanning and Container Scanning, but may not work
 depending on your instance's configuration. We can only suggest solutions, which are generally more
 current versions that have been patched, when we are able to access up-to-date registry services
 hosting the latest versions of that dependency or image.
 
 ### Scanner signature and rule updates
 
-When connected to the internet, some scanners will reference public databases
+When connected to the internet, some scanners reference public databases
 for the latest sets of signatures and rules to check against. Without connectivity,
 this is not possible. Depending on the scanner, you must therefore disable
 these automatic update checks and either use the databases that they came
@@ -131,15 +131,15 @@ a bastion, and used only for this specific project.
 
 #### Scheduling the updates
 
-By default, this project's pipeline will run only once, when the `.gitlab-ci.yml` is added to the
-repo. To update the GitLab security scanners and signatures, it's necessary to run this pipeline
+By default, this project's pipeline runs only once, when the `.gitlab-ci.yml` is added to the
+repository. To update the GitLab security scanners and signatures, it's necessary to run this pipeline
 regularly. GitLab provides a way to [schedule pipelines](../../../ci/pipelines/schedules.md). For
 example, you can set this up to download and store the Docker images every week.
 
 Some images can be updated more frequently than others. For example, the [vulnerability database](https://hub.docker.com/r/arminc/clair-db/tags)
 for Container Scanning is updated daily. To update this single image, create a new Scheduled
 Pipeline that runs daily and set `SECURE_BINARIES_ANALYZERS` to `clair-vulnerabilities-db`. Only
-this job will be triggered, and the image will be updated daily and made available in the project
+this job is triggered, and the image is updated daily and made available in the project
 registry.
 
 #### Using the secure bundle created
@@ -148,19 +148,19 @@ The project using the `Secure-Binaries.gitlab-ci.yml` template should now host a
 images and resources needed to run GitLab Security features.
 
 Next, you must tell the offline instance to use these resources instead of the default ones on
-GitLab.com. To do so, set the environment variable `SECURE_ANALYZERS_PREFIX` with the URL of the
+GitLab.com. To do so, set the CI/CD variable `SECURE_ANALYZERS_PREFIX` with the URL of the
 project [container registry](../../packages/container_registry/index.md).
 
 You can set this variable in the projects' `.gitlab-ci.yml`, or
-in the GitLab UI at the project or group level. See the [GitLab CI/CD environment variables page](../../../ci/variables/README.md#custom-environment-variables)
+in the GitLab UI at the project or group level. See the [GitLab CI/CD variables page](../../../ci/variables/README.md#custom-cicd-variables)
 for more information.
 
 #### Variables
 
-The following table shows which variables you can use with the `Secure-Binaries.gitlab-ci.yml`
+The following table shows which CI/CD variables you can use with the `Secure-Binaries.gitlab-ci.yml`
 template:
 
-| VARIABLE                                  | Description                                   | Default value                     |
+| CI/CD variable                            | Description                                   | Default value                     |
 |-------------------------------------------|-----------------------------------------------|-----------------------------------|
 | `SECURE_BINARIES_ANALYZERS`               | Comma-separated list of analyzers to download | `"bandit, brakeman, gosec, and so on..."` |
 | `SECURE_BINARIES_DOWNLOAD_IMAGES`         | Used to disable jobs                          | `"true"`                          |
@@ -213,3 +213,28 @@ do
   ssh $GITLAB_HOST "sudo docker push ${registry}/analyzers/${i}:2"
 done
 ```
+
+### Using GitLab Secure with AutoDevOps in an offline environment
+
+You can use GitLab AutoDevOps for Secure scans in an offline environment. However, you must first do
+these steps:
+
+1. Load the container images into the local registry. GitLab Secure leverages analyzer container
+   images to do the various scans. These images must be available as part of running AutoDevOps.
+   Before running AutoDevOps, follow the [above steps](#using-the-official-gitlab-template)
+   to load those container images into the local container registry.
+
+1. Set the CI/CD variable to ensure that AutoDevOps looks in the right place for those images.
+   The AutoDevOps templates leverage the `SECURE_ANALYZERS_PREFIX` variable to identify the location
+   of analyzer images. This variable is discussed above in [Using the secure bundle created](#using-the-secure-bundle-created).
+   Ensure that you set this variable to the correct value for where you loaded the analyzer images.
+   You could consider doing this with a project CI/CD variable or by [modifying](../../../topics/autodevops/customize.md#customizing-gitlab-ciyml)
+   the `.gitlab-ci.yml` file directly.
+
+Once these steps are complete, GitLab has local copies of the Secure analyzers and is set up to use
+them instead of an Internet-hosted container image. This allows you to run Secure in AutoDevOps in
+an offline environment.
+
+Note that these steps are specific to GitLab Secure with AutoDevOps. Using other stages with
+AutoDevOps may require other steps covered in the
+[Auto DevOps documentation](../../../topics/autodevops/).

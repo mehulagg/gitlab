@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
-    describe 'NPM registry' do
+    describe 'npm registry' do
       include Runtime::Fixtures
 
       let(:uri) { URI.parse(Runtime::Scenario.gitlab_address) }
@@ -15,13 +15,13 @@ module QA
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'geo-npm-package-project'
-          project.description = 'Geo project for NPM package replication test'
+          project.description = 'Geo project for npm package replication test'
         end
       end
 
       let(:auth_token) do
         QA::Flow::Login.while_signed_in(address: :geo_primary) do
-          Resource::PersonalAccessToken.fabricate!.access_token
+          Resource::PersonalAccessToken.fabricate!.token
         end
       end
 
@@ -32,7 +32,7 @@ module QA
             {
               "name": "#{package_name}",
               "version": "#{version}",
-              "description": "Example package for GitLab NPM registry",
+              "description": "Example package for GitLab npm registry",
               "publishConfig": {
                 "@#{registry_scope}:registry": "#{gitlab_address_with_port}/api/v4/projects/#{project.id}/packages/npm/"
               }
@@ -53,7 +53,7 @@ module QA
       end
 
       # Test code is based on qa/specs/features/browser_ui/5_package/npm_registry_spec.rb
-      it 'replicates NPM registry to secondary Geo site', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1026' do
+      it 'replicates npm registry to secondary Geo site', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1026' do
         # Use a Node Docker container to publish the package
         with_fixtures([npmrc, package_json]) do |dir|
           Service::DockerRun::NodeJs.new(dir).publish!

@@ -1,18 +1,17 @@
 <script>
-import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
 
 const MARK_TEXT = __('Mark as done');
-const TODO_TEXT = __('Add a To-Do');
+const TODO_TEXT = __('Add a to do');
 
 export default {
-  directives: {
-    tooltip,
-  },
   components: {
     GlIcon,
     GlLoadingIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     issuableId: {
@@ -43,7 +42,7 @@ export default {
     buttonClasses() {
       return this.collapsed
         ? 'btn-blank btn-todo sidebar-collapsed-icon dont-change-state'
-        : 'btn btn-default btn-todo issuable-header-btn float-right';
+        : 'gl-button btn btn-default btn-todo issuable-header-btn float-right';
     },
     buttonLabel() {
       return this.isTodo ? MARK_TEXT : TODO_TEXT;
@@ -71,16 +70,13 @@ export default {
 
 <template>
   <button
-    v-tooltip
+    v-gl-tooltip.left.viewport
     :class="buttonClasses"
     :title="buttonTooltip"
     :aria-label="buttonLabel"
     :data-issuable-id="issuableId"
     :data-issuable-type="issuableType"
     type="button"
-    data-container="body"
-    data-placement="left"
-    data-boundary="viewport"
     @click="handleButtonClick"
   >
     <gl-icon

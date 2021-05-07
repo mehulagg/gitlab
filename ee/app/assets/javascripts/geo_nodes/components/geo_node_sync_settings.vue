@@ -1,7 +1,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { sprintf, s__, __ } from '~/locale';
 import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
+import { sprintf, s__, __ } from '~/locale';
 import { TIME_DIFF } from '../constants';
 
 export default {

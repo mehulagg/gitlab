@@ -1,38 +1,45 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlPagination, GlAlert } from '@gitlab/ui';
 import Api from '~/api';
-import createFlash from '~/flash';
+import createFlash, { FLASH_TYPES } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+import { __, sprintf } from '~/locale';
+import Tracking from '~/tracking';
 
+import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
-
-import RequirementsTabs from './requirements_tabs.vue';
-import RequirementsLoading from './requirements_loading.vue';
-import RequirementsEmptyState from './requirements_empty_state.vue';
-import RequirementItem from './requirement_item.vue';
-import RequirementForm from './requirement_form.vue';
-
-import projectRequirements from '../queries/projectRequirements.query.graphql';
-import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
-import createRequirement from '../queries/createRequirement.mutation.graphql';
-import updateRequirement from '../queries/updateRequirement.mutation.graphql';
 
 import {
   FilterState,
   AvailableSortOptions,
   TestReportStatus,
+  TestReportStatusToValue,
   DEFAULT_PAGE_SIZE,
 } from '../constants';
+import createRequirement from '../queries/createRequirement.mutation.graphql';
+import exportRequirement from '../queries/exportRequirements.mutation.graphql';
+import projectRequirements from '../queries/projectRequirements.query.graphql';
+import projectRequirementsCount from '../queries/projectRequirementsCount.query.graphql';
+import updateRequirement from '../queries/updateRequirement.mutation.graphql';
+import ExportRequirementsModal from './export_requirements_modal.vue';
+import ImportRequirementsModal from './import_requirements_modal.vue';
+import RequirementForm from './requirement_form.vue';
+import RequirementItem from './requirement_item.vue';
+import RequirementsEmptyState from './requirements_empty_state.vue';
+import RequirementsLoading from './requirements_loading.vue';
+import RequirementsTabs from './requirements_tabs.vue';
+
+import StatusToken from './tokens/status_token.vue';
 
 export default {
   DEFAULT_PAGE_SIZE,
   AvailableSortOptions,
   components: {
     GlPagination,
+    GlAlert,
     FilteredSearchBar,
     RequirementsTabs,
     RequirementsLoading,
@@ -40,7 +47,10 @@ export default {
     RequirementItem,
     RequirementCreateForm: RequirementForm,
     RequirementEditForm: RequirementForm,
+    ImportRequirementsModal,
+    ExportRequirementsModal,
   },
+  mixins: [Tracking.mixin()],
   props: {
     projectPath: {
       type: String,
@@ -65,11 +75,16 @@ export default {
       required: false,
       default: () => [],
     },
+    initialStatus: {
+      type: String,
+      required: false,
+      default: '',
+    },
     initialRequirementsCount: {
       type: Object,
       required: true,
-      validator: value =>
-        ['OPENED', 'ARCHIVED', 'ALL'].every(prop => typeof value[prop] === 'number'),
+      validator: (value) =>
+        ['OPENED', 'ARCHIVED', 'ALL'].every((prop) => typeof value[prop] === 'number'),
     },
     page: {
       type: Number,
@@ -95,6 +110,14 @@ export default {
       required: true,
     },
     requirementsWebUrl: {
+      type: String,
+      required: true,
+    },
+    importCsvPath: {
+      type: String,
+      required: true,
+    },
+    currentUserEmail: {
       type: String,
       required: true,
     },
@@ -131,6 +154,10 @@ export default {
           queryVariables.authorUsernames = this.authorUsernames;
         }
 
+        if (this.status) {
+          queryVariables.status = TestReportStatusToValue[this.status];
+        }
+
         if (this.sortBy) {
           queryVariables.sortBy = this.sortBy;
         }
@@ -140,7 +167,7 @@ export default {
       update(data) {
         const requirementsRoot = data.project?.requirements;
 
-        const list = requirementsRoot?.nodes.map(node => {
+        const list = requirementsRoot?.nodes.map((node) => {
           return {
             ...node,
             satisfied: node.lastTestReportState === TestReportStatus.Passed,
@@ -188,6 +215,7 @@ export default {
       filterBy: this.initialFilterBy,
       textSearch: this.initialTextSearch,
       authorUsernames: this.initialAuthorUsernames,
+      status: this.initialStatus,
       sortBy: this.initialSortBy,
       showRequirementCreateDrawer: false,
       showRequirementViewDrawer: false,
@@ -207,6 +235,7 @@ export default {
         ARCHIVED: this.initialRequirementsCount[FilterState.archived],
         ALL: this.initialRequirementsCount[FilterState.all],
       },
+      alert: null,
     };
   },
   computed: {
@@ -219,11 +248,7 @@ export default {
       return this.$apollo.queries.requirements.loading;
     },
     requirementsListEmpty() {
-      return (
-        !this.$apollo.queries.requirements.loading &&
-        !this.requirements.list.length &&
-        this.requirementsCount[this.filterBy] === 0
-      );
+      return !this.$apollo.queries.requirements.loading && !this.requirementsList.length;
     },
     totalRequirementsForCurrentTab() {
       return this.requirementsCount[this.filterBy];
@@ -265,16 +290,34 @@ export default {
           fetchPath: this.projectPath,
           fetchAuthors: Api.projectUsers.bind(Api),
         },
+        {
+          type: 'status',
+          icon: 'status',
+          title: __('Status'),
+          unique: true,
+          token: StatusToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+        },
       ];
     },
     getFilteredSearchValue() {
-      const value = this.authorUsernames.map(author => ({
+      const value = this.authorUsernames.map((author) => ({
         type: 'author_username',
         value: { data: author },
       }));
 
+      if (this.status) {
+        value.push({
+          type: 'status',
+          value: { data: this.status },
+        });
+      }
+
       if (this.textSearch) {
-        value.push(this.textSearch);
+        value.push({
+          type: 'filtered-search-term',
+          value: { data: this.textSearch },
+        });
       }
 
       return value;
@@ -293,6 +336,7 @@ export default {
         nextPageCursor,
         textSearch,
         authorUsernames,
+        status,
         sortBy,
       } = this;
 
@@ -333,6 +377,12 @@ export default {
         queryParams['author_username[]'] = authorUsernames;
       }
 
+      if (status) {
+        queryParams.status = status;
+      } else {
+        delete queryParams.status;
+      }
+
       // We want to replace the history state so that back button
       // correctly reloads the page with previous URL.
       updateHistory({
@@ -368,11 +418,59 @@ export default {
             updateRequirementInput,
           },
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash({
             message: errorFlashMessage,
             parent: flashMessageContainer,
             captureError: true,
+          });
+          throw e;
+        });
+    },
+    importCsv({ file }) {
+      const formData = new FormData();
+      formData.append('file', file);
+      return axios
+        .post(this.importCsvPath, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .then(({ data }) => {
+          createFlash({ message: data?.message, type: FLASH_TYPES.NOTICE });
+        })
+        .catch((err) => {
+          const { data: { message = __('Something went wrong') } = {} } = err.response;
+          createFlash({ message });
+        });
+    },
+    exportCsv(selectedFields) {
+      return this.$apollo
+        .mutate({
+          mutation: exportRequirement,
+          variables: {
+            projectPath: this.projectPath,
+            state: this.filterBy,
+            authorUsername: this.authorUsernames,
+            search: this.textSearch,
+            sortBy: this.sortBy,
+            selectedFields,
+          },
+        })
+        .then(() => {
+          this.alert = {
+            variant: 'info',
+            message: sprintf(
+              __('Your CSV export has started. It will be emailed to %{email} when complete.'),
+              { email: this.currentUserEmail },
+            ),
+          };
+        })
+        .catch((e) => {
+          createFlash({
+            message: __('Something went wrong while exporting requirements'),
+            captureError: true,
+            error: e,
           });
           throw e;
         });
@@ -418,7 +516,7 @@ export default {
             },
           },
         })
-        .then(res => {
+        .then((res) => {
           const createReqMutation = res?.data?.createRequirement || {};
 
           if (createReqMutation.errors?.length === 0) {
@@ -434,7 +532,7 @@ export default {
             throw new Error(`Error creating a requirement ${res.message}`);
           }
         })
-        .catch(e => {
+        .catch((e) => {
           createFlash({
             message: __('Something went wrong while creating a requirement.'),
             parent: this.$el,
@@ -458,7 +556,7 @@ export default {
         errorFlashMessage: __('Something went wrong while updating a requirement.'),
         flashMessageContainer: this.$el,
       })
-        .then(res => {
+        .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
 
           if (updateReqMutation.errors?.length === 0) {
@@ -485,7 +583,7 @@ export default {
             ? __('Something went wrong while reopening a requirement.')
             : __('Something went wrong while archiving a requirement.'),
       })
-        .then(res => {
+        .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
 
           if (updateReqMutation.errors?.length === 0) {
@@ -517,21 +615,39 @@ export default {
     },
     handleFilterRequirements(filters = []) {
       const authors = [];
-      let textSearch = '';
+      let status = '';
+      const textSearch = [];
 
-      filters.forEach(filter => {
-        if (typeof filter === 'string') {
-          textSearch = filter;
-        } else if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
-          authors.push(filter.value.data);
+      filters.forEach((filter) => {
+        switch (filter.type) {
+          case 'author_username':
+            if (filter.value.data !== DEFAULT_LABEL_ANY.value) {
+              authors.push(filter.value.data);
+            }
+            break;
+          case 'status':
+            status = filter.value.data;
+            break;
+          case 'filtered-search-term':
+            if (filter.value.data) textSearch.push(filter.value.data);
+            break;
+          default:
+            break;
         }
       });
 
       this.authorUsernames = [...authors];
-      this.textSearch = textSearch;
+      this.status = status;
+      this.textSearch = textSearch.join(' ');
       this.currentPage = 1;
       this.prevPageCursor = '';
       this.nextPageCursor = '';
+
+      if (textSearch.length || authors.length || status) {
+        this.track('filter', {
+          property: JSON.stringify(filters),
+        });
+      }
 
       this.updateUrl();
     },
@@ -545,8 +661,9 @@ export default {
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.requirements.pageInfo;
+      const toNext = page > this.currentPage;
 
-      if (page > this.currentPage) {
+      if (toNext) {
         this.prevPageCursor = '';
         this.nextPageCursor = endCursor;
       } else {
@@ -554,9 +671,14 @@ export default {
         this.nextPageCursor = '';
       }
 
+      this.track('click_navigation', { label: toNext ? 'next' : 'prev' });
+
       this.currentPage = page;
 
       this.updateUrl();
+    },
+    handleImportRequirementsClick() {
+      this.$refs.modal.show();
     },
   },
 };
@@ -564,6 +686,16 @@ export default {
 
 <template>
   <div class="requirements-list-container">
+    <gl-alert
+      v-if="alert"
+      :variant="alert.variant"
+      :dismissible="true"
+      class="gl-mt-3 gl-mb-4"
+      @dismiss="alert = null"
+    >
+      {{ alert.message }}
+    </gl-alert>
+
     <requirements-tabs
       :filter-by="filterBy"
       :requirements-count="requirementsCount"
@@ -571,6 +703,8 @@ export default {
       :can-create-requirement="canCreateRequirement"
       @click-tab="handleTabClick"
       @click-new-requirement="handleNewRequirementClick"
+      @click-import-requirements="handleImportRequirementsClick"
+      @click-export-requirements="$refs.exportModal.show()"
     />
     <filtered-search-bar
       :namespace="projectPath"
@@ -591,6 +725,7 @@ export default {
       @drawer-close="handleNewRequirementCancel"
     />
     <requirement-edit-form
+      data-testid="edit-form"
       :drawer-open="showRequirementViewDrawer"
       :requirement="editedRequirement"
       :enable-requirement-edit="enableRequirementEdit"
@@ -607,6 +742,7 @@ export default {
       :requirements-count="requirementsCount"
       :can-create-requirement="canCreateRequirement"
       @click-new-requirement="handleNewRequirementClick"
+      @click-import-requirements="handleImportRequirementsClick"
     />
     <requirements-loading
       v-show="requirementsListLoading"
@@ -639,6 +775,13 @@ export default {
       align="center"
       class="gl-pagination gl-mt-3"
       @input="handlePageChange"
+    />
+    <import-requirements-modal ref="modal" :project-path="projectPath" @import="importCsv" />
+    <export-requirements-modal
+      ref="exportModal"
+      :requirement-count="totalRequirementsForCurrentTab"
+      :email="currentUserEmail"
+      @export="exportCsv"
     />
   </div>
 </template>

@@ -5,6 +5,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'critical',
     confidence: 'high',
+    url: '/testgroup/testproject/-/security/vulnerabilities/1',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -73,6 +74,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'critical',
     confidence: 'high',
+    url: '/testgroup/testproject/-/security/vulnerabilities/2',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -127,6 +129,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'medium',
     confidence: '',
+    url: '/testgroup/testproject/-/security/vulnerabilities/3',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -170,11 +173,11 @@ export default [
       issue_iid: null,
       pipeline: {
         id: 2,
-        path: '/namespace5/project5/pipelines/2',
+        path: '/namespace5/project5/-/pipelines/2',
       },
       category: 'sast',
       feedback_type: 'dismissal',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
       destroy_vulnerability_feedback_dismissal_path: 'https://example.com/feedback_dismissal_path',
     },
@@ -205,6 +208,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'high',
     confidence: 'low',
+    url: '/testgroup/testproject/-/security/vulnerabilities/4',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -249,12 +253,12 @@ export default [
       issue_iid: 1,
       pipeline: {
         id: 3,
-        path: '/namespace6/project6/pipelines/3',
+        path: '/namespace6/project6/-/pipelines/3',
       },
       issue_url: 'http://localhost/namespace1/project1/issues/1',
       category: 'sast',
       feedback_type: 'issue',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
     },
     create_vulnerability_feedback_issue_path: 'https://example.com/vulnerability_feedback',
@@ -284,6 +288,7 @@ export default [
       'Remote command execution due to flaw in the include params attribute of URL and Anchor tags for org.apache.struts/struts2core',
     severity: 'low',
     confidence: '',
+    url: '/testgroup/testproject/-/security/vulnerabilities/5',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -327,11 +332,11 @@ export default [
       issue_iid: null,
       pipeline: {
         id: 2,
-        path: '/namespace5/project5/pipelines/2',
+        path: '/namespace5/project5/-/pipelines/2',
       },
       category: 'sast',
       feedback_type: 'dismissal',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
       destroy_vulnerability_feedback_dismissal_path: 'https://example.com/feedback_dismissal_path',
     },
@@ -352,12 +357,12 @@ export default [
       issue_iid: 1,
       pipeline: {
         id: 3,
-        path: '/namespace6/project6/pipelines/3',
+        path: '/namespace6/project6/-/pipelines/3',
       },
       issue_url: 'http://localhost/namespace1/project1/issues/1',
       category: 'sast',
       feedback_type: 'issue',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
     },
     create_vulnerability_feedback_issue_path: 'https://example.com/vulnerability_feedback',
@@ -386,6 +391,7 @@ export default [
     name: 'Doorkeeper Gem does not revoke token for public clients',
     severity: 'unknown',
     confidence: '',
+    url: '/testgroup/testproject/-/security/vulnerabilities/6',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -440,6 +446,7 @@ export default [
     name: 'Insecure variable usage',
     severity: 'high',
     confidence: 'low',
+    url: '/testgroup/testproject/-/security/vulnerabilities/7',
     scanner: {
       external_id: 'find_sec_bugs',
       name: 'Find Security Bugs',
@@ -484,12 +491,12 @@ export default [
       issue_iid: null,
       pipeline: {
         id: 3,
-        path: '/namespace6/project6/pipelines/3',
+        path: '/namespace6/project6/-/pipelines/3',
       },
       issue_url: null,
       category: 'sast',
       feedback_type: 'issue',
-      branch: 'master',
+      branch: 'main',
       project_fingerprint: '4e5b6966dd100170b4b1ad599c7058cce91b57b4',
     },
     vulnerability_feedback_issue_path: 'https://example.com/vulnerability_feedback',
@@ -518,6 +525,7 @@ export default [
     name: 'CVE-2018-1000001 in glibc',
     severity: 'high',
     confidence: 'unknown',
+    url: '/testgroup/testproject/-/security/vulnerabilities/8',
     scanner: {
       external_id: 'clair',
       name: 'Clair',
@@ -554,7 +562,65 @@ export default [
     ],
     location: {
       image:
-        'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
+      operating_system: 'debian:9',
+      dependency: {
+        package: {
+          name: 'glibc',
+        },
+        version: '2.24-11+deb9u3',
+      },
+    },
+    remediations: null,
+    solution: null,
+    state: 'opened',
+    blob_path: '',
+  },
+  {
+    id: 9,
+    create_jira_issue_url: 'http://jira-project.atlassian.com/report',
+    report_type: 'container_scanning',
+    name: 'CVE-2018-1000001 in glibc',
+    severity: 'high',
+    confidence: 'unknown',
+    url: '/testgroup/testproject/-/security/vulnerabilities/9',
+    scanner: {
+      external_id: 'clair',
+      name: 'Clair',
+      vendor: 'GitLab',
+    },
+    identifiers: [
+      {
+        external_type: 'cve',
+        external_id: 'CVE-2018-1000001',
+        name: 'CVE-2018-1000001',
+        url: 'https://security-tracker.debian.org/tracker/CVE-2018-1000001',
+      },
+    ],
+    project_fingerprint: 'af08ab5aa899af9e74318ebc23684c9aa728ab7c',
+    create_vulnerability_feedback_issue_path: '/gitlab-org/sec-reports/vulnerability_feedback',
+    create_vulnerability_feedback_merge_request_path:
+      '/gitlab-org/sec-reports/vulnerability_feedback',
+    create_vulnerability_feedback_dismissal_path: '/gitlab-org/sec-reports/vulnerability_feedback',
+    project: {
+      id: 19,
+      name: 'sec-reports',
+      full_path: '/gitlab-org/sec-reports',
+      full_name: 'Gitlab Org / sec-reports',
+    },
+    dismissal_feedback: null,
+    issue_feedback: null,
+    merge_request_feedback: null,
+    description:
+      'In glibc 2.26 and earlier there is confusion in the usage of getcwd() by realpath() which can be used to write before the destination buffer leading to a buffer underflow and potential code execution.',
+    links: [
+      {
+        url: 'https://security-tracker.debian.org/tracker/CVE-2018-1000001',
+      },
+    ],
+    location: {
+      image:
+        'registry.gitlab.com/groulot/container-scanning-test/main:5f21de6956aee99ddb68ae49498662d9872f50ff',
       operating_system: 'debian:9',
       dependency: {
         package: {

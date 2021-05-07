@@ -6,9 +6,6 @@ class Projects::MilestonesController < Projects::ApplicationController
 
   before_action :check_issuables_available!
   before_action :milestone, only: [:edit, :update, :destroy, :show, :issues, :merge_requests, :participants, :labels, :promote]
-  before_action do
-    push_frontend_feature_flag(:burnup_charts, @project, default_enabled: true)
-  end
 
   # Allow read any milestone
   before_action :authorize_read_milestone!
@@ -42,7 +39,7 @@ class Projects::MilestonesController < Projects::ApplicationController
   end
 
   def new
-    @milestone = @project.milestones.new
+    @noteable = @milestone = @project.milestones.new
     respond_with(@milestone)
   end
 
@@ -128,7 +125,7 @@ class Projects::MilestonesController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def milestone
-    @milestone ||= @project.milestones.find_by!(iid: params[:id])
+    @noteable = @milestone ||= @project.milestones.find_by!(iid: params[:id])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

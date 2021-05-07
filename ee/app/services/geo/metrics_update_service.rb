@@ -2,7 +2,7 @@
 
 module Geo
   class MetricsUpdateService
-    METRIC_PREFIX = 'geo_'.freeze
+    METRIC_PREFIX = 'geo_'
 
     def execute
       return unless Gitlab::Geo.enabled?
@@ -29,7 +29,7 @@ module Geo
     end
 
     def send_status_to_primary(node, status)
-      if !NodeStatusRequestService.new.execute(status) && prometheus_enabled?
+      if !NodeStatusRequestService.new(status).execute && prometheus_enabled?
         increment_failed_status_counter(node)
       end
     end

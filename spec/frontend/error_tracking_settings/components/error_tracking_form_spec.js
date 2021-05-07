@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlFormInput, GlButton } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
 import ErrorTrackingForm from '~/error_tracking_settings/components/error_tracking_form.vue';
 import createStore from '~/error_tracking_settings/store';
 import { defaultProps } from '../mock';
@@ -33,35 +33,28 @@ describe('error tracking settings form', () => {
 
   describe('an empty form', () => {
     it('is rendered', () => {
-      expect(wrapper.findAll(GlFormInput).length).toBe(2);
-      expect(wrapper.find(GlFormInput).attributes('id')).toBe('error-tracking-api-host');
-      expect(
-        wrapper
-          .findAll(GlFormInput)
-          .at(1)
-          .attributes('id'),
-      ).toBe('error-tracking-token');
-
-      expect(wrapper.findAll(GlButton).exists()).toBe(true);
+      expect(wrapper.findAllComponents(GlFormInput).length).toBe(2);
+      expect(wrapper.findComponent(GlFormInput).attributes('id')).toBe('error-tracking-api-host');
+      expect(wrapper.findAllComponents(GlFormInput).at(1).attributes('id')).toBe(
+        'error-tracking-token',
+      );
+      expect(wrapper.findAllComponents(GlButton).exists()).toBe(true);
     });
 
     it('is rendered with labels and placeholders', () => {
       const pageText = wrapper.text();
 
       expect(pageText).toContain(
-        "If you self-host Sentry, enter the full URL of your Sentry instance. If you're using Sentry's hosted solution, enter https://sentry.io",
+        "If you self-host Sentry, enter your Sentry instance's full URL. If you use Sentry's hosted solution, enter https://sentry.io",
       );
       expect(pageText).toContain(
-        "After adding your Auth Token, use the 'Connect' button to load projects",
+        'After adding your Auth Token, select the Connect button to load projects.',
       );
 
-      expect(pageText).not.toContain('Connection has failed. Re-check Auth Token and try again');
-      expect(
-        wrapper
-          .findAll(GlFormInput)
-          .at(0)
-          .attributes('placeholder'),
-      ).toContain('https://mysentryserver.com');
+      expect(pageText).not.toContain('Connection failed. Check Auth Token and try again.');
+      expect(wrapper.findAllComponents(GlFormInput).at(0).attributes('placeholder')).toContain(
+        'https://mysentryserver.com',
+      );
     });
   });
 
@@ -71,7 +64,7 @@ describe('error tracking settings form', () => {
     });
 
     it('shows loading spinner', () => {
-      const buttonEl = wrapper.find(GlButton);
+      const buttonEl = wrapper.findComponent(GlButton);
 
       expect(buttonEl.props('loading')).toBe(true);
       expect(buttonEl.text()).toBe('Connecting');
@@ -88,9 +81,7 @@ describe('error tracking settings form', () => {
     });
 
     it('does not show an error', () => {
-      expect(wrapper.text()).not.toContain(
-        'Connection has failed. Re-check Auth Token and try again',
-      );
+      expect(wrapper.text()).not.toContain('Connection failed. Check Auth Token and try again.');
     });
   });
 
@@ -104,7 +95,7 @@ describe('error tracking settings form', () => {
     });
 
     it('shows an error', () => {
-      expect(wrapper.text()).toContain('Connection has failed. Re-check Auth Token and try again');
+      expect(wrapper.text()).toContain('Connection failed. Check Auth Token and try again.');
     });
   });
 });

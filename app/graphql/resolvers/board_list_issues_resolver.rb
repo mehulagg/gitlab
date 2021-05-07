@@ -6,7 +6,7 @@ module Resolvers
 
     argument :filters, Types::Boards::BoardIssueInputType,
              required: false,
-             description: 'Filters applied when selecting issues in the board list'
+             description: 'Filters applied when selecting issues in the board list.'
 
     type Types::IssueType, null: true
 
@@ -16,7 +16,7 @@ module Resolvers
       filter_params = issue_filters(args[:filters]).merge(board_id: list.board.id, id: list.id)
       service = ::Boards::Issues::ListService.new(list.board.resource_parent, context[:current_user], filter_params)
 
-      Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(service.execute)
+      offset_pagination(service.execute)
     end
 
     # https://gitlab.com/gitlab-org/gitlab/-/issues/235681

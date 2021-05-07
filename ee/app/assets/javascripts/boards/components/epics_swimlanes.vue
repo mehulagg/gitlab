@@ -1,25 +1,37 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import VirtualList from 'vue-virtual-scroll-list';
 import Draggable from 'vuedraggable';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
-import { DRAGGABLE_TAG } from '../constants';
-import defaultSortableConfig from '~/sortable/sortable_config';
+import { isListDraggable } from '~/boards/boards_util';
 import { n__ } from '~/locale';
+import defaultSortableConfig from '~/sortable/sortable_config';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { calculateSwimlanesBufferSize } from '../boards_util';
+import { DRAGGABLE_TAG, EPIC_LANE_BASE_HEIGHT } from '../constants';
 import EpicLane from './epic_lane.vue';
 import IssuesLaneList from './issues_lane_list.vue';
+import SwimlanesLoadingSkeleton from './swimlanes_loading_skeleton.vue';
 
 export default {
+  EpicLane,
+  epicLaneBaseHeight: EPIC_LANE_BASE_HEIGHT,
   components: {
+    BoardAddNewColumn,
     BoardListHeader,
     EpicLane,
     IssuesLaneList,
     GlButton,
     GlIcon,
+    SwimlanesLoadingSkeleton,
+    VirtualList,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     lists: {
       type: Array,
@@ -35,17 +47,31 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      bufferSize: 0,
+    };
+  },
   computed: {
-    ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
+    ...mapState([
+      'epics',
+      'pageInfoByListId',
+      'listsFlags',
+      'addColumnForm',
+      'filterParams',
+      'epicsSwimlanesFetchInProgress',
+    ]),
     ...mapGetters(['getUnassignedIssues']),
+    addColumnFormVisible() {
+      return this.addColumnForm?.visible;
+    },
     unassignedIssues() {
-      return listId => this.getUnassignedIssues(listId);
+      return (listId) => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
-      return this.lists.reduce(
-        (total, list) => total + this.listsFlags[list.id]?.unassignedIssuesCount || 0,
-        0,
-      );
+      return this.lists.reduce((total, list) => {
+        return total + (this.listsFlags[list.id]?.unassignedIssuesCount || 0);
+      }, 0);
     },
     unassignedIssuesCountTooltipText() {
       return n__(`%d unassigned issue`, `%d unassigned issues`, this.unassignedIssuesCount);
@@ -69,12 +95,37 @@ export default {
     hasMoreUnassignedIssues() {
       return (
         this.unassignedIssuesCount > 0 &&
-        this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage)
+        this.lists.some((list) => this.pageInfoByListId[list.id]?.hasNextPage)
       );
     },
+    isLoading() {
+      const {
+        epicLanesFetchInProgress,
+        listItemsFetchInProgress,
+      } = this.epicsSwimlanesFetchInProgress;
+      return epicLanesFetchInProgress && listItemsFetchInProgress;
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        Promise.all(
+          this.lists.map((list) => {
+            return this.fetchItemsForList({ listId: list.id, forSwimlanes: true });
+          }),
+        )
+          .then(() => this.doneLoadingSwimlanesItems())
+          .catch(() => {});
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
+  mounted() {
+    this.bufferSize = calculateSwimlanesBufferSize(this.$el.offsetTop);
   },
   methods: {
-    ...mapActions(['moveList', 'fetchIssuesForList']),
+    ...mapActions(['moveList', 'fetchItemsForList', 'doneLoadingSwimlanesItems']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item, to } = params;
       const { listId } = item.dataset;
@@ -88,11 +139,32 @@ export default {
       });
     },
     fetchMoreUnassignedIssues() {
-      this.lists.forEach(list => {
+      this.lists.forEach((list) => {
         if (this.pageInfoByListId[list.id]?.hasNextPage) {
-          this.fetchIssuesForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
+          this.fetchItemsForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
         }
       });
+    },
+    isListDraggable(list) {
+      return isListDraggable(list);
+    },
+    afterFormEnters() {
+      const container = this.$refs.scrollableContainer;
+      container.scrollTo({
+        left: container.scrollWidth,
+        behavior: 'smooth',
+      });
+    },
+    getEpicLaneProps(index) {
+      return {
+        key: this.epics[index].id,
+        props: {
+          epic: this.epics[index],
+          lists: this.lists,
+          disabled: this.disabled,
+          canAdminList: this.canAdminList,
+        },
+      };
     },
   },
 };
@@ -100,88 +172,116 @@ export default {
 
 <template>
   <div
-    class="board-swimlanes gl-white-space-nowrap gl-pb-5 gl-px-3"
+    ref="scrollableContainer"
+    class="board-swimlanes gl-white-space-nowrap gl-pb-5 gl-px-3 gl-display-flex gl-flex-grow-1"
     data-testid="board-swimlanes"
     data_qa_selector="board_epics_swimlanes"
   >
-    <component
-      :is="treeRootWrapper"
-      v-bind="treeRootOptions"
-      class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-bg-white gl-top-0 gl-z-index-3"
-      data-testid="board-swimlanes-headers"
-      @end="handleDragOnEnd"
-    >
-      <div
-        v-for="list in lists"
-        :key="list.id"
-        :class="{
-          'is-collapsed': !list.isExpanded,
-          'is-draggable': !list.preset,
-        }"
-        class="board gl-display-inline-block gl-px-3 gl-vertical-align-top gl-white-space-normal"
-        :data-list-id="list.id"
-        data-testid="board-header-container"
+    <swimlanes-loading-skeleton v-if="isLoading" />
+    <div v-else class="board-swimlanes-content">
+      <component
+        :is="treeRootWrapper"
+        v-bind="treeRootOptions"
+        class="board-swimlanes-headers gl-display-table gl-sticky gl-pt-5 gl-mb-5 gl-bg-white gl-top-0 gl-z-index-3"
+        data-testid="board-swimlanes-headers"
+        @end="handleDragOnEnd"
       >
-        <board-list-header
-          :can-admin-list="canAdminList"
-          :list="list"
-          :disabled="disabled"
-          :is-swimlanes-header="true"
-        />
-      </div>
-    </component>
-    <div class="board-epics-swimlanes gl-display-table">
-      <epic-lane
-        v-for="epic in epics"
-        :key="epic.id"
-        :epic="epic"
-        :lists="lists"
-        :disabled="disabled"
-        :can-admin-list="canAdminList"
-      />
-      <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
-        <div class="gl-left-0 gl-py-5 gl-px-3 gl-display-flex gl-align-items-center">
-          <span
-            class="gl-mr-3 gl-font-weight-bold gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
-          >
-            {{ __('Issues with no epic assigned') }}
-          </span>
-          <span
-            v-gl-tooltip.hover
-            :title="unassignedIssuesCountTooltipText"
-            class="gl-display-flex gl-align-items-center gl-text-gray-500"
-            tabindex="0"
-            :aria-label="unassignedIssuesCountTooltipText"
-            data-testid="issues-lane-issue-count"
-          >
-            <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
-            <span aria-hidden="true">{{ unassignedIssuesCount }}</span>
-          </span>
-        </div>
-      </div>
-      <div data-testid="board-lane-unassigned-issues">
-        <div class="gl-display-flex">
-          <issues-lane-list
-            v-for="list in lists"
-            :key="`${list.id}-issues`"
+        <div
+          v-for="list in lists"
+          :key="list.id"
+          :class="{
+            'is-collapsed': list.collapsed,
+            'is-draggable': isListDraggable(list),
+          }"
+          class="board gl-display-inline-block gl-px-3 gl-vertical-align-top gl-white-space-normal"
+          :data-list-id="list.id"
+          data-testid="board-header-container"
+        >
+          <board-list-header
+            :can-admin-list="canAdminList"
             :list="list"
-            :issues="unassignedIssues(list.id)"
-            :is-unassigned-issues-lane="true"
+            :disabled="disabled"
+            :is-swimlanes-header="true"
+          />
+        </div>
+      </component>
+      <div class="board-epics-swimlanes gl-display-table">
+        <template v-if="glFeatures.swimlanesBufferedRendering">
+          <virtual-list
+            v-if="epics.length"
+            :size="$options.epicLaneBaseHeight"
+            :remain="bufferSize"
+            :bench="bufferSize"
+            :scrollelement="$refs.scrollableContainer"
+            :item="$options.EpicLane"
+            :itemcount="epics.length"
+            :itemprops="getEpicLaneProps"
+          />
+        </template>
+        <template v-else>
+          <epic-lane
+            v-for="epic in epics"
+            :key="epic.id"
+            :epic="epic"
+            :lists="lists"
             :disabled="disabled"
             :can-admin-list="canAdminList"
           />
+        </template>
+        <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
+          <div class="gl-left-0 gl-pb-5 gl-px-3 gl-display-flex gl-align-items-center">
+            <span
+              class="gl-mr-3 gl-font-weight-bold gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
+            >
+              {{ __('Issues with no epic assigned') }}
+            </span>
+            <span
+              v-gl-tooltip.hover
+              :title="unassignedIssuesCountTooltipText"
+              class="gl-display-flex gl-align-items-center gl-text-gray-500"
+              tabindex="0"
+              :aria-label="unassignedIssuesCountTooltipText"
+              data-testid="issues-lane-issue-count"
+            >
+              <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
+              <span aria-hidden="true">{{ unassignedIssuesCount }}</span>
+            </span>
+          </div>
+        </div>
+        <div data-testid="board-lane-unassigned-issues">
+          <div class="gl-display-flex">
+            <issues-lane-list
+              v-for="list in lists"
+              :key="`${list.id}-issues`"
+              :list="list"
+              :issues="unassignedIssues(list.id)"
+              :is-unassigned-issues-lane="true"
+              :disabled="disabled"
+              :can-admin-list="canAdminList"
+            />
+          </div>
         </div>
       </div>
-    </div>
-    <div v-if="hasMoreUnassignedIssues" class="gl-p-3 gl-pr-0 gl-sticky gl-left-0 gl-max-w-full">
-      <gl-button
-        category="tertiary"
-        variant="info"
-        class="gl-w-full"
-        @click="fetchMoreUnassignedIssues()"
+      <div
+        v-if="hasMoreUnassignedIssues"
+        class="gl-p-3 gl-sticky gl-left-0"
+        style="max-width: 100vw"
       >
-        {{ s__('Board|Load more issues') }}
-      </gl-button>
+        <gl-button
+          category="tertiary"
+          variant="confirm"
+          class="gl-w-full"
+          @click="fetchMoreUnassignedIssues()"
+        >
+          {{ s__('Board|Load more issues') }}
+        </gl-button>
+      </div>
+      <!-- placeholder for some space below lane lists -->
+      <div v-else class="gl-pb-5"></div>
     </div>
+
+    <transition name="slide" @after-enter="afterFormEnters">
+      <board-add-new-column v-if="addColumnFormVisible" class="gl-sticky gl-top-5" />
+    </transition>
   </div>
 </template>

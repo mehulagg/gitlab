@@ -7,6 +7,14 @@ class Projects::TemplatesController < Projects::ApplicationController
 
   feature_category :templates
 
+  def index
+    templates = @template_type.template_subsets(project)
+
+    respond_to do |format|
+      format.json { render json: templates.to_json }
+    end
+  end
+
   def show
     template = @template_type.find(params[:key], project)
 
@@ -16,10 +24,8 @@ class Projects::TemplatesController < Projects::ApplicationController
   end
 
   def names
-    templates = @template_type.dropdown_names(project)
-
     respond_to do |format|
-      format.json { render json: templates }
+      format.json { render json: TemplateFinder.all_template_names_hash_or_array(project, params[:template_type].to_s) }
     end
   end
 

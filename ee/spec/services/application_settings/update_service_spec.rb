@@ -35,24 +35,32 @@ RSpec.describe ApplicationSettings::UpdateService do
     end
 
     context 'elasticsearch_indexing update' do
+      let(:helper) { Gitlab::Elastic::Helper.new }
+
+      before do
+        allow(Gitlab::Elastic::Helper).to receive(:new).and_return(helper)
+      end
+
       context 'index creation' do
         let(:opts) { { elasticsearch_indexing: true } }
 
-        context 'when index exists' do
-          it 'skips creating a new index' do
-            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
-            expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
+        context 'when index does not exist' do
+          it 'creates a new index' do
+            expect(helper).to receive(:create_empty_index).with(options: { skip_if_exists: true })
+            expect(helper).to receive(:create_standalone_indices).with(options: { skip_if_exists: true })
+            expect(helper).to receive(:migrations_index_exists?).and_return(false)
+            expect(helper).to receive(:create_migrations_index)
 
             service.execute
           end
         end
 
-        context 'when index does not exist' do
-          it 'creates a new index' do
-            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
-            expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
+        context 'when ES service is not reachable' do
+          it 'does not throw exception' do
+            expect(helper).to receive(:index_exists?).and_raise(Faraday::ConnectionFailed, nil)
+            expect(helper).not_to receive(:create_standalone_indices)
 
-            service.execute
+            expect { service.execute }.not_to raise_error
           end
         end
       end
@@ -161,6 +169,87 @@ RSpec.describe ApplicationSettings::UpdateService do
               expect(ElasticsearchIndexedProject.pluck(:project_id)).to eq([projects.first.id, projects.second.id])
             end
           end
+        end
+
+        context 'setting number_of_shards and number_of_replicas' do
+          let(:alias_name) { 'alias-name' }
+
+          it 'accepts hash values' do
+            opts = { elasticsearch_shards: { alias_name => 10 }, elasticsearch_replicas: { alias_name => 2 } }
+
+            described_class.new(setting, user, opts).execute
+
+            setting = Elastic::IndexSetting[alias_name]
+            expect(setting.number_of_shards).to eq(10)
+            expect(setting.number_of_replicas).to eq(2)
+          end
+
+          it 'accepts legacy (integer) values' do
+            opts = { elasticsearch_shards: 32, elasticsearch_replicas: 3 }
+
+            described_class.new(setting, user, opts).execute
+
+            Elastic::IndexSetting.every_alias do |setting|
+              expect(setting.number_of_shards).to eq(32)
+              expect(setting.number_of_replicas).to eq(3)
+            end
+          end
+        end
+      end
+    end
+
+    context 'user cap setting' do
+      shared_examples 'worker is not called' do
+        it 'does not call ApproveBlockedPendingApprovalUsersWorker' do
+          expect(ApproveBlockedPendingApprovalUsersWorker).not_to receive(:perform_async)
+
+          service.execute
+        end
+      end
+
+      shared_examples 'worker is called' do
+        it 'calls ApproveBlockedPendingApprovalUsersWorker' do
+          expect(ApproveBlockedPendingApprovalUsersWorker).to receive(:perform_async)
+
+          service.execute
+        end
+      end
+
+      context 'when new user cap is set to nil' do
+        context 'when changing new user cap to any number' do
+          let(:opts) { { new_user_signups_cap: 10 } }
+
+          include_examples 'worker is not called'
+        end
+
+        context 'when leaving new user cap set to nil' do
+          let(:opts) { { new_user_signups_cap: nil } }
+
+          include_examples 'worker is not called'
+        end
+      end
+
+      context 'when new user cap is set to a number' do
+        let(:setting) do
+          create(:application_setting, new_user_signups_cap: 10)
+        end
+
+        context 'when decreasing new user cap' do
+          let(:opts) { { new_user_signups_cap: 8 } }
+
+          include_examples 'worker is not called'
+        end
+
+        context 'when increasing new user cap' do
+          let(:opts) { { new_user_signups_cap: 15 } }
+
+          include_examples 'worker is called'
+        end
+
+        context 'when changing user cap to nil' do
+          let(:opts) { { new_user_signups_cap: nil } }
+
+          include_examples 'worker is called'
         end
       end
     end

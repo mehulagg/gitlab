@@ -9,27 +9,19 @@ module OperationsHelper
     end
   end
 
-  def alerts_service
-    strong_memoize(:alerts_service) do
-      @project.find_or_initialize_service(::AlertsService.to_param)
-    end
-  end
-
   def alerts_settings_data(disabled: false)
     {
       'prometheus_activated' => prometheus_service.manual_configuration?.to_s,
-      'activated' => alerts_service.activated?.to_s,
       'prometheus_form_path' => scoped_integration_path(prometheus_service),
-      'form_path' => scoped_integration_path(alerts_service),
       'prometheus_reset_key_path' => reset_alerting_token_project_settings_operations_path(@project),
       'prometheus_authorization_key' => @project.alerting_setting&.token,
       'prometheus_api_url' => prometheus_service.api_url,
-      'authorization_key' => alerts_service.token,
       'prometheus_url' => notify_project_prometheus_alerts_url(@project, format: :json),
-      'url' => alerts_service.url,
-      'alerts_setup_url' => help_page_path('operations/incident_management/alert_integrations.md', anchor: 'generic-http-endpoint'),
+      'alerts_setup_url' => help_page_path('operations/incident_management/integrations.md', anchor: 'configuration'),
       'alerts_usage_url' => project_alert_management_index_path(@project),
-      'disabled' => disabled.to_s
+      'disabled' => disabled.to_s,
+      'project_path' => @project.full_path,
+      'multi_integrations' => 'false'
     }
   end
 

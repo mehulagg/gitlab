@@ -13,6 +13,7 @@ module EE
           unless list&.movable? || list&.closed?
             issues = without_assignees_from_lists(issues)
             issues = without_milestones_from_lists(issues)
+            issues = without_iterations_from_lists(issues)
           end
 
           case list&.list_type
@@ -20,16 +21,18 @@ module EE
             with_assignee(super)
           when 'milestone'
             with_milestone(super)
+          when 'iteration'
+            with_iteration(super)
           else
             super
           end
         end
 
-        override :issues_label_links
+        override :label_links
         # rubocop: disable CodeReuse/ActiveRecord
-        def issues_label_links
+        def label_links(label_ids)
           if has_valid_milestone?
-            super.where("issues.milestone_id = ?", board.milestone_id)
+            super.where(issues: { milestone_id: board.milestone_id })
           else
             super
           end
@@ -52,6 +55,18 @@ module EE
         def all_milestone_lists
           if parent.feature_available?(:board_milestone_lists)
             board.lists.milestone.where.not(milestone_id: nil)
+          else
+            ::List.none
+          end
+        end
+        # rubocop: enable CodeReuse/ActiveRecord
+
+        # rubocop: disable CodeReuse/ActiveRecord
+        def all_iteration_lists
+          # Note that the names are very similar but these are different.
+          # One is a license name and the other is a feature flag
+          if parent.feature_available?(:board_iteration_lists) && ::Feature.enabled?(:iteration_board_lists, parent, default_enabled: :yaml)
+            board.lists.iteration.where.not(iteration_id: nil)
           else
             ::List.none
           end
@@ -85,6 +100,14 @@ module EE
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
+        # rubocop: disable CodeReuse/ActiveRecord
+        def without_iterations_from_lists(issues)
+          return issues if all_iteration_lists.empty?
+
+          issues.not_in_iterations(all_iteration_lists.select(:iteration_id))
+        end
+        # rubocop: enable CodeReuse/ActiveRecord
+
         def with_assignee(issues)
           issues.assigned_to(list.user)
         end
@@ -94,6 +117,10 @@ module EE
           issues.where(milestone_id: list.milestone_id)
         end
         # rubocop: enable CodeReuse/ActiveRecord
+
+        def with_iteration(issues)
+          issues.in_iterations(list.iteration_id)
+        end
 
         # Prevent filtering by milestone stubs
         # like Milestone::Upcoming, Milestone::Started etc

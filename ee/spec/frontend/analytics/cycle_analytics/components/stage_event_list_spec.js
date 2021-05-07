@@ -1,7 +1,7 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import StageEventList from 'ee/analytics/cycle_analytics/components/stage_event_list.vue';
-import StageEventItem from 'ee/analytics/cycle_analytics/components/stage_event_item.vue';
 import StageBuildItem from 'ee/analytics/cycle_analytics/components/stage_build_item.vue';
+import StageEventItem from 'ee/analytics/cycle_analytics/components/stage_event_item.vue';
+import StageEventList from 'ee/analytics/cycle_analytics/components/stage_event_list.vue';
 
 import {
   issueStage,
@@ -18,7 +18,7 @@ import {
   codeEvents,
 } from '../mock_data';
 
-const generateEvents = n =>
+const generateEvents = (n) =>
   Array(n)
     .fill(issueEvents[0])
     .map((ev, k) => ({ ...ev, title: `event-${k}`, id: k }));

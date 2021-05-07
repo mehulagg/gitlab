@@ -10,13 +10,10 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
 
   before_action :feature_flag, only: [:edit, :update, :destroy]
 
-  before_action :ensure_legacy_flags_writable!, only: [:update]
+  before_action :ensure_flag_writable!, only: [:update]
 
   before_action do
     push_frontend_feature_flag(:feature_flag_permissions)
-    push_frontend_feature_flag(:feature_flags_new_version, project, default_enabled: true)
-    push_frontend_feature_flag(:feature_flags_legacy_read_only, project, default_enabled: true)
-    push_frontend_feature_flag(:feature_flags_legacy_read_only_override, project)
   end
 
   feature_category :feature_flags
@@ -77,7 +74,7 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
       end
     else
       respond_to do |format|
-        format.json { render_error_json(result[:message]) }
+        format.json { render_error_json(result[:message], result[:http_status]) }
       end
     end
   end
@@ -101,21 +98,11 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   protected
 
   def feature_flag
-    @feature_flag ||= @noteable = if new_version_feature_flags_enabled?
-                                    project.operations_feature_flags.find_by_iid!(params[:iid])
-                                  else
-                                    project.operations_feature_flags.legacy_flag.find_by_iid!(params[:iid])
-                                  end
+    @feature_flag ||= @noteable = project.operations_feature_flags.find_by_iid!(params[:iid])
   end
 
-  def new_version_feature_flags_enabled?
-    ::Feature.enabled?(:feature_flags_new_version, project, default_enabled: true)
-  end
-
-  def ensure_legacy_flags_writable!
-    if ::Feature.enabled?(:feature_flags_legacy_read_only, project, default_enabled: true) &&
-        ::Feature.disabled?(:feature_flags_legacy_read_only_override, project) &&
-        feature_flag.legacy_flag?
+  def ensure_flag_writable!
+    if feature_flag.legacy_flag?
       render_error_json(['Legacy feature flags are read-only'])
     end
   end
@@ -167,8 +154,8 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
     render json: feature_flag_json(feature_flag), status: :ok
   end
 
-  def render_error_json(messages)
+  def render_error_json(messages, status = :bad_request)
     render json: { message: messages },
-           status: :bad_request
+           status: status
   end
 end

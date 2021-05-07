@@ -21,6 +21,10 @@ class Issue < ApplicationRecord
   include IdInOrdered
   include Presentable
   include IssueAvailableFeatures
+  include Todoable
+  include FromUnion
+
+  extend ::Gitlab::Utils::Override
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -47,7 +51,7 @@ class Issue < ApplicationRecord
   belongs_to :moved_to, class_name: 'Issue'
   has_one :moved_from, class_name: 'Issue', foreign_key: :moved_to_id
 
-  has_internal_id :iid, scope: :project, track_if: -> { !importing? }, init: ->(s) { s&.project&.issues&.maximum(:iid) }
+  has_internal_id :iid, scope: :project, track_if: -> { !importing? }
 
   has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
@@ -83,11 +87,13 @@ class Issue < ApplicationRecord
   enum issue_type: {
     issue: 0,
     incident: 1,
-    test_case: 2 ## EE-only
+    test_case: 2, ## EE-only
+    requirement: 3 ## EE-only
   }
 
-  alias_attribute :parent_ids, :project_id
   alias_method :issuing_parent, :project
+
+  alias_attribute :external_author, :service_desk_reply_to
 
   scope :in_projects, ->(project_ids) { where(project_id: project_ids) }
   scope :not_in_projects, ->(project_ids) { where.not(project_id: project_ids) }
@@ -103,20 +109,21 @@ class Issue < ApplicationRecord
   scope :order_due_date_desc, -> { reorder(::Gitlab::Database.nulls_last_order('due_date', 'DESC')) }
   scope :order_closest_future_date, -> { reorder(Arel.sql('CASE WHEN issues.due_date >= CURRENT_DATE THEN 0 ELSE 1 END ASC, ABS(CURRENT_DATE - issues.due_date) ASC')) }
   scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
+  scope :order_relative_position_desc, -> { reorder(::Gitlab::Database.nulls_first_order('relative_position', 'DESC')) }
   scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
   scope :order_severity_asc, -> { includes(:issuable_severity).order('issuable_severities.severity ASC NULLS FIRST') }
   scope :order_severity_desc, -> { includes(:issuable_severity).order('issuable_severities.severity DESC NULLS LAST') }
 
   scope :preload_associated_models, -> { preload(:assignees, :labels, project: :namespace) }
-  scope :with_web_entity_associations, -> { preload(:author, :project) }
-  scope :with_api_entity_associations, -> { preload(:timelogs, :assignees, :author, :notes, :labels, project: [:route, { namespace: :route }] ) }
+  scope :with_web_entity_associations, -> { preload(:author, project: [:project_feature, :route, namespace: :route]) }
+  scope :preload_awardable, -> { preload(:award_emoji) }
   scope :with_label_attributes, ->(label_attributes) { joins(:labels).where(labels: label_attributes) }
   scope :with_alert_management_alerts, -> { joins(:alert_management_alert) }
   scope :with_prometheus_alert_events, -> { joins(:issues_prometheus_alert_events) }
   scope :with_self_managed_prometheus_alert_events, -> { joins(:issues_self_managed_prometheus_alert_events) }
   scope :with_api_entity_associations, -> {
-    preload(:timelogs, :closed_by, :assignees, :author, :notes, :labels,
+    preload(:timelogs, :closed_by, :assignees, :author, :labels,
       milestone: { project: [:route, { namespace: :route }] },
       project: [:route, { namespace: :route }])
   }
@@ -128,7 +135,7 @@ class Issue < ApplicationRecord
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
-  scope :inc_relations_for_view, -> { includes(author: :status) }
+  scope :inc_relations_for_view, -> { includes(author: :status, assignees: :status) }
 
   # An issue can be uniquely identified by project_id and iid
   # Takes one or more sets of composite IDs, expressed as hash-like records of
@@ -187,7 +194,8 @@ class Issue < ApplicationRecord
   end
 
   def self.relative_positioning_query_base(issue)
-    in_projects(issue.parent_ids)
+    projects = issue.project.group&.root_ancestor&.all_projects || issue.project
+    in_projects(projects)
   end
 
   def self.relative_positioning_parent_column
@@ -305,6 +313,7 @@ class Issue < ApplicationRecord
     !moved? && persisted? &&
       user.can?(:admin_issue, self.project)
   end
+  alias_method :can_clone?, :can_move?
 
   def to_branch_name
     if self.confidential?
@@ -327,13 +336,17 @@ class Issue < ApplicationRecord
     related_issues = ::Issue
                        .select(['issues.*', 'issue_links.id AS issue_link_id',
                                 'issue_links.link_type as issue_link_type_value',
-                                'issue_links.target_id as issue_link_source_id'])
+                                'issue_links.target_id as issue_link_source_id',
+                                'issue_links.created_at as issue_link_created_at',
+                                'issue_links.updated_at as issue_link_updated_at'])
                        .joins("INNER JOIN issue_links ON
 	                             (issue_links.source_id = issues.id AND issue_links.target_id = #{id})
 	                             OR
 	                             (issue_links.target_id = issues.id AND issue_links.source_id = #{id})")
                        .preload(preload)
                        .reorder('issue_link_id')
+
+    related_issues = yield related_issues if block_given?
 
     cross_project_filter = -> (issues) { issues.where(project: project) }
     Ability.issues_readable_by_user(related_issues,
@@ -427,10 +440,32 @@ class Issue < ApplicationRecord
     moved_to || duplicated_to
   end
 
+  def supports_assignee?
+    issue_type_supports?(:assignee)
+  end
+
+  def email_participants_emails
+    issue_email_participants.pluck(:email)
+  end
+
+  def email_participants_emails_downcase
+    issue_email_participants.pluck(IssueEmailParticipant.arel_table[:email].lower)
+  end
+
+  def issue_assignee_user_ids
+    issue_assignees.pluck(:user_id)
+  end
+
   private
 
+  # Ensure that the metrics association is safely created and respecting the unique constraint on issue_id
+  override :ensure_metrics
   def ensure_metrics
-    super
+    if !association(:metrics).loaded? || metrics.blank?
+      metrics_record = Issue::Metrics.safe_find_or_create_by(issue: self)
+      self.metrics = metrics_record
+    end
+
     metrics.record!
   end
 

@@ -2,19 +2,17 @@
   jasmine/no-global-setup, no-underscore-dangle, no-console
 */
 
+import { config as testUtilsConfig } from '@vue/test-utils';
+import jasmineDiff from 'jasmine-diff';
 import $ from 'jquery';
 import 'core-js/features/set-immediate';
 import 'vendor/jasmine-jquery';
 import '~/commons';
 import Vue from 'vue';
-import jasmineDiff from 'jasmine-diff';
-import { config as testUtilsConfig } from '@vue/test-utils';
+import { getDefaultAdapter } from '~/lib/utils/axios_utils';
 import Translate from '~/vue_shared/translate';
 
-import { getDefaultAdapter } from '~/lib/utils/axios_utils';
 import { FIXTURES_PATH, TEST_HOST } from './test_constants';
-
-import customMatchers from './matchers';
 
 // Tech debt issue TBD
 testUtilsConfig.logModifiedComponents = false;
@@ -30,7 +28,7 @@ Vue.config.warnHandler = (msg, vm, trace) => {
   const currentStack = new Error().stack;
   const isInVueTestUtils = currentStack
     .split('\n')
-    .some(line => line.startsWith('    at VueWrapper.setProps ('));
+    .some((line) => line.startsWith('    at VueWrapper.setProps ('));
   if (isInVueTestUtils) {
     return;
   }
@@ -40,7 +38,7 @@ Vue.config.warnHandler = (msg, vm, trace) => {
 };
 
 let hasVueErrors = false;
-Vue.config.errorHandler = function(err) {
+Vue.config.errorHandler = function (err) {
   hasVueErrors = true;
   fail(err);
 };
@@ -58,7 +56,6 @@ beforeAll(() => {
       inline: window.__karma__.config.color,
     }),
   );
-  jasmine.addMatchers(customMatchers);
 });
 
 // globalize common libraries
@@ -75,23 +72,15 @@ gon.relative_url_root = '';
 
 let hasUnhandledPromiseRejections = false;
 
-window.addEventListener('unhandledrejection', event => {
+window.addEventListener('unhandledrejection', (event) => {
   hasUnhandledPromiseRejections = true;
   console.error('Unhandled promise rejection:');
   console.error(event.reason.stack || event.reason);
 });
 
-// HACK: Chrome 59 disconnects if there are too many synchronous tests in a row
-// because it appears to lock up the thread that communicates to Karma's socket
-// This async beforeEach gets called on every spec and releases the JS thread long
-// enough for the socket to continue to communicate.
-// The downside is that it creates a minor performance penalty in the time it takes
-// to run our unit tests.
-beforeEach(done => done());
-
 let longRunningTestTimeoutHandle;
 
-beforeEach(done => {
+beforeEach((done) => {
   longRunningTestTimeoutHandle = setTimeout(() => {
     done.fail('Test is running too long!');
   }, 4000);
@@ -111,15 +100,15 @@ if (process.env.IS_EE) {
   testContexts.push(require.context('ee_spec', true, /_spec$/));
 }
 
-testContexts.forEach(context => {
-  context.keys().forEach(path => {
+testContexts.forEach((context) => {
+  context.keys().forEach((path) => {
     try {
       context(path);
     } catch (err) {
       console.log(err);
       console.error('[GL SPEC RUNNER ERROR] Unable to load spec: ', path);
-      describe('Test bundle', function() {
-        it(`includes '${path}'`, function() {
+      describe('Test bundle', function () {
+        it(`includes '${path}'`, function () {
           expect(err).toBeNull();
         });
       });
@@ -128,7 +117,7 @@ testContexts.forEach(context => {
 });
 
 describe('test errors', () => {
-  beforeAll(done => {
+  beforeAll((done) => {
     if (hasUnhandledPromiseRejections || hasVueWarnings || hasVueErrors) {
       setTimeout(done, 1000);
     } else {

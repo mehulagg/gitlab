@@ -1,6 +1,4 @@
-@import './pages/admin';
 @import './pages/branches';
-@import './pages/builds';
 @import './pages/ci_projects';
 @import './pages/clusters';
 @import './pages/commits';
@@ -11,14 +9,11 @@
 @import './pages/events';
 @import './pages/groups';
 @import './pages/help';
-@import './pages/import';
-@import './pages/incident_management_list';
 @import './pages/issuable';
 @import './pages/issues/issue_count_badge';
 @import './pages/issues';
 @import './pages/labels';
 @import './pages/login';
-@import './pages/members';
 @import './pages/merge_requests';
 @import './pages/monitor';
 @import './pages/note_form';
@@ -30,7 +25,7 @@
 @import './pages/profiles/preferences';
 @import './pages/projects';
 @import './pages/prometheus';
-@import './pages/runners';
+@import './pages/registry';
 @import './pages/search';
 @import './pages/service_desk';
 @import './pages/settings';
@@ -38,5 +33,4 @@
 @import './pages/sherlock';
 @import './pages/storage_quota';
 @import './pages/tree';
-@import './pages/trials';
 @import './pages/users';

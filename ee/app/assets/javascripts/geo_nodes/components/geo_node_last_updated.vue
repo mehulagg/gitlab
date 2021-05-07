@@ -65,7 +65,7 @@ export default {
       name="question"
       class="text-primary-600 ml-1 cursor-pointer"
     />
-    <gl-popover :target="() => $refs.lastUpdated.$el" placement="top" triggers="hover focus">
+    <gl-popover :target="() => $refs.lastUpdated.$el" placement="top">
       <p>{{ syncTimeAgo.popoverText }}</p>
       <gl-link class="mt-3 gl-font-sm" :href="syncHelp.link" target="_blank">{{
         syncHelp.text

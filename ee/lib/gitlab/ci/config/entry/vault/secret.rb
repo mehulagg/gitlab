@@ -40,15 +40,15 @@ module Gitlab
 
               def secret
                 @secret ||= begin
-                              secret, engine_path = secret_and_engine
-                              secret_path, _, secret_field = secret.rpartition('/')
+                  secret, engine_path = secret_and_engine
+                  secret_path, _, secret_field = secret.rpartition('/')
 
-                              {
-                                engine_path: engine_path,
-                                secret_path: secret_path,
-                                secret_field: secret_field
-                              }
-                            end
+                  {
+                    engine_path: engine_path,
+                    secret_path: secret_path,
+                    secret_field: secret_field
+                  }
+                end
               end
 
               def secret_and_engine

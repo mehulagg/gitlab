@@ -1,25 +1,15 @@
 # frozen_string_literal: true
 
-class ProjectUpdateRepositoryStorageWorker
-  include ApplicationWorker
-
+# This is a compatibility class to avoid calling a non-existent
+# class from sidekiq during deployment.
+#
+# This class was moved to a namespace in https://gitlab.com/gitlab-org/gitlab/-/issues/299853.
+# we cannot remove this class entirely because there can be jobs
+# referencing it.
+#
+# We can get rid of this class in 14.0
+# https://gitlab.com/gitlab-org/gitlab/-/issues/322393
+class ProjectUpdateRepositoryStorageWorker < Projects::UpdateRepositoryStorageWorker
   idempotent!
-  feature_category :gitaly
   urgency :throttled
-
-  def perform(project_id, new_repository_storage_key, repository_storage_move_id = nil)
-    repository_storage_move =
-      if repository_storage_move_id
-        ProjectRepositoryStorageMove.find(repository_storage_move_id)
-      else
-        # maintain compatibility with workers queued before release
-        project = Project.find(project_id)
-        project.repository_storage_moves.create!(
-          source_storage_name: project.repository_storage,
-          destination_storage_name: new_repository_storage_key
-        )
-      end
-
-    ::Projects::UpdateRepositoryStorageService.new(repository_storage_move).execute
-  end
 end

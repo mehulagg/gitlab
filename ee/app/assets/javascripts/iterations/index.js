@@ -2,14 +2,21 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import Iterations from './components/iterations.vue';
+import App from './components/app.vue';
 import IterationForm from './components/iteration_form.vue';
 import IterationReport from './components/iteration_report.vue';
+import Iterations from './components/iterations.vue';
+import createRouter from './router';
 
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      batchMax: 1,
+    },
+  ),
 });
 
 export function initIterationsList(namespaceType) {
@@ -54,10 +61,12 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
 
   const {
     fullPath,
+    hasScopedLabelsFeature,
     iterationId,
-    iterationIid,
+    labelsFetchPath,
     editIterationPath,
     previewMarkdownPath,
+    svgPath,
   } = el.dataset;
   const canEdit = parseBoolean(el.dataset.canEdit);
 
@@ -68,12 +77,14 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
       return createElement(IterationReport, {
         props: {
           fullPath,
+          hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
           iterationId,
-          iterationIid,
+          labelsFetchPath,
           canEdit,
           editIterationPath,
           namespaceType,
           previewMarkdownPath,
+          svgPath,
           initiallyEditing,
         },
       });
@@ -81,4 +92,26 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   });
 }
 
-export default {};
+export function initCadenceApp() {
+  const el = document.querySelector('.js-iteration-cadence-app');
+
+  if (!el) {
+    return null;
+  }
+
+  const { groupFullPath: groupPath, cadencesListPath } = el.dataset;
+  const router = createRouter(cadencesListPath);
+
+  return new Vue({
+    el,
+    router,
+    apolloProvider,
+    provide: {
+      groupPath,
+      cadencesListPath,
+    },
+    render(createElement) {
+      return createElement(App);
+    },
+  });
+}

@@ -1,54 +1,48 @@
 <script>
+import { GlSearchBoxByType } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { mapActions } from 'vuex';
-import { GlIcon } from '@gitlab/ui';
-import eventHub from '../event_hub';
+import { mapVuexModuleActions, mapVuexModuleState } from '~/lib/utils/vuex_module_mappers';
+import Tracking from '~/tracking';
 import frequentItemsMixin from './frequent_items_mixin';
+
+const trackingMixin = Tracking.mixin();
 
 export default {
   components: {
-    GlIcon,
+    GlSearchBoxByType,
   },
-  mixins: [frequentItemsMixin],
+  mixins: [frequentItemsMixin, trackingMixin],
+  inject: ['vuexModule'],
   data() {
     return {
       searchQuery: '',
     };
   },
   computed: {
+    ...mapVuexModuleState((vm) => vm.vuexModule, ['dropdownType']),
     translations() {
       return this.getTranslations(['searchInputPlaceholder']);
     },
   },
   watch: {
     searchQuery: debounce(function debounceSearchQuery() {
+      this.track('type_search_query', {
+        label: `${this.dropdownType}_dropdown_frequent_items_search_input`,
+      });
       this.setSearchQuery(this.searchQuery);
     }, 500),
   },
-  mounted() {
-    eventHub.$on(`${this.namespace}-dropdownOpen`, this.setFocus);
-  },
-  beforeDestroy() {
-    eventHub.$off(`${this.namespace}-dropdownOpen`, this.setFocus);
-  },
   methods: {
-    ...mapActions(['setSearchQuery']),
-    setFocus() {
-      this.$refs.search.focus();
-    },
+    ...mapVuexModuleActions((vm) => vm.vuexModule, ['setSearchQuery']),
   },
 };
 </script>
 
 <template>
   <div class="search-input-container d-none d-sm-block">
-    <input
-      ref="search"
+    <gl-search-box-by-type
       v-model="searchQuery"
       :placeholder="translations.searchInputPlaceholder"
-      type="search"
-      class="form-control"
     />
-    <gl-icon v-if="!searchQuery" name="search" class="search-icon" />
   </div>
 </template>

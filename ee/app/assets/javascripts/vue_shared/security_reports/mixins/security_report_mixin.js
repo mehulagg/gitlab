@@ -1,5 +1,5 @@
-import { sprintf, s__ } from '~/locale';
 import { spriteIcon } from '~/lib/utils/common_utils';
+import { sprintf, s__ } from '~/locale';
 
 // Securely open external links in a new tab.
 function getLinkStartTag(url) {
@@ -88,11 +88,24 @@ export default {
     },
     coverageFuzzingPopover() {
       return {
-        title: s__('ciReport|Coverage Fuzzing Title'),
+        title: s__('ciReport|Coverage Fuzzing'),
         content: sprintf(
           s__('ciReport|%{linkStartTag}Learn more about Coverage Fuzzing %{linkEndTag}'),
           {
             linkStartTag: getLinkStartTag(this.coverageFuzzingHelpPath),
+            linkEndTag,
+          },
+          false,
+        ),
+      };
+    },
+    apiFuzzingPopover() {
+      return {
+        title: s__('ciReport|API Fuzzing'),
+        content: sprintf(
+          s__('ciReport|%{linkStartTag}Learn more about API Fuzzing%{linkEndTag}'),
+          {
+            linkStartTag: getLinkStartTag(this.apiFuzzingHelpPath),
             linkEndTag,
           },
           false,

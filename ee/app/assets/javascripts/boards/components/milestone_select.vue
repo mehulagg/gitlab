@@ -65,7 +65,9 @@ export default {
       } else if (milestone.title === NO_MILESTONE) {
         id = 0;
       }
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.milestone_id = id;
+      // eslint-disable-next-line vue/no-mutating-props
       this.board.milestone = {
         ...milestone,
         id,
@@ -84,9 +86,10 @@ export default {
       </button>
     </div>
     <div :class="milestoneTitleClass" class="value">{{ milestoneTitle }}</div>
-    <div class="selectbox" style="display: none;">
+    <div class="selectbox" style="display: none">
       <input :value="milestoneId" name="milestone_id" type="hidden" />
       <div class="dropdown">
+        <!-- eslint-disable @gitlab/vue-no-data-toggle -->
         <button
           ref="dropdownButton"
           :data-selected="selected"
@@ -108,6 +111,8 @@ export default {
             :size="16"
           />
         </button>
+        <!-- eslint-enable @gitlab/vue-no-data-toggle -->
+
         <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
           <div class="dropdown-input">
             <input

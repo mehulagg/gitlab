@@ -1,20 +1,21 @@
 ---
 stage: Manage
 group: Access
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: reference, howto
 ---
 
 # Project access tokens
 
-NOTE: **Note:**
-Project access tokens are supported for self-managed instances on Core and above. They are also supported on GitLab.com Bronze and above.
+NOTE:
+Project access tokens are supported for self-managed instances on Free and above. They are also supported on GitLab SaaS Premium and above (excluding [trial licenses](https://about.gitlab.com/free-trial/)).
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2587) in GitLab 13.0.
-> - It was [deployed](https://gitlab.com/groups/gitlab-org/-/epics/2587) behind a feature flag, disabled by default.
-> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/218722) in GitLab 13.3.
-> - [Became available on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/235765) in 13.5.
-> - It's recommended for production use.
+> - [Became available on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/235765) in GitLab 13.5 for paid groups only.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235765) in GitLab 13.5.
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
 
 Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
 
@@ -35,8 +36,10 @@ For examples of how you can use a project access token to authenticate with the 
 
 ## Project bot users
 
-For each project access token created, a bot user will also be created and added to the project with
-["Maintainer" level permissions](../../permissions.md#project-members-permissions).
+Project bot users are [GitLab-created service accounts](../../../subscriptions/self_managed/index.md#billable-users) and do not count as licensed seats.
+
+For each project access token created, a bot user is created and added to the project with
+[Maintainer level permissions](../../permissions.md#project-members-permissions).
 
 For the bot:
 
@@ -46,15 +49,15 @@ For the bot:
 
 API calls made with a project access token are associated with the corresponding bot user.
 
-These users will appear in **Members** but can not be modified.
-Furthermore, the bot user can not be added to any other project.
+These bot users are included in a project's **Members** list but cannot be modified. Also, a bot
+user cannot be added to any other project.
 
 - The username is set to `project_{project_id}_bot` for the first access token, such as `project_123_bot`.
 - The username is set to `project_{project_id}_bot{bot_count}` for further access tokens, such as `project_123_bot1`.
 
-When the project access token is [revoked](#revoking-a-project-access-token) the bot user is then deleted and all records are moved to a system-wide user with the username "Ghost User". For more information, see [Associated Records](../../profile/account/delete_account.md#associated-records).
-
-Project bot users are [GitLab-created service accounts](../../../subscriptions/self_managed/index.md#choose-the-number-of-users) and do not count as licensed seats.
+When the project access token is [revoked](#revoking-a-project-access-token) the bot user is deleted
+and all records are moved to a system-wide user with the username "Ghost User". For more
+information, see [Associated Records](../../profile/account/delete_account.md#associated-records).
 
 ## Revoking a project access token
 
@@ -69,9 +72,15 @@ the following table.
 
 | Scope              |  Description |
 | ------------------ |  ----------- |
-| `api`              | Grants complete read/write access to the scoped project API. |
-| `read_api`         | Grants read access to the scoped project API. |
+| `api`              | Grants complete read/write access to the scoped project API, including the [Package Registry](../../packages/package_registry/index.md). |
+| `read_api`         | Grants read access to the scoped project API, including the [Package Registry](../../packages/package_registry/index.md). |
 | `read_registry`    | Allows read-access (pull) to [container registry](../../packages/container_registry/index.md) images if a project is private and authorization is required. |
 | `write_registry`   | Allows write-access (push) to [container registry](../../packages/container_registry/index.md). |
 | `read_repository`  | Allows read-only access (pull) to the repository. |
 | `write_repository` | Allows read-write access (pull, push) to the repository. |
+
+## Enable or disable project access token creation
+
+You may enable or disable project access token creation for all projects in a group in **Group > Settings > General > Permissions, LFS, 2FA > Allow project access token creation**.
+Even when creation is disabled, you can still use and revoke existing project access tokens.
+This setting is available only on top-level groups.

@@ -17,7 +17,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
   def raise_and_wrap(wrapper, original)
     raise original
   rescue original.class
-    raise wrapper.new('boom')
+    raise wrapper, 'boom'
   end
 
   def wrapped_exception(wrapper, original)
@@ -195,7 +195,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
     end
 
     it 'returns false when we do not need to check the replica status' do
-      Timecop.freeze do
+      freeze_time do
         allow(host)
           .to receive(:last_checked_at)
           .and_return(Time.zone.now)
@@ -379,6 +379,36 @@ RSpec.describe Gitlab::Database::LoadBalancing::Host do
         .and_raise(wrapped_error)
 
       expect(host.caught_up?('foo')).to eq(false)
+    end
+  end
+
+  describe '#database_replica_location' do
+    let(:connection) { double(:connection) }
+
+    it 'returns the write ahead location of the replica', :aggregate_failures do
+      expect(host)
+        .to receive(:query_and_release)
+              .and_return({ 'location' => '0/D525E3A8' })
+
+      expect(host.database_replica_location).to be_an_instance_of(String)
+    end
+
+    it 'returns nil when the database query returned no rows' do
+      expect(host)
+        .to receive(:query_and_release)
+              .and_return({})
+
+      expect(host.database_replica_location).to be_nil
+    end
+
+    it 'returns nil when the database connection fails' do
+      wrapped_error = wrapped_exception(ActionView::Template::Error, StandardError)
+
+      allow(host)
+        .to receive(:connection)
+              .and_raise(wrapped_error)
+
+      expect(host.database_replica_location).to be_nil
     end
   end
 

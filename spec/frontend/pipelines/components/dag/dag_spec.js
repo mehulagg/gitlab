@@ -1,10 +1,10 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlEmptyState } from '@gitlab/ui';
-import Dag from '~/pipelines/components/dag/dag.vue';
-import DagGraph from '~/pipelines/components/dag/dag_graph.vue';
-import DagAnnotations from '~/pipelines/components/dag/dag_annotations.vue';
-
+import { mount, shallowMount } from '@vue/test-utils';
 import { ADD_NOTE, REMOVE_NOTE, REPLACE_NOTES } from '~/pipelines/components/dag/constants';
+import Dag from '~/pipelines/components/dag/dag.vue';
+import DagAnnotations from '~/pipelines/components/dag/dag_annotations.vue';
+import DagGraph from '~/pipelines/components/dag/dag_graph.vue';
+
 import { PARSE_FAILURE, UNSUPPORTED_DATA } from '~/pipelines/constants';
 import {
   mockParsedGraphQLNodes,
@@ -21,7 +21,7 @@ describe('Pipeline DAG graph wrapper', () => {
   const getAllAlerts = () => wrapper.findAll(GlAlert);
   const getGraph = () => wrapper.find(DagGraph);
   const getNotes = () => wrapper.find(DagAnnotations);
-  const getErrorText = type => wrapper.vm.$options.errorTexts[type];
+  const getErrorText = (type) => wrapper.vm.$options.errorTexts[type];
   const getEmptyState = () => wrapper.find(GlEmptyState);
 
   const createComponent = ({

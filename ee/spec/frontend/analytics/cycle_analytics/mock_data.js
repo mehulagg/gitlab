@@ -1,27 +1,31 @@
 import { uniq } from 'lodash';
-import { TEST_HOST } from 'helpers/test_constants';
-import { getJSONFixture } from 'helpers/fixtures';
-import mutations from 'ee/analytics/cycle_analytics/store/mutations';
-import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import {
   DEFAULT_DAYS_IN_PAST,
   TASKS_BY_TYPE_SUBJECT_ISSUE,
+  OVERVIEW_STAGE_CONFIG,
+  PAGINATION_TYPE,
+  PAGINATION_SORT_DIRECTION_DESC,
+  PAGINATION_SORT_FIELD_END_EVENT,
 } from 'ee/analytics/cycle_analytics/constants';
-import { toYmd } from 'ee/analytics/shared/utils';
+import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
+import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 import {
   getTasksByTypeData,
   transformRawTasksByTypeData,
   transformStagesForPathNavigation,
 } from 'ee/analytics/cycle_analytics/utils';
+import { toYmd } from 'ee/analytics/shared/utils';
+import { getJSONFixture } from 'helpers/fixtures';
+import { TEST_HOST } from 'helpers/test_constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { getDateInPast, getDatesInRange } from '~/lib/utils/datetime_utility';
 
 const fixtureEndpoints = {
   customizableCycleAnalyticsStagesAndEvents: 'analytics/value_stream_analytics/stages.json', // customizable stages and events endpoint
-  stageEvents: stage => `analytics/value_stream_analytics/stages/${stage}/records.json`,
-  stageMedian: stage => `analytics/value_stream_analytics/stages/${stage}/median.json`,
-  recentActivityData: 'analytics/value_stream_analytics/summary.json',
-  timeMetricsData: 'analytics/value_stream_analytics/time_summary.json',
+  stageEvents: (stage) => `analytics/value_stream_analytics/stages/${stage}/records.json`,
+  stageMedian: (stage) => `analytics/value_stream_analytics/stages/${stage}/median.json`,
+  recentActivityData: 'analytics/metrics/value_stream_analytics/summary.json',
+  timeMetricsData: 'analytics/metrics/value_stream_analytics/time_summary.json',
   groupLabels: 'api/group_labels.json',
 };
 
@@ -29,7 +33,7 @@ export const endpoints = {
   groupLabels: /groups\/[A-Z|a-z|\d|\-|_]+\/-\/labels.json/,
   recentActivityData: /analytics\/value_stream_analytics\/summary/,
   timeMetricsData: /analytics\/value_stream_analytics\/time_summary/,
-  durationData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/duration_chart/,
+  durationData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/average_duration_chart/,
   stageData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/records/,
   stageMedian: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/median/,
   baseStagesEndpoint: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages$/,
@@ -38,7 +42,10 @@ export const endpoints = {
   valueStreamData: /analytics\/value_stream_analytics\/value_streams/,
 };
 
-export const valueStreams = [{ id: 1, name: 'Value stream 1' }, { id: 2, name: 'Value stream 2' }];
+export const valueStreams = [
+  { id: 1, name: 'Value stream 1' },
+  { id: 2, name: 'Value stream 2' },
+];
 
 export const groupLabels = getJSONFixture(fixtureEndpoints.groupLabels).map(
   convertObjectPropsToCamelCase,
@@ -55,7 +62,7 @@ export const group = {
 export const currentGroup = convertObjectPropsToCamelCase(group, { deep: true });
 
 const getStageByTitle = (stages, title) =>
-  stages.find(stage => stage.title && stage.title.toLowerCase().trim() === title) || {};
+  stages.find((stage) => stage.title && stage.title.toLowerCase().trim() === title) || {};
 
 export const recentActivityData = getJSONFixture(fixtureEndpoints.recentActivityData);
 export const timeMetricsData = getJSONFixture(fixtureEndpoints.timeMetricsData);
@@ -65,6 +72,30 @@ export const customizableStagesAndEvents = getJSONFixture(
 );
 
 const dummyState = {};
+
+export const defaultStageConfig = [
+  {
+    name: 'issue',
+    custom: false,
+    relativePosition: 1,
+    startEventIdentifier: 'issue_created',
+    endEventIdentifier: 'issue_stage_end',
+  },
+  {
+    name: 'plan',
+    custom: false,
+    relativePosition: 2,
+    startEventIdentifier: 'plan_stage_start',
+    endEventIdentifier: 'issue_first_mentioned_in_commit',
+  },
+  {
+    name: 'code',
+    custom: false,
+    relativePosition: 3,
+    startEventIdentifier: 'code_stage_start',
+    endEventIdentifier: 'merge_request_created',
+  },
+];
 
 // prepare the raw stage data for our components
 mutations[types.RECEIVE_GROUP_STAGES_SUCCESS](dummyState, customizableStagesAndEvents.stages);
@@ -78,7 +109,7 @@ export const stagingStage = getStageByTitle(dummyState.stages, 'staging');
 
 export const allowedStages = [issueStage, planStage, codeStage];
 
-const deepCamelCase = obj => convertObjectPropsToCamelCase(obj, { deep: true });
+const deepCamelCase = (obj) => convertObjectPropsToCamelCase(obj, { deep: true });
 
 export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging'];
 
@@ -90,20 +121,24 @@ const stageFixtures = defaultStages.reduce((acc, stage) => {
   };
 }, {});
 
-export const stageMedians = defaultStages.reduce((acc, stage) => {
-  const { value } = getJSONFixture(fixtureEndpoints.stageMedian(stage));
-  return {
-    ...acc,
-    [stage]: value,
-  };
-}, {});
+export const rawStageMedians = defaultStages.map((id) => ({
+  id,
+  ...getJSONFixture(fixtureEndpoints.stageMedian(id)),
+}));
 
-export const stageMediansWithNumericIds = defaultStages.reduce((acc, stage) => {
-  const { value } = getJSONFixture(fixtureEndpoints.stageMedian(stage));
-  const { id } = getStageByTitle(dummyState.stages, stage);
-  return {
+export const stageMedians = rawStageMedians.reduce(
+  (acc, { id, value }) => ({
     ...acc,
     [id]: value,
+  }),
+  {},
+);
+
+export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id, value }) => {
+  const { id: stageId } = getStageByTitle(dummyState.stages, id);
+  return {
+    ...acc,
+    [stageId]: value,
   };
 }, {});
 
@@ -117,6 +152,7 @@ export const codeEvents = deepCamelCase(stageFixtures.code);
 export const testEvents = deepCamelCase(stageFixtures.test);
 export const stagingEvents = deepCamelCase(stageFixtures.staging);
 export const rawCustomStage = {
+  name: 'Coolest beans stage',
   title: 'Coolest beans stage',
   hidden: false,
   legend: '',
@@ -132,24 +168,24 @@ export const medians = stageMedians;
 export const rawCustomStageEvents = customizableStagesAndEvents.events;
 export const camelCasedStageEvents = rawCustomStageEvents.map(deepCamelCase);
 
-export const customStageLabelEvents = camelCasedStageEvents.filter(ev => ev.type === 'label');
-export const customStageStartEvents = camelCasedStageEvents.filter(ev => ev.canBeStartEvent);
+export const customStageLabelEvents = camelCasedStageEvents.filter((ev) => ev.type === 'label');
+export const customStageStartEvents = camelCasedStageEvents.filter((ev) => ev.canBeStartEvent);
 
 // get all the possible stop events
-const allowedEndEventIds = new Set(customStageStartEvents.flatMap(e => e.allowedEndEvents));
-export const customStageStopEvents = camelCasedStageEvents.filter(ev =>
+const allowedEndEventIds = new Set(customStageStartEvents.flatMap((e) => e.allowedEndEvents));
+export const customStageStopEvents = camelCasedStageEvents.filter((ev) =>
   allowedEndEventIds.has(ev.identifier),
 );
 
 export const customStageEvents = uniq(
   [...customStageStartEvents, ...customStageStopEvents],
   false,
-  ev => ev.identifier,
+  (ev) => ev.identifier,
 );
 
 export const labelStartEvent = customStageLabelEvents[0];
 export const labelStopEvent = customStageLabelEvents.find(
-  ev => ev.identifier === labelStartEvent.allowedEndEvents[0],
+  (ev) => ev.identifier === labelStartEvent.allowedEndEvents[0],
 );
 
 export const rawCustomStageFormErrors = {
@@ -161,30 +197,34 @@ export const customStageFormErrors = convertObjectPropsToCamelCase(rawCustomStag
 
 const dateRange = getDatesInRange(startDate, endDate, toYmd);
 
-export const apiTasksByTypeData = getJSONFixture('analytics/type_of_work/tasks_by_type.json').map(
-  labelData => {
-    // add data points for our mock date range
-    const maxValue = 10;
-    const series = dateRange.map(date => [date, Math.floor(Math.random() * Math.floor(maxValue))]);
-    return {
-      ...labelData,
-      series,
-    };
-  },
-);
+export const apiTasksByTypeData = getJSONFixture(
+  'analytics/charts/type_of_work/tasks_by_type.json',
+).map((labelData) => {
+  // add data points for our mock date range
+  const maxValue = 10;
+  const series = dateRange.map((date) => [date, Math.floor(Math.random() * Math.floor(maxValue))]);
+  return {
+    ...labelData,
+    series,
+  };
+});
 
 export const rawTasksByTypeData = transformRawTasksByTypeData(apiTasksByTypeData);
 export const transformedTasksByTypeData = getTasksByTypeData(apiTasksByTypeData);
 
 export const transformedStagePathData = transformStagesForPathNavigation({
-  stages: allowedStages,
+  stages: [{ ...OVERVIEW_STAGE_CONFIG }, ...allowedStages],
   medians,
   selectedStage: issueStage,
 });
 
 export const tasksByTypeData = {
   seriesNames: ['Cool label', 'Normal label'],
-  data: [[0, 1, 2], [5, 2, 3], [2, 4, 1]],
+  data: [
+    [0, 1, 2],
+    [5, 2, 3],
+    [2, 4, 1],
+  ],
   groupBy: ['Group 1', 'Group 2', 'Group 3'],
 };
 
@@ -204,12 +244,12 @@ export const taskByTypeFilters = {
 
 export const rawDurationData = [
   {
-    duration_in_seconds: 1234000,
-    finished_at: '2019-01-01T00:00:00.000Z',
+    average_duration_in_seconds: 1234000,
+    date: '2019-01-01T00:00:00.000Z',
   },
   {
-    duration_in_seconds: 4321000,
-    finished_at: '2019-01-02T00:00:00.000Z',
+    average_duration_in_seconds: 4321000,
+    date: '2019-01-02T00:00:00.000Z',
   },
 ];
 
@@ -227,25 +267,25 @@ export const transformedDurationData = [
 ];
 
 export const flattenedDurationData = [
-  { duration_in_seconds: 1234000, finished_at: '2019-01-01' },
-  { duration_in_seconds: 4321000, finished_at: '2019-01-02' },
-  { duration_in_seconds: 1234000, finished_at: '2019-01-01' },
-  { duration_in_seconds: 4321000, finished_at: '2019-01-02' },
+  { average_duration_in_seconds: 1234000, date: '2019-01-01' },
+  { average_duration_in_seconds: 4321000, date: '2019-01-02' },
+  { average_duration_in_seconds: 1234000, date: '2019-01-01' },
+  { average_duration_in_seconds: 4321000, date: '2019-01-02' },
 ];
 
 export const durationChartPlottableData = [
-  ['2019-01-01', 29, '2019-01-01'],
-  ['2019-01-02', 100, '2019-01-02'],
+  ['2019-01-01', 14, '2019-01-01'],
+  ['2019-01-02', 50, '2019-01-02'],
 ];
 
 export const rawDurationMedianData = [
   {
-    duration_in_seconds: 1234000,
-    finished_at: '2018-12-01T00:00:00.000Z',
+    average_duration_in_seconds: 1234000,
+    date: '2018-12-01T00:00:00.000Z',
   },
   {
-    duration_in_seconds: 4321000,
-    finished_at: '2018-12-02T00:00:00.000Z',
+    average_duration_in_seconds: 4321000,
+    date: '2018-12-02T00:00:00.000Z',
   },
 ];
 
@@ -264,5 +304,18 @@ export const selectedProjects = [
   },
 ];
 
-// Value returned from JSON fixture is 345600 for issue stage which equals 4d
-export const pathNavIssueMetric = '4d';
+export const pathNavIssueMetric = 172800;
+
+export const initialPaginationState = {
+  page: null,
+  hasNextPage: false,
+  sort: PAGINATION_SORT_FIELD_END_EVENT,
+  direction: PAGINATION_SORT_DIRECTION_DESC,
+};
+
+export const basePaginationResult = {
+  pagination: PAGINATION_TYPE,
+  sort: PAGINATION_SORT_FIELD_END_EVENT,
+  direction: PAGINATION_SORT_DIRECTION_DESC,
+  page: null,
+};

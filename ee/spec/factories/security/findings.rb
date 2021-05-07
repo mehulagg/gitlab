@@ -7,7 +7,7 @@ FactoryBot.define do
 
     severity { :critical }
     confidence { :high }
+    uuid { SecureRandom.uuid }
     project_fingerprint { generate(:project_fingerprint) }
-    sequence :position
   end
 end

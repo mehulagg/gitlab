@@ -10,6 +10,7 @@ RSpec.describe Vulnerabilities::ResolveService do
   end
 
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project) } # cannot use let_it_be here: caching causes problems with permission-related tests
   let(:vulnerability) { create(:vulnerability, project: project) }
   let(:service) { described_class.new(user, vulnerability) }
@@ -22,9 +23,10 @@ RSpec.describe Vulnerabilities::ResolveService do
     end
 
     it_behaves_like 'calls vulnerability statistics utility services in order'
+    it_behaves_like 'removes dismissal feedback from associated findings'
 
     it 'resolves a vulnerability' do
-      Timecop.freeze do
+      freeze_time do
         resolve_vulnerability
 
         expect(vulnerability.reload).to(
@@ -50,7 +52,12 @@ RSpec.describe Vulnerabilities::ResolveService do
   end
 
   describe 'permissions' do
-    it { expect { resolve_vulnerability }.to be_allowed_for(:admin) }
+    context 'when admin mode is enabled', :enable_admin_mode do
+      it { expect { resolve_vulnerability }.to be_allowed_for(:admin) }
+    end
+    context 'when admin mode is disabled' do
+      it { expect { resolve_vulnerability }.to be_denied_for(:admin) }
+    end
     it { expect { resolve_vulnerability }.to be_allowed_for(:owner).of(project) }
     it { expect { resolve_vulnerability }.to be_allowed_for(:maintainer).of(project) }
     it { expect { resolve_vulnerability }.to be_allowed_for(:developer).of(project) }

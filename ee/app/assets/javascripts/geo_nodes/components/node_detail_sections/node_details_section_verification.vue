@@ -48,7 +48,9 @@ export default {
     },
     itemValue(nodeDetailItem) {
       return {
-        totalCount: nodeDetailItem.itemValue.totalCount,
+        totalCount: this.nodeTypePrimary
+          ? nodeDetailItem.itemValue.checksumTotalCount
+          : nodeDetailItem.itemValue.verificationTotalCount,
         successCount: this.nodeTypePrimary
           ? nodeDetailItem.itemValue.checksumSuccessCount
           : nodeDetailItem.itemValue.verificationSuccessCount,
@@ -84,7 +86,7 @@ export default {
         name="question"
         class="text-primary-600 ml-1 cursor-pointer"
       />
-      <gl-popover :target="() => $refs.verificationInfo.$el" placement="top" triggers="hover focus">
+      <gl-popover :target="() => $refs.verificationInfo.$el" placement="top">
         <p>
           <gl-sprintf
             :message="

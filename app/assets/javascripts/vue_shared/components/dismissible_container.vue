@@ -22,7 +22,7 @@ export default {
         .post(this.path, {
           feature_name: this.featureId,
         })
-        .catch(e => {
+        .catch((e) => {
           // eslint-disable-next-line @gitlab/require-i18n-strings, no-console
           console.error('Failed to dismiss message.', e);
         });
@@ -45,7 +45,7 @@ export default {
           data-testid="close"
           @click="dismiss"
         >
-          <gl-icon name="close" aria-hidden="true" class="gl-text-gray-500" />
+          <gl-icon name="close" class="gl-text-gray-500" />
         </button>
       </div>
     </div>

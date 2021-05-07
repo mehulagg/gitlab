@@ -26,14 +26,19 @@ module ApplicationSettingsHelper
     end
   end
 
-  def storage_weights
-    ApplicationSetting.repository_storages_weighted_attributes.map do |attribute|
-      storage = attribute.to_s.delete_prefix('repository_storages_weighted_')
+  def kroki_available_formats
+    ApplicationSetting.kroki_formats_attributes.map do |key, value|
       {
-        name: attribute,
-        label: storage,
-        value: @application_setting.repository_storages_weighted[storage] || 0
+        name: "kroki_formats_#{key}",
+        label: value[:label],
+        value: @application_setting.kroki_formats[key] || false
       }
+    end
+  end
+
+  def storage_weights
+    Gitlab.config.repositories.storages.keys.each_with_object(OpenStruct.new) do |storage, weights|
+      weights[storage.to_sym] = @application_setting.repository_storages_weighted[storage] || 0
     end
   end
 
@@ -49,12 +54,12 @@ module ApplicationSettingsHelper
     all_protocols_enabled? || Gitlab::CurrentSettings.enabled_git_access_protocol == 'http'
   end
 
-  def enabled_project_button(project, protocol)
+  def enabled_protocol_button(container, protocol)
     case protocol
     when 'ssh'
-      ssh_clone_button(project, append_link: false)
+      ssh_clone_button(container, append_link: false)
     else
-      http_clone_button(project, append_link: false)
+      http_clone_button(container, append_link: false)
     end
   end
 
@@ -97,15 +102,20 @@ module ApplicationSettingsHelper
   def oauth_providers_checkboxes
     button_based_providers.map do |source|
       disabled = @application_setting.disabled_oauth_sign_in_sources.include?(source.to_s)
-      css_class = ['btn']
-      css_class << 'active' unless disabled
-      checkbox_name = 'application_setting[enabled_oauth_sign_in_sources][]'
       name = Gitlab::Auth::OAuth::Provider.label_for(source)
+      checkbox_name = 'application_setting[enabled_oauth_sign_in_sources][]'
+      checkbox_id = "application_setting_enabled_oauth_sign_in_sources_#{name.parameterize(separator: '_')}"
 
-      label_tag(checkbox_name, class: css_class.join(' ')) do
-        check_box_tag(checkbox_name, source, !disabled,
-                      autocomplete: 'off',
-                      id: name.tr(' ', '_')) + name
+      content_tag :div, class: 'form-check' do
+        check_box_tag(
+          checkbox_name,
+          source,
+          !disabled,
+          autocomplete: 'off',
+          id: checkbox_id,
+          class: 'form-check-input'
+        ) +
+        label_tag(checkbox_id, name, class: 'form-check-label')
       end
     end
   end
@@ -169,6 +179,7 @@ module ApplicationSettingsHelper
   def visible_attributes
     [
       :abuse_notification_email,
+      :admin_mode,
       :after_sign_out_path,
       :after_sign_up_text,
       :akismet_api_key,
@@ -181,7 +192,7 @@ module ApplicationSettingsHelper
       :asset_proxy_enabled,
       :asset_proxy_secret_key,
       :asset_proxy_url,
-      :asset_proxy_whitelist,
+      :asset_proxy_allowlist,
       :static_objects_external_storage_auth_token,
       :static_objects_external_storage_url,
       :authorized_keys_enabled,
@@ -198,15 +209,16 @@ module ApplicationSettingsHelper
       :default_project_visibility,
       :default_projects_limit,
       :default_snippet_visibility,
+      :disable_feed_token,
       :disabled_oauth_sign_in_sources,
-      :domain_blacklist,
-      :domain_blacklist_enabled,
-      # TODO Remove domain_blacklist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
-      :domain_blacklist_raw,
-      :domain_whitelist,
-      # TODO Remove domain_whitelist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
-      :domain_whitelist_raw,
-      :outbound_local_requests_whitelist_raw,
+      :domain_denylist,
+      :domain_denylist_enabled,
+      # TODO Remove domain_denylist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
+      :domain_denylist_raw,
+      :domain_allowlist,
+      # TODO Remove domain_allowlist_raw in APIv5 (See https://gitlab.com/gitlab-org/gitlab-foss/issues/67204)
+      :domain_allowlist_raw,
+      :outbound_local_requests_allowlist_raw,
       :dsa_key_restriction,
       :ecdsa_key_restriction,
       :ed25519_key_restriction,
@@ -217,7 +229,11 @@ module ApplicationSettingsHelper
       :email_author_in_body,
       :enabled_git_access_protocol,
       :enforce_terms,
+      :external_pipeline_validation_service_timeout,
+      :external_pipeline_validation_service_token,
+      :external_pipeline_validation_service_url,
       :first_day_of_week,
+      :floc_enabled,
       :force_pages_access_control,
       :gitaly_timeout_default,
       :gitaly_timeout_medium,
@@ -241,6 +257,8 @@ module ApplicationSettingsHelper
       :housekeeping_incremental_repack_period,
       :html_emails_enabled,
       :import_sources,
+      :in_product_marketing_emails_enabled,
+      :invisible_captcha_enabled,
       :max_artifacts_size,
       :max_attachment_size,
       :max_import_size,
@@ -254,6 +272,10 @@ module ApplicationSettingsHelper
       :password_authentication_enabled_for_git,
       :performance_bar_allowed_group_path,
       :performance_bar_enabled,
+      :personal_access_token_prefix,
+      :kroki_enabled,
+      :kroki_url,
+      :kroki_formats,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
@@ -281,6 +303,7 @@ module ApplicationSettingsHelper
       :sourcegraph_public_only,
       :spam_check_endpoint_enabled,
       :spam_check_endpoint_url,
+      :spam_check_api_key,
       :terminal_max_session_time,
       :terms,
       :throttle_authenticated_api_enabled,
@@ -289,9 +312,15 @@ module ApplicationSettingsHelper
       :throttle_authenticated_web_enabled,
       :throttle_authenticated_web_period_in_seconds,
       :throttle_authenticated_web_requests_per_period,
+      :throttle_authenticated_packages_api_enabled,
+      :throttle_authenticated_packages_api_period_in_seconds,
+      :throttle_authenticated_packages_api_requests_per_period,
       :throttle_unauthenticated_enabled,
       :throttle_unauthenticated_period_in_seconds,
       :throttle_unauthenticated_requests_per_period,
+      :throttle_unauthenticated_packages_api_enabled,
+      :throttle_unauthenticated_packages_api_period_in_seconds,
+      :throttle_unauthenticated_packages_api_requests_per_period,
       :throttle_protected_paths_enabled,
       :throttle_protected_paths_period_in_seconds,
       :throttle_protected_paths_requests_per_period,
@@ -323,6 +352,8 @@ module ApplicationSettingsHelper
       :email_restrictions_enabled,
       :email_restrictions,
       :issues_create_limit,
+      :notes_create_limit,
+      :notes_create_limit_allowlist_raw,
       :raw_blob_request_limit,
       :project_import_limit,
       :project_export_limit,
@@ -331,7 +362,12 @@ module ApplicationSettingsHelper
       :group_export_limit,
       :group_download_export_limit,
       :wiki_page_max_content_bytes,
-      :container_registry_delete_tags_service_timeout
+      :container_registry_delete_tags_service_timeout,
+      :rate_limiting_response_text,
+      :container_registry_expiration_policies_worker_capacity,
+      :container_registry_cleanup_tags_service_max_list_size,
+      :keep_latest_artifact,
+      :whats_new_variant
     ]
   end
 
@@ -347,9 +383,11 @@ module ApplicationSettingsHelper
     ]
   end
 
+  # ok to remove in REST API v5
   def deprecated_attributes
     [
-      :admin_notification_email # ok to remove in REST API v5
+      :admin_notification_email,
+      :asset_proxy_whitelist
     ]
   end
 
@@ -358,7 +396,7 @@ module ApplicationSettingsHelper
   end
 
   def integration_expanded?(substring)
-    @application_setting.errors.any? { |k| k.to_s.start_with?(substring) }
+    @application_setting.errors.messages.any? { |k, _| k.to_s.start_with?(substring) }
   end
 
   def instance_clusters_enabled?
@@ -393,6 +431,10 @@ module ApplicationSettingsHelper
 
   def show_documentation_base_url_field?
     Feature.enabled?(:help_page_documentation_redirect)
+  end
+
+  def signup_enabled?
+    !!Gitlab::CurrentSettings.signup_enabled
   end
 end
 

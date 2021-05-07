@@ -109,7 +109,7 @@ RSpec.describe ChaosController do
 
   describe '#kill' do
     it 'calls synchronously' do
-      expect(Gitlab::Chaos).to receive(:kill).with(no_args)
+      expect(Gitlab::Chaos).to receive(:kill).with('KILL')
 
       get :kill
 
@@ -117,11 +117,48 @@ RSpec.describe ChaosController do
     end
 
     it 'calls asynchronously' do
-      expect(Chaos::KillWorker).to receive(:perform_async).with(no_args)
+      expect(Chaos::KillWorker).to receive(:perform_async).with('KILL')
 
       get :kill, params: { async: 1 }
 
       expect(response).to have_gitlab_http_status(:ok)
     end
+  end
+
+  describe '#quit' do
+    it 'calls synchronously' do
+      expect(Gitlab::Chaos).to receive(:kill).with('QUIT')
+
+      get :quit
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+
+    it 'calls asynchronously' do
+      expect(Chaos::KillWorker).to receive(:perform_async).with('QUIT')
+
+      get :quit, params: { async: 1 }
+
+      expect(response).to have_gitlab_http_status(:ok)
+    end
+  end
+
+  describe '#gc' do
+    let(:gc_stat) { GC.stat.stringify_keys }
+
+    it 'runs a full GC on the current web worker' do
+      expect(Prometheus::PidProvider).to receive(:worker_id).and_return('worker-0')
+      expect(Gitlab::Chaos).to receive(:run_gc).and_return(gc_stat)
+
+      post :gc
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response_json['worker_id']).to eq('worker-0')
+      expect(response_json['gc_stat']).to eq(gc_stat)
+    end
+  end
+
+  def response_json
+    Gitlab::Json.parse(response.body)
   end
 end

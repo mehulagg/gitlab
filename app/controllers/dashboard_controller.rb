@@ -11,7 +11,6 @@ class DashboardController < Dashboard::ApplicationController
   before_action :projects, only: [:issues, :merge_requests]
   before_action :set_show_full_reference, only: [:issues, :merge_requests]
   before_action :check_filters_presence!, only: [:issues, :merge_requests]
-  before_action :set_not_query_feature_flag
 
   respond_to :html
 
@@ -33,6 +32,21 @@ class DashboardController < Dashboard::ApplicationController
   protected
 
   def load_events
+    @events =
+      if params[:filter] == "followed"
+        load_user_events
+      else
+        load_project_events
+      end
+
+    Events::RenderService.new(current_user).execute(@events)
+  end
+
+  def load_user_events
+    UserRecentEventsFinder.new(current_user, current_user.followees, event_filter, params).execute
+  end
+
+  def load_project_events
     projects =
       if params[:filter] == "starred"
         ProjectsFinder.new(current_user: current_user, params: { starred: true }).execute
@@ -40,12 +54,10 @@ class DashboardController < Dashboard::ApplicationController
         current_user.authorized_projects
       end
 
-    @events = EventCollection
+    EventCollection
       .new(projects, offset: params[:offset].to_i, filter: event_filter)
       .to_a
       .map(&:present)
-
-    Events::RenderService.new(current_user).execute(@events)
   end
 
   def set_show_full_reference

@@ -129,7 +129,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
     let(:output) { StringIO.new }
 
     before do
-      allow(File).to receive(:read).with(structure_file).and_return(input)
+      stub_file_read(structure_file, content: input)
       allow(File).to receive(:open).with(structure_file, any_args).and_yield(output)
     end
 
@@ -235,8 +235,8 @@ RSpec.describe 'gitlab:db namespace rake task' do
     let(:indexes) { double('indexes') }
 
     context 'when no index_name is given' do
-      it 'rebuilds a random number of large indexes' do
-        expect(Gitlab::Database::Reindexing).to receive_message_chain('candidate_indexes.random_few').and_return(indexes)
+      it 'uses all candidate indexes' do
+        expect(Gitlab::Database::Reindexing).to receive(:candidate_indexes).and_return(indexes)
         expect(Gitlab::Database::Reindexing).to receive(:perform).with(indexes)
 
         run_rake_task('gitlab:db:reindex')
@@ -246,18 +246,127 @@ RSpec.describe 'gitlab:db namespace rake task' do
     context 'with index name given' do
       let(:index) { double('index') }
 
+      before do
+        allow(Gitlab::Database::Reindexing).to receive(:candidate_indexes).and_return(indexes)
+      end
+
       it 'calls the index rebuilder with the proper arguments' do
-        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.foo_idx').and_return(index)
+        allow(indexes).to receive(:where).with(identifier: 'public.foo_idx').and_return([index])
         expect(Gitlab::Database::Reindexing).to receive(:perform).with([index])
 
         run_rake_task('gitlab:db:reindex', '[public.foo_idx]')
       end
 
       it 'raises an error if the index does not exist' do
-        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.absent_index').and_raise(ActiveRecord::RecordNotFound)
+        allow(indexes).to receive(:where).with(identifier: 'public.absent_index').and_return([])
 
-        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(ActiveRecord::RecordNotFound)
+        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(/Index not found/)
       end
+
+      it 'raises an error if the index is not fully qualified with a schema' do
+        expect { run_rake_task('gitlab:db:reindex', '[foo_idx]') }.to raise_error(/Index name is not fully qualified/)
+      end
+    end
+  end
+
+  describe 'active' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:task) { 'gitlab:db:active' }
+    let(:self_monitoring) { double('self_monitoring') }
+
+    where(:needs_migration, :self_monitoring_project, :project_count, :exit_status, :exit_code) do
+      true | nil | nil | 1 | false
+      false | :self_monitoring | 1 | 1 | false
+      false | nil | 0 | 1 | false
+      false | :self_monitoring | 2 | 0 | true
+    end
+
+    with_them do
+      it 'exits 0 or 1 depending on user modifications to the database' do
+        allow_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(needs_migration)
+        allow_any_instance_of(ApplicationSetting).to receive(:self_monitoring_project).and_return(self_monitoring_project)
+        allow(Project).to receive(:count).and_return(project_count)
+
+        expect { run_rake_task(task) }.to raise_error do |error|
+          expect(error).to be_a(SystemExit)
+          expect(error.status).to eq(exit_status)
+          expect(error.success?).to be(exit_code)
+        end
+      end
+    end
+  end
+
+  describe '#migrate_with_instrumentation' do
+    subject { run_rake_task('gitlab:db:migration_testing') }
+
+    let(:ctx) { double('ctx', migrations: all_migrations, schema_migration: double, get_all_versions: existing_versions) }
+    let(:instrumentation) { instance_double(Gitlab::Database::Migrations::Instrumentation, observations: observations) }
+    let(:existing_versions) { [1] }
+    let(:all_migrations) { [double('migration1', version: 1), pending_migration] }
+    let(:pending_migration) { double('migration2', version: 2) }
+    let(:filename) { Gitlab::Database::Migrations::Instrumentation::STATS_FILENAME }
+    let!(:directory) { Dir.mktmpdir }
+    let(:observations) { %w[some data] }
+
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:migration_context).and_return(ctx)
+      allow(Gitlab::Database::Migrations::Instrumentation).to receive(:new).and_return(instrumentation)
+      allow(ActiveRecord::Migrator).to receive_message_chain('new.run').with(any_args).with(no_args)
+
+      allow(instrumentation).to receive(:observe).and_yield
+
+      allow(Dir).to receive(:mkdir)
+      allow(File).to receive(:exist?).with(directory).and_return(false)
+      stub_const('Gitlab::Database::Migrations::Instrumentation::RESULT_DIR', directory)
+    end
+
+    after do
+      FileUtils.rm_rf([directory])
+    end
+
+    it 'fails when the directory already exists' do
+      expect(File).to receive(:exist?).with(directory).and_return(true)
+
+      expect { subject }.to raise_error(/Directory exists/)
+    end
+
+    it 'instruments the pending migration' do
+      expect(instrumentation).to receive(:observe).with(2).and_yield
+
+      subject
+    end
+
+    it 'executes the pending migration' do
+      expect(ActiveRecord::Migrator).to receive_message_chain('new.run').with(:up, ctx.migrations, ctx.schema_migration, pending_migration.version).with(no_args)
+
+      subject
+    end
+
+    it 'writes observations out to JSON file' do
+      subject
+
+      expect(File.read(File.join(directory, filename))).to eq(observations.to_json)
+    end
+  end
+
+  describe '#execute_batched_migrations' do
+    subject { run_rake_task('gitlab:db:execute_batched_migrations') }
+
+    let(:migrations) { create_list(:batched_background_migration, 2) }
+    let(:runner) { instance_double('Gitlab::Database::BackgroundMigration::BatchedMigrationRunner') }
+
+    before do
+      allow(Gitlab::Database::BackgroundMigration::BatchedMigration).to receive_message_chain(:active, :queue_order).and_return(migrations)
+      allow(Gitlab::Database::BackgroundMigration::BatchedMigrationRunner).to receive(:new).and_return(runner)
+    end
+
+    it 'executes all migrations' do
+      migrations.each do |migration|
+        expect(runner).to receive(:run_entire_migration).with(migration)
+      end
+
+      subject
     end
   end
 

@@ -14,7 +14,9 @@ module DesignManagement
       attr_reader :sha, :issue_id, :actions
 
       def initialize(sha, issue_id, actions)
-        @sha, @issue_id, @actions = sha, issue_id, actions
+        @sha = sha
+        @issue_id = issue_id
+        @actions = actions
       end
 
       def message
@@ -43,10 +45,7 @@ module DesignManagement
     validates :sha, presence: true
     validates :sha, uniqueness: { case_sensitive: false, scope: :issue_id }
     validates :author, presence: true
-    # We are not validating the issue object as it incurs an extra query to fetch
-    # the record from the DB. Instead, we rely on the foreign key constraint to
-    # ensure referential integrity.
-    validates :issue_id, presence: true, unless: :importing?
+    validates :issue, presence: true, unless: :importing?
 
     sha_attribute :sha
 
@@ -95,7 +94,7 @@ module DesignManagement
 
         version
       end
-    rescue
+    rescue StandardError
       raise CouldNotCreateVersion.new(sha, issue_id, design_actions)
     end
 

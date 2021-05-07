@@ -48,17 +48,7 @@ RSpec.describe NetworkPolicies::DeleteResourceService do
       end
     end
 
-    context 'with Kubeclient::HttpError' do
-      before do
-        allow(kubeclient).to receive(:delete_network_policy).and_raise(Kubeclient::HttpError.new(500, 'system failure', nil))
-      end
-
-      it 'returns error response' do
-        expect(subject).to be_error
-        expect(subject.http_status).to eq(:bad_request)
-        expect(subject.message).not_to be_nil
-      end
-    end
+    include_examples 'responds to Kubeclient::HttpError', :delete_network_policy
 
     context 'with CiliumNetworkPolicy' do
       let(:manifest) do

@@ -5,13 +5,16 @@ require 'spec_helper'
 RSpec.describe 'Edit group settings' do
   include Select2Helper
 
-  let(:user) { create(:user) }
-  let(:developer) { create(:user) }
-  let(:group) { create(:group, path: 'foo') }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:group) { create(:group, name: 'Foo bar', path: 'foo') }
 
-  before do
+  before_all do
     group.add_owner(user)
     group.add_developer(developer)
+  end
+
+  before do
     sign_in(user)
   end
 
@@ -150,6 +153,23 @@ RSpec.describe 'Edit group settings' do
     end
   end
 
+  context 'enable delayed project removal' do
+    before do
+      stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+    end
+
+    let_it_be(:subgroup) { create(:group, parent: group) }
+
+    let(:form_group_selector) { '[data-testid="delayed-project-removal-form-group"]' }
+    let(:setting_field_selector) { '[data-testid="delayed-project-removal-checkbox"]' }
+    let(:setting_path) { edit_group_path(group, anchor: 'js-permissions-settings') }
+    let(:group_path) { edit_group_path(group) }
+    let(:subgroup_path) { edit_group_path(subgroup) }
+    let(:click_save_button) { save_permissions_group }
+
+    it_behaves_like 'a cascading setting'
+  end
+
   context 'when custom_project_templates feature' do
     let!(:subgroup) { create(:group, :public, parent: group) }
     let!(:subgroup_1) { create(:group, :public, parent: subgroup) }
@@ -220,7 +240,7 @@ RSpec.describe 'Edit group settings' do
       end
 
       context 'namespace is on the proper plan' do
-        let(:plan) { create(:gold_plan) }
+        let(:plan) { create(:ultimate_plan) }
 
         context 'when the group is a top parent group' do
           let(:selected_group) { group }
@@ -271,6 +291,64 @@ RSpec.describe 'Edit group settings' do
 
         it_behaves_like 'does not show custom project templates settings'
       end
+    end
+  end
+
+  describe 'merge request approval settings', :js do
+    let_it_be(:approval_settings) do
+      create(:group_merge_request_approval_setting, group: group, allow_author_approval: false)
+    end
+
+    context 'when feature flag is enabled and group is licensed' do
+      before do
+        stub_feature_flags(group_merge_request_approval_settings_feature_flag: true)
+        stub_licensed_features(group_merge_request_approval_settings: true)
+      end
+
+      it 'allows to save settings' do
+        visit edit_group_path(group)
+        wait_for_all_requests
+
+        expect(page).to have_content('Merge request approvals')
+
+        within('[data-testid="merge-request-approval-settings"]') do
+          click_button 'Expand'
+          checkbox = find('[data-testid="prevent-author-approval"] > input')
+
+          expect(checkbox).to be_checked
+
+          checkbox.set(false)
+          click_button 'Save changes'
+          wait_for_all_requests
+        end
+
+        visit edit_group_path(group)
+        wait_for_all_requests
+
+        within('[data-testid="merge-request-approval-settings"]') do
+          click_button 'Expand'
+          expect(find('[data-testid="prevent-author-approval"] > input')).not_to be_checked
+        end
+      end
+    end
+
+    context 'when feature flag is disabled and group is not licensed' do
+      before do
+        stub_feature_flags(group_merge_request_approval_settings_feature_flag: false)
+        stub_licensed_features(group_merge_request_approval_settings: false)
+      end
+
+      it 'is not visible' do
+        visit edit_group_path(group)
+
+        expect(page).not_to have_content('Merge request approvals')
+      end
+    end
+  end
+
+  def save_permissions_group
+    page.within('.gs-permissions') do
+      click_button 'Save changes'
     end
   end
 end

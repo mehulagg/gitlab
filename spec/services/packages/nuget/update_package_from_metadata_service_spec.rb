@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
-  let(:package) { create(:nuget_package) }
+  let(:package) { create(:nuget_package, :processing) }
   let(:package_file) { package.package_files.first }
   let(:service) { described_class.new(package_file) }
   let(:package_name) { 'DummyProject.DummyPackage' }
@@ -60,6 +60,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
             .to change { ::Packages::Package.count }.by(0)
             .and change { Packages::DependencyLink.count }.by(0)
           expect(package_file.reload.file_name).not_to eq(package_file_name)
+          expect(package_file.package).to be_processing
           expect(package_file.package.reload.name).not_to eq(package_name)
           expect(package_file.package.version).not_to eq(package_version)
         end
@@ -78,6 +79,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
 
         expect(package.reload.name).to eq(package_name)
         expect(package.version).to eq(package_version)
+        expect(package).to be_default
         expect(package_file.reload.file_name).to eq(package_file_name)
         # hard reset needed to properly reload package_file.file
         expect(Packages::PackageFile.find(package_file.id).file.size).not_to eq 0
@@ -184,6 +186,7 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
 
         expect(package.reload.name).to eq(package_name)
         expect(package.version).to eq(package_version)
+        expect(package).to be_default
         expect(package_file.reload.file_name).to eq(package_file_name)
         # hard reset needed to properly reload package_file.file
         expect(Packages::PackageFile.find(package_file.id).file.size).not_to eq 0
@@ -198,24 +201,26 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
       it_behaves_like 'raising an', ::Packages::Nuget::MetadataExtractionService::ExtractionError
     end
 
-    context 'with package file with a blank package name' do
-      before do
-        allow(service).to receive(:package_name).and_return('')
+    context 'with an invalid package name' do
+      invalid_names = [
+        '',
+        'My/package',
+        '../../../my_package',
+        '%2e%2e%2fmy_package'
+      ]
+
+      invalid_names.each do |invalid_name|
+        before do
+          allow(service).to receive(:package_name).and_return(invalid_name)
+        end
+
+        it_behaves_like 'raising an', ::Packages::Nuget::UpdatePackageFromMetadataService::InvalidMetadataError
       end
-
-      it_behaves_like 'raising an', ::Packages::Nuget::UpdatePackageFromMetadataService::InvalidMetadataError
-    end
-
-    context 'with package file with a blank package version' do
-      before do
-        allow(service).to receive(:package_version).and_return('')
-      end
-
-      it_behaves_like 'raising an', ::Packages::Nuget::UpdatePackageFromMetadataService::InvalidMetadataError
     end
 
     context 'with an invalid package version' do
       invalid_versions = [
+        '',
         '555',
         '1.2',
         '1./2.3',
@@ -224,13 +229,11 @@ RSpec.describe Packages::Nuget::UpdatePackageFromMetadataService, :clean_gitlab_
       ]
 
       invalid_versions.each do |invalid_version|
-        it "raises an error for version #{invalid_version}" do
+        before do
           allow(service).to receive(:package_version).and_return(invalid_version)
-
-          expect { subject }.to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Version is invalid')
-          expect(package_file.file_name).not_to include(invalid_version)
-          expect(package_file.file.file.path).not_to include(invalid_version)
         end
+
+        it_behaves_like 'raising an', ::Packages::Nuget::UpdatePackageFromMetadataService::InvalidMetadataError
       end
     end
   end

@@ -1,0 +1,5 @@
+---
+title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/lib/gitlab/elastic
+merge_request: 58381
+author: Abdul Wadood @abdulwd
+type: fixed

@@ -1,16 +1,16 @@
+import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import produce from 'immer';
+import { uniqueId } from 'lodash';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { uniqueId } from 'lodash';
-import produce from 'immer';
-import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
-import axios from '~/lib/utils/axios_utils';
 import createDefaultClient from '~/lib/graphql';
+import axios from '~/lib/utils/axios_utils';
 import activeDiscussionQuery from './graphql/queries/active_discussion.query.graphql';
 import getDesignQuery from './graphql/queries/get_design.query.graphql';
 import typeDefs from './graphql/typedefs.graphql';
+import { addPendingTodoToStore } from './utils/cache_update';
 import { extractTodoIdFromDeletePath, createPendingTodo } from './utils/design_management_utils';
 import { CREATE_DESIGN_TODO_EXISTS_ERROR } from './utils/error_messages';
-import { addPendingTodoToStore } from './utils/cache_update';
 
 Vue.use(VueApollo);
 
@@ -19,8 +19,7 @@ const resolvers = {
     updateActiveDiscussion: (_, { id = null, source }, { cache }) => {
       const sourceData = cache.readQuery({ query: activeDiscussionQuery });
 
-      const data = produce(sourceData, draftData => {
-        // eslint-disable-next-line no-param-reassign
+      const data = produce(sourceData, (draftData) => {
         draftData.activeDiscussion = {
           __typename: 'ActiveDiscussion',
           id,
@@ -74,7 +73,7 @@ const defaultClient = createDefaultClient(
   // Should be removed as soon as https://gitlab.com/gitlab-org/gitlab/issues/13495 is resolved
   {
     cacheConfig: {
-      dataIdFromObject: object => {
+      dataIdFromObject: (object) => {
         // eslint-disable-next-line no-underscore-dangle, @gitlab/require-i18n-strings
         if (object.__typename === 'Design') {
           return object.id && object.image ? `${object.id}-${object.image}` : uniqueId();

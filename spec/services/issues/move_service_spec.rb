@@ -206,6 +206,7 @@ RSpec.describe Issues::MoveService do
 
       context 'issue with a design', :clean_gitlab_redis_shared_state do
         let_it_be(:new_project) { create(:project) }
+
         let!(:design) { create(:design, :with_lfs_file, issue: old_issue) }
         let!(:note) { create(:diff_note_on_design, noteable: design, issue: old_issue, project: old_issue.project) }
         let(:subject) { move_service.execute(old_issue, new_project) }
@@ -243,6 +244,12 @@ RSpec.describe Issues::MoveService do
           expect(new_issue.designs.size).to eq(1)
           expect(new_issue.designs.first.notes.size).to eq(1)
         end
+      end
+
+      context 'issue relative position' do
+        let(:subject) { move_service.execute(old_issue, new_project) }
+
+        it_behaves_like 'copy or reset relative position'
       end
     end
 
@@ -321,21 +328,40 @@ RSpec.describe Issues::MoveService do
 
     before do
       authorized_project.add_developer(user)
+      authorized_project.add_developer(admin)
       authorized_project2.add_developer(user)
+      authorized_project2.add_developer(admin)
     end
 
     context 'multiple related issues' do
-      it 'moves all related issues and retains permissions' do
-        new_issue = move_service.execute(old_issue, new_project)
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it 'moves all related issues and retains permissions' do
+          new_issue = move_service.execute(old_issue, new_project)
 
-        expect(new_issue.related_issues(admin))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d, unauthorized_issue])
+          expect(new_issue.related_issues(admin))
+            .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d, unauthorized_issue])
 
-        expect(new_issue.related_issues(user))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
+          expect(new_issue.related_issues(user))
+            .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
 
-        expect(authorized_issue_d.related_issues(user))
-          .to match_array([new_issue])
+          expect(authorized_issue_d.related_issues(user))
+            .to match_array([new_issue])
+        end
+      end
+
+      context 'when admin mode is disabled' do
+        it 'moves all related issues and retains permissions' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.related_issues(admin))
+              .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
+
+          expect(new_issue.related_issues(user))
+              .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
+
+          expect(authorized_issue_d.related_issues(user))
+              .to match_array([new_issue])
+        end
       end
     end
   end

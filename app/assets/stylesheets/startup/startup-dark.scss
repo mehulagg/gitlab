@@ -903,7 +903,7 @@ table a code {
   padding: 0;
   background-color: #4f4f4f;
 }
-.dropdown-menu .badge.badge-pill + span:not(.badge.badge-pill) {
+.dropdown-menu .badge.badge-pill + span:not(.badge):not(.badge-pill) {
   margin-right: 40px;
 }
 .dropdown-select {
@@ -1031,6 +1031,7 @@ body.gl-dark .logo-text svg {
 }
 body.gl-dark .navbar-gitlab {
   background-color: #2e2e2e;
+  box-shadow: 0 1px 0 0 var(--gray-100);
 }
 body.gl-dark .navbar-gitlab .navbar-sub-nav li.active > a,
 body.gl-dark .navbar-gitlab .navbar-sub-nav li.active > button,
@@ -1242,8 +1243,8 @@ body.gl-dark .navbar-gitlab .search form {
   line-height: 18px;
   margin: 4px 0 4px 2px;
 }
-.title-container .badge.badge-pill,
-.navbar-nav .badge.badge-pill {
+.title-container .badge.badge-pill:not(.merge-request-badge),
+.navbar-nav .badge.badge-pill:not(.merge-request-badge) {
   position: inherit;
   font-weight: 400;
   margin-left: -6px;

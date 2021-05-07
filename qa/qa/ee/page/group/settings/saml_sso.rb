@@ -10,8 +10,8 @@ module QA
               element :identity_provider_sso_field
               element :certificate_fingerprint_field
               element :default_membership_role_dropdown
-              element :enforced_sso_toggle_button
-              element :group_managed_accounts_toggle_button
+              element :enforced_sso_checkbox
+              element :group_managed_accounts_checkbox
               element :save_changes_button
             end
 
@@ -35,43 +35,43 @@ module QA
               select_element(:default_membership_role_dropdown, role)
             end
 
-            def has_enforced_sso_button?
-              has_button = has_element?(:enforced_sso_toggle_button, wait: 5)
-              QA::Runtime::Logger.debug "has_enforced_sso_button?: #{has_button}"
-              has_button
+            def has_enforced_sso_checkbox?
+              has_checkbox = has_element?(:enforced_sso_checkbox, visible: false, wait: 5)
+              QA::Runtime::Logger.debug "has_enforced_sso_checkbox?: #{has_checkbox}"
+              has_checkbox
             end
 
             def enforce_sso_enabled?
-              enabled = has_enforced_sso_button? && find_element(:enforced_sso_toggle_button).find('input', visible: :all)[:value] == 'true'
+              enabled = has_enforced_sso_checkbox? && find_element(:enforced_sso_checkbox, visible: false).checked?
               QA::Runtime::Logger.debug "enforce_sso_enabled?: #{enabled}"
               enabled
             end
 
             def enforce_sso
-              click_element :enforced_sso_toggle_button unless enforce_sso_enabled?
+              check_element(:enforced_sso_checkbox, true) unless enforce_sso_enabled?
               Support::Waiter.wait_until(raise_on_failure: true) { enforce_sso_enabled? }
             end
 
             def disable_enforced_sso
-              click_element :enforced_sso_toggle_button if enforce_sso_enabled?
+              uncheck_element(:enforced_sso_checkbox, true) if enforce_sso_enabled?
               Support::Waiter.wait_until(raise_on_failure: true) { !enforce_sso_enabled? }
             end
 
-            def has_group_managed_accounts_button?
-              has_element?(:group_managed_accounts_toggle_button, wait: 5)
+            def has_group_managed_accounts_checkbox?
+              has_element?(:group_managed_accounts_checkbox, wait: 5)
             end
 
             def group_managed_accounts_enabled?
-              enforce_sso_enabled? && has_group_managed_accounts_button? && find_element(:group_managed_accounts_toggle_button).find('input', visible: :all)[:value] == 'true'
+              enforce_sso_enabled? && has_group_managed_accounts_checkbox? && find_element(:group_managed_accounts_checkbox).checked?
             end
 
             def enable_group_managed_accounts
-              click_element :group_managed_accounts_toggle_button unless group_managed_accounts_enabled?
+              check_element(:group_managed_accounts_checkbox, true) unless group_managed_accounts_enabled?
               Support::Waiter.wait_until { group_managed_accounts_enabled? }
             end
 
             def disable_group_managed_accounts
-              click_element :group_managed_accounts_toggle_button if group_managed_accounts_enabled?
+              uncheck_element(:group_managed_accounts_checkbox, true) if group_managed_accounts_enabled?
               Support::Waiter.wait_until { !group_managed_accounts_enabled? }
             end
 

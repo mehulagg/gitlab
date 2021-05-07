@@ -1,6 +1,5 @@
-import { shallowMount } from '@vue/test-utils';
-
 import { GlLink } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 
 import DropdownValue from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value.vue';
 

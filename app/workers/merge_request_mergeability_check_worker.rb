@@ -3,7 +3,9 @@
 class MergeRequestMergeabilityCheckWorker
   include ApplicationWorker
 
-  feature_category :source_code_management
+  sidekiq_options retry: 3
+
+  feature_category :code_review
   idempotent!
 
   def perform(merge_request_id)

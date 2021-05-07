@@ -1,15 +1,19 @@
 <script>
-import { ApolloMutation } from 'vue-apollo';
 import { GlTooltipDirective, GlIcon, GlLink, GlSafeHtmlDirective } from '@gitlab/ui';
-import updateNoteMutation from '../../graphql/mutations/update_note.mutation.graphql';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import { ApolloMutation } from 'vue-apollo';
+import { __ } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import DesignReplyForm from './design_reply_form.vue';
-import { findNoteId, extractDesignNoteId } from '../../utils/design_management_utils';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import updateNoteMutation from '../../graphql/mutations/update_note.mutation.graphql';
 import { hasErrors } from '../../utils/cache_update';
+import { findNoteId, extractDesignNoteId } from '../../utils/design_management_utils';
+import DesignReplyForm from './design_reply_form.vue';
 
 export default {
+  i18n: {
+    editCommentLabel: __('Edit comment'),
+  },
   components: {
     UserAvatarLink,
     TimelineEntryItem,
@@ -108,12 +112,13 @@ export default {
         </span>
       </div>
       <div class="gl-display-flex gl-align-items-baseline">
-        <slot name="resolveDiscussion"></slot>
+        <slot name="resolve-discussion"></slot>
         <button
           v-if="isEditButtonVisible"
           v-gl-tooltip
           type="button"
-          :title="__('Edit comment')"
+          :title="$options.i18n.editCommentLabel"
+          :aria-label="$options.i18n.editCommentLabel"
           class="note-action-button js-note-edit btn btn-transparent qa-note-edit-button"
           @click="isEditing = true"
         >
@@ -127,7 +132,7 @@ export default {
         class="note-text js-note-text md"
         data-qa-selector="note_content"
       ></div>
-      <slot name="resolvedStatus"></slot>
+      <slot name="resolved-status"></slot>
     </template>
     <apollo-mutation
       v-else

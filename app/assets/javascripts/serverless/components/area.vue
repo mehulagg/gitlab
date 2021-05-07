@@ -2,9 +2,9 @@
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 import { X_INTERVAL } from '../constants';
 import { validateGraphData } from '../utils';
-import { __ } from '~/locale';
 
 let debouncedResize;
 
@@ -39,13 +39,13 @@ export default {
       }, {});
     },
     extractTimeData() {
-      return this.chartData.requests.map(data => data.time);
+      return this.chartData.requests.map((data) => data.time);
     },
     generateSeries() {
       return {
         name: __('Invocations'),
         type: 'line',
-        data: this.chartData.requests.map(data => [data.time, data.value]),
+        data: this.chartData.requests.map((data) => [data.time, data.value]),
         symbolSize: 0,
       };
     },
@@ -69,7 +69,7 @@ export default {
           name: 'time',
           type: 'time',
           axisLabel: {
-            formatter: date => dateFormat(date, 'h:MM TT'),
+            formatter: (date) => dateFormat(date, 'h:MM TT'),
           },
           data: this.extractTimeData,
           nameTextStyle: {
@@ -90,7 +90,7 @@ export default {
       };
     },
     xAxisLabel() {
-      return this.graphData.queries.map(query => query.label).join(', ');
+      return this.graphData.queries.map((query) => query.label).join(', ');
     },
     yAxisLabel() {
       const [query] = this.graphData.queries;
@@ -138,8 +138,8 @@ export default {
       :width="width"
       :include-legend-avg-max="false"
     >
-      <template #tooltipTitle>{{ tooltipPopoverTitle }}</template>
-      <template #tooltipContent>{{ tooltipPopoverContent }}</template>
+      <template #tooltip-title>{{ tooltipPopoverTitle }}</template>
+      <template #tooltip-content>{{ tooltipPopoverContent }}</template>
     </gl-area-chart>
   </div>
 </template>

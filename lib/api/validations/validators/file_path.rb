@@ -10,9 +10,11 @@ module API
           path = params[attr_name]
           path = Gitlab::Utils.check_path_traversal!(path)
           Gitlab::Utils.check_allowed_absolute_path!(path, path_allowlist)
-        rescue
-          raise Grape::Exceptions::Validation, params: [@scope.full_name(attr_name)],
-                                               message: "should be a valid file path"
+        rescue StandardError
+          raise Grape::Exceptions::Validation.new(
+            params: [@scope.full_name(attr_name)],
+            message: "should be a valid file path"
+          )
         end
       end
     end

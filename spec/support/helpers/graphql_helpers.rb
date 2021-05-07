@@ -4,6 +4,11 @@ module GraphqlHelpers
   MutationDefinition = Struct.new(:query, :variables)
 
   NoData = Class.new(StandardError)
+  UnauthorizedObject = Class.new(StandardError)
+
+  def graphql_args(**values)
+    ::Graphql::Arguments.new(values)
+  end
 
   # makes an underscored string look like a fieldname
   # "merge_request" => "mergeRequest"
@@ -11,19 +16,139 @@ module GraphqlHelpers
     underscored_field_name.to_s.camelize(:lower)
   end
 
-  # Run a loader's named resolver in a way that closely mimics the framework.
-  #
-  # First the `ready?` method is called. If it turns out that the resolver is not
-  # ready, then the early return is returned instead.
-  #
-  # Then the resolve method is called.
-  def resolve(resolver_class, obj: nil, args: {}, ctx: {}, field: nil)
-    resolver = resolver_class.new(object: obj, context: ctx, field: field)
-    ready, early_return = sync_all { resolver.ready?(**args) }
+  def self.deep_fieldnamerize(map)
+    map.to_h do |k, v|
+      [fieldnamerize(k), v.is_a?(Hash) ? deep_fieldnamerize(v) : v]
+    end
+  end
 
-    return early_return unless ready
+  # Run this resolver exactly as it would be called in the framework. This
+  # includes all authorization hooks, all argument processing and all result
+  # wrapping.
+  # see: GraphqlHelpers#resolve_field
+  def resolve(
+    resolver_class, # [Class[<= BaseResolver]] The resolver at test.
+    obj: nil, # [Any] The BaseObject#object for the resolver (available as `#object` in the resolver).
+    args: {}, # [Hash] The arguments to the resolver (using client names).
+    ctx: {},  # [#to_h] The current context values.
+    schema: GitlabSchema, # [GraphQL::Schema] Schema to use during execution.
+    parent: :not_given, # A GraphQL query node to be passed as the `:parent` extra.
+    lookahead: :not_given # A GraphQL lookahead object to be passed as the `:lookahead` extra.
+  )
+    # All resolution goes through fields, so we need to create one here that
+    # uses our resolver. Thankfully, apart from the field name, resolvers
+    # contain all the configuration needed to define one.
+    field_options = resolver_class.field_options.merge(
+      owner: resolver_parent,
+      name: 'field_value'
+    )
+    field = ::Types::BaseField.new(**field_options)
 
-    resolver.resolve(**args)
+    # All mutations accept a single `:input` argument. Wrap arguments here.
+    # See the unwrapping below in GraphqlHelpers#resolve_field
+    args = { input: args } if resolver_class <= ::Mutations::BaseMutation && !args.key?(:input)
+
+    resolve_field(field, obj,
+                  args: args,
+                  ctx: ctx,
+                  schema: schema,
+                  object_type: resolver_parent,
+                  extras: { parent: parent, lookahead: lookahead })
+  end
+
+  # Resolve the value of a field on an object.
+  #
+  # Use this method to test individual fields within type specs.
+  #
+  # e.g.
+  #
+  #   issue = create(:issue)
+  #   user = issue.author
+  #   project = issue.project
+  #
+  #   resolve_field(:author, issue, current_user: user, object_type: ::Types::IssueType)
+  #   resolve_field(:issue, project, args: { iid: issue.iid }, current_user: user, object_type: ::Types::ProjectType)
+  #
+  # The `object_type` defaults to the `described_class`, so when called from type specs,
+  # the above can be written as:
+  #
+  #   # In project_type_spec.rb
+  #   resolve_field(:author, issue, current_user: user)
+  #
+  #   # In issue_type_spec.rb
+  #   resolve_field(:issue, project, args: { iid: issue.iid }, current_user: user)
+  #
+  # NB: Arguments are passed from the client's perspective. If there is an argument
+  # `foo` aliased as `bar`, then we would pass `args: { bar: the_value }`, and
+  # types are checked before resolution.
+  def resolve_field(
+    field,                       # An instance of `BaseField`, or the name of a field on the current described_class
+    object,                      # The current object of the `BaseObject` this field 'belongs' to
+    args:   {},                  # Field arguments (keys will be fieldnamerized)
+    ctx:    {},                  # Context values (important ones are :current_user)
+    extras: {},                  # Stub values for field extras (parent and lookahead)
+    current_user: :not_given,    # The current user (specified explicitly, overrides ctx[:current_user])
+    schema: GitlabSchema,        # A specific schema instance
+    object_type: described_class # The `BaseObject` type this field belongs to
+  )
+    field = to_base_field(field, object_type)
+    ctx[:current_user] = current_user unless current_user == :not_given
+    query = GraphQL::Query.new(schema, context: ctx.to_h)
+    extras[:lookahead] = negative_lookahead if extras[:lookahead] == :not_given && field.extras.include?(:lookahead)
+
+    query_ctx = query.context
+
+    mock_extras(query_ctx, **extras)
+
+    parent = object_type.authorized_new(object, query_ctx)
+    raise UnauthorizedObject unless parent
+
+    # TODO: This will need to change when we move to the interpreter:
+    # At that point, arguments will be a plain ruby hash rather than
+    # an Arguments object
+    # see: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27536
+    #      https://gitlab.com/gitlab-org/gitlab/-/issues/210556
+    arguments = field.to_graphql.arguments_class.new(
+      GraphqlHelpers.deep_fieldnamerize(args),
+      context: query_ctx,
+      defaults_used: []
+    )
+
+    # we enable the request store so we can track gitaly calls.
+    ::Gitlab::WithRequestStore.with_request_store do
+      # TODO: This will need to change when we move to the interpreter - at that
+      # point we will call `field#resolve`
+
+      # Unwrap the arguments to mutations. This pairs with the wrapping in GraphqlHelpers#resolve
+      # If arguments are not wrapped first, then arguments processing will raise.
+      # If arguments are not unwrapped here, then the resolve method of the mutation will raise argument errors.
+      arguments = arguments.to_kwargs[:input] if field.resolver && field.resolver <= ::Mutations::BaseMutation
+
+      field.resolve_field(parent, arguments, query_ctx)
+    end
+  end
+
+  def mock_extras(context, parent: :not_given, lookahead: :not_given)
+    allow(context).to receive(:parent).and_return(parent) unless parent == :not_given
+    allow(context).to receive(:lookahead).and_return(lookahead) unless lookahead == :not_given
+  end
+
+  # a synthetic BaseObject type to be used in resolver specs. See `GraphqlHelpers#resolve`
+  def resolver_parent
+    @resolver_parent ||= fresh_object_type('ResolverParent')
+  end
+
+  def fresh_object_type(name = 'Object')
+    Class.new(::Types::BaseObject) { graphql_name name }
+  end
+
+  def resolver_instance(resolver_class, obj: nil, ctx: {}, field: nil, schema: GitlabSchema, subscription_update: false)
+    if ctx.is_a?(Hash)
+      q = double('Query', schema: schema, subscription_update?: subscription_update)
+      ctx = GraphQL::Query::Context.new(query: q, object: obj, values: ctx)
+    end
+
+    resolver_class.new(object: obj, context: ctx, field: field)
   end
 
   # Eagerly run a loader's named resolver
@@ -40,14 +165,16 @@ module GraphqlHelpers
     end
   end
 
+  def with_clean_batchloader_executor(&block)
+    BatchLoader::Executor.ensure_current
+    yield
+  ensure
+    BatchLoader::Executor.clear_current
+  end
+
   # Runs a block inside a BatchLoader::Executor wrapper
   def batch(max_queries: nil, &blk)
-    wrapper = proc do
-      BatchLoader::Executor.ensure_current
-      yield
-    ensure
-      BatchLoader::Executor.clear_current
-    end
+    wrapper = -> { with_clean_batchloader_executor(&blk) }
 
     if max_queries
       result = nil
@@ -56,6 +183,32 @@ module GraphqlHelpers
     else
       wrapper.call
     end
+  end
+
+  # Use this when writing N+1 tests.
+  #
+  # It does not use the controller, so it avoids confounding factors due to
+  # authentication (token set-up, license checks)
+  # It clears the request store, rails cache, and BatchLoader Executor between runs.
+  def run_with_clean_state(query, **args)
+    ::Gitlab::WithRequestStore.with_request_store do
+      with_clean_rails_cache do
+        with_clean_batchloader_executor do
+          ::GitlabSchema.execute(query, **args)
+        end
+      end
+    end
+  end
+
+  # Basically a combination of use_sql_query_cache and use_clean_rails_memory_store_caching,
+  # but more fine-grained, suitable for comparing two runs in the same example.
+  def with_clean_rails_cache(&blk)
+    caching_store = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+
+    ActiveRecord::Base.cache(&blk)
+  ensure
+    Rails.cache = caching_store
   end
 
   # BatchLoader::GraphQL returns a wrapper, so we need to :sync in order
@@ -69,12 +222,19 @@ module GraphqlHelpers
     lazy_vals.is_a?(Array) ? lazy_vals.map { |val| sync(val) } : sync(lazy_vals)
   end
 
-  def graphql_query_for(name, attributes = {}, fields = nil)
-    <<~QUERY
-    {
-      #{query_graphql_field(name, attributes, fields)}
-    }
-    QUERY
+  def graphql_query_for(name, args = {}, selection = nil, operation_name = nil)
+    type = GitlabSchema.types['Query'].fields[GraphqlHelpers.fieldnamerize(name)]&.type
+    query = wrap_query(query_graphql_field(name, args, selection, type))
+    query = "query #{operation_name}#{query}" if operation_name
+
+    query
+  end
+
+  def wrap_query(query)
+    q = query.to_s
+    return q if q.starts_with?('{')
+
+    "{ #{q} }"
   end
 
   def graphql_mutation(name, input, fields = nil, &block)
@@ -102,24 +262,14 @@ module GraphqlHelpers
   def variables_for_mutation(name, input)
     graphql_input = prepare_input_for_mutation(input)
 
-    result = { input_variable_name_for_mutation(name) => graphql_input }
-
-    # Avoid trying to serialize multipart data into JSON
-    if graphql_input.values.none? { |value| io_value?(value) }
-      result.to_json
-    else
-      result
-    end
+    { input_variable_name_for_mutation(name) => graphql_input }
   end
 
-  def resolve_field(name, object, args = {})
-    context = double("Context",
-                    schema: GitlabSchema,
-                    query: GraphQL::Query.new(GitlabSchema),
-                    parent: nil)
-    field = described_class.fields[name]
-    instance = described_class.authorized_new(object, context)
-    field.resolve_field(instance, {}, context)
+  def serialize_variables(variables)
+    return unless variables
+    return variables if variables.is_a?(String)
+
+    ::Gitlab::Utils::MergeHash.merge(Array.wrap(variables).map(&:to_h)).to_json
   end
 
   # Recursively convert a Hash with Ruby-style keys to GraphQL fieldname-style keys
@@ -127,11 +277,11 @@ module GraphqlHelpers
   # prepare_input_for_mutation({ 'my_key' => 1 })
   #   => { 'myKey' => 1}
   def prepare_input_for_mutation(input)
-    input.map do |name, value|
+    input.to_h do |name, value|
       value = prepare_input_for_mutation(value) if value.is_a?(Hash)
 
       [GraphqlHelpers.fieldnamerize(name), value]
-    end.to_h
+    end
   end
 
   def input_variable_name_for_mutation(mutation_name)
@@ -155,11 +305,41 @@ module GraphqlHelpers
     "#{namerized}#{field_params}"
   end
 
-  def query_graphql_field(name, attributes = {}, fields = nil)
-    <<~QUERY
-      #{field_with_params(name, attributes)}
-      #{wrap_fields(fields || all_graphql_fields_for(name.to_s.classify))}
-    QUERY
+  def query_graphql_field(name, attributes = {}, fields = nil, type = nil)
+    type ||= name.to_s.classify
+    if fields.nil? && !attributes.is_a?(Hash)
+      fields = attributes
+      attributes = nil
+    end
+
+    field = field_with_params(name, attributes)
+
+    field + wrap_fields(fields || all_graphql_fields_for(type)).to_s
+  end
+
+  def page_info_selection
+    "pageInfo { hasNextPage hasPreviousPage endCursor startCursor }"
+  end
+
+  def query_nodes(name, fields = nil, args: nil, of: name, include_pagination_info: false, max_depth: 1)
+    fields ||= all_graphql_fields_for(of.to_s.classify, max_depth: max_depth)
+    node_selection = include_pagination_info ? "#{page_info_selection} nodes" : :nodes
+    query_graphql_path([[name, args], node_selection], fields)
+  end
+
+  def query_graphql_fragment(name)
+    "... on #{name} { #{all_graphql_fields_for(name)} }"
+  end
+
+  # e.g:
+  #   query_graphql_path(%i[foo bar baz], all_graphql_fields_for('Baz'))
+  #   => foo { bar { baz { x y z } } }
+  def query_graphql_path(segments, fields = nil)
+    # we really want foldr here...
+    segments.reverse.reduce(fields) do |tail, segment|
+      name, args = Array.wrap(segment)
+      query_graphql_field(name, args, tail)
+    end
   end
 
   def wrap_fields(fields)
@@ -187,70 +367,50 @@ module GraphqlHelpers
     return if max_depth <= 0
 
     allow_unlimited_graphql_complexity
-    allow_unlimited_graphql_depth
+    allow_unlimited_graphql_depth if max_depth > 1
     allow_high_graphql_recursion
     allow_high_graphql_transaction_threshold
 
-    type = GitlabSchema.types[class_name.to_s]
-    return "" unless type
+    type = class_name.respond_to?(:kind) ? class_name : GitlabSchema.types[class_name.to_s]
+    raise "#{class_name} is not a known type in the GitlabSchema" unless type
 
-    type.fields.map do |name, field|
-      # We can't guess arguments, so skip fields that require them
-      next if required_arguments?(field)
-      next if excluded.include?(name)
+    # We can't guess arguments, so skip fields that require them
+    skip = ->(name, field) { excluded.include?(name) || required_arguments?(field) }
 
-      singular_field_type = field_type(field)
-
-      # If field type is the same as parent type, then we're hitting into
-      # mutual dependency. Break it from infinite recursion
-      next if parent_types.include?(singular_field_type)
-
-      if nested_fields?(field)
-        fields =
-          all_graphql_fields_for(singular_field_type, parent_types | [type], max_depth: max_depth - 1)
-
-        "#{name} { #{fields} }" unless fields.blank?
-      else
-        name
-      end
-    end.compact.join("\n")
+    ::Graphql::FieldSelection.select_fields(type, skip, parent_types, max_depth)
   end
 
-  def attributes_to_graphql(attributes)
-    attributes.map do |name, value|
-      value_str = as_graphql_literal(value)
-
-      "#{GraphqlHelpers.fieldnamerize(name.to_s)}: #{value_str}"
-    end.join(", ")
+  def with_signature(variables, query)
+    %Q[query(#{variables.map(&:sig).join(', ')}) #{wrap_query(query)}]
   end
 
-  # Fairly dumb Ruby => GraphQL rendering function. Only suitable for testing.
-  # Use symbol for Enum values
-  def as_graphql_literal(value)
-    case value
-    when Array then "[#{value.map { |v| as_graphql_literal(v) }.join(',')}]"
-    when Hash then "{#{attributes_to_graphql(value)}}"
-    when Integer, Float then value.to_s
-    when String then "\"#{value.gsub(/"/, '\\"')}\""
-    when Symbol then value
-    when nil then 'null'
-    when true then 'true'
-    when false then 'false'
-    else raise ArgumentError, "Cannot represent #{value} as GraphQL literal"
-    end
+  def var(type)
+    ::Graphql::Var.new(generate(:variable), type)
+  end
+
+  def attributes_to_graphql(arguments)
+    ::Graphql::Arguments.new(arguments).to_s
   end
 
   def post_multiplex(queries, current_user: nil, headers: {})
     post api('/', current_user, version: 'graphql'), params: { _json: queries }, headers: headers
   end
 
-  def post_graphql(query, current_user: nil, variables: nil, headers: {})
-    params = { query: query, variables: variables&.to_json }
-    post api('/', current_user, version: 'graphql'), params: params, headers: headers
+  def post_graphql(query, current_user: nil, variables: nil, headers: {}, token: {})
+    params = { query: query, variables: serialize_variables(variables) }
+    post api('/', current_user, version: 'graphql', **token), params: params, headers: headers
+
+    return unless graphql_errors
+
+    # Errors are acceptable, but not this one:
+    expect(graphql_errors).not_to include(a_hash_including('message' => 'Internal server error'))
   end
 
-  def post_graphql_mutation(mutation, current_user: nil)
-    post_graphql(mutation.query, current_user: current_user, variables: mutation.variables)
+  def post_graphql_mutation(mutation, current_user: nil, token: {})
+    post_graphql(mutation.query,
+                 current_user: current_user,
+                 variables: mutation.variables,
+                 token: token)
   end
 
   def post_graphql_mutation_with_uploads(mutation, current_user: nil)
@@ -311,36 +471,45 @@ module GraphqlHelpers
     { operations: operations.to_json, map: map.to_json }.merge(extracted_files)
   end
 
+  def fresh_response_data
+    Gitlab::Json.parse(response.body)
+  end
+
   # Raises an error if no data is found
-  def graphql_data
-    # Note that `json_response` is defined as `let(:json_response)` and
-    # therefore, in a spec with multiple queries, will only contain data
-    # from the _first_ query, not subsequent ones
-    json_response['data'] || (raise NoData, graphql_errors)
+  # NB: We use fresh_response_data to support tests that make multiple requests.
+  def graphql_data(body = fresh_response_data)
+    body['data'] || (raise NoData, graphql_errors(body))
   end
 
   def graphql_data_at(*path)
     graphql_dig_at(graphql_data, *path)
   end
 
+  # Slightly more powerful than just `dig`:
+  # - also supports implicit flat-mapping (.e.g. :foo :nodes :bar :nodes)
   def graphql_dig_at(data, *path)
     keys = path.map { |segment| segment.is_a?(Integer) ? segment : GraphqlHelpers.fieldnamerize(segment) }
 
     # Allows for array indexing, like this
     # ['project', 'boards', 'edges', 0, 'node', 'lists']
     keys.reduce(data) do |memo, key|
-      memo.is_a?(Array) ? memo[key] : memo&.dig(key)
+      if memo.is_a?(Array)
+        key.is_a?(Integer) ? memo[key] : memo.flat_map { |e| Array.wrap(e[key]) }
+      else
+        memo&.dig(key)
+      end
     end
   end
 
-  def graphql_errors
-    case json_response
+  # See note at graphql_data about memoization and multiple requests
+  def graphql_errors(body = json_response)
+    case body
     when Hash # regular query
-      json_response['errors']
+      body['errors']
     when Array # multiplexed queries
-      json_response.map { |response| response['errors'] }
+      body.map { |response| response['errors'] }
     else
-      raise "Unknown GraphQL response type #{json_response.class}"
+      raise "Unknown GraphQL response type #{body.class}"
     end
   end
 
@@ -383,19 +552,29 @@ module GraphqlHelpers
   end
 
   def nested_fields?(field)
-    !scalar?(field) && !enum?(field)
+    ::Graphql::FieldInspection.new(field).nested_fields?
   end
 
   def scalar?(field)
-    field_type(field).kind.scalar?
+    ::Graphql::FieldInspection.new(field).scalar?
   end
 
   def enum?(field)
-    field_type(field).kind.enum?
+    ::Graphql::FieldInspection.new(field).enum?
   end
 
+  # There are a few non BaseField fields in our schema (pageInfo for one).
+  # None of them require arguments.
   def required_arguments?(field)
-    field.arguments.values.any? { |argument| argument.type.non_null? }
+    return field.requires_argument? if field.is_a?(::Types::BaseField)
+
+    if (meta = field.try(:metadata)) && meta[:type_class]
+      required_arguments?(meta[:type_class])
+    elsif args = field.try(:arguments)
+      args.values.any? { |argument| argument.type.non_null? }
+    else
+      false
+    end
   end
 
   def io_value?(value)
@@ -403,15 +582,7 @@ module GraphqlHelpers
   end
 
   def field_type(field)
-    field_type = field.type.respond_to?(:to_graphql) ? field.type.to_graphql : field.type
-
-    # The type could be nested. For example `[GraphQL::STRING_TYPE]`:
-    # - List
-    # - String!
-    # - String
-    field_type = field_type.of_type while field_type.respond_to?(:of_type)
-
-    field_type
+    ::Graphql::FieldInspection.new(field).type
   end
 
   # for most tests, we want to allow unlimited complexity
@@ -439,8 +610,12 @@ module GraphqlHelpers
     end
   end
 
-  def global_id_of(model)
-    model.to_global_id.to_s
+  def global_id_of(model, id: nil, model_name: nil)
+    if id || model_name
+      ::Gitlab::GlobalId.build(model, id: id, model_name: model_name).to_s
+    else
+      model.to_global_id.to_s
+    end
   end
 
   def missing_required_argument(path, argument)
@@ -472,20 +647,55 @@ module GraphqlHelpers
     end
   end
 
-  def execute_query(query_type)
-    schema = Class.new(GraphQL::Schema) do
-      use GraphQL::Pagination::Connections
-      use Gitlab::Graphql::Authorize
-      use Gitlab::Graphql::Pagination::Connections
-
-      query(query_type)
-    end
+  # assumes query_string to be let-bound in the current context
+  def execute_query(query_type, schema: empty_schema, graphql: query_string)
+    schema.query(query_type)
 
     schema.execute(
-      query_string,
+      graphql,
       context: { current_user: user },
       variables: {}
     )
+  end
+
+  def empty_schema
+    Class.new(GraphQL::Schema) do
+      use GraphQL::Pagination::Connections
+      use Gitlab::Graphql::Pagination::Connections
+
+      lazy_resolve ::Gitlab::Graphql::Lazy, :force
+    end
+  end
+
+  # A lookahead that selects everything
+  def positive_lookahead
+    double(selects?: true).tap do |selection|
+      allow(selection).to receive(:selection).and_return(selection)
+    end
+  end
+
+  # A lookahead that selects nothing
+  def negative_lookahead
+    double(selects?: false).tap do |selection|
+      allow(selection).to receive(:selection).and_return(selection)
+    end
+  end
+
+  private
+
+  def to_base_field(name_or_field, object_type)
+    case name_or_field
+    when ::Types::BaseField
+      name_or_field
+    else
+      field_by_name(name_or_field, object_type)
+    end
+  end
+
+  def field_by_name(name, object_type)
+    name = ::GraphqlHelpers.fieldnamerize(name)
+
+    object_type.fields[name] || (raise ArgumentError, "Unknown field #{name} for #{described_class.graphql_name}")
   end
 end
 

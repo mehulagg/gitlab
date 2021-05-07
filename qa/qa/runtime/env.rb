@@ -2,13 +2,14 @@
 
 require 'gitlab/qa'
 require 'uri'
+require 'active_support/core_ext/object/blank'
 
 module QA
   module Runtime
     module Env
       extend self
 
-      attr_writer :personal_access_token, :ldap_username, :ldap_password
+      attr_writer :personal_access_token, :admin_personal_access_token
 
       ENV_VARIABLES = Gitlab::QA::Runtime::Env::ENV_VARIABLES
 
@@ -24,48 +25,6 @@ module QA
         SUPPORTED_FEATURES
       end
 
-      def context_matches?(*options)
-        return false unless Runtime::Scenario.attributes[:gitlab_address]
-
-        opts = {}
-        opts[:domain] = '.+'
-        opts[:tld] = '.com'
-
-        uri = URI(Runtime::Scenario.gitlab_address)
-
-        options.each do |option|
-          opts[:domain] = 'gitlab' if option == :production
-
-          if option.is_a?(Hash) && !option[:pipeline].nil? && !ci_project_name.nil?
-            return pipeline_matches?(option[:pipeline])
-
-          elsif option.is_a?(Hash) && !option[:subdomain].nil?
-            opts.merge!(option)
-
-            opts[:subdomain] = case option[:subdomain]
-                               when Array
-                                 "(#{option[:subdomain].join("|")})."
-                               when Regexp
-                                 option[:subdomain]
-                               else
-                                 "(#{option[:subdomain]})."
-                               end
-          end
-        end
-
-        uri.host.match?(/^#{opts[:subdomain]}#{opts[:domain]}#{opts[:tld]}$/)
-      end
-
-      alias_method :dot_com?, :context_matches?
-
-      def pipeline_matches?(pipeline_to_run_in)
-        Array(pipeline_to_run_in).any? { |pipeline| pipeline.to_s.casecmp?(pipeline_from_project_name) }
-      end
-
-      def pipeline_from_project_name
-        ci_project_name.to_s.start_with?('gitlab-qa') ? 'master' : ci_project_name
-      end
-
       def additional_repository_storage
         ENV['QA_ADDITIONAL_REPOSITORY_STORAGE']
       end
@@ -78,20 +37,12 @@ module QA
         ENV['QA_PRAEFECT_REPOSITORY_STORAGE']
       end
 
-      def admin_password
-        ENV['GITLAB_ADMIN_PASSWORD']
-      end
-
-      def admin_username
-        ENV['GITLAB_ADMIN_USERNAME']
-      end
-
-      def admin_personal_access_token
-        ENV['GITLAB_QA_ADMIN_ACCESS_TOKEN']
-      end
-
       def ci_job_url
         ENV['CI_JOB_URL']
+      end
+
+      def ci_job_name
+        ENV['CI_JOB_NAME']
       end
 
       def ci_project_name
@@ -100,6 +51,10 @@ module QA
 
       def debug?
         enabled?(ENV['QA_DEBUG'], default: false)
+      end
+
+      def default_branch
+        ENV['QA_DEFAULT_BRANCH'] || 'master'
       end
 
       def log_destination
@@ -134,6 +89,18 @@ module QA
 
       def signup_disabled?
         enabled?(ENV['SIGNUP_DISABLED'], default: false)
+      end
+
+      def admin_password
+        ENV['GITLAB_ADMIN_PASSWORD']
+      end
+
+      def admin_username
+        ENV['GITLAB_ADMIN_USERNAME']
+      end
+
+      def admin_personal_access_token
+        @admin_personal_access_token ||= ENV['GITLAB_QA_ADMIN_ACCESS_TOKEN']
       end
 
       # specifies token that can be used for the api
@@ -175,6 +142,10 @@ module QA
 
       def user_password
         ENV['GITLAB_PASSWORD']
+      end
+
+      def initial_root_password
+        ENV['GITLAB_INITIAL_ROOT_PASSWORD']
       end
 
       def github_username
@@ -293,6 +264,11 @@ module QA
         @ldap_username ||= ENV['GITLAB_LDAP_USERNAME']
       end
 
+      def ldap_username=(ldap_username)
+        @ldap_username = ldap_username # rubocop:disable Gitlab/ModuleWithInstanceVariables
+        ENV['GITLAB_LDAP_USERNAME'] = ldap_username
+      end
+
       def ldap_password
         @ldap_password ||= ENV['GITLAB_LDAP_PASSWORD']
       end
@@ -390,6 +366,22 @@ module QA
         ENV['DEPLOY_VERSION']
       end
 
+      def user_agent
+        ENV['GITLAB_QA_USER_AGENT']
+      end
+
+      def geo_environment?
+        QA::Runtime::Scenario.attributes.include?(:geo_secondary_address)
+      end
+
+      def gitlab_agentk_version
+        ENV.fetch('GITLAB_AGENTK_VERSION', 'v13.7.0')
+      end
+
+      def transient_trials
+        ENV.fetch('GITLAB_QA_TRANSIENT_TRIALS', 10).to_i
+      end
+
       private
 
       def remote_grid_credentials
@@ -411,4 +403,4 @@ module QA
   end
 end
 
-QA::Runtime::Env.extend_if_ee('QA::EE::Runtime::Env')
+QA::Runtime::Env.extend_if_ee('Runtime::Env', namespace: QA)

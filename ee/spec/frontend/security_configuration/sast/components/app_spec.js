@@ -1,8 +1,16 @@
-import { shallowMount } from '@vue/test-utils';
 import { GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import SASTConfigurationApp from 'ee/security_configuration/sast/components/app.vue';
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
-import { makeSastCiConfiguration } from './helpers';
+import sastCiConfigurationQuery from 'ee/security_configuration/sast/graphql/sast_ci_configuration.query.graphql';
+import { stripTypenames } from 'helpers/graphql_helpers';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { sastCiConfigurationQueryResponse } from '../mock_data';
+
+Vue.use(VueApollo);
 
 const sastDocumentationPath = '/help/sast';
 const projectPath = 'namespace/project';
@@ -10,29 +18,29 @@ const projectPath = 'namespace/project';
 describe('SAST Configuration App', () => {
   let wrapper;
 
-  const createComponent = ({
-    stubs = {},
-    loading = true,
-    hasLoadingError = false,
-    sastCiConfiguration = null,
-  } = {}) => {
-    wrapper = shallowMount(SASTConfigurationApp, {
-      mocks: { $apollo: { loading } },
-      stubs,
-      provide: {
-        sastDocumentationPath,
-        projectPath,
-      },
-      // While setting data is usually frowned upon, it is the documented way
-      // of mocking GraphQL response data:
-      // https://docs.gitlab.com/ee/development/fe_guide/graphql.html#testing
-      data() {
-        return {
-          hasLoadingError,
-          sastCiConfiguration,
-        };
-      },
-    });
+  const pendingHandler = () => new Promise(() => {});
+  const successHandler = async () => sastCiConfigurationQueryResponse;
+  const failureHandler = async () => ({ errors: [{ message: 'some error' }] });
+  const createMockApolloProvider = (handler) =>
+    createMockApollo([[sastCiConfigurationQuery, handler]]);
+
+  const createComponent = (options) => {
+    wrapper = shallowMount(
+      SASTConfigurationApp,
+      merge(
+        {
+          // Use a function reference here so it's lazily initialized, and can
+          // be replaced with other handlers in certain tests without
+          // initialising twice.
+          apolloProvider: () => createMockApolloProvider(successHandler),
+          provide: {
+            sastDocumentationPath,
+            projectPath,
+          },
+        },
+        options,
+      ),
+    );
   };
 
   const findHeader = () => wrapper.find('header');
@@ -98,7 +106,7 @@ describe('SAST Configuration App', () => {
   describe('when loading', () => {
     beforeEach(() => {
       createComponent({
-        loading: true,
+        apolloProvider: createMockApolloProvider(pendingHandler),
       });
     });
 
@@ -118,8 +126,7 @@ describe('SAST Configuration App', () => {
   describe('when loading failed', () => {
     beforeEach(() => {
       createComponent({
-        loading: false,
-        hasLoadingError: true,
+        apolloProvider: createMockApolloProvider(failureHandler),
       });
     });
 
@@ -137,14 +144,8 @@ describe('SAST Configuration App', () => {
   });
 
   describe('when loaded', () => {
-    let sastCiConfiguration;
-
     beforeEach(() => {
-      sastCiConfiguration = makeSastCiConfiguration();
-      createComponent({
-        loading: false,
-        sastCiConfiguration,
-      });
+      createComponent();
     });
 
     it('does not display a loading spinner', () => {
@@ -156,7 +157,9 @@ describe('SAST Configuration App', () => {
     });
 
     it('passes the sastCiConfiguration to the sastCiConfiguration prop', () => {
-      expect(findConfigurationForm().props('sastCiConfiguration')).toBe(sastCiConfiguration);
+      expect(findConfigurationForm().props('sastCiConfiguration')).toEqual(
+        stripTypenames(sastCiConfigurationQueryResponse.data.project.sastCiConfiguration),
+      );
     });
 
     it('does not display an alert message', () => {

@@ -1,11 +1,12 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import { GlEmptyState, GlLink, GlButton } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import ReleaseBlock from './release_block.vue';
-import ReleasesPagination from './releases_pagination.vue';
 import ReleaseSkeletonLoader from './release_skeleton_loader.vue';
+import ReleasesPagination from './releases_pagination.vue';
+import ReleasesSort from './releases_sort.vue';
 
 export default {
   name: 'ReleasesApp',
@@ -16,9 +17,10 @@ export default {
     ReleaseBlock,
     ReleasesPagination,
     ReleaseSkeletonLoader,
+    ReleasesSort,
   },
   computed: {
-    ...mapState('list', [
+    ...mapState('index', [
       'documentationPath',
       'illustrationPath',
       'newReleasePath',
@@ -44,17 +46,13 @@ export default {
     window.addEventListener('popstate', this.fetchReleases);
   },
   methods: {
-    ...mapActions('list', {
+    ...mapActions('index', {
       fetchReleasesStoreAction: 'fetchReleases',
     }),
     fetchReleases() {
       this.fetchReleasesStoreAction({
-        // these two parameters are only used in "GraphQL mode"
         before: getParameterByName('before'),
         after: getParameterByName('after'),
-
-        // this parameter is only used when in "REST mode"
-        page: getParameterByName('page'),
       });
     },
   },
@@ -62,22 +60,26 @@ export default {
 </script>
 <template>
   <div class="flex flex-column mt-2">
-    <gl-button
-      v-if="newReleasePath"
-      :href="newReleasePath"
-      :aria-describedby="shouldRenderEmptyState && 'releases-description'"
-      category="primary"
-      variant="success"
-      class="align-self-end mb-2 js-new-release-btn"
-    >
-      {{ __('New release') }}
-    </gl-button>
+    <div class="gl-align-self-end gl-mb-3">
+      <releases-sort class="gl-mr-2" @sort:changed="fetchReleases" />
 
-    <release-skeleton-loader v-if="isLoading" class="js-loading" />
+      <gl-button
+        v-if="newReleasePath"
+        :href="newReleasePath"
+        :aria-describedby="shouldRenderEmptyState && 'releases-description'"
+        category="primary"
+        variant="success"
+        data-testid="new-release-button"
+      >
+        {{ __('New release') }}
+      </gl-button>
+    </div>
+
+    <release-skeleton-loader v-if="isLoading" />
 
     <gl-empty-state
       v-else-if="shouldRenderEmptyState"
-      class="js-empty-state"
+      data-testid="empty-state"
       :title="__('Getting started with releases')"
       :svg-path="illustrationPath"
     >
@@ -95,7 +97,7 @@ export default {
       </template>
     </gl-empty-state>
 
-    <div v-else-if="shouldRenderSuccessState" class="js-success-state">
+    <div v-else-if="shouldRenderSuccessState" data-testid="success-state">
       <release-block
         v-for="(release, index) in releases"
         :key="index"

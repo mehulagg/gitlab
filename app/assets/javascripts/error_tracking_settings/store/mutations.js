@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
-import * as types from './mutation_types';
 import { projectKeys } from '../utils';
+import * as types from './mutation_types';
 
 export default {
   [types.CLEAR_PROJECTS](state) {
@@ -12,7 +12,7 @@ export default {
       .map(convertObjectPropsToCamelCase)
       // The `pick` strips out extra properties returned from Sentry.
       // Such properties could be problematic later, e.g. when checking whether `projects` contains `selectedProject`
-      .map(project => pick(project, projectKeys));
+      .map((project) => pick(project, projectKeys));
   },
   [types.RESET_CONNECT](state) {
     state.connectSuccessful = false;

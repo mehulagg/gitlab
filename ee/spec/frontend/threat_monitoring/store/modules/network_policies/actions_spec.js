@@ -1,15 +1,15 @@
 import MockAdapter from 'axios-mock-adapter';
-import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/threat_monitoring/store/modules/network_policies/actions';
 import * as types from 'ee/threat_monitoring/store/modules/network_policies/mutation_types';
 import getInitialState from 'ee/threat_monitoring/store/modules/network_policies/state';
-import { s__ } from '~/locale';
+import testAction from 'helpers/vuex_action_helper';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { joinPaths } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 
-import { mockPoliciesResponse } from '../../../mock_data';
+import { mockPoliciesResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 

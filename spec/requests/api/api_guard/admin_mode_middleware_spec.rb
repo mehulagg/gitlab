@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::APIGuard::AdminModeMiddleware, :do_not_mock_admin_mode, :request_store do
+RSpec.describe API::APIGuard::AdminModeMiddleware, :request_store do
   let(:user) { create(:admin) }
 
   it 'is loaded' do
@@ -13,7 +13,7 @@ RSpec.describe API::APIGuard::AdminModeMiddleware, :do_not_mock_admin_mode, :req
     let(:app) do
       Class.new(API::API) do
         get 'willfail' do
-          raise StandardError.new('oh noes!')
+          raise StandardError, 'oh noes!'
         end
       end
     end

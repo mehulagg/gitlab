@@ -1,3 +1,9 @@
+---
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Groups API
 
 ## List groups
@@ -12,12 +18,12 @@ Parameters:
 | Attribute                | Type              | Required | Description |
 | ------------------------ | ----------------- | -------- | ---------- |
 | `skip_groups`            | array of integers | no       | Skip the group IDs passed |
-| `all_available`          | boolean           | no       | Show all the groups you have access to (defaults to `false` for authenticated users, `true` for admin); Attributes `owned` and `min_access_level` have precedence |
+| `all_available`          | boolean           | no       | Show all the groups you have access to (defaults to `false` for authenticated users, `true` for administrators); Attributes `owned` and `min_access_level` have precedence |
 | `search`                 | string            | no       | Return the list of authorized groups matching the search criteria |
 | `order_by`               | string            | no       | Order groups by `name`, `path` or `id`. Default is `name` |
 | `sort`                   | string            | no       | Order groups in `asc` or `desc` order. Default is `asc` |
-| `statistics`             | boolean           | no       | Include group statistics (admins only) |
-| `with_custom_attributes` | boolean           | no       | Include [custom attributes](custom_attributes.md) in response (admins only) |
+| `statistics`             | boolean           | no       | Include group statistics (administrators only) |
+| `with_custom_attributes` | boolean           | no       | Include [custom attributes](custom_attributes.md) in response (administrators only) |
 | `owned`                  | boolean           | no       | Limit to groups explicitly owned by the current user |
 | `min_access_level`       | integer           | no       | Limit to groups where current user has at least this [access level](members.md#valid-access-levels) |
 | `top_level_only`         | boolean           | no       | Limit to top level groups, excluding all subgroups |
@@ -56,7 +62,7 @@ GET /groups
 ]
 ```
 
-When adding the parameter `statistics=true` and the authenticated user is an admin, additional group statistics are returned.
+When adding the parameter `statistics=true` and the authenticated user is an administrator, additional group statistics are returned.
 
 ```plaintext
 GET /groups?statistics=true
@@ -89,13 +95,13 @@ GET /groups?statistics=true
     "parent_id": null,
     "created_at": "2020-01-15T12:36:29.590Z",
     "statistics": {
-      "storage_size" : 212,
+      "storage_size" : 363,
       "repository_size" : 33,
       "wiki_size" : 100,
       "lfs_objects_size" : 123,
       "job_artifacts_size" : 57,
       "packages_size": 0,
-      "snippets_size" : 50,
+      "snippets_size" : 50
     }
   }
 ]
@@ -124,12 +130,12 @@ Parameters:
 | ------------------------ | ----------------- | -------- | ----------- |
 | `id`                     | integer/string    | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) of the immediate parent group |
 | `skip_groups`            | array of integers | no       | Skip the group IDs passed |
-| `all_available`          | boolean           | no       | Show all the groups you have access to (defaults to `false` for authenticated users, `true` for admin); Attributes `owned` and `min_access_level` have precedence |
+| `all_available`          | boolean           | no       | Show all the groups you have access to (defaults to `false` for authenticated users, `true` for administrators); Attributes `owned` and `min_access_level` have precedence |
 | `search`                 | string            | no       | Return the list of authorized groups matching the search criteria |
 | `order_by`               | string            | no       | Order groups by `name`, `path` or `id`. Default is `name` |
 | `sort`                   | string            | no       | Order groups in `asc` or `desc` order. Default is `asc` |
-| `statistics`             | boolean           | no       | Include group statistics (admins only) |
-| `with_custom_attributes` | boolean           | no       | Include [custom attributes](custom_attributes.md) in response (admins only) |
+| `statistics`             | boolean           | no       | Include group statistics (administrators only) |
+| `with_custom_attributes` | boolean           | no       | Include [custom attributes](custom_attributes.md) in response (administrators only) |
 | `owned`                  | boolean           | no       | Limit to groups explicitly owned by the current user |
 | `min_access_level`       | integer           | no       | Limit to groups where current user has at least this [access level](members.md#valid-access-levels) |
 
@@ -182,12 +188,12 @@ Parameters:
 | ------------------------ | ----------------- | -------- | ----------- |
 | `id`                     | integer/string    | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) of the immediate parent group |
 | `skip_groups`            | array of integers | no       | Skip the group IDs passed |
-| `all_available`          | boolean           | no       | Show all the groups you have access to (defaults to `false` for authenticated users, `true` for admin). Attributes `owned` and `min_access_level` have precedence |
+| `all_available`          | boolean           | no       | Show all the groups you have access to (defaults to `false` for authenticated users, `true` for administrators). Attributes `owned` and `min_access_level` have precedence |
 | `search`                 | string            | no       | Return the list of authorized groups matching the search criteria |
 | `order_by`               | string            | no       | Order groups by `name`, `path`, or `id`. Default is `name` |
 | `sort`                   | string            | no       | Order groups in `asc` or `desc` order. Default is `asc` |
-| `statistics`             | boolean           | no       | Include group statistics (admins only) |
-| `with_custom_attributes` | boolean           | no       | Include [custom attributes](custom_attributes.md) in response (admins only) |
+| `statistics`             | boolean           | no       | Include group statistics (administrators only) |
+| `with_custom_attributes` | boolean           | no       | Include [custom attributes](custom_attributes.md) in response (administrators only) |
 | `owned`                  | boolean           | no       | Limit to groups explicitly owned by the current user |
 | `min_access_level`       | integer           | no       | Limit to groups where current user has at least this [access level](members.md#valid-access-levels) |
 
@@ -278,7 +284,7 @@ Parameters:
 | `with_shared`                 | boolean        | no       | Include projects shared to this group. Default is `true` |
 | `include_subgroups`           | boolean        | no       | Include projects in subgroups of this group. Default is `false`   |
 | `min_access_level`            | integer        | no       | Limit to projects where current user has at least this [access level](members.md#valid-access-levels) |
-| `with_custom_attributes`      | boolean        | no       | Include [custom attributes](custom_attributes.md) in response (admins only) |
+| `with_custom_attributes`      | boolean        | no       | Include [custom attributes](custom_attributes.md) in response (administrators only) |
 | `with_security_reports`       | boolean        | no       | **(ULTIMATE)** Return only projects that have security reports artifacts present in any of their builds. This means "projects with security reports enabled". Default is `false` |
 
 1. Order by similarity: Orders the results by a similarity score calculated from the provided `search`
@@ -332,8 +338,8 @@ Example response:
 ]
 ```
 
-NOTE: **Note:**
-To distinguish between a project in the group and a project shared to the group, the `namespace` attribute can be used. When a project has been shared to the group, its `namespace` will be different from the group the request is being made for.
+NOTE:
+To distinguish between a project in the group and a project shared to the group, the `namespace` attribute can be used. When a project has been shared to the group, its `namespace` differs from the group the request is being made for.
 
 ## List a group's shared projects
 
@@ -360,7 +366,7 @@ Parameters:
 | `with_issues_enabled`         | boolean        | no       | Limit by projects with issues feature enabled. Default is `false` |
 | `with_merge_requests_enabled` | boolean        | no       | Limit by projects with merge requests feature enabled. Default is `false` |
 | `min_access_level`            | integer        | no       | Limit to projects where current user has at least this [access level](members.md#valid-access-levels) |
-| `with_custom_attributes`      | boolean        | no       | Include [custom attributes](custom_attributes.md) in response (admins only) |
+| `with_custom_attributes`      | boolean        | no       | Include [custom attributes](custom_attributes.md) in response (administrators only) |
 
 Example response:
 
@@ -473,7 +479,7 @@ Example response:
 ## Details of a group
 
 Get all details of a group. This endpoint can be accessed without authentication
-if the group is publicly accessible. In case the user that requests is admin of the group, it will return the `runners_token` for the group too.
+if the group is publicly accessible. In case the user that requests is administrator of the group, it returns the `runners_token` for the group too.
 
 ```plaintext
 GET /groups/:id
@@ -484,11 +490,11 @@ Parameters:
 | Attribute                | Type           | Required | Description |
 | ------------------------ | -------------- | -------- | ----------- |
 | `id`                     | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user. |
-| `with_custom_attributes` | boolean        | no       | Include [custom attributes](custom_attributes.md) in response (admins only). |
-| `with_projects`          | boolean        | no       | Include details from projects that belong to the specified group (defaults to `true`). (Deprecated, [will be removed in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797). To get the details of all projects within a group, use the [list a group's projects endpoint](#list-a-groups-projects).)  |
+| `with_custom_attributes` | boolean        | no       | Include [custom attributes](custom_attributes.md) in response (administrators only). |
+| `with_projects`          | boolean        | no       | Include details from projects that belong to the specified group (defaults to `true`). (Deprecated, [scheduled for removal in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797). To get the details of all projects within a group, use the [list a group's projects endpoint](#list-a-groups-projects).)  |
 
-NOTE: **Note:**
-The `projects` and `shared_projects` attributes in the response are deprecated and will be [removed in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797).
+NOTE:
+The `projects` and `shared_projects` attributes in the response are deprecated and [scheduled for removal in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797).
 To get the details of all projects within a group, use either the [list a group's projects](#list-a-groups-projects) or the [list a group's shared projects](#list-a-groups-shared-projects) endpoint.
 
 ```shell
@@ -664,7 +670,7 @@ Example response:
 }
 ```
 
-Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) also see
 the `shared_runners_minutes_limit` and `extra_shared_runners_minutes_limit` parameters:
 
 Additional response parameters:
@@ -679,7 +685,7 @@ Additional response parameters:
 }
 ```
 
-Users on GitLab [Silver, Premium, or higher](https://about.gitlab.com/pricing/) will also see
+Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/) also see
 the `marked_for_deletion_on` attribute:
 
 ```json
@@ -691,7 +697,7 @@ the `marked_for_deletion_on` attribute:
 }
 ```
 
-When adding the parameter `with_projects=false`, projects will not be returned.
+When adding the parameter `with_projects=false`, projects aren't returned.
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/4?with_projects=false"
@@ -750,7 +756,7 @@ Parameters:
 | `two_factor_grace_period`            | integer | no       | Time before Two-factor authentication is enforced (in hours). |
 | `project_creation_level`             | string  | no       | Determine if developers can create projects in the group. Can be `noone` (No one), `maintainer` (Maintainers), or `developer` (Developers + Maintainers). |
 | `auto_devops_enabled`                | boolean | no       | Default to Auto DevOps pipeline for all projects within this group. |
-| `subgroup_creation_level`            | string  | no       | Allowed to create subgroups. Can be `owner` (Owners), or `maintainer` (Maintainers). |
+| `subgroup_creation_level`            | string  | no       | Allowed to [create subgroups](../user/group/subgroups/index.md#creating-a-subgroup). Can be `owner` (Owners), or `maintainer` (Maintainers). |
 | `emails_disabled`                    | boolean | no       | Disable email notifications |
 | `avatar`                             | mixed   | no       | Image file for avatar of the group. [Introduced in GitLab 12.9](https://gitlab.com/gitlab-org/gitlab/-/issues/36681) |
 | `mentions_disabled`                  | boolean | no       | Disable the capability of a group from getting mentioned |
@@ -758,13 +764,12 @@ Parameters:
 | `request_access_enabled`             | boolean | no       | Allow users to request member access. |
 | `parent_id`                          | integer | no       | The parent group ID for creating nested group. |
 | `default_branch_protection`          | integer | no       | See [Options for `default_branch_protection`](#options-for-default_branch_protection). Default to the global level default branch protection setting.      |
-| `shared_runners_minutes_limit`       | integer | no       | **(STARTER ONLY)** Pipeline minutes quota for this group (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` |
-| `extra_shared_runners_minutes_limit` | integer | no       | **(STARTER ONLY)** Extra pipeline minutes quota for this group (purchased in addition to the minutes included in the plan). |
-| `shared_runners_setting`             | string  | no       | See [Options for `shared_runners_setting`](#options-for-shared_runners_setting). Enable or disable shared runners for a group's subgroups and projects. |
+| `shared_runners_minutes_limit`       | integer | no       | **(PREMIUM SELF)** Pipeline minutes quota for this group (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` |
+| `extra_shared_runners_minutes_limit` | integer | no       | **(PREMIUM SELF)** Extra pipeline minutes quota for this group (purchased in addition to the minutes included in the plan). |
 
 ### Options for `default_branch_protection`
 
-The `default_branch_protection` attribute determines whether developers and maintainers can push to the applicable master branch, as described in the following table:
+The `default_branch_protection` attribute determines whether developers and maintainers can push to the applicable [default branch](../user/project/repository/branches/default.md), as described in the following table:
 
 | Value | Description |
 |-------|-------------------------------------------------------------------------------------------------------------|
@@ -772,19 +777,9 @@ The `default_branch_protection` attribute determines whether developers and main
 | `1`   | Partial protection. Developers and maintainers can:  <br>- Push new commits |
 | `2`   | Full protection. Only maintainers can:  <br>- Push new commits |
 
-### Options for `shared_runners_setting`
-
-The `shared_runners_setting` attribute determines whether shared runners are enabled for a group's subgroups and projects.
-
-| Value | Description |
-|-------|-------------------------------------------------------------------------------------------------------------|
-| `enabled`                      | Enables shared runners for all projects and subgroups in this group. |
-| `disabled_with_override`       | Disables shared runners for all projects and subgroups in this group, but allows subgroups to override this setting. |
-| `disabled_and_unoverridable`   | Disables shared runners for all projects and subgroups in this group, and prevents subgroups from overriding this setting. |
-
 ## New Subgroup
 
-This is similar to creating a [New group](#new-group). You'll need the `parent_id` from the [List groups](#list-groups) call. You can then enter the desired:
+This is similar to creating a [New group](#new-group). You need the `parent_id` from the [List groups](#list-groups) call. You can then enter the desired:
 
 - `subgroup_path`
 - `subgroup_name`
@@ -835,7 +830,7 @@ PUT /groups/:id
 | `two_factor_grace_period`            | integer | no       | Time before Two-factor authentication is enforced (in hours). |
 | `project_creation_level`             | string  | no       | Determine if developers can create projects in the group. Can be `noone` (No one), `maintainer` (Maintainers), or `developer` (Developers + Maintainers). |
 | `auto_devops_enabled`                | boolean | no       | Default to Auto DevOps pipeline for all projects within this group. |
-| `subgroup_creation_level`            | string  | no       | Allowed to create subgroups. Can be `owner` (Owners), or `maintainer` (Maintainers). |
+| `subgroup_creation_level`            | string  | no       | Allowed to [create subgroups](../user/group/subgroups/index.md#creating-a-subgroup). Can be `owner` (Owners), or `maintainer` (Maintainers). |
 | `emails_disabled`                    | boolean | no       | Disable email notifications |
 | `avatar`                             | mixed   | no       | Image file for avatar of the group. [Introduced in GitLab 12.9](https://gitlab.com/gitlab-org/gitlab/-/issues/36681) |
 | `mentions_disabled`                  | boolean | no       | Disable the capability of a group from getting mentioned |
@@ -843,12 +838,13 @@ PUT /groups/:id
 | `request_access_enabled`             | boolean | no       | Allow users to request member access. |
 | `default_branch_protection`          | integer | no       | See [Options for `default_branch_protection`](#options-for-default_branch_protection). |
 | `file_template_project_id`           | integer | no       | **(PREMIUM)** The ID of a project to load custom file templates from. |
-| `shared_runners_minutes_limit`       | integer | no       | **(STARTER ONLY)** Pipeline minutes quota for this group (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` |
-| `extra_shared_runners_minutes_limit` | integer | no       | **(STARTER ONLY)** Extra pipeline minutes quota for this group (purchased in addition to the minutes included in the plan). |
+| `shared_runners_minutes_limit`       | integer | no       | **(PREMIUM SELF)** Pipeline minutes quota for this group (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` |
+| `extra_shared_runners_minutes_limit` | integer | no       | **(PREMIUM SELF)** Extra pipeline minutes quota for this group (purchased in addition to the minutes included in the plan). |
 | `prevent_forking_outside_group`      | boolean | no       | **(PREMIUM)** When enabled, users can **not** fork projects from this group to external namespaces
+| `shared_runners_setting`             | string  | no       | See [Options for `shared_runners_setting`](#options-for-shared_runners_setting). Enable or disable shared runners for a group's subgroups and projects. |
 
-NOTE: **Note:**
-The `projects` and `shared_projects` attributes in the response are deprecated and will be [removed in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797).
+NOTE:
+The `projects` and `shared_projects` attributes in the response are deprecated and [scheduled for removal in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797).
 To get the details of all projects within a group, use either the [list a group's projects](#list-a-groups-projects) or the [list a group's shared projects](#list-a-groups-shared-projects) endpoint.
 
 ```shell
@@ -935,6 +931,29 @@ with Rails console access to run the following command:
 Feature.disable(:limit_projects_in_groups_api)
 ```
 
+### Options for `shared_runners_setting`
+
+The `shared_runners_setting` attribute determines whether shared runners are enabled for a group's subgroups and projects.
+
+| Value | Description |
+|-------|-------------------------------------------------------------------------------------------------------------|
+| `enabled`                      | Enables shared runners for all projects and subgroups in this group. |
+| `disabled_with_override`       | Disables shared runners for all projects and subgroups in this group, but allows subgroups to override this setting. |
+| `disabled_and_unoverridable`   | Disables shared runners for all projects and subgroups in this group, and prevents subgroups from overriding this setting. |
+
+### Upload a group avatar
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36681) in GitLab 12.9.
+
+To upload an avatar file from your file system, use the `--form` argument. This causes
+curl to post data using the header `Content-Type: multipart/form-data`. The
+`file=` parameter must point to a file on your file system and be preceded by
+`@`. For example:
+
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/22" --form "avatar=@/tmp/example.png"
+```
+
 ## Remove group
 
 Only available to group owners and administrators.
@@ -942,7 +961,7 @@ Only available to group owners and administrators.
 This endpoint either:
 
 - Removes group, and queues a background job to delete all projects in the group as well.
-- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/) or higher tiers, marks a group for deletion. The deletion will happen 7 days later by default, but this can be changed in the [instance settings](../user/admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
+- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium](https://about.gitlab.com/pricing/) or higher tiers, marks a group for deletion. The deletion happens 7 days later by default, but this can be changed in the [instance settings](../user/admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
 ```plaintext
 DELETE /groups/:id
@@ -954,7 +973,10 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `id`            | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 
-The response will be `202 Accepted` if the user has authorization.
+The response is `202 Accepted` if the user has authorization.
+
+NOTE:
+A GitLab.com group can't be removed if it is linked to a subscription. To remove such a group, first [link the subscription](../subscriptions/index.md#change-the-linked-namespace) with a different group.
 
 ## Restore group marked for deletion **(PREMIUM)**
 
@@ -991,7 +1013,7 @@ GET /groups?search=foobar
 ]
 ```
 
-## Hooks
+## Hooks **(PREMIUM)**
 
 Also called Group Hooks and Webhooks.
 These are different from [System Hooks](system_hooks.md) that are system wide and [Project Hooks](projects.md#hooks) that are limited to one project.
@@ -1037,6 +1059,8 @@ GET /groups/:id/hooks/:hook_id
   "pipeline_events": true,
   "wiki_page_events": true,
   "deployment_events": true,
+  "releases_events": true,
+  "subgroup_events": true,
   "enable_ssl_verification": true,
   "created_at": "2012-10-12T17:04:47Z"
 }
@@ -1065,8 +1089,10 @@ POST /groups/:id/hooks
 | `pipeline_events`            | boolean        | no       | Trigger hook on pipeline events |
 | `wiki_page_events`           | boolean        | no       | Trigger hook on wiki events |
 | `deployment_events`          | boolean        | no       | Trigger hook on deployment events |
+| `releases_events`            | boolean        | no       | Trigger hook on release events |
+| `subgroup_events`            | boolean        | no       | Trigger hook on subgroup events |
 | `enable_ssl_verification`    | boolean        | no       | Do SSL verification when triggering the hook |
-| `token`                      | string         | no       | Secret token to validate received payloads; this will not be returned in the response |
+| `token`                      | string         | no       | Secret token to validate received payloads; not returned in the response |
 
 ### Edit group hook
 
@@ -1092,8 +1118,10 @@ PUT /groups/:id/hooks/:hook_id
 | `pipeline_events`            | boolean        | no       | Trigger hook on pipeline events |
 | `wiki_events`                | boolean        | no       | Trigger hook on wiki events |
 | `deployment_events`          | boolean        | no       | Trigger hook on deployment events |
+| `releases_events`            | boolean        | no       | Trigger hook on release events |
+| `subgroup_events`            | boolean        | no       | Trigger hook on subgroup events |
 | `enable_ssl_verification`    | boolean        | no       | Do SSL verification when triggering the hook |
-| `token`                      | string         | no       | Secret token to validate received payloads; this will not be returned in the response |
+| `token`                      | string         | no       | Secret token to validate received payloads; not returned in the response |
 
 ### Delete group hook
 
@@ -1113,7 +1141,7 @@ DELETE /groups/:id/hooks/:hook_id
 
 Group audit events can be accessed via the [Group Audit Events API](audit_events.md#group-audit-events)
 
-## Sync group with LDAP **(STARTER)**
+## Sync group with LDAP **(PREMIUM SELF)**
 
 Syncs the group with its linked LDAP group. Only available to group owners and administrators.
 
@@ -1133,7 +1161,7 @@ Please consult the [Group Members](members.md) documentation.
 
 List, add, and delete LDAP group links.
 
-### List LDAP group links **(STARTER)**
+### List LDAP group links **(PREMIUM SELF)**
 
 Lists LDAP group links.
 
@@ -1145,7 +1173,7 @@ GET /groups/:id/ldap_group_links
 | --------- | -------------- | -------- | ----------- |
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 
-### Add LDAP group link with CN or filter **(STARTER)**
+### Add LDAP group link with CN or filter **(PREMIUM SELF)**
 
 Adds an LDAP group link using a CN or filter. Adding a group link by filter is only supported in the Premium tier and above.
 
@@ -1161,12 +1189,12 @@ POST /groups/:id/ldap_group_links
 | `group_access` | integer   | yes      | Minimum [access level](members.md#valid-access-levels) for members of the LDAP group |
 | `provider` | string        | yes      | LDAP provider for the LDAP group link |
 
-NOTE: **Note:**
+NOTE:
 To define the LDAP group link, provide either a `cn` or a `filter`, but not both.
 
-### Delete LDAP group link **(STARTER)**
+### Delete LDAP group link **(PREMIUM SELF)**
 
-Deletes an LDAP group link. Deprecated. Will be removed in a future release.
+Deletes an LDAP group link. Deprecated. Scheduled for removal in a future release.
 
 ```plaintext
 DELETE /groups/:id/ldap_group_links/:cn
@@ -1177,7 +1205,7 @@ DELETE /groups/:id/ldap_group_links/:cn
 | `id`      | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 | `cn`      | string         | yes      | The CN of an LDAP group |
 
-Deletes an LDAP group link for a specific LDAP provider. Deprecated. Will be removed in a future release.
+Deletes an LDAP group link for a specific LDAP provider. Deprecated. Scheduled for removal in a future release.
 
 ```plaintext
 DELETE /groups/:id/ldap_group_links/:provider/:cn
@@ -1189,7 +1217,7 @@ DELETE /groups/:id/ldap_group_links/:provider/:cn
 | `cn`      | string         | yes      | The CN of an LDAP group |
 | `provider` | string        | yes      | LDAP provider for the LDAP group link |
 
-### Delete LDAP group link with CN or filter **(STARTER)**
+### Delete LDAP group link with CN or filter **(PREMIUM SELF)**
 
 Deletes an LDAP group link using a CN or filter. Deleting by filter is only supported in the Premium tier and above.
 
@@ -1204,7 +1232,7 @@ DELETE /groups/:id/ldap_group_links
 | `filter`  | string         | no       | The LDAP filter for the group |
 | `provider` | string        | yes       | LDAP provider for the LDAP group link |
 
-NOTE: **Note:**
+NOTE:
 To delete the LDAP group link, provide either a `cn` or a `filter`, but not both.
 
 ## Namespaces in groups
@@ -1229,11 +1257,13 @@ Read more in the [Group Badges](group_badges.md) documentation.
 
 ## Group Import/Export
 
-Read more in the [Group Import/Export](group_import_export.md) documentation.
+Read more in the [Group Import/Export](group_import_export.md)
+and [Group Relations Export](group_relations_export.md)
+documentation.
 
 ## Share Groups with Groups
 
-These endpoints create and delete links for sharing a group with another group. For more information, see the related discussion in the [GitLab Groups](../user/group/index.md#sharing-a-group-with-another-group) page.
+These endpoints create and delete links for sharing a group with another group. For more information, see the related discussion in the [GitLab Groups](../user/group/index.md#share-a-group-with-another-group) page.
 
 ### Create a link to share a group with another group
 
@@ -1297,7 +1327,7 @@ GET /groups/:id/push_rule
 }
 ```
 
-Users on GitLab [Premium, Silver, or higher](https://about.gitlab.com/pricing/) will also see
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
 the `commit_committer_check` and `reject_unsigned_commits` parameters:
 
 ```json
@@ -1325,15 +1355,15 @@ POST /groups/:id/push_rule
 | `id`                                          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 | `deny_delete_tag` **(STARTER)**               | boolean        | no       | Deny deleting a tag |
 | `member_check` **(STARTER)**                  | boolean        | no       | Allows only GitLab users to author commits |
-| `prevent_secrets` **(STARTER)**               | boolean        | no       | [Files that are likely to contain secrets](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/checks/files_denylist.yml) will be rejected |
+| `prevent_secrets` **(STARTER)**               | boolean        | no       | [Files that are likely to contain secrets](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/checks/files_denylist.yml) are rejected |
 | `commit_message_regex` **(STARTER)**          | string         | no       | All commit messages must match the regular expression provided in this attribute, e.g. `Fixed \d+\..*` |
-| `commit_message_negative_regex` **(STARTER)** | string         | no       | Commit messages matching the regular expression provided in this attribute will not be allowed, e.g. `ssh\:\/\/` |
+| `commit_message_negative_regex` **(STARTER)** | string         | no       | Commit messages matching the regular expression provided in this attribute aren't allowed, e.g. `ssh\:\/\/` |
 | `branch_name_regex` **(STARTER)**             | string         | no       | All branch names must match the regular expression provided in this attribute, e.g. `(feature|hotfix)\/*` |
 | `author_email_regex` **(STARTER)**            | string         | no       | All commit author emails must match the regular expression provided in this attribute, e.g. `@my-company.com$` |
-| `file_name_regex` **(STARTER)**               | string         | no       | Filenames matching the regular expression provided in this attribute will **not** be allowed, e.g. `(jar|exe)$` |
+| `file_name_regex` **(STARTER)**               | string         | no       | Filenames matching the regular expression provided in this attribute are **not** allowed, e.g. `(jar|exe)$` |
 | `max_file_size` **(STARTER)**                 | integer        | no       | Maximum file size (MB) allowed |
-| `commit_committer_check` **(PREMIUM)**        | boolean        | no       | Only commits pushed using verified emails will be allowed |
-| `reject_unsigned_commits` **(PREMIUM)**       | boolean        | no       | Only commits signed through GPG will be allowed |
+| `commit_committer_check` **(PREMIUM)**        | boolean        | no       | Only commits pushed using verified emails are allowed |
+| `reject_unsigned_commits` **(PREMIUM)**       | boolean        | no       | Only commits signed through GPG are allowed |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/19/push_rule"
@@ -1372,15 +1402,15 @@ PUT /groups/:id/push_rule
 | `id`                                          | integer/string | yes      | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |
 | `deny_delete_tag` **(STARTER)**               | boolean        | no       | Deny deleting a tag |
 | `member_check` **(STARTER)**                  | boolean        | no       | Restricts commits to be authored by existing GitLab users only |
-| `prevent_secrets` **(STARTER)**               | boolean        | no       | [Files that are likely to contain secrets](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/checks/files_denylist.yml) will be rejected |
+| `prevent_secrets` **(STARTER)**               | boolean        | no       | [Files that are likely to contain secrets](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/checks/files_denylist.yml) are rejected |
 | `commit_message_regex` **(STARTER)**          | string         | no       | All commit messages must match the regular expression provided in this attribute, e.g. `Fixed \d+\..*` |
-| `commit_message_negative_regex` **(STARTER)** | string         | no       | Commit messages matching the regular expression provided in this attribute will not be allowed, e.g. `ssh\:\/\/` |
+| `commit_message_negative_regex` **(STARTER)** | string         | no       | Commit messages matching the regular expression provided in this attribute aren't allowed, e.g. `ssh\:\/\/` |
 | `branch_name_regex` **(STARTER)**             | string         | no       | All branch names must match the regular expression provided in this attribute, e.g. `(feature|hotfix)\/*` |
 | `author_email_regex` **(STARTER)**            | string         | no       | All commit author emails must match the regular expression provided in this attribute, e.g. `@my-company.com$` |
-| `file_name_regex` **(STARTER)**               | string         | no       | Filenames matching the regular expression provided in this attribute will **not** be allowed, e.g. `(jar|exe)$` |
+| `file_name_regex` **(STARTER)**               | string         | no       | Filenames matching the regular expression provided in this attribute are **not** allowed, e.g. `(jar|exe)$` |
 | `max_file_size` **(STARTER)**                 | integer        | no       | Maximum file size (MB) allowed |
-| `commit_committer_check` **(PREMIUM)**        | boolean        | no       | Only commits pushed using verified emails will be allowed |
-| `reject_unsigned_commits` **(PREMIUM)**       | boolean        | no       | Only commits signed through GPG will be allowed |
+| `commit_committer_check` **(PREMIUM)**        | boolean        | no       | Only commits pushed using verified emails are allowed |
+| `reject_unsigned_commits` **(PREMIUM)**       | boolean        | no       | Only commits signed through GPG are allowed |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/19/push_rule"

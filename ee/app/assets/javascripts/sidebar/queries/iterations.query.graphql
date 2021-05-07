@@ -1,0 +1,12 @@
+#import "./iteration.fragment.graphql"
+
+query issueIterations($fullPath: ID!, $title: String, $state: IterationState) {
+  group(fullPath: $fullPath) {
+    iterations(title: $title, state: $state) {
+      nodes {
+        ...IterationFragment
+        state
+      }
+    }
+  }
+}

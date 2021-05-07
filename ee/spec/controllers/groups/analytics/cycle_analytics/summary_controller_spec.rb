@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Groups::Analytics::CycleAnalytics::SummaryController do
   let_it_be(:user) { create(:user) }
   let_it_be(:group, refind: true) { create(:group) }
+
   let(:params) { { group_id: group.full_path, created_after: '2010-01-01', created_before: '2010-01-02' } }
 
   before do
@@ -22,7 +23,7 @@ RSpec.describe Groups::Analytics::CycleAnalytics::SummaryController do
       expect(response).to match_response_schema('analytics/cycle_analytics/summary', dir: 'ee')
     end
 
-    include_examples 'cycle analytics data endpoint examples'
+    include_examples 'Value Stream Analytics data endpoint examples'
     include_examples 'group permission check on the controller level'
   end
 

@@ -1,11 +1,11 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
-import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR, RULE_NAME_ANY_APPROVER } from '../../constants';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
-import Rules from '../rules.vue';
-import RuleControls from '../rule_controls.vue';
+import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR, RULE_NAME_ANY_APPROVER } from '../../constants';
 import EmptyRule from '../empty_rule.vue';
+import RuleControls from '../rule_controls.vue';
+import Rules from '../rules.vue';
 import RuleInput from './rule_input.vue';
 
 let targetBranchMutationObserver;
@@ -21,12 +21,12 @@ export default {
   computed: {
     ...mapState(['settings']),
     ...mapState({
-      rules: state => state.approvals.rules,
-      targetBranch: state => state.approvals.targetBranch,
+      rules: (state) => state.approvals.rules,
+      targetBranch: (state) => state.approvals.targetBranch,
     }),
     hasNamedRule() {
       if (this.settings.allowMultiRule) {
-        return this.rules.some(rule => rule.ruleType !== RULE_TYPE_ANY_APPROVER);
+        return this.rules.some((rule) => rule.ruleType !== RULE_TYPE_ANY_APPROVER);
       }
 
       const [rule] = this.rules;
@@ -49,7 +49,7 @@ export default {
         }
         if (
           this.settings.allowMultiRule &&
-          !newValue.some(rule => rule.ruleType === RULE_TYPE_ANY_APPROVER)
+          !newValue.some((rule) => rule.ruleType === RULE_TYPE_ANY_APPROVER)
         ) {
           this.addEmptyRule();
         }

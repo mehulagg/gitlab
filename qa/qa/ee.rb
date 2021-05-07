@@ -49,6 +49,11 @@ module QA
           autoload :LDAPSync, 'qa/ee/page/group/settings/ldap_sync'
           autoload :General, 'qa/ee/page/group/settings/general'
         end
+
+        module Wiki
+          autoload :Show, 'qa/ee/page/group/wiki/show'
+          autoload :Edit, 'qa/ee/page/group/wiki/edit'
+        end
       end
 
       module File
@@ -58,7 +63,10 @@ module QA
       module Main
         autoload :Banner, 'qa/ee/page/main/banner'
         autoload :Menu, 'qa/ee/page/main/menu'
-        autoload :SignUp, 'qa/ee/page/main/sign_up'
+      end
+
+      module Registration
+        autoload :Welcome, 'qa/ee/page/registration/welcome'
       end
 
       module Admin
@@ -78,7 +86,6 @@ module QA
 
         module Settings
           autoload :Templates, 'qa/ee/page/admin/settings/templates'
-          autoload :Elasticsearch, 'qa/ee/page/admin/settings/elasticsearch'
           autoload :Preferences, 'qa/ee/page/admin/settings/preferences'
 
           module Component
@@ -107,15 +114,11 @@ module QA
         autoload :Show, 'qa/ee/page/project/show'
         autoload :Menu, 'qa/ee/page/project/menu'
 
-        module Artifact
-          autoload :Show, 'qa/ee/page/project/artifact/show'
-        end
-
         module SubMenus
           autoload :SecurityCompliance, 'qa/ee/page/project/sub_menus/security_compliance'
           autoload :Repository, 'qa/ee/page/project/sub_menus/repository'
           autoload :Settings, 'qa/ee/page/project/sub_menus/settings'
-          autoload :Project, 'qa/ee/page/project/sub_menus/project'
+          autoload :Analytics, 'qa/ee/page/project/sub_menus/analytics'
           autoload :LicenseCompliance, 'qa/ee/page/project/sub_menus/license_compliance'
         end
 
@@ -138,11 +141,9 @@ module QA
           autoload :Integrations, 'qa/ee/page/project/settings/integrations'
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
-          autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
-
-          module Services
-            autoload :Jenkins, 'qa/ee/page/project/settings/services/jenkins'
-          end
+          autoload :IssueTemplateDefault, 'qa/ee/page/project/settings/issue_template_default.rb'
+          autoload :CICD, 'qa/ee/page/project/settings/ci_cd'
+          autoload :PipelineSubscriptions, 'qa/ee/page/project/settings/pipeline_subscriptions'
         end
 
         module Operations
@@ -162,6 +163,7 @@ module QA
           autoload :SecurityDashboard, 'qa/ee/page/project/secure/security_dashboard'
           autoload :VulnerabilityDetails, 'qa/ee/page/project/secure/vulnerability_details'
           autoload :LicenseCompliance, 'qa/ee/page/project/secure/license_compliance'
+          autoload :ConfigurationForm, 'qa/ee/page/project/secure/configuration_form'
         end
 
         module PathLocks
@@ -192,6 +194,7 @@ module QA
 
         module Epic
           autoload :Index, 'qa/ee/page/group/epic/index'
+          autoload :New, 'qa/ee/page/group/epic/new'
           autoload :Show, 'qa/ee/page/group/epic/show'
         end
 
@@ -211,6 +214,7 @@ module QA
       autoload :GroupLabel, 'qa/ee/resource/group_label'
       autoload :GroupIteration, 'qa/ee/resource/group_iteration'
       autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
+      autoload :PipelineSubscriptions, 'qa/ee/resource/pipeline_subscriptions'
 
       module Board
         autoload :BaseBoard, 'qa/ee/resource/board/base_board'

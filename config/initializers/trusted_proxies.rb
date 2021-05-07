@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Override Rack::Request to make use of the same list of trusted_proxies
 # as the ActionDispatch::Request object. This is necessary for libraries
 # like rack_attack where they don't use ActionDispatch, and we want them
@@ -15,7 +17,7 @@ end
 
 gitlab_trusted_proxies = Array(Gitlab.config.gitlab.trusted_proxies).map do |proxy|
   IPAddr.new(proxy)
-                         rescue IPAddr::InvalidAddressError
+rescue IPAddr::InvalidAddressError
 end.compact
 
 Rails.application.config.action_dispatch.trusted_proxies = (
@@ -30,4 +32,4 @@ module TrustedProxyMonkeyPatch
   end
 end
 
-ActionDispatch::Request.send(:include, TrustedProxyMonkeyPatch)
+ActionDispatch::Request.include TrustedProxyMonkeyPatch

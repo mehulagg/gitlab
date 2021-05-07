@@ -1,11 +1,11 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments"
 type: concepts, howto
 ---
 
-# Signing commits and tags with X.509
+# Signing commits and tags with X.509 **(FREE)**
 
 [X.509](https://en.wikipedia.org/wiki/X.509) is a standard format for public key
 certificates issued by a public or private Public Key Infrastructure (PKI).
@@ -28,10 +28,10 @@ For a commit or tag to be *verified* by GitLab:
   which is usually up to three years.
 - The signing time is equal or later than commit time.
 
-NOTE: **Note:**
+NOTE:
 Certificate revocation lists are checked on a daily basis via background worker.
 
-NOTE: **Note:**
+NOTE:
 Self signed certificates without `authorityKeyIdentifier`,
 `subjectKeyIdentifier`, and `crlDistributionPoints` are not supported. We
 recommend using certificates from a PKI that are in line with
@@ -39,7 +39,7 @@ recommend using certificates from a PKI that are in line with
 
 ## Obtaining an X.509 key pair
 
-If your organization has Public Key Infrastructure (PKI), that PKI will provide
+If your organization has Public Key Infrastructure (PKI), that PKI provides
 an S/MIME key.
 
 If you do not have an S/MIME key pair from a PKI, you can either create your
@@ -49,7 +49,7 @@ and some of them generate keys for free.
 
 ## Associating your X.509 certificate with Git
 
-To take advantage of X.509 signing, you will need Git 2.19.0 or later. You can
+To take advantage of X.509 signing, you need Git 2.19.0 or later. You can
 check your Git version with:
 
 ```shell

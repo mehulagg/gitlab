@@ -27,7 +27,7 @@ module Ci
     # rubocop:enable Cop/ActiveRecordSerialize
 
     state_machine :status do
-      after_transition [:created, :manual] => :pending do |bridge|
+      after_transition [:created, :manual, :waiting_for_resource] => :pending do |bridge|
         next unless bridge.downstream_project
 
         bridge.run_after_commit do
@@ -131,14 +131,10 @@ module Ci
     end
 
     def playable?
-      return false unless ::Gitlab::Ci::Features.manual_bridges_enabled?(project)
-
       action? && !archived? && manual?
     end
 
     def action?
-      return false unless ::Gitlab::Ci::Features.manual_bridges_enabled?(project)
-
       %w[manual].include?(self.when)
     end
 
@@ -157,6 +153,10 @@ module Ci
     end
 
     def runnable?
+      false
+    end
+
+    def any_unmet_prerequisites?
       false
     end
 
@@ -203,10 +203,6 @@ module Ci
       end
     end
 
-    def dependency_variables
-      []
-    end
-
     def target_revision_ref
       downstream_pipeline_params.dig(:target_revision, :ref)
     end
@@ -218,7 +214,8 @@ module Ci
         project: downstream_project,
         source: :pipeline,
         target_revision: {
-          ref: target_ref || downstream_project.default_branch
+          ref: target_ref || downstream_project.default_branch,
+          variables_attributes: downstream_variables
         },
         execute_params: {
           ignore_skip_ci: true,
@@ -238,7 +235,8 @@ module Ci
           checkout_sha: parent_pipeline.sha,
           before: parent_pipeline.before_sha,
           source_sha: parent_pipeline.source_sha,
-          target_sha: parent_pipeline.target_sha
+          target_sha: parent_pipeline.target_sha,
+          variables_attributes: downstream_variables
         },
         execute_params: {
           ignore_skip_ci: true,

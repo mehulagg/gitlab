@@ -90,6 +90,7 @@ describe('buildCycleAnalyticsInitialData', () => {
     ${'selectedProjects'} | ${[]}
     ${'labelsPath'}       | ${''}
     ${'milestonesPath'}   | ${''}
+    ${'stage'}            | ${null}
   `('will set a default value for "$field" if is not present', ({ field, value }) => {
     expect(buildCycleAnalyticsInitialData()).toMatchObject({
       [field]: value,
@@ -192,7 +193,7 @@ describe('buildCycleAnalyticsInitialData', () => {
     });
 
     it('with no search term returns the data', () => {
-      ['', null].forEach(search => {
+      ['', null].forEach((search) => {
         expect(filterBySearchTerm(data, search)).toEqual(data);
       });
     });

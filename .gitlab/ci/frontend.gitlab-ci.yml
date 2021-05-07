@@ -1,22 +1,15 @@
-.frontend-base:
-  extends:
-    - .default-retry
-    - .default-before_script
-  variables:
-    SETUP_DB: "false"
-    # we override the max_old_space_size to prevent OOM errors
-    NODE_OPTIONS: --max_old_space_size=3584
-
 .yarn-install: &yarn-install
   - source scripts/utils.sh
   - run_timed_command "retry yarn install --frozen-lockfile"
 
 .compile-assets-base:
   extends:
-    - .frontend-base
+    - .default-retry
+    - .default-before_script
     - .assets-compile-cache
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-git-2.28-lfs-2.9-node-12.18-yarn-1.22-graphicsmagick-1.3.34
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:ruby-2.7.2-git-2.31-lfs-2.9-node-14.15-yarn-1.22-graphicsmagick-1.3.36
   variables:
+    SETUP_DB: "false"
     WEBPACK_VENDOR_DLL: "true"
   stage: prepare
   script:
@@ -93,42 +86,66 @@ update-yarn-cache:
 
 .frontend-fixtures-base:
   extends:
-    - .frontend-base
+    - .default-retry
+    - .default-before_script
     - .rails-cache
     - .use-pg11
   stage: fixtures
-  needs: ["setup-test-env", "compile-test-assets"]
+  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
   variables:
-    SETUP_DB: "true"
     WEBPACK_VENDOR_DLL: "true"
   script:
-    - run_timed_command "scripts/gitaly-test-build"
+    - run_timed_command "gem install knapsack --no-document"
     - run_timed_command "scripts/gitaly-test-spawn"
-    - run_timed_command "bin/rake frontend:fixtures"
+    - source ./scripts/rspec_helpers.sh
+    - rspec_paralellized_job "--tag frontend_fixture"
   artifacts:
     name: frontend-fixtures
     expire_in: 31d
     when: always
     paths:
       - tmp/tests/frontend/
+      - knapsack/
 
-frontend-fixtures:
+rspec frontend_fixture:
   extends:
     - .frontend-fixtures-base
     - .frontend:rules:default-frontend-jobs
 
-frontend-fixtures-as-if-foss:
+rspec frontend_fixture as-if-foss:
   extends:
     - .frontend-fixtures-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
 
+rspec-ee frontend_fixture:
+  extends:
+    - .frontend-fixtures-base
+    - .frontend:rules:default-frontend-jobs-ee
+  parallel: 2
+
+graphql-schema-dump:
+  variables:
+    SETUP_DB: "false"
+  extends:
+    - .default-retry
+    - .rails-cache
+    - .default-before_script
+    - .frontend:rules:default-frontend-jobs
+  stage: fixtures
+  needs: []
+  script:
+    - bundle exec rake gitlab:graphql:schema:dump
+  artifacts:
+    name: graphql-schema
+    paths:
+      - tmp/tests/graphql/gitlab_schema.graphql
+      - tmp/tests/graphql/gitlab_schema.json
+
 .frontend-test-base:
   extends:
-    - .frontend-base
+    - .default-retry
     - .yarn-cache
-  variables:
-    USE_BUNDLE_INSTALL: "false"
   stage: test
 
 eslint-as-if-foss:
@@ -152,7 +169,10 @@ karma:
   extends:
     - .karma-base
     - .frontend:rules:default-frontend-jobs
-  needs: ["frontend-fixtures"]
+  needs:
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
   coverage: '/^Statements *: (\d+\.\d+%)/'
   artifacts:
     name: coverage-javascript
@@ -171,7 +191,7 @@ karma-as-if-foss:
     - .karma-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
-  needs: ["frontend-fixtures-as-if-foss"]
+  needs: ["rspec frontend_fixture as-if-foss"]
 
 .jest-base:
   extends: .frontend-test-base
@@ -183,7 +203,10 @@ jest:
   extends:
     - .jest-base
     - .frontend:rules:default-frontend-jobs
-  needs: ["frontend-fixtures"]
+  needs:
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
   artifacts:
     name: coverage-frontend
     expire_in: 31d
@@ -203,27 +226,33 @@ jest-integration:
   script:
     - *yarn-install
     - run_timed_command "yarn jest:integration --ci"
-  needs: ["frontend-fixtures"]
+  needs:
+    - job: "rspec frontend_fixture"
+    - job: "rspec-ee frontend_fixture"
+      optional: true
+    - job: "graphql-schema-dump"
 
 jest-as-if-foss:
   extends:
     - .jest-base
     - .frontend:rules:default-frontend-jobs-as-if-foss
     - .as-if-foss
-  needs: ["frontend-fixtures-as-if-foss"]
+  needs: ["rspec frontend_fixture as-if-foss"]
   parallel: 2
 
 coverage-frontend:
   extends:
     - .default-retry
     - .yarn-cache
-    - .frontend:rules:ee-mr-and-master-only
+    - .frontend:rules:ee-mr-and-default-branch-only
   needs: ["jest"]
   stage: post-test
   before_script:
     - *yarn-install
   script:
     - run_timed_command "yarn node scripts/frontend/merge_coverage_frontend.js"
+    # Removing the individual coverage results, as we just merged them.
+    - rm -r coverage-frontend/jest-*
   coverage: '/^Statements\s*:\s*?(\d+(?:\.\d+)?)%/'
   artifacts:
     name: coverage-frontend
@@ -246,13 +275,13 @@ coverage-frontend:
 
 qa-frontend-node:10:
   extends: .qa-frontend-node
-  image: node:dubnium
+  image: ${GITLAB_DEPENDENCY_PROXY}node:dubnium
 
 qa-frontend-node:latest:
   extends:
     - .qa-frontend-node
     - .frontend:rules:qa-frontend-node-latest
-  image: node:latest
+  image: ${GITLAB_DEPENDENCY_PROXY}node:latest
 
 webpack-dev-server:
   extends:

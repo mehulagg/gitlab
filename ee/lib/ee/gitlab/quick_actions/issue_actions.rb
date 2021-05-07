@@ -70,11 +70,7 @@ module EE
           icon 'confidential'
           types Issue
           condition do
-            quick_action_target.persisted? &&
-              quick_action_target.supports_epic? &&
-              !quick_action_target.promoted? &&
-              current_user.can?(:admin_issue, project) &&
-              current_user.can?(:create_epic, project.group)
+            quick_action_target.can_be_promoted_to_epic?(current_user)
           end
           command :promote do
             @updates[:promote_to_epic] = true

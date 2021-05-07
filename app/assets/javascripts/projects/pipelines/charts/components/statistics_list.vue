@@ -1,4 +1,9 @@
 <script>
+import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
+import { s__, n__ } from '~/locale';
+
+const defaultPrecision = 2;
+
 export default {
   props: {
     counts: {
@@ -6,25 +11,39 @@ export default {
       required: true,
     },
   },
+  computed: {
+    statistics() {
+      const formatter = getFormatter(SUPPORTED_FORMATS.percentHundred);
+
+      return [
+        {
+          title: s__('PipelineCharts|Total:'),
+          value: n__('1 pipeline', '%d pipelines', this.counts.total),
+        },
+        {
+          title: s__('PipelineCharts|Successful:'),
+          value: n__('1 pipeline', '%d pipelines', this.counts.success),
+        },
+        {
+          title: s__('PipelineCharts|Failed:'),
+          value: n__('1 pipeline', '%d pipelines', this.counts.failed),
+        },
+        {
+          title: s__('PipelineCharts|Success ratio:'),
+          value: formatter(this.counts.successRatio, defaultPrecision),
+        },
+      ];
+    },
+  },
 };
 </script>
 <template>
   <ul>
-    <li>
-      <span>{{ s__('PipelineCharts|Total:') }}</span>
-      <strong>{{ n__('1 pipeline', '%d pipelines', counts.total) }}</strong>
-    </li>
-    <li>
-      <span>{{ s__('PipelineCharts|Successful:') }}</span>
-      <strong>{{ n__('1 pipeline', '%d pipelines', counts.success) }}</strong>
-    </li>
-    <li>
-      <span>{{ s__('PipelineCharts|Failed:') }}</span>
-      <strong>{{ n__('1 pipeline', '%d pipelines', counts.failed) }}</strong>
-    </li>
-    <li>
-      <span>{{ s__('PipelineCharts|Success ratio:') }}</span>
-      <strong>{{ counts.successRatio }}%</strong>
-    </li>
+    <template v-for="({ title, value }, index) in statistics">
+      <li :key="index">
+        <span>{{ title }}</span>
+        <strong>{{ value }}</strong>
+      </li>
+    </template>
   </ul>
 </template>

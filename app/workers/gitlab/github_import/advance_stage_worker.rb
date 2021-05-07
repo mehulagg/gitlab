@@ -8,6 +8,8 @@ module Gitlab
     # stage.
     class AdvanceStageWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
+
+      sidekiq_options retry: 3
       include ::Gitlab::Import::AdvanceStage
 
       sidekiq_options dead: false
@@ -16,6 +18,8 @@ module Gitlab
 
       # The known importer stages and their corresponding Sidekiq workers.
       STAGES = {
+        pull_requests_merged_by: Stage::ImportPullRequestsMergedByWorker,
+        pull_request_reviews: Stage::ImportPullRequestsReviewsWorker,
         issues_and_diff_notes: Stage::ImportIssuesAndDiffNotesWorker,
         notes: Stage::ImportNotesWorker,
         lfs_objects: Stage::ImportLfsObjectsWorker,

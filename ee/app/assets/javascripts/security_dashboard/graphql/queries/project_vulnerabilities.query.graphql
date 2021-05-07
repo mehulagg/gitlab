@@ -1,0 +1,56 @@
+#import "~/graphql_shared/fragments/pageInfoCursorsOnly.fragment.graphql"
+#import "../fragments/vulnerability.fragment.graphql"
+
+query projectVulnerabilities(
+  $fullPath: ID!
+  $after: String
+  $first: Int
+  $severity: [VulnerabilitySeverity!]
+  $reportType: [VulnerabilityReportType!]
+  $scanner: [String!]
+  $scannerId: [VulnerabilitiesScannerID!]
+  $state: [VulnerabilityState!]
+  $sort: VulnerabilitySort
+  $hasIssues: Boolean
+  $hasResolution: Boolean
+  $includeExternalIssueLinks: Boolean = false
+) {
+  project(fullPath: $fullPath) {
+    vulnerabilities(
+      after: $after
+      first: $first
+      severity: $severity
+      reportType: $reportType
+      scanner: $scanner
+      scannerId: $scannerId
+      state: $state
+      sort: $sort
+      hasIssues: $hasIssues
+      hasResolution: $hasResolution
+    ) {
+      nodes {
+        ...Vulnerability
+        externalIssueLinks @include(if: $includeExternalIssueLinks) {
+          nodes {
+            issue: externalIssue {
+              externalTracker
+              webUrl
+              title
+              iid: relativeReference
+            }
+          }
+        }
+        hasSolutions
+        mergeRequest {
+          webUrl
+          state
+          securityAutoFix
+          iid
+        }
+      }
+      pageInfo {
+        ...PageInfo
+      }
+    }
+  }
+}

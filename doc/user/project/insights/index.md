@@ -1,3 +1,9 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Insights **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/725) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.0.
@@ -8,39 +14,37 @@ requests to be merged and much more.
 
 ![Insights example bar chart](img/project_insights.png)
 
-NOTE: **Note:**
+NOTE:
 This feature is [also available at the group level](../../group/insights/index.md).
 
 ## View your project's Insights
 
 You can access your project's Insights by clicking the **Analytics > Insights**
-link in the left sidebar:
-
-![Insights sidebar link](img/insights_sidebar_link_v12_8.png)
+link in the left sidebar.
 
 ## Configure your Insights
 
 Insights are configured using a YAML file called `.gitlab/insights.yml` within
-a project. That file will then be used in the project's Insights page.
+a project. That file is used in the project's Insights page.
 
 See [Writing your `.gitlab/insights.yml`](#writing-your-gitlabinsightsyml) below
 for details about the content of this file.
 
-NOTE: **Note:**
-Once the configuration file is created, you can also
+NOTE:
+After the configuration file is created, you can also
 [use it for your project's group](../../group/insights/index.md#configure-your-insights).
 
-NOTE: **Note:**
-If the project doesn't have any configuration file, it'll try to use
+NOTE:
+If the project doesn't have any configuration file, it attempts to use
 the group configuration if possible. If the group doesn't have any
-configuration, the default configuration will be used.
+configuration, the default configuration is used.
 
 ## Permissions
 
 If you have access to view a project, then you have access to view their
 Insights.
 
-NOTE: **Note:**
+NOTE:
 Issues or merge requests that you don't have access to (because you don't have
 access to the project they belong to, or because they are confidential) are
 filtered out of the Insights charts.
@@ -50,11 +54,11 @@ You may also consult the [group permissions table](../../permissions.md#group-me
 ## Writing your `.gitlab/insights.yml`
 
 The `.gitlab/insights.yml` file defines the structure and order of the Insights
-charts that will be displayed in each Insights page of your project or group.
+charts displayed in each Insights page of your project or group.
 
 Each page has a unique key and a collection of charts to fetch and display.
 
-For example, here's a single definition for Insights that will display one page with one chart:
+For example, here's a single definition for Insights that displays one page with one chart:
 
 ```yaml
 bugsCharts:
@@ -97,8 +101,8 @@ The following table lists available parameters for charts:
 
 | Keyword                                            | Description |
 |:---------------------------------------------------|:------------|
-| [`title`](#title)                                  | The title of the chart. This will displayed on the Insights page. |
-| [`description`](#description)                      | A description for the individual chart. This will be displayed above the relevant chart. |
+| [`title`](#title)                                  | The title of the chart. This displays on the Insights page. |
+| [`description`](#description)                      | A description for the individual chart. This displays above the relevant chart. |
 | [`type`](#type)                                    | The type of chart: `bar`, `line` or `stacked-bar`. |
 | [`query`](#query)                                  | A hash that defines the conditions for issues / merge requests to be part of the chart. |
 
@@ -109,7 +113,7 @@ Insights charts.
 
 ### `title`
 
-`title` is the title of the chart as it will be displayed on the Insights page.
+`title` is the title of the chart as it displays on the Insights page.
 For example:
 
 ```yaml
@@ -181,14 +185,14 @@ Defines the type of "issuable" you want to create a chart for.
 
 Supported values are:
 
-- `issue`: The chart will display issues' data.
-- `merge_request`: The chart will display merge requests' data.
+- `issue`: The chart displays issues' data.
+- `merge_request`: The chart displays merge requests' data.
 
 #### `query.issuable_state`
 
-Filter by the state of the queried "issuable".
+Filter by the current state of the queried "issuable".
 
-By default, the `opened` state filter will be applied.
+By default, the `opened` state filter is applied.
 
 Supported values are:
 
@@ -200,10 +204,10 @@ Supported values are:
 
 #### `query.filter_labels`
 
-Filter by labels applied to the queried "issuable".
+Filter by labels currently applied to the queried "issuable".
 
-By default, no labels filter will be applied. All the defined labels must be
-applied to the "issuable" in order for it to be selected.
+By default, no labels filter is applied. All the defined labels must be
+currently applied to the "issuable" in order for it to be selected.
 
 Example:
 
@@ -223,7 +227,7 @@ monthlyBugsCreated:
 
 Group "issuable" by the configured labels.
 
-By default, no grouping will be done. When using this keyword, you need to
+By default, no grouping is done. When using this keyword, you need to
 set `type` to either `line` or `stacked-bar`.
 
 Example:
@@ -256,13 +260,13 @@ Supported values are:
 
 #### `query.period_limit`
 
-Define how far "issuables" are queried in the past.
+Define how far "issuables" are queried in the past (using the `query.period_field`).
 
 The unit is related to the `query.group_by` you defined. For instance if you
 defined `query.group_by: 'day'`  then `query.period_limit: 365` would mean
 "Gather and display data for the last 365 days".
 
-By default, default values will be applied depending on the `query.group_by`
+By default, default values are applied depending on the `query.group_by`
 you defined.
 
 | `query.group_by` | Default value |
@@ -287,10 +291,9 @@ The `period_field` is automatically set to:
 - `merged_at` if `query.issuable_state` is `merged`
 - `created_at` otherwise
 
-NOTE: **Note:**
-Until [this bug](https://gitlab.com/gitlab-org/gitlab/-/issues/26911), is resolved, you may see `created_at`
-in place of `merged_at`.
-`created_at` will be used instead.
+NOTE:
+Until [this bug](https://gitlab.com/gitlab-org/gitlab/-/issues/26911), is resolved,
+you may see `created_at` in place of `merged_at`. `created_at` is used instead.
 
 ### `projects`
 
@@ -298,22 +301,22 @@ in place of `merged_at`.
 
 You can limit where the "issuables" can be queried from:
 
-- If `.gitlab/insights.yml` is used for a [group's insights](../../group/insights/index.md#configure-your-insights), with `projects`, you can limit the projects to be queried. By default, all projects under the group will be used.
-- If `.gitlab/insights.yml` is used for a project's insights, specifying any other projects will yield no results. By default, the project itself will be used.
+- If `.gitlab/insights.yml` is used for a [group's insights](../../group/insights/index.md#configure-your-insights), with `projects`, you can limit the projects to be queried. By default, all projects currently under the group are used.
+- If `.gitlab/insights.yml` is used for a project's insights, specifying any other projects yields no results. By default, the project itself is used.
 
 #### `projects.only`
 
 The `projects.only` option specifies the projects which the "issuables"
 should be queried from.
 
-Projects listed here will be ignored when:
+Projects listed here are ignored when:
 
 - They don't exist.
 - The current user doesn't have sufficient permissions to read them.
 - They are outside of the group.
 
 In the following `insights.yml` example, we specify the projects
-the queries will be used on. This example is useful when setting
+the queries are used on. This example is useful when setting
 a group's insights:
 
 ```yaml

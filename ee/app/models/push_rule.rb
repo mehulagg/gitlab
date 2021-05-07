@@ -19,7 +19,8 @@ class PushRule < ApplicationRecord
     branch_name_regex
   ].freeze
 
-  belongs_to :project
+  belongs_to :project, inverse_of: :push_rule
+  has_one :group, inverse_of: :push_rule, autosave: true
 
   validates :max_file_size, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates(*REGEX_COLUMNS, untrusted_regexp: true)

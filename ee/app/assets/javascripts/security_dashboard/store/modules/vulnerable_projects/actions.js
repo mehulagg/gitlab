@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-import { __ } from '~/locale';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { __ } from '~/locale';
 
 import { SET_LOADING, SET_PROJECTS, SET_HAS_ERROR } from './mutation_types';
 
@@ -15,7 +15,7 @@ export const fetchProjects = ({ dispatch }, endpoint) => {
   return axios
     .get(endpoint)
     .then(({ data }) => data.map(convertObjectPropsToCamelCase))
-    .then(data => {
+    .then((data) => {
       dispatch('receiveProjectsSuccess', data);
     })
     .catch(() => {
@@ -34,7 +34,9 @@ export const receiveProjectsSuccess = ({ commit }, payload) => {
 };
 
 export const receiveProjectsError = ({ commit }) => {
-  createFlash(__('Unable to fetch vulnerable projects'));
+  createFlash({
+    message: __('Unable to fetch vulnerable projects'),
+  });
 
   commit(SET_HAS_ERROR, true);
 };

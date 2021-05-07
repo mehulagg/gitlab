@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import TagField from '~/releases/components/tag_field.vue';
-import TagFieldNew from '~/releases/components/tag_field_new.vue';
 import TagFieldExisting from '~/releases/components/tag_field_existing.vue';
+import TagFieldNew from '~/releases/components/tag_field_new.vue';
 import createStore from '~/releases/stores';
-import createDetailModule from '~/releases/stores/modules/detail';
+import createEditNewModule from '~/releases/stores/modules/edit_new';
 
 describe('releases/components/tag_field', () => {
   let store;
@@ -12,11 +12,11 @@ describe('releases/components/tag_field', () => {
   const createComponent = ({ tagName }) => {
     store = createStore({
       modules: {
-        detail: createDetailModule({}),
+        editNew: createEditNewModule({}),
       },
     });
 
-    store.state.detail.tagName = tagName;
+    store.state.editNew.tagName = tagName;
 
     wrapper = shallowMount(TagField, { store });
   };

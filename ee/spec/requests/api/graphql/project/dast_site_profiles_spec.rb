@@ -17,13 +17,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
             pageInfo {
               hasNextPage
             }
-            nodes {
-              id
-              profileName
-              targetUrl
-              editPath
-              validationStatus
-            }
+            nodes { #{all_graphql_fields_for('DastSiteProfile')} }
           }
         }
       }
@@ -76,7 +70,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
       expect(first_dast_site_profile_response['id']).to eq(dast_site_profile.to_global_id.to_s)
     end
 
-    it 'eager loads the dast site and dast site validation' do
+    it 'avoids N+1 queries' do
       control = ActiveRecord::QueryRecorder.new do
         post_graphql(
           query,
@@ -103,14 +97,6 @@ RSpec.describe 'Query.project(fullPath).dastSiteProfiles' do
         create_list(:dast_site_profile, 5, project: project)
 
         expect(dast_site_profiles_response.dig('pageInfo', 'hasNextPage')).to be(true)
-      end
-    end
-
-    context 'when on demand scan feature flag is disabled' do
-      it 'returns an empty edges array' do
-        stub_feature_flags(security_on_demand_scans_feature_flag: false)
-
-        expect(dast_site_profiles_response['nodes']).to be_empty
       end
     end
 

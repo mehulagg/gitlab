@@ -1,5 +1,4 @@
 <script>
-import { mapState, mapActions } from 'vuex';
 import {
   GlDashboardSkeleton,
   GlButton,
@@ -9,6 +8,7 @@ import {
   GlModalDirective,
 } from '@gitlab/ui';
 import VueDraggable from 'vuedraggable';
+import { mapState, mapActions } from 'vuex';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 import DashboardProject from './project.vue';
 
@@ -95,9 +95,7 @@ export default {
       this.clearSearchResults();
     },
     onOk() {
-      this.addProjectsToDashboard()
-        .then(this.clearSearchResults)
-        .catch(this.clearSearchResults);
+      this.addProjectsToDashboard().then(this.clearSearchResults).catch(this.clearSearchResults);
     },
     searched(query) {
       this.setSearchQuery(query);

@@ -3,6 +3,8 @@
 class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
+  sidekiq_options retry: 3
+
   feature_category :issue_tracking
   urgency :high
   weight 2
@@ -12,7 +14,7 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
 
     begin
       Gitlab::Email::Receiver.new(raw).execute
-    rescue => e
+    rescue StandardError => e
       handle_failure(raw, e)
     end
   end

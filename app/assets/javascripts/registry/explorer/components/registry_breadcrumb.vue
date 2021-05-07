@@ -1,61 +1,51 @@
 <script>
-import { initial, first, last } from 'lodash';
-import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+// We are using gl-breadcrumb only at the last child of the handwritten breadcrumb
+// until this gitlab-ui issue is resolved: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/1079
+//
+// See the CSS workaround in app/assets/stylesheets/pages/registry.scss when this file is changed.
+import { GlBreadcrumb, GlIcon } from '@gitlab/ui';
 
 export default {
-  directives: { SafeHtml },
-  props: {
-    crumbs: {
-      type: Array,
-      required: true,
-    },
+  components: {
+    GlBreadcrumb,
+    GlIcon,
   },
   computed: {
     rootRoute() {
-      return this.$router.options.routes.find(r => r.meta.root);
+      return this.$router.options.routes.find((r) => r.meta.root);
+    },
+    detailsRoute() {
+      return this.$router.options.routes.find((r) => r.name === 'details');
     },
     isRootRoute() {
       return this.$route.name === this.rootRoute.name;
     },
-    rootCrumbs() {
-      return initial(this.crumbs);
+    isLoaded() {
+      return this.isRootRoute || this.$store?.state.imageDetails?.name;
     },
-    divider() {
-      const { classList, tagName, innerHTML } = first(this.crumbs).querySelector('svg');
-      return { classList: [...classList], tagName, innerHTML };
-    },
-    lastCrumb() {
-      const { children } = last(this.crumbs);
-      const { tagName, className } = first(children);
-      return {
-        tagName,
-        className,
-        text: this.$route.meta.nameGenerator(this.$route),
-        path: { to: this.$route.name },
-      };
+    allCrumbs() {
+      const crumbs = [
+        {
+          text: this.rootRoute.meta.nameGenerator(),
+          to: this.rootRoute.path,
+        },
+      ];
+      if (!this.isRootRoute) {
+        crumbs.push({
+          text: this.detailsRoute.meta.nameGenerator(),
+          href: this.detailsRoute.meta.path,
+        });
+      }
+      return crumbs;
     },
   },
 };
 </script>
 
 <template>
-  <ul>
-    <li
-      v-for="(crumb, index) in rootCrumbs"
-      :key="index"
-      v-safe-html="crumb.innerHTML"
-      :class="crumb.className"
-    ></li>
-    <li v-if="!isRootRoute">
-      <router-link ref="rootRouteLink" :to="rootRoute.path">
-        {{ rootRoute.meta.nameGenerator(rootRoute) }}
-      </router-link>
-      <component :is="divider.tagName" v-safe-html="divider.innerHTML" :class="divider.classList" />
-    </li>
-    <li>
-      <component :is="lastCrumb.tagName" ref="lastCrumb" :class="lastCrumb.className">
-        <router-link ref="childRouteLink" :to="lastCrumb.path">{{ lastCrumb.text }}</router-link>
-      </component>
-    </li>
-  </ul>
+  <gl-breadcrumb :key="isLoaded" :items="allCrumbs">
+    <template #separator>
+      <gl-icon name="angle-right" :size="8" />
+    </template>
+  </gl-breadcrumb>
 </template>

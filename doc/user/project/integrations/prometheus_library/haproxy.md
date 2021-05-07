@@ -1,10 +1,10 @@
 ---
 stage: Monitor
-group: Health
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+group: Monitor
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Monitoring HAProxy
+# Monitoring HAProxy **(FREE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/12621) in GitLab 9.4
 
@@ -28,4 +28,4 @@ To get started with NGINX monitoring, you should install and configure the [HAPr
 ## Specifying the Environment label
 
 In order to isolate and only display relevant metrics for a given environment
-however, GitLab needs a method to detect which labels are associated. To do this, GitLab will [look for an `environment` label](index.md#identifying-environments).
+however, GitLab needs a method to detect which labels are associated. To do this, GitLab [looks for an `environment` label](index.md#identifying-environments).

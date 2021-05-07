@@ -10,9 +10,14 @@ RSpec.describe Groups::GroupLinksController do
   let!(:project) { create(:project, group: shared_group) }
 
   before do
+    travel_to DateTime.new(2019, 4, 1)
     sign_in(user)
 
     shared_with_group.add_developer(group_member)
+  end
+
+  after do
+    travel_back
   end
 
   shared_examples 'placeholder is passed as `id` parameter' do |action|

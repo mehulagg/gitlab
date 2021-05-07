@@ -1,10 +1,16 @@
+---
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+---
+
 # Adding a new Service Component to GitLab
 
 The GitLab product is made up of several service components that run as independent system processes in communication with each other. These services can be run on the same instance, or spread across different instances. A list of the existing components can be found in the [GitLab architecture overview](architecture.md).
 
 ## Integration phases
 
-The following outline re-uses the [maturity metric](https://about.gitlab.com/direction/maturity) naming as an example of the various phases of integrating a component. These are only loosely coupled to a components actual maturity, and are intended as a guide for implementation order (for example, a component does not need to be enabled by default to be Lovable, and being enabled by default does not on its own cause a component to be Lovable).
+The following outline re-uses the [maturity metric](https://about.gitlab.com/direction/maturity/) naming as an example of the various phases of integrating a component. These are only loosely coupled to a components actual maturity, and are intended as a guide for implementation order (for example, a component does not need to be enabled by default to be Lovable, and being enabled by default does not on its own cause a component to be Lovable).
 
 - Proposed
   - [Proposing a new component](#proposing-a-new-component)
@@ -41,27 +47,25 @@ Adding a new service follows the same [merge request workflow](contributing/merg
 
 The first iteration should be to add the ability to connect and use the service as an externally installed component. Often this involves providing settings in GitLab to connect to the service, or allow connections from it. And then shipping documentation on how to install and configure the service with GitLab.
 
-TIP: **Tip:**
+NOTE:
 [Elasticsearch](../integration/elasticsearch.md#installing-elasticsearch) is an example of a service that has been integrated this way. And many of the other services, including internal projects like Gitaly, started off as separately installed alternatives.
 
 **For services that depend on the existing GitLab codebase:**
 
 The first iteration should be opt-in, either through the `gitlab.yml` configuration or through [feature flags](feature_flags/index.md). For these types of services it is often necessary to [bundle the service and its dependencies with GitLab](#bundling-a-service-with-gitlab) as part of the initial integration.
 
-TIP: **Tip:**
+NOTE:
 [ActionCable](https://docs.gitlab.com/omnibus/settings/actioncable.html) is an example of a service that has been added this way.
 
 ## Bundling a service with GitLab
 
-NOTE: **Note:**
 Code shipped with GitLab needs to use a license approved by the Legal team. See the list of [existing approved licenses](https://about.gitlab.com/handbook/engineering/open-source/#using-open-source-libraries).
 
-NOTE: **Note:**
 Notify the [Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/) when adding a new dependency that must be compiled. We must be able to compile the dependency on all supported platforms.
 
 New services to be bundled with GitLab need to be available in the following environments.
 
-**Dev environment**
+**Development environment**
 
 The first step of bundling a new service is to provide it in the development environment to engage in collaboration and feedback.
 

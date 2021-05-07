@@ -1,7 +1,7 @@
 ---
 stage: Enablement
 group: Database
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
 # `NOT NULL` constraints
@@ -26,8 +26,6 @@ For example, consider a migration that creates a table with two `NOT NULL` colum
 
 ```ruby
 class CreateDbGuides < ActiveRecord::Migration[6.0]
-  DOWNTIME = false
-
   def change
     create_table :db_guides do |t|
       t.bigint :stars, default: 0, null: false
@@ -47,8 +45,6 @@ For example, consider a migration that adds a new `NOT NULL` column `active` to 
 
 ```ruby
 class AddExtendedTitleToSprints < ActiveRecord::Migration[6.0]
-  DOWNTIME = false
-
   def change
     add_column :db_guides, :active, :boolean, default: true, null: false
   end
@@ -66,7 +62,7 @@ different releases:
    - Add a post-deployment migration to add the `NOT NULL` constraint with `validate: false`.
    - Add a post-deployment migration to fix the existing records.
 
-     NOTE: **Note:**
+     NOTE:
      Depending on the size of the table, a background migration for cleanup could be required in the next release.
      See the [`NOT NULL` constraints on large tables](not_null_constraints.md#not-null-constraints-on-large-tables) section for more information.
 
@@ -94,7 +90,7 @@ that all epics should have a user-generated description.
 After checking our production database, we know that there are `epics` with `NULL` descriptions,
 so we can not add and validate the constraint in one step.
 
-NOTE: **Note:**
+NOTE:
 Even if we did not have any epic with a `NULL` description, another instance of GitLab could have
 such records, so we would follow the same process either way.
 
@@ -117,7 +113,6 @@ with `validate: false` in a post-deployment migration,
 ```ruby
 class AddNotNullConstraintToEpicsDescription < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
-  DOWNTIME = false
 
   disable_ddl_transaction!
 
@@ -191,7 +186,6 @@ migration helper in a final post-deployment migration,
 ```ruby
 class ValidateNotNullConstraintOnEpicsDescription < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
-  DOWNTIME = false
 
   disable_ddl_transaction!
 
@@ -207,7 +201,7 @@ end
 
 ## `NOT NULL` constraints on large tables
 
-If you have to clean up a text column for a really [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/migration_helpers.rb#L12)
+If you have to clean up a text column for a [high-traffic table](../migration_style_guide.md#high-traffic-tables)
 (for example, the `artifacts` in `ci_builds`), your background migration will go on for a while and
 it will need an additional [background migration cleaning up](../background_migrations.md#cleaning-up)
 in the release after adding the data migration.

@@ -18,7 +18,7 @@ class Projects::IssuesController < Projects::ApplicationController
   prepend_before_action :authenticate_user!, only: [:new, :export_csv]
   prepend_before_action :store_uri, only: [:new, :show, :designs]
 
-  before_action :whitelist_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
+  before_action :disable_query_limiting, only: [:create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
   before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
   after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
@@ -41,23 +41,29 @@ class Projects::IssuesController < Projects::ApplicationController
   before_action :create_rate_limit, only: [:create]
 
   before_action do
-    push_frontend_feature_flag(:vue_issuable_sidebar, project.group)
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
+    push_frontend_feature_flag(:usage_data_design_action, project, default_enabled: true)
+    push_frontend_feature_flag(:improved_emoji_picker, project, default_enabled: :yaml)
+    push_frontend_feature_flag(:vue_issues_list, project)
   end
 
   before_action only: :show do
     real_time_feature_flag = :real_time_issue_sidebar
     real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
 
-    gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
+    push_to_gon_attributes(:features, real_time_feature_flag, real_time_enabled)
+    push_frontend_feature_flag(:confidential_notes, @project, default_enabled: :yaml)
+    push_frontend_feature_flag(:issue_assignees_widget, @project, default_enabled: :yaml)
 
-    record_experiment_user(:invite_members_version_a)
-    record_experiment_user(:invite_members_version_b)
-  end
+    experiment(:invite_members_in_comment, namespace: @project.root_ancestor) do |experiment_instance|
+      experiment_instance.exclude! unless helpers.can_import_members?
 
-  before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
+      experiment_instance.use {}
+      experiment_instance.try(:invite_member_link) {}
+
+      experiment_instance.track(:view, property: @project.root_ancestor.id.to_s)
+    end
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
@@ -76,6 +82,8 @@ class Projects::IssuesController < Projects::ApplicationController
 
   feature_category :service_desk, [:service_desk]
   feature_category :importers, [:import_csv, :export_csv]
+
+  attr_accessor :vulnerability_id
 
   def index
     @issues = @issuables
@@ -100,10 +108,10 @@ class Projects::IssuesController < Projects::ApplicationController
     params[:issue] ||= ActionController::Parameters.new(
       assignee_ids: ""
     )
-    build_params = issue_create_params.merge(
+    build_params = issue_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve],
-      confidential: !!Gitlab::Utils.to_boolean(params[:issue][:confidential])
+      confidential: !!Gitlab::Utils.to_boolean(issue_params[:confidential])
     )
     service = ::Issues::BuildService.new(project, current_user, build_params)
 
@@ -120,13 +128,15 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def create
-    create_params = issue_create_params.merge(spammable_params).merge(
+    create_params = issue_params.merge(spammable_params).merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
     service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
+
+    create_vulnerability_issue_feedback(issue)
 
     if service.discussions_to_resolve.count(&:resolved?) > 0
       flash[:notice] = if service.discussion_to_resolve_id
@@ -139,9 +149,6 @@ class Projects::IssuesController < Projects::ApplicationController
     respond_to do |format|
       format.html do
         recaptcha_check_with_fallback { render :new }
-      end
-      format.js do
-        @link = @issue.attachment.url.to_js
       end
     end
   end
@@ -307,17 +314,8 @@ class Projects::IssuesController < Projects::ApplicationController
       task_num
       lock_version
       discussion_locked
-    ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
-  end
-
-  def issue_create_params
-    create_params = %i[
       issue_type
-    ]
-
-    params.require(:issue).permit(
-      *create_params
-    ).merge(issue_params)
+    ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
   end
 
   def reorder_params
@@ -343,13 +341,13 @@ class Projects::IssuesController < Projects::ApplicationController
     IssuesFinder
   end
 
-  def whitelist_query_limiting
+  def disable_query_limiting
     # Also see the following issues:
     #
-    # 1. https://gitlab.com/gitlab-org/gitlab-foss/issues/42423
-    # 2. https://gitlab.com/gitlab-org/gitlab-foss/issues/42424
-    # 3. https://gitlab.com/gitlab-org/gitlab-foss/issues/42426
-    Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42422')
+    # 1. https://gitlab.com/gitlab-org/gitlab/-/issues/20815
+    # 2. https://gitlab.com/gitlab-org/gitlab/-/issues/20816
+    # 3. https://gitlab.com/gitlab-org/gitlab/-/issues/21068
+    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/20814')
   end
 
   private
@@ -388,6 +386,9 @@ class Projects::IssuesController < Projects::ApplicationController
   def service_desk?
     action_name == 'service_desk'
   end
+
+  # Overridden in EE
+  def create_vulnerability_issue_feedback(issue); end
 end
 
 Projects::IssuesController.prepend_if_ee('EE::Projects::IssuesController')

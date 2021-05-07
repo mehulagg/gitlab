@@ -5,9 +5,12 @@ Object {
   "data": Array [
     Object {
       "_links": Object {
+        "closedIssuesUrl": "http://localhost/releases-namespace/releases-project/-/issues?release_tag=v1.1&scope=all&state=closed",
+        "closedMergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=closed",
         "editUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/edit",
-        "issuesUrl": "http://localhost/releases-namespace/releases-project/-/issues?release_tag=v1.1&scope=all&state=opened",
-        "mergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=opened",
+        "mergedMergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=merged",
+        "openedIssuesUrl": "http://localhost/releases-namespace/releases-project/-/issues?release_tag=v1.1&scope=all&state=opened",
+        "openedMergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=opened",
         "self": "http://localhost/releases-namespace/releases-project/-/releases/v1.1",
         "selfUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1",
       },
@@ -15,7 +18,7 @@ Object {
         "count": 8,
         "links": Array [
           Object {
-            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/awesome-app-3",
+            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/awesome-app-3",
             "external": true,
             "id": "gid://gitlab/Releases::Link/13",
             "linkType": "image",
@@ -23,7 +26,7 @@ Object {
             "url": "https://example.com/image",
           },
           Object {
-            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/awesome-app-2",
+            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/awesome-app-2",
             "external": true,
             "id": "gid://gitlab/Releases::Link/12",
             "linkType": "package",
@@ -31,7 +34,7 @@ Object {
             "url": "https://example.com/package",
           },
           Object {
-            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/awesome-app-1",
+            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/awesome-app-1",
             "external": false,
             "id": "gid://gitlab/Releases::Link/11",
             "linkType": "runbook",
@@ -39,7 +42,7 @@ Object {
             "url": "http://localhost/releases-namespace/releases-project/runbook",
           },
           Object {
-            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/linux-amd64",
+            "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/linux-amd64",
             "external": true,
             "id": "gid://gitlab/Releases::Link/10",
             "linkType": "other",
@@ -86,18 +89,6 @@ Object {
       ],
       "milestones": Array [
         Object {
-          "description": "The 12.4 milestone",
-          "id": "gid://gitlab/Milestone/124",
-          "issueStats": Object {
-            "closed": 1,
-            "total": 4,
-          },
-          "stats": undefined,
-          "title": "12.4",
-          "webPath": undefined,
-          "webUrl": "/releases-namespace/releases-project/-/milestones/2",
-        },
-        Object {
           "description": "The 12.3 milestone",
           "id": "gid://gitlab/Milestone/123",
           "issueStats": Object {
@@ -108,6 +99,18 @@ Object {
           "title": "12.3",
           "webPath": undefined,
           "webUrl": "/releases-namespace/releases-project/-/milestones/1",
+        },
+        Object {
+          "description": "The 12.4 milestone",
+          "id": "gid://gitlab/Milestone/124",
+          "issueStats": Object {
+            "closed": 1,
+            "total": 4,
+          },
+          "stats": undefined,
+          "title": "12.4",
+          "webPath": undefined,
+          "webUrl": "/releases-namespace/releases-project/-/milestones/2",
         },
       ],
       "name": "The first release",
@@ -126,13 +129,78 @@ Object {
 }
 `;
 
+exports[`releases/util.js convertOneReleaseForEditingGraphQLResponse matches snapshot 1`] = `
+Object {
+  "data": Object {
+    "_links": Object {
+      "self": "http://localhost/releases-namespace/releases-project/-/releases/v1.1",
+      "selfUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1",
+    },
+    "assets": Object {
+      "count": undefined,
+      "links": Array [
+        Object {
+          "id": "gid://gitlab/Releases::Link/13",
+          "linkType": "image",
+          "name": "Image",
+          "url": "https://example.com/image",
+        },
+        Object {
+          "id": "gid://gitlab/Releases::Link/12",
+          "linkType": "package",
+          "name": "Package",
+          "url": "https://example.com/package",
+        },
+        Object {
+          "id": "gid://gitlab/Releases::Link/11",
+          "linkType": "runbook",
+          "name": "Runbook",
+          "url": "http://localhost/releases-namespace/releases-project/runbook",
+        },
+        Object {
+          "id": "gid://gitlab/Releases::Link/10",
+          "linkType": "other",
+          "name": "linux-amd64 binaries",
+          "url": "https://downloads.example.com/bin/gitlab-linux-amd64",
+        },
+      ],
+      "sources": Array [],
+    },
+    "author": undefined,
+    "description": "Best. Release. **Ever.** :rocket:",
+    "evidences": Array [],
+    "milestones": Array [
+      Object {
+        "issueStats": Object {},
+        "stats": undefined,
+        "title": "12.3",
+        "webPath": undefined,
+        "webUrl": undefined,
+      },
+      Object {
+        "issueStats": Object {},
+        "stats": undefined,
+        "title": "12.4",
+        "webPath": undefined,
+        "webUrl": undefined,
+      },
+    ],
+    "name": "The first release",
+    "tagName": "v1.1",
+  },
+}
+`;
+
 exports[`releases/util.js convertOneReleaseGraphQLResponse matches snapshot 1`] = `
 Object {
   "data": Object {
     "_links": Object {
+      "closedIssuesUrl": "http://localhost/releases-namespace/releases-project/-/issues?release_tag=v1.1&scope=all&state=closed",
+      "closedMergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=closed",
       "editUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/edit",
-      "issuesUrl": "http://localhost/releases-namespace/releases-project/-/issues?release_tag=v1.1&scope=all&state=opened",
-      "mergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=opened",
+      "mergedMergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=merged",
+      "openedIssuesUrl": "http://localhost/releases-namespace/releases-project/-/issues?release_tag=v1.1&scope=all&state=opened",
+      "openedMergeRequestsUrl": "http://localhost/releases-namespace/releases-project/-/merge_requests?release_tag=v1.1&scope=all&state=opened",
       "self": "http://localhost/releases-namespace/releases-project/-/releases/v1.1",
       "selfUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1",
     },
@@ -140,7 +208,7 @@ Object {
       "count": 8,
       "links": Array [
         Object {
-          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/awesome-app-3",
+          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/awesome-app-3",
           "external": true,
           "id": "gid://gitlab/Releases::Link/13",
           "linkType": "image",
@@ -148,7 +216,7 @@ Object {
           "url": "https://example.com/image",
         },
         Object {
-          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/awesome-app-2",
+          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/awesome-app-2",
           "external": true,
           "id": "gid://gitlab/Releases::Link/12",
           "linkType": "package",
@@ -156,7 +224,7 @@ Object {
           "url": "https://example.com/package",
         },
         Object {
-          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/awesome-app-1",
+          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/awesome-app-1",
           "external": false,
           "id": "gid://gitlab/Releases::Link/11",
           "linkType": "runbook",
@@ -164,7 +232,7 @@ Object {
           "url": "http://localhost/releases-namespace/releases-project/runbook",
         },
         Object {
-          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/binaries/linux-amd64",
+          "directAssetUrl": "http://localhost/releases-namespace/releases-project/-/releases/v1.1/downloads/binaries/linux-amd64",
           "external": true,
           "id": "gid://gitlab/Releases::Link/10",
           "linkType": "other",
@@ -211,18 +279,6 @@ Object {
     ],
     "milestones": Array [
       Object {
-        "description": "The 12.4 milestone",
-        "id": "gid://gitlab/Milestone/124",
-        "issueStats": Object {
-          "closed": 1,
-          "total": 4,
-        },
-        "stats": undefined,
-        "title": "12.4",
-        "webPath": undefined,
-        "webUrl": "/releases-namespace/releases-project/-/milestones/2",
-      },
-      Object {
         "description": "The 12.3 milestone",
         "id": "gid://gitlab/Milestone/123",
         "issueStats": Object {
@@ -233,6 +289,18 @@ Object {
         "title": "12.3",
         "webPath": undefined,
         "webUrl": "/releases-namespace/releases-project/-/milestones/1",
+      },
+      Object {
+        "description": "The 12.4 milestone",
+        "id": "gid://gitlab/Milestone/124",
+        "issueStats": Object {
+          "closed": 1,
+          "total": 4,
+        },
+        "stats": undefined,
+        "title": "12.4",
+        "webPath": undefined,
+        "webUrl": "/releases-namespace/releases-project/-/milestones/2",
       },
     ],
     "name": "The first release",

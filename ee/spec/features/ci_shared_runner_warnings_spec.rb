@@ -20,21 +20,21 @@ RSpec.describe 'CI shared runner limits' do
       group.add_developer(user)
     end
 
-    where(:case_name, :percent, :remaining_minutes) do
-      'warning level' | 30 | 4
-      'danger level' | 5 | 1
+    where(:case_name, :percent_threshold, :minutes_limit, :minutes_used) do
+      'warning level' | 30 | 1000 | 800
+      'danger level'  | 5  | 1000 | 980
     end
 
     with_them do
       context "when there is a notification and minutes still exist", :js do
         let(:message) do
-          "Group #{group.name} has #{percent}% or less Shared Runner Pipeline minutes remaining. " \
+          "Group #{group.name} has #{percent_threshold}% or less Shared Runner Pipeline minutes remaining. " \
             "Once it runs out, no new jobs or pipelines in its projects will run."
         end
 
         before do
-          group.update!(shared_runners_minutes_limit: 20)
-          allow_any_instance_of(EE::Namespace).to receive(:shared_runners_remaining_minutes).and_return(remaining_minutes)
+          group.update!(shared_runners_minutes_limit: minutes_limit)
+          allow_any_instance_of(EE::Namespace).to receive(:shared_runners_seconds).and_return(minutes_used.minutes)
         end
 
         it 'displays a warning message on pipelines page' do
@@ -111,24 +111,24 @@ RSpec.describe 'CI shared runner limits' do
       group.add_owner(user)
     end
 
-    where(:case_name, :percent, :remaining_minutes) do
-      'warning level' | 30 | 4
-      'danger level' | 5 | 1
+    where(:case_name, :percent_threshold, :minutes_limit, :minutes_used) do
+      'warning level' | 30 | 1000 | 800
+      'danger level'  | 5  | 1000 | 980
     end
 
     with_them do
       context "when there is a notification and minutes still exist", :js do
         let(:message) do
-          "Group #{group.name} has #{percent}% or less Shared Runner Pipeline minutes remaining. " \
+          "Group #{group.name} has #{percent_threshold}% or less Shared Runner Pipeline minutes remaining. " \
             "Once it runs out, no new jobs or pipelines in its projects will run."
         end
 
         before do
-          group.update!(shared_runners_minutes_limit: 20)
-          allow_any_instance_of(EE::Namespace).to receive(:shared_runners_remaining_minutes).and_return(remaining_minutes)
+          group.update!(shared_runners_minutes_limit: minutes_limit)
+          allow_any_instance_of(EE::Namespace).to receive(:shared_runners_seconds).and_return(minutes_used.minutes)
         end
 
-        it 'displays a warning message on group overview page' do
+        it 'displays a warning message on group information page' do
           visit group_path(group)
 
           expect_quota_exceeded_alert(message)
@@ -143,7 +143,7 @@ RSpec.describe 'CI shared runner limits' do
           "Unless you buy additional pipeline minutes, no new jobs or pipelines in its projects will run."
       end
 
-      it 'displays a warning message on group overview page' do
+      it 'displays a warning message on group information page' do
         visit group_path(group)
 
         expect_quota_exceeded_alert(message)
@@ -153,7 +153,7 @@ RSpec.describe 'CI shared runner limits' do
     context 'when limit not yet exceeded' do
       let(:group) { create(:group, :with_not_used_build_minutes_limit) }
 
-      it 'does not display a warning message on group overview page' do
+      it 'does not display a warning message on group information page' do
         visit group_path(group)
 
         expect_no_quota_exceeded_alert

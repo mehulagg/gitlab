@@ -13,6 +13,7 @@ RSpec.describe Mutations::ResolvesIssuable do
   let_it_be(:user)     { create(:user) }
   let_it_be(:context)  { { current_user: user } }
   let_it_be(:epic) { create(:epic, group: group) }
+
   let(:mutation) { mutation_class.new(object: nil, context: context, field: nil) }
 
   context 'with epics' do

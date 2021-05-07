@@ -1,13 +1,16 @@
-import $ from 'jquery';
-import { shallowMount } from '@vue/test-utils';
-import { GlDrawer, GlFormTextarea, GlFormCheckbox } from '@gitlab/ui';
+import { GlDrawer, GlFormCheckbox } from '@gitlab/ui';
 import { getByText } from '@testing-library/dom';
+import { shallowMount } from '@vue/test-utils';
+import $ from 'jquery';
+import { nextTick } from 'vue';
 
 import RequirementForm from 'ee/requirements/components/requirement_form.vue';
 import RequirementStatusBadge from 'ee/requirements/components/requirement_status_badge.vue';
 
-import { TestReportStatus, MAX_TITLE_LENGTH } from 'ee/requirements/constants';
+import { TestReportStatus } from 'ee/requirements/constants';
 
+import IssuableBody from '~/issuable_show/components/issuable_body.vue';
+import IssuableEditForm from '~/issuable_show/components/issuable_edit_form.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import ZenMode from '~/zen_mode';
 
@@ -30,6 +33,8 @@ const createComponent = ({
     },
     stubs: {
       GlDrawer,
+      IssuableBody,
+      IssuableEditForm,
       MarkdownField,
     },
   });
@@ -85,21 +90,30 @@ describe('RequirementForm', () => {
       });
     });
 
-    describe('titleInvalid', () => {
-      it('returns `false` when `title` length is less than max title limit', () => {
-        expect(wrapper.vm.titleInvalid).toBe(false);
-      });
-
-      it('returns `true` when `title` length is more than max title limit', () => {
-        wrapper.setData({
-          title: Array(MAX_TITLE_LENGTH + 1)
-            .fill()
-            .map(() => 'a')
-            .join(''),
+    describe('requirementObject', () => {
+      it('returns requirement object while in show/edit mode', async () => {
+        wrapper.setProps({
+          requirement: mockRequirementsOpen[0],
         });
 
-        return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.titleInvalid).toBe(true);
+        await nextTick();
+
+        expect(wrapper.vm.requirementObject).toBe(mockRequirementsOpen[0]);
+      });
+
+      it('returns empty requirement object while in create mode', async () => {
+        wrapper.setProps({
+          requirement: null,
+        });
+
+        await nextTick();
+
+        expect(wrapper.vm.requirementObject).toMatchObject({
+          iid: '',
+          title: '',
+          titleHtml: '',
+          description: '',
+          descriptionHtml: '',
         });
       });
     });
@@ -108,26 +122,6 @@ describe('RequirementForm', () => {
   describe('watchers', () => {
     describe('requirement', () => {
       describe('when requirement is not null', () => {
-        it('renders the value of `requirement.title` as title and `requirement.description` as description', async () => {
-          wrapper.setProps({
-            requirement: mockRequirementsOpen[0],
-            enableRequirementEdit: true,
-          });
-
-          await wrapper.vm.$nextTick();
-
-          expect(
-            wrapper
-              .find('[data-testid="title"]')
-              .find(GlFormTextarea)
-              .attributes('value'),
-          ).toBe(mockRequirementsOpen[0].title);
-
-          expect(wrapper.find('[data-testid="description"] textarea').element.value).toBe(
-            mockRequirementsOpen[0].description,
-          );
-        });
-
         it.each`
           requirement                | satisfied
           ${mockRequirementsOpen[0]} | ${true}
@@ -138,7 +132,7 @@ describe('RequirementForm', () => {
             wrapper = createComponent();
             wrapper.setProps({ requirement, enableRequirementEdit: true });
 
-            await wrapper.vm.$nextTick();
+            await nextTick();
 
             expect(wrapper.find(GlFormCheckbox).vm.$attrs.checked).toBe(satisfied);
           },
@@ -153,36 +147,41 @@ describe('RequirementForm', () => {
           });
         });
 
-        it('renders empty string as title and description', async () => {
-          await wrapper.vm.$nextTick();
-
-          expect(
-            wrapper
-              .find('[data-testid="title"]')
-              .find(GlFormTextarea)
-              .attributes('value'),
-          ).toBe('');
-          expect(wrapper.find('[data-testid="description"] textarea').element.value).toBe('');
+        it('does not render the satisfied checkbox', async () => {
+          await nextTick();
           expect(wrapper.find(GlFormCheckbox).exists()).toBe(false);
         });
       });
     });
 
     describe('drawerOpen', () => {
-      it('clears `title` value when `drawerOpen` prop is changed to false', async () => {
-        wrapper.setData({
-          title: 'Foo',
+      it('sets `satisfied` value to false when `drawerOpen` prop is changed to false', async () => {
+        wrapper.setProps({
+          drawerOpen: false,
         });
+
+        await nextTick();
+
+        expect(wrapper.vm.satisfied).toBe(false);
+      });
+
+      it('binds `keydown` event listener on document when `drawerOpen` prop is changed to true', async () => {
+        jest.spyOn(document, 'addEventListener');
 
         wrapper.setProps({
           drawerOpen: false,
         });
 
-        await wrapper.vm.$nextTick();
+        await nextTick();
+        expect(document.addEventListener).not.toHaveBeenCalled();
 
-        expect(wrapper.vm.title).toBe('');
-        expect(wrapper.vm.description).toBe('');
-        expect(wrapper.vm.satisfied).toBe(false);
+        wrapper.setProps({
+          drawerOpen: true,
+        });
+
+        await nextTick();
+
+        expect(document.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
       });
     });
   });
@@ -246,27 +245,29 @@ describe('RequirementForm', () => {
 
     describe('handleSave', () => {
       it('emits `save` event on component with object as param containing `title` & `description` when form is in create mode', () => {
-        const title = 'foo';
-        const description = '_bar_';
-        wrapper.setData({
-          title,
-          description,
-        });
+        const issuableTitle = 'foo';
+        const issuableDescription = '_bar_';
 
-        wrapper.vm.handleSave();
+        wrapper.vm.handleSave({
+          issuableTitle,
+          issuableDescription,
+        });
 
         expect(wrapper.emitted('save')).toBeTruthy();
         expect(wrapper.emitted('save')[0]).toEqual([
           {
-            title,
-            description,
+            title: issuableTitle,
+            description: issuableDescription,
           },
         ]);
       });
 
       it('emits `save` event on component with object as param containing `iid`, `title`, `description` & `lastTestReportState` when form is in update mode', () => {
         const { iid, title, description } = mockRequirementsOpen[0];
-        wrapperWithRequirement.vm.handleSave();
+        wrapperWithRequirement.vm.handleSave({
+          issuableTitle: title,
+          issuableDescription: description,
+        });
 
         expect(wrapperWithRequirement.emitted('save')).toBeTruthy();
         expect(wrapperWithRequirement.emitted('save')[0]).toEqual([
@@ -300,128 +301,43 @@ describe('RequirementForm', () => {
       expect(wrapper.find(GlDrawer).exists()).toBe(true);
     });
 
-    describe('create requirement', () => {
-      it('renders drawer header with string "New Requirement"', () => {
-        expect(getByText(wrapper.element, 'New Requirement')).not.toBeNull();
-      });
+    it('renders drawer header with `requirement.reference` and test report badge', () => {
+      expect(
+        getByText(wrapperWithRequirement.element, `REQ-${mockRequirementsOpen[0].iid}`),
+      ).not.toBeNull();
+      expect(wrapperWithRequirement.find(RequirementStatusBadge).exists()).toBe(true);
+      expect(wrapperWithRequirement.find(RequirementStatusBadge).props('testReport')).toBe(
+        mockTestReport,
+      );
+    });
 
-      it('renders title and description input fields', () => {
-        expect(wrapper.find('[data-testid="title"]').exists()).toBe(true);
-        expect(wrapper.find('[data-testid="description"]').exists()).toBe(true);
-      });
+    it('renders issuable-body component', () => {
+      const issuableBody = wrapperWithRequirement.find(IssuableBody);
 
-      it('renders save button component', () => {
-        const saveButton = wrapper.find('.js-requirement-save');
-
-        expect(saveButton.exists()).toBe(true);
-        expect(saveButton.text()).toBe('Create requirement');
-      });
-
-      it('renders cancel button component', () => {
-        const cancelButton = wrapper.find('.js-requirement-cancel');
-
-        expect(cancelButton.exists()).toBe(true);
-        expect(cancelButton.text()).toBe('Cancel');
+      expect(issuableBody.exists()).toBe(true);
+      expect(issuableBody.props()).toMatchObject({
+        enableEdit: wrapper.vm.canEditRequirement,
+        enableAutocomplete: false,
+        enableAutosave: false,
+        editFormVisible: false,
+        showFieldTitle: true,
+        descriptionPreviewPath: '/gitlab-org/gitlab-test/preview_markdown',
+        descriptionHelpPath: '/help/user/markdown',
       });
     });
 
-    describe('view requirement', () => {
-      it('renders drawer header with `requirement.reference` and test report badge', () => {
-        expect(
-          getByText(wrapperWithRequirement.element, `REQ-${mockRequirementsOpen[0].iid}`),
-        ).not.toBeNull();
-        expect(wrapperWithRequirement.find(RequirementStatusBadge).exists()).toBe(true);
-        expect(wrapperWithRequirement.find(RequirementStatusBadge).props('testReport')).toBe(
-          mockTestReport,
-        );
+    it('renders edit-form-actions slot contents within issuable-body', async () => {
+      wrapperWithRequirement.setProps({
+        enableRequirementEdit: true,
       });
 
-      it('renders requirement title', () => {
-        expect(
-          getByText(wrapperWithRequirement.element, mockRequirementsOpen[0].titleHtml),
-        ).not.toBeNull();
-      });
+      await nextTick();
 
-      it('renders edit button', () => {
-        const editButtonEl = wrapperWithRequirement.find('[data-testid="edit"]');
+      const issuableBody = wrapperWithRequirement.find(IssuableBody);
 
-        expect(editButtonEl.exists()).toBe(true);
-        expect(editButtonEl.props('icon')).toBe('pencil');
-        expect(editButtonEl.attributes('title')).toBe('Edit title and description');
-      });
-
-      it('renders requirement description', () => {
-        const descriptionEl = wrapperWithRequirement.find('[data-testid="descriptionContainer"]');
-
-        expect(descriptionEl.exists()).toBe(true);
-        expect(descriptionEl.text()).toBe('fortitudinis fomentis dolor mitigari solet.');
-      });
-
-      describe('edit', () => {
-        beforeEach(async () => {
-          wrapperWithRequirement.setProps({
-            enableRequirementEdit: true,
-          });
-
-          await wrapperWithRequirement.vm.$nextTick();
-        });
-
-        it('renders flash error container', () => {
-          expect(wrapperWithRequirement.find('[data-testid="form-error-container"]').exists()).toBe(
-            true,
-          );
-        });
-
-        it('renders title input field', () => {
-          const titleInputEl = wrapperWithRequirement.find('[data-testid="title"]');
-          const titleTextarea = titleInputEl.find(GlFormTextarea);
-
-          expect(titleInputEl.exists()).toBe(true);
-          expect(titleInputEl.attributes()).toMatchObject({
-            label: 'Title',
-            state: 'true',
-            'label-for': 'requirementTitle',
-            'invalid-feedback': `Requirement title cannot have more than ${MAX_TITLE_LENGTH} characters.`,
-          });
-
-          expect(titleTextarea.exists()).toBe(true);
-          expect(titleTextarea.attributes()).toMatchObject({
-            id: 'requirementTitle',
-            placeholder: 'Requirement title',
-            value: mockRequirementsOpen[0].title,
-            'max-rows': '25',
-          });
-        });
-
-        it('renders description input field', () => {
-          const descriptionInputEl = wrapperWithRequirement.find('[data-testid="description"]');
-          const markdownEl = descriptionInputEl.find(MarkdownField);
-          const descriptionTextarea = markdownEl.find('textarea');
-
-          expect(descriptionInputEl.exists()).toBe(true);
-          expect(descriptionInputEl.find('label').text()).toBe('Description');
-
-          expect(markdownEl.exists()).toBe(true);
-          expect(markdownEl.props()).toMatchObject({
-            markdownPreviewPath: '/gitlab-org/gitlab-test/preview_markdown',
-            markdownDocsPath: '/help/user/markdown',
-            enableAutocomplete: false,
-            textareaValue: mockRequirementsOpen[0].description,
-          });
-
-          expect(descriptionTextarea.exists()).toBe(true);
-          expect(descriptionTextarea.attributes()).toMatchObject({
-            id: 'requirementDescription',
-            placeholder: 'Describe the requirement here',
-            'aria-label': 'Description',
-          });
-        });
-
-        it('renders satisfied checkbox field', () => {
-          expect(wrapperWithRequirement.find(GlFormCheckbox).exists()).toBe(true);
-          expect(wrapperWithRequirement.find(GlFormCheckbox).text()).toBe('Satisfied');
-        });
-      });
+      expect(issuableBody.find(GlFormCheckbox).exists()).toBe(true);
+      expect(issuableBody.find('[data-testid="requirement-save"]').exists()).toBe(true);
+      expect(issuableBody.find('[data-testid="requirement-cancel"]').exists()).toBe(true);
     });
   });
 });

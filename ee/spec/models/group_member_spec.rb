@@ -30,6 +30,21 @@ RSpec.describe GroupMember do
           expect(build(:group_member, group: group, user: acme_user)).to be_valid
         end
 
+        it 'shows proper error message' do
+          group_member = build(:group_member, group: group, user: gmail_user)
+
+          expect(group_member).to be_invalid
+          expect(group_member.errors[:user]).to include("email 'test@gmail.com' does not match the allowed domains: gitlab.com, acme.com")
+        end
+
+        it 'shows proper error message for single domain limitation' do
+          group.allowed_email_domains.last.destroy!
+          group_member = build(:group_member, group: group, user: gmail_user)
+
+          expect(group_member).to be_invalid
+          expect(group_member.errors[:user]).to include("email 'test@gmail.com' does not match the allowed domain of gitlab.com")
+        end
+
         it 'invited email must match at least one of the allowed domain emails' do
           expect(build(:group_member, group: group, user: nil, invite_email: 'user@gmail.com')).to be_invalid
           expect(build(:group_member, group: group, user: nil, invite_email: 'user@gitlab.com')).to be_valid
@@ -166,14 +181,22 @@ RSpec.describe GroupMember do
   end
 
   describe 'scopes' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:member1) { create(:group_member, group: group) }
+    let_it_be(:member2) { create(:group_member, group: group) }
+    let_it_be(:member3) { create(:group_member) }
+    let_it_be(:guest1) { create(:group_member, :guest) }
+    let_it_be(:guest2) { create(:group_member, :guest, group: group) }
+
     describe '.by_group_ids' do
       it 'returns only members from selected groups' do
-        group = create(:group)
-        member1 = create(:group_member, group: group)
-        member2 = create(:group_member, group: group)
-        create(:group_member)
+        expect(described_class.by_group_ids([group.id])).to contain_exactly(member1, member2, guest2)
+      end
+    end
 
-        expect(described_class.by_group_ids([group.id])).to match_array([member1, member2])
+    describe '.guests' do
+      it 'returns only guests members' do
+        expect(described_class.guests).to contain_exactly(guest1, guest2)
       end
     end
 
@@ -236,5 +259,165 @@ RSpec.describe GroupMember do
         it { is_expected.to eq nil }
       end
     end
+  end
+
+  context 'group member webhooks', :sidekiq_inline do
+    let_it_be_with_refind(:group) { create(:group_with_plan, plan: :ultimate_plan) }
+    let_it_be(:group_hook) { create(:group_hook, group: group, member_events: true) }
+    let_it_be(:user) { create(:user) }
+
+    context 'when a member is added to the group' do
+      let(:group_member) { create(:group_member, group: group) }
+
+      before do
+        WebMock.stub_request(:post, group_hook.url)
+      end
+
+      it 'executes user_add_to_group event webhook' do
+        group.add_guest(group_member.user)
+
+        expect(WebMock).to have_requested(:post, group_hook.url).with(
+          webhook_data(group_member, 'user_add_to_group')
+        )
+      end
+
+      context 'ancestor groups' do
+        let_it_be(:subgroup) { create(:group, parent: group) }
+        let_it_be(:subgroup_hook) { create(:group_hook, group: subgroup, member_events: true) }
+
+        it 'fires two webhooks when parent group has member_events webhook enabled' do
+          WebMock.stub_request(:post, subgroup_hook.url)
+
+          subgroup.add_guest(user)
+
+          expect(WebMock).to have_requested(:post, subgroup_hook.url)
+          expect(WebMock).to have_requested(:post, group_hook.url)
+        end
+
+        it 'fires one webhook when parent group has member_events webhook disabled' do
+          group_hook = create(:group_hook, group: group, member_events: false)
+
+          WebMock.stub_request(:post, subgroup_hook.url)
+
+          subgroup.add_guest(user)
+
+          expect(WebMock).to have_requested(:post, subgroup_hook.url)
+          expect(WebMock).not_to have_requested(:post, group_hook.url)
+        end
+      end
+    end
+
+    context 'when a group member is updated' do
+      let(:group_member) { create(:group_member, :developer, group: group, expires_at: 1.day.from_now) }
+
+      it 'executes user_update_for_group event webhook when user role is updated' do
+        WebMock.stub_request(:post, group_hook.url)
+
+        group_member.update!(access_level: Gitlab::Access::MAINTAINER)
+
+        expect(WebMock).to have_requested(:post, group_hook.url).with(
+          webhook_data(group_member, 'user_update_for_group')
+        )
+      end
+
+      it 'executes user_update_for_group event webhook when user expiration date is updated' do
+        WebMock.stub_request(:post, group_hook.url)
+
+        group_member.update!(expires_at: 2.days.from_now)
+
+        expect(WebMock).to have_requested(:post, group_hook.url).with(
+          webhook_data(group_member, 'user_update_for_group')
+        )
+      end
+    end
+
+    context 'when the group member is deleted' do
+      let_it_be(:group_member) { create(:group_member, :developer, group: group, expires_at: 1.day.from_now) }
+
+      it 'executes user_remove_from_group event webhook when group member is deleted' do
+        WebMock.stub_request(:post, group_hook.url)
+
+        group_member.destroy!
+
+        expect(WebMock).to have_requested(:post, group_hook.url).with(
+          webhook_data(group_member, 'user_remove_from_group')
+        )
+      end
+    end
+
+    context 'does not execute webhook' do
+      before do
+        WebMock.stub_request(:post, group_hook.url)
+      end
+
+      it 'does not execute webhooks if group member events webhook is disabled' do
+        group_hook = create(:group_hook, group: group, member_events: false)
+
+        group.add_guest(user)
+
+        expect(WebMock).not_to have_requested(:post, group_hook.url)
+      end
+
+      it 'does not execute webhooks if license is disabled' do
+        stub_licensed_features(group_webhooks: false)
+
+        group.add_guest(user)
+
+        expect(WebMock).not_to have_requested(:post, group_hook.url)
+      end
+    end
+  end
+
+  context 'group member welcome email', :sidekiq_inline do
+    let_it_be(:group) { create(:group_with_plan, plan: :ultimate_plan) }
+
+    let(:user) { create(:user) }
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.update!(provisioned_by_group_id: group.id)
+      end
+
+      it 'schedules the welcome email with confirmation' do
+        expect_next_instance_of(NotificationService) do |notification|
+          expect(notification).to receive(:new_group_member_with_confirmation)
+          expect(notification).not_to receive(:new_group_member)
+        end
+
+        group.add_developer(user)
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'schedules plain welcome to the group email' do
+        expect_next_instance_of(NotificationService) do |notification|
+          expect(notification).to receive(:new_group_member)
+          expect(notification).not_to receive(:new_group_member_with_confirmation)
+        end
+
+        group.add_developer(user)
+      end
+    end
+  end
+
+  def webhook_data(group_member, event)
+    {
+      headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },
+      body: {
+        created_at: group_member.created_at&.xmlschema,
+        updated_at: group_member.updated_at&.xmlschema,
+        group_name: group.name,
+        group_path: group.path,
+        group_id: group.id,
+        user_username: group_member.user.username,
+        user_name: group_member.user.name,
+        user_email: group_member.user.email,
+        user_id: group_member.user.id,
+        group_access: group_member.human_access,
+        expires_at: group_member.expires_at&.xmlschema,
+        group_plan: 'ultimate',
+        event_name: event
+      }.to_json
+    }
   end
 end

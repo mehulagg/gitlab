@@ -1,9 +1,9 @@
 <script>
 import { GlAlert, GlButton, GlDropdown, GlDropdownItem, GlFormCheckbox } from '@gitlab/ui';
 import { mapValues } from 'lodash';
-import { __ } from '~/locale';
 import { APPLICATION_STATUS, FLUENTD } from '~/clusters/constants';
 import eventHub from '~/clusters/event_hub';
+import { __ } from '~/locale';
 
 const { UPDATING, UNINSTALLING, INSTALLING, INSTALLED, UPDATED } = APPLICATION_STATUS;
 
@@ -54,15 +54,17 @@ export default {
       required: false,
     },
   },
-  data: () => ({
-    currentServerSideSettings: {
-      host: null,
-      port: null,
-      protocol: null,
-      wafLogEnabled: null,
-      ciliumLogEnabled: null,
-    },
-  }),
+  data() {
+    return {
+      currentServerSideSettings: {
+        host: null,
+        port: null,
+        protocol: null,
+        wafLogEnabled: null,
+        ciliumLogEnabled: null,
+      },
+    };
+  },
   computed: {
     isSaving() {
       return [UPDATING].includes(this.status);
@@ -127,7 +129,7 @@ export default {
       });
     },
     updateCurrentServerSideSettings(settings) {
-      Object.keys(settings).forEach(key => {
+      Object.keys(settings).forEach((key) => {
         if (this.currentServerSideSettings[key] === null) {
           this.currentServerSideSettings[key] = this[key];
         }

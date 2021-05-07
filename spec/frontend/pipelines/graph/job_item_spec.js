@@ -7,7 +7,7 @@ describe('pipeline graph job item', () => {
   const findJobWithoutLink = () => wrapper.find('[data-testid="job-without-link"]');
   const findJobWithLink = () => wrapper.find('[data-testid="job-with-link"]');
 
-  const createWrapper = propsData => {
+  const createWrapper = (propsData) => {
     wrapper = mount(JobItem, {
       propsData,
     });
@@ -52,7 +52,7 @@ describe('pipeline graph job item', () => {
   });
 
   describe('name with link', () => {
-    it('should render the job name and status with a link', done => {
+    it('should render the job name and status with a link', (done) => {
       createWrapper({ job: mockJob });
 
       wrapper.vm.$nextTick(() => {
@@ -122,7 +122,7 @@ describe('pipeline graph job item', () => {
         },
       });
 
-      expect(wrapper.find('.js-job-component-tooltip').attributes('title')).toBe('test');
+      expect(findJobWithoutLink().attributes('title')).toBe('test');
     });
 
     it('should not render status label when it is  provided', () => {
@@ -138,7 +138,7 @@ describe('pipeline graph job item', () => {
         },
       });
 
-      expect(wrapper.find('.js-job-component-tooltip').attributes('title')).toBe('test - success');
+      expect(findJobWithoutLink().attributes('title')).toBe('test - success');
     });
   });
 

@@ -122,6 +122,12 @@ RSpec.describe MergeRequests::RefreshService do
 
             it_behaves_like 'does not refresh the code owner rules'
           end
+
+          context 'when the branch is deleted' do
+            let(:newrev) { Gitlab::Git::BLANK_SHA }
+
+            it_behaves_like 'does not refresh the code owner rules'
+          end
         end
 
         context 'when the branch is not protected' do
@@ -249,7 +255,7 @@ RSpec.describe MergeRequests::RefreshService do
       end
     end
 
-    describe 'Pipelines for merge requests' do
+    describe 'Pipelines for merge requests', :sidekiq_inline do
       let(:service) { described_class.new(project, current_user) }
       let(:current_user) { merge_request.author }
 
@@ -274,7 +280,7 @@ RSpec.describe MergeRequests::RefreshService do
         expect { subject }
           .to change { merge_request.pipelines_for_merge_request.count }.by(1)
 
-        expect(merge_request.all_pipelines.last).to be_merge_request_pipeline
+        expect(merge_request.all_pipelines.last).to be_merged_result_pipeline
       end
 
       context 'when MergeRequestUpdateWorker is retried by an exception' do

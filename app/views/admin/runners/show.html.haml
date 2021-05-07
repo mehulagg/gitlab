@@ -1,68 +1,55 @@
-= content_for :title do
-  %h3.project-title
-    Runner ##{@runner.id}
-    .float-right
-      - if @runner.instance_type?
-        %span.runner-state.runner-state-shared
-          Shared
-      - else
-        %span.runner-state.runner-state-specific
-          Specific
+- add_page_specific_style 'page_bundles/ci_status'
 
-- page_title _("Runners")
-- add_to_breadcrumbs _("Runners"), admin_runners_path
-- breadcrumb_title "##{@runner.id}"
+- breadcrumb_title @runner.short_sha
+- page_title "##{@runner.id} (#{@runner.short_sha})"
+- add_to_breadcrumbs _('Runners'), admin_runners_path
 
-- if @runner.instance_type?
-  .bs-callout.bs-callout-success
-    %h4 This Runner will process jobs from ALL UNASSIGNED projects
-    %p
-      If you want Runners to build only specific projects, enable them in the table below.
-      Keep in mind that this is a one way transition.
-- elsif @runner.group_type?
-  .bs-callout.bs-callout-success
-    %h4 This runner will process jobs from all projects in its group and subgroups
+- if Feature.enabled?(:runner_detailed_view_vue_ui, current_user, default_enabled: :yaml)
+  #js-runner-details{ data: {runner_id: @runner.id} }
 - else
-  .bs-callout.bs-callout-info
-    %h4 This Runner will process jobs only from ASSIGNED projects
-    %p You can't make this a shared Runner.
-%hr
+  %h2.page-title
+    = s_('Runners|Runner #%{runner_id}' % { runner_id: @runner.id })
+    = render 'shared/runners/runner_type_badge', runner: @runner
+
+= render 'shared/runners/runner_type_alert', runner: @runner
 
 .gl-mb-6
   = render 'shared/runners/form', runner: @runner, runner_form_url: admin_runner_path(@runner), in_gitlab_com_admin_context: Gitlab.com?
 
 .row
   .col-md-6
-    %h4 Restrict projects for this Runner
+    %h4= _('Restrict projects for this runner')
     - if @runner.projects.any?
-      %table.table.assigned-projects
+      %table.table{ data: { testid: 'assigned-projects' } }
         %thead
           %tr
-            %th Assigned projects
-            %th
+            %th= _('Assigned projects')
         - @runner.runner_projects.each do |runner_project|
           - project = runner_project.project
           - if project
-            %tr.alert-info
+            %tr
               %td
-                %strong
-                  = project.full_name
-              %td
-                .float-right
-                  = link_to 'Disable', admin_namespace_project_runner_project_path(project.namespace, project, runner_project), method: :delete, class: 'gl-button btn btn-danger btn-sm'
+                .gl-alert.gl-alert-danger
+                  = sprite_icon('error', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+                  .gl-alert-body
+                    %strong
+                      = project.full_name
+                  .gl-alert-actions
+                    = link_to s_('Disable'), admin_namespace_project_runner_project_path(project.namespace, project, runner_project), method: :delete, class: 'btn gl-alert-action btn-info btn-md gl-button'
 
-    %table.table.unassigned-projects
+    %table.table{ data: { testid: 'unassigned-projects' } }
       %thead
         %tr
-          %th Project
+          %th= _('Project')
           %th
 
       %tr
         %td
           = form_tag admin_runner_path(@runner), id: 'runner-projects-search', class: 'form-inline', method: :get do
-            .form-group
-              = search_field_tag :search, params[:search], class: 'form-control', spellcheck: false
-            = submit_tag 'Search', class: 'btn'
+            .input-group
+              = search_field_tag :search, params[:search], class: 'form-control gl-form-input', spellcheck: false
+              .input-group-append
+                = submit_tag _('Search'), class: 'gl-button btn btn-default'
 
         %td
       - @projects.each do |project|
@@ -73,19 +60,19 @@
             .float-right
               = form_for project.runner_projects.new, url: admin_namespace_project_runner_projects_path(project.namespace, project), method: :post do |f|
                 = f.hidden_field :runner_id, value: @runner.id
-                = f.submit 'Enable', class: 'gl-button btn btn-sm'
+                = f.submit _('Enable'), class: 'gl-button btn btn-sm'
     = paginate_without_count @projects
 
   .col-md-6
-    %h4 Recent jobs served by this Runner
+    %h4= _('Recent jobs served by this runner')
     %table.table.ci-table.runner-builds
       %thead
         %tr
-          %th Job
-          %th Status
-          %th Project
-          %th Commit
-          %th Finished at
+          %th= _('Job')
+          %th= _('Status')
+          %th= _('Project')
+          %th= _('Commit')
+          %th= _('Finished at')
 
       - @builds.each do |build|
         - project = build.project

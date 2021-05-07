@@ -4,22 +4,15 @@ module EE
   module UserCalloutsHelper
     extend ::Gitlab::Utils::Override
 
-    GEO_ENABLE_HASHED_STORAGE = 'geo_enable_hashed_storage'
-    GEO_MIGRATE_HASHED_STORAGE = 'geo_migrate_hashed_storage'
-    CANARY_DEPLOYMENT = 'canary_deployment'
-    GOLD_TRIAL = 'gold_trial'
-    GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
-    THREAT_MONITORING_INFO = 'threat_monitoring_info'
     ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
-    ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
-    PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
-
-    def show_canary_deployment_callout?(project)
-      !user_dismissed?(CANARY_DEPLOYMENT) &&
-        show_promotions? &&
-        # use :canary_deployments if we create a feature flag for it in the future
-        !project.feature_available?(:deploy_board)
-    end
+    ACTIVE_USER_COUNT_THRESHOLD    = 'active_user_count_threshold'
+    GEO_ENABLE_HASHED_STORAGE      = 'geo_enable_hashed_storage'
+    GEO_MIGRATE_HASHED_STORAGE     = 'geo_migrate_hashed_storage'
+    ULTIMATE_TRIAL                 = 'ultimate_trial'
+    NEW_USER_SIGNUPS_CAP_REACHED   = 'new_user_signups_cap_reached'
+    PERSONAL_ACCESS_TOKEN_EXPIRY   = 'personal_access_token_expiry'
+    EOA_BRONZE_PLAN_BANNER         = 'eoa_bronze_plan_banner'
+    EOA_BRONZE_PLAN_END_DATE       = '2022-01-26'
 
     def render_enable_hashed_storage_warning
       return unless show_enable_hashed_storage_warning?
@@ -50,14 +43,14 @@ module EE
       any_project_not_in_hashed_storage?
     end
 
-    override :render_dashboard_gold_trial
-    def render_dashboard_gold_trial(user)
-      return unless show_gold_trial?(user, GOLD_TRIAL) &&
+    override :render_dashboard_ultimate_trial
+    def render_dashboard_ultimate_trial(user)
+      return unless show_ultimate_trial?(user, ULTIMATE_TRIAL) &&
           user_default_dashboard?(user) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 
-      render 'shared/gold_trial_callout_content'
+      render 'shared/ultimate_trial_callout_content'
     end
 
     def render_account_recovery_regular_check
@@ -69,18 +62,6 @@ module EE
       render 'shared/check_recovery_settings'
     end
 
-    def render_billings_gold_trial(user, namespace)
-      return if namespace.gold_plan?
-      return unless namespace.never_had_trial?
-      return unless show_gold_trial?(user, GOLD_TRIAL_BILLINGS)
-
-      render 'shared/gold_trial_callout_content', is_dismissable: !namespace.free_plan?, callout: GOLD_TRIAL_BILLINGS
-    end
-
-    def show_threat_monitoring_info?
-      !user_dismissed?(THREAT_MONITORING_INFO)
-    end
-
     def show_token_expiry_notification?
       return false unless current_user
 
@@ -89,7 +70,30 @@ module EE
         !user_dismissed?(PERSONAL_ACCESS_TOKEN_EXPIRY, 1.week.ago)
     end
 
+    def show_new_user_signups_cap_reached?
+      return false unless current_user&.admin?
+      return false if user_dismissed?(NEW_USER_SIGNUPS_CAP_REACHED)
+
+      new_user_signups_cap = ::Gitlab::CurrentSettings.current_application_settings.new_user_signups_cap
+      return false if new_user_signups_cap.nil?
+
+      new_user_signups_cap.to_i <= ::User.billable.count
+    end
+
+    def show_eoa_bronze_plan_banner?(namespace)
+      return false unless ::Feature.enabled?(:show_billing_eoa_banner)
+      return false unless Date.current < eoa_bronze_plan_end_date
+      return false unless namespace.bronze_plan?
+      return false if user_dismissed?(EOA_BRONZE_PLAN_BANNER)
+
+      (namespace.group? && namespace.has_owner?(current_user.id)) || !namespace.group?
+    end
+
     private
+
+    def eoa_bronze_plan_end_date
+      Date.parse(EOA_BRONZE_PLAN_END_DATE)
+    end
 
     def hashed_storage_enabled?
       ::Gitlab::CurrentSettings.current_application_settings.hashed_storage_enabled
@@ -117,20 +121,23 @@ module EE
       linked_message.html_safe
     end
 
-    def show_gold_trial?(user, callout = GOLD_TRIAL)
+    def show_ultimate_trial?(user, callout = ULTIMATE_TRIAL)
       return false unless user
-      return false unless show_gold_trial_suitable_env?
+      return false unless show_ultimate_trial_suitable_env?
       return false if user_dismissed?(callout)
 
       true
     end
 
-    def show_gold_trial_suitable_env?
+    def show_ultimate_trial_suitable_env?
       ::Gitlab.com? && !::Gitlab::Database.read_only?
     end
 
     def token_expiration_enforced?
       ::PersonalAccessToken.expiration_enforced?
+    end
+
+    def current_settings
     end
   end
 end
