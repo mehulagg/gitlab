@@ -249,6 +249,8 @@ The stage table provides a list of the related workflow items for the selected s
 The stage table also includes a **time** column, indicating the duration for the specified item to pass
 through the selected value stream stage.
 
+The stage table can be sorted by each of the available table columns by clicking on the table header, sorting can
+occur in both ascending or descending order.
 ### Adding a stage
 
 In the following example we're creating a new stage that measures and tracks issues from creation
