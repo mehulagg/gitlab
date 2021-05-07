@@ -54,7 +54,7 @@ export default {
     },
     typeToShow() {
       const { formState, issuableType } = this;
-      if(formState.issue_type) {
+      if (formState.issue_type) {
         return issuableTypes[formState.issue_type];
       }
 
@@ -65,6 +65,7 @@ export default {
     closeForm() {
       eventHub.$emit('close.form');
     },
+    // TODO: This should be be refactored to a GlModal
     deleteIssuable() {
       const confirmMessage =
         this.issuableType === 'epic'
@@ -91,12 +92,13 @@ export default {
       category="primary"
       variant="confirm"
       class="float-left qa-save-button gl-mr-3"
+      data-testid="issuable-save-button"
       type="submit"
       @click.prevent="updateIssuable"
     >
       {{ __('Save changes') }}
     </gl-button>
-    <gl-button @click="closeForm">
+    <gl-button data-testid="issuable-cancel-button" @click="closeForm">
       {{ __('Cancel') }}
     </gl-button>
     <gl-button
@@ -106,6 +108,7 @@ export default {
       category="secondary"
       variant="danger"
       class="float-right qa-delete-button"
+      data-testid="issuable-delete-button"
       @click="deleteIssuable"
     >
       {{ deleteIssuableButtonText }}

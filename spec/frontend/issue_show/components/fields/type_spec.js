@@ -15,7 +15,7 @@ describe('Issue type field component', () => {
   const findTypeFromDropDown = () => wrapper.findComponent(GlDropdown);
   const findTypeFromDropDownItems = () => wrapper.findAllComponents(GlDropdownItem);
 
-  const createComponent = ({ data } = {}) =>  {
+  const createComponent = ({ data } = {}) => {
     wrapper = shallowMount(IssueTypeField, {
       propsData: {
         formState: {
