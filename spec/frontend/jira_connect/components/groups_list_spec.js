@@ -178,6 +178,54 @@ describe('GroupsList', () => {
           expect(findFirstItem().props('group')).toBe(mockGroup1);
         });
       });
+
+      describe.each`
+        currentSearchTerm | previousSearchTerm | shouldSearch
+        ${'git'}          | ${undefined}       | ${true}
+        ${'git'}          | ${''}              | ${true}
+        ${'git'}          | ${'gi'}            | ${true}
+        ${undefined}      | ${'g'}             | ${true}
+        ${''}             | ${'g'}             | ${true}
+        ${'gi'}           | ${'git'}           | ${true}
+        ${'g'}            | ${'gi'}            | ${false}
+        ${'gi'}           | ${'g'}             | ${false}
+        ${'gi'}           | ${undefined}       | ${false}
+        ${'gi'}           | ${''}              | ${false}
+      `('when typing', ({ currentSearchTerm, previousSearchTerm, shouldSearch }) => {
+        let searchBox;
+
+        beforeEach(async () => {
+          fetchGroups.mockResolvedValue({
+            data: [mockGroup1],
+            headers: { 'X-PAGE': 1, 'X-TOTAL': 1 },
+          });
+
+          createComponent();
+          searchBox = findSearchBox();
+
+          searchBox.vm.$emit('input', previousSearchTerm);
+          await waitForPromises();
+
+          fetchGroups.mockClear();
+        });
+
+        it(`${
+          !shouldSearch ? 'does not ' : ''
+        }execute search when search term transitions from "${previousSearchTerm}" to "${currentSearchTerm}"`, async () => {
+          searchBox.vm.$emit('input', currentSearchTerm);
+          await waitForPromises();
+
+          if (!shouldSearch) {
+            expect(fetchGroups).not.toHaveBeenCalled();
+          } else {
+            expect(fetchGroups).toHaveBeenCalledWith(mockGroupsPath, {
+              page: 1,
+              perPage: 10,
+              search: currentSearchTerm,
+            });
+          }
+        });
+      });
     });
   });
 

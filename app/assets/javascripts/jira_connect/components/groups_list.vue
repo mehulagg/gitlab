@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon, GlPagination, GlAlert, GlSearchBoxByType } from '@gitlab/ui';
 import { fetchGroups } from '~/jira_connect/api';
-import { DEFAULT_GROUPS_PER_PAGE } from '~/jira_connect/constants';
+import { DEFAULT_GROUPS_PER_PAGE, MINIMUM_SEARCH_TERM_LENGTH } from '~/jira_connect/constants';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import GroupsListItem from './groups_list_item.vue';
@@ -27,11 +27,28 @@ export default {
       page: 1,
       totalItems: 0,
       errorMessage: null,
+      searchTerm: '',
     };
   },
   computed: {
     showPagination() {
       return this.totalItems > this.$options.DEFAULT_GROUPS_PER_PAGE && this.groups.length > 0;
+    },
+  },
+  watch: {
+    searchTerm(val, prevVal) {
+      // `fetchGroups` doesn't filter results for search terms < 3 characters.
+      // For better UX and to save some network requests,
+      // we will only search when we need to.
+      if (
+        val?.length > 0 &&
+        val?.length < MINIMUM_SEARCH_TERM_LENGTH &&
+        (!prevVal || prevVal?.length < MINIMUM_SEARCH_TERM_LENGTH)
+      ) {
+        return;
+      }
+
+      this.loadGroups({ searchTerm: val });
     },
   },
   mounted() {
@@ -42,7 +59,6 @@ export default {
   methods: {
     loadGroups({ searchTerm } = {}) {
       this.isLoadingMore = true;
-
       return fetchGroups(this.groupsPath, {
         page: this.page,
         perPage: this.$options.DEFAULT_GROUPS_PER_PAGE,
@@ -61,9 +77,6 @@ export default {
           this.isLoadingMore = false;
         });
     },
-    onGroupSearch(searchTerm) {
-      return this.loadGroups({ searchTerm });
-    },
   },
   DEFAULT_GROUPS_PER_PAGE,
 };
@@ -80,7 +93,7 @@ export default {
       debounce="500"
       :placeholder="__('Search by name')"
       :is-loading="isLoadingMore"
-      @input="onGroupSearch"
+      @input="searchTerm = $event"
     />
 
     <gl-loading-icon v-if="isLoadingInitial" size="md" />
