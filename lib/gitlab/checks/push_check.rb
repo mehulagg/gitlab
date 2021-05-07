@@ -3,9 +3,9 @@
 module Gitlab
   module Checks
     class PushCheck < BaseChecker
-      def validate!
+      def validate_change!(oldrev, newrev, ref)
         logger.log_timed("Checking if you are allowed to push...") do
-          unless can_push?
+          unless can_push?(ref)
             raise GitAccess::ForbiddenError, GitAccess::ERROR_MESSAGES[:push_code]
           end
         end
@@ -13,9 +13,9 @@ module Gitlab
 
       private
 
-      def can_push?
+      def can_push?(ref)
         user_access.can_push_for_ref?(ref) ||
-          project.branch_allows_collaboration?(user_access.user, branch_name)
+          project.branch_allows_collaboration?(user_access.user, Gitlab::Git.branch_name(ref))
       end
     end
   end
