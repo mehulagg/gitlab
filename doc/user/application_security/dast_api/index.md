@@ -84,7 +84,7 @@ Follow these steps to configure DAST API in GitLab with an OpenAPI specification
 
 1. To use DAST API, you must [include](../../../ci/yaml/README.md#includetemplate)
    the [`DAST-API.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST-API.gitlab-ci.yml)
-   that's provided as part of your GitLab installation. To do so, add the following to your
+   that's provided as part of your GitLab installation. Add the following to your
    `.gitlab-ci.yml` file:
 
    ```yaml
