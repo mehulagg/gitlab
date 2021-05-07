@@ -25,7 +25,8 @@ export default {
       <span class="gl-font-sm gl-mb-3">{{ translations.syncStatus }}</span>
       <geo-node-progress-bar
         v-if="item.syncValues"
-        :title="sprintf(translations.progressBarTitle, { component: item.component })"
+        :title="sprintf(translations.progressBarSyncTitle, { component: item.component })"
+        :target="`mobile-sync-progress-${item.component}`"
         :values="item.syncValues"
       />
       <span v-else class="gl-text-gray-400 gl-font-sm">{{ translations.nA }}</span>
@@ -34,7 +35,8 @@ export default {
       <span class="gl-font-sm gl-mb-3">{{ translations.verifStatus }}</span>
       <geo-node-progress-bar
         v-if="item.verificationValues"
-        :title="sprintf(translations.progressBarTitle, { component: item.component })"
+        :title="sprintf(translations.progressBarVerifTitle, { component: item.component })"
+        :target="`mobile-verification-progress-${item.component}`"
         :values="item.verificationValues"
       />
       <span v-else class="gl-text-gray-400 gl-font-sm">{{ translations.nA }}</span>
