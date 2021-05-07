@@ -1,0 +1,5 @@
+---
+title: Enable geo_terraform_state_version_verification by default
+merge_request: 61263
+author:
+type: changed
