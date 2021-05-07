@@ -376,6 +376,33 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect(finding.reload).to have_attributes(severity: 'medium', name: 'Cipher with no integrity')
       end
 
+      it 'handles RecordNotUnique errors correctly' do
+        next unless vulnerability_finding_signatures_enabled
+
+        report_finding = report.findings.find { |f| f.location.fingerprint == finding.location_fingerprint }
+
+        subj = described_class.new(new_pipeline, new_report)
+        allow(subj).to receive(:get_matched_findings).and_wrap_original do |orig_method, other_finding, *args|
+          if other_finding.uuid != report_finding.uuid
+            orig_method.call(other_finding, *args)
+          else
+            # if we don't do this *now*, we won't be able to trigger the RecordNotUnique
+            # error
+            finding.name = 'SHOULD BE UPDATED'
+            finding.uuid = report_finding.uuid
+            finding.save!
+
+            []
+          end
+        end
+
+        subj.execute
+
+        # should update the existing finding with new information
+        finding.reload
+        expect(finding.name).to eq(report_finding.name)
+      end
+
       it 'updates signatures to match new values' do
         next unless vulnerability_finding_signatures_enabled
 

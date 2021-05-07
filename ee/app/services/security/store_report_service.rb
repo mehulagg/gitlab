@@ -157,6 +157,17 @@ module Security
       end
     end
 
+    def sync_vulnerability_finding(vulnerability_finding, finding, location_data)
+      vulnerability_finding.uuid = finding.uuid
+      vulnerability_finding.location_fingerprint = if finding.signatures.empty?
+                                                     finding.location.fingerprint
+                                                   else
+                                                     finding.signatures.max_by(&:priority).signature_hex
+                                                   end
+
+      vulnerability_finding.location = location_data
+    end
+
     def find_or_create_vulnerability_finding_with_signatures(finding, create_params)
       find_params = {
         # this isn't taking prioritization into account (happens in the filter
@@ -175,22 +186,13 @@ module Security
       begin
         vulnerability_finding = matched_findings.first
         if vulnerability_finding.nil?
-          find_params[:uuid] = finding.uuid
           vulnerability_finding = project
             .vulnerability_findings
-            .create_with(create_params)
-            .find_or_initialize_by(find_params)
+            .create_with(create_params.merge(find_params))
+            .new
         end
 
-        vulnerability_finding.uuid = finding.uuid
-
-        vulnerability_finding.location_fingerprint = if finding.signatures.empty?
-                                                       finding.location.fingerprint
-                                                     else
-                                                       finding.signatures.max_by(&:priority).signature_hex
-                                                     end
-
-        vulnerability_finding.location = create_params.dig(:location)
+        sync_vulnerability_finding(vulnerability_finding, finding, create_params.dig(:location))
         vulnerability_finding.save!
 
         vulnerability_finding
@@ -198,7 +200,14 @@ module Security
         # the uuid is the only unique constraint on the vulnerability_occurrences
         # table - no need to use get_matched_findings(...).first here. Fetching
         # the finding with the same uuid will be enough
-        project.vulnerability_findings.find_by(uuid: finding.uuid)
+        by_uuid = project.vulnerability_findings.reset.find_by(uuid: finding.uuid)
+        if by_uuid
+          sync_vulnerability_finding(by_uuid, finding, create_params.dig(:location))
+          by_uuid.save!
+          return by_uuid
+        end
+
+        Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
