@@ -178,6 +178,30 @@ module API
           response.body
         end
       end
+
+      # Workhorse calls this to determine if it is a Geo site that should proxy
+      # requests. FOSS will return non-success since the endpoint doesn't exist,
+      # which Workhorse will treat as "not a Geo proxy".
+      get '/proxy' do
+        require_gitlab_workhorse!
+
+        status :ok
+        content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
+
+        # The methods used here (or their underlying methods) are cached
+        # for:
+        #
+        # * 1 minute in memory
+        # * 2 minutes in Redis
+        #
+        # The cached values are invalidated when changed.
+        #
+        if ::Feature.enabled?(:geo_secondary_proxy, default_enabled: :yaml) && ::Gitlab::Geo.secondary_with_primary?
+          { geo_proxy_url: ::Gitlab::Geo.primary_node.internal_url }
+        else
+          {}
+        end
+      end
     end
   end
 end
