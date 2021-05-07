@@ -43,7 +43,8 @@ class ProjectsController < Projects::ApplicationController
 
   feature_category :projects, [
                      :index, :show, :new, :create, :edit, :update, :transfer,
-                     :destroy, :resolve, :archive, :unarchive, :toggle_star
+                     :destroy, :resolve, :archive, :unarchive, :toggle_star,
+                     :upstream_commits
                    ]
 
   feature_category :source_code_management, [:remove_fork, :housekeeping, :refs]
@@ -297,6 +298,18 @@ class ProjectsController < Projects::ApplicationController
     render json: options.to_json
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def upstream_commits
+    forked_source = @project.fork_source
+
+    upstream_compare = CompareService.new(forked_source, forked_source.default_branch).execute(@project, params[:ref])
+    compare = CompareService.new(@project, params[:ref]).execute(forked_source, forked_source.default_branch)
+
+    render json: {
+      commits_behind: upstream_compare.commits.size,
+      commits_ahead: compare.commits.size
+    }.to_json
+  end
 
   def resolve
     @project = Project.find(params[:id])

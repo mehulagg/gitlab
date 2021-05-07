@@ -604,6 +604,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         get :refs
         put :new_issuable_address
         get :unfoldered_environment_names
+        get :upstream_commits
       end
     end
     # rubocop: enable Cop/PutProjectRoutesUnderScope

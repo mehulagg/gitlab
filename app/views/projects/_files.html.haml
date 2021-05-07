@@ -10,6 +10,11 @@
   .nav-block.gl-display-flex.gl-align-items-center
     = render 'projects/tree/tree_header', tree: @tree
 
+  - if Feature.enabled?(:fork_upstream_commit_count, @project, default_enabled: :yaml) && @project.forked?
+    - source = visible_fork_source(@project)
+    - if source
+      #js-fork-upstream-warning{ data: { upstream_commits_path: upstream_commits_project_path(@project), upstream_full_path: source.full_path, upstream_url: project_tree_path(source, source.default_branch), upstream_default_branch: source.default_branch, current_ref: ref } }
+
   #js-last-commit
     .info-well.gl-display-none.gl-sm-display-flex.project-last-commit
       .gl-spinner-container.m-auto

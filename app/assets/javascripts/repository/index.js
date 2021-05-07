@@ -174,6 +174,37 @@ export default function setupVueRepositoryList() {
     });
   }
 
+  const forkUpstreamWarningEl = document.getElementById('js-fork-upstream-warning');
+
+  if (forkUpstreamWarningEl) {
+    const {
+      upstreamFullPath,
+      upstreamUrl,
+      currentRef,
+      upstreamDefaultBranch,
+      upstreamCommitsPath,
+    } = forkUpstreamWarningEl.dataset;
+
+    // eslint-disable-next-line no-new
+    new Vue({
+      el: forkUpstreamWarningEl,
+      components: {
+        ForkUpstreamWarning: () => import('./components/fork_upstream_warning.vue'),
+      },
+      render(h) {
+        return h('fork-upstream-warning', {
+          props: {
+            upstreamFullPath,
+            upstreamUrl,
+            currentRef,
+            upstreamDefaultBranch,
+            upstreamCommitsPath,
+          },
+        });
+      },
+    });
+  }
+
   // eslint-disable-next-line no-new
   new Vue({
     el,
