@@ -14,6 +14,8 @@ need it for your tests to run.
 
 If you want to use a MySQL container, you can use [GitLab Runner](../runners/README.md) with the Docker executor.
 
+This example shows you how to set a username and password that GitLab uses to access the MySQL container. If you do not set a username and password, you must use `root`.
+
 1. [Create CI/CD variables](../variables/README.md#custom-cicd-variables) for your
    MySQL database and password by going to **Settings > CI/CD**, expanding **Variables**,
    and clicking **Add Variable**.
