@@ -34,8 +34,9 @@ module Gitlab
         true
       end
 
-      def commits
-        @commits ||= project.repository.new_commits(newrev)
+      def commits(newrev)
+        @commits ||= {}
+        @commits[newrev] ||= project.repository.new_commits(newrev)
       end
 
       protected

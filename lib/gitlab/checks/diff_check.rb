@@ -12,9 +12,9 @@ module Gitlab
       def validate!
         return if deletion?
         return unless should_run_validations?
-        return if commits.empty?
+        return if commits(newrev).empty?
 
-        paths = project.repository.find_changed_paths(commits.map(&:sha))
+        paths = project.repository.find_changed_paths(commits(newrev).map(&:sha))
         paths.each do |path|
           validate_path(path)
         end
