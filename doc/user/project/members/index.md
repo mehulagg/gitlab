@@ -73,7 +73,7 @@ A success message is displayed and the new members are now displayed in the list
 
 ## Inherited membership
 
-When your project belongs to the group, group members inherit the membership and permission
+When your project belongs to a group, group members inherit the membership and permission
 level for the project from the group.
 
 ![Project members page](img/project_members_v13_9.png)
