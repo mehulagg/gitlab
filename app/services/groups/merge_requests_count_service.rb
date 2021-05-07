@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Groups
-  # Service class for counting and caching the number of open merge requests of a group.
+  # Service class for counting and caching the number of merge requests (by state) for a group and its subgroups
   class MergeRequestsCountService < Groups::CountService
-    def count(state = 'opened')
+    def count state
       cached_count = Rails.cache.read(cache_key(state))
       return cached_count unless cached_count.blank?
 
-      # get every state returned by above group call but only set the ones that pass threshold
+      # update counter for merge request count for each state and cache it if above count threshold
       Gitlab::IssuablesCountForState::STATES.each do |mr_state|
         mr_state_count = issuables_counter[mr_state]
         update_cache_for_key(cache_key(mr_state)) { mr_state_count } if mr_state_count > CACHED_COUNT_THRESHOLD
@@ -22,6 +22,8 @@ module Groups
 
     private
 
+    # Use Gitlab::IssuablesCountForState as counter for number of MRs in each state for a specific group
+    # and cache the instantiated object for the duration of the request
     def issuables_counter
       return Gitlab::SafeRequestStore[request_store_key] if Gitlab::SafeRequestStore[request_store_key]
 
