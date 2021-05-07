@@ -4,7 +4,7 @@ module Packages
   class GroupOrProjectPackageFinder
     include ::Packages::FinderHelper
 
-    def initialize(current_user, project_or_group, params)
+    def initialize(current_user, project_or_group, params = {})
       @current_user = current_user
       @project_or_group = project_or_group
       @params = params

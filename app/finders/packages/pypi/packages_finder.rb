@@ -4,11 +4,10 @@ module Packages
   module Pypi
     class PackagesFinder < ::Packages::GroupOrProjectPackageFinder
       def execute!
-        packages.with_normalized_pypi_name(@params[:package_name])
+        results = packages.with_normalized_pypi_name(@params[:package_name])
+        raise ActiveRecord::RecordNotFound if results.empty?
 
-        raise ActiveRecord::RecordNotFound if packages.empty?
-
-        packages
+        results
       end
 
       private
