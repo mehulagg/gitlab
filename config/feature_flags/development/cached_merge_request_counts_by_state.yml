@@ -1,0 +1,8 @@
+---
+name: cached_merge_request_counts_by_state
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61280
+rollout_issue_url:
+milestone: '13.12'
+type: development
+group: group::product planning
+default_enabled: true
