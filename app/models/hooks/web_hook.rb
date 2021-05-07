@@ -41,4 +41,9 @@ class WebHook < ApplicationRecord
   def help_path
     'user/project/integrations/webhooks'
   end
+
+  # Overriden in ProjectHook and GroupHook, other webhooks are not rate-limited.
+  def rate_limit
+    nil
+  end
 end

@@ -112,6 +112,22 @@ Limit the maximum daily member invitations allowed per group hierarchy.
 - GitLab.com: Free members may invite 20 members per day.
 - Self-managed: Invites are not limited.
 
+### Webhook calls
+
+Limit the number of times any given webhook can be called per minute.
+This only applies to project and group webhooks.
+
+Calls over the rate limit are logged into `auth.log`.
+
+```ruby
+# If limits don't exist for the default plan, you can create one with:
+# Plan.default.create_limits!
+
+Plan.default.actual_limits.update!(web_hook_calls: 10)
+```
+
+Set the limit to `0` to disable it.
+
 ## Gitaly concurrency limit
 
 Clone traffic can put a large strain on your Gitaly service. To prevent such workloads from overwhelming your Gitaly server, you can set concurrency limits in Gitaly's configuration file.
@@ -201,21 +217,6 @@ Plan.default.actual_limits.update!(project_hooks: 200)
 
 # For group webhooks
 Plan.default.actual_limits.update!(group_hooks: 100)
-```
-
-Set the limit to `0` to disable it.
-
-## Webhook calls
-
-Limit the number of times any given webhook can be called per minute.
-
-Calls over the rate limit are logged into `auth.log`.
-
-```ruby
-# If limits don't exist for the default plan, you can create one with:
-# Plan.default.create_limits!
-
-Plan.default.actual_limits.update!(web_hook_calls: 10)
 ```
 
 Set the limit to `0` to disable it.

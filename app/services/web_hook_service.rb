@@ -76,7 +76,24 @@ class WebHookService
   end
 
   def async_execute
-    WebHookWorker.perform_async(hook.id, data, hook_name)
+    if rate_limited?(hook)
+      Gitlab::AuthLogger.error(
+        message: 'Webhook rate limit exceeded',
+        hook_id: hook.id,
+        hook_name: hook_name
+      )
+
+      # Also log into application log for now, so we can use this information
+      # to determine suitable limits for gitlab.com
+      Gitlab::AppLogger.error(
+        message: 'Webhook rate limit exceeded',
+        class: self.class.name,
+        hook_id: hook.id,
+        hook_name: hook_name
+      )
+    else
+      WebHookWorker.perform_async(hook.id, data, hook_name)
+    end
   end
 
   private
@@ -142,4 +159,21 @@ class WebHookService
 
     response.body.encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
   end
+
+  def rate_limited?(hook)
+    return false unless Feature.enabled?(:web_hooks_rate_limit, default_enabled: :yaml)
+    return false if rate_limit.nil?
+
+    Gitlab::ApplicationRateLimiter.throttled?(
+      :web_hook_calls,
+      scope: [hook],
+      threshold: rate_limit
+    )
+  end
+
+  def rate_limit
+    @rate_limit ||= hook.rate_limit
+  end
 end
+
+WebHookService.prepend_if_ee('EE::WebHookService')
