@@ -190,6 +190,7 @@
                 = s_('AdminUsers|Unblock user')
       - elsif !@user.internal?
         = render 'admin/users/block_user', user: @user
+        = render 'admin/users/shadow_ban_user', user: @user
 
       - if @user.access_locked?
         .card.border-info.gl-mb-5

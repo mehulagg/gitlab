@@ -162,6 +162,17 @@ module UsersHelper
     header + list
   end
 
+  def user_shadow_ban_effects
+    header = tag.p s_('AdminUsers|Shadow banning the user has the following effects:')
+
+    list = tag.ul do
+      concat tag.li s_('AdminUsers|User will be blocked')
+      concat tag.li s_('AdminUsers|Comments and issues created by the user will be hidden')
+    end
+
+    header + list
+  end
+
   def user_deactivation_data(user, message)
     {
       path: deactivate_admin_user_path(user),
