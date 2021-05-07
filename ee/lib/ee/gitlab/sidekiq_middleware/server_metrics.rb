@@ -35,7 +35,7 @@ module EE
 
           load_balancing_labels = {
             database_chosen: job[:database_chosen],
-            data_consistency: job[:data_consistency]
+            data_consistency: job['worker_data_consistency']
           }
 
           metrics[:sidekiq_load_balancing_count].increment(labels.merge(load_balancing_labels), 1)

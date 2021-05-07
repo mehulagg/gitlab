@@ -68,7 +68,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
 
             before do
               job[:database_chosen] = database_chosen
-              job[:data_consistency] = 'delayed'
+              job['worker_data_consistency'] = 'delayed'
               allow(load_balancing_metric).to receive(:increment)
             end
 
