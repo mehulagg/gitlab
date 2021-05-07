@@ -138,7 +138,6 @@ review-stop:
   artifacts:
     paths:
       - ./qa/gitlab-qa-run-*
-      - ./qa/reports/allure-results
     expire_in: 7 days
     when: always
 
@@ -220,12 +219,12 @@ allure-report-qa-smoke:
   stage: post-qa
   needs: ["review-qa-smoke"]
   script:
-    - >
-      allure-report-publisher upload s3
-        --results-glob="qa/reports/allure-results/*"
-        --bucket="gitlab-qa-allure-reports"
-        --prefix="gitlab-review/$CI_COMMIT_REF_SLUG"
-        --copy-latest
+    - |
+      allure-report-publisher upload s3 \
+        --results-glob="qa/gitlab-qa-run-*/**/allure-results/*" \
+        --bucket="gitlab-qa-allure-reports" \
+        --prefix="gitlab-review/$CI_COMMIT_REF_SLUG" \
+        --copy-latest \
         --color
 
 danger-review:

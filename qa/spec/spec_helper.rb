@@ -82,4 +82,9 @@ RSpec.configure do |config|
       example.run_with_retry retry: retry_times
     end
   end
+
+  AllureRspec.configure do |config|
+    config.results_directory = "tmp/allure-results"
+    config.clean_results_directory = true
+  end
 end
