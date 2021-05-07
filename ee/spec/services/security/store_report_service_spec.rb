@@ -397,34 +397,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect(existing_signature.id).to eq(finding.signatures.find(&:algorithm_hash?).id)
       end
 
-      it 'handles uniqueness collisions in finding uuids' do
-        next unless vulnerability_finding_signatures_enabled
-
-        # force the existing finding in the database to have the same UUID as
-        # the new one in the report
-        #report_finding = new_report.findings.find { |f| f.location.fingerprint == '0e7d0291d912f56880e39d4fbd80d99dd5d327ba' }
-        #finding.uuid = report_finding.uuid
-        #finding.save!
-
-        subj = described_class.new(new_pipeline, new_report)
-        allow(subj).to receive(:executed?).and_return(false)
-
-        subj.execute
-
-        project.vulnerability_findings.each do |vf|
-          vf.signatures.map(&:destroy)
-          vf.reload
-        end
-        num_orig_findings = project.vulnerability_findings.count
-
-        require 'pry' ; binding.pry
-
-        # should trigger the ActiveRecord::RecordNotUnique code path
-        subj.execute
-
-        expect(project.vulnerability_findings.count).to eq(num_orig_findings)
-      end
-
       it 'updates existing vulnerability with new data' do
         subject
 
