@@ -15953,6 +15953,24 @@ CREATE SEQUENCE packages_packages_id_seq
 
 ALTER SEQUENCE packages_packages_id_seq OWNED BY packages_packages.id;
 
+CREATE TABLE packages_pushes (
+    id bigint NOT NULL,
+    package_file_id bigint NOT NULL,
+    sha text NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_8564956a86 CHECK ((char_length(sha) <= 255))
+);
+
+CREATE SEQUENCE packages_pushes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE packages_pushes_id_seq OWNED BY packages_pushes.id;
+
 CREATE TABLE packages_pypi_metadata (
     package_id bigint NOT NULL,
     required_python text,
@@ -20102,6 +20120,8 @@ ALTER TABLE ONLY packages_package_files ALTER COLUMN id SET DEFAULT nextval('pac
 
 ALTER TABLE ONLY packages_packages ALTER COLUMN id SET DEFAULT nextval('packages_packages_id_seq'::regclass);
 
+ALTER TABLE ONLY packages_pushes ALTER COLUMN id SET DEFAULT nextval('packages_pushes_id_seq'::regclass);
+
 ALTER TABLE ONLY packages_tags ALTER COLUMN id SET DEFAULT nextval('packages_tags_id_seq'::regclass);
 
 ALTER TABLE ONLY pages_deployments ALTER COLUMN id SET DEFAULT nextval('pages_deployments_id_seq'::regclass);
@@ -21606,6 +21626,9 @@ ALTER TABLE ONLY packages_package_files
 
 ALTER TABLE ONLY packages_packages
     ADD CONSTRAINT packages_packages_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY packages_pushes
+    ADD CONSTRAINT packages_pushes_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY packages_pypi_metadata
     ADD CONSTRAINT packages_pypi_metadata_pkey PRIMARY KEY (package_id);
@@ -24019,6 +24042,8 @@ CREATE INDEX index_packages_packages_on_project_id_and_version ON packages_packa
 
 CREATE INDEX index_packages_project_id_name_partial_for_nuget ON packages_packages USING btree (project_id, name) WHERE (((name)::text <> 'NuGet.Temporary.Package'::text) AND (version IS NOT NULL) AND (package_type = 4));
 
+CREATE INDEX index_packages_pushes_on_package_file_id ON packages_pushes USING btree (package_file_id);
+
 CREATE INDEX index_packages_tags_on_package_id ON packages_tags USING btree (package_id);
 
 CREATE INDEX index_packages_tags_on_package_id_and_updated_at ON packages_tags USING btree (package_id, updated_at DESC);
@@ -25008,6 +25033,8 @@ CREATE INDEX tmp_idx_on_namespaces_delayed_project_removal ON namespaces USING b
 CREATE INDEX tmp_index_on_security_findings_scan_id ON security_findings USING btree (scan_id) WHERE (uuid IS NULL);
 
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
+
+CREATE UNIQUE INDEX uniq_packages_pushes_on_sha ON packages_pushes USING btree (sha);
 
 CREATE UNIQUE INDEX uniq_pkgs_deb_grp_architectures_on_distribution_id_and_name ON packages_debian_group_architectures USING btree (distribution_id, name);
 
@@ -27289,6 +27316,9 @@ ALTER TABLE ONLY packages_events
 
 ALTER TABLE ONLY project_settings
     ADD CONSTRAINT fk_rails_c6df6e6328 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_pushes
+    ADD CONSTRAINT fk_rails_c71dcafff0 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY container_expiration_policies
     ADD CONSTRAINT fk_rails_c7360f09ad FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

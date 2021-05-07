@@ -9,8 +9,14 @@ module Gitlab
             include Chain::Helpers
 
             def perform!
-              unless @command.branch_exists? || @command.tag_exists? || @command.merge_request_ref_exists?
-                return error('Reference not found')
+              if @command.package_push
+                unless @command.package_push.valid?
+                  return error('Package push invalid')
+                end
+              else
+                unless @command.branch_exists? || @command.tag_exists? || @command.merge_request_ref_exists?
+                  return error('Reference not found')
+                end
               end
 
               unless @command.sha

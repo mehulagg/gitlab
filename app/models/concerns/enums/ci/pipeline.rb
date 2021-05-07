@@ -37,7 +37,8 @@ module Enums
           merge_request_event: 10,
           external_pull_request_event: 11,
           parent_pipeline: 12,
-          ondemand_dast_scan: 13
+          ondemand_dast_scan: 13,
+          package_push_event: 14
         }
       end
 
@@ -49,7 +50,7 @@ module Enums
       # - when an ondemand_dast_scan pipeline runs it is for testing purpose and should
       #   not affect the ref CI status.
       def self.dangling_sources
-        sources.slice(:webide, :parent_pipeline, :ondemand_dast_scan)
+        sources.slice(:webide, :parent_pipeline, :ondemand_dast_scan, :package_push_event)
       end
 
       # CI sources are those pipeline events that affect the CI status of the ref
