@@ -328,7 +328,7 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
   puts "==="
   puts "Unusable deploy key for pushing: key ID: #{deploy_key.id}, title: #{deploy_key.title} for project ID: #{project.id}, path: #{project.full_path}"
 
-  if user.id == ghost_user_id or user.id.nil?
+  if user.nil? || user.id == ghost_user_id
     puts "No user associated"
     next
   end
