@@ -36,12 +36,11 @@ module Gitlab
         def add_complementary_review_note!(author_id)
           return if review.note.empty? && !review.approval?
 
-          note = "*Created by %{login}*\n\n%{note}" % {
-            note: review_note_content,
-            login: review.author.login
-          }
+          add_note!(author_id, "#{author_note_content}#{review_note_content}")
+        end
 
-          add_note!(author_id, note)
+        def author_note_content
+          "*Created by #{review.author.login}*\n\n" if review.author&.login.present?
         end
 
         def review_note_content
