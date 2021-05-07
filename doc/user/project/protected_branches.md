@@ -20,7 +20,7 @@ these restrictions on the branch.
 
 | Action | Who can do it |
 |--------|---------------|
-| Create a branch | Maintainers only. |
+| Protect a branch | Maintainers only. |
 | Push to the branch | GitLab administrators and anyone with **Allowed** permission. (*) |
 | Force push to the branch | No one. |
 | Delete the branch | No one. |
