@@ -16,6 +16,10 @@ import StageTableNav from 'ee/analytics/cycle_analytics/components/stage_table_n
 import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
+import {
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from 'ee/analytics/cycle_analytics/constants';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
@@ -611,11 +615,12 @@ describe('Value Stream Analytics component', () => {
       value_stream_id: selectedValueStream.id,
       created_after: toYmd(mockData.startDate),
       created_before: toYmd(mockData.endDate),
+      stage_id: 1,
       project_ids: null,
-      stage_id: null,
     };
 
     const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
+    const selectedStage = { title: 'Plan', id: 2 };
 
     beforeEach(async () => {
       commonUtils.historyPushState = jest.fn();
@@ -682,11 +687,6 @@ describe('Value Stream Analytics component', () => {
     });
 
     describe('with selectedStage set', () => {
-      const selectedStage = {
-        title: 'Plan',
-        id: 2,
-      };
-
       beforeEach(async () => {
         wrapper = await createComponent();
         store.dispatch('setSelectedStage', selectedStage);
@@ -700,6 +700,47 @@ describe('Value Stream Analytics component', () => {
           created_before: toYmd(mockData.endDate),
           project_ids: null,
           stage_id: 2,
+        });
+      });
+    });
+
+    describe('with hasPathNavigation=true', () => {
+      it('does not set the sort and direction parameters', async () => {
+        wrapper = await createComponent({
+          featureFlags: {
+            hasPathNavigation: true,
+          },
+        });
+        await store.dispatch('initializeCycleAnalytics', initialCycleAnalyticsState);
+        await wrapper.vm.$nextTick();
+
+        await shouldMergeUrlParams(wrapper, {
+          ...defaultParams,
+          created_after: toYmd(mockData.startDate),
+          created_before: toYmd(mockData.endDate),
+          project_ids: null,
+        });
+      });
+
+      describe('with a stage selected', () => {
+        beforeEach(async () => {
+          wrapper = await createComponent({
+            featureFlags: {
+              hasPathNavigation: true,
+            },
+          });
+
+          await store.dispatch('setSelectedStage', selectedStage);
+          await wrapper.vm.$nextTick();
+        });
+
+        it('sets the stage, sort and direction parameters', async () => {
+          await shouldMergeUrlParams(wrapper, {
+            ...defaultParams,
+            stage_id: selectedStage.id,
+            direction: PAGINATION_SORT_DIRECTION_DESC,
+            sort: PAGINATION_SORT_FIELD_END_EVENT,
+          });
         });
       });
     });

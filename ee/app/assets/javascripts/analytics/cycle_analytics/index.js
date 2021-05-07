@@ -29,6 +29,8 @@ export default () => {
     milestone_title = null,
     assignee_username = [],
     label_name = [],
+    sort,
+    direction,
   } = urlQueryToFilter(window.location.search);
 
   store.dispatch('initializeCycleAnalytics', {
@@ -37,10 +39,8 @@ export default () => {
     selectedMilestone: milestone_title,
     selectedAssigneeList: assignee_username,
     selectedLabelList: label_name,
-    featureFlags: {
-      hasDurationChart,
-      hasPathNavigation,
-    },
+    featureFlags: { hasDurationChart, hasPathNavigation },
+    pagination: { sort: sort?.value || null, direction: direction?.value || null },
   });
 
   return new Vue({

@@ -95,7 +95,8 @@ RSpec.describe LicenseHelper do
         expect(helper.cloud_license_view_data).to eq({ has_active_license: 'true',
                                                        free_trial_path: 'new_trial_url',
                                                        buy_subscription_path: 'subscriptions_plans_url',
-                                                       subscription_sync_path: sync_seat_link_admin_license_path })
+                                                       subscription_sync_path: sync_seat_link_admin_license_path,
+                                                       license_upload_path: new_admin_license_path })
       end
     end
 
@@ -106,7 +107,8 @@ RSpec.describe LicenseHelper do
         expect(helper.cloud_license_view_data).to eq({ has_active_license: 'false',
                                                        free_trial_path: 'new_trial_url',
                                                        buy_subscription_path: 'subscriptions_plans_url',
-                                                       subscription_sync_path: sync_seat_link_admin_license_path })
+                                                       subscription_sync_path: sync_seat_link_admin_license_path,
+                                                       license_upload_path: new_admin_license_path })
       end
     end
   end

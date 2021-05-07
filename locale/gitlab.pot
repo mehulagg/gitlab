@@ -800,6 +800,12 @@ msgstr ""
 msgid "%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}."
 msgstr ""
 
+msgid "%{rotation} has been recalculated with the remaining participants. Please review the new setup for %{rotation_link}. It is recommended that you reach out to the current on-call responder to ensure continuity of on-call coverage."
+msgstr ""
+
+msgid "%{rotation} has been recalculated with the remaining participants. Please review the new setup for %{rotation}. It is recommended that you reach out to the current on-call responder to ensure continuity of on-call coverage."
+msgstr ""
+
 msgid "%{seconds}s"
 msgstr ""
 
@@ -962,6 +968,9 @@ msgid "%{userName} (cannot merge)"
 msgstr ""
 
 msgid "%{userName}'s avatar"
+msgstr ""
+
+msgid "%{user_name} (%{user_username}) was removed from %{rotation} in %{schedule} in %{project}. "
 msgstr ""
 
 msgid "%{user_name} profile page"
@@ -1452,9 +1461,6 @@ msgid "A project boilerplate for Salesforce App development with Salesforce Deve
 msgstr ""
 
 msgid "A project containing issues for each audit inquiry in the HIPAA Audit Protocol published by the U.S. Department of Health & Human Services"
-msgstr ""
-
-msgid "A project is where you house your files (repository), plan your work (issues), and publish your documentation (wiki), %{among_other_things_link}."
 msgstr ""
 
 msgid "A project’s repository name defines its URL (the one you use to access the project via a browser) and its place on the file disk where GitLab is installed. %{link_start}Learn more.%{link_end}"
@@ -2163,6 +2169,9 @@ msgid "Adds email participant(s)"
 msgstr ""
 
 msgid "Adjust your filters/search criteria above. If you believe this may be an error, please refer to the %{linkStart}Geo Troubleshooting%{linkEnd} documentation for more information."
+msgstr ""
+
+msgid "Admin"
 msgstr ""
 
 msgid "Admin Area"
@@ -3172,9 +3181,6 @@ msgstr ""
 msgid "All epics"
 msgstr ""
 
-msgid "All features are enabled for blank projects, from templates, or when importing, but you can disable them afterward in the project settings."
-msgstr ""
-
 msgid "All groups and projects"
 msgstr ""
 
@@ -3490,6 +3496,9 @@ msgstr ""
 msgid "An error occurred while fetching markdown preview"
 msgstr ""
 
+msgid "An error occurred while fetching participants"
+msgstr ""
+
 msgid "An error occurred while fetching participants."
 msgstr ""
 
@@ -3581,9 +3590,6 @@ msgid "An error occurred while loading issues"
 msgstr ""
 
 msgid "An error occurred while loading merge requests."
-msgstr ""
-
-msgid "An error occurred while loading project creation UI"
 msgstr ""
 
 msgid "An error occurred while loading the access tokens form, please try again."
@@ -4158,16 +4164,13 @@ msgstr ""
 msgid "Archived in this version"
 msgstr ""
 
-msgid "Archived project! Repository and other project resources are read only"
-msgstr ""
-
 msgid "Archived project! Repository and other project resources are read-only"
 msgstr ""
 
 msgid "Archived projects"
 msgstr ""
 
-msgid "Archiving the project will make it entirely read only. It is hidden from the dashboard and doesn't show up in searches. %{strong_start}The repository cannot be committed to, and no issues, comments, or other entities can be created.%{strong_end} %{link_start}Learn more.%{link_end}"
+msgid "Archiving the project will make it entirely read-only. It is hidden from the dashboard and doesn't show up in searches. %{strong_start}The repository cannot be committed to, and no issues, comments, or other entities can be created.%{strong_end} %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "Are you ABSOLUTELY SURE you wish to delete this project?"
@@ -5037,6 +5040,15 @@ msgstr ""
 msgid "BillingPlan|Upgrade for free"
 msgstr ""
 
+msgid "Billings|Verify User Account"
+msgstr ""
+
+msgid "Billings|Verify account"
+msgstr ""
+
+msgid "Billings|Your user account has been flagged for potential abuse for running a large number of concurrent pipelines. To continue to run a large number of concurrent pipelines, you'll need to validate your account with a credit card. %{strongStart}GitLab will not charge your credit card, it will only be used for validation.%{strongEnd}"
+msgstr ""
+
 msgid "Billing|An email address is only visible for users with public emails."
 msgstr ""
 
@@ -5580,9 +5592,6 @@ msgstr ""
 msgid "CI/CD configuration file"
 msgstr ""
 
-msgid "CI/CD for external repo"
-msgstr ""
-
 msgid "CICDAnalytics|%{percent}%{percentSymbol}"
 msgstr ""
 
@@ -5596,6 +5605,9 @@ msgid "CICDAnalytics|Release"
 msgid_plural "CICDAnalytics|Releases"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "CICDAnalytics|Release statistics"
+msgstr ""
 
 msgid "CICDAnalytics|Releases"
 msgstr ""
@@ -7901,6 +7913,15 @@ msgstr ""
 msgid "CodeOwner|Pattern"
 msgstr ""
 
+msgid "CodeQuality|Code quality"
+msgstr ""
+
+msgid "CodeQuality|New code quality degradations in this file"
+msgstr ""
+
+msgid "CodeQuality|Some changes in this file degrade the code quality."
+msgstr ""
+
 msgid "Cohorts|Inactive users"
 msgstr ""
 
@@ -9235,9 +9256,6 @@ msgstr ""
 msgid "Create a personal access token on your account to pull or push via %{protocol}."
 msgstr ""
 
-msgid "Create a project pre-populated with the necessary files to get you started quickly."
-msgstr ""
-
 msgid "Create an account using:"
 msgstr ""
 
@@ -9338,6 +9356,9 @@ msgid "Create new file or directory"
 msgstr ""
 
 msgid "Create new label"
+msgstr ""
+
+msgid "Create new project"
 msgstr ""
 
 msgid "Create new..."
@@ -12971,9 +12992,6 @@ msgstr ""
 msgid "Errors:"
 msgstr ""
 
-msgid "Escalation Policies"
-msgstr ""
-
 msgid "Escalation policies"
 msgstr ""
 
@@ -15285,6 +15303,9 @@ msgstr ""
 msgid "Go to previous page"
 msgstr ""
 
+msgid "Go to primary node"
+msgstr ""
+
 msgid "Go to project"
 msgstr ""
 
@@ -17335,7 +17356,7 @@ msgstr ""
 msgid "Inform users without uploaded SSH keys that they can't push over SSH until one is added"
 msgstr ""
 
-msgid "Information about additional Pages templates and how to install them can be found in our %{pages_getting_started_guide}."
+msgid "Infrastructure"
 msgstr ""
 
 msgid "Infrastructure Registry"
@@ -18789,6 +18810,9 @@ msgstr ""
 msgid "Kubernetes cluster was successfully updated."
 msgstr ""
 
+msgid "Kubernetes clusters"
+msgstr ""
+
 msgid "Kubernetes deployment not found"
 msgstr ""
 
@@ -19035,9 +19059,6 @@ msgid "Lead Time"
 msgstr ""
 
 msgid "Lead time"
-msgstr ""
-
-msgid "Learn CI/CD syntax"
 msgstr ""
 
 msgid "Learn GitLab"
@@ -20275,6 +20296,9 @@ msgstr ""
 msgid "Memory Usage"
 msgstr ""
 
+msgid "Menu"
+msgstr ""
+
 msgid "Merge"
 msgstr ""
 
@@ -20893,9 +20917,6 @@ msgid "Microsoft Azure"
 msgstr ""
 
 msgid "Middleman project with Static Site Editor support"
-msgstr ""
-
-msgid "Migrate your data from an external source like GitHub, Bitbucket, or another instance of GitLab."
 msgstr ""
 
 msgid "Migrated %{success_count}/%{total_count} files."
@@ -22978,9 +22999,6 @@ msgstr ""
 msgid "Otherwise, click the link below to complete the process:"
 msgstr ""
 
-msgid "Our documentation includes an example DevOps Score report."
-msgstr ""
-
 msgid "Out-of-compliance with this project's policies and should be removed"
 msgstr ""
 
@@ -23372,9 +23390,6 @@ msgid "Pages"
 msgstr ""
 
 msgid "Pages Domain"
-msgstr ""
-
-msgid "Pages getting started guide"
 msgstr ""
 
 msgid "Pagination|Go to first page"
@@ -25798,12 +25813,6 @@ msgstr ""
 msgid "ProjectsNew|Allows you to immediately clone this project’s repository. Skip this if you plan to push up an existing repository."
 msgstr ""
 
-msgid "ProjectsNew|Blank"
-msgstr ""
-
-msgid "ProjectsNew|Blank project"
-msgstr ""
-
 msgid "ProjectsNew|Connect your external repository to GitLab CI/CD."
 msgstr ""
 
@@ -25816,6 +25825,9 @@ msgstr ""
 msgid "ProjectsNew|Create a blank project to house your files, plan your work, and collaborate on code, among other things."
 msgstr ""
 
+msgid "ProjectsNew|Create a project pre-populated with the necessary files to get you started quickly."
+msgstr ""
+
 msgid "ProjectsNew|Create blank project"
 msgstr ""
 
@@ -25826,9 +25838,6 @@ msgid "ProjectsNew|Create from template"
 msgstr ""
 
 msgid "ProjectsNew|Create new project"
-msgstr ""
-
-msgid "ProjectsNew|Creating project & repository."
 msgstr ""
 
 msgid "ProjectsNew|Description format"
@@ -25846,19 +25855,16 @@ msgstr ""
 msgid "ProjectsNew|Initialize repository with a README"
 msgstr ""
 
-msgid "ProjectsNew|No import options available"
+msgid "ProjectsNew|Migrate your data from an external source like GitHub, Bitbucket, or another instance of GitLab."
 msgstr ""
 
-msgid "ProjectsNew|Please wait a moment, this page will automatically refresh when ready."
+msgid "ProjectsNew|No import options available"
 msgstr ""
 
 msgid "ProjectsNew|Project description %{tag_start}(optional)%{tag_end}"
 msgstr ""
 
 msgid "ProjectsNew|Run CI/CD for external repository"
-msgstr ""
-
-msgid "ProjectsNew|Template"
 msgstr ""
 
 msgid "ProjectsNew|Visibility Level"
@@ -28498,9 +28504,6 @@ msgstr ""
 msgid "SecurityConfiguration|Configure via Merge Request"
 msgstr ""
 
-msgid "SecurityConfiguration|Configure via merge request"
-msgstr ""
-
 msgid "SecurityConfiguration|Could not retrieve configuration data. Please refresh the page, or try again later."
 msgstr ""
 
@@ -28535,9 +28538,6 @@ msgid "SecurityConfiguration|SAST Analyzers"
 msgstr ""
 
 msgid "SecurityConfiguration|SAST Configuration"
-msgstr ""
-
-msgid "SecurityConfiguration|SAST merge request creation mutation failed"
 msgstr ""
 
 msgid "SecurityConfiguration|Security Control"
@@ -28814,6 +28814,9 @@ msgid "SecurityReports|You must sign in as an authorized user to see this report
 msgstr ""
 
 msgid "SecurityReports|Your feedback is important to us! We will ask again in a week."
+msgstr ""
+
+msgid "See example DevOps Score page in our documentation."
 msgstr ""
 
 msgid "See metrics"
@@ -29114,6 +29117,9 @@ msgid "Serverless"
 msgstr ""
 
 msgid "Serverless domain"
+msgstr ""
+
+msgid "Serverless platform"
 msgstr ""
 
 msgid "ServerlessDetails|Function invocation metrics require Prometheus to be installed first."
@@ -31085,6 +31091,9 @@ msgstr ""
 msgid "SuperSonics|Activated on"
 msgstr ""
 
+msgid "SuperSonics|An error occurred while activating your subscription."
+msgstr ""
+
 msgid "SuperSonics|Expires on"
 msgstr ""
 
@@ -31131,6 +31140,9 @@ msgid "SuperSonics|This field is required."
 msgstr ""
 
 msgid "SuperSonics|Type"
+msgstr ""
+
+msgid "SuperSonics|Upload a legacy license"
 msgstr ""
 
 msgid "SuperSonics|Valid From"
@@ -31986,9 +31998,6 @@ msgid "The merge conflicts for this merge request have already been resolved. Pl
 msgstr ""
 
 msgid "The merge request can now be merged."
-msgstr ""
-
-msgid "The merge request has made changes to this file that affect the number of code quality violations in it."
 msgstr ""
 
 msgid "The metric must be one of %{metrics}."
@@ -33460,9 +33469,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Time|s"
-msgstr ""
-
-msgid "Tip:"
 msgstr ""
 
 msgid "Tip: Hover over a job to see the jobs it depends on to run."
@@ -37190,6 +37196,9 @@ msgstr ""
 msgid "Your authorized applications"
 msgstr ""
 
+msgid "Your browser does not support iFrames"
+msgstr ""
+
 msgid "Your browser doesn't support U2F. Please use Google Chrome desktop (version 41 or newer)."
 msgstr ""
 
@@ -37418,9 +37427,6 @@ msgid "already has a \"created\" issue link"
 msgstr ""
 
 msgid "already shared with this group"
-msgstr ""
-
-msgid "among other things"
 msgstr ""
 
 msgid "and"
@@ -38076,7 +38082,7 @@ msgstr ""
 msgid "is not valid. The iteration group has to match the iteration cadence group."
 msgstr ""
 
-msgid "is read only"
+msgid "is read-only"
 msgstr ""
 
 msgid "is too long (%{current_value}). The maximum size is %{max_size}."
@@ -38267,9 +38273,6 @@ msgstr ""
 msgid "mrWidget|Are you adding technical debt or code vulnerabilities?"
 msgstr ""
 
-msgid "mrWidget|Before this can be merged, one or more threads must be resolved."
-msgstr ""
-
 msgid "mrWidget|Cancel automatic merge"
 msgstr ""
 
@@ -38334,6 +38337,9 @@ msgid "mrWidget|Mentions"
 msgstr ""
 
 msgid "mrWidget|Merge"
+msgstr ""
+
+msgid "mrWidget|Merge blocked: all threads must be resolved."
 msgstr ""
 
 msgid "mrWidget|Merge failed."

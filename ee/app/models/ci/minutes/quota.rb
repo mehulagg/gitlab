@@ -64,6 +64,10 @@ module Ci
         namespace.root? && namespace.any_project_with_shared_runners_enabled?
       end
 
+      def current_balance
+        total_minutes.to_i - total_minutes_used
+      end
+
       private
 
       def minutes_limit
@@ -83,7 +87,7 @@ module Ci
       end
 
       def total_minutes_remaining
-        [total_minutes.to_i - total_minutes_used, 0].max
+        [current_balance, 0].max
       end
 
       def monthly_minutes_used_up?

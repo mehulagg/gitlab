@@ -13,15 +13,6 @@ module QA
         include SubMenus::Settings
         include SubMenus::Packages
 
-        view 'app/views/layouts/nav/sidebar/_project_menus.html.haml' do
-          element :snippets_link
-          element :members_link
-        end
-
-        view 'app/views/layouts/nav/sidebar/_wiki_link.html.haml' do
-          element :wiki_link
-        end
-
         def click_merge_requests
           within_sidebar do
             click_element(:sidebar_menu_link, menu_item: 'Merge requests')
@@ -30,7 +21,7 @@ module QA
 
         def click_wiki
           within_sidebar do
-            click_element(:wiki_link)
+            click_element(:sidebar_menu_link, menu_item: 'Wiki')
           end
         end
 
@@ -42,13 +33,13 @@ module QA
 
         def click_snippets
           within_sidebar do
-            click_element(:snippets_link)
+            click_element(:sidebar_menu_link, menu_item: 'Snippets')
           end
         end
 
         def click_members
           within_sidebar do
-            click_element(:members_link)
+            click_element(:sidebar_menu_link, menu_item: 'Members')
           end
         end
       end

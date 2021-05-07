@@ -9,6 +9,7 @@ RSpec.describe 'Updating an iteration cadence' do
   let_it_be(:group) { create(:group) }
   let_it_be(:iteration_cadence, refind: true) { create(:iterations_cadence, group: group) }
 
+  let(:description) { 'updated cadence description' }
   let(:start_date) { Time.now.strftime('%F') }
   let(:attributes) do
     {
@@ -17,7 +18,9 @@ RSpec.describe 'Updating an iteration cadence' do
       duration_in_weeks: 1,
       iterations_in_advance: 1,
       automatic: false,
-      active: false
+      active: false,
+      roll_over: true,
+      description: description
     }
   end
 
@@ -79,6 +82,8 @@ RSpec.describe 'Updating an iteration cadence' do
         expect(iteration_cadence_hash['iterationsInAdvance']).to eq(1)
         expect(iteration_cadence_hash['automatic']).to eq(false)
         expect(iteration_cadence_hash['active']).to eq(false)
+        expect(iteration_cadence_hash['rollOver']).to eq(true)
+        expect(iteration_cadence_hash['description']).to eq(description)
 
         iteration_cadence.reload
         expect(iteration_cadence.title).to eq('title')
@@ -87,6 +92,8 @@ RSpec.describe 'Updating an iteration cadence' do
         expect(iteration_cadence.iterations_in_advance).to eq(1)
         expect(iteration_cadence.automatic).to eq(false)
         expect(iteration_cadence.active).to eq(false)
+        expect(iteration_cadence.roll_over).to eq(true)
+        expect(iteration_cadence.description).to eq(description)
       end
 
       context 'when iteration_cadences feature flag is disabled' do

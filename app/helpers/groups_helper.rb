@@ -25,7 +25,7 @@ module GroupsHelper
       applications#index
       applications#show
       applications#edit
-      packages_and_registries#index
+      packages_and_registries#show
       groups/runners#show
       groups/runners#edit
     ]
@@ -125,9 +125,7 @@ module GroupsHelper
     @has_group_title = true
     full_title = []
 
-    ancestors = group.ancestors.with_route
-
-    ancestors.reverse_each.with_index do |parent, index|
+    sorted_ancestors(group).with_route.reverse_each.with_index do |parent, index|
       if index > 0
         add_to_breadcrumb_dropdown(group_title_link(parent, hidable: false, show_avatar: true, for_dropdown: true), location: :before)
       else
@@ -296,8 +294,17 @@ module GroupsHelper
   end
 
   def oldest_consecutively_locked_ancestor(group)
-    group.ancestors.find do |group|
+    sorted_ancestors(group).find do |group|
       !group.has_parent? || !group.parent.share_with_group_lock?
+    end
+  end
+
+  # Ancestors sorted by hierarchy depth in bottom-top order.
+  def sorted_ancestors(group)
+    if group.root_ancestor.use_traversal_ids?
+      group.ancestors(hierarchy_order: :asc)
+    else
+      group.ancestors
     end
   end
 

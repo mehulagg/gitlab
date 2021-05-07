@@ -179,6 +179,25 @@ RSpec.describe AppSec::Dast::SiteProfiles::CreateService do
         it_behaves_like 'it handles secret variable creation failure'
       end
 
+      context 'when an existing dast_site_validation does not exist' do
+        it 'does not create a dast_site_validation association' do
+          dast_site = subject.payload.dast_site
+
+          expect(dast_site.dast_site_validation).to be_nil
+        end
+      end
+
+      context 'when an existing dast_site_validation exists' do
+        let(:dast_site_validation) { create(:dast_site_validation, dast_site_token: create(:dast_site_token, project: project)) }
+        let(:target_url) { dast_site_validation.dast_site_token.url }
+
+        it 'gets associated with the dast_site' do
+          dast_site = subject.payload.dast_site
+
+          expect(dast_site.dast_site_validation).to eq(dast_site_validation)
+        end
+      end
+
       context 'when on demand scan licensed feature is not available' do
         before do
           stub_licensed_features(security_on_demand_scans: false)

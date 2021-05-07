@@ -18,6 +18,7 @@ module IncidentManagement
 
         if deleted
           save_current_shift!
+          send_notification
         end
       end
 
@@ -33,6 +34,10 @@ module IncidentManagement
         participant.update!(is_removed: true)
 
         oncall_rotation.touch
+      end
+
+      def send_notification
+        NotificationService.new.oncall_user_removed(oncall_rotation, user_to_remove)
       end
     end
   end

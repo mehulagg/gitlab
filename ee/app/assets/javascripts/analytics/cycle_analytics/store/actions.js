@@ -31,16 +31,17 @@ export const setFeatureFlags = ({ commit }, featureFlags) =>
 export const setSelectedProjects = ({ commit }, projects) =>
   commit(types.SET_SELECTED_PROJECTS, projects);
 
-export const setSelectedStage = ({ commit }, stage) => {
+export const setSelectedStage = ({ commit, getters: { paginationParams } }, stage) => {
   commit(types.SET_SELECTED_STAGE, stage);
-  commit(types.SET_PAGINATION, { page: 1, hasNextPage: null });
+  commit(types.SET_PAGINATION, { ...paginationParams, page: 1, hasNextPage: null });
 };
 
-export const setDateRange = ({ commit, dispatch }, { skipFetch = false, startDate, endDate }) => {
+export const setDateRange = (
+  { commit, dispatch, getters: { isOverviewStageSelected }, state: { selectedStage } },
+  { startDate, endDate },
+) => {
   commit(types.SET_DATE_RANGE, { startDate, endDate });
-
-  if (skipFetch) return false;
-
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };
 
@@ -77,7 +78,7 @@ export const fetchStageData = ({ dispatch, getters, commit }, stageId) => {
     .then(({ data, headers }) => {
       const { page = null, nextPage = null } = parseIntPagination(normalizeHeaders(headers));
       commit(types.RECEIVE_STAGE_DATA_SUCCESS, data);
-      commit(types.SET_PAGINATION, { page, hasNextPage: Boolean(nextPage) });
+      commit(types.SET_PAGINATION, { ...paginationParams, page, hasNextPage: Boolean(nextPage) });
     })
     .catch((error) => dispatch('receiveStageDataError', error));
 };
@@ -341,7 +342,6 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       selectedStage
         ? dispatch('setSelectedStage', selectedStage)
         : dispatch('setDefaultSelectedStage'),
-      selectedStage?.id ? dispatch('fetchStageData', selectedStage.id) : Promise.resolve(),
       dispatch('setPaths', { groupPath: group.fullPath, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
@@ -352,7 +352,12 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       dispatch('durationChart/setLoading', true),
       dispatch('typeOfWork/setLoading', true),
     ])
-      .then(() => dispatch('fetchCycleAnalyticsData'))
+      .then(() =>
+        Promise.all([
+          selectedStage?.id ? dispatch('fetchStageData', selectedStage.id) : Promise.resolve(),
+          dispatch('fetchCycleAnalyticsData'),
+        ]),
+      )
       .then(() => dispatch('initializeCycleAnalyticsSuccess'));
   }
 
@@ -477,14 +482,19 @@ export const fetchValueStreams = ({ commit, dispatch, getters }) => {
     });
 };
 
-export const setFilters = ({ dispatch }) => {
+export const setFilters = ({
+  dispatch,
+  getters: { isOverviewStageSelected },
+  state: { selectedStage },
+}) => {
+  if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };
 
 export const updateStageTablePagination = (
   { commit, dispatch, state: { selectedStage } },
-  { page },
+  paginationParams,
 ) => {
-  commit(types.SET_PAGINATION, { page });
+  commit(types.SET_PAGINATION, paginationParams);
   return dispatch('fetchStageData', selectedStage.id);
 };

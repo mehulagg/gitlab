@@ -23,7 +23,13 @@ export default () => {
     return null;
   }
 
-  const { hasActiveLicense, freeTrialPath, buySubscriptionPath, subscriptionSyncPath } = el.dataset;
+  const {
+    buySubscriptionPath,
+    freeTrialPath,
+    hasActiveLicense,
+    licenseUploadPath,
+    subscriptionSyncPath,
+  } = el.dataset;
   const connectivityHelpURL = helpPagePath('/user/admin_area/license.html', {
     anchor: 'activate-gitlab-ee-with-a-license',
   });
@@ -32,9 +38,10 @@ export default () => {
     el,
     apolloProvider,
     provide: {
-      freeTrialPath,
       buySubscriptionPath,
       connectivityHelpURL,
+      freeTrialPath,
+      licenseUploadPath,
       subscriptionSyncPath,
     },
     render: (h) =>

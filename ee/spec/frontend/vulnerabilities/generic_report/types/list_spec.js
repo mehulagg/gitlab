@@ -1,12 +1,13 @@
 import { screen } from '@testing-library/dom';
 import { shallowMount } from '@vue/test-utils';
+import { REPORT_TYPES } from 'ee/vulnerabilities/components/generic_report/types/constants';
 import List from 'ee/vulnerabilities/components/generic_report/types/list.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   items: [
-    { type: 'url', href: 'http://foo.bar' },
-    { type: 'url', href: 'http://bar.baz' },
+    { type: REPORT_TYPES.url, href: 'http://foo.bar' },
+    { type: REPORT_TYPES.url, href: 'http://bar.baz' },
   ],
 };
 
