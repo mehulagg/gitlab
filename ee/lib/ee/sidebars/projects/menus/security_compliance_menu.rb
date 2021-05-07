@@ -27,9 +27,9 @@ module EE
           override :link
           def link
             return project_security_discover_path(context.project) unless has_items?
-            return security_dashboard_menu_item.link if security_dashboard_menu_item
-            return audit_events_menu_item.link if audit_events_menu_item
-            return dependencies_menu_item.link if dependencies_menu_item
+            return security_dashboard_menu_item.link if security_dashboard_menu_item.render?
+            return audit_events_menu_item.link if audit_events_menu_item.render?
+            return dependencies_menu_item.link if dependencies_menu_item.render?
 
             renderable_items.first.link
           end
@@ -62,7 +62,9 @@ module EE
 
           def security_dashboard_menu_item
             strong_memoize(:security_dashboard_menu_item) do
-              next unless can?(context.current_user, :read_project_security_dashboard, context.project)
+              unless can?(context.current_user, :read_project_security_dashboard, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :dashboard)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('Security Dashboard'),
@@ -75,7 +77,9 @@ module EE
 
           def vulnerability_report_menu_item
             strong_memoize(:vulnerability_report_menu_item) do
-              next unless can?(context.current_user, :read_project_security_dashboard, context.project)
+              unless can?(context.current_user, :read_project_security_dashboard, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :vulnerability_report)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('Vulnerability Report'),
@@ -88,7 +92,9 @@ module EE
 
           def on_demand_scans_menu_item
             strong_memoize(:on_demand_scans_menu_item) do
-              next unless can?(context.current_user, :read_on_demand_scans, context.project)
+              unless can?(context.current_user, :read_on_demand_scans, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :on_demand_scans)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: s_('OnDemandScans|On-demand Scans'),
@@ -105,7 +111,9 @@ module EE
 
           def dependencies_menu_item
             strong_memoize(:dependencies_menu_item) do
-              next unless can?(context.current_user, :read_dependencies, context.project)
+              unless can?(context.current_user, :read_dependencies, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :dependency_list)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('Dependency List'),
@@ -118,7 +126,9 @@ module EE
 
           def license_compliance_menu_item
             strong_memoize(:license_compliance_menu_item) do
-              next unless can?(context.current_user, :read_licenses, context.project)
+              unless can?(context.current_user, :read_licenses, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :license_compliance)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('License Compliance'),
@@ -131,7 +141,9 @@ module EE
 
           def threat_monitoring_menu_item
             strong_memoize(:threat_monitoring_menu_item) do
-              next unless can?(context.current_user, :read_threat_monitoring, context.project)
+              unless can?(context.current_user, :read_threat_monitoring, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :threat_monitoring)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('Threat Monitoring'),
@@ -144,8 +156,10 @@ module EE
 
           def scan_policies_menu_item
             strong_memoize(:scan_policies_menu_item) do
-              next if ::Feature.disabled?(:security_orchestration_policies_configuration, context.project)
-              next unless can?(context.current_user, :security_orchestration_policies, context.project)
+              if ::Feature.disabled?(:security_orchestration_policies_configuration, context.project) ||
+                !can?(context.current_user, :security_orchestration_policies, context.project)
+                next ::Sidebars::NilMenuItem.new(item_id: :scan_policies)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('Scan Policies'),
@@ -158,8 +172,9 @@ module EE
 
           def audit_events_menu_item
             strong_memoize(:audit_events_menu_item) do
-              next unless can?(context.current_user, :read_project_audit_events, context.project)
-              next unless context.project.licensed_feature_available?(:audit_events) || context.show_promotions
+              unless show_audit_events?
+                next ::Sidebars::NilMenuItem.new(item_id: :audit_events)
+              end
 
               ::Sidebars::MenuItem.new(
                 title: _('Audit Events'),
@@ -168,6 +183,11 @@ module EE
                 item_id: :audit_events
               )
             end
+          end
+
+          def show_audit_events?
+            can?(context.current_user, :read_project_audit_events, context.project) &&
+              (context.project.licensed_feature_available?(:audit_events) || context.show_promotions)
           end
         end
       end

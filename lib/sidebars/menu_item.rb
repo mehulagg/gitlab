@@ -13,7 +13,6 @@ module Sidebars
       @sprite_icon = sprite_icon
       @sprite_icon_html_options = sprite_icon_html_options
       @hint_html_options = hint_html_options
-      @render = render.call
     end
 
     def show_hint?
