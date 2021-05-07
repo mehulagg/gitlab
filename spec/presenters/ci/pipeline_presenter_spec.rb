@@ -372,4 +372,23 @@ RSpec.describe Ci::PipelinePresenter do
       it { is_expected.to be_nil }
     end
   end
+
+  describe '#failed_due_to_missing_user_verification?' do
+    subject { presenter.failed_due_to_missing_user_verification? }
+
+    where(:failure_reason, :result) do
+      [
+        [Enums::Ci::Pipeline.failure_reasons[:config_error], false],
+        [Enums::Ci::Pipeline.failure_reasons[:user_not_verified], true]
+      ]
+    end
+
+    with_them do
+      before do
+        pipeline.failure_reason = failure_reason
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
 end

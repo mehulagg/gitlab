@@ -127,6 +127,10 @@ module Ci
       end
     end
 
+    def failed_due_to_missing_user_verification?
+      pipeline.failure_reason == Enums::Ci::Pipeline.failure_reasons[:user_not_verified]
+    end
+
     private
 
     def plain_ref_name
