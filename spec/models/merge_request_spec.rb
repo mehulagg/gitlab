@@ -3876,6 +3876,26 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     subject { merge_request.use_merge_base_pipeline_for_comparison?(service_class) }
 
+    context 'when service class is Ci::CompareMetricsReportsService' do
+      let(:service_class) { 'Ci::CompareMetricsReportsService' }
+
+      context 'with the feature flag enabled' do
+        before do
+          stub_feature_flags(merge_base_pipeline_for_metrics_comparison: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'with the metrics report flag disabled' do
+        before do
+          stub_feature_flags(merge_base_pipeline_for_metrics_comparison: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+
     context 'when service class is Ci::CompareCodequalityReportsService' do
       let(:service_class) { 'Ci::CompareCodequalityReportsService' }
 
