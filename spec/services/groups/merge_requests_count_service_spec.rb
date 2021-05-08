@@ -7,13 +7,12 @@ RSpec.describe Groups::MergeRequestsCountService, :use_clean_rails_memory_store_
   let_it_be(:group) { create(:group, :public)}
   let_it_be(:project) { create(:project, :repository, namespace: group) }
   let_it_be(:merge_requests) do
-    [ create(:merge_request, state: 'opened', source_project: project, target_project: project),
-      create(:merge_request, state: 'closed', source_project: project, target_project: project),
-      create(:merge_request, state: 'closed', source_project: project, target_project: project),
-      create(:merge_request, state: 'merged', source_project: project, target_project: project),
-      create(:merge_request, state: 'merged', source_project: project, target_project: project),
-      create(:merge_request, state: 'merged', source_project: project, target_project: project)
-    ]
+    [create(:merge_request, state: 'opened', source_project: project, target_project: project),
+     create(:merge_request, state: 'closed', source_project: project, target_project: project),
+     create(:merge_request, state: 'closed', source_project: project, target_project: project),
+     create(:merge_request, state: 'merged', source_project: project, target_project: project),
+     create(:merge_request, state: 'merged', source_project: project, target_project: project),
+     create(:merge_request, state: 'merged', source_project: project, target_project: project)]
   end
 
   subject { described_class.new(group, user) }
@@ -49,14 +48,14 @@ RSpec.describe Groups::MergeRequestsCountService, :use_clean_rails_memory_store_
         it 'refreshes cache if value over threshold' do
           allow(state_counter).to receive(:[]).with(state).and_return(over_threshold)
 
-          expect(subject.count).to eq(over_threshold)
+          expect(subject.count('opened')).to eq(over_threshold)
           expect(Rails.cache.read(cache_key)).to eq(over_threshold)
         end
 
         it 'does not refresh cache if value under threshold' do
           allow(state_counter).to receive(:[]).with(state).and_return(under_threshold)
 
-          expect(subject.count).to eq(under_threshold)
+          expect(subject.count('opened')).to eq(under_threshold)
           expect(Rails.cache.read(cache_key)).to be_nil
         end
       end
@@ -68,7 +67,7 @@ RSpec.describe Groups::MergeRequestsCountService, :use_clean_rails_memory_store_
 
         it 'does not refresh cache' do
           expect(Rails.cache).not_to receive(:write)
-          expect(subject.count).to eq(under_threshold)
+          expect(subject.count('opened')).to eq(under_threshold)
         end
       end
 
@@ -79,7 +78,7 @@ RSpec.describe Groups::MergeRequestsCountService, :use_clean_rails_memory_store_
 
         it 'does not refresh cache' do
           expect(Rails.cache).not_to receive(:write)
-          expect(subject.count).to eq(over_threshold)
+          expect(subject.count('opened')).to eq(over_threshold)
         end
       end
     end

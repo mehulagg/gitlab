@@ -3,7 +3,7 @@
 module Groups
   # Service class for counting and caching the number of merge requests (by state) for a group and its subgroups
   class MergeRequestsCountService < Groups::CountService
-    def count state
+    def count(state)
       cached_count = Rails.cache.read(cache_key(state))
       return cached_count unless cached_count.blank?
 
