@@ -238,7 +238,7 @@ RSpec.describe Issues::CloseService do
       it 'records closed user' do
         close_issue
 
-        expect(issue.closed_by_id).to be(user.id)
+        expect(issue.reload.closed_by_id).to be(user.id)
       end
 
       it 'sends email to user2 about assign of new issue', :sidekiq_might_not_need_inline do

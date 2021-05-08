@@ -27,6 +27,9 @@ module Issues
       return issue unless project.issues_enabled?
 
       issue.closed_by = current_user
+      # closing the issue will execute a DB update event, and by setting the issue.closed_by
+      # value above, we can update both the closed status and the closed_by values at the same
+      # time without needing 2 separate update queries
       unless issue.close
         issue.closed_by = nil
         return issue
