@@ -1,6 +1,9 @@
 .tree-ref-container
-  .tree-ref-holder
-    = render 'shared/ref_switcher', destination: 'tree', path: @path, show_create: true
+  - if Feature.enabled?(:vue_ref_dropdown, @project, default_enabled: :yaml)
+    #js-ref-dropdown
+  - else
+    .tree-ref-holder
+      = render 'shared/ref_switcher', destination: 'tree', path: @path, show_create: true
 
   #js-repo-breadcrumb{ data: breadcrumb_data_attributes }
 

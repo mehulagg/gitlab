@@ -8,6 +8,7 @@ import PerformancePlugin from '~/performance/vue_performance_plugin';
 import App from './components/app.vue';
 import Breadcrumbs from './components/breadcrumbs.vue';
 import DirectoryDownloadLinks from './components/directory_download_links.vue';
+import RefDropdown from './components/ref_dropdown.vue';
 import LastCommit from './components/last_commit.vue';
 import apolloProvider from './graphql';
 import commitsQuery from './queries/commits.query.graphql';
@@ -56,6 +57,22 @@ export default function setupVueRepositoryList() {
       escapedRef,
     },
   });
+
+  const initRefDropdown = () =>
+    new Vue({
+      el: document.getElementById('js-ref-dropdown'),
+      router,
+      apolloProvider,
+      render(h) {
+        return h(RefDropdown, {
+          props: {
+            currentPath: this.$route.params.path,
+          },
+        });
+      },
+    });
+
+  initRefDropdown();
 
   const initLastCommitApp = () =>
     new Vue({
