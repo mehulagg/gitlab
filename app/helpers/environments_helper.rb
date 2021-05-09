@@ -80,7 +80,7 @@ module EnvironmentsHelper
   end
 
   def has_managed_prometheus?(project)
-    project.prometheus_service&.prometheus_available?
+    project.prometheus_service&.prometheus_available? == true
   end
 
   def metrics_dashboard_base_path(environment, project)
