@@ -15,15 +15,6 @@ RSpec.describe Terraform::StateUploader do
     it 'contains the version of the terraform state record' do
       expect(subject.filename).to eq("#{state_version.version}.tfstate")
     end
-
-    context 'legacy state with versioning disabled' do
-      let(:state) { create(:terraform_state, versioning_enabled: false) }
-      let(:state_version) { create(:terraform_state_version, terraform_state: state) }
-
-      it 'contains the UUID of the terraform state record' do
-        expect(subject.filename).to eq("#{state_version.uuid}.tfstate")
-      end
-    end
   end
 
   describe '#store_dir' do
@@ -33,15 +24,6 @@ RSpec.describe Terraform::StateUploader do
         .and_return(:store_dir)
 
       expect(subject.store_dir).to eq(:store_dir)
-    end
-
-    context 'legacy state with versioning disabled' do
-      let(:state) { create(:terraform_state, versioning_enabled: false) }
-      let(:state_version) { create(:terraform_state_version, terraform_state: state) }
-
-      it 'contains the ID of the project' do
-        expect(subject.store_dir).to include(state_version.project_id.to_s)
-      end
     end
   end
 

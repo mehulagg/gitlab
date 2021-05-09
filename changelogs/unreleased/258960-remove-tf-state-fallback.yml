@@ -1,0 +1,5 @@
+---
+title: Remove support for non-versioned Terraform states
+merge_request: 61307
+author:
+type: removed

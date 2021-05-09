@@ -74,47 +74,16 @@ RSpec.describe Terraform::State do
     let_it_be(:build) { create(:ci_build) }
     let_it_be(:version) { 3 }
     let_it_be(:data) { Hash[terraform_version: '0.12.21'].to_json }
+    let_it_be(:terraform_state) { create(:terraform_state) }
 
     subject { terraform_state.update_file!(CarrierWaveStringFile.new(data), version: version, build: build) }
 
-    context 'versioning is enabled' do
-      let(:terraform_state) { create(:terraform_state) }
+    it 'creates a new version' do
+      expect { subject }.to change { Terraform::StateVersion.count }
 
-      it 'creates a new version' do
-        expect { subject }.to change { Terraform::StateVersion.count }
-
-        expect(terraform_state.latest_version.version).to eq(version)
-        expect(terraform_state.latest_version.build).to eq(build)
-        expect(terraform_state.latest_version.file.read).to eq(data)
-      end
-    end
-
-    context 'versioning is disabled (migration to versioned in progress)' do
-      let(:terraform_state) { create(:terraform_state, versioning_enabled: false) }
-      let!(:migrated_version) { create(:terraform_state_version, terraform_state: terraform_state, version: 0) }
-
-      it 'creates a new version, corrects the migrated version number, and marks the state as versioned' do
-        expect { subject }.to change { Terraform::StateVersion.count }
-
-        expect(migrated_version.reload.version).to eq(1)
-        expect(migrated_version.file.read).to eq(fixture_file('terraform/terraform.tfstate'))
-
-        expect(terraform_state.reload.latest_version.version).to eq(version)
-        expect(terraform_state.latest_version.file.read).to eq(data)
-        expect(terraform_state).to be_versioning_enabled
-      end
-
-      context 'the current version cannot be determined' do
-        before do
-          migrated_version.update!(file: CarrierWaveStringFile.new('invalid-json'))
-        end
-
-        it 'uses version - 1 to correct the migrated version number' do
-          expect { subject }.to change { Terraform::StateVersion.count }
-
-          expect(migrated_version.reload.version).to eq(2)
-        end
-      end
+      expect(terraform_state.latest_version.version).to eq(version)
+      expect(terraform_state.latest_version.build).to eq(build)
+      expect(terraform_state.latest_version.file.read).to eq(data)
     end
   end
 end

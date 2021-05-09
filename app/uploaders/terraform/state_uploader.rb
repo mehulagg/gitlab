@@ -16,27 +16,11 @@ module Terraform
     encrypt(key: :key)
 
     def filename
-      # This check is required to maintain backwards compatibility with
-      # states that were created prior to versioning being supported.
-      # This can be removed in 14.0 when support for these states is dropped.
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/258960
-      if terraform_state.versioning_enabled?
-        "#{model.version}.tfstate"
-      else
-        "#{model.uuid}.tfstate"
-      end
+      "#{model.version}.tfstate"
     end
 
     def store_dir
-      # This check is required to maintain backwards compatibility with
-      # states that were created prior to versioning being supported.
-      # This can be removed in 14.0 when support for these states is dropped.
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/258960
-      if terraform_state.versioning_enabled?
-        Gitlab::HashedPath.new(model.uuid, root_hash: project_id)
-      else
-        project_id.to_s
-      end
+      Gitlab::HashedPath.new(model.uuid, root_hash: project_id)
     end
 
     def key
