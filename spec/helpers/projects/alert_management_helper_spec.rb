@@ -94,7 +94,7 @@ RSpec.describe Projects::AlertManagementHelper do
     end
 
     context 'without prometheus service' do
-      it 'hides deprecation notice' do
+      it 'doesn\'t have managed prometheus' do
         expect(data).to include(
           'has-managed-prometheus' => 'false'
         )
