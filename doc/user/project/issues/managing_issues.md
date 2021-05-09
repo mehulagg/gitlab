@@ -350,5 +350,4 @@ This marks issues as progressing as planned or needs attention to keep on schedu
 After an issue is closed, its health status can't be edited and the **Edit** button becomes disabled
 until the issue is reopened.
 
-You can then see issue statuses in the issues list and the
-[epic tree](../../group/epics/index.md#issue-health-status-in-epic-tree).
+You can then see issue statuses in the issues list and the epic tree.

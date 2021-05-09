@@ -41,7 +41,7 @@ graph TD
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7327) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.10.
 
-If your epic contains one or more [child epics](#multi-level-child-epics) that
+If your epic contains one or more [child epics](manage_epics.md#multi-level-child-epics) that
 have a start or due date, a visual
 [roadmap](../roadmap/index.md) of the child epics is listed under the parent epic.
 
