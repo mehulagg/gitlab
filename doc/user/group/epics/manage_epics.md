@@ -324,9 +324,6 @@ When you add an epic that's already linked to a parent epic, the link to its cur
 
 Epics can contain multiple nested child epics, up to a total of seven levels deep.
 
-See [Manage multi-level child epics](manage_epics.md#manage-multi-level-child-epics) for
-steps to create, move, reorder, or delete child epics.
-
 ### Add a child epic to an epic
 
 To add a child epic to an epic:
