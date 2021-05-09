@@ -14,7 +14,7 @@ module Gitlab
     end
 
     def cache_key(type)
-      "#{type}:#{namespace}:set"
+      super("#{type}:#{namespace}")
     end
 
     def write(key, value)
