@@ -13,6 +13,7 @@ module Sidebars
           add_item(webhooks_menu_item)
           add_item(access_tokens_menu_item)
           add_item(repository_menu_item)
+          add_item(merge_requests_menu_item)
           add_item(ci_cd_menu_item)
           add_item(operations_menu_item)
           add_item(pages_menu_item)
@@ -137,6 +138,15 @@ module Sidebars
             link: project_settings_packages_and_registries_path(context.project),
             active_routes: { path: 'packages_and_registries#index' },
             item_id: :packages_and_registries
+          )
+        end
+
+        def merge_requests_menu_item
+          ::Sidebars::MenuItem.new(
+            title: _('Merge requests'),
+            link: project_settings_merge_requests_path(context.project),
+            active_routes: { path: 'merge_requests#show' },
+            item_id: :merge_requests
           )
         end
       end

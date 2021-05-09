@@ -163,5 +163,11 @@ RSpec.describe Sidebars::Projects::Menus::SettingsMenu do
         end
       end
     end
+
+    describe 'Merge requests' do
+      let(:item_id) { :merge_requests }
+
+      it_behaves_like 'access rights checks'
+    end
   end
 end
