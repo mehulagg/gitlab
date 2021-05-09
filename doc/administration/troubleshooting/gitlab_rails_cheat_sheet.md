@@ -308,7 +308,7 @@ pp p.statistics  # compare with earlier values
 ### Identify deploy keys associated with blocked and non-member users 
 
 When the user who created a deploy key is blocked or removed from the project, the key 
-can no longer be used to push to protected branches in a private project (see <https://gitlab.com/gitlab-org/gitlab/-/issues/329742>). 
+can no longer be used to push to protected branches in a private project (see [issue #329742](https://gitlab.com/gitlab-org/gitlab/-/issues/329742)). 
 The following script identifies unusable deploy keys:
 
 ```ruby
