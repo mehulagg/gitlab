@@ -321,19 +321,23 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
 
   access_checker = Gitlab::DeployKeyAccess.new(deploy_key, container: project)
 
-  # can_push_for_ref? tests if deploy_key can push to default branch - by default will fail if user role not Maintainer
+  # Can_push_for_ref? tests if deploy_key can push to specified (possibly protected) branch - change branch name below as required
   #
-  next if access_checker.allowed? && access_checker.can_do_action?(:push_code) && access_checker.can_push_for_ref?(project.repository.root_ref)
+  branch = project.repository.root_ref  #default branch
+  #branch = 'b1'
 
-  puts "==="
-  puts "Unusable deploy key for pushing: key ID: #{deploy_key.id}, title: #{deploy_key.title} for project ID: #{project.id}, path: #{project.full_path}"
+
+  next if access_checker.allowed? && access_checker.can_do_action?(:push_code) && access_checker.can_push_for_ref?(branch)
 
   if user.nil? || user.id == ghost_user_id
-    puts "No user associated"
-    next
+    user.username = 'none'
+    user.state = '-'
   end
 
-  puts "Associated user: #{user.username}, status: #{user.state}"
+  puts "Deploy key: #{deploy_key.id}, Project: #{project.full_path}, Can push?: " + (access_checker.can_do_action?(:push_code) ? 'YES' : 'NO') + 
+       ", Can push to branch #{branch}?: " + (access_checker.can_push_for_ref?(project.repository.root_ref) ? 'YES' : 'NO') + 
+       ", User: #{user.username}, User state: #{user.state}"
+
 end
 ```
 
