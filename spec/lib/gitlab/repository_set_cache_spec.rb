@@ -7,6 +7,7 @@ RSpec.describe Gitlab::RepositorySetCache, :clean_gitlab_redis_cache do
 
   let(:repository) { project.repository }
   let(:namespace) { "#{repository.full_path}:#{project.id}" }
+  let(:gitlab_cache_namespace) { Gitlab::Redis::Cache::CACHE_NAMESPACE }
   let(:cache) { described_class.new(repository) }
 
   describe '#cache_key' do
@@ -14,7 +15,7 @@ RSpec.describe Gitlab::RepositorySetCache, :clean_gitlab_redis_cache do
 
     shared_examples 'cache_key examples' do
       it 'includes the namespace' do
-        is_expected.to eq("foo:#{namespace}:set")
+        is_expected.to eq("#{gitlab_cache_namespace}:foo:#{namespace}:set")
       end
 
       context 'with a given namespace' do
@@ -22,7 +23,7 @@ RSpec.describe Gitlab::RepositorySetCache, :clean_gitlab_redis_cache do
         let(:cache) { described_class.new(repository, extra_namespace: extra_namespace) }
 
         it 'includes the full namespace' do
-          is_expected.to eq("foo:#{namespace}:#{extra_namespace}:set")
+          is_expected.to eq("#{gitlab_cache_namespace}:foo:#{namespace}:#{extra_namespace}:set")
         end
       end
     end
@@ -49,6 +50,24 @@ RSpec.describe Gitlab::RepositorySetCache, :clean_gitlab_redis_cache do
       it_behaves_like 'cache_key examples' do
         let(:repository) { project_snippet.repository }
       end
+    end
+  end
+
+  describe '#write' do
+    subject(:write_cache) { cache.write('branch_names', ['main']) }
+
+    it 'writes the value to the cache' do
+      write_cache
+
+      redis_keys = Gitlab::Redis::Cache.with { |redis| redis.scan(0, match: "*") }.last
+      expect(redis_keys).to include("#{gitlab_cache_namespace}:branch_names:#{namespace}:set")
+      expect(cache.fetch('branch_names')).to contain_exactly('main')
+    end
+
+    it 'sets the expiry of the set' do
+      write_cache
+
+      expect(cache.ttl('branch_names')).to be_within(1).of(cache.expires_in.seconds)
     end
   end
 

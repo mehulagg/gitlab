@@ -11,7 +11,7 @@ module Gitlab
     end
 
     def cache_key(key)
-      "#{key}:set"
+      "#{cache_namespace}:#{key}:set"
     end
 
     # Returns the number of keys deleted by Redis
@@ -72,6 +72,10 @@ module Gitlab
 
     def with(&blk)
       Gitlab::Redis::Cache.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
+    end
+
+    def cache_namespace
+      Gitlab::Redis::Cache::CACHE_NAMESPACE
     end
   end
 end
