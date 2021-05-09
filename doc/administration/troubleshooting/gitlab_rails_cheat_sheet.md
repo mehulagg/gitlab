@@ -321,23 +321,23 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
 
   access_checker = Gitlab::DeployKeyAccess.new(deploy_key, container: project)
 
-  # Can_push_for_ref? tests if deploy_key can push to specified (possibly protected) branch - change branch name below as required
-  #
-  branch = project.repository.root_ref  #default branch
-  #branch = 'b1'
-
-
-  next if access_checker.allowed? && access_checker.can_do_action?(:push_code) && access_checker.can_push_for_ref?(branch)
+  # can_push_for_ref? tests if deploy_key can push to default branch, which is likely to be protected
+  can_push = access_checker.can_do_action?(:push_code)
+  can_push_to_default = access_checker.can_push_for_ref?(project.repository.root_ref)
+  
+  next if access_checker.allowed? && can_push && can_push_to_default
 
   if user.nil? || user.id == ghost_user_id
-    user.username = 'none'
-    user.state = '-'
+    username = 'none'
+    state = '-'
+  else
+    username = user.username
+    user_state = user.state
   end
 
-  puts "Deploy key: #{deploy_key.id}, Project: #{project.full_path}, Can push?: " + (access_checker.can_do_action?(:push_code) ? 'YES' : 'NO') + 
-       ", Can push to branch #{branch}?: " + (access_checker.can_push_for_ref?(project.repository.root_ref) ? 'YES' : 'NO') + 
-       ", User: #{user.username}, User state: #{user.state}"
-
+  puts "Deploy key: #{deploy_key.id}, Project: #{project.full_path}, Can push?: " + (can_push ? 'YES' : 'NO') +
+       ", Can push to default branch #{project.repository.root_ref}?: " + (can_push_to_default ? 'YES' : 'NO') +
+       ", User: #{username}, User state: #{user_state}"
 end
 ```
 
