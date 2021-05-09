@@ -11,7 +11,7 @@ module Gitlab
     end
 
     def cache_key(key)
-      super("#{cache_namespace}:#{key}")
+      super(key)
     end
 
     def clear_cache!(key)
