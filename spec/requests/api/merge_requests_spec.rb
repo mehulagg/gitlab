@@ -2179,7 +2179,7 @@ RSpec.describe API::MergeRequests do
         put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['assignees']).to be_empty        )
+        expect(json_response['assignees']).to be_empty
       end
     end
 
@@ -2194,7 +2194,7 @@ RSpec.describe API::MergeRequests do
         put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: params
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['assignees']).to be_empty        )
+        expect(json_response['assignees']).to be_empty
       end
     end
 
