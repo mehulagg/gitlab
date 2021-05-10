@@ -34667,6 +34667,9 @@ msgstr ""
 msgid "Upload file"
 msgstr ""
 
+msgid "Upload license"
+msgstr ""
+
 msgid "Upload object map"
 msgstr ""
 

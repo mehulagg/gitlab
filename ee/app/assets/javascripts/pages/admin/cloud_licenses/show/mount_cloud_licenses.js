@@ -25,6 +25,7 @@ export default () => {
 
   const {
     buySubscriptionPath,
+    customersPortalUrl,
     freeTrialPath,
     hasActiveLicense,
     licenseUploadPath,
@@ -40,6 +41,7 @@ export default () => {
     provide: {
       buySubscriptionPath,
       connectivityHelpURL,
+      customersPortalUrl,
       freeTrialPath,
       licenseUploadPath,
       subscriptionSyncPath,

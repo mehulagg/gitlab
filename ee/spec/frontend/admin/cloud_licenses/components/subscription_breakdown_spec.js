@@ -18,6 +18,7 @@ import {
   licensedToHeaderText,
   notificationType,
   subscriptionDetailsHeaderText,
+  subscriptionType,
 } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -31,20 +32,24 @@ describe('Subscription Breakdown', () => {
 
   const [, legacyLicense] = subscriptionHistory;
   const connectivityHelpURL = 'connectivity/help/url';
+  const customersPortalUrl = 'customers.dot';
+  const licenseUploadPath = '/license/upload/';
   const subscriptionSyncPath = '/sync/path/';
 
   const findDetailsCards = () => wrapper.findAllComponents(SubscriptionDetailsCard);
   const findDetailsCardFooter = () => wrapper.find('.gl-card-footer');
   const findDetailsHistory = () => wrapper.findComponent(SubscriptionDetailsHistory);
   const findDetailsUserInfo = () => wrapper.findComponent(SubscriptionDetailsUserInfo);
+  const findLicenseUploadAction = () => wrapper.findByTestId('license-upload-action');
   const findSubscriptionActivationAction = () =>
     wrapper.findByTestId('subscription-activation-action');
+  const findSubscriptionMangeAction = () => wrapper.findByTestId('subscription-manage-action');
   const findSubscriptionSyncAction = () => wrapper.findByTestId('subscription-sync-action');
   const findSubscriptionActivationModal = () => wrapper.findComponent(SubscriptionActivationModal);
   const findSubscriptionSyncNotifications = () =>
     wrapper.findComponent(SubscriptionSyncNotifications);
 
-  const createComponent = ({ props, stubs } = {}) => {
+  const createComponent = ({ props = {}, provide = {}, stubs = {} } = {}) => {
     glModalDirective = jest.fn();
     wrapper = extendedWrapper(
       shallowMount(SubscriptionBreakdown, {
@@ -57,7 +62,10 @@ describe('Subscription Breakdown', () => {
         },
         provide: {
           connectivityHelpURL,
+          customersPortalUrl,
+          licenseUploadPath,
           subscriptionSyncPath,
+          ...provide,
         },
         propsData: {
           subscription: license.ULTIMATE,
@@ -122,12 +130,6 @@ describe('Subscription Breakdown', () => {
       expect(findDetailsCardFooter().exists()).toBe(true);
     });
 
-    it('shows a button to sync the subscription', () => {
-      createComponent({ stubs: { GlCard, SubscriptionDetailsCard } });
-
-      expect(findSubscriptionSyncAction().exists()).toBe(true);
-    });
-
     it('shows a button to activate a new subscription', () => {
       createComponent({ stubs: { GlCard, SubscriptionDetailsCard } });
 
@@ -142,7 +144,62 @@ describe('Subscription Breakdown', () => {
       expect(findSubscriptionActivationModal().attributes('modalid')).toBe(modalId);
     });
 
-    it.todo('shows a button to manage the subscription');
+    describe('footer buttons', () => {
+      it.each`
+        url                     | type                       | shouldShow
+        ${subscriptionSyncPath} | ${subscriptionType.CLOUD}  | ${true}
+        ${subscriptionSyncPath} | ${subscriptionType.LEGACY} | ${false}
+        ${''}                   | ${subscriptionType.CLOUD}  | ${false}
+        ${''}                   | ${subscriptionType.LEGACY} | ${false}
+        ${undefined}            | ${subscriptionType.CLOUD}  | ${false}
+        ${undefined}            | ${subscriptionType.LEGACY} | ${false}
+      `(
+        'with url is $url and type is $type the sync buttons is shown: $shouldShow',
+        ({ url, type, shouldShow }) => {
+          const provide = { subscriptionSyncPath: url };
+          const props = { subscription: { ...license.ULTIMATE, type } };
+          const stubs = { GlCard, SubscriptionDetailsCard };
+          createComponent({ props, provide, stubs });
+
+          expect(findSubscriptionSyncAction().exists()).toBe(shouldShow);
+        },
+      );
+
+      it.each`
+        url                  | type                       | shouldShow
+        ${licenseUploadPath} | ${subscriptionType.LEGACY} | ${true}
+        ${licenseUploadPath} | ${subscriptionType.CLOUD}  | ${false}
+        ${''}                | ${subscriptionType.LEGACY} | ${false}
+        ${''}                | ${subscriptionType.CLOUD}  | ${false}
+        ${undefined}         | ${subscriptionType.LEGACY} | ${false}
+        ${undefined}         | ${subscriptionType.CLOUD}  | ${false}
+      `(
+        'with url is $url and type is $type the upload buttons is shown: $shouldShow',
+        ({ url, type, shouldShow }) => {
+          const provide = { licenseUploadPath: url };
+          const props = { subscription: { ...license.ULTIMATE, type } };
+          const stubs = { GlCard, SubscriptionDetailsCard };
+          createComponent({ props, provide, stubs });
+
+          expect(findLicenseUploadAction().exists()).toBe(shouldShow);
+        },
+      );
+
+      it.each`
+        url                   | shouldShow
+        ${customersPortalUrl} | ${true}
+        ${''}                 | ${false}
+        ${undefined}          | ${false}
+      `('with url is $url the manage buttons is shown: $shouldShow', ({ url, shouldShow }) => {
+        const provide = { customersPortalUrl: url };
+        const stubs = { GlCard, SubscriptionDetailsCard };
+        createComponent({ provide, stubs });
+
+        expect(findSubscriptionMangeAction().exists()).toBe(shouldShow);
+      });
+
+      it.todo('should show a remove subscription button');
+    });
 
     describe('with a legacy license', () => {
       beforeEach(() => {

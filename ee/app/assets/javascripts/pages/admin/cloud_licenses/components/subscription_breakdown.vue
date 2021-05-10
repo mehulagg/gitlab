@@ -7,9 +7,11 @@ import {
   licensedToHeaderText,
   manageSubscriptionButtonText,
   notificationType,
+  removeLicense,
   subscriptionDetailsHeaderText,
   subscriptionType,
   syncSubscriptionButtonText,
+  uploadLicense,
 } from '../constants';
 import SubscriptionActivationModal from './subscription_activation_modal.vue';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
@@ -22,11 +24,13 @@ export const modalId = 'subscription-activation-modal';
 
 export default {
   i18n: {
+    enterActivationCode,
     licensedToHeaderText,
     manageSubscriptionButtonText,
+    removeLicense,
     subscriptionDetailsHeaderText,
     syncSubscriptionButtonText,
-    enterActivationCode,
+    uploadLicense,
   },
   modal: {
     id: modalId,
@@ -43,7 +47,7 @@ export default {
     SubscriptionDetailsUserInfo,
     SubscriptionSyncNotifications: () => import('./subscription_sync_notifications.vue'),
   },
-  inject: ['subscriptionSyncPath'],
+  inject: ['customersPortalUrl', 'licenseUploadPath', 'subscriptionSyncPath'],
   props: {
     subscription: {
       type: Object,
@@ -63,10 +67,16 @@ export default {
     };
   },
   computed: {
-    canSyncSubscription() {
-      return this.subscriptionSyncPath && this.subscription.type === subscriptionType.CLOUD;
-    },
     canManageSubscription() {
+      return this.customersPortalUrl;
+    },
+    canSyncSubscription() {
+      return this.subscriptionSyncPath && this.isCloudType;
+    },
+    canUploadLicense() {
+      return this.licenseUploadPath && this.isLegacyType;
+    },
+    canRemoveLicense() {
       return false;
     },
     hasSubscription() {
@@ -75,9 +85,21 @@ export default {
     hasSubscriptionHistory() {
       return Boolean(this.subscriptionList.length);
     },
+    isCloudType() {
+      return this.subscription.type === subscriptionType.CLOUD;
+    },
+    isLegacyType() {
+      return this.subscription.type === subscriptionType.LEGACY;
+    },
     shouldShowFooter() {
       return some(
-        pick(this, ['canSyncSubscription', 'canMangeSubscription', 'hasSubscription']),
+        pick(this, [
+          'hasSubscription',
+          'canDeleteSubscription',
+          'canManageSubscription',
+          'canSyncSubscription',
+          'canUploadSubscription',
+        ]),
         Boolean,
       );
     },
@@ -144,8 +166,33 @@ export default {
             >
               {{ $options.i18n.enterActivationCode }}
             </gl-button>
-            <gl-button v-if="canManageSubscription">
+            <gl-button
+              v-if="canUploadLicense"
+              :href="licenseUploadPath"
+              target="_blank"
+              category="secondary"
+              variant="confirm"
+              data-testid="license-upload-action"
+            >
+              {{ $options.i18n.uploadLicense }}
+            </gl-button>
+            <gl-button
+              v-if="canManageSubscription"
+              :href="customersPortalUrl"
+              target="_blank"
+              category="secondary"
+              variant="confirm"
+              data-testid="subscription-manage-action"
+            >
               {{ $options.i18n.manageSubscriptionButtonText }}
+            </gl-button>
+            <gl-button
+              v-if="canRemoveLicense"
+              category="secondary"
+              variant="danger"
+              data-testid="license-remove-action"
+            >
+              {{ $options.i18n.removeLicense }}
             </gl-button>
           </template>
         </subscription-details-card>
