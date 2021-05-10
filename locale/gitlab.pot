@@ -23224,6 +23224,9 @@ msgstr ""
 msgid "PackageRegistry|Install package version"
 msgstr ""
 
+msgid "PackageRegistry|Invalid Package: failed metadata extraction"
+msgstr ""
+
 msgid "PackageRegistry|Learn how to %{noPackagesLinkStart}publish and share your packages%{noPackagesLinkEnd} with GitLab."
 msgstr ""
 

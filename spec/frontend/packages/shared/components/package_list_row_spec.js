@@ -1,4 +1,6 @@
+import { GlLink, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 import PackagesListRow from '~/packages/shared/components/package_list_row.vue';
 import PackagePath from '~/packages/shared/components/package_path.vue';
@@ -20,7 +22,10 @@ describe('packages_list_row', () => {
   const findPackagePath = () => wrapper.find(PackagePath);
   const findDeleteButton = () => wrapper.find('[data-testid="action-delete"]');
   const findPackageIconAndName = () => wrapper.find(PackageIconAndName);
-  const findInfrastructureIconAndName = () => wrapper.find(InfrastructureIconAndName);
+  const findInfrastructureIconAndName = () => wrapper.findComponent(InfrastructureIconAndName);
+  const findListItem = () => wrapper.findComponent(ListItem);
+  const findPackageLink = () => wrapper.findComponent(GlLink);
+  const findWarningIcon = () => wrapper.findComponent(GlIcon);
 
   const mountComponent = ({
     isGroup = false,
@@ -43,6 +48,9 @@ describe('packages_list_row', () => {
         isGroup,
         showPackageType,
         disableDelete,
+      },
+      directives: {
+        GlTooltip: createMockDirective(),
       },
     });
   };
@@ -144,6 +152,36 @@ describe('packages_list_row', () => {
       expect(findPackageIconAndName().exists()).toBe(false);
 
       expect(findInfrastructureIconAndName().exists()).toBe(true);
+    });
+  });
+
+  describe('when the package is in error status', () => {
+    beforeEach(() => {
+      mountComponent({ packageEntity: { ...packageWithoutTags, status: 'error' } });
+    });
+
+    it('list item has a disabled prop', () => {
+      expect(findListItem().props('disabled')).toBe(true);
+    });
+
+    it('details link is disabled', () => {
+      expect(findPackageLink().attributes('disabled')).toBe('true');
+    });
+
+    it('has a warning icon', () => {
+      const icon = findWarningIcon();
+      const tooltip = getBinding(icon.element, 'gl-tooltip');
+      expect(icon.exists()).toBe(true);
+      expect(icon.props()).toMatchObject({
+        name: 'warning',
+      });
+      expect(tooltip.value).toMatchObject({
+        title: 'Invalid Package: failed metadata extraction',
+      });
+    });
+
+    it('delete button is disabled', () => {
+      expect(findDeleteButton().props('disabled')).toBe(true);
     });
   });
 });
