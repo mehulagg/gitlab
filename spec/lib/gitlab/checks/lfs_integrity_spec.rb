@@ -17,8 +17,9 @@ RSpec.describe Gitlab::Checks::LfsIntegrity do
     # pre-receive hook so that `--not --all` returns some objects
     operations.commit_tree('8856a329dd38ca86dfb9ce5aa58a16d88cc119bd', "New LFS objects")
   end
+  let(:newrevs) { [ newrev ] }
 
-  subject { described_class.new(project, newrev, time_left) }
+  subject { described_class.new(project, newrevs, time_left) }
 
   describe '#objects_missing?' do
     let(:blob_object) { repository.blob_at_branch('lfs', 'files/lfs/lfs_object.iso') }
@@ -40,8 +41,28 @@ RSpec.describe Gitlab::Checks::LfsIntegrity do
         allow(project).to receive(:lfs_enabled?).and_return(true)
       end
 
+      context 'nil rev' do
+        let(:newrevs) { [ nil ] }
+
+        it 'skips integrity check' do
+          expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
+
+          expect(subject.objects_missing?).to be_falsey
+        end
+      end
+
       context 'deletion' do
-        let(:newrev) { nil }
+        let(:newrevs) { [ Gitlab::Git::BLANK_SHA ] }
+
+        it 'skips integrity check' do
+          expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
+
+          expect(subject.objects_missing?).to be_falsey
+        end
+      end
+
+      context 'no changes' do
+        let(:newrevs) { [ ] }
 
         it 'skips integrity check' do
           expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)

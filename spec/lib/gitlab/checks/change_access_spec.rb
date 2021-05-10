@@ -37,14 +37,6 @@ RSpec.describe Gitlab::Checks::ChangeAccess do
         subject.validate!
       end
 
-      it 'calls lfs checks' do
-        expect_next_instance_of(Gitlab::Checks::LfsCheck) do |instance|
-          expect(instance).to receive(:validate!)
-        end
-
-        subject.validate!
-      end
-
       it 'calls diff checks' do
         expect_next_instance_of(Gitlab::Checks::DiffCheck) do |instance|
           expect(instance).to receive(:validate!)

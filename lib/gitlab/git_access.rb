@@ -340,16 +340,13 @@ module Gitlab
 
     def check_access!
       # Iterate over all changes to find if user allowed all of them to be applied
-      changes_list.each.with_index do |change, index|
-        skip_lfs_integrity_check = index != 0
-
+      changes_list.each do |change|
         # If user does not have access to make at least one change, cancel all
         # push by allowing the exception to bubble up
         Checks::ChangeAccess.new(
           change,
           user_access: user_access,
           project: project,
-          skip_lfs_integrity_check: skip_lfs_integrity_check,
           protocol: protocol,
           logger: logger
         ).validate!
@@ -361,7 +358,7 @@ module Gitlab
         project: project,
         protocol: protocol,
         logger: logger
-      ).validate!
+      ).validate! unless changes_list.blank?
     rescue Checks::TimedLogger::TimeoutError
       raise TimeoutError, logger.full_message
     end

@@ -4,21 +4,20 @@ module Gitlab
   module Checks
     class ChangeAccess
       ATTRIBUTES = %i[user_access project skip_authorization
-                      skip_lfs_integrity_check protocol oldrev newrev ref
+                      protocol oldrev newrev ref
                       branch_name tag_name logger commits].freeze
 
       attr_reader(*ATTRIBUTES)
 
       def initialize(
         change, user_access:, project:,
-        skip_lfs_integrity_check: false, protocol:, logger:
+        protocol:, logger:
       )
         @oldrev, @newrev, @ref = change.values_at(:oldrev, :newrev, :ref)
         @branch_name = Gitlab::Git.branch_name(@ref)
         @tag_name = Gitlab::Git.tag_name(@ref)
         @user_access = user_access
         @project = project
-        @skip_lfs_integrity_check = skip_lfs_integrity_check
         @protocol = protocol
 
         @logger = logger
@@ -44,7 +43,6 @@ module Gitlab
         Gitlab::Checks::PushCheck.new(self).validate!
         Gitlab::Checks::BranchCheck.new(self).validate!
         Gitlab::Checks::TagCheck.new(self).validate!
-        Gitlab::Checks::LfsCheck.new(self).validate!
       end
 
       def commits_check

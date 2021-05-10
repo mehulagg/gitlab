@@ -28,6 +28,7 @@ module Gitlab
       protected
 
       def checks
+        Gitlab::Checks::LfsCheck.new(self).validate!
       end
     end
   end

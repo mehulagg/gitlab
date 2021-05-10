@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Checks::LfsCheck do
-  include_context 'change access checks context'
+  include_context 'changes access checks context'
 
   let(:blob_object) { project.repository.blob_at_branch('lfs', 'files/lfs/lfs_object.iso') }
 
@@ -55,13 +55,13 @@ RSpec.describe Gitlab::Checks::LfsCheck do
 
         context 'with missing newrev' do
           it_behaves_like 'a skipped integrity check' do
-            let(:changes) { { oldrev: oldrev, ref: ref } }
+            let(:changes) { [ { oldrev: oldrev, ref: ref } ] }
           end
         end
 
         context 'with blank newrev' do
           it_behaves_like 'a skipped integrity check' do
-            let(:changes) { { oldrev: oldrev, newrev: Gitlab::Git::BLANK_SHA, ref: ref } }
+            let(:changes) { [ { oldrev: oldrev, newrev: Gitlab::Git::BLANK_SHA, ref: ref } ] }
           end
         end
       end

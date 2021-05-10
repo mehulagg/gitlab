@@ -1,0 +1,5 @@
+---
+title: "Fix LFS pointer checks only verifying first reference"
+merge_request: 61355
+author:
+type: fixed
