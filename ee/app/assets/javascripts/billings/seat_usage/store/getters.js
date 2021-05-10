@@ -1,7 +1,7 @@
 export const tableItems = (state) => {
   if (state.members.length) {
     return state.members.map(
-      ({ id, name, username, avatar_url, web_url, email, last_activity_on }) => {
+      ({ id, name, username, avatar_url, web_url, email, last_activity_on, membership_type }) => {
         const formattedUserName = `@${username}`;
 
         return {
@@ -12,6 +12,7 @@ export const tableItems = (state) => {
             avatar_url,
             web_url,
             last_activity_on,
+            membership_type,
           },
           email,
         };

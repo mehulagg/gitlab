@@ -21,6 +21,7 @@ import {
   SEARCH_DEBOUNCE_MS,
   REMOVE_BILLABLE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
+import { humanize } from '~/lib/utils/text_utility';
 import { s__ } from '~/locale';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
 import SubscriptionSeatDetails from './subscription_seat_details.vue';
@@ -118,6 +119,9 @@ export default {
         this.resetBillableMembers();
       }
     },
+    membershipType(str) {
+      return humanize(str);
+    },
   },
   i18n: {
     emailNotVisibleTooltipText: s__(
@@ -183,7 +187,13 @@ export default {
               :size="$options.avatarSize"
               :label="item.user.name"
               :sub-label="item.user.username"
-            />
+            >
+              <template v-if="item.user.membership_type !== 'group_member'" #meta>
+                <gl-badge size="sm" variant="muted">
+                  {{ membershipType(item.user.membership_type) }}
+                </gl-badge>
+              </template>
+            </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
       </template>
