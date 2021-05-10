@@ -41,8 +41,8 @@ const addExperimentContext = (opts) => {
 
 const createEventPayload = (el, { suffix = '' } = {}) => {
   const action = (el.dataset.trackAction || el.dataset.trackEvent) + (suffix || '');
-  let value = el.dataset.trackValue || el.value || undefined;
-  if (el.type === 'checkbox' && !el.checked) value = false;
+  let value = el.dataset.trackValue || el.value || 0;
+  if (el.type === 'checkbox' && !el.checked) value = 0;
 
   const context = addExperimentContext({
     experiment: el.dataset.trackExperiment,
