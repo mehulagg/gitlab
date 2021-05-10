@@ -3,13 +3,11 @@ import { GlLineChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import { merge } from 'lodash';
 import { __, n__, s__, sprintf } from '~/locale';
-import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 import commonChartOptions from './common_chart_options';
 
 export default {
   components: {
     GlLineChart,
-    ResizableChartContainer,
   },
   props: {
     startDate: {
@@ -105,7 +103,17 @@ export default {
       });
     },
   },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize);
+  },
   methods: {
+    bindResizeEvent(chart) {
+      this.chart = chart;
+      window.addEventListener('resize', this.onResize);
+    },
+    onResize() {
+      this.chart?.resize();
+    },
     formatTooltipText(params) {
       const [seriesData] = params.seriesData;
       if (!seriesData) {
@@ -131,18 +139,17 @@ export default {
     <div v-if="showTitle" class="burndown-header d-flex align-items-center">
       <h3>{{ __('Burndown chart') }}</h3>
     </div>
-    <resizable-chart-container v-if="!loading" class="burndown-chart js-burndown-chart">
-      <gl-line-chart
-        slot-scope="{ width }"
-        :width="width"
-        :data="dataSeries"
-        :option="options"
-        :format-tooltip-text="formatTooltipText"
-        :include-legend-avg-max="false"
-      >
-        <template slot="tooltip-title">{{ tooltip.title }}</template>
-        <template slot="tooltip-content">{{ tooltip.content }}</template>
-      </gl-line-chart>
-    </resizable-chart-container>
+    <gl-line-chart
+      v-if="!loading"
+      class="burndown-chart js-burndown-chart"
+      :data="dataSeries"
+      :option="options"
+      :format-tooltip-text="formatTooltipText"
+      :include-legend-avg-max="false"
+      @created="bindResizeEvent"
+    >
+      <template slot="tooltip-title">{{ tooltip.title }}</template>
+      <template slot="tooltip-content">{{ tooltip.content }}</template>
+    </gl-line-chart>
   </div>
 </template>
