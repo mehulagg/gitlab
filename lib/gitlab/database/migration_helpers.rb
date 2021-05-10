@@ -145,7 +145,7 @@ module Gitlab
         options = options.merge({ algorithm: :concurrently })
 
         if index_exists?(table_name, column_name, **options)
-          Gitlab::AppLogger.warn "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
+          log "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
@@ -171,7 +171,7 @@ module Gitlab
         options = options.merge({ algorithm: :concurrently })
 
         unless index_exists?(table_name, column_name, **options)
-          Gitlab::AppLogger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
+          log "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
@@ -201,7 +201,7 @@ module Gitlab
         options = options.merge({ algorithm: :concurrently })
 
         unless index_exists_by_name?(table_name, index_name)
-          Gitlab::AppLogger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, index_name: #{index_name}"
+          log "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, index_name: #{index_name}"
           return
         end
 
@@ -240,7 +240,7 @@ module Gitlab
             "source: #{source}, target: #{target}, column: #{options[:column]}, "\
             "name: #{options[:name]}, on_delete: #{options[:on_delete]}"
 
-          Gitlab::AppLogger.warn warning_message
+          log warning_message
         else
           # Using NOT VALID allows us to create a key without immediately
           # validating it. This means we keep the ALTER TABLE lock only for a
@@ -1189,9 +1189,11 @@ module Gitlab
         Arel::Nodes::SqlLiteral.new(replace.to_sql)
       end
 
-      def remove_foreign_key_if_exists(...)
-        if foreign_key_exists?(...)
-          remove_foreign_key(...)
+      def remove_foreign_key_if_exists(*args)
+        if foreign_key_exists?(*args)
+          remove_foreign_key(*args)
+        else
+          log "Foreign key not removed because it does not exist: #{args}"
         end
       end
 
@@ -1366,7 +1368,7 @@ into similar problems in the future (e.g. when new tables are created).
             table: #{table}, check: #{check}, constraint name: #{constraint_name}
           MESSAGE
 
-          Gitlab::AppLogger.warn warning_message
+          log warning_message
         else
           # Only add the constraint without validating it
           # Even though it is fast, ADD CONSTRAINT requires an EXCLUSIVE lock
@@ -1509,7 +1511,7 @@ into similar problems in the future (e.g. when new tables are created).
             column #{table}.#{column} is already defined as `NOT NULL`
           MESSAGE
 
-          Gitlab::AppLogger.warn warning_message
+          log warning_message
         end
       end
 
@@ -1731,6 +1733,15 @@ into similar problems in the future (e.g. when new tables are created).
           You can disable transactions by calling `disable_ddl_transaction!` in the body of
           your migration class
         ERROR
+      end
+
+      def log(message)
+        if Rails.env.development?
+          # This will help to see the warnings in the output of migrations.
+          puts message # rubocop:disable Rails/Output
+        else
+          Gitlab::AppLogger.warn(message)
+        end
       end
     end
   end

@@ -271,12 +271,25 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         model.add_concurrent_index(:users, :foo, unique: true)
       end
 
-      it 'does nothing if the index exists already' do
-        expect(model).to receive(:index_exists?)
-          .with(:users, :foo, { algorithm: :concurrently, unique: true }).and_return(true)
-        expect(model).not_to receive(:add_index)
+      context 'when the index exists already' do
+        before do
+          expect(model).to receive(:index_exists?)
+            .with(:users, :foo, { algorithm: :concurrently, unique: true }).and_return(true)
+        end
 
-        model.add_concurrent_index(:users, :foo, unique: true)
+        it 'does nothing' do
+          expect(model).not_to receive(:add_index)
+
+          model.add_concurrent_index(:users, :foo, unique: true)
+        end
+
+        it 'logs a message' do
+          expect(Gitlab::AppLogger).to receive(:warn).with(
+            'Index not created because it already exists (this may be due to an aborted migration or similar): table_name: users, column_name: foo'
+          )
+
+          model.add_concurrent_index(:users, :foo, unique: true)
+        end
       end
     end
 
@@ -306,12 +319,25 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           model.remove_concurrent_index(:users, :foo)
         end
 
-        it 'does nothing if the index does not exist' do
-          expect(model).to receive(:index_exists?)
-            .with(:users, :foo, { algorithm: :concurrently, unique: true }).and_return(false)
-          expect(model).not_to receive(:remove_index)
+        context 'when the index does not exist' do
+          before do
+            expect(model).to receive(:index_exists?)
+              .with(:users, :foo, { algorithm: :concurrently, unique: true }).and_return(false)
+          end
 
-          model.remove_concurrent_index(:users, :foo, unique: true)
+          it 'does nothing' do
+            expect(model).not_to receive(:remove_index)
+
+            model.remove_concurrent_index(:users, :foo, unique: true)
+          end
+
+          it 'logs a message' do
+            expect(Gitlab::AppLogger).to receive(:warn).with(
+              'Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: users, column_name: foo'
+            )
+
+            model.remove_concurrent_index(:users, :foo, unique: true)
+          end
         end
 
         describe 'by index name' do
@@ -326,11 +352,24 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
             model.remove_concurrent_index_by_name(:users, "index_x_by_y")
           end
 
-          it 'does nothing if the index does not exist' do
-            expect(model).to receive(:index_exists_by_name?).with(:users, "index_x_by_y").and_return(false)
-            expect(model).not_to receive(:remove_index)
+          context 'when the index does not exist' do
+            before do
+              expect(model).to receive(:index_exists_by_name?).with(:users, "index_x_by_y").and_return(false)
+            end
 
-            model.remove_concurrent_index_by_name(:users, "index_x_by_y")
+            it 'does nothing' do
+              expect(model).not_to receive(:remove_index)
+
+              model.remove_concurrent_index_by_name(:users, "index_x_by_y")
+            end
+
+            it 'logs a message' do
+              expect(Gitlab::AppLogger).to receive(:warn).with(
+                'Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: users, index_name: index_x_by_y'
+              )
+
+              model.remove_concurrent_index_by_name(:users, "index_x_by_y")
+            end
           end
 
           it 'removes the index with keyword arguments' do
@@ -445,17 +484,31 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           model.add_concurrent_foreign_key(:projects, :users, column: :user_id)
         end
 
-        it 'does not create a foreign key if it exists already' do
-          name = model.concurrent_foreign_key_name(:projects, :user_id)
-          expect(model).to receive(:foreign_key_exists?).with(:projects, :users,
-                                                              column: :user_id,
-                                                              on_delete: :cascade,
-                                                              name: name).and_return(true)
+        context 'when the foreign key exists already' do
+          before do
+            name = model.concurrent_foreign_key_name(:projects, :user_id)
+            expect(model).to receive(:foreign_key_exists?).with(:projects, :users,
+                                                                column: :user_id,
+                                                                on_delete: :cascade,
+                                                                name: name).and_return(true)
 
-          expect(model).not_to receive(:execute).with(/ADD CONSTRAINT/)
-          expect(model).to receive(:execute).with(/VALIDATE CONSTRAINT/)
+            allow(model).to receive(:execute)
+          end
 
-          model.add_concurrent_foreign_key(:projects, :users, column: :user_id)
+          it 'does nothing' do
+            expect(model).not_to receive(:execute).with(/ADD CONSTRAINT/)
+            expect(model).to receive(:execute).with(/VALIDATE CONSTRAINT/)
+
+            model.add_concurrent_foreign_key(:projects, :users, column: :user_id)
+          end
+
+          it 'logs a message' do
+            expect(Gitlab::AppLogger).to receive(:warn).with(
+              /Foreign key not created because it exists already \(this may be due to an aborted migration or similar\): source: projects, target: users, column: user_id, name: \w*, on_delete: cascade/
+            )
+
+            model.add_concurrent_foreign_key(:projects, :users, column: :user_id)
+          end
         end
       end
 
@@ -2336,14 +2389,29 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       end
 
       context 'when the constraint is already defined in the database' do
-        it 'does not create a constraint' do
+        before do
           expect(model).to receive(:check_constraint_exists?)
                        .with(:test_table, 'check_name_not_null')
                        .and_return(true)
+        end
 
+        it 'does not create a constraint' do
           expect(model).not_to receive(:execute).with(/ADD CONSTRAINT/)
 
           # setting validate: false to only focus on the ADD CONSTRAINT command
+          model.add_check_constraint(
+            :test_table,
+            'name IS NOT NULL',
+            'check_name_not_null',
+            validate: false
+          )
+        end
+
+        it 'logs a message' do
+          expect(Gitlab::AppLogger).to receive(:warn).with(
+            /Check constraint was not created because it exists already\n\(this may be due to an aborted migration or similar\)\ntable: test_table, check: name IS NOT NULL, constraint name: check_name_not_null\n/
+          )
+
           model.add_check_constraint(
             :test_table,
             'name IS NOT NULL',
@@ -2771,10 +2839,21 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
 
     context 'when the column is defined as NOT NULL' do
-      it 'does not add a check constraint' do
+      before do
         expect(model).to receive(:column_is_nullable?).and_return(false)
+      end
+
+      it 'does not add a check constraint' do
         expect(model).not_to receive(:check_constraint_name)
         expect(model).not_to receive(:add_check_constraint)
+
+        model.add_not_null_constraint(:test_table, :name)
+      end
+
+      it 'logs a message' do
+        expect(Gitlab::AppLogger).to receive(:warn).with(
+          /NOT NULL check constraint was not created:\ncolumn test_table.name is already defined as `NOT NULL`\n/
+        )
 
         model.add_not_null_constraint(:test_table, :name)
       end
