@@ -25,6 +25,18 @@ class DastSiteProfile < ApplicationRecord
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
+  def ci_variables
+    ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      variables.append(key: 'DAST_EXCLUDE_URLS', value: excluded_urls.presence&.join(','))
+
+      if auth_enabled
+        variables.append(key: 'DAST_AUTH_URL', value: auth_url)
+        variables.append(key: 'DAST_USERNAME_FIELD', value: auth_username_field)
+        variables.append(key: 'DAST_PASSWORD_FIELD', value: auth_password_field)
+      end
+    end
+  end
+
   def status
     return DastSiteValidation::NONE_STATE unless dast_site_validation
 
