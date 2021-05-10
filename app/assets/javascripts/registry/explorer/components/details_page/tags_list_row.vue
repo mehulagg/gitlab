@@ -50,6 +50,11 @@ export default {
       default: false,
       required: false,
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
   },
   i18n: {
     REMOVE_TAG_BUTTON_TITLE,
@@ -95,16 +100,19 @@ export default {
     invalidTag() {
       return !this.tag.digest;
     },
+    disableCheckbox() {
+      return this.invalidTag || this.disabled
+    }
   },
 };
 </script>
 
 <template>
-  <list-item v-bind="$attrs" :selected="selected">
+  <list-item v-bind="$attrs" :selected="selected" :disabled="disabled">
     <template #left-action>
       <gl-form-checkbox
         v-if="tag.canDelete"
-        :disabled="invalidTag"
+        :disabled="disableCheckbox"
         class="gl-m-0"
         :checked="selected"
         @change="$emit('select')"
@@ -126,6 +134,7 @@ export default {
           :title="tag.location"
           :text="tag.location"
           category="tertiary"
+          :disabled="disabled"
         />
 
         <gl-icon
@@ -162,7 +171,7 @@ export default {
     </template>
     <template #right-action>
       <delete-button
-        :disabled="!tag.canDelete || invalidTag"
+        :disabled="!tag.canDelete || invalidTag || disabled"
         :title="$options.i18n.REMOVE_TAG_BUTTON_TITLE"
         :tooltip-title="$options.i18n.REMOVE_TAG_BUTTON_DISABLE_TOOLTIP"
         :tooltip-disabled="tag.canDelete"
@@ -200,6 +209,7 @@ export default {
           :text="tag.digest"
           category="tertiary"
           size="small"
+          :disabled="disabled"
         />
       </details-row>
     </template>
@@ -216,6 +226,7 @@ export default {
           :text="formattedRevision"
           category="tertiary"
           size="small"
+          :disabled="disabled"
         />
       </details-row>
     </template>
