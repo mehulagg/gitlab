@@ -11,5 +11,8 @@ time_frame: 28d
 data_source:
 distribution:
 - ee
-tier: []
+tier: 
+- free
+- premium
+- ultimate
 skip_validation: true
