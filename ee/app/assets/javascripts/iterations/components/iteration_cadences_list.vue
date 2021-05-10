@@ -54,6 +54,7 @@ export default {
     queryVariables() {
       const vars = {
         fullPath: this.groupPath,
+        active: this.active,
       };
 
       if (this.pagination.beforeCursor) {
@@ -72,15 +73,15 @@ export default {
     loading() {
       return this.$apollo.queries.group.loading;
     },
-    state() {
+    active() {
       switch (this.tabIndex) {
         default:
         case 0:
-          return 'opened';
+          return true;
         case 1:
-          return 'closed';
+          return false;
         case 2:
-          return 'all';
+          return undefined;
       }
     },
     prevPage() {
