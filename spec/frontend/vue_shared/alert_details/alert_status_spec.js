@@ -1,5 +1,5 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import updateAlertStatusMutation from '~/graphql_shared//mutations/alert_status_update.mutation.graphql';
 import Tracking from '~/tracking';
@@ -10,9 +10,10 @@ const mockAlert = mockAlerts[0];
 
 describe('AlertManagementStatus', () => {
   let wrapper;
-  const findStatusDropdown = () => wrapper.find(GlDropdown);
-  const findFirstStatusOption = () => findStatusDropdown().find(GlDropdownItem);
+  const findStatusDropdown = () => wrapper.findComponent(GlDropdown);
+  const findFirstStatusOption = () => findStatusDropdown().findComponent(GlDropdownItem);
   const findAllStatusOptions = () => findStatusDropdown().findAll(GlDropdownItem);
+  const findStatusDropdownHeader = () => wrapper.findByTestId('dropdown-header');
 
   const selectFirstStatusOption = () => {
     findFirstStatusOption().vm.$emit('click');
@@ -21,7 +22,7 @@ describe('AlertManagementStatus', () => {
   };
 
   function mountComponent({ props = {}, provide = {}, loading = false, stubs = {} } = {}) {
-    wrapper = shallowMount(AlertManagementStatus, {
+    wrapper = shallowMountExtended(AlertManagementStatus, {
       propsData: {
         alert: { ...mockAlert },
         projectPath: 'gitlab-org/gitlab',
@@ -52,6 +53,13 @@ describe('AlertManagementStatus', () => {
       wrapper.destroy();
       wrapper = null;
     }
+  });
+
+  describe('sidebar', () => {
+    it('displays the dropdown status header', () => {
+      mountComponent({ props: { isSidebar: true } });
+      expect(findStatusDropdownHeader().exists()).toBe(true);
+    });
   });
 
   describe('updating the alert status', () => {
