@@ -5,6 +5,7 @@ import { getBaseURL, relativePathToAbsolute } from '~/lib/utils/url_utility';
 
 const defaultConfig = {
   ADD_TAGS: ['use'],
+  ALLOW_DATA_ATTR: false,
 };
 
 // Only icons urls from `gon` are allowed
