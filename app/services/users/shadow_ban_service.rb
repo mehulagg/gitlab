@@ -7,9 +7,7 @@ module Users
     end
 
     def execute(user)
-      return error('An internal user cannot be shadow_banned', 403) if user.internal?
-
-      if user.block
+      if user.shadow_ban
         success
       else
         messages = user.errors.full_messages

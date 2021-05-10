@@ -326,6 +326,7 @@ class User < ApplicationRecord
       transition deactivated: :blocked
       transition ldap_blocked: :blocked
       transition blocked_pending_approval: :blocked
+      transition shadow_banned: :blocked
     end
 
     event :ldap_block do
@@ -338,10 +339,15 @@ class User < ApplicationRecord
       transition blocked: :active
       transition ldap_blocked: :active
       transition blocked_pending_approval: :active
+      transition shadow_banned: :active
     end
 
     event :block_pending_approval do
       transition active: :blocked_pending_approval
+    end
+
+    event :shadow_ban do
+      transition active: :shadow_banned
     end
 
     event :deactivate do
@@ -350,7 +356,7 @@ class User < ApplicationRecord
       transition active: :deactivated
     end
 
-    state :blocked, :ldap_blocked, :blocked_pending_approval do
+    state :blocked, :ldap_blocked, :blocked_pending_approval, :shadow_banned do
       def blocked?
         true
       end
@@ -375,7 +381,7 @@ class User < ApplicationRecord
   # Scopes
   scope :admins, -> { where(admin: true) }
   scope :instance_access_request_approvers_to_be_notified, -> { admins.active.order_recent_sign_in.limit(INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT) }
-  scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
+  scope :blocked, -> { with_states(:blocked, :ldap_blocked, :shadow_banned) }
   scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
   scope :external, -> { where(external: true) }
   scope :non_external, -> { where(external: false) }
@@ -598,6 +604,8 @@ class User < ApplicationRecord
         blocked
       when 'blocked_pending_approval'
         blocked_pending_approval
+      when 'shadow_banned'
+        shadow_banned
       when 'two_factor_disabled'
         without_two_factor
       when 'two_factor_enabled'

@@ -259,6 +259,9 @@ module UsersHelper
     pending_approval_badge = { text: s_('AdminUsers|Pending approval'), variant: 'info' }
     return pending_approval_badge if user.blocked_pending_approval?
 
+    shadow_banned_badge = { text: s_('AdminUsers|Shadow banned'), variant: 'danger' }
+    return shadow_banned_badge if user.shadow_banned?
+
     { text: s_('AdminUsers|Blocked'), variant: 'danger' }
   end
 
