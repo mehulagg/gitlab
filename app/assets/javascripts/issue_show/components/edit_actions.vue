@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       deleteLoading: false,
-      issueState: null,
+      issueState: {},
     };
   },
   computed: {

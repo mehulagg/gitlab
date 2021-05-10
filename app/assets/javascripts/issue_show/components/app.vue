@@ -202,7 +202,7 @@ export default {
       showForm: false,
       templatesRequested: false,
       isStickyHeaderShowing: false,
-      issueState: null,
+      issueState: {},
     };
   },
   apollo: {
@@ -360,16 +360,24 @@ export default {
     },
 
     updateIssuable() {
+      const {
+        store: { formState },
+        issueState,
+      } = this;
+      const issuablePayload =
+        issueState.issue_type !== undefined
+          ? { ...formState, issue_type: issueState.issue_type }
+          : formState;
       this.clearFlash();
       return this.service
-        .updateIssuable({ ...this.store.formState, issue_type: this.issueState?.issue_type })
+        .updateIssuable(issuablePayload)
         .then((res) => res.data)
         .then((data) => {
           if (!window.location.pathname.includes(data.web_url)) {
             visitUrl(data.web_url);
           }
 
-          if (this.issueState) {
+          if (issueState.issue_type !== undefined) {
             const URI =
               this.issueState.issue_type === 'incident'
                 ? data.web_url.replace('issues', 'issues/incident')

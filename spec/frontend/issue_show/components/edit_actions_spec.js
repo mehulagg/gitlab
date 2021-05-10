@@ -46,7 +46,6 @@ describe('Edit Actions components', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders all buttons as enabled', () => {

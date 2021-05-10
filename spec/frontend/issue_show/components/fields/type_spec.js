@@ -24,7 +24,7 @@ describe('Issue type field component', () => {
       },
       data() {
         return {
-          issueState: null,
+          issueState: {},
           ...data,
         };
       },
@@ -56,6 +56,7 @@ describe('Issue type field component', () => {
   });
 
   it('emits an event when the `issue_type` value is changed', () => {
+    expect($apollo.mutate).toHaveBeenCalledTimes(0);
     findTypeFromDropDownItems().at(1).vm.$emit('click', IssuableTypes.incident);
 
     const expected = {
@@ -66,5 +67,6 @@ describe('Issue type field component', () => {
     };
 
     expect($apollo.mutate).toHaveBeenCalledWith(expected);
+    expect($apollo.mutate).toHaveBeenCalledTimes(1);
   });
 });

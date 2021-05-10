@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      issueState: null,
+      issueState: {},
     };
   },
   apollo: {
