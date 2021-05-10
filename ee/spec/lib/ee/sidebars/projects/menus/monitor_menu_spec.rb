@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
+RSpec.describe Sidebars::Projects::Menus::MonitorMenu do
   let(:project) { build(:project) }
   let(:user) { project.owner }
   let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project, show_cluster_hint: true) }

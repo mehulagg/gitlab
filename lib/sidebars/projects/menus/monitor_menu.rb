@@ -3,7 +3,7 @@
 module Sidebars
   module Projects
     module Menus
-      class OperationsMenu < ::Sidebars::Menu
+      class MonitorMenu < ::Sidebars::Menu
         override :configure_menu_items
         def configure_menu_items
           return false unless context.project.feature_available?(:operations, context.current_user)
@@ -42,7 +42,7 @@ module Sidebars
 
         override :title
         def title
-          _('Operations')
+          Feature.enabled?(:sidebar_refactor, context.current_user) ? _('Monitor') : _('Operations')
         end
 
         override :sprite_icon
@@ -217,4 +217,4 @@ module Sidebars
   end
 end
 
-Sidebars::Projects::Menus::OperationsMenu.prepend_if_ee('EE::Sidebars::Projects::Menus::OperationsMenu')
+Sidebars::Projects::Menus::MonitorMenu.prepend_if_ee('EE::Sidebars::Projects::Menus::MonitorMenu')

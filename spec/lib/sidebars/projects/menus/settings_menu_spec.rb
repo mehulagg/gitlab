@@ -82,8 +82,8 @@ RSpec.describe Sidebars::Projects::Menus::SettingsMenu do
       end
     end
 
-    describe 'Operations' do
-      let(:item_id) { :operations }
+    describe 'Monitor' do
+      let(:item_id) { :monitor }
 
       describe 'when project is archived' do
         before do

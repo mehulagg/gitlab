@@ -108,11 +108,12 @@ module Sidebars
           return if context.project.archived?
           return unless can?(context.current_user, :admin_operations, context.project)
 
+          title = Feature.enabled?(:sidebar_refactor, context.current_user) ? _('Monitor') : _('Operations')
           ::Sidebars::MenuItem.new(
-            title: _('Operations'),
+            title: title,
             link: project_settings_operations_path(context.project),
             active_routes: { path: 'operations#show' },
-            item_id: :operations
+            item_id: :monitor
           )
         end
 

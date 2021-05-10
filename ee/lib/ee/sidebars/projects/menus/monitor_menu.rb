@@ -4,7 +4,7 @@ module EE
   module Sidebars
     module Projects
       module Menus
-        module OperationsMenu
+        module MonitorMenu
           extend ::Gitlab::Utils::Override
 
           override :configure_menu_items
