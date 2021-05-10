@@ -149,6 +149,9 @@ We recommend:
 - **Unique User Identifier (Name identifier)** set to `user.objectID`.
 - **nameid-format** set to persistent.
 
+NOTE: 
+If you are planning on configuring [Group Sync](saml_sso.md/#group-sync), please make sure to customize the name of the group claim and set it to either `groups` or `Groups`. Please see our [troubleshooting section](../../../administration/troubleshooting/group_saml_scim.html#azure-active-directory) for an example.
+
 ### Okta setup notes
 
 Please follow the Okta documentation on [setting up a SAML application in Okta](https://developer.okta.com/docs/guides/build-sso-integration/saml2/overview/) with the notes below for consideration.
