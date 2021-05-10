@@ -15,7 +15,7 @@ RSpec.describe 'Incident details', :js do
     sign_in(developer)
 
     visit project_issues_incident_path(project, incident)
-    wait_for_all_requests
+    wait_for_requests
   end
 
   context 'when a developer+ displays the incident' do
@@ -68,7 +68,7 @@ RSpec.describe 'Incident details', :js do
         find('.gl-new-dropdown-item', text: 'Issue').click
         click_button 'Save changes'
 
-        wait_for_all_requests
+        wait_for_requests
 
         expect(page).to have_current_path("#{project_path}/-/issues/#{incident.iid}")
       end

@@ -91,6 +91,9 @@ export default {
     showLockedWarning() {
       return this.formState.lockedWarningVisible && !this.formState.updateLoading;
     },
+    isIssueType() {
+      return this.issuableType === 'issue';
+    },
   },
   created() {
     eventHub.$on('delete.issuable', this.resetAutosave);
@@ -183,16 +186,12 @@ export default {
     >
     <div class="row">
       <div class="col-9">
-        <issue-title-field
-          ref="title"
-          :form-state="formState"
-          :issuable-templates="issuableTemplates"
-        />
+        <issue-title-field ref="title" :form-state="formState" />
       </div>
     </div>
     <div class="row gl-pt-3 gl-mb-n3">
-      <div class="col-4">
-        <issue-type-field ref="issue-type" :form-state="formState" v-on="$listeners" />
+      <div v-if="isIssueType" class="col-4">
+        <issue-type-field ref="issue-type" :form-state="formState" />
       </div>
       <div v-if="hasIssuableTemplates" class="col-4">
         <description-template

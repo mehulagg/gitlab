@@ -6,7 +6,6 @@ import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
 import DescriptionComponent from '~/issue_show/components/description.vue';
-import IssuableAppForm from '~/issue_show/components/form.vue';
 import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
 import PinnedLinks from '~/issue_show/components/pinned_links.vue';
 import { IssuableStatus, IssuableStatusText } from '~/issue_show/constants';
@@ -570,7 +569,6 @@ describe('Issuable output', () => {
     const findIncidentTabs = () => wrapper.findComponent(IncidentTabs);
     const findDescriptionComponent = () => wrapper.findComponent(DescriptionComponent);
     const findPinnedLinks = () => wrapper.findComponent(PinnedLinks);
-    const findIssuableForm = () => wrapper.findComponent(IssuableAppForm);
     const borderClass = 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-mb-6';
 
     describe('when using description component', () => {

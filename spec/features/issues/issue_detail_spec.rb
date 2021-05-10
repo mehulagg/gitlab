@@ -11,7 +11,7 @@ RSpec.describe 'Issue Detail', :js do
   context 'when user displays the issue' do
     before do
       visit project_issue_path(project, issue)
-      wait_for_all_requests
+      wait_for_requests
     end
 
     it 'shows the issue' do
@@ -24,7 +24,7 @@ RSpec.describe 'Issue Detail', :js do
   context 'when user displays the issue as an incident' do
     before do
       visit project_issue_path(project, incident)
-      wait_for_all_requests
+      wait_for_requests
     end
 
     it 'does not show design management' do
@@ -55,12 +55,12 @@ RSpec.describe 'Issue Detail', :js do
     before do
       sign_in(user)
       visit project_issue_path(project, issue)
-      wait_for_all_requests
+      wait_for_requests
 
       page.find('.js-issuable-edit').click
       fill_in 'issuable-title', with: 'issue title'
       click_button 'Save changes'
-      wait_for_all_requests
+      wait_for_requests
 
       Users::DestroyService.new(user).execute(user)
 
@@ -80,7 +80,7 @@ RSpec.describe 'Issue Detail', :js do
         sign_in(user)
 
         visit project_issue_path(project, issue)
-        wait_for_all_requests
+        wait_for_requests
       end
 
       it 'shows the issue type selector with the correct details set' do
@@ -107,7 +107,7 @@ RSpec.describe 'Issue Detail', :js do
         sign_in(user)
 
         visit project_issue_path(project, incident)
-        wait_for_all_requests
+        wait_for_requests
       end
 
       it 'shows the issue type selector with the correct details set' do
@@ -135,6 +135,6 @@ RSpec.describe 'Issue Detail', :js do
     find('.gl-new-dropdown-item', text: to).click
     click_button 'Save changes'
 
-    wait_for_all_requests
+    wait_for_requests
   end
 end
