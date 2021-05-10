@@ -99,7 +99,12 @@ export function initCadenceApp() {
     return null;
   }
 
-  const { groupFullPath: groupPath, cadencesListPath } = el.dataset;
+  const {
+    groupFullPath: groupPath,
+    cadencesListPath,
+    canCreateCadence,
+    canEditCadence,
+  } = el.dataset;
   const router = createRouter(cadencesListPath);
 
   return new Vue({
@@ -109,6 +114,8 @@ export function initCadenceApp() {
     provide: {
       groupPath,
       cadencesListPath,
+      canCreateCadence: parseBoolean(canCreateCadence),
+      canEditCadence: parseBoolean(canEditCadence),
     },
     render(createElement) {
       return createElement(App);

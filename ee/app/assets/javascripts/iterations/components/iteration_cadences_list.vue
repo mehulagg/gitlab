@@ -33,7 +33,7 @@ export default {
       },
     },
   },
-  inject: ['groupPath', 'cadencesListPath'],
+  inject: ['groupPath', 'cadencesListPath', 'canCreateCadence'],
   data() {
     return {
       group: {
@@ -145,18 +145,17 @@ export default {
         />
       </div>
     </gl-tab>
-    <template #tabs-end>
-      <!-- TODO canAdmin -->
+    <template v-if="canCreateCadence" #tabs-end>
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
-        <router-link
+        <gl-button
+          variant="confirm"
+          data-qa-selector="new_iteration_button"
           :to="{
             name: 'new',
           }"
         >
-          <gl-button variant="confirm" data-qa-selector="new_iteration_button" @click="go">
-            {{ __('New iteration') }}
-          </gl-button></router-link
-        >
+          {{ __('New iteration') }}
+        </gl-button>
       </li>
     </template>
   </gl-tabs>
