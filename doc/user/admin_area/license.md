@@ -157,6 +157,6 @@ additional users. More information on how to determine the required number of us
 and how to add additional seats can be found in the
 [licensing FAQ](https://about.gitlab.com/pricing/licensing-faq/).
 
-### There is a Connectivity Issue
+### There is a connectivity issue
 
 In GitLab 14.0 and later, to activate your subscription, your GitLab instance must be connected to the internet. If you have questions or need assistance activating your instance please [contact GitLab Support](https://about.gitlab.com/support/#contact-support).
