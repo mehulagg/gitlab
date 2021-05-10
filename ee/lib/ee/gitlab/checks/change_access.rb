@@ -8,7 +8,7 @@ module EE
         extend ::Gitlab::Utils::Override
 
         override :ref_level_checks
-        def ref_level_checks(oldrev, newrev, ref)
+        def ref_level_checks(oldrev, newrev, ref, skip_lfs_integrity_check: false)
           super
 
           PushRuleCheck.new(self).validate_change!(oldrev, newrev, ref)

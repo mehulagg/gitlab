@@ -57,8 +57,7 @@ RSpec.describe Gitlab::Checks::ChangeAccess do
     context 'when time limit was reached' do
       it 'raises a TimeoutError' do
         logger = Gitlab::Checks::TimedLogger.new(start_time: timeout.ago, timeout: timeout)
-        access = described_class.new(changes,
-                                     project: project,
+        access = described_class.new(project: project,
                                      user_access: user_access,
                                      protocol: protocol,
                                      logger: logger)

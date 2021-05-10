@@ -12,7 +12,6 @@ module Gitlab
         return unless Feature.enabled?(:lfs_check, default_enabled: true)
 
         return unless project.lfs_enabled?
-        return if skip_lfs_integrity_check
         return if deletion?(oldrev, newrev)
 
         logger.log_timed(LOG_MESSAGE) do

@@ -13,7 +13,6 @@ RSpec.shared_context 'change access checks context' do
   let(:logger) { Gitlab::Checks::TimedLogger.new(timeout: timeout) }
   let(:change_access) do
     Gitlab::Checks::ChangeAccess.new(
-      changes,
       project: project,
       user_access: user_access,
       protocol: protocol,
@@ -21,7 +20,7 @@ RSpec.shared_context 'change access checks context' do
     )
   end
 
-  subject { described_class.new(change_access) }
+  subject { described_class.new }
 
   before do
     project.add_developer(user)

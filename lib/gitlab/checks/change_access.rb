@@ -10,23 +10,18 @@ module Gitlab
       attr_reader(*ATTRIBUTES)
 
       def initialize(
-        change, user_access:, project:,
-        skip_lfs_integrity_check: false, protocol:, logger:
+        user_access:, project:, protocol:, logger:
       )
-        @oldrev, @newrev, @ref = change.values_at(:oldrev, :newrev, :ref)
-        @branch_name = Gitlab::Git.branch_name(@ref)
-        @tag_name = Gitlab::Git.tag_name(@ref)
         @user_access = user_access
         @project = project
-        @skip_lfs_integrity_check = skip_lfs_integrity_check
         @protocol = protocol
-
         @logger = logger
-        @logger.append_message("Running checks for ref: #{@branch_name || @tag_name}")
       end
 
-      def validate_change!(oldrev, newrev, ref)
-        ref_level_checks(oldrev, newrev, ref)
+      def validate_change!(oldrev, newrev, ref, skip_lfs_integrity_check: false)
+        @logger.append_message("Running checks for ref: #{Gitlab::Git.branch_name(@ref) || Gitlab::Git.tag_name(@ref)}")
+
+        ref_level_checks(oldrev, newrev, ref, skip_lfs_integrity_check: skip_lfs_integrity_check)
         # Check of commits should happen as the last step
         # given they're expensive in terms of performance
         commits_check(oldrev, newrev)
@@ -41,11 +36,11 @@ module Gitlab
 
       protected
 
-      def ref_level_checks(oldrev, newrev, ref)
+      def ref_level_checks(oldrev, newrev, ref, skip_lfs_integrity_check: false)
         Gitlab::Checks::PushCheck.new(self).validate_change!(oldrev, newrev, ref)
         Gitlab::Checks::BranchCheck.new(self).validate_change!(oldrev, newrev, ref)
         Gitlab::Checks::TagCheck.new(self).validate_change!(oldrev, newrev, ref)
-        Gitlab::Checks::LfsCheck.new(self).validate_change!(oldrev, newrev, ref)
+        Gitlab::Checks::LfsCheck.new(self).validate_change!(oldrev, newrev, ref) unless skip_lfs_integrity_check
       end
 
       def commits_check(oldrev, newrev)
