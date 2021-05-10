@@ -180,7 +180,6 @@ module UsersHelper
 
     list = tag.ul do
       concat tag.li s_('AdminUsers|User will be blocked')
-      concat tag.li s_('AdminUsers|Comments and issues created by the user will be hidden')
     end
 
     header + list
