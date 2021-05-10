@@ -48,10 +48,11 @@ To add groups to a project:
 1. Optional. Choose an expiration date. On that date, the user can no longer access the project.
 1. Select **Invite**.
 
-When the project was created, if it was created in a personal [namespace](../../group/index.md#namespaces),
-the users in the group do not appear on the **Members** tab. If the
-project was created in a group namespace, the users in the group
-are displayed on the **Members** tab.
+The members of the group are not displayed on the **Members** tab.
+The **Members** tab shows:
+
+- Members who are directly assigned to the project.
+- If the project was created in a group [namespace](../../group/index.md#namespaces), members of that group.
 
 ## Import users from another project
 
