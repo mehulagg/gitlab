@@ -16,12 +16,14 @@ import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
+  apiSortParams,
   CREATED_DESC,
   i18n,
   MAX_LIST_SIZE,
   PAGE_SIZE,
-  RELATIVE_POSITION_ASC,
-  sortParams,
+  RELATIVE_POSITION_DESC,
+  UPDATED_DESC,
+  urlSortParams,
 } from '~/issues_list/constants';
 import {
   convertToApiParams,
@@ -45,11 +47,8 @@ import eventHub from '../eventhub';
 import IssueCardTimeInfo from './issue_card_time_info.vue';
 
 export default {
-  CREATED_DESC,
   i18n,
   IssuableListTabs,
-  PAGE_SIZE,
-  sortParams,
   components: {
     CsvImportExportButtons,
     GlButton,
@@ -134,8 +133,8 @@ export default {
     },
   },
   data() {
-    const orderBy = getParameterByName('order_by');
-    const sort = getParameterByName('sort');
+    const state = getParameterByName('state');
+    const defaultSortKey = state === IssuableStates.Closed ? UPDATED_DESC : CREATED_DESC;
 
     return {
       exportCsvPathWithQuery: this.getExportCsvPathWithQuery(),
@@ -144,8 +143,8 @@ export default {
       issues: [],
       page: toNumber(getParameterByName('page')) || 1,
       showBulkEditSidebar: false,
-      sortKey: getSortKey(orderBy, sort) || CREATED_DESC,
-      state: getParameterByName('state') || IssuableStates.Opened,
+      sortKey: getSortKey(getParameterByName('sort')) || defaultSortKey,
+      state: state || IssuableStates.Opened,
       totalIssues: 0,
     };
   },
@@ -154,7 +153,7 @@ export default {
       return this.showBulkEditSidebar || !this.issues.length;
     },
     isManualOrdering() {
-      return this.sortKey === RELATIVE_POSITION_ASC;
+      return this.sortKey === RELATIVE_POSITION_DESC;
     },
     isOpenTab() {
       return this.state === IssuableStates.Opened;
@@ -273,7 +272,7 @@ export default {
         page: this.page,
         search: this.searchQuery,
         state: this.state,
-        ...sortParams[this.sortKey],
+        ...urlSortParams[this.sortKey],
         ...this.urlFilterParams,
       };
     },
@@ -329,11 +328,11 @@ export default {
         .get(this.endpoint, {
           params: {
             page: this.page,
-            per_page: this.$options.PAGE_SIZE,
+            per_page: PAGE_SIZE,
             search: this.searchQuery,
             state: this.state,
             with_labels_details: true,
-            ...sortParams[this.sortKey],
+            ...apiSortParams[this.sortKey],
             ...this.apiFilterParams,
           },
         })
