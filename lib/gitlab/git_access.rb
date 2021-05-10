@@ -354,6 +354,14 @@ module Gitlab
           logger: logger
         ).validate!
       end
+
+      Checks::ChangesAccess.new(
+        changes_list,
+        user_access: user_access,
+        project: project,
+        protocol: protocol,
+        logger: logger
+      ).validate!
     rescue Checks::TimedLogger::TimeoutError
       raise TimeoutError, logger.full_message
     end
