@@ -132,17 +132,13 @@ If you added a file to staging, you can undo it.
 
 ### Quickly save local changes
 
-If you want to change to another branch, you can save your work.
+If you want to change to another branch, you can use `git stash`.
 
-1. Save your work.
-1. Run a version of `git stash`:
-
-   - Use `git stash save` to include a temporary commit message, which helps you identify changes, among with other options.
-   - Use `git stash list` to list all previously stashed commits.
-
+1. From the branch where you want to save your work, type `git stash`.
 1. Swap to another branch (`git checkout <branchname>`).
 1. Commit, push, and test.
 1. Return to the branch where you want to resume your changes.
+1. Use `git stash list` to list all previously stashed commits.
 1. Run a version of `git stash`:
 
    - Use `git stash pop` to redo previously stashed changes and remove them from stashed list.
@@ -161,28 +157,26 @@ You can revert a commit while retaining the commit history.
 This example uses five commits `A`,`B`,`C`,`D`,`E`, which were committed in order: `A-B-C-D-E`.
 The commit you want to undo is `B`.
 
-1. Find the commit ID of the commit you want to revert to. If you are not sure, run
-   [`git bisect`](https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git) with a range of the
-   last known good commit (`A`) and first known bad commit (`E`). For example, `git bisect A..E`.
-
+1. Find the commit SHA of the commit you want to revert to. To look
+   through a log of commits, type `git log`.
 1. Choose an option and undo your changes:
 
    - To swap additions and deletions changes introduced by commit `B`:
 
      ```shell
-     git revert <commit-B-id>
+     git revert <commit-B-SHA>
      ```
 
    - To undo changes on a single file or directory from commit `B`, but retain them in the staged state:
 
      ```shell
-     git checkout <commit-B-id> <file>
+     git checkout <commit-B-SHA> <file>
      ```
 
    - To undo changes on a single file or directory from commit `B`, but retain them in the unstaged state:
 
      ```shell
-     git reset <commit-B-id> <file>
+     git reset <commit-B-SHA> <file>
      ```
 
 #### Undo multiple committed changes
@@ -195,7 +189,7 @@ To recover from multiple incorrect commits:
 1. Check out the last correct commit. In this example, `B`.
 
    ```shell
-   git checkout <commit-B-id>
+   git checkout <commit-B-SHA>
    ```
 
 1. Create a new branch.
