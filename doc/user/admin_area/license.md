@@ -32,7 +32,6 @@ To begin the activation process with your activation code:
 
 If you receive a license file from GitLab, you can upload it by signing into your GitLab instance as an admin or adding it during installation. The license is a base64-encoded ASCII text file with a `.gitlab-license` extension. 
 
-
 ## Uploading your license
 
 The first time you visit your GitLab EE installation signed in as an administrator,
