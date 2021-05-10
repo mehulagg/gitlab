@@ -15,6 +15,10 @@ RSpec.describe Gitlab::Checks::LfsCheck do
 
   describe '#validate!' do
     context 'with LFS not enabled' do
+      before do
+        allow(project).to receive(:lfs_enabled?).and_return(false)
+      end
+
       it 'skips integrity check' do
         expect_any_instance_of(Gitlab::Git::LfsChanges).not_to receive(:new_pointers)
 
