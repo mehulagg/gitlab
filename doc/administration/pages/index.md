@@ -120,7 +120,7 @@ This example contains the following:
 - `example.com`: The GitLab domain.
 - `example.io`: The domain GitLab Pages is served from.
 - `192.0.2.1`: The primary IP of your GitLab instance.
-- `192.0.2.2`: The secondary IP, which is dedicated to GitLab Pages. That is, it must be different to the Primary IP.
+- `192.0.2.2`: The secondary IP, which is dedicated to GitLab Pages. It must be different than the primary IP.
 
 NOTE:
 You should not use the GitLab domain to serve user pages. For more information see the [security section](#security).
