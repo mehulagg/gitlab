@@ -76,6 +76,7 @@ export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => 
   // We need to add dummy IDs here to avoid rendering issues.
   const vulnerabilities = data.map((vulnerability) => ({
     ...vulnerability,
+    hasBackendId: Boolean(vulnerability.id),
     id: vulnerability.id || _.uniqueId('client_'),
   }));
 

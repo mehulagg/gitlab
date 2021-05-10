@@ -279,7 +279,8 @@ export default {
         />
       </div>
 
-      <div class="detail-page-header-actions align-items-center">
+      <!-- TODO: check this; write and update tests -->
+      <div v-if="vulnerability.hasBackendId" class="detail-page-header-actions align-items-center">
         <label class="mb-0 mx-2">{{ __('Status') }}</label>
         <gl-loading-icon v-if="isLoadingVulnerability" class="d-inline" />
         <vulnerability-state-dropdown
