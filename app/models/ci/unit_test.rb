@@ -3,6 +3,7 @@
 module Ci
   class UnitTest < ApplicationRecord
     extend Gitlab::Ci::Model
+    include EachBatch
 
     MAX_NAME_SIZE = 255
     MAX_SUITE_NAME_SIZE = 255
@@ -14,6 +15,7 @@ module Ci
     belongs_to :project
 
     scope :by_project_and_keys, -> (project, keys) { where(project_id: project.id, key_hash: keys) }
+    scope :deletable, -> { left_outer_joins(:unit_test_failures).where(ci_unit_test_failures: { id: nil }) }
 
     class << self
       def find_or_create_by_batch(project, unit_test_attrs)
