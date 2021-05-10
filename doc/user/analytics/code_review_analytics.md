@@ -28,7 +28,7 @@ To access Code Review Analytics, from your project's menu, go to **Analytics > C
 
 You can filter the list of merge requests by milestone and label.
 
-![Code Review Analytics](img/code_review_analytics_v13_11.png "List of code reviews; oldest review first.")
+![Code Review Analytics](img/code_review_analytics_v13_12.png "List of code reviews; oldest review first.")
 
 The table is sorted by:
 
