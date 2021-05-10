@@ -7,7 +7,7 @@ type: howto
 
 # Activating GitLab EE
 
-To enable features of GitLab Enterprise Edition (EE), you need to activate your instance.  Ensure you are running an enterprise edition.  To verify, sign in to GitLab and browse to `/help`. The GitLab edition and version are listed at the top of the **Help** page.
+To enable features of GitLab Enterprise Edition (EE), you need to activate your instance. Ensure you are running an enterprise edition. To verify, sign in to GitLab and browse to `/help`. The GitLab edition and version are listed at the top of the **Help** page.
 
 If you are running GitLab Community Edition (CE), upgrade your installation to GitLab Enterprise Edition (EE). For more details, see [Upgrading between editions](../../update/index.md#upgrading-between-editions). If you have questions or need assistance upgrading from GitLab CE to EE please [contact GitLab Support](https://about.gitlab.com/support/#contact-support).
 
