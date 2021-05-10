@@ -1,0 +1,5 @@
+---
+title: Backfill primary key migration for self-managed instances
+merge_request: 61321
+author:
+type: other
