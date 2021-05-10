@@ -324,6 +324,11 @@ to the original comment, so a note about when it was last edited appears underne
 This feature exists only for issues, merge requests, and epics. Commits, snippets, and merge request diff threads are
 not supported yet.
 
+## Add a suggested change with or instead of a comment
+
+To make code suggestions that others can accept into the MR with the click of a button, [read about the suggestions control in the comment editor](https://docs.gitlab.com/ee/user/project/merge_requests/reviews/suggestions.html).
+
+
 ## Assign an issue to the commenting user
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/191455) in GitLab 13.1.
