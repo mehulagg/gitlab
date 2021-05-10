@@ -93,6 +93,7 @@ RSpec.describe LicenseHelper do
         allow(License).to receive(:current).and_return(license)
 
         expect(helper.cloud_license_view_data).to eq({ has_active_license: 'true',
+                                                       customers_portal_url: Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL,
                                                        free_trial_path: 'new_trial_url',
                                                        buy_subscription_path: 'subscriptions_plans_url',
                                                        subscription_sync_path: sync_seat_link_admin_license_path,
@@ -105,6 +106,7 @@ RSpec.describe LicenseHelper do
         allow(License).to receive(:current).and_return(nil)
 
         expect(helper.cloud_license_view_data).to eq({ has_active_license: 'false',
+                                                       customers_portal_url: Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL,
                                                        free_trial_path: 'new_trial_url',
                                                        buy_subscription_path: 'subscriptions_plans_url',
                                                        subscription_sync_path: sync_seat_link_admin_license_path,
