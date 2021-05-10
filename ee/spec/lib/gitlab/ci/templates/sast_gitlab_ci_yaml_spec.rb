@@ -69,7 +69,7 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
             'Kubernetes Manifests' | { 'Chart.yaml' => '' }                          | { 'SCAN_KUBERNETES_MANIFESTS' => 'true' }  | %w(kubesec-sast)
             'Multiple languages'   | { 'app.java' => '', 'app.js' => '' }            | {}                                         | %w(eslint-sast spotbugs-sast)
             'PHP'                  | { 'app.php' => '' }                             | {}                                         | %w(phpcs-security-audit-sast)
-            'Python'               | { 'app.py' => '' }                              | {}                                         | %w(bandit-sast)
+            'Python'               | { 'app.py' => '' }                              | {}                                         | %w(bandit-sast semgrep-sast)
             'Ruby'                 | { 'config/routes.rb' => '' }                    | {}                                         | %w(brakeman-sast)
             'Scala'                | { 'app.scala' => '' }                           | {}                                         | %w(spotbugs-sast)
             'Typescript'           | { 'app.ts' => '' }                              | {}                                         | %w(eslint-sast)
