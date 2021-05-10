@@ -6,23 +6,29 @@ import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 describe('Time ago with tooltip component', () => {
   let vm;
 
-  const buildVm = (propsData = {}, scopedSlots = {}) => {
+  const timestamp = '2017-05-08T14:57:39.781Z';
+  const timeAgoTimestamp = getTimeago().format(timestamp);
+
+  const defaultProps = {
+    time: timestamp,
+  };
+
+  const buildVm = (props = {}, scopedSlots = {}) => {
     vm = shallowMount(TimeAgoTooltip, {
-      propsData,
+      propsData: {
+        ...defaultProps,
+        ...props,
+      },
       scopedSlots,
     });
   };
-  const timestamp = '2017-05-08T14:57:39.781Z';
-  const timeAgoTimestamp = getTimeago().format(timestamp);
 
   afterEach(() => {
     vm.destroy();
   });
 
   it('should render timeago with a bootstrap tooltip', () => {
-    buildVm({
-      time: timestamp,
-    });
+    buildVm();
 
     expect(vm.attributes('title')).toEqual(formatDate(timestamp));
     expect(vm.text()).toEqual(timeAgoTimestamp);
@@ -30,7 +36,6 @@ describe('Time ago with tooltip component', () => {
 
   it('should render provided html class', () => {
     buildVm({
-      time: timestamp,
       cssClass: 'foo',
     });
 
@@ -38,14 +43,21 @@ describe('Time ago with tooltip component', () => {
   });
 
   it('should render with the datetime attribute', () => {
-    buildVm({ time: timestamp });
+    buildVm();
 
     expect(vm.attributes('datetime')).toEqual(timestamp);
   });
 
   it('should render provided scope content with the correct timeAgo string', () => {
-    buildVm({ time: timestamp }, { default: `<span>The time is {{ props.timeAgo }}</span>` });
+    buildVm(null, { default: `<span>The time is {{ props.timeAgo }}</span>` });
 
     expect(vm.text()).toEqual(`The time is ${timeAgoTimestamp}`);
+  });
+
+  it('should handle number based timestamps', () => {
+    const time = new Date().getTime();
+    buildVm({ time });
+
+    expect(vm.text()).toEqual(getTimeago().format(time));
   });
 });

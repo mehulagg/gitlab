@@ -51,12 +51,12 @@ export default {
       return this.$options.i18n.unknown;
     },
     lastEventTimestamp() {
-      const time = this.node.lastEventTimestamp * 1000;
-      return new Date(time).toString();
+      // Converting timestamp to ms
+      return this.node.lastEventTimestamp * 1000;
     },
     lastCursorEventTimestamp() {
-      const time = this.node.cursorLastEventTimestamp * 1000;
-      return new Date(time).toString();
+      // Converting timestamp to ms
+      return this.node.cursorLastEventTimestamp * 1000;
     },
   },
 };

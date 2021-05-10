@@ -51,9 +51,7 @@ describe('GeoNodeLastUpdated', () => {
 
       it('renders main text correctly', () => {
         expect(findMainText().exists()).toBe(true);
-        expect(findMainText().find(TimeAgo).props('time')).toBe(
-          new Date(staleStatusTime).toString(),
-        );
+        expect(findMainText().find(TimeAgo).props('time')).toBe(staleStatusTime);
       });
 
       it('renders the question icon correctly', () => {
@@ -67,9 +65,7 @@ describe('GeoNodeLastUpdated', () => {
 
       it('renders the popover text correctly', () => {
         expect(findPopoverText().exists()).toBe(true);
-        expect(findPopoverText().find(TimeAgo).props('time')).toBe(
-          new Date(staleStatusTime).toString(),
-        );
+        expect(findPopoverText().find(TimeAgo).props('time')).toBe(staleStatusTime);
       });
 
       it('renders the popover link always', () => {
