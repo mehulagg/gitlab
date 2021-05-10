@@ -28,7 +28,6 @@ To begin the activation process with your activation code:
 1. Read and accept the terms of service.
 1. Select **Activate**.
 
-![Activate Subscription](img/activate_subscription.png)
 
 # Activate GitLab EE with a License File **(PREMIUM SELF)**
 
