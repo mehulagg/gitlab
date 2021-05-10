@@ -101,8 +101,8 @@ export default {
       return !this.tag.digest;
     },
     disableCheckbox() {
-      return this.invalidTag || this.disabled
-    }
+      return this.invalidTag || this.disabled;
+    },
   },
 };
 </script>
