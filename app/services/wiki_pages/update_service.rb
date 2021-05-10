@@ -4,12 +4,14 @@ module WikiPages
   class UpdateService < WikiPages::BaseService
     def execute(page)
       # this class is not thread safe!
-      @old_slug = page.slug
+      @old_attributes = page.attributes
 
       if page.update(@params)
         execute_hooks(page)
         ServiceResponse.success(payload: { page: page })
       else
+        page.update_attributes(@old_attributes)
+
         ServiceResponse.error(
           message: _('Could not update wiki page'),
           payload: { page: page }
@@ -30,7 +32,7 @@ module WikiPages
     end
 
     def slug_for_page(page)
-      @old_slug.presence || super
+      @old_attributes[:slug].presence || super
     end
   end
 end

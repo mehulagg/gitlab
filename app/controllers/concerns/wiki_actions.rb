@@ -116,6 +116,7 @@ module WikiActions
       render 'shared/wikis/edit'
     end
   rescue WikiPage::PageChangedError, WikiPage::PageRenameError => e
+    @page.update_attributes(wiki_params)
     @error = e.message
     render 'shared/wikis/edit'
   end

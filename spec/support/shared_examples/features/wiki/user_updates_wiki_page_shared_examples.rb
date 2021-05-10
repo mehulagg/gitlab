@@ -145,6 +145,18 @@ RSpec.shared_examples 'User updates wiki page' do
     end
 
     it_behaves_like 'wiki file attachments'
+
+    context 'when multiple people edit the same page' do
+      it 'preserves user changes in the wiki editor', :js do
+        wiki_page.update(content: 'Some Other Updates')
+
+        fill_in('Content', with: 'Updated Wiki Content')
+        click_on('Save changes')
+
+        expect(page).to have_content('Someone edited the page the same time you did.')
+        expect(page).to have_content('Updated Wiki Content')
+      end
+    end
   end
 
   context 'when the page is in a subdir', :js do
