@@ -33,6 +33,8 @@ class User < ApplicationRecord
 
   BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'
 
+  SHADOW_BANNED_STATE = 'shadow_banned'
+
   COUNT_CACHE_VALIDITY_PERIOD = 24.hours
 
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
@@ -383,6 +385,7 @@ class User < ApplicationRecord
   scope :instance_access_request_approvers_to_be_notified, -> { admins.active.order_recent_sign_in.limit(INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT) }
   scope :blocked, -> { with_states(:blocked, :ldap_blocked, :shadow_banned) }
   scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
+  scope :shadow_banned, -> { with_states(:shadow_banned) }
   scope :external, -> { where(external: true) }
   scope :non_external, -> { where(external: false) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }

@@ -1934,6 +1934,12 @@ RSpec.describe User do
       expect(described_class.filter_items('blocked')).to include user
     end
 
+    it 'filters by shadow banned' do
+      expect(described_class).to receive(:shadow_banned).and_return([user])
+
+      expect(described_class.filter_items('shadow_banned')).to include user
+    end
+
     it 'filters by blocked pending approval' do
       expect(described_class).to receive(:blocked_pending_approval).and_return([user])
 
