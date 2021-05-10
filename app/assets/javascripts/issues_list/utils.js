@@ -5,7 +5,6 @@ import {
   CREATED_DESC,
   DUE_DATE_ASC,
   DUE_DATE_DESC,
-  FILTERED_SEARCH_TERM,
   filters,
   LABEL_PRIORITY_ASC,
   LABEL_PRIORITY_DESC,
@@ -26,6 +25,7 @@ import {
   WEIGHT_DESC,
 } from '~/issues_list/constants';
 import { __ } from '~/locale';
+import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
 
 export const getSortKey = (orderBy, sort) =>
   Object.keys(sortParams).find(

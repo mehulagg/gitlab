@@ -3,6 +3,7 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import MembersFilteredSearchBar from '~/members/components/filter_sort/members_filtered_search_bar.vue';
 import { MEMBER_TYPES } from '~/members/constants';
+import { DEFAULT_ONLY_IS } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
 const localVue = createLocalVue();
@@ -65,7 +66,7 @@ describe('MembersFilteredSearchBar', () => {
           title: '2FA',
           token: GlFilteredSearchToken,
           unique: true,
-          operators: [{ value: '=', description: 'is' }],
+          operators: DEFAULT_ONLY_IS,
           options: [
             { value: 'enabled', title: 'Enabled' },
             { value: 'disabled', title: 'Disabled' },
@@ -99,7 +100,7 @@ describe('MembersFilteredSearchBar', () => {
             title: 'Membership',
             token: GlFilteredSearchToken,
             unique: true,
-            operators: [{ value: '=', description: 'is' }],
+            operators: DEFAULT_ONLY_IS,
             options: [
               { value: 'exclude', title: 'Direct' },
               { value: 'only', title: 'Inherited' },
