@@ -12,6 +12,16 @@ module API
 
     feature_category :importers
 
+    helpers do
+      def relation_export
+        @relation_export ||= user_group.bulk_import_exports.find_by_relation(params[:relation])
+      end
+
+      def relation_export_file
+        @relation_export_file ||= relation_export&.upload&.export_file
+      end
+    end
+
     params do
       requires :id, type: String, desc: 'The ID of a group'
     end
@@ -57,6 +67,21 @@ module API
         end
       end
 
+      desc 'Get relations export metadata information' do
+        detail 'This feature was introduced in GitLab 13.12'
+      end
+      params do
+        requires :relation, type: String, desc: 'Group relation name'
+      end
+      head ':id/export_relations/download' do
+        if relation_export_file
+          header 'Content-Length', relation_export_file.size
+          header 'Content-Type', relation_export_file.content_type
+        else
+          render_api_error!('404 Not found', 404)
+        end
+      end
+
       desc 'Download relations export' do
         detail 'This feature was introduced in GitLab 13.12'
       end
@@ -64,11 +89,8 @@ module API
         requires :relation, type: String, desc: 'Group relation name'
       end
       get ':id/export_relations/download' do
-        export = user_group.bulk_import_exports.find_by_relation(params[:relation])
-        file = export&.upload&.export_file
-
-        if file
-          present_carrierwave_file!(file)
+        if relation_export_file
+          present_carrierwave_file!(relation_export_file)
         else
           render_api_error!('404 Not found', 404)
         end

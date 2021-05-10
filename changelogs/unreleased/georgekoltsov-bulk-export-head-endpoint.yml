@@ -1,0 +1,5 @@
+---
+title: Add HEAD endpoint to group relations export API
+merge_request: 61353
+author:
+type: added

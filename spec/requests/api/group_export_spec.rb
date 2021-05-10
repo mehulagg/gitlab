@@ -209,6 +209,31 @@ RSpec.describe API::GroupExport do
       end
     end
 
+    describe 'HEAD /groups/:id/export_relations/download' do
+      let(:export) { create(:bulk_import_export, group: group, relation: 'labels') }
+      let(:upload) { create(:bulk_import_export_upload, export: export) }
+
+      context 'when export file exists' do
+        it 'returns file size & type metadata' do
+          upload.update!(export_file: fixture_file_upload('spec/fixtures/bulk_imports/labels.ndjson.gz'))
+
+          head api(download_path, user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.headers['Content-Type']).to eq('application/gzip')
+          expect(response.headers['Content-Length']).to be > 0
+        end
+      end
+
+      context 'when export_file.file does not exist' do
+        it 'returns 404' do
+          head api(download_path, user)
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
     describe 'GET /groups/:id/export_relations/download' do
       let(:export) { create(:bulk_import_export, group: group, relation: 'labels') }
       let(:upload) { create(:bulk_import_export_upload, export: export) }

@@ -99,3 +99,28 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" --remote-header-name --remote
 ls labels.ndjson.gz
 labels.ndjson.gz
 ```
+
+## Export metadata
+
+View relations export type & size metadata:
+
+```plaintext
+HEAD /groups/:id/export_relations/download
+```
+
+| Attribute       | Type           | Required | Description                              |
+| --------------- | -------------- | -------- | ---------------------------------------- |
+| `id`            | integer/string | yes      | ID of the group owned by the authenticated user. |
+| `relation`      | string         | yes      | Name of the group top-level relation to download. |
+
+```shell
+curl --head --header "PRIVATE-TOKEN: <your_access_token>" --remote-header-name --remote-name "https://gitlab.example.com/api/v4/groups/1/export_relations/download?relation=labels"
+```
+
+```plaintext
+HTTP/1.1 200 OK
+...
+Content-Type: application/gzip
+Content-Length: 202
+...
+```
