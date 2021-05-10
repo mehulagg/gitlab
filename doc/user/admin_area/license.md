@@ -15,7 +15,7 @@ As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an
 uploaded license only has the Free features active. A trial license activates all Ultimate features, but after [the trial expires](#what-happens-when-your-license-expires), some functionality
 is locked.
 
-# Activate GitLab EE with an Activation Code **(PREMIUM SELF)**
+## Activate GitLab EE with an Activation Code **(PREMIUM SELF)**
 
 As of GitLab Enterprise Edition 14.0, you need an activation code to activate your instance. You can obtain an activation code by [purchasing a license](https://about.gitlab.com/pricing/) or by signing up for a [free trial](https://about.gitlab.com/free-trial/). This activation code is a 24-character alphanumeric string you receive in a confirmation email. You can also sign in to the Customers Portal to copy the activation code to your clipboard.
 
@@ -28,8 +28,7 @@ To begin the activation process with your activation code:
 1. Read and accept the terms of service.
 1. Select **Activate**.
 
-
-# Activate GitLab EE with a License File **(PREMIUM SELF)**
+## Activate GitLab EE with a License File **(PREMIUM SELF)**
 
 If you receive a license file from GitLab, you can upload it by signing into your GitLab instance as an admin or adding it during installation. The license is a base64-encoded ASCII text file with a `.gitlab-license` extension. 
 
