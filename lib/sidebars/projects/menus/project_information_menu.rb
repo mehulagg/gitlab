@@ -15,7 +15,7 @@ module Sidebars
 
         override :link
         def link
-          project_path(context.project)
+          items.first.link
         end
 
         override :extra_container_html_options
@@ -46,13 +46,6 @@ module Sidebars
           else
             'home'
           end
-        end
-
-        override :active_routes
-        def active_routes
-          return {} if Feature.disabled?(:sidebar_refactor, context.current_user)
-
-          { path: 'projects#show' }
         end
 
         private

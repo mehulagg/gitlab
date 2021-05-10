@@ -13,6 +13,11 @@ module Sidebars
         def title
           context.project.name
         end
+
+        override :active_routes
+        def active_routes
+          { path: 'projects#show' }
+        end
       end
     end
   end
