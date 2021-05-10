@@ -58,7 +58,8 @@ module LicenseHelper
       free_trial_path: new_trial_url,
       buy_subscription_path: ::EE::SUBSCRIPTIONS_PLANS_URL,
       subscription_sync_path: sync_seat_link_admin_license_path,
-      license_upload_path: new_admin_license_path
+      license_upload_path: new_admin_license_path,
+      license_remove_path: admin_license_path
     }
   end
 

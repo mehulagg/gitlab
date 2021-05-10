@@ -8,6 +8,7 @@ import {
   manageSubscriptionButtonText,
   notificationType,
   removeLicense,
+  removeLicenseConfirm,
   subscriptionDetailsHeaderText,
   subscriptionType,
   syncSubscriptionButtonText,
@@ -28,6 +29,7 @@ export default {
     licensedToHeaderText,
     manageSubscriptionButtonText,
     removeLicense,
+    removeLicenseConfirm,
     subscriptionDetailsHeaderText,
     syncSubscriptionButtonText,
     uploadLicense,
@@ -47,7 +49,7 @@ export default {
     SubscriptionDetailsUserInfo,
     SubscriptionSyncNotifications: () => import('./subscription_sync_notifications.vue'),
   },
-  inject: ['customersPortalUrl', 'licenseUploadPath', 'subscriptionSyncPath'],
+  inject: ['customersPortalUrl', 'licenseRemovePath', 'licenseUploadPath', 'subscriptionSyncPath'],
   props: {
     subscription: {
       type: Object,
@@ -77,7 +79,7 @@ export default {
       return this.licenseUploadPath && this.isLegacyType;
     },
     canRemoveLicense() {
-      return false;
+      return this.licenseRemovePath && this.isLegacyType;
     },
     hasSubscription() {
       return Boolean(Object.keys(this.subscription).length);
@@ -173,6 +175,7 @@ export default {
               category="secondary"
               variant="confirm"
               data-testid="license-upload-action"
+              data-qa-selector="license_upload_link"
             >
               {{ $options.i18n.uploadLicense }}
             </gl-button>
@@ -190,7 +193,11 @@ export default {
               v-if="canRemoveLicense"
               category="secondary"
               variant="danger"
+              :href="licenseRemovePath"
+              :data-confirm="$options.i18n.removeLicenseConfirm"
+              data-method="delete"
               data-testid="license-remove-action"
+              data-qa-selector="remove_license_link"
             >
               {{ $options.i18n.removeLicense }}
             </gl-button>

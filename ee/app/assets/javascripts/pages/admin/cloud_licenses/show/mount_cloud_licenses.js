@@ -28,6 +28,7 @@ export default () => {
     customersPortalUrl,
     freeTrialPath,
     hasActiveLicense,
+    licenseRemovePath,
     licenseUploadPath,
     subscriptionSyncPath,
   } = el.dataset;
@@ -43,6 +44,7 @@ export default () => {
       connectivityHelpURL,
       customersPortalUrl,
       freeTrialPath,
+      licenseRemovePath,
       licenseUploadPath,
       subscriptionSyncPath,
     },
