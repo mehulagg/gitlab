@@ -10,6 +10,11 @@ module EE
         super
 
         gon.roadmap_epics_limit = 1000
+
+        if ::Gitlab.com?
+          gon.subscriptions_url = ::Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL
+          gon.payment_form_url  = ::Gitlab::SubscriptionPortal::PAYMENT_FORM_URL
+        end
       end
 
       # Exposes if a licensed feature is available.
