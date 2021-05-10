@@ -87,6 +87,16 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
 
         expect(group.examples[0].execution_result.status).to eq(:passed)
       end
+
+      context 'when excluding contexts' do
+        it 'can apply to contexts or descriptions' do
+          group = describe_successfully 'skips staging', exclude: { subdomain: :staging } do
+            it('skips staging') {}
+          end
+
+          expect(group.examples[0].execution_result.status).to eq(:pending)
+        end
+      end
     end
 
     context 'with different environment set' do
@@ -102,6 +112,16 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
 
         expect(group.examples[0].execution_result.status).to eq(:pending)
       end
+
+      context 'when excluding contexts' do
+        it 'runs against production' do
+          group = describe_successfully 'Runs in staging', :something, exclude: { subdomain: :staging } do
+            it('runs in staging') {}
+          end
+
+          expect(group.examples[0].execution_result.status).to eq(:passed)
+        end
+      end
     end
   end
 
@@ -110,13 +130,27 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
       it('runs in staging', only: { subdomain: :staging }) {}
       it('doesnt run in staging', only: :production) {}
       it('runs in staging also', only: { subdomain: %i[release staging] }) {}
-      it('runs in any env') {}
+      it('runs in any other env') {}
     end
 
     expect(group.examples[0].execution_result.status).to eq(:passed)
     expect(group.examples[1].execution_result.status).to eq(:pending)
     expect(group.examples[2].execution_result.status).to eq(:passed)
     expect(group.examples[3].execution_result.status).to eq(:passed)
+  end
+
+  context 'when excluding contexts' do
+    it 'skips staging' do
+      group = describe_successfully do
+        it('skips staging', exclude: { subdomain: :staging }) {}
+        it('runs in staging', exclude: :production) {}
+        it('skips staging also', exclude: { subdomain: %i[release staging] }) {}
+      end
+
+      expect(group.examples[0].execution_result.status).to eq(:pending)
+      expect(group.examples[1].execution_result.status).to eq(:passed)
+      expect(group.examples[2].execution_result.status).to eq(:pending)
+    end
   end
 
   context 'custom env' do
@@ -132,6 +166,18 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
 
       expect(group.examples.first.execution_result.status).to eq(:passed)
       expect(group.examples.last.execution_result.status).to eq(:pending)
+    end
+
+    context 'when excluding contexts' do
+      it 'skips a custom environment' do
+        group = describe_successfully do
+          it('skips release gitlab net', exclude: { tld: '.net', subdomain: :release, domain: 'gitlab' }) {}
+          it('runs on release', exclude: :production) {}
+        end
+
+        expect(group.examples.first.execution_result.status).to eq(:pending)
+        expect(group.examples.last.execution_result.status).to eq(:passed)
+      end
     end
   end
 
@@ -150,6 +196,20 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
       expect(group.examples[0].execution_result.status).to eq(:passed)
       expect(group.examples[1].execution_result.status).to eq(:pending)
       expect(group.examples[2].execution_result.status).to eq(:passed)
+    end
+
+    context 'when excluding contexts' do
+      it 'skips production' do
+        group = describe_successfully do
+          it('skips prod', exclude: :production) {}
+          it('runs on prod', exclude: { subdomain: :staging }) {}
+          it('skips prod and staging', exclude: { subdomain: /(staging.)?/, domain: 'gitlab' }) {}
+        end
+
+        expect(group.examples[0].execution_result.status).to eq(:pending)
+        expect(group.examples[1].execution_result.status).to eq(:passed)
+        expect(group.examples[2].execution_result.status).to eq(:pending)
+      end
     end
   end
 
@@ -179,6 +239,21 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
           expect(group.examples[1].execution_result.status).to eq(:passed)
         end
       end
+
+      context 'when excluding contexts' do
+        it 'runs in any pipeline' do
+          group = describe_successfully do
+            it('runs given a single named pipeline', exclude: { pipeline: :nightly }) {}
+            it('runs given an array of pipelines', exclude: { pipeline: [:canary, :not_nightly] }) {}
+          end
+
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:passed)
+            end
+          end
+        end
+      end
     end
 
     context 'when a pipeline triggered from the default branch runs in gitlab-qa' do
@@ -198,6 +273,22 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
           expect(group.examples[0].execution_result.status).to eq(:passed)
           expect(group.examples[1].execution_result.status).to eq(:passed)
           expect(group.examples[2].execution_result.status).to eq(:pending)
+        end
+      end
+
+      context 'when excluding contexts' do
+        it 'skips default branch pipelines' do
+          group = describe_successfully do
+            it('skips master pipeline given a single pipeline', exclude: { pipeline: :master }) {}
+            it('skips master given an array of pipelines', exclude: { pipeline: [:canary, :master] }) {}
+            it('runs non-default pipelines', exclude: { pipeline: [:nightly, :not_nightly, :not_master] }) {}
+          end
+
+          aggregate_failures do
+            expect(group.examples[0].execution_result.status).to eq(:pending)
+            expect(group.examples[1].execution_result.status).to eq(:pending)
+            expect(group.examples[2].execution_result.status).to eq(:passed)
+          end
         end
       end
     end
@@ -223,17 +314,35 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
           expect(group.examples[3].execution_result.status).to eq(:pending)
         end
       end
+
+      context 'when excluding contexts' do
+        it 'skips designated pipeline' do
+          group = describe_successfully do
+            it('skips nightly', exclude: { pipeline: :nightly }) {}
+            it('runs in not_nightly', exclude: { pipeline: :not_nightly }) {}
+            it('skips on nightly given an array', exclude: { pipeline: [:canary, :nightly] }) {}
+            it('runs in not_nightly given an array', exclude: { pipeline: [:not_nightly, :canary] }) {}
+          end
+
+          aggregate_failures do
+            expect(group.examples[0].execution_result.status).to eq(:pending)
+            expect(group.examples[1].execution_result.status).to eq(:passed)
+            expect(group.examples[2].execution_result.status).to eq(:pending)
+            expect(group.examples[3].execution_result.status).to eq(:passed)
+          end
+        end
+      end
     end
   end
 
-  context 'when excluding contexts' do
-    context 'with job constraints' do
-      context 'without CI_JOB_NAME set' do
-        before do
-          stub_env('CI_JOB_NAME', nil)
-          described_class.configure_rspec
-        end
+  context 'with job constraints' do
+    context 'without CI_JOB_NAME set' do
+      before do
+        stub_env('CI_JOB_NAME', nil)
+        described_class.configure_rspec
+      end
 
+      context 'when excluding contexts' do
         it 'runs in any job' do
           group = describe_successfully do
             it('runs given a single named job', exclude: { job: 'ee:instance-image' }) {}
@@ -251,12 +360,32 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
         end
       end
 
-      context 'with CI_JOB_NAME set' do
-        before do
-          stub_env('CI_JOB_NAME', 'ee:instance-image')
-          described_class.configure_rspec
-        end
+      context 'when including only specific contexts' do
+        it 'runs in any job' do
+          group = describe_successfully do
+            it('runs given a single named job', only: { job: 'ee:instance-image' }) {}
+            it('runs given a single regex pattern', only: { job: '.*:instance-image' }) {}
+            it('runs given an array of jobs', only: { job: %w[ee:instance-image qa-schedules-browser_ui-3_create] }) {}
+            it('runs given an array of regex patterns', only: { job: %w[ee:.* qa-schedules-browser_ui.*] }) {}
+            it('runs given a mix of strings and regex patterns', only: { job: %w[ee:instance-image qa-schedules-browser_ui.*] }) {}
+          end
 
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:passed)
+            end
+          end
+        end
+      end
+    end
+
+    context 'with CI_JOB_NAME set' do
+      before do
+        stub_env('CI_JOB_NAME', 'ee:instance-image')
+        described_class.configure_rspec
+      end
+
+      context 'when excluding contexts' do
         it 'does not run in the specified job' do
           group = describe_successfully do
             it('skips given a single named job', exclude: { job: 'ee:instance-image' }) {}
@@ -285,6 +414,40 @@ RSpec.describe QA::Specs::Helpers::ContextSelector do
           aggregate_failures do
             group.examples.each do |example|
               expect(example.execution_result.status).to eq(:passed)
+            end
+          end
+        end
+      end
+
+      context 'when including only specific contexts' do
+        it 'runs only in the specified jobs' do
+          group = describe_successfully do
+            it('runs given a single named job', only: { job: 'ee:instance-image' }) {}
+            it('runs given a single regex pattern', only: { job: '.*:instance-image' }) {}
+            it('runs given an array of jobs', only: { job: %w[ee:instance-image qa-schedules-browser_ui-3_create] }) {}
+            it('runs given an array of regex patterns', only: { job: %w[ee:.* qa-schedules-browser_ui.*] }) {}
+            it('runs given a mix of strings and regex patterns', only: { job: %w[ee:instance-image qa-schedules-browser_ui.*] }) {}
+          end
+
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:passed)
+            end
+          end
+        end
+
+        it 'does not run in jobs that do not match' do
+          group = describe_successfully do
+            it('skips given a single named job', only: { job: 'ce:instance-image' }) {}
+            it('skips given a single regex pattern', only: { job: '.*:instance-image-quarantine' }) {}
+            it('skips given an array of jobs', only: { job: %w[ce:instance-image qa-schedules-browser_ui-3_create] }) {}
+            it('skips given an array of regex patterns', only: { job: %w[ce:.* qa-schedules-browser_ui.*] }) {}
+            it('skips given a mix of strings and regex patterns', only: { job: %w[ce:instance-image qa-schedules-browser_ui.*] }) {}
+          end
+
+          aggregate_failures do
+            group.examples.each do |example|
+              expect(example.execution_result.status).to eq(:pending)
             end
           end
         end
