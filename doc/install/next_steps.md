@@ -9,11 +9,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Here are a few resources you might want to check out after completing the
 installation.
 
-## License
+## Email and notifications
 
-- [Upload a license](../user/admin_area/license.md) or [start a free trial](https://about.gitlab.com/free-trial/):
-  Activate all GitLab Enterprise Edition functionality with a license.
-- [Pricing](https://about.gitlab.com/pricing/): Pricing for the different tiers.
+- [SMTP](https://docs.gitlab.com/omnibus/settings/smtp.html): Configure SMTP
+  for proper email notifications support.
 
 ## Security
 
@@ -25,10 +24,15 @@ installation.
 - [LDAP](../administration/auth/ldap/index.md): Configure LDAP to be used as
   an authentication mechanism for GitLab.
 
-## Email and notifications
+## CI/CD
 
-- [SMTP](https://docs.gitlab.com/omnibus/settings/smtp.html): Configure SMTP
-  for proper email notifications support.
+- [Set up runners](https://docs.gitlab.com/runner/): Set up one or more GitLab
+  Runners, the agents that are responsible for all of the GitLab CI/CD features.
+- [GitLab Pages](../administration/pages/index.md): Configure GitLab Pages to
+  allow hosting of static sites.
+- [GitLab Registry](../administration/packages/container_registry.md): With the
+  GitLab Container Registry, every project can have its own space to store Docker
+  images.
 
 ## Backup and upgrade
 
@@ -39,16 +43,6 @@ installation.
 - [Release and maintenance policy](../policy/maintenance.md): Learn about GitLab
   policies governing version naming, as well as release pace for major, minor, patch,
   and security releases.
-
-## CI/CD
-
-- [Set up runners](https://docs.gitlab.com/runner/): Set up one or more GitLab
-  Runners, the agents that are responsible for all of the GitLab CI/CD features.
-- [GitLab Pages](../administration/pages/index.md): Configure GitLab Pages to
-  allow hosting of static sites.
-- [GitLab Registry](../administration/packages/container_registry.md): With the
-  GitLab Container Registry, every project can have its own space to store Docker
-  images.
 
 ## Scaling and replication
 
@@ -61,3 +55,9 @@ installation.
 
 - [Advanced Search](../integration/elasticsearch.md): Leverage Elasticsearch for
   faster, more advanced code search across your entire GitLab instance.
+
+## License
+
+- [Upload a license](../user/admin_area/license.md) or [start a free trial](https://about.gitlab.com/free-trial/):
+  Activate all GitLab Enterprise Edition functionality with a license.
+- [Pricing](https://about.gitlab.com/pricing/): Pricing for the different tiers.
