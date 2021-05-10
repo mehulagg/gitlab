@@ -19,6 +19,7 @@ export default {
     ...mapState([
       'parentItem',
       'children',
+      'weightSum',
       'descendantCounts',
       'healthStatus',
       'allowSubEpics',
@@ -34,21 +35,8 @@ export default {
     showHealthStatus() {
       return this.healthStatus && this.allowIssuableHealthStatus;
     },
-    recursiveTotalWeight() {
-      const queue = [...this.directChildren];
-      let accumulatedWeight = 0;
-
-      while(queue.length > 0) {
-        const item = queue.pop();
-
-        if (item.type === ChildType.Issue) {
-          accumulatedWeight += item.weight || 0;
-        } else if (item.type === ChildType.Epic && this.children[item.reference]) {
-          queue.push(...this.children[item.reference]);
-        }
-      }
-
-      return accumulatedWeight;
+    totalWeight() {
+      return this.weightSum.openedIssues + this.weightSum.closedIssues;
     }
   },
   methods: {
@@ -126,7 +114,7 @@ export default {
         </span>
         <span class="d-inline-flex align-items-center" :class="{ 'ml-3': allowSubEpics }">
           <gl-icon name="weight" class="mr-1" />
-          {{ recursiveTotalWeight }}
+          {{ totalWeight }}
         </span>
       </div>
       <epic-health-status v-if="showHealthStatus" :health-status="healthStatus" />
