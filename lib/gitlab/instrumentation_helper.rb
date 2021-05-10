@@ -15,7 +15,8 @@ module Gitlab
       end
 
       Gitlab::RequestContext.instance.start_thread_cpu_time = Gitlab::Metrics::System.thread_cpu_time
-      Gitlab::RequestContext.instance.thread_memory_allocations = Gitlab::Memory::Instrumentation.start_thread_memory_allocations
+      Gitlab::RequestContext.instance.start_thread_memory_allocations = Gitlab::Memory::Instrumentation.start_thread_memory_allocations
+      Gitlab::RequestContext.instance.final_thread_memory_allocations = nil
     end
 
     def add_instrumentation_data(payload)
@@ -100,7 +101,10 @@ module Gitlab
 
     def instrument_thread_memory_allocations(payload)
       counters = ::Gitlab::Memory::Instrumentation.measure_thread_memory_allocations(
-        ::Gitlab::RequestContext.instance.thread_memory_allocations)
+        ::Gitlab::RequestContext.instance.start_thread_memory_allocations
+      )
+      ::Gitlab::RequestContext.instance.final_thread_memory_allocations = counters
+
       payload.merge!(counters) if counters
     end
 
