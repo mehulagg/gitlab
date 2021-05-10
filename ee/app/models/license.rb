@@ -75,6 +75,7 @@ class License < ApplicationRecord
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
     disable_name_update_for_users
+    merge_before_pipeline_completes_setting
     email_additional_text
     epics
     extended_audit_events

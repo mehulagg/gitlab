@@ -77,8 +77,6 @@ RSpec.describe ProjectCiCdSetting do
   end
 
   describe '#auto_rollback_enabled?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) { create(:project) }
 
     where(:license_feature, :actual_setting) do
@@ -101,6 +99,32 @@ RSpec.describe ProjectCiCdSetting do
       it 'is only enabled if set and both the license and the feature flag allows' do
         expect(project.auto_rollback_enabled?).to be(actual_setting && license_feature)
       end
+    end
+  end
+
+  describe '#merge_before_pipeline_completes_available?' do
+    let_it_be(:project) { create(:project) }
+
+    let(:project_settings) { described_class.new(merge_before_pipeline_completes_enabled: setting_enabled, project: project ) }
+
+    subject(:resulting_availability) { project_settings.merge_before_pipeline_completes_available? }
+
+    before do
+      stub_feature_flags(merge_before_pipeline_completes_setting: feature_enabled)
+      stub_licensed_features(merge_before_pipeline_completes_setting: feature_available)
+    end
+
+    where(:setting_enabled, :feature_enabled, :feature_available, :expected_availability) do
+      true  | false | false | true
+      true  | false | true  | true
+      true  | true  | true  | true
+      false | false | false | true
+      false | false | true  | true
+      false | true  | true  | false
+    end
+
+    with_them do
+      it { expect(resulting_availability).to eq(expected_availability) }
     end
   end
 

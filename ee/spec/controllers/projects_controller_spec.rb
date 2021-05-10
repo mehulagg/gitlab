@@ -360,6 +360,48 @@ RSpec.describe ProjectsController do
       end
     end
 
+    context 'when merge_before_pipeline_completes_enabled param is specified' do
+      let(:params) { { merge_before_pipeline_completes_enabled: false } }
+
+      let(:request) do
+        put :update, params: { namespace_id: project.namespace, id: project, project: params }
+      end
+
+      before do
+        stub_licensed_features(merge_before_pipeline_completes_setting: true)
+      end
+
+      it 'updates the attribute' do
+        request
+
+        expect(project.merge_before_pipeline_completes_enabled).to be_falsy
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(merge_before_pipeline_completes_setting: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.merge_before_pipeline_completes_enabled).to be_truthy
+        end
+      end
+
+      context 'when license is not sufficient' do
+        before do
+          stub_licensed_features(merge_before_pipeline_completes_setting: false)
+        end
+
+        it 'does not update the attribute' do
+          request
+
+          expect(project.merge_before_pipeline_completes_enabled).to be_truthy
+        end
+      end
+    end
+
     context 'when auto_rollback_enabled param is specified' do
       let(:params) { { auto_rollback_enabled: true } }
 

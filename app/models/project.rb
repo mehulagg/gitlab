@@ -420,6 +420,7 @@ class Project < ApplicationRecord
   delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
   delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
     to: :ci_cd_settings
+  delegate :merge_before_pipeline_completes_enabled, :merge_before_pipeline_completes_enabled=, :merge_before_pipeline_completes_enabled?, :merge_before_pipeline_completes_available?, :merge_before_pipeline_completes_setting_available?, to: :ci_cd_settings
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,

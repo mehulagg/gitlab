@@ -90,7 +90,11 @@ module API
         if merge_when_pipeline_succeeds
           merge_request.actual_head_pipeline_success?
         else
-          merge_request.mergeable_state?
+          if merge_request.source_project.merge_before_pipeline_completes_available?
+            merge_request.mergeable_state?
+          else
+            false
+          end
         end
       end
 

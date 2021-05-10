@@ -73,4 +73,12 @@ RSpec.describe ProjectCiCdSetting do
       end
     end
   end
+
+  describe '#merge_before_pipeline_completes_available?' do
+    let(:project) { create(:project) }
+
+    subject { project.merge_before_pipeline_completes_available? }
+
+    specify { expect(subject).to eq(true) }
+  end
 end

@@ -3,6 +3,7 @@
 module EE
   module ProjectCiCdSetting
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
 
     def merge_pipelines_enabled?
       project.feature_available?(:merge_pipelines) && super
@@ -26,6 +27,13 @@ module EE
 
     def auto_rollback_enabled?
       super && project.feature_available?(:auto_rollback)
+    end
+
+    override :merge_before_pipeline_completes_available?
+    def merge_before_pipeline_completes_available?
+      return true unless merge_before_pipeline_completes_setting_available?
+
+      merge_before_pipeline_completes_enabled?
     end
 
     private

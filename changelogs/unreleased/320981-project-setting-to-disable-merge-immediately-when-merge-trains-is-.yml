@@ -1,0 +1,5 @@
+---
+title: Add project setting to enable/disable merging before a pipeline completes
+merge_request: 54343
+author:
+type: added

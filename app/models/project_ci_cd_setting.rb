@@ -26,6 +26,14 @@ class ProjectCiCdSetting < ApplicationRecord
     Gitlab::CurrentSettings.current_application_settings.keep_latest_artifact? && keep_latest_artifact?
   end
 
+  def merge_before_pipeline_completes_available?
+    true
+  end
+
+  def merge_before_pipeline_completes_setting_available?
+    ::Feature.enabled?(:merge_before_pipeline_completes_setting, project) && project.licensed_feature_available?(:merge_before_pipeline_completes_setting)
+  end
+
   private
 
   def set_default_git_depth

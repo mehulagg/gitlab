@@ -109,6 +109,7 @@ module EE
 
       attrs << %i[merge_pipelines_enabled] if allow_merge_pipelines_params?
       attrs << %i[merge_trains_enabled] if allow_merge_trains_params?
+      attrs << %i[merge_before_pipeline_completes_enabled] if project&.merge_before_pipeline_completes_setting_available?
 
       attrs += merge_request_rules_params
 
