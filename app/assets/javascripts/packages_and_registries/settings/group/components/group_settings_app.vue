@@ -131,7 +131,7 @@ export default {
         </span>
       </template>
       <template #default>
-        <maven-settings>
+        <maven-settings data-testid="maven-settings">
           <template #default="{ modelNames }">
             <duplicates-settings
               :duplicates-allowed="packageSettings.mavenDuplicatesAllowed"
@@ -139,11 +139,13 @@ export default {
               :duplicate-exception-regex-error="errors.mavenDuplicateExceptionRegex"
               :model-names="modelNames"
               :loading="isLoading"
+              toggle-qa-selector="allow_duplicates_toggle"
+              label-qa-selector="allow_duplicates_label"
               @update="updateSettings"
             />
           </template>
         </maven-settings>
-        <generic-settings>
+        <generic-settings data-testid="generic-settings">
           <template #default="{ modelNames }">
             <duplicates-settings
               :duplicates-allowed="packageSettings.genericDuplicatesAllowed"

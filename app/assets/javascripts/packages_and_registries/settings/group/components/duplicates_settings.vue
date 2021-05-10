@@ -51,6 +51,16 @@ export default {
         return isEqual(Object.keys(value), ['allowed', 'exception']);
       },
     },
+    toggleQaSelector: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    labelQaSelector: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     enabledButtonLabel() {
@@ -72,14 +82,14 @@ export default {
   <form>
     <div class="gl-display-flex">
       <gl-toggle
-        data-qa-selector="allow_duplicates_toggle"
+        :data-qa-selector="toggleQaSelector"
         :label="$options.i18n.DUPLICATES_TOGGLE_LABEL"
         label-position="hidden"
         :value="duplicatesAllowed"
         @change="update(modelNames.allowed, $event)"
       />
       <div class="gl-ml-5">
-        <div data-testid="toggle-label" data-qa-selector="allow_duplicates_label">
+        <div data-testid="toggle-label" :data-qa-selector="labelQaSelector">
           <gl-sprintf :message="enabledButtonLabel">
             <template #bold="{ content }">
               <strong>{{ content }}</strong>
