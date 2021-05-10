@@ -5730,6 +5730,29 @@ The edge type for [`PackageTag`](#packagetag).
 | <a id="packagetagedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="packagetagedgenode"></a>`node` | [`PackageTag`](#packagetag) | The item at the end of the edge. |
 
+#### `PathLockConnection`
+
+The connection type for [`PathLock`](#pathlock).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockconnectionedges"></a>`edges` | [`[PathLockEdge]`](#pathlockedge) | A list of edges. |
+| <a id="pathlockconnectionnodes"></a>`nodes` | [`[PathLock]`](#pathlock) | A list of nodes. |
+| <a id="pathlockconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `PathLockEdge`
+
+The edge type for [`PathLock`](#pathlock).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="pathlockedgenode"></a>`node` | [`PathLock`](#pathlock) | The item at the end of the edge. |
+
 #### `PipelineArtifactRegistryConnection`
 
 The connection type for [`PipelineArtifactRegistry`](#pipelineartifactregistry).
@@ -10521,6 +10544,18 @@ Information about pagination in a connection.
 | <a id="pageinfohaspreviouspage"></a>`hasPreviousPage` | [`Boolean!`](#boolean) | When paginating backwards, are there more items?. |
 | <a id="pageinfostartcursor"></a>`startCursor` | [`String`](#string) | When paginating backwards, the cursor to continue. |
 
+### `PathLock`
+
+Represents a file or directory in the project repository that has been locked.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockid"></a>`id` | [`ID!`](#id) | ID of the path lock. |
+| <a id="pathlockpath"></a>`path` | [`String`](#string) | The locked path. |
+| <a id="pathlockuser"></a>`user` | [`UserCore`](#usercore) | The user that has locked this path. |
+
 ### `Pipeline`
 
 #### Fields
@@ -11275,6 +11310,23 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectpackagessort"></a>`sort` | [`PackageSort`](#packagesort) | Sort packages by this criteria. |
+
+##### `Project.pathLocks`
+
+The project's path locks.
+
+Returns [`PathLockConnection`](#pathlockconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectpathlocksexact"></a>`exact` | [`Boolean`](#boolean) | Whether to return only exact matches for this path. |
+| <a id="projectpathlockspaths"></a>`paths` | [`[String!]`](#string) | List of paths to check for locks. |
 
 ##### `Project.pipeline`
 
