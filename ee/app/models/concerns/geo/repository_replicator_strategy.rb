@@ -17,6 +17,14 @@ module Geo
       def sync_timeout
         ::Geo::FrameworkRepositorySyncService::LEASE_TIMEOUT
       end
+
+      def data_type
+        'repository'
+      end
+
+      def data_type_title
+        _('Git')
+      end
     end
 
     # Called by Gitlab::Geo::Replicator#consume

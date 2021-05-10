@@ -16,6 +16,14 @@ module Geo
       def sync_timeout
         ::Geo::BlobDownloadService::LEASE_TIMEOUT
       end
+
+      def data_type
+        'blob'
+      end
+
+      def data_type_title
+        _('File')
+      end
     end
 
     def handle_after_create_commit

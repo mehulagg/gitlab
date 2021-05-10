@@ -223,8 +223,8 @@ module EE
       enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
           {
-            data_type: 'blob',
-            data_type_title: _('File'),
+            data_type: replicator_class.data_type,
+            data_type_title: replicator_class.data_type_title,
             title: replicator_class.replicable_title,
             title_plural: replicator_class.replicable_title_plural,
             name: replicator_class.replicable_name,
