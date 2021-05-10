@@ -10,7 +10,7 @@ module WikiPages
         execute_hooks(page)
         ServiceResponse.success(payload: { page: page })
       else
-        page.update_attributes(@old_attributes)
+        page.update_attributes(@old_attributes) # rubocop:disable Rails/ActiveRecordAliases
 
         ServiceResponse.error(
           message: _('Could not update wiki page'),
