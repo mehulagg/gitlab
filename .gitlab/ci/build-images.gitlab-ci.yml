@@ -10,6 +10,12 @@ build-qa-image:
   stage: build-images
   needs: []
   script:
+    # Use $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA so that GitLab image built in omnibus-gitlab-mirror and QA image are in sync.
+    # This falls back to $CI_COMMIT_SHA (the default checked out out commit) for the non-MR pipelines.
+    # See https://docs.gitlab.com/ee/development/testing_guide/end_to_end/index.html#with-pipeline-for-merged-results.
+    - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
+        git checkout -f ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA};
+      fi
     - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
     - /kaniko/executor --context=${CI_PROJECT_DIR} --dockerfile=${CI_PROJECT_DIR}/qa/Dockerfile --destination=${QA_IMAGE} --cache=true
   retry: 2
