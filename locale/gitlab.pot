@@ -2432,6 +2432,9 @@ msgstr ""
 msgid "AdminUsers|(Pending approval)"
 msgstr ""
 
+msgid "AdminUsers|(Shadow banned)"
+msgstr ""
+
 msgid "AdminUsers|2FA Disabled"
 msgstr ""
 
@@ -2514,9 +2517,6 @@ msgid "AdminUsers|Cannot unblock LDAP blocked users"
 msgstr ""
 
 msgid "AdminUsers|Cohorts"
-msgstr ""
-
-msgid "AdminUsers|Comments and issues created by the user will be hidden"
 msgstr ""
 
 msgid "AdminUsers|Deactivate"
@@ -2637,6 +2637,9 @@ msgid "AdminUsers|Shadow ban user"
 msgstr ""
 
 msgid "AdminUsers|Shadow ban user %{username}?"
+msgstr ""
+
+msgid "AdminUsers|Shadow banned"
 msgstr ""
 
 msgid "AdminUsers|Shadow banning the user has the following effects:"
