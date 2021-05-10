@@ -584,6 +584,7 @@ repository's root as `.gitlab-api-fuzzing.yml`.
 |------------------------------------------------------|--------------------|
 | `FUZZAPI_VERSION`                                    | Specify API Fuzzing container version. Defaults to `latest`. |
 | `FUZZAPI_TARGET_URL`                                 | Base URL of API testing target. |
+|[`FUZZAPI_CONFIG`](#configuration-files)              | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/276395) in GitLab 13.12, replaced with default `.gitlab/gitlab-api-fuzzing-config.yml`. API Fuzzing configuration file. |
 |[`FUZZAPI_PROFILE`](#configuration-files)             | Configuration profile to use during testing. Defaults to `Quick`. |
 |[`FUZZAPI_OPENAPI`](#openapi-specification)           | OpenAPI specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har)                    | HTTP Archive (HAR) file. |
