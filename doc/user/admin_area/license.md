@@ -159,4 +159,4 @@ and how to add additional seats can be found in the
 
 ### There is a Connectivity Issue
 
-Beginning with GitLab 14.0 and higher, you will need to be connected to the internet to activate your subscription.  If you have questions or need assistance activating your instance please [contact GitLab Support](https://about.gitlab.com/support/#contact-support).
+In GitLab 14.0 and later, to activate your subscription, your GitLab instance must be connected to the internet. If you have questions or need assistance activating your instance please [contact GitLab Support](https://about.gitlab.com/support/#contact-support).
