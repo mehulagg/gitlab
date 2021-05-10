@@ -67,4 +67,3 @@ The file size is measured in kilobytes, and is set to a default of `512 KB`. Any
        ## https://docs.gitlab.com/ee/user/project/highlighting.html
        maximum_text_highlight_size_kilobytes: 512
    ```
-
