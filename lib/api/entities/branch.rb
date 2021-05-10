@@ -5,6 +5,13 @@ module API
     class Branch < Grape::Entity
       include Gitlab::Routing
 
+      def self.cache_context(branch, **options)
+        {
+          merged: options[:merged_branch_names].include?(branch.name),
+          protected: ::ProtectedBranch.protected?(options[:project], branch.name)
+        }
+      end
+
       expose :name
 
       expose :commit, using: Entities::Commit do |repo_branch, options|

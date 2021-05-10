@@ -71,10 +71,14 @@ module API
       # @param context [Proc] a proc that will be called with the object as an argument, and which should return a
       #                       string or array of strings to be combined into the cache key
       # @return [String]
-      def contextual_cache_key(object, context)
+      def contextual_cache_key(object, presenter:, presenter_args:, context:)
         return object.cache_key if context.nil?
 
-        [object.cache_key, context.call(object)].flatten.join(":")
+        [
+          object.cache_key,
+          context.call(object),
+          (presenter.cache_context(object, **presenter_args) if presenter.respond_to?(:cache_context))
+        ].flatten.join(":")
       end
 
       # Used for fetching or rendering a single object
@@ -86,7 +90,7 @@ module API
       # @param expires_in [ActiveSupport::Duration, Integer] an expiry time for the cache entry
       # @return [String]
       def cached_object(object, presenter:, presenter_args:, context:, expires_in:)
-        cache.fetch(contextual_cache_key(object, context), expires_in: expires_in) do
+        cache.fetch(contextual_cache_key(object, presenter: presenter, presenter_args: presenter_args, context: context), expires_in: expires_in) do
           Gitlab::Json.dump(presenter.represent(object, **presenter_args).as_json)
         end
       end
@@ -99,8 +103,8 @@ module API
       # @param context [Proc]
       # @param expires_in [ActiveSupport::Duration, Integer] an expiry time for the cache entry
       # @return [Array<String>]
-      def cached_collection(collection, presenter:, presenter_args:, context:, expires_in:)
-        json = fetch_multi(collection, context: context, expires_in: expires_in) do |obj|
+      def cached_collection(collection, presenter_args:, **kwargs)
+        json = fetch_multi(collection, presenter_args: presenter_args, **kwargs) do |obj|
           Gitlab::Json.dump(presenter.represent(obj, **presenter_args).as_json)
         end
 
@@ -115,13 +119,13 @@ module API
       # block.
       #
       # The result is that this is functionally identical to `#fetch`.
-      def fetch_multi(*objs, context:, **kwargs)
+      def fetch_multi(*objs, expires_in:, **kwargs)
         objs.flatten!
-        map = multi_key_map(objs, context: context)
+        map = multi_key_map(objs, **kwargs)
 
         # TODO: `contextual_cache_key` should be constructed based on the guideline https://docs.gitlab.com/ee/development/redis.html#multi-key-commands.
         Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
-          cache.fetch_multi(*map.keys, **kwargs) do |key|
+          cache.fetch_multi(*map.keys, expires_in: expires_in) do |key|
             yield map[key]
           end
         end
@@ -130,9 +134,9 @@ module API
       # @param objects [Enumerable<Object>] objects which _must_ respond to `#cache_key`
       # @param context [Proc] a proc that can be called to help generate each cache key
       # @return [Hash]
-      def multi_key_map(objects, context:)
+      def multi_key_map(objects, **kwargs)
         objects.index_by do |object|
-          contextual_cache_key(object, context)
+          contextual_cache_key(object, **kwargs)
         end
       end
     end
