@@ -2200,7 +2200,7 @@ RSpec.describe API::MergeRequests do
       end
     end
 
-    context 'when only assignee_ids are provided, and the list is contains the sentinel value' do
+    context 'when only assignee_ids are provided, and the list contains the sentinel value' do
       let(:params) do
         {
           assignee_ids: [0]
