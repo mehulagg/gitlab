@@ -64,16 +64,19 @@ export default {
   },
   computed: {
     canSyncSubscription() {
-      return this.subscriptionSyncPath && this.subscription.type === subscriptionType.CLOUD;
-    },
-    canMangeSubscription() {
-      return false;
+      return this.subscriptionSyncPath && this.isCloudType;
     },
     hasSubscription() {
       return Boolean(Object.keys(this.subscription).length);
     },
     hasSubscriptionHistory() {
       return Boolean(this.subscriptionList.length);
+    },
+    isCloudType() {
+      return this.subscription.type === subscriptionType.CLOUD;
+    },
+    isLegacyType() {
+      return this.subscription.type === subscriptionType.LEGACY;
     },
     shouldShowFooter() {
       return some(
