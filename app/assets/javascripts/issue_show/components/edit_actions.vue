@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       deleteLoading: false,
-      issueState: null,
+      issueState: {},
     };
   },
   computed: {
@@ -54,11 +54,12 @@ export default {
     },
     typeToShow() {
       const { formState, issuableType } = this;
-      if (formState.issue_type) {
-        return issuableTypes[formState.issue_type];
+
+      if (this.issuableType === 'epic' || formState.issue_type === '') {
+        return issuableTypes[issuableType];
       }
 
-      return issuableTypes[issuableType];
+      return issuableTypes[formState.issue_type];
     },
   },
   methods: {

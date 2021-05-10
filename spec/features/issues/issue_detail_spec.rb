@@ -83,19 +83,11 @@ RSpec.describe 'Issue Detail', :js do
         wait_for_requests
       end
 
-      it 'shows the issue type selector with the correct details set' do
-        page.find('.js-issuable-edit').click
-
-        page.within('.issuable-details') do
-          expect(find_button('Issue')).to be_present
-        end
-      end
-
       it 'routes the user to the incident details page when the `issue_type` is set to incident' do
-        page.find('.js-issuable-edit').click
+        open_issue_edit_form
 
         page.within('.issuable-details') do
-          update_type_select('Issue', 'Incident')
+          update_type_select('Incident')
 
           expect(page).to have_current_path(project_issues_incident_path(project, issue))
         end
@@ -110,19 +102,11 @@ RSpec.describe 'Issue Detail', :js do
         wait_for_requests
       end
 
-      it 'shows the issue type selector with the correct details set' do
-        page.find('.js-issuable-edit').click
-
-        page.within('.issuable-details') do
-          expect(find_button('Incident')).to be_present
-        end
-      end
-
       it 'routes the user to the issue details page when the `issue_type` is set to issue' do
-        page.find('.js-issuable-edit').click
+        open_issue_edit_form
 
         page.within('.issuable-details') do
-          update_type_select('Incident', 'Issue')
+          update_type_select( 'Issue')
 
           expect(page).to have_current_path(project_issue_path(project, incident))
         end
@@ -130,11 +114,17 @@ RSpec.describe 'Issue Detail', :js do
     end
   end
 
-  def update_type_select(from, to)
-    find('.gl-dropdown-toggle', text: from).click
+  def update_type_select(to)
+    find('#issuable-type').click
     find('.gl-new-dropdown-item', text: to).click
     click_button 'Save changes'
 
+    wait_for_requests
+  end
+
+  def open_issue_edit_form
+    wait_for_requests
+    page.find('.js-issuable-edit').click
     wait_for_requests
   end
 end

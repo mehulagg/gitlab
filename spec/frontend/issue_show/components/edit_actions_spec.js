@@ -46,7 +46,6 @@ describe('Edit Actions components', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders all buttons as enabled', () => {
@@ -67,7 +66,7 @@ describe('Edit Actions components', () => {
   });
 
   it('disables save button when title is blank', () => {
-    createComponent({ props: { formState: { title: '' } } });
+    createComponent({ props: { formState: { title: '', issue_type: '' } } });
 
     expect(findSaveButton().attributes('disabled')).toBe('true');
   });

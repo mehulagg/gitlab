@@ -51,20 +51,14 @@ RSpec.describe 'Incident details', :js do
   end
 
   context 'when an issue `issue_type` is edited by a signed in user' do
-    it 'shows the issue type selector with the correct details set' do
-      page.find('.js-issuable-edit').click
-
-      page.within('.issuable-details') do
-        expect(find_button('Incident')).to be_present
-      end
-    end
-
     it 'routes the user to the incident details page when the `issue_type` is set to incident' do
+      wait_for_requests
       project_path = "/#{project.full_path}"
       page.find('.js-issuable-edit').click
+      wait_for_requests
 
       page.within('.issuable-details') do
-        find('.gl-dropdown-toggle', text: 'Incident').click
+        find('#issuable-type').click
         find('.gl-new-dropdown-item', text: 'Issue').click
         click_button 'Save changes'
 

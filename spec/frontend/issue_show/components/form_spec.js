@@ -2,6 +2,7 @@ import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Autosave from '~/autosave';
 import DescriptionTemplate from '~/issue_show/components/fields/description_template.vue';
+import IssueTypeField from '~/issue_show/components/fields/type.vue';
 import formComponent from '~/issue_show/components/form.vue';
 import LockedWarning from '~/issue_show/components/locked_warning.vue';
 import eventHub from '~/issue_show/event_hub';
@@ -39,6 +40,7 @@ describe('Inline edit form component', () => {
   };
 
   const findDescriptionTemplate = () => wrapper.findComponent(DescriptionTemplate);
+  const findIssuableTypeField = () => wrapper.findComponent(IssueTypeField);
   const findLockedWarning = () => wrapper.findComponent(LockedWarning);
   const findAlert = () => wrapper.findComponent(GlAlert);
 
@@ -66,6 +68,20 @@ describe('Inline edit form component', () => {
     });
 
     expect(findDescriptionTemplate().exists()).toBe(true);
+  });
+
+  it('renders the issuable type selector when the type is `issue`', () => {
+    createComponent();
+
+    expect(findIssuableTypeField().exists()).toBe(true);
+  });
+
+  it('does not render the issuable type selector when the type is not `issue`', () => {
+    createComponent({
+      issuableType: 'epic',
+    });
+
+    expect(findIssuableTypeField().exists()).toBe(false);
   });
 
   it('hides locked warning by default', () => {
