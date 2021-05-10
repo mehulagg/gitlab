@@ -190,9 +190,7 @@ is available for use on self-managed GitLab instances, but is not in use on GitL
 It is configured with [environment variables](../../administration/environment_variables.md)
 on the instance.
 
-To enable the feature on GitLab.com, enable the `ci_external_validation_service`
-[feature flag](../feature_flags/index.md). The valid "Not accepted" response code
-for GitLab.com is `406` only.
+The valid "Not accepted" response code for GitLab.com is `406` only.
 
 For more details, see the linked issues and MRs in the
 [feature flag rollout issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325982).
