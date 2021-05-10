@@ -20,11 +20,13 @@ is locked.
 As of GitLab Enterprise Edition 14.0, you need an activation code to activate your instance.  You can obtain an activation code by [purchasing a license](https://about.gitlab.com/pricing/) or by signing up for a [free trial](https://about.gitlab.com/free-trial/).  This activation code is a 24 character alphanumeric string sent in the confirmation email.  You can also log in to the `Customer Portal` to copy the activation code to your clipboard.
 
 To begin the activation process with your activation code:
-  1. Login to your GitLab self-manage instance.
-  1. Click on the wrench on the top menu bar to navigate to the Admin Area > Subscriptions Page.
-  1. ‘Your Subscription’ page loads.  Paste the activation code onto the input field in the ‘Activate subscription’ panel.
-  1. Read and accept the terms of service.
-  1. Click activate.
+
+1. Sign in to your GitLab self-managed instance.
+1. From the top menu, select the Admin Area **{admin}**.
+1. From the left sidebar, select **Subscriptions**.
+1. Paste the activation code onto the input field.
+1. Read and accept the terms of service.
+1. Select **Activate**.
 
 ![Activate Subscription](img/activate_subscription.png)
 
