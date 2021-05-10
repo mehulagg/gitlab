@@ -45,7 +45,7 @@ of a DAST API scan. The only changes to the API should be from the DAST API scan
 any changes made to the API (for example, by users, scheduled tasks, database changes, code
 changes, other pipelines, or other scanners) during a scan could cause inaccurate results.
 
-## Configuration
+## Enable DAST API scanning
 
 There are three ways to perform scans. See the configuration section for the one you wish to use:
 
