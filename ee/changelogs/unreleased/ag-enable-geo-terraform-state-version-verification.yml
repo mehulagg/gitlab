@@ -1,5 +1,5 @@
 ---
-title: Enable geo_terraform_state_version_verification by default
+title: 'Geo: Release verification for Terraform States'
 merge_request: 61263
 author:
 type: changed
