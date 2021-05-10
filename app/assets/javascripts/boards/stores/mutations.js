@@ -136,6 +136,7 @@ export default {
 
   [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (state, { listItems, listPageInfo, listId }) => {
     const { listData, boardItems } = listItems;
+    Vue.set(state.boardLists[listId], 'issuesCount', listItems.count);
     Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
     Vue.set(
       state.boardItemsByListId,
