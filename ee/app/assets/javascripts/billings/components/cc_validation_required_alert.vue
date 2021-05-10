@@ -7,7 +7,7 @@ const i18n = {
   alertTitle: s__('Billings|User Verification Required'),
   alertText: s__(`Billings|As a user on a free or trial namespace, you'll need to verify your account with a credit card to run pipelines. This is required to help prevent
 cryptomining attacks on GitLab infrastructure.
-%{strongStart}GitLab will not charge or store your credit card, it will only be used for validation.%{strongEnd} %{linkStart}Learn more%{linkEnd}.`),
+%{strongStart}GitLab will not charge or store your credit card, it will only be used for validation.%{strongEnd}`),
   primaryButtonText: s__('Billings|Verify account'),
 };
 
@@ -27,11 +27,6 @@ export default {
     allowedOrigin: {
       type: String,
       required: true,
-    },
-  },
-  computed: {
-    learnMoreUrl() {
-      return 'about:blank';
     },
   },
   methods: {
@@ -55,9 +50,6 @@ export default {
       <gl-sprintf :message="$options.i18n.alertText">
         <template #strong="{ content }">
           <strong>{{ content }}</strong>
-        </template>
-        <template #link="{ content }">
-          <gl-link :href="learnMoreUrl">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
     </gl-alert>
