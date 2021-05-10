@@ -71,6 +71,27 @@ RSpec.describe Gitlab::ImportExport::FileImporter do
     it 'creates the file in the right subfolder' do
       expect(shared.export_path).to include('test/abcd')
     end
+
+    context 'when the import file is remote' do
+      include AfterNextHelpers
+
+      it 'foo' do
+        import_export_upload = build(
+          :import_export_upload,
+          remote_import_url: 'https://remote.url/file'
+        )
+        project = build( :project, import_export_upload: import_export_upload)
+
+        expect_next(described_class)
+          .to receive(:download)
+          .with(
+            'https://remote.url/file',
+            kind_of(String)
+          )
+
+        described_class.import(importable: project, archive_file: nil, shared: shared)
+      end
+    end
   end
 
   context 'error' do
