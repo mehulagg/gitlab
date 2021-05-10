@@ -360,6 +360,8 @@ To install the latest version of a package from a group, use the following comma
 pip install --index-url https://<personal_access_token_name>:<personal_access_token>@gitlab.example.com/api/v4/groups/<group_id>/packages/pypi/simple --no-deps <package_name>
 ```
 
+In this command:
+
 - `<package_name>` is the package name.
 - `<personal_access_token_name>` is a personal access token name with the `read_api` scope.
 - `<personal_access_token>` is a personal access token with the `read_api` scope.
@@ -369,10 +371,9 @@ In these commands, you can use `--extra-index-url` instead of `--index-url`. How
 `--extra-index-url` makes you vulnerable to dependency confusion attacks because it checks the PyPi
 repository for the package before it checks the custom repository. `--extra-index-url` adds the
 provided URL as an additional registry which the client checks if the package is present.
-`--index-url` tells the client to check for the package on the provided URL only.
+`--index-url` tells the client to check for the package at the provided URL only.
 
-If you were following the guide and want to install the
-`MyPyPiPackage` package, you can run:
+If you're following the guide and want to install the `MyPyPiPackage` package, you can run:
 
 ```shell
 pip install mypypipackage --no-deps --index-url https://<personal_access_token_name>:<personal_access_token>@gitlab.example.com/api/v4/groups/<your_group_id>/packages/pypi/simple

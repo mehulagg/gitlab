@@ -31,11 +31,11 @@ normally supplies this URL.
 GET groups/:id/packages/pypi/files/:sha256/:file_identifier
 ```
 
-| Attribute | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `id`              | string | yes | The ID or full path of the group. |
-| `sha256`          | string | yes | PyPI package file sha256 check sum. |
-| `file_identifier` | string | yes | The PyPI package file name. |
+| Attribute         | Type   | Required | Description |
+| ----------------- | ------ | -------- | ----------- |
+| `id`              | string | yes      | The ID or full path of the group. |
+| `sha256`          | string | yes      | The PyPI package file's sha256 checksum. |
+| `file_identifier` | string | yes      | The PyPI package file's name. |
 
 ```shell
 curl --user <username>:<personal_access_token> "https://gitlab.example.com/api/v4/groups/1/packages/pypi/files/5y57017232013c8ac80647f4ca153k3726f6cba62d055cd747844ed95b3c65ff/my.pypi.package-0.0.1.tar.gz"
@@ -59,10 +59,10 @@ Returns the package descriptor as an HTML file:
 GET groups/:id/packages/pypi/simple/:package_name
 ```
 
-| Attribute | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `id`           | string | yes | The ID or full path of the group. |
-| `package_name` | string | yes | The name of the package. |
+| Attribute      | Type   | Required | Description |
+| -------------- | ------ | -------- | ----------- |
+| `id`           | string | yes      | The ID or full path of the group. |
+| `package_name` | string | yes      | The name of the package. |
 
 ```shell
 curl --user <username>:<personal_access_token> "https://gitlab.example.com/api/v4/groups/1/packages/pypi/simple/my.pypi.package"
@@ -120,7 +120,7 @@ curl --user <username>:<personal_access_token> "https://gitlab.example.com/api/v
 
 This writes the downloaded file to `my.pypi.package-0.0.1.tar.gz` in the current directory.
 
-## Project level simple API entry point
+## Project-level simple API entry point
 
 > Introduced in GitLab 12.10.
 
