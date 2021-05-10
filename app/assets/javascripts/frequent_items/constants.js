@@ -37,14 +37,17 @@ export const TRANSLATION_KEYS = {
   },
 };
 
+export const PROJECTS_NAMESPACE = 'projects';
+export const GROUPS_NAMESPACE = 'groups';
+
 export const FREQUENT_ITEMS_DROPDOWNS = [
   {
-    namespace: 'projects',
+    namespace: PROJECTS_NAMESPACE,
     key: 'project',
     vuexModule: 'frequentProjects',
   },
   {
-    namespace: 'groups',
+    namespace: GROUPS_NAMESPACE,
     key: 'group',
     vuexModule: 'frequentGroups',
   },
