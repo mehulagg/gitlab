@@ -162,7 +162,7 @@ reports are available to download. To download a report, click on the
 
 ### Ultimate
 
-Within a merge request there is a security widget which will display a summary of the NEW results. New results are determined by comparing the current findings against existing findings in the target (default) branch (if there are prior findings). 
+A merge request contains a security widget which displays a summary of the NEW results. New results are determined by comparing the current findings against existing findings in the target (default) branch (if there are prior findings). 
 
 It is recommended you run a scan of the `default` branch before enabling feature branch scans for your developers. Otherwise, there will be no base for comparison and all feature branches will display the full scan results in the merge request security widget.
 
