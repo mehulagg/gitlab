@@ -92,8 +92,6 @@ To generate an API Fuzzing configuration snippet:
 
 A modal opens with the YAML snippet corresponding to the options you've selected in the form.
 
-![API Fuzzing configuration snippet](img/api_fuzzing_configuration_snippet_v13.10.png)
-
 Select **Copy code and open `.gitlab-ci.yml` file** to copy the snippet to your clipboard and be redirected
 to your project's `.gitlab-ci.yml` file where you can paste the YAML configuration.
 
