@@ -19,13 +19,18 @@ export default {
     AccountVerificationModal,
   },
   props: {
-    iframeUrl: {
-      type: String,
-      required: true,
+    containerClass: {
+      type: Array,
+      required: false,
+      default: () => ['gl-pt-5'],
+    }
+  },
+  computed: {
+    iframeUrl() {
+      return gon.payment_form_url;
     },
-    allowedOrigin: {
-      type: String,
-      required: true,
+    allowedOrigin() {
+      return gon.subscriptions_url;
     },
   },
   methods: {
@@ -38,7 +43,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-pt-5">
+  <div :class="containerClass">
     <gl-alert
       variant="danger"
       :dismissible="false"
