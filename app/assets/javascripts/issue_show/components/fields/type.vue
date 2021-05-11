@@ -59,7 +59,12 @@ export default {
 </script>
 
 <template>
-  <gl-form-group :label="$options.i18n.label" label-class="sr-only" label-for="issuable-type">
+  <gl-form-group
+    :label="$options.i18n.label"
+    label-class="sr-only"
+    label-for="issuable-type"
+    class="mb-2 mb-md-0"
+  >
     <gl-dropdown
       id="issuable-type"
       :aria-labelledby="$options.i18n.label"

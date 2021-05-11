@@ -184,16 +184,16 @@ export default {
         )
       }}</gl-alert
     >
-    <div class="row">
+    <div class="row gl-mb-3">
       <div class="col-12">
         <issue-title-field ref="title" :form-state="formState" />
       </div>
     </div>
-    <div class="row gl-pt-3 gl-mb-n3">
-      <div v-if="isIssueType" class="col-4 gl-pr-0">
+    <div class="row">
+      <div v-if="isIssueType" class="col-12 col-md-4 pr-md-0">
         <issue-type-field ref="issue-type" :form-state="formState" />
       </div>
-      <div v-if="hasIssuableTemplates" class="col-4 gl-pr-0">
+      <div v-if="hasIssuableTemplates" class="col-12 col-md-4 pl-md-2">
         <description-template-field
           :form-state="formState"
           :issuable-templates="issuableTemplates"
