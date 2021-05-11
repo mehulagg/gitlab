@@ -11,7 +11,7 @@ module EE
 
         gon.roadmap_epics_limit = 1000
 
-        if ::Gitlab.com?
+        if ::Gitlab.dev_env_or_com?
           gon.subscriptions_url = ::Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL
           gon.payment_form_url  = ::Gitlab::SubscriptionPortal::PAYMENT_FORM_URL
         end
