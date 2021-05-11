@@ -346,6 +346,7 @@ db:check-migrations:
     - .db-job-base
     - .rails:rules:ee-and-foss-mr-with-migration
   script:
+    - scripts/validate_migration_timestamps
     - scripts/validate_migration_schema
   allow_failure: true
 
