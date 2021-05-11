@@ -131,9 +131,7 @@ If you want to override this to increase the pipeline speed you may choose which
 
 ### Secure job status
 
-Jobs pass if they are able to complete a scan. The pass does NOT indicate if they did, or did not, identify findings. *
-
-*At this time this applies to all tools except coverage fuzzing which fails if it identifies findings.
+Jobs pass if they are able to complete a scan. A _pass_ result does NOT indicate if they did, or did not, identify findings. The only exception is coverage fuzzing, which fails if it identifies findings.
 
 Jobs fail if they are unable to complete a scan. You can view the pipeline logs for more information. 
 
