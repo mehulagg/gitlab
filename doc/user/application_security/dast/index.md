@@ -144,6 +144,14 @@ image. Using the `DAST_VERSION` variable, you can choose how DAST updates:
 Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/security-products/dast/-/releases)
 page.
 
+#### Crawling web applications dependent on JavaScript
+
+GitLab has released a new browser-based crawler, an add-on to DAST that uses a browser to crawl web applications for content. This crawler replaces the standard DAST Spider and Ajax Crawler.
+
+The browser-based crawler crawls websites by browsing web pages as a user would. This approach works well with web applications that make heavy use of JavaScript, such as Single Page Applications.
+
+For more details, including setup instructions, see [DAST browser-based crawler](browser_based.md).
+
 ## Deployment options
 
 Depending on the complexity of the target application, there are a few options as to how to deploy and configure
@@ -471,7 +479,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_API_SPECIFICATION: http://my.api/api-specification.yml
+  DAST_API_OPENAPI: http://my.api/api-specification.yml
 ```
 
 #### Import API specification from a file
@@ -486,7 +494,7 @@ dast:
     - cp api-specification.yml /zap/wrk/api-specification.yml
   variables:
     GIT_STRATEGY: fetch
-    DAST_API_SPECIFICATION: api-specification.yml
+    DAST_API_OPENAPI: api-specification.yml
 ```
 
 #### Full API scan
@@ -522,7 +530,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_API_SPECIFICATION: http://api-test.host.com/api-specification.yml
+  DAST_API_OPENAPI: http://api-test.host.com/api-specification.yml
   DAST_API_HOST_OVERRIDE: api-test.host.com
 ```
 
@@ -537,7 +545,7 @@ include:
   - template: DAST.gitlab-ci.yml
 
 variables:
-  DAST_API_SPECIFICATION: http://api-test.api.com/api-specification.yml
+  DAST_API_OPENAPI: http://api-test.api.com/api-specification.yml
   DAST_REQUEST_HEADERS: "Authorization: Bearer my.token"
 ```
 
@@ -673,8 +681,9 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | CI/CD variable               | Type    | Description |
 |------------------------------| --------|-------------|
 | `SECURE_ANALYZERS_PREFIX`    | URL     | Set the Docker registry base address from which to download the analyzer. |
-| `DAST_WEBSITE`               | URL     | The URL of the website to scan. `DAST_API_SPECIFICATION` must be specified if this is omitted. |
-| `DAST_API_SPECIFICATION`     | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
+| `DAST_WEBSITE`               | URL     | The URL of the website to scan. `DAST_API_OPENAPI` must be specified if this is omitted. |
+| `DAST_API_OPENAPI`           | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
+| `DAST_API_SPECIFICATION`     | URL or string | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/290241) in GitLab 13.12 and replaced by `DAST_API_OPENAPI`. To be removed in GitLab 15.0. The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
 | `DAST_SPIDER_START_AT_HOST`  | boolean | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
 | `DAST_AUTH_URL`              | URL     | The URL of the page containing the sign-in HTML form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Not supported for API scans. |
 | `DAST_AUTH_VERIFICATION_URL`   | URL     | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST will exit if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8.
@@ -977,6 +986,7 @@ required for an on-demand DAST scan.
 A site profile contains the following:
 
 - **Profile name**: A name you assign to the site to be scanned.
+- **Site type**: The type of target to be scanned, either website or API scan.
 - **Target URL**: The URL that DAST runs against.
 - **Excluded URLs**: A comma-separated list of URLs to exclude from the scan.
 - **Request headers**: A comma-separated list of HTTP request headers, including names and values. These headers are added to every request made by DAST.
@@ -986,6 +996,8 @@ A site profile contains the following:
   - **Password**: The password used to authenticate to the website.
   - **Username form field**: The name of username field at the sign-in HTML form.
   - **Password form field**: The name of password field at the sign-in HTML form.
+
+When an API site type is selected, a [host override](#host-override) is used to ensure the API being scanned is on the same host as the target. This is done to reduce the risk of running an active scan against the wrong API.
 
 #### Site profile validation
 

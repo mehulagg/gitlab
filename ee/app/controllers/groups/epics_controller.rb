@@ -19,6 +19,7 @@ class Groups::EpicsController < Groups::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:vue_epics_list, @group, type: :development, default_enabled: :yaml)
+    push_frontend_feature_flag(:improved_emoji_picker, @group, type: :development, default_enabled: :yaml)
   end
 
   feature_category :epics

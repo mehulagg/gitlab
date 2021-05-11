@@ -50,10 +50,6 @@ module EE
         @subject.feature_available?(:project_merge_request_analytics)
       end
 
-      condition(:custom_compliance_framework_available) do
-        ::Feature.enabled?(:ff_custom_compliance_frameworks, default_enabled: :yaml)
-      end
-
       with_scope :subject
       condition(:group_push_rules_enabled) do
         @subject.group && @subject.group.licensed_feature_available?(:push_rules)
@@ -137,6 +133,11 @@ module EE
         ::Gitlab::IncidentManagement.oncall_schedules_available?(@subject)
       end
 
+      with_scope :subject
+      condition(:escalation_policies_available) do
+        ::Gitlab::IncidentManagement.escalation_policies_available?(@subject)
+      end
+
       rule { visual_review_bot }.policy do
         prevent :read_note
         enable :create_note
@@ -167,6 +168,7 @@ module EE
       end
 
       rule { oncall_schedules_available & can?(:reporter_access) }.enable :read_incident_management_oncall_schedule
+      rule { escalation_policies_available & can?(:reporter_access) }.enable :read_incident_management_escalation_policy
 
       rule { can?(:developer_access) }.policy do
         enable :admin_issue_board
@@ -249,6 +251,7 @@ module EE
       rule { license_scanning_enabled & can?(:maintainer_access) }.enable :admin_software_license_policy
 
       rule { oncall_schedules_available & can?(:maintainer_access) }.enable :admin_incident_management_oncall_schedule
+      rule { escalation_policies_available & can?(:maintainer_access) }.enable :admin_incident_management_escalation_policy
 
       rule { auditor }.policy do
         enable :public_user_access
@@ -357,8 +360,7 @@ module EE
 
       rule { requirements_available & owner }.enable :destroy_requirement
 
-      rule { compliance_framework_available & can?(:owner_access) }.enable :admin_compliance_framework
-      rule { compliance_framework_available & can?(:maintainer_access) & ~custom_compliance_framework_available }.enable :admin_compliance_framework
+      rule { compliance_framework_available & can?(:maintainer_access) }.enable :admin_compliance_framework
 
       rule { status_page_available & can?(:owner_access) }.enable :mark_issue_for_publication
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page

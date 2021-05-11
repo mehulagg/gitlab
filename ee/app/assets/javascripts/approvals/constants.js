@@ -49,3 +49,16 @@ export const APPROVAL_RULE_CONFIGS = {
 };
 
 export const APPROVALS_HELP_PATH = 'user/project/merge_requests/merge_request_approvals';
+
+export const APPROVAL_SETTINGS_I18N = {
+  authorApprovalLabel: __('Prevent MR approvals by the author.'),
+  preventMrApprovalRuleEditLabel: __('Prevent users from modifying MR approval rules.'),
+  preventCommittersApprovalLabel: __(
+    'Prevent approval of merge requests by merge request committers.',
+  ),
+  requireUserPasswordLabel: __('Require user password for approvals.'),
+  removeApprovalsOnPushLabel: __(
+    'Remove all approvals in a merge request when new commits are pushed to its source branch.',
+  ),
+  saveChanges: __('Save changes'),
+};

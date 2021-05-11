@@ -70,6 +70,7 @@ export default {
     ref="sidebarItem"
     :title="__('Weight')"
     :loading="loading"
+    data-testid="sidebar-weight"
     @close="setWeight()"
   >
     <template v-if="hasWeight" #collapsed>

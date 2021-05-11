@@ -1,3 +1,5 @@
+import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from '../constants';
+
 export default () => ({
   featureFlags: {},
   defaultStageConfig: [],
@@ -38,5 +40,7 @@ export default () => ({
   pagination: {
     page: null,
     hasNextPage: false,
+    sort: PAGINATION_SORT_FIELD_END_EVENT,
+    direction: PAGINATION_SORT_DIRECTION_DESC,
   },
 });

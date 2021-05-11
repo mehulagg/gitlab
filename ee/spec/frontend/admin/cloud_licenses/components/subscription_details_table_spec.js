@@ -79,7 +79,7 @@ describe('Subscription Details Table', () => {
     it('displays a loader', () => {
       createComponent([]);
 
-      expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
+      expect(wrapper.findComponent(GlSkeletonLoader).exists()).toBe(true);
     });
   });
 });

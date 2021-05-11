@@ -48,7 +48,7 @@ module EE
       return unless show_ultimate_trial?(user, ULTIMATE_TRIAL) &&
           user_default_dashboard?(user) &&
           !user.owns_paid_namespace? &&
-          user.any_namespace_without_trial?
+          user.owns_group_without_trial?
 
       render 'shared/ultimate_trial_callout_content'
     end

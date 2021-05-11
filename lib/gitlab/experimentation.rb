@@ -51,10 +51,6 @@ module Gitlab
       trial_during_signup: {
         tracking_category: 'Growth::Conversion::Experiment::TrialDuringSignup'
       },
-      ci_syntax_templates_b: {
-        tracking_category: 'Growth::Activation::Experiment::CiSyntaxTemplates',
-        rollout_strategy: :user
-      },
       invite_members_new_dropdown: {
         tracking_category: 'Growth::Expansion::Experiment::InviteMembersNewDropdown'
       },
@@ -150,7 +146,7 @@ module Gitlab
         elsif subject.respond_to?(:to_s)
           subject.to_s
         else
-          raise ArgumentError.new('Subject must respond to `to_global_id` or `to_s`')
+          raise ArgumentError, 'Subject must respond to `to_global_id` or `to_s`'
         end
       end
     end

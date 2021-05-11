@@ -194,13 +194,7 @@ is an archive file format for logging HTTP transactions. When used with the GitL
 must contain records of calling the web API to test. The API fuzzer extracts all the requests and
 uses them to perform testing.
 
-You can use various tools to generate HAR files:
-
-- [Fiddler](https://www.telerik.com/fiddler): Web debugging proxy
-- [Insomnia Core](https://insomnia.rest/): API client
-- [Chrome](https://www.google.com/chrome/): Browser
-- [Firefox](https://www.mozilla.org/en-US/firefox/): Browser
-- [GitLab HAR Recorder](https://gitlab.com/gitlab-org/security-products/har-recorder): Command line
+For more details, including how to create a HAR file, see [HTTP Archive format](create_har_files.md).
 
 WARNING:
 HAR files may contain sensitive information such as authentication tokens, API keys, and session
@@ -575,7 +569,10 @@ To get you started quickly, GitLab provides the configuration file
 [`gitlab-api-fuzzing-config.yml`](https://gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing/-/blob/master/gitlab-api-fuzzing-config.yml).
 This file has several testing profiles that perform various numbers of tests. The run time of each
 profile increases as the test numbers go up. To use a configuration file, add it to your
-repository's root as `.gitlab-api-fuzzing.yml`.
+repository as `.gitlab/gitlab-api-fuzzing-config.yml`.
+
+NOTE:
++In GitLab 13.11 and earlier, the configuration file was `.gitlab-api-fuzzing.yml` in the repository's root. In GitLab 13.12 and later, it is `.gitlab/gitlab-api-fuzzing-config.yml` in the repository's root.
 
 | Profile  | Fuzz Tests (per parameter) |
 |:---------|:-----------|
@@ -588,9 +585,10 @@ repository's root as `.gitlab-api-fuzzing.yml`.
 
 | CI/CD variable                                       | Description        |
 |------------------------------------------------------|--------------------|
+| `SECURE_ANALYZERS_PREFIX`                            | Specify the Docker registry base address from which to download the analyzer. |
 | `FUZZAPI_VERSION`                                    | Specify API Fuzzing container version. Defaults to `latest`. |
 | `FUZZAPI_TARGET_URL`                                 | Base URL of API testing target. |
-|[`FUZZAPI_CONFIG`](#configuration-files)              | API Fuzzing configuration file. Defaults to `.gitlab-apifuzzer.yml`. |
+|[`FUZZAPI_CONFIG`](#configuration-files)              | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/276395) in GitLab 13.12, replaced with default `.gitlab/gitlab-api-fuzzing-config.yml`. API Fuzzing configuration file. |
 |[`FUZZAPI_PROFILE`](#configuration-files)             | Configuration profile to use during testing. Defaults to `Quick`. |
 |[`FUZZAPI_OPENAPI`](#openapi-specification)           | OpenAPI specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har)                    | HTTP Archive (HAR) file. |
@@ -1122,6 +1120,12 @@ Profiles:
               FuzzingCount: 10
               UnicodeFuzzing: true
 ```
+
+## Running API fuzzing in an offline environment
+
+For self-managed GitLab instances in an environment with limited, restricted, or intermittent access
+to external resources through the internet, some adjustments are required for the Web API Fuzz testing job to
+successfully run. For more information, see [Offline environments](../offline_deployments/index.md).
 
 ## Troubleshooting
 

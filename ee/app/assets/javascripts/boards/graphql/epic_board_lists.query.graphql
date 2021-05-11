@@ -2,7 +2,7 @@
 
 query ListEpics($fullPath: ID!, $boardId: BoardsEpicBoardID!) {
   group(fullPath: $fullPath) {
-    epicBoard(id: $boardId) {
+    board: epicBoard(id: $boardId) {
       lists {
         nodes {
           ...EpicBoardListFragment

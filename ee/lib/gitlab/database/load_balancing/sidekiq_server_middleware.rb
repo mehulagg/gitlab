@@ -35,7 +35,7 @@ module Gitlab
           if replica_caught_up?(location)
             job[:database_chosen] = 'replica'
             false
-          elsif worker_class.get_data_consistency == :delayed && job['retry_count'].to_i == 0
+          elsif worker_class.get_data_consistency == :delayed && not_yet_retried?(job)
             job[:database_chosen] = 'retry'
             raise JobReplicaNotUpToDate, "Sidekiq job #{worker_class} JID-#{job['jid']} couldn't use the replica."\
                "  Replica was not up to date."
@@ -43,6 +43,12 @@ module Gitlab
             job[:database_chosen] = 'primary'
             true
           end
+        end
+
+        def not_yet_retried?(job)
+          # if `retry_count` is `nil` it indicates that this job was never retried
+          # the `0` indicates that this is a first retry
+          job['retry_count'].nil?
         end
 
         def load_balancer

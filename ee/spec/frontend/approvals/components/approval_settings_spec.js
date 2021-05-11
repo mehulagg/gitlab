@@ -3,6 +3,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 
 import ApprovalSettings from 'ee/approvals/components/approval_settings.vue';
+import { APPROVAL_SETTINGS_I18N } from 'ee/approvals/constants';
 import { createStoreOptions } from 'ee/approvals/stores';
 import groupSettingsModule from 'ee/approvals/stores/modules/group_settings';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -50,13 +51,13 @@ describe('ApprovalSettings', () => {
   });
 
   describe.each`
-    testid                             | setting                        | label                                                                                          | anchor
-    ${'prevent-author-approval'}       | ${'preventAuthorApproval'}     | ${'Prevent MR approvals by the author.'}                                                       | ${'allowing-merge-request-authors-to-approve-their-own-merge-requests'}
-    ${'prevent-committers-approval'}   | ${'preventCommittersApproval'} | ${'Prevent approval of merge requests by merge request committers.'}                           | ${'prevent-approval-of-merge-requests-by-their-committers'}
-    ${'prevent-mr-approval-rule-edit'} | ${'preventMrApprovalRuleEdit'} | ${'Prevent users from modifying MR approval rules.'}                                           | ${'editing--overriding-approval-rules-per-merge-request'}
-    ${'require-user-password'}         | ${'requireUserPassword'}       | ${'Require user password for approvals.'}                                                      | ${'require-authentication-when-approving-a-merge-request'}
-    ${'remove-approvals-on-push'}      | ${'removeApprovalsOnPush'}     | ${'Remove all approvals in a merge request when new commits are pushed to its source branch.'} | ${'resetting-approvals-on-push'}
-  `('with $testid checkbox', ({ testid, setting, label, anchor }) => {
+    testid                             | setting                        | labelKey                            | anchor
+    ${'prevent-author-approval'}       | ${'preventAuthorApproval'}     | ${'authorApprovalLabel'}            | ${'allowing-merge-request-authors-to-approve-their-own-merge-requests'}
+    ${'prevent-committers-approval'}   | ${'preventCommittersApproval'} | ${'preventCommittersApprovalLabel'} | ${'prevent-approval-of-merge-requests-by-their-committers'}
+    ${'prevent-mr-approval-rule-edit'} | ${'preventMrApprovalRuleEdit'} | ${'preventMrApprovalRuleEditLabel'} | ${'editing--overriding-approval-rules-per-merge-request'}
+    ${'require-user-password'}         | ${'requireUserPassword'}       | ${'requireUserPasswordLabel'}       | ${'require-authentication-when-approving-a-merge-request'}
+    ${'remove-approvals-on-push'}      | ${'removeApprovalsOnPush'}     | ${'removeApprovalsOnPushLabel'}     | ${'resetting-approvals-on-push'}
+  `('with $testid checkbox', ({ testid, setting, labelKey, anchor }) => {
     let checkbox = null;
 
     beforeEach(() => {
@@ -76,7 +77,7 @@ describe('ApprovalSettings', () => {
     it('has the anchor and label props', () => {
       expect(checkbox.props()).toMatchObject({
         anchor,
-        label,
+        label: APPROVAL_SETTINGS_I18N[labelKey],
       });
     });
 

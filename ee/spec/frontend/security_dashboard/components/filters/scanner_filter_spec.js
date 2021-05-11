@@ -1,45 +1,51 @@
 import { GlDropdownItem } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { sampleSize, cloneDeep } from 'lodash';
+import VueRouter from 'vue-router';
 import FilterItem from 'ee/security_dashboard/components/filters/filter_item.vue';
 import ScannerFilter from 'ee/security_dashboard/components/filters/scanner_filter.vue';
-import { DEFAULT_SCANNER } from 'ee/security_dashboard/constants';
+import { DEFAULT_SCANNER, SCANNER_ID_PREFIX } from 'ee/security_dashboard/constants';
 import { scannerFilter } from 'ee/security_dashboard/helpers';
 
-const filter = cloneDeep(scannerFilter);
-filter.options = filter.options.map((option) => ({
-  ...option,
-  id: `GitLab.${option.id}`,
-}));
+const localVue = createLocalVue();
+localVue.use(VueRouter);
+const router = new VueRouter();
 
-const createScannerConfig = (vendor, reportType, externalId) => ({
+const createScannerConfig = (vendor, reportType, id) => ({
   vendor,
   report_type: reportType,
-  external_id: externalId,
+  id,
 });
 
 const scanners = [
-  createScannerConfig(DEFAULT_SCANNER, 'DEPENDENCY_SCANNING', 'bundler_audit'),
-  createScannerConfig(DEFAULT_SCANNER, 'SAST', 'eslint'),
-  createScannerConfig(DEFAULT_SCANNER, 'SAST', 'find_sec_bugs'),
-  createScannerConfig(DEFAULT_SCANNER, 'DEPENDENCY_SCANNING', 'gemnasium'),
-  createScannerConfig(DEFAULT_SCANNER, 'SECRET_DETECTION', 'gitleaks'),
-  createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 'klar'),
-  createScannerConfig(DEFAULT_SCANNER, 'COVERAGE_FUZZING', 'libfuzzer'),
-  createScannerConfig(DEFAULT_SCANNER, 'SAST', 'pmd-apex'),
-  createScannerConfig(DEFAULT_SCANNER, 'SAST', 'sobelow'),
-  createScannerConfig(DEFAULT_SCANNER, 'SAST', 'tslint'),
-  createScannerConfig(DEFAULT_SCANNER, 'DAST', 'zaproxy'),
-  createScannerConfig('Custom', 'SAST', 'custom1'),
-  createScannerConfig('Custom', 'SAST', 'custom2'),
-  createScannerConfig('Custom', 'DAST', 'custom3'),
+  createScannerConfig(DEFAULT_SCANNER, 'DEPENDENCY_SCANNING', 1),
+  createScannerConfig(DEFAULT_SCANNER, 'DEPENDENCY_SCANNING', 2),
+  createScannerConfig(DEFAULT_SCANNER, 'SAST', 3),
+  createScannerConfig(DEFAULT_SCANNER, 'SAST', 4),
+  createScannerConfig(DEFAULT_SCANNER, 'SECRET_DETECTION', 5),
+  createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 6),
+  createScannerConfig(DEFAULT_SCANNER, 'COVERAGE_FUZZING', 7),
+  createScannerConfig(DEFAULT_SCANNER, 'DAST', 8),
+  createScannerConfig(DEFAULT_SCANNER, 'DAST', 9),
+  createScannerConfig('Custom', 'SAST', 10),
+  createScannerConfig('Custom', 'SAST', 11),
+  createScannerConfig('Custom', 'DAST', 12),
 ];
 
 describe('Scanner Filter component', () => {
   let wrapper;
+  let filter;
 
   const createWrapper = () => {
+    filter = cloneDeep(scannerFilter);
+    filter.options = filter.options.map((option) => ({
+      ...option,
+      id: `GitLab.${option.id}`,
+    }));
+
     wrapper = shallowMount(ScannerFilter, {
+      localVue,
+      router,
       propsData: { filter },
       provide: { scanners },
     });
@@ -47,14 +53,18 @@ describe('Scanner Filter component', () => {
 
   beforeEach(() => {
     gon.features = { customSecurityScanners: true };
-    createWrapper();
   });
 
   afterEach(() => {
+    // Clear out the querystring if one exists. It persists between tests.
+    if (wrapper.vm.$route.query[filter.id]) {
+      wrapper.vm.$router.push('/');
+    }
     wrapper.destroy();
   });
 
   it('shows the correct dropdown items', () => {
+    createWrapper();
     const getTestIds = (selector) =>
       wrapper.findAll(selector).wrappers.map((x) => x.attributes('data-testid'));
 
@@ -74,6 +84,7 @@ describe('Scanner Filter component', () => {
   });
 
   it('toggles selection of all items in a group when the group header is clicked', async () => {
+    createWrapper();
     const expectSelectedItems = (items) => {
       const checkedItems = wrapper
         .findAll(FilterItem)
@@ -100,14 +111,15 @@ describe('Scanner Filter component', () => {
     await clickAndCheck(filter.options); // Third click selects all again.
   });
 
-  it('emits filter-changed event with expected data when selected options is changed', async () => {
-    const selectedIds = ['GitLab.SAST', 'Custom.SAST'];
-    const selectedOptions = wrapper.vm.options.filter((x) => selectedIds.includes(x.id));
-    await wrapper.setData({ selectedOptions });
+  it('emits filter-changed event with expected data for selected options', async () => {
+    const ids = ['GitLab.SAST', 'Custom.SAST'];
+    router.replace({ query: { [filter.id]: ids } });
+    const selectedScanners = scanners.filter((x) => ids.includes(`${x.vendor}.${x.report_type}`));
+    createWrapper();
+    await wrapper.vm.$nextTick();
 
-    expect(wrapper.emitted('filter-changed')[1][0]).toEqual({
-      reportType: ['SAST'],
-      scanner: scanners.filter((x) => x.report_type === 'SAST').map((x) => x.external_id),
+    expect(wrapper.emitted('filter-changed')[0][0]).toEqual({
+      scannerId: selectedScanners.map((x) => `${SCANNER_ID_PREFIX}${x.id}`),
     });
   });
 });

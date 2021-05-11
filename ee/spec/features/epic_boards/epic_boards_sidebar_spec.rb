@@ -176,20 +176,26 @@ RSpec.describe 'Epic boards sidebar', :js do
     it 'displays notifications toggle', :aggregate_failures do
       click_card(card)
 
-      page.within('[data-testid="sidebar-notifications"]') do
+      page.within('.subscriptions') do
         expect(page).to have_button('Notifications')
-        expect(page).not_to have_content('Notifications have been disabled by the project or group owner')
+        expect(page).not_to have_content('Disabled by group owner')
       end
     end
 
-    it 'shows toggle as on then as off as user toggles to subscribe and unsubscribe', :aggregate_failures, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/329292' do
+    it 'shows toggle as on then as off as user toggles to subscribe and unsubscribe', :aggregate_failures do
       click_card(card)
 
+      wait_for_requests
+
       click_button 'Notifications'
+
+      wait_for_requests
 
       expect(page).to have_button('Notifications', class: 'is-checked')
 
       click_button 'Notifications'
+
+      wait_for_requests
 
       expect(page).not_to have_button('Notifications', class: 'is-checked')
     end
@@ -202,9 +208,9 @@ RSpec.describe 'Epic boards sidebar', :js do
       end
 
       it 'displays a message that notifications have been disabled' do
-        page.within('[data-testid="sidebar-notifications"]') do
-          expect(page).not_to have_selector('[data-testid="notification-subscribe-toggle"]')
-          expect(page).to have_content('Notifications have been disabled by the project or group owner')
+        page.within('.subscriptions') do
+          expect(page).to have_button('Notifications', class: 'is-disabled')
+          expect(page).to have_content('Disabled by group owner')
         end
       end
     end

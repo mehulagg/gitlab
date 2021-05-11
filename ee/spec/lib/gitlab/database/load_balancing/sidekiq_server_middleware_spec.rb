@@ -100,7 +100,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
     let(:queue) { 'default' }
     let(:redis_pool) { Sidekiq.redis_pool }
     let(:worker) { worker_class.new }
-    let(:job) { { "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'database_replica_location' => '0/D525E3A8' } }
+    let(:job) { { "retry" => 3, "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'database_replica_location' => '0/D525E3A8' } }
     let(:block) { 10 }
 
     before do
@@ -127,22 +127,37 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
       context 'when replica is not up to date' do
         before do
-          allow(middleware).to receive(:replica_caught_up?).and_return(false)
+          allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :release_host)
+          allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :host, :caught_up?).and_return(false)
         end
 
-        context 'when job is retried once' do
-          it 'raise an error and retries' do
-            expect { middleware.call(worker, job, double(:queue)) { block } }.to raise_error(Gitlab::Database::LoadBalancing::SidekiqServerMiddleware::JobReplicaNotUpToDate)
+        around do |example|
+          with_sidekiq_server_middleware do |chain|
+            chain.add described_class
+            Sidekiq::Testing.disable! { example.run }
           end
         end
 
-        context 'when job is retried more then once' do
-          before do
-            job['retry_count'] = 1
-          end
+        context 'when job is executed first' do
+          it 'raise an error and retries', :aggregate_failures do
+            expect do
+              process_job(job)
+            end.to raise_error(Sidekiq::JobRetry::Skip)
 
-          include_examples 'stick to the primary'
-          include_examples 'job marked with chosen database'
+            expect(job['error_class']).to eq('Gitlab::Database::LoadBalancing::SidekiqServerMiddleware::JobReplicaNotUpToDate')
+            expect(job[:database_chosen]).to eq('retry')
+          end
+        end
+
+        context 'when job is retried' do
+          it 'stick to the primary', :aggregate_failures do
+            expect do
+              process_job(job)
+            end.to raise_error(Sidekiq::JobRetry::Skip)
+
+            process_job(job)
+            expect(job[:database_chosen]).to eq('primary')
+          end
         end
       end
     end
@@ -158,6 +173,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         include_examples 'stick to the primary'
         include_examples 'job marked with chosen database'
       end
+    end
+  end
+
+  def process_job(job)
+    Sidekiq::JobRetry.new.local(worker_class, job, queue) do
+      worker_class.process_job(job)
     end
   end
 end

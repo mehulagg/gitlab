@@ -141,7 +141,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
           context 'when there is a conflict on merge ref creation' do
             before do
               allow(project.repository).to receive(:merge_to_ref) do
-                raise Gitlab::Git::CommandError.new('Failed to create merge commit')
+                raise Gitlab::Git::CommandError, 'Failed to create merge commit'
               end
             end
 

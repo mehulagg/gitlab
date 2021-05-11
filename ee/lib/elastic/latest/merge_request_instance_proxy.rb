@@ -32,6 +32,14 @@ module Elastic
 
         data.merge(generic_attributes)
       end
+
+      def generic_attributes
+        if Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
+          super.except('join_field')
+        else
+          super
+        end
+      end
     end
   end
 end

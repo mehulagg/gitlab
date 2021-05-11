@@ -7,8 +7,7 @@ module EE
     prepended do
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
       condition(:compliance_framework_available) do
-        @subject.feature_available?(:custom_compliance_frameworks) &&
-          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
+        @subject.feature_available?(:custom_compliance_frameworks)
       end
 
       rule { admin & is_gitlab_com }.enable :update_subscription_limit

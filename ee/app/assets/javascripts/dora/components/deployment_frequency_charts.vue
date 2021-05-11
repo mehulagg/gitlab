@@ -28,6 +28,10 @@ export default {
       type: String,
       default: '',
     },
+    groupPath: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
@@ -49,11 +53,28 @@ export default {
   async mounted() {
     const results = await Promise.allSettled(
       allChartDefinitions.map(async ({ id, requestParams, startDate, endDate }) => {
-        const { data: apiData } = await DoraApi.getProjectDoraMetrics(
-          this.projectPath,
-          DoraApi.DEPLOYMENT_FREQUENCY_METRIC_TYPE,
-          requestParams,
-        );
+        let apiData;
+        if (this.projectPath && this.groupPath) {
+          throw new Error('Both projectPath and groupPath were provided');
+        } else if (this.projectPath) {
+          apiData = (
+            await DoraApi.getProjectDoraMetrics(
+              this.projectPath,
+              DoraApi.DEPLOYMENT_FREQUENCY_METRIC_TYPE,
+              requestParams,
+            )
+          ).data;
+        } else if (this.groupPath) {
+          apiData = (
+            await DoraApi.getGroupDoraMetrics(
+              this.groupPath,
+              DoraApi.DEPLOYMENT_FREQUENCY_METRIC_TYPE,
+              requestParams,
+            )
+          ).data;
+        } else {
+          throw new Error('Either projectPath or groupPath must be provided');
+        }
 
         this.chartData[id] = apiDataToChartSeries(apiData, startDate, endDate, CHART_TITLE);
       }),

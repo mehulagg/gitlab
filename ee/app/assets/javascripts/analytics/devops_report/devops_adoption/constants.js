@@ -18,6 +18,17 @@ export const DEVOPS_ADOPTION_ERROR_KEYS = {
   addSegment: 'addSegmentsError',
 };
 
+export const TABLE_HEADER_TEXT = s__(
+  'DevopsAdoption|Feature adoption is based on usage in the current calendar month. Last updated: %{timestamp}.',
+);
+
+export const ADD_REMOVE_BUTTON_TOOLTIP = sprintf(
+  s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'),
+  {
+    maxSegments: MAX_SEGMENTS,
+  },
+);
+
 export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove sub-groups');
 
 export const DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED = s__(
@@ -36,13 +47,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
       'DevopsAdoption|There was an error enabling the current group. Please refresh the page.',
     ),
     tableHeader: {
-      text: s__(
-        'DevopsAdoption|Feature adoption is based on usage in the current calendar month. Last updated: %{timestamp}.',
-      ),
       button: s__('DevopsAdoption|Add/remove groups'),
-      buttonTooltip: sprintf(s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'), {
-        maxSegments: MAX_SEGMENTS,
-      }),
     },
   },
   emptyState: {
@@ -63,39 +68,6 @@ export const DEVOPS_ADOPTION_STRINGS = {
   },
   table: {
     removeButton: s__('DevopsAdoption|Remove Group from the table.'),
-    headers: {
-      name: {
-        label: __('Group'),
-      },
-      issueOpened: {
-        label: s__('DevopsAdoption|Issues'),
-        tooltip: s__('DevopsAdoption|At least 1 issue opened'),
-      },
-      mergeRequestOpened: {
-        label: s__('DevopsAdoption|MRs'),
-        tooltip: s__('DevopsAdoption|At least 1 MR opened'),
-      },
-      mergeRequestApproved: {
-        label: s__('DevopsAdoption|Approvals'),
-        tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
-      },
-      runnerConfigured: {
-        label: s__('DevopsAdoption|Runners'),
-        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
-      },
-      pipelineSucceeded: {
-        label: s__('DevopsAdoption|Pipelines'),
-        tooltip: s__('DevopsAdoption|At least 1 pipeline successfully run'),
-      },
-      deploySucceeded: {
-        label: s__('DevopsAdoption|Deploys'),
-        tooltip: s__('DevopsAdoption|At least 1 deploy'),
-      },
-      securityScanSucceeded: {
-        label: s__('DevopsAdoption|Scanning'),
-        tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
-      },
-    },
   },
   deleteModal: {
     title: s__('DevopsAdoption|Confirm remove Group'),
@@ -115,14 +87,7 @@ export const DEVOPS_ADOPTION_STRINGS = {
 export const DEVOPS_ADOPTION_TABLE_TEST_IDS = {
   TABLE_HEADERS: 'header',
   SEGMENT: 'segmentCol',
-  ISSUES: 'issuesCol',
-  MRS: 'mrsCol',
-  APPROVALS: 'approvalsCol',
-  RUNNERS: 'runnersCol',
-  PIPELINES: 'pipelinesCol',
-  DEPLOYS: 'deploysCol',
   ACTIONS: 'actionsCol',
-  SCANNING: 'scanningCol',
   LOCAL_STORAGE_SORT_BY: 'localStorageSortBy',
   LOCAL_STORAGE_SORT_DESC: 'localStorageSortDesc',
 };
@@ -132,3 +97,55 @@ export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY =
 
 export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY =
   'devops_adoption_segments_table_sort_desc';
+
+export const DEVOPS_ADOPTION_GROUP_COL_LABEL = __('Group');
+
+export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
+  {
+    title: s__('DevopsAdoption|Adoption'),
+    cols: [
+      {
+        key: 'issueOpened',
+        label: s__('DevopsAdoption|Issues'),
+        tooltip: s__('DevopsAdoption|At least 1 issue opened'),
+        testId: 'issuesCol',
+      },
+      {
+        key: 'mergeRequestOpened',
+        label: s__('DevopsAdoption|MRs'),
+        tooltip: s__('DevopsAdoption|At least 1 MR opened'),
+        testId: 'mrsCol',
+      },
+      {
+        key: 'mergeRequestApproved',
+        label: s__('DevopsAdoption|Approvals'),
+        tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
+        testId: 'approvalsCol',
+      },
+      {
+        key: 'runnerConfigured',
+        label: s__('DevopsAdoption|Runners'),
+        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
+        testId: 'runnersCol',
+      },
+      {
+        key: 'pipelineSucceeded',
+        label: s__('DevopsAdoption|Pipelines'),
+        tooltip: s__('DevopsAdoption|At least 1 pipeline successfully run'),
+        testId: 'pipelinesCol',
+      },
+      {
+        key: 'deploySucceeded',
+        label: s__('DevopsAdoption|Deploys'),
+        tooltip: s__('DevopsAdoption|At least 1 deploy'),
+        testId: 'deploysCol',
+      },
+      {
+        key: 'securityScanSucceeded',
+        label: s__('DevopsAdoption|Scanning'),
+        tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
+        testId: 'scanningCol',
+      },
+    ],
+  },
+];

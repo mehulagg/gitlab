@@ -131,6 +131,7 @@ class License < ApplicationRecord
     ci_project_subscriptions
     incident_timeline_view
     oncall_schedules
+    escalation_policies
     export_user_permissions
   ]
   EEP_FEATURES.freeze
@@ -551,7 +552,11 @@ class License < ApplicationRecord
   end
 
   def cloud_license?
-    license&.type == CLOUD_LICENSE_TYPE
+    !!license&.cloud_licensing?
+  end
+
+  def usage_ping?
+    !!license&.usage_ping_required_metrics?
   end
 
   def license_type

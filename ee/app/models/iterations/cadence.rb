@@ -16,6 +16,7 @@ module Iterations
     validates :iterations_in_advance, presence: true
     validates :active, inclusion: [true, false]
     validates :automatic, inclusion: [true, false]
+    validates :description, length: { maximum: 5000 }
 
     scope :with_groups, -> (group_ids) { where(group_id: group_ids) }
     scope :with_duration, -> (duration) { where(duration_in_weeks: duration) }

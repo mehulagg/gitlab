@@ -28,6 +28,12 @@ module Types
 
       field :active, GraphQL::BOOLEAN_TYPE, null: true,
         description: 'Whether the iteration cadence is active.'
+
+      field :roll_over, GraphQL::BOOLEAN_TYPE, null: false,
+        description: 'Whether the iteration cadence should roll over issues to the next iteration or not.'
+
+      field :description, GraphQL::STRING_TYPE, null: true,
+        description: 'Description of the iteration cadence. Maximum length is 5000 characters.'
     end
   end
 end

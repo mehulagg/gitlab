@@ -534,20 +534,59 @@ RSpec.describe EpicsFinder do
           let_it_be(:public_group1) { create(:group, :public, parent: base_group) }
           let_it_be(:public_epic1) { create(:epic, group: public_group1) }
           let_it_be(:public_epic2) { create(:epic, :confidential, group: public_group1) }
+          let_it_be(:internal_group) { create(:group, :internal, parent: base_group) }
+          let_it_be(:internal_epic) { create(:epic, group: internal_group) }
 
           let(:execute_params) { {} }
 
-          subject { described_class.new(search_user, group_id: base_group.id).execute(**execute_params) }
+          def execute
+            described_class.new(search_user, group_id: base_group.id).execute(**execute_params)
+          end
 
-          it 'returns only public epics' do
-            expect(subject).to match_array([base_epic2, public_epic1])
+          shared_examples 'avoids N+1 queries' do
+            it 'avoids N+1 queries on searched groups' do
+              execute # warm up
+              control = ActiveRecord::QueryRecorder.new(skip_cached: false) { execute }
+
+              create_list(:group, 5, :private, parent: base_group)
+
+              expect { execute }.not_to exceed_all_query_limit(control)
+            end
+          end
+
+          context 'when user is not set' do
+            let(:search_user) { nil }
+
+            it 'returns only public epics in public groups' do
+              expect(execute).to match_array([base_epic2, public_epic1])
+            end
+
+            it_behaves_like 'avoids N+1 queries'
+          end
+
+          context 'when user is not member of any groups being searched' do
+            it 'returns only public epics in public and internal groups' do
+              expect(execute).to match_array([base_epic2, public_epic1, internal_epic])
+            end
+
+            it_behaves_like 'avoids N+1 queries'
+
+            context 'when limit_epic_groups_query is disabled' do
+              before do
+                stub_feature_flags(limit_epic_groups_query: false)
+              end
+
+              it 'returns only public epics' do
+                expect(execute).to match_array([base_epic2, public_epic1, internal_epic])
+              end
+            end
           end
 
           context 'when skip_visibility_check is true' do
             let(:execute_params) { { skip_visibility_check: true } }
 
             it 'returns all epics' do
-              expect(subject).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2])
+              expect(execute).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2, internal_epic])
             end
           end
 
@@ -557,17 +596,10 @@ RSpec.describe EpicsFinder do
             end
 
             it 'returns all nested epics' do
-              expect(subject).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2])
+              expect(execute).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2, internal_epic])
             end
 
-            it 'does not execute more than 6 SQL queries' do
-              normal_query_count = 5
-              # sync_traversal_ids feature flag has to query for root_ancestor.
-              ff_query_count = 1
-              total_count = normal_query_count + ff_query_count
-
-              expect { subject }.not_to exceed_all_query_limit(total_count)
-            end
+            it_behaves_like 'avoids N+1 queries'
 
             it 'does not check permission for subgroups because user inherits permission' do
               finder = described_class.new(search_user, group_id: base_group.id)
@@ -584,14 +616,14 @@ RSpec.describe EpicsFinder do
             end
 
             it 'returns also confidential epics from this subgroup' do
-              expect(subject).to match_array([base_epic2, private_epic1, private_epic2, public_epic1])
+              expect(execute).to match_array([base_epic2, private_epic1, private_epic2, public_epic1, internal_epic])
             end
 
             # if user is not member of top-level group, we need to check
             # if he can read epics in each subgroup
-            it 'does not execute more than 15 SQL queries' do
+            it 'does not execute more than 17 SQL queries' do
               # The limit here is fragile!
-              expect { subject }.not_to exceed_all_query_limit(15)
+              expect { execute }.not_to exceed_all_query_limit(17)
             end
 
             it 'checks permission for each subgroup' do
@@ -609,7 +641,7 @@ RSpec.describe EpicsFinder do
             end
 
             it 'does not return any confidential epics in the base or subgroups' do
-              expect(subject).to match_array([base_epic2, private_epic1, public_epic1])
+              expect(execute).to match_array([base_epic2, private_epic1, public_epic1, internal_epic])
             end
           end
 
@@ -619,7 +651,7 @@ RSpec.describe EpicsFinder do
             end
 
             it 'returns also confidential epics from this subgroup' do
-              expect(subject).to match_array([base_epic2, public_epic1, public_epic2])
+              expect(execute).to match_array([base_epic2, public_epic1, public_epic2, internal_epic])
             end
           end
         end

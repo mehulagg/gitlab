@@ -8,8 +8,8 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
   describe 'the template file' do
     let(:template_filename) { Rails.root.join("lib/gitlab/ci/templates/" + template.full_name) }
     let(:contents) { File.read(template_filename) }
-    let(:production_registry) { 'registry.gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing:${FUZZAPI_VERSION}-engine' }
-    let(:staging_registry) { 'registry.gitlab.com/gitlab-org/security-products/analyzers/api-fuzzing-src:${FUZZAPI_VERSION}-engine' }
+    let(:production_registry) { '${SECURE_ANALYZERS_PREFIX}/api-fuzzing:${FUZZAPI_VERSION}' }
+    let(:staging_registry) { '${SECURE_ANALYZERS_PREFIX}/api-fuzzing-src:${FUZZAPI_VERSION}' }
 
     # Make sure future changes to the template use the production container registry.
     #

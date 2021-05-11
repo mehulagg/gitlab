@@ -119,8 +119,7 @@ module EE
       condition(:eligible_for_trial, scope: :subject) { @subject.eligible_for_trial? }
 
       condition(:compliance_framework_available) do
-        @subject.feature_available?(:custom_compliance_frameworks) &&
-          ::Feature.enabled?(:ff_custom_compliance_frameworks, @subject, default_enabled: :yaml)
+        @subject.feature_available?(:custom_compliance_frameworks)
       end
 
       condition(:group_level_compliance_pipeline_available) do

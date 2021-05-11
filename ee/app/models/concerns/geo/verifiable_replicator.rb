@@ -46,7 +46,7 @@ module Geo
 
         # Secondaries don't need to run this since they will receive an event for each
         # rechecksummed resource: https://gitlab.com/gitlab-org/gitlab/-/issues/13842
-        ::Geo::ReverificationBatchWorker.perform_async(replicable_name) if ::Gitlab::Geo.primary?
+        ::Geo::ReverificationBatchWorker.perform_with_capacity(replicable_name) if ::Gitlab::Geo.primary?
       end
 
       # Called by VerificationBatchWorker.

@@ -10,7 +10,7 @@ module Geo
     include ::Gitlab::Geo::LogHelpers
 
     idempotent!
-    tags :exclude_from_kubernetes
+    tags :exclude_from_kubernetes, :exclude_from_gitlab_com
     loggable_arguments 0
 
     def perform_work(replicable_name)
@@ -28,7 +28,7 @@ module Geo
       replicator_class = replicator_class_for(replicable_name)
 
       @remaining_work_count ||= replicator_class
-        .remaining_verification_batch_count(max_batch_count: remaining_capacity)
+        .remaining_verification_batch_count(max_batch_count: max_running_jobs)
     end
 
     def replicator_class_for(replicable_name)

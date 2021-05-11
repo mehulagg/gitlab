@@ -31,8 +31,7 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
           /Attachments: /,
           /CI job artifacts: /,
           /Container repositories: /,
-          /Design repositories: /,
-          /Repositories Checked: /
+          /Design repositories: /
         ]
 
         checks.each do |text|

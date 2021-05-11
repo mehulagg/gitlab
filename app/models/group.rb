@@ -107,6 +107,8 @@ class Group < Namespace
 
   scope :with_users, -> { includes(:users) }
 
+  scope :with_onboarding_progress, -> { joins(:onboarding_progress) }
+
   scope :by_id, ->(groups) { where(id: groups) }
 
   scope :for_authorized_group_members, -> (user_ids) do
@@ -704,6 +706,14 @@ class Group < Namespace
     Gitlab::ServiceDesk.supported? && all_projects.service_desk_enabled.exists?
   end
 
+  def to_ability_name
+    model_name.singular
+  end
+
+  def activity_path
+    Gitlab::Routing.url_helpers.activity_group_path(self)
+  end
+
   private
 
   def update_two_factor_requirement
@@ -831,7 +841,12 @@ class Group < Namespace
   end
 
   def uncached_ci_variables_for(ref, project, environment: nil)
-    list_of_ids = [self] + ancestors
+    list_of_ids = if root_ancestor.use_traversal_ids?
+                    [self] + ancestors(hierarchy_order: :asc)
+                  else
+                    [self] + ancestors
+                  end
+
     variables = Ci::GroupVariable.where(group: list_of_ids)
     variables = variables.unprotected unless project.protected_for?(ref)
 

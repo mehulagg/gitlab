@@ -128,8 +128,11 @@ export default {
         })
         .catch((error) => {
           this.issuesListLoadFailed = true;
+          const errors = error?.response?.data?.errors || [];
+          const errorMessage = errors[0] || __('An error occurred while loading issues');
+
           createFlash({
-            message: __('An error occurred while loading issues'),
+            message: errorMessage,
             captureError: true,
             error,
           });
@@ -200,25 +203,26 @@ export default {
     @filter="handleFilterIssues"
   >
     <template #nav-actions>
-      <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5"
-        >{{ s__('Integrations|Create new issue in Jira') }}<gl-icon name="external-link"
-      /></gl-button>
+      <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5">
+        {{ s__('Integrations|Create new issue in Jira') }}
+        <gl-icon name="external-link" />
+      </gl-button>
     </template>
     <template #reference="{ issuable }">
       <span v-safe-html="jiraLogo" class="svg-container jira-logo-container"></span>
-      <span>{{ issuable.references.relative }}</span>
+      <span v-if="issuable">{{ issuable.references.relative }}</span>
     </template>
     <template #author="{ author }">
       <gl-sprintf message="%{authorName} in Jira">
         <template #authorName>
-          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl"
-            >{{ author.name }}
+          <gl-link class="author-link js-user-link" target="_blank" :href="author.webUrl">
+            {{ author.name }}
           </gl-link>
         </template>
       </gl-sprintf>
     </template>
     <template #status="{ issuable }">
-      {{ issuable.status }}
+      <template v-if="issuable"> {{ issuable.status }} </template>
     </template>
     <template #empty-state>
       <jira-issues-list-empty-state

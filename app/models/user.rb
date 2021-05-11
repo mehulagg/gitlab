@@ -205,6 +205,7 @@ class User < ApplicationRecord
   has_one :user_detail
   has_one :user_highest_role
   has_one :user_canonical_email
+  has_one :credit_card_validation, class_name: '::Users::CreditCardValidation'
   has_one :atlassian_identity, class_name: 'Atlassian::Identity'
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
@@ -317,6 +318,7 @@ class User < ApplicationRecord
 
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
+  accepts_nested_attributes_for :credit_card_validation, update_only: true
 
   state_machine :state, initial: :active do
     event :block do
@@ -431,7 +433,7 @@ class User < ApplicationRecord
 
   def preferred_language
     read_attribute('preferred_language') ||
-      I18n.default_locale.to_s.presence_in(Gitlab::I18n::AVAILABLE_LANGUAGES.keys) ||
+      I18n.default_locale.to_s.presence_in(Gitlab::I18n.available_locales) ||
       'en'
   end
 
@@ -1221,6 +1223,10 @@ class User < ApplicationRecord
 
   def highest_role
     user_highest_role&.highest_access_level || Gitlab::Access::NO_ACCESS
+  end
+
+  def credit_card_validated_at
+    credit_card_validation&.credit_card_validated_at
   end
 
   def accessible_deploy_keys

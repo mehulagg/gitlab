@@ -140,20 +140,6 @@ describe('Value Stream Analytics actions', () => {
     });
   });
 
-  describe('setDateRange', () => {
-    const payload = { startDate, endDate };
-
-    it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(
-        actions.setDateRange,
-        payload,
-        state,
-        [{ type: types.SET_DATE_RANGE, payload: { startDate, endDate } }],
-        [{ type: 'fetchCycleAnalyticsData' }],
-      );
-    });
-  });
-
   describe('fetchStageData', () => {
     const headers = {
       'X-Next-Page': 2,
@@ -408,140 +394,31 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe('receiveGroupStagesSuccess', () => {
-    describe('when the `hasPathNavigation` feature flag is enabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasPathNavigation: true,
+    it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation'`, () => {
+      return testAction(
+        actions.receiveGroupStagesSuccess,
+        { ...customizableStagesAndEvents.stages },
+        state,
+        [
+          {
+            type: types.RECEIVE_GROUP_STAGES_SUCCESS,
+            payload: { ...customizableStagesAndEvents.stages },
           },
-        };
-      });
-
-      it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation'`, () => {
-        return testAction(
-          actions.receiveGroupStagesSuccess,
-          { ...customizableStagesAndEvents.stages },
-          state,
-          [
-            {
-              type: types.RECEIVE_GROUP_STAGES_SUCCESS,
-              payload: { ...customizableStagesAndEvents.stages },
-            },
-          ],
-          [],
-        );
-      });
-    });
-
-    describe('when the `hasPathNavigation` feature flag is disabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasPathNavigation: false,
-          },
-        };
-      });
-
-      it(`commits the ${types.RECEIVE_GROUP_STAGES_SUCCESS} mutation and dispatches 'setDefaultSelectedStage`, () => {
-        return testAction(
-          actions.receiveGroupStagesSuccess,
-          { ...customizableStagesAndEvents.stages },
-          state,
-          [
-            {
-              type: types.RECEIVE_GROUP_STAGES_SUCCESS,
-              payload: { ...customizableStagesAndEvents.stages },
-            },
-          ],
-          [{ type: 'setDefaultSelectedStage' }],
-        );
-      });
+        ],
+        [],
+      );
     });
   });
 
   describe('setDefaultSelectedStage', () => {
-    describe('when the `hasPathNavigation` feature flag is enabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasPathNavigation: true,
-          },
-        };
-      });
-
-      afterEach(() => {
-        mock.restore();
-      });
-
-      it("dispatches the 'setSelectedStage' with the overview stage", () => {
-        return testAction(
-          actions.setDefaultSelectedStage,
-          null,
-          state,
-          [],
-          [{ type: 'setSelectedStage', payload: OVERVIEW_STAGE_CONFIG }],
-        );
-      });
-    });
-
-    describe('when the `hasPathNavigation` feature flag is disabled', () => {
-      beforeEach(() => {
-        state = {
-          ...state,
-          featureFlags: {
-            ...state.featureFlags,
-            hasPathNavigation: false,
-          },
-        };
-      });
-
-      afterEach(() => {
-        mock.restore();
-      });
-
-      it("dispatches the 'fetchStageData' action", () => {
-        return testAction(
-          actions.setDefaultSelectedStage,
-          null,
-          state,
-          [],
-          [
-            { type: 'setSelectedStage', payload: selectedStage },
-            { type: 'fetchStageData', payload: selectedStageSlug },
-          ],
-        );
-      });
-
-      it.each`
-        data
-        ${[]}
-        ${null}
-      `('with $data will flash an error', ({ data }) => {
-        actions.setDefaultSelectedStage(
-          { state, getters: { activeStages: data }, dispatch: () => {} },
-          {},
-        );
-        expect(createFlash).toHaveBeenCalledWith({ message: flashErrorMessage });
-      });
-
-      it('will select the first active stage', () => {
-        return testAction(
-          actions.setDefaultSelectedStage,
-          null,
-          state,
-          [],
-          [
-            { type: 'setSelectedStage', payload: stages[1] },
-            { type: 'fetchStageData', payload: stages[1].slug },
-          ],
-        );
-      });
+    it("dispatches the 'setSelectedStage' with the overview stage", () => {
+      return testAction(
+        actions.setDefaultSelectedStage,
+        null,
+        state,
+        [],
+        [{ type: 'setSelectedStage', payload: OVERVIEW_STAGE_CONFIG }],
+      );
     });
   });
 
@@ -1363,9 +1240,34 @@ describe('Value Stream Analytics actions', () => {
     });
   });
 
-  describe('setFilters', () => {
+  describe.each`
+    targetAction            | payload                   | mutations
+    ${actions.setDateRange} | ${{ startDate, endDate }} | ${[{ type: 'SET_DATE_RANGE', payload: { startDate, endDate } }]}
+    ${actions.setFilters}   | ${''}                     | ${[]}
+  `('$action', ({ targetAction, payload, mutations }) => {
+    let stateWithOverview = null;
+
+    beforeEach(() => {
+      stateWithOverview = { ...state, isOverviewStageSelected: () => true };
+    });
+
     it('dispatches the fetchCycleAnalyticsData action', () => {
-      return testAction(actions.setFilters, null, state, [], [{ type: 'fetchCycleAnalyticsData' }]);
+      return testAction(targetAction, payload, stateWithOverview, mutations, [
+        { type: 'fetchCycleAnalyticsData' },
+      ]);
+    });
+
+    describe('with a stage selected', () => {
+      beforeEach(() => {
+        stateWithOverview = { ...state, selectedStage };
+      });
+
+      it('dispatches the fetchStageData action', () => {
+        return testAction(targetAction, payload, stateWithOverview, mutations, [
+          { type: 'fetchStageData', payload: selectedStage.id },
+          { type: 'fetchCycleAnalyticsData' },
+        ]);
+      });
     });
   });
 });

@@ -287,6 +287,8 @@ module EE
         plan_eligible_for_trial?
     end
 
+    # Be sure to call this on root_ancestor since plans are only associated
+    # with the top-level namespace, not with subgroups.
     def trial_active?
       trial? && trial_ends_on.present? && trial_ends_on >= Date.today
     end

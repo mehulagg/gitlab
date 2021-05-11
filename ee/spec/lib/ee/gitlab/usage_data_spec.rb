@@ -299,7 +299,6 @@ RSpec.describe Gitlab::UsageData do
         create(:approval_project_rule, project: project, users: [create(:user)], approvals_required: 1)
         protected_branch = create(:protected_branch, project: project)
         create(:approval_project_rule, protected_branches: [protected_branch], users: [create(:user)], approvals_required: 2, project: project)
-        create(:suggestion, note: create(:note, project: project))
         create(:code_owner_rule, merge_request: merge_request, approvals_required: 3)
         create(:code_owner_rule, merge_request: merge_request, approvals_required: 7, section: 'new_section')
         create(:approval_merge_request_rule, merge_request: merge_request)
@@ -337,7 +336,6 @@ RSpec.describe Gitlab::UsageData do
         projects_imported_from_github: 2,
         projects_with_repositories_enabled: 26,
         protected_branches: 2,
-        suggestions: 2,
         users_using_lfs_locks: 12,
         users_using_path_locks: 16,
         total_number_of_path_locks: 20,
@@ -357,7 +355,6 @@ RSpec.describe Gitlab::UsageData do
         projects_imported_from_github: 1,
         projects_with_repositories_enabled: 13,
         protected_branches: 1,
-        suggestions: 1,
         users_using_lfs_locks: 6,
         users_using_path_locks: 8,
         total_number_of_path_locks: 10,
@@ -420,6 +417,7 @@ RSpec.describe Gitlab::UsageData do
         create(:group_member, ldap: true, user: user)
         create(:cycle_analytics_group_stage)
         create(:compliance_framework_project_setting)
+        create(:compliance_framework)
       end
 
       expect(described_class.usage_activity_by_stage_manage({})).to include(
@@ -427,6 +425,7 @@ RSpec.describe Gitlab::UsageData do
         ldap_users: 2,
         value_stream_management_customized_group_stages: 2,
         projects_with_compliance_framework: 2,
+        custom_compliance_frameworks: 4,
         ldap_servers: 2,
         ldap_group_sync_enabled: true,
         ldap_admin_sync_enabled: true,
@@ -437,6 +436,7 @@ RSpec.describe Gitlab::UsageData do
         ldap_users: 1,
         value_stream_management_customized_group_stages: 2,
         projects_with_compliance_framework: 2,
+        custom_compliance_frameworks: 4,
         ldap_servers: 2,
         ldap_group_sync_enabled: true,
         ldap_admin_sync_enabled: true,

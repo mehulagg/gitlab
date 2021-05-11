@@ -173,6 +173,54 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
     end
   end
 
+  describe 'credit card requirement' do
+    shared_examples 'creates a successful pipeline' do
+      it 'creates a successful pipeline' do
+        pipeline = create_pipeline!
+
+        expect(pipeline).to be_created_successfully
+      end
+    end
+
+    context 'when credit card is required' do
+      context 'when project is on free plan' do
+        before do
+          allow(::Gitlab).to receive(:com?).and_return(true)
+          namespace.gitlab_subscription.update!(hosted_plan: create(:free_plan))
+        end
+
+        context 'when user has credit card' do
+          before do
+            allow(user).to receive(:credit_card_validated_at).and_return(Time.current)
+          end
+
+          it_behaves_like 'creates a successful pipeline'
+        end
+
+        context 'when user does not have credit card' do
+          it 'creates a pipeline with errors', :aggregate_failures do
+            pipeline = create_pipeline!
+
+            expect(pipeline).not_to be_created_successfully
+            expect(pipeline.failure_reason).to eq('user_not_verified')
+          end
+
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(ci_require_credit_card_on_free_plan: false)
+            end
+
+            it_behaves_like 'creates a successful pipeline'
+          end
+        end
+      end
+    end
+
+    context 'when credit card is not required' do
+      it_behaves_like 'creates a successful pipeline'
+    end
+  end
+
   def create_pipeline!
     service.execute(:push)
   end

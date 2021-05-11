@@ -1,4 +1,9 @@
 import { __, s__ } from '~/locale';
+import {
+  FILTER_ANY,
+  FILTER_CURRENT,
+  FILTER_NONE,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 
 // Maps sort order as it appears in the URL query to API `order_by` and `sort` params.
 const PRIORITY = 'priority';
@@ -188,170 +193,155 @@ export const sortParams = {
   },
 };
 
-export const sortOptions = [
-  {
-    id: 1,
-    title: __('Priority'),
-    sortDirection: {
-      ascending: PRIORITY_ASC,
-      descending: PRIORITY_DESC,
-    },
-  },
-  {
-    id: 2,
-    title: __('Created date'),
-    sortDirection: {
-      ascending: CREATED_ASC,
-      descending: CREATED_DESC,
-    },
-  },
-  {
-    id: 3,
-    title: __('Last updated'),
-    sortDirection: {
-      ascending: UPDATED_ASC,
-      descending: UPDATED_DESC,
-    },
-  },
-  {
-    id: 4,
-    title: __('Milestone due date'),
-    sortDirection: {
-      ascending: MILESTONE_DUE_ASC,
-      descending: MILESTONE_DUE_DESC,
-    },
-  },
-  {
-    id: 5,
-    title: __('Due date'),
-    sortDirection: {
-      ascending: DUE_DATE_ASC,
-      descending: DUE_DATE_DESC,
-    },
-  },
-  {
-    id: 6,
-    title: __('Popularity'),
-    sortDirection: {
-      ascending: POPULARITY_ASC,
-      descending: POPULARITY_DESC,
-    },
-  },
-  {
-    id: 7,
-    title: __('Label priority'),
-    sortDirection: {
-      ascending: LABEL_PRIORITY_ASC,
-      descending: LABEL_PRIORITY_DESC,
-    },
-  },
-  {
-    id: 8,
-    title: __('Manual'),
-    sortDirection: {
-      ascending: RELATIVE_POSITION_ASC,
-      descending: RELATIVE_POSITION_ASC,
-    },
-  },
-  {
-    id: 9,
-    title: __('Weight'),
-    sortDirection: {
-      ascending: WEIGHT_ASC,
-      descending: WEIGHT_DESC,
-    },
-  },
-  {
-    id: 10,
-    title: __('Blocking'),
-    sortDirection: {
-      ascending: BLOCKING_ISSUES_ASC,
-      descending: BLOCKING_ISSUES_DESC,
-    },
-  },
-];
-
 export const MAX_LIST_SIZE = 10;
 
 export const FILTERED_SEARCH_TERM = 'filtered-search-term';
 export const OPERATOR_IS = '=';
 export const OPERATOR_IS_NOT = '!=';
 
+export const NORMAL_FILTER = 'normalFilter';
+export const SPECIAL_FILTER = 'specialFilter';
+export const SPECIAL_FILTER_VALUES = [FILTER_NONE, FILTER_ANY, FILTER_CURRENT];
+
 export const filters = {
   author_username: {
     apiParam: {
-      [OPERATOR_IS]: 'author_username',
-      [OPERATOR_IS_NOT]: 'not[author_username]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'author_username',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[author_username]',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'author_username',
-      [OPERATOR_IS_NOT]: 'not[author_username]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'author_username',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[author_username]',
+      },
     },
   },
   assignee_username: {
     apiParam: {
-      [OPERATOR_IS]: 'assignee_username',
-      [OPERATOR_IS_NOT]: 'not[assignee_username]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'assignee_username',
+        [SPECIAL_FILTER]: 'assignee_id',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[assignee_username]',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'assignee_username[]',
-      [OPERATOR_IS_NOT]: 'not[assignee_username][]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'assignee_username[]',
+        [SPECIAL_FILTER]: 'assignee_id',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[assignee_username][]',
+      },
     },
   },
   milestone: {
     apiParam: {
-      [OPERATOR_IS]: 'milestone',
-      [OPERATOR_IS_NOT]: 'not[milestone]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'milestone',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[milestone]',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'milestone_title',
-      [OPERATOR_IS_NOT]: 'not[milestone_title]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'milestone_title',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[milestone_title]',
+      },
     },
   },
   labels: {
     apiParam: {
-      [OPERATOR_IS]: 'labels',
-      [OPERATOR_IS_NOT]: 'not[labels]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'labels',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[labels]',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'label_name[]',
-      [OPERATOR_IS_NOT]: 'not[label_name][]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'label_name[]',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[label_name][]',
+      },
     },
   },
   my_reaction_emoji: {
     apiParam: {
-      [OPERATOR_IS]: 'my_reaction_emoji',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'my_reaction_emoji',
+        [SPECIAL_FILTER]: 'my_reaction_emoji',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'my_reaction_emoji',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'my_reaction_emoji',
+        [SPECIAL_FILTER]: 'my_reaction_emoji',
+      },
     },
   },
   confidential: {
     apiParam: {
-      [OPERATOR_IS]: 'confidential',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'confidential',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'confidential',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'confidential',
+      },
     },
   },
   iteration: {
     apiParam: {
-      [OPERATOR_IS]: 'iteration_title',
-      [OPERATOR_IS_NOT]: 'not[iteration_title]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'iteration_title',
+        [SPECIAL_FILTER]: 'iteration_id',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[iteration_title]',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'iteration_title',
-      [OPERATOR_IS_NOT]: 'not[iteration_title]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'iteration_title',
+        [SPECIAL_FILTER]: 'iteration_id',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[iteration_title]',
+      },
     },
   },
   weight: {
     apiParam: {
-      [OPERATOR_IS]: 'weight',
-      [OPERATOR_IS_NOT]: 'not[weight]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'weight',
+        [SPECIAL_FILTER]: 'weight',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[weight]',
+      },
     },
     urlParam: {
-      [OPERATOR_IS]: 'weight',
-      [OPERATOR_IS_NOT]: 'not[weight]',
+      [OPERATOR_IS]: {
+        [NORMAL_FILTER]: 'weight',
+        [SPECIAL_FILTER]: 'weight',
+      },
+      [OPERATOR_IS_NOT]: {
+        [NORMAL_FILTER]: 'not[weight]',
+      },
     },
   },
 };

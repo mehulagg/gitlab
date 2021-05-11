@@ -64,6 +64,28 @@ RSpec.describe Dast::Profile, type: :model do
         end
       end
     end
+
+    context 'when a branch_name is specified but the project does not have a respository' do
+      subject { build(:dast_profile, branch_name: SecureRandom.hex) }
+
+      it 'is not valid', :aggregate_failures do
+        expect(subject).not_to be_valid
+        expect(subject.errors.full_messages).to include('Project must have a repository')
+        expect(subject.errors.full_messages).not_to include('Branch name can\'t reference a branch that does not exist')
+      end
+    end
+
+    context 'when a branch_name is specified but the project does not have a respository' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      subject { build(:dast_profile, project: project, branch_name: SecureRandom.hex) }
+
+      it 'is not valid', :aggregate_failures do
+        expect(subject).not_to be_valid
+        expect(subject.errors.full_messages).not_to include('Project must have a repository')
+        expect(subject.errors.full_messages).to include('Branch name can\'t reference a branch that does not exist')
+      end
+    end
   end
 
   describe 'scopes' do

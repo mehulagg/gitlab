@@ -229,12 +229,12 @@ module EE
       super || DEFAULT_GROUP_VIEW
     end
 
-    # Returns true if the user is a Reporter or higher on any namespace
+    # Returns true if the user owns a group
     # that has never had a trial (now or in the past)
-    def any_namespace_without_trial?
-      ::Namespace
-        .from("(#{namespace_union_for_reporter_developer_maintainer_owned}) #{::Namespace.table_name}")
+    def owns_group_without_trial?
+      owned_groups
         .include_gitlab_subscription
+        .where(parent_id: nil)
         .where(gitlab_subscriptions: { trial_ends_on: nil })
         .any?
     end
@@ -314,6 +314,7 @@ module EE
     override :allow_password_authentication_for_web?
     def allow_password_authentication_for_web?(*)
       return false if group_managed_account?
+      return false if user_authorized_by_provisioning_group?
 
       super
     end
@@ -321,8 +322,17 @@ module EE
     override :allow_password_authentication_for_git?
     def allow_password_authentication_for_git?(*)
       return false if group_managed_account?
+      return false if user_authorized_by_provisioning_group?
 
       super
+    end
+
+    def user_authorized_by_provisioning_group?
+      user_detail.provisioned_by_group? && ::Feature.enabled?(:block_password_auth_for_saml_users, user_detail.provisioned_by_group, type: :ops)
+    end
+
+    def authorized_by_provisioning_group?(group)
+      user_authorized_by_provisioning_group? && provisioned_by_group == group
     end
 
     def gitlab_employee?
@@ -360,10 +370,12 @@ module EE
 
     # Returns the groups a user has access to, either through a membership or a project authorization
     override :authorized_groups
-    def authorized_groups
+    def authorized_groups(with_minimal_access: true)
+      return super() unless with_minimal_access
+
       ::Group.unscoped do
         ::Group.from_union([
-          super,
+          super(),
           available_minimal_access_groups
         ])
       end
@@ -382,6 +394,27 @@ module EE
       return true unless ::Gitlab.com?
 
       !password_automatically_set?
+    end
+
+    def has_valid_credit_card?
+      credit_card_validated_at.present?
+    end
+
+    def requires_credit_card_to_run_pipelines?(project)
+      return false unless ::Gitlab.com?
+
+      root_namespace = project.root_namespace
+      if root_namespace.free_plan?
+        ::Feature.enabled?(:ci_require_credit_card_on_free_plan, project, default_enabled: :yaml)
+      elsif root_namespace.trial?
+        ::Feature.enabled?(:ci_require_credit_card_on_trial_plan, project, default_enabled: :yaml)
+      else
+        false
+      end
+    end
+
+    def has_required_credit_card_to_run_pipelines?(project)
+      has_valid_credit_card? || !requires_credit_card_to_run_pipelines?(project)
     end
 
     protected

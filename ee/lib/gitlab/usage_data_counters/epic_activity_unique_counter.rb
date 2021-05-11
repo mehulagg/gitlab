@@ -13,6 +13,8 @@ module Gitlab
       EPIC_NOTE_CREATED = 'g_project_management_users_creating_epic_notes'
       EPIC_NOTE_UPDATED = 'g_project_management_users_updating_epic_notes'
       EPIC_NOTE_DESTROYED = 'g_project_management_users_destroying_epic_notes'
+      EPIC_EMOJI_AWARDED = 'g_project_management_users_awarding_epic_emoji'
+      EPIC_EMOJI_REMOVED = 'g_project_management_users_removing_epic_emoji'
       EPIC_START_DATE_SET_AS_FIXED = 'g_project_management_users_setting_epic_start_date_as_fixed'
       EPIC_START_DATE_SET_AS_INHERITED = 'g_project_management_users_setting_epic_start_date_as_inherited'
       EPIC_DUE_DATE_SET_AS_FIXED = 'g_project_management_users_setting_epic_due_date_as_fixed'
@@ -22,6 +24,7 @@ module Gitlab
       EPIC_ISSUE_ADDED = 'g_project_management_epic_issue_added'
       EPIC_ISSUE_REMOVED = 'g_project_management_epic_issue_removed'
       EPIC_ISSUE_MOVED_FROM_PROJECT = 'g_project_management_epic_issue_moved_from_project'
+      EPIC_PARENT_UPDATED = 'g_project_management_users_updating_epic_parent'
       EPIC_CLOSED = 'g_project_management_epic_closed'
       EPIC_REOPENED = 'g_project_management_epic_reopened'
       ISSUE_PROMOTED_TO_EPIC = 'g_project_management_issue_promoted_to_epic'
@@ -29,6 +32,9 @@ module Gitlab
       EPIC_VISIBLE = 'g_project_management_users_setting_epic_visible'
       EPIC_LABELS = 'g_project_management_epic_users_changing_labels'
       EPIC_DESTROYED = 'g_project_management_epic_destroyed'
+      EPIC_TASK_CHECKED = 'project_management_users_checking_epic_task'
+      EPIC_TASK_UNCHECKED = 'project_management_users_unchecking_epic_task'
+      EPIC_CROSS_REFERENCED = 'g_project_management_epic_cross_referenced'
 
       class << self
         def track_epic_created_action(author:)
@@ -53,6 +59,14 @@ module Gitlab
 
         def track_epic_note_destroyed_action(author:)
           track_unique_action(EPIC_NOTE_DESTROYED, author)
+        end
+
+        def track_epic_emoji_awarded_action(author:)
+          track_unique_action(EPIC_EMOJI_AWARDED, author)
+        end
+
+        def track_epic_emoji_removed_action(author:)
+          track_unique_action(EPIC_EMOJI_REMOVED, author)
         end
 
         def track_epic_start_date_set_as_fixed_action(author:)
@@ -91,6 +105,10 @@ module Gitlab
           track_unique_action(EPIC_ISSUE_MOVED_FROM_PROJECT, author)
         end
 
+        def track_epic_parent_updated_action(author:)
+          track_unique_action(EPIC_PARENT_UPDATED, author)
+        end
+
         def track_epic_closed_action(author:)
           track_unique_action(EPIC_CLOSED, author)
         end
@@ -117,6 +135,18 @@ module Gitlab
 
         def track_epic_destroyed(author:)
           track_unique_action(EPIC_DESTROYED, author)
+        end
+
+        def track_epic_task_checked(author:)
+          track_unique_action(EPIC_TASK_CHECKED, author)
+        end
+
+        def track_epic_task_unchecked(author:)
+          track_unique_action(EPIC_TASK_UNCHECKED, author)
+        end
+
+        def track_epic_cross_referenced(author:)
+          track_unique_action(EPIC_CROSS_REFERENCED, author)
         end
 
         private

@@ -71,8 +71,19 @@ RSpec.describe API::License, api: true do
   end
 
   describe 'DELETE /license/:id' do
-    let(:license_type) { nil }
-    let(:license) { create(:license, created_at: Time.now, data: build(:gitlab_license, type: license_type, starts_at: Date.today, expires_at: Date.today, restrictions: { add_ons: { 'GitLab_DeployBoard' => 1 }, active_user_count: 2 }).export) }
+    let(:cloud_licensing_enabled) { false }
+    let(:license) do
+      gitlab_license = build(
+        :gitlab_license,
+        cloud_licensing_enabled: cloud_licensing_enabled,
+        starts_at: Date.current,
+        expires_at: Date.current,
+        restrictions: { add_ons: { 'GitLab_DeployBoard' => 1 }, active_user_count: 2 }
+      )
+
+      create(:license, created_at: Time.now, data: gitlab_license.export)
+    end
+
     let(:endpoint) { "/license/#{license.id}" }
 
     it 'destroys a license and returns 204' do
@@ -98,7 +109,7 @@ RSpec.describe API::License, api: true do
     end
 
     context 'with a cloud license' do
-      let(:license_type) { License::CLOUD_LICENSE_TYPE }
+      let(:cloud_licensing_enabled) { true }
 
       it 'returns 422 and does not delete the license' do
         delete api(endpoint, admin)

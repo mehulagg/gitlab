@@ -68,7 +68,7 @@ RSpec.describe DastOnDemandScans::CreateService do
               auth_url: dast_site_profile.auth_url,
               auth_username: dast_site_profile.auth_username,
               auth_username_field: dast_site_profile.auth_username_field,
-              branch: project.default_branch_or_master,
+              branch: project.default_branch,
               dast_profile: nil,
               excluded_urls: dast_site_profile.excluded_urls.join(','),
               full_scan_enabled: false,

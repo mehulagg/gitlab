@@ -112,7 +112,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   context 'with namespace' do
                     let(:has_future_renewal) { false }
 
-                    let_it_be(:namespace) { create(:group, name: 'No Limit Records') }
+                    let_it_be(:namespace) { create(:group_with_plan, name: 'No Limit Records') }
 
                     before do
                       allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
@@ -140,6 +140,16 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                       let(:has_future_renewal) { true }
 
                       it { is_expected.to be_nil }
+                    end
+
+                    context 'without gitlab_subscription' do
+                      let(:namespace) { build(:group, name: 'No Subscription Records') }
+
+                      it 'does not check for a future renewal' do
+                        expect(GitlabSubscriptions::CheckFutureRenewalService).not_to receive(:new)
+
+                        subject
+                      end
                     end
                   end
                 end
@@ -200,11 +210,15 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
 
                 let(:has_future_renewal) { false }
 
-                let_it_be(:namespace) { create(:group, name: 'No Limit Records') }
+                let_it_be(:namespace) { create(:group_with_plan, name: 'No Limit Records') }
 
                 before do
                   allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
                     allow(service).to receive(:execute).and_return(has_future_renewal)
+                  end
+
+                  allow_next_instance_of(Group) do |group|
+                    allow(group).to receive(:gitlab_subscription).and_return(gitlab_subscription)
                   end
                 end
 
@@ -254,6 +268,16 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   let(:has_future_renewal) { true }
 
                   it { is_expected.to be_nil }
+                end
+
+                context 'without gitlab_subscription' do
+                  let(:namespace) { build(:group, name: 'No Subscription Records') }
+
+                  it 'does not check for a future renewal' do
+                    expect(GitlabSubscriptions::CheckFutureRenewalService).not_to receive(:new)
+
+                    subject
+                  end
                 end
               end
             end

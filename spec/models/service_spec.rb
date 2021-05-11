@@ -248,7 +248,7 @@ RSpec.describe Service do
   describe '.find_or_initialize_all_non_project_specific' do
     shared_examples 'service instances' do
       it 'returns the available service instances' do
-        expect(Service.find_or_initialize_all_non_project_specific(Service.for_instance).pluck(:type)).to match_array(Service.available_services_types(include_project_specific: false))
+        expect(Service.find_or_initialize_all_non_project_specific(Service.for_instance).map(&:to_param)).to match_array(Service.available_services_names(include_project_specific: false))
       end
 
       it 'does not create service instances' do
@@ -597,23 +597,49 @@ RSpec.describe Service do
             context 'passing a group' do
               let!(:sub_subgroup) { create(:group, parent: subgroup) }
 
-              it 'creates a service from the subgroup-level integration' do
-                described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+              context 'traversal queries' do
+                shared_examples 'correct ancestor order' do
+                  it 'creates a service from the subgroup-level integration' do
+                    described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
 
-                expect(sub_subgroup.reload.services.size).to eq(1)
-                expect(sub_subgroup.reload.services.first.api_url).to eq(subgroup_integration.api_url)
-                expect(sub_subgroup.reload.services.first.inherit_from_id).to eq(subgroup_integration.id)
-              end
+                    sub_subgroup.reload
 
-              context 'having a service inheriting settings' do
-                let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
+                    expect(sub_subgroup.services.size).to eq(1)
+                    expect(sub_subgroup.services.first.api_url).to eq(subgroup_integration.api_url)
+                    expect(sub_subgroup.services.first.inherit_from_id).to eq(subgroup_integration.id)
+                  end
 
-                it 'creates a service from the group-level integration' do
-                  described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+                  context 'having a service inheriting settings' do
+                    let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
 
-                  expect(sub_subgroup.reload.services.size).to eq(1)
-                  expect(sub_subgroup.reload.services.first.api_url).to eq(group_integration.api_url)
-                  expect(sub_subgroup.reload.services.first.inherit_from_id).to eq(group_integration.id)
+                    it 'creates a service from the group-level integration' do
+                      described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
+
+                      sub_subgroup.reload
+
+                      expect(sub_subgroup.services.size).to eq(1)
+                      expect(sub_subgroup.services.first.api_url).to eq(group_integration.api_url)
+                      expect(sub_subgroup.services.first.inherit_from_id).to eq(group_integration.id)
+                    end
+                  end
+                end
+
+                context 'recursive' do
+                  before do
+                    stub_feature_flags(use_traversal_ids: false)
+                  end
+
+                  include_examples 'correct ancestor order'
+                end
+
+                context 'linear' do
+                  before do
+                    stub_feature_flags(use_traversal_ids: true)
+
+                    sub_subgroup.reload # make sure traversal_ids are reloaded
+                  end
+
+                  include_examples 'correct ancestor order'
                 end
               end
             end
@@ -640,9 +666,22 @@ RSpec.describe Service do
     end
   end
 
+  describe '.service_name_to_model' do
+    it 'returns the model for the given service name', :aggregate_failures do
+      expect(described_class.service_name_to_model('asana')).to eq(Integrations::Asana)
+      # TODO We can remove this test when all models have been namespaced:
+      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60968#note_570994955
+      expect(described_class.service_name_to_model('youtrack')).to eq(YoutrackService)
+    end
+
+    it 'raises an error if service name is invalid' do
+      expect { described_class.service_name_to_model('foo') }.to raise_exception(NameError, /uninitialized constant FooService/)
+    end
+  end
+
   describe "{property}_changed?" do
     let(:service) do
-      BambooService.create(
+      Integrations::Bamboo.create(
         project: project,
         properties: {
           bamboo_url: 'http://gitlab.com',
@@ -682,7 +721,7 @@ RSpec.describe Service do
 
   describe "{property}_touched?" do
     let(:service) do
-      BambooService.create(
+      Integrations::Bamboo.create(
         project: project,
         properties: {
           bamboo_url: 'http://gitlab.com',
@@ -722,7 +761,7 @@ RSpec.describe Service do
 
   describe "{property}_was" do
     let(:service) do
-      BambooService.create(
+      Integrations::Bamboo.create(
         project: project,
         properties: {
           bamboo_url: 'http://gitlab.com',

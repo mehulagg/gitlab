@@ -97,6 +97,22 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       assign(:elasticsearch_reindexing_task, task)
     end
 
+    context 'when task is in progress' do
+      let(:task) { build(:elastic_reindexing_task, state: :reindexing) }
+
+      it 'renders a disabled pause checkbox' do
+        render
+
+        expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+      end
+
+      it 'renders a disabled trigger cluster reindexing link' do
+        render
+
+        expect(rendered).to have_css('a.gl-button[disabled="disabled"]', text: 'Trigger cluster reindexing')
+      end
+    end
+
     context 'without extended details' do
       let(:task) { build(:elastic_reindexing_task) }
 

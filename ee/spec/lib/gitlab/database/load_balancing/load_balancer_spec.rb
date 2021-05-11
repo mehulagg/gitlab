@@ -21,7 +21,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
   def raise_and_wrap(wrapper, original)
     raise original
   rescue original.class
-    raise wrapper.new('boop')
+    raise wrapper, 'boop'
   end
 
   def wrapped_exception(wrapper, original)
@@ -94,7 +94,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       returned = lb.read do
         unless raised
           raised = true
-          raise conflict_error.new
+          raise conflict_error
         end
 
         10
@@ -107,7 +107,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
       expect(lb).to receive(:release_host).exactly(6).times
       expect(lb).to receive(:read_write)
 
-      lb.read { raise conflict_error.new }
+      lb.read { raise conflict_error }
     end
 
     it 'uses the primary if no secondaries are available' do

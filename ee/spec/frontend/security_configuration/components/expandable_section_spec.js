@@ -1,6 +1,7 @@
 import { mount, shallowMount } from '@vue/test-utils';
 import ExpandableSection from 'ee/security_configuration/components/expandable_section.vue';
 import { stubTransition } from 'helpers/stub_transition';
+import waitForPromises from 'helpers/wait_for_promises';
 
 describe('ExpandableSection component', () => {
   let wrapper;
@@ -90,7 +91,8 @@ describe('ExpandableSection component', () => {
     });
 
     describe('clicking the expand button', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
+        await waitForPromises();
         const button = findButton();
         button.trigger('click');
         return wrapper.vm.$nextTick();

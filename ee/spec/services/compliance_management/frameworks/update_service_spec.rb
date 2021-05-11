@@ -22,18 +22,9 @@ RSpec.describe ComplianceManagement::Frameworks::UpdateService do
     end
   end
 
-  context 'feature is disabled' do
+  context 'feature is unlicensed' do
     before do
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
-    end
-
-    it_behaves_like 'a failed update request'
-  end
-
-  context 'feature is licensed but disabled' do
-    before do
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
-      stub_licensed_features(custom_compliance_frameworks: true)
+      stub_licensed_features(custom_compliance_frameworks: false)
     end
 
     it_behaves_like 'a failed update request'
@@ -45,10 +36,9 @@ RSpec.describe ComplianceManagement::Frameworks::UpdateService do
     it_behaves_like 'a failed update request'
   end
 
-  context 'when feature is enabled and licensed' do
+  context 'when feature is licensed' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     context 'with an invalid param passed' do

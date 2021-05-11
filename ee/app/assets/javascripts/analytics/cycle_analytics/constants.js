@@ -75,4 +75,7 @@ export const NOT_ENOUGH_DATA_ERROR = s__(
 );
 
 export const PAGINATION_TYPE = 'keyset';
-export const PAGINATION_SORT_FIELD = 'created_at';
+export const PAGINATION_SORT_FIELD_END_EVENT = 'end_event';
+export const PAGINATION_SORT_FIELD_DURATION = 'duration';
+export const PAGINATION_SORT_DIRECTION_DESC = 'desc';
+export const PAGINATION_SORT_DIRECTION_ASC = 'asc';

@@ -52,7 +52,10 @@ module Types
     mount_mutation Mutations::MergeRequests::SetLocked
     mount_mutation Mutations::MergeRequests::SetMilestone
     mount_mutation Mutations::MergeRequests::SetSubscription
-    mount_mutation Mutations::MergeRequests::SetWip, calls_gitaly: true
+    mount_mutation Mutations::MergeRequests::SetWip,
+                   calls_gitaly: true,
+                   deprecated: { reason: 'Use mergeRequestSetDraft', milestone: '13.12' }
+    mount_mutation Mutations::MergeRequests::SetDraft, calls_gitaly: true
     mount_mutation Mutations::MergeRequests::SetAssignees
     mount_mutation Mutations::MergeRequests::ReviewerRereview
     mount_mutation Mutations::Metrics::Dashboard::Annotations::Create
@@ -94,6 +97,8 @@ module Types
     mount_mutation Mutations::Ci::Pipeline::Destroy
     mount_mutation Mutations::Ci::Pipeline::Retry
     mount_mutation Mutations::Ci::CiCdSettingsUpdate
+    mount_mutation Mutations::Ci::Job::Play
+    mount_mutation Mutations::Ci::Job::Retry
     mount_mutation Mutations::Namespace::PackageSettings::Update
     mount_mutation Mutations::UserCallouts::Create
   end

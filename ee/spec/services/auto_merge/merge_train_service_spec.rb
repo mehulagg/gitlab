@@ -59,7 +59,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when failed to save the record' do
       before do
-        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled.new }
+        allow(merge_request).to receive(:save!) { raise PG::QueryCanceled }
       end
 
       it 'returns result code' do
@@ -69,7 +69,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns failed status' do
@@ -218,7 +218,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:cancel_merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns error' do
@@ -304,7 +304,7 @@ RSpec.describe AutoMerge::MergeTrainService do
 
     context 'when statement timeout happened on system note creation' do
       before do
-        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled.new }
+        allow(SystemNoteService).to receive(:abort_merge_train) { raise PG::QueryCanceled }
       end
 
       it 'returns error' do

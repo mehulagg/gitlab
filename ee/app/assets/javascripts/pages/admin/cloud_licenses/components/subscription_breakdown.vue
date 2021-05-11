@@ -1,38 +1,53 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlModalDirective } from '@gitlab/ui';
 import { pick, some } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import {
+  enterActivationCode,
   licensedToHeaderText,
   manageSubscriptionButtonText,
+  notificationType,
+  removeLicense,
   subscriptionDetailsHeaderText,
   subscriptionType,
   syncSubscriptionButtonText,
-  notificationType,
+  uploadLicense,
 } from '../constants';
+import SubscriptionActivationModal from './subscription_activation_modal.vue';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
 import SubscriptionDetailsHistory from './subscription_details_history.vue';
 import SubscriptionDetailsUserInfo from './subscription_details_user_info.vue';
 
 export const subscriptionDetailsFields = ['id', 'plan', 'expiresAt', 'lastSync', 'startsAt'];
 export const licensedToFields = ['name', 'email', 'company'];
+export const modalId = 'subscription-activation-modal';
 
 export default {
   i18n: {
+    enterActivationCode,
     licensedToHeaderText,
     manageSubscriptionButtonText,
+    removeLicense,
     subscriptionDetailsHeaderText,
     syncSubscriptionButtonText,
+    uploadLicense,
+  },
+  modal: {
+    id: modalId,
   },
   name: 'SubscriptionBreakdown',
+  directives: {
+    GlModal: GlModalDirective,
+  },
   components: {
     GlButton,
+    SubscriptionActivationModal,
     SubscriptionDetailsCard,
     SubscriptionDetailsHistory,
     SubscriptionDetailsUserInfo,
     SubscriptionSyncNotifications: () => import('./subscription_sync_notifications.vue'),
   },
-  inject: ['subscriptionSyncPath'],
+  inject: ['customersPortalUrl', 'licenseUploadPath', 'subscriptionSyncPath'],
   props: {
     subscription: {
       type: Object,
@@ -52,10 +67,16 @@ export default {
     };
   },
   computed: {
-    canSyncSubscription() {
-      return this.subscriptionSyncPath && this.subscription.type === subscriptionType.CLOUD;
+    canManageSubscription() {
+      return this.customersPortalUrl;
     },
-    canMangeSubscription() {
+    canSyncSubscription() {
+      return this.subscriptionSyncPath && this.isCloudType;
+    },
+    canUploadLicense() {
+      return this.licenseUploadPath && this.isLegacyType;
+    },
+    canRemoveLicense() {
       return false;
     },
     hasSubscription() {
@@ -64,8 +85,23 @@ export default {
     hasSubscriptionHistory() {
       return Boolean(this.subscriptionList.length);
     },
+    isCloudType() {
+      return this.subscription.type === subscriptionType.CLOUD;
+    },
+    isLegacyType() {
+      return this.subscription.type === subscriptionType.LEGACY;
+    },
     shouldShowFooter() {
-      return some(pick(this, ['canSyncSubscription', 'canMangeSubscription']), Boolean);
+      return some(
+        pick(this, [
+          'hasSubscription',
+          'canDeleteSubscription',
+          'canManageSubscription',
+          'canSyncSubscription',
+          'canUploadSubscription',
+        ]),
+        Boolean,
+      );
     },
     subscriptionHistory() {
       return this.hasSubscriptionHistory ? this.subscriptionList : [this.subscription];
@@ -96,6 +132,7 @@ export default {
 
 <template>
   <div>
+    <subscription-activation-modal v-if="hasSubscription" :modal-id="$options.modal.id" />
     <subscription-sync-notifications
       v-if="notification"
       class="mb-4"
@@ -120,8 +157,41 @@ export default {
             >
               {{ $options.i18n.syncSubscriptionButtonText }}
             </gl-button>
-            <gl-button v-if="canMangeSubscription">
+            <gl-button
+              v-if="hasSubscription"
+              v-gl-modal="$options.modal.id"
+              category="primary"
+              variant="confirm"
+              data-testid="subscription-activation-action"
+            >
+              {{ $options.i18n.enterActivationCode }}
+            </gl-button>
+            <gl-button
+              v-if="canUploadLicense"
+              :href="licenseUploadPath"
+              category="secondary"
+              variant="confirm"
+              data-testid="license-upload-action"
+            >
+              {{ $options.i18n.uploadLicense }}
+            </gl-button>
+            <gl-button
+              v-if="canManageSubscription"
+              :href="customersPortalUrl"
+              target="_blank"
+              category="secondary"
+              variant="confirm"
+              data-testid="subscription-manage-action"
+            >
               {{ $options.i18n.manageSubscriptionButtonText }}
+            </gl-button>
+            <gl-button
+              v-if="canRemoveLicense"
+              category="secondary"
+              variant="danger"
+              data-testid="license-remove-action"
+            >
+              {{ $options.i18n.removeLicense }}
             </gl-button>
           </template>
         </subscription-details-card>

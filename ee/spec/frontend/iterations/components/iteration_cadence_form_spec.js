@@ -1,5 +1,6 @@
 import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
-import { createLocalVue, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceForm from 'ee/iterations/components/iteration_cadence_form.vue';
 import createCadence from 'ee/iterations/queries/create_cadence.mutation.graphql';
@@ -7,14 +8,14 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { visitUrl } from '~/lib/utils/url_utility';
 
-jest.mock('~/lib/utils/url_utility');
-
-const localVue = createLocalVue();
+const push = jest.fn();
+const $router = {
+  push,
+};
 
 function createMockApolloProvider(requestHandlers) {
-  localVue.use(VueApollo);
+  Vue.use(VueApollo);
 
   return createMockApollo(requestHandlers);
 }
@@ -39,17 +40,18 @@ describe('Iteration cadence form', () => {
       iterationCadenceCreate: { iterationCadence, errors: ['alas, your data is unchanged'] },
     },
   };
-  const defaultProps = { cadencesListPath: TEST_HOST };
 
-  function createComponent({ props = defaultProps, resolverMock } = {}) {
+  function createComponent({ resolverMock } = {}) {
     const apolloProvider = createMockApolloProvider([[createCadence, resolverMock]]);
     wrapper = extendedWrapper(
       mount(IterationCadenceForm, {
         apolloProvider,
-        localVue,
-        propsData: props,
+        mocks: {
+          $router,
+        },
         provide: {
           groupPath,
+          cadencesListPath: TEST_HOST,
         },
       }),
     );
@@ -86,7 +88,7 @@ describe('Iteration cadence form', () => {
     it('cancel button links to list page', () => {
       clickCancel();
 
-      expect(visitUrl).toHaveBeenCalledWith(TEST_HOST);
+      expect(push).toHaveBeenCalledWith({ name: 'index' });
     });
 
     describe('save', () => {
@@ -131,7 +133,7 @@ describe('Iteration cadence form', () => {
 
         await waitForPromises();
 
-        expect(visitUrl).toHaveBeenCalled();
+        expect(push).toHaveBeenCalledWith({ name: 'index' });
       });
 
       it('does not submit if required fields missing', () => {

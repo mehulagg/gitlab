@@ -115,6 +115,48 @@ RSpec.describe Groups::OmniauthCallbacksController do
       end
     end
 
+    context 'when user used to be a member of a group' do
+      before do
+        user.provisioned_by_group = group
+        user.save!
+      end
+
+      it "displays a flash message verifying group sign in" do
+        post provider, params: { group_id: group }
+
+        expect(flash[:notice]).to match(/Signed in with SAML/i)
+      end
+
+      it 'adds linked identity' do
+        expect { post provider, params: { group_id: group } }.to change(linked_accounts, :count)
+      end
+
+      it 'adds group membership' do
+        expect { post provider, params: { group_id: group } }.to change { group.members.count }
+      end
+    end
+
+    context 'when user was provisioned by other group' do
+      before do
+        user.provisioned_by_group = create(:group)
+        user.save!
+      end
+
+      it "displays a flash message verifying group sign in" do
+        post provider, params: { group_id: group }
+
+        expect(flash[:notice]).to eq('Login to a GitLab account to link with your SAML identity')
+      end
+
+      it 'does not add linked identity' do
+        expect { post provider, params: { group_id: group } }.not_to change(linked_accounts, :count)
+      end
+
+      it 'does not add group membership' do
+        expect { post provider, params: { group_id: group } }.not_to change { group.members.count }
+      end
+    end
+
     context "when signed in" do
       before do
         sign_in(user)

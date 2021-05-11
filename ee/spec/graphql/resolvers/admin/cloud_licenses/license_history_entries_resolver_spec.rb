@@ -51,7 +51,6 @@ RSpec.describe Resolvers::Admin::CloudLicenses::LicenseHistoryEntriesResolver do
 
     it 'returns the license history entries', :enable_admin_mode do
       today = Date.current
-      type = License::CLOUD_LICENSE_TYPE
 
       past_license = create_license(
         data: { starts_at: today - 1.month, expires_at: today + 11.months },
@@ -59,8 +58,12 @@ RSpec.describe Resolvers::Admin::CloudLicenses::LicenseHistoryEntriesResolver do
       )
       expired_license = create_license(data: { starts_at: today - 1.year, expires_at: today - 1.month })
       another_license = create_license(data: { starts_at: today - 1.month, expires_at: today + 1.year })
-      future_license = create_license(data: { starts_at: today + 1.month, expires_at: today + 13.months, type: type })
-      current_license = create_license(data: { starts_at: today - 15.days, expires_at: today + 11.months, type: type })
+      future_license = create_license(
+        data: { starts_at: today + 1.month, expires_at: today + 13.months, cloud_licensing_enabled: true }
+      )
+      current_license = create_license(
+        data: { starts_at: today - 15.days, expires_at: today + 11.months, cloud_licensing_enabled: true }
+      )
 
       expect(result).to eq(
         [

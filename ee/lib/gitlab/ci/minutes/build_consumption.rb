@@ -8,12 +8,13 @@ module Gitlab
       # The amount returned is a float so that internally we could track
       # an accurate usage of minutes/credits.
       class BuildConsumption
-        def initialize(build)
+        def initialize(build, duration)
           @build = build
+          @duration = duration
         end
 
         def amount
-          (@build.duration.to_f / 60 * cost_factor).round(2)
+          @amount ||= (@duration.to_f / 60 * cost_factor).round(2)
         end
 
         private

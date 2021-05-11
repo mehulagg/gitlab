@@ -12,7 +12,7 @@ module EE
       prepended do
         scope :latest, -> do
           with(
-            latest_by_project: select(:project_id, 'MAX(date) AS date').group(:project_id)
+            ::Gitlab::SQL::CTE.new(:latest_by_project, select(:project_id, 'MAX(date) AS date').group(:project_id)).to_arel
           )
           .joins(
             'JOIN latest_by_project ON ci_daily_build_group_report_results.date = latest_by_project.date

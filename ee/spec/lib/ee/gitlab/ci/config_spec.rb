@@ -36,6 +36,8 @@ RSpec.describe Gitlab::Ci::Config do
   end
 
   describe 'with security orchestration policy' do
+    let(:source) { 'push' }
+
     let_it_be(:ref) { 'master' }
     let_it_be_with_refind(:project) { create(:project, :repository) }
 
@@ -59,7 +61,7 @@ RSpec.describe Gitlab::Ci::Config do
       EOS
     end
 
-    subject(:config) { described_class.new(ci_yml, ref: ref, project: project) }
+    subject(:config) { described_class.new(ci_yml, ref: ref, project: project, source: source) }
 
     before do
       allow_next_instance_of(Repository) do |repository|
@@ -146,6 +148,14 @@ RSpec.describe Gitlab::Ci::Config do
 
             it 'extends config with additional jobs' do
               expect(config.to_hash).to include(expected_configuration)
+            end
+
+            context 'when source is ondemand_dast_scan' do
+              let(:source) { 'ondemand_dast_scan' }
+
+              it 'does not modify the config' do
+                expect(config.to_hash).to eq(sample_job: { script: ["echo 'test'"] })
+              end
             end
           end
         end

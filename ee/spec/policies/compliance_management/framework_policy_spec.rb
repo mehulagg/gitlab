@@ -55,15 +55,4 @@ RSpec.describe ComplianceManagement::FrameworkPolicy do
     it { is_expected.to be_disallowed(:manage_compliance_framework) }
     it { is_expected.to be_disallowed(:manage_group_level_compliance_pipeline_config) }
   end
-
-  context 'feature is disabled' do
-    before do
-      stub_licensed_features(custom_compliance_frameworks: true, evaluate_group_level_compliance_pipeline: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: false)
-      stub_feature_flags(ff_evaluate_group_level_compliance_pipeline: false)
-    end
-
-    it { is_expected.to be_disallowed(:manage_compliance_framework) }
-    it { is_expected.to be_disallowed(:manage_group_level_compliance_pipeline_config) }
-  end
 end
