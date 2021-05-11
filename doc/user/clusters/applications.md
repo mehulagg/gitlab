@@ -1219,108 +1219,6 @@ as `*.example.com.`) to reach your apps. If your external endpoint is an IP
 address, use an A record. If your external endpoint is a hostname, use a CNAME
 record.
 
-#### Web Application Firewall (ModSecurity)
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21966) in GitLab 12.7.
-
-WARNING:
-The Web Application Firewall is in its end-of-life process. It is [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/271276)
-in GitLab 13.6, and planned for [removal](https://gitlab.com/gitlab-org/gitlab/-/issues/271349)
-in GitLab 14.0.
-
-A Web Application Firewall (WAF) examines traffic being sent or received,
-and can block malicious traffic before it reaches your application. The benefits
-of a WAF are:
-
-- Real-time security monitoring for your application.
-- Logging of all your HTTP traffic to the application.
-- Access control for your application.
-- Highly configurable logging and blocking rules.
-
-By default, GitLab provides you with a WAF known as [`ModSecurity`](https://www.modsecurity.org/),
-which is a toolkit for real-time web application monitoring, logging, and access
-control. GitLab applies the [OWASP's Core Rule Set](https://coreruleset.org/),
-which provides generic attack detection capabilities.
-
-This feature:
-
-- Runs in "Detection-only mode" unless configured otherwise.
-- Is viewable by checking your Ingress controller's `modsec` log for rule violations.
-  For example:
-
-  ```shell
-  kubectl -n gitlab-managed-apps logs -l app=nginx-ingress,component=controller -c modsecurity-log -f
-  ```
-
-To enable WAF, switch its respective toggle to the enabled position when installing
-or updating [Ingress application](#ingress).
-
-If this is your first time using the GitLab WAF, we recommend you follow the
-[quick start guide](../project/clusters/protect/web_application_firewall/quick_start_guide.md).
-
-There is a small performance overhead by enabling ModSecurity. If this is
-considered significant for your application, you can disable ModSecurity's
-rule engine for your deployed application in any of the following ways:
-
-1. Set the [deployment variable](../../topics/autodevops/index.md)
-   `AUTO_DEVOPS_MODSECURITY_SEC_RULE_ENGINE` to `Off` to prevent ModSecurity
-   from processing any requests for the given application or environment.
-1. Switch its respective toggle to the disabled position, and then apply changes
-   by selecting **Save changes** to reinstall Ingress with the recent changes.
-
-![Disabling WAF](../project/clusters/protect/web_application_firewall/img/guide_waf_ingress_save_changes_v12_10.png)
-
-##### Logging and blocking modes
-
-To help you tune your WAF rules, you can globally set your WAF to either
-*Logging* or *Blocking* mode:
-
-- *Logging mode*: Allows traffic matching the rule to pass, and logs the event.
-- *Blocking mode*: Prevents traffic matching the rule from passing, and logs the event.
-
-To change your WAF's mode:
-
-1. If you haven't already done so,
-   [install ModSecurity](../project/clusters/protect/web_application_firewall/quick_start_guide.md).
-1. Navigate to **Operations > Kubernetes**.
-1. In **Applications**, scroll to **Ingress**.
-1. Under **Global default**, select your desired mode.
-1. Select **Save changes**.
-
-##### WAF version updates
-
-Enabling, disabling, or changing the logging mode for **ModSecurity** is only
-allowed in same version of [Ingress](#ingress) due to limitations in
-[Helm](https://helm.sh/) which might be overcome in future releases.
-
-The **ModSecurity** user interface controls are disabled if the version deployed
-differs from the one available in GitLab. However, actions at the [Ingress](#ingress)
-level, such as uninstalling, can still be performed:
-
-![WAF settings disabled](../project/clusters/protect/web_application_firewall/img/guide_waf_ingress_disabled_settings_v12_10.png)
-
-Update [Ingress](#ingress) to the most recent version to take advantage of bug
-fixes, security fixes, and performance improvements. To update the
-[Ingress application](#ingress), you must first uninstall it, and then re-install
-it as described in [Install ModSecurity](../project/clusters/protect/web_application_firewall/quick_start_guide.md).
-
-##### Viewing Web Application Firewall traffic
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14707) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.9.
-
-You can view Web Application Firewall traffic by navigating to your project's
-**Security & Compliance > Threat Monitoring** page. From there, you can see
-tracked over time:
-
-- The total amount of traffic to your application.
-- The proportion of traffic that's considered anomalous by the Web Application
-  Firewall's default [OWASP ruleset](https://coreruleset.org/).
-
-If a significant percentage of traffic is anomalous, investigate it for potential threats
-by [examining the Web Application Firewall logs](#web-application-firewall-modsecurity).
-
-![Threat Monitoring](img/threat_monitoring_v12_9.png)
-
 ### JupyterHub
 
 > - Introduced in GitLab 11.0 for project-level clusters.
@@ -1535,12 +1433,12 @@ To enable Fluentd:
 
 1. Navigate to **Operations > Kubernetes** and click
    **Applications**. Enter a host, port, and protocol
-   for sending the WAF logs with syslog.
-1. Provide the host domain name or URL in **SIEM Hostname**.
-1. Provide the host port number in **SIEM Port**.
-1. Select a **SIEM Protocol**.
-1. Select at least one of the available logs (such as WAF or Cilium).
-1. Click **Save changes**.
+   for sending logs.
+2. Provide the host domain name or URL in **SIEM Hostname**.
+3. Provide the host port number in **SIEM Port**.
+4. Select a **SIEM Protocol**.
+5. Select a **Send Container Network Policies Logs** checkbox.
+6. Click **Save changes**.
 
 ![Fluentd input fields](img/fluentd_v13_0.png)
 
