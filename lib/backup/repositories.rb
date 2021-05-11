@@ -6,9 +6,9 @@ module Backup
   class Repositories
     attr_reader :progress, :strategy
 
-    def initialize(progress)
+    def initialize(progress, strategy: nil)
       @progress = progress
-      @strategy = GitalyRpcBackup.new(progress)
+      @strategy = strategy || GitalyRpcBackup.new(progress)
     end
 
     def dump(max_concurrency:, max_storage_concurrency:)
