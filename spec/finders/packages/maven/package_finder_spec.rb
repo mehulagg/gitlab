@@ -116,7 +116,7 @@ RSpec.describe ::Packages::Maven::PackageFinder do
     it_behaves_like 'Packages::Maven::PackageFinder examples'
 
     it 'uses CTE in the query' do
-      sql = described_class.new('some_path', user, group: group).send(:packages_with_path).to_sql
+      sql = described_class.new('some_path', user, group: group).send(:packages).to_sql
 
       expect(sql).to include('WITH "maven_metadata_by_path" AS')
     end
