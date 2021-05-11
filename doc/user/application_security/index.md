@@ -117,7 +117,7 @@ When [Auto DevOps](../../topics/autodevops/) is enabled, all GitLab Security sca
 
 While you cannot directly customize Auto DevOps, you can [include the Auto DevOps template in your project's `.gitlab-ci.yml` file](../../topics/autodevops/customize.md#customizing-gitlab-ciyml).
 
-## Default behaviour of GitLab security scanning tools
+## Default behavior of GitLab security scanning tools
 
 ### Secure jobs in your pipeline
 
