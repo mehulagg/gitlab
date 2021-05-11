@@ -203,6 +203,7 @@ export default {
     ...mapActions('diffs', [
       'loadCollapsedDiff',
       'assignDiscussionsToDiff',
+      'scrollToFile',
       'setRenderIt',
       'setFileCollapsedByUser',
     ]),
@@ -233,15 +234,20 @@ export default {
         eventHub.$emit(event);
       });
     },
-    handleToggle() {
-      const currentCollapsedFlag = this.isCollapsed;
+    handleToggle({ viaUserInteraction = false } = {}) {
+      const collapsingNow = !this.isCollapsed;
+      const toContent = true;
 
       this.setFileCollapsedByUser({
         filePath: this.file.file_path,
-        collapsed: !currentCollapsedFlag,
+        collapsed: collapsingNow,
       });
 
-      if (!this.hasDiff && currentCollapsedFlag) {
+      if (collapsingNow && viaUserInteraction) {
+        this.scrollToFile({ path: this.file.file_path, toContent });
+      }
+
+      if (!this.hasDiff && !collapsingNow) {
         this.requestDiff();
       }
     },
@@ -300,7 +306,7 @@ export default {
       :codequality-diff="codequalityDiffForFile"
       class="js-file-title file-title gl-border-1 gl-border-solid gl-border-gray-100"
       :class="hasBodyClasses.header"
-      @toggleFile="handleToggle"
+      @toggleFile="handleToggle({ viaUserInteraction: true })"
       @showForkMessage="showForkMessage"
     />
 
