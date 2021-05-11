@@ -58,7 +58,23 @@ module EE
       def handle_issue_type_change(issue)
         return unless issue.previous_changes.include?('issue_type')
 
+        handle_issue_type_label_update(issue)
         ::IncidentManagement::Incidents::CreateSlaService.new(issue, current_user).execute
+      end
+
+      def handle_issue_type_label_update(issue)
+        if issue.issue_type === 'incident'
+          label = ::IncidentManagement::CreateIncidentLabelService
+                    .new(project, current_user)
+                    .execute
+                    .payload[:label]
+
+          return if issue.label_ids.include?(label.id)
+
+          issue.labels << label
+        else
+          issue.labels = issue.labels.select { |label| label.title != 'incident' }
+        end
       end
 
       def handle_promotion(issue)

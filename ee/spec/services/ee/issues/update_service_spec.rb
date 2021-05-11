@@ -181,6 +181,24 @@ RSpec.describe Issues::UpdateService do
           expect { update_issue(issue_type: 'incident') }.to change(IssuableSla, :count).by(1)
           expect(issue.reload.issuable_sla).to be_present
         end
+
+        it 'adds a `incident` label if one does not exist' do
+          expect { update_issue(issue_type: 'incident') }.to change(issue.labels, :count).by(1)
+          expect(issue.labels.pluck(:title)).to eq(['incident'])
+        end
+
+        context 'for an issue with multiple labels' do
+          let!(:label_1) { create(:label, project: project, title: 'incident') }
+          let(:issue) { create(:incident, project: project, labels: [label_1]) }
+
+          before do
+            update_issue(issue_type: 'incident')
+          end
+
+          it 'does not add an `incident` label if one already exist' do
+            expect(issue.labels).to eq([label_1])
+          end
+        end
       end
 
       context 'from incident to issue' do
@@ -191,6 +209,20 @@ RSpec.describe Issues::UpdateService do
           expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
           expect(issue.reload.issuable_sla).to be_present
         end
+
+        context 'for an incident with multiple labels' do
+          let!(:label_1) { create(:label, project: project, title: 'incident') }
+          let!(:label_2) { create(:label, project: project, title: 'missed-sla') }
+          let(:issue) { create(:incident, project: project, labels: [label_1, label_2]) }
+
+          before do
+            update_issue(issue_type: 'issue')
+          end
+
+          it 'removes an `incident` label if one exists on the incident' do
+            expect(issue.labels).to eq([label_2])
+          end
+        end
       end
 
       # Not an expected scenario, but covers an SLA-agnostic hypothetical
@@ -200,6 +232,11 @@ RSpec.describe Issues::UpdateService do
         it 'does nothing' do
           expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
           expect(issue.reload.issuable_sla).to be_nil
+        end
+
+        it 'does nothing to the labels' do
+          expect { update_issue(issue_type: 'issue') }.not_to change(issue.labels, :count)
+          expect(issue.reload.labels).to eq([])
         end
       end
     end
