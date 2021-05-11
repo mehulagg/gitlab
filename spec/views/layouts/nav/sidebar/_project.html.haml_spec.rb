@@ -72,6 +72,27 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         expect(rendered).to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-project-releases')
       end
     end
+
+    describe 'Members' do
+      let(:page) { Nokogiri::HTML.parse(rendered) }
+
+      it 'has a link to the members page' do
+        render
+
+        expect(page.at_css('.shortcuts-project').parent.css('[aria-label="Members"]')).not_to be_empty
+        expect(rendered).to have_link('Members', href: project_project_members_path(project))
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        it 'does not have a link to the members page' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(page.at_css('.shortcuts-project').parent.css('[aria-label="Members"]')).to be_empty
+        end
+      end
+    end
   end
 
   describe 'Learn GitLab' do
@@ -905,21 +926,30 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Members' do
-    before do
-      render
+    it 'does not show the Member menu item' do
+      expect(rendered).not_to have_selector('.sidebar-top-level-items > li > a[aria-label="Members"]')
     end
 
-    context 'when user can access members' do
-      it 'show Members link' do
-        expect(rendered).to have_link('Members', href: project_project_members_path(project))
+    context 'when feature flag :sidebar_refactor is disabled' do
+      before do
+        stub_feature_flags(sidebar_refactor: false)
+
+        render
       end
-    end
 
-    context 'when user cannot access members' do
-      let(:user) { nil }
+      context 'when user can access members' do
+        it 'show Members link' do
+          expect(rendered).to have_selector('.sidebar-top-level-items > li > a[aria-label="Members"]')
+          expect(rendered).to have_link('Members', href: project_project_members_path(project))
+        end
+      end
 
-      it 'show Members link' do
-        expect(rendered).not_to have_link('Members')
+      context 'when user cannot access members' do
+        let(:user) { nil }
+
+        it 'show Members link' do
+          expect(rendered).not_to have_link('Members')
+        end
       end
     end
   end

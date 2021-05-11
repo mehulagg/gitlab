@@ -17,6 +17,14 @@ RSpec.describe 'Project navbar' do
     insert_infrastructure_registry_nav
     stub_config(registry: { enabled: false })
 
+    insert_after_nav_item(
+      _('Snippets'),
+      new_nav_item: {
+        nav_item: _('Members'),
+        nav_sub_items: []
+      }
+    )
+
     project.add_maintainer(user)
     sign_in(user)
   end
@@ -91,7 +99,8 @@ RSpec.describe 'Project navbar' do
         nav_item: _('Project information'),
         nav_sub_items: [
           _('Activity'),
-          _('Releases')
+          _('Releases'),
+          _('Members')
         ]
       }
     end

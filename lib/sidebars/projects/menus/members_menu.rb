@@ -28,6 +28,8 @@ module Sidebars
 
         override :render?
         def render?
+          return false if Feature.enabled?(:sidebar_refactor, context.current_user)
+
           can?(context.current_user, :read_project_member, context.project)
         end
 
