@@ -386,7 +386,12 @@ There are a variety of locations and ways to interact with the results of the se
 - [Vulnerability Pages](https://docs.gitlab.com/ee/user/application_security/vulnerabilities/)
 - [Dependency List](https://docs.gitlab.com/ee/user/application_security/dependency_list/)
 
-You can read more about which findings and/or vulnerabilities you can view in each of those locations by clicking the links above. Each page details the ways in which you can interact with the findings and vulnerabilities. As an example, in most cases findings will start out as “detected” and you have the option to change the status, create an issue, link it to an existing issue, or in some cases you can also [apply an automatic remediation for a vulnerability](#apply-an-automatic-remediation-for-a-vulnerability).
+For more details about which findings or vulnerabilities you can view in each of those locations, select the respective link. Each page details the ways in which you can interact with the findings and vulnerabilities. As an example, in most cases findings will start out as “detected” status. You have the option to:
+
+- Change the status.
+- Create an issue.
+- Link it to an existing issue.
+- In some cases, [apply an automatic remediation for a vulnerability](#apply-an-automatic-remediation-for-a-vulnerability).
 
 ## Troubleshooting
 
