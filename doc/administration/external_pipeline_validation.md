@@ -22,7 +22,7 @@ should accept or reject the pipeline. If the response is:
 
 If there's an error or the request times out, the pipeline is accepted.
 
-Pipelines rejected by the external validation service aren't created, and do not
+Pipelines rejected by the external validation service aren't created, and don't
 appear in pipeline lists in the GitLab UI or API. If you create a pipeline in the
 UI that is rejected, `Pipeline cannot be run. External validation failed` is displayed.
 
