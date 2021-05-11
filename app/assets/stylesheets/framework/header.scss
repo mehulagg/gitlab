@@ -254,6 +254,7 @@
       }
     }
 
+    .top-nav-toggle,
     > button {
       background: transparent;
       border: 0;
@@ -627,5 +628,45 @@
       padding-left: $gl-padding;
       border-left: 1px solid $gl-text-color-quaternary;
     }
+  }
+}
+
+.navbar-sub-nav {
+  .top-nav-dropdown {
+    max-width: none;
+    width: auto;
+    @include gl-mt-3;
+  }
+
+  .show.dropdown .dropdown-menu.top-nav-dropdown {
+    max-height: none;
+  }
+}
+
+.top-nav-dropdown {
+  .gl-new-dropdown &.dropdown-menu .gl-search-box-by-type {
+    @include gl-m-0;
+  }
+
+  .frequent-items-list-item-container > a {
+    @include gl-px-0;
+  }
+}
+
+.top-nav-toggle {
+  .dropdown-icon {
+    @include gl-mr-3;
+  }
+
+  .dropdown-chevron {
+    top: 0;
+  }
+}
+
+.top-nav-menu-item {
+  color: var(--indigo-900, $theme-indigo-900) !important;
+
+  .gl-icon {
+    color: inherit !important;
   }
 }
