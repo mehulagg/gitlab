@@ -111,6 +111,7 @@ gemnasium-python-dependency_scanning:
         # See https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#configuring-specific-analyzers-used-by-dependency-scanning
     - if: $CI_COMMIT_BRANCH &&
           $GITLAB_FEATURES =~ /\bdependency_scanning\b/ &&
+          $DS_DEFAULT_ANALYZERS =~ /gemnasium-python/ &&
           $PIP_REQUIREMENTS_FILE
 
 bundler-audit-dependency_scanning:

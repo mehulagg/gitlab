@@ -53,7 +53,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with all DS jobs specified in the template' do
-            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-dependency_scanning gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning] )
           end
         end
 
@@ -63,7 +63,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with all expected jobs except gemnasium' do
-            expect(build_names).to eq(['gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning] )
           end
         end
 
@@ -73,7 +73,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with all expected jobs except gemnasium-maven' do
-            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning] )
           end
         end
 
@@ -83,7 +83,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with all expected jobs except gemnasium-python' do
-            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-dependency_scanning gemnasium-maven-dependency_scanning bundler-audit-dependency_scanning retire-js-dependency_scanning] )
           end
         end
 
@@ -93,7 +93,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with all expected jobs except bundler-audit' do
-            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'retire-js-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-dependency_scanning gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning retire-js-dependency_scanning] )
           end
         end
 
@@ -103,7 +103,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with all expected jobs except retire.js' do
-            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-dependency_scanning gemnasium-maven-dependency_scanning gemnasium-python-dependency_scanning bundler-audit-dependency_scanning] )
           end
         end
 
@@ -113,7 +113,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
           end
 
           it 'creates a pipeline with the specified jobs excluded' do
-            expect(build_names).to eq(['gemnasium-maven-dependency_scanning', 'bundler-audit-dependency_scanning'] )
+            expect(build_names).to eq(%w[gemnasium-maven-dependency_scanning bundler-audit-dependency_scanning] )
           end
         end
       end
