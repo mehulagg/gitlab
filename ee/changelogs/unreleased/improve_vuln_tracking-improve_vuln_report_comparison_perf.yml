@@ -1,0 +1,5 @@
+---
+title: Improves performance of VulnerabilityReportsComparer
+merge_request: 61200
+author:
+type: performance
