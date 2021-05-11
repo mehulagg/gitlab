@@ -26,6 +26,7 @@ the PostgreSQL console (or `sudo gitlab-psql`) to drop the problematic triggers:
 drop trigger trigger_e40a6f1858e6 on application_settings;
 drop trigger trigger_0d588df444c8 on application_settings;
 drop trigger trigger_1572cbc9a15f on application_settings;
+drop trigger trigger_22a39c5c25f3 on application_settings;
 ```
 
 Afterwards, you can run the final `sudo gitlab-rake db:migrate` command.
