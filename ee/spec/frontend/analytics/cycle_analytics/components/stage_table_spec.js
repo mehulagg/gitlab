@@ -1,53 +1,53 @@
-import { GlLoadingIcon } from '@gitlab/ui';
-import { getByText } from '@testing-library/dom';
+import { GlEmptyState, GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
-import { issueEvents, issueStage, allowedStages } from '../mock_data';
+import { PAGINATION_SORT_FIELD_DURATION } from 'ee/analytics/cycle_analytics/constants';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import {
+  stagingEvents,
+  stagingStage,
+  issueEvents,
+  issueStage,
+  testEvents,
+  testStage,
+  reviewStage,
+  reviewEvents,
+} from '../mock_data';
 
 let wrapper = null;
-const $sel = {
-  nav: '.stage-nav',
-  eventList: '.stage-events',
-  events: '.stage-event-item',
-  description: '.events-description',
-  headers: '.col-headers li',
-  headersList: '.col-headers',
-  illustration: '.empty-state .svg-content',
-};
 
-const headers = ['Stage', 'Median', issueStage.legend, 'Time'];
 const noDataSvgPath = 'path/to/no/data';
-const tooMuchDataError = "We don't have enough data to show this stage.";
+const emptyStateMessage = 'Too much data';
+const notEnoughDataError = "We don't have enough data to show this stage.";
+const [firstIssueEvent] = issueEvents;
+const [firstStagingEvent] = stagingEvents;
+const [firstTestEvent] = testEvents;
+const [firstReviewEvent] = reviewEvents;
+const pagination = { page: 1, hasNextPage: true };
 
-const StageTableNavSlot = {
-  name: 'stage-table-nav-slot-stub',
-  template: '<ul><li v-for="stage in stages">{{ stage.title }}</li></ul>',
-};
+const findStageEvents = () => wrapper.findAllByTestId('vsa-stage-event');
+const findPagination = () => wrapper.findByTestId('vsa-stage-pagination');
+const findTable = () => wrapper.findComponent(GlTable);
+const findStageEventTitle = (ev) => extendedWrapper(ev).findByTestId('vsa-stage-event-title');
 
 function createComponent(props = {}, shallow = false) {
   const func = shallow ? shallowMount : mount;
-  return func(StageTable, {
-    propsData: {
-      currentStage: issueStage,
-      isLoading: false,
-      isLoadingStage: false,
-      isEmptyStage: false,
-      currentStageEvents: issueEvents,
-      noDataSvgPath,
-      customStageFormActive: false,
-      ...props,
-    },
-    slots: {
-      nav: StageTableNavSlot,
-    },
-    mocks: {
-      stages: allowedStages,
-    },
-    stubs: {
-      'stage-nav-item': true,
-      'gl-loading-icon': true,
-    },
-  });
+  return extendedWrapper(
+    func(StageTable, {
+      propsData: {
+        isLoading: false,
+        stageEvents: issueEvents,
+        noDataSvgPath,
+        selectedStage: issueStage,
+        pagination,
+        ...props,
+      },
+      stubs: {
+        GlLoadingIcon,
+        GlEmptyState,
+      },
+    }),
+  );
 }
 
 describe('StageTable', () => {
@@ -55,116 +55,287 @@ describe('StageTable', () => {
     wrapper.destroy();
   });
 
-  describe('headers', () => {
-    beforeEach(() => {
-      wrapper = createComponent();
-    });
-
-    it('will render the headers', () => {
-      const renderedHeaders = wrapper.findAll($sel.headers);
-      expect(renderedHeaders).toHaveLength(headers.length);
-
-      const headerText = wrapper.find($sel.headersList).text();
-      headers.forEach((title) => {
-        expect(headerText).toContain(title);
-      });
-    });
-  });
-
   describe('is loaded with data', () => {
     beforeEach(() => {
       wrapper = createComponent();
     });
 
-    it('will render the events list', () => {
-      expect(wrapper.find($sel.eventList).exists()).toBeTruthy();
-    });
-
-    it('will render the correct stages', () => {
-      const evs = wrapper.find(StageTableNavSlot).findAll('li');
-      expect(evs).toHaveLength(allowedStages.length);
-
-      const nav = wrapper.find($sel.nav).html();
-      allowedStages.forEach((stage) => {
-        expect(nav).toContain(stage.title);
-      });
-    });
-
-    it('will render the current stage', () => {
-      expect(wrapper.find($sel.description).exists()).toBeTruthy();
-      expect(wrapper.find($sel.description).text()).toEqual(issueStage.description);
-    });
-
-    it('will render the event list', () => {
-      expect(wrapper.find($sel.eventList).exists()).toBeTruthy();
-      expect(wrapper.findAll($sel.events).exists()).toBeTruthy();
-    });
-
     it('will render the correct events', () => {
-      const evs = wrapper.findAll($sel.events);
+      const evs = findStageEvents();
       expect(evs).toHaveLength(issueEvents.length);
 
-      const evshtml = wrapper.find($sel.eventList).html();
-      issueEvents.forEach((ev) => {
-        expect(evshtml).toContain(ev.title);
+      const titles = evs.wrappers.map((ev) => findStageEventTitle(ev).text());
+      issueEvents.forEach((ev, index) => {
+        expect(titles[index]).toBe(ev.title);
       });
     });
 
     it('will not display the default data message', () => {
-      expect(wrapper.html()).not.toContain(tooMuchDataError);
+      expect(wrapper.html()).not.toContain(notEnoughDataError);
     });
   });
 
-  it('isLoading = true', () => {
-    wrapper = createComponent({ isLoading: true }, true);
-    expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
-  });
-
-  describe('isLoadingStage = true', () => {
+  describe('with minimal stage data', () => {
     beforeEach(() => {
-      wrapper = createComponent({ isLoadingStage: true }, true);
+      wrapper = createComponent({ currentStage: { title: 'New stage title' } });
     });
 
-    it('will render the list of stages', () => {
-      const navEl = wrapper.find($sel.nav).element;
+    it('will render the correct events', () => {
+      const evs = findStageEvents();
+      expect(evs).toHaveLength(issueEvents.length);
 
-      allowedStages.forEach((stage) => {
-        expect(getByText(navEl, stage.title, { selector: 'li' })).not.toBe(null);
+      const titles = evs.wrappers.map((ev) => findStageEventTitle(ev).text());
+      issueEvents.forEach((ev, index) => {
+        expect(titles[index]).toBe(ev.title);
+      });
+    });
+  });
+
+  describe('default event', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        stageEvents: [{ ...firstIssueEvent }],
+        selectedStage: { ...issueStage, custom: false },
       });
     });
 
-    it('will render a loading icon', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
+    it('will render the event title', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-title').text()).toBe(firstIssueEvent.title);
+    });
+
+    it('will set the workflow title to "Issues"', () => {
+      expect(wrapper.find('thead').text()).toContain('Issues');
+    });
+
+    it('does not render the fork icon', () => {
+      expect(wrapper.findByTestId('fork-icon').exists()).toBe(false);
+    });
+
+    it('does not render the branch icon', () => {
+      expect(wrapper.findByTestId('commit-icon').exists()).toBe(false);
+    });
+
+    it('will render the total time', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-time').text()).toBe('2 days');
+    });
+
+    it('will render the author', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-author').text()).toContain(
+        firstIssueEvent.author.name,
+      );
+    });
+
+    it('will render the created at date', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-date').text()).toContain(
+        firstIssueEvent.createdAt,
+      );
     });
   });
 
-  describe('isEmptyStage = true', () => {
+  describe('merge request event', () => {
     beforeEach(() => {
-      wrapper = createComponent({ isEmptyStage: true });
+      wrapper = createComponent({
+        stageEvents: [{ ...firstReviewEvent }],
+        selectedStage: { ...reviewStage, custom: false },
+      });
     });
 
-    it('will render the empty stage illustration', () => {
-      expect(wrapper.find($sel.illustration).exists()).toBeTruthy();
-      expect(wrapper.find($sel.illustration).html()).toContain(noDataSvgPath);
+    it('will set the workflow title to "Merge requests"', () => {
+      expect(wrapper.find('thead').text()).toContain('Merge requests');
+      expect(wrapper.find('thead').text()).not.toContain('Issues');
+    });
+  });
+
+  describe('staging event', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        stageEvents: [{ ...firstStagingEvent }],
+        selectedStage: { ...stagingStage, custom: false },
+      });
+    });
+
+    it('will set the workflow title to "Deployments"', () => {
+      expect(wrapper.find('thead').text()).toContain('Deployments');
+      expect(wrapper.find('thead').text()).not.toContain('Issues');
+    });
+
+    it('will not render the event title', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-title').exists()).toBe(false);
+    });
+
+    it('will render the fork icon', () => {
+      expect(wrapper.findByTestId('fork-icon').exists()).toBe(true);
+    });
+
+    it('will render the branch icon', () => {
+      expect(wrapper.findByTestId('commit-icon').exists()).toBe(true);
+    });
+
+    it('will render the total time', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-time').text()).toBe('2 mins');
+    });
+
+    it('will render the build shortSha', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-build-sha').text()).toBe(
+        firstStagingEvent.shortSha,
+      );
+    });
+
+    it('will render the author and date', () => {
+      const content = wrapper.findByTestId('vsa-stage-event-build-author-and-date').text();
+      expect(content).toContain(firstStagingEvent.author.name);
+      expect(content).toContain(firstStagingEvent.date);
+    });
+  });
+
+  describe('test event', () => {
+    beforeEach(() => {
+      wrapper = createComponent({
+        stageEvents: [{ ...firstTestEvent }],
+        selectedStage: { ...testStage, custom: false },
+      });
+    });
+
+    it('will set the workflow title to "Jobs"', () => {
+      expect(wrapper.find('thead').text()).toContain('Jobs');
+      expect(wrapper.find('thead').text()).not.toContain('Issues');
+    });
+
+    it('will not render the event title', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-title').exists()).toBe(false);
+    });
+
+    it('will render the fork icon', () => {
+      expect(wrapper.findByTestId('fork-icon').exists()).toBe(true);
+    });
+
+    it('will render the branch icon', () => {
+      expect(wrapper.findByTestId('commit-icon').exists()).toBe(true);
+    });
+
+    it('will render the total time', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-time').text()).toBe('2 mins');
+    });
+
+    it('will render the build shortSha', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-build-sha').text()).toBe(
+        firstTestEvent.shortSha,
+      );
+    });
+
+    it('will render the build pipeline success icon', () => {
+      expect(wrapper.findByTestId('status_success-icon').exists()).toBe(true);
+    });
+
+    it('will render the build date', () => {
+      const content = wrapper.findByTestId('vsa-stage-event-build-status-date').text();
+      expect(content).toContain(firstTestEvent.date);
+    });
+
+    it('will render the build event name', () => {
+      expect(wrapper.findByTestId('vsa-stage-event-build-name').text()).toContain(
+        firstTestEvent.name,
+      );
+    });
+  });
+
+  describe('isLoading = true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ isLoading: true }, true);
+    });
+
+    it('will display the loading icon', () => {
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    });
+
+    it('will not display pagination', () => {
+      expect(findPagination().exists()).toBe(false);
+    });
+  });
+
+  describe('with no stageEvents', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ stageEvents: [] });
+    });
+
+    it('will render the empty state', () => {
+      expect(wrapper.find(GlEmptyState).exists()).toBe(true);
     });
 
     it('will display the default no data message', () => {
-      expect(wrapper.html()).toContain(tooMuchDataError);
+      expect(wrapper.html()).toContain(notEnoughDataError);
     });
   });
 
   describe('emptyStateMessage set', () => {
-    const emptyStateMessage = 'Too much data';
     beforeEach(() => {
-      wrapper = createComponent({ isEmptyStage: true, emptyStateMessage });
-    });
-
-    it('will not display the default data message', () => {
-      expect(wrapper.html()).not.toContain(tooMuchDataError);
+      wrapper = createComponent({ stageEvents: [], emptyStateMessage });
     });
 
     it('will display the custom message', () => {
+      expect(wrapper.html()).not.toContain(notEnoughDataError);
       expect(wrapper.html()).toContain(emptyStateMessage);
+    });
+  });
+
+  describe('Pagination', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('will display the pagination component', () => {
+      expect(findPagination().exists()).toBe(true);
+    });
+
+    it('clicking prev or next will emit an event', async () => {
+      findPagination().vm.$emit('input', 2);
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([{ page: 2 }]);
+    });
+
+    describe('with `hasNextPage=false', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ pagination: { page: 1, hasNextPage: false } });
+      });
+
+      it('will not display the pagination component', () => {
+        expect(findPagination().exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('Sorting', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('clicking a table column will update the sort field', () => {
+      findTable().vm.$emit('sort-changed', {
+        sortBy: PAGINATION_SORT_FIELD_DURATION,
+        sortDesc: true,
+      });
+
+      expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([
+        {
+          direction: 'desc',
+          sort: 'duration',
+        },
+      ]);
+    });
+
+    it('with sortDesc=false will toggle the direction field', async () => {
+      findTable().vm.$emit('sort-changed', {
+        sortBy: PAGINATION_SORT_FIELD_DURATION,
+        sortDesc: false,
+      });
+
+      expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([
+        {
+          direction: 'asc',
+          sort: 'duration',
+        },
+      ]);
     });
   });
 });

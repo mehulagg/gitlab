@@ -11,7 +11,7 @@ import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
 import Metrics from './metrics.vue';
 import PathNavigation from './path_navigation.vue';
-import StageTableNew from './stage_table_new.vue';
+import StageTable from './stage_table.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
@@ -23,7 +23,7 @@ export default {
     GlEmptyState,
     ProjectsDropdownFilter,
     TypeOfWorkCharts,
-    StageTableNew,
+    StageTable,
     PathNavigation,
     FilterBar,
     ValueStreamSelect,
@@ -257,7 +257,7 @@ export default {
           />
           <type-of-work-charts />
         </template>
-        <stage-table-new
+        <stage-table
           v-else
           :is-loading="isLoading || isLoadingStage"
           :stage-events="currentStageEvents"

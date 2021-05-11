@@ -1,48 +1,48 @@
 <script>
-import { GlTooltipDirective, GlLoadingIcon, GlEmptyState } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
-import StageEventList from './stage_event_list.vue';
-import StageTableHeader from './stage_table_header.vue';
+import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlPagination, GlTable } from '@gitlab/ui';
+import { __ } from '~/locale';
+import {
+  NOT_ENOUGH_DATA_ERROR,
+  PAGINATION_SORT_FIELD_END_EVENT,
+  PAGINATION_SORT_FIELD_DURATION,
+  PAGINATION_SORT_DIRECTION_ASC,
+  PAGINATION_SORT_DIRECTION_DESC,
+} from '../constants';
+import TotalTime from './total_time_component.vue';
 
-const MIN_TABLE_HEIGHT = 420;
-const NOT_ENOUGH_DATA_ERROR = s__(
-  "ValueStreamAnalyticsStage|We don't have enough data to show this stage.",
-);
+const DEFAULT_WORKFLOW_TITLE_PROPERTIES = {
+  thClass: 'gl-w-half',
+  key: PAGINATION_SORT_FIELD_END_EVENT,
+  sortable: true,
+};
+const WORKFLOW_COLUMN_TITLES = {
+  issues: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Issues') },
+  jobs: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Jobs') },
+  deployments: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Deployments') },
+  mergeRequests: { ...DEFAULT_WORKFLOW_TITLE_PROPERTIES, label: __('Merge requests') },
+};
 
 export default {
   name: 'StageTable',
   components: {
-    GlLoadingIcon,
     GlEmptyState,
-    StageEventList,
-    StageTableHeader,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
+    GlIcon,
+    GlLink,
+    GlLoadingIcon,
+    GlPagination,
+    GlTable,
+    TotalTime,
   },
   props: {
-    currentStage: {
+    selectedStage: {
       type: Object,
-      required: false,
-      default: () => {},
+      required: true,
     },
     isLoading: {
       type: Boolean,
       required: true,
     },
-    isEmptyStage: {
-      type: Boolean,
-      required: true,
-    },
-    isLoadingStage: {
-      type: Boolean,
-      required: true,
-    },
-    customStageFormActive: {
-      type: Boolean,
-      required: true,
-    },
-    currentStageEvents: {
+    stageEvents: {
       type: Array,
       required: true,
     },
@@ -55,132 +55,208 @@ export default {
       required: false,
       default: '',
     },
-    hasPathNavigation: {
-      type: Boolean,
-      required: false,
-      default: false,
+    pagination: {
+      type: Object,
+      required: true,
     },
   },
   data() {
+    const {
+      pagination: { sort, direction },
+    } = this;
     return {
-      stageNavHeight: MIN_TABLE_HEIGHT,
+      sort,
+      sortDesc: direction === PAGINATION_SORT_DIRECTION_DESC,
     };
   },
   computed: {
-    stageEventsHeight() {
-      return `${this.stageNavHeight}px`;
-    },
-    stageName() {
-      return this.currentStage?.title || __('Related Issues');
-    },
-    shouldDisplayStage() {
-      const { currentStageEvents = [], isLoading, isEmptyStage } = this;
-      return currentStageEvents.length && !isLoading && !isEmptyStage;
-    },
-    stageHeaders() {
-      const verticalNavHeaders = !this.hasPathNavigation
-        ? [
-            {
-              title: s__('ProjectLifecycle|Stage'),
-              description: __('The phase of the development lifecycle.'),
-              classes: 'stage-header pl-5',
-            },
-            {
-              title: __('Median'),
-              description: __(
-                'The value lying at the midpoint of a series of observed values. E.g., between 3, 5, 9, the median is 5. Between 3, 5, 7, 8, the median is (5+7)/2 = 6.',
-              ),
-              classes: 'median-header',
-            },
-          ]
-        : [];
-      return [
-        ...verticalNavHeaders,
-        {
-          title: this.stageName,
-          description: __('The collection of events added to the data gathered for that stage.'),
-          classes: !this.hasPathNavigation
-            ? 'event-header pl-3'
-            : 'event-header gl-align-items-flex-start! gl-w-half!',
-          displayHeader: !this.customStageFormActive,
-        },
-        {
-          title: __('Time'),
-          description: __('The time taken by each data entry gathered by that stage.'),
-          classes: !this.hasPathNavigation
-            ? 'total-time-header pr-5 text-right'
-            : 'total-time-header gl-align-items-flex-end! gl-text-right! gl-w-half!',
-          displayHeader: !this.customStageFormActive,
-        },
-      ];
+    isEmptyStage() {
+      return !this.stageEvents.length;
     },
     emptyStateTitle() {
       const { emptyStateMessage } = this;
-      return emptyStateMessage.length ? emptyStateMessage : NOT_ENOUGH_DATA_ERROR;
+      return emptyStateMessage || NOT_ENOUGH_DATA_ERROR;
+    },
+    isDefaultTestStage() {
+      const { selectedStage } = this;
+      return !selectedStage.custom && selectedStage.title?.toLowerCase().trim() === 'test';
+    },
+    isDefaultStagingStage() {
+      const { selectedStage } = this;
+      return !selectedStage.custom && selectedStage.title?.toLowerCase().trim() === 'staging';
+    },
+    isMergeRequestStage() {
+      const [firstEvent] = this.stageEvents;
+      return this.isMrLink(firstEvent.url);
+    },
+    workflowTitle() {
+      if (this.isDefaultTestStage) {
+        return WORKFLOW_COLUMN_TITLES.jobs;
+      } else if (this.isDefaultStagingStage) {
+        return WORKFLOW_COLUMN_TITLES.deployments;
+      } else if (this.isMergeRequestStage) {
+        return WORKFLOW_COLUMN_TITLES.mergeRequests;
+      }
+      return WORKFLOW_COLUMN_TITLES.issues;
+    },
+    fields() {
+      return [
+        this.workflowTitle,
+        {
+          key: PAGINATION_SORT_FIELD_DURATION,
+          label: __('Time'),
+          thClass: 'gl-w-half',
+          sortable: true,
+        },
+      ];
+    },
+    prevPage() {
+      return Math.max(this.pagination.page - 1, 0);
+    },
+    nextPage() {
+      return this.pagination.hasNextPage ? this.pagination.page + 1 : null;
     },
   },
-  updated() {
-    if (!this.isLoading && this.$refs.stageNav) {
-      this.$set(this, 'stageNavHeight', this.$refs.stageNav.clientHeight);
-    }
+  methods: {
+    isMrLink(url = '') {
+      return url.includes('/merge_request');
+    },
+    itemTitle(item) {
+      return item.title || item.name;
+    },
+    onSelectPage(page) {
+      const { sort, direction } = this.pagination;
+      this.$emit('handleUpdatePagination', { sort, direction, page });
+    },
+    onSort({ sortBy, sortDesc }) {
+      this.sort = sortBy;
+      this.sortDesc = sortDesc;
+      this.$emit('handleUpdatePagination', {
+        sort: sortBy,
+        direction: sortDesc ? PAGINATION_SORT_DIRECTION_DESC : PAGINATION_SORT_DIRECTION_ASC,
+      });
+    },
   },
 };
 </script>
 <template>
-  <div class="stage-panel-container" data-testid="vsa-stage-table">
-    <div
-      v-if="isLoading"
-      class="gl-display-flex gl-justify-content-center gl-align-items-center gl-w-full"
-      :style="{ height: stageEventsHeight }"
+  <div data-testid="vsa-stage-table">
+    <gl-loading-icon v-if="isLoading" class="gl-mt-4" size="md" />
+    <gl-empty-state v-else-if="isEmptyStage" :title="emptyStateTitle" :svg-path="noDataSvgPath" />
+    <gl-table
+      v-else
+      head-variant="white"
+      stacked="lg"
+      thead-class="border-bottom"
+      show-empty
+      :sort-by.sync="sort"
+      :sort-direction.sync="pagination.direction"
+      :sort-desc.sync="sortDesc"
+      :fields="fields"
+      :items="stageEvents"
+      :empty-text="emptyStateMessage"
+      @sort-changed="onSort"
     >
-      <gl-loading-icon size="lg" />
-    </div>
-    <div v-else class="card stage-panel">
-      <div class="card-header gl-border-b-0">
-        <nav class="col-headers">
-          <ul
-            :class="{
-              'gl-display-flex! gl-justify-content-space-between! gl-flex-direction-row! gl-px-5!': hasPathNavigation,
-            }"
-          >
-            <stage-table-header
-              v-for="({ title, description, classes, displayHeader = true }, i) in stageHeaders"
-              v-show="displayHeader"
-              :key="`stage-header-${i}`"
-              :header-classes="classes"
-              :title="title"
-              :tooltip-title="description"
-            />
-          </ul>
-        </nav>
-      </div>
-      <div class="stage-panel-body">
-        <nav v-if="!hasPathNavigation" ref="stageNav" class="stage-nav gl-pl-2">
-          <slot name="nav"></slot>
-        </nav>
-        <div
-          class="section stage-events overflow-auto"
-          :class="{ 'w-100': hasPathNavigation }"
-          :style="{ height: stageEventsHeight }"
-        >
-          <slot name="content">
-            <gl-loading-icon v-if="isLoadingStage" class="gl-mt-4" size="md" />
-            <template v-else>
-              <stage-event-list
-                v-if="shouldDisplayStage"
-                :stage="currentStage"
-                :events="currentStageEvents"
-              />
-              <gl-empty-state
-                v-if="isEmptyStage"
-                :title="emptyStateTitle"
-                :description="currentStage.emptyStageText"
-                :svg-path="noDataSvgPath"
-              />
-            </template>
-          </slot>
+      <template #cell(end_event)="{ item }">
+        <div data-testid="vsa-stage-event">
+          <div v-if="item.id" data-testid="vsa-stage-content">
+            <p class="gl-m-0">
+              <template v-if="isDefaultTestStage">
+                <span
+                  class="icon-build-status gl-vertical-align-middle gl-text-green-500"
+                  data-testid="vsa-stage-event-build-status"
+                >
+                  <gl-icon name="status_success" :size="14" />
+                </span>
+                <gl-link
+                  class="gl-text-black-normal item-build-name"
+                  data-testid="vsa-stage-event-build-name"
+                  :href="item.url"
+                >
+                  {{ item.name }}
+                </gl-link>
+                &middot;
+              </template>
+              <gl-link class="gl-text-black-normal pipeline-id" :href="item.url"
+                >#{{ item.id }}</gl-link
+              >
+              <gl-icon :size="16" name="fork" />
+              <gl-link
+                v-if="item.branch"
+                :href="item.branch.url"
+                class="gl-text-black-normal ref-name"
+                >{{ item.branch.name }}</gl-link
+              >
+              <span class="icon-branch gl-text-gray-400">
+                <gl-icon name="commit" :size="14" />
+              </span>
+              <gl-link
+                class="commit-sha"
+                :href="item.commitUrl"
+                data-testid="vsa-stage-event-build-sha"
+                >{{ item.shortSha }}</gl-link
+              >
+            </p>
+            <p class="gl-m-0">
+              <span v-if="isDefaultTestStage" data-testid="vsa-stage-event-build-status-date">
+                <gl-link class="gl-text-black-normal issue-date" :href="item.url">{{
+                  item.date
+                }}</gl-link>
+              </span>
+              <span v-else data-testid="vsa-stage-event-build-author-and-date">
+                <gl-link class="gl-text-black-normal build-date" :href="item.url">{{
+                  item.date
+                }}</gl-link>
+                {{ s__('ByAuthor|by') }}
+                <gl-link
+                  class="gl-text-black-normal issue-author-link"
+                  :href="item.author.webUrl"
+                  >{{ item.author.name }}</gl-link
+                >
+              </span>
+            </p>
+          </div>
+          <div v-else data-testid="vsa-stage-content">
+            <h5 class="gl-font-weight-bold gl-my-1" data-testid="vsa-stage-event-title">
+              <gl-link class="gl-text-black-normal" :href="item.url">{{ itemTitle(item) }}</gl-link>
+            </h5>
+            <p class="gl-m-0">
+              <template v-if="isMrLink(item.url)">
+                <gl-link class="gl-text-black-normal" :href="item.url">!{{ item.iid }}</gl-link>
+              </template>
+              <template v-else>
+                <gl-link class="gl-text-black-normal" :href="item.url">#{{ item.iid }}</gl-link>
+              </template>
+              <span class="gl-font-lg">&middot;</span>
+              <span data-testid="vsa-stage-event-date">
+                {{ s__('OpenedNDaysAgo|Opened') }}
+                <gl-link class="gl-text-black-normal" :href="item.url">{{
+                  item.createdAt
+                }}</gl-link>
+              </span>
+              <span data-testid="vsa-stage-event-author">
+                {{ s__('ByAuthor|by') }}
+                <gl-link class="gl-text-black-normal" :href="item.author.webUrl">{{
+                  item.author.name
+                }}</gl-link>
+              </span>
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+      <template #cell(duration)="{ item }">
+        <total-time :time="item.totalTime" data-testid="vsa-stage-event-time" />
+      </template>
+    </gl-table>
+    <gl-pagination
+      v-if="!isLoading"
+      :value="pagination.page"
+      :prev-page="prevPage"
+      :next-page="nextPage"
+      align="center"
+      class="gl-mt-3"
+      data-testid="vsa-stage-pagination"
+      @input="onSelectPage"
+    />
   </div>
 </template>
