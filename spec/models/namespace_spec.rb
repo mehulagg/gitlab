@@ -155,6 +155,54 @@ RSpec.describe Namespace do
     end
   end
 
+  describe 'constrain traversal_ids in the database' do
+    let!(:parent) { create(:namespace, id: 123, name: 'namespace parent') }
+
+    def insert_namespace!(**attributes)
+      attributes = FactoryBot.attributes_for(:namespace, attributes).except(:owner)
+      Namespace.insert!(attributes)
+    end
+
+    context 'with valid traversal_ids' do
+      where(:id, :parent_id, :traversal_ids) do
+        [
+          [10, nil, [10]],
+          [10, 123, [123, 10]],
+          # We only check the last 2 array items as parent_id and id.
+          [10, 123, [456, 123, 10]],
+          # These must pass due to a limitation of after_create setter timing.
+          [10, nil, []],
+          [10, 123, []]
+        ]
+      end
+
+      with_them do
+        it_behaves_like 'traversal_ids without constraints' do
+          subject { insert_namespace!(id: id, parent_id: parent_id, traversal_ids: traversal_ids) }
+        end
+      end
+    end
+
+    context 'with invalid traversal_ids' do
+      where(:id, :parent_id, :traversal_ids) do
+        [
+          [10, nil, [20]],
+          [10, 123, [10, 20]],
+          [10, 123, [20, 10, 30]]
+          # TODO This should belong here, but it's not possible without triggers
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/321615
+          # [10, nil, []]
+        ]
+      end
+
+      with_them do
+        it_behaves_like 'traversal_ids constraint violation' do
+          subject { insert_namespace!(id: id, parent_id: parent_id, traversal_ids: traversal_ids) }
+        end
+      end
+    end
+  end
+
   describe 'scopes' do
     let_it_be(:namespace1) { create(:group, name: 'Namespace 1', path: 'namespace-1') }
     let_it_be(:namespace2) { create(:group, name: 'Namespace 2', path: 'namespace-2') }
