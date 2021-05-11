@@ -178,7 +178,7 @@ For more details, see [security tab](security_dashboard/index.md#pipeline-securi
 
 ## View security scan information in the Security Dashboard
 
-The Security Dashboard show vulnerabilities present in a project's default branch. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default will show up after the refresh job.
+The Security Dashboard show vulnerabilities present in a project's default branch. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default will show up after the daily data refresh.
 
 For more details, see [Security Dashboard](security_dashboard/index.md).
 
