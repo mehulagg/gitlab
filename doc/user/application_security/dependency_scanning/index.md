@@ -564,7 +564,7 @@ such references:
 ERROR: Could not find dependencies: <dependency-name>. You may need to run npm install
 ```
 
-As a workaround, add the [`retire.js`](analyzers.md#selecting-specific-analyzers) analyzer to
+As a workaround, add the [`retire.js`](analyzers.html#selecting-specific-analyzers) analyzer to
 [DS_EXCLUDED_ANALYZERS](#configuring-dependency-scanning).
 
 ## Troubleshooting
