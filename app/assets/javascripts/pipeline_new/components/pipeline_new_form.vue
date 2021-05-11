@@ -336,7 +336,7 @@ export default {
   <gl-form @submit.prevent="createPipeline">
     <cc-validation-required-alert
       v-if="ccRequiredError"
-      :container-class="null"
+      class="gl-pb-5"
     />
     <gl-alert
       v-else-if="error"

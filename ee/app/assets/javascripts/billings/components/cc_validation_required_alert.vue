@@ -18,13 +18,6 @@ export default {
     GlSprintf,
     AccountVerificationModal,
   },
-  props: {
-    containerClass: {
-      type: Array,
-      required: false,
-      default: () => ['gl-pt-5'],
-    }
-  },
   computed: {
     iframeUrl() {
       return gon.payment_form_url;
@@ -43,7 +36,7 @@ export default {
 </script>
 
 <template>
-  <div :class="containerClass">
+  <div>
     <gl-alert
       variant="danger"
       :dismissible="false"
