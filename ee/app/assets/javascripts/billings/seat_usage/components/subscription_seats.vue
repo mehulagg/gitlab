@@ -6,6 +6,7 @@ import {
   GlButton,
   GlDropdown,
   GlDropdownItem,
+  GlModal,
   GlModalDirective,
   GlIcon,
   GlPagination,
@@ -20,6 +21,7 @@ import {
   AVATAR_SIZE,
   SEARCH_DEBOUNCE_MS,
   REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
@@ -37,6 +39,7 @@ export default {
     GlButton,
     GlDropdown,
     GlDropdownItem,
+    GlModal,
     GlIcon,
     GlPagination,
     GlSearchBoxByType,
@@ -80,6 +83,15 @@ export default {
       }
       return s__('Billing|No users to display.');
     },
+    cannotRemoveModalTitle() {
+      return s__('Billing|Cannot remove user');
+    },
+    cannotRemoveModalText() {
+      return s__(
+        `Billing|Members who were invited via a group invitation cannot be removed.
+        You can either remove the entire group, or ask an Owner of the invited group to remove the member.`,
+      );
+    },
   },
   watch: {
     searchQuery() {
@@ -118,6 +130,9 @@ export default {
         this.resetBillableMembers();
       }
     },
+    openCannotRemoveModal() {
+      this.$refs.cannotRemoveModal.show();
+    },
   },
   i18n: {
     emailNotVisibleTooltipText: s__(
@@ -127,6 +142,7 @@ export default {
   avatarSize: AVATAR_SIZE,
   fields: FIELDS,
   removeBillableMemberModalId: REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  cannotRemoveModalId: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
 };
 </script>
 
@@ -211,8 +227,16 @@ export default {
       <template #cell(actions)="data">
         <gl-dropdown icon="ellipsis_h" right data-testid="user-actions">
           <gl-dropdown-item
+            v-if="data.item.user.removable"
             v-gl-modal="$options.removeBillableMemberModalId"
             @click="setBillableMemberToRemove(data.item.user)"
+          >
+            {{ __('Remove user') }}
+          </gl-dropdown-item>
+          <gl-dropdown-item
+            v-else-if="!data.item.user.removable"
+            v-gl-modal-directive="$options.cannotRemoveModalId"
+            @click="openCannotRemoveModal"
           >
             {{ __('Remove user') }}
           </gl-dropdown-item>
@@ -237,5 +261,16 @@ export default {
       v-if="billableMemberToRemove"
       :modal-id="$options.removeBillableMemberModalId"
     />
+
+    <gl-modal
+      ref="cannotRemoveModal"
+      :modal-id="$options.cannotRemoveModalId"
+      :title="cannotRemoveModalTitle"
+      :ok-title="__('Okay')"
+    >
+      <p>
+        {{ cannotRemoveModalText }}
+      </p>
+    </gl-modal>
   </section>
 </template>

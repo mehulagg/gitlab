@@ -35,6 +35,7 @@ export const DETAILS_FIELDS = [
   { key: 'role', label: __('Role'), thClass: thWidthClass(40) },
 ];
 
+export const CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID = 'cannot-remove-member-modal';
 export const REMOVE_BILLABLE_MEMBER_MODAL_ID = 'billable-member-remove-modal';
 export const REMOVE_BILLABLE_MEMBER_MODAL_CONTENT_TEXT_TEMPLATE = s__(
   `Billing|You are about to remove user %{username} from your subscription.
