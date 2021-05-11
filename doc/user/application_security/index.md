@@ -186,7 +186,7 @@ For more details, see [Security Dashboard](security_dashboard/index.md).
 
 The vulnerability report shows the results of the last completed pipeline on the default branch. It is updated on every pipeline completion. All detected vulnerabilities are shown as well as any previous ones that are no longer detected in the latest scan. Vulnerabilities that are no longer detected may have been remediated or otherwise removed and can be marked as `Resolved` after proper verification. Vulnerabilities that are no longer detected are denoted with an icon for filtering and review.
 
-By default, the vulnerability report does not show “dismissed” or “resolved” so you can focus on open vulnerabilities. You can easily change the Status filter to see these.
+By default, the vulnerability report does not show vulnerabilities of `dismissed` or `resolved` status so you can focus on open vulnerabilities. You can change the Status filter to see these.
 
 [Read more about the Vulnerability report](/vulnerability_report/)
 
@@ -333,7 +333,7 @@ You can do it quickly by following the hyperlink given to run a new pipeline.
 
 ## DAST On-Demand Scans
 
-If you don’t want scans running in your normal DevOps process you can use on-demand scans instead. For more details, see [on-demand scans](dast/index.md#on-demand-scans). Currently, this is only available for DAST. If you run an on-demand scan against the default branch, it will be reported as a “successful pipeline” and these results will appear in locations such as the security dashboard and vulnerability report.
+If you don’t want scans running in your normal DevOps process you can use on-demand scans instead. For more details, see [on-demand scans](dast/index.md#on-demand-scans). Currently, this is only available for DAST. If you run an on-demand scan against the default branch, it will be reported as a “successful pipeline” and these results are included in the security dashboard and vulnerability report.
 
 ## Security report validation
 
