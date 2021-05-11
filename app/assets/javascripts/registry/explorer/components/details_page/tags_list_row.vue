@@ -97,11 +97,14 @@ export default {
     tagLocation() {
       return this.tag.path?.replace(`:${this.tag.name}`, '');
     },
-    invalidTag() {
+    isInvalidTag() {
       return !this.tag.digest;
     },
-    disableCheckbox() {
-      return this.invalidTag || this.disabled;
+    isCheckboxDisabled() {
+      return this.isInvalidTag || this.disabled;
+    },
+    isDeleteDisabled() {
+      return this.isInvalidTag || this.disabled || !this.tag.canDelete;
     },
   },
 };
@@ -112,7 +115,7 @@ export default {
     <template #left-action>
       <gl-form-checkbox
         v-if="tag.canDelete"
-        :disabled="disableCheckbox"
+        :disabled="isCheckboxDisabled"
         class="gl-m-0"
         :checked="selected"
         @change="$emit('select')"
@@ -138,7 +141,7 @@ export default {
         />
 
         <gl-icon
-          v-if="invalidTag"
+          v-if="isInvalidTag"
           v-gl-tooltip="{ title: $options.i18n.MISSING_MANIFEST_WARNING_TOOLTIP }"
           name="warning"
           class="gl-text-orange-500 gl-mb-2 gl-ml-2"
@@ -171,7 +174,7 @@ export default {
     </template>
     <template #right-action>
       <delete-button
-        :disabled="!tag.canDelete || invalidTag || disabled"
+        :disabled="isDeleteDisabled"
         :title="$options.i18n.REMOVE_TAG_BUTTON_TITLE"
         :tooltip-title="$options.i18n.REMOVE_TAG_BUTTON_DISABLE_TOOLTIP"
         :tooltip-disabled="tag.canDelete"
@@ -181,7 +184,7 @@ export default {
       />
     </template>
 
-    <template v-if="!invalidTag" #details-published>
+    <template v-if="!isInvalidTag" #details-published>
       <details-row icon="clock" data-testid="published-date-detail">
         <gl-sprintf :message="$options.i18n.PUBLISHED_DETAILS_ROW_TEXT">
           <template #repositoryPath>
@@ -196,7 +199,7 @@ export default {
         </gl-sprintf>
       </details-row>
     </template>
-    <template v-if="!invalidTag" #details-manifest-digest>
+    <template v-if="!isInvalidTag" #details-manifest-digest>
       <details-row icon="log" data-testid="manifest-detail">
         <gl-sprintf :message="$options.i18n.MANIFEST_DETAILS_ROW_TEST">
           <template #digest>
@@ -213,7 +216,7 @@ export default {
         />
       </details-row>
     </template>
-    <template v-if="!invalidTag" #details-configuration-digest>
+    <template v-if="!isInvalidTag" #details-configuration-digest>
       <details-row icon="cloud-gear" data-testid="configuration-detail">
         <gl-sprintf :message="$options.i18n.CONFIGURATION_DETAILS_ROW_TEST">
           <template #digest>

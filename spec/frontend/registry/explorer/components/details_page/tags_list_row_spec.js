@@ -344,7 +344,9 @@ describe('tags list row', () => {
             mountComponent({ ...defaultProps, disabled: true });
             await nextTick();
 
-            expect(finderFunction().findComponent(ClipboardButton).attributes('disabled')).toBe('true');
+            expect(finderFunction().findComponent(ClipboardButton).attributes('disabled')).toBe(
+              'true',
+            );
           });
         }
       });
