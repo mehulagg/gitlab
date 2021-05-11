@@ -7,7 +7,7 @@ require 'time'
 MIGRATION_DIRS = %w[db/migrate db/post_migrate].freeze
 VERSION_DIGITS = 14
 
-maximum_timestamp = Time.now.strftime('%Y%m%d%H%M%S').to_i
+maximum_timestamp = Time.now.utc.strftime('%Y%m%d%H%M%S').to_i
 
 MIGRATION_DIRS.each do |migration_dir|
   Dir[File.join(migration_dir, '*.rb')].each do |filename|
