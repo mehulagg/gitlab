@@ -16,7 +16,7 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
     it 'has a link to the group path' do
       render
 
-      expect(rendered).to have_link('Group information', href: group_path(group))
+      expect(rendered).to have_link('Group information', href: activity_group_path(group))
     end
 
     it 'does not have a link to the details menu item' do
