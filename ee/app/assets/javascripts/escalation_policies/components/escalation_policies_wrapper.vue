@@ -24,8 +24,8 @@ export default {
   inject: ['emptyEscalationPoliciesSvgPath'],
   data() {
     return {
+      hasEscalationPolicy: true, // flip this to activate/deactivate the WIP policy view
       // TODO: Replace with apollo data
-      hasEscalationPolicy: true,
       policies: [
         {
           title: __('Dev on-call escalation'),
