@@ -1,7 +1,7 @@
 import { GlForm, GlSprintf, GlLoadingIcon } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import CreditCardValidationRequiredAlert from 'ee/billings/components/cc_validation_required_alert.vue';
+import CreditCardValidationRequiredAlert from 'ee_component/billings/components/cc_validation_required_alert.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -16,6 +16,7 @@ import {
   mockRefs,
   mockCreditCardValidationRequiredError,
 } from '../mock_data';
+import { TEST_HOST } from 'helpers/test_constants';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
@@ -390,6 +391,10 @@ describe('Pipeline New Form', () => {
           mock
             .onPost(pipelinesPath)
             .reply(httpStatusCodes.BAD_REQUEST, mockCreditCardValidationRequiredError);
+          window.gon = {
+            subscriptions_url: TEST_HOST,
+            payment_form_url: TEST_HOST,
+          };
 
           findForm().vm.$emit('submit', dummySubmitEvent);
 

@@ -24,7 +24,6 @@ import { s__, __, n__ } from '~/locale';
 import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
 import filterVariables from '../utils/filter_variables';
 import RefsDropdown from './refs_dropdown.vue';
-import CcValidationRequiredAlert from 'ee/billings/components/cc_validation_required_alert.vue';
 
 const i18n = {
   variablesDescription: s__(
@@ -61,7 +60,7 @@ export default {
     GlSprintf,
     GlLoadingIcon,
     RefsDropdown,
-    CcValidationRequiredAlert,
+    CcValidationRequiredAlert: () => import('ee_component/billings/components/cc_validation_required_alert.vue'),
   },
   directives: { SafeHtml },
   props: {
