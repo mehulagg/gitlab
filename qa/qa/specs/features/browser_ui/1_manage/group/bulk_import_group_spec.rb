@@ -26,10 +26,27 @@ module QA
         end
       end
 
+      let!(:subgroup) do
+        Resource::Group.fabricate_via_api! do |group|
+          group.api_client = api_client
+          group.sandbox = source_group
+        end
+      end
+
       let(:imported_group) do
         Resource::Group.new.tap do |group|
           group.api_client = api_client
           group.path = source_group.path
+        end.reload!
+      rescue Resource::ApiFabricator::ResourceNotFoundError
+        nil
+      end
+
+      let(:imported_subgroup) do
+        Resource::Group.new.tap do |group|
+          group.api_client = api_client
+          group.sandbox = imported_group
+          group.path = subgroup.path
         end.reload!
       rescue Resource::ApiFabricator::ResourceNotFoundError
         nil
@@ -68,8 +85,7 @@ module QA
       it(
         "performs bulk group import from another gitlab instance",
         testcase: "https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785",
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/330344
-        exclude: { job: ["ce:relative_url", "ee:relative_url"] }
+        exclude: { job: ["ce:relative_url", "ee:relative_url"] } # https://gitlab.com/gitlab-org/gitlab/-/issues/330344
       ) do
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
