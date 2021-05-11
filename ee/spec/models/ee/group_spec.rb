@@ -30,6 +30,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:repository_storage_moves) }
     it { is_expected.to have_many(:iterations) }
     it { is_expected.to have_many(:iterations_cadences) }
+    it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:group) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }

@@ -41,6 +41,22 @@ RSpec.describe Groups::EpicBoardsController do
 
         expect(response).to have_gitlab_http_status(:ok)
       end
+
+      context 'with multiple boards' do
+        let(:boards) { create_list(:epic_board, 3, group: group) }
+
+        before do
+          visit_board(boards[2], Time.current + 1.minute)
+          visit_board(boards[0], Time.current + 2.minutes)
+          visit_board(boards[1], Time.current + 5.minutes)
+        end
+
+        it 'redirects to latest visited board' do
+          list_boards
+
+          expect(response).to redirect_to(group_epic_board_path(group, boards[1]))
+        end
+      end
     end
 
     context 'with unauthorized user' do
@@ -87,6 +103,10 @@ RSpec.describe Groups::EpicBoardsController do
     def list_boards(format: :html)
       get :index, params: { group_id: group }, format: format
     end
+
+    def visit_board(epic_board, time)
+      create(:epic_board_recent_visit, group: group, epic_board: epic_board, user: user, updated_at: time)
+    end
   end
 
   describe 'GET show' do
@@ -114,8 +134,6 @@ RSpec.describe Groups::EpicBoardsController do
 
     context 'when format is HTML' do
       it 'renders template' do
-        # epic board visits not supported yet
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/321625
         expect { read_board board: board }.not_to change(BoardGroupRecentVisit, :count)
 
         expect(response).to render_template :show
@@ -141,14 +159,24 @@ RSpec.describe Groups::EpicBoardsController do
           group.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
         end
 
-        it 'does not save visit for unsigned user' do
-          sign_out(user)
+        context 'when user is signed out' do
+          it 'does not save visit' do
+            sign_out(user)
 
-          # epic board visits not supported yet
-          expect { read_board board: board }.not_to change(BoardGroupRecentVisit, :count)
+            expect { read_board board: board }.not_to change(Boards::EpicBoardRecentVisit, :count)
 
-          expect(response).to render_template :show
-          expect(response.media_type).to eq 'text/html'
+            expect(response).to render_template :show
+            expect(response.media_type).to eq 'text/html'
+          end
+        end
+
+        context 'when user is signed in' do
+          it 'saves the visit' do
+            expect { read_board board: board }.to change(Boards::EpicBoardRecentVisit, :count)
+
+            expect(response).to render_template :show
+            expect(response.media_type).to eq 'text/html'
+          end
         end
       end
     end

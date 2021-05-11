@@ -55,6 +55,8 @@ module EE
       has_one :group_wiki_repository
       has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
 
+      has_many :epic_board_recent_visits, class_name: 'Boards::EpicBoardRecentVisit', inverse_of: :group
+
       belongs_to :file_template_project, class_name: "Project"
 
       belongs_to :push_rule, inverse_of: :group

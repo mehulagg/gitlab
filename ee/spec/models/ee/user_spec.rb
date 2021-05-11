@@ -31,6 +31,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:oncall_participants).class_name('IncidentManagement::OncallParticipant') }
     it { is_expected.to have_many(:oncall_rotations).class_name('IncidentManagement::OncallRotation').through(:oncall_participants) }
     it { is_expected.to have_many(:oncall_schedules).class_name('IncidentManagement::OncallSchedule').through(:oncall_rotations) }
+    it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:user) }
   end
 
   describe 'nested attributes' do
