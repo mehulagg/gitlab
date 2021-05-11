@@ -122,7 +122,7 @@ RSpec.describe EpicIssues::CreateService do
 
             include_examples 'returns success'
 
-            it 'does not perofrm N + 1 queries' do
+            it 'does not perform N + 1 queries' do
               allow(SystemNoteService).to receive(:epic_issue)
               allow(SystemNoteService).to receive(:issue_on_epic)
 
@@ -130,9 +130,9 @@ RSpec.describe EpicIssues::CreateService do
               extractor = double
               allow(Gitlab::ReferenceExtractor).to receive(:new).and_return(extractor)
               allow(extractor).to receive(:reset_memoized_values)
-              allow(extractor).to receive(:mentioned_users)
-              allow(extractor).to receive(:mentioned_groups)
-              allow(extractor).to receive(:mentioned_projects)
+              allow(extractor).to receive(:mentioned_user_ids)
+              allow(extractor).to receive(:mentioned_group_ids)
+              allow(extractor).to receive(:mentioned_project_ids)
               allow(extractor).to receive(:analyze)
               allow(extractor).to receive(:issues).and_return([issue])
 
