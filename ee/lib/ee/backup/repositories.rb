@@ -5,24 +5,11 @@ module EE
     module Repositories
       extend ::Gitlab::Utils::Override
 
-      override :restore
-      def restore
-        restore_group_repositories
-
-        super
-      end
-
       private
 
       override :repository_storage_klasses
       def repository_storage_klasses
         super << GroupWikiRepository
-      end
-
-      def restore_group_repositories
-        find_groups_in_batches do |group|
-          restore_repository(group, ::Gitlab::GlRepository::WIKI)
-        end
       end
 
       def group_relation
@@ -45,7 +32,7 @@ module EE
       end
 
       def dump_group(group)
-        backup_repository(group, ::Gitlab::GlRepository::WIKI)
+        strategy.enqueue(group, ::Gitlab::GlRepository::WIKI)
       end
 
       override :dump_consecutive

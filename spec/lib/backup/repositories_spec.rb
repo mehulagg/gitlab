@@ -173,7 +173,7 @@ RSpec.describe Backup::Repositories do
     end
 
     it 'restores repositories from bundles', :aggregate_failures do
-      allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
+      allow_next_instance_of(::Backup::GitalyRpcBackup::BackupRestore) do |backup_restore|
         allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
       end
 
@@ -190,7 +190,7 @@ RSpec.describe Backup::Repositories do
 
     describe 'command failure' do
       before do
-        expect(Project).to receive(:find_each).and_yield(project)
+        expect(Project).to receive_message_chain(:includes, :find_each).and_yield(project)
 
         allow_next_instance_of(DesignManagement::Repository) do |repository|
           allow(repository).to receive(:create_repository) { raise 'Fail in tests' }
@@ -269,7 +269,7 @@ RSpec.describe Backup::Repositories do
         create(:snippet_repository, snippet: personal_snippet)
         create(:snippet_repository, snippet: project_snippet)
 
-        allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
+        allow_next_instance_of(::Backup::GitalyRpcBackup::BackupRestore) do |backup_restore|
           allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
         end
       end
