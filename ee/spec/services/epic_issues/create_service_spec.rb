@@ -130,9 +130,9 @@ RSpec.describe EpicIssues::CreateService do
               extractor = double
               allow(Gitlab::ReferenceExtractor).to receive(:new).and_return(extractor)
               allow(extractor).to receive(:reset_memoized_values)
-              allow(extractor).to receive(:mentioned_user_ids)
-              allow(extractor).to receive(:mentioned_group_ids)
-              allow(extractor).to receive(:mentioned_project_ids)
+              allow(extractor).to receive(:mentioned_users)
+              allow(extractor).to receive(:mentioned_groups)
+              allow(extractor).to receive(:mentioned_projects)
               allow(extractor).to receive(:analyze)
               allow(extractor).to receive(:issues).and_return([issue])
 
