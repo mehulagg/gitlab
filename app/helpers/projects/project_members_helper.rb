@@ -27,8 +27,15 @@ module Projects::ProjectMembersHelper
     project.group.has_owner?(current_user)
   end
 
-  def project_members_list_data_json(project, members, pagination = {})
-    project_members_list_data(project, members, pagination).to_json
+  def project_members_list_data_json(project, user:, group:, invite:, access_request:)
+    {
+      user: project_members_list_data(project, user, { param_name: :page, params: { search_groups: nil } }),
+      group: project_group_links_list_data(project, group),
+      invite: project_members_list_data(project, invite.nil? ? [] : invite),
+      access_request: project_members_list_data(project, access_request.nil? ? [] : access_request),
+      source_id: project.id,
+      can_manage_members: can_manage_project_members?(project)
+    }.to_json
   end
 
   def project_group_links_list_data_json(project, group_links)
@@ -45,13 +52,11 @@ module Projects::ProjectMembersHelper
     GroupLink::ProjectGroupLinkSerializer.new.represent(group_links, { current_user: current_user })
   end
 
-  def project_members_list_data(project, members, pagination)
+  def project_members_list_data(project, members, pagination = {})
     {
       members: project_members_serialized(project, members),
       pagination: members_pagination_data(members, pagination),
       member_path: project_project_member_path(project, ':id'),
-      source_id: project.id,
-      can_manage_members: can_manage_project_members?(project)
     }
   end
 
@@ -60,8 +65,6 @@ module Projects::ProjectMembersHelper
       members: project_group_links_serialized(group_links),
       pagination: members_pagination_data(group_links),
       member_path: project_group_link_path(project, ':id'),
-      source_id: project.id,
-      can_manage_members: can_manage_project_members?(project)
     }
   end
 end
