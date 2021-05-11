@@ -274,17 +274,16 @@ In order to change the default issue closing pattern, GitLab administrators must
 [`gitlab.rb` or `gitlab.yml` file](../../../administration/issue_closing_pattern.md)
 of your installation.
 
-## Changing issue type
+## Change the issue type
 
-Users with [developer permission](../../permissions.md) can change an issue type by
-editing it and selecting the **Issue type** from the dropdown provided.
+Users with [developer permission](../../permissions.md)
+can change an issue's type. To do this, edit the issue and select an issue type from the
+**Issue type** selector menu:
 
-![chnage issue type - dropdown](img/issue_type_change_v13_12.png)
+- [Issue](index.md)
+- [Incident](../../../operations/incident_management/index.md)
 
-The current choices are:
-
-1. [Issue](index.md)
-1. [Incident](../../../operations/incident_management/index.md)
+![Change the issue type](img/issue_type_change_v13_12.png)
 
 ## Deleting issues
 
