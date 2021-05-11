@@ -266,7 +266,7 @@ To remove a deprecated metric:
    [fixtures](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/spec/support/usage_data_helpers.rb#L540)
    used to test
    [`UsageDataController#create`](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/3760ef28/spec/controllers/usage_data_controller_spec.rb#L75)
-   endpoint, and assure that test suite does not fail when metric that you wish to remove is not included into test payload.  
+   endpoint, and assure that test suite does not fail when metric that you wish to remove is not included into test payload.
 
 1. Create an issue in the
    [GitLab Data Team project](https://gitlab.com/gitlab-data/analytics/-/issues).
@@ -276,7 +276,7 @@ To remove a deprecated metric:
    This step can be skipped if verification done during [deprecation process](#3-deprecate-a-metric)
    reported that metric is not required by any data transformation in Snowflake data warehouse nor it is
    used by any of SiSense dashboards.
-  
+
 1. After you verify the metric can be safely removed,
    update the attributes of the metric's YAML definition:
 
@@ -1348,7 +1348,6 @@ The following is example content of the Usage Ping payload.
   "reply_by_email_enabled": "incoming+%{key}@incoming.gitlab.com",
   "signup_enabled": true,
   "web_ide_clientside_preview_enabled": true,
-  "ingress_modsecurity_enabled": true,
   "projects_with_expiration_policy_disabled": 999,
   "projects_with_expiration_policy_enabled": 999,
   ...

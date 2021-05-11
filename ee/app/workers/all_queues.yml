@@ -314,15 +314,6 @@
   :idempotent: true
   :tags:
   - :exclude_from_kubernetes
-- :name: cronjob:ingress_modsecurity_counter_metrics
-  :worker_name: IngressModsecurityCounterMetricsWorker
-  :feature_category: :web_firewall
-  :has_external_dependencies: true
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent:
-  :tags: []
 - :name: cronjob:iterations_update_status
   :worker_name: IterationsUpdateStatusWorker
   :feature_category: :issue_tracking

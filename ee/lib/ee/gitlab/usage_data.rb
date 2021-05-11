@@ -52,7 +52,6 @@ module EE
         def usage_data_counters
           super + [
             ::Gitlab::UsageDataCounters::LicensesList,
-            ::Gitlab::UsageDataCounters::IngressModsecurityCounter,
             ::Gitlab::StatusPage::UsageDataCounters::IncidentCounter,
             ::Gitlab::UsageDataCounters::NetworkPolicyCounter
           ]

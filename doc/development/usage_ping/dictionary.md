@@ -2178,7 +2178,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2190,7 +2190,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2202,7 +2202,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2214,7 +2214,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2226,7 +2226,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2238,7 +2238,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2250,7 +2250,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `ultimate`
 
@@ -6726,7 +6726,7 @@ Whether or not ModSecurity is enabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
