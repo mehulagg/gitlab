@@ -108,6 +108,9 @@ When an alert is created in a project, GitLab sends an email to the on-call resp
 on-call schedule for that project. If there is no schedule or no one on-call in that schedule at the
 time the alert is triggered, no email is sent.
 
-## Removal or deletion of a user that is a part of the on-call schedule
+## Removal or deletion of on-call user
 
-If a user is removed from project/group or his account is deleted, the confirmation modal will display the list of schedules that a current user is a part of. If removal/deletion is confirmed, the on-call rotation will be recalculated and an email will be sent to the Project owners and all participants in the rotation.
+If an on-call user is removed from the project or group, or their account is deleted, the
+confirmation modal displays the list of that user's on-call schedules. If the user's removal or
+deletion is confirmed, GitLab recalculates the on-call rotation and sends an email to the project
+owners and the rotation's participants.
