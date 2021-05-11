@@ -41,8 +41,9 @@ module Backup
 
     def restore
       restore_project_repositories
-      restore_snippets
+      restore_snippet_repositories
 
+      cleanup_snippets_without_repositories
       restore_object_pools
     end
 
@@ -56,12 +57,10 @@ module Backup
       end
     end
 
-    def restore_snippets
-      invalid_ids = Snippet.find_each(batch_size: 1000)
-        .map { |snippet| restore_snippet_repository(snippet) }
-        .compact
-
-      cleanup_snippets_without_repositories(invalid_ids)
+    def restore_snippet_repositories
+      Snippet.find_each(batch_size: 1000).each do |snippet|
+        restore_repository(snippet, Gitlab::GlRepository::SNIPPET)
+      end
     end
 
     def check_valid_storages!
@@ -214,26 +213,22 @@ module Backup
       end
     end
 
-    def restore_snippet_repository(snippet)
-      restore_repository(snippet, Gitlab::GlRepository::SNIPPET)
-
-      response = Snippets::RepositoryValidationService.new(nil, snippet).execute
-
-      if response.error?
-        snippet.repository.remove
-
-        progress.puts("Snippet #{snippet.full_path} can't be restored: #{response.message}")
-
-        snippet.id
-      else
-        nil
-      end
-    end
-
     # Snippets without a repository should be removed because they failed to import
     # due to having invalid repositories
-    def cleanup_snippets_without_repositories(ids)
-      Snippet.id_in(ids).delete_all
+    def cleanup_snippets_without_repositories
+      invalid_snippets = []
+
+      Snippet.find_each(batch_size: 1000).each do |snippet|
+        response = Snippets::RepositoryValidationService.new(nil, snippet).execute
+        next if response.success?
+
+        snippet.repository.remove
+        progress.puts("Snippet #{snippet.full_path} can't be restored: #{response.message}")
+
+        invalid_snippets << snippet
+      end
+
+      Snippet.id_in(invalid_snippets).delete_all
     end
 
     class BackupRestore
