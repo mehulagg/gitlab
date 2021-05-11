@@ -397,23 +397,6 @@ module EE
       !password_automatically_set?
     end
 
-    def has_valid_credit_card?
-      credit_card_validated_at.present?
-    end
-
-    def requires_credit_card_to_run_pipelines?(project)
-      return false unless ::Gitlab.com?
-
-      root_namespace = project.root_namespace
-      if root_namespace.free_plan?
-        ::Feature.enabled?(:ci_require_credit_card_on_free_plan, project, default_enabled: :yaml)
-      elsif root_namespace.trial?
-        ::Feature.enabled?(:ci_require_credit_card_on_trial_plan, project, default_enabled: :yaml)
-      else
-        false
-      end
-    end
-
     def has_required_credit_card_to_run_pipelines?(project)
       has_valid_credit_card? || !requires_credit_card_to_run_pipelines?(project)
     end
@@ -428,6 +411,28 @@ module EE
     end
 
     private
+
+    def created_after_credit_card_release_day?
+      created_at >= ::Users::CreditCardValidation::RELEASE_DAY
+    end
+
+    def has_valid_credit_card?
+      credit_card_validated_at.present?
+    end
+
+    def requires_credit_card_to_run_pipelines?(project)
+      return false unless ::Gitlab.com?
+      return false unless created_after_credit_card_release_day?
+
+      root_namespace = project.root_namespace
+      if root_namespace.free_plan?
+        ::Feature.enabled?(:ci_require_credit_card_on_free_plan, project, default_enabled: :yaml)
+      elsif root_namespace.trial?
+        ::Feature.enabled?(:ci_require_credit_card_on_trial_plan, project, default_enabled: :yaml)
+      else
+        false
+      end
+    end
 
     def namespace_union_for_owned(select = :id)
       ::Gitlab::SQL::Union.new([

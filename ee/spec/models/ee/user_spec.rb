@@ -1683,24 +1683,27 @@ RSpec.describe User do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:is_saas, :cc_present, :is_free, :is_trial, :free_ff_enabled, :trial_ff_enabled, :result) do
+    where(:is_saas, :cc_present, :is_free, :is_trial, :free_ff_enabled, :trial_ff_enabled, :days_from_release, :result) do
       # self-hosted
-      false | false | false | false | true  | true  | true  # paid plan
-      false | false | false | true  | true  | true  | true  # missing CC on trial plan
+      false | false | false | false | true  | true  | 0 | true  # paid plan
+      false | false | false | true  | true  | true  | 0 | true  # missing CC on trial plan
 
       # saas
-      true  | false | false | false | true  | true  | true  # missing CC on paid plan
-      true  | false | true  | false | true  | true  | false # missing CC on free plan
-      true  | false | true  | false | false | true  | true  # missing CC on free plan - FF off
-      true  | false | false | true  | true  | true  | false # missing CC on trial plan
-      true  | false | false | true  | true  | false | true  # missing CC on trial plan - FF off
-      true  | true  | true  | false | true  | true  | true  # present CC on free plan
-      true  | true  | false | true  | true  | true  | true  # present CC on trial plan
+      true  | false | false | false | true  | true  | 0  | true  # missing CC on paid plan
+      true  | false | true  | false | true  | true  | 0  | false # missing CC on free plan
+      true  | false | true  | false | true  | true  | -1 | true  # missing CC on free plan but old user
+      true  | false | true  | false | false | true  | 0  | true  # missing CC on free plan - FF off
+      true  | false | false | true  | true  | true  | 0  | false # missing CC on trial plan
+      true  | false | false | true  | true  | true  | -1 | true  # missing CC on trial plan but old user
+      true  | false | false | true  | true  | false | 0  | true  # missing CC on trial plan - FF off
+      true  | true  | true  | false | true  | true  | 0  | true  # present CC on free plan
+      true  | true  | false | true  | true  | true  | 0  | true  # present CC on trial plan
     end
 
     with_them do
       before do
         allow(::Gitlab).to receive(:com?).and_return(is_saas)
+        user.created_at = ::Users::CreditCardValidation::RELEASE_DAY + days_from_release.days
         allow(user).to receive(:credit_card_validated_at).and_return(Time.current) if cc_present
         allow(project.namespace).to receive(:free_plan?).and_return(is_free)
         allow(project.namespace).to receive(:trial?).and_return(is_trial)
