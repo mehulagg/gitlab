@@ -6977,9 +6977,6 @@ msgstr ""
 msgid "ClusterIntegration|Before you enable this integration, follow the %{link_start}documented process%{link_end}."
 msgstr ""
 
-msgid "ClusterIntegration|Blocking mode"
-msgstr ""
-
 msgid "ClusterIntegration|CA Certificate"
 msgstr ""
 
@@ -7226,9 +7223,6 @@ msgstr ""
 msgid "ClusterIntegration|GitLab-managed cluster"
 msgstr ""
 
-msgid "ClusterIntegration|Global default"
-msgstr ""
-
 msgid "ClusterIntegration|Google Cloud Platform project"
 msgstr ""
 
@@ -7322,9 +7316,6 @@ msgstr ""
 msgid "ClusterIntegration|Knative domain name was updated successfully."
 msgstr ""
 
-msgid "ClusterIntegration|Knative extends Kubernetes to provide a set of middleware components that are essential to build modern, source-centric, and container-based applications that can run anywhere: on premises, in the cloud, or even in a third-party data center."
-msgstr ""
-
 msgid "ClusterIntegration|Kubernetes cluster is being created..."
 msgstr ""
 
@@ -7385,9 +7376,6 @@ msgstr ""
 msgid "ClusterIntegration|Loading subnetworks"
 msgstr ""
 
-msgid "ClusterIntegration|Logging mode"
-msgstr ""
-
 msgid "ClusterIntegration|Machine type"
 msgstr ""
 
@@ -7398,9 +7386,6 @@ msgid "ClusterIntegration|Make sure your account %{link_to_requirements} to crea
 msgstr ""
 
 msgid "ClusterIntegration|Manage your Kubernetes cluster by visiting %{provider_link}"
-msgstr ""
-
-msgid "ClusterIntegration|ModSecurity enabled"
 msgstr ""
 
 msgid "ClusterIntegration|Namespace per environment"
@@ -7497,9 +7482,6 @@ msgid "ClusterIntegration|Read our %{linkStart}help page%{linkEnd} on Kubernetes
 msgstr ""
 
 msgid "ClusterIntegration|Read our %{link_start}help page%{link_end} on Kubernetes cluster integration."
-msgstr ""
-
-msgid "ClusterIntegration|Real-time web application monitoring, logging and access control. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
 msgid "ClusterIntegration|Remove Kubernetes cluster integration"
@@ -7640,9 +7622,6 @@ msgstr ""
 msgid "ClusterIntegration|Send Container Network Policies Logs"
 msgstr ""
 
-msgid "ClusterIntegration|Send Web Application Firewall Logs"
-msgstr ""
-
 msgid "ClusterIntegration|Service Token"
 msgstr ""
 
@@ -7653,9 +7632,6 @@ msgid "ClusterIntegration|Service token is required."
 msgstr ""
 
 msgid "ClusterIntegration|Set a prefix for your namespaces. If not set, defaults to your project path. If modified, existing environments will use their current namespaces until the cluster cache is cleared."
-msgstr ""
-
-msgid "ClusterIntegration|Set the global mode for the WAF in this cluster. This can be overridden at the environmental level."
 msgstr ""
 
 msgid "ClusterIntegration|Something went wrong on our end."
@@ -7812,9 +7788,6 @@ msgid "ClusterIntegration|You are about to update %{appTitle} on your cluster."
 msgstr ""
 
 msgid "ClusterIntegration|You must grant access to your organization’s AWS resources in order to create a new EKS cluster. To grant access, create a provision role using the account and external ID below and provide us the ARN."
-msgstr ""
-
-msgid "ClusterIntegration|You must have an RBAC-enabled cluster to install Knative."
 msgstr ""
 
 msgid "ClusterIntegration|You must specify a domain before you can install Knative."
@@ -33236,9 +33209,6 @@ msgstr ""
 msgid "ThreatMonitoring|Anomalous Requests"
 msgstr ""
 
-msgid "ThreatMonitoring|Application firewall not detected"
-msgstr ""
-
 msgid "ThreatMonitoring|Container Network Policies are not installed or have been disabled. To view this data, ensure your Network Policies are installed and enabled for your cluster."
 msgstr ""
 
@@ -33314,9 +33284,6 @@ msgstr ""
 msgid "ThreatMonitoring|Status"
 msgstr ""
 
-msgid "ThreatMonitoring|The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
-msgstr ""
-
 msgid "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear."
 msgstr ""
 
@@ -33345,12 +33312,6 @@ msgid "ThreatMonitoring|Unreviewed"
 msgstr ""
 
 msgid "ThreatMonitoring|View documentation"
-msgstr ""
-
-msgid "ThreatMonitoring|Web Application Firewall"
-msgstr ""
-
-msgid "ThreatMonitoring|While it's rare to have no traffic coming to your application, it can happen. In any event, we ask that you double check your settings to make sure you've set up the WAF correctly."
 msgstr ""
 
 msgid "Throughput"
@@ -36022,9 +35983,6 @@ msgid "We'll continuously validate your pipeline configuration. The validation r
 msgstr ""
 
 msgid "We've found no vulnerabilities"
-msgstr ""
-
-msgid "Web Application Firewall"
 msgstr ""
 
 msgid "Web IDE"

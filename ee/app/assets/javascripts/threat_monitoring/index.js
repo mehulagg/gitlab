@@ -13,12 +13,10 @@ const apolloProvider = new VueApollo({
 export default () => {
   const el = document.querySelector('#js-threat-monitoring-app');
   const {
-    wafStatisticsEndpoint,
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
     networkPoliciesEndpoint,
     emptyStateSvgPath,
-    wafNoDataSvgPath,
     networkPolicyNoDataSvgPath,
     newPolicyPath,
     documentationPath,
@@ -28,7 +26,6 @@ export default () => {
 
   const store = createStore();
   store.dispatch('threatMonitoring/setEndpoints', {
-    wafStatisticsEndpoint,
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
   });
@@ -48,7 +45,6 @@ export default () => {
     render(createElement) {
       return createElement(ThreatMonitoringApp, {
         props: {
-          wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),
           newPolicyPath,

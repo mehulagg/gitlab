@@ -84,16 +84,12 @@ describe('Clusters Store', () => {
             externalHostname: null,
             installable: true,
             installed: false,
-            isEditingModSecurityEnabled: false,
-            isEditingModSecurityMode: false,
             installFailed: true,
             uninstallable: false,
             updateFailed: false,
             uninstallSuccessful: false,
             uninstallFailed: false,
             validationError: null,
-            modsecurity_enabled: false,
-            modsecurity_mode: undefined,
           },
           runner: {
             title: 'GitLab Runner',
@@ -142,8 +138,7 @@ describe('Clusters Store', () => {
             uninstallable: false,
             uninstallSuccessful: false,
             uninstallFailed: false,
-            validationError: null,
-            wafLogEnabled: null,
+            validationError: null
           },
           jupyter: {
             title: 'JupyterHub',
