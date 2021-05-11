@@ -1,4 +1,4 @@
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlModal } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import IssuableEditActions from '~/issue_show/components/edit_actions.vue';
@@ -25,6 +25,7 @@ describe('Edit Actions components', () => {
         },
         data() {
           return {
+            modalId: 'delete-issuable-modal-1',
             ...data,
           };
         },
@@ -35,6 +36,11 @@ describe('Edit Actions components', () => {
     );
   };
 
+  async function deleteIssuable(localWrapper) {
+    localWrapper.findComponent(GlModal).vm.$emit('primary');
+  }
+
+  const findModal = () => wrapper.findComponent(GlModal);
   const findEditButtons = () => wrapper.findAllComponents(GlButton);
   const findDeleteButton = () => wrapper.findByTestId('issuable-delete-button');
   const findSaveButton = () => wrapper.findByTestId('issuable-save-button');
@@ -88,6 +94,7 @@ describe('Edit Actions components', () => {
       expect(eventHub.$emit).toHaveBeenCalledWith('update.issuable');
     });
   });
+
   describe('closeForm', () => {
     beforeEach(() => {
       jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
@@ -100,23 +107,25 @@ describe('Edit Actions components', () => {
     });
   });
 
+  describe('renders create modal with the correct information', () => {
+    it('renders correct modal id', () => {
+      expect(findModal().attributes('modalid')).toBe(wrapper.vm.modalId);
+    });
+  });
+
   describe('deleteIssuable', () => {
     beforeEach(() => {
       jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
     });
 
-    it('sends delete.issuable event when clicking save button', () => {
-      jest.spyOn(window, 'confirm').mockReturnValue(true);
+    it('doesn not sends delete.issuable event when clicking delete button', () => {
       findDeleteButton().vm.$emit('click');
-
-      expect(eventHub.$emit).toHaveBeenCalledWith('delete.issuable', { destroy_confirm: true });
+      expect(eventHub.$emit).not.toHaveBeenCalled();
     });
 
-    it('does nothing when confirm is false', () => {
-      jest.spyOn(window, 'confirm').mockReturnValue(false);
-      findDeleteButton().vm.$emit('click');
-
-      expect(eventHub.$emit).not.toHaveBeenCalledWith('delete.issuable');
+    it('sends delete.issuable event when clicking the delete confirm button', async () => {
+      await deleteIssuable(wrapper);
+      expect(eventHub.$emit).toHaveBeenCalledWith('delete.issuable', { destroy_confirm: true });
     });
   });
 });
