@@ -8,6 +8,8 @@ class Packages::Push < ApplicationRecord
 
   before_validation :set_sha, unless: :sha?
 
+  scope :with_sha, ->(sha) { find_by(sha: sha) }
+
   private
 
   def set_sha
