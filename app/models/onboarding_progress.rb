@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OnboardingProgress < ApplicationRecord
+class OnboardingProgress < NamespaceShard
   belongs_to :namespace, optional: false
 
   validate :namespace_is_root_namespace
