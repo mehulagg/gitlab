@@ -182,7 +182,9 @@ class Issue < ApplicationRecord
       issue.closed_at = issue.system_note_timestamp
 
       next if args.empty?
+
       next unless args.first.is_a?(User)
+
       issue.closed_by = args.first
     end
 
