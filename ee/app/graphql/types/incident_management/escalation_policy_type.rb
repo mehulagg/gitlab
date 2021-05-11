@@ -6,7 +6,7 @@ module Types
       graphql_name 'EscalationPolicyType'
       description 'Represents an escalation policy'
 
-      # authorize :read_incident_management_escalation_policy
+      authorize :read_incident_management_escalation_policy
 
       field :id,
             Types::GlobalIDType[::IncidentManagement::EscalationPolicy],
