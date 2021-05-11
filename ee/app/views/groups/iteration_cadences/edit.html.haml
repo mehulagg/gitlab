@@ -1,9 +1,5 @@
-- add_to_breadcrumbs _("Iteration cadences"), group_iteration_cadences_path(@group)
+- add_to_breadcrumbs _('Iteration cadences'), group_iteration_cadences_path(@group)
 - breadcrumb_title params[:id]
-- page_title _("Edit iteration cadence")
+- page_title _('Edit iteration cadence')
 
-.js-iteration-cadence-app{ data: { group_full_path: @group.full_path,
-  cadence_id: params[:id],
-  cadences_list_path: group_iteration_cadences_path(@group),
-  can_create_cadence: can?(current_user, :create_iteration_cadence, @group),
-  can_edit_cadence: can?(current_user, :admin_iteration_cadence, @group) } }
+= render 'js_app'

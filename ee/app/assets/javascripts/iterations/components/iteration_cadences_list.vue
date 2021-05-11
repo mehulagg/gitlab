@@ -24,12 +24,12 @@ export default {
       },
       update(data) {
         return {
-          iterationCadences: data.group.iterationCadences?.nodes || [],
-          pageInfo: data.group.iterationCadences?.pageInfo || {},
+          iterationCadences: data.group?.iterationCadences?.nodes || [],
+          pageInfo: data.group?.iterationCadences?.pageInfo || {},
         };
       },
       error({ message }) {
-        this.error = message || __('Error loading iterations');
+        this.error = message || __('Iterations|Error loading iteration cadences.');
       },
     },
   },
@@ -54,8 +54,11 @@ export default {
     queryVariables() {
       const vars = {
         fullPath: this.groupPath,
-        active: this.active,
       };
+
+      if (this.active !== undefined) {
+        vars.active = this.active;
+      }
 
       if (this.pagination.beforeCursor) {
         vars.beforeCursor = this.pagination.beforeCursor;
@@ -133,7 +136,7 @@ export default {
           <iteration-cadence v-for="cadence in cadences" :key="cadence.id" :title="cadence.title" />
         </ul>
         <div v-else class="nothing-here-block">
-          {{ __('No iteration cadences to show') }}
+          {{ __('Iterations|No iteration cadences to show.') }}
         </div>
         <gl-pagination
           v-if="prevPage || nextPage"
@@ -150,12 +153,12 @@ export default {
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
         <gl-button
           variant="confirm"
-          data-qa-selector="new_iteration_button"
+          data-qa-selector="create_cadence_button"
           :to="{
             name: 'new',
           }"
         >
-          {{ __('New iteration') }}
+          {{ __('Iterations|New iteration cadence') }}
         </gl-button>
       </li>
     </template>

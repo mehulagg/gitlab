@@ -18303,6 +18303,9 @@ msgstr ""
 msgid "Iterations|Duration"
 msgstr ""
 
+msgid "Iterations|Error loading iteration cadences."
+msgstr ""
+
 msgid "Iterations|Future iterations"
 msgstr ""
 
@@ -18310,6 +18313,9 @@ msgid "Iterations|Iteration scheduling will be handled automatically"
 msgstr ""
 
 msgid "Iterations|New iteration cadence"
+msgstr ""
+
+msgid "Iterations|No iteration cadences to show."
 msgstr ""
 
 msgid "Iterations|Number of future iterations you would like to have scheduled"
