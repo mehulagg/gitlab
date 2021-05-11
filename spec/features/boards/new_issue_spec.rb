@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Issue Boards new issue', :js do
+  include BoardHelpers
+
   let_it_be(:project)      { create(:project, :public) }
   let_it_be(:board)        { create(:board, project: project) }
   let_it_be(:backlog_list) { create(:backlog_list, board: board) }
@@ -10,15 +12,16 @@ RSpec.describe 'Issue Boards new issue', :js do
   let_it_be(:list)         { create(:list, board: board, label: label, position: 0) }
   let_it_be(:user)         { create(:user) }
 
+  let(:board_list_header) { find('[data-testid="board-list-header"]') }
+  let(:project_select_dropdown) { find('[data-testid="project-select-dropdown"]') }
+
   context 'authorized user' do
     before do
       project.add_maintainer(user)
 
       sign_in(user)
 
-      visit project_board_path(project, board)
-
-      wait_for_requests
+      load_board project_board_path(project, board)
 
       expect(page).to have_selector('.board', count: 3)
     end
@@ -121,8 +124,7 @@ RSpec.describe 'Issue Boards new issue', :js do
 
   context 'unauthorized user' do
     before do
-      visit project_board_path(project, board)
-      wait_for_requests
+      load_board project_board_path(project, board)
     end
 
     it 'displays new issue button in open list' do
@@ -138,33 +140,39 @@ RSpec.describe 'Issue Boards new issue', :js do
 
   context 'group boards' do
     let_it_be(:group) { create(:group, :public) }
-    let_it_be(:project) { create(:project, :public, namespace: group) }
+    let_it_be(:project) { create(:project, :public, namespace: group, name: "root project") }
+
+    let_it_be(:sub_group) { create(:group, parent: group) }
+    let_it_be(:sub_project) { create(:project, group: sub_group, name: "sub project") }
+
     let_it_be(:group_board) { create(:board, group: group) }
-    let_it_be(:project_label) { create(:label, project: project, name: 'label') }
-    let_it_be(:list) { create(:list, board: group_board, label: project_label, position: 0) }
 
     context 'for unauthorized users' do
+      before do
+        sign_in(user)
+      end
+
       context 'when backlog does not exist' do
+        let_it_be(:project_label) { create(:label, project: project, name: 'label') }
+        let_it_be(:list) { create(:list, board: group_board, label: project_label, position: 0) }
+
         before do
-          sign_in(user)
-          visit group_board_path(group, group_board)
-          wait_for_requests
+          load_board group_board_path(group, group_board)
         end
 
         it 'does not display new issue button in label list' do
           page.within('.board.is-draggable') do
+            # data-testid="board-list-header"
             expect(page).not_to have_selector('.issue-count-badge-add-button')
           end
         end
       end
 
       context 'when backlog list already exists' do
-        let!(:backlog_list) { create(:backlog_list, board: group_board) }
+        let_it_be(:backlog_list) { create(:backlog_list, board: group_board) }
 
         before do
-          sign_in(user)
-          visit group_board_path(group, group_board)
-          wait_for_requests
+          load_board group_board_path(group, group_board)
         end
 
         it 'displays new issue button in open list' do
@@ -180,18 +188,52 @@ RSpec.describe 'Issue Boards new issue', :js do
     end
 
     context 'for authorized users' do
-      it 'display new issue button in label list' do
-        project = create(:project, namespace: group)
+      before do
         project.add_reporter(user)
-
+        
         sign_in(user)
-        visit group_board_path(group, group_board)
-        wait_for_requests
+        
+        load_board group_board_path(group, group_board)
+      end
+      
+      context 'when backlog does not exist' do
+        let_it_be(:project_label) { create(:label, project: project, name: 'label') }
+        let_it_be(:list) { create(:list, board: group_board, label: project_label, position: 0) }
 
-        page.within('.board.is-draggable') do
-          expect(page).to have_selector('.issue-count-badge-add-button')
+        it 'display new issue button in label list' do
+          page.within('.board.is-draggable') do
+            expect(page).to have_selector('.issue-count-badge-add-button')
+          end
         end
       end
+
+      context 'when backlog list already exists' do
+        let_it_be(:backlog_list) { create(:backlog_list, board: group_board) }
+
+        before do
+          load_board group_board_path(group, group_board)
+        end
+
+        it 'displays a project who is a direct descendant of the top-level group' do
+          board_list_header.within do
+            expect(project_select_dropdown).to have_content("root project")
+          end
+        end
+  
+        it 'displays a project that belongs to a sub group' do
+          board_list_header.within do
+            expect(project_select_dropdown).to have_content("sub project")
+          end 
+        end
+      end      
     end
+  end
+
+  def click_new_issue
+    find_button('New issue').click
+
+    project_select_dropdown.click
+
+    wait_for_requests
   end
 end
