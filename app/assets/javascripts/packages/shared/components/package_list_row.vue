@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlLink, GlSprintf, GlTooltipDirective, GlTruncate, GlIcon } from '@gitlab/ui';
+import { GlButton, GlLink, GlSprintf, GlTooltipDirective, GlTruncate } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
@@ -19,7 +19,6 @@ export default {
     PackagePath,
     PublishMethod,
     ListItem,
-    GlIcon,
     PackageIconAndName: () =>
       import(/* webpackChunkName: 'package_registry_components' */ './package_icon_and_name.vue'),
     InfrastructureIconAndName: () =>

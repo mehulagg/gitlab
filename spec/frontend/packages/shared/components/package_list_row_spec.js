@@ -1,4 +1,4 @@
-import { GlLink, GlIcon } from '@gitlab/ui';
+import { GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
