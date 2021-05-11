@@ -171,10 +171,7 @@ describe('packages_list_row', () => {
     it('has a warning icon', () => {
       const icon = findWarningIcon();
       const tooltip = getBinding(icon.element, 'gl-tooltip');
-      expect(icon.exists()).toBe(true);
-      expect(icon.props()).toMatchObject({
-        name: 'warning',
-      });
+      expect(icon.props('name')).toBe('warning');
       expect(tooltip.value).toMatchObject({
         title: 'Invalid Package: failed metadata extraction',
       });

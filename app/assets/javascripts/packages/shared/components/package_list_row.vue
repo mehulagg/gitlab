@@ -81,9 +81,6 @@ export default {
     disabledDeleteButton() {
       return this.disabledRow || !this.packageEntity._links.delete_api_path;
     },
-    invalidMetadataText() {
-      return 'lol';
-    },
   },
   i18n: {
     erroredPackageText: s__('PackageRegistry|Invalid Package: failed metadata extraction'),
@@ -104,11 +101,12 @@ export default {
           <gl-truncate :text="packageEntity.name" />
         </gl-link>
 
-        <gl-icon
+        <gl-button
           v-if="showWarningIcon"
           v-gl-tooltip="{ title: $options.i18n.erroredPackageText }"
-          name="warning"
-          class="gl-ml-3"
+          icon="warning"
+          category="tertiary"
+          :aria-label="__('Warning')"
         />
 
         <package-tags
