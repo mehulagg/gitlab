@@ -9,6 +9,8 @@ module Mutations
 
           graphql_name 'DeleteDevopsAdoptionSegment'
 
+          description '**BETA** This endpoint is subject to change without notice.'
+
           argument :id, [::Types::GlobalIDType[::Analytics::DevopsAdoption::Segment]],
                    required: true,
                    description: 'One or many IDs of the segments to delete.'
