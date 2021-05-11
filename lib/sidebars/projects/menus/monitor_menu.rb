@@ -42,7 +42,8 @@ module Sidebars
 
         override :title
         def title
-          Feature.enabled?(:sidebar_refactor, context.current_user) ? _('Monitor') : _('Operations')
+          # Feature.enabled?(:sidebar_refactor, context.current_user) ? _('Monitor') : _('Operations')
+          _('Monitor')
         end
 
         override :sprite_icon
