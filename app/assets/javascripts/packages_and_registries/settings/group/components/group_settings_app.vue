@@ -145,7 +145,7 @@ export default {
             />
           </template>
         </maven-settings>
-        <generic-settings data-testid="generic-settings">
+        <generic-settings class="gl-mt-6" data-testid="generic-settings">
           <template #default="{ modelNames }">
             <duplicates-settings
               :duplicates-allowed="packageSettings.genericDuplicatesAllowed"
