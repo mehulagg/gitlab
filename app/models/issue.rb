@@ -180,7 +180,10 @@ class Issue < ApplicationRecord
       args = transition.args
 
       issue.closed_at = issue.system_note_timestamp
-      issue.closed_by = args.first unless args.empty?
+
+      next if args.empty?
+      next unless args.first.is_a?(User)
+      issue.closed_by = args.first
     end
 
     before_transition closed: :opened do |issue|
