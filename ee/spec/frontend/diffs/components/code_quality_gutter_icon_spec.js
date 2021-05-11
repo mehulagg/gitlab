@@ -13,6 +13,14 @@ describe('EE CodeQualityGutterIcon', () => {
   let wrapper;
   let codequalityDiff;
 
+  const defaultProps = {
+    filePath: 'index.js',
+    line: {
+      left: {},
+      right: {},
+    },
+  };
+
   const findIcon = () => wrapper.findComponent(GlIcon);
 
   const createComponent = (props = {}, extendStore = () => {}) => {
@@ -22,14 +30,7 @@ describe('EE CodeQualityGutterIcon', () => {
     extendStore(store);
 
     wrapper = shallowMount(CodeQualityGutterIcon, {
-      propsData: {
-        filePath: 'index.js',
-        line: {
-          left: {},
-          right: {},
-        },
-        ...props,
-      },
+      propsData: { ...defaultProps, ...props },
       store,
     });
   };

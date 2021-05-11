@@ -22,11 +22,14 @@ export default {
   },
   computed: {
     ...mapState('diffs', ['codequalityDiff']),
+    severity() {
+      return this.codequalityDiffForLine[0].severity;
+    },
     severityClass() {
-      return SEVERITY_CLASSES[this.codequalityDiffForLine[0].severity] || SEVERITY_CLASSES.unknown;
+      return SEVERITY_CLASSES[this.severity] || SEVERITY_CLASSES.unknown;
     },
     severityIcon() {
-      return SEVERITY_ICONS[this.codequalityDiffForLine[0].severity] || SEVERITY_ICONS.unknown;
+      return SEVERITY_ICONS[this.severity] || SEVERITY_ICONS.unknown;
     },
     codequalityDiffForLine() {
       const codequalityDiffForFile = this.codequalityDiff?.files?.[this.filePath] || [];
