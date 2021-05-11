@@ -600,6 +600,9 @@ Migration/ReferToIndexByName:
     - !ruby/regexp /\Adb\/(post_)?migrate\/20200[1-7].*\.rb\z/
     - !ruby/regexp /\Aee\/db\/geo\/(post_)?migrate\/201.*\.rb\z/
 
+Migration/RenameTable:
+  Include:
+    - 'lib/gitlab/database.rb'
 Migration/CreateTableWithForeignKeys:
   # Disable this cop for all the existing migrations
   Exclude:
