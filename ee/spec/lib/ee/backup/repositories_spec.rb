@@ -84,7 +84,7 @@ RSpec.describe Backup::Repositories do
     end
 
     it 'restores repositories from bundles', :aggregate_failures do
-      allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
+      allow_next_instance_of(::Backup::GitalyRpcBackup::BackupRestore) do |backup_restore|
         allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
       end
 
