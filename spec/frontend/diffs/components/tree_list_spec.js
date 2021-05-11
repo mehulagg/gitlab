@@ -113,7 +113,7 @@ describe('Diffs tree list component', () => {
 
       wrapper.find('.file-row').trigger('click');
 
-      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('diffs/scrollToFile', 'app/index.js');
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith('diffs/scrollToFile', { path: 'app/index.js' });
     });
 
     it('renders as file list when renderTreeList is false', () => {

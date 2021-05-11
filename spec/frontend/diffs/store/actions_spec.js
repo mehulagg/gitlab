@@ -885,7 +885,7 @@ describe('DiffsStoreActions', () => {
         },
       };
 
-      scrollToFile({ state, commit }, 'path');
+      scrollToFile({ state, commit }, { path: 'path' });
 
       expect(document.location.hash).toBe('#test');
     });
@@ -899,7 +899,7 @@ describe('DiffsStoreActions', () => {
         },
       };
 
-      scrollToFile({ state, commit }, 'path');
+      scrollToFile({ state, commit }, { path: 'path' });
 
       expect(commit).toHaveBeenCalledWith(types.VIEW_DIFF_FILE, 'test');
     });

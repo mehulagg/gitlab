@@ -515,11 +515,15 @@ export const toggleActiveFileByHash = ({ commit }, hash) => {
   commit(types.VIEW_DIFF_FILE, hash);
 };
 
-export const scrollToFile = ({ state, commit }, path) => {
+export const scrollToFile = ({ state, commit }, { path, toContent = false } = {}) => {
   if (!state.treeEntries[path]) return;
 
   const { fileHash } = state.treeEntries[path];
-  document.location.hash = fileHash;
+  const contentHash = `diff-content-${fileHash}`;
+
+  // Clear the hash so that the next set forces a scroll position change even if the hash is the same
+  document.location.hash = '';
+  document.location.hash = toContent ? contentHash : fileHash;
 
   commit(types.VIEW_DIFF_FILE, fileHash);
 };

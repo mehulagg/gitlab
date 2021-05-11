@@ -82,7 +82,7 @@ function handleDiscussionJump(self, fn, discussionId = self.currentDiscussionId)
   const discussionFilePath = discussion?.diff_file?.file_path;
 
   if (discussionFilePath) {
-    self.scrollToFile(discussionFilePath);
+    self.scrollToFile({ path: discussionFilePath });
   }
 
   self.$nextTick(() => {
