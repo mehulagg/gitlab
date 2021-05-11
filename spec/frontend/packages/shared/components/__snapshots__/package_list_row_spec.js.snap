@@ -2,7 +2,7 @@
 
 exports[`packages_list_row renders 1`] = `
 <div
-  class="gl-display-flex gl-flex-direction-column gl-border-b-solid gl-border-t-solid gl-border-t-1 gl-border-b-1 gl-border-t-transparent gl-opacity-5 gl-border-b-gray-100"
+  class="gl-display-flex gl-flex-direction-column gl-border-b-solid gl-border-t-solid gl-border-t-1 gl-border-b-1 gl-border-t-transparent gl-border-b-gray-100"
   data-qa-selector="package_row"
 >
   <div
@@ -25,7 +25,6 @@ exports[`packages_list_row renders 1`] = `
             <gl-link-stub
               class="gl-text-body gl-min-w-0"
               data-qa-selector="package_link"
-              disabled="true"
               href="foo"
             >
               <gl-truncate-stub
@@ -57,7 +56,6 @@ exports[`packages_list_row renders 1`] = `
             <div />
              
             <package-path-stub
-              disabled="true"
               path="foo/bar/baz"
             />
           </div>
@@ -95,7 +93,6 @@ exports[`packages_list_row renders 1`] = `
         buttontextclasses=""
         category="secondary"
         data-testid="action-delete"
-        disabled="true"
         icon="remove"
         size="medium"
         title="Remove package"
