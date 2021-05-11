@@ -133,7 +133,12 @@ export default {
       </div>
       <div v-else>
         <ul v-if="cadences.length > 0" class="content-list">
-          <iteration-cadence v-for="cadence in cadences" :key="cadence.id" :title="cadence.title" />
+          <iteration-cadence
+            v-for="cadence in cadences"
+            :key="cadence.id"
+            :cadence-id="cadence.id"
+            :title="cadence.title"
+          />
         </ul>
         <div v-else class="nothing-here-block">
           {{ s__('Iterations|No iteration cadences to show.') }}
