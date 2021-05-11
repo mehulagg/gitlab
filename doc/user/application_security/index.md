@@ -164,7 +164,7 @@ reports are available to download. To download a report, click on the
 
 A merge request contains a security widget which displays a summary of the NEW results. New results are determined by comparing the current findings against existing findings in the target (default) branch (if there are prior findings). 
 
-It is recommended you run a scan of the `default` branch before enabling feature branch scans for your developers. Otherwise, there will be no base for comparison and all feature branches will display the full scan results in the merge request security widget.
+We recommended you run a scan of the `default` branch before enabling feature branch scans for your developers. Otherwise, there will be no base for comparison and all feature branches display the full scan results in the merge request security widget.
 
 The merge request security widget will only display a subset of the vulnerabilities the generated JSON artifact because the JSON artifact contains both NEW and EXISTING findings.
 
