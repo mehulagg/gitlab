@@ -11,7 +11,6 @@ module Gitlab
       # the right load balancer pool, depending on the type of query.
       class ConnectionProxy
         WriteInsideReadOnlyTransactionError = Class.new(StandardError)
-        READ_ONLY_TRANSACTION_KEY = :load_balacing_read_only_transaction
 
         attr_reader :load_balancer
 
@@ -31,6 +30,8 @@ module Gitlab
           select_one
           quote_column_name
         ).freeze
+
+        ALLOWED_EXEC_QUERY = %r{^SET }
 
         # hosts - The hosts to use for load balancing.
         def initialize(hosts = [])
@@ -59,9 +60,17 @@ module Gitlab
           end
         end
 
+        def exec_query(*args, &block)
+          # first param of args is SQL
+          if ALLOWED_EXEC_QUERY.match?(args.first.match)
+            read_using_load_balancer(:exec_query, args, &block)
+          else
+            write_using_load_balancer(:exec_query, args, &block)
+          end
+        end
+
         def transaction(*args, &block)
-          if current_session.fallback_to_replicas_for_ambiguous_queries?
-            track_read_only_transaction!
+          if current_session.transaction_using_replica?
             read_using_load_balancer(:transaction, args, &block)
           else
             write_using_load_balancer(:transaction, args, sticky: true, &block)
@@ -73,19 +82,14 @@ module Gitlab
 
         # Delegates all unknown messages to a read-write connection.
         def method_missing(name, *args, &block)
-          if current_session.fallback_to_replicas_for_ambiguous_queries?
-            read_using_load_balancer(name, args, &block)
-          else
-            write_using_load_balancer(name, args, &block)
-          end
+          write_using_load_balancer(name, args, &block)
         end
 
         # Performs a read using the load balancer.
         #
         # name - The name of the method to call on a connection object.
         def read_using_load_balancer(name, args, &block)
-          if current_session.use_primary? &&
-             !current_session.use_replicas_for_read_queries?
+          if current_session.use_primary?
             @load_balancer.read_write do |connection|
               connection.send(name, *args, &block)
             end
@@ -102,7 +106,7 @@ module Gitlab
         # sticky - If set to true the session will stick to the master after
         #          the write.
         def write_using_load_balancer(name, args, sticky: false, &block)
-          if read_only_transaction?
+          if current_session.read_only?
             raise WriteInsideReadOnlyTransactionError, 'A write query is performed inside a read-only transaction'
           end
 
@@ -120,18 +124,6 @@ module Gitlab
 
         def current_session
           ::Gitlab::Database::LoadBalancing::Session.current
-        end
-
-        def track_read_only_transaction!
-          Thread.current[READ_ONLY_TRANSACTION_KEY] = true
-        end
-
-        def untrack_read_only_transaction!
-          Thread.current[READ_ONLY_TRANSACTION_KEY] = nil
-        end
-
-        def read_only_transaction?
-          Thread.current[READ_ONLY_TRANSACTION_KEY] == true
         end
       end
     end

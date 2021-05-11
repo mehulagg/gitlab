@@ -7,7 +7,7 @@ module EE
 
     override :log_jira_dvcs_integration_usage
     def log_jira_dvcs_integration_usage(**options)
-      ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes do
+      ::Gitlab::Database::LoadBalancing::Session.isolated_write do
         super(**options)
       end
     end

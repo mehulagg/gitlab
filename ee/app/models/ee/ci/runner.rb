@@ -25,7 +25,7 @@ module EE
         # not want to upgrade database connection proxy to use the primary
         # database after heartbeat write happens.
         #
-        ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes { super }
+        ::Gitlab::Database::LoadBalancing::Session.isolated_write { super }
       end
 
       def minutes_cost_factor(access_level)
