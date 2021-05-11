@@ -25,7 +25,7 @@ describe('packages_list_row', () => {
   const findInfrastructureIconAndName = () => wrapper.findComponent(InfrastructureIconAndName);
   const findListItem = () => wrapper.findComponent(ListItem);
   const findPackageLink = () => wrapper.findComponent(GlLink);
-  const findWarningIcon = () => wrapper.findComponent(GlIcon);
+  const findWarningIcon = () => wrapper.find('[data-testid="warning-icon"]');
 
   const mountComponent = ({
     isGroup = false,
@@ -171,7 +171,7 @@ describe('packages_list_row', () => {
     it('has a warning icon', () => {
       const icon = findWarningIcon();
       const tooltip = getBinding(icon.element, 'gl-tooltip');
-      expect(icon.props('name')).toBe('warning');
+      expect(icon.props('icon')).toBe('warning');
       expect(tooltip.value).toMatchObject({
         title: 'Invalid Package: failed metadata extraction',
       });

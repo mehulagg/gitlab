@@ -104,8 +104,10 @@ export default {
         <gl-button
           v-if="showWarningIcon"
           v-gl-tooltip="{ title: $options.i18n.erroredPackageText }"
+          class="gl-hover-bg-transparent!"
           icon="warning"
           category="tertiary"
+          data-testid="warning-icon"
           :aria-label="__('Warning')"
         />
 
