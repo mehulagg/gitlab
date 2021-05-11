@@ -384,11 +384,11 @@ RSpec.describe Issues::UpdateService, :mailer do
       it 'verifies the number of queries' do
         update_issue(description: "- [ ] Task 1 #{user.to_reference}\n- [ ] Task 2 #{user.to_reference}\n")
 
-        recorded = ActiveRecord::QueryRecorder.new {
+        recorded = ActiveRecord::QueryRecorder.new do
           update_issue(description: "- [x] Task 1 #{user.to_reference}\n- [x] Task 2 #{user.to_reference}\n")
-        }
+        end
 
-        expected_queries = 44
+        expected_queries = 50
 
         expect(recorded.count).to be <= expected_queries
         expect(recorded.cached_count).to eq(0)
