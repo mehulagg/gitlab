@@ -975,6 +975,21 @@ RSpec.describe Ci::Runner do
     end
   end
 
+  describe '.runner_matchers' do
+    before do
+      create(:ci_runner, :instance)
+      create(:ci_runner, :project)
+    end
+
+    subject(:matchers) { described_class.instance_type.runner_matchers }
+
+    it 'creates matchers' do
+      expect(matchers.size).to eq(1)
+
+      expect(matchers.first.runner_type).to eq('instance_type')
+    end
+  end
+
   describe '#uncached_contacted_at' do
     let(:contacted_at_stored) { 1.hour.ago.change(usec: 0) }
     let(:runner) { create(:ci_runner, contacted_at: contacted_at_stored) }

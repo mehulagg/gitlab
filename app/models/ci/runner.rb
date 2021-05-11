@@ -10,6 +10,7 @@ module Ci
     include TokenAuthenticatable
     include IgnorableColumns
     include FeatureGate
+    include Gitlab::Utils::StrongMemoize
 
     add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
@@ -194,6 +195,10 @@ module Ci
       else
         order_created_at_desc
       end
+    end
+
+    def self.runner_matchers
+      ::Gitlab::Ci::Matching::RunnerMatcher.for(all)
     end
 
     def assign_to(project, current_user = nil)
@@ -394,13 +399,13 @@ module Ci
     end
 
     def matches_build?(build)
-      return false if self.ref_protected? && !build.protected?
-
-      accepting_tags?(build)
+      runner_matcher.matches?(build)
     end
 
-    def accepting_tags?(build)
-      (run_untagged? || build.has_tags?) && (build.tag_list - tag_list).empty?
+    def runner_matcher
+      strong_memoize(:runner_matcher) do
+        Gitlab::Ci::Matching::RunnerMatcher.for(self).first
+      end
     end
   end
 end
