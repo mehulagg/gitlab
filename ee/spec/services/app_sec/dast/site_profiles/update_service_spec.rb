@@ -160,16 +160,6 @@ RSpec.describe AppSec::Dast::SiteProfiles::UpdateService do
 
           expect(Base64.strict_decode64(variable.value)).to eq(raw_value)
         end
-
-        context 'when the feature flag is disabled' do
-          it 'does not update the secret variable' do
-            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-            variable = Dast::SiteProfileSecretVariable.find_by(key: key, dast_site_profile: dast_site_profile)
-
-            expect { subject }.not_to change { variable.reload.value }
-          end
-        end
       end
 
       shared_examples 'it handles secret variable updating failure' do
@@ -207,18 +197,6 @@ RSpec.describe AppSec::Dast::SiteProfiles::UpdateService do
             variable = Dast::SiteProfileSecretVariable.find_by(key: key, dast_site_profile: dast_site_profile)
 
             expect { subject }.not_to change { variable.reload.value }
-          end
-        end
-
-        context 'when the feature flag is disabled' do
-          let(:params) { default_params.merge(argument => '') }
-
-          it 'does not delete the secret variable' do
-            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-            variable = Dast::SiteProfileSecretVariable.find_by(key: key, dast_site_profile: dast_site_profile)
-
-            expect { variable.reload }.not_to raise_error
           end
         end
       end

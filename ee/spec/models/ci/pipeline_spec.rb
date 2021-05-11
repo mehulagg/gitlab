@@ -631,14 +631,6 @@ RSpec.describe Ci::Pipeline do
         it { is_expected.to be_falsey }
       end
     end
-
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
   end
 
   describe '#needs_touch?' do

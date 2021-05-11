@@ -183,13 +183,13 @@ RSpec.describe Ci::Build do
           end
         end
 
-        it_behaves_like 'a pipeline with no dast on-demand variables' do
-          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+        # it_behaves_like 'a pipeline with no dast on-demand variables' do
+        #   let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
 
-          before do
-            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-          end
-        end
+        #   before do
+        #     stub_feature_flags(security_dast_site_profiles_additional_fields: false)
+        #   end
+        # end
       end
     end
 
