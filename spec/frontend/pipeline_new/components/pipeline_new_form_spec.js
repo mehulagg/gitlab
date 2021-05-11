@@ -386,11 +386,16 @@ describe('Pipeline New Form', () => {
         expect(findSubmitButton().props('disabled')).toBe(false);
       });
 
+      it('does not show the credit card validation required alert', () => {
+        expect(wrapper.findComponent(CreditCardValidationRequiredAlert).exists()).toBe(false);
+      });
+
       describe('when the error response is credit card validation required', () => {
         beforeEach(async () => {
           mock
             .onPost(pipelinesPath)
             .reply(httpStatusCodes.BAD_REQUEST, mockCreditCardValidationRequiredError);
+
           window.gon = {
             subscriptions_url: TEST_HOST,
             payment_form_url: TEST_HOST,
