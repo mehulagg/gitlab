@@ -158,7 +158,6 @@ module EE
           mirror_max_delay: Settings.gitlab['mirror_max_delay'],
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
-          seat_link_enabled: Settings.gitlab['seat_link_enabled'],
           secret_detection_token_revocation_enabled: false,
           secret_detection_token_revocation_url: nil,
           secret_detection_token_revocation_token: nil,
@@ -243,14 +242,6 @@ module EE
 
     def seat_link_available?
       License.feature_available?(:seat_link)
-    end
-
-    def seat_link_can_be_configured?
-      Settings.gitlab.seat_link_enabled
-    end
-
-    def seat_link_enabled?
-      seat_link_available? && seat_link_can_be_configured? && super
     end
 
     def should_check_namespace_plan?

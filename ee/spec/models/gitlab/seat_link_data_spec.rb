@@ -170,9 +170,9 @@ RSpec.describe Gitlab::SeatLinkData do
     context 'legacy license' do
       let(:license) { build(:license) }
 
-      context 'when seat link is disabled' do
+      context 'when seat link feature is not available' do
         before do
-          allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(false)
+          allow(Settings.gitlab).to receive(:seat_link_available).and_return(false)
         end
 
         it { is_expected.to be_falsey }

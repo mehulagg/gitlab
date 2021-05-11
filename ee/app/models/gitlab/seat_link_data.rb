@@ -35,7 +35,7 @@ module Gitlab
       else
         # Only sync paid licenses from start date until 14 days after expiration
         # when seat link feature is enabled.
-        Gitlab::CurrentSettings.seat_link_enabled? &&
+        Gitlab::CurrentSettings.seat_link_available? &&
           !license.trial? &&
           license.expires_at && # Skip sync if license has no expiration
           historical_data.present? && # Skip sync if there is no historical data

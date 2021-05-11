@@ -694,50 +694,6 @@ RSpec.describe ApplicationSetting do
     end
   end
 
-  describe '#seat_link_can_be_configured?' do
-    subject { setting.seat_link_can_be_configured? }
-
-    before do
-      allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(seat_link_enabled)
-    end
-
-    context 'when the seat_link_enabled configuration is enabled' do
-      let(:seat_link_enabled) { true }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when the seat_link_enabled configuration is disabled' do
-      let(:seat_link_enabled) { false }
-
-      it { is_expected.to eq(false) }
-    end
-  end
-
-  describe '#seat_link_enabled?' do
-    subject { setting.seat_link_enabled? }
-
-    using RSpec::Parameterized::TableSyntax
-
-    where(:seat_link_available, :seat_link_can_be_configured, :seat_link_enabled, :result) do
-      true  | true  | true  | true
-      false | true  | true  | false
-      true  | false | true  | false
-      true  | true  | false | false
-      false | false | false | false
-    end
-
-    with_them do
-      before do
-        allow(setting).to receive(:seat_link_available?).and_return(seat_link_available)
-        allow(setting).to receive(:seat_link_can_be_configured?).and_return(seat_link_can_be_configured)
-        setting.seat_link_enabled = seat_link_enabled
-      end
-
-      it { is_expected.to eq(result) }
-    end
-  end
-
   describe '#compliance_frameworks' do
     it 'sorts the list' do
       setting.compliance_frameworks = [5, 4, 1, 3, 2]
