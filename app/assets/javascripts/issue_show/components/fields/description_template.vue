@@ -61,7 +61,7 @@ export default {
       :data-project-path="projectPath"
       :data-project-id="projectId"
       :data-data="issuableTemplatesJson"
-      class="dropdown-menu-toggle js-issuable-selector"
+      class="dropdown-menu-toggle js-issuable-selector gl-button"
       type="button"
       data-field-name="issuable_template"
       data-selected="null"

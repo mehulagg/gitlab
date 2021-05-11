@@ -3,18 +3,18 @@ import { GlAlert } from '@gitlab/ui';
 import $ from 'jquery';
 import Autosave from '~/autosave';
 import eventHub from '../event_hub';
-import editActions from './edit_actions.vue';
-import descriptionField from './fields/description.vue';
-import descriptionTemplate from './fields/description_template.vue';
+import EditActions from './edit_actions.vue';
+import DescriptionField from './fields/description.vue';
+import DescriptionTemplateField from './fields/description_template.vue';
 import IssueTitleField from './fields/title.vue';
 import IssueTypeField from './fields/type.vue';
 import LockedWarning from './locked_warning.vue';
 
 export default {
   components: {
-    descriptionField,
-    descriptionTemplate,
-    editActions,
+    DescriptionField,
+    DescriptionTemplateField,
+    EditActions,
     GlAlert,
     IssueTitleField,
     IssueTypeField,
@@ -185,16 +185,16 @@ export default {
       }}</gl-alert
     >
     <div class="row">
-      <div class="col-9">
+      <div class="col-12">
         <issue-title-field ref="title" :form-state="formState" />
       </div>
     </div>
     <div class="row gl-pt-3 gl-mb-n3">
-      <div v-if="isIssueType" class="col-4">
+      <div v-if="isIssueType" class="col-4 gl-pr-0">
         <issue-type-field ref="issue-type" :form-state="formState" />
       </div>
-      <div v-if="hasIssuableTemplates" class="col-4">
-        <description-template
+      <div v-if="hasIssuableTemplates" class="col-4 gl-pr-0">
+        <description-template-field
           :form-state="formState"
           :issuable-templates="issuableTemplates"
           :project-path="projectPath"

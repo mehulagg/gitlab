@@ -211,8 +211,8 @@ export default {
     },
   },
   computed: {
-    issuableTemplates() {
-      return this.store.formState.issuableTemplates;
+    defaultErrorMessage() {
+      return sprintf(s__('Error updating %{issuableType}'), { issuableType: this.issuableType });
     },
     formState() {
       return this.store.formState;
@@ -239,11 +239,21 @@ export default {
 
       return false;
     },
-    defaultErrorMessage() {
-      return sprintf(s__('Error updating %{issuableType}'), { issuableType: this.issuableType });
-    },
     isClosed() {
       return this.issuableStatus === IssuableStatus.Closed;
+    },
+    issuableTemplates() {
+      return this.store.formState.issuableTemplates;
+    },
+    issuablePayload() {
+      const {
+        store: { formState },
+        issueState,
+      } = this;
+
+      return issueState?.issue_type
+        ? { ...formState, issue_type: issueState.issue_type }
+        : formState;
     },
     pinnedLinkClasses() {
       return this.showTitleBorder
@@ -360,14 +370,7 @@ export default {
     },
 
     updateIssuable() {
-      const {
-        store: { formState },
-        issueState,
-      } = this;
-      const issuablePayload =
-        issueState.issue_type !== undefined
-          ? { ...formState, issue_type: issueState.issue_type }
-          : formState;
+      const { issuablePayload, issueState } = this;
       this.clearFlash();
       return this.service
         .updateIssuable(issuablePayload)
@@ -377,9 +380,9 @@ export default {
             visitUrl(data.web_url);
           }
 
-          if (issueState.issue_type !== undefined) {
+          if (issueState?.issue_type) {
             const URI =
-              this.issueState.issue_type === 'incident'
+              issueState.issue_type === 'incident'
                 ? data.web_url.replace('issues', 'issues/incident')
                 : data.web_url;
             visitUrl(URI);
