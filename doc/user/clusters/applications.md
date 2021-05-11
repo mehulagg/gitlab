@@ -1434,11 +1434,11 @@ To enable Fluentd:
 1. Navigate to **Operations > Kubernetes** and click
    **Applications**. Enter a host, port, and protocol
    for sending logs.
-2. Provide the host domain name or URL in **SIEM Hostname**.
-3. Provide the host port number in **SIEM Port**.
-4. Select a **SIEM Protocol**.
-5. Select a **Send Container Network Policies Logs** checkbox.
-6. Click **Save changes**.
+1. Provide the host domain name or URL in **SIEM Hostname**.
+1. Provide the host port number in **SIEM Port**.
+1. Select a **SIEM Protocol**.
+1. Select a **Send Container Network Policies Logs** checkbox.
+1. Click **Save changes**.
 
 ![Fluentd input fields](img/fluentd_v13_0.png)
 
