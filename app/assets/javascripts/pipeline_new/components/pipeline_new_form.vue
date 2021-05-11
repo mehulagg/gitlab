@@ -21,7 +21,7 @@ import { backOff } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, n__ } from '~/locale';
-import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
+import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT, CC_VALIDATION_REQUIRED_ERROR } from '../constants';
 import filterVariables from '../utils/filter_variables';
 import RefsDropdown from './refs_dropdown.vue';
 
@@ -145,8 +145,7 @@ export default {
       return this.form[this.refFullName]?.descriptions ?? {};
     },
     ccRequiredError() {
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      return this.error === 'Credit card required to be on file in order to create a pipeline';
+      return this.error === CC_VALIDATION_REQUIRED_ERROR;
     }
   },
   watch: {
