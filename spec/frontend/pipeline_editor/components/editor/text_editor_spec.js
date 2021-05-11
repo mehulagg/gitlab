@@ -9,6 +9,7 @@ import {
   mockProjectPath,
   mockProjectNamespace,
 } from '../../mock_data';
+import { EditorLiteExtension } from '~/editor/extensions/editor_lite_extension_base';
 
 describe('Pipeline Editor | Text editor component', () => {
   let wrapper;
@@ -58,6 +59,10 @@ describe('Pipeline Editor | Text editor component', () => {
   };
 
   const findEditor = () => wrapper.findComponent(MockEditorLite);
+
+  beforeEach(() => {
+    EditorLiteExtension.deferRerender = jest.fn();
+  });
 
   afterEach(() => {
     wrapper.destroy();
