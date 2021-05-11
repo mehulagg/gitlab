@@ -73,7 +73,7 @@ export default {
       return Boolean(this.packageEntity.project_path);
     },
     showWarningIcon() {
-      return this.packageEntity.status && this.packageEntity.status === 'error';
+      return this.packageEntity.status === 'error';
     },
     disabledRow() {
       return this.packageEntity.status && this.packageEntity.status !== 'default';
