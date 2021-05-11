@@ -15,6 +15,7 @@
 
       - if group_sidebar_link?(:overview)
         - paths = group_overview_nav_link_paths
+        - paths << 'group_members#index' if Feature.enabled?(:sidebar_refactor, current_user)
         = nav_link(path: paths, unless: -> { current_path?('groups/contribution_analytics#show') }, html_options: { class: 'home' }) do
           = link_to group_path(@group) do
             .nav-icon-container
@@ -24,7 +25,7 @@
               = group_information_title(@group)
 
           %ul.sidebar-sub-level-items
-            = nav_link(path: ['groups#show', 'groups#details', 'groups#activity', 'groups#subgroups'], html_options: { class: "fly-out-top-item" } ) do
+            = nav_link(path: paths, html_options: { class: "fly-out-top-item" } ) do
               = link_to group_path(@group) do
                 %strong.fly-out-top-item-name
                   = group_information_title(@group)
@@ -41,6 +42,13 @@
                 = link_to activity_group_path(@group), title: _('Activity') do
                   %span
                     = _('Activity')
+
+            - if Feature.enabled?(:sidebar_refactor, current_user)
+              - if group_sidebar_link?(:group_members)
+                = nav_link(path: 'group_members#index') do
+                  = link_to group_group_members_path(@group), title: _('Members') do
+                    %span
+                      = _('Members')
 
       = render_if_exists "layouts/nav/ee/epic_link", group: @group
 
@@ -125,18 +133,19 @@
       - if group_sidebar_link?(:wiki)
         = render 'layouts/nav/sidebar/wiki_link', wiki_url: @group.wiki.web_url
 
-      - if group_sidebar_link?(:group_members)
-        = nav_link(path: 'group_members#index') do
-          = link_to group_group_members_path(@group) do
-            .nav-icon-container
-              = sprite_icon('users')
-            %span.nav-item-name.qa-group-members-item
-              = _('Members')
-          %ul.sidebar-sub-level-items.is-fly-out-only
-            = nav_link(path: 'group_members#index', html_options: { class: "fly-out-top-item" } ) do
-              = link_to group_group_members_path(@group) do
-                %strong.fly-out-top-item-name
-                  = _('Members')
+      - if Feature.disabled?(:sidebar_refactor, current_user)
+        - if group_sidebar_link?(:group_members)
+          = nav_link(path: 'group_members#index') do
+            = link_to group_group_members_path(@group) do
+              .nav-icon-container
+                = sprite_icon('users')
+              %span.nav-item-name.qa-group-members-item
+                = _('Members')
+            %ul.sidebar-sub-level-items.is-fly-out-only
+              = nav_link(path: 'group_members#index', html_options: { class: "fly-out-top-item" } ) do
+                = link_to group_group_members_path(@group) do
+                  %strong.fly-out-top-item-name
+                    = _('Members')
 
       - if group_sidebar_link?(:settings)
         = nav_link(path: group_settings_nav_link_paths) do

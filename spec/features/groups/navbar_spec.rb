@@ -13,12 +13,7 @@ RSpec.describe 'Group navbar' do
 
   let(:structure) do
     [
-      {
-        nav_item: _('Group information'),
-        nav_sub_items: [
-          _('Activity')
-        ]
-      },
+      group_information_nav_item,
       {
         nav_item: _('Issues'),
         nav_sub_items: [
@@ -39,11 +34,12 @@ RSpec.describe 'Group navbar' do
         nav_sub_items: []
       },
       (analytics_nav_item if Gitlab.ee?),
-      {
-        nav_item: _('Members'),
-        nav_sub_items: []
-      }
-    ]
+      members_nav_item
+    ].compact
+  end
+
+  let(:members_nav_item) do
+    nil
   end
 
   before do
@@ -80,6 +76,33 @@ RSpec.describe 'Group navbar' do
       stub_config(dependency_proxy: { enabled: true })
 
       insert_dependency_proxy_nav
+
+      visit group_path(group)
+    end
+
+    it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when feature flag :sidebar_refactor is disabled' do
+    let(:group_information_nav_item) do
+      {
+        nav_item: _('Group overview'),
+        nav_sub_items: [
+          _('Details'),
+          _('Activity')
+        ]
+      }
+    end
+
+    let(:members_nav_item) do
+      {
+        nav_item: _('Members'),
+        nav_sub_items: []
+      }
+    end
+
+    before do
+      stub_feature_flags(sidebar_refactor: false)
 
       visit group_path(group)
     end

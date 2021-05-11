@@ -182,7 +182,8 @@ RSpec.shared_context 'group navbar structure' do
     {
       nav_item: _('Group information'),
       nav_sub_items: [
-        _('Activity')
+        _('Activity'),
+        _('Members')
       ]
     }
   end
@@ -209,11 +210,7 @@ RSpec.shared_context 'group navbar structure' do
         nav_item: _('Kubernetes'),
         nav_sub_items: []
       },
-      (analytics_nav_item if Gitlab.ee?),
-      {
-        nav_item: _('Members'),
-        nav_sub_items: []
-      }
+      (analytics_nav_item if Gitlab.ee?)
     ]
   end
 end
