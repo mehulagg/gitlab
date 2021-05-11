@@ -6,11 +6,12 @@ export default () => {
 
   if (!el) return null;
 
-  const { emptyEscalationPoliciesSvgPath } = el.dataset;
+  const { emptyEscalationPoliciesSvgPath, projectPath = '' } = el.dataset;
 
   return new Vue({
     el,
     provide: {
+      projectPath,
       emptyEscalationPoliciesSvgPath,
     },
     render(createElement) {
