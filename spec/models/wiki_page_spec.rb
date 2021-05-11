@@ -627,10 +627,6 @@ RSpec.describe WikiPage do
 
       expect(subject.versions.count).to eq(4)
     end
-
-    it 'returns instances of WikiPageVersion' do
-      expect(subject.versions).to all( be_a(Gitlab::Git::WikiPageVersion) )
-    end
   end
 
   describe '#title_changed?' do

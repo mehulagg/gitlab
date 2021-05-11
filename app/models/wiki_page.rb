@@ -130,7 +130,13 @@ class WikiPage
   def versions(options = {})
     return [] unless persisted?
 
-    wiki.wiki.page_versions(page.path, options)
+    default_per_page = Kaminari.config.default_per_page
+    offset = options[:page].to_i * options.fetch(:per_page, default_per_page)
+
+    wiki.repository.commits(wiki.wiki.class.default_ref,
+                            path: page.path,
+                            limit: options.fetch(:limit, default_per_page),
+                            offset: offset)
   end
 
   def count_versions
