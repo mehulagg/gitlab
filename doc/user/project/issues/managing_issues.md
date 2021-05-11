@@ -283,7 +283,7 @@ editing it and selecting the **Issue type** from the dropdown provided.
 
 The current choices are:
 
-1. [Issue](./index.md)
+1. [Issue](index.md)
 1. [Incident](../../../operations/incident_management/index.md)
 
 ## Deleting issues
