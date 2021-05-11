@@ -43,6 +43,81 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
         end
       end
 
+      context 'when DS_EXCLUDED_ANALYZERS set' do
+        let(:files) { { 'conan.lock' => '', 'Gemfile.lock' => '', 'package.json' => '', 'pom.xml' => '', 'Pipfile' => ''  } }
+        let(:jobs) { }
+
+        context 'when excluding nothing' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: '')
+          end
+
+          it 'creates a pipeline with all DS jobs specified in the template' do
+            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+          end
+        end
+
+        context 'when excluding the gemnasium analyzer' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'gemnasium')
+          end
+
+          it 'creates a pipeline with all expected jobs except gemnasium' do
+            expect(build_names).to eq(['gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+          end
+        end
+
+        context 'when excluding the gemnasium-maven analyzer' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'gemnasium-maven')
+          end
+
+          it 'creates a pipeline with all expected jobs except gemnasium-maven' do
+            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+          end
+        end
+
+        context 'when excluding the gemnasium-python analyzer' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'gemnasium-python')
+          end
+
+          it 'creates a pipeline with all expected jobs except gemnasium-python' do
+            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'bundler-audit-dependency_scanning', 'retire-js-dependency_scanning'] )
+          end
+        end
+
+        context 'when excluding the bundler-audit analyzer' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'bundler-audit')
+          end
+
+          it 'creates a pipeline with all expected jobs except bundler-audit' do
+            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'retire-js-dependency_scanning'] )
+          end
+        end
+
+        context 'when excluding the retire.js analyzer' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'retire.js')
+          end
+
+          it 'creates a pipeline with all expected jobs except retire.js' do
+            expect(build_names).to eq(['gemnasium-dependency_scanning', 'gemnasium-maven-dependency_scanning', 'gemnasium-python-dependency_scanning', 'bundler-audit-dependency_scanning'] )
+          end
+        end
+
+        context 'when excluding several analyzers in any order' do
+          before do
+            create(:ci_variable, project: project, key: 'DS_EXCLUDED_ANALYZERS', value: 'gemnasium-python, retire.js, gemnasium')
+          end
+
+          it 'creates a pipeline with the specified jobs excluded' do
+            expect(build_names).to eq(['gemnasium-maven-dependency_scanning', 'bundler-audit-dependency_scanning'] )
+          end
+        end
+      end
+
       context 'by default' do
         describe 'language detection' do
           using RSpec::Parameterized::TableSyntax
