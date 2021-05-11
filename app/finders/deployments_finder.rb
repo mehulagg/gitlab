@@ -144,7 +144,7 @@ class DeploymentsFinder
     elsif sort_params['updated_at']
       # This adds the order as a tie-breaker when multiple rows have the same updated_at value.
       # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20848.
-      sort_params.merge!(id: :desc)
+      sort_params.merge!(id: sort_params.each_value.first)
     end
   end
 
