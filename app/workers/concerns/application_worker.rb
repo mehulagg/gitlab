@@ -51,6 +51,15 @@ module ApplicationWorker
       subclass.after_set_class_attribute { subclass.set_queue }
     end
 
+    def perform_async(*args)
+      # Delay execution for :delayed and :sticky workers to give replication enough time to complete
+      if get_data_consistency != :always && get_data_consistency_delay_feature_flag_enabled?
+        perform_in(get_data_consistency_delay, *args)
+      else
+        super
+      end
+    end
+
     def set_queue
       queue_name = ::Gitlab::SidekiqConfig::WorkerRouter.global.route(self)
       sidekiq_options queue: queue_name # rubocop:disable Cop/SidekiqOptionsQueue

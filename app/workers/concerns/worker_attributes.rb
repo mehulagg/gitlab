@@ -13,6 +13,8 @@ module WorkerAttributes
 
   VALID_DATA_CONSISTENCIES = [:always, :sticky, :delayed].freeze
 
+  DATA_CONSISTENCY_DELAY = 1
+
   NAMESPACE_WEIGHTS = {
     auto_devops: 2,
     auto_merge: 3,
@@ -71,7 +73,7 @@ module WorkerAttributes
       class_attributes[:urgency] || :low
     end
 
-    def data_consistency(data_consistency, feature_flag: nil)
+    def data_consistency(data_consistency, delay_for: nil, feature_flag: nil)
       raise ArgumentError, "Invalid data consistency: #{data_consistency}" unless VALID_DATA_CONSISTENCIES.include?(data_consistency)
       raise ArgumentError, 'Data consistency is already set' if class_attributes[:data_consistency]
 
@@ -79,6 +81,14 @@ module WorkerAttributes
       set_class_attribute(:data_consistency, data_consistency)
 
       validate_worker_attributes!
+    end
+
+    def data_consistency_delay(data_consistency_delay, feature_flag: nil)
+      raise ArgumentError, 'Data consistency delay is already set' if class_attributes[:data_consistency_delay]
+
+      set_class_attribute(:data_consistency_delay_feature_flag, feature_flag) if feature_flag
+
+      set_class_attribute(:data_consistency_delay, data_consistency_delay) if data_consistency_delay
     end
 
     def validate_worker_attributes!
@@ -94,10 +104,20 @@ module WorkerAttributes
       class_attributes[:data_consistency] || :always
     end
 
+    def get_data_consistency_delay
+      class_attributes[:data_consistency_delay] || DATA_CONSISTENCY_DELAY.seconds
+    end
+
     def get_data_consistency_feature_flag_enabled?
       return true unless class_attributes[:data_consistency_feature_flag]
 
       Feature.enabled?(class_attributes[:data_consistency_feature_flag], default_enabled: :yaml)
+    end
+
+    def get_data_consistency_delay_feature_flag_enabled?
+      return true unless class_attributes[:data_consistency_delay_feature_flag]
+
+      Feature.enabled?(class_attributes[:data_consistency_delay_feature_flag], default_enabled: :yaml)
     end
 
     # Set this attribute on a job when it will call to services outside of the

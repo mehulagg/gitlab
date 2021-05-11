@@ -58,6 +58,34 @@ RSpec.describe WorkerAttributes do
           expect(worker.get_data_consistency_feature_flag_enabled?).not_to be_truthy
         end
       end
+
+      it 'returns correct data_consistency_delay' do
+        worker.data_consistency_delay(3.seconds)
+
+        expect(worker.get_data_consistency_delay).to eq(3.seconds)
+      end
+    end
+  end
+
+  describe '.data_consistency_delay' do
+    context 'when data_consistency is not provided' do
+      it 'defaults to DATA_CONSISTENCY_DELAY.seconds' do
+        expect(worker.get_data_consistency_delay).to eq(described_class::DATA_CONSISTENCY_DELAY.seconds)
+      end
+    end
+
+    context 'when feature_flag is provided' do
+      before do
+        stub_feature_flags(test_feature_flag: false)
+        skip_feature_flags_yaml_validation
+        skip_default_enabled_yaml_check
+      end
+
+      it 'returns correct feature flag value' do
+        worker.data_consistency_delay(3.seconds, feature_flag: :test_feature_flag)
+
+        expect(worker.get_data_consistency_delay_feature_flag_enabled?).not_to be_truthy
+      end
     end
   end
 

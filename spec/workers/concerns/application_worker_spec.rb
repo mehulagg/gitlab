@@ -176,6 +176,58 @@ RSpec.describe ApplicationWorker do
     end
   end
 
+  describe '.perform_async' do
+    context 'when workers data consistency is not :always' do
+      before do
+        worker.data_consistency(:delayed)
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(test_feature_flag: false)
+          skip_feature_flags_yaml_validation
+          skip_default_enabled_yaml_check
+
+          worker.data_consistency_delay(3.seconds, feature_flag: :test_feature_flag)
+        end
+
+        it 'does not call perform_in' do
+          expect(worker).not_to receive(:perform_in)
+
+          worker.perform_async
+        end
+      end
+
+      context 'when data_consistency_delay is not set' do
+        it 'delays scheduling a job by calling perform_in with default delay' do
+          expect(worker).to receive(:perform_in).with(worker::DATA_CONSISTENCY_DELAY.seconds, 123)
+
+          worker.perform_async(123)
+        end
+      end
+
+      context 'when data_consistency_delay is provided' do
+        before do
+          worker.data_consistency_delay(3.seconds)
+        end
+
+        it 'delays scheduling a job by calling perform_in with correct params' do
+          expect(worker).to receive(:perform_in).with(3.seconds, 123)
+
+          worker.perform_async(123)
+        end
+      end
+    end
+
+    context 'when workers data consistency is :always' do
+      it 'does not call perform_in' do
+        expect(worker).not_to receive(:perform_in)
+
+        worker.perform_async
+      end
+    end
+  end
+
   describe '.bulk_perform_async' do
     it 'enqueues jobs in bulk' do
       Sidekiq::Testing.fake! do
