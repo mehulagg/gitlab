@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Route < NamespaceShard
+class Route < ApplicationRecord
   include CaseSensitivity
   include Gitlab::SQL::Pattern
 

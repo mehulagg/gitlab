@@ -242,7 +242,7 @@ class GroupsController < Groups::ApplicationController
   def parent_group
     return unless params[:parent_id].present?
 
-    @parent_group ||= Group.with_route.sharded_find(params[:parent_id])
+    @parent_group ||= Group.sharded_find(params[:parent_id])
   end
 
   def determine_layout
