@@ -108,7 +108,7 @@ class JiraService < IssueTrackerService
   def help
     "You need to configure Jira before enabling this service. For more details
     read the
-    [Jira service documentation](#{help_page_url('user/project/integrations/jira')})."
+    [Jira service documentation](#{help_page_url('integration/jira/')})."
   end
 
   def title
