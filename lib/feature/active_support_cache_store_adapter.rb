@@ -5,7 +5,7 @@
 class Feature
   class ActiveSupportCacheStoreAdapter < Flipper::Adapters::ActiveSupportCacheStore
     # This patch represents https://github.com/jnunemaker/flipper/pull/512. In
-    # Flipper 0.20.4 and later, we can remove this and just pass `write_through:
+    # Flipper 0.21.0 and later, we can remove this and just pass `write_through:
     # true` to the constructor in `Feature.build_flipper_instance`.
 
     extend ::Gitlab::Utils::Override
