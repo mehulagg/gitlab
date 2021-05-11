@@ -5157,6 +5157,29 @@ The edge type for [`EpicList`](#epiclist).
 | <a id="epiclistedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="epiclistedgenode"></a>`node` | [`EpicList`](#epiclist) | The item at the end of the edge. |
 
+#### `EscalationPolicyTypeConnection`
+
+The connection type for [`EscalationPolicyType`](#escalationpolicytype).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationpolicytypeconnectionedges"></a>`edges` | [`[EscalationPolicyTypeEdge]`](#escalationpolicytypeedge) | A list of edges. |
+| <a id="escalationpolicytypeconnectionnodes"></a>`nodes` | [`[EscalationPolicyType]`](#escalationpolicytype) | A list of nodes. |
+| <a id="escalationpolicytypeconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `EscalationPolicyTypeEdge`
+
+The edge type for [`EscalationPolicyType`](#escalationpolicytype).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationpolicytypeedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="escalationpolicytypeedgenode"></a>`node` | [`EscalationPolicyType`](#escalationpolicytype) | The item at the end of the edge. |
+
 #### `EventConnection`
 
 The connection type for [`Event`](#event).
@@ -8567,6 +8590,32 @@ Check permissions for the current user on an epic.
 | <a id="epicpermissionsreadepiciid"></a>`readEpicIid` | [`Boolean!`](#boolean) | Indicates the user can perform `read_epic_iid` on this resource. |
 | <a id="epicpermissionsupdateepic"></a>`updateEpic` | [`Boolean!`](#boolean) | Indicates the user can perform `update_epic` on this resource. |
 
+### `EscalationPolicyType`
+
+Represents an escalation policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationpolicytypedescription"></a>`description` | [`String`](#string) | The description of the escalation policy. |
+| <a id="escalationpolicytypeid"></a>`id` | [`IncidentManagementEscalationPolicyID`](#incidentmanagementescalationpolicyid) | ID of the escalation policy. |
+| <a id="escalationpolicytypename"></a>`name` | [`String!`](#string) | The name of the escalation policy. |
+| <a id="escalationpolicytyperules"></a>`rules` | [`[EscalationRuleType!]`](#escalationruletype) | Steps of the escalation policy. |
+
+### `EscalationRuleType`
+
+Represents an escalation rule for an escalation policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationruletypeelapsedtimeseconds"></a>`elapsedTimeSeconds` | [`Int`](#int) | The time in seconds before the rule is activated. |
+| <a id="escalationruletypeid"></a>`id` | [`IncidentManagementEscalationRuleID`](#incidentmanagementescalationruleid) | ID of the escalation policy. |
+| <a id="escalationruletypeoncallschedule"></a>`oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule to notify. |
+| <a id="escalationruletypestatus"></a>`status` | [`EscalationRuleStatus`](#escalationrulestatus) | The status required to prevent the rule from activating. |
+
 ### `Event`
 
 Representing an event.
@@ -10867,6 +10916,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projecthttpurltorepo"></a>`httpUrlToRepo` | [`String`](#string) | URL to connect to the project via HTTPS. |
 | <a id="projectid"></a>`id` | [`ID!`](#id) | ID of the project. |
 | <a id="projectimportstatus"></a>`importStatus` | [`String`](#string) | Status of import background job of the project. |
+| <a id="projectincidentmanagementescalationpolicies"></a>`incidentManagementEscalationPolicies` | [`EscalationPolicyTypeConnection`](#escalationpolicytypeconnection) | Incident Management escalation policies of the project. (see [Connections](#connections)) |
 | <a id="projectissuesenabled"></a>`issuesEnabled` | [`Boolean`](#boolean) | Indicates if Issues are enabled for the current user. |
 | <a id="projectjiraimportstatus"></a>`jiraImportStatus` | [`String`](#string) | Status of Jira import background job of the project. |
 | <a id="projectjiraimports"></a>`jiraImports` | [`JiraImportConnection`](#jiraimportconnection) | Jira imports into the project. (see [Connections](#connections)) |
@@ -11139,6 +11189,18 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectenvironmentsname"></a>`name` | [`String`](#string) | Name of the environment. |
 | <a id="projectenvironmentssearch"></a>`search` | [`String`](#string) | Search query for environment name. |
 | <a id="projectenvironmentsstates"></a>`states` | [`[String!]`](#string) | States of environments that should be included in result. |
+
+##### `Project.incidentManagementEscalationPolicy`
+
+Incident Management escalation policies of the project.
+
+Returns [`EscalationPolicyType`](#escalationpolicytype).
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectincidentmanagementescalationpolicyid"></a>`id` | [`IncidentManagementEscalationPolicyID!`](#incidentmanagementescalationpolicyid) | ID of the escalation policy. |
 
 ##### `Project.incidentManagementOncallSchedules`
 
@@ -13914,6 +13976,15 @@ Epic ID wildcard values.
 | <a id="epicwildcardidany"></a>`ANY` | Any epic is assigned. |
 | <a id="epicwildcardidnone"></a>`NONE` | No epic is assigned. |
 
+### `EscalationRuleStatus`
+
+Escalation rule statuses.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="escalationrulestatusacknowledged"></a>`ACKNOWLEDGED` | . |
+| <a id="escalationrulestatusresolved"></a>`RESOLVED` | . |
+
 ### `EventAction`
 
 Event action.
@@ -14960,6 +15031,18 @@ Represents a unique identifier that is Base64 obfuscated. It is often used to re
 ### `ISO8601Date`
 
 An ISO 8601-encoded date.
+
+### `IncidentManagementEscalationPolicyID`
+
+A `IncidentManagementEscalationPolicyID` is a global ID. It is encoded as a string.
+
+An example `IncidentManagementEscalationPolicyID` is: `"gid://gitlab/IncidentManagement::EscalationPolicy/1"`.
+
+### `IncidentManagementEscalationRuleID`
+
+A `IncidentManagementEscalationRuleID` is a global ID. It is encoded as a string.
+
+An example `IncidentManagementEscalationRuleID` is: `"gid://gitlab/IncidentManagement::EscalationRule/1"`.
 
 ### `IncidentManagementOncallParticipantID`
 

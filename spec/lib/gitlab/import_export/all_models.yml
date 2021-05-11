@@ -568,6 +568,7 @@ project:
 - exported_protected_branches
 - incident_management_oncall_schedules
 - incident_management_oncall_rotations
+- incident_management_escalation_policies
 - debian_distributions
 - merge_request_metrics
 - security_orchestration_policy_configuration
