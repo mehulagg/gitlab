@@ -21,7 +21,6 @@ module BoardsHelper
       parent: current_board_parent.model_name.param_key,
       group_id: group_id,
       labels_filter_base_path: build_issue_link_base,
-      labels_fetch_path: labels_fetch_path,
       labels_manage_path: labels_manage_path,
       board_type: board.to_type
     }
@@ -46,14 +45,6 @@ module BoardsHelper
       "#{group_path(@board.group)}/:project_path/issues"
     else
       project_issues_path(@project)
-    end
-  end
-
-  def labels_fetch_path
-    if board.group_board?
-      group_labels_path(@group, format: :json, only_group_labels: true, include_ancestor_groups: true)
-    else
-      project_labels_path(@project, format: :json, include_ancestor_groups: true)
     end
   end
 

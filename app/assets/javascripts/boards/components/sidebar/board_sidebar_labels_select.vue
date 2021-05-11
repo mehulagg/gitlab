@@ -1,6 +1,6 @@
 <script>
 import { GlLabel } from '@gitlab/ui';
-import { mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -14,13 +14,14 @@ export default {
     LabelsSelect,
     GlLabel,
   },
-  inject: ['labelsFetchPath', 'labelsManagePath', 'labelsFilterBasePath'],
+  inject: ['labelsManagePath', 'labelsFilterBasePath'],
   data() {
     return {
       loading: false,
     };
   },
   computed: {
+    ...mapState(['fullPath']),
     ...mapGetters(['activeBoardItem', 'projectPathForActiveIssue']),
     selectedLabels() {
       const { labels = [] } = this.activeBoardItem;
@@ -37,6 +38,9 @@ export default {
         ...label,
         scoped: isScopedLabel(label),
       }));
+    },
+    labelsFetchPath() {
+      return `/${this.projectPathForActiveIssue}/-/labels.json?include_ancestor_groups=true`;
     },
   },
   methods: {
