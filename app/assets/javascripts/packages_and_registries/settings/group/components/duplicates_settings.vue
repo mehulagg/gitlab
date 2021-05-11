@@ -32,12 +32,12 @@ export default {
     duplicatesAllowed: {
       type: Boolean,
       default: false,
-      required: true,
+      required: false,
     },
     duplicateExceptionRegex: {
       type: String,
       default: '',
-      required: true,
+      required: false,
     },
     duplicateExceptionRegexError: {
       type: String,

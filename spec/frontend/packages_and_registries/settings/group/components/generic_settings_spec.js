@@ -18,7 +18,6 @@ describe('generic_settings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('title component', () => {

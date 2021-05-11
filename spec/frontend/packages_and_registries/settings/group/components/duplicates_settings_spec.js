@@ -33,14 +33,13 @@ describe('Duplicates Settings', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  const findToggle = () => wrapper.find(GlToggle);
+  const findToggle = () => wrapper.findComponent(GlToggle);
   const findToggleLabel = () => wrapper.find('[data-testid="toggle-label"');
 
-  const findInputGroup = () => wrapper.find(GlFormGroup);
-  const findInput = () => wrapper.find(GlFormInput);
+  const findInputGroup = () => wrapper.findComponent(GlFormGroup);
+  const findInput = () => wrapper.findComponent(GlFormInput);
 
   it('has a toggle', () => {
     mountComponent();
@@ -57,7 +56,9 @@ describe('Duplicates Settings', () => {
 
     findToggle().vm.$emit('change', false);
 
-    expect(wrapper.emitted('update')).toEqual([[{ [defaultProps.modelNames.allowed]: false }]]);
+    expect(wrapper.emitted('update')).toStrictEqual([
+      [{ [defaultProps.modelNames.allowed]: false }],
+    ]);
   });
 
   describe('when the duplicates are disabled', () => {
@@ -96,7 +97,9 @@ describe('Duplicates Settings', () => {
 
       findInput().vm.$emit('change', 'bar');
 
-      expect(wrapper.emitted('update')).toEqual([[{ [defaultProps.modelNames.exception]: 'bar' }]]);
+      expect(wrapper.emitted('update')).toStrictEqual([
+        [{ [defaultProps.modelNames.exception]: 'bar' }],
+      ]);
     });
 
     describe('valid state', () => {

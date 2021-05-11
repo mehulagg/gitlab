@@ -15,7 +15,6 @@ describe('settings_titles', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders properly', () => {

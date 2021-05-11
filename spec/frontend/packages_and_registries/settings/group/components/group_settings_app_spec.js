@@ -82,7 +82,6 @@ describe('Group Settings App', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findSettingsBlock = () => wrapper.findComponent(SettingsBlock);
