@@ -24,6 +24,7 @@ import { s__, __, n__ } from '~/locale';
 import { VARIABLE_TYPE, FILE_TYPE, CONFIG_VARIABLES_TIMEOUT } from '../constants';
 import filterVariables from '../utils/filter_variables';
 import RefsDropdown from './refs_dropdown.vue';
+import CcValidationRequiredAlert from 'ee/billings/components/cc_validation_required_alert.vue';
 
 const i18n = {
   variablesDescription: s__(
@@ -60,6 +61,7 @@ export default {
     GlSprintf,
     GlLoadingIcon,
     RefsDropdown,
+    CcValidationRequiredAlert,
   },
   directives: { SafeHtml },
   props: {
@@ -143,6 +145,10 @@ export default {
     descriptions() {
       return this.form[this.refFullName]?.descriptions ?? {};
     },
+    ccRequiredError() {
+      // eslint-disable-next-line @gitlab/require-i18n-strings
+      return this.error === 'Credit card required to be on file in order to create a pipeline';
+    }
   },
   watch: {
     refValue() {
@@ -329,8 +335,12 @@ export default {
 
 <template>
   <gl-form @submit.prevent="createPipeline">
+    <cc-validation-required-alert
+      v-if="ccRequiredError"
+      :container-class="null"
+    />
     <gl-alert
-      v-if="error"
+      v-else-if="error"
       :title="errorTitle"
       :dismissible="false"
       variant="danger"
