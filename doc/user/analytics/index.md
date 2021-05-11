@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 When we describe GitLab analytics, we use the following terms:
 
-- **Cycle time:** The duration of only the execution work alone. Often displayed in combination with "lead time," which is longer. GitLab measures from issue first merge request creation to issue close. This approach under-estimates lead time because merge request creation is always later than commit time. GitLab displays cycle time in [group-level Value Stream Analytics](../group/value_stream_analytics/index.md).
+- **Cycle time:** The duration of only the execution work alone. Often displayed in combination with "lead time," which is longer. GitLab measures cycle time from issue first merge request creation to issue close. This approach underestimates lead time because merge request creation is always later than commit time. GitLab displays cycle time in [group-level Value Stream Analytics](../group/value_stream_analytics/index.md).
 - **DORA (DevOps Research and Assessment)** ["Four Keys"](https://cloud.google.com/blog/products/devops-sre/using-the-four-keys-to-measure-your-devops-performance):
   - **Speed/Velocity**
 
