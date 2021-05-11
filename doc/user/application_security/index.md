@@ -172,19 +172,19 @@ From the merge request security widget, select **Expand** to unfold the widget, 
 
 ## View security scan information in the pipeline Security tab
 
-This list in the security tab of the pipeline shows all findings in the current branch. You will see both new findings introduced by this branch as well as any existing vulnerabilities that were already present when the branch was created. These results likely do not match the findings displayed in the Merge Request security widget as those do not include the existing vulnerabilities (with the exception of showing any existing vulnerabilities that are no longer detected in the feature branch).
+A pipeline's security tab lists all findings in the current branch. It includes new findings introduced by this branch and existing vulnerabilities that were already present when the branch was created. These results likely do not match the findings displayed in the Merge Request security widget as those do not include the existing vulnerabilities (with the exception of showing any existing vulnerabilities that are no longer detected in the feature branch).
 
 For more details, see [security tab](security_dashboard/index.md#pipeline-security).
 
 ## View security scan information in the Security Dashboard
 
-Security Dashboards show vulnerabilities present in project default branches. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default will show up after the refresh job.
+The Security Dashboard show vulnerabilities present in a project's default branch. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default will show up after the refresh job.
 
 For more details, see [Security Dashboard](security_dashboard/index.md).
 
 ## View security scan information in the Vulnerability Report
 
-The vulnerability report shows the results of the last completed pipeline on the default branch. It is updated on every pipeline completion. All detected vulnerabilities are shown as well as any previous ones that are no longer detected in the latest scan. Vulnerabilities that are no longer detected may have been remediated or otherwise removed and can be marked as `Resolved` after proper verification. Vulnerabilities that are no longer detected are denoted with an icon for easy filtering and review.
+The vulnerability report shows the results of the last completed pipeline on the default branch. It is updated on every pipeline completion. All detected vulnerabilities are shown as well as any previous ones that are no longer detected in the latest scan. Vulnerabilities that are no longer detected may have been remediated or otherwise removed and can be marked as `Resolved` after proper verification. Vulnerabilities that are no longer detected are denoted with an icon for filtering and review.
 
 By default, the vulnerability report does not show “dismissed” or “resolved” so you can focus on open vulnerabilities. You can easily change the Status filter to see these.
 
