@@ -1,0 +1,5 @@
+---
+title: Add DS_EXCLUDED_ANALYZERS var to Dependency Scanning template
+merge_request:
+author:
+type: added
