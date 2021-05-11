@@ -36,7 +36,7 @@ You can undo changes at any point in this workflow:
 - [When you're working locally](#undo-local-changes) and haven't yet pushed to a remote repository.
 - When you have already pushed to a remote repository and you want to:
   - [Keep the history intact](#undo-remote-changes-without-changing-history) (preferred).
-  - [Change the history](#undo-remote-changes-with-modifying-history) (requires
+  - [Change the history](#undo-remote-changes-while-changing-history) (requires
     coordination with team and force pushes).
 
 ## Undo local changes
