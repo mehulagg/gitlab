@@ -377,14 +377,14 @@ For example, the configuration below enables validation for only the `sast` job:
 ## Interacting with findings and vulnerabilities
 
 There are a variety of locations and ways to interact with the results of the security scanning tools;
-- [Scan information in merge requests](https://docs.gitlab.com/ee/user/application_security/#view-security-scan-information-in-merge-requests) 
-- [Project Security Dashboard](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#project-security-dashboard)
-- [Security pipeline tab](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#pipeline-security)
-- [Group Security Dashboard](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#group-security-dashboard)
-- [Security Center](https://docs.gitlab.com/ee/user/application_security/security_dashboard/#security-center)
-- [Vulnerability Report](https://docs.gitlab.com/ee/user/application_security/vulnerability_report/)
-- [Vulnerability Pages](https://docs.gitlab.com/ee/user/application_security/vulnerabilities/)
-- [Dependency List](https://docs.gitlab.com/ee/user/application_security/dependency_list/)
+- [Scan information in merge requests](#view-security-scan-information-in-merge-requests) 
+- [Project Security Dashboard](security_dashboard/#project-security-dashboard)
+- [Security pipeline tab](security_dashboard/#pipeline-security)
+- [Group Security Dashboard](security_dashboard/#group-security-dashboard)
+- [Security Center](security_dashboard/#security-center)
+- [Vulnerability Report](vulnerability_report/index.md)
+- [Vulnerability Pages](vulnerabilities/index.md)
+- [Dependency List](dependency_list/index.md)
 
 For more details about which findings or vulnerabilities you can view in each of those locations, select the respective link. Each page details the ways in which you can interact with the findings and vulnerabilities. As an example, in most cases findings will start out as “detected” status. You have the option to:
 
