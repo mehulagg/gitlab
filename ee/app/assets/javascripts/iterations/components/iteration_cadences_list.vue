@@ -1,6 +1,6 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { s__ } from '~/locale';
 import query from '../queries/iteration_cadences_list.query.graphql';
 import IterationCadence from './iteration_cadence.vue';
 
@@ -29,7 +29,7 @@ export default {
         };
       },
       error({ message }) {
-        this.error = message || __('Iterations|Error loading iteration cadences.');
+        this.error = message || s__('Iterations|Error loading iteration cadences.');
       },
     },
   },
@@ -136,7 +136,7 @@ export default {
           <iteration-cadence v-for="cadence in cadences" :key="cadence.id" :title="cadence.title" />
         </ul>
         <div v-else class="nothing-here-block">
-          {{ __('Iterations|No iteration cadences to show.') }}
+          {{ s__('Iterations|No iteration cadences to show.') }}
         </div>
         <gl-pagination
           v-if="prevPage || nextPage"
@@ -158,7 +158,7 @@ export default {
             name: 'new',
           }"
         >
-          {{ __('Iterations|New iteration cadence') }}
+          {{ s__('Iterations|New iteration cadence') }}
         </gl-button>
       </li>
     </template>
