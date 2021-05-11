@@ -6,9 +6,9 @@ module Backup
   class Repositories
     attr_reader :progress, :strategy
 
-    def initialize(progress)
+    def initialize(progress, strategy: nil)
       @progress = progress
-      @strategy = GitalyRpcBackup.new(progress)
+      @strategy = strategy || GitalyRpcBackup.new(progress)
     end
 
     def dump(max_concurrency:, max_storage_concurrency:)
@@ -161,7 +161,6 @@ module Backup
     def snippets_in_storage(storage)
       Snippet.id_in(SnippetRepository.for_repository_storage(storage).select(:snippet_id))
     end
-
 
     def restore_object_pools
       PoolRepository.includes(:source_project).find_each do |pool|
