@@ -6,6 +6,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Managed Apps **(FREE) (Deprecated)**
 
+WARNING:
+This is now DEPRECATED and won't be getting anymore updates. Read below the reasoning and how to proceed.
+
 GitLab provides **GitLab Managed Apps** for various
 applications which can be added directly to your configured cluster. These
 applications are needed for [Review Apps](../../ci/review_apps/index.md) and
@@ -17,29 +20,37 @@ situations users will need more flexibility and control over these applications.
 for most users is for them to have full control of their dependency updates, chart values and Helmfiles 
 customization. If you want to read in more detail about it, see the discussion 
 [in this epic](https://gitlab.com/groups/gitlab-org/-/epics/4280). In the spirit of giving users more flexibility,
-We have decided to take the following actions:
+we have decided to take the following actions:
 
-- To foster users to control their own apps completely, we will create a Project Template that will have default sane values 
-  for these applications. Users will be able to create a new repository from this functional template, 
-  then quickly start managing a default set of applications.
-  More so, since all the files will be exposed in this template, nothing will be locked-in a Docker image, the user
-  user will have the full control of its values that we have talked about. This template should be ready close to 14.0.
-  You can track the progress [through this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/327908). This template
-  will be completely compatible with the [Cluster management project](management_project.md) feature. 
+- For the applications that integrate with core GitLab features, we want users to be able to bring their own installations
+  and simply connect them to GitLab. These are called GitLab Integrations. So we're adding documentation on how to bring
+  your own application. An example is the [GitLab Prometheus Integration](../project/integrations/prometheus.md#enabling-prometheus-integration)
+  page.
+- For users who want to user Helmfile to manage their applications, we will create a Project Template that will have default production sane values. 
+  Users will be able to create a new repository from this functional template, then quickly start managing a default set of applications.
+  More so, since all the files will be exposed in this template, nothing will be locked-in a Docker image, so the user
+  user will have full control of its chart configuration, Helmfiles and values. This template is expected to land in 14.0.
+  You can track the progress [through this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/327908). The template
+  will aim to facilitate the migration from CI/CD managed apps as well as 1-click install apps.
 - We will keep focusing on improving the [GitLab Kubernetes Agent](agent/index.md),
-  which also enables you to manage Kubernetes deployments without introducing the GitLab Managed Apps limitations. 
+  which is an interesting alternative to manage Kubernetes deployments without introducing the GitLab Managed Apps limitations.
 - GitLab Managed Apps with [one-click installations](#install-with-one-click)
-  have been deprecated, and are scheduled for removal in GitLab 14.0. If you are using this strategy, be
-  sure to [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps) before 14.0.
+  have been deprecated, and are scheduled for removal in GitLab 14.0. If you are using this strategy, read on
+  how to [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps) before 14.0. You can still
+  take these steps after 14.0. But remember that in 14.0 the clusters applications tab will not be present anymore.
 - GitLab Managed Apps [using CI/CD](#install-using-gitlab-cicd) is deprecated from 13.12 on. If you are
-  using this strategy, you can keep using even after 14.0. Everything should keep working. So, you can
-  either keep using it for now or [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). Just don't deliberately 
-  upgrade your [`cluster-applications` Docker image](https://gitlab.com/gitlab-org/gitlab/-/blob/35a195ed4e64c3bd3235cd3d72b054d9310c62ea/lib/gitlab/ci/templates/Managed-Cluster-Applications.gitlab-ci.yml#L3)
-  to the new major version, since there will be a breaking change to support the new Project Template. If you 
-  you were not controlling this image version by customizing it on your repo and don't know what it is about,
-  just disregard this message. Your GitLab Managed Apps will keep working as it is today. Still it won't be
-  getting anymore automatic updates. That's why we recommend you [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps)
-  or start using the Project Template as soon as it's available.
+  using this strategy, you can keep using it even after 14.0. Everything should keep working and the CI template won't be
+  removed yet. So your options are:
+  - [Take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps) immediately and start managing
+    your apps independently.
+  - Wait for the new [Project Template](https://gitlab.com/gitlab-org/gitlab/-/issues/327908) if you want an easy way to
+    migrate while still having the utilities that Helmfiles provide.
+  We just ask you to don't deliberately upgrade your [`cluster-applications` Docker image](https://gitlab.com/gitlab-org/gitlab/-/blob/35a195ed4e64c3bd3235cd3d72b054d9310c62ea/lib/gitlab/ci/templates/Managed-Cluster-Applications.gitlab-ci.yml#L3)
+  to the new major version, since there will be a breaking change to support the new [Project Template](https://gitlab.com/gitlab-org/gitlab/-/issues/327908). 
+  If you were not controlling this image version by customizing it on your repository and/or don't know what it is about,
+  just disregard this message. Your GitLab Managed Apps will keep working as it is today. It just won't be
+  getting anymore automatic updates.
+  - Experiment with the [GitLab Kubernetes Agent](agent/index.md).
 
 ## Take control of your GitLab Managed Apps
 
@@ -108,9 +119,6 @@ managing different apps in the same cluster.
 
 WARNING:
 This is a _beta_ feature, and some applications might miss features to provide full integration with GitLab.
-Also, this is now DEPRECATED and won't be getting anymore updates. If you're using feature we recommend that
-you [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). To facilitate integration of 
-such applications we're [working on a Project Template](https://gitlab.com/gitlab-org/gitlab/-/issues/327908).
 
 This primary method for installing applications to clusters allows users to install GitLab-managed
 applications using GitLab CI/CD. It also allows customization of the
