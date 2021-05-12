@@ -114,9 +114,9 @@ Prerequisites:
 To create an issue:
 
 1. Go to **Issues > List**.
-1. In the top right, click **New issue**.
+1. In the top right, select **New issue**.
 1. Complete the fields. (If you have a reference topic that lists each field, link to it here.)
-1. Click **Create issue**.
+1. Select **Create issue**.
 
 The issue is created. You can view it by going to **Issues > List**.
 ```
@@ -217,7 +217,7 @@ check with a technical writer.
 Note that after adding `feedback: false` to the front matter, it will omit
 Disqus, therefore, don't add both keys to the same document.
 
-The click events in the feedback section are tracked with Google Tag Manager.
+The select events in the feedback section are tracked with Google Tag Manager.
 The conversions can be viewed on Google Analytics by navigating to
 **Behavior > Events > Top events > docs**.
 
