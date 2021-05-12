@@ -5,6 +5,7 @@ import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import PackagesListRow from '~/packages/shared/components/package_list_row.vue';
 import PackagePath from '~/packages/shared/components/package_path.vue';
 import PackageTags from '~/packages/shared/components/package_tags.vue';
+import { PACKAGE_ERROR_STATUS } from '~/packages/shared/constants';
 
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import { packageList } from '../../mock_data';
@@ -155,9 +156,9 @@ describe('packages_list_row', () => {
     });
   });
 
-  describe('when the package is in error status', () => {
+  describe(`when the package is in ${PACKAGE_ERROR_STATUS} status`, () => {
     beforeEach(() => {
-      mountComponent({ packageEntity: { ...packageWithoutTags, status: 'error' } });
+      mountComponent({ packageEntity: { ...packageWithoutTags, status: PACKAGE_ERROR_STATUS } });
     });
 
     it('list item has a disabled prop', () => {

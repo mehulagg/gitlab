@@ -3,6 +3,7 @@ import { GlButton, GlLink, GlSprintf, GlTooltipDirective, GlTruncate } from '@gi
 import { s__ } from '~/locale';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
+import { PACKAGE_ERROR_STATUS, PACKAGE_DEFAULT_STATUS } from '../constants';
 import { getPackageTypeLabel } from '../utils';
 import PackagePath from './package_path.vue';
 import PackageTags from './package_tags.vue';
@@ -72,10 +73,10 @@ export default {
       return Boolean(this.packageEntity.project_path);
     },
     showWarningIcon() {
-      return this.packageEntity.status === 'error';
+      return this.packageEntity.status === PACKAGE_ERROR_STATUS;
     },
     disabledRow() {
-      return this.packageEntity.status && this.packageEntity.status !== 'default';
+      return this.packageEntity.status && this.packageEntity.status !== PACKAGE_DEFAULT_STATUS;
     },
     disabledDeleteButton() {
       return this.disabledRow || !this.packageEntity._links.delete_api_path;
