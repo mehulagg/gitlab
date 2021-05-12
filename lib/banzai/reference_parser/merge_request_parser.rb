@@ -27,6 +27,11 @@ module Banzai
           self.class.data_attribute
         )
       end
+
+      def can_read_reference?(user, merge_request)
+        @can_read_reference ||= {}
+        @can_read_reference[merge_request.project.id] ||= can?(user, :read_merge_request_iid, merge_request.project)
+      end
     end
   end
 end
