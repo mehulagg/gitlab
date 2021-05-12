@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
+import IssueBoardFilteredSearch from '~/boards/components/issue_board_filtered_search.vue';
 import store from '~/boards/stores';
 import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
@@ -9,6 +9,7 @@ export default (apolloProvider) => {
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {}),
   };
+
   if (!el) {
     return null;
   }
@@ -20,6 +21,6 @@ export default (apolloProvider) => {
     },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider,
-    render: (createElement) => createElement(EpicFilteredSearch, { props: { fullPath: store.state.fullPath, boardType: store.state.boardType } }),
+    render: (createElement) => createElement(IssueBoardFilteredSearch, {props: { fullPath: store.state.fullPath, boardType: store.state.boardType } }),
   });
 };

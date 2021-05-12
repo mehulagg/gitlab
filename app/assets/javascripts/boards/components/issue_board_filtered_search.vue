@@ -1,9 +1,9 @@
 <script>
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
-import issueBoardFilter from '~/boards/issue_board_filters';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import issueBoardFilters from '~/boards/issue_board_filters';
 
 export default {
   i18n: {
@@ -16,27 +16,16 @@ export default {
   components: { BoardFilteredSearch },
   props: {
     fullPath: {
-      required: true,
+      required: true
     },
     boardType: {
       required: true,
     }
   },
-  watch: {
-    xxx: {
-      handler(x) {
-        console.log('updating')
-        this.filterParams = x;
-        this.testParams = this.getFilteredSearchValue();
-        console.log(this.testParams)
-      }
-    }
-  },
   computed: {
     tokens() {
-      const { fetchLabels, fetchAuthors } = issueBoardFilter(this.$apollo, this.fullPath, this.boardType);
-
       const { label, is, isNot, author } = this.$options.i18n;
+      const { fetchAuthors, fetchLabels } = issueBoardFilters(this.$apollo, this.fullPath, this.boardType);
       return [
         {
           icon: 'labels',
@@ -64,6 +53,19 @@ export default {
           unique: true,
           fetchAuthors,
         },
+        {
+          icon: 'user',
+          title: 'Assignee',
+          type: 'assignee_username',
+          operators: [
+            { value: '=', description: is },
+            { value: '!=', description: isNot },
+          ],
+          symbol: '@',
+          token: AuthorToken,
+          unique: true,
+          fetchAuthors,
+        },
       ];
     },
   }
@@ -71,5 +73,5 @@ export default {
 </script>
 
 <template>
-  <board-filtered-search data-testid="epic-filtered-search" :tokens="tokens" />
+  <board-filtered-search data-testid="issue-board-filtered-search" :tokens="tokens" />
 </template>

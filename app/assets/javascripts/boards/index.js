@@ -40,6 +40,7 @@ import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 import { fullBoardId } from './boards_util';
 import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
+import initiBoardsFilteredSearch from '~/boards/mount_filtered_search_issue_boards';
 
 Vue.use(VueApollo);
 
@@ -75,6 +76,10 @@ export default () => {
 
   if (issueBoardsApp) {
     issueBoardsApp.$destroy(true);
+  }
+
+  if (gon?.features?.issueBoardsFilteredSearch) {
+    initiBoardsFilteredSearch(apolloProvider);
   }
 
   if (!gon?.features?.graphqlBoardLists) {
@@ -179,9 +184,10 @@ export default () => {
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
-      this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
-
-      this.filterManager.setup();
+      // if (!gon?.features?.issueBoardsFilteredSearch) {
+        this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
+        this.filterManager.setup();
+      // }
 
       this.performSearch();
 

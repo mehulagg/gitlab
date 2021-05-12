@@ -1,0 +1,21 @@
+query BoardMembers(
+  $fullPath: ID!
+  $searchTerm: String
+  $isGroup: Boolean = false
+  $isProject: Boolean = false
+) {
+  group(fullPath: $fullPath) @include(if: $isGroup) {
+    labels(searchTerm: $searchTerm) {
+      nodes {
+        ...Label
+      }
+    }
+  }
+  project(fullPath: $fullPath) @include(if: $isProject) {
+    labels(searchTerm: $searchTerm) {
+      nodes {
+        ...Label
+      }
+    }
+  }
+}

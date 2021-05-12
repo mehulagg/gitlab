@@ -1,0 +1,8 @@
+---
+name: issue_boards_filtered_search
+introduced_by_url:
+rollout_issue_url:
+milestone: '13.12'
+type: development
+group: group::plan
+default_enabled: false
