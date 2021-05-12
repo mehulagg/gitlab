@@ -139,7 +139,7 @@ All jobs are permitted to fail by default. This means that if they fail it do no
 
 If you want to prevent vulnerabilities from being merged, you should do this by adding [Security Approvals in Merge Requests](#security-approvals-in-merge-requests) which prevents unknown, high or critical findings from being merged without an approval from a specific group of people that you choose.
 
-We do not recommend changing the job [`allow_failure` setting](../../ci/yaml/index.md#allow_failure) as that fails the entire pipeline.
+We do not recommend changing the job [`allow_failure` setting](../../ci/yaml/README.md#allow_failure) as that fails the entire pipeline.
 
 ### JSON Artifact
 
@@ -188,7 +188,7 @@ The vulnerability report shows the results of the last completed pipeline on the
 
 By default, the vulnerability report does not show vulnerabilities of `dismissed` or `resolved` status so you can focus on open vulnerabilities. You can change the Status filter to see these.
 
-[Read more about the Vulnerability report](/vulnerability_report/)
+[Read more about the Vulnerability report](vulnerability_report/index.md).
 
 ## Security approvals in merge requests
 
