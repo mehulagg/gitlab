@@ -11,7 +11,7 @@
   .row.js-search-settings-section
     .col-lg-4.profile-settings-sidebar
       %h4.gl-mt-0
-        = s_("Profiles|Public Avatar")
+        = s_("Profiles|Public avatar")
       %p
         - if @user.avatar?
           - if gravatar_enabled?
@@ -127,7 +127,7 @@
   .row.gl-justify-content-end
     .col-lg-8.gl-display-flex
       = f.submit s_("Profiles|Update profile settings"), class: 'gl-button btn btn-confirm gl-mr-3'
-      = link_to _("Cancel"), user_path(current_user), class: 'gl-button btn btn-cancel'
+      = link_to _("Cancel"), user_path(current_user), class: 'gl-button btn btn-default btn-cancel'
 
 .modal.modal-profile-crop{ data: { cropper_css_path: ActionController::Base.helpers.stylesheet_path('lazy_bundles/cropper.css') } }
   .modal-dialog
