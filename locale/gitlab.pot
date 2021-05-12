@@ -5055,6 +5055,9 @@ msgstr ""
 msgid "Billings|User Verification Required"
 msgstr ""
 
+msgid "Billings|User successfully verified"
+msgstr ""
+
 msgid "Billings|Verify User Account"
 msgstr ""
 
@@ -5062,6 +5065,9 @@ msgid "Billings|Verify account"
 msgstr ""
 
 msgid "Billings|Your user account has been flagged for potential abuse for running a large number of concurrent pipelines. To continue to run a large number of concurrent pipelines, you'll need to validate your account with a credit card. %{strongStart}GitLab will not charge your credit card, it will only be used for validation.%{strongEnd}"
+msgstr ""
+
+msgid "Billings|Your user account has been successfully verified. You will now be able to run pipelines on any free or trial namespace."
 msgstr ""
 
 msgid "Billing|An email address is only visible for users with public emails."
