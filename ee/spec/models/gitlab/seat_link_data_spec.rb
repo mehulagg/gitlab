@@ -172,7 +172,7 @@ RSpec.describe Gitlab::SeatLinkData do
 
       context 'when seat link feature is not available' do
         before do
-          allow(Settings.gitlab).to receive(:seat_link_available).and_return(false)
+          allow(Gitlab::CurrentSettings).to receive(:seat_link_available?).and_return(false)
         end
 
         it { is_expected.to be_falsey }

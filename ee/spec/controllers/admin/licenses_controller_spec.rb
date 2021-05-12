@@ -119,16 +119,16 @@ RSpec.describe Admin::LicensesController do
   end
 
   describe 'POST sync_seat_link' do
+    let(:seat_link_available) { true }
+
     let_it_be(:historical_data) { create(:historical_data, recorded_at: Time.current) }
 
     before do
-      allow(License).to receive(:current).and_return(create(:license))
-      allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(seat_link_enabled)
+      allow(License).to receive(:current).and_return(license)
+      allow(Gitlab::CurrentSettings).to receive(:seat_link_available?).and_return(seat_link_available)
     end
 
-    context 'with seat link enabled' do
-      let(:seat_link_enabled) { true }
-
+    shared_examples 'successful response' do
       it 'returns a success response' do
         post :sync_seat_link, format: :json
 
@@ -137,14 +137,26 @@ RSpec.describe Admin::LicensesController do
       end
     end
 
-    context 'with seat link disabled' do
-      let(:seat_link_enabled) { false }
+    context 'with a cloud license' do
+      let(:license) { build(:license, cloud: true) }
 
-      it 'returns a failure response' do
-        post :sync_seat_link, format: :json
+      include_examples 'successful response'
+    end
 
-        expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(json_response).to eq({ 'success' => false })
+    context 'with a legacy license' do
+      let(:license) { build(:license) }
+
+      include_examples 'successful response'
+
+      context 'when the seat link feature is not available' do
+        let(:seat_link_available) { false }
+
+        it 'returns a success response' do
+          post :sync_seat_link, format: :json
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+          expect(json_response).to eq({ 'success' => false })
+        end
       end
     end
   end
