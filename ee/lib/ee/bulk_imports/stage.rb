@@ -28,6 +28,8 @@ module EE
         }
       }.freeze
 
+      private
+
       override :config
       def config
         @config ||= super.deep_merge(EE_CONFIG)

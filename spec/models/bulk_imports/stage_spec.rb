@@ -1,39 +1,29 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 
 RSpec.describe BulkImports::Stage do
   let(:pipelines) do
-    if Gitlab.ee?
-      [
-        [0, BulkImports::Groups::Pipelines::GroupPipeline],
-        [1, BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline],
-        [1, BulkImports::Groups::Pipelines::MembersPipeline],
-        [1, BulkImports::Groups::Pipelines::LabelsPipeline],
-        [1, BulkImports::Groups::Pipelines::MilestonesPipeline],
-        [1, BulkImports::Groups::Pipelines::BadgesPipeline],
-        [1, 'BulkImports::Groups::Pipelines::IterationsPipeline'.constantize],
-        [2, 'BulkImports::Groups::Pipelines::EpicsPipeline'.constantize],
-        [3, 'BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline'.constantize],
-        [3, 'BulkImports::Groups::Pipelines::EpicEventsPipeline'.constantize],
-        [4, BulkImports::Groups::Pipelines::EntityFinisher]
-      ]
-    else
-      [
-        [0, BulkImports::Groups::Pipelines::GroupPipeline],
-        [1, BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline],
-        [1, BulkImports::Groups::Pipelines::MembersPipeline],
-        [1, BulkImports::Groups::Pipelines::LabelsPipeline],
-        [1, BulkImports::Groups::Pipelines::MilestonesPipeline],
-        [1, BulkImports::Groups::Pipelines::BadgesPipeline],
-        [2, BulkImports::Groups::Pipelines::EntityFinisher]
-      ]
-    end
+    [
+      [0, BulkImports::Groups::Pipelines::GroupPipeline],
+      [1, BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline],
+      [1, BulkImports::Groups::Pipelines::MembersPipeline],
+      [1, BulkImports::Groups::Pipelines::LabelsPipeline],
+      [1, BulkImports::Groups::Pipelines::MilestonesPipeline],
+      [1, BulkImports::Groups::Pipelines::BadgesPipeline],
+      [2, BulkImports::Groups::Pipelines::EntityFinisher]
+    ]
   end
+
 
   describe '.pipelines' do
     it 'list all the pipelines with their stage number, ordered by stage' do
+      expect(described_class.instance)
+        .to receive(:config)
+        .and_return(described_class::CONFIG)
+
       expect(described_class.pipelines).to match_array(pipelines)
+      expect(described_class.pipelines.last.last).to eq(BulkImports::Groups::Pipelines::EntityFinisher)
     end
   end
 
