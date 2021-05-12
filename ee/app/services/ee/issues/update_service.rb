@@ -64,16 +64,9 @@ module EE
 
       def handle_issue_type_label_update(issue)
         if issue.issue_type === 'incident'
-          label = ::IncidentManagement::CreateIncidentLabelService
-                    .new(project, current_user)
-                    .execute
-                    .payload[:label]
-
-          return if issue.label_ids.include?(label.id)
-
-          issue.labels << label
+          add_incident_label(issue)
         else
-          issue.labels = issue.labels.select { |label| label.title != 'incident' }
+          issue.labels = issue.labels.reject { |label| label.title == 'incident' }
         end
       end
 
