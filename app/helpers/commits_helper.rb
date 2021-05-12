@@ -148,6 +148,17 @@ module CommitsHelper
     end
   end
 
+  def commit_partial_cache_key(commit, ref, request)
+    [
+      commit,
+      commit.author,
+      ref,
+      hashed_pipeline_status(commit, ref),
+      request.xhr?,
+      @path
+    ]
+  end
+
   protected
 
   # Private: Returns a link to a person. If the person has a matching user and
@@ -220,5 +231,15 @@ module CommitsHelper
     else
       project_commit_path(project, commit)
     end
+  end
+
+  private
+
+  def hashed_pipeline_status(commit, ref)
+    status = commit.status_for(ref)
+
+    return if status.nil?
+
+    Digest::SHA1.hexdigest(status.to_s)
   end
 end
