@@ -73,7 +73,7 @@ module WorkerAttributes
       class_attributes[:urgency] || :low
     end
 
-    def data_consistency(data_consistency, delay_for: nil, feature_flag: nil)
+    def data_consistency(data_consistency, feature_flag: nil)
       raise ArgumentError, "Invalid data consistency: #{data_consistency}" unless VALID_DATA_CONSISTENCIES.include?(data_consistency)
       raise ArgumentError, 'Data consistency is already set' if class_attributes[:data_consistency]
 
