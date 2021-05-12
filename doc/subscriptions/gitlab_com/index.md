@@ -265,6 +265,13 @@ To remove a billable user:
 1. In the row for the user you want to remove, on the right side, select the ellipsis and **Remove user**.
 1. Re-type the username and select **Remove user**.
 
+Be aware that:
+
+- If a member has been added to a group via [share a group with another group](https://docs.gitlab.com/ee/user/group/#share-a-group-with-another-group) feature, the member cannot be removed via this feature. 
+- There are two options to remove member which has been invited via a shared group:
+     1. An owner from the shared group must remove the member from the shared group
+     1. From the group's membership page, remove access from the entire shared group
+
 ## CI pipeline minutes
 
 CI pipeline minutes are the execution time for your
