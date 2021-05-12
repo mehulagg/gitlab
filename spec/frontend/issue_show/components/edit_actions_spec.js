@@ -11,6 +11,8 @@ describe('Edit Actions components', () => {
     mutate: jest.fn().mockResolvedValue(),
   };
 
+  const modalId = 'delete-issuable-modal-1';
+
   const createComponent = ({ props, data } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(IssuableEditActions, {
@@ -25,7 +27,7 @@ describe('Edit Actions components', () => {
         },
         data() {
           return {
-            modalId: 'delete-issuable-modal-1',
+            modalId,
             ...data,
           };
         },
@@ -109,7 +111,7 @@ describe('Edit Actions components', () => {
 
   describe('renders create modal with the correct information', () => {
     it('renders correct modal id', () => {
-      expect(findModal().attributes('modalid')).toBe(wrapper.vm.modalId);
+      expect(findModal().attributes('modalid')).toBe(modalId);
     });
   });
 
@@ -118,14 +120,16 @@ describe('Edit Actions components', () => {
       jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
     });
 
-    it('doesn not sends delete.issuable event when clicking delete button', () => {
+    it('does not send the `delete.issuable` event when clicking delete button', () => {
       findDeleteButton().vm.$emit('click');
       expect(eventHub.$emit).not.toHaveBeenCalled();
     });
 
-    it('sends delete.issuable event when clicking the delete confirm button', async () => {
+    it('sends the `delete.issuable` event when clicking the delete confirm button', async () => {
+      expect(eventHub.$emit).toHaveBeenCalledTimes(0);
       await deleteIssuable(wrapper);
       expect(eventHub.$emit).toHaveBeenCalledWith('delete.issuable', { destroy_confirm: true });
+      expect(eventHub.$emit).toHaveBeenCalledTimes(1);
     });
   });
 });
