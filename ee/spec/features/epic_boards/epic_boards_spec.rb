@@ -214,7 +214,6 @@ RSpec.describe 'epic boards', :js do
   context 'filtered search' do
     before do
       stub_licensed_features(epics: true)
-      stub_feature_flags(boards_filtered_search: true)
 
       group.add_guest(user)
       sign_in(user)
