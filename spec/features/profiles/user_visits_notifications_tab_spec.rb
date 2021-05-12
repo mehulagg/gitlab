@@ -12,6 +12,14 @@ RSpec.describe 'User visits the notifications tab', :js do
     visit(profile_notifications_path)
   end
 
+  it 'turns on the receive product marketing emails setting' do
+    expect(page).to have_content('Notifications')
+
+    check 'Receive product marketing emails'
+
+    expect(user.reload.email_opted_in).to eq(true)
+  end
+
   it 'changes the project notifications setting' do
     expect(page).to have_content('Notifications')
 
