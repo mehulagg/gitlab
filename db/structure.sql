@@ -18783,6 +18783,27 @@ CREATE SEQUENCE vulnerability_feedback_id_seq
 
 ALTER SEQUENCE vulnerability_feedback_id_seq OWNED BY vulnerability_feedback.id;
 
+CREATE TABLE vulnerability_finding_evidence_headers (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    vulnerability_finding_evidence_request_id bigint,
+    vulnerability_finding_evidence_response_id bigint,
+    name text NOT NULL,
+    value text NOT NULL,
+    CONSTRAINT check_01d21e8d92 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_3f9011f903 CHECK ((char_length(value) <= 8192))
+);
+
+CREATE SEQUENCE vulnerability_finding_evidence_headers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_finding_evidence_headers_id_seq OWNED BY vulnerability_finding_evidence_headers.id;
+
 CREATE TABLE vulnerability_finding_evidence_requests (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -18790,6 +18811,8 @@ CREATE TABLE vulnerability_finding_evidence_requests (
     vulnerability_finding_evidence_id bigint NOT NULL,
     method text,
     url text,
+    body text,
+    CONSTRAINT check_7e37f2d01a CHECK ((char_length(body) <= 2048)),
     CONSTRAINT check_8152fbb236 CHECK ((char_length(url) <= 2048)),
     CONSTRAINT check_d9d11300f4 CHECK ((char_length(method) <= 32))
 );
@@ -18810,7 +18833,9 @@ CREATE TABLE vulnerability_finding_evidence_responses (
     vulnerability_finding_evidence_id bigint NOT NULL,
     status_code integer,
     reason_phrase text,
-    CONSTRAINT check_58b124ab48 CHECK ((char_length(reason_phrase) <= 2048))
+    body text,
+    CONSTRAINT check_58b124ab48 CHECK ((char_length(reason_phrase) <= 2048)),
+    CONSTRAINT check_76bac0c32b CHECK ((char_length(body) <= 2048))
 );
 
 CREATE SEQUENCE vulnerability_finding_evidence_responses_id_seq
@@ -20143,6 +20168,8 @@ ALTER TABLE ONLY vulnerability_exports ALTER COLUMN id SET DEFAULT nextval('vuln
 ALTER TABLE ONLY vulnerability_external_issue_links ALTER COLUMN id SET DEFAULT nextval('vulnerability_external_issue_links_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_feedback ALTER COLUMN id SET DEFAULT nextval('vulnerability_feedback_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_finding_evidence_headers ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidence_headers_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_finding_evidence_requests ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidence_requests_id_seq'::regclass);
 
@@ -21805,6 +21832,9 @@ ALTER TABLE ONLY vulnerability_external_issue_links
 ALTER TABLE ONLY vulnerability_feedback
     ADD CONSTRAINT vulnerability_feedback_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vulnerability_finding_evidence_headers
+    ADD CONSTRAINT vulnerability_finding_evidence_headers_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY vulnerability_finding_evidence_requests
     ADD CONSTRAINT vulnerability_finding_evidence_requests_pkey PRIMARY KEY (id);
 
@@ -22044,6 +22074,10 @@ CREATE INDEX design_user_mentions_on_design_id_and_note_id_index ON design_user_
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user_mentions USING btree (epic_id, note_id);
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions USING btree (epic_id) WHERE (note_id IS NULL);
+
+CREATE INDEX finding_evidence_header_on_finding_evidence_request_id ON vulnerability_finding_evidence_headers USING btree (vulnerability_finding_evidence_request_id);
+
+CREATE INDEX finding_evidence_header_on_finding_evidence_response_id ON vulnerability_finding_evidence_headers USING btree (vulnerability_finding_evidence_response_id);
 
 CREATE INDEX finding_evidence_requests_on_finding_evidence_id ON vulnerability_finding_evidence_requests USING btree (vulnerability_finding_evidence_id);
 
@@ -26479,6 +26513,9 @@ ALTER TABLE ONLY vulnerability_findings_remediations
 ALTER TABLE ONLY resource_iteration_events
     ADD CONSTRAINT fk_rails_6830c13ac1 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY vulnerability_finding_evidence_headers
+    ADD CONSTRAINT fk_rails_683b8e000c FOREIGN KEY (vulnerability_finding_evidence_response_id) REFERENCES vulnerability_finding_evidence_responses(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY geo_hashed_storage_migrated_events
     ADD CONSTRAINT fk_rails_687ed7d7c5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -27036,6 +27073,9 @@ ALTER TABLE ONLY operations_strategies_user_lists
 
 ALTER TABLE ONLY issue_tracker_data
     ADD CONSTRAINT fk_rails_ccc0840427 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_finding_evidence_headers
+    ADD CONSTRAINT fk_rails_ce7f121a03 FOREIGN KEY (vulnerability_finding_evidence_request_id) REFERENCES vulnerability_finding_evidence_requests(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_cedf8cce4d FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
