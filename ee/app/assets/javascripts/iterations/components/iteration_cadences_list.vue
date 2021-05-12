@@ -1,12 +1,13 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 import query from '../queries/iteration_cadences_list.query.graphql';
 import IterationCadence from './iteration_cadence.vue';
 
 const pageSize = 20;
 
 export default {
+  tabTitles: [__('Open'), __('Done'), __('All')],
   components: {
     IterationCadence,
     GlAlert,
@@ -119,25 +120,22 @@ export default {
 
 <template>
   <gl-tabs v-model="tabIndex" @activate-tab="handleTabChange">
-    <gl-tab v-for="tab in [__('Open'), __('Done'), __('All')]" :key="tab">
+    <gl-tab v-for="tab in $options.tabTitles" :key="tab">
       <template #title>
         {{ tab }}
       </template>
-      <div v-if="loading" class="gl-my-5">
-        <gl-loading-icon size="lg" />
-      </div>
-      <div v-else-if="error">
-        <gl-alert variant="danger" @dismiss="error = ''">
-          {{ error }}
-        </gl-alert>
-      </div>
-      <div v-else>
-        <ul v-if="cadences.length > 0" class="content-list">
+      <gl-loading-icon v-if="loading" class="gl-my-5" size="lg" />
+
+      <gl-alert v-else-if="error" variant="danger" @dismiss="error = ''">
+        {{ error }}
+      </gl-alert>
+      <template v-else>
+        <ul v-if="cadences.length" class="content-list">
           <iteration-cadence v-for="cadence in cadences" :key="cadence.id" :title="cadence.title" />
         </ul>
-        <div v-else class="nothing-here-block">
+        <p v-else class="nothing-here-block">
           {{ s__('Iterations|No iteration cadences to show.') }}
-        </div>
+        </p>
         <gl-pagination
           v-if="prevPage || nextPage"
           :value="pagination.currentPage"
@@ -147,7 +145,7 @@ export default {
           class="gl-pagination gl-mt-3"
           @input="handlePageChange"
         />
-      </div>
+      </template>
     </gl-tab>
     <template v-if="canCreateCadence" #tabs-end>
       <li class="gl-ml-auto gl-display-flex gl-align-items-center">
