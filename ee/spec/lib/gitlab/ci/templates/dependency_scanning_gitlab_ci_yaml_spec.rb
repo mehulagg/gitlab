@@ -44,7 +44,7 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
       end
 
       context 'when DS_EXCLUDED_ANALYZERS set' do
-        let(:files) { { 'conan.lock' => '', 'Gemfile.lock' => '', 'package.json' => '', 'pom.xml' => '', 'Pipfile' => ''  } }
+        let(:files) { {'conan.lock' => '', 'Gemfile.lock' => '', 'package.json' => '', 'pom.xml' => '', 'Pipfile' => ''} }
         let(:jobs) { }
 
         context 'when excluding nothing' do
