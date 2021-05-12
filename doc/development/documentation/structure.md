@@ -217,7 +217,7 @@ check with a technical writer.
 Note that after adding `feedback: false` to the front matter, it will omit
 Disqus, therefore, don't add both keys to the same document.
 
-The select events in the feedback section are tracked with Google Tag Manager.
+The click events in the feedback section are tracked with Google Tag Manager.
 The conversions can be viewed on Google Analytics by navigating to
 **Behavior > Events > Top events > docs**.
 
