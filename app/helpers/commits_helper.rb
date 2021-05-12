@@ -148,14 +148,21 @@ module CommitsHelper
     end
   end
 
-  def commit_partial_cache_key(commit, ref, request)
+  # This is used to calculate a cache key for the app/views/projects/commits/_commit.html.haml
+  # partial. It takes some of the same parameters as used in the partial and will hash the
+  # current pipeline status.
+  #
+  # This is currently configured only for use on the merge requests commits tab, and will
+  # require expansion for use elsewhere.
+
+  def commit_partial_cache_key(commit, ref:, request:)
     [
       commit,
       commit.author,
       ref,
       hashed_pipeline_status(commit, ref),
-      request.xhr?,
-      @path
+      { xhr: request.xhr? },
+      @path # referred to in #link_to_browse_code
     ]
   end
 

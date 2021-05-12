@@ -3,8 +3,8 @@
 - ref = local_assigns.fetch(:ref) { merge_request&.source_branch }
 - can_update_merge_request = can?(current_user, :update_merge_request, @merge_request)
 
-- commits = @commits.map { |commit| commit.present(current_user: current_user) }
-- context_commits = @context_commits.map { |commit| commit.present(current_user: current_user) }
+- commits = @commits&.map { |commit| commit.present(current_user: current_user) }
+- context_commits = @context_commits&.map { |commit| commit.present(current_user: current_user) }
 - hidden = @hidden_commit_count
 
 - commits.chunk { |c| c.committed_date.in_time_zone.to_date }.each do |day, daily_commits|
@@ -15,7 +15,7 @@
   %li.commits-row{ data: { day: day } }
     %ul.content-list.commit-list.flex-list
       - if Feature.enabled?(:cached_mr_commits, project)
-        = render partial: 'projects/commits/commit', collection: daily_commits, locals: { project: project, ref: ref, merge_request: merge_request }, cached: -> (commit) { commit_partial_cache_key(commit, ref, merge_request, request) }, expires_in: 1.day
+        = render partial: 'projects/commits/commit', collection: daily_commits, locals: { project: project, ref: ref, merge_request: merge_request }, cached: -> (commit) { commit_partial_cache_key(commit, ref: ref, request: request) }, expires_in: 1.day
       - else
         = render partial: 'projects/commits/commit', collection: daily_commits, locals: { project: project, ref: ref, merge_request: merge_request }
 
@@ -29,7 +29,7 @@
   %li.commits-row
     %ul.content-list.commit-list.flex-list
       - if Feature.enabled?(:cached_mr_commits, project)
-        = render partial: 'projects/commits/commit', collection: context_commits, locals: { project: project, ref: ref, merge_request: merge_request }, cached: -> (commit) { commit_partial_cache_key(commit, ref, merge_request, request) }, expires_in: 1.day
+        = render partial: 'projects/commits/commit', collection: context_commits, locals: { project: project, ref: ref, merge_request: merge_request }, cached: -> (commit) { commit_partial_cache_key(commit, ref: ref, request: request) }, expires_in: 1.day
       - else
         = render partial: 'projects/commits/commit', collection: context_commits, locals: { project: project, ref: ref, merge_request: merge_request }
 

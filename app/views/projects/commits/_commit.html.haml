@@ -4,17 +4,15 @@
 
   EXCEPTION WARNING - see above `.vue` file for de-sync drift
 -#-----------------------------------------------------------------
-- view_details  = local_assigns.fetch(:view_details, false)
-- merge_request = local_assigns.fetch(:merge_request, nil)
-- project       = local_assigns.fetch(:project) { merge_request&.project }
-- ref           = local_assigns.fetch(:ref) { merge_request&.source_branch }
-- commit        = commit.present(current_user: current_user)
-- commit_status = commit.status_for(ref)
-- collapsible = local_assigns.fetch(:collapsible, true)
-- link_data_attrs = local_assigns.fetch(:link_data_attrs, {})
-
-- link = commit_path(project, commit, merge_request: merge_request)
-
+- view_details      = local_assigns.fetch(:view_details, false)
+- merge_request     = local_assigns.fetch(:merge_request, nil)
+- project           = local_assigns.fetch(:project) { merge_request&.project }
+- ref               = local_assigns.fetch(:ref) { merge_request&.source_branch }
+- commit            = commit.present(current_user: current_user)
+- commit_status     = commit.status_for(ref)
+- collapsible       = local_assigns.fetch(:collapsible, true)
+- link_data_attrs   = local_assigns.fetch(:link_data_attrs, {})
+- link              = commit_path(project, commit, merge_request: merge_request)
 - show_project_name = local_assigns.fetch(:show_project_name, false)
 
 %li{ class: ["commit flex-row", ("js-toggle-container" if collapsible)], id: "commit-#{commit.short_id}" }
