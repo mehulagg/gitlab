@@ -17050,10 +17050,13 @@ ALTER SEQUENCE protected_environment_deploy_access_levels_id_seq OWNED BY protec
 
 CREATE TABLE protected_environments (
     id integer NOT NULL,
-    project_id integer NOT NULL,
+    project_id integer,
+    group_id integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    name character varying NOT NULL
+    name character varying,
+    tier integer,
+    CONSTRAINT check_0ad9f01463 CHECK ((exist(project_id) && exist(name)) || (exist(group_id) && exist(tier))),
 );
 
 CREATE SEQUENCE protected_environments_id_seq
