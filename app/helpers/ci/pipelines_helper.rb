@@ -50,7 +50,6 @@ module Ci
         { name: 'Gradle', logo: image_path('illustrations/logos/gradle.svg') },
         { name: 'Grails', logo: image_path('illustrations/logos/grails.svg') },
         { name: 'dotNET', logo: image_path('illustrations/logos/dotnet.svg') },
-        { name: 'Rails', logo: image_path('illustrations/logos/rails.svg') },
         { name: 'Julia', logo: image_path('illustrations/logos/julia.svg') },
         { name: 'Laravel', logo: image_path('illustrations/logos/laravel.svg') },
         { name: 'LaTeX', logo: image_path('illustrations/logos/latex.svg') },
