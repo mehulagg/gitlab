@@ -1,16 +1,18 @@
 import { GlAlert, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import AccountVerificationModal from 'ee/billings/components/account_verification_modal.vue';
 import CreditCardValidationRequiredAlert from 'ee/billings/components/cc_validation_required_alert.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 
 describe('CreditCardValidationRequiredAlert', () => {
   let wrapper;
 
-  const createComponent = () => {
+  const createComponent = (data = {}) => {
     return shallowMount(CreditCardValidationRequiredAlert, {
       stubs: {
         GlSprintf,
+      },
+      data() {
+        return data;
       },
     });
   };
@@ -42,13 +44,9 @@ describe('CreditCardValidationRequiredAlert', () => {
     expect(findGlAlert().attributes('variant')).toBe('danger');
   });
 
-  describe('on success', () => {
-    beforeEach(() => {
-      wrapper.findComponent(AccountVerificationModal).vm.$emit('success');
-    });
+  it('renders the success alert instead of danger', () => {
+    wrapper = createComponent({ shouldRenderSuccess: true });
 
-    it('renders the success alert instead of danger', () => {
-      expect(findGlAlert().attributes('variant')).toBe('success');
-    });
+    expect(findGlAlert().attributes('variant')).toBe('success');
   });
 });
