@@ -25,20 +25,20 @@ We have decided to take the following actions:
   More so, since all the files will be exposed in this template, nothing will be locked-in a docker image, the user
   user will have the full control of its values that we have talked about. This template should be ready close to 14.0.
   You can track the progress [through this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/327908). This template
-  will be completely compatible with the [Cluster management project](https://docs.gitlab.com/ee/user/clusters/management_project.html) feature. 
-- We will keep focusing on improving the [GitLab Kubernetes Agent](https://docs.gitlab.com/ee/user/clusters/agent/),
-  which also enbles you to manage Kubernetes deployments without introducing the GitLab Managed Apps limitations. 
+  will be completely compatible with the [Cluster management project](management_project.md) feature. 
+- We will keep focusing on improving the [GitLab Kubernetes Agent](agent/index.md),
+  which also enables you to manage Kubernetes deployments without introducing the GitLab Managed Apps limitations. 
 - GitLab Managed Apps with [one-click installations](#install-with-one-click)
   have been deprecated, and are scheduled for removal in GitLab 14.0. If you are using this strategy, be
-  sure to [take control of your GitLab Managed Apps](#take-control-of-your-gitLab-managed-apps) before 14.0.
+  sure to [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps) before 14.0.
 - GitLab Managed Apps [using CI/CD](#install-using-gitlab-cicd) is deprecated from 13.12 on. If you are
   using this strategy, you can keep using even after 14.0. Everything should keep working. So, you can
-  either keep using it for now or [take control of your GitLab Managed Apps](#take-control-of-your-gitLab-managed-apps). Just don't deliberately 
+  either keep using it for now or [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). Just don't deliberately 
   upgrade your [`cluster-applications` docker image](https://gitlab.com/gitlab-org/gitlab/-/blob/35a195ed4e64c3bd3235cd3d72b054d9310c62ea/lib/gitlab/ci/templates/Managed-Cluster-Applications.gitlab-ci.yml#L3)
   to the new major version, since there will be a breaking change to support the new Project Template. If you 
   you were not controlling this image version by customizing it on your repo and don't know what it is about,
   just disregard this message. Your GitLab Managed Apps will keep working as it is today. Still it won't be
-  getting anymore automatic updates. That's why we recommend you [take control of your GitLab Managed Apps](#take-control-of-your-gitLab-managed-apps)
+  getting anymore automatic updates. That's why we recommend you [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps)
   or start using the Project Template as soon as it's available.
 
 ## Take control of your GitLab Managed Apps
@@ -56,7 +56,7 @@ A few manual steps are needed to take control of your apps:
    Tillerless Helm v2 setup, which is the same GitLab used to install Helm v2 apps. For this you need Helm v2 and Tiller
    installed locally. Then run in a terminal tab:
    
-   ```bash
+   ```shell
    export KUBE_NAMESPACE=gitlab-managed-apps
    export TILLER_NAMESPACE=$KUBE_NAMESPACE
    tiller -listen localhost:44134
@@ -64,7 +64,7 @@ A few manual steps are needed to take control of your apps:
    
    In another tab run: 
    
-   ```bash
+   ```shell
    export HELM_HOST="localhost:44134"
    helm2 init --client-only
    helm2 ls
@@ -109,7 +109,7 @@ managing different apps in the same cluster.
 WARNING:
 This is a _beta_ feature, and some applications might miss features to provide full integration with GitLab.
 Also, this is now DEPRECATED and won't be getting anymore updates. If you're using feature we recommend that
-you [take control of your GitLab Managed Apps](#take-control-of-your-gitLab-managed-apps). To facilitate integration of of such applications we're
+you [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). To facilitate integration of of such applications we're
 [working on a Project Template](https://gitlab.com/gitlab-org/gitlab/-/issues/327908).
 
 This primary method for installing applications to clusters allows users to install GitLab-managed
