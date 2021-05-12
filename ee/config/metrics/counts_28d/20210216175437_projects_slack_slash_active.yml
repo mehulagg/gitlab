@@ -8,10 +8,10 @@ product_category: chatops
 value_type: number
 status: data_available
 time_frame: 28d
-data_source:
+data_source: database
 distribution:
 - ee
-tier: 
+tier:
 - free
 - premium
 - ultimate
