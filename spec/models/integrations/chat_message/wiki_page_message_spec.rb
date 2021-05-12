@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ChatMessage::WikiPageMessage do
+RSpec.describe Integrations::ChatMessage::WikiPageMessage do
   subject { described_class.new(args) }
 
   let(:args) do

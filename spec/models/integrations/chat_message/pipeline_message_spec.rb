@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe ChatMessage::PipelineMessage do
+RSpec.describe Integrations::ChatMessage::PipelineMessage do
   subject { described_class.new(args) }
 
   let(:args) do

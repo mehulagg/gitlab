@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ChatMessage::DeploymentMessage do
+RSpec.describe Integrations::ChatMessage::DeploymentMessage do
   describe '#pretext' do
     it 'returns a message with the data returned by the deployment data builder' do
       environment = create(:environment, name: "myenvironment")

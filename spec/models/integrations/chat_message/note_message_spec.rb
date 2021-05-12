@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ChatMessage::NoteMessage do
+RSpec.describe Integrations::ChatMessage::NoteMessage do
   subject { described_class.new(args) }
 
   let(:color) { '#345' }
