@@ -87,7 +87,7 @@ RSpec.describe 'Admin views Cloud License', :js do
     context 'Upload Legacy License' do
       it 'shows a link to upload a legacy license' do
         page.within(find('#content-body', match: :first)) do
-          expect(page).to have_link('Upload a legacy license', href: new_admin_license_path)
+          expect(page).to have_link('Download a legacy license', href: new_admin_license_path)
         end
       end
     end
