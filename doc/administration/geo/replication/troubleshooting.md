@@ -559,6 +559,7 @@ to start again from scratch, there are a few steps that can help you:
    mkdir -p /var/opt/gitlab/gitlab-rails/uploads
 
    gitlab-ctl start geo-postgresql
+   gitlab-ctl start postgresql
    ```
 
    Reconfigure to recreate the folders and make sure permissions and ownership
