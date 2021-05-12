@@ -23,7 +23,6 @@ You can restrict the password authentication for web interface and Git over HTTP
 - **Web interface**: When this feature is disabled, the **Standard** sign-in tab is removed and an [external authentication provider](../../../administration/auth/README.md) must be used.
 - **Git over HTTP(S)**: When this feature is disabled, a [Personal Access Token](../../profile/personal_access_tokens.md) must be used to authenticate.
 
-
 ## Admin Mode
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2158) in GitLab 13.10.
