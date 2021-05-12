@@ -5,7 +5,6 @@ module Users
     delegate :user_default_internal_regex_enabled?,
              :user_default_internal_regex_instance,
              to: :'Gitlab::CurrentSettings.current_application_settings'
-    attr_reader :identity_params
 
     def initialize(current_user, params = {})
       @current_user = current_user
@@ -16,22 +15,8 @@ module Users
     def execute(skip_authorization: false)
       @skip_authorization = skip_authorization
 
-      raise Gitlab::Access::AccessDeniedError unless skip_authorization || can_create_user?
-
-      user_params = build_user_params
-      user = User.new(user_params)
-
-      if current_user&.admin?
-        @reset_token = user.generate_reset_token if params[:reset_password]
-
-        if user_params[:force_random_password]
-          random_password = User.random_password
-          user.password = user.password_confirmation = random_password
-        end
-      end
-
-      build_identity(user)
-
+      build_user
+      build_identity
       Users::UpdateCanonicalEmailService.new(user: user).execute
 
       user
@@ -39,20 +24,104 @@ module Users
 
     private
 
-    attr_reader :skip_authorization
+    attr_reader :skip_authorization, :identity_params, :user_params, :user
 
     def identity_attributes
       [:extern_uid, :provider]
     end
 
-    def build_identity(user)
-      return if identity_params.empty?
+    def build_user
+      if current_user&.admin?
+        build_user_params_for_admin
+        init_user
+        password_reset
+      else
+        validate_access!
+        build_user_params_for_non_admin
+        init_user
+      end
+    end
 
-      user.identities.build(identity_params)
+    def build_user_params_for_admin
+      @user_params = params.slice(*admin_create_params)
+      @user_params.merge!(force_random_password: true, password_expires_at: nil) if params[:reset_password]
+    end
+
+    def init_user
+      build_user_params
+
+      @user = User.new(user_params)
+    end
+
+    def build_user_params
+      @user_params[:created_by_id] = current_user&.id
+      @user_params[:external] = user_external? if set_external_param?
+
+      @user_params.delete(:user_type) unless project_bot?
+    end
+
+    def set_external_param?
+      user_default_internal_regex_enabled? && !user_params.key?(:external)
+    end
+
+    def user_external?
+      user_default_internal_regex_instance.match(params[:email]).nil?
+    end
+
+    def project_bot?
+      user_params[:user_type]&.to_sym == :project_bot
+    end
+
+    def password_reset
+      @reset_token = user.generate_reset_token if params[:reset_password]
+
+      if user_params[:force_random_password]
+        random_password = User.random_password
+        @user.password = user.password_confirmation = random_password
+      end
+    end
+
+    def validate_access!
+      raise Gitlab::Access::AccessDeniedError unless skip_authorization || can_create_user?
     end
 
     def can_create_user?
       (current_user.nil? && Gitlab::CurrentSettings.allow_signup?) || current_user&.admin?
+    end
+
+    def build_user_params_for_non_admin
+      allowed_signup_params = signup_params
+      allowed_signup_params << :skip_confirmation if allow_caller_to_request_skip_confirmation?
+
+      @user_params = params.slice(*allowed_signup_params)
+      @user_params[:skip_confirmation] = skip_user_confirmation_email_from_setting if assign_skip_confirmation_from_settings?
+      @user_params[:name] = fallback_name if use_fallback_name?
+    end
+
+    def allow_caller_to_request_skip_confirmation?
+      skip_authorization
+    end
+
+    def assign_skip_confirmation_from_settings?
+      user_params[:skip_confirmation].nil?
+    end
+
+    def skip_user_confirmation_email_from_setting
+      !Gitlab::CurrentSettings.send_user_confirmation_email
+    end
+
+    def use_fallback_name?
+      user_params[:name].blank? && fallback_name.present?
+    end
+
+    def fallback_name
+      "#{user_params[:first_name]} #{user_params[:last_name]}"
+    end
+
+    def build_identity
+      return if identity_params.empty?
+
+      user.identities.build(identity_params)
     end
 
     # Allowed params for creating a user (admins only)
@@ -104,60 +173,6 @@ module Users
         :username,
         :user_type
       ]
-    end
-
-    def build_user_params
-      if current_user&.admin?
-        user_params = params.slice(*admin_create_params)
-
-        if params[:reset_password]
-          user_params.merge!(force_random_password: true, password_expires_at: nil)
-        end
-      else
-        allowed_signup_params = signup_params
-        allowed_signup_params << :skip_confirmation if allow_caller_to_request_skip_confirmation?
-
-        user_params = params.slice(*allowed_signup_params)
-        if assign_skip_confirmation_from_settings?(user_params)
-          user_params[:skip_confirmation] = skip_user_confirmation_email_from_setting
-        end
-
-        fallback_name = "#{user_params[:first_name]} #{user_params[:last_name]}"
-
-        if user_params[:name].blank? && fallback_name.present?
-          user_params = user_params.merge(name: fallback_name)
-        end
-      end
-
-      user_params[:created_by_id] = current_user&.id
-
-      if user_default_internal_regex_enabled? && !user_params.key?(:external)
-        user_params[:external] = user_external?
-      end
-
-      user_params.delete(:user_type) unless project_bot?(user_params[:user_type])
-
-      user_params
-    end
-
-    def allow_caller_to_request_skip_confirmation?
-      skip_authorization
-    end
-
-    def assign_skip_confirmation_from_settings?(user_params)
-      user_params[:skip_confirmation].nil?
-    end
-
-    def skip_user_confirmation_email_from_setting
-      !Gitlab::CurrentSettings.send_user_confirmation_email
-    end
-
-    def user_external?
-      user_default_internal_regex_instance.match(params[:email]).nil?
-    end
-
-    def project_bot?(user_type)
-      user_type&.to_sym == :project_bot
     end
   end
 end
