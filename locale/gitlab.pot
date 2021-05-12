@@ -30869,6 +30869,9 @@ msgstr ""
 msgid "StatusCheck|Status to check"
 msgstr ""
 
+msgid "StatusCheck|Update status check"
+msgstr ""
+
 msgid "StatusCheck|You are about to remove the %{name} status check."
 msgstr ""
 

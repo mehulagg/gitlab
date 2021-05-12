@@ -1,9 +1,10 @@
-import { GlButton, GlTable } from '@gitlab/ui';
+import { GlTable } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Actions from 'ee/status_checks/components/actions.vue';
 import Branch from 'ee/status_checks/components/branch.vue';
+import ModalCreate from 'ee/status_checks/components/modal_create.vue';
 import StatusChecks, { i18n } from 'ee/status_checks/components/status_checks.vue';
 import createStore from 'ee/status_checks/store';
 import { SET_STATUS_CHECKS } from 'ee/status_checks/store/mutation_types';
@@ -23,7 +24,7 @@ describe('Status checks', () => {
     wrapper.destroy();
   });
 
-  const findAddButton = () => wrapper.findComponent(GlButton);
+  const findCreateModal = () => wrapper.findComponent(ModalCreate);
   const findTable = () => wrapper.findComponent(GlTable);
   const findHeaders = () => findTable().find('thead').find('tr').findAll('th');
   const findBranch = (trIdx) => wrapper.findAllComponents(Branch).at(trIdx);
@@ -45,10 +46,10 @@ describe('Status checks', () => {
       expect(findCell(0, 0).text()).toBe(i18n.emptyTableText);
     });
 
-    it('renders the add button', () => {
+    it('renders the create modal', () => {
       createWrapper(shallowMount);
 
-      expect(findAddButton().text()).toBe(i18n.addButton);
+      expect(findCreateModal().exists()).toBe(true);
     });
   });
 
@@ -87,7 +88,7 @@ describe('Status checks', () => {
       });
 
       it('renders the actions', () => {
-        expect(findActions(index, 1).exists()).toBe(true);
+        expect(findActions(index, 1).props('statusCheck')).toStrictEqual(statusCheck);
       });
     });
   });
