@@ -61,7 +61,7 @@ module Resolvers
       def find(**params)
         ::DesignManagement::VersionsFinder
           .new(design_or_collection, current_user, params)
-          .execute
+          .execute.with_author
       end
 
       def by_id(gid)

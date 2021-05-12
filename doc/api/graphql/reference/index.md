@@ -7985,6 +7985,8 @@ A specific version in which designs were added, modified or deleted.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="designversionauthor"></a>`author` | [`UserCore!`](#usercore) | Author of the version. |
+| <a id="designversioncreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the version was created. |
 | <a id="designversiondesigns"></a>`designs` | [`DesignConnection!`](#designconnection) | All designs that were changed in the version. (see [Connections](#connections)) |
 | <a id="designversionid"></a>`id` | [`ID!`](#id) | ID of the design version. |
 | <a id="designversionsha"></a>`sha` | [`ID!`](#id) | SHA of the design version. |
