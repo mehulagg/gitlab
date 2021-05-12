@@ -1,4 +1,5 @@
-import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import { mountExtended } from 'helpers/vue_test_utils_helper';
 import KeepAliveSlots from '~/vue_shared/components/keep_alive_slots.vue';
 
 const SLOT_1 = {
@@ -20,7 +21,7 @@ describe('~/vue_shared/components/keep_alive_slots.vue', () => {
     </div>
   `;
   const createComponent = (props = {}) => {
-    wrapper = mount(KeepAliveSlots, {
+    wrapper = mountExtended(KeepAliveSlots, {
       propsData: props,
       slots: {
         [SLOT_1.slotKey]: createSlotContent(SLOT_1),
@@ -30,7 +31,7 @@ describe('~/vue_shared/components/keep_alive_slots.vue', () => {
   };
 
   const findRenderedSlots = () =>
-    wrapper.findAll('[data-testid="slot-child"]').wrappers.map((x) => ({
+    wrapper.findAllByTestId('slot-child').wrappers.map((x) => ({
       title: x.find('h1').text(),
       inputValue: x.find('input').element.value,
       isVisible: x.isVisible(),
@@ -52,7 +53,7 @@ describe('~/vue_shared/components/keep_alive_slots.vue', () => {
     describe('when slotKey is changed', () => {
       beforeEach(async () => {
         wrapper.setProps({ slotKey: SLOT_1.slotKey });
-        await wrapper.vm.$nextTick();
+        await nextTick();
       });
 
       it('shows slot', () => {
@@ -67,7 +68,7 @@ describe('~/vue_shared/components/keep_alive_slots.vue', () => {
 
       it('hides everything when slotKey cannot be found', async () => {
         wrapper.setProps({ slotKey: '' });
-        await wrapper.vm.$nextTick();
+        await nextTick();
 
         expect(findRenderedSlots()).toEqual([
           {
@@ -82,7 +83,7 @@ describe('~/vue_shared/components/keep_alive_slots.vue', () => {
         beforeEach(async () => {
           wrapper.find('input').setValue('TEST');
           wrapper.setProps({ slotKey: SLOT_2.slotKey });
-          await wrapper.vm.$nextTick();
+          await nextTick();
         });
 
         it('keeps first slot alive but hidden', () => {
