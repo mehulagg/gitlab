@@ -1,11 +1,12 @@
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { GlLoadingIcon } from '@gitlab/ui';
+import { createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadencesList from 'ee/iterations/components/iteration_cadences_list.vue';
 import cadencesListQuery from 'ee/iterations/queries/iteration_cadences_list.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
+import { mountExtended as mount } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
 const push = jest.fn();
@@ -25,6 +26,7 @@ describe('Iteration cadences list', () => {
   let wrapper;
   let apolloProvider;
 
+  const cadencesListPath = TEST_HOST;
   const groupPath = 'gitlab-org';
   const cadences = [
     {
@@ -90,7 +92,7 @@ describe('Iteration cadences list', () => {
       },
       provide: {
         groupPath,
-        cadencesListPath: TEST_HOST,
+        cadencesListPath,
         canCreateCadence,
       },
     });
@@ -98,9 +100,8 @@ describe('Iteration cadences list', () => {
     return nextTick();
   }
 
-  const withText = (text) => (node) => node.text().match(text);
-  const createCadenceButtons = () =>
-    wrapper.findAllComponents(GlButton).filter(withText('New iteration cadence'));
+  const createCadenceButton = () =>
+    wrapper.findByRole('link', { name: 'New iteration cadence', href: cadencesListPath });
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
 
   afterEach(() => {
@@ -112,7 +113,7 @@ describe('Iteration cadences list', () => {
     it('is shown when canCreateCadence is true', async () => {
       await createComponent({ canCreateCadence: true });
 
-      expect(createCadenceButtons()).toHaveLength(1);
+      expect(createCadenceButton().exists()).toBe(true);
     });
 
     it('is hidden when canCreateCadence is false', async () => {
@@ -120,7 +121,7 @@ describe('Iteration cadences list', () => {
         canCreateCadence: false,
       });
 
-      expect(createCadenceButtons()).toHaveLength(0);
+      expect(createCadenceButton().exists()).toBe(false);
     });
   });
 
