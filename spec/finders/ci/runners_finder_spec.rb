@@ -70,17 +70,6 @@ RSpec.describe Ci::RunnersFinder do
         end
       end
 
-      context 'paginate' do
-        it 'returns the runners for the specified page' do
-          stub_const('Ci::RunnersFinder::NUMBER_OF_RUNNERS_PER_PAGE', 1)
-          runner1 = create :ci_runner, created_at: '2018-07-12 07:00'
-          runner2 = create :ci_runner, created_at: '2018-07-12 08:00'
-
-          expect(described_class.new(current_user: admin, params: { page: 1 }).execute).to eq [runner2]
-          expect(described_class.new(current_user: admin, params: { page: 2 }).execute).to eq [runner1]
-        end
-      end
-
       context 'non admin user' do
         it 'returns no runners' do
           user = create :user
