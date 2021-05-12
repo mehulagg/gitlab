@@ -312,6 +312,7 @@
 .input-group-append {
   .btn {
     @include btn-middle;
+    box-shadow: inset 0 0 0 1px $gray-400;
 
     &:hover {
       outline: none;
