@@ -23,6 +23,20 @@ We have two kinds of changes related to JH:
 
 If needed, review the corresponding JH merge request located at [JH repository](https://gitlab.com/gitlab-jh/gitlab)
 
+## Process Overview
+
+The JiHu Merge Request process follows these steps:
+
+1. The `gitlab-jh` Engineering team will open two MRs:
+   1. JH MR with all changes against `gitlab-jh/gitlab`
+   1. Inc MR with all non-`jh/` changes against the default branch in `gitlab-org/gitlab`
+1. The GitLab Inc MR will be reviewed by the `gitlab-org/gitlab` team members
+1. After merging, the updates will be mirrored to `gitlab-jh/gitlab` via pull mirroring and synced to the `main-jh` `gitlab-jh/gitlab` branch with a [code sync](https://gitlab.com/gitlab-jh/gitlab-jh-enablement/-/issues/107).
+1. The `gitlab-jh` Engineering team will remove all non-`jh/` changes from the JH MR.
+1. The `gitlab-jh` Engineering team will review and merge the JH MR against the `gitlab-jh/gitlab` default branch
+
+![GitLab JH MR Process Overview](img/gitlab-jh-mr-process.png)
+
 ## Act as EE when `jh/` does not exist
 
 - In the case of EE repository, `jh/` does not exist so it should just act like EE (or CE when the license is absent)
