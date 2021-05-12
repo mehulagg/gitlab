@@ -4,27 +4,32 @@ load File.expand_path('../../../../../lib/tasks/gitlab/helpers.rake', __dir__)
 load File.expand_path('../../../../lib/tasks/gitlab/indexer.rake', __dir__)
 
 require_relative '../../../../lib/gitlab/elastic/indexer' unless defined?(Gitlab::Elastic::Indexer)
+require_relative '../../../../../lib/gitlab/utils/override'
 
 module EE
   module TestEnv
-    def init(*args, &blk)
+    extend ::Gitlab::Utils::Override
+
+    override :setup_methods
+    def setup_methods
+      (super + [:setup_indexer]).freeze
+    end
+
+    override :post_init
+    def post_init
       super
 
-      setup_indexer
+      Settings.elasticsearch['indexer_path'] = indexer_bin_path
     end
 
     def setup_indexer
-      indexer_args = [indexer_path, indexer_url].compact
-
       component_timed_setup(
         'GitLab Elasticsearch Indexer',
         install_dir: indexer_path,
         version: indexer_version,
         task: "gitlab:indexer:install",
-        task_args: indexer_args
+        task_args: [indexer_path, indexer_url].compact
       )
-
-      Settings.elasticsearch['indexer_path'] = indexer_bin_path
     end
 
     def indexer_path
