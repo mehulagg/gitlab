@@ -856,6 +856,33 @@ class BuildMetadata
 end
 ```
 
+## Encrypted attributes
+
+Attributes using `attr_encrypted` should not be stored as `:text` in the
+database. Instead it's recommended to use `:binary`. This makes use of the
+`bytea` type in PostgreSQL and makes storage more efficient.
+
+Attributes stored in a binary column need to provide the `encode: false` option
+to `attr_encrypted`.
+
+```ruby
+class AddSecretToSomething < ActiveRecord::Migration[5.0]
+  def change
+    add_column :something, :encrypted_secret, :binary
+    add_column :something, :encrypted_secret_iv, :binary
+  end
+end
+```
+
+```ruby
+class Something < ApplicationRecord
+  attr_encrypted :secret,
+    mode: :per_attribute_iv,
+    key: Settings.attr_encrypted_db_key_base_32,
+    algorithm: 'aes-256-gcm'
+end
+```
+
 ## Testing
 
 See the [Testing Rails migrations](testing_guide/testing_migrations_guide.md) style guide.
