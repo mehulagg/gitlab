@@ -47,18 +47,22 @@ RSpec.describe ::EE::API::Entities::BillableMember do
   context 'with different group membership types' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:user_ids, :expected_value) do
-      :group_member_user_ids   | 'group_member'
-      :project_member_user_ids | 'project_member'
-      :shared_group_user_ids   | 'group_invite'
-      :shared_project_user_ids | 'project_invite'
+    where(:user_ids, :membership_type, :removable) do
+      :group_member_user_ids   | 'group_member'   | true
+      :project_member_user_ids | 'project_member' | true
+      :shared_group_user_ids   | 'group_invite'   | false
+      :shared_project_user_ids | 'project_invite' | false
     end
 
     with_them do
       let(:options) { super().merge(user_ids => [member.id]) }
 
-      it 'returns the expected value' do
-        expect(entity_representation[:membership_type]).to eq expected_value
+      it 'returns the expected membership_type value' do
+        expect(entity_representation[:membership_type]).to eq membership_type
+      end
+
+      it 'exposes the expected removable value' do
+        expect(entity_representation[:removable]).to eq removable
       end
     end
 
