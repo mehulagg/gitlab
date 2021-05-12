@@ -35,14 +35,8 @@ export default {
     state[FEATURE_FLAG_SCOPE] = (response.data.feature_flags || []).map(mapFlag);
 
     const paginationInfo = createPaginationInfo(state, response.headers);
-    state.count = {
-      ...state.count,
-      [FEATURE_FLAG_SCOPE]: paginationInfo?.total ?? state[FEATURE_FLAG_SCOPE].length,
-    };
-    state.pageInfo = {
-      ...state.pageInfo,
-      [FEATURE_FLAG_SCOPE]: paginationInfo,
-    };
+    state.count = paginationInfo?.total ?? state[FEATURE_FLAG_SCOPE].length;
+    state.pageInfo = paginationInfo;
   },
   [types.RECEIVE_FEATURE_FLAGS_ERROR](state) {
     state.isLoading = false;
