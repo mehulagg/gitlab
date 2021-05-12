@@ -72,6 +72,10 @@ export default {
       this.isLoading = true;
       this.$refs.modal.show();
     },
+    hide() {
+      this.error = null;
+      this.$refs.modal.hide();
+    },
     handleFrameLoaded() {
       this.isLoading = false;
       window.addEventListener('message', this.handleFrameMessages, true);
