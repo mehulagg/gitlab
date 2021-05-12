@@ -1683,21 +1683,23 @@ RSpec.describe User do
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:is_saas, :cc_present, :is_free, :is_trial, :free_ff_enabled, :trial_ff_enabled, :days_from_release, :result) do
+    where(:is_saas, :cc_present, :is_free, :is_trial, :free_ff_enabled, :trial_ff_enabled, :old_users_ff_enabled, :days_from_release, :result, :description) do
       # self-hosted
-      false | false | false | false | true  | true  | 0 | true  # paid plan
-      false | false | false | true  | true  | true  | 0 | true  # missing CC on trial plan
+      false | false | false | false | true  | true  | false | 0 | true | 'self-hosted paid plan'
+      false | false | false | true  | true  | true  | false | 0 | true | 'self-hosted missing CC on trial plan'
 
       # saas
-      true  | false | false | false | true  | true  | 0  | true  # missing CC on paid plan
-      true  | false | true  | false | true  | true  | 0  | false # missing CC on free plan
-      true  | false | true  | false | true  | true  | -1 | true  # missing CC on free plan but old user
-      true  | false | true  | false | false | true  | 0  | true  # missing CC on free plan - FF off
-      true  | false | false | true  | true  | true  | 0  | false # missing CC on trial plan
-      true  | false | false | true  | true  | true  | -1 | true  # missing CC on trial plan but old user
-      true  | false | false | true  | true  | false | 0  | true  # missing CC on trial plan - FF off
-      true  | true  | true  | false | true  | true  | 0  | true  # present CC on free plan
-      true  | true  | false | true  | true  | true  | 0  | true  # present CC on trial plan
+      true  | false | false | false | true  | true  | false | 0  | true  | 'missing CC on paid plan'
+      true  | false | true  | false | true  | true  | false | 0  | false | 'missing CC on free plan'
+      true  | false | true  | false | true  | true  | false | -1 | true  | 'missing CC on free plan but old user'
+      true  | false | true  | false | true  | true  | true  | -1 | false | 'missing CC on free plan but old user and FF enabled'
+      true  | false | true  | false | false | true  | false | 0  | true  | 'missing CC on free plan - FF off'
+      true  | false | false | true  | true  | true  | false | 0  | false | 'missing CC on trial plan'
+      true  | false | false | true  | true  | true  | false | -1 | true  | 'missing CC on trial plan but old user'
+      true  | false | false | true  | true  | true  | true  | -1 | false | 'missing CC on trial plan but old user and FF enabled'
+      true  | false | false | true  | true  | false | false | 0  | true  | 'missing CC on trial plan - FF off'
+      true  | true  | true  | false | true  | true  | false | 0  | true  | 'present CC on free plan'
+      true  | true  | false | true  | true  | true  | false | 0  | true  | 'present CC on trial plan'
     end
 
     with_them do
@@ -1709,10 +1711,13 @@ RSpec.describe User do
         allow(project.namespace).to receive(:trial?).and_return(is_trial)
         stub_feature_flags(
           ci_require_credit_card_on_free_plan: free_ff_enabled,
-          ci_require_credit_card_on_trial_plan: trial_ff_enabled)
+          ci_require_credit_card_on_trial_plan: trial_ff_enabled,
+          ci_require_credit_card_for_old_users: old_users_ff_enabled)
       end
 
-      it { is_expected.to eq(result) }
+      it description do
+        expect(subject).to eq(result)
+      end
     end
   end
 

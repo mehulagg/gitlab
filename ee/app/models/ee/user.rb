@@ -412,8 +412,9 @@ module EE
 
     private
 
-    def created_after_credit_card_release_day?
-      created_at >= ::Users::CreditCardValidation::RELEASE_DAY
+    def created_after_credit_card_release_day?(project)
+      created_at >= ::Users::CreditCardValidation::RELEASE_DAY ||
+        ::Feature.enabled?(:ci_require_credit_card_for_old_users, project, default_enabled: :yaml)
     end
 
     def has_valid_credit_card?
@@ -422,7 +423,7 @@ module EE
 
     def requires_credit_card_to_run_pipelines?(project)
       return false unless ::Gitlab.com?
-      return false unless created_after_credit_card_release_day?
+      return false unless created_after_credit_card_release_day?(project)
 
       root_namespace = project.root_namespace
       if root_namespace.free_plan?
