@@ -20,10 +20,9 @@ To access sign-in restriction settings:
 
 You can restrict the password authentication for web interface and Git over HTTP(S):
 
-- **Web interface**: When this feature is disabled, an [external authentication provider](../../../administration/auth/README.md) must be used.
+- **Web interface**: When this feature is disabled, the **Standard** sign-in tab is removed and an [external authentication provider](../../../administration/auth/README.md) must be used.
 - **Git over HTTP(S)**: When this feature is disabled, a [Personal Access Token](../../profile/personal_access_tokens.md) must be used to authenticate.
 
-Note: Restricting password authentication will remove the option to sign in using the **Standard** tab on the web interface sign-in page.
 
 ## Admin Mode
 
