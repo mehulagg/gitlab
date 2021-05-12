@@ -139,7 +139,7 @@ All jobs are permitted to fail by default. This means that if they fail it do no
 
 If you want to prevent vulnerabilities from being merged, you should do this by adding [Security Approvals in Merge Requests](#security-approvals-in-merge-requests) which prevents unknown, high or critical findings from being merged without an approval from a specific group of people that you choose.
 
-We do not recommend changing the job [`allow_failure` setting](../../ci/yaml/yaml/index.md#allow_failure) as that fails the entire pipeline.
+We do not recommend changing the job [`allow_failure` setting](../../ci/yaml/index.md#allow_failure) as that fails the entire pipeline.
 
 ### JSON Artifact
 
@@ -393,7 +393,7 @@ For more details about which findings or vulnerabilities you can view in each of
 - Change the status.
 - Create an issue.
 - Link it to an existing issue.
-- In some cases, [apply an automatic remediation for a vulnerability](#apply-an-automatic-remediation-for-a-vulnerability).
+- In some cases, [apply an automatic remediation for a vulnerability](vulnerabilities/index.md#remediate-a-vulnerability-automatically).
 
 ## Troubleshooting
 
