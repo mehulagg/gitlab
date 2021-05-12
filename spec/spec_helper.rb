@@ -241,10 +241,6 @@ RSpec.configure do |config|
       # (ie. ApplicationSetting#auto_devops_enabled)
       stub_feature_flags(force_autodevops_on_by_default: false)
 
-      # Merge request widget GraphQL requests are disabled in the tests
-      # for now whilst we migrate as much as we can over the GraphQL
-      # stub_feature_flags(merge_request_widget_graphql: false)
-
       # Using FortiAuthenticator as OTP provider is disabled by default in
       # tests, until we introduce it in user settings
       stub_feature_flags(forti_authenticator: false)

@@ -20,7 +20,6 @@ import { secondsToMilliseconds } from '~/lib/utils/datetime_utility';
 import simplePoll from '~/lib/utils/simple_poll';
 import { __ } from '~/locale';
 import SmartInterval from '~/smart_interval';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import MergeRequest from '../../../merge_request';
 import { AUTO_MERGE_STRATEGIES, DANGER, INFO, WARNING } from '../../constants';
 import eventHub from '../../event_hub';
@@ -46,9 +45,6 @@ export default {
   apollo: {
     state: {
       query: readyToMergeQuery,
-      skip() {
-        return !this.glFeatures.mergeRequestWidgetGraphql;
-      },
       variables() {
         return this.mergeRequestQueryVariables;
       },
@@ -103,14 +99,14 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [readyToMergeMixin, glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
+  mixins: [readyToMergeMixin, mergeRequestQueryVariablesMixin],
   props: {
     mr: { type: Object, required: true },
     service: { type: Object, required: true },
   },
   data() {
     return {
-      loading: this.glFeatures.mergeRequestWidgetGraphql,
+      loading: true,
       state: {},
       removeSourceBranch: this.mr.shouldRemoveSourceBranch,
       isMakingRequest: false,
@@ -123,7 +119,7 @@ export default {
   },
   computed: {
     stateData() {
-      return this.glFeatures.mergeRequestWidgetGraphql ? this.state : this.mr;
+      return this.state;
     },
     hasCI() {
       return this.stateData.hasCI || this.stateData.hasCi;
@@ -132,81 +128,39 @@ export default {
       return !isEmpty(this.stateData.availableAutoMergeStrategies);
     },
     pipeline() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.headPipeline;
-      }
-
-      return this.mr.pipeline;
+      return this.state.headPipeline;
     },
     isPipelineFailed() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return ['FAILED', 'CANCELED'].indexOf(this.pipeline?.status) !== -1;
-      }
-
-      return this.mr.isPipelineFailed;
+      return ['FAILED', 'CANCELED'].indexOf(this.pipeline?.status) !== -1;
     },
     isMergeAllowed() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.mergeable || false;
-      }
-
-      return this.mr.isMergeAllowed;
+      return this.state.mergeable || false;
     },
     canRemoveSourceBranch() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.userPermissions.removeSourceBranch;
-      }
-
-      return this.mr.canRemoveSourceBranch;
+      return this.state.userPermissions.removeSourceBranch;
     },
     commits() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.commitsWithoutMergeCommits.nodes;
-      }
-
-      return this.mr.commits;
+      return this.state.commitsWithoutMergeCommits.nodes;
     },
     commitsCount() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.commitCount || 0;
-      }
-
-      return this.mr.commitsCount;
+      return this.state.commitCount || 0;
     },
     preferredAutoMergeStrategy() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return MergeRequestStore.getPreferredAutoMergeStrategy(
-          this.state.availableAutoMergeStrategies,
-        );
-      }
-
-      return this.mr.preferredAutoMergeStrategy;
+      return MergeRequestStore.getPreferredAutoMergeStrategy(
+        this.state.availableAutoMergeStrategies,
+      );
     },
     isSHAMismatch() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.mr.sha !== this.state.diffHeadSha;
-      }
-
-      return this.mr.isSHAMismatch;
+      return this.mr.sha !== this.state.diffHeadSha;
     },
     squashIsSelected() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.squashReadOnly ? this.state.squashOnMerge : this.state.squash;
-      }
-
-      return this.mr.squashIsSelected;
+      return this.squashReadOnly ? this.state.squashOnMerge : this.state.squash;
     },
     isPipelineActive() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.pipeline?.active || false;
-      }
-
-      return this.mr.isPipelineActive;
+      return this.pipeline?.active || false;
     },
     status() {
-      const ciStatus = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.pipeline?.status.toLowerCase()
-        : this.mr.ciStatus;
+      const ciStatus = this.pipeline?.status.toLowerCase();
 
       if ((this.hasCI && !ciStatus) || this.hasPipelineMustSucceedConflict) {
         return PIPELINE_FAILED_STATE;
@@ -281,25 +235,17 @@ export default {
       return this.squashBeforeMerge && this.shouldShowSquashBeforeMerge;
     },
     shouldShowMergeEdit() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return !this.state.mergeRequestsFfOnlyEnabled;
-      }
-
-      return !this.mr.ffOnlyEnabled;
+      return !this.state.mergeRequestsFfOnlyEnabled;
     },
     shaMismatchLink() {
       return this.mr.mergeRequestDiffsPath;
     },
   },
   mounted() {
-    if (this.glFeatures.mergeRequestWidgetGraphql) {
-      eventHub.$on('ApprovalUpdated', this.updateGraphqlState);
-    }
+    eventHub.$on('ApprovalUpdated', this.updateGraphqlState);
   },
   beforeDestroy() {
-    if (this.glFeatures.mergeRequestWidgetGraphql) {
-      eventHub.$off('ApprovalUpdated', this.updateGraphqlState);
-    }
+    eventHub.$off('ApprovalUpdated', this.updateGraphqlState);
 
     if (this.pollingInterval) {
       this.pollingInterval.destroy();
@@ -321,21 +267,15 @@ export default {
       return this.$apollo.queries.state.refetch();
     },
     updateMergeCommitMessage(includeDescription) {
-      const commitMessage = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.state.defaultMergeCommitMessage
-        : this.mr.commitMessage;
-      const commitMessageWithDescription = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.state.defaultMergeCommitMessageWithDescription
-        : this.mr.commitMessageWithDescription;
+      const commitMessage = this.state.defaultMergeCommitMessage;
+      const commitMessageWithDescription = this.state.defaultMergeCommitMessageWithDescription;
       this.commitMessage = includeDescription ? commitMessageWithDescription : commitMessage;
     },
     handleMergeButtonClick(useAutoMerge, mergeImmediately = false) {
       if (mergeImmediately) {
         this.isMergingImmediately = true;
       }
-      const latestSha = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.state.diffHeadSha
-        : this.mr.latestSHA;
+      const latestSha = this.state.diffHeadSha;
 
       const options = {
         sha: latestSha || this.mr.sha,
@@ -369,9 +309,7 @@ export default {
             eventHub.$emit('FailedToMerge', data.merge_error);
           }
 
-          if (this.glFeatures.mergeRequestWidgetGraphql) {
-            this.updateGraphqlState();
-          }
+          this.updateGraphqlState();
         })
         .catch(() => {
           this.isMakingRequest = false;

@@ -3,7 +3,6 @@
 import { GlButton, GlSkeletonLoader } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { __, sprintf } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { deprecatedCreateFlash as Flash } from '../../../flash';
 import simplePoll from '../../../lib/utils/simple_poll';
 import eventHub from '../../event_hub';
@@ -16,9 +15,6 @@ export default {
   apollo: {
     state: {
       query: rebaseQuery,
-      skip() {
-        return !this.glFeatures.mergeRequestWidgetGraphql;
-      },
       variables() {
         return this.mergeRequestQueryVariables;
       },
@@ -30,7 +26,7 @@ export default {
     GlButton,
     GlSkeletonLoader,
   },
-  mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
+  mixins: [mergeRequestQueryVariablesMixin],
   props: {
     mr: {
       type: Object,
@@ -49,35 +45,11 @@ export default {
     };
   },
   computed: {
-    isLoading() {
-      return this.glFeatures.mergeRequestWidgetGraphql && this.$apollo.queries.state.loading;
-    },
-    rebaseInProgress() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.rebaseInProgress;
-      }
-
-      return this.mr.rebaseInProgress;
-    },
-    canPushToSourceBranch() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.userPermissions.pushToSourceBranch;
-      }
-
-      return this.mr.canPushToSourceBranch;
-    },
-    targetBranch() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.targetBranch;
-      }
-
-      return this.mr.targetBranch;
-    },
     status() {
-      if (this.rebaseInProgress || this.isMakingRequest) {
+      if (this.state.rebaseInProgress || this.isMakingRequest) {
         return 'loading';
       }
-      if (!this.canPushToSourceBranch && !this.rebaseInProgress) {
+      if (!this.state.userPermissions.pushToSourceBranch && !this.state.rebaseInProgress) {
         return 'warning';
       }
       return 'success';
@@ -91,7 +63,7 @@ export default {
           'Fast-forward merge is not possible. Rebase the source branch onto %{targetBranch} to allow this merge request to be merged.',
         ),
         {
-          targetBranch: `<span class="label-branch">${escape(this.targetBranch)}</span>`,
+          targetBranch: `<span class="label-branch">${escape(this.state.targetBranch)}</span>`,
         },
         false,
       );
@@ -147,7 +119,7 @@ export default {
 </script>
 <template>
   <div class="mr-widget-body media">
-    <div v-if="isLoading" class="gl-w-full mr-conflict-loader">
+    <div v-if="$apollo.queries.state.loading" class="gl-w-full mr-conflict-loader">
       <gl-skeleton-loader :width="334" :height="30">
         <rect x="0" y="3" width="24" height="24" rx="4" />
         <rect x="32" y="5" width="302" height="20" rx="4" />
@@ -158,19 +130,21 @@ export default {
 
       <div class="rebase-state-find-class-convention media media-body space-children">
         <span
-          v-if="rebaseInProgress || isMakingRequest"
+          v-if="state.rebaseInProgress || isMakingRequest"
           class="gl-font-weight-bold"
           data-testid="rebase-message"
           >{{ __('Rebase in progress') }}</span
         >
         <span
-          v-if="!rebaseInProgress && !canPushToSourceBranch"
+          v-if="!state.rebaseInProgress && !state.userPermissions.pushToSourceBranch"
           class="gl-font-weight-bold gl-ml-0!"
           data-testid="rebase-message"
           v-html="fastForwardMergeText"
         ></span>
         <div
-          v-if="!rebaseInProgress && canPushToSourceBranch && !isMakingRequest"
+          v-if="
+            !state.rebaseInProgress && state.userPermissions.pushToSourceBranch && !isMakingRequest
+          "
           class="accept-merge-holder clearfix js-toggle-container accept-action media space-children"
         >
           <gl-button

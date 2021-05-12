@@ -93,7 +93,7 @@ export default {
       query: getStateQuery,
       manual: true,
       skip() {
-        return !this.mr || !window.gon?.features?.mergeRequestWidgetGraphql;
+        return !this.mr;
       },
       variables() {
         return this.mergeRequestQueryVariables;
@@ -125,13 +125,6 @@ export default {
     };
   },
   computed: {
-    isLoaded() {
-      if (window.gon?.features?.mergeRequestWidgetGraphql) {
-        return !this.loading;
-      }
-
-      return this.mr;
-    },
     shouldRenderApprovals() {
       return this.mr.state !== 'nothingToMerge';
     },
@@ -280,9 +273,7 @@ export default {
       return new MRWidgetService(this.getServiceEndpoints(store));
     },
     checkStatus(cb, isRebased) {
-      if (window.gon?.features?.mergeRequestWidgetGraphql) {
-        this.$apollo.queries.state.refetch();
-      }
+      this.$apollo.queries.state.refetch();
 
       return this.service
         .checkStatus()
@@ -431,7 +422,7 @@ export default {
 };
 </script>
 <template>
-  <div v-if="isLoaded" class="mr-state-widget gl-mt-3">
+  <div v-if="!loading" class="mr-state-widget gl-mt-3">
     <mr-widget-header :mr="mr" />
     <mr-widget-suggest-pipeline
       v-if="shouldSuggestPipelines"

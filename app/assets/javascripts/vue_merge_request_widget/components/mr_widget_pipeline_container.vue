@@ -85,13 +85,7 @@ export default {
       );
     },
     preferredAutoMergeStrategy() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return MergeRequestStore.getPreferredAutoMergeStrategy(
-          this.mr.availableAutoMergeStrategies,
-        );
-      }
-
-      return this.mr.preferredAutoMergeStrategy;
+      return MergeRequestStore.getPreferredAutoMergeStrategy(this.mr.availableAutoMergeStrategies);
     },
   },
 };

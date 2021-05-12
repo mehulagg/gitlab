@@ -129,24 +129,6 @@ export default class MergeRequestStore {
     this.mergeCommitPath = data.merged_commit_path;
     this.canPushToSourceBranch = data.can_push_to_source_branch;
 
-    if (!window.gon?.features?.mergeRequestWidgetGraphql) {
-      this.autoMergeEnabled = Boolean(data.auto_merge_enabled);
-      this.canBeMerged = data.can_be_merged || false;
-      this.canMerge = Boolean(data.merge_path);
-      this.commitsCount = data.commits_count;
-      this.branchMissing = data.branch_missing;
-      this.hasConflicts = data.has_conflicts;
-      this.hasMergeableDiscussionsState = data.mergeable_discussions_state === false;
-      this.isPipelineFailed = this.ciStatus === 'failed' || this.ciStatus === 'canceled';
-      this.mergeError = data.merge_error;
-      this.mergeStatus = data.merge_status;
-      this.onlyAllowMergeIfPipelineSucceeds = data.only_allow_merge_if_pipeline_succeeds || false;
-      this.projectArchived = data.project_archived;
-      this.isSHAMismatch = this.sha !== data.diff_head_sha;
-      this.shouldBeRebased = Boolean(data.should_be_rebased);
-      this.workInProgress = data.work_in_progress;
-    }
-
     const currentUser = data.current_user;
 
     this.cherryPickInForkPath = currentUser.cherry_pick_in_fork_path;

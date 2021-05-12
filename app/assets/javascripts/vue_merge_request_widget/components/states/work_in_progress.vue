@@ -4,9 +4,6 @@ import { produce } from 'immer';
 import $ from 'jquery';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
-import MergeRequest from '~/merge_request';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import eventHub from '../../event_hub';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import getStateQuery from '../../queries/get_state.query.graphql';
 import workInProgressQuery from '../../queries/states/work_in_progress.query.graphql';
@@ -19,13 +16,10 @@ export default {
     StatusIcon,
     GlButton,
   },
-  mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
+  mixins: [mergeRequestQueryVariablesMixin],
   apollo: {
     userPermissions: {
       query: workInProgressQuery,
-      skip() {
-        return !this.glFeatures.mergeRequestWidgetGraphql;
-      },
       variables() {
         return this.mergeRequestQueryVariables;
       },
@@ -41,15 +35,6 @@ export default {
       userPermissions: {},
       isMakingRequest: false,
     };
-  },
-  computed: {
-    canUpdate() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.userPermissions.updateMergeRequest;
-      }
-
-      return Boolean(this.mr.removeWIPPath);
-    },
   },
   methods: {
     removeWipMutation() {
@@ -130,31 +115,13 @@ export default {
           this.isMakingRequest = false;
         });
     },
-    handleRemoveWIP() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        this.removeWipMutation();
-      } else {
-        this.isMakingRequest = true;
-        this.service
-          .removeWIP()
-          .then((res) => res.data)
-          .then((data) => {
-            eventHub.$emit('UpdateWidgetData', data);
-            MergeRequest.toggleDraftStatus(this.mr.title, true);
-          })
-          .catch(() => {
-            this.isMakingRequest = false;
-            createFlash(__('Something went wrong. Please try again.'));
-          });
-      }
-    },
   },
 };
 </script>
 
 <template>
   <div class="mr-widget-body media">
-    <status-icon :show-disabled-button="canUpdate" status="warning" />
+    <status-icon :show-disabled-button="userPermissions.updateMergeRequest" status="warning" />
     <div class="media-body">
       <div class="gl-ml-3 float-left">
         <span class="gl-font-weight-bold">
@@ -165,12 +132,12 @@ export default {
         }}</span>
       </div>
       <gl-button
-        v-if="canUpdate"
+        v-if="userPermissions.updateMergeRequest"
         size="small"
         :disabled="isMakingRequest"
         :loading="isMakingRequest"
         class="js-remove-wip gl-ml-3"
-        @click="handleRemoveWIP"
+        @click="removeWipMutation"
       >
         {{ s__('mrWidget|Mark as ready') }}
       </gl-button>

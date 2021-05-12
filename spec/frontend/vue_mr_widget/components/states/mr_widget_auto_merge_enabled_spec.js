@@ -8,7 +8,6 @@ import eventHub from '~/vue_merge_request_widget/event_hub';
 import MRWidgetService from '~/vue_merge_request_widget/services/mr_widget_service';
 
 let wrapper;
-let mergeRequestWidgetGraphqlEnabled = false;
 
 function convertPropsToGraphqlState(props) {
   return {
@@ -29,11 +28,7 @@ function convertPropsToGraphqlState(props) {
 }
 
 function factory(propsData, stateOverride = {}) {
-  let state = {};
-
-  if (mergeRequestWidgetGraphqlEnabled) {
-    state = { ...convertPropsToGraphqlState(propsData), ...stateOverride };
-  }
+  const state = { ...convertPropsToGraphqlState(propsData), ...stateOverride };
 
   wrapper = extendedWrapper(
     shallowMount(autoMergeEnabledComponent, {
@@ -44,7 +39,6 @@ function factory(propsData, stateOverride = {}) {
       data() {
         return { state };
       },
-      provide: { glFeatures: { mergeRequestWidgetGraphql: mergeRequestWidgetGraphqlEnabled } },
       mocks: {
         $apollo: {
           queries: {
@@ -92,254 +86,242 @@ describe('MRWidgetAutoMergeEnabled', () => {
     wrapper = null;
   });
 
-  [true, false].forEach((mergeRequestWidgetGraphql) => {
-    describe(`when graphql is ${mergeRequestWidgetGraphql ? 'enabled' : 'disabled'}`, () => {
-      beforeEach(() => {
-        mergeRequestWidgetGraphqlEnabled = mergeRequestWidgetGraphql;
+  describe('computed', () => {
+    describe('canRemoveSourceBranch', () => {
+      it('should return true when user is able to remove source branch', () => {
+        factory({
+          ...defaultMrProps(),
+        });
+
+        expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
       });
 
-      describe('computed', () => {
-        describe('canRemoveSourceBranch', () => {
-          it('should return true when user is able to remove source branch', () => {
-            factory({
-              ...defaultMrProps(),
-            });
-
-            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
+      it.each`
+        mergeUserId | currentUserId
+        ${2}        | ${1}
+        ${1}        | ${2}
+      `(
+        'should return false when user id is not the same with who set the MWPS',
+        ({ mergeUserId, currentUserId }) => {
+          factory({
+            ...defaultMrProps(),
+            mergeUserId,
+            currentUserId,
           });
 
-          it.each`
-            mergeUserId | currentUserId
-            ${2}        | ${1}
-            ${1}        | ${2}
-          `(
-            'should return false when user id is not the same with who set the MWPS',
-            ({ mergeUserId, currentUserId }) => {
-              factory({
-                ...defaultMrProps(),
-                mergeUserId,
-                currentUserId,
-              });
+          expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
+        },
+      );
 
-              expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
+      it('should not find "Delete" button when shouldRemoveSourceBranch set to true', () => {
+        factory({
+          ...defaultMrProps(),
+          shouldRemoveSourceBranch: true,
+        });
+
+        expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
+      });
+
+      it('should find "Delete" button when shouldRemoveSourceBranch overrides state.forceRemoveSourceBranch', () => {
+        factory(
+          {
+            ...defaultMrProps(),
+            shouldRemoveSourceBranch: false,
+          },
+          {
+            forceRemoveSourceBranch: true,
+          },
+        );
+
+        expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
+      });
+
+      it('should find "Delete" button when shouldRemoveSourceBranch set to false', () => {
+        factory({
+          ...defaultMrProps(),
+          shouldRemoveSourceBranch: false,
+        });
+
+        expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
+      });
+
+      it('should return false if user is not able to remove the source branch', () => {
+        factory({
+          ...defaultMrProps(),
+          canRemoveSourceBranch: false,
+        });
+
+        expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
+      });
+    });
+
+    describe('statusTextBeforeAuthor', () => {
+      it('should return "Set by" if the MWPS is selected', () => {
+        factory({
+          ...defaultMrProps(),
+          autoMergeStrategy: MWPS_MERGE_STRATEGY,
+        });
+
+        expect(wrapper.findByTestId('beforeStatusText').text()).toBe('Set by');
+      });
+    });
+
+    describe('statusTextAfterAuthor', () => {
+      it('should return "to be merged automatically..." if MWPS is selected', () => {
+        factory({
+          ...defaultMrProps(),
+          autoMergeStrategy: MWPS_MERGE_STRATEGY,
+        });
+
+        expect(wrapper.findByTestId('afterStatusText').text()).toBe(
+          'to be merged automatically when the pipeline succeeds',
+        );
+      });
+    });
+
+    describe('cancelButtonText', () => {
+      it('should return "Cancel automatic merge" if MWPS is selected', () => {
+        factory({
+          ...defaultMrProps(),
+          autoMergeStrategy: MWPS_MERGE_STRATEGY,
+        });
+
+        expect(wrapper.findByTestId('cancelAutomaticMergeButton').text()).toBe(
+          'Cancel automatic merge',
+        );
+      });
+    });
+  });
+
+  describe('methods', () => {
+    describe('cancelAutomaticMerge', () => {
+      it('should set flag and call service then tell main component to update the widget with data', (done) => {
+        factory({
+          ...defaultMrProps(),
+        });
+        const mrObj = {
+          is_new_mr_data: true,
+        };
+        jest.spyOn(wrapper.vm.service, 'cancelAutomaticMerge').mockReturnValue(
+          new Promise((resolve) => {
+            resolve({
+              data: mrObj,
+            });
+          }),
+        );
+
+        wrapper.vm.cancelAutomaticMerge();
+        setImmediate(() => {
+          expect(wrapper.vm.isCancellingAutoMerge).toBeTruthy();
+          expect(eventHub.$emit).toHaveBeenCalledWith('MRWidgetUpdateRequested');
+          done();
+        });
+      });
+    });
+
+    describe('removeSourceBranch', () => {
+      it('should set flag and call service then request main component to update the widget', (done) => {
+        factory({
+          ...defaultMrProps(),
+        });
+        jest.spyOn(wrapper.vm.service, 'merge').mockReturnValue(
+          Promise.resolve({
+            data: {
+              status: MWPS_MERGE_STRATEGY,
             },
-          );
+          }),
+        );
 
-          it('should not find "Delete" button when shouldRemoveSourceBranch set to true', () => {
-            factory({
-              ...defaultMrProps(),
-              shouldRemoveSourceBranch: true,
-            });
-
-            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
+        wrapper.vm.removeSourceBranch();
+        setImmediate(() => {
+          expect(eventHub.$emit).toHaveBeenCalledWith('MRWidgetUpdateRequested');
+          expect(wrapper.vm.service.merge).toHaveBeenCalledWith({
+            sha,
+            auto_merge_strategy: MWPS_MERGE_STRATEGY,
+            should_remove_source_branch: true,
           });
-
-          it('should find "Delete" button when shouldRemoveSourceBranch overrides state.forceRemoveSourceBranch', () => {
-            factory(
-              {
-                ...defaultMrProps(),
-                shouldRemoveSourceBranch: false,
-              },
-              {
-                forceRemoveSourceBranch: true,
-              },
-            );
-
-            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
-          });
-
-          it('should find "Delete" button when shouldRemoveSourceBranch set to false', () => {
-            factory({
-              ...defaultMrProps(),
-              shouldRemoveSourceBranch: false,
-            });
-
-            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(true);
-          });
-
-          it('should return false if user is not able to remove the source branch', () => {
-            factory({
-              ...defaultMrProps(),
-              canRemoveSourceBranch: false,
-            });
-
-            expect(wrapper.findByTestId('removeSourceBranchButton').exists()).toBe(false);
-          });
-        });
-
-        describe('statusTextBeforeAuthor', () => {
-          it('should return "Set by" if the MWPS is selected', () => {
-            factory({
-              ...defaultMrProps(),
-              autoMergeStrategy: MWPS_MERGE_STRATEGY,
-            });
-
-            expect(wrapper.findByTestId('beforeStatusText').text()).toBe('Set by');
-          });
-        });
-
-        describe('statusTextAfterAuthor', () => {
-          it('should return "to be merged automatically..." if MWPS is selected', () => {
-            factory({
-              ...defaultMrProps(),
-              autoMergeStrategy: MWPS_MERGE_STRATEGY,
-            });
-
-            expect(wrapper.findByTestId('afterStatusText').text()).toBe(
-              'to be merged automatically when the pipeline succeeds',
-            );
-          });
-        });
-
-        describe('cancelButtonText', () => {
-          it('should return "Cancel automatic merge" if MWPS is selected', () => {
-            factory({
-              ...defaultMrProps(),
-              autoMergeStrategy: MWPS_MERGE_STRATEGY,
-            });
-
-            expect(wrapper.findByTestId('cancelAutomaticMergeButton').text()).toBe(
-              'Cancel automatic merge',
-            );
-          });
+          done();
         });
       });
+    });
+  });
 
-      describe('methods', () => {
-        describe('cancelAutomaticMerge', () => {
-          it('should set flag and call service then tell main component to update the widget with data', (done) => {
-            factory({
-              ...defaultMrProps(),
-            });
-            const mrObj = {
-              is_new_mr_data: true,
-            };
-            jest.spyOn(wrapper.vm.service, 'cancelAutomaticMerge').mockReturnValue(
-              new Promise((resolve) => {
-                resolve({
-                  data: mrObj,
-                });
-              }),
-            );
-
-            wrapper.vm.cancelAutomaticMerge();
-            setImmediate(() => {
-              expect(wrapper.vm.isCancellingAutoMerge).toBeTruthy();
-              if (mergeRequestWidgetGraphql) {
-                expect(eventHub.$emit).toHaveBeenCalledWith('MRWidgetUpdateRequested');
-              } else {
-                expect(eventHub.$emit).toHaveBeenCalledWith('UpdateWidgetData', mrObj);
-              }
-              done();
-            });
-          });
-        });
-
-        describe('removeSourceBranch', () => {
-          it('should set flag and call service then request main component to update the widget', (done) => {
-            factory({
-              ...defaultMrProps(),
-            });
-            jest.spyOn(wrapper.vm.service, 'merge').mockReturnValue(
-              Promise.resolve({
-                data: {
-                  status: MWPS_MERGE_STRATEGY,
-                },
-              }),
-            );
-
-            wrapper.vm.removeSourceBranch();
-            setImmediate(() => {
-              expect(eventHub.$emit).toHaveBeenCalledWith('MRWidgetUpdateRequested');
-              expect(wrapper.vm.service.merge).toHaveBeenCalledWith({
-                sha,
-                auto_merge_strategy: MWPS_MERGE_STRATEGY,
-                should_remove_source_branch: true,
-              });
-              done();
-            });
-          });
-        });
+  describe('template', () => {
+    it('should have correct elements', () => {
+      factory({
+        ...defaultMrProps(),
       });
 
-      describe('template', () => {
-        it('should have correct elements', () => {
-          factory({
-            ...defaultMrProps(),
-          });
+      expect(wrapper.element).toMatchSnapshot();
+    });
 
-          expect(wrapper.element).toMatchSnapshot();
-        });
-
-        it('should disable cancel auto merge button when the action is in progress', async () => {
-          factory({
-            ...defaultMrProps(),
-          });
-          wrapper.setData({
-            isCancellingAutoMerge: true,
-          });
-
-          await nextTick();
-
-          expect(wrapper.find('.js-cancel-auto-merge').attributes('disabled')).toBe('disabled');
-        });
-
-        it('should show source branch will be deleted text when it source branch set to remove', () => {
-          factory({
-            ...defaultMrProps(),
-            shouldRemoveSourceBranch: true,
-          });
-
-          const normalizedText = wrapper.text().replace(/\s+/g, ' ');
-
-          expect(normalizedText).toContain('The source branch will be deleted');
-          expect(normalizedText).not.toContain('The source branch will not be deleted');
-        });
-
-        it('should not show delete source branch button when user not able to delete source branch', () => {
-          factory({
-            ...defaultMrProps(),
-            currentUserId: 4,
-          });
-
-          expect(wrapper.find('.js-remove-source-branch').exists()).toBe(false);
-        });
-
-        it('should disable delete source branch button when the action is in progress', async () => {
-          factory({
-            ...defaultMrProps(),
-          });
-          wrapper.setData({
-            isRemovingSourceBranch: true,
-          });
-
-          await nextTick();
-
-          expect(wrapper.find('.js-remove-source-branch').attributes('disabled')).toBe('disabled');
-        });
-
-        it('should render the status text as "...to merged automatically" if MWPS is selected', () => {
-          factory({
-            ...defaultMrProps(),
-            autoMergeStrategy: MWPS_MERGE_STRATEGY,
-          });
-
-          const statusText = trimText(wrapper.find('.js-status-text-after-author').text());
-
-          expect(statusText).toBe('to be merged automatically when the pipeline succeeds');
-        });
-
-        it('should render the cancel button as "Cancel automatic merge" if MWPS is selected', () => {
-          factory({
-            ...defaultMrProps(),
-            autoMergeStrategy: MWPS_MERGE_STRATEGY,
-          });
-
-          const cancelButtonText = trimText(wrapper.find('.js-cancel-auto-merge').text());
-
-          expect(cancelButtonText).toBe('Cancel automatic merge');
-        });
+    it('should disable cancel auto merge button when the action is in progress', async () => {
+      factory({
+        ...defaultMrProps(),
       });
+      wrapper.setData({
+        isCancellingAutoMerge: true,
+      });
+
+      await nextTick();
+
+      expect(wrapper.find('.js-cancel-auto-merge').attributes('disabled')).toBe('disabled');
+    });
+
+    it('should show source branch will be deleted text when it source branch set to remove', () => {
+      factory({
+        ...defaultMrProps(),
+        shouldRemoveSourceBranch: true,
+      });
+
+      const normalizedText = wrapper.text().replace(/\s+/g, ' ');
+
+      expect(normalizedText).toContain('The source branch will be deleted');
+      expect(normalizedText).not.toContain('The source branch will not be deleted');
+    });
+
+    it('should not show delete source branch button when user not able to delete source branch', () => {
+      factory({
+        ...defaultMrProps(),
+        currentUserId: 4,
+      });
+
+      expect(wrapper.find('.js-remove-source-branch').exists()).toBe(false);
+    });
+
+    it('should disable delete source branch button when the action is in progress', async () => {
+      factory({
+        ...defaultMrProps(),
+      });
+      wrapper.setData({
+        isRemovingSourceBranch: true,
+      });
+
+      await nextTick();
+
+      expect(wrapper.find('.js-remove-source-branch').attributes('disabled')).toBe('disabled');
+    });
+
+    it('should render the status text as "...to merged automatically" if MWPS is selected', () => {
+      factory({
+        ...defaultMrProps(),
+        autoMergeStrategy: MWPS_MERGE_STRATEGY,
+      });
+
+      const statusText = trimText(wrapper.find('.js-status-text-after-author').text());
+
+      expect(statusText).toBe('to be merged automatically when the pipeline succeeds');
+    });
+
+    it('should render the cancel button as "Cancel automatic merge" if MWPS is selected', () => {
+      factory({
+        ...defaultMrProps(),
+        autoMergeStrategy: MWPS_MERGE_STRATEGY,
+      });
+
+      const cancelButtonText = trimText(wrapper.find('.js-cancel-auto-merge').text());
+
+      expect(cancelButtonText).toBe('Cancel automatic merge');
     });
   });
 });

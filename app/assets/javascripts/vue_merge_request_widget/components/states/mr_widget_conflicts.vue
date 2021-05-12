@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlModalDirective, GlSkeletonLoader } from '@gitlab/ui';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import mergeRequestQueryVariablesMixin from '../../mixins/merge_request_query_variables';
 import userPermissionsQuery from '../../queries/permissions.query.graphql';
 import conflictsStateQuery from '../../queries/states/conflicts.query.graphql';
@@ -16,23 +15,17 @@ export default {
   directives: {
     GlModalDirective,
   },
-  mixins: [glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
+  mixins: [mergeRequestQueryVariablesMixin],
   apollo: {
     userPermissions: {
       query: userPermissionsQuery,
-      skip() {
-        return !this.glFeatures.mergeRequestWidgetGraphql;
-      },
       variables() {
         return this.mergeRequestQueryVariables;
       },
       update: (data) => data.project.mergeRequest.userPermissions,
     },
-    stateData: {
+    state: {
       query: conflictsStateQuery,
-      skip() {
-        return !this.glFeatures.mergeRequestWidgetGraphql;
-      },
       variables() {
         return this.mergeRequestQueryVariables;
       },
@@ -51,48 +44,18 @@ export default {
   data() {
     return {
       userPermissions: {},
-      stateData: {},
+      state: {},
     };
   },
   computed: {
     isLoading() {
-      return (
-        this.glFeatures.mergeRequestWidgetGraphql &&
-        this.$apollo.queries.userPermissions.loading &&
-        this.$apollo.queries.stateData.loading
-      );
-    },
-    canPushToSourceBranch() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.userPermissions.pushToSourceBranch;
-      }
-
-      return this.mr.canPushToSourceBranch;
-    },
-    canMerge() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.userPermissions.canMerge;
-      }
-
-      return this.mr.canMerge;
-    },
-    shouldBeRebased() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.stateData.shouldBeRebased;
-      }
-
-      return this.mr.shouldBeRebased;
-    },
-    sourceBranchProtected() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.stateData.sourceBranchProtected;
-      }
-
-      return this.mr.sourceBranchProtected;
+      return this.$apollo.queries.userPermissions.loading && this.$apollo.queries.state.loading;
     },
     showResolveButton() {
       return (
-        this.mr.conflictResolutionPath && this.canPushToSourceBranch && !this.sourceBranchProtected
+        this.mr.conflictResolutionPath &&
+        this.userPermissions.pushToSourceBranch &&
+        !this.state.sourceBranchProtected
       );
     },
   },
@@ -110,7 +73,7 @@ export default {
       </gl-skeleton-loader>
     </div>
     <div v-else class="media-body space-children gl-display-flex gl-align-items-center">
-      <span v-if="shouldBeRebased" class="bold">
+      <span v-if="state.shouldBeRebased" class="bold">
         {{
           s__(`mrWidget|Fast-forward merge is not possible.
   To merge this request, first rebase locally.`)
@@ -118,8 +81,9 @@ export default {
       </span>
       <template v-else>
         <span class="bold">
-          {{ s__('mrWidget|There are merge conflicts') }}<span v-if="!canMerge">.</span>
-          <span v-if="!canMerge">
+          {{ s__('mrWidget|There are merge conflicts')
+          }}<span v-if="!userPermissions.canMerge">.</span>
+          <span v-if="!userPermissions.canMerge">
             {{
               s__(`mrWidget|Resolve these conflicts or ask someone
               with write access to this repository to merge it locally`)
@@ -134,7 +98,7 @@ export default {
           {{ s__('mrWidget|Resolve conflicts') }}
         </gl-button>
         <gl-button
-          v-if="canMerge"
+          v-if="userPermissions.canMerge"
           v-gl-modal-directive="'modal-merge-info'"
           data-testid="merge-locally-button"
         >

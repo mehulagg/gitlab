@@ -8,27 +8,27 @@ import {
 export default {
   computed: {
     statusTextBeforeAuthor() {
-      if (this.autoMergeStrategy === MT_MERGE_STRATEGY) {
+      if (this.state.autoMergeStrategy === MT_MERGE_STRATEGY) {
         return s__('mrWidget|Added to the merge train by');
       }
 
       return s__('mrWidget|Set by');
     },
     statusTextAfterAuthor() {
-      const { mergeTrainsCount } = this.glFeatures.mergeRequestWidgetGraphql ? this.state : this.mr;
+      const { mergeTrainsCount } = this.state;
 
-      if (this.autoMergeStrategy === MTWPS_MERGE_STRATEGY && mergeTrainsCount === 0) {
+      if (this.state.autoMergeStrategy === MTWPS_MERGE_STRATEGY && mergeTrainsCount === 0) {
         return s__('mrWidget|to start a merge train when the pipeline succeeds');
-      } else if (this.autoMergeStrategy === MTWPS_MERGE_STRATEGY && mergeTrainsCount !== 0) {
+      } else if (this.state.autoMergeStrategy === MTWPS_MERGE_STRATEGY && mergeTrainsCount !== 0) {
         return s__('mrWidget|to be added to the merge train when the pipeline succeeds');
-      } else if (this.autoMergeStrategy === MWPS_MERGE_STRATEGY) {
+      } else if (this.state.autoMergeStrategy === MWPS_MERGE_STRATEGY) {
         return s__('mrWidget|to be merged automatically when the pipeline succeeds');
       }
 
       return '';
     },
     cancelButtonText() {
-      if (this.autoMergeStrategy === MT_MERGE_STRATEGY) {
+      if (this.state.autoMergeStrategy === MT_MERGE_STRATEGY) {
         return s__('mrWidget|Remove from merge train');
       }
 

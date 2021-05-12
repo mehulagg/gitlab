@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
 class MergeRequestPollCachedWidgetEntity < IssuableEntity
-  expose :auto_merge_enabled
   expose :state
   expose :merged_commit_sha
   expose :short_merged_commit_sha
-  expose :merge_error
-  expose :public_merge_status, as: :merge_status
   expose :merge_user_id
   expose :source_branch
   expose :source_project_id
@@ -16,14 +13,9 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
   expose :squash
   expose :rebase_in_progress?, as: :rebase_in_progress
   expose :default_squash_commit_message
-  expose :commits_count
   expose :merge_ongoing?, as: :merge_ongoing
-  expose :work_in_progress?, as: :work_in_progress
-  expose :cannot_be_merged?, as: :has_conflicts
-  expose :can_be_merged?, as: :can_be_merged
   expose :remove_source_branch?, as: :remove_source_branch
   expose :source_branch_exists?, as: :source_branch_exists
-  expose :branch_missing?, as: :branch_missing
 
   expose :commits_without_merge_commits, using: MergeRequestWidgetCommitEntity do |merge_request|
     merge_request.recent_commits.without_merge_commits

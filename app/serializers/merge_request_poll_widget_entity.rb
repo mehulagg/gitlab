@@ -11,7 +11,6 @@ class MergeRequestPollWidgetEntity < Grape::Entity
     merge_request.source_project.present? && ProtectedBranch.protected?(merge_request.source_project, merge_request.source_branch)
   end
   expose :allow_collaboration
-  expose :should_be_rebased?, as: :should_be_rebased
   expose :ff_only_enabled do |merge_request|
     merge_request.project.merge_requests_ff_only_enabled
   end
@@ -38,22 +37,6 @@ class MergeRequestPollWidgetEntity < Grape::Entity
 
   expose :default_merge_commit_message_with_description do |merge_request|
     merge_request.default_merge_commit_message(include_description: true)
-  end
-
-  # Booleans
-  expose :mergeable_discussions_state?, as: :mergeable_discussions_state do |merge_request|
-    # This avoids calling MergeRequest#mergeable_discussions_state without
-    # considering the state of the MR first. If a MR isn't mergeable, we can
-    # safely short-circuit it.
-    if merge_request.mergeable_state?(skip_ci_check: true, skip_discussions_check: true)
-      merge_request.mergeable_discussions_state?
-    else
-      false
-    end
-  end
-
-  expose :project_archived do |merge_request|
-    merge_request.project.archived?
   end
 
   expose :only_allow_merge_if_pipeline_succeeds do |merge_request|

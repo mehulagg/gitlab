@@ -4,7 +4,6 @@ import autoMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/auto_merg
 import autoMergeEnabledQuery from 'ee_else_ce/vue_merge_request_widget/queries/states/auto_merge_enabled.query.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { deprecatedCreateFlash as Flash } from '../../../flash';
 import { AUTO_MERGE_STRATEGIES } from '../../constants';
 import eventHub from '../../event_hub';
@@ -17,9 +16,6 @@ export default {
   apollo: {
     state: {
       query: autoMergeEnabledQuery,
-      skip() {
-        return !this.glFeatures.mergeRequestWidgetGraphql;
-      },
       variables() {
         return this.mergeRequestQueryVariables;
       },
@@ -32,7 +28,7 @@ export default {
     GlLoadingIcon,
     GlSkeletonLoader,
   },
-  mixins: [autoMergeMixin, glFeatureFlagMixin(), mergeRequestQueryVariablesMixin],
+  mixins: [autoMergeMixin, mergeRequestQueryVariablesMixin],
   props: {
     mr: {
       type: Object,
@@ -54,40 +50,17 @@ export default {
   },
   computed: {
     loading() {
-      return (
-        this.glFeatures.mergeRequestWidgetGraphql &&
-        this.$apollo.queries.state.loading &&
-        Object.keys(this.state).length === 0
-      );
-    },
-    mergeUser() {
-      if (this.glFeatures.mergeRequestWidgetGraphql) {
-        return this.state.mergeUser;
-      }
-
-      return this.mr.setToAutoMergeBy;
-    },
-    targetBranch() {
-      return (this.glFeatures.mergeRequestWidgetGraphql ? this.state : this.mr).targetBranch;
+      return this.$apollo.queries.state.loading && Object.keys(this.state).length === 0;
     },
     shouldRemoveSourceBranch() {
-      if (!this.glFeatures.mergeRequestWidgetGraphql) return this.mr.shouldRemoveSourceBranch;
-
       if (!this.state.shouldRemoveSourceBranch) return false;
 
       return this.state.shouldRemoveSourceBranch || this.state.forceRemoveSourceBranch;
     },
-    autoMergeStrategy() {
-      return (this.glFeatures.mergeRequestWidgetGraphql ? this.state : this.mr).autoMergeStrategy;
-    },
     canRemoveSourceBranch() {
       const { currentUserId } = this.mr;
-      const mergeUserId = this.glFeatures.mergeRequestWidgetGraphql
-        ? getIdFromGraphQLId(this.state.mergeUser?.id)
-        : this.mr.mergeUserId;
-      const canRemoveSourceBranch = this.glFeatures.mergeRequestWidgetGraphql
-        ? this.state.userPermissions.removeSourceBranch
-        : this.mr.canRemoveSourceBranch;
+      const mergeUserId = getIdFromGraphQLId(this.state.mergeUser?.id);
+      const canRemoveSourceBranch = this.state.userPermissions.removeSourceBranch;
 
       return (
         !this.shouldRemoveSourceBranch && canRemoveSourceBranch && mergeUserId === currentUserId
@@ -100,12 +73,8 @@ export default {
       this.service
         .cancelAutomaticMerge()
         .then((res) => res.data)
-        .then((data) => {
-          if (this.glFeatures.mergeRequestWidgetGraphql) {
-            eventHub.$emit('MRWidgetUpdateRequested');
-          } else {
-            eventHub.$emit('UpdateWidgetData', data);
-          }
+        .then(() => {
+          eventHub.$emit('MRWidgetUpdateRequested');
         })
         .catch(() => {
           this.isCancellingAutoMerge = false;
@@ -115,7 +84,7 @@ export default {
     removeSourceBranch() {
       const options = {
         sha: this.mr.sha,
-        auto_merge_strategy: this.autoMergeStrategy,
+        auto_merge_strategy: this.state.autoMergeStrategy,
         should_remove_source_branch: true,
       };
 
@@ -129,9 +98,7 @@ export default {
           }
         })
         .then(() => {
-          if (this.glFeatures.mergeRequestWidgetGraphql) {
-            this.$apollo.queries.state.refetch();
-          }
+          this.$apollo.queries.state.refetch();
         })
         .catch(() => {
           this.isRemovingSourceBranch = false;
@@ -158,7 +125,7 @@ export default {
             <span class="js-status-text-before-author" data-testid="beforeStatusText">{{
               statusTextBeforeAuthor
             }}</span>
-            <mr-widget-author :author="mergeUser" />
+            <mr-widget-author :author="state.mergeUser" />
             <span class="js-status-text-after-author" data-testid="afterStatusText">{{
               statusTextAfterAuthor
             }}</span>
@@ -179,7 +146,7 @@ export default {
         <section class="mr-info-list">
           <p>
             {{ s__('mrWidget|The changes will be merged into') }}
-            <a :href="mr.targetBranchPath" class="label-branch">{{ targetBranch }}</a>
+            <a :href="mr.targetBranchPath" class="label-branch">{{ state.targetBranch }}</a>
           </p>
           <p v-if="shouldRemoveSourceBranch">
             {{ s__('mrWidget|The source branch will be deleted') }}
