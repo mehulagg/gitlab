@@ -109,8 +109,8 @@ managing different apps in the same cluster.
 WARNING:
 This is a _beta_ feature, and some applications might miss features to provide full integration with GitLab.
 Also, this is now DEPRECATED and won't be getting anymore updates. If you're using feature we recommend that
-you [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). To facilitate integration of of such applications we're
-[working on a Project Template](https://gitlab.com/gitlab-org/gitlab/-/issues/327908).
+you [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). To facilitate integration of 
+such applications we're [working on a Project Template](https://gitlab.com/gitlab-org/gitlab/-/issues/327908).
 
 This primary method for installing applications to clusters allows users to install GitLab-managed
 applications using GitLab CI/CD. It also allows customization of the
