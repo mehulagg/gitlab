@@ -47,9 +47,7 @@ module Clusters
       private
 
       def has_at_least_one_log_enabled?
-        if !waf_log_enabled && !cilium_log_enabled
-          errors.add(:base, _("At least one logging option is required to be enabled"))
-        end
+        errors.add(:base, _("At least one logging option is required to be enabled")) unless cilium_log_enabled
       end
 
       def content_values
@@ -112,7 +110,6 @@ module Clusters
 
       def path_to_logs
         path = []
-        path << "/var/log/containers/*#{Ingress::MODSECURITY_LOG_CONTAINER_NAME}*.log" if waf_log_enabled
         path << "/var/log/containers/*#{CILIUM_CONTAINER_NAME}*.log" if cilium_log_enabled
         path.join(',')
       end
