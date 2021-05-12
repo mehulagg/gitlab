@@ -38594,7 +38594,7 @@ msgstr ""
 msgid "mrWidget|Are you adding technical debt or code vulnerabilities?"
 msgstr ""
 
-msgid "mrWidget|Cancel automatic merge"
+msgid "mrWidget|Cancel"
 msgstr ""
 
 msgid "mrWidget|Check out branch"
