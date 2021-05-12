@@ -10,15 +10,14 @@ const IFRAME_QUERY = Object.freeze({
 // 350 is the mininum required height to get all iframe inputs visible
 const IFRAME_MINIMUM_HEIGHT = 350;
 const i18n = Object.freeze({
-  title: s__('Billings|Verify User Account'),
+  title: s__('Billings|Validate user account'),
   description: s__(`
-Billings|To discourage and reduce abuse GitLab will require some users to provide a valid credit card to use free pipeline minutes on GitLab.com.
-To use free pipeline minutes, you will need to validate your account with a credit card.
-%{strongStart}GitLab will not add permanent charges to your credit card as we will only use it for validation.%{strongEnd}`),
+Billings|To use free pipeline minutes, you'll need to validate your account with a credit card. This is required to discourage and reduce abuse on GitLab infrastructure.
+%{strongStart}GitLab will not charge or store your credit card, it will only be used for validation.%{strongEnd}`),
   iframeNotSupported: __('Your browser does not support iFrames'),
   actions: {
     primary: {
-      text: s__('Billings|Verify account'),
+      text: s__('Billings|Validate account'),
     },
   },
 });

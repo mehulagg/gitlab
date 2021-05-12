@@ -11,11 +11,11 @@ const i18n = {
     ),
   },
   dangerAlert: {
-    title: s__('Billings|User Verification Required'),
-    text: s__(`Billings|As a user on a free or trial namespace, you'll need to verify your account with a credit card to run pipelines. This is required to help prevent
-cryptomining attacks on GitLab infrastructure.
+    title: s__('Billings|User validation required'),
+    text: s__(`Billings|To use free pipeline minutes, you'll need to validate your account with a credit card.
+    This is required to discourage and reduce abuse on GitLab infrastructure.
 %{strongStart}GitLab will not charge or store your credit card, it will only be used for validation.%{strongEnd}`),
-    primaryButtonText: s__('Billings|Verify account'),
+    primaryButtonText: s__('Billings|Validate account'),
   },
 };
 
