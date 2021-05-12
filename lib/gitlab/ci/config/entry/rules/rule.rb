@@ -28,7 +28,7 @@ module Gitlab
 
             with_options allow_nil: true do
               validates :if, expression: true
-              validates :changes, :exists, array_of_strings: true, length: { maximum: 50 }
+              validates :changes, :exists, array_of_strings: true, length: { maximum: 256 }
               validates :when, allowed_values: { in: ALLOWABLE_WHEN }
               validates :allow_failure, boolean: true
             end
