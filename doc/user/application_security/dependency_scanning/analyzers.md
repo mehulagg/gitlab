@@ -72,7 +72,7 @@ variables:
 
 ### Disabling default analyzers
 
-Setting `DS_EXCLUDED_ANALYZERS` to list of the official analyzers, disables them.
+Setting `DS_EXCLUDED_ANALYZERS` to a list of the official analyzers, disables them.
 In `.gitlab-ci.yml` define:
 
 ```yaml
