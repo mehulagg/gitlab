@@ -1,3 +1,4 @@
+# Dummy: EOC Firedrills
 # frozen_string_literal: true
 
 require 'pathname'
