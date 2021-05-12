@@ -332,4 +332,4 @@ Dangerfile @gl-quality/eng-prod
 /workhorse/ @jacobvosmaer-gitlab @nick.thomas @nolith @patrickbajao
 
 [Application Security]
-/lib/gitlab/content_security_policy/config_loader.rb @gitlab-com/gl-security/appsec
+/lib/gitlab/content_security_policy/ @gitlab-com/gl-security/appsec
