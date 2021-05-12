@@ -21,6 +21,8 @@ module Spam
         spamcheck_result, spamcheck_attribs = spamcheck_verdict
       end
 
+      histogram.observe( {}, external_spam_check_round_trip_time )
+
       # assign result to a var and log it before reassigning to nil when monitorMode is true
       original_spamcheck_result = spamcheck_result
 
@@ -94,6 +96,10 @@ module Spam
 
     def logger
       @logger ||= Gitlab::AppJsonLogger.build
+    end
+
+    def histogram
+      @histogram ||= Gitlab::Metrics.histogram(:spamcheck_latency_seconds, 'Latency to the Spamcheck service')
     end
   end
 end
