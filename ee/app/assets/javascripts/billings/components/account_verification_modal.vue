@@ -87,10 +87,12 @@ export default {
 
       if (event.data.success) {
         this.$emit('success');
-      } else {
+      } else if (parseInt(event.data.code, 10) > 6) {
+        // 0-6 error codes mean client-side validation error,
+        // no needs to reload the iframe and emit the failure event
         this.error = event.data.msg;
         this.$refs.zuora.src = this.iframeSrc;
-        this.$emit('error', this.error);
+        this.$emit('failure', { msg: this.error });
       }
 
       this.isLoading = false;
