@@ -134,6 +134,12 @@ namespace :gitlab do
       Rake::Task['gitlab:db:dump_custom_structure'].invoke
     end
 
+    # Inform Rake that custom tasks should be run every time rake db:schema:dump is run
+    Rake::Task['db:schema:dump'].enhance do
+      Rake::Task['gitlab:db:clean_structure_sql'].invoke
+      Rake::Task['gitlab:db:dump_custom_structure'].invoke
+    end
+
     # Inform Rake that custom tasks should be run every time rake db:structure:load is run
     Rake::Task['db:structure:load'].enhance do
       Rake::Task['gitlab:db:load_custom_structure'].invoke
