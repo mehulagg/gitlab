@@ -2723,11 +2723,8 @@ class Project < ApplicationRecord
     Gitlab::SafeRequestStore.fetch("project-#{id}:branch-#{branch_name}:user-#{user.id}:branch_allows_collaboration") do
       next false if empty_repo?
 
-      # Issue for N+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/49322
-      Gitlab::GitalyClient.allow_n_plus_1_calls do
-        merge_requests_allowing_collaboration(branch_name).any? do |merge_request|
-          merge_request.can_be_merged_by?(user, skip_collaboration_check: true)
-        end
+      merge_requests_allowing_collaboration(branch_name).any? do |merge_request|
+        merge_request.can_be_merged_by?(user, skip_collaboration_check: true)
       end
     end
   end
