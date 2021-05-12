@@ -53,7 +53,7 @@ module Ci
         { name: 'Rails', logo: image_path('illustrations/logos/rails.svg') },
         { name: 'Julia', logo: image_path('illustrations/logos/julia.svg') },
         { name: 'Laravel', logo: image_path('illustrations/logos/laravel.svg') },
-        { name: 'Latex', logo: image_path('illustrations/logos/latex.svg') },
+        { name: 'LaTeX', logo: image_path('illustrations/logos/latex.svg') },
         { name: 'Maven', logo: image_path('illustrations/logos/maven.svg') },
         { name: 'Mono', logo: image_path('illustrations/logos/mono.svg') },
         { name: 'Nodejs', logo: image_path('illustrations/logos/node_js.svg') },
