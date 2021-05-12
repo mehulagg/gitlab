@@ -398,7 +398,8 @@ To configure the `s3` storage driver in Omnibus:
        'secretkey' => 's3-secret-key-for-access-key',
        'bucket' => 'your-s3-bucket',
        'region' => 'your-s3-region',
-       'regionendpoint' => 'your-s3-regionendpoint'
+       'regionendpoint' => 'your-s3-regionendpoint',
+       'path_style' => true # set to false for AWS S3
      }
    }
    ```
@@ -419,6 +420,7 @@ To configure the `s3` storage driver in Omnibus:
 
    - `regionendpoint` is only required when configuring an S3 compatible service such as MinIO. It takes a URL such as `http://127.0.0.1:9000`.
    - `your-s3-bucket` should be the name of a bucket that exists, and can't include subdirectories.
+   - `path_style` should be set to true to use `host/bucket_name/object` style paths instead of `bucket_name.host/object`. Leave as false for AWS S3.
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
