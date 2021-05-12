@@ -35,7 +35,7 @@ module Gitlab
             skip_confirmation:          true
           }
 
-          Users::CreateService.new(nil, user_params).execute(skip_authorization: true)
+          Users::AuthorizedCreateService.new(nil, user_params).execute
         end
 
         def create_smartcard_identity_for(user)

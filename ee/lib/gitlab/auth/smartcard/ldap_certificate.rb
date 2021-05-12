@@ -43,7 +43,7 @@ module Gitlab
             skip_confirmation:          true
           }
 
-          Users::CreateService.new(nil, user_params).execute(skip_authorization: true)
+          Users::AuthorizedCreateService.new(nil, user_params).execute
         end
 
         def create_ldap_certificate_identity_for(user)

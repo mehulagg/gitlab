@@ -69,7 +69,7 @@ module EE
         end
 
         def build_user
-          ::Users::BuildService.new(nil, user_params).execute(skip_authorization: true)
+          ::Users::AuthorizedBuildService.new(nil, user_params).execute
         end
 
         def build_scim_identity
