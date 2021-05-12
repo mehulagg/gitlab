@@ -9,7 +9,4 @@ export const canChangeEnvironment = ({
   isLoadingEnvironments,
   isLoadingNetworkPolicyStatistics,
   environments,
-}) =>
-  !isLoadingEnvironments &&
-  !isLoadingNetworkPolicyStatistics &&
-  environments.length > 0;
+}) => !isLoadingEnvironments && !isLoadingNetworkPolicyStatistics && environments.length > 0;

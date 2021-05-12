@@ -7316,6 +7316,9 @@ msgstr ""
 msgid "ClusterIntegration|Knative domain name was updated successfully."
 msgstr ""
 
+msgid "ClusterIntegration|Knative extends Kubernetes to provide a set of middleware components that are essential to build modern, source-centric, and container-based applications that can run anywhere: on premises, in the cloud, or even in a third-party data center."
+msgstr ""
+
 msgid "ClusterIntegration|Kubernetes cluster is being created..."
 msgstr ""
 
@@ -7788,6 +7791,9 @@ msgid "ClusterIntegration|You are about to update %{appTitle} on your cluster."
 msgstr ""
 
 msgid "ClusterIntegration|You must grant access to your organization’s AWS resources in order to create a new EKS cluster. To grant access, create a provision role using the account and external ID below and provide us the ARN."
+msgstr ""
+
+msgid "ClusterIntegration|You must have an RBAC-enabled cluster to install Knative."
 msgstr ""
 
 msgid "ClusterIntegration|You must specify a domain before you can install Knative."

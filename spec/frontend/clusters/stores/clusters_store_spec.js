@@ -138,7 +138,7 @@ describe('Clusters Store', () => {
             uninstallable: false,
             uninstallSuccessful: false,
             uninstallFailed: false,
-            validationError: null
+            validationError: null,
           },
           jupyter: {
             title: 'JupyterHub',

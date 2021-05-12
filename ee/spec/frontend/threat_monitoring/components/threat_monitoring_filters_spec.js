@@ -72,11 +72,7 @@ describe('ThreatMonitoringFilters component', () => {
     ${'there are no environments'}     | ${false}              | ${false}                         | ${[]}
   `(
     'given $context',
-    ({
-      isLoadingEnvironments,
-      isLoadingNetworkPolicyStatistics,
-      environments,
-    }) => {
+    ({ isLoadingEnvironments, isLoadingNetworkPolicyStatistics, environments }) => {
       beforeEach(() => {
         factory({
           environments,
