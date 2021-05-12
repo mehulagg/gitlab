@@ -58,7 +58,7 @@ the official analyzers.
 
 ### Disabling specific analyzers
 
-You can select the official analyzers you don't want to run. Here's how to disable
+You can select the default analyzers you don't want to run. For example, here's how to disable
 `bundler-audit` and `gemnasium` analyzers.
 In `.gitlab-ci.yml` define:
 
@@ -70,7 +70,7 @@ variables:
   DS_EXCLUDED_ANALYZERS: "bundler-audit, gemnasium"
 ```
 
-### Disabling default analyzers
+### Disabling all default analyzers
 
 Setting `DS_EXCLUDED_ANALYZERS` to list of the official analyzers, disables them.
 In `.gitlab-ci.yml` define:
@@ -83,7 +83,7 @@ variables:
   DS_EXCLUDED_ANALYZERS: "gemnasium, gemansium-maven, gemnasium-python, bundler-audit, retire.js"
 ```
 
-That's needed when one totally relies on [custom analyzers](#custom-analyzers).
+This is used when one totally relies on [custom analyzers](#custom-analyzers).
 
 ## Custom analyzers
 
