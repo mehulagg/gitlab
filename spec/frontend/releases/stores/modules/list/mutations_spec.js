@@ -15,14 +15,12 @@ const graphqlReleasesResponse = getJSONFixture(
 
 describe('Releases Store Mutations', () => {
   let stateCopy;
-  let restPageInfo;
-  let graphQlPageInfo;
+  let pageInfo;
   let releases;
 
   beforeEach(() => {
     stateCopy = createState({});
-    restPageInfo = parseIntPagination(pageInfoHeadersWithoutPagination);
-    graphQlPageInfo = convertAllReleasesGraphQLResponse(graphqlReleasesResponse).paginationInfo;
+    pageInfo = convertAllReleasesGraphQLResponse(graphqlReleasesResponse).paginationInfo;
     releases = convertObjectPropsToCamelCase(originalReleases, { deep: true });
   });
 
@@ -37,8 +35,7 @@ describe('Releases Store Mutations', () => {
   describe('RECEIVE_RELEASES_SUCCESS', () => {
     beforeEach(() => {
       mutations[types.RECEIVE_RELEASES_SUCCESS](stateCopy, {
-        restPageInfo,
-        graphQlPageInfo,
+        pageInfo,
         data: releases,
       });
     });
@@ -55,20 +52,15 @@ describe('Releases Store Mutations', () => {
       expect(stateCopy.releases).toEqual(releases);
     });
 
-    it('sets restPageInfo', () => {
-      expect(stateCopy.restPageInfo).toEqual(restPageInfo);
-    });
-
-    it('sets graphQlPageInfo', () => {
-      expect(stateCopy.graphQlPageInfo).toEqual(graphQlPageInfo);
+    it('sets pageInfo', () => {
+      expect(stateCopy.pageInfo).toEqual(pageInfo);
     });
   });
 
   describe('RECEIVE_RELEASES_ERROR', () => {
     it('resets data', () => {
       mutations[types.RECEIVE_RELEASES_SUCCESS](stateCopy, {
-        restPageInfo,
-        graphQlPageInfo,
+        pageInfo,
         data: releases,
       });
 
@@ -76,8 +68,7 @@ describe('Releases Store Mutations', () => {
 
       expect(stateCopy.isLoading).toEqual(false);
       expect(stateCopy.releases).toEqual([]);
-      expect(stateCopy.restPageInfo).toEqual({});
-      expect(stateCopy.graphQlPageInfo).toEqual({});
+      expect(stateCopy.pageInfo).toEqual({});
     });
   });
 
