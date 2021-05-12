@@ -148,18 +148,18 @@ Follow these examples to form your new issue URL with prefilled fields.
 > - Editing health status [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218395) in GitLab 13.2.
 > - Editing iteration [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196806) in GitLab 13.9.
 
-Users with permission level of [Reporter or higher](../permissions.md) can manage issues.
+Users with permission level of [Reporter or higher](../../permissions.md) can manage issues.
 
 When bulk editing issues in a project, you can edit the following attributes:
 
 - Status (open/closed)
 - Assignee
-- [Epic](../group/epics/index.md)
-- [Milestone](milestones/index.md)
-- [Labels](labels.md)
+- [Epic](../../group/epics/index.md)
+- [Milestone](../milestones/index.md)
+- [Labels](../labels.md)
 - [Health status](#health-status)
 - Notification subscription
-- [Iteration](../group/iterations/index.md)
+- [Iteration](../../group/iterations/index.md)
 
 To update multiple project issues at the same time:
 

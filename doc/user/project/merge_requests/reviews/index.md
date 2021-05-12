@@ -33,7 +33,7 @@ the results, or select a merge request to begin a review.
 
 ## Bulk edit merge requests at the project level
 
-Users with permission level of [Developer or higher](../permissions.md) can manage merge requests.
+Users with permission level of [Developer or higher](../../../permissions.md) can manage merge requests.
 
 When bulk editing merge requests in a project, you can edit the following attributes:
 
