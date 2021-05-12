@@ -133,7 +133,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules::Rule do
       it { is_expected.not_to be_valid }
 
       it 'returns errors' do
-        expect(subject.errors).to include(/changes is too long \(maximum is 50 characters\)/)
+        expect(subject.errors).to include(/changes is too long \(maximum is 256 characters\)/)
       end
     end
 
@@ -169,7 +169,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules::Rule do
       it { is_expected.not_to be_valid }
 
       it 'returns errors' do
-        expect(subject.errors).to include(/exists is too long \(maximum is 50 characters\)/)
+        expect(subject.errors).to include(/exists is too long \(maximum is 256 characters\)/)
       end
     end
 
