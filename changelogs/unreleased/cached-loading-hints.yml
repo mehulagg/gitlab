@@ -1,0 +1,5 @@
+---
+title: Cache loading_hints partial on short TTL
+merge_request: 61609
+author:
+type: performance
