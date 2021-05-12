@@ -188,9 +188,7 @@ After about 10 minutes, your cluster is ready to go. You can now proceed
 to install some [pre-defined applications](index.md#installing-applications).
 
 NOTE:
-You must add your AWS external ID to the
-[IAM Role in the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html#cli-configure-role-xaccount)
-to manage your cluster using `kubectl`.
+If you have [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)  `kubectl`  and you would like to manage your cluster using `kubectl`, you must add your AWS external ID in the AWS configuration. For more information on how to configure AWS CLI, please check [using an IAM role in the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html#cli-configure-role-xaccount).
 
 ### Cluster creation flow
 
