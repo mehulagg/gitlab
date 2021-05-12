@@ -7,8 +7,8 @@ const IFRAME_QUERY = Object.freeze({
   enable_submit: false,
   user_id: null,
 });
-// 450 is the mininum required height to get all iframe inputs visible
-const IFRAME_MINIMUM_HEIGHT = 450;
+// 350 is the mininum required height to get all iframe inputs visible
+const IFRAME_MINIMUM_HEIGHT = 350;
 const i18n = Object.freeze({
   title: s__('Billings|Verify User Account'),
   description: s__(`
