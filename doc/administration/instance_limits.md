@@ -531,7 +531,22 @@ See [Environment Dashboard](../ci/environments/environments_dashboard.md#adding-
 Pods and Deployments. However, data over 10 MB for a certain environment read from
 Kubernetes won't be shown.
 
-## Merge request reports
+## Merge requests
+
+### Diff limits
+
+GitLab has limits around:
+
+- The patch size for a single file. [This is configurable on self-managed instance](../user/admin_area/diff_limits.md).
+- The total size of all the diffs for a merge request.
+
+Two limits apply for the number of changed files, changed lines, and the cumulative
+size of the changes displayed.  The lower limits will result in further diffs being
+collapsed, and the higher limits prevents any more changes being rendered.
+
+[Read more about these limits in the development documentation](../development/diffs.md#diff-limits).
+
+### Merge request reports size limit
 
 Reports that go over the 20 MB limit won't be loaded. Affected reports:
 
