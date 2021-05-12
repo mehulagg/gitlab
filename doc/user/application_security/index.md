@@ -121,25 +121,25 @@ While you cannot directly customize Auto DevOps, you can [include the Auto DevOp
 
 ### Secure jobs in your pipeline
 
-If you add the security scanning jobs as described in [Security scanning with Auto DevOps](#security-scanning-with-auto-devops) or [Security scanning without Auto DevOps](#security-scanning-without-auto-devops) to your `.gitlab-ci.yml` each added [security scanning tool](#security-scanning-tools) will behave as described below.
+If you add the security scanning jobs as described in [Security scanning with Auto DevOps](#security-scanning-with-auto-devops) or [Security scanning without Auto DevOps](#security-scanning-without-auto-devops) to your `.gitlab-ci.yml` each added [security scanning tool](#security-scanning-tools) behave as described below.
 
 For each compatible analyzer, a job is created in the `test`, `dast` or `fuzz` stage of your pipeline and runs on the next new branch pipeline. Features such as the [Security Dashboard](security_dashboard/index.md), [Vulnerability Report](vulnerability_report/index.md), and [Dependency List](dependency_list/index.md) that rely on this scan data only show results from pipelines on the default branch. Please note that one tool may use many analyzers.
 
-Our language and package manager specific jobs will attempt to assess which analyzer(s) they should run for your project so that you can do less configuration. 
+Our language and package manager specific jobs attempt to assess which analyzer(s) they should run for your project so that you can do less configuration.
 
-If you want to override this to increase the pipeline speed you may choose which analyzers to exclude if you know they are not applicable (languages or package managers not contained within your project) by following variable customization directions for that specific tool.
+If you want to override this to increase the pipeline speed you may choose which analyzers to exclude if you know they are not applicable (languages or package managers not contained in your project) by following variable customization directions for that specific tool.
 
 ### Secure job status
 
 Jobs pass if they are able to complete a scan. A _pass_ result does NOT indicate if they did, or did not, identify findings. The only exception is coverage fuzzing, which fails if it identifies findings.
 
-Jobs fail if they are unable to complete a scan. You can view the pipeline logs for more information. 
+Jobs fail if they are unable to complete a scan. You can view the pipeline logs for more information.
 
-All jobs are permitted to fail by default. This means that if they fail it will not fail the pipeline. 
+All jobs are permitted to fail by default. This means that if they fail it do not fail the pipeline.
 
-If you want to prevent vulnerabilities from being merged, you should do this by adding [Security Approvals in Merge Requests](#security-approvals-in-merge-requests) which prevents unknown, high or critical findings from being merged without an approval from a specific group of people that you choose. 
+If you want to prevent vulnerabilities from being merged, you should do this by adding [Security Approvals in Merge Requests](#security-approvals-in-merge-requests) which prevents unknown, high or critical findings from being merged without an approval from a specific group of people that you choose.
 
-We do not recommend changing the job [`allow_failure` setting](https://docs.gitlab.com/ee/ci/yaml/#allow_failure) as that fails the entire pipeline.
+We do not recommend changing the job [`allow_failure` setting](../../ci/yaml/yaml/index.md#allow_failure) as that fails the entire pipeline.
 
 ### JSON Artifact
 
@@ -162,9 +162,9 @@ reports are available to download. To download a report, click on the
 
 ### Ultimate
 
-A merge request contains a security widget which displays a summary of the NEW results. New results are determined by comparing the current findings against existing findings in the target (default) branch (if there are prior findings). 
+A merge request contains a security widget which displays a summary of the NEW results. New results are determined by comparing the current findings against existing findings in the target (default) branch (if there are prior findings).
 
-We recommended you run a scan of the `default` branch before enabling feature branch scans for your developers. Otherwise, there will be no base for comparison and all feature branches display the full scan results in the merge request security widget.
+We recommended you run a scan of the `default` branch before enabling feature branch scans for your developers. Otherwise, there is no base for comparison and all feature branches display the full scan results in the merge request security widget.
 
 The merge request security widget displays only a subset of the vulnerabilities in the generated JSON artifact because it contains both NEW and EXISTING findings.
 
@@ -178,7 +178,7 @@ For more details, see [security tab](security_dashboard/index.md#pipeline-securi
 
 ## View security scan information in the Security Dashboard
 
-The Security Dashboard show vulnerabilities present in a project's default branch. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default will show up after the daily data refresh.
+The Security Dashboard show vulnerabilities present in a project's default branch. Data is updated every 24 hours. Vulnerability count updates resulting from any feature branches introducing new vulnerabilities that are merged to default are included after the daily data refresh.
 
 For more details, see [Security Dashboard](security_dashboard/index.md).
 
@@ -333,7 +333,7 @@ You can do it quickly by following the hyperlink given to run a new pipeline.
 
 ## DAST On-Demand Scans
 
-If you don’t want scans running in your normal DevOps process you can use on-demand scans instead. For more details, see [on-demand scans](dast/index.md#on-demand-scans). Currently, this is only available for DAST. If you run an on-demand scan against the default branch, it will be reported as a “successful pipeline” and these results are included in the security dashboard and vulnerability report.
+If you don’t want scans running in your normal DevOps process you can use on-demand scans instead. For more details, see [on-demand scans](dast/index.md#on-demand-scans). This feature is only available for DAST. If you run an on-demand scan against the default branch, it is reported as a "successful pipeline" and these results are included in the security dashboard and vulnerability report.
 
 ## Security report validation
 
@@ -374,10 +374,12 @@ For example, the configuration below enables validation for only the `sast` job:
   .secret-analyzer:
     stage: security-scan
   ```
+
 ## Interacting with findings and vulnerabilities
 
-There are a variety of locations and ways to interact with the results of the security scanning tools;
-- [Scan information in merge requests](#view-security-scan-information-in-merge-requests) 
+There are a variety of locations and ways to interact with the results of the security scanning tools:
+
+- [Scan information in merge requests](#view-security-scan-information-in-merge-requests)
 - [Project Security Dashboard](security_dashboard/#project-security-dashboard)
 - [Security pipeline tab](security_dashboard/#pipeline-security)
 - [Group Security Dashboard](security_dashboard/#group-security-dashboard)
@@ -386,7 +388,7 @@ There are a variety of locations and ways to interact with the results of the se
 - [Vulnerability Pages](vulnerabilities/index.md)
 - [Dependency List](dependency_list/index.md)
 
-For more details about which findings or vulnerabilities you can view in each of those locations, select the respective link. Each page details the ways in which you can interact with the findings and vulnerabilities. As an example, in most cases findings will start out as “detected” status. You have the option to:
+For more details about which findings or vulnerabilities you can view in each of those locations, select the respective link. Each page details the ways in which you can interact with the findings and vulnerabilities. As an example, in most cases findings start out as _detected_ status. You have the option to:
 
 - Change the status.
 - Create an issue.
