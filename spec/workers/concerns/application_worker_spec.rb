@@ -188,7 +188,7 @@ RSpec.describe ApplicationWorker do
           skip_feature_flags_yaml_validation
           skip_default_enabled_yaml_check
 
-          worker.data_consistency_delay(3.seconds, feature_flag: :test_feature_flag)
+          worker.data_consistency_delay_interval(3.seconds, feature_flag: :test_feature_flag)
         end
 
         it 'does not call perform_in' do
@@ -200,21 +200,47 @@ RSpec.describe ApplicationWorker do
 
       context 'when data_consistency_delay is not set' do
         it 'delays scheduling a job by calling perform_in with default delay' do
-          expect(worker).to receive(:perform_in).with(worker::DATA_CONSISTENCY_DELAY.seconds, 123)
+          expect(worker).to receive(:perform_in).with(worker::DEFAULT_DELAY_INTERVAL.seconds, 123)
 
           worker.perform_async(123)
         end
       end
 
-      context 'when data_consistency_delay is provided' do
-        before do
-          worker.data_consistency_delay(3.seconds)
+      context 'when data_consistency_delay_interval is provided' do
+        context 'when data_consistency_daly is false' do
+          before do
+            worker.data_consistency_delay_interval(false)
+          end
+
+          it 'does not call perform_in' do
+            expect(worker).not_to receive(:perform_in)
+
+            worker.perform_async
+          end
         end
 
-        it 'delays scheduling a job by calling perform_in with correct params' do
-          expect(worker).to receive(:perform_in).with(3.seconds, 123)
+        context 'when data_consistency_daly is true' do
+          before do
+            worker.data_consistency_delay_interval(true)
+          end
 
-          worker.perform_async(123)
+          it 'delays scheduling a job by calling perform_in with default delay' do
+            expect(worker).to receive(:perform_in).with(worker::DEFAULT_DELAY_INTERVAL.seconds, 123)
+
+            worker.perform_async(123)
+          end
+        end
+
+        context 'when data_consistency_daly is numeric time interval' do
+          before do
+            worker.data_consistency_delay_interval(3.seconds)
+          end
+
+          it 'delays scheduling a job by calling perform_in with correct params' do
+            expect(worker).to receive(:perform_in).with(3.seconds, 123)
+
+            worker.perform_async(123)
+          end
         end
       end
     end

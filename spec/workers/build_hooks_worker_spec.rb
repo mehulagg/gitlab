@@ -23,10 +23,10 @@ RSpec.describe BuildHooksWorker do
     end
   end
 
-  it_behaves_like 'worker with data consistency delay',
+  it_behaves_like 'worker with data consistency delay interval',
                   described_class,
                   feature_flag: :delayed_perform_for_build_hooks_worker,
-                  data_consistency_delay: 3.seconds
+                  data_consistency_delay_interval: 3.seconds
 
   it_behaves_like 'worker with data consistency',
                   described_class,

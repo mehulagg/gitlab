@@ -13,7 +13,7 @@ module WorkerAttributes
 
   VALID_DATA_CONSISTENCIES = [:always, :sticky, :delayed].freeze
 
-  DATA_CONSISTENCY_DELAY = 1
+  DEFAULT_DELAY_INTERVAL = 1
 
   NAMESPACE_WEIGHTS = {
     auto_devops: 2,
@@ -73,6 +73,16 @@ module WorkerAttributes
       class_attributes[:urgency] || :low
     end
 
+    # Allows configuring worker's data_consistency.
+    #
+    #  - *data_consistency* values:
+    #    - 'always' - The job is required to use the primary database (default).
+    #    - 'sticky' - The uses a replica as long as possible. It switches to primary either on write or long replication lag.
+    #    - 'delayed' - The job would switch to primary only on write. It would use replica always.
+    #      If there's a long replication lag the job will be delayed, and only if the replica is not up to date on the next retry,
+    #      it will switch to the primary.
+    #  - *feature_flag* - allows you to toggle a job's `data_consistency, which permits you to safely toggle load balancing capabilities for a specific job.
+    #    If disabled, job will default to `:always`, which means that the job will always use the primary.
     def data_consistency(data_consistency, feature_flag: nil)
       raise ArgumentError, "Invalid data consistency: #{data_consistency}" unless VALID_DATA_CONSISTENCIES.include?(data_consistency)
       raise ArgumentError, 'Data consistency is already set' if class_attributes[:data_consistency]
@@ -83,12 +93,24 @@ module WorkerAttributes
       validate_worker_attributes!
     end
 
-    def data_consistency_delay(data_consistency_delay, feature_flag: nil)
-      raise ArgumentError, 'Data consistency delay is already set' if class_attributes[:data_consistency_delay]
+    # Allows configuring worker's data_consistency_delay_interval duration.
+    #
+    # Workers with data_consistency set to :delayed or :sticky, calling #perform_async
+    # will be delayed in order to give replication process enough time to complete.
+    #
+    # If not set, it will use the default DEFAULT_DELAY_INTERVAL.seconds
+    #
+    #  - *interval* - timestamp, numeric or something that acts numeric (like an activesupport time interval),
+    #    *true* for the default interval (DEFAULT_DELAY_INTERVAL) or *false* to disable the delay.
+    #  - *feature_flag* - allows you to toggle a job's `data_consistency_delay_interval`.
+    #    If disabled, #perform_async will not be delayed
+    def data_consistency_delay_interval(interval, feature_flag: nil)
+      raise ArgumentError, 'Data consistency delay is already set' unless class_attributes[:data_consistency_delay_interval].nil?
+      raise ArgumentError, 'Data consistency delay is already set' unless class_attributes[:data_consistency_delay_interval].nil?
 
-      set_class_attribute(:data_consistency_delay_feature_flag, feature_flag) if feature_flag
+      set_class_attribute(:data_consistency_delay_interval_feature_flag, feature_flag) if feature_flag
 
-      set_class_attribute(:data_consistency_delay, data_consistency_delay) if data_consistency_delay
+      set_class_attribute(:data_consistency_delay_interval, interval)
     end
 
     def validate_worker_attributes!
@@ -104,8 +126,13 @@ module WorkerAttributes
       class_attributes[:data_consistency] || :always
     end
 
-    def get_data_consistency_delay
-      class_attributes[:data_consistency_delay] || DATA_CONSISTENCY_DELAY.seconds
+    def get_data_consistency_delay_interval
+      case class_attributes[:data_consistency_delay_interval]
+      when nil, true
+        DEFAULT_DELAY_INTERVAL.seconds
+      else
+        class_attributes[:data_consistency_delay_interval]
+      end
     end
 
     def get_data_consistency_feature_flag_enabled?
@@ -114,10 +141,10 @@ module WorkerAttributes
       Feature.enabled?(class_attributes[:data_consistency_feature_flag], default_enabled: :yaml)
     end
 
-    def get_data_consistency_delay_feature_flag_enabled?
-      return true unless class_attributes[:data_consistency_delay_feature_flag]
+    def get_data_consistency_delay_interval_feature_flag_enabled?
+      return true unless class_attributes[:data_consistency_delay_interval_feature_flag]
 
-      Feature.enabled?(class_attributes[:data_consistency_delay_feature_flag], default_enabled: :yaml)
+      Feature.enabled?(class_attributes[:data_consistency_delay_interval_feature_flag], default_enabled: :yaml)
     end
 
     # Set this attribute on a job when it will call to services outside of the

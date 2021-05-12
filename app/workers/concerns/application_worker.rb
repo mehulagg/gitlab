@@ -52,9 +52,10 @@ module ApplicationWorker
     end
 
     def perform_async(*args)
-      # Delay execution for :delayed and :sticky workers to give replication enough time to complete
-      if get_data_consistency != :always && get_data_consistency_delay_feature_flag_enabled?
-        perform_in(get_data_consistency_delay, *args)
+      # Worker execution for workers with data_consistency set to :delayed or :sticky
+      # will be delayed to give replication enough time to complete
+      if delay_execution?
+        perform_in(get_data_consistency_delay_interval, *args)
       else
         super
       end
@@ -119,6 +120,12 @@ module ApplicationWorker
       else
         Sidekiq::Client.push_bulk('class' => self, 'args' => args_list, 'at' => schedule)
       end
+    end
+
+    private
+
+    def delay_execution?
+      get_data_consistency != :always && get_data_consistency_delay_interval && get_data_consistency_delay_interval_feature_flag_enabled?
     end
   end
 end

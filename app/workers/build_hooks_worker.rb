@@ -10,7 +10,7 @@ class BuildHooksWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :continuous_integration
   urgency :high
   data_consistency :delayed, feature_flag: :load_balancing_for_build_hooks_worker
-  data_consistency_delay 3.seconds, feature_flag: :delayed_perform_for_build_hooks_worker
+  data_consistency_delay_interval 3.seconds, feature_flag: :delayed_perform_for_build_hooks_worker
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(build_id)

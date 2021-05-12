@@ -13,7 +13,7 @@ RSpec.describe WorkerAttributes do
     end
   end
 
-  describe '.data_consistency' do
+  describe '.get_data_consistency' do
     context 'with valid data_consistency' do
       it 'returns correct data_consistency' do
         worker.data_consistency(:sticky)
@@ -44,36 +44,10 @@ RSpec.describe WorkerAttributes do
             .to raise_error("Class can't be marked as idempotent if data_consistency is not set to :always")
         end
       end
-
-      context 'when feature_flag is provided' do
-        before do
-          stub_feature_flags(test_feature_flag: false)
-          skip_feature_flags_yaml_validation
-          skip_default_enabled_yaml_check
-        end
-
-        it 'returns correct feature flag value' do
-          worker.data_consistency(:sticky, feature_flag: :test_feature_flag)
-
-          expect(worker.get_data_consistency_feature_flag_enabled?).not_to be_truthy
-        end
-      end
-
-      it 'returns correct data_consistency_delay' do
-        worker.data_consistency_delay(3.seconds)
-
-        expect(worker.get_data_consistency_delay).to eq(3.seconds)
-      end
     end
+
   end
-
-  describe '.data_consistency_delay' do
-    context 'when data_consistency is not provided' do
-      it 'defaults to DATA_CONSISTENCY_DELAY.seconds' do
-        expect(worker.get_data_consistency_delay).to eq(described_class::DATA_CONSISTENCY_DELAY.seconds)
-      end
-    end
-
+  describe 'get_data_consistency_feature_flag_enabled?' do
     context 'when feature_flag is provided' do
       before do
         stub_feature_flags(test_feature_flag: false)
@@ -82,9 +56,57 @@ RSpec.describe WorkerAttributes do
       end
 
       it 'returns correct feature flag value' do
-        worker.data_consistency_delay(3.seconds, feature_flag: :test_feature_flag)
+        worker.data_consistency(:sticky, feature_flag: :test_feature_flag)
 
-        expect(worker.get_data_consistency_delay_feature_flag_enabled?).not_to be_truthy
+        expect(worker.get_data_consistency_feature_flag_enabled?).to be false
+      end
+    end
+  end
+
+  describe '.get_data_consistency_delay_interval' do
+    context 'when data_consistency delay interval is not provided' do
+      it 'defaults to DATA_CONSISTENCY_DELAY_INTERVAL.seconds' do
+        expect(worker.get_data_consistency_delay_interval).to eq(described_class::DEFAULT_DELAY_INTERVAL.seconds)
+      end
+    end
+
+    context 'when data_consistency_delay_interval is true' do
+      it 'defaults to DATA_CONSISTENCY_DELAY_INTERVAL.seconds' do
+        worker.data_consistency_delay_interval(true)
+
+        expect(worker.get_data_consistency_delay_interval).to eq(described_class::DEFAULT_DELAY_INTERVAL.seconds)
+      end
+    end
+
+    context 'when data_consistency_delay_interval is false' do
+      it 'defaults to DATA_CONSISTENCY_DELAY_INTERVAL.seconds' do
+        worker.data_consistency_delay_interval(false)
+
+        expect(worker.get_data_consistency_delay_interval).to be false
+      end
+    end
+
+    context 'when data_consistency_delay_interval is provided' do
+      it 'returns correct feature flag value' do
+        worker.data_consistency_delay_interval(3.seconds)
+
+        expect(worker.get_data_consistency_delay_interval).to eq(3.seconds)
+      end
+    end
+  end
+
+  describe '.get_data_consistency_delay_interval_feature_flag_enabled?' do
+    context 'when feature_flag is provided' do
+      before do
+        stub_feature_flags(test_feature_flag: false)
+        skip_feature_flags_yaml_validation
+        skip_default_enabled_yaml_check
+      end
+
+      it 'returns correct feature flag value' do
+        worker.data_consistency_delay_interval(3.seconds, feature_flag: :test_feature_flag)
+
+        expect(worker.get_data_consistency_delay_interval_feature_flag_enabled?).to be false
       end
     end
   end
