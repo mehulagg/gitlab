@@ -128,7 +128,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules::Rule do
     end
 
     context 'when using a long list as an invalid changes: clause' do
-      let(:config) { { changes: ['app/'] * 51 } }
+      let(:config) { { changes: ['app/'] * 257 } }
 
       it { is_expected.not_to be_valid }
 
@@ -164,7 +164,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Rules::Rule do
     end
 
     context 'when using a long list as an invalid exists: clause' do
-      let(:config) { { exists: ['app/'] * 51 } }
+      let(:config) { { exists: ['app/'] * 257 } }
 
       it { is_expected.not_to be_valid }
 
