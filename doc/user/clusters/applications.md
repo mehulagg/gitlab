@@ -44,23 +44,62 @@ We have decided to take the following actions:
 ## Take control of your GitLab Managed Apps
 
 Firstly, it's important to know that your apps won't be removed from your cluster, regardless if you were using
-GitLab Managed Apps v1 or v2.
+one-click or CI/CD.
 
 A few manual steps are needed to take control of your apps:
 
+1. Check which apps you have installed with `kubectl get pods -n gitlab-managed-apps`. 
+1. Find out which Helm version was used to install these apps. To do this, install the latest version of Helm v3 locally
+   and run the command: `helm ls -n gitlab-managed-apps`. If the apps show up, it means they are already
+   installed via Helm v3. If they don't show up, they were installed with Helm v2. We can assure this because Helm v2
+   and v3 keep releases data in different locations. To list your releases with Helm v2, you can use a
+   Tillerless Helm v2 setup, which is the same GitLab used to install Helm v2 apps. For this you need Helm v2 and Tiller
+   installed locally. Then run in a terminal tab:
+   
+   ```bash
+   export KUBE_NAMESPACE=gitlab-managed-apps
+   export TILLER_NAMESPACE=$KUBE_NAMESPACE
+   tiller -listen localhost:44134
+   ```
+   
+   In another tab run: 
+   
+   ```bash
+   export HELM_HOST="localhost:44134"
+   helm2 init --client-only
+   helm2 ls
+   ```
+   
+   Finally, if your apps are still on Helm v2. We strongly recommend that you follow the [Helm documentation to upgrade
+   them to Helm 3](https://helm.sh/docs/topics/v2_v3_migration/), since Helm v2 is deprecated.
+1. Take note of your `CHART` and `APP VERSION` columns as printed out from the `helm ls` command mentioned above. 
+1. Get a copy of each of your charts' computed values and save it in a file. E.g. for a GitLab Runner release:
+   With Tillerless Helm v2: `helm2 get values runner -a --output yaml > runner-values.yaml`.
+   
+   With Helm v3: `helm get values runner -n gitlab-managed-apps -a --output yaml > runner-values.yaml`
+1. Save these in a repository where you can manage your releases. From now on, you can use the chart versions and values
+   you've collected above and manually manage your chart. To upgrade your running releases, reference the [Helm v3](https://helm.sh/docs/helm/helm_upgrade/) 
+   and [Helm v2](https://v2.helm.sh/docs/helm/#helm-upgrade) docs on the `helm upgrade` command.
+   
+### Important Notes
 
-1. Verify, which version of Helm you're applications were installed with:
-   Run `kubectl get pods -n gitlab-managed-apps`
-1. Make sure you have [Helm](https://helm.sh/) installed on your machine.
-1. Take note of your charts versions.
-   This can be achieved by running 
-1. Get a copy of your charts computed values.
-1. Save these in a repository where you can manage your releases.
+#### Nginx ingress
 
+After printing out the computed values with `helm ls`, you might see these `clusterIP: "-"` occourences. When upgrading
+your Ingress release with these values, you might see this [Helm error](https://github.com/helm/helm/issues/7956).
+There is a [discussion in the Ingress chart](https://github.com/helm/charts/pull/13646) repo on how to workaround this.
+If the suggestion in the discussion also did not work for you, you can manually collect the `clusterIP` data from your
+services with: `kubectl get services -n gitlab-managed-apps`, then override your chart values with these IPs. The
+`helm upgrade` command should then workout with the correct IPs.
 
-### Fetching a
-If you didn't customize your the GitLab Managed Apps Kubernetes namespace, they're installed by default under 
-`gitlab-managed-apps`.
+#### CertManager
+
+Migrating CertManager from Helm v2 to v3 will introduce breaking changes regarding the related CRDs and Cluster Issuer
+necessary for it to work. When doing this migration, it's best to actually uninstall the application with v2 then 
+re-install it with v3 once you have migrated everything else. If you can't afford to do this, you would have to keep
+using Helm v2 for this App. The [Helm documentation to upgrade
+to Helm 3](https://helm.sh/docs/topics/v2_v3_migration/) also mention that it's possible to have Helm v2 and v3
+managing different apps in the same cluster.
 
 ## Install using GitLab CI/CD
 
