@@ -22,7 +22,7 @@ We have decided to take the following actions:
 - To foster users to control their own apps completely, we will create a Project Template that will have default sane values 
   for these applications. Users will be able to create a new repository from this functional template, 
   then quickly start managing a default set of applications.
-  More so, since all the files will be exposed in this template, nothing will be locked-in a docker image, the user
+  More so, since all the files will be exposed in this template, nothing will be locked-in a Docker image, the user
   user will have the full control of its values that we have talked about. This template should be ready close to 14.0.
   You can track the progress [through this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/327908). This template
   will be completely compatible with the [Cluster management project](management_project.md) feature. 
@@ -34,7 +34,7 @@ We have decided to take the following actions:
 - GitLab Managed Apps [using CI/CD](#install-using-gitlab-cicd) is deprecated from 13.12 on. If you are
   using this strategy, you can keep using even after 14.0. Everything should keep working. So, you can
   either keep using it for now or [take control of your GitLab Managed Apps](#take-control-of-your-gitlab-managed-apps). Just don't deliberately 
-  upgrade your [`cluster-applications` docker image](https://gitlab.com/gitlab-org/gitlab/-/blob/35a195ed4e64c3bd3235cd3d72b054d9310c62ea/lib/gitlab/ci/templates/Managed-Cluster-Applications.gitlab-ci.yml#L3)
+  upgrade your [`cluster-applications` Docker image](https://gitlab.com/gitlab-org/gitlab/-/blob/35a195ed4e64c3bd3235cd3d72b054d9310c62ea/lib/gitlab/ci/templates/Managed-Cluster-Applications.gitlab-ci.yml#L3)
   to the new major version, since there will be a breaking change to support the new Project Template. If you 
   you were not controlling this image version by customizing it on your repo and don't know what it is about,
   just disregard this message. Your GitLab Managed Apps will keep working as it is today. Still it won't be
