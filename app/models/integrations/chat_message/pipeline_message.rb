@@ -237,7 +237,7 @@ module Integrations
           }
         end
 
-        failed_links.join(I18n.translate(:'support.array.words_connector'))
+        failed_links.join(I18n.t(:'support.array.words_connector'))
       end
 
       def stage_link(stage)
@@ -246,7 +246,7 @@ module Integrations
       end
 
       def failed_stages_links
-        failed_stages.map { |s| stage_link(s) }.join(I18n.translate(:'support.array.words_connector'))
+        failed_stages.map { |s| stage_link(s) }.join(I18n.t(:'support.array.words_connector'))
       end
 
       def commit_url

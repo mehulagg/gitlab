@@ -3,7 +3,7 @@
 module Integrations
   module ChatMessage
     class BaseMessage
-      RELATIVE_LINK_REGEX = /!\[[^\]]*\]\((\/uploads\/[^\)]*)\)/.freeze
+      RELATIVE_LINK_REGEX = %r{!\[[^\]]*\]\((/uploads/[^\)]*)\)}.freeze
 
       attr_reader :markdown
       attr_reader :user_full_name
