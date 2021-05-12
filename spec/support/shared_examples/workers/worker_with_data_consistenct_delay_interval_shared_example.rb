@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'worker with data consistency delay interval' do |worker_class, data_consistency_delay_interval: nil, feature_flag: nil|
-  describe '.get_data_consistency_feature_flag_enabled?' do
+  describe '.get_data_consistency_delay_interval_feature_flag_enabled?' do
     it 'returns true' do
       expect(worker_class.get_data_consistency_delay_interval_feature_flag_enabled?).to be(true)
     end
@@ -31,9 +31,9 @@ RSpec.shared_examples 'worker with data consistency delay interval' do |worker_c
     end
   end
 
-  describe '.get_data_consistency_delay' do
-    it 'returns correct data consistency' do
-      expect(worker_class.get_data_consistency_delay_interval).to eq(data_consistency_delay)
+  describe '.get_data_consistency_delay_interval' do
+    it 'returns correct data consistency delay interval' do
+      expect(worker_class.get_data_consistency_delay_interval).to eq(data_consistency_delay_interval)
     end
   end
 end
