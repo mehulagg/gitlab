@@ -63,7 +63,7 @@ module EE
       end
 
       def handle_issue_type_label_update(issue)
-        if issue.issue_type === 'incident'
+        if issue.incident?
           add_incident_label(issue)
         else
           issue.labels = issue.labels.reject { |label| label.title == 'incident' }
