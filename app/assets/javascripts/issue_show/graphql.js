@@ -8,7 +8,7 @@ Vue.use(VueApollo);
 
 const resolvers = {
   Mutation: {
-    updateIssueState: (_, { issue_type = '' }, { cache }) => {
+    updateIssueState: (_, { issue_type = {} }, { cache }) => {
       const sourceData = cache.readQuery({ query: getIssueStateQuery });
       const data = produce(sourceData, (draftData) => {
         draftData.issueState = { issue_type };
