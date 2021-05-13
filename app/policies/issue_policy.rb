@@ -15,6 +15,16 @@ class IssuePolicy < IssuablePolicy
   desc "Issue is confidential"
   condition(:confidential, scope: :subject) { @subject.confidential? }
 
+  desc "Issue was created by banned user"
+  condition(:author_banned, scope: :subject) { @subject.author.banned? }
+
+  desc "Current user is an admin"
+  condition(:admin) { @user.admin? }
+
+  rule { author_banned & ~admin }.policy do
+    prevent :read_issue
+  end
+
   rule { confidential & ~can_read_confidential }.policy do
     prevent(*create_read_update_admin_destroy(:issue))
     prevent :read_issue_iid

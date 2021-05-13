@@ -284,4 +284,20 @@ RSpec.describe IssuePolicy do
       expect(policies).to be_allowed(:read_issue_iid)
     end
   end
+
+  context 'with issue created by banned user' do 
+    let(:project) { create(:project, :public) }
+    let(:user) { create(:user) }
+    let(:admin) { create(:user, :admin)}
+    let(:banned_user) { create(:user, :banned) }
+    let(:issue) { create(:issue, author: banned_user, project: project) }
+
+    it 'does not allow non-admin user to read the issue' do
+      expect(permissions(user, issue)).not_to be_allowed(:read_issue)
+    end
+
+    it 'allows admin to read the issue' do
+      expect(permissions(admin, issue)).to be_allowed(:read_issue)
+    end
+  end
 end
