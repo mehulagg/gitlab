@@ -159,56 +159,23 @@ const label = __('Subscribe');
 const nameSpacedlabel = __('Plan|Subscribe');
 ```
 
-For the static text strings we suggest two patterns for using these translations in Vue files:
+For the static text strings we recommend defining them in the `<script>` rather than the `<template>`
+block. Doing this means we can refer to the directly in tests, rather than copying the same text.
 
-- External constants file:
+```javascript
+// good
+expect(wrapper.text()).toEqual(MyComponent.i18n.buttonLabel);
 
-  ```javascript
-  javascripts
-  │
-  └───alert_settings
-  │   │   constants.js
-  │   └───components
-  │       │   alert_settings_form.vue
+// not so good
+expect(wrapper.text()).toEqual('this test will fail just from button text changing!');
+```
 
+There are a few possible ways to do this:
 
-  // constants.js
+- using `$options.i18n` on the component
+- adding `i18n` to component `data` (preferably non-reactively)
+- using an external constants file 
 
-  import { s__ } from '~/locale';
-
-  /* Integration constants */
-
-  export const I18N_ALERT_SETTINGS_FORM = {
-    saveBtnLabel: __('Save changes'),
-  };
-
-
-  // alert_settings_form.vue
-
-  import {
-    I18N_ALERT_SETTINGS_FORM,
-  } from '../constants';
-
-  <script>
-    export default {
-      i18n: {
-        I18N_ALERT_SETTINGS_FORM,
-      }
-    }
-  </script>
-
-  <template>
-    <gl-button
-      ref="submitBtn"
-      variant="success"
-      type="submit"
-    >
-      {{ $options.i18n.I18N_ALERT_SETTINGS_FORM }}
-    </gl-button>
-  </template>
-  ```
-
-  When possible, you should opt for this pattern, as this allows you to import these strings directly into your component specs for re-use during testing.
 
 - Internal component `$options` object:
 
@@ -224,6 +191,30 @@ For the static text strings we suggest two patterns for using these translations
   <template>
     <gl-button :aria-label="$options.i18n.buttonLabel">
       {{ $options.i18n.buttonLabel }}
+    </gl-button>
+  </template>
+  ```
+
+- Or by adding non-reactive properties to your component:
+
+  ```javascript
+  <script>
+    const i18n = Object.freeze({
+      buttonLabel: s__('Plan|Button Label')
+    });
+
+    export default {
+      data() {
+        return {
+          i18n,
+        };
+      }
+    },
+  </script>
+
+  <template>
+    <gl-button :aria-label="i18n.buttonLabel">
+      {{ i18n.buttonLabel }}
     </gl-button>
   </template>
   ```
