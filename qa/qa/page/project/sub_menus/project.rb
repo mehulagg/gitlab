@@ -18,7 +18,7 @@ module QA
           def click_project
             retry_on_exception do
               within_sidebar do
-                click_element(:sidebar_menu_link, menu_item: 'Project overview')
+                click_element(:sidebar_menu_link, menu_item: 'Project information')
               end
             end
           end
