@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe "Manage", :requires_admin do
-    describe "Group bulk import" do
+  RSpec.describe 'Manage', :requires_admin do
+    describe 'Group bulk import' do
       let!(:api_client) { Runtime::API::Client.as_admin }
       let!(:user) do
         Resource::User.fabricate_via_api! do |usr|
@@ -53,7 +53,7 @@ module QA
       end
 
       def staging?
-        Runtime::Scenario.gitlab_address.include?("staging.gitlab.com")
+        Runtime::Scenario.gitlab_address.include?('staging.gitlab.com')
       end
 
       before(:all) do
@@ -71,10 +71,10 @@ module QA
       end
 
       it(
-        "performs bulk group import from another gitlab instance",
-        testcase: "https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785",
+        'performs bulk group import from another gitlab instance',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
         # https://gitlab.com/gitlab-org/gitlab/-/issues/330344
-        exclude: { job: ["ce:relative_url", "ee:relative_url"] }
+        exclude: { job: ['ce:relative_url', 'ee:relative_url'] }
       ) do
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
