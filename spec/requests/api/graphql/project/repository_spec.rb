@@ -36,6 +36,21 @@ RSpec.describe 'getting a repository in a project' do
     end
   end
 
+  context 'as a user that can read the repository but does not have admin permissions' do
+    let(:current_user) { create(:user) }
+
+    before do
+      project.add_role(current_user, :developer)
+    end
+
+    it 'does not return diskPath' do
+      post_graphql(query, current_user: current_user)
+
+      expect(graphql_data['project']['repository']).not_to be_nil
+      expect(graphql_data['project']['repository']['diskPath']).to be_nil
+    end
+  end
+
   context 'when the repository is only accessible to members' do
     let(:project) do
       create(:project, :public, :repository, repository_access_level: ProjectFeature::PRIVATE)
