@@ -1,14 +1,21 @@
-import { GlButton, GlTable } from '@gitlab/ui';
+import { GlTable } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Actions from 'ee/status_checks/components/actions.vue';
 import Branch from 'ee/status_checks/components/branch.vue';
+import ModalCreate from 'ee/status_checks/components/modal_create.vue';
+import ModalUpdate from 'ee/status_checks/components/modal_update.vue';
 import StatusChecks, { i18n } from 'ee/status_checks/components/status_checks.vue';
 import createStore from 'ee/status_checks/store';
 import { SET_STATUS_CHECKS } from 'ee/status_checks/store/mutation_types';
 
 Vue.use(Vuex);
+
+const statusChecks = [
+  { name: 'Foo', externalUrl: 'http://foo.com/api', protectedBranches: [] },
+  { name: 'Bar', externalUrl: 'http://bar.com/api', protectedBranches: [{ name: 'main' }] },
+];
 
 describe('Status checks', () => {
   let store;
@@ -17,13 +24,16 @@ describe('Status checks', () => {
   const createWrapper = (mountFn = mount) => {
     store = createStore();
     wrapper = mountFn(StatusChecks, { store });
+
+    wrapper.vm.$refs.updateModal.show = jest.fn();
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  const findAddButton = () => wrapper.findComponent(GlButton);
+  const findCreateModal = () => wrapper.findComponent(ModalCreate);
+  const findUpdateModal = () => wrapper.findComponent(ModalUpdate);
   const findTable = () => wrapper.findComponent(GlTable);
   const findHeaders = () => findTable().find('thead').find('tr').findAll('th');
   const findBranch = (trIdx) => wrapper.findAllComponents(Branch).at(trIdx);
@@ -45,19 +55,20 @@ describe('Status checks', () => {
       expect(findCell(0, 0).text()).toBe(i18n.emptyTableText);
     });
 
-    it('renders the add button', () => {
+    it('creates the create modal', () => {
       createWrapper(shallowMount);
 
-      expect(findAddButton().text()).toBe(i18n.addButton);
+      expect(findCreateModal().exists()).toBe(true);
+    });
+
+    it('creates the update modal', () => {
+      createWrapper(shallowMount);
+
+      expect(findUpdateModal().exists()).toBe(true);
     });
   });
 
-  describe('Filled table', () => {
-    const statusChecks = [
-      { name: 'Foo', externalUrl: 'http://foo.com/api', protectedBranches: [] },
-      { name: 'Bar', externalUrl: 'http://bar.com/api', protectedBranches: [{ name: 'main' }] },
-    ];
-
+  describe('Table', () => {
     beforeEach(() => {
       createWrapper();
       store.commit(SET_STATUS_CHECKS, statusChecks);
@@ -87,8 +98,36 @@ describe('Status checks', () => {
       });
 
       it('renders the actions', () => {
-        expect(findActions(index, 1).exists()).toBe(true);
+        expect(findActions(index, 1).props('statusCheck')).toStrictEqual(statusCheck);
       });
+    });
+  });
+
+  describe('Update modal filling', () => {
+    beforeEach(() => {
+      createWrapper();
+      store.commit(SET_STATUS_CHECKS, statusChecks);
+    });
+
+    it('opens the update modal with the correct status check when an edit button is clicked', async () => {
+      const statusCheck = findActions(0, 1).props('statusCheck');
+
+      await findActions(0, 1).vm.$emit('update-status-to-check', statusCheck);
+
+      expect(findUpdateModal().props('statusCheck')).toStrictEqual(statusCheck);
+      expect(wrapper.vm.$refs.updateModal.show).toHaveBeenCalled();
+    });
+
+    it('updates the status check prop for the update modal when another edit button is clicked', async () => {
+      const statusCheck = findActions(1, 1).props('statusCheck');
+
+      await findActions(0, 1).vm.$emit(
+        'update-status-to-check',
+        findActions(0, 1).props('statusCheck'),
+      );
+      await findActions(1, 1).vm.$emit('update-status-to-check', statusCheck);
+
+      expect(findUpdateModal().props('statusCheck')).toStrictEqual(statusCheck);
     });
   });
 });

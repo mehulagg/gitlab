@@ -1,16 +1,18 @@
 <script>
-import { GlButton, GlTable } from '@gitlab/ui';
+import { GlTable } from '@gitlab/ui';
 import { mapState } from 'vuex';
 import { __, s__ } from '~/locale';
+import { EMPTY_STATUS_CHECK } from '../constants';
 import Actions from './actions.vue';
 import Branch from './branch.vue';
+import ModalCreate from './modal_create.vue';
+import ModalUpdate from './modal_update.vue';
 
 const DEFAULT_TH_CLASSES =
   'gl-bg-transparent! gl-border-b-solid! gl-border-b-gray-100! gl-p-5! gl-border-b-1!';
 const thWidthClass = (width) => `gl-w-${width}p ${DEFAULT_TH_CLASSES}`;
 
 export const i18n = {
-  addButton: s__('StatusCheck|Add status check'),
   apiHeader: __('API'),
   branchHeader: __('Target branch'),
   emptyTableText: s__('StatusCheck|No status checks are defined yet.'),
@@ -21,11 +23,23 @@ export default {
   components: {
     Actions,
     Branch,
-    GlButton,
     GlTable,
+    ModalCreate,
+    ModalUpdate,
+  },
+  data() {
+    return {
+      statusCheckToUpdate: EMPTY_STATUS_CHECK,
+    };
   },
   computed: {
     ...mapState(['statusChecks']),
+  },
+  methods: {
+    openUpdateModal(statusCheck) {
+      this.statusCheckToUpdate = statusCheck;
+      this.$refs.updateModal.show();
+    },
   },
   fields: [
     {
@@ -67,13 +81,12 @@ export default {
       <template #cell(protectedBranches)="{ item }">
         <branch :branches="item.protectedBranches" />
       </template>
-      <template #cell(actions)>
-        <actions />
+      <template #cell(actions)="{ item }">
+        <actions :status-check="item" @update-status-to-check="openUpdateModal" />
       </template>
     </gl-table>
 
-    <gl-button category="secondary" variant="confirm" size="small">
-      {{ $options.i18n.addButton }}
-    </gl-button>
+    <modal-create />
+    <modal-update ref="updateModal" :status-check="statusCheckToUpdate" />
   </div>
 </template>
