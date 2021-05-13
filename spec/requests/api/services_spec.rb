@@ -146,7 +146,6 @@ RSpec.describe API::Services do
 
         get api("/projects/#{project.id}/services/#{dashed_service}", user)
 
-        # binding.pry if initialized_service.active?
         expect(initialized_service).not_to be_active
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['properties'].keys).to match_array(service_instance.api_field_names)
