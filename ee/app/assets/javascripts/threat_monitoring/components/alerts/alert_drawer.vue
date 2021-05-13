@@ -6,6 +6,7 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import createIssueMutation from '~/vue_shared/alert_details/graphql/mutations/alert_issue_create.mutation.graphql';
 import getAlertDetailsQuery from '~/vue_shared/alert_details/graphql/queries/alert_details.query.graphql';
+import { getContentWrapperHeight } from '../../utils';
 import { ALERT_DETAILS_LOADING_ROWS, DRAWER_ERRORS, HIDDEN_VALUES } from './constants';
 
 export default {
@@ -112,13 +113,7 @@ export default {
       }
     },
     getDrawerHeaderHeight() {
-      const wrapperEl = document.querySelector('.js-threat-monitoring-container-wrapper');
-
-      if (wrapperEl) {
-        return `${wrapperEl.offsetTop}px`;
-      }
-
-      return '';
+      return getContentWrapperHeight('.js-threat-monitoring-container-wrapper');
     },
     handleAlertError({ type, error }) {
       this.errorMessage = this.$options.i18n.ERRORS[type];
