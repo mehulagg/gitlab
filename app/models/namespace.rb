@@ -94,6 +94,8 @@ class Namespace < ApplicationRecord
       saved_change_to_name? || saved_change_to_path? || saved_change_to_parent_id?
   }
 
+  after_commit :insert_namespace_lock, on: :create
+
   scope :for_user, -> { where(type: nil) }
   scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
   scope :include_route, -> { includes(:route) }
@@ -502,6 +504,10 @@ class Namespace < ApplicationRecord
       project.write_repository_config
       project.track_project_repository
     end
+  end
+
+  def add_namespace_lock
+    NamespaceLock.create!(namespace_id: id)
   end
 end
 

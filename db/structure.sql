@@ -14854,6 +14854,19 @@ CREATE TABLE namespace_limits (
     temporary_storage_increase_ends_on date
 );
 
+CREATE TABLE namespace_locks (
+    namespace_id bigint NOT NULL
+);
+
+CREATE SEQUENCE namespace_locks_namespace_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE namespace_locks_namespace_id_seq OWNED BY namespace_locks.namespace_id;
+
 CREATE TABLE namespace_package_settings (
     namespace_id bigint NOT NULL,
     maven_duplicates_allowed boolean DEFAULT true NOT NULL,
@@ -19855,6 +19868,8 @@ ALTER TABLE ONLY milestones ALTER COLUMN id SET DEFAULT nextval('milestones_id_s
 
 ALTER TABLE ONLY namespace_admin_notes ALTER COLUMN id SET DEFAULT nextval('namespace_admin_notes_id_seq'::regclass);
 
+ALTER TABLE ONLY namespace_locks ALTER COLUMN namespace_id SET DEFAULT nextval('namespace_locks_namespace_id_seq'::regclass);
+
 ALTER TABLE ONLY namespace_statistics ALTER COLUMN id SET DEFAULT nextval('namespace_statistics_id_seq'::regclass);
 
 ALTER TABLE ONLY namespaces ALTER COLUMN id SET DEFAULT nextval('namespaces_id_seq'::regclass);
@@ -21276,6 +21291,9 @@ ALTER TABLE ONLY namespace_aggregation_schedules
 
 ALTER TABLE ONLY namespace_limits
     ADD CONSTRAINT namespace_limits_pkey PRIMARY KEY (namespace_id);
+
+ALTER TABLE ONLY namespace_locks
+    ADD CONSTRAINT namespace_locks_pkey PRIMARY KEY (namespace_id);
 
 ALTER TABLE ONLY namespace_package_settings
     ADD CONSTRAINT namespace_package_settings_pkey PRIMARY KEY (namespace_id);
@@ -23560,6 +23578,8 @@ CREATE INDEX index_mr_metrics_on_target_project_id_merged_at_time_to_merge ON me
 CREATE INDEX index_namespace_admin_notes_on_namespace_id ON namespace_admin_notes USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_aggregation_schedules_on_namespace_id ON namespace_aggregation_schedules USING btree (namespace_id);
+
+CREATE INDEX index_namespace_locks_on_namespace_id ON namespace_locks USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_namespace_root_storage_statistics_on_namespace_id ON namespace_root_storage_statistics USING btree (namespace_id);
 
@@ -27043,6 +27063,9 @@ ALTER TABLE ONLY vulnerability_occurrences
 
 ALTER TABLE ONLY project_export_jobs
     ADD CONSTRAINT fk_rails_c88d8db2e1 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY namespace_locks
+    ADD CONSTRAINT fk_rails_c8a9ab4911 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_state_events
     ADD CONSTRAINT fk_rails_c913c64977 FOREIGN KEY (epic_id) REFERENCES epics(id) ON DELETE CASCADE;
