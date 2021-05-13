@@ -30,7 +30,7 @@
                   = group_information_title(@group)
             %li.divider.fly-out-top-item
 
-            - if Feature.disabled?(:sidebar_refactor, current_user)
+            - if Feature.disabled?(:sidebar_refactor, current_user, default_enabled: :yaml)
               = nav_link(path: ['groups#show', 'groups#details', 'groups#subgroups'], html_options: { class: 'home' }) do
                 = link_to details_group_path(@group), title: _('Group details') do
                   %span

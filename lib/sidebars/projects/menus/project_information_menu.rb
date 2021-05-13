@@ -50,7 +50,7 @@ module Sidebars
 
         override :active_routes
         def active_routes
-          return {} if Feature.disabled?(:sidebar_refactor, context.current_user)
+          return {} if Feature.disabled?(:sidebar_refactor, context.current_user, default_enabled: :yaml)
 
           { path: 'projects#show' }
         end
