@@ -13,7 +13,7 @@ module EE
     def integration_form_data(integration, group: nil)
       form_data = super
 
-      if integration.is_a?(JiraService)
+      if integration.is_a?(Integrations::Jira)
         form_data.merge!(
           show_jira_issues_integration: @project&.jira_issues_integration_available?.to_s,
           show_jira_vulnerabilities_integration: integration.jira_vulnerabilities_integration_available?.to_s,

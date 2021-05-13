@@ -567,7 +567,7 @@ module EE
           min_id = minimum_id(JiraTrackerData.where(issues_enabled: true), :service_id)
           max_id = maximum_id(JiraTrackerData.where(issues_enabled: true), :service_id)
           # rubocop: enable UsageData/LargeTable:
-          count(::JiraService.active.includes(:jira_tracker_data).where(jira_tracker_data: { issues_enabled: true }), start: min_id, finish: max_id)
+          count(::Integrations::Jira.active.includes(:jira_tracker_data).where(jira_tracker_data: { issues_enabled: true }), start: min_id, finish: max_id)
         end
         # rubocop:enable CodeReuse/ActiveRecord
 

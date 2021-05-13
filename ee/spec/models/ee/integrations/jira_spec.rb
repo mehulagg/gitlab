@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe JiraService do
+RSpec.describe Integrations::Jira do
   let(:jira_service) { build(:jira_service, **options) }
   let(:headers) { { 'Content-Type' => 'application/json' } }
 

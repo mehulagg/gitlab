@@ -1689,7 +1689,6 @@ Gitlab/NamespacedClass:
     - 'app/models/project_services/irker_service.rb'
     - 'app/models/project_services/issue_tracker_data.rb'
     - 'app/models/project_services/jenkins_service.rb'
-    - 'app/models/project_services/jira_service.rb'
     - 'app/models/project_services/jira_tracker_data.rb'
     - 'app/models/project_services/mattermost_service.rb'
     - 'app/models/project_services/mattermost_slash_commands_service.rb'

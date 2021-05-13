@@ -792,7 +792,7 @@ module API
           ::HangoutsChatService,
           ::IrkerService,
           ::JenkinsService,
-          ::JiraService,
+          ::Integrations::Jira,
           ::MattermostSlashCommandsService,
           ::SlackSlashCommandsService,
           ::PackagistService,

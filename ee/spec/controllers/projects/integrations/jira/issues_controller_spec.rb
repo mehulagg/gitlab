@@ -203,7 +203,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       before do
         stub_licensed_features(jira_issues_integration: true)
 
-        expect_next_found_instance_of(JiraService) do |service|
+        expect_next_found_instance_of(Integrations::Jira) do |service|
           expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)
         end
 

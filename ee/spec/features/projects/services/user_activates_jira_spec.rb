@@ -15,7 +15,7 @@ RSpec.describe 'User activates Jira', :js do
     context 'when Jira connection test succeeds' do
       before do
         stub_licensed_features(jira_issues_integration: true)
-        allow_any_instance_of(JiraService).to receive(:issues_enabled) { true }
+        allow_any_instance_of(Integrations::Jira).to receive(:issues_enabled) { true }
 
         visit_project_integration('Jira')
         fill_form
