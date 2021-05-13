@@ -1,7 +1,7 @@
 <script>
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { mapState } from 'vuex';
 import { SEVERITY_CLASSES, SEVERITY_ICONS } from '~/reports/codequality_report/constants';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -10,20 +10,23 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
-    filePath: {
-      type: String,
-      required: true,
-    },
-    line: {
-      type: Object,
-      required: true,
+    codequality: {
+      type: Array,
+      required: false,
+      default: () => [],
     },
   },
   computed: {
-    ...mapState('diffs', ['codequalityDiff']),
+    visible() {
+      return this.glFeatures.codequalityMrDiffAnnotations && this.codequality.length > 0;
+    },
+    description() {
+      return this.codequality[0].description;
+    },
     severity() {
-      return this.codequalityDiffForLine[0].severity;
+      return this.codequality[0].severity;
     },
     severityClass() {
       return SEVERITY_CLASSES[this.severity] || SEVERITY_CLASSES.unknown;
@@ -31,25 +34,12 @@ export default {
     severityIcon() {
       return SEVERITY_ICONS[this.severity] || SEVERITY_ICONS.unknown;
     },
-    codequalityDiffForLine() {
-      const codequalityDiffForFile = this.codequalityDiff?.files?.[this.filePath] || [];
-
-      return codequalityDiffForFile.filter(
-        (violation) =>
-          (this.line.left && violation.line === this.line.left.new_line) ||
-          (this.line.right && violation.line === this.line.right.new_line),
-      );
-    },
   },
 };
 </script>
 
 <template>
-  <div
-    v-if="codequalityDiffForLine.length"
-    v-gl-tooltip.hover
-    :title="codequalityDiffForLine.length ? codequalityDiffForLine[0].description : ''"
-  >
+  <div v-if="visible" v-gl-tooltip.hover :title="description">
     <gl-icon :size="12" :name="severityIcon" :class="severityClass" />
   </div>
 </template>

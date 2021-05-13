@@ -3662,9 +3662,10 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
           expect(subject).to be_truthy
         end
 
-        context 'when feature is disabled' do
+        context 'when feature flags are disabled' do
           before do
             stub_feature_flags(codequality_mr_diff: false)
+            stub_feature_flags(codequality_mr_diff_annotations: false)
           end
 
           it 'can not generate a codequality report' do

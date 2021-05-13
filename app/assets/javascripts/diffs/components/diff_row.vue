@@ -272,7 +272,7 @@ export default {
           class="diff-td line-coverage left-side"
         ></div>
         <div class="diff-td line-codequality left-side" :class="[...parallelViewLeftLineType]">
-          <code-quality-gutter-icon v-if="inline" :file-path="filePath" :line="line" />
+          <code-quality-gutter-icon v-if="inline" :codequality="line.left.codequality" />
         </div>
         <div
           :id="line.left.line_code"
@@ -384,7 +384,7 @@ export default {
           class="diff-td line-codequality right-side"
           :class="[line.right.type, { hll: isHighlighted, hll: isCommented }]"
         >
-          <code-quality-gutter-icon :file-path="filePath" :line="line" />
+          <code-quality-gutter-icon :codequality="line.right.codequality" />
         </div>
         <div
           :id="line.right.line_code"

@@ -47,7 +47,8 @@ module Gitlab
       end
 
       def self.display_quality_on_mr_diff?(project)
-        ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: :yaml)
+        ::Feature.enabled?(:codequality_mr_diff, project, default_enabled: :yaml) ||
+        ::Feature.enabled?(:codequality_mr_diff_annotations, project, default_enabled: false)
       end
 
       def self.gldropdown_tags_enabled?

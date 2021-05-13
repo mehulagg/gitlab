@@ -13,24 +13,17 @@ describe('EE CodeQualityGutterIcon', () => {
   let wrapper;
   let codequalityDiff;
 
-  const defaultProps = {
-    filePath: 'index.js',
-    line: {
-      left: {},
-      right: {},
-    },
-  };
-
   const findIcon = () => wrapper.findComponent(GlIcon);
 
-  const createComponent = (props = {}, extendStore = () => {}) => {
+  const createComponent = (props = {}, provide = {}, extendStore = () => {}) => {
     store = createDiffsStore();
     store.state.diffs.codequalityDiff = codequalityDiff;
 
     extendStore(store);
 
     wrapper = shallowMount(CodeQualityGutterIcon, {
-      propsData: { ...defaultProps, ...props },
+      propsData: { ...props },
+      provide,
       store,
     });
   };
@@ -39,49 +32,38 @@ describe('EE CodeQualityGutterIcon', () => {
     wrapper.destroy();
   });
 
-  describe('with violations on some lines', () => {
-    codequalityDiff = {
-      files: {
-        'index.js': [
-          {
-            severity: 'minor',
-            description: 'Unexpected alert.',
-            line: 1,
-          },
-          {
-            severity: 'major',
-            description:
-              'Function `aVeryLongFunction` has 52 lines of code (exceeds 25 allowed). Consider refactoring.',
-            line: 3,
-          },
-          {
-            severity: 'minor',
-            description: 'Arrow function has too many statements (52). Maximum allowed is 30.',
-            line: 3,
-          },
-        ],
-      },
-    };
-
+  describe('with feature flag enabled', () => {
     it.each`
-      line | severity
-      ${1} | ${'minor'}
-      ${2} | ${'no'}
-      ${3} | ${'major'}
-      ${4} | ${'no'}
-    `('shows $severity icon for line $line', ({ line, severity }) => {
-      createComponent({ line: { right: { new_line: line } } });
+      severity
+      ${'info'}
+      ${'minor'}
+      ${'major'}
+      ${'critical'}
+      ${'blocker'}
+      ${'unknown'}
+    `('shows icon for $severity degradation', ({ severity }) => {
+      createComponent(
+        { codequality: [{ severity }] },
+        { glFeatures: { codequalityMrDiffAnnotations: true } },
+      );
 
-      if (severity === 'no') {
-        expect(findIcon().exists()).toBe(false);
-      } else {
-        expect(findIcon().exists()).toBe(true);
-        expect(findIcon().attributes()).toEqual({
-          class: SEVERITY_CLASSES[severity],
-          name: SEVERITY_ICONS[severity],
-          size: '12',
-        });
-      }
+      expect(findIcon().exists()).toBe(true);
+      expect(findIcon().attributes()).toEqual({
+        class: SEVERITY_CLASSES[severity],
+        name: SEVERITY_ICONS[severity],
+        size: '12',
+      });
+    });
+  });
+
+  describe('without feature flag enabled', () => {
+    it('does not show an icon', () => {
+      createComponent(
+        { codequality: [{ severity: 'critical' }] },
+        { glFeatures: { codequalityMrDiffAnnotations: false } },
+      );
+
+      expect(findIcon().exists()).toBe(false);
     });
   });
 });
