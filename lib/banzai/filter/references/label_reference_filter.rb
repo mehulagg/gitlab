@@ -8,24 +8,81 @@ module Banzai
         self.reference_type = :label
         self.object_class   = Label
 
+        def parent_records(parent, ids)
+          return unless parent.is_a?(Project) || parent.is_a?(Group)
+
+          x = find_labels(parent)
+          label_ids = ids.map {|y| y[:label_id]}.compact
+          label_names = ids.map {|y| y[:label_name]}.compact
+          id_relation = x.where(id: label_ids)
+          label_relation = x.where(title: label_names)
+          Label.from_union([id_relation, label_relation])
+        end
+
         def find_object(parent_object, id)
-          find_labels(parent_object).find(id)
+          key = if id[:label_id]
+                  reference_cache.records_per_parent[parent_object].keys.find {|i| i[:label_id] == id[:label_id].to_i }
+                elsif id[:label_name]
+                  reference_cache.records_per_parent[parent_object].keys.find {|i| i[:label_name] == id[:label_name] }
+                else
+                  nil
+                end
+
+          reference_cache.records_per_parent[parent_object][key] if key
+        end
+
+        # Transform a symbol extracted from the text to a meaningful value
+        # In most cases these will be integers, so we call #to_i by default
+        #
+        # This method has the contract that if a string `ref` refers to a
+        # record `record`, then `parse_symbol(ref) == record_identifier(record)`.
+        def parse_symbol(symbol, match_data)
+          { label_id: match_data[:label_id], label_name: match_data[:label_name] }
+        end
+
+        # We assume that most classes are identifying records by ID.
+        #
+        # This method has the contract that if a string `ref` refers to a
+        # record `record`, then `class.parse_symbol(ref) == record_identifier(record)`.
+        def record_identifier(record)
+          # record.id
+          { label_id: record.id, label_name: record.title }
         end
 
         def references_in(text, pattern = Label.reference_pattern)
-          labels = {}
-          unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
-            namespace = $~[:namespace]
-            project = $~[:project]
-            project_path = reference_cache.full_project_path(namespace, project)
-            label = find_label_cached(project_path, $~[:label_id], $~[:label_name])
+          # text.gsub(pattern) do |match|
+          #   if ident = identifier($~)
+          #     yield match, ident, $~[:project], $~[:namespace], $~
+          #   else
+          #     match
+          #   end
+          # end
 
-            if label
-              labels[label.id] = yield match, label.id, project, namespace, $~
-              "#{REFERENCE_PLACEHOLDER}#{label.id}"
+          labels = {}
+          index = 0
+          # binding.pry
+          unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
+            if ident = identifier($~)
+              index +=1
+              # label = find_object(parent_object, id)
+              labels[index] = yield match, ident, $~[:project], $~[:namespace], $~
+              # labels[label.id] = yield match, label.id, project, namespace, $~
+              "#{REFERENCE_PLACEHOLDER}#{index}"
             else
               match
             end
+            #
+            # namespace = $~[:namespace]
+            # project = $~[:project]
+            # project_path = reference_cache.full_project_path(namespace, project)
+            # label = find_label_cached(project_path, $~[:label_id], $~[:label_name])
+            #
+            # if label
+            #   labels[label.id] = yield match, label.id, project, namespace, $~
+            #   "#{REFERENCE_PLACEHOLDER}#{label.id}"
+            # else
+            #   match
+            # end
           end
 
           return text if labels.empty?
@@ -40,6 +97,7 @@ module Banzai
         end
 
         def find_label(parent_ref, label_id, label_name)
+          binding.pry
           parent = parent_from_ref(parent_ref)
           return unless parent
 

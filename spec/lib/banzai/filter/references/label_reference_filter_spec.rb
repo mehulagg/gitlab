@@ -702,4 +702,34 @@ RSpec.describe Banzai::Filter::References::LabelReferenceFilter do
       expect(result.css('a').first.text).to eq "#{label.name} in #{project.full_name}"
     end
   end
+
+  context 'checking N+1' do
+    let(:namespace2) { create(:namespace) }
+    let(:project2)   { create(:project, :public, namespace: namespace2) }
+    let(:snippet2)   { create(:project_snippet, project: project2) }
+    let(:reference2) { "#{project2.full_path}$#{snippet2.id}" }
+
+    it 'does not have N+1 per multiple references per project', :use_sql_query_cache do
+      markdown = "#{label.to_reference} ~qwert ~werty"
+
+      # Run this once to establish a baseline
+      reference_filter(markdown)
+
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+        reference_filter(markdown)
+      end.count
+
+      markdown = "#{label.to_reference} ~qwert ~werty ~ertyu ~rtyui ~tyuio ~yuiop ~asdfg ~sdfgj ~dfghj ~fghjk"
+
+      # Since we're not batching snippet queries across projects,
+      # we have to account for that.
+      # 1 for both projects, 1 for snippets in each project == 3
+      # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/330359
+      max_count = control_count + 1
+
+      expect do
+        reference_filter(markdown)
+      end.not_to exceed_all_query_limit(control_count)
+    end
+  end
 end
