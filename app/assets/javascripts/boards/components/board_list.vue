@@ -49,10 +49,10 @@ export default {
     };
   },
   computed: {
-    ...mapState(['pageInfoByListId', 'listsFlags', 'boardListsTotals']),
+    ...mapState(['pageInfoByListId', 'listsFlags']),
     ...mapGetters(['isEpicBoard']),
     listItemsCount() {
-      return this.boardListsTotals[this.list.id].count;
+      return this.list.itemsCount;
     },
     paginatedIssueText() {
       return sprintf(__('Showing %{pageSize} of %{total} %{issuableType}'), {

@@ -7,22 +7,15 @@ const expectNotImplemented = (action) => {
   });
 };
 
-const listId1 = 'gid://gitlab/List/1';
-const listId2 = 'gid://gitlab/List/2';
-
 const initialBoardListsState = {
-  [listId1]: mockLists[0],
-  [listId2]: mockLists[1],
+  'gid://gitlab/List/1': mockLists[0],
+  'gid://gitlab/List/2': mockLists[1],
 };
 
 let state = {
   boardItemsByListId: {},
   boardItems: {},
   boardLists: initialBoardListsState,
-  boardListsTotals: {
-    [listId1]: 20,
-    [listId2]: 8,
-  },
 };
 
 describe('SET_SHOW_LABELS', () => {

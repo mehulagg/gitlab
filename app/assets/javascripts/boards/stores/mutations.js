@@ -11,7 +11,8 @@ const notImplemented = () => {
 };
 
 const updateListItemsCount = ({ state, listId, value }) => {
-  state.boardListsTotals[listId] += value;
+  const list = state.boardLists[listId];
+  Vue.set(state.boardLists, listId, { ...list, itemsCount: list.itemsCount + value });
 };
 
 export const removeItemFromList = ({ state, listId, itemId }) => {
@@ -130,9 +131,6 @@ export default {
 
   [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (state, { listItems, listPageInfo, listId }) => {
     const { listData, boardItems } = listItems;
-    Vue.set(state.boardListsTotals, listId, {
-      count: listItems.count,
-    });
     Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
     Vue.set(
       state.boardItemsByListId,

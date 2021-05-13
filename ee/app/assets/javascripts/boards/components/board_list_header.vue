@@ -1,5 +1,5 @@
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 // This is a false violation of @gitlab/no-runtime-template-compiler, since it
 // extends a valid Vue single file component.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
@@ -10,13 +10,12 @@ export default {
   extends: BoardListHeaderFoss,
   inject: ['weightFeatureAvailable'],
   computed: {
-    ...mapState(['boardListsTotals']),
     ...mapGetters(['isEpicBoard']),
     countIcon() {
       return this.isEpicBoard ? 'epic' : 'issues';
     },
     itemsCount() {
-      return this.boardListsTotals[this.list.id]?.count || 0;
+      return this.list.itemsCount;
     },
     itemsTooltipLabel() {
       const { maxIssueCount } = this.list;

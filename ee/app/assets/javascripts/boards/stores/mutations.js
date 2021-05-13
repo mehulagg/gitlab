@@ -76,8 +76,9 @@ export default {
       listId,
       union(state.boardItemsByListId[listId] || [], listData[listId]),
     );
-    Vue.set(state.boardListsTotals, listId, {
-      count: listItemsCount,
+    Vue.set(state.boardLists, listId, {
+      ...state.boardLists[listId],
+      itemsCount: listItemsCount,
     });
     Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
     Vue.set(state.listsFlags[listId], 'isLoading', false);
@@ -119,7 +120,14 @@ export default {
   },
 
   [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, boardLists) => {
-    state.boardLists = boardLists;
+    const olLists = state.boardLists;
+    state.boardLists = {};
+    Object.keys(boardLists).forEach((listId) => {
+      state.boardLists[listId] = {
+        ...boardLists[listId],
+        itemsCount: olLists[listId]?.itemsCount || 0,
+      };
+    });
   },
 
   [mutationTypes.RECEIVE_SWIMLANES_FAILURE]: (state) => {

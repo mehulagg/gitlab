@@ -293,7 +293,6 @@ export const mockList = {
   assignee: null,
   milestone: null,
   loading: false,
-  issuesCount: 1,
 };
 
 export const mockLabelList = {

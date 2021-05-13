@@ -69,7 +69,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['activeId', 'boardListsTotals']),
+    ...mapState(['activeId']),
     ...mapGetters(['isEpicBoard']),
     isLoggedIn() {
       return Boolean(this.currentUserId);
@@ -99,7 +99,7 @@ export default {
       return !this.list.collapsed || !this.isSwimlanesHeader;
     },
     itemsCount() {
-      return this.boardListsTotals[this.list.id].count;
+      return this.list.itemsCount;
     },
     countIcon() {
       return 'issues';
