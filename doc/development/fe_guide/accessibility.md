@@ -39,7 +39,7 @@ so when in doubt don't use `aria-*`, `role`, and `tabindex` and stick with seman
   - [Clickable icons](#icons-that-are-clickable) are buttons, that is, `<gl-button icon="close" />` is used and not `<gl-icon />`.
   - Icon-only buttons have an `aria-label`.
 - Interactive elements can be [accessed with the Tab key](#support-keyboard-only-use) and have a visible focus state.
-- [Tooltips](#tooltips) are focusable using the Tab key.
+- Elements with [tooltips](#tooltips) are focusable using the Tab key.
 - Are any `role`, `tabindex` or `aria-*` attributes unnecessary?
 - Can any `div` or `span` elements be replaced with a more semantic [HTML element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element) like `p`, `button`, or `time`?
 
@@ -51,6 +51,7 @@ We should ensure that:
 
 - There is only one `h1` element on the page.
 - Heading levels are not skipped.
+- Heading levels are nested correctly.
 
 ## Provide accessible names for screen readers
 
