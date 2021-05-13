@@ -45,6 +45,15 @@ module EE
       filter_mutually_exclusive_labels(ids, added_label_ids)
     end
 
+    override :associations_before_update
+    def associations_before_update(issuable)
+      associations = super
+
+      associations[:epic] = issuable.epic
+
+      associations
+    end
+
     def filter_mutually_exclusive_labels(ids, added_label_ids)
       return ids if added_label_ids.empty? || !parent.feature_available?(:scoped_labels)
 

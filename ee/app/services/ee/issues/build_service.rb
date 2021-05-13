@@ -33,7 +33,7 @@ module EE
       def allowed_issue_admin_params
         return super + [:issue_type] if params[:issue_type] == 'test_case'
 
-        super
+        super + [:epic]
       end
     end
   end

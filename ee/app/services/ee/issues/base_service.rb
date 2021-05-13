@@ -7,16 +7,10 @@ module EE
 
       class EpicAssignmentError < ::ArgumentError; end
 
-      def handle_epic(issue)
+      def filter_epic(issue)
         return unless epic_param_present?
 
-        epic = epic_param(issue)
-        result = epic ? assign_epic(issue, epic) : unassign_epic(issue)
-        issue.reload_epic
-
-        if result[:status] == :error
-          raise EpicAssignmentError, result[:message]
-        end
+        params[:epic] = epic_param(issue)
       end
 
       def assign_epic(issue, epic)
@@ -26,26 +20,26 @@ module EE
 
         link_params = { target_issuable: issue, skip_epic_dates_update: true }
 
-        EpicIssues::CreateService.new(epic, current_user, link_params).execute.tap do |result|
-          next unless result[:status] == :success
-
-          if had_epic
-            ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_changed_epic_action(author: current_user)
-          else
-            ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_added_to_epic_action(author: current_user)
-          end
-        end
+        # EpicIssues::CreateService.new(epic, current_user, link_params).execute.tap do |result|
+        #   next unless result[:status] == :success
+        #
+        #   if had_epic
+        #     ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_changed_epic_action(author: current_user)
+        #   else
+        #     ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_added_to_epic_action(author: current_user)
+        #   end
+        # end
       end
 
       def unassign_epic(issue)
         link = EpicIssue.find_by_issue_id(issue.id)
         return success unless link
 
-        EpicIssues::DestroyService.new(link, current_user).execute.tap do |result|
-          next unless result[:status] == :success
-
-          ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_removed_from_epic_action(author: current_user)
-        end
+        # EpicIssues::DestroyService.new(link, current_user).execute.tap do |result|
+        #   next unless result[:status] == :success
+        #
+        #   ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_removed_from_epic_action(author: current_user)
+        # end
       end
 
       def epic_param(issue)
@@ -85,6 +79,37 @@ module EE
           ::Iteration.for_projects_and_groups([project.id], groups).find_by_id(params[:sprint_id])
 
         params[:sprint_id] = '' unless iteration
+      end
+
+      override :execute_hooks
+      def execute_hooks(issuable, action = 'open', old_associations: {})
+        super
+        handle_epic_change(issuable, old_associations)
+      end
+
+      def handle_epic_change(issuable, old_associations)
+        epic = issuable.epic
+        old_epic = old_associations[:epic]
+
+        return if !epic && !old_epic
+        return if !old_associations[:epic] && !issuable.epic_issue&.previous_changes&.include?('epic_id')
+
+        unless old_epic
+          old_epic_id = issuable.epic_issue.previous_changes['epic_id'].first
+          old_epic = Epic.find(old_epic_id) if old_epic_id
+        end
+
+        if old_epic && !epic
+          epic = old_epic
+          action = :removed
+        elsif !old_epic
+          action = :added
+        else
+          action = :changed
+        end
+
+        ::SystemNoteService.epic_issue(epic, issuable, current_user, action)
+        ::SystemNoteService.issue_on_epic(issuable, epic, current_user, action)
       end
     end
   end

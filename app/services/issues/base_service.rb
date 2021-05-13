@@ -54,10 +54,13 @@ module Issues
     end
 
     def execute_hooks(issue, action = 'open', old_associations: {})
+      old_assignees = old_associations.fetch(:assignees, [])
       issue_data  = Gitlab::Lazy.new { hook_data(issue, action, old_associations: old_associations) }
       hooks_scope = issue.confidential? ? :confidential_issue_hooks : :issue_hooks
+
       issue.project.execute_hooks(issue_data, hooks_scope)
       issue.project.execute_services(issue_data, hooks_scope)
+      handle_assignee_changes(issue, old_assignees)
     end
 
     def update_project_counter_caches?(issue)
@@ -74,6 +77,19 @@ module Issues
       return unless milestone
 
       Milestones::IssuesCountService.new(milestone).delete_cache
+    end
+
+    def handle_assignee_changes(issue, old_assignees)
+      return if issue.assignees == old_assignees
+
+      create_assignee_note(issue, old_assignees)
+      notification_service.async.reassigned_issue(issue, current_user, old_assignees)
+      todo_service.reassigned_assignable(issue, current_user, old_assignees)
+      track_incident_action(current_user, issue, :incident_assigned)
+
+      if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
+        GraphqlTriggers.issuable_assignees_updated(issue)
+      end
     end
   end
 end
