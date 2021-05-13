@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UsersSecurityDashboardProject < ApplicationRecord
+class UsersSecurityDashboardProject < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   SECURITY_DASHBOARD_PROJECTS_LIMIT = 1000

@@ -3,7 +3,7 @@
 # This module is intended to centralize all database access to the secondary
 # tracking database for Geo.
 module Geo
-  class TrackingBase < ApplicationRecord
+  class TrackingBase < NamespaceShard
     self.abstract_class = true
 
     NOT_CONFIGURED_MSG     = 'Geo secondary database is not configured'

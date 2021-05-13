@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module BulkImports
-  class ExportUpload < ApplicationRecord
+  class ExportUpload < NamespaceShard
     include WithUploads
     include ObjectStorage::BackgroundMove
 

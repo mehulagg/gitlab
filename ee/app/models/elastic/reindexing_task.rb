@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Elastic::ReindexingTask < ApplicationRecord
+class Elastic::ReindexingTask < NamespaceShard
   include IgnorableColumns
 
   self.table_name = 'elastic_reindexing_tasks'

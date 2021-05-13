@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class WikiPage
-  class Slug < ApplicationRecord
+  class Slug < NamespaceShard
     def self.meta_foreign_key
       :wiki_page_meta_id
     end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class UploadDeletedEvent < ApplicationRecord
+  class UploadDeletedEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

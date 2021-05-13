@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequest < ApplicationRecord
+class MergeRequest < NamespaceShard
   include AtomicInternalId
   include IidRoutes
   include Issuable

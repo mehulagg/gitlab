@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class PipelineScheduleVariable < ApplicationRecord
+  class PipelineScheduleVariable < NamespaceShard
     extend Gitlab::Ci::Model
     include Ci::HasVariable
 

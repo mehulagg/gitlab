@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UsersStatistics < ApplicationRecord
+class UsersStatistics < NamespaceShard
   scope :order_created_at_desc, -> { order(created_at: :desc) }
 
   class << self

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PathLock < ApplicationRecord
+class PathLock < NamespaceShard
   belongs_to :project
   belongs_to :user
 

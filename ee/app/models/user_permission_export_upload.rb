@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserPermissionExportUpload < ApplicationRecord
+class UserPermissionExportUpload < NamespaceShard
   include WithUploads
   include ObjectStorage::BackgroundMove
 

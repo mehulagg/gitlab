@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RemoteMirror < ApplicationRecord
+class RemoteMirror < NamespaceShard
   include AfterCommitQueue
   include MirrorAuthentication
   include SafeUrl

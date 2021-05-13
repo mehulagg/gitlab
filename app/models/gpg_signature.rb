@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GpgSignature < ApplicationRecord
+class GpgSignature < NamespaceShard
   include ShaAttribute
 
   sha_attribute :commit_sha

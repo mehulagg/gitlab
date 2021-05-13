@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AwardEmoji < ApplicationRecord
+class AwardEmoji < NamespaceShard
   DOWNVOTE_NAME = "thumbsdown"
   UPVOTE_NAME   = "thumbsup"
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserCallout < ApplicationRecord
+class UserCallout < NamespaceShard
   belongs_to :user
 
   enum feature_name: {

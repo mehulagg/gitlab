@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Namespace::PackageSetting < ApplicationRecord
+class Namespace::PackageSetting < NamespaceShard
   self.primary_key = :namespace_id
   self.table_name = 'namespace_package_settings'
 

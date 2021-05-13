@@ -2,7 +2,7 @@
 
 require 'carrierwave/orm/activerecord'
 
-class ProjectImportData < ApplicationRecord
+class ProjectImportData < NamespaceShard
   prepend_mod_with('ProjectImportData') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
   belongs_to :project, inverse_of: :import_data

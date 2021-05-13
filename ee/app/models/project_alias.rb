@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectAlias < ApplicationRecord
+class ProjectAlias < NamespaceShard
   belongs_to :project
 
   validates :project, presence: true

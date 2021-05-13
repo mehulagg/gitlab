@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OpenProjectTrackerData < ApplicationRecord
+class OpenProjectTrackerData < NamespaceShard
   include Services::DataFields
 
   # When the Open Project is fresh installed, the default closed status id is "13" based on current version: v8.

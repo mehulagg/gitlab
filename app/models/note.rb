@@ -3,7 +3,7 @@
 # A note on the root of an issue, merge request, commit, or snippet.
 #
 # A note of this type is never resolvable.
-class Note < ApplicationRecord
+class Note < NamespaceShard
   extend ActiveModel::Naming
   include Gitlab::Utils::StrongMemoize
   include Participable

@@ -2,7 +2,7 @@
 
 module Analytics
   module UsageTrends
-    class Measurement < ApplicationRecord
+    class Measurement < NamespaceShard
       self.table_name = 'analytics_instance_statistics_measurements'
 
       enum identifier: {

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class LabelLink < ApplicationRecord
+class LabelLink < NamespaceShard
   include BulkInsertSafe
   include Importable
 

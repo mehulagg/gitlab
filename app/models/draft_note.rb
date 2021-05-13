@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class DraftNote < ApplicationRecord
+class DraftNote < NamespaceShard
   include DiffPositionableNote
   include Gitlab::Utils::StrongMemoize
   include Sortable

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class Ref < ApplicationRecord
+  class Ref < NamespaceShard
     extend Gitlab::Ci::Model
     include AfterCommitQueue
     include Gitlab::OptimisticLocking

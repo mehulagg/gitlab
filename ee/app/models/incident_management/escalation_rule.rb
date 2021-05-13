@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class EscalationRule < ApplicationRecord
+  class EscalationRule < NamespaceShard
     self.table_name = 'incident_management_escalation_rules'
 
     belongs_to :policy, class_name: 'EscalationPolicy', inverse_of: 'rules', foreign_key: 'policy_id'

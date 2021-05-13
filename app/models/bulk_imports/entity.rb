@@ -17,7 +17,7 @@
 #
 # The tree structure of the entities results in the same structure for imported
 # Groups and Projects.
-class BulkImports::Entity < ApplicationRecord
+class BulkImports::Entity < NamespaceShard
   self.table_name = 'bulk_import_entities'
 
   belongs_to :bulk_import, optional: false

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RawUsageData < ApplicationRecord
+class RawUsageData < NamespaceShard
   validates :payload, presence: true
   validates :recorded_at, presence: true, uniqueness: true
 

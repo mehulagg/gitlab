@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SentryIssue < ApplicationRecord
+class SentryIssue < NamespaceShard
   include Importable
 
   belongs_to :issue

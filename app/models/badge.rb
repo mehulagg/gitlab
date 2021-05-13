@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Badge < ApplicationRecord
+class Badge < NamespaceShard
   include FromUnion
 
   # This structure sets the placeholders that the urls

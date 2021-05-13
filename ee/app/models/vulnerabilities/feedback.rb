@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class Feedback < ApplicationRecord
+  class Feedback < NamespaceShard
     self.table_name = 'vulnerability_feedback'
 
     belongs_to :project

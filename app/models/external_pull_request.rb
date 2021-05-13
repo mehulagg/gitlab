@@ -11,7 +11,7 @@
 # When the mirror is updated and changes are pushed to branches we check
 # if there are open pull requests for the source and target branch.
 # If so, we create pipelines for external pull requests.
-class ExternalPullRequest < ApplicationRecord
+class ExternalPullRequest < NamespaceShard
   include Gitlab::Utils::StrongMemoize
   include ShaAttribute
 

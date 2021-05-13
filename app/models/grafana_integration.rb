@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GrafanaIntegration < ApplicationRecord
+class GrafanaIntegration < NamespaceShard
   belongs_to :project
 
   attr_encrypted :token,

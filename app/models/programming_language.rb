@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProgrammingLanguage < ApplicationRecord
+class ProgrammingLanguage < NamespaceShard
   validates :name, presence: true
   validates :color, allow_blank: false, color: true
 

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
+class ProtectedEnvironment::DeployAccessLevel < NamespaceShard
   ALLOWED_ACCESS_LEVELS = [
     Gitlab::Access::MAINTAINER,
     Gitlab::Access::DEVELOPER,

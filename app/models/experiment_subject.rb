@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ExperimentSubject < ApplicationRecord
+class ExperimentSubject < NamespaceShard
   include ::Gitlab::Experimentation::GroupTypes
 
   belongs_to :experiment, inverse_of: :experiment_subjects

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class JiraConnectSubscription < ApplicationRecord
+class JiraConnectSubscription < NamespaceShard
   belongs_to :installation, class_name: 'JiraConnectInstallation', foreign_key: 'jira_connect_installation_id'
   belongs_to :namespace
 

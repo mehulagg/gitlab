@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Appearance < ApplicationRecord
+class Appearance < NamespaceShard
   include CacheableAttributes
   include CacheMarkdownField
   include ObjectStorage::BackgroundMove

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::PackageFile < ApplicationRecord
+class Packages::PackageFile < NamespaceShard
   include UpdateProjectStatistics
   include FileStoreMounter
 

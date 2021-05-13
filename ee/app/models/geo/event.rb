@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class Event < ApplicationRecord
+  class Event < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

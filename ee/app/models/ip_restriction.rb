@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IpRestriction < ApplicationRecord
+class IpRestriction < NamespaceShard
   INVALID_SUBNET_ERRORS = [IPAddr::AddressFamilyError,
                            IPAddr::InvalidAddressError].freeze
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DependencyProxy::GroupSetting < ApplicationRecord
+class DependencyProxy::GroupSetting < NamespaceShard
   belongs_to :group
 
   validates :group, presence: true

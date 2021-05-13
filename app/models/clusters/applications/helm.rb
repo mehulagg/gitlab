@@ -6,7 +6,7 @@ module Clusters
   module Applications
     # DEPRECATED: This model represents the Helm 2 Tiller server.
     # It is being kept around to enable the cleanup of the unused Tiller server.
-    class Helm < ApplicationRecord
+    class Helm < NamespaceShard
       self.table_name = 'clusters_applications_helm'
 
       attr_encrypted :ca_key,

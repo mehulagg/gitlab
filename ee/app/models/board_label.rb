@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BoardLabel < ApplicationRecord
+class BoardLabel < NamespaceShard
   belongs_to :board
   belongs_to :label
 

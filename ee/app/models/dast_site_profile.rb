@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DastSiteProfile < ApplicationRecord
+class DastSiteProfile < NamespaceShard
   belongs_to :project
   belongs_to :dast_site
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Timelog < ApplicationRecord
+class Timelog < NamespaceShard
   include Importable
 
   before_save :set_project

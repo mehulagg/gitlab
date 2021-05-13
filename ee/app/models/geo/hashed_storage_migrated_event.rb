@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class HashedStorageMigratedEvent < ApplicationRecord
+  class HashedStorageMigratedEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

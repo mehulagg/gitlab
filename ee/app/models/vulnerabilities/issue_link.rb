@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class IssueLink < ApplicationRecord
+  class IssueLink < NamespaceShard
     self.table_name = 'vulnerability_issue_links'
 
     belongs_to :vulnerability

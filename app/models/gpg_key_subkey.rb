@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GpgKeySubkey < ApplicationRecord
+class GpgKeySubkey < NamespaceShard
   include ShaAttribute
 
   sha_attribute :keyid

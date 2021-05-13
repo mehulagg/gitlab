@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserInteractedProject < ApplicationRecord
+class UserInteractedProject < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   belongs_to :user

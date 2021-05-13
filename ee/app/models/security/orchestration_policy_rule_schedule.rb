@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Security
-  class OrchestrationPolicyRuleSchedule < ApplicationRecord
+  class OrchestrationPolicyRuleSchedule < NamespaceShard
     self.table_name = 'security_orchestration_policy_rule_schedules'
 
     belongs_to :owner, class_name: 'User', foreign_key: 'user_id'

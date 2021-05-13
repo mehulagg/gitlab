@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class LabelPriority < ApplicationRecord
+class LabelPriority < NamespaceShard
   include Importable
 
   belongs_to :project

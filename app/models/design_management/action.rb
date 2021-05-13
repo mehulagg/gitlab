@@ -3,7 +3,7 @@
 require_dependency 'design_management'
 
 module DesignManagement
-  class Action < ApplicationRecord
+  class Action < NamespaceShard
     include WithUploads
 
     self.table_name = "#{DesignManagement.table_name_prefix}designs_versions"

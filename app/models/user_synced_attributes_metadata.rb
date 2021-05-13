@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserSyncedAttributesMetadata < ApplicationRecord
+class UserSyncedAttributesMetadata < NamespaceShard
   belongs_to :user
 
   validates :user, presence: true

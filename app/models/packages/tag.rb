@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::Tag < ApplicationRecord
+class Packages::Tag < NamespaceShard
   belongs_to :package, inverse_of: :tags
 
   validates :package, :name, presence: true

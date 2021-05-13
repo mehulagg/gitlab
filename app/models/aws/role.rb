@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Aws
-  class Role < ApplicationRecord
+  class Role < NamespaceShard
     self.table_name = 'aws_roles'
 
     belongs_to :user, inverse_of: :aws_role

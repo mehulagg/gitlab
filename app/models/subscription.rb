@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Subscription < ApplicationRecord
+class Subscription < NamespaceShard
   belongs_to :user
   belongs_to :project
   belongs_to :subscribable, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations

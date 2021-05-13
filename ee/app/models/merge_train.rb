@@ -3,7 +3,7 @@
 # This model represents the merge train metadata of a single merge request.
 # Please note that, in product perspective, a merge train represents a group of merge requests,
 # however, in ActiveRecord model perspective, it exists for _each_ merge request on the train.
-class MergeTrain < ApplicationRecord
+class MergeTrain < NamespaceShard
   include Gitlab::Utils::StrongMemoize
   include AfterCommitQueue
 

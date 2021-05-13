@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class JiraTrackerData < ApplicationRecord
+class JiraTrackerData < NamespaceShard
   include Services::DataFields
   include IgnorableColumns
 

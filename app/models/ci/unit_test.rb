@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class UnitTest < ApplicationRecord
+  class UnitTest < NamespaceShard
     extend Gitlab::Ci::Model
 
     MAX_NAME_SIZE = 255

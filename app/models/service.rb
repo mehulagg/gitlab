@@ -2,7 +2,7 @@
 
 # To add new service you should build a class inherited from Service
 # and implement a set of methods
-class Service < ApplicationRecord
+class Service < NamespaceShard
   include Sortable
   include Importable
   include ProjectServicesLoggable

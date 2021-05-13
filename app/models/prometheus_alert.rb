@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PrometheusAlert < ApplicationRecord
+class PrometheusAlert < NamespaceShard
   include Sortable
   include UsageStatistics
   include Presentable

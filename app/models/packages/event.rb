@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Event < ApplicationRecord
+class Packages::Event < NamespaceShard
   belongs_to :package, optional: true
 
   UNIQUE_EVENTS_ALLOWED = %i[push_package delete_package pull_package].freeze

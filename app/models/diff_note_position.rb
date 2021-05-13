@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DiffNotePosition < ApplicationRecord
+class DiffNotePosition < NamespaceShard
   belongs_to :note
   attr_accessor :line_range
 

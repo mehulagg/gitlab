@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class NamespaceStatistics < ApplicationRecord
+class NamespaceStatistics < NamespaceShard
   include AfterCommitQueue
 
   belongs_to :namespace

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class CacheInvalidationEvent < ApplicationRecord
+  class CacheInvalidationEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ZoomMeeting < ApplicationRecord
+class ZoomMeeting < NamespaceShard
   include Importable
   include UsageStatistics
 

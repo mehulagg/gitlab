@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class RunnerNamespace < ApplicationRecord
+  class RunnerNamespace < NamespaceShard
     extend Gitlab::Ci::Model
     include Limitable
 

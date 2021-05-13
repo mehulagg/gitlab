@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Clusters
-  class Cluster < ApplicationRecord
+  class Cluster < NamespaceShard
     prepend HasEnvironmentScope
     include Presentable
     include Gitlab::Utils::StrongMemoize

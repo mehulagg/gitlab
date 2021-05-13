@@ -15,7 +15,7 @@
 #
 # @example
 #
-#   class MergeRequestDiff < ApplicationRecord
+#   class MergeRequestDiff < NamespaceShard
 #     include BulkInsertableAssociations
 #
 #     # target association class must `include BulkInsertSafe`

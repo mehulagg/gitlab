@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ElasticsearchIndexedNamespace < ApplicationRecord
+class ElasticsearchIndexedNamespace < NamespaceShard
   include ElasticsearchIndexedContainer
   include EachBatch
 

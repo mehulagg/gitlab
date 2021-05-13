@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module BulkImports
-  class Export < ApplicationRecord
+  class Export < NamespaceShard
     include Gitlab::Utils::StrongMemoize
 
     self.table_name = 'bulk_import_exports'

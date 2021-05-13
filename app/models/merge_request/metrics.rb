@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequest::Metrics < ApplicationRecord
+class MergeRequest::Metrics < NamespaceShard
   belongs_to :merge_request, inverse_of: :metrics
   belongs_to :pipeline, class_name: 'Ci::Pipeline', foreign_key: :pipeline_id
   belongs_to :latest_closed_by, class_name: 'User'

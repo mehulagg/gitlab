@@ -7,6 +7,6 @@
 # for details.
 # rubocop:disable Gitlab/NamespacedClass: This is a temporary class with no relevant namespace
 #  WebHook, WebHookLog and all hooks are defined outside of a namespace
-class WebHookLogArchived < ApplicationRecord
+class WebHookLogArchived < NamespaceShard
   self.table_name = 'web_hook_logs_archived'
 end

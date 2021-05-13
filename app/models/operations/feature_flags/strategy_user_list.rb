@@ -2,7 +2,7 @@
 
 module Operations
   module FeatureFlags
-    class StrategyUserList < ApplicationRecord
+    class StrategyUserList < NamespaceShard
       self.table_name = 'operations_strategies_user_lists'
 
       belongs_to :strategy

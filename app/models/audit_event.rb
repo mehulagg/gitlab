@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AuditEvent < ApplicationRecord
+class AuditEvent < NamespaceShard
   include CreatedAtFilterable
   include BulkInsertSafe
   include EachBatch

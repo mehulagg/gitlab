@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class Statistic < ApplicationRecord
+  class Statistic < NamespaceShard
     self.table_name = 'vulnerability_statistics'
 
     belongs_to :project, optional: false

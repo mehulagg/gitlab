@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PersonalAccessToken < ApplicationRecord
+class PersonalAccessToken < NamespaceShard
   include Expirable
   include TokenAuthenticatable
   include Sortable

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module DevOpsReport
-  class Metric < ApplicationRecord
+  class Metric < NamespaceShard
     include Presentable
 
     self.table_name = 'conversational_development_index_metrics'

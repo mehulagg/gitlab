@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class BuildTraceSection < ApplicationRecord
+  class BuildTraceSection < NamespaceShard
     extend SuppressCompositePrimaryKeyWarning
     extend Gitlab::Ci::Model
 

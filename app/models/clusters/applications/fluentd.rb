@@ -2,7 +2,7 @@
 
 module Clusters
   module Applications
-    class Fluentd < ApplicationRecord
+    class Fluentd < NamespaceShard
       VERSION = '2.4.0'
       CILIUM_CONTAINER_NAME = 'cilium-monitor'
 

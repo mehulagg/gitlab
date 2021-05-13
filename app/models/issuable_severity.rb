@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssuableSeverity < ApplicationRecord
+class IssuableSeverity < NamespaceShard
   DEFAULT = 'unknown'
   SEVERITY_LABELS = {
     unknown:  'Unknown',

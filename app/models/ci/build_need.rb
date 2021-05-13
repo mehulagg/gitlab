@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class BuildNeed < ApplicationRecord
+  class BuildNeed < NamespaceShard
     extend Gitlab::Ci::Model
 
     include BulkInsertSafe

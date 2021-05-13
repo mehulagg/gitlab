@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Identity < ApplicationRecord
+class Identity < NamespaceShard
   include Sortable
   include CaseSensitivity
 

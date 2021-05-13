@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ApprovalRules
-  class ExternalApprovalRule < ApplicationRecord
+  class ExternalApprovalRule < NamespaceShard
     self.table_name = 'external_approval_rules'
     scope :with_api_entity_associations, -> { preload(:protected_branches) }
 

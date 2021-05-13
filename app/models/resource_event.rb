@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ResourceEvent < ApplicationRecord
+class ResourceEvent < NamespaceShard
   include Gitlab::Utils::StrongMemoize
   include Importable
 

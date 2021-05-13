@@ -6,7 +6,7 @@
 #
 # Model usage:
 #
-#   class User < ApplicationRecord
+#   class User < NamespaceShard
 #     include NullifyIfBlank
 #
 #     nullify_if_blank :name, :email

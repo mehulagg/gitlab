@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class BuildTraceChunk < ApplicationRecord
+  class BuildTraceChunk < NamespaceShard
     extend ::Gitlab::Ci::Model
     include ::Comparable
     include ::FastDestroyAll

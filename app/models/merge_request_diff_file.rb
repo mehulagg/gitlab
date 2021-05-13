@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestDiffFile < ApplicationRecord
+class MergeRequestDiffFile < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   include BulkInsertSafe

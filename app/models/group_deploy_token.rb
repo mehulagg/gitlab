@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GroupDeployToken < ApplicationRecord
+class GroupDeployToken < NamespaceShard
   belongs_to :group, class_name: '::Group'
   belongs_to :deploy_token, inverse_of: :group_deploy_tokens
 

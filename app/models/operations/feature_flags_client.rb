@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Operations
-  class FeatureFlagsClient < ApplicationRecord
+  class FeatureFlagsClient < NamespaceShard
     include TokenAuthenticatable
 
     self.table_name = 'operations_feature_flags_clients'

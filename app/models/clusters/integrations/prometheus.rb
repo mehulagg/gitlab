@@ -2,7 +2,7 @@
 
 module Clusters
   module Integrations
-    class Prometheus < ApplicationRecord
+    class Prometheus < NamespaceShard
       include ::Clusters::Concerns::PrometheusClient
       include AfterCommitQueue
 

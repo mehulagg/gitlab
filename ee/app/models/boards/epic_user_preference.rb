@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Boards
-  class EpicUserPreference < ApplicationRecord
+  class EpicUserPreference < NamespaceShard
     self.table_name = 'boards_epic_user_preferences'
 
     belongs_to :user, inverse_of: :boards_epic_user_preferences

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Elastic
-  class IndexSetting < ApplicationRecord
+  class IndexSetting < NamespaceShard
     self.table_name = 'elastic_index_settings'
 
     validates :alias_name, uniqueness: true, length: { maximum: 255 }

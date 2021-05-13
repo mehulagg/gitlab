@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ComplianceManagement
-  class Framework < ApplicationRecord
+  class Framework < NamespaceShard
     include StripAttribute
     include IgnorableColumns
     include Gitlab::Utils::StrongMemoize

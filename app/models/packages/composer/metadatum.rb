@@ -2,7 +2,7 @@
 
 module Packages
   module Composer
-    class Metadatum < ApplicationRecord
+    class Metadatum < NamespaceShard
       self.table_name = 'packages_composer_metadata'
       self.primary_key = :package_id
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Dast
-  class ProfilesPipeline < ApplicationRecord
+  class ProfilesPipeline < NamespaceShard
     extend SuppressCompositePrimaryKeyWarning
 
     self.table_name = 'dast_profiles_pipelines'

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssueLink < ApplicationRecord
+class IssueLink < NamespaceShard
   include FromUnion
 
   belongs_to :source, class_name: 'Issue'

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SamlProvider < ApplicationRecord
+class SamlProvider < NamespaceShard
   USER_ATTRIBUTES_LOCKED_FOR_MANAGED_ACCOUNTS = %i(email public_email commit_email notification_email).freeze
 
   belongs_to :group

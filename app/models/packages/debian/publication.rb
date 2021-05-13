@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Debian::Publication < ApplicationRecord
+class Packages::Debian::Publication < NamespaceShard
   belongs_to :package,
     -> { where(package_type: :debian).where.not(version: nil) },
     inverse_of: :debian_publication,

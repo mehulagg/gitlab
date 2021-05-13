@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class Stage < ApplicationRecord
+  class Stage < NamespaceShard
     extend Gitlab::Ci::Model
     include Importable
     include Ci::HasStatus

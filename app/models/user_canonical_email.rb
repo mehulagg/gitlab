@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserCanonicalEmail < ApplicationRecord
+class UserCanonicalEmail < NamespaceShard
   validates :canonical_email, presence: true
   validates :canonical_email, format: { with: Devise.email_regexp }
 

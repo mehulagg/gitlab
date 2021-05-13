@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class LfsObject < ApplicationRecord
+class LfsObject < NamespaceShard
   include AfterCommitQueue
   include Checksummable
   include EachBatch

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class FindingSignature < ApplicationRecord
+  class FindingSignature < NamespaceShard
     self.table_name = 'vulnerability_finding_signatures'
 
     include BulkInsertSafe

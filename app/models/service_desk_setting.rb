@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ServiceDeskSetting < ApplicationRecord
+class ServiceDeskSetting < NamespaceShard
   include Gitlab::Utils::StrongMemoize
 
   belongs_to :project

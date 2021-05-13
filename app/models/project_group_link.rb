@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectGroupLink < ApplicationRecord
+class ProjectGroupLink < NamespaceShard
   include Expirable
 
   belongs_to :project

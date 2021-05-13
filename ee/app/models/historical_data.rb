@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class HistoricalData < ApplicationRecord
+class HistoricalData < NamespaceShard
   validates :recorded_at, presence: true
 
   # HistoricalData.during((Time.current - 1.year)..Time.current).average(:active_user_count)

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::DependencyLink < ApplicationRecord
+class Packages::DependencyLink < NamespaceShard
   belongs_to :package, inverse_of: :dependency_links
   belongs_to :dependency, inverse_of: :dependency_links, class_name: 'Packages::Dependency'
   has_one :nuget_metadatum, inverse_of: :dependency_link, class_name: 'Packages::Nuget::DependencyLinkMetadatum'

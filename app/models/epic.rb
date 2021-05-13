@@ -2,7 +2,7 @@
 
 # Placeholder class for model that is implemented in EE
 # It reserves '&' as a reference prefix, but the table does not exist in FOSS
-class Epic < ApplicationRecord
+class Epic < NamespaceShard
   include IgnorableColumns
 
   def self.link_reference_pattern

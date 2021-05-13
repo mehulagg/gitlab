@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ContainerRepository < ApplicationRecord
+class ContainerRepository < NamespaceShard
   include Gitlab::Utils::StrongMemoize
   include Gitlab::SQL::Pattern
   include EachBatch

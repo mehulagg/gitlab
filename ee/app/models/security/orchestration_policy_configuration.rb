@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Security
-  class OrchestrationPolicyConfiguration < ApplicationRecord
+  class OrchestrationPolicyConfiguration < NamespaceShard
     include Gitlab::Utils::StrongMemoize
 
     self.table_name = 'security_orchestration_policy_configurations'

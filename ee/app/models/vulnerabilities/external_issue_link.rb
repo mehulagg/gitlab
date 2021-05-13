@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class ExternalIssueLink < ApplicationRecord
+  class ExternalIssueLink < NamespaceShard
     self.table_name = 'vulnerability_external_issue_links'
 
     belongs_to :author, class_name: 'User'

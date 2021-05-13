@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestBlock < ApplicationRecord
+class MergeRequestBlock < NamespaceShard
   belongs_to :blocking_merge_request, class_name: 'MergeRequest'
   belongs_to :blocked_merge_request, class_name: 'MergeRequest'
 

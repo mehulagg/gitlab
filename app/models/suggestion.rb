@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Suggestion < ApplicationRecord
+class Suggestion < NamespaceShard
   include Importable
   include Suggestible
 

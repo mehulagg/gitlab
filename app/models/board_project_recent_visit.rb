@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Tracks which boards in a specific project a user has visited
-class BoardProjectRecentVisit < ApplicationRecord
+class BoardProjectRecentVisit < NamespaceShard
   include BoardRecentVisit
 
   belongs_to :user

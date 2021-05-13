@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Nuget::DependencyLinkMetadatum < ApplicationRecord
+class Packages::Nuget::DependencyLinkMetadatum < NamespaceShard
   self.primary_key = :dependency_link_id
 
   belongs_to :dependency_link, inverse_of: :nuget_metadatum

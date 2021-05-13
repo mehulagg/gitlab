@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Deployment < ApplicationRecord
+class Deployment < NamespaceShard
   include AtomicInternalId
   include IidRoutes
   include AfterCommitQueue

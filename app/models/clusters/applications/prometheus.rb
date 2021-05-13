@@ -2,7 +2,7 @@
 
 module Clusters
   module Applications
-    class Prometheus < ApplicationRecord
+    class Prometheus < NamespaceShard
       include ::Clusters::Concerns::PrometheusClient
 
       VERSION = '10.4.1'

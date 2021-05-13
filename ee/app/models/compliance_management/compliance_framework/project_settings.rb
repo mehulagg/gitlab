@@ -4,7 +4,7 @@ require_dependency 'compliance_management/compliance_framework'
 
 module ComplianceManagement
   module ComplianceFramework
-    class ProjectSettings < ApplicationRecord
+    class ProjectSettings < NamespaceShard
       include IgnorableColumns
 
       self.table_name = 'project_compliance_framework_settings'

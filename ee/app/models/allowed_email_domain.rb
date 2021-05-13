@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AllowedEmailDomain < ApplicationRecord
+class AllowedEmailDomain < NamespaceShard
   RESERVED_DOMAINS = [
     'gmail.com',
     'yahoo.com',

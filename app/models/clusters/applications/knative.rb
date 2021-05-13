@@ -4,7 +4,7 @@ module Clusters
   module Applications
     # DEPRECATED for removal in %14.0
     # See https://gitlab.com/groups/gitlab-org/-/epics/4280
-    class Knative < ApplicationRecord
+    class Knative < NamespaceShard
       VERSION = '0.10.0'
       REPOSITORY = 'https://charts.gitlab.io'
       METRICS_CONFIG = 'https://gitlab.com/gitlab-org/charts/knative/-/raw/v0.9.0/vendor/istio-metrics.yml'

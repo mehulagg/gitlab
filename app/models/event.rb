@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Event < ApplicationRecord
+class Event < NamespaceShard
   include Sortable
   include FromUnion
   include Presentable

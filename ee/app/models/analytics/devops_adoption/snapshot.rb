@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
+class Analytics::DevopsAdoption::Snapshot < NamespaceShard
   belongs_to :segment, inverse_of: :snapshots
 
   validates :segment, presence: true

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Elastic::ReindexingSlice < ApplicationRecord
+class Elastic::ReindexingSlice < NamespaceShard
   self.table_name = 'elastic_reindexing_slices'
 
   belongs_to :elastic_reindexing_subtask, class_name: 'Elastic::ReindexingSubtask'

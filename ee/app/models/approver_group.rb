@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ApproverGroup < ApplicationRecord
+class ApproverGroup < NamespaceShard
   belongs_to :target, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations
   belongs_to :group
 

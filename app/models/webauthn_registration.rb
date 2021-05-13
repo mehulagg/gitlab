@@ -2,7 +2,7 @@
 
 # Registration information for WebAuthn credentials
 
-class WebauthnRegistration < ApplicationRecord
+class WebauthnRegistration < NamespaceShard
   belongs_to :user
 
   validates :credential_xid, :public_key, :name, :counter, presence: true

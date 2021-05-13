@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class Remediation < ApplicationRecord
+  class Remediation < NamespaceShard
     include FileStoreMounter
     include ShaAttribute
 

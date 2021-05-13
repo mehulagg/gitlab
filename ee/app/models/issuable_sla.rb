@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssuableSla < ApplicationRecord
+class IssuableSla < NamespaceShard
   belongs_to :issue, optional: false
   validates :due_at, presence: true
 

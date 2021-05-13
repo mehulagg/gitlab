@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PagesDomain < ApplicationRecord
+class PagesDomain < NamespaceShard
   include Presentable
   include FromUnion
   include AfterCommitQueue

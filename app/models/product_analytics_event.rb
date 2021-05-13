@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProductAnalyticsEvent < ApplicationRecord
+class ProductAnalyticsEvent < NamespaceShard
   self.table_name = 'product_analytics_events_experimental'
 
   # Ignore that the partition key :project_id is part of the formal primary key

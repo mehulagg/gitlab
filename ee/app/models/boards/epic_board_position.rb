@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Boards
-  class EpicBoardPosition < ApplicationRecord
+  class EpicBoardPosition < NamespaceShard
     include RelativePositioning
 
     belongs_to :epic_board, optional: false, inverse_of: :epic_board_positions

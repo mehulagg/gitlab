@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class UnitTestFailure < ApplicationRecord
+  class UnitTestFailure < NamespaceShard
     extend Gitlab::Ci::Model
 
     REPORT_WINDOW = 14.days

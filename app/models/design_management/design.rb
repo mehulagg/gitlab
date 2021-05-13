@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module DesignManagement
-  class Design < ApplicationRecord
+  class Design < NamespaceShard
     include AtomicInternalId
     include Importable
     include Noteable

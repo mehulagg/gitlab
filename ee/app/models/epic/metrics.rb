@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Epic::Metrics < ApplicationRecord
+class Epic::Metrics < NamespaceShard
   belongs_to :epic
 
   def record!

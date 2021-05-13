@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectTracingSetting < ApplicationRecord
+class ProjectTracingSetting < NamespaceShard
   belongs_to :project
 
   validates :external_url, length: { maximum: 255 }, public_url: true

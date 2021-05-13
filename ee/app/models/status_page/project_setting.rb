@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module StatusPage
-  class ProjectSetting < ApplicationRecord
+  class ProjectSetting < NamespaceShard
     # AWS validations. See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25863#note_295772553
     AWS_BUCKET_NAME_REGEXP = /\A[a-z0-9][a-z0-9\-.]*\z/.freeze
     AWS_ACCESS_KEY_REGEXP  = /\A[A-Z0-9]{20}\z/.freeze

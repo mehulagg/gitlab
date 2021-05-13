@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::Package < ApplicationRecord
+class Packages::Package < NamespaceShard
   include Sortable
   include Gitlab::SQL::Pattern
   include UsageStatistics

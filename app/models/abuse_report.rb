@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AbuseReport < ApplicationRecord
+class AbuseReport < NamespaceShard
   include CacheMarkdownField
   include Sortable
 

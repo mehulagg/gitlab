@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssuableMetricImage < ApplicationRecord
+class IssuableMetricImage < NamespaceShard
   include Gitlab::FileTypeDetection
   include FileStoreMounter
   include WithUploads

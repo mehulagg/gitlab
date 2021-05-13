@@ -4,7 +4,7 @@
 # project. For example, moving a project to another gitaly node to help
 # balance storage capacity.
 module Projects
-  class RepositoryStorageMove < ApplicationRecord
+  class RepositoryStorageMove < NamespaceShard
     extend ::Gitlab::Utils::Override
     include RepositoryStorageMovable
 

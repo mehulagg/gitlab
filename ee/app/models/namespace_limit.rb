@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class NamespaceLimit < ApplicationRecord
+class NamespaceLimit < NamespaceShard
   MIN_REQURIED_STORAGE_USAGE_RATIO = 0.5
 
   self.primary_key = :namespace_id

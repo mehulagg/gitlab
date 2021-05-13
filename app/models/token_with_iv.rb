@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # rubocop: todo Gitlab/NamespacedClass
-class TokenWithIv < ApplicationRecord
+class TokenWithIv < NamespaceShard
   validates :hashed_token, presence: true
   validates :iv, presence: true
   validates :hashed_plaintext_token, presence: true

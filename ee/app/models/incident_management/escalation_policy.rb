@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class EscalationPolicy < ApplicationRecord
+  class EscalationPolicy < NamespaceShard
     self.table_name = 'incident_management_escalation_policies'
 
     belongs_to :project

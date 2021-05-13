@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Releases
-  class Link < ApplicationRecord
+  class Link < NamespaceShard
     self.table_name = 'release_links'
 
     belongs_to :release, touch: true

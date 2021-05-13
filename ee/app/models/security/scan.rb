@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Security
-  class Scan < ApplicationRecord
+  class Scan < NamespaceShard
     include CreatedAtFilterable
 
     self.table_name = 'security_scans'

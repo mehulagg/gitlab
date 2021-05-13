@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Snippet < ApplicationRecord
+class Snippet < NamespaceShard
   include Gitlab::VisibilityLevel
   include Redactable
   include CacheMarkdownField

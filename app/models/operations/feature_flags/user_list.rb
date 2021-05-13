@@ -2,7 +2,7 @@
 
 module Operations
   module FeatureFlags
-    class UserList < ApplicationRecord
+    class UserList < NamespaceShard
       include AtomicInternalId
       include IidRoutes
       include ::Gitlab::SQL::Pattern

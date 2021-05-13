@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ExperimentUser < ApplicationRecord
+class ExperimentUser < NamespaceShard
   include ::Gitlab::Experimentation::GroupTypes
 
   belongs_to :experiment

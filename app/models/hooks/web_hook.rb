@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class WebHook < ApplicationRecord
+class WebHook < NamespaceShard
   include Sortable
 
   FAILURE_THRESHOLD = 3 # three strikes

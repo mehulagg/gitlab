@@ -3,7 +3,7 @@
 # This class represents a software license policy. Which means the fact that the user
 # approves or not of the use of a certain software license in their project.
 # For use in the License Management feature.
-class SoftwareLicensePolicy < ApplicationRecord
+class SoftwareLicensePolicy < NamespaceShard
   include Presentable
   # Mapping from old classification names to new names
   LEGACY_CLASSIFICATION_STATUS = {

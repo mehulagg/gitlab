@@ -2,7 +2,7 @@
 
 module Metrics
   module Dashboard
-    class Annotation < ApplicationRecord
+    class Annotation < NamespaceShard
       include DeleteWithLimit
 
       self.table_name = 'metrics_dashboard_annotations'

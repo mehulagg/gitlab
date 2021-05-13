@@ -2,7 +2,7 @@
 
 module Packages
   module Composer
-    class CacheFile < ApplicationRecord
+    class CacheFile < NamespaceShard
       include FileStoreMounter
 
       self.table_name = 'packages_composer_cache_files'

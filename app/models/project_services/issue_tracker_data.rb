@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssueTrackerData < ApplicationRecord
+class IssueTrackerData < NamespaceShard
   include Services::DataFields
 
   attr_encrypted :project_url, encryption_options

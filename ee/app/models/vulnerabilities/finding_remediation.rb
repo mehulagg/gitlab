@@ -2,7 +2,7 @@
 
 # This is a join model between the `Finding` and `Remediation` models.
 module Vulnerabilities
-  class FindingRemediation < ApplicationRecord
+  class FindingRemediation < NamespaceShard
     self.table_name = 'vulnerability_findings_remediations'
 
     belongs_to :finding, class_name: 'Vulnerabilities::Finding', inverse_of: :finding_remediations, foreign_key: 'vulnerability_occurrence_id', optional: false

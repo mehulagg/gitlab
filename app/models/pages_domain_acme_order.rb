@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PagesDomainAcmeOrder < ApplicationRecord
+class PagesDomainAcmeOrder < NamespaceShard
   belongs_to :pages_domain
 
   scope :expired, -> { where("expires_at < ?", Time.current) }

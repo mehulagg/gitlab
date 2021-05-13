@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ListUserPreference < ApplicationRecord
+class ListUserPreference < NamespaceShard
   belongs_to :user
   belongs_to :list
 

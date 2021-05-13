@@ -2,7 +2,7 @@
 
 module Clusters
   module Providers
-    class Gcp < ApplicationRecord
+    class Gcp < NamespaceShard
       include Clusters::Concerns::ProviderStatus
 
       self.table_name = 'cluster_providers_gcp'

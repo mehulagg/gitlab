@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestContextCommitDiffFile < ApplicationRecord
+class MergeRequestContextCommitDiffFile < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   include Gitlab::EncodingHelper

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RequirementsManagement
-  class TestReport < ApplicationRecord
+  class TestReport < NamespaceShard
     include Sortable
     include BulkInsertSafe
 

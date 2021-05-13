@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # PagesDeployment stores a zip archive containing GitLab Pages web-site
-class PagesDeployment < ApplicationRecord
+class PagesDeployment < NamespaceShard
   include EachBatch
   include FileStoreMounter
 

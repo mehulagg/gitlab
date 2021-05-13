@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class WebHookLog < ApplicationRecord
+class WebHookLog < NamespaceShard
   include SafeUrl
   include Presentable
   include DeleteWithLimit

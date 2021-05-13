@@ -3,7 +3,7 @@
 require_dependency 'alert_management'
 
 module AlertManagement
-  class Alert < ApplicationRecord
+  class Alert < NamespaceShard
     include IidRoutes
     include AtomicInternalId
     include ShaAttribute

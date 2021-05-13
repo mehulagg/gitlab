@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ApplicationSetting
-  class Term < ApplicationRecord
+  class Term < NamespaceShard
     include CacheMarkdownField
     has_many :term_agreements
 

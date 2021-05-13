@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Nuget::Metadatum < ApplicationRecord
+class Packages::Nuget::Metadatum < NamespaceShard
   belongs_to :package, -> { where(package_type: :nuget) }, inverse_of: :nuget_metadatum
 
   validates :package, presence: true

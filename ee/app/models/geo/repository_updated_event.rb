@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class RepositoryUpdatedEvent < ApplicationRecord
+  class RepositoryUpdatedEvent < NamespaceShard
     extend ::Gitlab::Utils::Override
     include Geo::Model
     include Geo::Eventable

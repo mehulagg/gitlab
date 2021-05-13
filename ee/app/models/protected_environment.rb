@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class ProtectedEnvironment < ApplicationRecord
+class ProtectedEnvironment < NamespaceShard
   include ::Gitlab::Utils::StrongMemoize
 
   belongs_to :project

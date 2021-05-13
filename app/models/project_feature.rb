@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectFeature < ApplicationRecord
+class ProjectFeature < NamespaceShard
   include Featurable
 
   # When updating this array, make sure to update rubocop/cop/gitlab/feature_available_usage.rb as well.

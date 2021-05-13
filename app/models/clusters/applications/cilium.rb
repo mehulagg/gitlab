@@ -2,7 +2,7 @@
 
 module Clusters
   module Applications
-    class Cilium < ApplicationRecord
+    class Cilium < NamespaceShard
       self.table_name = 'clusters_applications_cilium'
 
       include ::Clusters::Concerns::ApplicationCore

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DeployKeysProject < ApplicationRecord
+class DeployKeysProject < NamespaceShard
   belongs_to :project, inverse_of: :deploy_keys_projects
   belongs_to :deploy_key, inverse_of: :deploy_keys_projects
   scope :without_project_deleted,  -> { joins(:project).where(projects: { pending_delete: false }) }

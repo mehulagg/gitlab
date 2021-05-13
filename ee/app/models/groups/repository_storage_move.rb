@@ -4,7 +4,7 @@
 # group. For example, moving a group to another gitaly node to help
 # balance storage capacity.
 module Groups
-  class RepositoryStorageMove < ApplicationRecord
+  class RepositoryStorageMove < NamespaceShard
     extend ::Gitlab::Utils::Override
     include RepositoryStorageMovable
 

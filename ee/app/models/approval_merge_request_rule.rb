@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ApprovalMergeRequestRule < ApplicationRecord
+class ApprovalMergeRequestRule < NamespaceShard
   include Gitlab::Utils::StrongMemoize
   include ApprovalRuleLike
   include UsageStatistics

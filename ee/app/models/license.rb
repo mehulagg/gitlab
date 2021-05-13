@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class License < ApplicationRecord
+class License < NamespaceShard
   include ActionView::Helpers::NumberHelper
   include Gitlab::Utils::StrongMemoize
 

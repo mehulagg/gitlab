@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Issues::CsvImport < ApplicationRecord
+class Issues::CsvImport < NamespaceShard
   self.table_name = 'csv_issue_imports'
 
   belongs_to :project, optional: false

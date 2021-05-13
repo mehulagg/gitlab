@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IndexStatus < ApplicationRecord
+class IndexStatus < NamespaceShard
   include ::ShaAttribute
 
   belongs_to :project

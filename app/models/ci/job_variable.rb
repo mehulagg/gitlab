@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class JobVariable < ApplicationRecord
+  class JobVariable < NamespaceShard
     extend Gitlab::Ci::Model
     include Ci::NewHasVariable
     include BulkInsertSafe

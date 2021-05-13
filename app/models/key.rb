@@ -2,7 +2,7 @@
 
 require 'digest/md5'
 
-class Key < ApplicationRecord
+class Key < NamespaceShard
   include AfterCommitQueue
   include Sortable
   include Sha256Attribute

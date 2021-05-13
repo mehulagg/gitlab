@@ -3,7 +3,7 @@
 # The BulkImport model links all models required for a bulk import of groups and
 # projects to a GitLab instance. It associates the import with the responsible
 # user.
-class BulkImport < ApplicationRecord
+class BulkImport < NamespaceShard
   belongs_to :user, optional: false
 
   has_one :configuration, class_name: 'BulkImports::Configuration'

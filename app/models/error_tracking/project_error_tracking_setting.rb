@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ErrorTracking
-  class ProjectErrorTrackingSetting < ApplicationRecord
+  class ProjectErrorTrackingSetting < NamespaceShard
     include Gitlab::Utils::StrongMemoize
     include ReactiveCaching
     include Gitlab::Routing

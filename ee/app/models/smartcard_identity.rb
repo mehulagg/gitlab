@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SmartcardIdentity < ApplicationRecord
+class SmartcardIdentity < NamespaceShard
   belongs_to :user
 
   validates :user,

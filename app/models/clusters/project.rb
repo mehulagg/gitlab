@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Clusters
-  class Project < ApplicationRecord
+  class Project < NamespaceShard
     self.table_name = 'cluster_projects'
 
     belongs_to :cluster, class_name: 'Clusters::Cluster'

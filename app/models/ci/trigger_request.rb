@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class TriggerRequest < ApplicationRecord
+  class TriggerRequest < NamespaceShard
     extend Gitlab::Ci::Model
 
     belongs_to :trigger

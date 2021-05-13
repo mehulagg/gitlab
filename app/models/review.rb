@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Review < ApplicationRecord
+class Review < NamespaceShard
   include Participable
   include Mentionable
 

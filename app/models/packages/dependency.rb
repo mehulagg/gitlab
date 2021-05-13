@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::Dependency < ApplicationRecord
+class Packages::Dependency < NamespaceShard
   has_many :dependency_links, class_name: 'Packages::DependencyLink'
 
   validates :name, :version_pattern, presence: true

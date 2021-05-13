@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class NotificationSetting < ApplicationRecord
+class NotificationSetting < NamespaceShard
   include FromUnion
 
   enum level: { global: 3, watch: 2, participating: 1, mention: 4, disabled: 0, custom: 5 }

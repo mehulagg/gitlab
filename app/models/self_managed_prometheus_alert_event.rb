@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SelfManagedPrometheusAlertEvent < ApplicationRecord
+class SelfManagedPrometheusAlertEvent < NamespaceShard
   include AlertEventLifecycle
 
   belongs_to :project, validate: true, inverse_of: :self_managed_prometheus_alert_events

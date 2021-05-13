@@ -6,7 +6,7 @@
 #
 # Usage:
 #
-#     class Milestone < ApplicationRecord
+#     class Milestone < NamespaceShard
 #       strip_attributes :title
 #     end
 #

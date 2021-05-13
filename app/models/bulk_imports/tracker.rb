@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BulkImports::Tracker < ApplicationRecord
+class BulkImports::Tracker < NamespaceShard
   self.table_name = 'bulk_import_trackers'
 
   alias_attribute :pipeline_name, :relation

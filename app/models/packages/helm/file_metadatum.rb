@@ -2,7 +2,7 @@
 
 module Packages
   module Helm
-    class FileMetadatum < ApplicationRecord
+    class FileMetadatum < NamespaceShard
       self.primary_key = :package_file_id
 
       belongs_to :package_file, inverse_of: :helm_file_metadatum

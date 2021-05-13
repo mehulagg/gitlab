@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class LfsFileLock < ApplicationRecord
+class LfsFileLock < NamespaceShard
   belongs_to :project
   belongs_to :user
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Serverless
-  class DomainCluster < ApplicationRecord
+  class DomainCluster < NamespaceShard
     self.table_name = 'serverless_domain_cluster'
 
     HEX_REGEXP = %r{\A\h+\z}.freeze

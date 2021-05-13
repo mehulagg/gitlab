@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectDailyStatistic < ApplicationRecord
+class ProjectDailyStatistic < NamespaceShard
   belongs_to :project
 
   scope :of_project, -> (project) { where(project: project) }

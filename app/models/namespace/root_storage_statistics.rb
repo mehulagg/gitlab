@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Namespace::RootStorageStatistics < ApplicationRecord
+class Namespace::RootStorageStatistics < NamespaceShard
   SNIPPETS_SIZE_STAT_NAME = 'snippets_size'
   STATISTICS_ATTRIBUTES = %W(
     storage_size

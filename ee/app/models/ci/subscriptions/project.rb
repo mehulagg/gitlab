@@ -2,7 +2,7 @@
 
 module Ci
   module Subscriptions
-    class Project < ApplicationRecord
+    class Project < NamespaceShard
       include ::Limitable
 
       self.table_name = 'ci_subscriptions_projects'

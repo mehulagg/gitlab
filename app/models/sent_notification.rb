@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SentNotification < ApplicationRecord
+class SentNotification < NamespaceShard
   serialize :position, Gitlab::Diff::Position # rubocop:disable Cop/ActiveRecordSerialize
 
   belongs_to :project

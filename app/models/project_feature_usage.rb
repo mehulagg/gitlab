@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectFeatureUsage < ApplicationRecord
+class ProjectFeatureUsage < NamespaceShard
   self.primary_key = :project_id
 
   JIRA_DVCS_CLOUD_FIELD = 'jira_dvcs_cloud_last_sync_at'

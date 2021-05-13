@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProtectedBranch < ApplicationRecord
+class ProtectedBranch < NamespaceShard
   include ProtectedRef
   include Gitlab::SQL::Pattern
 

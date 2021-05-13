@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class X509Certificate < ApplicationRecord
+class X509Certificate < NamespaceShard
   include X509SerialNumberAttribute
   include AfterCommitQueue
 

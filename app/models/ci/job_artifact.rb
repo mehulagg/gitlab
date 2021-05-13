@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class JobArtifact < ApplicationRecord
+  class JobArtifact < NamespaceShard
     include AfterCommitQueue
     include ObjectStorage::BackgroundMove
     include UpdateProjectStatistics

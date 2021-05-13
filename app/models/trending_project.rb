@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class TrendingProject < ApplicationRecord
+class TrendingProject < NamespaceShard
   belongs_to :project
 
   # The number of months to include in the trending calculation.

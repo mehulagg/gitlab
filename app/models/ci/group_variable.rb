@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class GroupVariable < ApplicationRecord
+  class GroupVariable < NamespaceShard
     extend Gitlab::Ci::Model
     include Ci::HasVariable
     include Presentable

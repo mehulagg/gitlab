@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Experiment < ApplicationRecord
+class Experiment < NamespaceShard
   has_many :experiment_users
   has_many :experiment_subjects, inverse_of: :experiment
 

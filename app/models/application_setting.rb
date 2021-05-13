@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ApplicationSetting < ApplicationRecord
+class ApplicationSetting < NamespaceShard
   include CacheableAttributes
   include CacheMarkdownField
   include TokenAuthenticatable

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class LfsObjectDeletedEvent < ApplicationRecord
+  class LfsObjectDeletedEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DeployToken < ApplicationRecord
+class DeployToken < NamespaceShard
   include Expirable
   include TokenAuthenticatable
   include PolicyActor

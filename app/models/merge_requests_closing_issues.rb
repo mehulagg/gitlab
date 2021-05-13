@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestsClosingIssues < ApplicationRecord
+class MergeRequestsClosingIssues < NamespaceShard
   belongs_to :merge_request
   belongs_to :issue
 

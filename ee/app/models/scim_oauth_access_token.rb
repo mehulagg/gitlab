@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ScimOauthAccessToken < ApplicationRecord
+class ScimOauthAccessToken < NamespaceShard
   include TokenAuthenticatable
 
   belongs_to :group

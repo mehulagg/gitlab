@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectMetricsSetting < ApplicationRecord
+class ProjectMetricsSetting < NamespaceShard
   belongs_to :project
 
   validates :external_dashboard_url,

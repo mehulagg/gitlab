@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RepositoryLanguage < ApplicationRecord
+class RepositoryLanguage < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   belongs_to :project

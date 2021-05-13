@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BoardAssignee < ApplicationRecord
+class BoardAssignee < NamespaceShard
   belongs_to :board
   belongs_to :assignee, class_name: 'User'
 

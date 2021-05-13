@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Todo < ApplicationRecord
+class Todo < NamespaceShard
   include Sortable
   include FromUnion
 

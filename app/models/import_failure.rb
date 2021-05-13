@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ImportFailure < ApplicationRecord
+class ImportFailure < NamespaceShard
   belongs_to :project
   belongs_to :group
 

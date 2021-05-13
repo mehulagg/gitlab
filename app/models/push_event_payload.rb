@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PushEventPayload < ApplicationRecord
+class PushEventPayload < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   include ShaAttribute

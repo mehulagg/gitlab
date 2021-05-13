@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Conan::Metadatum < ApplicationRecord
+class Packages::Conan::Metadatum < NamespaceShard
   belongs_to :package, -> { where(package_type: :conan) }, inverse_of: :conan_metadatum
 
   validates :package, presence: true

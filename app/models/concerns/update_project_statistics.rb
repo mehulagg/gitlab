@@ -8,7 +8,7 @@
 # Example:
 #
 # module Ci
-#   class JobArtifact < ApplicationRecord
+#   class JobArtifact < NamespaceShard
 #     include UpdateProjectStatistics
 #
 #     update_project_statistics project_statistics_name: :build_artifacts_size

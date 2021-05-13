@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 #
-class ProjectSecuritySetting < ApplicationRecord
+class ProjectSecuritySetting < NamespaceShard
   self.primary_key = :project_id
 
   # Note: Even if we store settings for all types of security scanning

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectAutoDevops < ApplicationRecord
+class ProjectAutoDevops < NamespaceShard
   belongs_to :project, inverse_of: :auto_devops
 
   enum deploy_strategy: {

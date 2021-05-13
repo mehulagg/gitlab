@@ -15,7 +15,7 @@
 #
 # @example
 #
-#   class MyRecord < ApplicationRecord
+#   class MyRecord < NamespaceShard
 #     include BulkInsertSafe # must be included _last_ i.e. after any other concerns
 #   end
 #

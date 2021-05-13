@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Releases
-  class Evidence < ApplicationRecord
+  class Evidence < NamespaceShard
     include ShaAttribute
     include Presentable
 

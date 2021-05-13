@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UsersOpsDashboardProject < ApplicationRecord
+class UsersOpsDashboardProject < NamespaceShard
   include UsageStatistics
 
   belongs_to :project

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Boards
-  class EpicList < ApplicationRecord
+  class EpicList < NamespaceShard
     include ::Boards::Listable
 
     belongs_to :epic_board, optional: false, inverse_of: :epic_lists

@@ -2,7 +2,7 @@
 
 module StatusPage
   # Corresponds to an issue which has been published to the Status Page.
-  class PublishedIncident < ApplicationRecord
+  class PublishedIncident < NamespaceShard
     self.table_name = "status_page_published_incidents"
 
     belongs_to :issue, inverse_of: :status_page_published_incident

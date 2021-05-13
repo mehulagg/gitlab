@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Dast
-  class Profile < ApplicationRecord
+  class Profile < NamespaceShard
     self.table_name = 'dast_profiles'
 
     belongs_to :project

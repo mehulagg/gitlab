@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Environment < ApplicationRecord
+class Environment < NamespaceShard
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
   include FastDestroyAll::Helpers

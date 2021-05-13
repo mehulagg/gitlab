@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class WikiPage
-  class Meta < ApplicationRecord
+  class Meta < NamespaceShard
     include HasWikiPageMetaAttributes
 
     self.table_name = 'wiki_page_meta'

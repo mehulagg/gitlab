@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Analytics::CycleAnalytics::GroupValueStream < ApplicationRecord
+class Analytics::CycleAnalytics::GroupValueStream < NamespaceShard
   belongs_to :group
 
   has_many :stages, -> { ordered }, class_name: 'Analytics::CycleAnalytics::GroupStage', index_errors: true

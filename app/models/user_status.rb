@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserStatus < ApplicationRecord
+class UserStatus < NamespaceShard
   include CacheMarkdownField
 
   self.primary_key = :user_id

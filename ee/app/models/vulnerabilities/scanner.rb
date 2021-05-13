@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class Scanner < ApplicationRecord
+  class Scanner < NamespaceShard
     self.table_name = "vulnerability_scanners"
 
     has_many :findings, class_name: 'Vulnerabilities::Finding', inverse_of: :scanner

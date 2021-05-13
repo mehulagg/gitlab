@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GitlabSubscription < ApplicationRecord
+class GitlabSubscription < NamespaceShard
   include EachBatch
   include Gitlab::Utils::StrongMemoize
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PushRule < ApplicationRecord
+class PushRule < NamespaceShard
   extend Gitlab::Cache::RequestCache
 
   request_cache_key do

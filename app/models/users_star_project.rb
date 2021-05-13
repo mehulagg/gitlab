@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UsersStarProject < ApplicationRecord
+class UsersStarProject < NamespaceShard
   include Sortable
 
   belongs_to :project, counter_cache: :star_count, touch: true

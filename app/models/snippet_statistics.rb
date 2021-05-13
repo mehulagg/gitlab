@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SnippetStatistics < ApplicationRecord
+class SnippetStatistics < NamespaceShard
   include AfterCommitQueue
   include UpdateProjectStatistics
 

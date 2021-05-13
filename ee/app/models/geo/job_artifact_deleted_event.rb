@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class JobArtifactDeletedEvent < ApplicationRecord
+  class JobArtifactDeletedEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
     include BulkInsertSafe

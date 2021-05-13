@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ChatName < ApplicationRecord
+class ChatName < NamespaceShard
   LAST_USED_AT_INTERVAL = 1.hour
 
   belongs_to :service

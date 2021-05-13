@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Boards
-  class EpicListUserPreference < ApplicationRecord
+  class EpicListUserPreference < NamespaceShard
     belongs_to :user
     belongs_to :epic_list, foreign_key: :epic_list_id, inverse_of: :epic_list_user_preferences
 

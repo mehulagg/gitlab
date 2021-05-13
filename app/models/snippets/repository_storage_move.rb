@@ -4,7 +4,7 @@
 # snippet. For example, moving a snippet to another gitaly node to help
 # balance storage capacity.
 module Snippets
-  class RepositoryStorageMove < ApplicationRecord
+  class RepositoryStorageMove < NamespaceShard
     extend ::Gitlab::Utils::Override
     include RepositoryStorageMovable
 

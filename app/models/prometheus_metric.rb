@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PrometheusMetric < ApplicationRecord
+class PrometheusMetric < NamespaceShard
   include EachBatch
 
   belongs_to :project, validate: true, inverse_of: :prometheus_metrics

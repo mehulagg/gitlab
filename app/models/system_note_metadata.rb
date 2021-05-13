@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SystemNoteMetadata < ApplicationRecord
+class SystemNoteMetadata < NamespaceShard
   include Importable
 
   # These notes's action text might contain a reference that is external.

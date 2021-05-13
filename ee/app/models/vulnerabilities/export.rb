@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class Export < ApplicationRecord
+  class Export < NamespaceShard
     include FileStoreMounter
 
     self.table_name = "vulnerability_exports"

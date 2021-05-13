@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GpgKey < ApplicationRecord
+class GpgKey < NamespaceShard
   KEY_PREFIX = '-----BEGIN PGP PUBLIC KEY BLOCK-----'
   KEY_SUFFIX = '-----END PGP PUBLIC KEY BLOCK-----'
 

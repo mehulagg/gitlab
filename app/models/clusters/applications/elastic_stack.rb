@@ -2,7 +2,7 @@
 
 module Clusters
   module Applications
-    class ElasticStack < ApplicationRecord
+    class ElasticStack < NamespaceShard
       VERSION = '3.0.0'
 
       ELASTICSEARCH_PORT = 9200

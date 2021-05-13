@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SnippetRepository < ApplicationRecord
+class SnippetRepository < NamespaceShard
   include EachBatch
   include Shardable
 

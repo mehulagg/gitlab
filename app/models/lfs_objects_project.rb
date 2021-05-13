@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class LfsObjectsProject < ApplicationRecord
+class LfsObjectsProject < NamespaceShard
   include ::EachBatch
 
   belongs_to :project

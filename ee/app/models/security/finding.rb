@@ -8,7 +8,7 @@
 # only stores some important meta information to
 # calculate which report artifact to download and parse.
 module Security
-  class Finding < ApplicationRecord
+  class Finding < NamespaceShard
     self.table_name = 'security_findings'
 
     belongs_to :scan, inverse_of: :findings, optional: false

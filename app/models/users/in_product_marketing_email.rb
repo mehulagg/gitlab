@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Users
-  class InProductMarketingEmail < ApplicationRecord
+  class InProductMarketingEmail < NamespaceShard
     include BulkInsertSafe
 
     belongs_to :user

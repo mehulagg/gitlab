@@ -4,7 +4,7 @@ module Clusters
   module Applications
     # DEPRECATED for removal in %14.0
     # See https://gitlab.com/groups/gitlab-org/-/epics/4280
-    class Ingress < ApplicationRecord
+    class Ingress < NamespaceShard
       VERSION = '1.40.2'
       INGRESS_CONTAINER_NAME = 'nginx-ingress-controller'
       MODSECURITY_LOG_CONTAINER_NAME = 'modsecurity-log'

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserMention < ApplicationRecord
+class UserMention < NamespaceShard
   self.abstract_class = true
 
   def has_mentions?

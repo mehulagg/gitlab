@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestReviewer < ApplicationRecord
+class MergeRequestReviewer < NamespaceShard
   enum state: {
     unreviewed: 0,
     reviewed: 1

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class PipelineConfig < ApplicationRecord
+  class PipelineConfig < NamespaceShard
     extend Gitlab::Ci::Model
 
     self.table_name = 'ci_pipelines_config'

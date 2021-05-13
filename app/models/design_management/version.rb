@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module DesignManagement
-  class Version < ApplicationRecord
+  class Version < NamespaceShard
     include Importable
     include ShaAttribute
     include AfterCommitQueue

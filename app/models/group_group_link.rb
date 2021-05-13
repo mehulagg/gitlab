@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GroupGroupLink < ApplicationRecord
+class GroupGroupLink < NamespaceShard
   include Expirable
 
   belongs_to :shared_group, class_name: 'Group', foreign_key: :shared_group_id

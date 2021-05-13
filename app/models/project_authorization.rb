@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectAuthorization < ApplicationRecord
+class ProjectAuthorization < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
   include FromUnion
 

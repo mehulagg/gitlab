@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ContainerExpirationPolicy < ApplicationRecord
+class ContainerExpirationPolicy < NamespaceShard
   include Schedulable
   include UsageStatistics
   include EachBatch

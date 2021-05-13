@@ -2,7 +2,7 @@
 
 module Operations
   module FeatureFlags
-    class Strategy < ApplicationRecord
+    class Strategy < NamespaceShard
       STRATEGY_DEFAULT = 'default'
       STRATEGY_GITLABUSERLIST = 'gitlabUserList'
       STRATEGY_GRADUALROLLOUTUSERID = 'gradualRolloutUserId'

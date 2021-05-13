@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class HistoricalStatistic < ApplicationRecord
+  class HistoricalStatistic < NamespaceShard
     include EachBatch
 
     self.table_name = 'vulnerability_historical_statistics'

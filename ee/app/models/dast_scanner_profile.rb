@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DastScannerProfile < ApplicationRecord
+class DastScannerProfile < NamespaceShard
   belongs_to :project
 
   validates :project_id, presence: true

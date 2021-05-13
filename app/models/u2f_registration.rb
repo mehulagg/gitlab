@@ -2,7 +2,7 @@
 
 # Registration information for U2F (universal 2nd factor) devices, like Yubikeys
 
-class U2fRegistration < ApplicationRecord
+class U2fRegistration < NamespaceShard
   belongs_to :user
 
   after_create :create_webauthn_registration

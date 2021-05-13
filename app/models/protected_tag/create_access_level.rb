@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProtectedTag::CreateAccessLevel < ApplicationRecord
+class ProtectedTag::CreateAccessLevel < NamespaceShard
   include ProtectedTagAccess
 
   def check_access(user)

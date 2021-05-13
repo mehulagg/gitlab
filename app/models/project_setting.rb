@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectSetting < ApplicationRecord
+class ProjectSetting < NamespaceShard
   belongs_to :project, inverse_of: :project_setting
 
   enum squash_option: {

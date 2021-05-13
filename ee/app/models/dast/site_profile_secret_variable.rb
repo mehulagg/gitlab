@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Dast
-  class SiteProfileSecretVariable < ApplicationRecord
+  class SiteProfileSecretVariable < NamespaceShard
     REQUEST_HEADERS = 'DAST_REQUEST_HEADERS_BASE64'
     PASSWORD = 'DAST_PASSWORD_BASE64'
 

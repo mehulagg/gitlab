@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BroadcastMessage < ApplicationRecord
+class BroadcastMessage < NamespaceShard
   include CacheMarkdownField
   include Sortable
 

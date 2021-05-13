@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Atlassian
-  class Identity < ApplicationRecord
+  class Identity < NamespaceShard
     self.table_name = 'atlassian_identities'
 
     belongs_to :user

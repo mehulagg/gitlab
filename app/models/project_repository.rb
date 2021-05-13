@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectRepository < ApplicationRecord
+class ProjectRepository < NamespaceShard
   include EachBatch
   include Shardable
 

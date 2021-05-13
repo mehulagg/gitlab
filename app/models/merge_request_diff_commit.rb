@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestDiffCommit < ApplicationRecord
+class MergeRequestDiffCommit < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   include BulkInsertSafe

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class Identifier < ApplicationRecord
+  class Identifier < NamespaceShard
     include ShaAttribute
 
     self.table_name = "vulnerability_identifiers"

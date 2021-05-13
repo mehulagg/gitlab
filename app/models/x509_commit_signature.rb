@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class X509CommitSignature < ApplicationRecord
+class X509CommitSignature < NamespaceShard
   include ShaAttribute
 
   sha_attribute :commit_sha

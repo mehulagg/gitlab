@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ImportExportUpload < ApplicationRecord
+class ImportExportUpload < NamespaceShard
   include WithUploads
   include ObjectStorage::BackgroundMove
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GroupImportState < ApplicationRecord
+class GroupImportState < NamespaceShard
   self.primary_key = :group_id
 
   MAX_ERROR_LENGTH = 255

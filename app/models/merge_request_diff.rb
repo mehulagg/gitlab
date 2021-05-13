@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestDiff < ApplicationRecord
+class MergeRequestDiff < NamespaceShard
   include Sortable
   include Importable
   include ManualInverseAssociation

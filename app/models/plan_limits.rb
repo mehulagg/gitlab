@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PlanLimits < ApplicationRecord
+class PlanLimits < NamespaceShard
   LimitUndefinedError = Class.new(StandardError)
 
   belongs_to :plan

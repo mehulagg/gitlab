@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class OncallSchedule < ApplicationRecord
+  class OncallSchedule < NamespaceShard
     self.table_name = 'incident_management_oncall_schedules'
 
     include IidRoutes

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class OncallParticipant < ApplicationRecord
+  class OncallParticipant < NamespaceShard
     self.table_name = 'incident_management_oncall_participants'
 
     enum color_palette: Enums::DataVisualizationPalette.colors

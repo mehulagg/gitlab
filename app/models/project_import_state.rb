@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectImportState < ApplicationRecord
+class ProjectImportState < NamespaceShard
   include AfterCommitQueue
   include ImportState::SidekiqJobTracker
 

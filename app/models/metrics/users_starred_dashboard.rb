@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Metrics
-  class UsersStarredDashboard < ApplicationRecord
+  class UsersStarredDashboard < NamespaceShard
     self.table_name = 'metrics_users_starred_dashboards'
 
     belongs_to :user, inverse_of: :metrics_users_starred_dashboards

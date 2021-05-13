@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BoardUserPreference < ApplicationRecord
+class BoardUserPreference < NamespaceShard
   belongs_to :user, inverse_of: :board_preferences
   belongs_to :board, inverse_of: :user_preferences
 

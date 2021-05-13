@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectExportJob < ApplicationRecord
+class ProjectExportJob < NamespaceShard
   belongs_to :project
 
   validates :project, :jid, :status, presence: true

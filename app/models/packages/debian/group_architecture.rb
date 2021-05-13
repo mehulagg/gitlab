@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Debian::GroupArchitecture < ApplicationRecord
+class Packages::Debian::GroupArchitecture < NamespaceShard
   def self.container_type
     :group
   end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class FindingPipeline < ApplicationRecord
+  class FindingPipeline < NamespaceShard
     self.table_name = "vulnerability_occurrence_pipelines"
 
     alias_attribute :finding_id, :occurrence_id

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class OncallShift < ApplicationRecord
+  class OncallShift < NamespaceShard
     include BulkInsertSafe
 
     self.table_name = 'incident_management_oncall_shifts'

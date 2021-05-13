@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class ContainerRepositoryUpdatedEvent < ApplicationRecord
+  class ContainerRepositoryUpdatedEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

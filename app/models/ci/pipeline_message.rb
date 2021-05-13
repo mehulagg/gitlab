@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class PipelineMessage < ApplicationRecord
+  class PipelineMessage < NamespaceShard
     extend Gitlab::Ci::Model
 
     MAX_CONTENT_LENGTH = 10_000

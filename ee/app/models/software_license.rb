@@ -2,7 +2,7 @@
 
 # This class represents a software license.
 # For use in the License Management feature.
-class SoftwareLicense < ApplicationRecord
+class SoftwareLicense < NamespaceShard
   include Presentable
 
   validates :name, presence: true, uniqueness: true

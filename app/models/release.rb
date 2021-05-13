@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Release < ApplicationRecord
+class Release < NamespaceShard
   include Presentable
   include CacheMarkdownField
   include Importable

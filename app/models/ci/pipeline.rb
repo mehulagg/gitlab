@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class Pipeline < ApplicationRecord
+  class Pipeline < NamespaceShard
     extend Gitlab::Ci::Model
     include Ci::HasStatus
     include Importable

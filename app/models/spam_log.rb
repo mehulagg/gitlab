@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SpamLog < ApplicationRecord
+class SpamLog < NamespaceShard
   belongs_to :user
 
   validates :user, presence: true

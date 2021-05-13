@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Clusters
-  class Agent < ApplicationRecord
+  class Agent < NamespaceShard
     self.table_name = 'cluster_agents'
 
     belongs_to :created_by_user, class_name: 'User', optional: true

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectCustomAttribute < ApplicationRecord
+class ProjectCustomAttribute < NamespaceShard
   belongs_to :project
 
   validates :project, :key, :value, presence: true

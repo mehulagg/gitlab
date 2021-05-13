@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DeploymentMergeRequest < ApplicationRecord
+class DeploymentMergeRequest < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   belongs_to :deployment, optional: false

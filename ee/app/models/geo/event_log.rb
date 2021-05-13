@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class EventLog < ApplicationRecord
+  class EventLog < NamespaceShard
     include Geo::Model
     include ::EachBatch
 

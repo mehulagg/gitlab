@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProtectedTag < ApplicationRecord
+class ProtectedTag < NamespaceShard
   include ProtectedRef
 
   validates :name, uniqueness: { scope: :project_id }

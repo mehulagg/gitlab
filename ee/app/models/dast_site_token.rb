@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DastSiteToken < ApplicationRecord
+class DastSiteToken < NamespaceShard
   belongs_to :project
 
   validates :project_id, presence: true

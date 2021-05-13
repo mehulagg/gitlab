@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class FindingLink < ApplicationRecord
+  class FindingLink < NamespaceShard
     self.table_name = 'vulnerability_finding_links'
 
     belongs_to :finding, class_name: 'Vulnerabilities::Finding', inverse_of: :finding_identifiers, foreign_key: 'vulnerability_occurrence_id'

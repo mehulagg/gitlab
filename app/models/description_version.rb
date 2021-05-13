@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DescriptionVersion < ApplicationRecord
+class DescriptionVersion < NamespaceShard
   belongs_to :issue
   belongs_to :merge_request
 

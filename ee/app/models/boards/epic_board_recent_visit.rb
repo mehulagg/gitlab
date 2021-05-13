@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Boards
-  class EpicBoardRecentVisit < ApplicationRecord
+  class EpicBoardRecentVisit < NamespaceShard
     include BoardRecentVisit
 
     belongs_to :user, optional: false, inverse_of: :epic_board_recent_visits

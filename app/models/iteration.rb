@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Placeholder class for model that is implemented in EE
-class Iteration < ApplicationRecord
+class Iteration < NamespaceShard
   self.table_name = 'sprints'
 
   def self.reference_prefix

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class EpicIssue < ApplicationRecord
+class EpicIssue < NamespaceShard
   include EpicTreeSorting
   include EachBatch
 

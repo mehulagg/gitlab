@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class JiraImportState < ApplicationRecord
+class JiraImportState < NamespaceShard
   include AfterCommitQueue
   include ImportState::SidekiqJobTracker
   include UsageStatistics

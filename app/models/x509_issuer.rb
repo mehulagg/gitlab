@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class X509Issuer < ApplicationRecord
+class X509Issuer < NamespaceShard
   has_many :x509_certificates, inverse_of: 'x509_issuer'
 
   # rfc 5280 - 4.2.1.1  Authority Key Identifier

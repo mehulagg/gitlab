@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module Alerting
-  class ProjectAlertingSetting < ApplicationRecord
+  class ProjectAlertingSetting < NamespaceShard
     belongs_to :project
 
     validates :token, presence: true

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class DeletedObject < ApplicationRecord
+  class DeletedObject < NamespaceShard
     extend Gitlab::Ci::Model
 
     mount_uploader :file, DeletedObjectUploader

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GeoNodeStatus < ApplicationRecord
+class GeoNodeStatus < NamespaceShard
   include ShaAttribute
 
   belongs_to :geo_node

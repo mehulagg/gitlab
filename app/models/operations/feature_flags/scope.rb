@@ -2,7 +2,7 @@
 
 module Operations
   module FeatureFlags
-    class Scope < ApplicationRecord
+    class Scope < NamespaceShard
       prepend HasEnvironmentScope
 
       self.table_name = 'operations_scopes'

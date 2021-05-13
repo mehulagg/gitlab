@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class CustomEmoji < ApplicationRecord
+class CustomEmoji < NamespaceShard
   NAME_REGEXP = /[a-z0-9_-]+/.freeze
 
   belongs_to :namespace, inverse_of: :custom_emoji

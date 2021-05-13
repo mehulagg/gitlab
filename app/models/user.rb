@@ -2,7 +2,7 @@
 
 require 'carrierwave/orm/activerecord'
 
-class User < ApplicationRecord
+class User < NamespaceShard
   extend Gitlab::ConfigHelper
 
   include Gitlab::ConfigHelper

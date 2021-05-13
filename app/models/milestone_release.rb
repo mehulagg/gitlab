@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MilestoneRelease < ApplicationRecord
+class MilestoneRelease < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   belongs_to :milestone

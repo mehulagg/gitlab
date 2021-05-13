@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::Maven::Metadatum < ApplicationRecord
+class Packages::Maven::Metadatum < NamespaceShard
   belongs_to :package, -> { where(package_type: :maven) }
 
   validates :package, presence: true

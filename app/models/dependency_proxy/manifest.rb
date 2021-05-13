@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DependencyProxy::Manifest < ApplicationRecord
+class DependencyProxy::Manifest < NamespaceShard
   include FileStoreMounter
 
   belongs_to :group

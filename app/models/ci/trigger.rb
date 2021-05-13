@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class Trigger < ApplicationRecord
+  class Trigger < NamespaceShard
     extend Gitlab::Ci::Model
     include Presentable
 

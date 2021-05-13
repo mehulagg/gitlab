@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Namespace::AggregationSchedule < ApplicationRecord
+class Namespace::AggregationSchedule < NamespaceShard
   include AfterCommitQueue
   include ExclusiveLeaseGuard
 

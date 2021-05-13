@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Operations
-  class FeatureFlagScope < ApplicationRecord
+  class FeatureFlagScope < NamespaceShard
     prepend HasEnvironmentScope
     include Gitlab::Utils::StrongMemoize
 

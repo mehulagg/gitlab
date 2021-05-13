@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Clusters
-  class AgentToken < ApplicationRecord
+  class AgentToken < NamespaceShard
     include RedisCacheable
     include TokenAuthenticatable
 

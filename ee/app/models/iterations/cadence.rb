@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Iterations
-  class Cadence < ApplicationRecord
+  class Cadence < NamespaceShard
     include Gitlab::SQL::Pattern
 
     self.table_name = 'iterations_cadences'

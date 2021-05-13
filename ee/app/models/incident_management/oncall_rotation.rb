@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class OncallRotation < ApplicationRecord
+  class OncallRotation < NamespaceShard
     ActivePeriod = Struct.new(:start_time, :end_time) do
       def present?
         start_time && end_time

@@ -5,7 +5,7 @@ module Dora
   # Lead Time for Changes, Change Failure Rate and Time to Restore Service
   # are tracked as daily summary.
   # Reference: https://cloud.google.com/blog/products/devops-sre/using-the-four-keys-to-measure-your-devops-performance
-  class DailyMetrics < ApplicationRecord
+  class DailyMetrics < NamespaceShard
     belongs_to :environment
 
     self.table_name = 'dora_daily_metrics'

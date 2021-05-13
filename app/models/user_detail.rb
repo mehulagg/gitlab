@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserDetail < ApplicationRecord
+class UserDetail < NamespaceShard
   extend ::Gitlab::Utils::Override
   include CacheMarkdownField
 

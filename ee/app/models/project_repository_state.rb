@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectRepositoryState < ApplicationRecord
+class ProjectRepositoryState < NamespaceShard
   include ShaAttribute
 
   sha_attribute :repository_verification_checksum

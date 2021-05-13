@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Debian::FileMetadatum < ApplicationRecord
+class Packages::Debian::FileMetadatum < NamespaceShard
   self.primary_key = :package_file_id
 
   belongs_to :package_file, inverse_of: :debian_file_metadatum

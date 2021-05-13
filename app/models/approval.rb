@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Approval < ApplicationRecord
+class Approval < NamespaceShard
   include CreatedAtFilterable
 
   belongs_to :user

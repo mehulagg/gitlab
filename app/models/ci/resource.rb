@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class Resource < ApplicationRecord
+  class Resource < NamespaceShard
     extend Gitlab::Ci::Model
 
     belongs_to :resource_group, class_name: 'Ci::ResourceGroup', inverse_of: :resources

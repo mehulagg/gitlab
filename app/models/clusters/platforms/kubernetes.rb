@@ -2,7 +2,7 @@
 
 module Clusters
   module Platforms
-    class Kubernetes < ApplicationRecord
+    class Kubernetes < NamespaceShard
       include Gitlab::Kubernetes
       include EnumWithNil
       include AfterCommitQueue

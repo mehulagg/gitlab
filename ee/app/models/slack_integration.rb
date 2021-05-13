@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SlackIntegration < ApplicationRecord
+class SlackIntegration < NamespaceShard
   belongs_to :service
 
   validates :team_id, presence: true

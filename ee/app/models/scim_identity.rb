@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ScimIdentity < ApplicationRecord
+class ScimIdentity < NamespaceShard
   include Sortable
   include CaseSensitivity
   include ScimPaginatable

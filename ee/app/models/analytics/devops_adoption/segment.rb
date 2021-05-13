@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Analytics::DevopsAdoption::Segment < ApplicationRecord
+class Analytics::DevopsAdoption::Segment < NamespaceShard
   include IgnorableColumns
 
   belongs_to :namespace

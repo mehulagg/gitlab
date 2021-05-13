@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class BuildReportResult < ApplicationRecord
+  class BuildReportResult < NamespaceShard
     extend Gitlab::Ci::Model
 
     self.primary_key = :build_id

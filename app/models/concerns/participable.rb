@@ -7,7 +7,7 @@
 #
 # Usage:
 #
-#     class Issue < ApplicationRecord
+#     class Issue < NamespaceShard
 #       include Participable
 #
 #       # ...

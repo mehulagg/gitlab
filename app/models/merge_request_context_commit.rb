@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MergeRequestContextCommit < ApplicationRecord
+class MergeRequestContextCommit < NamespaceShard
   include CachedCommit
   include ShaAttribute
 

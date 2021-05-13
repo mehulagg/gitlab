@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ApprovalProjectRule < ApplicationRecord
+class ApprovalProjectRule < NamespaceShard
   include ApprovalRuleLike
   include Auditable
 

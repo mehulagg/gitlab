@@ -2,7 +2,7 @@
 
 module Analytics
   module CycleAnalytics
-    class GroupStage < ApplicationRecord
+    class GroupStage < NamespaceShard
       include Analytics::CycleAnalytics::Stage
 
       validates :group, presence: true

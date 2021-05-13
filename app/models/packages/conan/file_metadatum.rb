@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Packages::Conan::FileMetadatum < ApplicationRecord
+class Packages::Conan::FileMetadatum < NamespaceShard
   belongs_to :package_file, inverse_of: :conan_file_metadatum
 
   DEFAULT_PACKAGE_REVISION = '0'

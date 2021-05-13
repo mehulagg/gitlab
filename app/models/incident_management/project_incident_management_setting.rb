@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  class ProjectIncidentManagementSetting < ApplicationRecord
+  class ProjectIncidentManagementSetting < NamespaceShard
     include Gitlab::Utils::StrongMemoize
 
     belongs_to :project

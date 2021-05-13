@@ -2,7 +2,7 @@
 
 module Analytics
   module CycleAnalytics
-    class ProjectStage < ApplicationRecord
+    class ProjectStage < NamespaceShard
       include Analytics::CycleAnalytics::Stage
 
       validates :project, presence: true

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssueEmailParticipant < ApplicationRecord
+class IssueEmailParticipant < NamespaceShard
   belongs_to :issue
 
   validates :email, uniqueness: { scope: [:issue_id], case_sensitive: false }

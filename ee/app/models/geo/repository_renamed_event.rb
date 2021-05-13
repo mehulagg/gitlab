@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class RepositoryRenamedEvent < ApplicationRecord
+  class RepositoryRenamedEvent < NamespaceShard
     include Geo::Model
     include Geo::Eventable
 

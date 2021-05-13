@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Operations
-  class FeatureFlag < ApplicationRecord
+  class FeatureFlag < NamespaceShard
     include AfterCommitQueue
     include AtomicInternalId
     include IidRoutes

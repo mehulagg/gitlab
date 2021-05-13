@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Terraform
-  class StateVersion < ApplicationRecord
+  class StateVersion < NamespaceShard
     include FileStoreMounter
 
     belongs_to :terraform_state, class_name: 'Terraform::State', optional: false

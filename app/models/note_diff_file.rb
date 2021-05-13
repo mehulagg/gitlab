@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class NoteDiffFile < ApplicationRecord
+class NoteDiffFile < NamespaceShard
   include DiffFile
 
   scope :referencing_sha, -> (oids, project_id:) do

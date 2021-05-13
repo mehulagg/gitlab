@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ChatTeam < ApplicationRecord
+class ChatTeam < NamespaceShard
   validates :team_id, presence: true
   validates :namespace, uniqueness: true
 

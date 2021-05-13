@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Ci
-  class DailyBuildGroupReportResult < ApplicationRecord
+  class DailyBuildGroupReportResult < NamespaceShard
     extend Gitlab::Ci::Model
 
     PARAM_TYPES = %w[coverage].freeze

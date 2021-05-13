@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class JiraConnectInstallation < ApplicationRecord
+class JiraConnectInstallation < NamespaceShard
   attr_encrypted :shared_secret,
                  mode:      :per_attribute_iv,
                  algorithm: 'aes-256-gcm',

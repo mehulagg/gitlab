@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module AlertManagement
-  class HttpIntegration < ApplicationRecord
+  class HttpIntegration < NamespaceShard
     include ::Gitlab::Routing
     LEGACY_IDENTIFIER = 'legacy'
     DEFAULT_NAME_SLUG = 'http-endpoint'

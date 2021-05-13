@@ -2,7 +2,7 @@
 
 # Stores the authentication data required to access another GitLab instance on
 # behalf of a user, to import Groups and Projects directly from that instance.
-class BulkImports::Configuration < ApplicationRecord
+class BulkImports::Configuration < NamespaceShard
   self.table_name = 'bulk_import_configurations'
 
   belongs_to :bulk_import, inverse_of: :configuration, optional: false

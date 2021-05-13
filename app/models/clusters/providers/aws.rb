@@ -2,7 +2,7 @@
 
 module Clusters
   module Providers
-    class Aws < ApplicationRecord
+    class Aws < NamespaceShard
       include Gitlab::Utils::StrongMemoize
       include Clusters::Concerns::ProviderStatus
 

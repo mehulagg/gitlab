@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GroupMergeRequestApprovalSetting < ApplicationRecord
+class GroupMergeRequestApprovalSetting < NamespaceShard
   self.primary_key = :group_id
 
   belongs_to :group, inverse_of: :group_merge_request_approval_setting

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Terraform
-  class State < ApplicationRecord
+  class State < NamespaceShard
     include UsageStatistics
 
     HEX_REGEXP = %r{\A\h+\z}.freeze

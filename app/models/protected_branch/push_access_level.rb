@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProtectedBranch::PushAccessLevel < ApplicationRecord
+class ProtectedBranch::PushAccessLevel < NamespaceShard
   include ProtectedBranchAccess
 
   belongs_to :deploy_key

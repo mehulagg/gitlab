@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GeoNodeNamespaceLink < ApplicationRecord
+class GeoNodeNamespaceLink < NamespaceShard
   belongs_to :geo_node, inverse_of: :namespaces
   belongs_to :namespace
 

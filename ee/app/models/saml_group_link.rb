@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SamlGroupLink < ApplicationRecord
+class SamlGroupLink < NamespaceShard
   belongs_to :group
 
   enum access_level: ::Gitlab::Access.options_with_owner

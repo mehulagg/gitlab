@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RequirementsManagement
-  class Requirement < ApplicationRecord
+  class Requirement < NamespaceShard
     include CacheMarkdownField
     include StripAttribute
     include AtomicInternalId
