@@ -1,5 +1,5 @@
 ---
 title: Allow Merge request pipelines in API fuzzing template
-merge_request:
+merge_request: 61670
 author:
 type: other
