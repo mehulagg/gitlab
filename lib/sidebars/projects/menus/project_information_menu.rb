@@ -32,7 +32,7 @@ module Sidebars
 
         override :title
         def title
-          if Feature.enabled?(:sidebar_refactor, context.current_user)
+          if Feature.enabled?(:sidebar_refactor, context.current_user, default_enabled: :yaml)
             _('Project information')
           else
             _('Project overview')
@@ -41,7 +41,7 @@ module Sidebars
 
         override :sprite_icon
         def sprite_icon
-          if Feature.enabled?(:sidebar_refactor, context.current_user)
+          if Feature.enabled?(:sidebar_refactor, context.current_user, default_enabled: :yaml)
             'project'
           else
             'home'
@@ -58,7 +58,7 @@ module Sidebars
         private
 
         def details_menu_item
-          return if Feature.enabled?(:sidebar_refactor, context.current_user)
+          return if Feature.enabled?(:sidebar_refactor, context.current_user, default_enabled: :yaml)
 
           ::Sidebars::MenuItem.new(
             title: _('Details'),
