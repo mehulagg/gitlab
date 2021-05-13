@@ -8,7 +8,9 @@ module QA
         include SubMenus::Project
         include SubMenus::CiCd
         include SubMenus::Issues
-        include SubMenus::Operations
+        include SubMenus::Deployments
+        include SubMenus::Monitor
+        include SubMenus::Infrastructure
         include SubMenus::Repository
         include SubMenus::Settings
         include SubMenus::Packages
