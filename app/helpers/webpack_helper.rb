@@ -4,10 +4,7 @@ module WebpackHelper
   def prefetch_link_tag(source)
     href = asset_path(source)
 
-    link_tag = tag.link(**{
-      rel: "prefetch",
-      href: href,
-    })
+    link_tag = tag.link(rel: "prefetch",href: href)
 
     early_hints_link = "<#{href}>; rel=prefetch"
 
