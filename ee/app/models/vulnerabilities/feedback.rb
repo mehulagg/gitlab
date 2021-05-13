@@ -28,6 +28,7 @@ module Vulnerabilities
     validates :category, presence: true
     validates :project_fingerprint, presence: true, uniqueness: { scope: [:project_id, :category, :feedback_type] }
     validates :pipeline, same_project_association: true, if: :pipeline_id?
+    validates :finding_uuid, presence: true
 
     scope :with_associations, -> { includes(:pipeline, :issue, :merge_request, :author, :comment_author) }
 

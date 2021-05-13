@@ -28,6 +28,7 @@ RSpec.describe Vulnerabilities::Feedback do
     it { is_expected.to validate_presence_of(:feedback_type) }
     it { is_expected.to validate_presence_of(:category) }
     it { is_expected.to validate_presence_of(:project_fingerprint) }
+    it { is_expected.to validate_presence_of(:finding_uuid) }
 
     let_it_be(:project) { create(:project) }
 
@@ -241,6 +242,7 @@ RSpec.describe Vulnerabilities::Feedback do
     let(:project) { create(:project, :public, :repository, namespace: group) }
     let(:user) { create(:user) }
     let(:pipeline) { create(:ci_pipeline, project: project) }
+    let(:finding) { create(:vulnerabilities_finding) }
 
     let(:feedback_params) do
       {
@@ -255,7 +257,8 @@ RSpec.describe Vulnerabilities::Feedback do
           name: 'Predictable pseudorandom number generator',
           description: 'Description of Predictable pseudorandom number generator',
           tool: 'find_sec_bugs'
-        }
+        },
+        finding_uuid: finding.uuid
       }
     end
 
@@ -279,28 +282,10 @@ RSpec.describe Vulnerabilities::Feedback do
       end
 
       context 'when a finding_uuid is provided' do
-        let(:finding) { create(:vulnerabilities_finding) }
-        let(:feedback_params_with_finding) { feedback_params.merge(finding_uuid: finding.uuid) }
-
-        subject(:feedback) { described_class.find_or_init_for(feedback_params_with_finding) }
-
         it 'sets finding_uuid' do
           feedback.save!
 
           expect(feedback.finding_uuid).to eq(finding.uuid)
-        end
-      end
-
-      context 'when the finding_uuid provided is nil' do
-        let(:finding) { create(:vulnerabilities_finding) }
-        let(:feedback_params_with_finding) { feedback_params.merge(finding_uuid: nil) }
-
-        subject(:feedback) { described_class.find_or_init_for(feedback_params_with_finding) }
-
-        it 'sets finding_uuid as nil' do
-          feedback.save!
-
-          expect(feedback.finding_uuid).to be_nil
         end
       end
 
