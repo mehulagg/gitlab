@@ -19,16 +19,20 @@ module API
                 put ':id' do
                   validation = DastSiteValidation.find(params[:id])
 
-                  case params[:state]
-                  when 'start'
-                    validation.start
-                  when 'retry'
-                    validation.retry
-                  when 'fail'
-                    validation.fail_op
-                  when 'pass'
-                    validation.pass
-                  end
+                  success = case params[:state]
+                            when 'start'
+                              validation.start
+                            when 'retry'
+                              validation.retry
+                            when 'fail_op'
+                              validation.fail_op
+                            when 'pass'
+                              validation.pass
+                            end
+
+                  render_api_error!('Could not update DAST site validation', 400) unless success
+
+                  status 200, { state: validation.state }
                 end
               end
             end
