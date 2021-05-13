@@ -290,7 +290,8 @@ JiraService.where(active: true, instance: false, template: false, inherit_from_i
 end
 ```
 
-WARNING: After running the script, modify and save again the instance-level integration from the UI to propagate the changes to all the group-level and project-level integrations.
+WARNING: 
+After running the script, modify and save again the instance-level integration from the UI to propagate the changes to all the group-level and project-level integrations.
 
 ### Bulk update to disable the Slack Notification service
 
