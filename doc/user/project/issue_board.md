@@ -192,6 +192,17 @@ card includes:
 - Issue number
 - Assignee
 
+**Sidebar** is the menu that appears on the right when you select an issue card (not its title). You can edit an issue without leaving the board view using sidebar. There you can see and edit the issue's:
+
+- Assignees
+- Epic **PREMIUM**
+- Milestone
+- Time tracking value (view only)
+- Due date
+- Labels
+- Weight
+- Notifications setting
+
 ## Permissions
 
 Users with the [Reporter and higher roles](../permissions.md) can use all the functionality of the
@@ -221,6 +232,33 @@ board, for example.
 This ordering also affects [issue lists](issues/sorting_issue_lists.md).
 Changing the order in an issue board changes the ordering in an issue list,
 and vice versa.
+
+#### GraphQL-based Issue Boards
+
+<!-- This anchor is linked from #blocked-issues as well. -->
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285074) in GitLab 13.9.
+> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
+> - It's enabled on GitLab.com in GitLab 14.0.
+> - Recommended for production use.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-graphql-based-issue-boards).
+
+WARNING:
+This feature might not be available to you. Check the **version history** note above for details.
+
+WARNING:
+(on multiselection being disabled....)
+
+The work-in-progress GraphQL-based boards comes with new and upgraded features.
+
+You can edit and view the following issue attributes in boards sidebar:
+
+- Title
+- Iteration **PREMIUM**
+
+You can [view blocking issues](#blocked-issues) inside issue cards.
+
+<!-- Add this at the end of the file -->
 
 ## GitLab Enterprise features for issue boards
 
@@ -269,40 +307,13 @@ especially in combination with [assignee lists](#assignee-lists).
 
 ![issue board summed weights](img/issue_board_summed_weights_v13_6.png)
 
-### Group issue boards **(PREMIUM)**
+### Group issue boards
 
 Accessible at the group navigation level, a group issue board offers the same features as a project-level board.
 It can display issues from all projects in that
 group and its descendant subgroups. Similarly, you can only filter by group labels for these
 boards. When updating milestones and labels for an issue through the sidebar update mechanism, again only
-group-level objects are available.
-
-#### GraphQL-based sidebar for group issue boards **(PREMIUM)**
-
-<!-- When the feature flag is removed, integrate this section into the above ("Group issue boards"). -->
-<!-- This anchor is linked from #blocked-issues as well. -->
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285074) in GitLab 13.9.
-> - It's [deployed behind a feature flag](../feature_flags.md), disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-graphql-based-sidebar-for-group-issue-boards). **(PREMIUM SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
-
-The work-in-progress GraphQL-based sidebar for group issue boards brings better performance and the
-ability to edit issue titles in the issue sidebar.
-
-To **edit an issue's title** in the issue sidebar:
-
-1. In a group issue board, select the issue card. The issue sidebar opens on the right.
-1. Next to the issue's title, select **Edit**.
-
-This is work in progress as of GitLab 13.9. Learn more about the known issues in
-[MR 51480](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51480).
-
-<!-- Add this at the end of the file -->
+group-level objects are available. A single group issue board is available in GitLab Free.
 
 ### Assignee lists **(PREMIUM)**
 
@@ -386,19 +397,6 @@ To group issues by epic in an issue board:
 
 ![Epics Swimlanes](img/epics_swimlanes_v13.6.png)
 
-To edit an issue without leaving this view, select the issue card (not its title), and a sidebar
-appears on the right. There you can see and edit the issue's:
-
-- Title
-- Assignees
-- Epic **PREMIUM**
-- Milestone
-- Time tracking value (view only)
-- Due date
-- Labels
-- Weight
-- Notifications setting
-
 You can also [drag issues](#drag-issues-between-lists) to change their position and epic assignment:
 
 - To reorder an issue, drag it to the new position within a list.
@@ -442,8 +440,8 @@ status.
 
 When you hover over the blocked icon (**{issue-block}**), a detailed information popover is displayed.
 
-To enable this in group issue boards, enable the [GraphQL-based sidebar](#graphql-based-sidebar-for-group-issue-boards).
-The feature is enabled by default when you use group issue boards with epic swimlanes.
+To enable this in issue boards, enable the [GraphQL-based boards](#graphql-based-issue-boards).
+The feature is enabled by default when you use issue boards with epic swimlanes.
 
 ![Blocked issues](img/issue_boards_blocked_icon_v13_10.png)
 
@@ -626,9 +624,9 @@ A few things to remember:
   by default. If you have more than 20 issues, start scrolling down and the next
   20 appear.
 
-## Enable or disable GraphQL-based sidebar for group issue boards **(PREMIUM SELF)**
+## Enable or disable GraphQL-based issue boards **(FREE SELF)**
 
-GraphQL-based sidebar for group issue boards is under development and not ready for production use.
+GraphQL-based issue boards is ready for production use.
 It is deployed behind a feature flag that is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can enable it.
