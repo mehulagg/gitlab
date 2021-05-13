@@ -115,17 +115,23 @@ export default {
 </script>
 <template>
   <div class="cycle-analytics">
+    <path-navigation
+      v-if="shouldDisplayPathNavigation"
+      :key="`path_navigation_key_${pathNavigationData.length}`"
+      class="js-path-navigation gl-w-full gl-pb-2"
+      :loading="isLoading"
+      :stages="pathNavigationData"
+      :selected-stage="selectedStage"
+      :with-stage-counts="false"
+      @selected="(ev) => onSelectStage(ev)"
+    />
     <gl-loading-icon v-if="isLoading" size="lg" />
     <div v-else class="wrapper">
-      <path-navigation
-        v-if="shouldDisplayPathNavigation"
-        :key="`path_navigation_key_${pathNavigationData.length}`"
-        class="js-path-navigation gl-w-full gl-pb-2"
-        :loading="isLoading"
-        :stages="pathNavigationData"
-        :selected-stage="selectedStage"
-        @selected="(ev) => onSelectStage(ev)"
-      />
+      <!--
+        We wont have access to the stage counts until we move to a default value stream
+        For now we can use the `withStageCounts` flag to ensure we don't display empty stage counts
+        Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/326705
+      -->
       <div class="card">
         <div class="card-header">{{ __('Recent Project Activity') }}</div>
         <div class="d-flex justify-content-between">

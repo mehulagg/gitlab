@@ -21,8 +21,6 @@ export default {
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, data) {
     state.isLoading = false;
     const { stages, summary, medians } = decorateData(data);
-    console.log('medians', medians);
-    console.log('formatMedianValues::medians', formatMedianValues(medians));
     state.stages = stages;
     state.summary = summary;
     state.medians = formatMedianValues(medians);

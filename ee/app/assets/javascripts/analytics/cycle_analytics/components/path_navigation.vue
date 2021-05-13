@@ -32,12 +32,17 @@ export default {
       required: false,
       default: () => {},
     },
+    withStageCounts: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   methods: {
     showPopover({ id }) {
       return id && id !== OVERVIEW_STAGE_ID;
     },
-    hasStageCount({ stageCount }) {
+    hasStageCount({ stageCount = null }) {
       return stageCount !== null;
     },
   },
@@ -67,7 +72,7 @@ export default {
             <div class="gl-pb-4 gl-font-weight-bold">{{ pathItem.metric }}</div>
           </div>
         </div>
-        <div class="gl-px-4">
+        <div v-if="withStageCounts" class="gl-px-4">
           <div class="gl-display-flex gl-justify-content-space-between">
             <div class="gl-pr-4 gl-pb-4">
               {{ s__('ValueStreamEvent|Items in stage') }}

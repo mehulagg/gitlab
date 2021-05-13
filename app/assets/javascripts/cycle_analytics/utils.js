@@ -50,10 +50,17 @@ const mapToEvent = (event, stage) => {
 
 export const decorateEvents = (events, stage) => events.map((event) => mapToEvent(event, stage));
 
-const mapToStage = (permissions, item) => {
-  const slug = dasherize(item.name.toLowerCase());
+/*
+ * NOTE: We currently use the `name` field since the project level stages are in memory
+ * once we migrate to a default value stream https://gitlab.com/gitlab-org/gitlab/-/issues/326705
+ * we can use the `id` to identify which median we are using
+ */
+const mapToStage = (permissions, { name, ...rest }) => {
+  const slug = dasherize(name.toLowerCase());
   return {
-    ...item,
+    ...rest,
+    name,
+    id: name,
     slug,
     active: false,
     isUserAllowed: permissions[slug],
@@ -63,14 +70,15 @@ const mapToStage = (permissions, item) => {
 };
 
 const mapToSummary = ({ value, ...rest }) => ({ ...rest, value: value || '-' });
-const mapToMedians = ({ id, name, value }) => ({ id, name, value });
+const mapToMedians = ({ id, value }) => ({ id, value });
 
 export const decorateData = (data = {}) => {
   const { permissions, stats, summary } = data;
+  const stages = stats?.map((item) => mapToStage(permissions, item)) || [];
   return {
-    stages: stats?.map((item) => mapToStage(permissions, item)) || [],
+    stages,
     summary: summary?.map((item) => mapToSummary(item)) || [],
-    medians: stats?.map((item) => mapToMedians(item)) || [],
+    medians: stages?.map((item) => mapToMedians(item)) || [],
   };
 };
 
@@ -90,8 +98,6 @@ export const transformStagesForPathNavigation = ({
   stageCounts = {},
   selectedStage,
 }) => {
-  // TODO: do we need popovers for the project path
-  // - medians, start / end events + descriptions
   const formattedStages = stages.map((stage) => {
     return {
       metric: medians[stage?.id],
