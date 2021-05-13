@@ -142,6 +142,17 @@ module QA
           ::File.join(QA::Runtime::Namespace.name(reset_cache: false), example.full_description.downcase.parameterize(separator: "_")[0..99])
         end
 
+        if ENV["CI"]
+          Capybara::Screenshot.after_save_screenshot do |path|
+            Allure.add_attachment(
+              name: "screenshot",
+              source: File.open(path),
+              type: "image/png",
+              test_case: true
+            )
+          end
+        end
+
         Capybara.configure do |config|
           config.default_driver = QA::Runtime::Env.browser
           config.javascript_driver = QA::Runtime::Env.browser
