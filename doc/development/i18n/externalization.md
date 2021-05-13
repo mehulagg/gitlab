@@ -796,11 +796,11 @@ aren't in the message with ID `1 pipeline`.
 ## Adding a new language
 
 NOTE:
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
-Languages with less than 2% of translations are not available in the UI.
+A new language should only be added as an option in User Preferences once at least 10% of the strings have been translated and approved. Note that even though a larger number of strings may have been translated, only the approved translations will display in the GitLab UI.
 
 NOTE:
-A new language should only be added as an option in User Preferences once at least 10% of the strings have been translated and approved. Note that even though a larger number of strings may have been translated, only the approved translations will display in the GitLab UI.
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
+Languages with less than 2% of translations are not available in the UI.
 
 Let's suppose you want to add translations for a new language, let's say French.
 
