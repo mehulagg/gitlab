@@ -51,7 +51,6 @@ module Types
           description: 'Normalized URL of the target to be scanned.'
 
     field :referenced_in_security_policies, [GraphQL::STRING_TYPE], null: true,
-          complexity: 10,
           calls_gitaly: true,
           description: 'List of security policy names that are referencing given project.'
 
@@ -83,6 +82,13 @@ module Types
 
     def normalized_target_url
       DastSiteValidation.get_normalized_url_base(object.dast_site.url)
+    end
+
+    def referenced_in_security_policies
+      ::Gitlab::Graphql::Aggregations::SecurityOrchestrationPolicies::LazyDastProfileAggregate.new(
+        context,
+        object
+      )
     end
   end
 end

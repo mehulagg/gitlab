@@ -277,7 +277,13 @@ module EE
     # This method is overwritten in Group where we made the calculation
     # for Group namespaces.
     def billed_user_ids(_requested_hosted_plan = nil)
-      [owner_id]
+      {
+        user_ids: [owner_id],
+        group_member_user_ids: [],
+        project_member_user_ids: [],
+        shared_group_user_ids: [],
+        shared_project_user_ids: []
+      }
     end
 
     def eligible_for_trial?

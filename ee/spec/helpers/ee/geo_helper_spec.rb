@@ -21,7 +21,7 @@ RSpec.describe EE::GeoHelper do
     end
   end
 
-  describe 'replicable_types' do
+  describe '#replicable_types' do
     subject(:names) { helper.replicable_types.map { |t| t[:name_plural] } }
 
     it 'includes legacy types' do
@@ -42,6 +42,20 @@ RSpec.describe EE::GeoHelper do
       expected_names = helper.enabled_replicator_classes.map { |c| c.replicable_name_plural }
 
       expect(names).to include(*expected_names)
+    end
+
+    it 'includes replicator data types' do
+      data_types = helper.replicable_types.map { |t| t[:data_type] }
+      expected_data_types = helper.enabled_replicator_classes.map { |c| c.data_type }
+
+      expect(data_types).to include(*expected_data_types)
+    end
+
+    it 'includes replicator data type titles' do
+      data_type_titles = helper.replicable_types.map { |t| t[:data_type_title] }
+      expected_data_type_titles = helper.enabled_replicator_classes.map { |c| c.data_type_title }
+
+      expect(data_type_titles).to include(*expected_data_type_titles)
     end
   end
 end

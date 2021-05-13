@@ -37,6 +37,9 @@ export const detailsLabels = {
   startsAt: s__('SuperSonics|Started'),
 };
 
+export const removeLicense = __('Remove license');
+export const removeLicenseConfirm = __('Are you sure you want to remove the license?');
+export const uploadLicense = __('Upload license');
 export const uploadLegacyLicense = s__('SuperSonics|Upload a legacy license');
 export const billableUsersTitle = s__('CloudLicense|Billable users');
 export const maximumUsersTitle = s__('CloudLicense|Maximum users');

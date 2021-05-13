@@ -325,4 +325,16 @@ RSpec.describe Gitlab::UsageDataCounters::EpicActivityUniqueCounter, :clean_gitl
 
     it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
   end
+
+  context 'for epic cross reference' do
+    def track_action(params)
+      described_class.track_epic_cross_referenced(**params)
+    end
+
+    it_behaves_like 'a daily tracked issuable event' do
+      let(:action) { described_class::EPIC_CROSS_REFERENCED }
+    end
+
+    it_behaves_like 'does not track when feature flag is disabled', :track_epics_activity
+  end
 end

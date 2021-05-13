@@ -2178,6 +2178,14 @@ RSpec.describe Project do
         .not_to change { project.default_branch }
     end
 
+    it 'does not raise error when repository does not exist' do
+      allow(project.repository).to receive(:find_remote_root_ref)
+        .with('origin', url, auth)
+        .and_raise(Gitlab::Git::Repository::NoRepository)
+
+      expect { project.update_root_ref('origin', url, auth) }.not_to raise_error
+    end
+
     def stub_find_remote_root_ref(project, ref:)
       allow(project.repository)
         .to receive(:find_remote_root_ref)

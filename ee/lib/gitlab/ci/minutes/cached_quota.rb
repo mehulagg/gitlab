@@ -16,12 +16,10 @@ module Gitlab
           @root_namespace = root_namespace
         end
 
-        # TODO:
-        #   - when monthly minutes are updated via the API (e.g. plan change)
-        #   - when extra_shared_runners_minutes_limit are updated via the API
-        #   - when minutes consumption is reset via the controller (TS or admin)
         def expire!
-          # todo
+          ::Gitlab::Redis::SharedState.with do |redis|
+            redis.unlink(cache_key)
+          end
         end
 
         # Reduces the remaining minutes by the consumption argument.

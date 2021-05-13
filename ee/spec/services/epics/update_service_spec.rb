@@ -27,7 +27,7 @@ RSpec.describe Epics::UpdateService do
     end
 
     def update_epic(opts)
-      described_class.new(group, user, opts).execute(epic)
+      described_class.new(group: group, current_user: user, params: opts).execute(epic)
     end
 
     context 'multiple values update' do
@@ -324,7 +324,7 @@ RSpec.describe Epics::UpdateService do
 
       it_behaves_like 'updating a single task' do
         def update_issuable(opts)
-          described_class.new(group, user, opts).execute(epic)
+          described_class.new(group: group, current_user: user, params: opts).execute(epic)
         end
       end
 

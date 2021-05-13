@@ -180,7 +180,7 @@ RSpec.describe 'Two merge requests on a merge train' do
       oldrev = project.repository.commit('feature').sha
       create_file_in_repo(project, 'refs/heads/feature', 'refs/heads/feature', 'test.txt', 'This is test')
       newrev = project.repository.commit('feature').sha
-      MergeRequests::RefreshService.new(project, maintainer_1)
+      MergeRequests::RefreshService.new(project: project, current_user: maintainer_1)
         .execute(oldrev, newrev, 'refs/heads/feature')
 
       merge_request_1.reload

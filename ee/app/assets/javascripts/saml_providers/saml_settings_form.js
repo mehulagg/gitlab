@@ -5,13 +5,18 @@ import { fixTitle } from '~/tooltips';
 
 const CALLOUT_SELECTOR = '.js-callout';
 const HELPER_SELECTOR = '.js-helper-text';
+const WARNING_SELECTOR = '.js-warning';
 
 function getHelperText(el) {
-  return el.parentNode.querySelector(HELPER_SELECTOR);
+  return el?.parentNode?.querySelector(HELPER_SELECTOR) || null;
+}
+
+function getWarning(el) {
+  return el?.parentNode?.querySelector(WARNING_SELECTOR) || null;
 }
 
 function getCallout(el) {
-  return el.closest('.form-group').querySelector(CALLOUT_SELECTOR);
+  return el?.closest('.form-group')?.querySelector(CALLOUT_SELECTOR) || null;
 }
 
 function toggleElementVisibility(el, show) {
@@ -55,6 +60,7 @@ export default class SamlSettingsForm {
       .map((setting) => ({
         ...setting,
         helperText: getHelperText(setting.el),
+        warning: getWarning(setting.el),
         callout: getCallout(setting.el),
       }));
 
@@ -127,7 +133,7 @@ export default class SamlSettingsForm {
     this.settings
       .filter((setting) => setting.dependsOn)
       .forEach((setting) => {
-        const { helperText, callout, el } = setting;
+        const { helperText, warning, callout, el } = setting;
         const isRelatedToggleOn = this.getValueWithDeps(setting.dependsOn);
 
         if (helperText) {
@@ -135,6 +141,10 @@ export default class SamlSettingsForm {
         }
 
         el.disabled = !isRelatedToggleOn;
+
+        if (warning) {
+          toggleElementVisibility(warning, !setting.value);
+        }
 
         if (callout) {
           toggleElementVisibility(callout, setting.value && isRelatedToggleOn);

@@ -8,8 +8,9 @@ RSpec.describe Mutations::Dast::Profiles::Create do
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
-  let(:name) { SecureRandom.hex }
+  let(:branch_name) { project.default_branch }
   let(:description) { SecureRandom.hex }
+  let(:name) { SecureRandom.hex }
   let(:run_after_create) { false }
 
   let(:dast_profile) { Dast::Profile.find_by(project: project, name: name) }
@@ -28,7 +29,7 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         full_path: project.full_path,
         name: name,
         description: description,
-        branch_name: project.default_branch,
+        branch_name: branch_name,
         dast_site_profile_id: dast_site_profile.to_global_id.to_s,
         dast_scanner_profile_id: dast_scanner_profile.to_global_id.to_s,
         run_after_create: run_after_create
@@ -44,16 +45,11 @@ RSpec.describe Mutations::Dast::Profiles::Create do
         context 'when run_after_create=true' do
           let(:run_after_create) { true }
 
+          it_behaves_like 'it checks branch permissions before creating a DAST on-demand scan pipeline'
           it_behaves_like 'it creates a DAST on-demand scan pipeline'
 
           it_behaves_like 'it delegates scan creation to another service' do
             let(:delegated_params) { hash_including(dast_profile: instance_of(Dast::Profile)) }
-          end
-        end
-
-        context "when branch_name='orphaned_branch'" do
-          it 'sets the branch_name' do
-            expect(subject[:dast_profile].branch_name).to eq(project.default_branch)
           end
         end
       end

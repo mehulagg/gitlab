@@ -31,6 +31,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:oncall_participants).class_name('IncidentManagement::OncallParticipant') }
     it { is_expected.to have_many(:oncall_rotations).class_name('IncidentManagement::OncallRotation').through(:oncall_participants) }
     it { is_expected.to have_many(:oncall_schedules).class_name('IncidentManagement::OncallSchedule').through(:oncall_rotations) }
+    it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:user) }
   end
 
   describe 'nested attributes' do
@@ -136,7 +137,7 @@ RSpec.describe User do
 
     it 'returns the user' do
       expect(described_class.find_by_smartcard_identity(smartcard_identity.subject,
-                                             smartcard_identity.issuer))
+                                                        smartcard_identity.issuer))
         .to eq(user)
     end
   end
@@ -1249,7 +1250,7 @@ RSpec.describe User do
         before do
           allow(Gitlab::CurrentSettings)
             .to receive(:should_check_namespace_plan?)
-            .and_return(false)
+                  .and_return(false)
         end
 
         it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
@@ -1263,7 +1264,7 @@ RSpec.describe User do
         before do
           allow(Gitlab::CurrentSettings)
             .to receive(:should_check_namespace_plan?)
-            .and_return(true)
+                  .and_return(true)
           create(:gitlab_subscription, :ultimate, namespace: minimal_access_group)
           create(:group_member, :minimal_access, user: user, source: create(:group))
         end
@@ -1672,6 +1673,81 @@ RSpec.describe User do
 
         it { is_expected.to eq false }
       end
+    end
+  end
+
+  describe '#has_required_credit_card_to_run_pipelines?' do
+    let_it_be(:project) { create(:project) }
+
+    subject { user.has_required_credit_card_to_run_pipelines?(project) }
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:is_saas, :cc_present, :is_free, :is_trial, :free_ff_enabled, :trial_ff_enabled, :old_users_ff_enabled, :days_from_release, :result, :description) do
+      # self-hosted
+      false | false | false | false | true  | true  | false | 0 | true | 'self-hosted paid plan'
+      false | false | false | true  | true  | true  | false | 0 | true | 'self-hosted missing CC on trial plan'
+
+      # saas
+      true  | false | false | false | true  | true  | false | 0  | true  | 'missing CC on paid plan'
+      true  | false | true  | false | true  | true  | false | 0  | false | 'missing CC on free plan'
+      true  | false | true  | false | true  | true  | false | -1 | true  | 'missing CC on free plan but old user'
+      true  | false | true  | false | true  | true  | true  | -1 | false | 'missing CC on free plan but old user and FF enabled'
+      true  | false | true  | false | false | true  | false | 0  | true  | 'missing CC on free plan - FF off'
+      true  | false | false | true  | true  | true  | false | 0  | false | 'missing CC on trial plan'
+      true  | false | false | true  | true  | true  | false | -1 | true  | 'missing CC on trial plan but old user'
+      true  | false | false | true  | true  | true  | true  | -1 | false | 'missing CC on trial plan but old user and FF enabled'
+      true  | false | false | true  | true  | false | false | 0  | true  | 'missing CC on trial plan - FF off'
+      true  | true  | true  | false | true  | true  | false | 0  | true  | 'present CC on free plan'
+      true  | true  | false | true  | true  | true  | false | 0  | true  | 'present CC on trial plan'
+    end
+
+    with_them do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(is_saas)
+        user.created_at = ::Users::CreditCardValidation::RELEASE_DAY + days_from_release.days
+        allow(user).to receive(:credit_card_validated_at).and_return(Time.current) if cc_present
+        allow(project.namespace).to receive(:free_plan?).and_return(is_free)
+        allow(project.namespace).to receive(:trial?).and_return(is_trial)
+        stub_feature_flags(
+          ci_require_credit_card_on_free_plan: free_ff_enabled,
+          ci_require_credit_card_on_trial_plan: trial_ff_enabled,
+          ci_require_credit_card_for_old_users: old_users_ff_enabled)
+      end
+
+      it description do
+        expect(subject).to eq(result)
+      end
+    end
+  end
+
+  describe "#owns_group_without_trial" do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+
+    subject { user.owns_group_without_trial? }
+
+    it 'returns true if owns a group' do
+      group.add_owner(user)
+
+      is_expected.to be(true)
+    end
+
+    it 'returns false if is a member group' do
+      group.add_maintainer(user)
+
+      is_expected.to be(false)
+    end
+
+    it 'returns false if is not a member of any group' do
+      is_expected.to be(false)
+    end
+
+    it 'returns false if owns a group with a plan on a trial with an end date' do
+      group_with_plan = create(:group_with_plan, name: 'trial group', plan: :premium_plan, trial_ends_on: 1.year.from_now)
+      group_with_plan.add_owner(user)
+
+      is_expected.to be(false)
     end
   end
 end

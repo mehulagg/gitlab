@@ -1,0 +1,5 @@
+---
+title: Compare live vs actual CI minutes consumption and record it as a Prometheus metric
+merge_request: 60949
+author:
+type: added

@@ -29,6 +29,7 @@ describe('GeoNodeHealthStatus', () => {
 
   describe.each`
     status         | uiData
+    ${undefined}   | ${HEALTH_STATUS_UI.unknown}
     ${'Healthy'}   | ${HEALTH_STATUS_UI.healthy}
     ${'Unhealthy'} | ${HEALTH_STATUS_UI.unhealthy}
     ${'Disabled'}  | ${HEALTH_STATUS_UI.disabled}
@@ -48,8 +49,8 @@ describe('GeoNodeHealthStatus', () => {
         expect(findGeoStatusIcon().attributes('name')).toBe(uiData.icon);
       });
 
-      it(`renders status text to ${status}`, () => {
-        expect(findGeoStatusText().text()).toBe(status);
+      it(`renders status text to ${uiData.text}`, () => {
+        expect(findGeoStatusText().text()).toBe(uiData.text);
       });
     });
   });

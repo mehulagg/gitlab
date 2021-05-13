@@ -37,7 +37,9 @@ module Sidebars
         private
 
         def list_menu_item
-          return if Feature.enabled?(:sidebar_refactor, context.current_user)
+          if Feature.enabled?(:sidebar_refactor, context.current_user)
+            return ::Sidebars::NilMenuItem.new(item_id: :requirements_list)
+          end
 
           ::Sidebars::MenuItem.new(
             title: _('List'),

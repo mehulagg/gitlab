@@ -71,12 +71,26 @@ GitLab provides the ability to filter analytics based on a date range. To filter
 1. Optionally select a project.
 1. Select a date range using the available date pickers.
 
-## How Time metrics are measured
+## How metrics are measured
 
 The "Time" metrics near the top of the page are measured as follows:
 
 - **Lead time**: median time from issue created to issue closed.
-- **Cycle time**: median time from first commit to issue closed. (You can associate a commit with an issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).)
+- **Cycle time**: median time from first commit to issue closed. (You can associate a commit with an
+  issue by [crosslinking in the commit message](../../project/issues/crosslinking_issues.md#from-commit-messages).)
+
+The "Recent Activity" metrics near the top of the page are measured as follows:
+
+- **New Issues:** the number of issues created in the date range.
+- **Deploys:** the number of deployments to production (1) in the date range.
+- **Deployment Frequency:** the average number of deployments to production (1) per day in the date range.
+
+(1) To give a more accurate representation of deployments that actually completed successfully,
+the calculation for these two metrics changed in GitLab 13.9 from using the time a deployment was
+created to the time a deployment finished. If you were referencing this metric prior to 13.9, please
+keep this slight change in mind.
+
+You can learn more about these metrics in our [analytics definitions](../../analytics/index.md).
 
 ![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
 
@@ -109,8 +123,8 @@ How this works, behind the scenes:
    we need for the stages, like issue creation date, merge request merge time,
    etc.
 
-To sum up, anything that doesn't follow [GitLab flow](../../../topics/gitlab_flow.md) will not be tracked and the
-Value Stream Analytics dashboard will not present any data for:
+To sum up, anything that doesn't follow [GitLab flow](../../../topics/gitlab_flow.md) is not tracked and the
+Value Stream Analytics dashboard doesn not present any data for:
 
 - Merge requests that do not close an issue.
 - Issues not labeled with a label present in the Issue Board or for issues not assigned a milestone.
@@ -118,7 +132,8 @@ Value Stream Analytics dashboard will not present any data for:
 
 ## How the production environment is identified
 
-Value Stream Analytics identifies production environments by looking for project [environments](../../../ci/yaml/README.md#environment) with a name matching any of these patterns:
+Value Stream Analytics identifies production environments by looking for project
+[environments](../../../ci/yaml/README.md#environment) with a name matching any of these patterns:
 
 - `prod` or `prod/*`
 - `production` or `production/*`
@@ -184,14 +199,13 @@ The default stages are designed to work straight out of the box, but they might 
 all teams. Different teams use different approaches to building software, so some teams might want
 to customize their Value Stream Analytics.
 
-GitLab allows users to create multiple value streams, hide default stages and create custom stages that align better to their development workflow.
+GitLab allows users to create multiple value streams, hide default stages and create custom stages
+that align better to their development workflow.
 
 ### Stage path
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210315) in GitLab 13.0.
-> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md). **(FREE SELF)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/323982) in GitLab 13.12.
 
 ![Value stream path navigation](img/vsa_path_nav_v13_11.png "Value stream path navigation")
 
@@ -213,13 +227,49 @@ Hovering over a stage item displays a popover with the following information:
 - Start event description for the given stage
 - End event description
 
-Horizontal path navigation is enabled by default. If you have a self-managed instance, an
-administrator can [open a Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md)
-and disable it with the following command:
+### Stream overview
 
-```ruby
-Feature.disable(:value_stream_analytics_path_navigation)
-```
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321438) in GitLab 13.11.
+
+![Value Stream Analytics Overview](img/vsa_overview_stage_v13_11.png "VSA overview")
+
+The stream overview provides access to key metrics and charts summarizing all the stages in the value stream
+based on selected filters.
+
+Shown metrics and charts includes:
+
+- [Lead time](#how-metrics-are-measured)
+- [Cycle time](#how-metrics-are-measured)
+- [Days to completion chart](#days-to-completion-chart)
+- [Tasks by type chart](#type-of-work---tasks-by-type-chart)
+
+### Stage table
+
+> Sorting the stage table [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/301082) in GitLab 13.12.
+
+![Value Stream Analytics Stage table](img/vsa_stage_table_v13_12.png "VSA stage table")
+
+The stage table shows a list of related workflow items for the selected stage. This can include:
+
+- CI/CD jobs
+- Issues
+- Merge requests
+- Pipelines
+
+The stage table also includes the **Time** column, which shows how long it takes each item to pass
+through the selected value stream stage.
+
+The stage table is not displayed on the stream [Overview](#stream-overview).
+The workflow item column (first column) is ordered by end event.
+
+To sort the stage table by a table column, select the table header.
+You can sort in ascending or descending order. To find items that spent the most time in a stage,
+potentially causing bottlenecks in your value stream, sort the table by the **Time** column.
+From there, select individual items to drill in and investigate how delays are happening.
+To see which items the stage most recently, sort by the work item column on the left.
+
+The table displays up to 20 items at a time. If there are more than 20 items, you can use the
+**Prev** and **Next** buttons to navigate through the pages.
 
 ### Adding a stage
 
@@ -265,7 +315,8 @@ the start event, the stop event dropdown will only list the compatible events.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196698) in GitLab 12.10.
 
-Once a custom stage has been added, you can "drag and drop" stages to rearrange their order. These changes are automatically saved to the system.
+Once a custom stage has been added, you can "drag and drop" stages to rearrange their order. These
+changes are automatically saved to the system.
 
 ### Label based stages
 
@@ -303,7 +354,8 @@ To recover a default stage that was previously hidden:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221202) in GitLab 13.3
 
-A default value stream is readily available for each group. You can create additional value streams based on the different areas of work that you would like to measure.
+A default value stream is readily available for each group. You can create additional value streams
+based on the different areas of work that you would like to measure.
 
 Once created, a new value stream includes the [seven stages](#default-stages) that follow
 [GitLab workflow](../../../topics/gitlab_flow.md)
@@ -360,8 +412,9 @@ To delete a custom value stream:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21631) in GitLab 12.6.
 > - [Chart median line removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235455) in GitLab 13.4.
+> - [Totals replaced with averages](https://gitlab.com/gitlab-org/gitlab/-/issues/262070) in GitLab 13.12.
 
-This chart visually depicts the total number of days it takes for cycles to be completed. (Totals are being replaced with averages in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/262070).)
+This chart visually depicts the average number of days it takes for cycles to be completed.
 
 This chart uses the global page filters for displaying data based on the selected
 group, projects, and time frame. In addition, specific stages can be selected

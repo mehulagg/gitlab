@@ -7,7 +7,7 @@ RSpec.describe Issues::MoveService do
   let(:old_project) { create(:project) }
   let(:new_project) { create(:project, group: create(:group)) }
   let(:old_issue) { create(:issue, project: old_project, author: user) }
-  let(:move_service) { described_class.new(old_project, user) }
+  let(:move_service) { described_class.new(project: old_project, current_user: user) }
 
   before do
     old_project.add_reporter(user)

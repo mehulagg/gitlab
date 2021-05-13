@@ -54,7 +54,9 @@ describe('Account verification modal', () => {
     });
 
     it('renders the description', () => {
-      expect(wrapper.find('p').text()).toContain('Your user account has been flagged');
+      expect(wrapper.find('p').text()).toContain(
+        'To discourage and reduce abuse GitLab will require',
+      );
     });
   });
 });

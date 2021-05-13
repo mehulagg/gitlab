@@ -8,7 +8,7 @@ module EE
       private
 
       override :build_view_model
-      def build_view_model(builder:, project:)
+      def build_view_model(builder:, project:, group:)
         super
 
         # These come from `ee/app/views/dashboard/_nav_link_list.html.haml`

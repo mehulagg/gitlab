@@ -167,7 +167,7 @@ module Projects
         @project.create_or_update_import_data(data: @import_data[:data], credentials: @import_data[:credentials]) if @import_data
 
         if @project.save
-          Service.create_from_active_default_integrations(@project, :project_id, with_templates: true)
+          Integration.create_from_active_default_integrations(@project, :project_id, with_templates: true)
 
           @project.create_labels unless @project.gitlab_project_import?
 
@@ -264,7 +264,7 @@ module Projects
   end
 end
 
-Projects::CreateService.prepend_if_ee('EE::Projects::CreateService')
+Projects::CreateService.prepend_mod_with('Projects::CreateService')
 
 # Measurable should be at the bottom of the ancestor chain, so it will measure execution of EE::Projects::CreateService as well
 Projects::CreateService.prepend(Measurable)

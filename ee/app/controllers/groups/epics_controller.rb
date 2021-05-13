@@ -40,7 +40,7 @@ class Groups::EpicsController < Groups::ApplicationController
   end
 
   def create
-    @epic = ::Epics::CreateService.new(@group, current_user, epic_params).execute
+    @epic = ::Epics::CreateService.new(group: @group, current_user: current_user, params: epic_params).execute
 
     if @epic.persisted?
       render json: {
@@ -102,7 +102,7 @@ class Groups::EpicsController < Groups::ApplicationController
   end
 
   def update_service
-    ::Epics::UpdateService.new(@group, current_user, epic_params.to_h)
+    ::Epics::UpdateService.new(group: @group, current_user: current_user, params: epic_params.to_h)
   end
 
   def finder_type

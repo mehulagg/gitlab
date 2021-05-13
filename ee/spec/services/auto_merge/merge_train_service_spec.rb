@@ -403,6 +403,6 @@ RSpec.describe AutoMerge::MergeTrainService do
   end
 
   def create_pipeline_for(merge_request)
-    MergeRequests::CreatePipelineService.new(project, user).execute(merge_request)
+    MergeRequests::CreatePipelineService.new(project: project, current_user: user).execute(merge_request)
   end
 end

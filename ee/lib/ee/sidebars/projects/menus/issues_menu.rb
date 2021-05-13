@@ -19,8 +19,10 @@ module EE
           private
 
           def iterations_menu_item
-            return unless context.project.licensed_feature_available?(:iterations)
-            return unless can?(context.current_user, :read_iteration, context.project)
+            if !context.project.licensed_feature_available?(:iterations) ||
+              !can?(context.current_user, :read_iteration, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :iterations)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Iterations'),

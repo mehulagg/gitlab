@@ -14,7 +14,7 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
                    milestone: milestone, description: description, weight: 3)
   end
 
-  subject { described_class.new(issue.project, user) }
+  subject { described_class.new(project: issue.project, current_user: user) }
 
   let(:epic) { Epic.last }
 
@@ -127,6 +127,25 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
               expect(new_image_uploader.markdown_link).not_to eq(image_uploader.markdown_link)
               expect(epic.description).to eq("A description and image: #{new_image_uploader.markdown_link}")
             end
+          end
+        end
+
+        context 'when issue has resource state event' do
+          let!(:issue_event) { create(:resource_state_event, issue: issue) }
+
+          it 'does not raise error' do
+            expect { subject.execute(issue) }.not_to raise_error
+          end
+
+          it 'promotes issue successfully' do
+            epic = subject.execute(issue)
+
+            resource_state_event = epic.resource_state_events.first
+            expect(epic.title).to eq(issue.title)
+            expect(issue.promoted_to_epic).to eq(epic)
+            expect(resource_state_event.issue_id).to eq(nil)
+            expect(resource_state_event.epic_id).to eq(epic.id)
+            expect(resource_state_event.state).to eq(issue_event.state)
           end
         end
 

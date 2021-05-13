@@ -21,7 +21,7 @@ RSpec.describe UsersHelper do
         allow(helper).to receive(:can?).and_return(false)
 
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(user).to receive(:any_namespace_without_trial?) { user_eligible? }
+        allow(user).to receive(:owns_group_without_trial?) { user_eligible? }
         allow(user).to receive(:has_paid_namespace?) { has_paid_namespace? }
       end
 

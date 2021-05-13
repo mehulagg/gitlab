@@ -23,6 +23,8 @@ module Security
     validates :project, presence: true, uniqueness: true
     validates :security_policy_management_project, presence: true
 
+    scope :for_project, -> (project_id) { where(project_id: project_id) }
+
     def enabled?
       ::Feature.enabled?(:security_orchestration_policies_configuration, project)
     end
@@ -92,10 +94,15 @@ module Security
     end
 
     def policy_hash
-      blob_data = policy_repo.blob_data_at(default_branch_or_main, POLICY_PATH)
-      return if blob_data.blank?
+      return if policy_blob.blank?
 
-      Gitlab::Config::Loader::Yaml.new(blob_data).load!
+      Gitlab::Config::Loader::Yaml.new(policy_blob).load!
+    end
+
+    def policy_blob
+      strong_memoize(:policy_blob) do
+        policy_repo.blob_data_at(default_branch_or_main, POLICY_PATH)
+      end
     end
 
     def applicable_for_branch?(policy, ref)

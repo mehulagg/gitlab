@@ -95,7 +95,7 @@ $selection-summary-with-error-height: 118px;
 
   // Due to position: sticky not being supported on Chrome (https://caniuse.com/#feat=css-sticky),
   // the property is assigned to the th element as a workaround
-  .card,
+  .selection-summary,
   thead th {
     position: -webkit-sticky;
     position: sticky;

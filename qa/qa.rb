@@ -68,6 +68,7 @@ module QA
     autoload :Sandbox, 'qa/resource/sandbox'
     autoload :Group, 'qa/resource/group'
     autoload :Issue, 'qa/resource/issue'
+    autoload :ProjectIssueNote, 'qa/resource/project_issue_note'
     autoload :Project, 'qa/resource/project'
     autoload :Label, 'qa/resource/label'
     autoload :MergeRequest, 'qa/resource/merge_request'
@@ -224,6 +225,7 @@ module QA
       autoload :Show, 'qa/page/group/show'
       autoload :Menu, 'qa/page/group/menu'
       autoload :Members, 'qa/page/group/members'
+      autoload :BulkImport, 'qa/page/group/bulk_import'
 
       module Milestone
         autoload :Index, 'qa/page/group/milestone/index'
@@ -413,6 +415,10 @@ module QA
       module Accounts
         autoload :Show, 'qa/page/profile/accounts/show'
       end
+    end
+
+    module User
+      autoload :Show, 'qa/page/user/show'
     end
 
     module Issuable

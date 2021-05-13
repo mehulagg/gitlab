@@ -10,6 +10,10 @@ export default () => ({
   childrenFlags: {},
   epicsCount: 0,
   issuesCount: 0,
+  weightSum: {
+    openedIssues: 0,
+    closedIssues: 0,
+  },
   descendantCounts: {
     openedEpics: 0,
     closedEpics: 0,

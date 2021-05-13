@@ -56,10 +56,12 @@ describe('Scanner Filter component', () => {
   });
 
   afterEach(() => {
-    // Clear out the querystring if one exists. It persists between tests.
-    if (wrapper.vm.$route.query[filter.id]) {
-      wrapper.vm.$router.push('/');
+    wrapper.destroy();
+    // Clear out the querystring if one exists, it persists between tests.
+    if (router.currentRoute.query[filter.id]) {
+      router.replace('/');
     }
+
     wrapper.destroy();
   });
 

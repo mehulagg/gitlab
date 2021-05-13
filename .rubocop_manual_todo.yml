@@ -200,7 +200,6 @@ Rails/SaveBang:
     - 'spec/models/resource_milestone_event_spec.rb'
     - 'spec/models/route_spec.rb'
     - 'spec/models/sentry_issue_spec.rb'
-    - 'spec/models/service_spec.rb'
     - 'spec/models/snippet_spec.rb'
     - 'spec/models/upload_spec.rb'
 
@@ -566,7 +565,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/models/prometheus_alert_spec.rb
     - spec/models/protected_branch/push_access_level_spec.rb
     - spec/models/repository_spec.rb
-    - spec/models/service_spec.rb
     - spec/models/snippet_repository_spec.rb
     - spec/models/snippet_spec.rb
     - spec/models/terraform/state_spec.rb
@@ -1586,6 +1584,7 @@ Gitlab/NamespacedClass:
     - 'app/models/individual_note_discussion.rb'
     - 'app/models/instance_configuration.rb'
     - 'app/models/instance_metadata.rb'
+    - 'app/models/integration.rb'
     - 'app/models/internal_id.rb'
     - 'app/models/issuable_severity.rb'
     - 'app/models/issue.rb'
@@ -1673,9 +1672,6 @@ Gitlab/NamespacedClass:
     - 'app/models/project_repository_storage_move.rb'
     - 'app/models/project_services/alerts_service.rb'
     - 'app/models/project_services/alerts_service_data.rb'
-    - 'app/models/project_services/asana_service.rb'
-    - 'app/models/project_services/assembla_service.rb'
-    - 'app/models/project_services/bamboo_service.rb'
     - 'app/models/project_services/bugzilla_service.rb'
     - 'app/models/project_services/buildkite_service.rb'
     - 'app/models/project_services/builds_email_service.rb'
@@ -1754,7 +1750,6 @@ Gitlab/NamespacedClass:
     - 'app/models/self_managed_prometheus_alert_event.rb'
     - 'app/models/sent_notification.rb'
     - 'app/models/sentry_issue.rb'
-    - 'app/models/service.rb'
     - 'app/models/service_desk_setting.rb'
     - 'app/models/service_list.rb'
     - 'app/models/shard.rb'
@@ -1832,6 +1827,7 @@ Gitlab/NamespacedClass:
     - 'app/policies/group_policy.rb'
     - 'app/policies/identity_provider_policy.rb'
     - 'app/policies/instance_metadata_policy.rb'
+    - 'app/policies/integration_policy.rb'
     - 'app/policies/issuable_policy.rb'
     - 'app/policies/issue_policy.rb'
     - 'app/policies/merge_request_policy.rb'
@@ -1852,7 +1848,6 @@ Gitlab/NamespacedClass:
     - 'app/policies/release_policy.rb'
     - 'app/policies/repository_policy.rb'
     - 'app/policies/resource_label_event_policy.rb'
-    - 'app/policies/service_policy.rb'
     - 'app/policies/suggestion_policy.rb'
     - 'app/policies/timebox_policy.rb'
     - 'app/policies/timelog_policy.rb'
@@ -2097,6 +2092,7 @@ Gitlab/NamespacedClass:
     - 'app/services/auto_merge_service.rb'
     - 'app/services/base_container_service.rb'
     - 'app/services/base_count_service.rb'
+    - 'app/services/base_project_service.rb'
     - 'app/services/base_renderer.rb'
     - 'app/services/base_service.rb'
     - 'app/services/bulk_create_integration_service.rb'

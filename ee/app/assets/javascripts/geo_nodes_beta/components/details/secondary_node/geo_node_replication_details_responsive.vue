@@ -17,7 +17,8 @@ export default {
     ),
     learnMore: __('Learn more'),
     nA: __('N/A'),
-    progressBarTitle: s__('Geo|%{component} synced'),
+    progressBarSyncTitle: s__('Geo|%{component} synced'),
+    progressBarVerifTitle: s__('Geo|%{component} verified'),
   },
   components: {
     GlIcon,
@@ -81,7 +82,8 @@ export default {
         <div class="gl-mr-5" data-testid="sync-status">
           <geo-node-progress-bar
             v-if="item.syncValues"
-            :title="sprintf($options.i18n.progressBarTitle, { component: item.component })"
+            :title="sprintf($options.i18n.progressBarSyncTitle, { component: item.component })"
+            :target="`sync-progress-${item.component}`"
             :values="item.syncValues"
           />
           <span v-else class="gl-text-gray-400 gl-font-sm">{{ $options.i18n.nA }}</span>
@@ -89,7 +91,8 @@ export default {
         <div data-testid="verification-status">
           <geo-node-progress-bar
             v-if="item.verificationValues"
-            :title="sprintf($options.i18n.progressBarTitle, { component: item.component })"
+            :title="sprintf($options.i18n.progressBarVerifTitle, { component: item.component })"
+            :target="`verification-progress-${item.component}`"
             :values="item.verificationValues"
           />
           <span v-else class="gl-text-gray-400 gl-font-sm">{{ $options.i18n.nA }}</span>

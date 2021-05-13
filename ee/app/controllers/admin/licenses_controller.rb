@@ -5,6 +5,7 @@ class Admin::LicensesController < Admin::ApplicationController
 
   before_action :license, only: [:show, :download, :destroy]
   before_action :require_license, only: [:download, :destroy]
+  before_action :check_cloud_license, only: [:show]
 
   respond_to :html
 
@@ -78,6 +79,10 @@ class Admin::LicensesController < Admin::ApplicationController
 
   def build_license
     @license ||= License.new(data: params[:trial_key])
+  end
+
+  def check_cloud_license
+    redirect_to admin_cloud_license_path if Gitlab::CurrentSettings.cloud_license_enabled?
   end
 
   def license_params

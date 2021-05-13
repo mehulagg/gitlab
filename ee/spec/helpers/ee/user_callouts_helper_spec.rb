@@ -138,7 +138,7 @@ RSpec.describe EE::UserCalloutsHelper do
 
     let(:user) { namespace.owner }
 
-    where(:any_namespace_without_trial?, :show_ultimate_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do
+    where(:owns_group_without_trial?, :show_ultimate_trial?, :user_default_dashboard?, :has_no_trial_or_paid_plan?, :should_render?) do
       true  | true  | true  | true  | true
       true  | true  | true  | false | false
       true  | true  | false | true  | false
@@ -161,7 +161,7 @@ RSpec.describe EE::UserCalloutsHelper do
       before do
         allow(helper).to receive(:show_ultimate_trial?) { show_ultimate_trial? }
         allow(helper).to receive(:user_default_dashboard?) { user_default_dashboard? }
-        allow(user).to receive(:any_namespace_without_trial?) { any_namespace_without_trial? }
+        allow(user).to receive(:owns_group_without_trial?) { owns_group_without_trial? }
 
         unless has_no_trial_or_paid_plan?
           create(:gitlab_subscription, hosted_plan: ultimate_plan, namespace: namespace)

@@ -7,56 +7,12 @@ import { s__, __ } from '~/locale';
 import { ErrorMessages } from '../constants';
 import * as mutationTypes from './mutation_types';
 
-const notImplemented = () => {
-  /* eslint-disable-next-line @gitlab/require-i18n-strings */
-  throw new Error('Not implemented!');
-};
-
 export default {
   ...mutationsCE,
   [mutationTypes.SET_SHOW_LABELS]: (state, val) => {
     state.isShowingLabels = val;
   },
 
-  [mutationTypes.REQUEST_AVAILABLE_BOARDS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_AVAILABLE_BOARDS_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_AVAILABLE_BOARDS_ERROR]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.REQUEST_RECENT_BOARDS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_RECENT_BOARDS_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_RECENT_BOARDS_ERROR]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.REQUEST_REMOVE_BOARD]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_REMOVE_BOARD_SUCCESS]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.RECEIVE_REMOVE_BOARD_ERROR]: () => {
-    notImplemented();
-  },
-
-  [mutationTypes.TOGGLE_PROMOTION_STATE]: () => {
-    notImplemented();
-  },
   [mutationTypes.UPDATE_LIST_SUCCESS]: (state, { listId, list }) => {
     Vue.set(state.boardLists, listId, list);
   },

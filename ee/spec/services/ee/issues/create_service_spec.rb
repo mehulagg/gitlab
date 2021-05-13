@@ -8,7 +8,7 @@ RSpec.describe Issues::CreateService do
   let(:project) { create(:project, group: group) }
   let(:user) { create(:user) }
   let(:params) { { title: 'Awesome issue', description: 'please fix', weight: 9 } }
-  let(:service) { described_class.new(project, user, params) }
+  let(:service) { described_class.new(project: project, current_user: user, params: params) }
 
   describe '#execute' do
     context 'when current user cannot admin issues in the project' do
@@ -90,7 +90,7 @@ RSpec.describe Issues::CreateService do
               confidential_epic = create(:epic, group: group, confidential: true)
               params = { title: 'confidential issue', epic_id: confidential_epic.id }
 
-              issue = described_class.new(project, user, params).execute
+              issue = described_class.new(project: project, current_user: user, params: params).execute
 
               expect(issue.confidential).to eq(true)
             end
@@ -100,7 +100,7 @@ RSpec.describe Issues::CreateService do
             it 'creates a confidential child issue' do
               params = { title: 'confidential issue', epic_id: epic.id, confidential: true }
 
-              issue = described_class.new(project, user, params).execute
+              issue = described_class.new(project: project, current_user: user, params: params).execute
 
               expect(issue.confidential).to eq(true)
             end

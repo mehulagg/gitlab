@@ -433,7 +433,7 @@ class User < ApplicationRecord
 
   def preferred_language
     read_attribute('preferred_language') ||
-      I18n.default_locale.to_s.presence_in(Gitlab::I18n::AVAILABLE_LANGUAGES.keys) ||
+      I18n.default_locale.to_s.presence_in(Gitlab::I18n.available_locales) ||
       'en'
   end
 
@@ -2079,4 +2079,4 @@ class User < ApplicationRecord
   end
 end
 
-User.prepend_if_ee('EE::User')
+User.prepend_mod_with('User')

@@ -28,6 +28,11 @@ export default {
       type: Object,
       required: true,
     },
+    target: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     queuedCount() {
@@ -42,6 +47,9 @@ export default {
     successCount() {
       return toNumber(this.values.success) || 0;
     },
+    popoverTarget() {
+      return this.target ? this.target : `syncProgress-${this.title}`;
+    },
   },
 };
 </script>
@@ -49,7 +57,7 @@ export default {
 <template>
   <div>
     <stacked-progress-bar
-      :id="`syncProgress-${title}`"
+      :id="popoverTarget"
       tabindex="0"
       hide-tooltips
       :unavailable-label="$options.i18n.unavailableLabel"
@@ -58,7 +66,7 @@ export default {
       :total-count="totalCount"
     />
     <gl-popover
-      :target="`syncProgress-${title}`"
+      :target="popoverTarget"
       placement="right"
       triggers="hover focus"
       :css-classes="['w-100']"

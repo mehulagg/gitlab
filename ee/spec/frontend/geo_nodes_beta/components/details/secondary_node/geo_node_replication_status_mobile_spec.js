@@ -14,7 +14,8 @@ describe('GeoNodeReplicationStatusMobile', () => {
     },
     translations: {
       nA: 'N/A',
-      progressBarTitle: '%{component} synced',
+      progressBarSyncTitle: '%{component} synced',
+      progressBarVerifTitle: '%{component} verified',
     },
   };
 

@@ -46,6 +46,8 @@ describe('Iteration cadences list', () => {
     },
   ];
 
+  const startCursor = 'MQ';
+  const endCursor = 'MjA';
   const querySuccessResponse = {
     data: {
       group: {
@@ -54,8 +56,8 @@ describe('Iteration cadences list', () => {
           pageInfo: {
             hasNextPage: true,
             hasPreviousPage: false,
-            startCursor: 'MQ',
-            endCursor: 'MjA',
+            startCursor,
+            endCursor,
           },
         },
       },
@@ -70,8 +72,8 @@ describe('Iteration cadences list', () => {
           pageInfo: {
             hasNextPage: false,
             hasPreviousPage: false,
-            startCursor: 'MQ',
-            endCursor: 'MjA',
+            startCursor: null,
+            endCursor: null,
           },
         },
       },
@@ -102,7 +104,10 @@ describe('Iteration cadences list', () => {
 
   const createCadenceButton = () =>
     wrapper.findByRole('link', { name: 'New iteration cadence', href: cadencesListPath });
+  const findNextPageButton = () => wrapper.findByRole('button', { name: 'Next' });
+  const findPrevPageButton = () => wrapper.findByRole('button', { name: 'Prev' });
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findPagination = () => wrapper.findComponent(GlKeysetPagination);
 
   afterEach(() => {
     wrapper.destroy();
@@ -140,6 +145,7 @@ describe('Iteration cadences list', () => {
       await waitForPromises();
 
       expect(findLoadingIcon().exists()).toBe(false);
+      expect(findPagination().exists()).toBe(false);
       expect(wrapper.text()).toContain('No iteration cadences to show');
     });
 
@@ -162,6 +168,50 @@ describe('Iteration cadences list', () => {
 
       expect(findLoadingIcon().exists()).toBe(false);
       expect(wrapper.text()).toContain('Network error');
+    });
+
+    describe('pagination', () => {
+      let resolverMock;
+
+      beforeEach(async () => {
+        resolverMock = jest.fn().mockResolvedValue(querySuccessResponse);
+        await createComponent({ resolverMock });
+
+        await waitForPromises();
+
+        resolverMock.mockReset();
+      });
+
+      it('correctly disables pagination buttons', async () => {
+        expect(findNextPageButton().element.disabled).toBe(false);
+        expect(findPrevPageButton().element.disabled).toBe(true);
+      });
+
+      it('updates query when next page clicked', async () => {
+        findPagination().vm.$emit('next');
+
+        await nextTick();
+
+        expect(resolverMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            beforeCursor: '',
+            afterCursor: endCursor,
+          }),
+        );
+      });
+
+      it('updates query when previous page clicked', async () => {
+        findPagination().vm.$emit('prev');
+
+        await nextTick();
+
+        expect(resolverMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            beforeCursor: startCursor,
+            afterCursor: '',
+          }),
+        );
+      });
     });
   });
 });

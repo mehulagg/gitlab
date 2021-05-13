@@ -1,5 +1,5 @@
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 
 export const GEO_INFO_URL = helpPagePath('administration/geo/index.md');
 
@@ -31,22 +31,27 @@ export const HEALTH_STATUS_UI = {
   healthy: {
     icon: 'status_success',
     variant: 'success',
+    text: s__('Geo|Healthy'),
   },
   unhealthy: {
     icon: 'status_failed',
     variant: 'danger',
+    text: s__('Geo|Unhealthy'),
   },
   disabled: {
     icon: 'status_canceled',
     variant: 'neutral',
+    text: s__('Geo|Disabled'),
   },
   unknown: {
     icon: 'status_notfound',
     variant: 'neutral',
+    text: s__('Geo|Unknown'),
   },
   offline: {
     icon: 'status_canceled',
     variant: 'neutral',
+    text: s__('Geo|Offline'),
   },
 };
 

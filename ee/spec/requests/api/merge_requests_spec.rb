@@ -198,7 +198,7 @@ RSpec.describe API::MergeRequests do
       let!(:merge_request) { create(:merge_request, :on_train, source_project: project, target_project: project) }
 
       before do
-        ::MergeRequests::MergeToRefService.new(merge_request.project, merge_request.merge_user, target_ref: merge_request.train_ref_path)
+        ::MergeRequests::MergeToRefService.new(project: merge_request.project, current_user: merge_request.merge_user, params: { target_ref: merge_request.train_ref_path })
                                           .execute(merge_request)
       end
 

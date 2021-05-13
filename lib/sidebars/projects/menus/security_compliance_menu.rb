@@ -34,7 +34,9 @@ module Sidebars
 
         def configuration_menu_item
           strong_memoize(:configuration_menu_item) do
-            next unless render_configuration_menu_item?
+            unless render_configuration_menu_item?
+              next ::Sidebars::NilMenuItem.new(item_id: :configuration)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Configuration'),
@@ -59,4 +61,4 @@ module Sidebars
   end
 end
 
-Sidebars::Projects::Menus::SecurityComplianceMenu.prepend_if_ee('EE::Sidebars::Projects::Menus::SecurityComplianceMenu')
+Sidebars::Projects::Menus::SecurityComplianceMenu.prepend_mod_with('Sidebars::Projects::Menus::SecurityComplianceMenu')

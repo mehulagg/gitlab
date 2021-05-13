@@ -378,4 +378,12 @@ RSpec.describe ProjectsHelper do
       end
     end
   end
+
+  describe '#status_checks_app_data' do
+    subject { helper.status_checks_app_data(project) }
+
+    it 'returns the correct data' do
+      expect(subject[:data]).to eq({ status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id)) })
+    end
+  end
 end

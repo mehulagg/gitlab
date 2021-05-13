@@ -105,7 +105,7 @@ RSpec.describe License do
                 let(:gitlab_license) do
                   build(
                     :gitlab_license,
-                    type: described_class::CLOUD_LICENSE_TYPE,
+                    cloud_licensing_enabled: true,
                     starts_at: Date.current,
                     restrictions: { active_user_count: 10, previous_user_count: previous_user_count }
                   )
@@ -1418,12 +1418,38 @@ RSpec.describe License do
       it { is_expected.to be false }
     end
 
-    context 'when the license is not a cloud license' do
+    context 'when the license has cloud licensing disabled' do
+      let(:gl_license) { build(:gitlab_license, cloud_licensing_enabled: false) }
+
       it { is_expected.to be false }
     end
 
-    context 'when the license is a cloud license' do
-      let(:gl_license) { build(:gitlab_license, type: described_class::CLOUD_LICENSE_TYPE) }
+    context 'when the license has cloud licensing enabled' do
+      let(:gl_license) { build(:gitlab_license, cloud_licensing_enabled: true) }
+
+      it { is_expected.to be true }
+    end
+  end
+
+  describe '#usage_ping?' do
+    subject { license.usage_ping? }
+
+    context 'when no license provided' do
+      before do
+        license.data = nil
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license has usage ping required metrics disabled' do
+      let(:gl_license) { build(:gitlab_license, usage_ping_required_metrics_enabled: false) }
+
+      it { is_expected.to be false }
+    end
+
+    context 'when the license has usage ping required metrics enabled' do
+      let(:gl_license) { build(:gitlab_license, usage_ping_required_metrics_enabled: true) }
 
       it { is_expected.to be true }
     end
@@ -1437,7 +1463,7 @@ RSpec.describe License do
     end
 
     context 'when the license is a cloud license' do
-      let(:gl_license) { build(:gitlab_license, type: described_class::CLOUD_LICENSE_TYPE) }
+      let(:gl_license) { build(:gitlab_license, cloud_licensing_enabled: true) }
 
       it { is_expected.to eq(described_class::CLOUD_LICENSE_TYPE) }
     end

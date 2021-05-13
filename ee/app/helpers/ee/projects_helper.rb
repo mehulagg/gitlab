@@ -4,50 +4,12 @@ module EE
   module ProjectsHelper
     extend ::Gitlab::Utils::Override
 
-    override :sidebar_settings_paths
-    def sidebar_settings_paths
-      super + %w[
-        operations#show
-      ]
-    end
-
     override :sidebar_operations_paths
     def sidebar_operations_paths
       super + %w[
         cluster_agents
         oncall_schedules
       ]
-    end
-
-    override :get_project_nav_tabs
-    def get_project_nav_tabs(project, current_user)
-      nav_tabs = super
-
-      if can?(current_user, :read_code_review_analytics, project)
-        nav_tabs << :code_review
-      end
-
-      if can?(current_user, :read_project_merge_request_analytics, project)
-        nav_tabs << :merge_request_analytics
-      end
-
-      if project.feature_available?(:issues_analytics) && can?(current_user, :read_project, project)
-        nav_tabs << :issues_analytics
-      end
-
-      if project.insights_available?
-        nav_tabs << :project_insights
-      end
-
-      if can?(current_user, :read_requirement, project)
-        nav_tabs << :requirements
-      end
-
-      if can?(current_user, :read_incident_management_oncall_schedule, project)
-        nav_tabs << :oncall_schedule
-      end
-
-      nav_tabs
     end
 
     override :project_permissions_settings
@@ -123,6 +85,14 @@ module EE
       end
 
       { data: data }
+    end
+
+    def status_checks_app_data(project)
+      {
+        data: {
+          status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+        }
+      }
     end
 
     def can_modify_approvers(project = @project)
@@ -246,10 +216,6 @@ module EE
       if can_create_feedback?(project, :dismissal)
         project_vulnerability_feedback_index_path(project)
       end
-    end
-
-    def any_project_nav_tab?(tabs)
-      tabs.any? { |tab| project_nav_tab?(tab) }
     end
 
     def show_discover_project_security?(project)

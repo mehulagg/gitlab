@@ -20,7 +20,9 @@ module EE
           private
 
           def on_call_schedules_menu_item
-            return unless can?(context.current_user, :read_incident_management_oncall_schedule, context.project)
+            unless can?(context.current_user, :read_incident_management_oncall_schedule, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :on_call_schedules)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('On-call Schedules'),
@@ -31,7 +33,9 @@ module EE
           end
 
           def escalation_policies_menu_item
-            return unless can?(context.current_user, :read_incident_management_escalation_policy, context.project)
+            unless can?(context.current_user, :read_incident_management_escalation_policy, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :escalation_policies)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Escalation policies'),

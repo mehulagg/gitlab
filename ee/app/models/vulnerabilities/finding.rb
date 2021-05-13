@@ -37,7 +37,7 @@ module Vulnerabilities
 
     has_many :signatures, class_name: 'Vulnerabilities::FindingSignature', inverse_of: :finding
 
-    has_many :finding_evidences, class_name: 'Vulnerabilities::FindingEvidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
+    has_one :evidence, class_name: 'Vulnerabilities::Findings::Evidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
 
     serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
 

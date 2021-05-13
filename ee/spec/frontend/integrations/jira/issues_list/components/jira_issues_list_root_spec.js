@@ -124,7 +124,7 @@ describe('JiraIssuesListRoot', () => {
     describe('when request fails', () => {
       it.each`
         APIErrorMessage | expectedRenderedErrorMessage
-        ${'API error'}  | ${'An error occurred while loading issues'}
+        ${'API error'}  | ${'API error'}
         ${undefined}    | ${'An error occurred while loading issues'}
       `(
         'calls `createFlash` with "$expectedRenderedErrorMessage" when API responds with "$APIErrorMessage"',

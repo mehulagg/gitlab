@@ -3,7 +3,7 @@
 class TrialRegistrationsController < RegistrationsController
   extend ::Gitlab::Utils::Override
 
-  layout 'trial'
+  layout 'simple_registration'
 
   skip_before_action :require_no_authentication
 

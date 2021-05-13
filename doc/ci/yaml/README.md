@@ -487,7 +487,7 @@ Use local includes instead of symbolic links.
 > - It's not recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to enable it. **(CORE ONLY)**
 
-You can use wildcard paths (`*`) with `include:local`.
+You can use wildcard paths (`*` and `**`) with `include:local`.
 
 Example:
 
@@ -495,7 +495,19 @@ Example:
 include: 'configs/*.yml'
 ```
 
-When the pipeline runs, it adds all `.yml` files in the `configs` folder into the pipeline configuration.
+When the pipeline runs, GitLab:
+
+- Adds all `.yml` files in the `configs` directory into the pipeline configuration.
+- Does not add `.yml` files in subfolders of the `configs` directory. To allow this,
+  add the following configuration:
+
+  ```yaml
+  # This matches all `.yml` files in `configs` and any subfolder in it.
+  include: 'configs/**.yml'
+
+  # This matches all `.yml` files only in subfolders of `configs`.
+  include: 'configs/**/*.yml'
+  ```
 
 The wildcard file paths feature is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
@@ -2958,11 +2970,7 @@ You can specify a [fallback cache key](#fallback-cache-key) to use if the specif
 ##### Multiple caches
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32814) in GitLab 13.10.
-> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/321877) in GitLab 13.11.
-> - Enabled on GitLab.com.
-> - Recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-multiple-caches). **(FREE SELF)**
+> - [Feature Flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/321877), in GitLab 13.12.
 
 You can have a maximum of four caches:
 
@@ -2988,25 +2996,6 @@ test-job:
 
 If multiple caches are combined with a [Fallback cache key](#fallback-cache-key),
 the fallback is fetched multiple times if multiple caches are not found.
-
-##### Enable or disable multiple caches **(FREE SELF)**
-
-The multiple caches feature is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:multiple_cache_per_job)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:multiple_cache_per_job)
-```
 
 #### Fallback cache key
 
@@ -3274,10 +3263,6 @@ If the artifacts of the job that is set as a dependency are
 [expired](#artifactsexpire_in) or
 [deleted](../pipelines/job_artifacts.md#delete-job-artifacts), then
 the dependent job fails.
-
-You can ask your administrator to
-[flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
-and bring back the old behavior.
 
 #### `artifacts:exclude`
 
@@ -3873,7 +3858,9 @@ failure.
 `artifacts:when` can be set to one of the following values:
 
 1. `on_success` (default): Upload artifacts only when the job succeeds.
-1. `on_failure`: Upload artifacts only when the job fails.
+1. `on_failure`: Upload artifacts only when the job fails. Useful, for example, when
+   [uploading artifacts](../unit_test_reports.md#viewing-junit-screenshots-on-gitlab) required to
+   troubleshoot failing tests.
 1. `always`: Always upload artifacts.
 
 For example, to upload artifacts only when a job fails:
@@ -4481,6 +4468,7 @@ These keywords are supported:
 - [`ref`](#releaseref) (optional)
 - [`milestones`](#releasemilestones) (optional)
 - [`released_at`](#releasereleased_at) (optional)
+- [`assets:links`](#releaseassetslinks) (optional)
 
 The release is created only if the job processes without error. If the Rails API
 returns an error during release creation, the `release` job fails.
@@ -4689,6 +4677,26 @@ defined. Should be enclosed in quotes and expressed in ISO 8601 format.
 released_at: '2021-03-15T08:00:00Z'
 ```
 
+#### `release:assets:links`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/271454) in GitLab 13.12.
+
+Include [asset links](../../user/project/releases/index.md#release-assets) in the release.
+
+NOTE:
+Requires `release-cli` version v0.4.0 or higher.
+
+```yaml
+assets:
+  links:
+    - name: 'asset1'
+      url: 'https://example.com/assets/1'
+    - name: 'asset2'
+      url: 'https://example.com/assets/2'
+      filepath: '/pretty/url/1' # optional
+      link_type: 'other' # optional
+```
+
 #### Complete example for `release`
 
 If you combine the previous examples for `release`, you get two options, depending on how you generate the
@@ -4715,6 +4723,14 @@ tags. You can't use these options together, so choose one:
         - 'm2'
         - 'm3'
       released_at: '2020-07-15T08:00:00Z'  # Optional, is auto generated if not defined, or can use a variable.
+      assets: # Optional, multiple asset links
+        links:
+          - name: 'asset1'
+            url: 'https://example.com/assets/1'
+          - name: 'asset2'
+            url: 'https://example.com/assets/2'
+            filepath: '/pretty/url/1' # optional
+            link_type: 'other' # optional
   ```
 
 - To create a release automatically when commits are pushed or merged to the default branch,
@@ -4761,6 +4777,14 @@ tags. You can't use these options together, so choose one:
         - 'm2'
         - 'm3'
       released_at: '2020-07-15T08:00:00Z'  # Optional, is auto generated if not defined, or can use a variable.
+      assets:
+        links:
+          - name: 'asset1'
+            url: 'https://example.com/assets/1'
+          - name: 'asset2'
+            url: 'https://example.com/assets/2'
+            filepath: '/pretty/url/1' # optional
+            link_type: 'other' # optional
   ```
 
 #### Release assets as Generic packages
@@ -4778,7 +4802,7 @@ You can also call the `release-cli` directly from a `script` entry.
 For example, if you use the YAML described previously:
 
 ```shell
-release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using the release-cli $EXTRA_DESCRIPTION" --tag-name "v${MAJOR}.${MINOR}.${REVISION}" --ref "$CI_COMMIT_SHA" --released-at "2020-07-15T08:00:00Z" --milestone "m1" --milestone "m2" --milestone "m3"
+release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using the release-cli $EXTRA_DESCRIPTION" --tag-name "v${MAJOR}.${MINOR}.${REVISION}" --ref "$CI_COMMIT_SHA" --released-at "2020-07-15T08:00:00Z" --milestone "m1" --milestone "m2" --milestone "m3" --assets-link "{\"name\":\"asset1\",\"url\":\"https://example.com/assets/1\",\"link_type\":\"other\"}
 ```
 
 ### `secrets`

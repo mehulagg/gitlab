@@ -233,53 +233,119 @@ RSpec.describe Geo::RepositorySyncService, :geo do
         context 'with non empty repositories' do
           let(:project) { create(:project, :repository) }
 
-          context 'when when HEAD change' do
+          context 'with inmemory feature disabled' do
             before do
-              allow(project.repository)
-                .to receive(:find_remote_root_ref)
-                .with('geo', url_to_repo, anything)
-                .and_return('feature')
+              stub_feature_flags(find_remote_root_refs_inmemory: false)
             end
 
-            it 'syncs gitattributes to info/attributes' do
-              expect(repository).to receive(:copy_gitattributes)
+            context 'when HEAD change' do
+              before do
+                allow(project.repository)
+                  .to receive(:find_remote_root_ref)
+                  .with('geo', url_to_repo, nil)
+                  .and_return('feature')
+              end
 
-              subject.execute
+              it 'syncs gitattributes to info/attributes' do
+                expect(repository).to receive(:copy_gitattributes)
+
+                subject.execute
+              end
+
+              it 'updates the default branch with JWT credentials' do
+                expect(repository).to receive(:with_config)
+                  .with("http.#{url_to_repo}.extraHeader" => anything)
+                  .and_call_original
+                  .twice
+
+                expect(project).to receive(:change_head).with('feature').once
+
+                subject.execute
+              end
             end
 
-            it 'updates the default branch with JWT credentials' do
-              expect(repository).to receive(:with_config)
-                .with("http.#{url_to_repo}.extraHeader" => anything)
-                .and_call_original
+            context 'when HEAD does not change' do
+              before do
+                allow(project.repository)
+                  .to receive(:find_remote_root_ref)
+                  .with('geo', url_to_repo, nil)
+                  .and_return(project.default_branch)
+              end
 
-              expect(project).to receive(:change_head).with('feature').once
+              it 'syncs gitattributes to info/attributes' do
+                expect(repository).to receive(:copy_gitattributes)
 
-              subject.execute
+                subject.execute
+              end
+
+              it 'updates the default branch with JWT credentials' do
+                expect(repository).to receive(:with_config)
+                  .with("http.#{url_to_repo}.extraHeader" => anything)
+                  .and_call_original
+                  .twice
+
+                expect(project).to receive(:change_head).with('master').once
+
+                subject.execute
+              end
             end
           end
 
-          context 'when HEAD does not change' do
+          context 'with inmemory feature enabled' do
             before do
-              allow(project.repository)
-                .to receive(:find_remote_root_ref)
-                .with('geo', url_to_repo, anything)
-                .and_return(project.default_branch)
+              stub_feature_flags(find_remote_root_refs_inmemory: true)
             end
 
-            it 'syncs gitattributes to info/attributes' do
-              expect(repository).to receive(:copy_gitattributes)
+            context 'when HEAD change' do
+              before do
+                allow(project.repository)
+                  .to receive(:find_remote_root_ref)
+                  .with('geo', url_to_repo, anything)
+                  .and_return('feature')
+              end
 
-              subject.execute
+              it 'syncs gitattributes to info/attributes' do
+                expect(repository).to receive(:copy_gitattributes)
+
+                subject.execute
+              end
+
+              it 'updates the default branch' do
+                expect(repository).to receive(:with_config)
+                  .with("http.#{url_to_repo}.extraHeader" => anything)
+                  .and_call_original
+                  .once
+
+                expect(project).to receive(:change_head).with('feature').once
+
+                subject.execute
+              end
             end
 
-            it 'updates the default branch with JWT credentials' do
-              expect(repository).to receive(:with_config)
-                .with("http.#{url_to_repo}.extraHeader" => anything)
-                .and_call_original
+            context 'when HEAD does not change' do
+              before do
+                allow(project.repository)
+                  .to receive(:find_remote_root_ref)
+                  .with('geo', url_to_repo, anything)
+                  .and_return(project.default_branch)
+              end
 
-              expect(project).to receive(:change_head).with('master').once
+              it 'syncs gitattributes to info/attributes' do
+                expect(repository).to receive(:copy_gitattributes)
 
-              subject.execute
+                subject.execute
+              end
+
+              it 'updates the default branch' do
+                expect(repository).to receive(:with_config)
+                  .with("http.#{url_to_repo}.extraHeader" => anything)
+                  .and_call_original
+                  .once
+
+                expect(project).to receive(:change_head).with('master').once
+
+                subject.execute
+              end
             end
           end
         end

@@ -23,6 +23,8 @@ module Registrations
       @group = Groups::CreateService.new(current_user, group_params).execute
 
       if @group.persisted?
+        experiment(:jobs_to_be_done, user: current_user)
+          .track(:create_group, namespace: @group)
         create_successful_flow
       else
         render action: :new

@@ -49,6 +49,18 @@ describe('DAST Scanner Profile', () => {
   const findPolicyProfileAlert = () => findByTestId('dast-policy-scanner-profile-alert');
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
+  const setFieldValue = async (field, value) => {
+    await field.find('input').setValue(value);
+    field.trigger('blur');
+  };
+
+  const fillAndSubmitForm = async () => {
+    await setFieldValue(findProfileNameInput(), profileName);
+    await setFieldValue(findSpiderTimeoutInput(), spiderTimeout);
+    await setFieldValue(findTargetTimeoutInput(), targetTimeout);
+    await submitForm();
+  };
+
   const componentFactory = (mountFn = shallowMount) => (options) => {
     wrapper = mountFn(
       DastScannerProfileForm,
@@ -94,18 +106,18 @@ describe('DAST Scanner Profile', () => {
       createComponent();
     });
 
-    describe('is disabled if', () => {
+    describe('is enabled even if', () => {
       it('form contains errors', async () => {
         findProfileNameInput().vm.$emit('input', profileName);
         await findSpiderTimeoutInput().vm.$emit('input', '12312');
-        expect(findSubmitButton().props('disabled')).toBe(true);
+        expect(findSubmitButton().props('disabled')).toBe(false);
       });
 
       it('at least one field is empty', async () => {
         findProfileNameInput().vm.$emit('input', '');
         await findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
         await findTargetTimeoutInput().vm.$emit('input', targetTimeout);
-        expect(findSubmitButton().props('disabled')).toBe(true);
+        expect(findSubmitButton().props('disabled')).toBe(false);
       });
     });
 
@@ -124,21 +136,19 @@ describe('DAST Scanner Profile', () => {
     ${'Spider'} | ${findSpiderTimeoutInput} | ${[-1, 2881]} | ${spiderTimeout}
     ${'Target'} | ${findTargetTimeoutInput} | ${[0, 3601]}  | ${targetTimeout}
   `('$timeoutType Timeout', ({ finder, invalidValues, validValue }) => {
-    const errorMessage = 'Please enter a valid timeout value';
+    const errorMessage = 'Constraints not satisfied';
 
     beforeEach(() => {
       createFullComponent();
     });
 
     it.each(invalidValues)('is marked as invalid provided an invalid value', async (value) => {
-      await finder().find('input').setValue(value);
-
+      await setFieldValue(finder().find('input'), value);
       expect(wrapper.text()).toContain(errorMessage);
     });
 
     it('is marked as valid provided a valid value', async () => {
-      await finder().find('input').setValue(validValue);
-
+      await setFieldValue(finder().find('input'), validValue);
       expect(wrapper.text()).not.toContain(errorMessage);
     });
 
@@ -175,14 +185,14 @@ describe('DAST Scanner Profile', () => {
       const createdProfileId = 30203;
 
       describe('on success', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           jest
             .spyOn(wrapper.vm.$apollo, 'mutate')
             .mockResolvedValue({ data: { [mutationKind]: { id: createdProfileId } } });
-          findProfileNameInput().vm.$emit('input', profileName);
-          findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
-          findTargetTimeoutInput().vm.$emit('input', targetTimeout);
-          submitForm();
+          await findProfileNameInput().vm.$emit('input', profileName);
+          await findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
+          await findTargetTimeoutInput().vm.$emit('input', targetTimeout);
+          await submitForm();
         });
 
         it('sets loading state', () => {
@@ -219,19 +229,17 @@ describe('DAST Scanner Profile', () => {
       });
 
       describe('on top-level error', () => {
-        beforeEach(() => {
-          createComponent();
+        beforeEach(async () => {
+          createFullComponent();
           jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue();
-          const input = findTargetTimeoutInput();
-          input.vm.$emit('input', targetTimeout);
-          submitForm();
+          await fillAndSubmitForm();
         });
 
         it('resets loading state', () => {
           expect(findSubmitButton().props('loading')).toBe(false);
         });
 
-        it('shows an error alert', () => {
+        it('shows an error alert', async () => {
           expect(findAlert().exists()).toBe(true);
         });
       });
@@ -239,13 +247,14 @@ describe('DAST Scanner Profile', () => {
       describe('on errors as data', () => {
         const errors = ['Name is already taken', 'Value should be Int', 'error#3'];
 
-        beforeEach(() => {
+        beforeEach(async () => {
           jest
             .spyOn(wrapper.vm.$apollo, 'mutate')
             .mockResolvedValue({ data: { [mutationKind]: { errors } } });
-          const input = findSpiderTimeoutInput();
-          input.vm.$emit('input', spiderTimeout);
-          submitForm();
+          await findProfileNameInput().vm.$emit('input', profileName);
+          await findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
+          await findTargetTimeoutInput().vm.$emit('input', targetTimeout);
+          await submitForm();
         });
 
         it('resets loading state', () => {

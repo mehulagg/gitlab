@@ -25,8 +25,10 @@ export default () => {
 
   const {
     buySubscriptionPath,
+    customersPortalUrl,
     freeTrialPath,
     hasActiveLicense,
+    licenseRemovePath,
     licenseUploadPath,
     subscriptionSyncPath,
   } = el.dataset;
@@ -40,7 +42,9 @@ export default () => {
     provide: {
       buySubscriptionPath,
       connectivityHelpURL,
+      customersPortalUrl,
       freeTrialPath,
+      licenseRemovePath,
       licenseUploadPath,
       subscriptionSyncPath,
     },

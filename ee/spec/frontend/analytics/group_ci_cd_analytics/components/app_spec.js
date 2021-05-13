@@ -2,6 +2,7 @@ import { GlTabs, GlTab } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CiCdAnalyticsApp from 'ee/analytics/group_ci_cd_analytics/components/app.vue';
 import ReleaseStatsCard from 'ee/analytics/group_ci_cd_analytics/components/release_stats_card.vue';
+import DeploymentFrequencyCharts from 'ee/dora/components/deployment_frequency_charts.vue';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { getParameterValues } from '~/lib/utils/url_utility';
@@ -32,6 +33,7 @@ describe('ee/analytics/group_ci_cd_analytics/components/app.vue', () => {
       expect(findGlTabs().exists()).toBe(true);
 
       expect(findGlTabAtIndex(0).attributes('title')).toBe('Release statistics');
+      expect(findGlTabAtIndex(1).attributes('title')).toBe('Deployment frequency');
     });
   });
 
@@ -41,16 +43,27 @@ describe('ee/analytics/group_ci_cd_analytics/components/app.vue', () => {
     });
 
     it('renders the release statistics component inside the first tab', () => {
-      expect(findGlTabAtIndex(0).find(ReleaseStatsCard).exists()).toBe(true);
+      expect(findGlTabAtIndex(0).findComponent(ReleaseStatsCard).exists()).toBe(true);
+    });
+  });
+
+  describe('deployment frequency', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('renders the deployment frequency component inside the first tab', () => {
+      expect(findGlTabAtIndex(1).findComponent(DeploymentFrequencyCharts).exists()).toBe(true);
     });
   });
 
   describe('when provided with a query param', () => {
     it.each`
-      tab                     | index
-      ${'release-statistics'} | ${'0'}
-      ${'fake'}               | ${'0'}
-      ${''}                   | ${'0'}
+      tab                       | index
+      ${'release-statistics'}   | ${'0'}
+      ${'deployment-frequency'} | ${'1'}
+      ${'fake'}                 | ${'0'}
+      ${''}                     | ${'0'}
     `('shows the correct tab for URL parameter "$tab"', ({ tab, index }) => {
       setWindowLocation(`${TEST_HOST}/groups/gitlab-org/gitlab/-/analytics/ci_cd?tab=${tab}`);
       getParameterValues.mockImplementation((name) => {

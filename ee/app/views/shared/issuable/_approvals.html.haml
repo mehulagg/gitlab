@@ -9,7 +9,7 @@
       .gl-display-flex.gl-align-items-center.gl-sm-justify-content-end
         - root_group = @project.group&.root_ancestor
         - run_highlight_paid_features_during_active_trial_experiment(root_group) do
-          - feature_name = 'merge request approvals'
+          - feature_name = _('merge request approvals')
           .gl-xs-ml-3.gl-sm-mr-3.gl-mb-2.gl-order-1.gl-sm-order-init
             #js-paid-feature-badge{ data: paid_feature_badge_data_attrs(feature_name) }
           #js-paid-feature-popover{ data: paid_feature_popover_data_attrs(group: root_group, feature_name: feature_name).merge(promo_image_path: image_path('illustrations/golden_tanuki.svg'), promo_image_alt_text: s_('ImageAltText|Sparkling golden tanuki logo')) }

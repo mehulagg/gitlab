@@ -1394,6 +1394,9 @@ msgstr ""
 msgid "A description is required"
 msgstr ""
 
+msgid "A different reason"
+msgstr ""
+
 msgid "A file has been changed."
 msgstr ""
 
@@ -1520,7 +1523,13 @@ msgstr ""
 msgid "APIFuzzing|$VariableWithUsername"
 msgstr ""
 
+msgid "APIFuzzing|/folder/example_file.har"
+msgstr ""
+
 msgid "APIFuzzing|/folder/example_file.json"
+msgstr ""
+
+msgid "APIFuzzing|/folder/example_file.postman_collection.json"
 msgstr ""
 
 msgid "APIFuzzing|API Fuzzing Configuration"
@@ -1562,28 +1571,22 @@ msgstr ""
 msgid "APIFuzzing|Enter the name of the variable containing the username. For example, $VariableWithUsername."
 msgstr ""
 
-msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz"
-msgstr ""
-
-msgid "APIFuzzing|Ex: Project_Test/File/example_fuzz.har"
+msgid "APIFuzzing|File path containing APIs to be tested. For example, /folder/example_file.har. HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository."
 msgstr ""
 
 msgid "APIFuzzing|File path containing APIs to be tested. For example, /folder/example_file.json."
 msgstr ""
 
-msgid "APIFuzzing|Generate code snippet"
+msgid "APIFuzzing|File path containing requests to be tested. For example, /folder/example_file.postman_collection.json."
 msgstr ""
 
-msgid "APIFuzzing|HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository."
+msgid "APIFuzzing|Generate code snippet"
 msgstr ""
 
 msgid "APIFuzzing|Make sure your credentials are secured"
 msgstr ""
 
 msgid "APIFuzzing|Password for basic authentication"
-msgstr ""
-
-msgid "APIFuzzing|Postman collections are a group of saved requests you can organize into folders."
 msgstr ""
 
 msgid "APIFuzzing|Predefined profiles"
@@ -1893,6 +1896,9 @@ msgid "Add a Jaeger URL to replace this page with a link to your Jaeger server. 
 msgstr ""
 
 msgid "Add a bullet list"
+msgstr ""
+
+msgid "Add a collapsible section"
 msgstr ""
 
 msgid "Add a comment to this line"
@@ -2523,6 +2529,9 @@ msgid "AdminUsers|Cannot unblock LDAP blocked users"
 msgstr ""
 
 msgid "AdminUsers|Cohorts"
+msgstr ""
+
+msgid "AdminUsers|Could not load user group counts. Please refresh the page to try again."
 msgstr ""
 
 msgid "AdminUsers|Deactivate"
@@ -3283,6 +3292,9 @@ msgstr ""
 msgid "Allowed Geo IP"
 msgstr ""
 
+msgid "Allowed characters: +, 0-9, -, and spaces."
+msgstr ""
+
 msgid "Allowed email domain restriction only permitted for top-level groups"
 msgstr ""
 
@@ -3661,7 +3673,7 @@ msgstr ""
 msgid "An error occurred while reordering issues."
 msgstr ""
 
-msgid "An error occurred while requesting data from the Jira service"
+msgid "An error occurred while requesting data from the Jira service."
 msgstr ""
 
 msgid "An error occurred while retrieving calendar activity"
@@ -5040,13 +5052,25 @@ msgstr ""
 msgid "BillingPlan|Upgrade for free"
 msgstr ""
 
+msgid "Billings|As a user on a free or trial namespace, you'll need to verify your account with a credit card to run pipelines. This is required to help prevent cryptomining attacks on GitLab infrastructure. %{strongStart}GitLab will not charge or store your credit card, it will only be used for validation.%{strongEnd}"
+msgstr ""
+
+msgid "Billings|To discourage and reduce abuse GitLab will require some users to provide a valid credit card to use free pipeline minutes on GitLab.com. To use free pipeline minutes, you will need to validate your account with a credit card. %{strongStart}GitLab will not add permanent charges to your credit card as we will only use it for validation.%{strongEnd}"
+msgstr ""
+
+msgid "Billings|User Verification Required"
+msgstr ""
+
+msgid "Billings|User successfully verified"
+msgstr ""
+
 msgid "Billings|Verify User Account"
 msgstr ""
 
 msgid "Billings|Verify account"
 msgstr ""
 
-msgid "Billings|Your user account has been flagged for potential abuse for running a large number of concurrent pipelines. To continue to run a large number of concurrent pipelines, you'll need to validate your account with a credit card. %{strongStart}GitLab will not charge your credit card, it will only be used for validation.%{strongEnd}"
+msgid "Billings|Your user account has been successfully verified. You will now be able to run pipelines on any free or trial namespace."
 msgstr ""
 
 msgid "Billing|An email address is only visible for users with public emails."
@@ -5068,6 +5092,9 @@ msgid "Billing|Enter at least three characters to search."
 msgstr ""
 
 msgid "Billing|Group"
+msgstr ""
+
+msgid "Billing|Group invite"
 msgstr ""
 
 msgid "Billing|No users to display."
@@ -5460,6 +5487,9 @@ msgstr ""
 msgid "BulkImport|From source group"
 msgstr ""
 
+msgid "BulkImport|Import %{groups}"
+msgstr ""
+
 msgid "BulkImport|Import failed: Destination cannot be a subgroup of the source group. Change the destination and try again."
 msgstr ""
 
@@ -5472,7 +5502,13 @@ msgstr ""
 msgid "BulkImport|Name already exists."
 msgstr ""
 
+msgid "BulkImport|No groups on this page are available for import"
+msgstr ""
+
 msgid "BulkImport|No parent"
+msgstr ""
+
+msgid "BulkImport|One or more groups has validation errors"
 msgstr ""
 
 msgid "BulkImport|Showing %{start}-%{end} of %{total}"
@@ -5541,9 +5577,6 @@ msgstr ""
 msgid "By authenticating with an account tied to an Enterprise e-mail address, it is understood that this account is an Enterprise User. "
 msgstr ""
 
-msgid "By clicking Register, I agree that I have read and accepted the %{company_name} %{linkStart}Terms of Use and Privacy Policy%{linkEnd}"
-msgstr ""
-
 msgid "By default GitLab sends emails in HTML and plain text formats so mail clients can choose what format to use. Disable this option if you only want to send emails in plain text format."
 msgstr ""
 
@@ -5596,6 +5629,9 @@ msgid "CICDAnalytics|%{percent}%{percentSymbol}"
 msgstr ""
 
 msgid "CICDAnalytics|All time"
+msgstr ""
+
+msgid "CICDAnalytics|Deployment frequency"
 msgstr ""
 
 msgid "CICDAnalytics|Projects with releases"
@@ -8065,6 +8101,9 @@ msgstr ""
 msgid "CommitMessage|Add %{file_name}"
 msgstr ""
 
+msgid "CommitMessage|Add %{file_name} and create a code quality job"
+msgstr ""
+
 msgid "CommitWidget|authored"
 msgstr ""
 
@@ -8541,6 +8580,9 @@ msgid "ContainerRegistry|%{strongStart}Enabled%{strongEnd} - Tags that match the
 msgstr ""
 
 msgid "ContainerRegistry|%{title} was successfully scheduled for deletion"
+msgstr ""
+
+msgid "ContainerRegistry|-- tags"
 msgstr ""
 
 msgid "ContainerRegistry|Build an image"
@@ -9223,9 +9265,6 @@ msgstr ""
 msgid "Create Project"
 msgstr ""
 
-msgid "Create Value Stream"
-msgstr ""
-
 msgid "Create a GitLab account first, and then connect it to your %{label} account."
 msgstr ""
 
@@ -9392,6 +9431,9 @@ msgid "Create your first page"
 msgstr ""
 
 msgid "Create your group"
+msgstr ""
+
+msgid "Create your own profile to collaborate with your teammates in issues, merge requests, and more."
 msgstr ""
 
 msgid "Create/import your first project"
@@ -9731,9 +9773,6 @@ msgid "CustomCycleAnalytics|Editing stage"
 msgstr ""
 
 msgid "CustomCycleAnalytics|End event label"
-msgstr ""
-
-msgid "CustomCycleAnalytics|New stage"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Stage name already exists"
@@ -10182,9 +10221,6 @@ msgid "DastProfiles|Password"
 msgstr ""
 
 msgid "DastProfiles|Password form field"
-msgstr ""
-
-msgid "DastProfiles|Please enter a valid timeout value"
 msgstr ""
 
 msgid "DastProfiles|Profile name"
@@ -11256,6 +11292,9 @@ msgstr ""
 msgid "DevopsAdoption|Adopted"
 msgstr ""
 
+msgid "DevopsAdoption|Adoption"
+msgstr ""
+
 msgid "DevopsAdoption|An error occurred while removing the group. Please try again."
 msgstr ""
 
@@ -11446,9 +11485,6 @@ msgid "Disable group runners"
 msgstr ""
 
 msgid "Disable public access to Pages sites"
-msgstr ""
-
-msgid "Disable shared runners"
 msgstr ""
 
 msgid "Disable two-factor authentication"
@@ -11736,9 +11772,6 @@ msgid "Due date"
 msgstr ""
 
 msgid "Duration"
-msgstr ""
-
-msgid "Duration for the last 30 commits"
 msgstr ""
 
 msgid "During this process, you’ll be asked for URLs from GitLab’s side. Use the URLs shown below."
@@ -12170,9 +12203,6 @@ msgstr ""
 msgid "Enable or disable Seat Link."
 msgstr ""
 
-msgid "Enable or disable keyboard shortcuts"
-msgstr ""
-
 msgid "Enable or disable the Pseudonymizer data collection."
 msgstr ""
 
@@ -12192,9 +12222,6 @@ msgid "Enable reCAPTCHA for login"
 msgstr ""
 
 msgid "Enable reCAPTCHA, Invisible Captcha, Akismet and set IP limits. For reCAPTCHA, we currently only support %{recaptcha_v2_link_start}v2%{recaptcha_v2_link_end}"
-msgstr ""
-
-msgid "Enable shared runners"
 msgstr ""
 
 msgid "Enable shared runners for all projects and subgroups in this group."
@@ -14097,6 +14124,15 @@ msgstr ""
 msgid "Flags"
 msgstr ""
 
+msgid "FloC|Configure whether you want to participate in FloC."
+msgstr ""
+
+msgid "FloC|Enable FloC (Federated Learning of Cohorts)"
+msgstr ""
+
+msgid "FloC|Federated Learning of Cohorts"
+msgstr ""
+
 msgid "FlowdockService|1b609b52537..."
 msgstr ""
 
@@ -14245,6 +14281,15 @@ msgid "ForkProject|Visibility level"
 msgstr ""
 
 msgid "ForkProject|Want to house several dependent projects under the same namespace?"
+msgstr ""
+
+msgid "ForkSuggestion|Cancel"
+msgstr ""
+
+msgid "ForkSuggestion|Fork"
+msgstr ""
+
+msgid "ForkSuggestion|You can’t %{edit_start}edit%{edit_end} files directly in this project. Fork this project and submit a merge request with your changes."
 msgstr ""
 
 msgid "ForkedFromProjectPath|Forked from"
@@ -14514,6 +14559,12 @@ msgstr ""
 msgid "Geo|%{component} synced"
 msgstr ""
 
+msgid "Geo|%{component} verified"
+msgstr ""
+
+msgid "Geo|%{eventId} (%{timeAgo})"
+msgstr ""
+
 msgid "Geo|%{itemTitle} checksum progress"
 msgstr ""
 
@@ -14592,6 +14643,9 @@ msgstr ""
 msgid "Geo|Data type"
 msgstr ""
 
+msgid "Geo|Disabled"
+msgstr ""
+
 msgid "Geo|Discover GitLab Geo"
 msgstr ""
 
@@ -14617,6 +14671,9 @@ msgid "Geo|Geo supports replication of many data types."
 msgstr ""
 
 msgid "Geo|Go to the primary site"
+msgstr ""
+
+msgid "Geo|Healthy"
 msgstr ""
 
 msgid "Geo|If you want to make changes, you must visit the primary site."
@@ -14680,6 +14737,9 @@ msgid "Geo|Nothing to synchronize"
 msgstr ""
 
 msgid "Geo|Number of %{title}"
+msgstr ""
+
+msgid "Geo|Offline"
 msgstr ""
 
 msgid "Geo|Pending synchronization"
@@ -14844,6 +14904,12 @@ msgstr ""
 msgid "Geo|Undefined"
 msgstr ""
 
+msgid "Geo|Unhealthy"
+msgstr ""
+
+msgid "Geo|Unknown"
+msgstr ""
+
 msgid "Geo|Unknown state"
 msgstr ""
 
@@ -14856,10 +14922,10 @@ msgstr ""
 msgid "Geo|Verification failed - %{error}"
 msgstr ""
 
-msgid "Geo|Verification status"
+msgid "Geo|Verification information"
 msgstr ""
 
-msgid "Geo|Verificaton information"
+msgid "Geo|Verification status"
 msgstr ""
 
 msgid "Geo|Waiting for scheduler"
@@ -15651,6 +15717,9 @@ msgstr ""
 msgid "GroupRoadmap|To widen your search, change or remove filters; from %{startDate} to %{endDate}."
 msgstr ""
 
+msgid "GroupSAML|%{strongOpen}Warning%{strongClose} - Enabling %{linkStart}SSO enforcement%{linkEnd} can reduce security risks."
+msgstr ""
+
 msgid "GroupSAML|Active SAML Group Links (%{count})"
 msgstr ""
 
@@ -16357,7 +16426,22 @@ msgstr ""
 msgid "I have read and agree to the Let's Encrypt %{link_start}Terms of Service%{link_end} (PDF)"
 msgstr ""
 
+msgid "I want to explore GitLab to see if it’s worth switching to"
+msgstr ""
+
+msgid "I want to learn the basics of Git"
+msgstr ""
+
+msgid "I want to move my repository to GitLab from somewhere else"
+msgstr ""
+
+msgid "I want to use GitLab CI with my existing repository"
+msgstr ""
+
 msgid "I'd like to receive updates about GitLab via email"
+msgstr ""
+
+msgid "I'm signing up for GitLab because:"
 msgstr ""
 
 msgid "ID"
@@ -17553,10 +17637,10 @@ msgstr ""
 msgid "Integrations|Failed to unlink namespace. Please try again."
 msgstr ""
 
-msgid "Integrations|Includes Standard plus entire commit message, commit hash, and issue IDs"
+msgid "Integrations|Includes Standard, plus the entire commit message, commit hash, and issue IDs"
 msgstr ""
 
-msgid "Integrations|Includes commit title and branch"
+msgid "Integrations|Includes commit title and branch."
 msgstr ""
 
 msgid "Integrations|Issues created in Jira are shown here once you have created the issues in project setup in Jira."
@@ -17634,7 +17718,7 @@ msgstr ""
 msgid "Integrations|Use default settings"
 msgstr ""
 
-msgid "Integrations|When a Jira issue is mentioned in a commit or merge request a remote link and comment (if enabled) is created."
+msgid "Integrations|When you mention a Jira issue in a commit or merge request, GitLab creates a remote link and comment (if enabled)."
 msgstr ""
 
 msgid "Integrations|You can now close this window and return to the GitLab for Jira application."
@@ -18156,6 +18240,27 @@ msgstr ""
 msgid "IssueTracker|Custom issue tracker"
 msgstr ""
 
+msgid "IssueTracker|Issue URL"
+msgstr ""
+
+msgid "IssueTracker|New issue URL"
+msgstr ""
+
+msgid "IssueTracker|The URL to create an issue in the external issue tracker."
+msgstr ""
+
+msgid "IssueTracker|The URL to the project in YouTrack."
+msgstr ""
+
+msgid "IssueTracker|The URL to the project in the external issue tracker."
+msgstr ""
+
+msgid "IssueTracker|The URL to view an issue in the YouTrack project. Must contain %{colon_id}."
+msgstr ""
+
+msgid "IssueTracker|The URL to view an issue in the external issue tracker. Must contain %{colon_id}."
+msgstr ""
+
 msgid "IssueTracker|Use Bugzilla as this project's issue tracker."
 msgstr ""
 
@@ -18351,6 +18456,9 @@ msgstr ""
 msgid "I’m familiar with the basics of DevOps."
 msgstr ""
 
+msgid "I’m joining my team who’s already on GitLab"
+msgstr ""
+
 msgid "I’m not familiar with the basics of DevOps."
 msgstr ""
 
@@ -18381,7 +18489,7 @@ msgstr ""
 msgid "Jira integration not configured."
 msgstr ""
 
-msgid "Jira project key is not configured"
+msgid "Jira project key is not configured."
 msgstr ""
 
 msgid "Jira project: %{importProject}"
@@ -18561,6 +18669,9 @@ msgstr ""
 msgid "JiraService|Work on Jira issues without leaving GitLab. Adds a Jira menu to access your list of Jira issues and view any issue as read-only."
 msgstr ""
 
+msgid "JiraService|You need to configure Jira before enabling this integration. For more details, read the %{jira_doc_link_start}Jira integration documentation%{link_end}."
+msgstr ""
+
 msgid "JiraService|transition ids can have only numbers which can be split with , or ;"
 msgstr ""
 
@@ -18607,6 +18718,18 @@ msgid "Job to delete self-monitoring project is in progress"
 msgstr ""
 
 msgid "Job was retried"
+msgstr ""
+
+msgid "JobName|build-job"
+msgstr ""
+
+msgid "JobName|deploy-app"
+msgstr ""
+
+msgid "JobName|lint-test"
+msgstr ""
+
+msgid "JobName|unit-test"
 msgstr ""
 
 msgid "Jobs"
@@ -18717,6 +18840,9 @@ msgstr ""
 msgid "Join Zoom meeting"
 msgstr ""
 
+msgid "Join your team"
+msgstr ""
+
 msgid "Joined %{time_ago}"
 msgstr ""
 
@@ -18750,6 +18876,9 @@ msgstr ""
 msgid "KEY"
 msgstr ""
 
+msgid "Keep"
+msgstr ""
+
 msgid "Keep artifacts from most recent successful jobs"
 msgstr ""
 
@@ -18777,7 +18906,28 @@ msgstr ""
 msgid "Keyboard shortcuts"
 msgstr ""
 
+msgid "KeyboardKey|Alt"
+msgstr ""
+
+msgid "KeyboardKey|Ctrl"
+msgstr ""
+
 msgid "KeyboardKey|Ctrl+"
+msgstr ""
+
+msgid "KeyboardKey|Enter"
+msgstr ""
+
+msgid "KeyboardKey|Esc"
+msgstr ""
+
+msgid "KeyboardKey|Shift"
+msgstr ""
+
+msgid "KeyboardShortcuts|No shortcuts matched your search"
+msgstr ""
+
+msgid "KeyboardShortcuts|Search keyboard shortcuts"
 msgstr ""
 
 msgid "Keys"
@@ -19238,6 +19388,12 @@ msgstr ""
 msgid "LearnGitLab|Use your new GitLab workflow to deploy your application, monitor its health, and keep it secure:"
 msgstr ""
 
+msgid "LearnGitlab|Creating your onboarding experience..."
+msgstr ""
+
+msgid "LearnGitlab|Ok, let's go"
+msgstr ""
+
 msgid "LearnGitlab|Trial only"
 msgstr ""
 
@@ -19272,6 +19428,9 @@ msgid "Let's Encrypt does not accept emails on example.com"
 msgstr ""
 
 msgid "Let's Encrypt is a free, automated, and open certificate authority (CA) that gives digital certificates in order to enable HTTPS (SSL/TLS) for websites. Learn more about Let's Encrypt configuration by following the %{docs_link_start}documentation on GitLab Pages%{docs_link_end}."
+msgstr ""
+
+msgid "Let's talk!"
 msgstr ""
 
 msgid "License"
@@ -20751,6 +20910,9 @@ msgstr ""
 msgid "Metrics|For grouping similar metrics"
 msgstr ""
 
+msgid "Metrics|GitLab-managed Prometheus is deprecated and %{linkStart}scheduled for removal%{linkEnd}. Following this removal, your existing alerts will continue to function as part of the new cluster integration. However, you will no longer be able to add new alerts or edit existing alerts from the metrics dashboard."
+msgstr ""
+
 msgid "Metrics|Invalid time range, please verify."
 msgstr ""
 
@@ -21312,6 +21474,9 @@ msgid "Multiple model types found: %{model_types}"
 msgstr ""
 
 msgid "Multiple uploaders found: %{uploader_types}"
+msgstr ""
+
+msgid "Must have a unique policy, status, and elapsed time"
 msgstr ""
 
 msgid "Must match with the %{codeStart}external_url%{codeEnd} in %{codeStart}/etc/gitlab/gitlab.rb%{codeEnd}."
@@ -21985,6 +22150,9 @@ msgid "No data found"
 msgstr ""
 
 msgid "No data to display"
+msgstr ""
+
+msgid "No deployments detected. Use environments to control your software's continuous deployment. %{linkStart}Learn more about deployment jobs.%{linkEnd}"
 msgstr ""
 
 msgid "No deployments found"
@@ -23098,6 +23266,9 @@ msgstr ""
 msgid "PackageRegistry|Add Gradle Groovy DSL repository command"
 msgstr ""
 
+msgid "PackageRegistry|Add Gradle Kotlin DSL repository command"
+msgstr ""
+
 msgid "PackageRegistry|Add NuGet Source"
 msgstr ""
 
@@ -23140,6 +23311,9 @@ msgstr ""
 msgid "PackageRegistry|Copy Gradle Groovy DSL install command"
 msgstr ""
 
+msgid "PackageRegistry|Copy Gradle Kotlin DSL install command"
+msgstr ""
+
 msgid "PackageRegistry|Copy Maven XML"
 msgstr ""
 
@@ -23159,6 +23333,9 @@ msgid "PackageRegistry|Copy Pip command"
 msgstr ""
 
 msgid "PackageRegistry|Copy add Gradle Groovy DSL repository command"
+msgstr ""
+
+msgid "PackageRegistry|Copy add Gradle Kotlin DSL repository command"
 msgstr ""
 
 msgid "PackageRegistry|Copy and paste this inside your %{codeStart}pom.xml%{codeEnd} %{codeStart}dependencies%{codeEnd} block."
@@ -23212,7 +23389,16 @@ msgstr ""
 msgid "PackageRegistry|GitLab Packages allows organizations to utilize GitLab as a private repository for a variety of common package formats. %{linkStart}More Information%{linkEnd}"
 msgstr ""
 
+msgid "PackageRegistry|Gradle Groovy DSL"
+msgstr ""
+
 msgid "PackageRegistry|Gradle Groovy DSL install command"
+msgstr ""
+
+msgid "PackageRegistry|Gradle Kotlin DSL"
+msgstr ""
+
+msgid "PackageRegistry|Gradle Kotlin DSL install command"
 msgstr ""
 
 msgid "PackageRegistry|If you haven't already done so, you will need to add the below to your %{codeStart}.pypirc%{codeEnd} file."
@@ -23222,6 +23408,9 @@ msgid "PackageRegistry|If you haven't already done so, you will need to add the 
 msgstr ""
 
 msgid "PackageRegistry|Install package version"
+msgstr ""
+
+msgid "PackageRegistry|Invalid Package: failed metadata extraction"
 msgstr ""
 
 msgid "PackageRegistry|Learn how to %{noPackagesLinkStart}publish and share your packages%{noPackagesLinkEnd} with GitLab."
@@ -23237,6 +23426,9 @@ msgid "PackageRegistry|Maven"
 msgstr ""
 
 msgid "PackageRegistry|Maven Command"
+msgstr ""
+
+msgid "PackageRegistry|Maven XML"
 msgstr ""
 
 msgid "PackageRegistry|NuGet"
@@ -23284,6 +23476,9 @@ msgstr ""
 msgid "PackageRegistry|RubyGems"
 msgstr ""
 
+msgid "PackageRegistry|Settings for Generic packages"
+msgstr ""
+
 msgid "PackageRegistry|Settings for Maven packages"
 msgstr ""
 
@@ -23294,12 +23489,6 @@ msgid "PackageRegistry|Show Composer commands"
 msgstr ""
 
 msgid "PackageRegistry|Show Conan commands"
-msgstr ""
-
-msgid "PackageRegistry|Show Gradle Groovy DSL commands"
-msgstr ""
-
-msgid "PackageRegistry|Show Maven commands"
 msgstr ""
 
 msgid "PackageRegistry|Show NPM commands"
@@ -23674,6 +23863,9 @@ msgstr ""
 msgid "Pipeline Schedules"
 msgstr ""
 
+msgid "Pipeline durations for the last 30 commits"
+msgstr ""
+
 msgid "Pipeline minutes quota"
 msgstr ""
 
@@ -23726,6 +23918,54 @@ msgid "PipelineCharts|There was an error parsing the data for the charts."
 msgstr ""
 
 msgid "PipelineCharts|Total:"
+msgstr ""
+
+msgid "PipelineEditorTutorial|A typical GitLab pipeline consists of three stages: build, test and deploy. Each stage can have one or more jobs."
+msgstr ""
+
+msgid "PipelineEditorTutorial|Browse %{linkStart}CI/CD examples and templates%{linkEnd}"
+msgstr ""
+
+msgid "PipelineEditorTutorial|Get started with GitLab CI/CD"
+msgstr ""
+
+msgid "PipelineEditorTutorial|GitLab CI/CD can automatically build, test, and deploy your application."
+msgstr ""
+
+msgid "PipelineEditorTutorial|If you’re using a self-managed GitLab instance, %{linkStart}make sure your instance has runners available.%{linkEnd}"
+msgstr ""
+
+msgid "PipelineEditorTutorial|In the example below, %{codeStart}build%{codeEnd} and %{codeStart}deploy%{codeEnd} each contain one job, and %{codeStart}test%{codeEnd} contains two jobs. Your scripts run in jobs like these."
+msgstr ""
+
+msgid "PipelineEditorTutorial|Learn more about %{linkStart}GitLab CI/CD concepts%{linkEnd}"
+msgstr ""
+
+msgid "PipelineEditorTutorial|Make your pipeline more efficient with the %{linkStart}Needs keyword%{linkEnd}"
+msgstr ""
+
+msgid "PipelineEditorTutorial|Resources to help with your CI/CD configuration:"
+msgstr ""
+
+msgid "PipelineEditorTutorial|The pipeline stages and jobs are defined in a %{codeStart}.gitlab-ci.yml%{codeEnd} file. You can edit, visualize and validate the syntax in this file by using the Pipeline Editor."
+msgstr ""
+
+msgid "PipelineEditorTutorial|Use the Visualize and Lint tabs in the Pipeline Editor to visualize your pipeline and check for any errors or warnings before committing your changes."
+msgstr ""
+
+msgid "PipelineEditorTutorial|View %{linkStart}.gitlab-ci.yml syntax reference%{linkEnd}"
+msgstr ""
+
+msgid "PipelineEditorTutorial|You can use %{linkStart}CI/CD examples and templates%{linkEnd} to get your first %{codeStart}.gitlab-ci.yml%{codeEnd} configuration file started. Your first pipeline runs when you commit the changes."
+msgstr ""
+
+msgid "PipelineEditorTutorial|⚙️ Pipeline configuration reference"
+msgstr ""
+
+msgid "PipelineEditorTutorial|💡 Tip: Visualize and validate your pipeline"
+msgstr ""
+
+msgid "PipelineEditorTutorial|🚀 Run your first pipeline"
 msgstr ""
 
 msgid "PipelineEditor|The CI/CD configuration is continuously validated. Errors and warnings are displayed when the CI/CD configuration file is not empty."
@@ -23794,6 +24034,9 @@ msgstr ""
 msgid "Pipelines|API"
 msgstr ""
 
+msgid "Pipelines|Add a code quality job"
+msgstr ""
+
 msgid "Pipelines|Are you sure you want to run this pipeline?"
 msgstr ""
 
@@ -23851,6 +24094,9 @@ msgstr ""
 msgid "Pipelines|If you are unsure, please ask a project maintainer to review it for you."
 msgstr ""
 
+msgid "Pipelines|Improve code quality with GitLab CI/CD"
+msgstr ""
+
 msgid "Pipelines|It is recommended the code is reviewed thoroughly before running this pipeline with the parent project's CI resource."
 msgstr ""
 
@@ -23870,6 +24116,9 @@ msgid "Pipelines|Merged YAML is view only"
 msgstr ""
 
 msgid "Pipelines|More Information"
+msgstr ""
+
+msgid "Pipelines|No artifacts available"
 msgstr ""
 
 msgid "Pipelines|No triggers have been created yet. Add one using the form above."
@@ -23924,6 +24173,9 @@ msgid "Pipelines|This pipeline will run code originating from a forked project m
 msgstr ""
 
 msgid "Pipelines|This project is not currently set up to run pipelines."
+msgstr ""
+
+msgid "Pipelines|To keep your codebase simple, readable, and accessible to contributors, use GitLab CI/CD to analyze your code quality with every push to your project."
 msgstr ""
 
 msgid "Pipelines|Token"
@@ -24259,6 +24511,9 @@ msgstr ""
 msgid "Please provide a valid URL"
 msgstr ""
 
+msgid "Please provide a valid URL ending with .git"
+msgstr ""
+
 msgid "Please provide a valid YouTube URL or ID"
 msgstr ""
 
@@ -24302,6 +24557,9 @@ msgid "Please select at least one filter to see results"
 msgstr ""
 
 msgid "Please select what should be included in each exported requirement."
+msgstr ""
+
+msgid "Please select..."
 msgstr ""
 
 msgid "Please set a new password before proceeding."
@@ -25135,6 +25393,9 @@ msgstr ""
 msgid "Project info:"
 msgstr ""
 
+msgid "Project information"
+msgstr ""
+
 msgid "Project is required when cluster_type is :project"
 msgstr ""
 
@@ -25286,9 +25547,6 @@ msgid "ProjectService|Mock service URL"
 msgstr ""
 
 msgid "ProjectService|Must have permission to trigger a manual build in TeamCity."
-msgstr ""
-
-msgid "ProjectService|New issue URL"
 msgstr ""
 
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
@@ -26620,9 +26878,6 @@ msgstr ""
 msgid "Reconfigure"
 msgstr ""
 
-msgid "Recover hidden stage"
-msgstr ""
-
 msgid "Recovering projects"
 msgstr ""
 
@@ -26979,6 +27234,9 @@ msgid "Remove user from group"
 msgstr ""
 
 msgid "Remove user from project"
+msgstr ""
+
+msgid "Remove..."
 msgstr ""
 
 msgid "Removed"
@@ -29518,9 +29776,6 @@ msgstr ""
 msgid "Shared runners are disabled on group level"
 msgstr ""
 
-msgid "Shared runners disabled on group level"
-msgstr ""
-
 msgid "Shared runners help link"
 msgstr ""
 
@@ -29757,6 +30012,12 @@ msgid "Sign-in text"
 msgstr ""
 
 msgid "Sign-up restrictions"
+msgstr ""
+
+msgid "SignUp|By clicking %{button_text}, I agree that I have read and accepted the %{link_start}Terms of Use and Privacy Policy%{link_end}"
+msgstr ""
+
+msgid "SignUp|By clicking %{button_text}, I agree that I have read and accepted the GitLab %{link_start}Terms of Use and Privacy Policy%{link_end}"
 msgstr ""
 
 msgid "SignUp|First name is too long (maximum is %{max_length} characters)."
@@ -30419,6 +30680,15 @@ msgstr ""
 msgid "Stage removed"
 msgstr ""
 
+msgid "StageName|Build"
+msgstr ""
+
+msgid "StageName|Deploy"
+msgstr ""
+
+msgid "StageName|Test"
+msgstr ""
+
 msgid "Standard"
 msgstr ""
 
@@ -30638,13 +30908,31 @@ msgstr ""
 msgid "StatusCheck|API to check"
 msgstr ""
 
+msgid "StatusCheck|Add status check"
+msgstr ""
+
+msgid "StatusCheck|An error occurred fetching the status checks."
+msgstr ""
+
+msgid "StatusCheck|Check for a status response in Merge Requests. Failures do not block merges. %{link_start}Learn more%{link_end}."
+msgstr ""
+
 msgid "StatusCheck|Invoke an external API as part of the approvals"
+msgstr ""
+
+msgid "StatusCheck|No status checks are defined yet."
 msgstr ""
 
 msgid "StatusCheck|Remove status check"
 msgstr ""
 
 msgid "StatusCheck|Remove status check?"
+msgstr ""
+
+msgid "StatusCheck|Service name"
+msgstr ""
+
+msgid "StatusCheck|Status checks"
 msgstr ""
 
 msgid "StatusCheck|Status to check"
@@ -30846,6 +31134,9 @@ msgid "Subscription History"
 msgstr ""
 
 msgid "Subscription deletion failed."
+msgstr ""
+
+msgid "Subscription service outage"
 msgstr ""
 
 msgid "Subscription successfully applied to \"%{group_name}\""
@@ -31729,6 +32020,9 @@ msgstr ""
 msgid "The \"Require approval from CODEOWNERS\" setting was moved to %{banner_link_start}Protected Branches%{banner_link_end}"
 msgstr ""
 
+msgid "The %{featureName} feature is part of your GitLab Ultimate trial."
+msgstr ""
+
 msgid "The %{link_start}true-up model%{link_end} allows having more users, and additional users will incur a retroactive charge on renewal."
 msgstr ""
 
@@ -31747,6 +32041,9 @@ msgid "The Advanced Search in GitLab is a powerful search service that saves you
 msgstr ""
 
 msgid "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group."
+msgstr ""
+
+msgid "The GitLab subscription service (customers.gitlab.com) is currently experiencing an outage. You can monitor the status and get updates at %{linkStart}status.gitlab.com%{linkEnd}."
 msgstr ""
 
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
@@ -33711,13 +34008,13 @@ msgstr ""
 msgid "Toggle project select"
 msgstr ""
 
+msgid "Toggle shortcuts"
+msgstr ""
+
 msgid "Toggle sidebar"
 msgstr ""
 
 msgid "Toggle the Performance Bar"
-msgstr ""
-
-msgid "Toggle this dialog"
 msgstr ""
 
 msgid "Toggle thread"
@@ -34572,6 +34869,9 @@ msgid "Upload an image"
 msgstr ""
 
 msgid "Upload file"
+msgstr ""
+
+msgid "Upload license"
 msgstr ""
 
 msgid "Upload object map"
@@ -35871,6 +36171,9 @@ msgstr ""
 msgid "We heard back from your device. You have been authenticated."
 msgstr ""
 
+msgid "We love speaking to our users. Got more to say about your GitLab experiences?"
+msgstr ""
+
 msgid "We recommend cloud-based mobile authenticator apps such as Authy, Duo Mobile, and LastPass. They can restore access if you lose your hardware device."
 msgstr ""
 
@@ -35940,16 +36243,16 @@ msgstr ""
 msgid "WebIDE|This project does not accept unsigned commits."
 msgstr ""
 
-msgid "WebIDE|This project does not accept unsigned commits. You will not be able to commit your changes through the Web IDE."
+msgid "WebIDE|This project does not accept unsigned commits. You can’t commit changes through the Web IDE."
+msgstr ""
+
+msgid "WebIDE|You can’t edit files directly in this project. Fork this project and submit a merge request with your changes."
+msgstr ""
+
+msgid "WebIDE|You can’t edit files directly in this project. Go to your fork and submit a merge request with your changes."
 msgstr ""
 
 msgid "WebIDE|You need permission to edit files directly in this project."
-msgstr ""
-
-msgid "WebIDE|You need permission to edit files directly in this project. Fork this project to make your changes and submit a merge request."
-msgstr ""
-
-msgid "WebIDE|You need permission to edit files directly in this project. Go to your fork to make changes and submit a merge request."
 msgstr ""
 
 msgid "WebexTeamsService|Send notifications about project events to Webex Teams."
@@ -36225,6 +36528,9 @@ msgid "Who will be using this GitLab subscription?"
 msgstr ""
 
 msgid "Who will be using this GitLab trial?"
+msgstr ""
+
+msgid "Why are you signing up? (Optional)"
 msgstr ""
 
 msgid "Wiki"
@@ -36762,6 +37068,9 @@ msgid "You cannot write to a read-only secondary GitLab Geo instance. Please use
 msgstr ""
 
 msgid "You cannot write to this read-only GitLab instance."
+msgstr ""
+
+msgid "You can’t %{tag_start}edit%{tag_end} files directly in this project. Fork this project and submit a merge request with your changes."
 msgstr ""
 
 msgid "You could not create a new trigger."
@@ -37770,6 +38079,45 @@ msgstr ""
 msgid "closed issue"
 msgstr ""
 
+msgid "codeQualityWalkthrough|A code quality job will now run every time you or your team members commit changes to your project. You can view the results of the code quality job in the job logs."
+msgstr ""
+
+msgid "codeQualityWalkthrough|Congrats! Your first pipeline is running %{emojiStart}zap%{emojiEnd}"
+msgstr ""
+
+msgid "codeQualityWalkthrough|Got it"
+msgstr ""
+
+msgid "codeQualityWalkthrough|Let's start by creating a new CI file."
+msgstr ""
+
+msgid "codeQualityWalkthrough|Not sure how to fix your failed job? We have compiled some tips on how to troubleshoot code quality jobs in the documentation."
+msgstr ""
+
+msgid "codeQualityWalkthrough|Read the documentation"
+msgstr ""
+
+msgid "codeQualityWalkthrough|Something went wrong. %{emojiStart}thinking%{emojiEnd} Let's fix it."
+msgstr ""
+
+msgid "codeQualityWalkthrough|To begin with code quality, we first need to create a new CI file using our code editor. We added a code quality template in the code editor to help you get started %{emojiStart}wink%{emojiEnd} .%{lineBreak}Take some time to review the template, when you are ready, use the %{strongStart}commit changes%{strongEnd} button at the bottom of the page."
+msgstr ""
+
+msgid "codeQualityWalkthrough|Troubleshoot your code quality job"
+msgstr ""
+
+msgid "codeQualityWalkthrough|View the logs"
+msgstr ""
+
+msgid "codeQualityWalkthrough|Well done! You've just automated your code quality review. %{emojiStart}raised_hands%{emojiEnd}"
+msgstr ""
+
+msgid "codeQualityWalkthrough|Your job failed. No worries - this happens. Let's view the logs, and see how we can fix it."
+msgstr ""
+
+msgid "codeQualityWalkthrough|Your pipeline can take a few minutes to run. If you enabled email notifications, you'll receive an email with your pipeline status. In the meantime, why don't you get some coffee? You earned it!"
+msgstr ""
+
 msgid "collect usage information"
 msgstr ""
 
@@ -38011,6 +38359,9 @@ msgstr ""
 msgid "https://your-bitbucket-server"
 msgstr ""
 
+msgid "i18n|%{language} (%{percent_translated}%% translated)"
+msgstr ""
+
 msgid "image diff"
 msgstr ""
 
@@ -38188,6 +38539,9 @@ msgid "merge request"
 msgid_plural "merge requests"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "merge request approvals"
+msgstr ""
 
 msgid "merged %{timeAgo}"
 msgstr ""
@@ -38878,6 +39232,9 @@ msgid "the following issue(s)"
 msgstr ""
 
 msgid "the wiki"
+msgstr ""
+
+msgid "then"
 msgstr ""
 
 msgid "this document"

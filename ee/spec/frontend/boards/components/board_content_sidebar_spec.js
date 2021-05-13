@@ -1,7 +1,6 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import SidebarIterationWidget from 'ee_component/sidebar/components/sidebar_iteration_widget';
 import { stubComponent } from 'helpers/stub_component';
 import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
 import { ISSUABLE, issuableTypes } from '~/boards/constants';
@@ -45,6 +44,9 @@ describe('ee/BoardContentSidebar', () => {
         canUpdate: true,
         rootPath: '/',
         groupId: 1,
+        epicFeatureAvailable: true,
+        iterationFeatureAvailable: true,
+        weightFeatureAvailable: true,
       },
       store,
       stubs: {
@@ -80,7 +82,7 @@ describe('ee/BoardContentSidebar', () => {
     wrapper = null;
   });
 
-  it('renders SidebarIterationWidget', () => {
-    expect(wrapper.find(SidebarIterationWidget).exists()).toBe(true);
+  it('matches the snapshot', () => {
+    expect(wrapper.element).toMatchSnapshot();
   });
 });

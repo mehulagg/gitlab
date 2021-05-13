@@ -2,6 +2,7 @@ import { GlFilteredSearchToken } from '@gitlab/ui';
 
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
+import { joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -120,13 +121,13 @@ export default {
           symbol: '&',
           token: EpicToken,
           operators: FilterTokenOperators,
+          idProperty: 'iid',
+          defaultEpics: [],
           fetchEpics: (search = '') => {
-            return axios.get(this.listEpicsPath, { params: { search } }).then(({ data }) => {
-              return { data };
-            });
-          },
-          fetchSingleEpic: (iid) => {
-            return axios.get(`${this.listEpicsPath}/${iid}`).then(({ data }) => ({ data }));
+            const number = Number(search);
+            return !search || Number.isNaN(number)
+              ? axios.get(this.listEpicsPath, { params: { search } })
+              : axios.get(joinPaths(this.listEpicsPath, search)).then(({ data }) => [data]);
           },
         },
       ];
@@ -242,7 +243,7 @@ export default {
             filterParams.myReactionEmoji = filter.value.data;
             break;
           case 'epic_iid':
-            filterParams.epicIid = Number(filter.value.data.split('::&')[1]);
+            filterParams.epicIid = filter.value.data;
             break;
           case 'filtered-search-term':
             if (filter.value.data) plainText.push(filter.value.data);

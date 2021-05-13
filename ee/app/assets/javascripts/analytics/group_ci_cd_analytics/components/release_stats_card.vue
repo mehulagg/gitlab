@@ -12,7 +12,7 @@ export default {
     GlSkeletonLoader,
   },
   inject: {
-    fullPath: {
+    groupPath: {
       default: '',
     },
   },
@@ -21,7 +21,7 @@ export default {
       query: groupReleaseStatsQuery,
       variables() {
         return {
-          fullPath: this.fullPath,
+          fullPath: this.groupPath,
         };
       },
       update(data) {

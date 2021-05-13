@@ -754,7 +754,6 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def reorder_diff_files!
-    return unless sort_diffs?
     return if sorted? || merge_request_diff_files.empty?
 
     diff_files = sort_diffs(merge_request_diff_files)
@@ -773,14 +772,8 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def sort_diffs(diffs)
-    return diffs unless sort_diffs?
-
     Gitlab::Diff::FileCollectionSorter.new(diffs).sort
-  end
-
-  def sort_diffs?
-    Feature.enabled?(:sort_diffs, project, default_enabled: :yaml)
   end
 end
 
-MergeRequestDiff.prepend_if_ee('EE::MergeRequestDiff')
+MergeRequestDiff.prepend_mod_with('MergeRequestDiff')

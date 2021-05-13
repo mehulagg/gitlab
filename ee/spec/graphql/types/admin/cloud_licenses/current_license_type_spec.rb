@@ -12,7 +12,7 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
     }
   end
 
-  let_it_be(:license) { create_current_license(licensee: licensee, type: License::CLOUD_LICENSE_TYPE) }
+  let_it_be(:license) { create_current_license(licensee: licensee, cloud_licensing_enabled: true) }
 
   let(:fields) do
     %w[last_sync billable_users_count maximum_user_count users_over_license_count]

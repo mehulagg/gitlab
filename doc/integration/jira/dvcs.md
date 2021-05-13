@@ -135,7 +135,7 @@ Problems with SSL and TLS can cause this error message:
 Error obtaining access token. Cannot access https://gitlab.example.com from Jira.
 ```
 
-- The [GitLab Jira integration](../../user/project/integrations/jira.md) requires
+- The [GitLab Jira integration](index.md) requires
   GitLab to connect to Jira. Any TLS issues that arise from a private certificate
   authority or self-signed certificate are resolved
   [on the GitLab server](https://docs.gitlab.com/omnibus/settings/ssl.html#other-certificate-authorities),
@@ -198,9 +198,8 @@ encounter these issues:
 
 To resolve this issue:
 
-- If you're using GitLab Free or GitLab Starter, be sure you're using
-  GitLab 13.4 or later.
-- *If you're using GitLab versions 11.10-12.7,* upgrade to GitLab 12.8.10 or later
+- If you're using GitLab Free, be sure you're using GitLab 13.4 or later.
+- If you're using GitLab versions 11.10-12.7, upgrade to GitLab 12.8.10 or later
   to resolve [an identified issue](https://gitlab.com/gitlab-org/gitlab/-/issues/37012).
 
 [Contact GitLab Support](https://about.gitlab.com/support/) if none of these reasons apply.

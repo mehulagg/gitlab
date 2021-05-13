@@ -1188,6 +1188,7 @@ Input type: `CreateIssueInput`
 | <a id="mutationcreateissuemilestoneid"></a>`milestoneId` | [`MilestoneID`](#milestoneid) | The ID of the milestone to assign to the issue. On update milestone will be removed if set to null. |
 | <a id="mutationcreateissueprojectpath"></a>`projectPath` | [`ID!`](#id) | Project full path the issue is associated with. |
 | <a id="mutationcreateissuetitle"></a>`title` | [`String!`](#string) | Title of the issue. |
+| <a id="mutationcreateissuetype"></a>`type` | [`IssueType`](#issuetype) | Type of the issue. |
 | <a id="mutationcreateissueweight"></a>`weight` | [`Int`](#int) | The weight of the issue. |
 
 #### Fields
@@ -2562,6 +2563,25 @@ Input type: `IterationCadenceUpdateInput`
 | <a id="mutationiterationcadenceupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationiterationcadenceupdateiterationcadence"></a>`iterationCadence` | [`IterationCadence`](#iterationcadence) | The updated iteration cadence. |
 
+### `Mutation.iterationDelete`
+
+Input type: `IterationDeleteInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationiterationdeleteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationiterationdeleteid"></a>`id` | [`IterationID!`](#iterationid) | ID of the iteration. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationiterationdeleteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationiterationdeleteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationiterationdeletegroup"></a>`group` | [`Group!`](#group) | Group the iteration belongs to. |
+
 ### `Mutation.jiraImportStart`
 
 Input type: `JiraImportStartInput`
@@ -2781,6 +2801,27 @@ Input type: `MergeRequestSetAssigneesInput`
 | <a id="mutationmergerequestsetassigneeserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationmergerequestsetassigneesmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
+### `Mutation.mergeRequestSetDraft`
+
+Input type: `MergeRequestSetDraftInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationmergerequestsetdraftclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationmergerequestsetdraftdraft"></a>`draft` | [`Boolean!`](#boolean) | Whether or not to set the merge request as a draft. |
+| <a id="mutationmergerequestsetdraftiid"></a>`iid` | [`String!`](#string) | The IID of the merge request to mutate. |
+| <a id="mutationmergerequestsetdraftprojectpath"></a>`projectPath` | [`ID!`](#id) | The project the merge request to mutate is in. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationmergerequestsetdraftclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationmergerequestsetdrafterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationmergerequestsetdraftmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
+
 ### `Mutation.mergeRequestSetLabels`
 
 Input type: `MergeRequestSetLabelsInput`
@@ -2867,6 +2908,10 @@ Input type: `MergeRequestSetSubscriptionInput`
 | <a id="mutationmergerequestsetsubscriptionmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | The merge request after mutation. |
 
 ### `Mutation.mergeRequestSetWip`
+
+WARNING:
+**Deprecated** in 13.12.
+Use mergeRequestSetDraft.
 
 Input type: `MergeRequestSetWipInput`
 
@@ -3868,6 +3913,7 @@ Input type: `UpdateIssueInput`
 | <a id="mutationupdateissueremovelabelids"></a>`removeLabelIds` | [`[ID!]`](#id) | The IDs of labels to be removed from the issue. |
 | <a id="mutationupdateissuestateevent"></a>`stateEvent` | [`IssueStateEvent`](#issuestateevent) | Close or reopen an issue. |
 | <a id="mutationupdateissuetitle"></a>`title` | [`String`](#string) | Title of the issue. |
+| <a id="mutationupdateissuetype"></a>`type` | [`IssueType`](#issuetype) | Type of the issue. |
 | <a id="mutationupdateissueweight"></a>`weight` | [`Int`](#int) | The weight of the issue. |
 
 #### Fields
@@ -3911,6 +3957,8 @@ Input type: `UpdateNamespacePackageSettingsInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationupdatenamespacepackagesettingsclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationupdatenamespacepackagesettingsgenericduplicateexceptionregex"></a>`genericDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When generic_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
+| <a id="mutationupdatenamespacepackagesettingsgenericduplicatesallowed"></a>`genericDuplicatesAllowed` | [`Boolean`](#boolean) | Indicates whether duplicate generic packages are allowed for this namespace. |
 | <a id="mutationupdatenamespacepackagesettingsmavenduplicateexceptionregex"></a>`mavenDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | <a id="mutationupdatenamespacepackagesettingsmavenduplicatesallowed"></a>`mavenDuplicatesAllowed` | [`Boolean`](#boolean) | Indicates whether duplicate Maven packages are allowed for this namespace. |
 | <a id="mutationupdatenamespacepackagesettingsnamespacepath"></a>`namespacePath` | [`ID!`](#id) | The namespace path where the namespace package setting is located. |
@@ -4639,6 +4687,30 @@ The edge type for [`CodeCoverageActivity`](#codecoverageactivity).
 | ---- | ---- | ----------- |
 | <a id="codecoverageactivityedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="codecoverageactivityedgenode"></a>`node` | [`CodeCoverageActivity`](#codecoverageactivity) | The item at the end of the edge. |
+
+#### `CodeQualityDegradationConnection`
+
+The connection type for [`CodeQualityDegradation`](#codequalitydegradation).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalitydegradationconnectioncount"></a>`count` | [`Int!`](#int) | Total count of collection. |
+| <a id="codequalitydegradationconnectionedges"></a>`edges` | [`[CodeQualityDegradationEdge]`](#codequalitydegradationedge) | A list of edges. |
+| <a id="codequalitydegradationconnectionnodes"></a>`nodes` | [`[CodeQualityDegradation]`](#codequalitydegradation) | A list of nodes. |
+| <a id="codequalitydegradationconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `CodeQualityDegradationEdge`
+
+The edge type for [`CodeQualityDegradation`](#codequalitydegradation).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalitydegradationedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="codequalitydegradationedgenode"></a>`node` | [`CodeQualityDegradation`](#codequalitydegradation) | The item at the end of the edge. |
 
 #### `CommitConnection`
 
@@ -7296,6 +7368,7 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cijobstage"></a>`stage` | [`CiStage`](#cistage) | Stage of the job. |
 | <a id="cijobstartedat"></a>`startedAt` | [`Time`](#time) | When the job was started. |
 | <a id="cijobstatus"></a>`status` | [`CiJobStatus`](#cijobstatus) | Status of the job. |
+| <a id="cijobstuck"></a>`stuck` | [`Boolean!`](#boolean) | Indicates the job is stuck. |
 | <a id="cijobtags"></a>`tags` | [`[String!]`](#string) | Tags for the current job. |
 | <a id="cijobtriggered"></a>`triggered` | [`Boolean`](#boolean) | Whether the job was triggered. |
 | <a id="cijobuserpermissions"></a>`userPermissions` | [`JobPermissions!`](#jobpermissions) | Permissions for the current user on the resource. |
@@ -7406,6 +7479,20 @@ Represents the code coverage summary for a project.
 | <a id="codecoveragesummaryaveragecoverage"></a>`averageCoverage` | [`Float`](#float) | Average percentage of the different code coverage results available for the project. |
 | <a id="codecoveragesummarycoveragecount"></a>`coverageCount` | [`Int`](#int) | Number of different code coverage results available. |
 | <a id="codecoveragesummarylastupdatedon"></a>`lastUpdatedOn` | [`Date`](#date) | Latest date when the code coverage was created for the project. |
+
+### `CodeQualityDegradation`
+
+Represents a code quality degradation on the pipeline.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="codequalitydegradationdescription"></a>`description` | [`String!`](#string) | A description of the code quality degradation. |
+| <a id="codequalitydegradationfingerprint"></a>`fingerprint` | [`String!`](#string) | A unique fingerprint to identify the code quality degradation. For example, an MD5 hash. |
+| <a id="codequalitydegradationline"></a>`line` | [`Int!`](#int) | The line on which the code quality degradation occurred. |
+| <a id="codequalitydegradationpath"></a>`path` | [`String!`](#string) | The relative path to the file containing the code quality degradation. |
+| <a id="codequalitydegradationseverity"></a>`severity` | [`CodeQualityDegradationSeverity!`](#codequalitydegradationseverity) | Status of the degradation (BLOCKER, CRITICAL, MAJOR, MINOR, INFO). |
 
 ### `Commit`
 
@@ -9666,6 +9753,7 @@ Maven metadata.
 | <a id="mergerequestdiscussions"></a>`discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. (see [Connections](#connections)) |
 | <a id="mergerequestdivergedfromtargetbranch"></a>`divergedFromTargetBranch` | [`Boolean!`](#boolean) | Indicates if the source branch is behind the target branch. |
 | <a id="mergerequestdownvotes"></a>`downvotes` | [`Int!`](#int) | Number of downvotes for the merge request. |
+| <a id="mergerequestdraft"></a>`draft` | [`Boolean!`](#boolean) | Indicates if the merge request is a draft. |
 | <a id="mergerequestforceremovesourcebranch"></a>`forceRemoveSourceBranch` | [`Boolean`](#boolean) | Indicates if the project settings will lead to source branch deletion after merge. |
 | <a id="mergerequesthasci"></a>`hasCi` | [`Boolean!`](#boolean) | Indicates if the merge request has CI. |
 | <a id="mergerequesthassecurityreports"></a>`hasSecurityReports` | [`Boolean!`](#boolean) | Indicates if the source branch has any security reports. |
@@ -9721,7 +9809,7 @@ Maven metadata.
 | <a id="mergerequestusernotescount"></a>`userNotesCount` | [`Int`](#int) | User notes count of the merge request. |
 | <a id="mergerequestuserpermissions"></a>`userPermissions` | [`MergeRequestPermissions!`](#mergerequestpermissions) | Permissions for the current user on the resource. |
 | <a id="mergerequestweburl"></a>`webUrl` | [`String`](#string) | Web URL of the merge request. |
-| <a id="mergerequestworkinprogress"></a>`workInProgress` | [`Boolean!`](#boolean) | Indicates if the merge request is a draft. |
+| <a id="mergerequestworkinprogress"></a>`workInProgress` **{warning-solid}** | [`Boolean!`](#boolean) | **Deprecated** in 13.12. Use `draft`. |
 
 #### Fields with arguments
 
@@ -9795,7 +9883,7 @@ A user assigned to a merge request.
 | <a id="mergerequestassigneebot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
 | <a id="mergerequestassigneecallouts"></a>`callouts` | [`UserCalloutConnection`](#usercalloutconnection) | User callouts that belong to the user. (see [Connections](#connections)) |
 | <a id="mergerequestassigneeemail"></a>`email` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.7. This was renamed. Use: [`User.publicEmail`](#userpublicemail). |
-| <a id="mergerequestassigneegroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
+| <a id="mergerequestassigneegroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="mergerequestassigneegroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
 | <a id="mergerequestassigneeid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="mergerequestassigneelocation"></a>`location` | [`String`](#string) | The location of the user. |
@@ -10001,7 +10089,7 @@ A user assigned to a merge request as a reviewer.
 | <a id="mergerequestreviewerbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
 | <a id="mergerequestreviewercallouts"></a>`callouts` | [`UserCalloutConnection`](#usercalloutconnection) | User callouts that belong to the user. (see [Connections](#connections)) |
 | <a id="mergerequestrevieweremail"></a>`email` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.7. This was renamed. Use: [`User.publicEmail`](#userpublicemail). |
-| <a id="mergerequestreviewergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
+| <a id="mergerequestreviewergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="mergerequestreviewergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
 | <a id="mergerequestreviewerid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="mergerequestreviewerlocation"></a>`location` | [`String`](#string) | The location of the user. |
@@ -10488,6 +10576,8 @@ Namespace-level Package Registry settings.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="packagesettingsgenericduplicateexceptionregex"></a>`genericDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When generic_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
+| <a id="packagesettingsgenericduplicatesallowed"></a>`genericDuplicatesAllowed` | [`Boolean!`](#boolean) | Indicates whether duplicate generic packages are allowed for this namespace. |
 | <a id="packagesettingsmavenduplicateexceptionregex"></a>`mavenDuplicateExceptionRegex` | [`UntrustedRegexp`](#untrustedregexp) | When maven_duplicates_allowed is false, you can publish duplicate packages with names that match this regex. Otherwise, this setting has no effect. |
 | <a id="packagesettingsmavenduplicatesallowed"></a>`mavenDuplicatesAllowed` | [`Boolean!`](#boolean) | Indicates whether duplicate Maven packages are allowed for this namespace. |
 
@@ -10526,6 +10616,7 @@ Information about pagination in a connection.
 | <a id="pipelineactive"></a>`active` | [`Boolean!`](#boolean) | Indicates if the pipeline is active. |
 | <a id="pipelinebeforesha"></a>`beforeSha` | [`String`](#string) | Base SHA of the source branch. |
 | <a id="pipelinecancelable"></a>`cancelable` | [`Boolean!`](#boolean) | Specifies if a pipeline can be canceled. |
+| <a id="pipelinecodequalityreports"></a>`codeQualityReports` | [`CodeQualityDegradationConnection`](#codequalitydegradationconnection) | Code Quality degradations reported on the pipeline. (see [Connections](#connections)) |
 | <a id="pipelinecommitpath"></a>`commitPath` | [`String`](#string) | Path to the commit that triggered the pipeline. |
 | <a id="pipelinecommittedat"></a>`committedAt` | [`Time`](#time) | Timestamp of the pipeline's commit. |
 | <a id="pipelineconfigsource"></a>`configSource` | [`PipelineConfigSourceEnum`](#pipelineconfigsourceenum) | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE, COMPLIANCE_SOURCE). |
@@ -10752,8 +10843,9 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectstarcount"></a>`starCount` | [`Int!`](#int) | Number of times the project has been starred. |
 | <a id="projectstatistics"></a>`statistics` | [`ProjectStatistics`](#projectstatistics) | Statistics of the project. |
 | <a id="projectsuggestioncommitmessage"></a>`suggestionCommitMessage` | [`String`](#string) | The commit message used to apply merge request suggestions. |
-| <a id="projecttaglist"></a>`tagList` | [`String`](#string) | List of project topics (not Git tags). |
+| <a id="projecttaglist"></a>`tagList` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.12. Use `topics`. |
 | <a id="projectterraformstates"></a>`terraformStates` | [`TerraformStateConnection`](#terraformstateconnection) | Terraform states associated with the project. (see [Connections](#connections)) |
+| <a id="projecttopics"></a>`topics` | [`[String!]`](#string) | List of project topics. |
 | <a id="projectuserpermissions"></a>`userPermissions` | [`ProjectPermissions!`](#projectpermissions) | Permissions for the current user on the resource. |
 | <a id="projectvisibility"></a>`visibility` | [`String`](#string) | Visibility of the project. |
 | <a id="projectvulnerabilityscanners"></a>`vulnerabilityScanners` | [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection) | Vulnerability scanners reported on the project vulnerabilities. (see [Connections](#connections)) |
@@ -11756,6 +11848,8 @@ Returns [`[String!]`](#string).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="repositorybranchnameslimit"></a>`limit` | [`Int!`](#int) | The number of branch names to return. |
+| <a id="repositorybranchnamesoffset"></a>`offset` | [`Int!`](#int) | The number of branch names to skip. |
 | <a id="repositorybranchnamessearchpattern"></a>`searchPattern` | [`String!`](#string) | The pattern to search for branch names by. |
 
 ##### `Repository.tree`
@@ -11778,14 +11872,20 @@ Returns [`Tree`](#tree).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="repositoryblobcanmodifyblob"></a>`canModifyBlob` | [`Boolean`](#boolean) | Whether the current user can modify the blob. |
 | <a id="repositoryblobeditblobpath"></a>`editBlobPath` | [`String`](#string) | Web path to edit the blob in the old-style editor. |
+| <a id="repositoryblobexternalstorageurl"></a>`externalStorageUrl` | [`String`](#string) | Web path to download the raw blob via external storage, if enabled. |
 | <a id="repositoryblobfiletype"></a>`fileType` | [`String`](#string) | The expected format of the blob based on the extension. |
+| <a id="repositoryblobforkandeditpath"></a>`forkAndEditPath` | [`String`](#string) | Web path to edit this blob using a forked project. |
 | <a id="repositoryblobid"></a>`id` | [`ID!`](#id) | ID of the blob. |
+| <a id="repositoryblobideeditpath"></a>`ideEditPath` | [`String`](#string) | Web path to edit this blob in the Web IDE. |
+| <a id="repositoryblobideforkandeditpath"></a>`ideForkAndEditPath` | [`String`](#string) | Web path to edit this blob in the Web IDE using a forked project. |
 | <a id="repositorybloblfsoid"></a>`lfsOid` | [`String`](#string) | LFS OID of the blob. |
 | <a id="repositoryblobmode"></a>`mode` | [`String`](#string) | Blob mode. |
 | <a id="repositoryblobname"></a>`name` | [`String`](#string) | Blob name. |
 | <a id="repositorybloboid"></a>`oid` | [`String!`](#string) | OID of the blob. |
 | <a id="repositoryblobpath"></a>`path` | [`String!`](#string) | Path of the blob. |
+| <a id="repositoryblobplaindata"></a>`plainData` | [`String`](#string) | Blob plain highlighted data. |
 | <a id="repositoryblobrawblob"></a>`rawBlob` | [`String`](#string) | The raw content of the blob. |
 | <a id="repositoryblobrawpath"></a>`rawPath` | [`String`](#string) | Web path to download the raw blob. |
 | <a id="repositoryblobrawsize"></a>`rawSize` | [`Int`](#int) | Size (in bytes) of the blob, or the blob target if stored externally. |
@@ -12625,7 +12725,7 @@ Core represention of a GitLab user.
 | <a id="usercorebot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
 | <a id="usercorecallouts"></a>`callouts` | [`UserCalloutConnection`](#usercalloutconnection) | User callouts that belong to the user. (see [Connections](#connections)) |
 | <a id="usercoreemail"></a>`email` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.7. This was renamed. Use: [`User.publicEmail`](#userpublicemail). |
-| <a id="usercoregroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
+| <a id="usercoregroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="usercoregroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
 | <a id="usercoreid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="usercorelocation"></a>`location` | [`String`](#string) | The location of the user. |
@@ -13485,6 +13585,7 @@ Values for YAML processor result.
 | Value | Description |
 | ----- | ----------- |
 | <a id="cirunnerstatusactive"></a>`ACTIVE` | A runner that is active. |
+| <a id="cirunnerstatusnot_connected"></a>`NOT_CONNECTED` | A runner that is not connected. |
 | <a id="cirunnerstatusoffline"></a>`OFFLINE` | A runner that is offline. |
 | <a id="cirunnerstatusonline"></a>`ONLINE` | A runner that is online. |
 | <a id="cirunnerstatuspaused"></a>`PAUSED` | A runner that is paused. |
@@ -13496,6 +13597,16 @@ Values for YAML processor result.
 | <a id="cirunnertypegroup_type"></a>`GROUP_TYPE` | A runner that is group type. |
 | <a id="cirunnertypeinstance_type"></a>`INSTANCE_TYPE` | A runner that is instance type. |
 | <a id="cirunnertypeproject_type"></a>`PROJECT_TYPE` | A runner that is project type. |
+
+### `CodeQualityDegradationSeverity`
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="codequalitydegradationseverityblocker"></a>`BLOCKER` | Code Quality degradation has a status of blocker. |
+| <a id="codequalitydegradationseveritycritical"></a>`CRITICAL` | Code Quality degradation has a status of critical. |
+| <a id="codequalitydegradationseverityinfo"></a>`INFO` | Code Quality degradation has a status of info. |
+| <a id="codequalitydegradationseveritymajor"></a>`MAJOR` | Code Quality degradation has a status of major. |
+| <a id="codequalitydegradationseverityminor"></a>`MINOR` | Code Quality degradation has a status of minor. |
 
 ### `CommitActionMode`
 
@@ -14411,6 +14522,7 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumunfinished_tag_cleanup_callout"></a>`UNFINISHED_TAG_CLEANUP_CALLOUT` | Callout feature name for unfinished_tag_cleanup_callout. |
 | <a id="usercalloutfeaturenameenumwebhooks_moved"></a>`WEBHOOKS_MOVED` | Callout feature name for webhooks_moved. |
 | <a id="usercalloutfeaturenameenumweb_ide_alert_dismissed"></a>`WEB_IDE_ALERT_DISMISSED` | Callout feature name for web_ide_alert_dismissed. |
+| <a id="usercalloutfeaturenameenumweb_ide_ci_environments_guidance"></a>`WEB_IDE_CI_ENVIRONMENTS_GUIDANCE` | Callout feature name for web_ide_ci_environments_guidance. |
 
 ### `UserState`
 
@@ -15291,7 +15403,7 @@ Implementations:
 | <a id="userbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
 | <a id="usercallouts"></a>`callouts` | [`UserCalloutConnection`](#usercalloutconnection) | User callouts that belong to the user. (see [Connections](#connections)) |
 | <a id="useremail"></a>`email` **{warning-solid}** | [`String`](#string) | **Deprecated** in 13.7. This was renamed. Use: [`User.publicEmail`](#userpublicemail). |
-| <a id="usergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. Available only when feature flag `user_group_counts` is enabled. |
+| <a id="usergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="usergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
 | <a id="userid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="userlocation"></a>`location` | [`String`](#string) | The location of the user. |

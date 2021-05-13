@@ -57,8 +57,8 @@ module Geo
 
         project.update_root_ref(GEO_REMOTE_NAME, remote_url, authorization)
       else
-        repository_with_config(jwt_authentication_header) do
-          project.update_root_ref(GEO_REMOTE_NAME, remote_url)
+        repository.with_config(jwt_authentication_header) do
+          project.update_root_ref(GEO_REMOTE_NAME, remote_url, nil)
         end
       end
     end

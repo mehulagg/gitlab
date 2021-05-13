@@ -51,17 +51,7 @@ export default {
     state.medians = {};
   },
   [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians = []) {
-    if (state?.featureFlags?.hasPathNavigation) {
-      state.medians = formatMedianValuesWithOverview(medians);
-    } else {
-      state.medians = medians.reduce(
-        (acc, { id, value, error = null }) => ({
-          ...acc,
-          [id]: { value, error },
-        }),
-        {},
-      );
-    }
+    state.medians = formatMedianValuesWithOverview(medians);
   },
   [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
     state.medians = {};

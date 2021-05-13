@@ -21,7 +21,7 @@ module Mutations
         validate_arguments!(args)
 
         group = authorized_find!(group_path: group_path)
-        epic = ::Epics::CreateService.new(group, current_user, args).execute
+        epic = ::Epics::CreateService.new(group: group, current_user: current_user, params: args).execute
 
         response_object = epic if epic.valid?
 

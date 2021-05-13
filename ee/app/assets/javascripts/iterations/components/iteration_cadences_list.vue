@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlButton, GlLoadingIcon, GlPagination, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLoadingIcon, GlKeysetPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import query from '../queries/iteration_cadences_list.query.graphql';
 import IterationCadence from './iteration_cadence.vue';
@@ -13,7 +13,7 @@ export default {
     GlAlert,
     GlButton,
     GlLoadingIcon,
-    GlPagination,
+    GlKeysetPagination,
     GlTab,
     GlTabs,
   },
@@ -22,12 +22,6 @@ export default {
       query,
       variables() {
         return this.queryVariables;
-      },
-      update(data) {
-        return {
-          iterationCadences: data.group?.iterationCadences?.nodes || [],
-          pageInfo: data.group?.iterationCadences?.pageInfo || {},
-        };
       },
       error({ message }) {
         this.error = message || s__('Iterations|Error loading iteration cadences.');
@@ -44,9 +38,7 @@ export default {
           hasPreviousPage: false,
         },
       },
-      pagination: {
-        currentPage: 1,
-      },
+      pagination: {},
       tabIndex: 0,
       error: '',
     };
@@ -72,7 +64,10 @@ export default {
       return vars;
     },
     cadences() {
-      return this.group.iterationCadences;
+      return this.group?.iterationCadences?.nodes || [];
+    },
+    pageInfo() {
+      return this.group?.iterationCadences?.pageInfo || {};
     },
     loading() {
       return this.$apollo.queries.group.loading;
@@ -88,31 +83,20 @@ export default {
           return undefined;
       }
     },
-    prevPage() {
-      return Number(this.group.pageInfo.hasPreviousPage);
-    },
-    nextPage() {
-      return Number(this.group.pageInfo.hasNextPage);
-    },
   },
   methods: {
-    handlePageChange(page) {
-      const { startCursor, endCursor } = this.group.pageInfo;
-
-      if (page > this.pagination.currentPage) {
-        this.pagination = {
-          afterCursor: endCursor,
-          currentPage: page,
-        };
-      } else {
-        this.pagination = {
-          beforeCursor: startCursor,
-          currentPage: page,
-        };
-      }
+    nextPage() {
+      this.pagination = {
+        afterCursor: this.pageInfo.endCursor,
+      };
+    },
+    previousPage() {
+      this.pagination = {
+        beforeCursor: this.pageInfo.startCursor,
+      };
     },
     handleTabChange() {
-      this.pagination = { currentPage: 1 };
+      this.pagination = {};
     },
   },
 };
@@ -141,15 +125,17 @@ export default {
         <p v-else class="nothing-here-block">
           {{ s__('Iterations|No iteration cadences to show.') }}
         </p>
-        <gl-pagination
-          v-if="prevPage || nextPage"
-          :value="pagination.currentPage"
-          :prev-page="prevPage"
-          :next-page="nextPage"
-          align="center"
-          class="gl-pagination gl-mt-3"
-          @input="handlePageChange"
-        />
+        <div
+          v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage"
+          class="gl-display-flex gl-justify-content-center gl-mt-3"
+        >
+          <gl-keyset-pagination
+            :has-next-page="pageInfo.hasNextPage"
+            :has-previous-page="pageInfo.hasPreviousPage"
+            @prev="previousPage"
+            @next="nextPage"
+          />
+        </div>
       </template>
     </gl-tab>
     <template v-if="canCreateCadence" #tabs-end>

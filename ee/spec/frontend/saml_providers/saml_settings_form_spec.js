@@ -13,6 +13,8 @@ describe('SamlSettingsForm', () => {
 
   const findEnforcedGroupManagedAccountSetting = () =>
     samlSettingsForm.settings.find((s) => s.name === 'enforced-group-managed-accounts');
+  const findEnforcedSsoSetting = () =>
+    samlSettingsForm.settings.find((s) => s.name === 'enforced-sso');
   const findProhibitForksSetting = () =>
     samlSettingsForm.settings.find((s) => s.name === 'prohibited-outer-forks');
 
@@ -63,6 +65,16 @@ describe('SamlSettingsForm', () => {
     expect(findProhibitForksSetting().el.hasAttribute('disabled')).toBe(true);
     expect(findProhibitForksSetting().helperText.classList.contains('gl-display-none')).toBe(false);
     expect(findProhibitForksSetting().value).toBe(true);
+  });
+
+  it('correctly shows warning text when checkbox is unchecked', () => {
+    expect(findEnforcedSsoSetting().warning.classList.contains('gl-display-none')).toBe(true);
+
+    findEnforcedSsoSetting().el.checked = false;
+    samlSettingsForm.updateSAMLSettings();
+    samlSettingsForm.updateView();
+
+    expect(findEnforcedSsoSetting().warning.classList.contains('gl-display-none')).toBe(false);
   });
 
   it('correctly disables multiple dependent toggles', () => {

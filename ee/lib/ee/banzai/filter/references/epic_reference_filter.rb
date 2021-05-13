@@ -43,8 +43,6 @@ module EE
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
-          private
-
           def parent_type
             :group
           end

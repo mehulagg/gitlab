@@ -19,6 +19,7 @@ module Dast
     validates :project_id, :dast_site_profile_id, :dast_scanner_profile_id, presence: true
 
     validate :project_ids_match
+    validate :branch_name_exists_in_repository
     validate :description_not_nil
 
     scope :by_project_id, -> (project_id) do
@@ -40,6 +41,19 @@ module Dast
     def project_ids_match
       association_project_id_matches(dast_site_profile)
       association_project_id_matches(dast_scanner_profile)
+    end
+
+    def branch_name_exists_in_repository
+      return unless branch_name
+
+      unless project.repository.exists?
+        errors.add(:project, 'must have a repository')
+        return
+      end
+
+      unless project.repository.branch_exists?(branch_name)
+        errors.add(:branch_name, 'can\'t reference a branch that does not exist')
+      end
     end
 
     def description_not_nil

@@ -19,10 +19,7 @@ export default () => {
   const { emptyStateSvgPath, noDataSvgPath, noAccessSvgPath } = el.dataset;
   const initialData = buildCycleAnalyticsInitialData(el.dataset);
   const store = createStore();
-  const {
-    cycleAnalyticsScatterplotEnabled: hasDurationChart = false,
-    valueStreamAnalyticsPathNavigation: hasPathNavigation = false,
-  } = gon?.features;
+  const { cycleAnalyticsScatterplotEnabled: hasDurationChart = false } = gon?.features;
 
   const {
     author_username = null,
@@ -39,7 +36,7 @@ export default () => {
     selectedMilestone: milestone_title,
     selectedAssigneeList: assignee_username,
     selectedLabelList: label_name,
-    featureFlags: { hasDurationChart, hasPathNavigation },
+    featureFlags: { hasDurationChart },
     pagination: { sort: sort?.value || null, direction: direction?.value || null },
   });
 

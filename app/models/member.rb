@@ -92,6 +92,15 @@ class Member < ApplicationRecord
       .reorder(nil)
   end
 
+  # This scope is exclusively used to get the members
+  # that can possibly have project_authorization records
+  # to projects/groups.
+  scope :authorizable, -> do
+    where.not(user_id: nil)
+      .non_request
+      .non_minimal_access
+  end
+
   # Like active, but without invites. For when a User is required.
   scope :active_without_invites_and_requests, -> do
     left_join_users
@@ -560,4 +569,4 @@ class Member < ApplicationRecord
   end
 end
 
-Member.prepend_if_ee('EE::Member')
+Member.prepend_mod_with('Member')

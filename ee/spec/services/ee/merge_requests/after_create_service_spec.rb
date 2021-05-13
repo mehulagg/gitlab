@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe MergeRequests::AfterCreateService do
   let_it_be(:merge_request) { create(:merge_request) }
 
-  let(:service_object) { described_class.new(merge_request.target_project, merge_request.author) }
+  let(:service_object) { described_class.new(project: merge_request.target_project, current_user: merge_request.author) }
 
   describe '#execute' do
     subject(:execute) { service_object.execute(merge_request) }

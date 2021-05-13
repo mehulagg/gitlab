@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Security::OrchestrationPolicyConfiguration do
   let_it_be(:security_policy_management_project) { create(:project, :repository) }
-  let_it_be(:security_orchestration_policy_configuration) do
+
+  let!(:security_orchestration_policy_configuration) do
     create(:security_orchestration_policy_configuration, security_policy_management_project: security_policy_management_project)
   end
 
@@ -24,6 +25,18 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     it { is_expected.to validate_presence_of(:security_policy_management_project) }
 
     it { is_expected.to validate_uniqueness_of(:project) }
+  end
+
+  describe '.for_project' do
+    let!(:security_orchestration_policy_configuration_1) { create(:security_orchestration_policy_configuration) }
+    let!(:security_orchestration_policy_configuration_2) { create(:security_orchestration_policy_configuration) }
+    let!(:security_orchestration_policy_configuration_3) { create(:security_orchestration_policy_configuration) }
+
+    subject { described_class.for_project([security_orchestration_policy_configuration_2.project, security_orchestration_policy_configuration_3.project]) }
+
+    it 'returns configuration for given projects' do
+      is_expected.to contain_exactly(security_orchestration_policy_configuration_2, security_orchestration_policy_configuration_3)
+    end
   end
 
   describe '#enabled?' do

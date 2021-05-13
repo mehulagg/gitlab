@@ -49,6 +49,16 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
 
         expect(service.live_consumption.to_i).to eq(minutes_consumption)
       end
+
+      it 'logs event' do
+        expect(Gitlab::AppLogger).to receive(:info).with(
+          message: 'Build dropped due to CI minutes limit exceeded',
+          project_path: project.full_path,
+          build_id: build.id,
+          user_id: build.user_id)
+
+        subject
+      end
     end
 
     context 'when build is not running' do

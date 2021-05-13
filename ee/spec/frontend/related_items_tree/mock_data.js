@@ -284,6 +284,10 @@ export const mockQueryResponse = {
           },
         },
         descendantCounts: mockParentItem.descendantCounts,
+        descendantWeightSum: {
+          openedIssues: 10,
+          closedIssues: 5,
+        },
         healthStatus: {
           atRisk: 0,
           needsAttention: 1,

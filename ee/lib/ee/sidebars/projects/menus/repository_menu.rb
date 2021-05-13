@@ -19,7 +19,9 @@ module EE
           private
 
           def file_locks_menu_item
-            return unless context.project.licensed_feature_available?(:file_locks)
+            unless context.project.licensed_feature_available?(:file_locks)
+              return ::Sidebars::NilMenuItem.new(item_id: :file_locks)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Locked Files'),

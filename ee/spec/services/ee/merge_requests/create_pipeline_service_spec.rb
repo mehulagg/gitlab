@@ -8,7 +8,7 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
   describe '#execute' do
     subject { service.execute(merge_request) }
 
-    let(:service) { described_class.new(source_project, user) }
+    let(:service) { described_class.new(project: source_project, current_user: user) }
     let(:project) { create(:project, :repository) }
     let(:user) { create(:user) }
     let(:title) { 'Awesome merge request' }

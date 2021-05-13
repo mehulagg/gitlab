@@ -1,17 +1,13 @@
-import { GlAlert, GlButton, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { getByText } from '@testing-library/dom';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_app.vue';
-import DevopsAdoptionEmptyState from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_empty_state.vue';
+import DevopsAdoptionSection from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_section.vue';
 import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
-import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
-  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
-  MAX_SEGMENTS,
   DEFAULT_POLLING_INTERVAL,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
@@ -19,7 +15,6 @@ import devopsAdoptionSegments from 'ee/analytics/devops_report/devops_adoption/g
 import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   groupNodes,
@@ -93,12 +88,6 @@ describe('DevopsAdoptionApp', () => {
       localVue,
       apolloProvider: mockApollo,
       provide,
-      stubs: {
-        GlSprintf,
-      },
-      directives: {
-        GlTooltip: createMockDirective(),
-      },
       data() {
         return data;
       },
@@ -116,12 +105,8 @@ describe('DevopsAdoptionApp', () => {
       wrapper = createComponent({ mockApollo });
     });
 
-    it('does not display the empty state', () => {
-      expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-    });
-
-    it('displays the loader', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    it('does not render the modal', () => {
+      expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
     });
   });
 
@@ -143,10 +128,6 @@ describe('DevopsAdoptionApp', () => {
       it('does not render the segment modal', () => {
         expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
-
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-      });
     });
 
     describe('when group data is present', () => {
@@ -155,10 +136,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('renders the segment modal', () => {
@@ -179,10 +156,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('does not render the segment modal', () => {
@@ -225,10 +198,6 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-      });
-
       it('renders the segment modal', () => {
         expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
       });
@@ -256,10 +225,6 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-      });
-
       it('should fetch data twice', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(2);
       });
@@ -278,10 +243,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
       });
 
       it('does not render the segment modal', () => {
@@ -311,153 +272,6 @@ describe('DevopsAdoptionApp', () => {
   });
 
   describe('segments data', () => {
-    describe('when loading', () => {
-      beforeEach(async () => {
-        const segmentsLoading = jest.fn().mockResolvedValue(new Promise(() => {}));
-        const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsLoading });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
-      it('displays the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
-      });
-    });
-
-    describe('when there is no segment data', () => {
-      beforeEach(async () => {
-        const mockApollo = createMockApolloProvider();
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('displays the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(true);
-      });
-
-      it('does not display the table', () => {
-        expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(false);
-      });
-    });
-
-    describe('when there is segment data and group data', () => {
-      beforeEach(async () => {
-        const segmentsWithData = jest
-          .fn()
-          .mockResolvedValue({ data: { devopsAdoptionSegments: devopsAdoptionSegmentsData } });
-        const groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
-        const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsWithData, groupsSpy });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('does not display the empty state', () => {
-        expect(wrapper.find(DevopsAdoptionEmptyState).exists()).toBe(false);
-      });
-
-      it('displays the table', () => {
-        expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(true);
-      });
-
-      describe('table header', () => {
-        let tableHeader;
-
-        beforeEach(() => {
-          tableHeader = wrapper.find("[data-testid='tableHeader']");
-        });
-
-        afterEach(() => {
-          tableHeader = null;
-        });
-
-        it('displays the table header', () => {
-          expect(tableHeader.exists()).toBe(true);
-        });
-
-        it('displays the header text', () => {
-          const text =
-            'Feature adoption is based on usage in the current calendar month. Last updated: 2020-10-31 23:59.';
-          expect(getByText(wrapper.element, text)).not.toBeNull();
-        });
-
-        describe('segment modal button', () => {
-          let segmentButton;
-          let segmentButtonWrapper;
-
-          beforeEach(() => {
-            segmentButton = tableHeader.find(GlButton);
-            segmentButtonWrapper = wrapper.find("[data-testid='segmentButtonWrapper']");
-          });
-
-          afterEach(() => {
-            segmentButton = null;
-          });
-
-          it('displays the add segment button', () => {
-            expect(segmentButton.exists()).toBe(true);
-            expect(segmentButton.text()).toBe('Add/remove groups');
-          });
-
-          it('calls the gl-modal show', async () => {
-            const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
-
-            segmentButton.trigger('click');
-
-            expect(rootEmit.mock.calls[0][0]).toContain('show');
-            expect(rootEmit.mock.calls[0][1]).toBe(DEVOPS_ADOPTION_SEGMENT_MODAL_ID);
-          });
-
-          it('does not have a tooltip', () => {
-            const tooltip = getBinding(segmentButtonWrapper.element, 'gl-tooltip');
-
-            // Setting a directive's value to false tells it not to render
-            expect(tooltip.value).toBe(false);
-          });
-
-          describe('when there are more than the max number of segments', () => {
-            beforeEach(() => {
-              const data = {
-                nodes: Array(MAX_SEGMENTS + 1).fill(devopsAdoptionSegmentsData.nodes[0]),
-              };
-              wrapper.setData({ devopsAdoptionSegments: data });
-            });
-
-            it('disables the button', () => {
-              expect(segmentButton.props('disabled')).toBe(true);
-            });
-
-            it('has a tooltip', () => {
-              const tooltip = getBinding(segmentButtonWrapper.element, 'gl-tooltip');
-
-              expect(tooltip).toBeDefined();
-              expect(tooltip.value).toBe('Maximum 30 groups allowed');
-            });
-          });
-        });
-      });
-    });
-
-    describe('when there is segment data but no group data', () => {
-      beforeEach(async () => {
-        const segmentsWithData = jest.fn().mockResolvedValue({
-          data: { devopsAdoptionSegments: devopsAdoptionSegmentsData },
-        });
-        const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsWithData });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('does not display the modal button', () => {
-        const segmentButtonWrapper = wrapper.find("[data-testid='segmentButtonWrapper']");
-
-        expect(segmentButtonWrapper.exists()).toBe(false);
-      });
-    });
-
     describe('when there is no active group', () => {
       beforeEach(async () => {
         const mockApollo = createMockApolloProvider();
@@ -545,16 +359,12 @@ describe('DevopsAdoptionApp', () => {
               await wrapper.vm.$nextTick();
             });
 
-            it('does not display the loader', () => {
-              expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-            });
-
             it('does not render the segment modal', () => {
               expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
             });
 
-            it('does not render the table', () => {
-              expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(false);
+            it('does not render the devops section', () => {
+              expect(wrapper.find(DevopsAdoptionSection).exists()).toBe(false);
             });
 
             it('displays the error message ', () => {
@@ -571,32 +381,6 @@ describe('DevopsAdoptionApp', () => {
           });
         });
       });
-
-      describe('segment modal button', () => {
-        beforeEach(async () => {
-          const segmentsWithData = jest.fn().mockResolvedValue({
-            data: { devopsAdoptionSegments: devopsAdoptionSegmentsData },
-          });
-          const groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
-          const mockApollo = createMockApolloProvider({
-            segmentsSpy: segmentsWithData,
-            groupsSpy,
-          });
-          const provide = {
-            isGroup: true,
-            groupGid,
-          };
-          wrapper = createComponent({ mockApollo, provide });
-          await waitForPromises();
-          await wrapper.vm.$nextTick();
-        });
-
-        it('displays group level text', () => {
-          const segmentButton = wrapper.find("[data-testid='segmentButtonWrapper']").find(GlButton);
-
-          expect(segmentButton.text()).toBe('Add/remove sub-groups');
-        });
-      });
     });
 
     describe('when there is an error', () => {
@@ -610,16 +394,12 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not display the loader', () => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
-      });
-
       it('does not render the segment modal', () => {
         expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
-      it('does not render the table', () => {
-        expect(wrapper.find(DevopsAdoptionTable).exists()).toBe(false);
+      it('does not render the devops section', () => {
+        expect(wrapper.find(DevopsAdoptionSection).exists()).toBe(false);
       });
 
       it('displays the error message ', () => {

@@ -19,6 +19,8 @@ jest.mock('~/lib/utils/url_utility');
 
 Vue.use(VueApollo);
 
+const projectPath = 'namespace/project';
+
 describe('ManageViaMr component', () => {
   let wrapper;
 
@@ -29,7 +31,7 @@ describe('ManageViaMr component', () => {
     ${'DEPENDENCY_SCANNING'} | ${REPORT_TYPE_SECRET_DETECTION}    | ${configureSecretDetectionMutation}    | ${'configureSecretDetection'}
   `('$featureType', ({ featureName, mutation, featureType, mutationId }) => {
     const buildConfigureSecurityFeatureMock = buildConfigureSecurityFeatureMockFactory(mutationId);
-    const successHandler = async () => buildConfigureSecurityFeatureMock();
+    const successHandler = jest.fn(async () => buildConfigureSecurityFeatureMock());
     const noSuccessPathHandler = async () =>
       buildConfigureSecurityFeatureMock({
         successPath: '',
@@ -51,7 +53,7 @@ describe('ManageViaMr component', () => {
         mount(ManageViaMr, {
           apolloProvider: mockApollo,
           provide: {
-            projectPath: 'testProjectPath',
+            projectPath,
           },
           propsData: {
             feature: {
@@ -87,6 +89,17 @@ describe('ManageViaMr component', () => {
 
       it('it does render a button', () => {
         expect(findButton().exists()).toBe(true);
+      });
+
+      it('clicking on the button triggers the configure mutation', () => {
+        findButton().trigger('click');
+
+        expect(successHandler).toHaveBeenCalledTimes(1);
+        expect(successHandler).toHaveBeenCalledWith({
+          input: {
+            projectPath,
+          },
+        });
       });
     });
 

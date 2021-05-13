@@ -8,12 +8,18 @@ class BilledUsersFinder
   end
 
   def execute
-    return User.none unless group_billed_user_ids.any?
+    return {} unless user_ids.any?
 
-    users = ::User.id_in(group_billed_user_ids)
+    users = ::User.id_in(user_ids)
     users = users.search(search_term) if search_term
 
-    users.sort_by_attribute(order_by)
+    {
+      users: users.sort_by_attribute(order_by),
+      group_member_user_ids: group_billed_user_ids[:group_member_user_ids],
+      project_member_user_ids: group_billed_user_ids[:project_member_user_ids],
+      shared_group_user_ids: group_billed_user_ids[:shared_group_user_ids],
+      shared_project_user_ids: group_billed_user_ids[:shared_project_user_ids]
+    }
   end
 
   private
@@ -22,5 +28,9 @@ class BilledUsersFinder
 
   def group_billed_user_ids
     @group_billed_user_ids ||= group.billed_user_ids
+  end
+
+  def user_ids
+    group_billed_user_ids[:user_ids]
   end
 end

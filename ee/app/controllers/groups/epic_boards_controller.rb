@@ -2,18 +2,37 @@
 class Groups::EpicBoardsController < Groups::ApplicationController
   include BoardsActions
   include RecordUserLastActivity
+  include RedisTracking
   include Gitlab::Utils::StrongMemoize
   extend ::Gitlab::Utils::Override
 
+  before_action :redirect_to_recent_board, only: [:index]
   before_action :assign_endpoint_vars
   before_action do
     push_frontend_feature_flag(:epic_boards, group, default_enabled: :yaml)
     push_frontend_feature_flag(:boards_filtered_search, group)
   end
 
+  track_redis_hll_event :index, :show, name: 'g_project_management_users_viewing_epic_boards'
+
   feature_category :boards
 
   private
+
+  def redirect_to_recent_board
+    return if request.format.json? || !latest_visited_board
+
+    redirect_to group_epic_board_path(group, latest_visited_board.epic_board)
+  end
+
+  def latest_visited_board
+    @latest_visited_board ||= Boards::EpicBoardsVisitsFinder.new(parent, current_user).latest
+  end
+
+  override :board_visit_service
+  def board_visit_service
+    Boards::EpicBoards::Visits::CreateService
+  end
 
   def board_klass
     ::Boards::EpicBoard

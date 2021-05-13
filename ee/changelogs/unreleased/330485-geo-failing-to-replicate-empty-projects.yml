@@ -1,0 +1,5 @@
+---
+title: Geo - Fix replication for for empty projects
+merge_request: 61419
+author:
+type: fixed

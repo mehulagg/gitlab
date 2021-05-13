@@ -25,7 +25,9 @@ module EE
           private
 
           def insights_menu_item
-            return unless context.project.insights_available?
+            unless context.project.insights_available?
+              return ::Sidebars::NilMenuItem.new(item_id: :insights)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Insights'),
@@ -37,7 +39,9 @@ module EE
           end
 
           def code_review_analytics_menu_item
-            return unless can?(context.current_user, :read_code_review_analytics, context.project)
+            unless can?(context.current_user, :read_code_review_analytics, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :code_review)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Code Review'),
@@ -48,9 +52,9 @@ module EE
           end
 
           def issues_analytics_menu_item
-            return unless ::Feature.enabled?(:project_level_issues_analytics, context.project, default_enabled: true)
-            return unless context.project.licensed_feature_available?(:issues_analytics)
-            return unless can?(context.current_user, :read_project, context.project)
+            unless show_issues_analytics?
+              return ::Sidebars::NilMenuItem.new(item_id: :issues)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Issue'),
@@ -60,8 +64,16 @@ module EE
             )
           end
 
+          def show_issues_analytics?
+            ::Feature.enabled?(:project_level_issues_analytics, context.project, default_enabled: true) &&
+              context.project.licensed_feature_available?(:issues_analytics) &&
+              can?(context.current_user, :read_project, context.project)
+          end
+
           def merge_request_analytics_menu_item
-            return unless can?(context.current_user, :read_project_merge_request_analytics, context.project)
+            unless can?(context.current_user, :read_project_merge_request_analytics, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :merge_requests)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Merge Request'),

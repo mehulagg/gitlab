@@ -34,7 +34,7 @@ class Group < Namespace
   has_many :members_and_requesters, as: :source, class_name: 'GroupMember'
 
   has_many :milestones
-  has_many :services
+  has_many :integrations
   has_many :shared_group_links, foreign_key: :shared_with_group_id, class_name: 'GroupGroupLink'
   has_many :shared_with_group_links, foreign_key: :shared_group_id, class_name: 'GroupGroupLink'
   has_many :shared_groups, through: :shared_group_links, source: :shared_group
@@ -107,6 +107,8 @@ class Group < Namespace
 
   scope :with_users, -> { includes(:users) }
 
+  scope :with_onboarding_progress, -> { joins(:onboarding_progress) }
+
   scope :by_id, ->(groups) { where(id: groups) }
 
   scope :for_authorized_group_members, -> (user_ids) do
@@ -163,12 +165,12 @@ class Group < Namespace
     end
 
     def without_integration(integration)
-      services = Service
+      integrations = Integration
         .select('1')
         .where('services.group_id = namespaces.id')
         .where(type: integration.type)
 
-      where('NOT EXISTS (?)', services)
+      where('NOT EXISTS (?)', integrations)
     end
 
     # This method can be used only if all groups have the same top-level
@@ -446,6 +448,20 @@ class Group < Namespace
     GroupMember.active_without_invites_and_requests
                .non_minimal_access
                .where(source_id: id)
+  end
+
+  def authorizable_members_with_parents
+    source_ids =
+      if has_parent?
+        self_and_ancestors.reorder(nil).select(:id)
+      else
+        id
+      end
+
+    group_hierarchy_members = GroupMember.where(source_id: source_ids)
+
+    GroupMember.from_union([group_hierarchy_members,
+                            members_from_self_and_ancestor_group_shares]).authorizable
   end
 
   def members_with_parents
@@ -859,4 +875,4 @@ class Group < Namespace
   end
 end
 
-Group.prepend_if_ee('EE::Group')
+Group.prepend_mod_with('Group')

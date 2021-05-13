@@ -12,15 +12,15 @@ describe('PaidFeatureCalloutBadge component', () => {
   const findGlBadge = () => wrapper.findComponent(GlBadge);
   const findGlIcon = () => wrapper.findComponent(GlIcon);
 
-  const createComponent = () => {
-    return shallowMount(PaidFeatureCalloutBadge);
+  const createComponent = (props = {}) => {
+    return shallowMount(PaidFeatureCalloutBadge, { propsData: props });
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  describe('with some default props', () => {
+  describe('default rendering', () => {
     beforeEach(() => {
       wrapper = createComponent();
     });
@@ -38,6 +38,26 @@ describe('PaidFeatureCalloutBadge component', () => {
       expect(findGlIcon().attributes()).toEqual({
         name: 'license',
         size: '14',
+      });
+    });
+  });
+
+  describe('title', () => {
+    describe('when no featureName is provided', () => {
+      it('sets the title to a sensible default', () => {
+        wrapper = createComponent();
+        expect(findGlBadge().attributes('title')).toBe(
+          'This feature is part of your GitLab Ultimate trial.',
+        );
+      });
+    });
+
+    describe('when an optional featureName is provided', () => {
+      it('sets the title using the given feature name', () => {
+        wrapper = createComponent({ featureName: 'fantastical thing' });
+        expect(findGlBadge().attributes('title')).toBe(
+          'The fantastical thing feature is part of your GitLab Ultimate trial.',
+        );
       });
     });
   });

@@ -61,7 +61,7 @@ module IssuableActions
   end
 
   def destroy
-    Issuable::DestroyService.new(issuable.project, current_user).execute(issuable)
+    Issuable::DestroyService.new(project: issuable.project, current_user: current_user).execute(issuable)
 
     name = issuable.human_class_name
     flash[:notice] = "The #{name} was successfully deleted."
@@ -259,4 +259,4 @@ module IssuableActions
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 end
 
-IssuableActions.prepend_if_ee('EE::IssuableActions')
+IssuableActions.prepend_mod_with('IssuableActions')

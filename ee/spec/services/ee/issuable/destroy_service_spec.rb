@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Issuable::DestroyService do
   let_it_be(:user) { create(:user) }
 
-  subject(:service) { described_class.new(nil, user) }
+  subject(:service) { described_class.new(project: nil, current_user: user) }
 
   describe '#execute' do
     context 'when destroying an epic' do
@@ -20,6 +20,7 @@ RSpec.describe Issuable::DestroyService do
       end
 
       it_behaves_like 'service deleting todos'
+      it_behaves_like 'service deleting label links'
     end
 
     context 'when destroying other issuable type' do

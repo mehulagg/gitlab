@@ -114,7 +114,7 @@ Unique visitors to /groups/:group/-/analytics/merge_request_analytics
 
 Group: `group::optimize`
 
-Status: `data_available`
+Status: `removed`
 
 Tiers: `free`
 
@@ -468,7 +468,7 @@ Tiers: `free`
 
 ### `counts.boards`
 
-Count of total Boards created
+Count of Boards created
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181252_boards.yml)
 
@@ -2899,6 +2899,18 @@ Count of GitOps Sync events
 Group: `group::configure`
 
 Status: `data_available`
+
+Tiers: `premium`, `ultimate`
+
+### `counts.kubernetes_agent_k8s_api_proxy_request`
+
+Count of Kubernetes API proxy requests
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210505015532_kubernetes_agent_k8s_api_proxy_request.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
@@ -6482,7 +6494,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 TBD
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183248_pg_system_id.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216183248_pg_system_id.yml)
 
 Group: `group::distribution`
 
@@ -6578,7 +6590,7 @@ Tiers: `free`
 
 Missing description
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183241_filesystems.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216183241_filesystems.yml)
 
 Group: ``
 
@@ -6974,7 +6986,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 What Object Storage provider has been configured for Artifacts
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180843_provider.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180843_provider.yml)
 
 Group: `group::memory`
 
@@ -7034,7 +7046,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 What Object Storage provider has been configured for External Diffs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180852_provider.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180852_provider.yml)
 
 Group: `group::memory`
 
@@ -7094,7 +7106,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 What Object Storage provider has been configured for LFS
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180902_provider.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180902_provider.yml)
 
 Group: `group::memory`
 
@@ -7154,7 +7166,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 What Object Storage provider has been configured for Packages
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180920_provider.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180920_provider.yml)
 
 Group: `group::memory`
 
@@ -7166,7 +7178,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Whether Object Storage is enabled for Uploads
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180903_enabled.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180903_enabled.yml)
 
 Group: `group::memory`
 
@@ -7214,7 +7226,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 What Object Storage provider has been configured for Uploads
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180911_provider.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180911_provider.yml)
 
 Group: `group::memory`
 
@@ -7398,7 +7410,7 @@ Missing description
 
 Group: `group::optimize`
 
-Status: `data_available`
+Status: `removed`
 
 Tiers: `free`
 
@@ -7410,7 +7422,7 @@ Missing description
 
 Group: `group::optimize`
 
-Status: `data_available`
+Status: `removed`
 
 Tiers:
 
@@ -10222,6 +10234,78 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `redis_hll_counters.epic_boards_usage.g_project_management_users_creating_epic_boards_monthly`
+
+Count of MAU creating epic boards
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210428072511_g_project_management_users_creating_epic_boards_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epic_boards_usage.g_project_management_users_creating_epic_boards_weekly`
+
+Count of WAU creating epic boards
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210428072508_g_project_management_users_creating_epic_boards_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epic_boards_usage.g_project_management_users_updating_epic_board_names_monthly`
+
+Count of MAU updating epic board names
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210428073607_g_project_management_users_updating_epic_board_names_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epic_boards_usage.g_project_management_users_updating_epic_board_names_weekly`
+
+Count of WAU updating epic board names
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210428073604_g_project_management_users_updating_epic_board_names_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epic_boards_usage.g_project_management_users_viewing_epic_boards_monthly`
+
+Count of MAU viewing epic boards
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210428073329_g_project_management_users_viewing_epic_boards_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epic_boards_usage.g_project_management_users_viewing_epic_boards_weekly`
+
+Count of WAU viewing epic boards
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210428073327_g_project_management_users_viewing_epic_boards_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `redis_hll_counters.epics_usage.epics_usage_total_unique_counts_monthly`
 
 Total monthly users count for epics_usage
@@ -10291,6 +10375,30 @@ Count of WAU creating epics
 Group: `group::product planning`
 
 Status: `data_available`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_cross_referenced_monthly`
+
+Count of MAU cross referencing epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210430174100_g_project_management_epic_cross_referenced_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_epic_cross_referenced_weekly`
+
+Counts of WAU cross referencing epics
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210430173650_g_project_management_epic_cross_referenced_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
 
 Tiers: `premium`, `ultimate`
 
@@ -18148,7 +18256,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.plan.issues`
 
-Count of MAU creating issues
+Count of users creating Issues in last 28 days.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181139_issues.yml)
 

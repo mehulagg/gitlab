@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'create a board' do |scope|
+  let_it_be(:user) { create(:user) }
+
   context 'with valid params' do
-    subject(:service) { described_class.new(parent, double, name: 'Backend') }
+    subject(:service) { described_class.new(parent, user, name: 'Backend') }
 
     it 'creates a new board' do
       expect { service.execute }.to change(parent.send(scope), :count).by(1)
@@ -22,7 +24,7 @@ RSpec.shared_examples 'create a board' do |scope|
   end
 
   context 'with invalid params' do
-    subject(:service) { described_class.new(parent, double, name: nil) }
+    subject(:service) { described_class.new(parent, user, name: nil) }
 
     it 'does not create a new parent board' do
       expect { service.execute }.not_to change(parent.send(scope), :count)
@@ -38,7 +40,7 @@ RSpec.shared_examples 'create a board' do |scope|
   end
 
   context 'without params' do
-    subject(:service) { described_class.new(parent, double) }
+    subject(:service) { described_class.new(parent, user) }
 
     it 'creates a new parent board' do
       expect { service.execute }.to change(parent.send(scope), :count).by(1)

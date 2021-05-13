@@ -384,16 +384,6 @@ RSpec.describe Gitlab::Geo, :geo, :request_store do
         expect(described_class.verification_enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
       end
     end
-
-    context 'when verification is disabled' do
-      before do
-        stub_feature_flags(geo_package_file_verification: false)
-      end
-
-      it 'does not return the replicator class' do
-        expect(described_class.verification_enabled_replicator_classes).not_to include(Geo::PackageFileReplicator)
-      end
-    end
   end
 
   describe '.verification_max_capacity_per_replicator_class' do

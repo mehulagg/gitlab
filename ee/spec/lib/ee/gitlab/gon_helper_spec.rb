@@ -25,6 +25,19 @@ RSpec.describe EE::Gitlab::GonHelper do
 
       helper.add_gon_variables
     end
+
+    context 'when GitLab.com' do
+      before do
+        allow(Gitlab).to receive(:dev_env_or_com?).and_return(true)
+      end
+
+      it 'includes CustomersDot variables' do
+        expect(gon).to receive(:subscriptions_url=).with(Gitlab::SubscriptionPortal::SUBSCRIPTIONS_URL)
+        expect(gon).to receive(:payment_form_url=).with(Gitlab::SubscriptionPortal::PAYMENT_FORM_URL)
+
+        helper.add_gon_variables
+      end
+    end
   end
 
   describe '#push_licensed_feature' do

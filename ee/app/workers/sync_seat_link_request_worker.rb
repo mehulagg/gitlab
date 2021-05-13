@@ -24,7 +24,7 @@ class SyncSeatLinkRequestWorker
     )
 
     if response.success?
-      create_license(response['license']) if response['license']
+      reset_license!(response['license']) if response['license']
     else
       raise RequestError, request_error_message(response)
     end
@@ -32,8 +32,13 @@ class SyncSeatLinkRequestWorker
 
   private
 
-  def create_license(license_data)
-    License.create!(data: license_data, cloud: true)
+  def reset_license!(license_data)
+    current_license = License.current if License.current&.cloud_license?
+
+    License.transaction do
+      current_license&.destroy!
+      License.create!(data: license_data, cloud: true)
+    end
   rescue StandardError => e
     Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
   end

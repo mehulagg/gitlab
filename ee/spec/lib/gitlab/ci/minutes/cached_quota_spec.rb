@@ -46,4 +46,22 @@ RSpec.describe Gitlab::Ci::Minutes::CachedQuota do
       end
     end
   end
+
+  describe '#expire!' do
+    subject { cached_quota.expire! }
+
+    before do
+      ::Gitlab::Redis::SharedState.with do |redis|
+        redis.set(cached_quota.cache_key, 80.0, ex: 20)
+      end
+    end
+
+    it 'expires the key' do
+      subject
+
+      ::Gitlab::Redis::SharedState.with do |redis|
+        expect(redis.exists(cached_quota.cache_key)).to be_falsey
+      end
+    end
+  end
 end

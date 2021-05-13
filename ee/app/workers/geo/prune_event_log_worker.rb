@@ -12,6 +12,7 @@ module Geo
     include ::Gitlab::Geo::LogHelpers
 
     feature_category :geo_replication
+    tags :exclude_from_gitlab_com
 
     def perform
       return if Gitlab::Database.read_only?

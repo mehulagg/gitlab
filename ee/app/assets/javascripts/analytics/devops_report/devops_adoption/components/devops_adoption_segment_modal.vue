@@ -108,6 +108,16 @@ export default {
       );
     },
   },
+  watch: {
+    enabledGroups(newValues) {
+      if (!this.loading) {
+        this.checkboxValuesFromEnabledGroups = newValues.map((group) =>
+          getIdFromGraphQLId(group.namespace.id),
+        );
+        this.checkboxValues = this.checkboxValuesFromEnabledGroups;
+      }
+    },
+  },
   methods: {
     async saveChanges() {
       await this.deleteMissingGroups();
@@ -200,6 +210,9 @@ export default {
     },
     clearErrors() {
       this.errors = [];
+    },
+    openModal() {
+      this.$refs.modal.show();
     },
     closeModal() {
       this.$refs.modal.hide();

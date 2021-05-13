@@ -183,7 +183,13 @@ export default {
               :size="$options.avatarSize"
               :label="item.user.name"
               :sub-label="item.user.username"
-            />
+            >
+              <template v-if="item.user.membership_type === 'group_invite'" #meta>
+                <gl-badge size="sm" variant="muted">
+                  {{ s__('Billing|Group invite') }}
+                </gl-badge>
+              </template>
+            </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
       </template>

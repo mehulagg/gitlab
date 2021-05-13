@@ -148,6 +148,7 @@ export default {
           skip_groups: this.skipGroupIds,
           ...(hasTerm ? { search: term } : {}),
           with_shared: true,
+          shared_visible_only: true,
           shared_min_access_level: DEVELOPER_ACCESS_LEVEL,
         });
       }

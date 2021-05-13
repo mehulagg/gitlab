@@ -15,6 +15,7 @@ const pipelineId = 1234;
 const pipelineIid = 4321;
 const projectId = 5678;
 const sourceBranch = 'feature-branch-1';
+const jobsPath = 'my-jobs-path';
 const vulnerabilitiesEndpoint = '/vulnerabilities';
 const loadingErrorIllustrations = {
   401: '/401.svg',
@@ -28,7 +29,7 @@ describe('Pipeline Security Dashboard component', () => {
   const findSecurityDashboard = () => wrapper.findComponent(SecurityDashboard);
   const findVulnerabilityReport = () => wrapper.findComponent(VulnerabilityReport);
 
-  const factory = (options) => {
+  const factory = ({ data, stubs, provide } = {}) => {
     store = new Vuex.Store({
       modules: {
         vulnerabilities: {
@@ -51,21 +52,28 @@ describe('Pipeline Security Dashboard component', () => {
     wrapper = shallowMount(PipelineSecurityDashboard, {
       localVue,
       store,
-      propsData: {
-        dashboardDocumentation,
+      provide: {
+        projectFullPath: 'my-path',
         emptyStateSvgPath,
-        pipelineId,
-        pipelineIid,
+        dashboardDocumentation,
+        pipeline: {
+          id: pipelineId,
+          iid: pipelineIid,
+          jobsPath,
+          sourceBranch,
+        },
+        ...provide,
+      },
+      propsData: {
         projectId,
-        sourceBranch,
         vulnerabilitiesEndpoint,
         loadingErrorIllustrations,
       },
-      ...options,
+      stubs,
       data() {
         return {
           securityReportSummary: {},
-          ...options?.data,
+          ...data,
         };
       },
     });
@@ -83,7 +91,7 @@ describe('Pipeline Security Dashboard component', () => {
     it('dispatches the expected actions', () => {
       expect(store.dispatch.mock.calls).toEqual([
         ['vulnerabilities/setSourceBranch', sourceBranch],
-        ['pipelineJobs/setPipelineJobsPath', ''],
+        ['pipelineJobs/setPipelineJobsPath', jobsPath],
         ['pipelineJobs/setProjectId', 5678],
       ]);
     });

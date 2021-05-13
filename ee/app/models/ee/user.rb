@@ -45,6 +45,7 @@ module EE
       has_many :vulnerability_feedback, foreign_key: :author_id, class_name: 'Vulnerabilities::Feedback'
       has_many :commented_vulnerability_feedback, foreign_key: :comment_author_id, class_name: 'Vulnerabilities::Feedback'
       has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :user
+      has_many :epic_board_recent_visits, class_name: 'Boards::EpicBoardRecentVisit', inverse_of: :user
 
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
@@ -229,12 +230,12 @@ module EE
       super || DEFAULT_GROUP_VIEW
     end
 
-    # Returns true if the user is a Reporter or higher on any namespace
+    # Returns true if the user owns a group
     # that has never had a trial (now or in the past)
-    def any_namespace_without_trial?
-      ::Namespace
-        .from("(#{namespace_union_for_reporter_developer_maintainer_owned}) #{::Namespace.table_name}")
+    def owns_group_without_trial?
+      owned_groups
         .include_gitlab_subscription
+        .where(parent_id: nil)
         .where(gitlab_subscriptions: { trial_ends_on: nil })
         .any?
     end
@@ -281,7 +282,7 @@ module EE
       namespace.present? &&
       active? &&
       !namespace.root_ancestor.free_plan? &&
-      namespace.root_ancestor.billed_user_ids.include?(self.id)
+      namespace.root_ancestor.billed_user_ids[:user_ids].include?(self.id)
     end
 
     def group_sso?(group)
@@ -396,6 +397,10 @@ module EE
       !password_automatically_set?
     end
 
+    def has_required_credit_card_to_run_pipelines?(project)
+      has_valid_credit_card? || !requires_credit_card_to_run_pipelines?(project)
+    end
+
     protected
 
     override :password_required?
@@ -406,6 +411,29 @@ module EE
     end
 
     private
+
+    def created_after_credit_card_release_day?(project)
+      created_at >= ::Users::CreditCardValidation::RELEASE_DAY ||
+        ::Feature.enabled?(:ci_require_credit_card_for_old_users, project, default_enabled: :yaml)
+    end
+
+    def has_valid_credit_card?
+      credit_card_validated_at.present?
+    end
+
+    def requires_credit_card_to_run_pipelines?(project)
+      return false unless ::Gitlab.com?
+      return false unless created_after_credit_card_release_day?(project)
+
+      root_namespace = project.root_namespace
+      if root_namespace.free_plan?
+        ::Feature.enabled?(:ci_require_credit_card_on_free_plan, project, default_enabled: :yaml)
+      elsif root_namespace.trial?
+        ::Feature.enabled?(:ci_require_credit_card_on_trial_plan, project, default_enabled: :yaml)
+      else
+        false
+      end
+    end
 
     def namespace_union_for_owned(select = :id)
       ::Gitlab::SQL::Union.new([
