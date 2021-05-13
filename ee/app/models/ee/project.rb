@@ -240,7 +240,7 @@ module EE
       alias_attribute :fallback_approvals_required, :approvals_before_merge
 
       def jira_issue_association_required_to_merge_enabled?
-        ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
+        ::Feature.enabled?(:jira_issue_association_on_merge_request, self, default_enabled: :yaml) &&
           feature_available?(:jira_issue_association_enforcement)
       end
 
