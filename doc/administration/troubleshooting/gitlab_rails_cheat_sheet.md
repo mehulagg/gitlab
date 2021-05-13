@@ -286,7 +286,6 @@ To change all Jira project to use the instance-level integration settings, do:
 ```ruby
 jira_service_instance_id = JiraService.find_by(instance: true).id
 JiraService.where(active: true, instance: false, template: false, inherit_from_id: nil).find_each do |service|
-  next unless service.project_level?
   service.update_attribute(inherit_from_id: jira_service_instance_id)
 end
 ```
