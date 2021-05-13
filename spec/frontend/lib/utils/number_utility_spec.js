@@ -9,6 +9,7 @@ import {
   median,
   changeInPercent,
   formattedChangeInPercent,
+  isInteger,
   isNumeric,
 } from '~/lib/utils/number_utils';
 
@@ -182,6 +183,31 @@ describe('Number Utils', () => {
       ${null}      | ${false}
     `('when called with $value it returns $outcome', ({ value, outcome }) => {
       expect(isNumeric(value)).toBe(outcome);
+    });
+  });
+
+  describe('isInteger', () => {
+    it.each`
+      value        | outcome
+      ${0}         | ${true}
+      ${'0'}       | ${true}
+      ${12345}     | ${true}
+      ${'12345'}   | ${true}
+      ${-1}        | ${false}
+      ${'-1'}      | ${false}
+      ${1.01}      | ${false}
+      ${'1.01'}    | ${false}
+      ${'abcd'}    | ${false}
+      ${'100abcd'} | ${false}
+      ${'abcd100'} | ${false}
+      ${''}        | ${false}
+      ${false}     | ${false}
+      ${true}      | ${false}
+      ${undefined} | ${false}
+      ${null}      | ${false}
+      ${Infinity}  | ${false}
+    `('when called with $value it returns $outcome', ({ value, outcome }) => {
+      expect(isInteger(value)).toBe(outcome);
     });
   });
 });
