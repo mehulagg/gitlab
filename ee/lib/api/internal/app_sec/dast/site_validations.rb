@@ -14,17 +14,17 @@ module API
                   detail 'Transitions a DAST site validation to a new state.'
                 end
                 params do
-                  requires :state, type: String, desc: 'The new state to transition to.'
+                  requires :event, type: String, desc: 'The transition event.'
                 end
-                put ':id' do
+                put ':id/transition' do
                   validation = DastSiteValidation.find(params[:id])
 
-                  success = case params[:state]
+                  success = case params[:event]
                             when 'start'
                               validation.start
                             when 'retry'
                               validation.retry
-                            when 'fail_op'
+                            when 'fail'
                               validation.fail_op
                             when 'pass'
                               validation.pass
