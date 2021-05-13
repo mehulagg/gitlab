@@ -19,69 +19,6 @@ RSpec.describe EE::Ci::Runner do
     end
   end
 
-  describe '#minutes_cost_factor' do
-    subject { runner.minutes_cost_factor(visibility_level) }
-
-    context 'with group type runner' do
-      let(:runner) { create(:ci_runner, :group) }
-
-      ::Gitlab::VisibilityLevel.options.each do |level_name, level_value|
-        context "with #{level_name}" do
-          let(:visibility_level) {level_value}
-
-          it { is_expected.to eq(0.0) }
-        end
-      end
-    end
-
-    context 'with project type runner' do
-      let(:runner) { create(:ci_runner, :project) }
-
-      ::Gitlab::VisibilityLevel.options.each do |level_name, level_value|
-        context "with #{level_name}" do
-          let(:visibility_level) {level_value}
-
-          it { is_expected.to eq(0.0) }
-        end
-      end
-    end
-
-    context 'with instance type runner' do
-      let(:runner) do
-        create(:ci_runner,
-               :instance,
-               private_projects_minutes_cost_factor: 1.1,
-               public_projects_minutes_cost_factor: 2.2)
-      end
-
-      context 'with private visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::PRIVATE }
-
-        it { is_expected.to eq(1.1) }
-      end
-
-      context 'with public visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::PUBLIC }
-
-        it { is_expected.to eq(2.2) }
-      end
-
-      context 'with internal visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::INTERNAL }
-
-        it { is_expected.to eq(1.1) }
-      end
-
-      context 'with invalid visibility level' do
-        let(:visibility_level) { 123 }
-
-        it 'raises an error' do
-          expect { subject }.to raise_error(ArgumentError)
-        end
-      end
-    end
-  end
-
   describe `#visibility_levels_without_minutes_quota` do
     subject { runner.visibility_levels_without_minutes_quota }
 
