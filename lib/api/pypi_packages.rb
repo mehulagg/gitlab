@@ -30,7 +30,7 @@ module API
           .packages
           .pypi
           .has_version
-          .processed
+          .installable
       end
 
       def find_package_versions

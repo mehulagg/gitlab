@@ -34,7 +34,6 @@ module Packages
       def packages
         result = base.nuget
                      .has_version
-                     .processed
                      .with_name_like(@package_name)
         result = result.with_version(@package_version) if @package_version.present?
         result
