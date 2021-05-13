@@ -4,6 +4,7 @@ describe('state', () => {
   it('returns the expected default state', () => {
     expect(initialState()).toStrictEqual({
       isLoading: false,
+      settings: {},
       statusChecks: [],
     });
   });
