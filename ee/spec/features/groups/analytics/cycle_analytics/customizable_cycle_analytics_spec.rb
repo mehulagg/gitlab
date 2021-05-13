@@ -42,7 +42,6 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
   end_field_label = 'custom-stage-end-event-label-0'
   name_field = 'custom-stage-name-0'
 
-  let(:add_stage_button) { '.js-add-stage-button' }
   let(:params) { { name: custom_stage_name, start_event_identifier: start_event_identifier, end_event_identifier: end_event_identifier } }
   let(:first_default_stage) { page.find('.stage-nav-item-cell', text: 'Issue').ancestor('.stage-nav-item') }
   let(:first_custom_stage) { page.find('.stage-nav-item-cell', text: custom_stage_name).ancestor('.stage-nav-item') }
@@ -90,85 +89,6 @@ RSpec.describe 'Customizable Group Value Stream Analytics', :js do
 
       expect(page.find('.flash-notice')).to have_text(_("Your custom stage '%{title}' was created") % { title: stage_name })
       expect(page).to have_selector('.stage-nav-item', text: stage_name)
-    end
-  end
-
-  shared_examples 'can create custom stages' do
-    context 'Custom stage form' do
-      let(:show_form_add_stage_button) { '.js-add-stage-button' }
-
-      before do
-        page.find(show_form_add_stage_button).click
-        wait_for_requests
-      end
-
-      context 'with empty fields' do
-        it 'submit button is disabled by default' do
-          expect(page).to have_button(s_('CustomCycleAnalytics|Add stage'), disabled: true)
-        end
-      end
-
-      context 'with all required fields set' do
-        before do
-          fill_in name_field, with: custom_stage_name
-          select_dropdown_option start_event_field, start_event_identifier
-          select_dropdown_option end_event_field, end_event_identifier
-        end
-
-        it 'does not have label dropdowns' do
-          expect(page).not_to have_content(s_('CustomCycleAnalytics|Start event label'))
-          expect(page).not_to have_content(s_('CustomCycleAnalytics|End event label'))
-        end
-
-        it 'submit button is disabled if a default name is used' do
-          fill_in name_field, with: 'issue'
-
-          expect(page).to have_button(s_('CustomCycleAnalytics|Add stage'), disabled: true)
-        end
-
-        it 'submit button is disabled if the start event changes' do
-          select_dropdown_option start_event_field, 'issue_created'
-
-          expect(page).to have_button(s_('CustomCycleAnalytics|Add stage'), disabled: true)
-        end
-
-        include_examples 'submits custom stage form successfully', custom_stage_name
-      end
-
-      context 'with label based stages selected' do
-        before do
-          fill_in name_field, with: custom_stage_with_labels_name
-          select_dropdown_option_by_value start_event_field, start_label_event
-          select_dropdown_option_by_value end_event_field, end_label_event
-        end
-
-        it 'submit button is disabled' do
-          expect(page).to have_button(s_('CustomCycleAnalytics|Add stage'), disabled: true)
-        end
-
-        context 'with labels available' do
-          it 'does not contain labels from outside the group' do
-            toggle_dropdown(start_field_label)
-            menu = page.find("[data-testid=#{start_field_label}] .dropdown-menu")
-
-            expect(menu).not_to have_content(other_label.name)
-            expect(menu).to have_content(first_label.name)
-            expect(menu).to have_content(second_label.name)
-          end
-
-          context 'with all required fields set' do
-            before do
-              toggle_dropdown(start_field_label)
-              select_dropdown_label start_field_label, 0
-
-              toggle_dropdown(end_field_label)
-              select_dropdown_label end_field_label, 1
-            end
-
-            include_examples 'submits custom stage form successfully', custom_stage_with_labels_name
-          end
-        end
-      end
     end
   end
 
