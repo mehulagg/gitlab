@@ -126,6 +126,7 @@ For each user, the following are listed:
 1. Username
 1. Email address
 1. Project membership count
+1. Group membership count
 1. Date of account creation
 1. Date of last activity
 
