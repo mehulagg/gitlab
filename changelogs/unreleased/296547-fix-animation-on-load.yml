@@ -1,0 +1,5 @@
+---
+title: Fix animation of pipeline drawer on load
+merge_request: 61693
+author:
+type: fixed
