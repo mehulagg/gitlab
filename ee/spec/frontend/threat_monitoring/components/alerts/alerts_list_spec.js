@@ -191,27 +191,11 @@ describe('AlertsList component', () => {
 
       it.each`
         description                                 | id   | text             | link
-        ${'when an issue is created and is open'}   | ${0} | ${'#5'}          | ${'/#/-/issues/incident/5'}
-        ${'when an issue is created and is closed'} | ${1} | ${'#6 (closed)'} | ${'/#/-/issues/incident/6'}
+        ${'when an issue is created and is open'}   | ${0} | ${'#5'}          | ${mockAlerts[0].issue.webUrl}
+        ${'when an issue is created and is closed'} | ${1} | ${'#6 (closed)'} | ${mockAlerts[1].issue.webUrl}
       `('displays the correct text $description', ({ id, text, link }) => {
         expect(findIssueColumnAt(id).text()).toBe(text);
         expect(findIssueColumnAt(id).find('a').attributes('href')).toBe(link);
-      });
-
-      describe('gon.relative_url_root', () => {
-        beforeAll(() => {
-          gon.relative_url_root = '/test';
-        });
-
-        afterEach(() => {
-          gon.relative_url_root = '';
-        });
-
-        it('creates the correct href when the gon.relative_url_root is set', () => {
-          expect(findIssueColumnAt(0).find('a').attributes('href')).toBe(
-            '/test/#/-/issues/incident/5',
-          );
-        });
       });
     });
 

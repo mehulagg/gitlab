@@ -138,17 +138,8 @@ export default {
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
-    getIssueMeta({ issue: { iid, state } }) {
-      return {
-        state: state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '',
-        link: joinPaths(
-          gon.relative_url_root || '/',
-          this.projectPath,
-          '-',
-          'issues/incident',
-          iid,
-        ),
-      };
+    getIssueState({ issue: { state } }) {
+      return state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '';
     },
     handleAlertDeselect() {
       this.isAlertDrawerOpen = false;
@@ -247,9 +238,9 @@ export default {
             v-if="item.issue"
             v-gl-tooltip
             :title="item.issue.title"
-            :href="getIssueMeta(item).link"
+            :href="item.issue.webUrl"
           >
-            #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
+            #{{ item.issue.iid }} {{ getIssueState(item) }}
           </gl-link>
           <span v-else>-</span>
         </div>
