@@ -672,7 +672,7 @@ RSpec.describe Integration do
       expect(described_class.service_name_to_model('asana')).to eq(Integrations::Asana)
       # TODO We can remove this test when all models have been namespaced:
       # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60968#note_570994955
-      expect(described_class.service_name_to_model('youtrack')).to eq(YoutrackService)
+      expect(described_class.service_name_to_model('webex_teams')).to eq(WebexTeamsService)
     end
 
     it 'raises an error if service name is invalid' do
@@ -802,7 +802,7 @@ RSpec.describe Integration do
 
   describe 'initialize service with no properties' do
     let(:service) do
-      BugzillaService.create!(
+      Integrations::Bugzilla.create!(
         project: project,
         project_url: 'http://gitlab.example.com'
       )

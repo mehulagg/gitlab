@@ -6,7 +6,7 @@ FactoryBot.define do
     type { 'Integration' }
   end
 
-  factory :custom_issue_tracker_service, class: 'CustomIssueTrackerService' do
+  factory :custom_issue_tracker_service, class: 'Integrations::CustomIssueTracker' do
     project
     active { true }
     issue_tracker
@@ -182,13 +182,13 @@ FactoryBot.define do
     create_data { false }
 
     after(:build) do
-      IssueTrackerService.skip_callback(:validation, :before, :handle_properties)
+      Integrations::IssueTracker.skip_callback(:validation, :before, :handle_properties)
     end
 
     to_create { |instance| instance.save!(validate: false) }
 
     after(:create) do
-      IssueTrackerService.set_callback(:validation, :before, :handle_properties)
+      Integrations::IssueTracker.set_callback(:validation, :before, :handle_properties)
     end
   end
 
