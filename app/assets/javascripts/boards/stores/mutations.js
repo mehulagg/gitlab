@@ -3,7 +3,6 @@ import Vue from 'vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
 import { formatIssue } from '../boards_util';
-import { issuableTypes } from '../constants';
 import * as mutationTypes from './mutation_types';
 
 const notImplemented = () => {
@@ -12,12 +11,7 @@ const notImplemented = () => {
 };
 
 const updateListItemsCount = ({ state, listId, value }) => {
-  const list = state.boardLists[listId];
-  if (state.issuableType === issuableTypes.epic) {
-    Vue.set(state.boardLists, listId, { ...list, epicsCount: list.epicsCount + value });
-  } else {
-    Vue.set(state.boardLists, listId, { ...list, issuesCount: list.issuesCount + value });
-  }
+  state.boardListsTotals[listId] += value;
 };
 
 export const removeItemFromList = ({ state, listId, itemId }) => {
@@ -136,7 +130,9 @@ export default {
 
   [mutationTypes.RECEIVE_ITEMS_FOR_LIST_SUCCESS]: (state, { listItems, listPageInfo, listId }) => {
     const { listData, boardItems } = listItems;
-    Vue.set(state.boardLists[listId], 'issuesCount', listItems.count);
+    Vue.set(state.boardListsTotals, listId, {
+      count: listItems.count,
+    });
     Vue.set(state, 'boardItems', { ...state.boardItems, ...boardItems });
     Vue.set(
       state.boardItemsByListId,
