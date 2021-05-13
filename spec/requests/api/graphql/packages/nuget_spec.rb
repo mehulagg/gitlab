@@ -52,7 +52,7 @@ RSpec.describe 'nuget package details' do
       'id' => global_id_of(nuget_package.nuget_metadatum),
       'licenseUrl' => nuget_package.nuget_metadatum.license_url,
       'projectUrl' => nuget_package.nuget_metadatum.project_url,
-      'iconUrl' => nuget_package.nuget_metadatum.icon_url,
+      'iconUrl' => nuget_package.nuget_metadatum.icon_url
     )
   end
 
