@@ -13,7 +13,7 @@ You can prevent merge requests from being merged if it does not [refer to a Jira
 
 To enforce this, navigate to your project's setting page, and select the **Require an associated issue from Jira** check box and click **Save** for the changes to take effect.
 
-![Require an associated issue from Jira](img/require_an_associated_issue_from_jia_v13_12.png)
+![Require an associated issue from Jira](img/require_an_associated_issue_from_jira_v13_12.png)
 
 Once enabled, you won't be able to merge until the merge request has an associated Jira issue.
 
