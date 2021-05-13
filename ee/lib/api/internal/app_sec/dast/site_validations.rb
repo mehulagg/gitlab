@@ -10,7 +10,7 @@ module API
           namespace :internal do
             namespace :dast do
               resource :site_validations do
-                desc 'Update a DAST site validation.' do
+                desc 'Transition a DAST site validation.' do
                   detail 'Transitions a DAST site validation to a new state.'
                 end
                 params do

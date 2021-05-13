@@ -23,7 +23,11 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
         end
 
         shared_examples 'it transitions' do |event|
-          it 'calls the modeel ', :aggregate_failures do
+          it 'calls the underlying transition method', :aggregate_failures do
+            expect_next_instance_of(DastSiteValidation) do |record|
+              expect(record).to receive(event)
+            end
+
             put api(url, developer), params: { event: event }
           end
         end
