@@ -10,6 +10,6 @@ RSpec.describe Gitlab::Usage::Metrics::Instrumentations::RedisHLLMetric, :clean_
     Gitlab::UsageDataCounters::HLLRedisCounter.track_event(:i_quickactions_approve, values: 2, time: 2.months.ago)
   end
 
-  it_behaves_like 'a correct instrumented metric value', { time_frame: '28d', extra: { events: ['i_quickactions_approve'] } }, 2
-  it_behaves_like 'a correct instrumented metric value', { time_frame: '7d', extra: { events: ['i_quickactions_approve'] } }, 1
+  it_behaves_like 'a correct instrumented metric value', { time_frame: '28d', options: { events: ['i_quickactions_approve'] } }, 2
+  it_behaves_like 'a correct instrumented metric value', { time_frame: '7d', options: { events: ['i_quickactions_approve'] } }, 1
 end

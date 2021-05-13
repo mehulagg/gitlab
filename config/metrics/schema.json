@@ -43,7 +43,7 @@
     "introduced_by_url": {
       "type": ["string", "null"]
     },
-    "extra": {
+    "options": {
       "type": "object"
     },
     "time_frame": {

@@ -61,7 +61,7 @@ Count unique values for `i_quickactions_approve` event.
 time_frame: 28d
 data_source: redis_hll
 instrumentation_class: 'Gitlab::Usage::Metrics::Instrumentations::RedisHLLMetric'
-extra:
+options:
   events:
     - i_quickactions_approve
 ```

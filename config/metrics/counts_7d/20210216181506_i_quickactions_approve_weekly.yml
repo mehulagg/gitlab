@@ -10,7 +10,7 @@ status: data_available
 time_frame: 7d
 data_source: redis_hll
 instrumentation_class: 'Gitlab::Usage::Metrics::Instrumentations::RedisHLLMetric'
-extra:
+options:
   events:
     - i_quickactions_approve
 distribution:

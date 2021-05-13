@@ -13,7 +13,7 @@ module Gitlab
           #     - g_analytics_valuestream
           # end
           def metric_events
-            extra[:events]
+            options[:events]
           end
 
           def value
