@@ -185,11 +185,11 @@ RSpec.describe Integrations::Jira do
           end
 
           before do
-            WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json )
-            WebMock.stub_request(:get, /api\/2\/project\/GL\z/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: headers)
-            WebMock.stub_request(:get, /api\/2\/issuetype\z/).to_return(body: issue_types_response.to_json, headers: headers)
-            WebMock.stub_request(:get, /api\/2\/issuetypescheme\/project\?projectId\=10000\z/).to_return(body: issue_type_scheme_response.to_json, headers: headers)
-            WebMock.stub_request(:get, /api\/2\/issuetypescheme\/mapping\?issueTypeSchemeId\=10126\z/).to_return(body: issue_type_mapping_response.to_json, headers: headers)
+            WebMock.stub_request(:get, %r{api/2/project/GL}).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json )
+            WebMock.stub_request(:get, %r{api/2/project/GL\z}).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: { 'id' => '10000' }.to_json, headers: headers)
+            WebMock.stub_request(:get, %r{api/2/issuetype\z}).to_return(body: issue_types_response.to_json, headers: headers)
+            WebMock.stub_request(:get, %r{api/2/issuetypescheme/project\?projectId\=10000\z}).to_return(body: issue_type_scheme_response.to_json, headers: headers)
+            WebMock.stub_request(:get, %r{api/2/issuetypescheme/mapping\?issueTypeSchemeId\=10126\z}).to_return(body: issue_type_mapping_response.to_json, headers: headers)
           end
 
           it { is_expected.to eq(success: true, result: { jira: true }, data: { issuetypes: [{ id: '10001', name: 'Bug', description: 'Jira Bug' }] }) }
@@ -254,8 +254,8 @@ RSpec.describe Integrations::Jira do
             allow(jira_service.data_fields).to receive(:deployment_cloud?).and_return(false)
             allow(jira_service.data_fields).to receive(:deployment_server?).and_return(true)
 
-            WebMock.stub_request(:get, /api\/2\/project\/GL/).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json, headers: headers)
-            WebMock.stub_request(:get, /api\/2\/issuetype\z/).to_return(body: issue_types_response.to_json, headers: headers)
+            WebMock.stub_request(:get, %r{api/2/project/GL}).with(basic_auth: %w(gitlab_jira_username gitlab_jira_password)).to_return(body: project_info_result.to_json, headers: headers)
+            WebMock.stub_request(:get, %r{api/2/issuetype\z}).to_return(body: issue_types_response.to_json, headers: headers)
           end
 
           it { is_expected.to eq(success: true, result: { jira: true }, data: { issuetypes: [{ description: "A task that needs to be done.", id: "10003", name: "Task" }, { description: "Created by Jira Software - do not edit or delete. Issue type for a user story.", id: "10002", name: "Story" }, { description: "A problem which impairs or prevents the functions of the product.", id: "10004", name: "Bug" }, { description: "Created by Jira Software - do not edit or delete. Issue type for a big user story that needs to be broken down.", id: "10001", name: "Epic" }] }) }

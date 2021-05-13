@@ -502,7 +502,9 @@ RSpec.describe Integrations::Jira do
         allow(closed_issue).to receive(:resolution).and_return(true)
         allow(JIRA::Resource::Issue).to receive(:find).and_return(open_issue, closed_issue)
 
-        allow_any_instance_of(JIRA::Resource::Issue).to receive(:key).and_return(issue_key)
+        allow_next_instance_of(JIRA::Resource::Issue) do |instance|
+          allow(instance).to receive(:key).and_return(issue_key)
+        end
         allow(JIRA::Resource::Remotelink).to receive(:all).and_return([])
 
         WebMock.stub_request(:get, issue_url).with(basic_auth: %w(jira-username jira-password))
@@ -595,7 +597,9 @@ RSpec.describe Integrations::Jira do
       end
 
       it 'does not send comment or remote links to issues already closed' do
-        allow_any_instance_of(JIRA::Resource::Issue).to receive(:resolution).and_return(true)
+        allow_next_instance_of(JIRA::Resource::Issue) do |instance|
+          allow(instance).to receive(:resolution).and_return(true)
+        end
 
         close_issue
 
@@ -604,7 +608,9 @@ RSpec.describe Integrations::Jira do
       end
 
       it 'does not send comment or remote links to issues with unknown resolution' do
-        allow_any_instance_of(JIRA::Resource::Issue).to receive(:respond_to?).with(:resolution).and_return(false)
+        allow_next_instance_of(JIRA::Resource::Issue) do |instance|
+          allow(instance).to receive(:respond_to?).with(:resolution).and_return(false)
+        end
 
         close_issue
 
