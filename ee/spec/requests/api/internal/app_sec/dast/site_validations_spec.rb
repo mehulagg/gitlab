@@ -22,18 +22,16 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
           end
         end
 
-        shared_examples 'it calls the correct transition method' do |event|
-          it 'calls the ', :aggregate_failures do
+        shared_examples 'it transitions' do |event|
+          it 'calls the modeel ', :aggregate_failures do
             put api(url, developer), params: { event: event }
-
-
           end
         end
 
-        it_behaves_like 'it calls the correct transition method', :start
-        it_behaves_like 'it calls the correct transition method', :retry
-        it_behaves_like 'it calls the correct transition method', :fail
-        it_behaves_like 'it calls the correct transition method', :pass
+        it_behaves_like 'it transitions', :start
+        it_behaves_like 'it transitions', :fail
+        it_behaves_like 'it transitions', :retry
+        it_behaves_like 'it transitions', :pass
       end
     end
   end
