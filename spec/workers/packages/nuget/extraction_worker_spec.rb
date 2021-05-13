@@ -103,5 +103,16 @@ RSpec.describe Packages::Nuget::ExtractionWorker, type: :worker do
         it_behaves_like 'handling the metadata error'
       end
     end
+
+    context 'with an unaccounted for error'
+      it 'updates the package status', :aggregate_failures do
+        expect(::Packages::Nuget::UpdatePackageFromMetadataService).to receive(:new)
+          .and_raise(Zip::Error)
+
+        subject
+
+        expect(package.reload).to be_error
+      end
+    end
   end
 end

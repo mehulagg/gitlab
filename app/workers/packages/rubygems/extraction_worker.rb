@@ -21,6 +21,14 @@ module Packages
 
       rescue ::Packages::Rubygems::ProcessGemService::ExtractionError => e
         Gitlab::ErrorTracking.log_exception(e, project_id: package_file.project_id)
+        set_error_status(package_file)
+      rescue StandardError
+        set_error_status(package_file)
+      end
+
+      private
+
+      def set_error_status(package_file)
         package_file.package.update_column(:status, :error)
       end
     end
