@@ -32,7 +32,7 @@ export default {
       return this.filter.options;
     },
     querystringIds() {
-      const ids = this.$route.query[this.filter.id] || [];
+      const ids = this.$route?.query[this.filter.id] || [];
       return Array.isArray(ids) ? ids : [ids];
     },
     selectedOptions: {
