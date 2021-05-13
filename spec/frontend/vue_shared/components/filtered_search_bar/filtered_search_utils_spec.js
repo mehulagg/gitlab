@@ -1,3 +1,6 @@
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+
+import AccessorUtilities from '~/lib/utils/accessor';
 import {
   stripQuotes,
   uniqueTokens,
@@ -5,6 +8,8 @@ import {
   processFilters,
   filterToQueryObject,
   urlQueryToFilter,
+  getRecentlyUsedTokenValues,
+  setTokenValueToRecentlyUsed,
 } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 
 import {
@@ -247,5 +252,75 @@ describe('urlQueryToFilter', () => {
   ])('gathers filter values %s into query object=%j', (query, result) => {
     const res = urlQueryToFilter(query);
     expect(res).toEqual(result);
+  });
+});
+
+describe('getRecentlyUsedTokenValues', () => {
+  const mockStorageKey = 'recent-tokens';
+  useLocalStorageSpy();
+
+  it('returns array containing recently used token values from provided recentTokenValuesStorageKey', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
+
+    const mockExpectedArray = [{ foo: 'bar' }];
+    localStorage.setItem(mockStorageKey, JSON.stringify(mockExpectedArray));
+
+    expect(getRecentlyUsedTokenValues(mockStorageKey)).toEqual(mockExpectedArray);
+  });
+
+  it('returns empty array when provided recentTokenValuesStorageKey does not have anything in localStorage', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
+
+    expect(getRecentlyUsedTokenValues(mockStorageKey)).toEqual([]);
+  });
+
+  it('returns empty array when when access to localStorage is not available', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(false);
+
+    expect(getRecentlyUsedTokenValues(mockStorageKey)).toEqual([]);
+  });
+});
+
+describe('setTokenValueToRecentlyUsed', () => {
+  const mockStorageKey = 'recent-tokens';
+  const mockTokenValue1 = { foo: 'bar' };
+  const mockTokenValue2 = { bar: 'baz' };
+  useLocalStorageSpy();
+
+  it('adds provided tokenValue to localStorage for recentTokenValuesStorageKey', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toEqual([mockTokenValue1]);
+  });
+
+  it('adds provided tokenValue to localStorage at the top of existing values (i.e. Stack order)', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue2);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toEqual([
+      mockTokenValue2,
+      mockTokenValue1,
+    ]);
+  });
+
+  it('ensure that provided tokenValue is not added twice', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(true);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toEqual([mockTokenValue1]);
+  });
+
+  it('does not add any value when acess to localStorage is not available', () => {
+    jest.spyOn(AccessorUtilities, 'isLocalStorageAccessSafe').mockReturnValue(false);
+
+    setTokenValueToRecentlyUsed(mockStorageKey, mockTokenValue1);
+
+    expect(JSON.parse(localStorage.getItem(mockStorageKey))).toBeNull();
   });
 });
