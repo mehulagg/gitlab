@@ -10585,6 +10585,9 @@ msgstr ""
 msgid "Delete Comment"
 msgstr ""
 
+msgid "Delete Key"
+msgstr ""
+
 msgid "Delete Value Stream"
 msgstr ""
 

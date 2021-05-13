@@ -14,8 +14,8 @@ module SshKeysHelper
             okTitle: _('Delete')
         },
         toggle: 'tooltip',
-        placement: 'bottom',
-        container: 'body',
+        placement: 'top',
+        container: 'body'
     }
   end
 end
