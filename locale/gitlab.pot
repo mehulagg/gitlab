@@ -860,9 +860,6 @@ msgstr ""
 msgid "%{strongStart}Deletes%{strongEnd} source branch"
 msgstr ""
 
-msgid "%{strongStart}Note:%{strongEnd} Once a custom stage has been added you can re-order stages by dragging them into the desired position."
-msgstr ""
-
 msgid "%{strongStart}Tip:%{strongEnd} You can also checkout merge requests locally by %{linkStart}following these guidelines%{linkEnd}"
 msgstr ""
 
@@ -9771,22 +9768,13 @@ msgstr ""
 msgid "Custom range (UTC)"
 msgstr ""
 
-msgid "CustomCycleAnalytics|Add a stage"
-msgstr ""
-
 msgid "CustomCycleAnalytics|Add stage"
 msgstr ""
 
 msgid "CustomCycleAnalytics|Editing stage"
 msgstr ""
 
-msgid "CustomCycleAnalytics|End event label"
-msgstr ""
-
 msgid "CustomCycleAnalytics|Stage name already exists"
-msgstr ""
-
-msgid "CustomCycleAnalytics|Start event label"
 msgstr ""
 
 msgid "Customer Portal"
