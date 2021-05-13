@@ -290,6 +290,7 @@ JiraService.where(active: true, instance: false, template: false, inherit_from_i
   service.update_attribute(inherit_from_id: jira_service_instance_id)
 end
 ```
+
 After running the script, modify and save again the instance-level integration from the UI to propagate the changes to all the project-level integrations.
 
 ### Bulk update to disable the Slack Notification service
