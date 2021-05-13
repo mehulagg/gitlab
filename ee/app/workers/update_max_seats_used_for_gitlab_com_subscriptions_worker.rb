@@ -18,7 +18,9 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
       tuples = []
 
       subscriptions.each do |subscription|
-        subscription.refresh_seat_attributes!
+        ::Gitlab::Database::LoadBalancing::Session.current.use_replicas_for_read_queries do
+          subscription.refresh_seat_attributes!
+        end
 
         tuples << [subscription.id, subscription.max_seats_used, subscription.seats_in_use, subscription.seats_owed]
       rescue ActiveRecord::QueryCanceled => e
