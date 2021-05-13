@@ -69,9 +69,14 @@ starting in GitLab 14.0, GitLab will not check your repository's root for config
 ### OpenAPI Specification
 
 The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an
-API description format for REST APIs. This section shows you how to configure DAST API by using
-an OpenAPI specification to provide information about the target API to test. OpenAPI specifications
-are provided as a file system resource or URL.
+API description format for REST APIs. An OpenAPI document that conforms to the OpenAPI Specification 
+is itself a JSON object, which may be represented either in JSON or YAML format.
+This section shows you how to configure DAST API by using an OpenAPI specification to provide 
+information about the target API to test. 
+OpenAPI specifications are provided as a file system resource or URL.
+
+> Support for OpenAPI Specification using YAML format was
+> [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/330583) in GitLab 14.0.
 
 DAST API uses an OpenAPI document to generate the request body. When a request body is required,
 the body generation is limited to these body types:
