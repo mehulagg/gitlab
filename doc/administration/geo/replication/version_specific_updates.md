@@ -15,8 +15,8 @@ for updating Geo nodes.
 
 We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/324160)
 that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3.
-We are working on a patch and recommend delaying any upgrade attempt until a fixed version
-is released.
+We are working on a patch, but until a fixed version is released, you can manually complete
+the zero-downtime upgrade:
 
 It is still possible to complete a zero downtime update to this version however. Before running the
 final `sudo gitlab-rake db:migrate` command on the deploy node, you can execute the following queries via
