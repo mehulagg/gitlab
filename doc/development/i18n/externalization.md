@@ -799,6 +799,9 @@ NOTE:
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
 Languages with less than 2% of translations are not available in the UI.
 
+NOTE:
+A new language should only be added as an option in User Preferences once at least 10% of the strings have been translated and approved. Note that even though a larger number of strings may have been translated, only the approved translations will display in the GitLab UI.
+
 Let's suppose you want to add translations for a new language, let's say French.
 
 1. The first step is to register the new language in `lib/gitlab/i18n.rb`:
