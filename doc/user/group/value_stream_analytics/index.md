@@ -229,7 +229,6 @@ Hovering over a stage item displays a popover with the following information:
 - Median time items took to complete the stage
 - Number of items that completed the stage
 
-
 ### Stream overview
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/321438) in GitLab 13.11.
