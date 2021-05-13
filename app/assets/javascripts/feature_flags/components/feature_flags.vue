@@ -9,7 +9,6 @@ import {
   historyPushState,
 } from '~/lib/utils/common_utils';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
-import { FEATURE_FLAG_SCOPE } from '../constants';
 import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
 import EmptyState from './empty_state.vue';
 import FeatureFlagsTable from './feature_flags_table.vue';
@@ -43,7 +42,7 @@ export default {
   },
   computed: {
     ...mapState([
-      FEATURE_FLAG_SCOPE,
+      'featureFlags',
       'alerts',
       'count',
       'pageInfo',

@@ -9,11 +9,10 @@ import ConfigureFeatureFlagsModal from '~/feature_flags/components/configure_fea
 import FeatureFlagsComponent from '~/feature_flags/components/feature_flags.vue';
 import FeatureFlagsTab from '~/feature_flags/components/feature_flags_tab.vue';
 import FeatureFlagsTable from '~/feature_flags/components/feature_flags_table.vue';
-import { FEATURE_FLAG_SCOPE } from '~/feature_flags/constants';
 import createStore from '~/feature_flags/store/index';
 import axios from '~/lib/utils/axios_utils';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
-import { getRequestData, userList } from '../mock_data';
+import { getRequestData } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -63,17 +62,6 @@ describe('Feature flags', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    jest.spyOn(Api, 'fetchFeatureFlagUserLists').mockResolvedValue({
-      data: [userList],
-      headers: {
-        'x-next-page': '2',
-        'x-page': '1',
-        'X-Per-Page': '8',
-        'X-Prev-Page': '',
-        'X-TOTAL': '40',
-        'X-Total-Pages': '5',
-      },
-    });
   });
 
   afterEach(() => {
@@ -87,7 +75,7 @@ describe('Feature flags', () => {
 
     beforeEach((done) => {
       mock
-        .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
+        .onGet(`${TEST_HOST}/endpoint.json`, { params: { page: '1' } })
         .reply(200, getRequestData, {});
       factory(provideData);
       setImmediate(done);
@@ -132,7 +120,7 @@ describe('Feature flags', () => {
 
     beforeEach((done) => {
       mock
-        .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
+        .onGet(`${TEST_HOST}/endpoint.json`, { params: { page: '1' } })
         .reply(200, getRequestData, {});
       factory(provideData);
       setImmediate(done);
@@ -154,7 +142,7 @@ describe('Feature flags', () => {
   describe('loading state', () => {
     it('renders a loading icon', () => {
       mock
-        .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
+        .onGet(`${TEST_HOST}/endpoint.json`, { params: { page: '1' } })
         .replyOnce(200, getRequestData, {});
 
       factory();
@@ -234,7 +222,7 @@ describe('Feature flags', () => {
       it('should render a table with feature flags', () => {
         const table = wrapper.findComponent(FeatureFlagsTable);
         expect(table.exists()).toBe(true);
-        expect(table.props(FEATURE_FLAG_SCOPE)).toEqual(
+        expect(table.props('featureFlags')).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               name: getRequestData.feature_flags[0].name,
@@ -247,7 +235,7 @@ describe('Feature flags', () => {
       it('should toggle a flag when receiving the toggle-flag event', () => {
         const table = wrapper.findComponent(FeatureFlagsTable);
 
-        const [flag] = table.props(FEATURE_FLAG_SCOPE);
+        const [flag] = table.props('featureFlags');
         table.vm.$emit('toggle-flag', flag);
 
         expect(store.dispatch).toHaveBeenCalledWith('toggleFeatureFlag', flag);
@@ -286,7 +274,6 @@ describe('Feature flags', () => {
   describe('unsuccessful request', () => {
     beforeEach((done) => {
       mock.onGet(mockState.endpoint, { params: { page: '1' } }).replyOnce(500, {});
-      Api.fetchFeatureFlagUserLists.mockRejectedValueOnce();
 
       factory();
       setImmediate(done);
