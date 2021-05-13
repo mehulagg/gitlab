@@ -3,8 +3,6 @@
 module QA
   RSpec.describe "Manage", :requires_admin do
     describe "Group bulk import" do
-      let(:gitlab_address) { Runtime::Scenario.gitlab_address }
-
       let!(:api_client) { Runtime::API::Client.as_admin }
       let!(:user) do
         Resource::User.fabricate_via_api! do |usr|
@@ -55,7 +53,7 @@ module QA
       end
 
       def staging?
-        gitlab_address.include?("staging.gitlab.com")
+        Runtime::Scenario.gitlab_address.include?("staging.gitlab.com")
       end
 
       before(:all) do
@@ -69,7 +67,7 @@ module QA
 
         Flow::Login.sign_in(as: user)
         Page::Main::Menu.new.go_to_import_group
-        Page::Group::New.new.connect_gitlab_instance(gitlab_address, personal_access_token)
+        Page::Group::New.new.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
       end
 
       it(
