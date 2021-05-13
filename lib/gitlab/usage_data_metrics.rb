@@ -7,9 +7,10 @@ module Gitlab
       def uncached_data
         ::Gitlab::Usage::MetricDefinition.all.map do |definition|
           instrumentation_class = definition.attributes[:instrumentation_class]
+          extra = definition.attributes[:extra]
 
           if instrumentation_class.present?
-            metric_value = instrumentation_class.constantize.new(time_frame: definition.attributes[:time_frame]).value
+            metric_value = instrumentation_class.constantize.new(time_frame: definition.attributes[:time_frame], extra: extra).value
 
             metric_payload(definition.key_path, metric_value)
           else

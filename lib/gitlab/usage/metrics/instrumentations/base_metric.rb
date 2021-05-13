@@ -8,9 +8,11 @@ module Gitlab
           include Gitlab::Utils::UsageData
 
           attr_reader :time_frame
+          attr_reader :extra
 
-          def initialize(time_frame:)
+          def initialize(time_frame:, extra: {})
             @time_frame = time_frame
+            @extra = extra
           end
         end
       end

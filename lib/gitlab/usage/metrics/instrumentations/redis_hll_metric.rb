@@ -7,20 +7,18 @@ module Gitlab
         class RedisHLLMetric < BaseMetric
           # Usage example
           #
-          # class CountUsersVisitingAnalyticsValuestreamMetric < RedisHLLMetric
-          #   event_names :g_analytics_valuestream
+          # In metric YAML defintion
+          # instrumentation_class: RedisHLLMetric
+          #   events:
+          #     - g_analytics_valuestream
           # end
-          class << self
-            def event_names(events = nil)
-              @metric_events = events
-            end
-
-            attr_reader :metric_events
+          def metric_events
+            extra[:events]
           end
 
           def value
             redis_usage_data do
-              event_params = time_constraints.merge(event_names: self.class.metric_events)
+              event_params = time_constraints.merge(event_names: metric_events)
 
               Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(**event_params)
             end
