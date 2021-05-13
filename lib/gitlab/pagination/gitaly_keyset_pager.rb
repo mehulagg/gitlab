@@ -30,7 +30,10 @@ module Gitlab
       end
 
       def paginate_first_page?
-        Feature.enabled?(:branch_list_keyset_pagination, project, default_enabled: :yaml) && (params[:page].blank? || params[:page].to_i == 1)
+        return false unless Feature.enabled?(:branch_api_first_page_performance, project, default_enabled: :yaml)
+        return false if params[:search].present? || params[:names].present?
+
+        params[:page].blank? || params[:page].to_i == 1
       end
 
       def paginate_via_gitaly(finder)
@@ -45,6 +48,8 @@ module Gitlab
         finder.execute(gitaly_pagination: true).tap do |records|
           total = project.repository.branch_count
           per_page = params[:per_page].presence || Kaminari.config.default_per_page
+
+          records = records.take(per_page) # Make sure that the number of records is correct
 
           Gitlab::Pagination::OffsetHeaderBuilder.new(
             request_context: request_context, per_page: per_page, page: 1, next_page: 2,

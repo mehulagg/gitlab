@@ -11,9 +11,12 @@ RSpec.describe Gitlab::Pagination::GitalyKeysetPager do
   let(:finder) { double("branch finder") }
   let(:custom_port) { 8080 }
   let(:incoming_api_projects_url) { "#{Gitlab.config.gitlab.url}:#{custom_port}/api/v4/projects" }
+  let(:fake_request) { double(url: "#{incoming_api_projects_url}?#{query.to_query}") }
 
   before do
     stub_config_setting(port: custom_port)
+
+    allow(request_context).to receive(:request).and_return(fake_request)
   end
 
   describe '.paginate' do
@@ -40,9 +43,10 @@ RSpec.describe Gitlab::Pagination::GitalyKeysetPager do
       end
     end
 
-    context 'with branch_list_keyset_pagination feature off' do
+    context 'with branch_list_keyset_pagination and branch_api_first_page_performance feature off' do
       before do
         stub_feature_flags(branch_list_keyset_pagination: false)
+        stub_feature_flags(branch_api_first_page_performance: false)
       end
 
       context 'without keyset pagination option' do
@@ -57,7 +61,6 @@ RSpec.describe Gitlab::Pagination::GitalyKeysetPager do
     end
 
     context 'with branch_list_keyset_pagination feature on' do
-      let(:fake_request) { double(url: "#{incoming_api_projects_url}?#{query.to_query}") }
       let(:branch1) { double 'branch', name: 'branch1' }
       let(:branch2) { double 'branch', name: 'branch2' }
       let(:branch3) { double 'branch', name: 'branch3' }
@@ -66,39 +69,10 @@ RSpec.describe Gitlab::Pagination::GitalyKeysetPager do
         stub_feature_flags(branch_list_keyset_pagination: project)
       end
 
-      context 'without keyset pagination option' do
-        context 'when first page is requested' do
-          let(:branches) { [branch1, branch2, branch3] }
-
-          it 'keyset pagination is used with offset headers' do
-            allow(request_context).to receive(:request).and_return(fake_request)
-            allow(project.repository).to receive(:branch_count).and_return(branches.size)
-
-            expect(finder).to receive(:execute).with(gitaly_pagination: true).and_return(branches)
-            expect(request_context).to receive(:header).with('X-Per-Page', '2')
-            expect(request_context).to receive(:header).with('X-Page', '1')
-            expect(request_context).to receive(:header).with('X-Next-Page', '2')
-            expect(request_context).to receive(:header).with('X-Prev-Page', '')
-            expect(request_context).to receive(:header).with('Link', kind_of(String))
-            expect(request_context).to receive(:header).with('X-Total', '3')
-            expect(request_context).to receive(:header).with('X-Total-Pages', '2')
-
-            pager.paginate(finder)
-          end
-        end
-
-        context 'when second page is requested' do
-          let(:base_query) { { per_page: 2, page: 2 } }
-
-          it_behaves_like 'offset pagination'
-        end
-      end
-
       context 'with keyset pagination option' do
         let(:query) { base_query.merge(pagination: 'keyset') }
 
         before do
-          allow(request_context).to receive(:request).and_return(fake_request)
           expect(finder).to receive(:execute).with(gitaly_pagination: true).and_return(branches)
         end
 
@@ -125,6 +99,46 @@ RSpec.describe Gitlab::Pagination::GitalyKeysetPager do
             pager.paginate(finder)
           end
         end
+      end
+    end
+
+    context 'when first page is requested' do
+      let(:branch1) { double 'branch', name: 'branch1' }
+      let(:branch2) { double 'branch', name: 'branch2' }
+      let(:branch3) { double 'branch', name: 'branch3' }
+      let(:branches) { [branch1, branch2, branch3] }
+
+      it 'keyset pagination is used with offset headers' do
+        allow(project.repository).to receive(:branch_count).and_return(branches.size)
+
+        expect(finder).to receive(:execute).with(gitaly_pagination: true).and_return(branches)
+        expect(request_context).to receive(:header).with('X-Per-Page', '2')
+        expect(request_context).to receive(:header).with('X-Page', '1')
+        expect(request_context).to receive(:header).with('X-Next-Page', '2')
+        expect(request_context).to receive(:header).with('X-Prev-Page', '')
+        expect(request_context).to receive(:header).with('Link', kind_of(String))
+        expect(request_context).to receive(:header).with('X-Total', '3')
+        expect(request_context).to receive(:header).with('X-Total-Pages', '2')
+
+        pager.paginate(finder)
+      end
+
+      context 'when search param is passed' do
+        let(:base_query) { { per_page: 2, page: 1, search: 'a' } }
+
+        it_behaves_like 'offset pagination'
+      end
+
+      context 'when names param is passed' do
+        let(:base_query) { { per_page: 2, page: 1, names: ['branch1'] } }
+
+        it_behaves_like 'offset pagination'
+      end
+
+      context 'when second page is requested' do
+        let(:base_query) { { per_page: 2, page: 2 } }
+
+        it_behaves_like 'offset pagination'
       end
     end
   end
