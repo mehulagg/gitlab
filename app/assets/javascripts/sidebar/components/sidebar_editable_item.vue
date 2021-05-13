@@ -110,7 +110,13 @@ export default {
 <template>
   <div>
     <div class="gl-display-flex gl-align-items-center" @click.self="collapse">
-      <span class="hide-collapsed" data-testid="title" @click="collapse">{{ title }}</span>
+      <span
+        class="hide-collapsed gl-line-height-20 gl-mb-2 gl-text-gray-900"
+        data-testid="title"
+        @click="collapse"
+      >
+        {{ title }}
+      </span>
       <slot name="title-extra"></slot>
       <gl-loading-icon v-if="loading || initialLoading" inline class="gl-ml-2 hide-collapsed" />
       <gl-loading-icon
