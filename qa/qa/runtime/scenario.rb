@@ -27,6 +27,8 @@ module QA
       end
 
       def from_env(var)
+        return unless var
+
         JSON.parse(Runtime::Env.runtime_scenario_attributes).each { |k, v| define(k, v) }
       end
 

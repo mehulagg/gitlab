@@ -4,7 +4,6 @@ require_relative '../qa'
 require 'rspec/retry'
 require 'rspec-parameterized'
 require 'active_support/core_ext/hash'
-require 'allure-rspec'
 
 if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
   require 'knapsack'
@@ -12,15 +11,8 @@ if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
 end
 
 QA::Runtime::Browser.configure!
-
-AllureRspec.configure do |config|
-  config.results_directory = "tmp/allure-results"
-  config.clean_results_directory = true
-end
-
-if QA::Runtime::Env.runtime_scenario_attributes
-  QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes)
-end
+QA::Runtime::AllureReport.configure!
+QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes)
 
 Dir[::File.join(__dir__, "support/helpers/*.rb")].sort.each { |f| require f }
 Dir[::File.join(__dir__, "support/matchers/*.rb")].sort.each { |f| require f }
@@ -35,7 +27,6 @@ RSpec.configure do |config|
 
   config.before do |example|
     QA::Runtime::Logger.debug("\nStarting test: #{example.full_description}\n")
-    Allure.add_link(url: ENV["CI_JOB_URL"], name: "job") if ENV["CI_JOB_URL"]
   end
 
   config.after do
