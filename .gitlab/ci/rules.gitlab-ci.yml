@@ -1071,15 +1071,15 @@
       changes: *ci-review-patterns
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *frontend-patterns
-      allow_failure: true
+      allow_failure: false
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *code-patterns
-      allow_failure: true
+      allow_failure: false
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *qa-patterns
-      allow_failure: true
+      allow_failure: false
     - <<: *if-dot-com-gitlab-org-schedule
-      allow_failure: true
+      allow_failure: false
 
 .review:rules:review-performance:
   rules:
