@@ -1,5 +1,5 @@
 ---
 title: Allow MR pipelines in latest DAST template
-merge_request:
+merge_request: 61672
 author:
 type: other
