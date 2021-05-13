@@ -108,7 +108,7 @@ RSpec.describe UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker do
         allow_next_found_instance_of(GitlabSubscription) do |subscription|
           allow(subscription).to receive(:refresh_seat_attributes!) do
             if subscription.id == gitlab_subscription.id
-              raise ActiveRecord::QueryCanceled, 'PG::QueryCanceled: ERROR:  canceling statement due to statement timeout'
+              raise ActiveRecord::QueryCanceled, 'statement timeout'
             else
               subscription.max_seats_used = subscription.seats + 3
               subscription.seats_in_use = subscription.seats + 2
