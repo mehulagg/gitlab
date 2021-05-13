@@ -31,7 +31,7 @@ describe('Board Store Mutations', () => {
     state = cloneDeep({
       ...state,
       boardItemsByListId: { 'gid://gitlab/List/1': [mockIssue.id] },
-      boardLists: { 'gid://gitlab/List/1': mockList },
+      boardLists: { 'gid://gitlab/List/1': { ...mockList, issuesCount: 1 } },
     });
   };
 
