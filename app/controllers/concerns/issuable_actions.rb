@@ -40,7 +40,7 @@ module IssuableActions
   end
 
   def realtime_changes
-    Gitlab::PollingInterval.set_header(response, interval: 3_000)
+    Gitlab::PollingInterval.set_header(response, interval: 10_000)
 
     response = {
       title: view_context.markdown_field(issuable, :title),
