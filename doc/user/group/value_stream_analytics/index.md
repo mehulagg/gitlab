@@ -258,7 +258,8 @@ The stage table shows a list of related workflow items for the selected stage. T
 - Merge requests
 - Pipelines
 
-A little badge next to the workflow items table header shows the number of workflow items that completed the selected stage.
+A little badge next to the workflow items table header shows the number of workflow items that
+completed the selected stage.
 
 The stage table also includes the **Time** column, which shows how long it takes each item to pass
 through the selected value stream stage.
