@@ -12,6 +12,8 @@ const defaultTableClasses = {
   thClass: 'gl-bg-transparent! gl-border-b-solid! gl-border-b-gray-100! gl-p-5! gl-border-b-1!',
 };
 
+const coverageTdClasses = `${defaultTableClasses.tdClass} gl-display-none! gl-lg-display-table-cell!`;
+
 export default {
   i18n: {
     emptyText: s__('Jobs|No jobs to show'),
@@ -56,7 +58,8 @@ export default {
     {
       key: 'coverage',
       label: __('Coverage'),
-      ...defaultTableClasses,
+      tdClass: coverageTdClasses,
+      thClass: defaultTableClasses.thClass,
       columnClass: 'gl-w-10p',
     },
     {
