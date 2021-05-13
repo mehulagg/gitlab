@@ -164,7 +164,7 @@ For a demo of the Okta SAML setup including SCIM, see [Demo: Okta Group SAML & S
 | Identifier | Audience URI |
 | Assertion consumer service URL | Single sign-on URL |
 | GitLab single sign-on URL | Login page URL (under **Application Login Page** settings) |
-| Identity provider single sign-on URL | Identity Provider Single Sign-On URL |
+| GitLab single sign-on URL | Identity Provider Single Sign-On URL |
 
 Under Okta's **Single sign-on URL** field, check the option **Use this for Recipient URL and Destination URL**.
 
