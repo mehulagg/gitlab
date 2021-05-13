@@ -81,7 +81,7 @@ module QA
             job.click_element(:pipeline_path)
           end
 
-          Page::Project::Menu.perform(&:go_to_operations_environments)
+          Page::Project::Menu.perform(&:go_to_deployments_environments)
           Page::Project::Operations::Environments::Index.perform do |index|
             index.click_environment_link('production')
           end

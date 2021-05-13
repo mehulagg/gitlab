@@ -332,7 +332,7 @@ module QA
           autoload :Jenkins, 'qa/page/project/settings/services/jenkins'
           autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
         end
-        autoload :Operations, 'qa/page/project/settings/operations'
+        autoload :Monitor, 'qa/page/project/settings/monitor'
         autoload :Incidents, 'qa/page/project/settings/incidents'
         autoload :Integrations, 'qa/page/project/settings/integrations'
       end
@@ -341,7 +341,9 @@ module QA
         autoload :CiCd, 'qa/page/project/sub_menus/ci_cd'
         autoload :Common, 'qa/page/project/sub_menus/common'
         autoload :Issues, 'qa/page/project/sub_menus/issues'
-        autoload :Operations, 'qa/page/project/sub_menus/operations'
+        autoload :Monitor, 'qa/page/project/sub_menus/operations'
+        autoload :Deployments, 'qa/page/project/sub_menus/deployments'
+        autoload :Infrastructure, 'qa/page/project/sub_menus/infrastructure'
         autoload :Repository, 'qa/page/project/sub_menus/repository'
         autoload :Settings, 'qa/page/project/sub_menus/settings'
         autoload :Project, 'qa/page/project/sub_menus/project'

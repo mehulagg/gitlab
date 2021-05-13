@@ -12,7 +12,7 @@ module QA
     end
 
     it 'allows configuration of alerts', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/869' do
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         verify_metrics(on_dashboard)
@@ -79,7 +79,7 @@ module QA
     end
 
     def create_incident_template
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       chart_link = Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         on_dashboard.wait_for_metrics
@@ -104,7 +104,7 @@ module QA
     end
 
     def create_incident_issue
-      Page::Project::Menu.perform(&:go_to_operations_incidents)
+      Page::Project::Menu.perform(&:go_to_monitor_incidents)
 
       Page::Project::Operations::Incidents::Index.perform do |incidents_page|
         incidents_page.create_incident

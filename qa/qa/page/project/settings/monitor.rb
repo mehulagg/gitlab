@@ -4,7 +4,7 @@ module QA
   module Page
     module Project
       module Settings
-        class Operations < Page::Base
+        class Monitor < Page::Base
           include QA::Page::Settings::Common
 
           view 'app/assets/javascripts/incidents_settings/components/incidents_settings_tabs.vue' do

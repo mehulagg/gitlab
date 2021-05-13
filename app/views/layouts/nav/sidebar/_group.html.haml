@@ -16,14 +16,14 @@
       - if group_sidebar_link?(:overview)
         - paths = group_overview_nav_link_paths
         = nav_link(path: paths, unless: -> { current_path?('groups/contribution_analytics#show') }, html_options: { class: 'home' }) do
-          = link_to group_path(@group) do
+          = link_to group_path(@group), data: { qa_selector: 'group_information' } do
             .nav-icon-container
               - sprite = Feature.enabled?(:sidebar_refactor, current_user, default_enabled: :yaml) ? 'group' : 'home'
               = sprite_icon(sprite)
             %span.nav-item-name
               = group_information_title(@group)
 
-          %ul.sidebar-sub-level-items
+          %ul.sidebar-sub-level-items{ data: { qa_selector: 'group_information_submenu'} }
             = nav_link(path: ['groups#show', 'groups#details', 'groups#activity', 'groups#subgroups'], html_options: { class: "fly-out-top-item" } ) do
               = link_to group_path(@group) do
                 %strong.fly-out-top-item-name

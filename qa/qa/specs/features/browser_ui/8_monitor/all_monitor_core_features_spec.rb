@@ -17,7 +17,7 @@ module QA
     end
 
     it 'duplicates to create dashboard to custom', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/871' do
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         on_dashboard.duplicate_dashboard
@@ -28,7 +28,7 @@ module QA
     end
 
     it 'verifies data on filtered deployed environment', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/874' do
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         on_dashboard.filter_environment
@@ -38,7 +38,7 @@ module QA
     end
 
     it 'filters using the quick range', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/873' do
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         on_dashboard.show_last('30 minutes')
@@ -53,7 +53,7 @@ module QA
     end
 
     it 'observes cluster health graph', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/920' do
-      Page::Project::Menu.perform(&:go_to_operations_kubernetes)
+      Page::Project::Menu.perform(&:go_to_infrastructure_kubernetes)
 
       Page::Project::Operations::Kubernetes::Index.perform do |cluster_list|
         cluster_list.click_on_cluster(@cluster)
@@ -78,7 +78,7 @@ module QA
         push.new_branch = false
       end
 
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |dashboard|
         dashboard.select_dashboard('templating.yml')
@@ -101,7 +101,7 @@ module QA
         metrics_panel.add_custom_metric
       end
 
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         expect(on_dashboard).to have_custom_metric('HTTP Requests Total')
@@ -116,7 +116,7 @@ module QA
         metrics_panel.edit_custom_metric
       end
 
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         expect(on_dashboard).to have_custom_metric('Throughput')
@@ -132,7 +132,7 @@ module QA
         metrics_panel.delete_custom_metric
       end
 
-      Page::Project::Menu.perform(&:go_to_operations_metrics)
+      Page::Project::Menu.perform(&:go_to_monitor_metrics)
 
       Page::Project::Operations::Metrics::Show.perform do |on_dashboard|
         expect(on_dashboard).not_to have_custom_metric('Throughput')

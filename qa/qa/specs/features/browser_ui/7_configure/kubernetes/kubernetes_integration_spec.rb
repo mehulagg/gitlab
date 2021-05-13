@@ -26,7 +26,7 @@ module QA
             k8s_cluster.cluster = cluster
           end.project.visit!
 
-          Page::Project::Menu.perform(&:go_to_operations_kubernetes)
+          Page::Project::Menu.perform(&:go_to_infrastructure_kubernetes)
 
           Page::Project::Operations::Kubernetes::Index.perform do |index|
             expect(index).to have_cluster(cluster)

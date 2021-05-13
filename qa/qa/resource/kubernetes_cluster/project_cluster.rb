@@ -19,7 +19,7 @@ module QA
           project.visit!
 
           Page::Project::Menu.perform(
-            &:go_to_operations_kubernetes)
+            &:go_to_infrastructure_kubernetes)
 
           Page::Project::Operations::Kubernetes::Index.perform(
             &:add_kubernetes_cluster)
