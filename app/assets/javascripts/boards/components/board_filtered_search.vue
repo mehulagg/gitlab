@@ -53,7 +53,7 @@ export default {
       this.filterParams = this.getFilterParams(filters);
 
       updateHistory({
-        url: setUrlParams(this.urlParams, window.location.href, true, false, true),
+        url: setUrlParams(this.urlParams, window.location.href, true, false, false),
         title: document.title,
         replace: true,
       });
