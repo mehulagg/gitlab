@@ -2,6 +2,8 @@
 
 module WikiPages
   class UpdateService < WikiPages::BaseService
+    UpdateError = Class.new(StandardError)
+
     def execute(page)
       # this class is not thread safe!
       @old_attributes = page.attributes
@@ -10,13 +12,15 @@ module WikiPages
         execute_hooks(page)
         ServiceResponse.success(payload: { page: page })
       else
-        page.update_attributes(@old_attributes) # rubocop:disable Rails/ActiveRecordAliases
-
-        ServiceResponse.error(
-          message: _('Could not update wiki page'),
-          payload: { page: page }
-        )
+        raise UpdateError, s_('Could not update wiki page')
       end
+    rescue UpdateError, WikiPage::PageChangedError, WikiPage::PageRenameError => e
+      page.update_attributes(@params) # rubocop:disable Rails/ActiveRecordAliases
+
+      ServiceResponse.error(
+        message: e.message,
+        payload: { page: page }
+      )
     end
 
     def usage_counter_action

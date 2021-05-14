@@ -115,10 +115,6 @@ module WikiActions
       @error = response.message
       render 'shared/wikis/edit'
     end
-  rescue WikiPage::PageChangedError, WikiPage::PageRenameError => e
-    @page.update_attributes(wiki_params) # rubocop:disable Rails/ActiveRecordAliases
-    @error = e.message
-    render 'shared/wikis/edit'
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
