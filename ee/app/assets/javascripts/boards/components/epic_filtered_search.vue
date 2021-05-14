@@ -22,16 +22,6 @@ export default {
       required: true,
     }
   },
-  watch: {
-    xxx: {
-      handler(x) {
-        console.log('updating')
-        this.filterParams = x;
-        this.testParams = this.getFilteredSearchValue();
-        console.log(this.testParams)
-      }
-    }
-  },
   computed: {
     tokens() {
       const { fetchLabels, fetchAuthors } = issueBoardFilter(this.$apollo, this.fullPath, this.boardType);
