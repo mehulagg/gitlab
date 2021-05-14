@@ -39,7 +39,16 @@ RSpec.describe DeleteNotesFromOriginalIndex, :elastic, :sidekiq_inline do
     end
 
     it 'removes notes from the index' do
+      # initiate the task in Elasticsearch
+      # since we only have 10 records, it will complete after the initial task is created
       expect { migration.migrate }.to change { migration.completed? }.from(false).to(true)
+        .and change { migration.migration_state }.from({}).to({ retry_attempt: 0, task_id: anything })
+
+      task_id = migration.migration_state[:task_id]
+      # migrate again to make sure we do clean up of the task from Elasticsearch
+      expect { migration.migrate }.to change { migration.migration_state }
+        .from({ retry_attempt: 0, task_id: anything }).to({ retry_attempt: 0, task_id: nil })
+      expect { helper.client.get(index: '.tasks', type: 'task', id: task_id) }.to raise_error(Elasticsearch::Transport::Transport::Errors::NotFound)
     end
   end
 
@@ -60,7 +69,7 @@ RSpec.describe DeleteNotesFromOriginalIndex, :elastic, :sidekiq_inline do
         migration.set_migration_state(retry_attempt: 1)
 
         expect { migration.migrate }.to raise_error(StandardError)
-        expect(migration.migration_state).to match(retry_attempt: 2)
+        expect(migration.migration_state).to match(retry_attempt: 2, task_id: nil)
       end
 
       it 'fails the migration after too many attempts' do
@@ -73,19 +82,37 @@ RSpec.describe DeleteNotesFromOriginalIndex, :elastic, :sidekiq_inline do
 
         migration.migrate
 
-        expect(migration.migration_state).to match(retry_attempt: 2, halted: true, halted_indexing_unpaused: false)
+        expect(migration.migration_state).to match(retry_attempt: 2, task_id: nil, halted: true, halted_indexing_unpaused: false)
         expect(client).not_to receive(:delete_by_query)
       end
     end
 
     context 'es responds with errors' do
       before do
-        allow(client).to receive(:delete_by_query).and_return('failures' => ['failed'])
+        allow(client).to receive(:delete_by_query).and_return('task' => 'task_1')
       end
 
-      it 'raises an error and increases retry attempt' do
-        expect { migration.migrate }.to raise_error(/Failed to delete notes/)
-        expect(migration.migration_state).to match(retry_attempt: 1)
+      context 'when a task throws an error' do
+        before do
+          allow(helper).to receive(:task_status).and_return('failures' => ['failed'])
+          migration.migrate
+        end
+
+        it 'raises an error and increases retry attempt' do
+          expect { migration.migrate }.to raise_error(/Failed to delete notes/)
+          expect(migration.migration_state).to match(retry_attempt: 1, task_id: nil)
+        end
+      end
+
+      context 'when delete_by_query throws an error' do
+        before do
+          allow(client).to receive(:delete_by_query).and_return('failures' => ['failed'])
+        end
+
+        it 'raises an error and increases retry attempt' do
+          expect { migration.migrate }.to raise_error(/Failed to delete notes/)
+          expect(migration.migration_state).to match(retry_attempt: 1, task_id: nil)
+        end
       end
     end
   end
