@@ -2,7 +2,7 @@
 
 require 'carrierwave/orm/activerecord'
 
-class Project < ApplicationRecord
+class Project < NamespaceShard
   include Gitlab::ConfigHelper
   include Gitlab::VisibilityLevel
   include AccessRequestable

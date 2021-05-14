@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectPagesMetadatum < ApplicationRecord
+class ProjectPagesMetadatum < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   include EachBatch

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectStatistics < ApplicationRecord
+class ProjectStatistics < NamespaceShard
   include AfterCommitQueue
   include CounterAttribute
 
