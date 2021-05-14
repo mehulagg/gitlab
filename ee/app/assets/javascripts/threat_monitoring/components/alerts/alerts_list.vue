@@ -58,6 +58,9 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  provide: {
+    statuses: STATUSES,
+  },
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
@@ -74,6 +77,11 @@ export default {
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
         this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
+        if (this.selectedAlert) {
+          this.selectedAlert = data?.project?.alertManagementAlerts?.nodes.find(
+            (alert) => alert.iid === this.selectedAlert.iid,
+          );
+        }
       },
       error() {
         this.errored = true;
@@ -143,7 +151,7 @@ export default {
     },
     handleAlertDeselect() {
       this.isAlertDrawerOpen = false;
-      this.selectedAlert = {};
+      this.selectedAlert = null;
     },
     handleAlertError(msg) {
       this.errored = true;
@@ -312,6 +320,7 @@ export default {
       v-if="selectedAlert"
       :is-alert-drawer-open="isAlertDrawerOpen"
       :selected-alert="selectedAlert"
+      @alert-update="handleStatusUpdate"
       @deselect-alert="handleAlertDeselect"
     />
   </div>
