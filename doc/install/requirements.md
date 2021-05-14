@@ -166,13 +166,14 @@ the following table) as these were used for development and testing:
 | 10.0           | 9.6                        |
 | 13.0           | 11                         |
 
-You must also ensure the following extensions are [loaded into every
-GitLab database](postgresql_extensions.html):
+You must also ensure the following extensions are loaded into every
+GitLab database. [Read more about this requirement, and troubleshooting](postgresql_extensions.html).
 
 | Extension    | Minimum GitLab version |
 | ------------ | ---------------------- |
 | `pg_trgm`    | 8.6                    |
 | `btree_gist` | 13.1                   |
+| `plpgsql`    | 11.7                   |
 
 NOTE:
 Support for [PostgreSQL 9.6 and 10 was removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
@@ -184,6 +185,12 @@ recommend running Omnibus GitLab-managed instances, as we actively develop and
 test based on those. We try to be compatible with most external (not managed by
 Omnibus GitLab) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)),
 but we can't guarantee compatibility.
+
+#### Gitaly Cluster database requirements
+
+[Read more in the Gitaly Cluster documentation](../administration/gitaly/praefect.md).
+
+#### 
 
 ## Puma settings
 
