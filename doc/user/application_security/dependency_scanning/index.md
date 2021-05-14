@@ -566,7 +566,7 @@ ERROR: Could not find dependencies: <dependency-name>. You may need to run npm i
 ```
 
 As a workaround, add the [`retire.js`](analyzers.md) analyzer to
-[DS_EXCLUDED_ANALYZERS](#configuring-dependency-scanning).
+[`DS_EXCLUDED_ANALYZERS`](#configuring-dependency-scanning).
 
 ## Troubleshooting
 
