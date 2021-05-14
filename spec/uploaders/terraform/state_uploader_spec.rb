@@ -26,6 +26,16 @@ RSpec.describe Terraform::StateUploader do
     end
   end
 
+  describe '#file_storage?' do
+    it 'returns true if storage is through a file object' do
+
+    end
+
+    it 'returns true if storage is through `fog` gem' do
+
+    end
+  end
+
   describe '#store_dir' do
     it 'hashes the project ID and UUID' do
       expect(Gitlab::HashedPath).to receive(:new)

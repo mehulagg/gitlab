@@ -43,6 +43,10 @@ module Terraform
       OpenSSL::HMAC.digest('SHA256', Gitlab::Application.secrets.db_key_base, project_id.to_s)
     end
 
+    def file_storage?
+      storage == CarrierWave::Storage::Fog || super
+    end
+
     class << self
       def direct_upload_enabled?
         false
