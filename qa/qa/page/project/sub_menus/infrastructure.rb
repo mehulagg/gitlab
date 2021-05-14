@@ -18,7 +18,7 @@ module QA
           def go_to_infrastructure_kubernetes
             hover_infrastructure do
               within_submenu do
-                click_link('Kubernetes')
+                click_link('Kubernetes clusters')
               end
             end
           end
