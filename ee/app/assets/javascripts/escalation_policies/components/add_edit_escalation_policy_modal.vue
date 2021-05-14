@@ -2,6 +2,7 @@
 import { GlModal } from '@gitlab/ui';
 import { set } from 'lodash';
 import { s__, __ } from '~/locale';
+import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
 import { isNameFieldValid } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
 
@@ -78,7 +79,47 @@ export default {
     },
   },
   methods: {
-    createEscalationPolicy() {},
+    createEscalationPolicy() {
+      this.loading = true;
+      const { projectPath } = this;
+      this.$apollo
+        .mutate({
+          mutation: createEscalationPolicyMutation,
+          variables: {
+            input: {
+              projectPath,
+              ...this.form,
+            },
+          },
+          /*    update(store, { data }) {
+            updateStoreOnScheduleCreate(store, getOncallSchedulesWithRotationsQuery, data, {
+              projectPath,
+            });
+          }, */
+        })
+        .then(
+          ({
+            data: {
+              escalationPolicyCreate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateEscalationPolicyModal.hide();
+            this.$emit('policyCreated');
+            // this.clearScheduleForm();
+          },
+        )
+        .catch((error) => {
+          this.error = error;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
     // TODO: will be implemented in scope of https://gitlab.com/gitlab-org/gitlab/-/issues/268362
     editEscalationPolicy() {},
     updateForm({ type, value }) {

@@ -9486,8 +9486,8 @@ CREATE TABLE application_settings (
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
-    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
@@ -13710,9 +13710,9 @@ CREATE TABLE incident_management_oncall_rotations (
     length_unit smallint NOT NULL,
     starts_at timestamp with time zone NOT NULL,
     name text NOT NULL,
-    ends_at timestamp with time zone,
     active_period_start time without time zone,
     active_period_end time without time zone,
+    ends_at timestamp with time zone,
     CONSTRAINT check_5209fb5d02 CHECK ((char_length(name) <= 200))
 );
 
@@ -23678,6 +23678,8 @@ CREATE INDEX index_on_oncall_schedule_escalation_rule ON incident_management_esc
 CREATE INDEX index_on_pages_metadata_not_migrated ON project_pages_metadata USING btree (project_id) WHERE ((deployed = true) AND (pages_deployment_id IS NULL));
 
 CREATE UNIQUE INDEX index_on_policy_schedule_status_elapsed_time_escalation_rules ON incident_management_escalation_rules USING btree (policy_id, oncall_schedule_id, status, elapsed_time_seconds);
+
+CREATE INDEX index_on_project_escalation_rule ON incident_management_escalation_rules USING btree (policy_id);
 
 CREATE UNIQUE INDEX index_on_project_id_escalation_policy_name_unique ON incident_management_escalation_policies USING btree (project_id, name);
 
