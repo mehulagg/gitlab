@@ -10,18 +10,13 @@ disqus_identifier: 'https://docs.gitlab.com/ee/user/project/merge_requests/merge
 
 > Redesign [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1979) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8 and [feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/10685) in 12.0.
 
-Successful projects depend on code reviews. Merge request approvals clearly communicate
-someone's ability to merge proposed changes. Approvals [are optional](#optional-approvals)
-in GitLab Free, but you can require them for your project in higher tiers.
+You can configure your merge requests so that they must be approved before
+they can be merged. You can do this by creating [rules](rules.md) or by specifying
+a list of users who act as [code owners](../../code_owners.md) for specific files.
 
-Merge request approvals are configured at the project level. Administrator users
-of self-managed GitLab installations can also configure
-[instance-level approval rules](../../../admin_area/merge_requests_approvals.md)
-that cannot be overridden on a project-level basis.
-
-Merge request approvals are created and managed as part of the source code management
-process, however, some of its outputs are consumed in the code review process
-of the software development lifecycle.
+You can configure merge request approvals for each project. In higher GitLab tiers,
+Administrators of self-managed GitLab instances can configure approvals
+[for the entire instance](../../../admin_area/merge_requests_approvals.md).
 
 ## How approvals work
 
