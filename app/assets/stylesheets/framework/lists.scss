@@ -135,7 +135,7 @@ ul.content-list {
       float: right;
 
       > .control-text {
-        margin-right: $gl-padding-top;
+        margin-right: $grid-size;
         line-height: $list-text-height;
 
         &:last-child {
@@ -146,10 +146,8 @@ ul.content-list {
       > .btn,
       > .btn-group,
       > .dropdown.inline {
-        margin-right: $gl-padding-top;
+        margin-right: $grid-size;
         display: inline-block;
-        margin-top: 3px;
-        margin-bottom: 4px;
 
         &.btn-ldap-override {
           @include media-breakpoint-up(sm) {
