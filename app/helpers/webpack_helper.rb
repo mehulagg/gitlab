@@ -8,7 +8,7 @@ module WebpackHelper
 
     early_hints_link = "<#{href}>; rel=prefetch"
 
-    request.send_early_hints("Link" => early_hints_link) if respond_to?(:request)
+    request.send_early_hints("Link" => early_hints_link)
 
     link_tag
   end
