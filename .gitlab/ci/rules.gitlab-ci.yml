@@ -315,13 +315,14 @@
 ######################
 .build-images:rules:build-qa-image:
   rules:
-    - <<: *if-not-ee
-      when: never
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      <<: *exists-ee
       changes: *ci-build-images-patterns
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      <<: *exists-ee
       changes: *code-qa-patterns
     - <<: *if-dot-com-gitlab-org-schedule
+      <<: *exists-ee
 
 .build-images:rules:build-assets-image:
   rules:
