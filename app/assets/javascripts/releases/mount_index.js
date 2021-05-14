@@ -1,21 +1,39 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import ReleaseIndexApp from './components/app_index.vue';
+import ReleaseIndexApollopClientApp from './components/app_index_apollo_client.vue';
 import createStore from './stores';
 import createIndexModule from './stores/modules/index';
-
-Vue.use(Vuex);
 
 export default () => {
   const el = document.getElementById('js-releases-page');
 
-  return new Vue({
-    el,
-    store: createStore({
-      modules: {
-        index: createIndexModule(el.dataset),
-      },
-    }),
-    render: (h) => h(ReleaseIndexApp),
-  });
+  if (window.gon?.features?.releasesIndexApolloClient) {
+    Vue.use(VueApollo);
+
+    const apolloProvider = new VueApollo({
+      defaultClient: createDefaultClient(),
+    });
+
+    return new Vue({
+      el,
+      apolloProvider,
+      provide: { ...el.dataset },
+      render: (h) => h(ReleaseIndexApollopClientApp),
+    });
+  } else {
+    Vue.use(Vuex);
+
+    return new Vue({
+      el,
+      store: createStore({
+        modules: {
+          index: createIndexModule(el.dataset),
+        },
+      }),
+      render: (h) => h(ReleaseIndexApp),
+    });
+  }
 };
