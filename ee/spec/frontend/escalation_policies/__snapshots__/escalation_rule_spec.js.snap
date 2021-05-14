@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EscalationRule renders default rule layout 1`] = `
+<gl-card-stub
+  bodyclass=""
+  class="gl-border-gray-400 gl-bg-gray-10 gl-mb-3"
+  footerclass=""
+  headerclass=""
+>
+  <div
+    class="gl-display-flex gl-align-items-center"
+  >
+    <span>
+      IF alert is not
+    </span>
+     
+    <gl-dropdown-stub
+      category="primary"
+      class="rule-control gl-mx-3"
+      headertext=""
+      hideheaderborder="true"
+      size="medium"
+      text="Acknowledged"
+      variant="default"
+    >
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischecked="true"
+        ischeckitem="true"
+        secondarytext=""
+      >
+        
+        Acknowledged
+      
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischeckitem="true"
+        secondarytext=""
+      >
+        
+        Resolved
+      
+      </gl-dropdown-item-stub>
+    </gl-dropdown-stub>
+     
+    <span>
+      in
+    </span>
+     
+    <gl-form-input-stub
+      class="gl-mx-3 rule-elapsed-minutes"
+      value="0"
+    />
+     
+    <span>
+      minutes
+    </span>
+  </div>
+   
+  <div
+    class="gl-display-flex gl-align-items-center gl-mt-3"
+  >
+    <span
+      class="gl-text-gray-700"
+    >
+      THEN
+    </span>
+     
+    <gl-dropdown-stub
+      category="primary"
+      class="rule-control gl-mx-3"
+      headertext=""
+      hideheaderborder="true"
+      size="medium"
+      text="Email on-call user in schedule"
+      variant="default"
+    >
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightarialabel=""
+        iconrightname=""
+        ischecked="true"
+        ischeckitem="true"
+        secondarytext=""
+      >
+        
+        Email on-call user in schedule
+      
+      </gl-dropdown-item-stub>
+    </gl-dropdown-stub>
+     
+    <gl-dropdown-stub
+      category="primary"
+      class="rule-control gl-mx-3"
+      headertext=""
+      hideheaderborder="true"
+      size="medium"
+      text="Select schedule"
+      variant="default"
+    />
+  </div>
+</gl-card-stub>
+`;

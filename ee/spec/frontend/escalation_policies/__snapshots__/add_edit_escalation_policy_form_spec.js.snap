@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddEscalationPolicyForm renders form layout 1`] = `
+<gl-form-stub>
+  <div
+    class="w-75 gl-xs-w-full!"
+  >
+    <gl-form-group-stub
+      data-testid="escalation-policy-name"
+      invalid-feedback="Can't be empty"
+      label="Name"
+      label-for="escalation-policy-name"
+      label-size="sm"
+      requried=""
+      state="true"
+    >
+      <gl-form-input-stub
+        id="escalation-policy-name"
+        value="Test ecsaltion policy"
+      />
+    </gl-form-group-stub>
+     
+    <gl-form-group-stub
+      label="Description (optional)"
+      label-for="escalation-policy-description"
+      label-size="sm"
+    >
+      <gl-form-input-stub
+        id="escalation-policy-description"
+        value="Description 1 lives here"
+      />
+    </gl-form-group-stub>
+  </div>
+   
+  <gl-form-group-stub
+    class="escalation-policy-rules"
+    label="Escalation rules"
+    label-size="sm"
+  >
+    <escalation-rule-stub
+      rule="[object Object]"
+      schedules=""
+    />
+  </gl-form-group-stub>
+   
+  <gl-link-stub>
+    <span>
+      + Add an additional rule
+    </span>
+  </gl-link-stub>
+</gl-form-stub>
+`;

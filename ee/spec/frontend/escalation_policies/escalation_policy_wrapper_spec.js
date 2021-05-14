@@ -1,6 +1,6 @@
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import OnCallScheduleWrapper, {
+import EscalationPoliciesWrapper, {
   i18n,
 } from 'ee/escalation_policies/components/escalation_policies_wrapper.vue';
 
@@ -9,7 +9,7 @@ describe('AlertManagementEmptyState', () => {
   const emptyEscalationPoliciesSvgPath = 'illustration/path.svg';
 
   function mountComponent() {
-    wrapper = shallowMount(OnCallScheduleWrapper, {
+    wrapper = shallowMount(EscalationPoliciesWrapper, {
       provide: {
         emptyEscalationPoliciesSvgPath,
       },

@@ -16,7 +16,6 @@ describe('AddEditScheduleForm', () => {
   const createComponent = ({ props = {} } = {}) => {
     wrapper = shallowMount(AddEditScheduleForm, {
       propsData: {
-        modalId: 'modalId',
         form: {
           name: mockSchedule.name,
           description: mockSchedule.description,
@@ -26,7 +25,6 @@ describe('AddEditScheduleForm', () => {
           name: true,
           timezone: true,
         },
-        schedule: mockSchedule,
         ...props,
       },
       provide: {
@@ -54,7 +52,7 @@ describe('AddEditScheduleForm', () => {
   const findTimezoneSearchBox = () => wrapper.find(GlSearchBoxByType);
   const findScheduleName = () => wrapper.find(GlFormGroup);
 
-  it('renders modal layout', () => {
+  it('renders form layout', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 

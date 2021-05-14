@@ -62,11 +62,6 @@ export default {
       type: Object,
       required: true,
     },
-    schedule: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
   },
   data() {
     return {

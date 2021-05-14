@@ -215,7 +215,6 @@ export default {
     <add-edit-schedule-form
       :validation-state="validationState"
       :form="form"
-      :schedule="schedule"
       @update-schedule-form="updateScheduleForm"
     />
   </gl-modal>
