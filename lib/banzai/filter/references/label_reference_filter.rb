@@ -5,8 +5,8 @@ module Banzai
     module References
       # HTML filter that replaces label references with links.
       class LabelReferenceFilter < AbstractReferenceFilter
-        self.reference_type = :label
-        self.object_class   = Label
+        self.reference_type    = :label
+        self.object_class      = Label
 
         def parent_records(parent, ids)
           return unless parent.is_a?(Project) || parent.is_a?(Group)
@@ -20,12 +20,14 @@ module Banzai
         end
 
         def find_object(parent_object, id)
-          key = if id[:label_id]
-                  reference_cache.records_per_parent[parent_object].keys.find {|i| i[:label_id] == id[:label_id].to_i }
-                elsif id[:label_name]
-                  reference_cache.records_per_parent[parent_object].keys.find {|i| i[:label_name] == id[:label_name] }
-                else
-                  nil
+          key = reference_cache.records_per_parent[parent_object].keys.find do |k|
+                  if id[:label_id]
+                    k[:label_id] == id[:label_id]
+                  elsif id[:label_name]
+                    k[:label_name] == id[:label_name]
+                  else
+                    nil
+                  end
                 end
 
           reference_cache.records_per_parent[parent_object][key] if key
@@ -37,7 +39,7 @@ module Banzai
         # This method has the contract that if a string `ref` refers to a
         # record `record`, then `parse_symbol(ref) == record_identifier(record)`.
         def parse_symbol(symbol, match_data)
-          { label_id: match_data[:label_id], label_name: match_data[:label_name] }
+          { label_id: match_data[:label_id]&.to_i, label_name: match_data[:label_name]&.tr('"', '') }
         end
 
         # We assume that most classes are identifying records by ID.
@@ -45,7 +47,6 @@ module Banzai
         # This method has the contract that if a string `ref` refers to a
         # record `record`, then `class.parse_symbol(ref) == record_identifier(record)`.
         def record_identifier(record)
-          # record.id
           { label_id: record.id, label_name: record.title }
         end
 
@@ -60,17 +61,33 @@ module Banzai
 
           labels = {}
           index = 0
-          # binding.pry
+
           unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
-            if ident = identifier($~)
+            ident = identifier($~)
+            # namespace = $~[:namespace]
+            # project = $~[:project]
+            # # binding.pry
+            # project_path = reference_cache.full_project_path(namespace, project)
+            # parent = reference_cache.parent_per_reference[project_path]
+            # label = find_object(parent, ident)
+            #
+            # if label
+            #   index +=1
+            #   labels[index] = yield match, ident, $~[:project], $~[:namespace], $~
+            #   "#{REFERENCE_PLACEHOLDER}#{index}"
+            # else
+            #   match
+            # end
+
+            label = yield match, ident, $~[:project], $~[:namespace], $~
+            if label != match
               index +=1
-              # label = find_object(parent_object, id)
-              labels[index] = yield match, ident, $~[:project], $~[:namespace], $~
-              # labels[label.id] = yield match, label.id, project, namespace, $~
+              labels[index] = label
               "#{REFERENCE_PLACEHOLDER}#{index}"
             else
               match
             end
+
             #
             # namespace = $~[:namespace]
             # project = $~[:project]
@@ -97,7 +114,7 @@ module Banzai
         end
 
         def find_label(parent_ref, label_id, label_name)
-          binding.pry
+          # binding.pry
           parent = parent_from_ref(parent_ref)
           return unless parent
 
@@ -178,6 +195,14 @@ module Banzai
         def object_link_title(object, matches)
           presenter = object.present(issuable_subject: project || group)
           LabelsHelper.label_tooltip_title(presenter)
+        end
+
+        def parent
+          project || group
+        end
+
+        def requires_unescaping?
+          true
         end
       end
     end

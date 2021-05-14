@@ -35,6 +35,15 @@ module Routable
     route.is_a?(Routable) ? route : route.source
   end
 
+  def self.where_full_path_in(paths, use_includes: true, route_scope: Route)
+    return route_scope.none if paths.empty?
+
+    route = route_scope.iwhere(Route.arel_table[:path] => paths)
+    route = route.includes(:source) if use_includes
+
+    return route
+  end
+
   included do
     # Remove `inverse_of: source` when upgraded to rails 5.2
     # See https://github.com/rails/rails/pull/28808

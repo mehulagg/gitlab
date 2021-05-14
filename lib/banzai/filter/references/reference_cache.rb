@@ -29,7 +29,7 @@ module Banzai
             refs = Hash.new { |hash, key| hash[key] = Set.new }
 
             nodes.each do |node|
-              node.to_html.scan(regex) do
+              prepare_node_text(node).scan(regex) do
                 path = if parent_type == :project
                          full_project_path($~[:namespace], $~[:project])
                        else
@@ -45,6 +45,12 @@ module Banzai
           end
         end
 
+        def prepare_node_text(node)
+          html = node.to_html
+
+          filter.requires_unescaping? ? unescape_html_entities(html) : html
+        end
+
         def references_per_parent
           @references_per_parent[parent_type]
         end
@@ -57,7 +63,8 @@ module Banzai
           @per_reference[parent_type] ||= begin
             refs = references_per_parent.keys.to_set
 
-            find_for_paths(refs.to_a).index_by(&:full_path)
+            # find_for_paths(refs.to_a).index_by(&:full_path)
+            find_parents_for_paths(refs.to_a).index_by(&:full_path)
           end
         end
 
@@ -87,12 +94,29 @@ module Banzai
           @_records_per_project[filter.object_class.to_s.underscore]
         end
 
-        def relation_for_paths(paths)
-          klass = parent_type.to_s.camelize.constantize
-          result = klass.where_full_path_in(paths)
-          return result if parent_type == :group
+        def find_parents_for_paths(paths)
+          result = Routable.where_full_path_in(paths).includes(:source)
 
-          result.includes(namespace: :route) if parent_type == :project
+          result.map(&:source)
+        end
+
+        def relation_for_paths(paths)
+          # binding.pry
+
+          # klass = parent_type.to_s.camelize.constantize
+          # result = klass.where_full_path_in(paths)
+          # return result if parent_type == :group
+          #
+          # result.includes(namespace: :route) if parent_type == :project
+
+          #------------------------------------------------------------------------------
+
+          result = Routable.where_full_path_in(paths)
+          # return result if parent.is_a?(Group)
+
+          # result.includes(namespace: :route) if parent.is_a?(Project)
+          #
+          # .includes(:route, :namespace, :group) # for design references
         end
 
         # Returns projects for the given paths.
@@ -169,6 +193,10 @@ module Banzai
 
         def refs_cache
           Gitlab::SafeRequestStore["banzai_#{parent_type}_refs".to_sym] ||= {}
+        end
+
+        def unescape_html_entities(text)
+          CGI.unescapeHTML(text.to_s)
         end
       end
     end
