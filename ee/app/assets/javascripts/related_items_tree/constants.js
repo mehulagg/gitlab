@@ -58,3 +58,5 @@ export const issueHealthStatusCSSMapping = {
   onTrack: 'status-on-track',
   needsAttention: 'status-needs-attention',
 };
+
+export const trackingNewIssue = 'g_product_planning_epic_new_issue_added_from_epic';

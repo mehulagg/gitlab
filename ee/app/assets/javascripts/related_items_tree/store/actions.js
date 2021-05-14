@@ -12,7 +12,7 @@ import {
   relatedIssuesRemoveErrorMap,
 } from '~/related_issues/constants';
 
-import { ChildType, ChildState, idProp, relativePositions } from '../constants';
+import { ChildType, ChildState, idProp, relativePositions, trackingNewIssue } from '../constants';
 
 import epicChildReorder from '../queries/epicChildReorder.mutation.graphql';
 import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
@@ -568,6 +568,7 @@ export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) =
   return axios
     .post(issuesEndpoint, { epic_id: epicId, title })
     .then(({ data }) => {
+      Api.trackRedisHllUserEvent(trackingNewIssue);
       dispatch('receiveCreateIssueSuccess', data);
       dispatch('fetchItems', {
         parentItem,
