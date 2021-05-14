@@ -894,7 +894,7 @@ module Gitlab
       end
 
       def project_imports(time_period)
-        {
+        counters = {
           gitlab_project: projects_imported_count('gitlab_project', time_period),
           gitlab: projects_imported_count('gitlab', time_period),
           github: projects_imported_count('github', time_period),
@@ -905,6 +905,10 @@ module Gitlab
           manifest: projects_imported_count('manifest', time_period),
           gitlab_migration: count(::BulkImports::Entity.where(time_period).project_entity) # rubocop: disable CodeReuse/ActiveRecord
         }
+
+        counters[:total] = add(*counters.values)
+
+        counters
       end
 
       def projects_imported_count(from, time_period)

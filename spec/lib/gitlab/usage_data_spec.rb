@@ -294,7 +294,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 2,
             gitlab_migration: 2,
             gitlab_project: 2,
-            manifest: 2
+            manifest: 2,
+            total: 18
           },
           issue_imports: {
             jira: 2,
@@ -341,7 +342,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 1,
             gitlab_migration: 1,
             gitlab_project: 1,
-            manifest: 1
+            manifest: 1,
+            total: 9
           },
           issue_imports: {
             jira: 1,
@@ -371,7 +373,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             csv: Gitlab::UsageData::DEPRECATED_VALUE
           },
           groups_imported: Gitlab::UsageData::DEPRECATED_VALUE
-
         }
       )
     end
