@@ -537,7 +537,7 @@ module TestEnv
     if component_needs_update?(install_dir, version)
       puts "\n==> Setting up #{component}..."
       # Cleanup the component entirely to ensure we start fresh
-      FileUtils.rm_rf(install_dir)
+      FileUtils.rm_rf(install_dir) unless component == "Gitaly"
 
       unless system('rake', task)
         raise ComponentFailedToInstallError
