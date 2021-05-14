@@ -53,6 +53,7 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
             'Android'              | { 'AndroidManifest.xml' => '', 'a.java' => '' } | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
             'Android'              | { 'app/src/main/AndroidManifest.xml' => '' }    | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
             'Android'              | { 'a/b/AndroidManifest.xml' => '' }             | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
+            'Android'              | { 'a/b/android.apk' => '' }                     | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(mobsf-android-sast)
             'Apex'                 | { 'app.cls' => '' }                             | {}                                         | %w(pmd-apex-sast)
             'C'                    | { 'app.c' => '' }                               | {}                                         | %w(flawfinder-sast)
             'C++'                  | { 'app.cpp' => '' }                             | {}                                         | %w(flawfinder-sast)

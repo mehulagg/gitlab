@@ -173,6 +173,7 @@ mobsf-android-sast:
           $SAST_DEFAULT_ANALYZERS =~ /mobsf/ &&
           $SAST_EXPERIMENTAL_FEATURES == 'true'
       exists:
+        - '**/*.apk'
         - '**/AndroidManifest.xml'
 
 mobsf-ios-sast:
@@ -193,6 +194,7 @@ mobsf-ios-sast:
           $SAST_DEFAULT_ANALYZERS =~ /mobsf/ &&
           $SAST_EXPERIMENTAL_FEATURES == 'true'
       exists:
+        - '**/*.ipa'
         - '**/*.xcodeproj/*'
 
 nodejs-scan-sast:
