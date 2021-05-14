@@ -54,7 +54,7 @@ module EE
           end
 
           def parse_and_find_iteration(project_ref, namespace_ref, iteration_id, iteration_name)
-            project_path = full_project_path(namespace_ref, project_ref)
+            project_path = reference_cache.full_project_path(namespace_ref, project_ref)
 
             # Returns group if project is not found by path
             parent = parent_from_ref(project_path)

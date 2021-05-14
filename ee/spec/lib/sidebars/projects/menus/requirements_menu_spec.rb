@@ -33,7 +33,7 @@ RSpec.describe Sidebars::Projects::Menus::RequirementsMenu do
         end
 
         it 'does not contain any menu item' do
-          expect(subject.items).to be_empty
+          expect(subject.renderable_items).to be_empty
         end
       end
 
@@ -47,7 +47,7 @@ RSpec.describe Sidebars::Projects::Menus::RequirementsMenu do
         end
 
         it 'contains list menu item' do
-          expect(subject.items[0].item_id).to eq :requirements_list
+          expect(subject.renderable_items[0].item_id).to eq :requirements_list
         end
       end
     end

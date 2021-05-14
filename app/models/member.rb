@@ -84,13 +84,21 @@ class Member < ApplicationRecord
     is_external_invite = arel_table[:user_id].eq(nil).and(arel_table[:invite_token].not_eq(nil))
     user_is_blocked = User.arel_table[:state].eq(:blocked)
 
-    user_ok = Arel::Nodes::Grouping.new(is_external_invite).or(user_is_blocked)
-
     left_join_users
-      .where(user_ok)
+      .where(user_is_blocked)
+      .where.not(is_external_invite)
       .non_request
       .non_minimal_access
       .reorder(nil)
+  end
+
+  # This scope is exclusively used to get the members
+  # that can possibly have project_authorization records
+  # to projects/groups.
+  scope :authorizable, -> do
+    where.not(user_id: nil)
+      .non_request
+      .non_minimal_access
   end
 
   # Like active, but without invites. For when a User is required.
@@ -561,4 +569,4 @@ class Member < ApplicationRecord
   end
 end
 
-Member.prepend_if_ee('EE::Member')
+Member.prepend_mod_with('Member')

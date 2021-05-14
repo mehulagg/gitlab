@@ -13,7 +13,7 @@ RSpec.describe 'Slack application' do
     gitlab_sign_in(user)
     project.add_maintainer(user)
 
-    create(:slack_integration, service: service)
+    create(:slack_integration, integration: service)
 
     allow(Gitlab).to receive(:com?).and_return(true)
     allow(Gitlab::CurrentSettings).to receive(:slack_app_enabled).and_return(true)

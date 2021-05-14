@@ -197,6 +197,12 @@ RSpec.describe API::Users do
               expect(json_response).to include('plan' => 'ultimate', 'trial' => true)
             end
           end
+
+          it 'contains is_auditor parameter' do
+            get api("/users/#{user.id}", admin)
+
+            expect(json_response).to have_key('is_auditor')
+          end
         end
 
         context 'and user has no plan' do
@@ -214,6 +220,12 @@ RSpec.describe API::Users do
 
           expect(json_response).not_to have_key('plan')
           expect(json_response).not_to have_key('trial')
+        end
+
+        it 'does not contain is_auditor parameter' do
+          get api("/users/#{user.id}", user)
+
+          expect(json_response).not_to have_key('is_auditor')
         end
       end
     end

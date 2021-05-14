@@ -48,7 +48,7 @@
               .form-group
                 .form-check
                 - pending_migrations = elasticsearch_available && Elastic::DataMigrationService.pending_migrations? && Gitlab::CurrentSettings.elasticsearch_pause_indexing?
-                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations
+                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations || @elasticsearch_reindexing_task&.in_progress?
                 = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: disable_checkbox
                 = f.label :elasticsearch_pause_indexing, class: 'form-check-label' do
                   = _('Pause Elasticsearch indexing')

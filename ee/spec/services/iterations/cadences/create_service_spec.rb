@@ -21,7 +21,9 @@ RSpec.describe Iterations::Cadences::CreateService do
           title: 'My iteration cadence',
           start_date: Time.current.to_s,
           duration_in_weeks: 1,
-          iterations_in_advance: 1
+          iterations_in_advance: 1,
+          roll_over: true,
+          description: 'Iteration cadence description'
         }
       end
 

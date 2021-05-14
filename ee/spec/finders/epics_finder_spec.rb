@@ -570,16 +570,6 @@ RSpec.describe EpicsFinder do
             end
 
             it_behaves_like 'avoids N+1 queries'
-
-            context 'when limit_epic_groups_query is disabled' do
-              before do
-                stub_feature_flags(limit_epic_groups_query: false)
-              end
-
-              it 'returns only public epics' do
-                expect(execute).to match_array([base_epic2, public_epic1, internal_epic])
-              end
-            end
           end
 
           context 'when skip_visibility_check is true' do

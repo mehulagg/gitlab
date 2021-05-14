@@ -23,7 +23,7 @@ RSpec.describe Admin::LicensesController do
 
     context 'when the license is for a cloud license' do
       it 'redirects back' do
-        license = build_license(type: 'cloud')
+        license = build_license(cloud_licensing_enabled: true)
 
         expect do
           post :create, params: { license: { data: license.data } }
@@ -69,14 +69,19 @@ RSpec.describe Admin::LicensesController do
       end
     end
 
-    def build_license(type: nil, restrictions: {})
+    def build_license(cloud_licensing_enabled: false, restrictions: {})
       license_restrictions = {
         trial: false,
         plan: License::PREMIUM_PLAN,
         active_user_count: 1,
         previous_user_count: 1
       }.merge(restrictions)
-      gl_license = build(:gitlab_license, type: type, restrictions: license_restrictions)
+
+      gl_license = build(
+        :gitlab_license,
+        cloud_licensing_enabled: cloud_licensing_enabled,
+        restrictions: license_restrictions
+      )
 
       build(:license, data: gl_license.export)
     end
@@ -90,6 +95,15 @@ RSpec.describe Admin::LicensesController do
         get :show
 
         expect(response).to render_template(:show)
+      end
+
+      it 'redirects to new path when a valid license is entered/uploaded' do
+        allow(License).to receive(:current).and_return(create(:license))
+        stub_application_setting(cloud_license_enabled: true)
+
+        get :show
+
+        expect(response).to redirect_to(admin_cloud_license_path)
       end
     end
 

@@ -19,6 +19,15 @@ module EE
             null: true,
             description: 'Vulnerability findings reported on the pipeline.',
             resolver: ::Resolvers::PipelineSecurityReportFindingsResolver
+
+          field :code_quality_reports,
+            ::Types::Ci::CodeQualityDegradationType.connection_type,
+            null: true,
+            description: 'Code Quality degradations reported on the pipeline.'
+
+          def code_quality_reports
+            pipeline.codequality_reports.all_degradations.presence
+          end
         end
       end
     end

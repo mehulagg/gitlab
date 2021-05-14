@@ -16,8 +16,18 @@ export const locationSearch = [
   'confidential=no',
   'iteration_title=season:+%234',
   'not[iteration_title]=season:+%2320',
+  'epic_id=12',
+  'not[epic_id]=34',
   'weight=1',
   'not[weight]=3',
+].join('&');
+
+export const locationSearchWithSpecialValues = [
+  'assignee_id=None',
+  'my_reaction_emoji=None',
+  'iteration_id=Current',
+  'epic_id=None',
+  'weight=None',
 ].join('&');
 
 export const filteredTokens = [
@@ -35,10 +45,20 @@ export const filteredTokens = [
   { type: 'confidential', value: { data: 'no', operator: OPERATOR_IS } },
   { type: 'iteration', value: { data: 'season: #4', operator: OPERATOR_IS } },
   { type: 'iteration', value: { data: 'season: #20', operator: OPERATOR_IS_NOT } },
+  { type: 'epic_id', value: { data: '12', operator: OPERATOR_IS } },
+  { type: 'epic_id', value: { data: '34', operator: OPERATOR_IS_NOT } },
   { type: 'weight', value: { data: '1', operator: OPERATOR_IS } },
   { type: 'weight', value: { data: '3', operator: OPERATOR_IS_NOT } },
   { type: 'filtered-search-term', value: { data: 'find' } },
   { type: 'filtered-search-term', value: { data: 'issues' } },
+];
+
+export const filteredTokensWithSpecialValues = [
+  { type: 'assignee_username', value: { data: 'None', operator: OPERATOR_IS } },
+  { type: 'my_reaction_emoji', value: { data: 'None', operator: OPERATOR_IS } },
+  { type: 'iteration', value: { data: 'Current', operator: OPERATOR_IS } },
+  { type: 'epic_id', value: { data: 'None', operator: OPERATOR_IS } },
+  { type: 'weight', value: { data: 'None', operator: OPERATOR_IS } },
 ];
 
 export const apiParams = {
@@ -54,8 +74,18 @@ export const apiParams = {
   confidential: 'no',
   iteration_title: 'season: #4',
   'not[iteration_title]': 'season: #20',
+  epic_id: '12',
+  'not[epic_id]': '34',
   weight: '1',
   'not[weight]': '3',
+};
+
+export const apiParamsWithSpecialValues = {
+  assignee_id: 'None',
+  my_reaction_emoji: 'None',
+  iteration_id: 'Current',
+  epic_id: 'None',
+  weight: 'None',
 };
 
 export const urlParams = {
@@ -71,6 +101,16 @@ export const urlParams = {
   confidential: ['no'],
   iteration_title: ['season: #4'],
   'not[iteration_title]': ['season: #20'],
+  epic_id: ['12'],
+  'not[epic_id]': ['34'],
   weight: ['1'],
   'not[weight]': ['3'],
+};
+
+export const urlParamsWithSpecialValues = {
+  assignee_id: ['None'],
+  my_reaction_emoji: ['None'],
+  iteration_id: ['Current'],
+  epic_id: ['None'],
+  weight: ['None'],
 };

@@ -14,8 +14,9 @@ import {
 import * as Sentry from '@sentry/browser';
 import { isEqual } from 'lodash';
 import { initFormField } from 'ee/security_configuration/utils';
-import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
+import { serializeFormObject } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
+import validation from '~/vue_shared/directives/validation';
 import { SCAN_TYPE, SCAN_TYPE_OPTIONS } from '../constants';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
@@ -40,6 +41,9 @@ export default {
     GlFormCheckbox,
     GlFormRadioGroup,
     tooltipIcon,
+  },
+  directives: {
+    validation: validation(),
   },
   props: {
     projectFullPath: {
@@ -68,17 +72,29 @@ export default {
     } = this.profile;
 
     const form = {
-      profileName: initFormField({ value: profileName }),
-      spiderTimeout: initFormField({ value: spiderTimeout }),
-      targetTimeout: initFormField({ value: targetTimeout }),
-      scanType: initFormField({ value: scanType }),
-      useAjaxSpider: initFormField({ value: useAjaxSpider }),
-      showDebugMessages: initFormField({ value: showDebugMessages }),
+      state: false,
+      showValidation: false,
+      fields: {
+        profileName: initFormField({ value: profileName }),
+        spiderTimeout: initFormField({ value: spiderTimeout }),
+        targetTimeout: initFormField({ value: targetTimeout }),
+        scanType: initFormField({ value: scanType, required: false, skipValidation: true }),
+        useAjaxSpider: initFormField({
+          value: useAjaxSpider,
+          required: false,
+          skipValidation: true,
+        }),
+        showDebugMessages: initFormField({
+          value: showDebugMessages,
+          required: false,
+          skipValidation: true,
+        }),
+      },
     };
 
     return {
       form,
-      initialFormValues: serializeFormObject(form),
+      initialFormValues: serializeFormObject(form.fields),
       loading: false,
       showAlert: false,
     };
@@ -130,18 +146,10 @@ export default {
       };
     },
     formTouched() {
-      return !isEqual(serializeFormObject(this.form), this.initialFormValues);
-    },
-    formHasErrors() {
-      return Object.values(this.form).some(({ state }) => state === false);
-    },
-    requiredFieldEmpty() {
-      return Object.values(this.form).some(
-        ({ required, value }) => required && isEmptyValue(value),
-      );
+      return !isEqual(serializeFormObject(this.form.fields), this.initialFormValues);
     },
     isSubmitDisabled() {
-      return this.formHasErrors || this.requiredFieldEmpty || this.isPolicyProfile;
+      return this.isPolicyProfile;
     },
     isPolicyProfile() {
       return Boolean(this.profile?.referencedInSecurityPolicies?.length);
@@ -149,27 +157,13 @@ export default {
   },
 
   methods: {
-    validateTimeout(timeoutObject, range) {
-      const timeout = timeoutObject;
+    onSubmit() {
+      this.form.showValidation = true;
 
-      const hasValue = timeout.value !== '';
-      const isOutOfRange = timeout.value < range.min || timeout.value > range.max;
-
-      if (hasValue && isOutOfRange) {
-        timeout.state = false;
-        timeout.feedback = s__('DastProfiles|Please enter a valid timeout value');
+      if (!this.form.state) {
         return;
       }
-      timeout.state = true;
-      timeout.feedback = null;
-    },
-    validateSpiderTimeout() {
-      this.validateTimeout(this.form.spiderTimeout, this.$options.spiderTimeoutRange);
-    },
-    validateTargetTimeout() {
-      this.validateTimeout(this.form.targetTimeout, this.$options.targetTimeoutRange);
-    },
-    onSubmit() {
+
       this.loading = true;
       this.hideErrors();
 
@@ -177,7 +171,7 @@ export default {
         input: {
           fullPath: this.projectFullPath,
           ...(this.isEdit ? { id: this.profile.id } : {}),
-          ...serializeFormObject(this.form),
+          ...serializeFormObject(this.form.fields),
         },
       };
 
@@ -237,7 +231,7 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="onSubmit">
+  <gl-form novalidate @submit.prevent="onSubmit">
     <h2 v-if="showHeader" class="gl-mb-6">{{ i18n.title }}</h2>
 
     <gl-alert
@@ -268,13 +262,19 @@ export default {
     </gl-alert>
 
     <gl-form-group data-testid="dast-scanner-parent-group" :disabled="isPolicyProfile">
-      <gl-form-group :label="s__('DastProfiles|Profile name')">
+      <gl-form-group
+        :label="s__('DastProfiles|Profile name')"
+        :invalid-feedback="form.fields.profileName.feedback"
+      >
         <gl-form-input
-          v-model="form.profileName.value"
-          name="profile_name"
+          v-model="form.fields.profileName.value"
+          v-validation:[form.showValidation]
+          name="profileName"
           class="mw-460"
           data-testid="profile-name-input"
           type="text"
+          required
+          :state="form.fields.profileName.state"
         />
       </gl-form-group>
 
@@ -287,7 +287,7 @@ export default {
         </template>
 
         <gl-form-radio-group
-          v-model="form.scanType.value"
+          v-model="form.fields.scanType.value"
           :options="$options.SCAN_TYPE_OPTIONS"
           data-testid="scan-type-option"
         />
@@ -296,22 +296,24 @@ export default {
       <div class="row">
         <gl-form-group
           class="col-md-6 mb-0"
-          :state="form.spiderTimeout.state"
-          :invalid-feedback="form.spiderTimeout.feedback"
+          :invalid-feedback="form.fields.spiderTimeout.feedback"
+          :state="form.fields.spiderTimeout.state"
         >
           <template #label>
             {{ s__('DastProfiles|Spider timeout') }}
             <tooltip-icon :title="i18n.tooltips.spiderTimeout" />
           </template>
           <gl-form-input-group
-            v-model.number="form.spiderTimeout.value"
-            name="spider_timeout"
+            v-model.number="form.fields.spiderTimeout.value"
+            v-validation:[form.showValidation]
+            name="spiderTimeout"
             class="mw-460"
             data-testid="spider-timeout-input"
             type="number"
             :min="$options.spiderTimeoutRange.min"
             :max="$options.spiderTimeoutRange.max"
-            @input="validateSpiderTimeout"
+            :state="form.fields.spiderTimeout.state"
+            required
           >
             <template #append>
               <gl-input-group-text>{{ __('Minutes') }}</gl-input-group-text>
@@ -324,22 +326,24 @@ export default {
 
         <gl-form-group
           class="col-md-6 mb-0"
-          :state="form.targetTimeout.state"
-          :invalid-feedback="form.targetTimeout.feedback"
+          :invalid-feedback="form.fields.targetTimeout.feedback"
+          :state="form.fields.targetTimeout.state"
         >
           <template #label>
             {{ s__('DastProfiles|Target timeout') }}
             <tooltip-icon :title="i18n.tooltips.targetTimeout" />
           </template>
           <gl-form-input-group
-            v-model.number="form.targetTimeout.value"
-            name="target_timeout"
+            v-model.number="form.fields.targetTimeout.value"
+            v-validation:[form.showValidation]
+            name="targetTimeout"
             class="mw-460"
             data-testid="target-timeout-input"
             type="number"
             :min="$options.targetTimeoutRange.min"
             :max="$options.targetTimeoutRange.max"
-            @input="validateTargetTimeout"
+            :state="form.fields.targetTimeout.state"
+            required
           >
             <template #append>
               <gl-input-group-text>{{ __('Seconds') }}</gl-input-group-text>
@@ -359,7 +363,7 @@ export default {
             {{ s__('DastProfiles|AJAX spider') }}
             <tooltip-icon :title="i18n.tooltips.ajaxSpider" />
           </template>
-          <gl-form-checkbox v-model="form.useAjaxSpider.value">{{
+          <gl-form-checkbox v-model="form.fields.useAjaxSpider.value">{{
             s__('DastProfiles|Turn on AJAX spider')
           }}</gl-form-checkbox>
         </gl-form-group>
@@ -369,7 +373,7 @@ export default {
             {{ s__('DastProfiles|Debug messages') }}
             <tooltip-icon :title="i18n.tooltips.debugMessage" />
           </template>
-          <gl-form-checkbox v-model="form.showDebugMessages.value">{{
+          <gl-form-checkbox v-model="form.fields.showDebugMessages.value">{{
             s__('DastProfiles|Show debug messages')
           }}</gl-form-checkbox>
         </gl-form-group>

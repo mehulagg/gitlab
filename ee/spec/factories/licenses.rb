@@ -16,7 +16,7 @@ FactoryBot.define do
     end
 
     trait :cloud do
-      type { 'cloud' }
+      cloud_licensing_enabled { true }
     end
 
     transient do
@@ -50,10 +50,6 @@ FactoryBot.define do
       plan { nil }
       expired { false }
       trial { false }
-    end
-
-    trait :cloud do
-      cloud { true }
     end
 
     data do

@@ -30,6 +30,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:repository_storage_moves) }
     it { is_expected.to have_many(:iterations) }
     it { is_expected.to have_many(:iterations_cadences) }
+    it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:group) }
 
     it_behaves_like 'model with wiki' do
       let(:container) { create(:group, :nested, :wiki_repo) }
@@ -827,7 +828,7 @@ RSpec.describe Group do
         expect { group.saml_discovery_token }.to change { group.reload.read_attribute(:saml_discovery_token) }
       end
 
-      context 'in read only mode' do
+      context 'in read-only mode' do
         before do
           allow(Gitlab::Database).to receive(:read_only?).and_return(true)
           allow(group).to receive(:create_or_update).and_raise(ActiveRecord::ReadOnlyRecord)
@@ -982,6 +983,19 @@ RSpec.describe Group do
                                         .with(group_hook, data, 'member_hooks').and_call_original
             expect(WebHookService).to receive(:new)
                                         .with(parent_group_hook, data, 'member_hooks').and_call_original
+
+            group.execute_hooks(data, :member_hooks)
+          end
+        end
+
+        context 'when a hook is not executable' do
+          before do
+            group_hook.update!(recent_failures: 4)
+          end
+
+          it 'does not execute the disabled hook' do
+            expect(WebHookService).to receive(:new).with(parent_group_hook, anything, anything).and_call_original
+            expect(WebHookService).not_to receive(:new).with(group_hook, anything, anything)
 
             group.execute_hooks(data, :member_hooks)
           end

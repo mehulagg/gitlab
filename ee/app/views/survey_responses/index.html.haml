@@ -3,9 +3,12 @@
 !!! 5
 %html{ lang: I18n.locale }
   = render 'layouts/head'
-  %body.ui-indigo.d-flex.vh-100
+  %body.ui-indigo.gl-display-flex
     = render 'layouts/header/logo_with_title'
-    .container.pt-6.mw-100.text-center
-      .mt-9.mb-4= image_tag 'illustrations/subscription-success.svg'
-      %h2.font-weight-bold= _('Thank you for your feedback!')
-      %p.pt-1= _('Your response has been recorded.')
+    .container.gl-pt-8.gl-max-w-full.gl-text-center
+      .gl-mt-11.gl-mb-6= image_tag 'illustrations/subscription-success.svg'
+      %h2.gl-font-weight-bold= _('Thank you for your feedback!')
+      %p.gl-pt-2.gl-mb-0= _('Your response has been recorded.')
+      - if @invite_link
+        %p= _('We love speaking to our users. Got more to say about your GitLab experiences?')
+        %p.gl-pt-3= link_to _("Let's talk!"), @invite_link, target: '_blank', rel: 'noopener noreferrer', class: 'gl-button btn btn-confirm'

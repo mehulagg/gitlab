@@ -9,3 +9,15 @@ RSpec.shared_examples 'it delegates scan creation to another service' do
     subject
   end
 end
+
+RSpec.shared_examples 'it checks branch permissions before creating a DAST on-demand scan pipeline' do
+  context 'when the user does not have access to the branch' do
+    before do
+      create(:protected_branch, project: project, name: branch_name)
+    end
+
+    it 'communicates failure' do
+      expect(subject[:errors]).to include(a_string_including("You do not have sufficient permission to run a pipeline on '#{branch_name}'"))
+    end
+  end
+end

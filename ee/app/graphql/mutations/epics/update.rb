@@ -21,7 +21,7 @@ module Mutations
         validate_arguments!(args)
 
         epic = authorized_find!(group_path: group_path, iid: epic_iid)
-        epic = ::Epics::UpdateService.new(epic.group, current_user, args).execute(epic)
+        epic = ::Epics::UpdateService.new(group: epic.group, current_user: current_user, params: args).execute(epic)
 
         {
           epic: epic.reset,

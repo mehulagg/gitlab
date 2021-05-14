@@ -2,6 +2,7 @@
 // relies on app/views/shared/boards/_show.html.haml for its
 // template.
 /* eslint-disable @gitlab/no-runtime-template-compiler */
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapActions, mapState } from 'vuex';
@@ -21,11 +22,24 @@ import createDefaultClient from '~/lib/graphql';
 import '~/boards/filters/due_date_filters';
 import { NavigationType, parseBoolean } from '~/lib/utils/common_utils';
 import { updateHistory } from '~/lib/utils/url_utility';
+import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 
 Vue.use(VueApollo);
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData,
+});
+
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: createDefaultClient(
+    {},
+    {
+      cacheConfig: {
+        fragmentMatcher,
+      },
+      assumeImmutableResults: true,
+    },
+  ),
 });
 
 export default () => {

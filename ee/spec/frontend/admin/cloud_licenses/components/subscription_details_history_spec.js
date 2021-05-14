@@ -7,6 +7,7 @@ import { license, subscriptionHistory } from '../mock_data';
 describe('Subscription Details History', () => {
   let wrapper;
 
+  const findCurrentRow = () => wrapper.findByTestId('subscription-current');
   const findTableRows = () => wrapper.findAllByTestId('subscription-history-row');
   const cellFinder = (row) => (testId) => extendedWrapper(row).findByTestId(testId);
   const containsABadge = (row) => row.findComponent(GlBadge).exists();
@@ -32,13 +33,17 @@ describe('Subscription Details History', () => {
       createComponent();
     });
 
-    it('has the correct number of rows', () => {
-      expect(findTableRows()).toHaveLength(2);
+    it('has a current subscription row', () => {
+      expect(findCurrentRow().exists()).toBe(true);
+    });
+
+    it('has the correct number of subscription rows', () => {
+      expect(findTableRows()).toHaveLength(1);
     });
 
     it('has the correct license type', () => {
-      expect(findTableRows().at(0).text()).toContain('Cloud License');
-      expect(findTableRows().at(1).text()).toContain('Legacy License');
+      expect(findCurrentRow().text()).toContain('Cloud License');
+      expect(findTableRows().at(0).text()).toContain('Legacy License');
     });
 
     it('has a badge for the license type', () => {
@@ -46,11 +51,11 @@ describe('Subscription Details History', () => {
     });
 
     it('highlights the current subscription row', () => {
-      expect(findTableRows().at(0).classes('gl-text-blue-500')).toBe(true);
+      expect(findCurrentRow().classes('gl-text-blue-500')).toBe(true);
     });
 
-    it('does not highlight the current subscription row', () => {
-      expect(findTableRows().at(1).classes('gl-text-blue-500')).toBe(false);
+    it('does not highlight the other subscription row', () => {
+      expect(findTableRows().at(0).classes('gl-text-blue-500')).toBe(false);
     });
 
     describe('cell data', () => {
@@ -58,7 +63,7 @@ describe('Subscription Details History', () => {
 
       beforeEach(() => {
         createComponent();
-        findCellByTestid = cellFinder(findTableRows().at(0));
+        findCellByTestid = cellFinder(findCurrentRow());
       });
 
       it.each`

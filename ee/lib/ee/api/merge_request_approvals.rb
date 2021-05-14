@@ -70,7 +70,7 @@ module EE
 
               error!('Overriding approvals is disabled', 422) if merge_request.project.disable_overriding_approvers_per_merge_request
 
-              merge_request = ::MergeRequests::UpdateService.new(user_project, current_user, approvals_before_merge: params[:approvals_required]).execute(merge_request)
+              merge_request = ::MergeRequests::UpdateService.new(project: user_project, current_user: current_user, params: { approvals_before_merge: params[:approvals_required] }).execute(merge_request)
 
               # Merge request shouldn't be in an invalid state after the changes, but handling errors to be safe
               handle_merge_request_errors!(merge_request)

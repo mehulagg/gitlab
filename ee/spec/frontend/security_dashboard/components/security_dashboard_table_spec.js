@@ -4,7 +4,6 @@ import Vuex from 'vuex';
 
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
-import SelectionSummary from 'ee/security_dashboard/components/selection_summary.vue';
 import createStore from 'ee/security_dashboard/store';
 
 import {
@@ -12,6 +11,7 @@ import {
   RECEIVE_VULNERABILITIES_SUCCESS,
   REQUEST_VULNERABILITIES,
 } from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
@@ -25,7 +25,7 @@ describe('Security Dashboard Table', () => {
 
   beforeEach(() => {
     store = createStore();
-    wrapper = shallowMount(SecurityDashboardTable, {
+    wrapper = shallowMountExtended(SecurityDashboardTable, {
       localVue,
       store,
     });
@@ -37,6 +37,7 @@ describe('Security Dashboard Table', () => {
   });
 
   const findCheckbox = () => wrapper.find(GlFormCheckbox);
+  const findSelectionSummaryCollapse = () => wrapper.findByTestId('selection-summary-collapse');
 
   describe('while loading', () => {
     beforeEach(() => {
@@ -63,7 +64,7 @@ describe('Security Dashboard Table', () => {
     });
 
     it('should not show the multi select box', () => {
-      expect(wrapper.find(SelectionSummary).exists()).toBe(false);
+      expect(findSelectionSummaryCollapse().attributes('visible')).toBeFalsy();
     });
 
     it('should show the select all as unchecked', () => {
@@ -76,7 +77,7 @@ describe('Security Dashboard Table', () => {
       });
 
       it('should show the multi select box', () => {
-        expect(wrapper.find(SelectionSummary).exists()).toBe(true);
+        expect(findSelectionSummaryCollapse().attributes('visible')).toBe('true');
       });
 
       it('should show the select all as checked', () => {

@@ -315,6 +315,22 @@ RSpec.describe 'Billing plan pages', :feature, :js do
       it_behaves_like 'plan with subscription table'
       it_behaves_like 'does not display EoA banner'
     end
+
+    context 'when CustomersDot is unavailable' do
+      let(:plan) { ultimate_plan }
+      let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: plan) }
+
+      before do
+        stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
+          .to_raise("Connection refused")
+      end
+
+      it 'renders an error page' do
+        visit page_path
+
+        expect(page).to have_content("Subscription service outage")
+      end
+    end
   end
 
   context 'users profile billing page with a trial' do

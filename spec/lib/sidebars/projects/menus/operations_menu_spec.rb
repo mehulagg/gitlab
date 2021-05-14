@@ -21,9 +21,9 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
     end
 
     context 'when operation feature is enabled' do
-      context 'when menu does not have any menu items' do
+      context 'when menu does not have any renderable menu items' do
         it 'returns false' do
-          allow(subject).to receive(:has_items?).and_return(false)
+          allow(subject).to receive(:has_renderable_items?).and_return(false)
 
           expect(subject.render?).to be false
         end
@@ -54,7 +54,7 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
   end
 
   context 'Menu items' do
-    subject { described_class.new(context).items.index { |e| e.item_id == item_id } }
+    subject { described_class.new(context).renderable_items.index { |e| e.item_id == item_id } }
 
     describe 'Metrics Dashboard' do
       let(:item_id) { :metrics }
@@ -131,36 +131,66 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
     describe 'Serverless' do
       let(:item_id) { :serverless }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
+      context 'when feature flag :sidebar_refactor is enabled' do
         specify { is_expected.to be_nil }
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
+
+        specify { is_expected.not_to be_nil }
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          specify { is_expected.to be_nil }
+        end
       end
     end
 
     describe 'Terraform' do
       let(:item_id) { :terraform }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
+      context 'when feature flag :sidebar_refactor is enabled' do
         specify { is_expected.to be_nil }
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
+
+        specify { is_expected.not_to be_nil }
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          specify { is_expected.to be_nil }
+        end
       end
     end
 
     describe 'Kubernetes' do
       let(:item_id) { :kubernetes }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
+      context 'when feature flag :sidebar_refactor is enabled' do
         specify { is_expected.to be_nil }
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
+
+        specify { is_expected.not_to be_nil }
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          specify { is_expected.to be_nil }
+        end
       end
     end
 

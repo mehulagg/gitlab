@@ -49,7 +49,9 @@ module API
               project: user_project,
               environment: environment_name,
               finished_after: start_date,
-              finished_before: end_date
+              finished_before: end_date,
+              status: :success,
+              order_by: :finished_at
             ).execute
           end
         end

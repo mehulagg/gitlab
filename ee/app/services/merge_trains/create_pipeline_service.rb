@@ -26,10 +26,10 @@ module MergeTrains
 
       commit_message = commit_message(merge_request, previous_ref)
 
-      ::MergeRequests::MergeToRefService.new(merge_request.target_project, merge_request.merge_user,
-                                             target_ref: merge_request.train_ref_path,
-                                             first_parent_ref: previous_ref,
-                                             commit_message: commit_message)
+      ::MergeRequests::MergeToRefService.new(project: merge_request.target_project, current_user: merge_request.merge_user,
+                                             params: { target_ref: merge_request.train_ref_path,
+                                                       first_parent_ref: previous_ref,
+                                                       commit_message: commit_message })
                                         .execute(merge_request)
     end
 
@@ -40,11 +40,11 @@ module MergeTrains
 
     def create_pipeline(merge_request, merge_status)
       pipeline = ::Ci::CreatePipelineService.new(merge_request.target_project, merge_request.merge_user,
-        ref: merge_request.train_ref_path,
-        checkout_sha: merge_status[:commit_id],
-        target_sha: merge_status[:target_id],
-        source_sha: merge_status[:source_id])
-        .execute(:merge_request_event, merge_request: merge_request)
+                                                 ref: merge_request.train_ref_path,
+                                                 checkout_sha: merge_status[:commit_id],
+                                                 target_sha: merge_status[:target_id],
+                                                 source_sha: merge_status[:source_id])
+                                            .execute(:merge_request_event, merge_request: merge_request)
 
       return error(pipeline.full_error_messages) unless pipeline.persisted?
 

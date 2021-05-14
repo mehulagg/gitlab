@@ -21,7 +21,7 @@ RSpec.describe Groups::SamlProvidersController, '(JavaScript fixtures)', type: :
   end
 
   it 'groups/saml_providers/show.html' do
-    create(:saml_provider, group: group)
+    create(:saml_provider, group: group, enforced_sso: true)
 
     get :show, params: { group_id: group }
 

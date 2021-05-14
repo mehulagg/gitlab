@@ -23,7 +23,6 @@ module EE
     def show_upgrade_link?(user)
       return unless user
       return unless ::Gitlab.com?
-      return unless ::Feature.enabled?(:upgrade_link_in_user_menu_a, default_enabled: :yaml)
 
       Rails.cache.fetch(['users', user.id, 'show_upgrade_link?'], expires_in: 10.minutes) do
         user.owns_upgradeable_namespace?
@@ -37,7 +36,7 @@ module EE
       return unless ::Gitlab.com?
 
       Rails.cache.fetch(['users', user.id, 'trials_allowed?'], expires_in: 10.minutes) do
-        !user.has_paid_namespace? && user.any_namespace_without_trial?
+        !user.has_paid_namespace? && user.owns_group_without_trial?
       end
     end
   end

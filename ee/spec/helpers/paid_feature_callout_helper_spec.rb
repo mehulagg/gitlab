@@ -65,7 +65,7 @@ RSpec.describe PaidFeatureCalloutHelper do
     subject { helper.paid_feature_badge_data_attrs('some feature') }
 
     it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutBadge component' do
-      is_expected.to eq({ id: 'some-feature-callout' })
+      is_expected.to eq({ id: 'some-feature-callout', feature_name: 'some feature' })
     end
   end
 

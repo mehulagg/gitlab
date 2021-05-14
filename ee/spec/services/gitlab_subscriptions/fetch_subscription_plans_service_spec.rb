@@ -88,6 +88,18 @@ RSpec.describe GitlabSubscriptions::FetchSubscriptionPlansService do
       it 'returns nil' do
         is_expected.to be_nil
       end
+
+      it 'does not cache the result' do
+        service = described_class.new(plan: plan)
+
+        Rails.cache.with_local_cache do
+          service.execute
+
+          expect(Gitlab::HTTP).to receive(:get)
+
+          service.execute
+        end
+      end
     end
   end
 end

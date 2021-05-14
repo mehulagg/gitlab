@@ -426,13 +426,15 @@ module Gitlab
 
       def services_usage
         # rubocop: disable UsageData/LargeTable:
-        Service.available_services_names.each_with_object({}) do |service_name, response|
-          response["projects_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where(type: "#{service_name}_service".camelize))
-          response["groups_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where(type: "#{service_name}_service".camelize))
-          response["templates_#{service_name}_active".to_sym] = count(Service.active.where(template: true, type: "#{service_name}_service".camelize))
-          response["instances_#{service_name}_active".to_sym] = count(Service.active.where(instance: true, type: "#{service_name}_service".camelize))
-          response["projects_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
-          response["groups_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
+        Integration.available_services_names.each_with_object({}) do |service_name, response|
+          service_type = Integration.service_name_to_type(service_name)
+
+          response["projects_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where(type: service_type))
+          response["groups_#{service_name}_active".to_sym] = count(Integration.active.where.not(group: nil).where(type: service_type))
+          response["templates_#{service_name}_active".to_sym] = count(Integration.active.where(template: true, type: service_type))
+          response["instances_#{service_name}_active".to_sym] = count(Integration.active.where(instance: true, type: service_type))
+          response["projects_inheriting_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: service_type))
+          response["groups_inheriting_#{service_name}_active".to_sym] = count(Integration.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: service_type))
         end.merge(jira_usage, jira_import_usage)
         # rubocop: enable UsageData/LargeTable:
       end
@@ -605,7 +607,7 @@ module Gitlab
           unique_users_all_imports: unique_users_all_imports(time_period),
           bulk_imports: {
             gitlab: DEPRECATED_VALUE,
-            gitlab_v1: count(::BulkImport.where(time_period, source_type: :gitlab))
+            gitlab_v1: count(::BulkImport.where(**time_period, source_type: :gitlab))
           },
           project_imports: project_imports(time_period),
           issue_imports: issue_imports(time_period),
@@ -973,4 +975,4 @@ module Gitlab
   end
 end
 
-Gitlab::UsageData.prepend_if_ee('EE::Gitlab::UsageData')
+Gitlab::UsageData.prepend_mod_with('Gitlab::UsageData')

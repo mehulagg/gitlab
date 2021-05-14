@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RequirementsManagement
-  class CreateRequirementService < BaseService
+  class CreateRequirementService < ::BaseProjectService
     include Gitlab::Allowable
 
     def execute

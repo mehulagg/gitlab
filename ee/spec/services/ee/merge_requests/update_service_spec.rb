@@ -42,7 +42,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     end
 
     def update_merge_request(opts)
-      described_class.new(project, user, opts).execute(merge_request)
+      described_class.new(project: project, current_user: user, params: opts).execute(merge_request)
     end
 
     context 'when code owners changes' do

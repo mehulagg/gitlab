@@ -21,6 +21,13 @@ RSpec.describe Ci::CreateWebIdeTerminalService do
           expect(subject[:pipeline].stages.count).to eq(1)
           expect(subject[:pipeline].builds.count).to eq(1)
         end
+
+        it 'calls ensure_project_iid explicitly' do
+          expect_next_instance_of(Ci::Pipeline) do |instance|
+            expect(instance).to receive(:ensure_project_iid!).twice
+          end
+          subject
+        end
       end
 
       before do

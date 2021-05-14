@@ -36,7 +36,7 @@ module Gitlab
 
       # Returns a Hash containing the load balancing configuration.
       def self.configuration
-        ActiveRecord::Base.configurations[Rails.env]['load_balancing'] || {}
+        Gitlab::Database.config[:load_balancing] || {}
       end
 
       # Returns the maximum replica lag size in bytes.
@@ -79,7 +79,7 @@ module Gitlab
       end
 
       def self.pool_size
-        ActiveRecord::Base.configurations[Rails.env]['pool']
+        Gitlab::Database.config[:pool]
       end
 
       # Returns true if load balancing is to be enabled.

@@ -137,7 +137,7 @@ RSpec.describe EE::IssuesHelper do
 
     context 'when features are enabled' do
       before do
-        stub_licensed_features(iterations: true, issue_weights: true, issuable_health_status: true, blocked_issues: true)
+        stub_licensed_features(epics: true, iterations: true, issue_weights: true, issuable_health_status: true, blocked_issues: true)
       end
 
       it 'returns data with licensed features enabled' do
@@ -145,16 +145,25 @@ RSpec.describe EE::IssuesHelper do
           has_blocked_issues_feature: 'true',
           has_issuable_health_status_feature: 'true',
           has_issue_weights_feature: 'true',
+          group_epics_path: group_epics_path(project.group, format: :json),
           project_iterations_path: api_v4_projects_iterations_path(id: project.id)
         }
 
         expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
       end
+
+      context 'when project does not have group' do
+        let(:project_with_no_group) { create :project }
+
+        it 'does not return group_epics_path' do
+          expect(helper.issues_list_data(project_with_no_group, current_user, finder)).not_to include(:group_epics_path)
+        end
+      end
     end
 
     context 'when features are disabled' do
       before do
-        stub_licensed_features(iterations: false, issue_weights: false, issuable_health_status: false, blocked_issues: false)
+        stub_licensed_features(epics: false, iterations: false, issue_weights: false, issuable_health_status: false, blocked_issues: false)
       end
 
       it 'returns data with licensed features disabled' do
@@ -166,6 +175,7 @@ RSpec.describe EE::IssuesHelper do
 
         result = helper.issues_list_data(project, current_user, finder)
         expect(result).to include(expected)
+        expect(result).not_to include(:group_epics_path)
         expect(result).not_to include(:project_iterations_path)
       end
     end

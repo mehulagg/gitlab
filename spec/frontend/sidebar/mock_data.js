@@ -262,6 +262,31 @@ export const issuableStartDateResponse = (startDate = null) => ({
   },
 });
 
+export const epicParticipantsResponse = () => ({
+  data: {
+    workspace: {
+      __typename: 'Group',
+      issuable: {
+        __typename: 'Epic',
+        id: 'gid://gitlab/Epic/4',
+        participants: {
+          nodes: [
+            {
+              id: 'gid://gitlab/User/2',
+              avatarUrl:
+                'https://www.gravatar.com/avatar/a95e5b71488f4b9d69ce5ff58bfd28d6?s=80\u0026d=identicon',
+              name: 'Jacki Kub',
+              username: 'francina.skiles',
+              webUrl: '/franc',
+              status: null,
+            },
+          ],
+        },
+      },
+    },
+  },
+});
+
 export const issueReferenceResponse = (reference) => ({
   data: {
     workspace: {
@@ -380,6 +405,25 @@ export const subscriptionNullResponse = {
   },
 };
 
+const mockUser1 = {
+  id: 'gid://gitlab/User/1',
+  avatarUrl:
+    'https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80\u0026d=identicon',
+  name: 'Administrator',
+  username: 'root',
+  webUrl: '/root',
+  status: null,
+};
+
+const mockUser2 = {
+  id: 'gid://gitlab/User/4',
+  avatarUrl: '/avatar2',
+  name: 'rookie',
+  username: 'rookie',
+  webUrl: 'rookie',
+  status: null,
+};
+
 export const searchResponse = {
   data: {
     workspace: {
@@ -387,24 +431,10 @@ export const searchResponse = {
       users: {
         nodes: [
           {
-            user: {
-              id: '1',
-              avatarUrl: '/avatar',
-              name: 'root',
-              username: 'root',
-              webUrl: 'root',
-              status: null,
-            },
+            user: mockUser1,
           },
           {
-            user: {
-              id: '2',
-              avatarUrl: '/avatar2',
-              name: 'rookie',
-              username: 'rookie',
-              webUrl: 'rookie',
-              status: null,
-            },
+            user: mockUser2,
           },
         ],
       },
@@ -418,27 +448,13 @@ export const projectMembersResponse = {
       __typename: 'Project',
       users: {
         nodes: [
-          {
-            user: {
-              id: 'gid://gitlab/User/1',
-              avatarUrl:
-                'https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80\u0026d=identicon',
-              name: 'Administrator',
-              username: 'root',
-              webUrl: '/root',
-              status: null,
-            },
-          },
-          {
-            user: {
-              id: '2',
-              avatarUrl: '/avatar2',
-              name: 'rookie',
-              username: 'rookie',
-              webUrl: 'rookie',
-              status: null,
-            },
-          },
+          // Remove nulls https://gitlab.com/gitlab-org/gitlab/-/issues/329750
+          null,
+          null,
+          // Remove duplicated entry https://gitlab.com/gitlab-org/gitlab/-/issues/327822
+          mockUser1,
+          mockUser1,
+          mockUser2,
           {
             user: {
               id: 'gid://gitlab/User/2',
@@ -468,15 +484,9 @@ export const participantsQueryResponse = {
         iid: '1',
         participants: {
           nodes: [
-            {
-              id: 'gid://gitlab/User/1',
-              avatarUrl:
-                'https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80\u0026d=identicon',
-              name: 'Administrator',
-              username: 'root',
-              webUrl: '/root',
-              status: null,
-            },
+            // Remove duplicated entry https://gitlab.com/gitlab-org/gitlab/-/issues/327822
+            mockUser1,
+            mockUser1,
             {
               id: 'gid://gitlab/User/2',
               avatarUrl:

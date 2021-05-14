@@ -6,8 +6,9 @@ RSpec.describe 'registrations/welcome/show' do
   using RSpec::Parameterized::TableSyntax
 
   describe 'forms and progress bar' do
-    let_it_be(:user) { User.new }
+    let_it_be(:user) { create(:user) }
     let_it_be(:user_other_role_details_enabled) { false }
+    let_it_be(:stubbed_experiments) { {} }
 
     before do
       allow(view).to receive(:current_user).and_return(user)
@@ -15,6 +16,7 @@ RSpec.describe 'registrations/welcome/show' do
       allow(view).to receive(:signup_onboarding_enabled?).and_return(signup_onboarding_enabled)
       allow(Gitlab).to receive(:com?).and_return(true)
       stub_feature_flags(user_other_role_details: user_other_role_details_enabled)
+      stub_experiments(stubbed_experiments)
 
       render
     end
@@ -53,6 +55,15 @@ RSpec.describe 'registrations/welcome/show' do
         it 'has a text field for other role' do
           is_expected.not_to have_selector('input[type="hidden"][name="user[other_role]"]', visible: false)
           is_expected.to have_selector('input[type="text"][name="user[other_role]"]')
+        end
+      end
+
+      context 'experiment(:jobs_to_be_done)' do
+        let_it_be(:stubbed_experiments) { { jobs_to_be_done: :candidate } }
+
+        it 'renders a select and text field for additional information' do
+          is_expected.to have_selector('select[name="jobs_to_be_done"]')
+          is_expected.to have_selector('input[name="jobs_to_be_done_other"]', visible: false)
         end
       end
     end

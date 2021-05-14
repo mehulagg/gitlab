@@ -102,10 +102,8 @@ class EpicsFinder < IssuableFinder
       # all epics in all subgroups
       next groups if can_read_all_epics_in_related_groups?(groups, include_confidential: false)
 
-      if Feature.enabled?(:limit_epic_groups_query, group)
-        next groups.public_to_user unless current_user
-        next groups.public_to_user(current_user) unless groups.user_is_member(current_user).exists?
-      end
+      next groups.public_to_user unless current_user
+      next groups.public_to_user(current_user) unless groups.user_is_member(current_user).exists?
 
       # when traversal ids are enabled, we could avoid N+1 issue
       # by taking all public groups plus groups where user is member

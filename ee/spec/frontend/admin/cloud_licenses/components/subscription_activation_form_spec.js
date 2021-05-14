@@ -1,12 +1,15 @@
-import { GlAlert, GlForm, GlFormInput, GlFormCheckbox, GlLink, GlSprintf } from '@gitlab/ui';
+import { GlForm, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import CloudLicenseSubscriptionActivationForm, {
+import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
-  troubleshootingHelpLink,
-  subscriptionActivationHelpLink,
+  SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
-import { fieldRequiredMessage, subscriptionQueries } from 'ee/pages/admin/cloud_licenses/constants';
+import {
+  CONNECTIVITY_ERROR,
+  fieldRequiredMessage,
+  subscriptionQueries,
+} from 'ee/pages/admin/cloud_licenses/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -32,7 +35,6 @@ describe('CloudLicenseApp', () => {
   const findActivationCodeFormGroup = () => wrapper.findByTestId('form-group-activation-code');
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
   const findActivateSubscriptionForm = () => wrapper.findComponent(GlForm);
-  const findConnectivityErrorAlert = () => wrapper.findComponent(GlAlert);
 
   const GlFormInputStub = stubComponent(GlFormInput, {
     template: `<input />`,
@@ -43,9 +45,9 @@ describe('CloudLicenseApp', () => {
     stopPropagation,
   });
 
-  const createComponentWithApollo = ({ props = {}, mutationMock, stubs = {} } = {}) => {
+  const createComponentWithApollo = ({ props = {}, mutationMock } = {}) => {
     wrapper = extendedWrapper(
-      shallowMount(CloudLicenseSubscriptionActivationForm, {
+      shallowMount(SubscriptionActivationForm, {
         localVue,
         apolloProvider: createMockApolloProvider(mutationMock),
         propsData: {
@@ -53,7 +55,6 @@ describe('CloudLicenseApp', () => {
         },
         stubs: {
           GlFormInput: GlFormInputStub,
-          ...stubs,
         },
       }),
     );
@@ -115,10 +116,11 @@ describe('CloudLicenseApp', () => {
   });
 
   describe('activate the subscription', () => {
-    describe('when submitting the form', () => {
+    describe('when submitting the mutation is successful', () => {
       const mutationMock = jest.fn().mockResolvedValue(activateLicenseMutationResponse.SUCCESS);
       beforeEach(async () => {
         createComponentWithApollo({ mutationMock });
+        jest.spyOn(wrapper.vm, 'updateSubscriptionAppCache').mockImplementation();
         await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
         await findAgreementCheckbox().vm.$emit('input', true);
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
@@ -135,9 +137,17 @@ describe('CloudLicenseApp', () => {
           },
         });
       });
+
+      it('emits a successful event', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT)).toEqual([[]]);
+      });
+
+      it('calls the method to update the cache', () => {
+        expect(wrapper.vm.updateSubscriptionAppCache).toHaveBeenCalledTimes(1);
+      });
     });
 
-    describe('when the mutation is not successful but looks like it is', () => {
+    describe('when the mutation is not successful', () => {
       const mutationMock = jest
         .fn()
         .mockResolvedValue(activateLicenseMutationResponse.ERRORS_AS_DATA);
@@ -146,7 +156,9 @@ describe('CloudLicenseApp', () => {
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
-      it.todo('deals with failures in a meaningful way');
+      it('emits a unsuccessful event', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toBeUndefined();
+      });
     });
 
     describe('when the mutation is not successful with connectivity error', () => {
@@ -154,21 +166,20 @@ describe('CloudLicenseApp', () => {
         .fn()
         .mockResolvedValue(activateLicenseMutationResponse.CONNECTIVITY_ERROR);
       beforeEach(async () => {
-        createComponentWithApollo({ mutationMock, stubs: { GlSprintf } });
+        createComponentWithApollo({ mutationMock });
         await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
         await findAgreementCheckbox().vm.$emit('input', true);
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
-      it('shows alert component guiding the user to resolve the connectivity problem', () => {
-        const alert = findConnectivityErrorAlert();
-        expect(alert.exists()).toBe(true);
-        expect(alert.findAll(GlLink).at(0).attributes('href')).toBe(subscriptionActivationHelpLink);
-        expect(alert.findAll(GlLink).at(1).attributes('href')).toBe(troubleshootingHelpLink);
+      it('emits an failure event with a connectivity error payload', () => {
+        expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toEqual([
+          [CONNECTIVITY_ERROR],
+        ]);
       });
     });
 
-    describe('when the mutation is not successful', () => {
+    describe('when the mutation request fails', () => {
       const mutationMock = jest.fn().mockRejectedValue(activateLicenseMutationResponse.FAILURE);
       beforeEach(() => {
         createComponentWithApollo({ mutationMock });
@@ -178,8 +189,6 @@ describe('CloudLicenseApp', () => {
       it('emits a unsuccessful event', () => {
         expect(wrapper.emitted(SUBSCRIPTION_ACTIVATION_FAILURE_EVENT)).toBeUndefined();
       });
-
-      it.todo('deals with failures in a meaningful way');
     });
   });
 });

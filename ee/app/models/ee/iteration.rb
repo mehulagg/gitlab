@@ -47,11 +47,13 @@ module EE
 
       before_validation :set_iterations_cadence, unless: -> { project_id.present? }
       before_create :set_past_iteration_state
+      before_destroy :check_if_can_be_destroyed
 
       scope :upcoming, -> { with_state(:upcoming) }
       scope :started, -> { with_state(:started) }
       scope :closed, -> { with_state(:closed) }
       scope :by_iteration_cadence_ids, ->(cadence_ids) { where(iterations_cadence_id: cadence_ids) }
+      scope :with_start_date_after, ->(date) { where('start_date > :date', date: date) }
 
       scope :within_timeframe, -> (start_date, end_date) do
         where('start_date <= ?', end_date).where('due_date >= ?', start_date)
@@ -139,6 +141,19 @@ module EE
     end
 
     private
+
+    def last_iteration_in_cadence?
+      !::Iteration.by_iteration_cadence_ids(iterations_cadence_id).with_start_date_after(due_date).exists?
+    end
+
+    def check_if_can_be_destroyed
+      return if closed?
+
+      unless last_iteration_in_cadence?
+        errors.add(:base, "upcoming/current iterations can't be deleted unless they are the last one in the cadence")
+        throw :abort # rubocop: disable Cop/BanCatchThrow
+      end
+    end
 
     def timebox_format_reference(format = :id)
       raise ::ArgumentError, _('Unknown format') unless [:id, :name].include?(format)

@@ -31,7 +31,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
           ended_at: nil,
           environment_id: nil,
           events:  1,
-          fingerprint: '89269ffa3902af37f036a77bc9ea57cdee3a52c2',
+          fingerprint: '23907c66f431ae66aad738553ccbd03e26f6838f',
           hosts: [],
           issue_id: nil,
           monitoring_tool: 'Cilium',
@@ -62,7 +62,7 @@ RSpec.describe AlertManagement::NetworkAlertService do
       it_behaves_like 'never-before-seen network alert'
 
       context 'for an existing alert with the same fingerprint' do
-        let_it_be(:fingerprint_sha) { '89269ffa3902af37f036a77bc9ea57cdee3a52c2' }
+        let_it_be(:fingerprint_sha) { '23907c66f431ae66aad738553ccbd03e26f6838f' }
 
         context 'which is triggered' do
           let_it_be(:alert) do

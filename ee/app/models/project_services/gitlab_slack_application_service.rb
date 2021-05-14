@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GitlabSlackApplicationService < Service
+class GitlabSlackApplicationService < Integration
   default_value_for :category, 'chat'
 
   has_one :slack_integration, foreign_key: :service_id

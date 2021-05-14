@@ -105,8 +105,6 @@ module Ci
     end
 
     def valid_local?
-      return true unless Gitlab::Ci::Features.validate_build_dependencies?(project)
-
       local.all?(&:valid_dependency?)
     end
 
@@ -157,4 +155,4 @@ module Ci
   end
 end
 
-Ci::BuildDependencies.prepend_if_ee('EE::Ci::BuildDependencies')
+Ci::BuildDependencies.prepend_mod_with('Ci::BuildDependencies')

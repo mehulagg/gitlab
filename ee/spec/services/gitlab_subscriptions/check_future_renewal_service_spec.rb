@@ -45,6 +45,23 @@ RSpec.describe GitlabSubscriptions::CheckFutureRenewalService, :use_clean_rails_
       end
     end
 
+    context 'when called with a sub-group' do
+      let(:root_namespace) { create(:group_with_plan) }
+      let(:namespace) { build(:group, parent: root_namespace) }
+
+      it 'uses the root ancestor namespace' do
+        expect(Gitlab::SubscriptionPortal::Client).to receive(:subscription_last_term).with(root_namespace.id).and_return({})
+
+        execute_service
+      end
+    end
+
+    context 'when the namespace has no plan' do
+      let(:namespace) { build(:group) }
+
+      it { is_expected.to be false }
+    end
+
     context 'when the `gitlab_subscription_future_renewal` feature flag is disabled' do
       before do
         stub_feature_flags(gitlab_subscription_future_renewal: false)

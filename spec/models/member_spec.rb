@@ -143,16 +143,10 @@ RSpec.describe Member do
       @blocked_maintainer = project.members.find_by(user_id: @blocked_maintainer_user.id, access_level: Gitlab::Access::MAINTAINER)
       @blocked_developer = project.members.find_by(user_id: @blocked_developer_user.id, access_level: Gitlab::Access::DEVELOPER)
 
-      @invited_member = create(:project_member, :developer,
-                              project: project,
-                              invite_token: '1234',
-                              invite_email: 'toto1@example.com')
+      @invited_member = create(:project_member, :invited, :developer, project: project)
 
       accepted_invite_user = build(:user, state: :active)
-      @accepted_invite_member = create(:project_member, :developer,
-                                      project: project,
-                                      invite_token: '1234',
-                                      invite_email: 'toto2@example.com')
+      @accepted_invite_member = create(:project_member, :invited, :developer, project: project)
                                       .tap { |u| u.accept_invite!(accepted_invite_user) }
 
       requested_user = create(:user).tap { |u| project.request_access(u) }
@@ -325,12 +319,12 @@ RSpec.describe Member do
 
     describe '.search_invite_email' do
       it 'returns only members the matching e-mail' do
-        create(:group_member, :invited)
+        invited_member = create(:group_member, :invited, invite_email: 'invited@example.com')
 
-        invited = described_class.search_invite_email(@invited_member.invite_email)
+        invited = described_class.search_invite_email(invited_member.invite_email)
 
         expect(invited.count).to eq(1)
-        expect(invited.first).to eq(@invited_member)
+        expect(invited.first).to eq(invited_member)
 
         expect(described_class.search_invite_email('bad-email@example.com').count).to eq(0)
       end
@@ -411,6 +405,30 @@ RSpec.describe Member do
       it { is_expected.to include @accepted_request_member }
       it { is_expected.not_to include @blocked_maintainer }
       it { is_expected.not_to include @blocked_developer }
+      it { is_expected.not_to include @member_with_minimal_access }
+    end
+
+    describe '.authorizable' do
+      subject { described_class.authorizable.to_a }
+
+      it 'includes the member who has an associated user record,'\
+       'but also having an invite_token' do
+        member = create(:project_member,
+                        :developer,
+                        :invited,
+                        user: create(:user))
+
+        expect(subject).to include(member)
+      end
+
+      it { is_expected.to include @owner }
+      it { is_expected.to include @maintainer }
+      it { is_expected.to include @accepted_invite_member }
+      it { is_expected.to include @accepted_request_member }
+      it { is_expected.to include @blocked_maintainer }
+      it { is_expected.to include @blocked_developer }
+      it { is_expected.not_to include @invited_member }
+      it { is_expected.not_to include @requested_member }
       it { is_expected.not_to include @member_with_minimal_access }
     end
 

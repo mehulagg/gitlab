@@ -54,9 +54,12 @@ module LicenseHelper
 
   def cloud_license_view_data
     {
-      has_active_license: (has_active_license? ? 'true' : 'false'),
-      free_trial_path: new_trial_url,
       buy_subscription_path: ::EE::SUBSCRIPTIONS_PLANS_URL,
+      customers_portal_url: ::EE::SUBSCRIPTIONS_MANAGE_URL,
+      free_trial_path: new_trial_url,
+      has_active_license: (has_active_license? ? 'true' : 'false'),
+      license_upload_path: new_admin_license_path,
+      license_remove_path: admin_license_path,
       subscription_sync_path: sync_seat_link_admin_license_path
     }
   end

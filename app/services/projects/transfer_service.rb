@@ -223,10 +223,10 @@ module Projects
     end
 
     def update_integrations
-      project.services.inherit.delete_all
-      Service.create_from_active_default_integrations(project, :project_id)
+      project.integrations.inherit.delete_all
+      Integration.create_from_active_default_integrations(project, :project_id)
     end
   end
 end
 
-Projects::TransferService.prepend_if_ee('EE::Projects::TransferService')
+Projects::TransferService.prepend_mod_with('Projects::TransferService')

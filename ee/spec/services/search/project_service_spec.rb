@@ -42,7 +42,7 @@ RSpec.describe Search::ProjectService do
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
   end
 
-  context 'visibility', :elastic, :sidekiq_inline do
+  context 'visibility', :elastic_delete_by_query, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
     shared_examples 'search respects visibility' do
@@ -51,6 +51,7 @@ RSpec.describe Search::ProjectService do
         projects.each do |project|
           update_feature_access_level(project, feature_access_level)
         end
+
         ensure_elasticsearch_index!
 
         expect_search_results(user, scope, expected_count: expected_count) do |user|
@@ -260,6 +261,7 @@ RSpec.describe Search::ProjectService do
             'issues_access_level' => issues_access_level,
             'merge_requests_access_level' => merge_requests_access_level
           )
+
           ensure_elasticsearch_index!
 
           expect_search_results(user, 'milestones', expected_count: expected_count) do |user|

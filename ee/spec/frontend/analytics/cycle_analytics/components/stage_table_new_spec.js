@@ -1,6 +1,7 @@
-import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
+import { GlEmptyState, GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
+import { PAGINATION_SORT_FIELD_DURATION } from 'ee/analytics/cycle_analytics/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import {
   stagingEvents,
@@ -26,6 +27,7 @@ const pagination = { page: 1, hasNextPage: true };
 
 const findStageEvents = () => wrapper.findAllByTestId('vsa-stage-event');
 const findPagination = () => wrapper.findByTestId('vsa-stage-pagination');
+const findTable = () => wrapper.findComponent(GlTable);
 const findStageEventTitle = (ev) => extendedWrapper(ev).findByTestId('vsa-stage-event-title');
 
 function createComponent(props = {}, shallow = false) {
@@ -289,7 +291,7 @@ describe('StageTable', () => {
       findPagination().vm.$emit('input', 2);
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.emitted('handleSelectPage')[0]).toEqual([{ page: 2 }]);
+      expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([{ page: 2 }]);
     });
 
     describe('with `hasNextPage=false', () => {
@@ -300,6 +302,40 @@ describe('StageTable', () => {
       it('will not display the pagination component', () => {
         expect(findPagination().exists()).toBe(false);
       });
+    });
+  });
+
+  describe('Sorting', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('clicking a table column will update the sort field', () => {
+      findTable().vm.$emit('sort-changed', {
+        sortBy: PAGINATION_SORT_FIELD_DURATION,
+        sortDesc: true,
+      });
+
+      expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([
+        {
+          direction: 'desc',
+          sort: 'duration',
+        },
+      ]);
+    });
+
+    it('with sortDesc=false will toggle the direction field', async () => {
+      findTable().vm.$emit('sort-changed', {
+        sortBy: PAGINATION_SORT_FIELD_DURATION,
+        sortDesc: false,
+      });
+
+      expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([
+        {
+          direction: 'asc',
+          sort: 'duration',
+        },
+      ]);
     });
   });
 });

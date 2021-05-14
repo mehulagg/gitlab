@@ -1,7 +1,7 @@
 <script>
 import { GlButton, GlForm, GlFormGroup } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { __ } from '~/locale';
+import { APPROVAL_SETTINGS_I18N } from '../constants';
 import ApprovalSettingsCheckbox from './approval_settings_checkbox.vue';
 
 export default {
@@ -40,18 +40,7 @@ export default {
     removeApprovalsOnPushDocsAnchor: 'resetting-approvals-on-push',
     preventCommittersApprovalAnchor: 'prevent-approval-of-merge-requests-by-their-committers',
   },
-  i18n: {
-    authorApprovalLabel: __('Prevent MR approvals by the author.'),
-    preventMrApprovalRuleEditLabel: __('Prevent users from modifying MR approval rules.'),
-    preventCommittersApprovalLabel: __(
-      'Prevent approval of merge requests by merge request committers.',
-    ),
-    requireUserPasswordLabel: __('Require user password for approvals.'),
-    removeApprovalsOnPushLabel: __(
-      'Remove all approvals in a merge request when new commits are pushed to its source branch.',
-    ),
-    saveChanges: __('Save changes'),
-  },
+  i18n: APPROVAL_SETTINGS_I18N,
 };
 </script>
 

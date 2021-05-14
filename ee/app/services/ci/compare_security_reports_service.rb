@@ -2,6 +2,10 @@
 
 module Ci
   class CompareSecurityReportsService < ::Ci::CompareReportsBaseService
+    def build_comparer(base_report, head_report)
+      comparer_class.new(project, base_report, head_report)
+    end
+
     def comparer_class
       Gitlab::Ci::Reports::Security::VulnerabilityReportsComparer
     end

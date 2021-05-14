@@ -4,9 +4,9 @@ export const SCAN_MODES = {
   HAR: {
     scanModeLabel: __('HAR (HTTP Archive)'),
     label: __('HAR file path'),
-    placeholder: s__('APIFuzzing|Ex: Project_Test/File/example_fuzz.har'),
+    placeholder: s__('APIFuzzing|/folder/example_file.har'),
     description: s__(
-      "APIFuzzing|HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository.",
+      "APIFuzzing|File path containing APIs to be tested. For example, /folder/example_file.har. HAR files may contain sensitive information such as authentication tokens, API keys, and session cookies. We recommend that you review the HAR files' contents before adding them to a repository.",
     ),
   },
   OPENAPI: {
@@ -20,9 +20,9 @@ export const SCAN_MODES = {
   POSTMAN: {
     scanModeLabel: __('Postman collection'),
     label: __('Postman collection'),
-    placeholder: s__('APIFuzzing|Ex: Project_Test/File/example_fuzz'),
+    placeholder: s__('APIFuzzing|/folder/example_file.postman_collection.json'),
     description: s__(
-      'APIFuzzing|Postman collections are a group of saved requests you can organize into folders.',
+      'APIFuzzing|File path containing requests to be tested. For example, /folder/example_file.postman_collection.json.',
     ),
   },
 };

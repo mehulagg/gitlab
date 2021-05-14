@@ -59,7 +59,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
     }
 
     Sidekiq::Worker.skipping_transaction_check do
-      merge_request = MergeRequests::CreateService.new(@project, admin, opts).execute
+      merge_request = MergeRequests::CreateService.new(project: @project, current_user: admin, params: opts).execute
       merge_request.save!
       merge_request.approvals.create(approvals)
       merge_request.state = :merged

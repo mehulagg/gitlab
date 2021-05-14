@@ -4,7 +4,7 @@ import SubscriptionSyncNotifications, {
   SUCCESS_ALERT_DISMISSED_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_sync_notifications.vue';
 import {
-  manualSyncFailureTitle,
+  connectivityIssue,
   manualSyncSuccessfulTitle,
   notificationType,
 } from 'ee/pages/admin/cloud_licenses/constants';
@@ -69,7 +69,7 @@ describe('Subscription Sync Notifications', () => {
     });
 
     it('displays an alert with a failure title', () => {
-      expect(findFailureAlert().props('title')).toBe(manualSyncFailureTitle);
+      expect(findFailureAlert().props('title')).toBe(connectivityIssue);
     });
 
     it('displays an alert with a failure message', () => {

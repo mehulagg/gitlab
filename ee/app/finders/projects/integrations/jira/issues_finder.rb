@@ -30,7 +30,7 @@ module Projects
           raise IntegrationError, _('Jira service not configured.') unless jira_service&.active?
 
           project_key = jira_service.project_key
-          raise IntegrationError, _('Jira project key is not configured') if project_key.blank?
+          raise IntegrationError, _('Jira project key is not configured.') if project_key.blank?
 
           fetch_issues(project_key)
         end

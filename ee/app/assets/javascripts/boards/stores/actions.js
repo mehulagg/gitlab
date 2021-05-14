@@ -52,11 +52,6 @@ import updateEpicLabelsMutation from '../graphql/update_epic_labels.mutation.gra
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 
-const notImplemented = () => {
-  /* eslint-disable-next-line @gitlab/require-i18n-strings */
-  throw new Error('Not implemented!');
-};
-
 const fetchAndFormatListIssues = (state, extraVariables) => {
   const { fullPath, boardId, boardType, filterParams } = state;
 
@@ -267,22 +262,6 @@ export default {
         max_issue_count: maxIssueCount,
       },
     });
-  },
-
-  fetchAllBoards: () => {
-    notImplemented();
-  },
-
-  fetchRecentBoards: () => {
-    notImplemented();
-  },
-
-  deleteBoard: () => {
-    notImplemented();
-  },
-
-  updateIssueWeight: () => {
-    notImplemented();
   },
 
   fetchItemsForList: (

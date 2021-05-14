@@ -53,6 +53,12 @@ RSpec.describe IncidentManagement::OncallParticipant do
 
       it { is_expected.to contain_exactly(removed_participant) }
     end
+
+    describe '.for_user' do
+      subject { described_class.for_user(participant.user) }
+
+      it { is_expected.to contain_exactly(participant) }
+    end
   end
 
   private

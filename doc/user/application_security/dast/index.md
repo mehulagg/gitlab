@@ -144,6 +144,14 @@ image. Using the `DAST_VERSION` variable, you can choose how DAST updates:
 Find the latest DAST versions on the [Releases](https://gitlab.com/gitlab-org/security-products/dast/-/releases)
 page.
 
+#### Crawling web applications dependent on JavaScript
+
+GitLab has released a new browser-based crawler, an add-on to DAST that uses a browser to crawl web applications for content. This crawler replaces the standard DAST Spider and Ajax Crawler.
+
+The browser-based crawler crawls websites by browsing web pages as a user would. This approach works well with web applications that make heavy use of JavaScript, such as Single Page Applications.
+
+For more details, including setup instructions, see [DAST browser-based crawler](browser_based.md).
+
 ## Deployment options
 
 Depending on the complexity of the target application, there are a few options as to how to deploy and configure
@@ -978,6 +986,7 @@ required for an on-demand DAST scan.
 A site profile contains the following:
 
 - **Profile name**: A name you assign to the site to be scanned.
+- **Site type**: The type of target to be scanned, either website or API scan.
 - **Target URL**: The URL that DAST runs against.
 - **Excluded URLs**: A comma-separated list of URLs to exclude from the scan.
 - **Request headers**: A comma-separated list of HTTP request headers, including names and values. These headers are added to every request made by DAST.
@@ -987,6 +996,8 @@ A site profile contains the following:
   - **Password**: The password used to authenticate to the website.
   - **Username form field**: The name of username field at the sign-in HTML form.
   - **Password form field**: The name of password field at the sign-in HTML form.
+
+When an API site type is selected, a [host override](#host-override) is used to ensure the API being scanned is on the same host as the target. This is done to reduce the risk of running an active scan against the wrong API.
 
 #### Site profile validation
 

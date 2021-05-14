@@ -27,7 +27,7 @@ RSpec.describe Issuable::CommonSystemNotesService do
   end
 
   context 'on issuable update' do
-    subject { described_class.new(project, user).execute(issuable, old_labels: []) }
+    subject { described_class.new(project: project, current_user: user).execute(issuable, old_labels: []) }
 
     context 'when weight is changed' do
       before do
@@ -72,7 +72,7 @@ RSpec.describe Issuable::CommonSystemNotesService do
       let(:timestamp) { Time.current }
       let(:issuable) { create(:epic, end_date: timestamp) }
 
-      subject { described_class.new(nil, user).execute(issuable, old_labels: []) }
+      subject { described_class.new(project: nil, current_user: user).execute(issuable, old_labels: []) }
 
       before do
         issuable.assign_attributes(start_date: timestamp, end_date: nil)
@@ -93,7 +93,7 @@ RSpec.describe Issuable::CommonSystemNotesService do
   context 'on issuable create' do
     let(:issuable) { build(:issue) }
 
-    subject { described_class.new(project, user).execute(issuable, old_labels: [], is_update: false) }
+    subject { described_class.new(project: project, current_user: user).execute(issuable, old_labels: [], is_update: false) }
 
     before do
       issuable.update(weight: 5, health_status: 'at_risk')

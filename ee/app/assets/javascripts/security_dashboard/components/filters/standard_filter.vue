@@ -25,12 +25,44 @@ export default {
   data() {
     return {
       searchTerm: '',
-      selectedOptions: undefined,
     };
   },
   computed: {
     options() {
       return this.filter.options;
+    },
+    querystringIds() {
+      const ids = this.$route.query[this.filter.id] || [];
+      return Array.isArray(ids) ? ids : [ids];
+    },
+    selectedOptions: {
+      get() {
+        const hasAllId = this.querystringIds.includes(this.filter.allOption.id);
+        // If the querystring IDs includes the All option, return an empty array. We'll do this even
+        // if there are other IDs because the special All option takes precedence.
+        if (hasAllId) {
+          return [];
+        }
+
+        const options = this.options.filter((x) => this.querystringIds.includes(x.id));
+        // If the querystring IDs didn't match any options, return the default options.
+        if (!options.length) {
+          return this.filter.defaultOptions;
+        }
+
+        return options;
+      },
+      set(options) {
+        const selectedOptions = options.length ? options : [this.filter.allOption];
+        const ids = selectedOptions.map((x) => x.id);
+        // To avoid a console error, don't update the querystring if it's the same as the current one.
+        if (isEqual(this.querystringIds, ids)) {
+          return;
+        }
+
+        const query = { ...this.$route.query, [this.filter.id]: ids };
+        this.$router.push({ query });
+      },
     },
     selectedSet() {
       return new Set(this.selectedOptions);
@@ -50,55 +82,29 @@ export default {
         option.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
       );
     },
-    querystringIds() {
-      const ids = this.$route?.query[this.filter.id] || [];
-      return Array.isArray(ids) ? ids : [ids];
-    },
-    querystringOptions() {
-      const options = this.options.filter((x) => this.querystringIds.includes(x.id));
-      const hasAllId = this.querystringIds.includes(this.filter.allOption.id);
-
-      if (options.length && !hasAllId) {
-        return options;
-      }
-
-      return hasAllId ? [] : this.filter.defaultOptions;
-    },
     showSearchBox() {
       return this.options.length >= this.searchBoxShowThreshold;
     },
   },
   watch: {
-    selectedOptions() {
-      this.$emit('filter-changed', this.filterObject);
+    selectedOptions: {
+      immediate: true,
+      handler(newOptions, oldOptions) {
+        // This check is needed because updating the querystring for one filter will trigger an
+        // update for all filters, even if the querystring for this filter didn't change.
+        if (!isEqual(newOptions, oldOptions)) {
+          this.$emit('filter-changed', this.filterObject);
+        }
+      },
     },
-  },
-  created() {
-    this.selectedOptions = this.querystringOptions;
-    // When the user clicks the forward/back browser buttons, update the selected options.
-    window.addEventListener('popstate', () => {
-      this.selectedOptions = this.querystringOptions;
-    });
   },
   methods: {
     toggleOption(option) {
       // Toggle the option's existence in the array.
       this.selectedOptions = xor(this.selectedOptions, [option]);
-      this.updateQuerystring();
     },
     deselectAllOptions() {
       this.selectedOptions = [];
-      this.updateQuerystring();
-    },
-    updateQuerystring() {
-      const options = this.selectedOptionsOrAll.map((x) => x.id);
-      // To avoid a console error, don't update the querystring if it's the same as the current one.
-      if (!this.$router || isEqual(this.querystringIds, options)) {
-        return;
-      }
-
-      const query = { ...this.$route.query, [this.filter.id]: options };
-      this.$router.push({ query });
     },
     isSelected(option) {
       return this.selectedSet.has(option);

@@ -28,12 +28,6 @@ import {
 
 Vue.use(Vuex);
 
-const expectNotImplemented = (action) => {
-  it('is not implemented', () => {
-    expect(action).toThrow(new Error('Not implemented!'));
-  });
-};
-
 let mock;
 
 beforeEach(() => {
@@ -526,22 +520,6 @@ describe('updateListWipLimit', () => {
       [],
     );
   });
-});
-
-describe('fetchAllBoards', () => {
-  expectNotImplemented(actions.fetchAllBoards);
-});
-
-describe('fetchRecentBoards', () => {
-  expectNotImplemented(actions.fetchRecentBoards);
-});
-
-describe('deleteBoard', () => {
-  expectNotImplemented(actions.deleteBoard);
-});
-
-describe('updateIssueWeight', () => {
-  expectNotImplemented(actions.updateIssueWeight);
 });
 
 describe('toggleEpicSwimlanes', () => {

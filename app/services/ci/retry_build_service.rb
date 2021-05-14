@@ -18,7 +18,7 @@ module Ci
         AfterRequeueJobService.new(project, current_user).execute(build)
 
         ::MergeRequests::AddTodoWhenBuildFailsService
-          .new(project, current_user)
+          .new(project: project, current_user: current_user)
           .close(new_build)
       end
     end
@@ -64,4 +64,4 @@ module Ci
   end
 end
 
-Ci::RetryBuildService.prepend_if_ee('EE::Ci::RetryBuildService')
+Ci::RetryBuildService.prepend_mod_with('Ci::RetryBuildService')

@@ -23,7 +23,8 @@ class CommitStatusPresenter < Gitlab::View::Presenter::Delegated
     secrets_provider_not_found: 'The secrets provider can not be found',
     reached_max_descendant_pipelines_depth: 'You reached the maximum depth of child pipelines',
     project_deleted: 'The job belongs to a deleted project',
-    user_blocked: 'The user who created this job is blocked'
+    user_blocked: 'The user who created this job is blocked',
+    ci_quota_exceeded: 'No more CI minutes available'
   }.freeze
 
   private_constant :CALLOUT_FAILURE_MESSAGES
@@ -39,4 +40,4 @@ class CommitStatusPresenter < Gitlab::View::Presenter::Delegated
   end
 end
 
-CommitStatusPresenter.prepend_if_ee('::EE::CommitStatusPresenter')
+CommitStatusPresenter.prepend_mod_with('CommitStatusPresenter')

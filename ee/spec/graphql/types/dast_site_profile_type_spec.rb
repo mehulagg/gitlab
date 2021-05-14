@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   include GraphqlHelpers
+  include RepoHelpers
 
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user, developer_projects: [project]) }
@@ -19,7 +20,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   specify { expect(described_class).to expose_permissions_using(Types::PermissionTypes::DastSiteProfile) }
 
   it { expect(described_class).to have_graphql_fields(fields) }
-  it { expect(described_class).to have_graphql_field(:referenced_in_security_policies, calls_gitaly?: true, complexity: 10) }
+  it { expect(described_class).to have_graphql_field(:referenced_in_security_policies, calls_gitaly?: true) }
 
   describe 'id field' do
     it 'is the global id' do
@@ -136,8 +137,89 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   end
 
   describe 'referencedInSecurityPolicies field' do
-    it 'is the policies' do
-      expect(resolve_field(:referenced_in_security_policies, object, current_user: user)).to eq(object.referenced_in_security_policies)
+    it 'is the lazy aggregate that is resolved to policies', :aggregate_failures do
+      field_value = resolve_field(:referenced_in_security_policies, object, current_user: user)
+
+      expect(field_value).to be_a(GraphQL::Execution::Lazy)
+      expect(field_value.value).to eq(object.referenced_in_security_policies)
+    end
+  end
+
+  describe 'dast_site_profiles' do
+    subject(:response) do
+      GitlabSchema.execute(
+        query,
+        context: {
+          current_user: user
+        },
+        variables: {
+          fullPath: project.full_path
+        }
+      ).as_json
+    end
+
+    let(:query) do
+      %(
+        query project($fullPath: ID!) {
+          project(fullPath: $fullPath) {
+            dastSiteProfiles {
+              nodes {
+                id
+                profileName
+                referencedInSecurityPolicies
+              }
+            }
+          }
+        }
+      )
+    end
+
+    context 'when security policies are enabled' do
+      let_it_be(:policies_project) { create(:project, :repository) }
+      let_it_be(:security_orchestration_policy_configuration) { create(:security_orchestration_policy_configuration, project: project, security_policy_management_project: policies_project) }
+
+      let_it_be(:policy_yml) do
+        <<-EOS
+        scan_execution_policy:
+        - name: Run DAST in every pipeline
+          description: This policy enforces to run DAST for every pipeline within the project
+          enabled: true
+          rules:
+          - type: pipeline
+            branches:
+            - "master"
+          actions:
+          - scan: dast
+            site_profile: Site Profile
+            scanner_profile: Scanner Profile
+          - scan: dast
+            site_profile: Site Profile 2
+            scanner_profile: Scanner Profile 2
+        - name: Run DAST in every pipeline 2
+          description: This policy enforces to run DAST for every pipeline within the project
+          enabled: true
+          rules:
+          - type: pipeline
+            branches:
+            - "master"
+          actions:
+          - scan: dast
+            site_profile: Site Profile 3
+            scanner_profile: Scanner Profile 3
+          - scan: dast
+            site_profile: Site Profile 4
+            scanner_profile: Scanner Profile 4
+        EOS
+      end
+
+      before do
+        create_list(:dast_site_profile, 30, project: project)
+        create_file_in_repo(policies_project, 'master', 'master', Security::OrchestrationPolicyConfiguration::POLICY_PATH, policy_yml)
+      end
+
+      it 'only calls Gitaly twice when multiple profiles are present', :request_store do
+        expect { response }.to change { Gitlab::GitalyClient.get_request_count }.by(2)
+      end
     end
   end
 end

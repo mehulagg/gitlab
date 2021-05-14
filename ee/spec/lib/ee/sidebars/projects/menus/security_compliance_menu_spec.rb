@@ -62,207 +62,211 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
       let(:user) { nil }
 
       it 'returns the link to the discover security path', :aggregate_failures do
-        expect(subject.items).to be_empty
+        expect(subject.renderable_items).to be_empty
         expect(subject.link).to eq("/#{project.full_path}/-/security/discover")
       end
     end
   end
 
-  describe 'Configuration' do
-    describe '#sidebar_security_configuration_paths' do
-      let(:expected_security_configuration_paths) do
-        %w[
-          projects/security/configuration#show
-          projects/security/sast_configuration#show
-          projects/security/api_fuzzing_configuration#show
-          projects/security/dast_profiles#show
-          projects/security/dast_site_profiles#new
-          projects/security/dast_site_profiles#edit
-          projects/security/dast_scanner_profiles#new
-          projects/security/dast_scanner_profiles#edit
-        ]
+  describe 'Menu items' do
+    subject { described_class.new(context).renderable_items.find { |i| i.item_id == item_id } }
+
+    describe 'Configuration' do
+      let(:item_id) { :configuration }
+
+      describe '#sidebar_security_configuration_paths' do
+        let(:expected_security_configuration_paths) do
+          %w[
+            projects/security/configuration#show
+            projects/security/sast_configuration#show
+            projects/security/api_fuzzing_configuration#show
+            projects/security/dast_profiles#show
+            projects/security/dast_site_profiles#new
+            projects/security/dast_site_profiles#edit
+            projects/security/dast_scanner_profiles#new
+            projects/security/dast_scanner_profiles#edit
+          ]
+        end
+
+        it 'includes all the security configuration paths' do
+          expect(subject.active_routes[:path]).to eq expected_security_configuration_paths
+        end
       end
-
-      subject { described_class.new(context).items.find { |i| i.item_id == :configuration } }
-
-      it 'includes all the security configuration paths' do
-        expect(subject.active_routes[:path]).to eq expected_security_configuration_paths
-      end
-    end
-  end
-
-  describe 'Security Dashboard' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :dashboard } }
-
-    before do
-      stub_licensed_features(security_dashboard: true)
     end
 
-    context 'when user can access security dashboard' do
-      it { is_expected.not_to be_nil }
-    end
+    describe 'Security Dashboard' do
+      let(:item_id) { :dashboard }
 
-    context 'when user cannot access security dashboard' do
-      let(:user) { nil }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'Vulnerability Report' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :vulnerability_report } }
-
-    before do
-      stub_licensed_features(security_dashboard: true)
-    end
-
-    context 'when user can access vulnerabilities report' do
-      it { is_expected.not_to be_nil }
-    end
-
-    context 'when user cannot access vulnerabilities report' do
-      let(:user) { nil }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'On Demand Scans' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :on_demand_scans } }
-
-    before do
-      stub_licensed_features(security_on_demand_scans: true)
-    end
-
-    context 'when user can access vulnerabilities report' do
-      it { is_expected.not_to be_nil }
-    end
-
-    context 'when user cannot access vulnerabilities report' do
-      let(:user) { nil }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'Dependency List' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :dependency_list } }
-
-    before do
-      stub_licensed_features(dependency_scanning: true)
-    end
-
-    context 'when user can access dependency list' do
-      it { is_expected.not_to be_nil }
-    end
-
-    context 'when user cannot access dependency list' do
-      let(:user) { nil }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'License Compliance' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :license_compliance } }
-
-    before do
-      stub_licensed_features(license_scanning: true)
-    end
-
-    context 'when user can access license compliance' do
-      it { is_expected.not_to be_nil }
-    end
-
-    context 'when user cannot access license compliance' do
-      let(:user) { nil }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'Threat monitoring' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :threat_monitoring } }
-
-    before do
-      stub_licensed_features(threat_monitoring: true)
-    end
-
-    context 'when user can access threat monitoring' do
-      it { is_expected.not_to be_nil }
-    end
-
-    context 'when user cannot access threat monitoring' do
-      let(:user) { nil }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'Scan Policies' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :scan_policies } }
-
-    context 'when feature flag :security_orchestration_policies_configuration is enabled' do
       before do
-        stub_feature_flags(security_orchestration_policies_configuration: true)
-        stub_licensed_features(security_orchestration_policies: true)
+        stub_licensed_features(security_dashboard: true)
       end
 
-      context 'when user can access scan policies' do
+      context 'when user can access security dashboard' do
         it { is_expected.not_to be_nil }
       end
 
-      context 'when user cannot access scan policies' do
+      context 'when user cannot access security dashboard' do
         let(:user) { nil }
 
         it { is_expected.to be_nil }
       end
     end
 
-    context 'when feature flag :security_orchestration_policies_configuration is disabled' do
+    describe 'Vulnerability Report' do
+      let(:item_id) { :vulnerability_report }
+
       before do
-        stub_feature_flags(security_orchestration_policies_configuration: false)
+        stub_licensed_features(security_dashboard: true)
       end
 
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe 'Audit Events' do
-    subject { described_class.new(context).items.find { |i| i.item_id == :audit_events } }
-
-    context 'when user can access audit events' do
-      it { is_expected.not_to be_nil }
-
-      context 'when feature audit events is licensed' do
-        before do
-          stub_licensed_features(audit_events: true)
-        end
-
+      context 'when user can access vulnerabilities report' do
         it { is_expected.not_to be_nil }
       end
 
-      context 'when feature audit events is not licensed' do
+      context 'when user cannot access vulnerabilities report' do
+        let(:user) { nil }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    describe 'On Demand Scans' do
+      let(:item_id) { :on_demand_scans }
+
+      before do
+        stub_licensed_features(security_on_demand_scans: true)
+      end
+
+      context 'when user can access vulnerabilities report' do
+        it { is_expected.not_to be_nil }
+      end
+
+      context 'when user cannot access vulnerabilities report' do
+        let(:user) { nil }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    describe 'Dependency List' do
+      let(:item_id) { :dependency_list }
+
+      before do
+        stub_licensed_features(dependency_scanning: true)
+      end
+
+      context 'when user can access dependency list' do
+        it { is_expected.not_to be_nil }
+      end
+
+      context 'when user cannot access dependency list' do
+        let(:user) { nil }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    describe 'License Compliance' do
+      let(:item_id) { :license_compliance }
+
+      before do
+        stub_licensed_features(license_scanning: true)
+      end
+
+      context 'when user can access license compliance' do
+        it { is_expected.not_to be_nil }
+      end
+
+      context 'when user cannot access license compliance' do
+        let(:user) { nil }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    describe 'Threat monitoring' do
+      let(:item_id) { :threat_monitoring }
+
+      before do
+        stub_licensed_features(threat_monitoring: true)
+      end
+
+      context 'when user can access threat monitoring' do
+        it { is_expected.not_to be_nil }
+      end
+
+      context 'when user cannot access threat monitoring' do
+        let(:user) { nil }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    describe 'Scan Policies' do
+      let(:item_id) { :scan_policies }
+
+      context 'when feature flag :security_orchestration_policies_configuration is enabled' do
         before do
-          stub_licensed_features(audit_events: false)
+          stub_feature_flags(security_orchestration_policies_configuration: true)
+          stub_licensed_features(security_orchestration_policies: true)
         end
 
-        context 'when show promotions is enabled' do
+        context 'when user can access scan policies' do
           it { is_expected.not_to be_nil }
         end
 
-        context 'when show promotions is disabled' do
-          let(:show_promotions) { false }
+        context 'when user cannot access scan policies' do
+          let(:user) { nil }
 
           it { is_expected.to be_nil }
         end
       end
+
+      context 'when feature flag :security_orchestration_policies_configuration is disabled' do
+        before do
+          stub_feature_flags(security_orchestration_policies_configuration: false)
+        end
+
+        it { is_expected.to be_nil }
+      end
     end
 
-    context 'when user cannot access audit events' do
-      let(:user) { nil }
+    describe 'Audit Events' do
+      let(:item_id) { :audit_events }
 
-      it { is_expected.to be_nil }
+      context 'when user can access audit events' do
+        it { is_expected.not_to be_nil }
+
+        context 'when feature audit events is licensed' do
+          before do
+            stub_licensed_features(audit_events: true)
+          end
+
+          it { is_expected.not_to be_nil }
+        end
+
+        context 'when feature audit events is not licensed' do
+          before do
+            stub_licensed_features(audit_events: false)
+          end
+
+          context 'when show promotions is enabled' do
+            it { is_expected.not_to be_nil }
+          end
+
+          context 'when show promotions is disabled' do
+            let(:show_promotions) { false }
+
+            it { is_expected.to be_nil }
+          end
+        end
+      end
+
+      context 'when user cannot access audit events' do
+        let(:user) { nil }
+
+        it { is_expected.to be_nil }
+      end
     end
   end
 end

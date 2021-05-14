@@ -774,9 +774,9 @@ module API
 
       def self.service_classes
         [
-          ::AsanaService,
-          ::AssemblaService,
-          ::BambooService,
+          ::Integrations::Asana,
+          ::Integrations::Assembla,
+          ::Integrations::Bamboo,
           ::BugzillaService,
           ::BuildkiteService,
           ::ConfluenceService,
@@ -819,4 +819,4 @@ module API
   end
 end
 
-API::Helpers::ServicesHelpers.prepend_if_ee('EE::API::Helpers::ServicesHelpers')
+API::Helpers::ServicesHelpers.prepend_mod_with('API::Helpers::ServicesHelpers')

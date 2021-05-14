@@ -8,7 +8,7 @@ module Boards
       private
 
       def update(epic, epic_modification_params)
-        ::Epics::UpdateService.new(epic.group, current_user, epic_modification_params).execute(epic)
+        ::Epics::UpdateService.new(group: epic.group, current_user: current_user, params: epic_modification_params).execute(epic)
       end
 
       def board

@@ -28,7 +28,7 @@ RSpec.describe Group do
     it { is_expected.to have_many(:container_repositories) }
     it { is_expected.to have_many(:milestones) }
     it { is_expected.to have_many(:group_deploy_keys) }
-    it { is_expected.to have_many(:services) }
+    it { is_expected.to have_many(:integrations) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
     it { is_expected.to have_many(:dependency_proxy_blobs) }
     it { is_expected.to have_many(:dependency_proxy_manifests) }
@@ -395,18 +395,94 @@ RSpec.describe Group do
       end
     end
 
-    context 'assigning a new parent' do
-      let!(:old_parent) { create(:group) }
-      let!(:new_parent) { create(:group) }
+    context 'assign a new parent' do
       let!(:group) { create(:group, parent: old_parent) }
+      let(:recorded_queries) { ActiveRecord::QueryRecorder.new }
+
+      subject do
+        recorded_queries.record do
+          group.update(parent: new_parent)
+        end
+      end
 
       before do
-        group.update(parent: new_parent)
+        subject
         reload_models(old_parent, new_parent, group)
       end
 
-      it 'updates traversal_ids' do
-        expect(group.traversal_ids).to eq [new_parent.id, group.id]
+      context 'within the same hierarchy' do
+        let!(:root) { create(:group).reload }
+        let!(:old_parent) { create(:group, parent: root) }
+        let!(:new_parent) { create(:group, parent: root) }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [root.id, new_parent.id, group.id]
+        end
+
+        it_behaves_like 'hierarchy with traversal_ids'
+        it_behaves_like 'locked row' do
+          let(:row) { root }
+        end
+      end
+
+      context 'to another hierarchy' do
+        let!(:old_parent) { create(:group) }
+        let!(:new_parent) { create(:group) }
+        let!(:group) { create(:group, parent: old_parent) }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [new_parent.id, group.id]
+        end
+
+        it_behaves_like 'locked rows' do
+          let(:rows) { [old_parent, new_parent] }
+        end
+
+        context 'old hierarchy' do
+          let(:root) { old_parent.root_ancestor }
+
+          it_behaves_like 'hierarchy with traversal_ids'
+        end
+
+        context 'new hierarchy' do
+          let(:root) { new_parent.root_ancestor }
+
+          it_behaves_like 'hierarchy with traversal_ids'
+        end
+      end
+
+      context 'from being a root ancestor' do
+        let!(:old_parent) { nil }
+        let!(:new_parent) { create(:group) }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [new_parent.id, group.id]
+        end
+
+        it_behaves_like 'locked rows' do
+          let(:rows) { [group, new_parent] }
+        end
+
+        it_behaves_like 'hierarchy with traversal_ids' do
+          let(:root) { new_parent }
+        end
+      end
+
+      context 'to being a root ancestor' do
+        let!(:old_parent) { create(:group) }
+        let!(:new_parent) { nil }
+
+        it 'updates traversal_ids' do
+          expect(group.traversal_ids).to eq [group.id]
+        end
+
+        it_behaves_like 'locked rows' do
+          let(:rows) { [old_parent, group] }
+        end
+
+        it_behaves_like 'hierarchy with traversal_ids' do
+          let(:root) { group }
+        end
       end
     end
 
@@ -423,6 +499,58 @@ RSpec.describe Group do
       it 'updates traversal_ids for all descendants' do
         expect(parent_group.reload.traversal_ids).to eq [new_grandparent.id, parent_group.id]
         expect(group.reload.traversal_ids).to eq [new_grandparent.id, parent_group.id, group.id]
+      end
+    end
+  end
+
+  context 'traversal queries' do
+    let_it_be(:group, reload: true) { create(:group, :nested) }
+
+    context 'recursive' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
+
+      it_behaves_like 'namespace traversal'
+
+      describe '#self_and_descendants' do
+        it { expect(group.self_and_descendants.to_sql).not_to include 'traversal_ids @>' }
+      end
+
+      describe '#descendants' do
+        it { expect(group.descendants.to_sql).not_to include 'traversal_ids @>' }
+      end
+
+      describe '#ancestors' do
+        it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
+      end
+    end
+
+    context 'linear' do
+      it_behaves_like 'namespace traversal'
+
+      describe '#self_and_descendants' do
+        it { expect(group.self_and_descendants.to_sql).to include 'traversal_ids @>' }
+      end
+
+      describe '#descendants' do
+        it { expect(group.descendants.to_sql).to include 'traversal_ids @>' }
+      end
+
+      describe '#ancestors' do
+        it { expect(group.ancestors.to_sql).to include "\"namespaces\".\"id\" = #{group.parent_id}" }
+
+        it 'hierarchy order' do
+          expect(group.ancestors(hierarchy_order: :asc).to_sql).to include 'ORDER BY "depth" ASC'
+        end
+
+        context 'ancestor linear queries feature flag disabled' do
+          before do
+            stub_feature_flags(use_traversal_ids_for_ancestors: false)
+          end
+
+          it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
+        end
       end
     end
   end
@@ -502,6 +630,16 @@ RSpec.describe Group do
       subject { described_class.non_public_only.to_a }
 
       it { is_expected.to match_array([private_group, internal_group]) }
+    end
+
+    describe 'with_onboarding_progress' do
+      subject { described_class.with_onboarding_progress }
+
+      it 'joins onboarding_progress' do
+        create(:onboarding_progress, namespace: group)
+
+        expect(subject).to eq([group])
+      end
     end
 
     describe 'for_authorized_group_members' do
@@ -1147,7 +1285,7 @@ RSpec.describe Group do
     end
   end
 
-  describe '#members_with_parents' do
+  shared_examples_for 'members_with_parents' do
     let!(:group) { create(:group, :nested) }
     let!(:maintainer) { group.parent.add_user(create(:user), GroupMember::MAINTAINER) }
     let!(:developer) { group.add_user(create(:user), GroupMember::DEVELOPER) }
@@ -1167,6 +1305,50 @@ RSpec.describe Group do
       it 'returns shared with group members' do
         expect(shared_group.members_with_parents).to(
           include(developer))
+      end
+    end
+  end
+
+  describe '#members_with_parents' do
+    it_behaves_like 'members_with_parents'
+  end
+
+  describe '#authorizable_members_with_parents' do
+    let(:group) { create(:group) }
+
+    it_behaves_like 'members_with_parents'
+
+    context 'members with associated user but also having invite_token' do
+      let!(:member) { create(:group_member, :developer, :invited, user: create(:user), group: group) }
+
+      it 'includes such members in the result' do
+        expect(group.authorizable_members_with_parents).to include(member)
+      end
+    end
+
+    context 'invited members' do
+      let!(:member) { create(:group_member, :developer, :invited, group: group) }
+
+      it 'does not include such members in the result' do
+        expect(group.authorizable_members_with_parents).not_to include(member)
+      end
+    end
+
+    context 'members from group shares' do
+      let(:shared_group) { group }
+      let(:shared_with_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: shared_with_group)
+      end
+
+      context 'an invited member that is part of the shared_with_group' do
+        let!(:member) { create(:group_member, :developer, :invited, group: shared_with_group) }
+
+        it 'does not include such members in the result' do
+          expect(shared_group.authorizable_members_with_parents).not_to(
+            include(member))
+        end
       end
     end
   end
@@ -1798,13 +1980,35 @@ RSpec.describe Group do
         allow(project).to receive(:protected_for?).with('ref').and_return(true)
       end
 
-      it 'returns all variables belong to the group and parent groups' do
-        expected_array1 = [protected_variable, ci_variable]
-        expected_array2 = [variable_child, variable_child_2, variable_child_3]
-        got_array = group_child_3.ci_variables_for('ref', project).to_a
+      context 'traversal queries' do
+        shared_examples 'correct ancestor order' do
+          it 'returns all variables belong to the group and parent groups' do
+            expected_array1 = [protected_variable, ci_variable]
+            expected_array2 = [variable_child, variable_child_2, variable_child_3]
+            got_array = group_child_3.ci_variables_for('ref', project).to_a
 
-        expect(got_array.shift(2)).to contain_exactly(*expected_array1)
-        expect(got_array).to eq(expected_array2)
+            expect(got_array.shift(2)).to contain_exactly(*expected_array1)
+            expect(got_array).to eq(expected_array2)
+          end
+        end
+
+        context 'recursive' do
+          before do
+            stub_feature_flags(use_traversal_ids: false)
+          end
+
+          include_examples 'correct ancestor order'
+        end
+
+        context 'linear' do
+          before do
+            stub_feature_flags(use_traversal_ids: true)
+
+            group_child_3.reload # make sure traversal_ids are reloaded
+          end
+
+          include_examples 'correct ancestor order'
+        end
       end
     end
   end
@@ -2396,6 +2600,14 @@ RSpec.describe Group do
       group = build(:group)
 
       expect(group.to_ability_name).to eq('group')
+    end
+  end
+
+  describe '#activity_path' do
+    it 'returns the group activity_path' do
+      expected_path = "/groups/#{group.name}/-/activity"
+
+      expect(group.activity_path).to eq(expected_path)
     end
   end
 end

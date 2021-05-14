@@ -10,6 +10,7 @@ export default {
     otherInformation: __('Other information'),
     replicationSlotWAL: s__('Geo|Replication slot WAL'),
     replicationSlots: s__('Geo|Replication slots'),
+    unknown: __('Unknown'),
   },
   components: {
     GlCard,
@@ -23,7 +24,9 @@ export default {
   },
   computed: {
     replicationSlotWAL() {
-      return numberToHumanSize(this.node.replicationSlotsMaxRetainedWalBytes);
+      return this.node.replicationSlotsMaxRetainedWalBytes
+        ? numberToHumanSize(this.node.replicationSlotsMaxRetainedWalBytes)
+        : this.$options.i18n.unknown;
     },
     replicationSlots() {
       return {
@@ -51,10 +54,7 @@ export default {
         :values="replicationSlots.values"
       />
     </div>
-    <div
-      v-if="node.replicationSlotsMaxRetainedWalBytes"
-      class="gl-display-flex gl-flex-direction-column gl-mb-5"
-    >
+    <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.replicationSlotWAL }}</span>
       <span class="gl-font-weight-bold gl-mt-2" data-testid="replication-slot-wal">{{
         replicationSlotWAL

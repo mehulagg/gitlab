@@ -148,7 +148,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         it 'does not enqueue ReverificationBatchWorker' do
           stub_secondary_node
 
-          expect(::Geo::ReverificationBatchWorker).not_to receive(:perform_async)
+          expect(::Geo::ReverificationBatchWorker).not_to receive(:perform_with_capacity)
 
           described_class.trigger_background_verification
         end
@@ -158,7 +158,7 @@ RSpec.shared_examples 'a verifiable replicator' do
         it 'enqueues ReverificationBatchWorker' do
           stub_primary_node
 
-          expect(::Geo::ReverificationBatchWorker).to receive(:perform_async).with(described_class.replicable_name)
+          expect(::Geo::ReverificationBatchWorker).to receive(:perform_with_capacity).with(described_class.replicable_name)
 
           described_class.trigger_background_verification
         end

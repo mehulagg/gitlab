@@ -71,6 +71,7 @@ export const setItemChildrenFlags = ({ commit }, data) =>
 
 export const setEpicPageInfo = ({ commit }, data) => commit(types.SET_EPIC_PAGE_INFO, data);
 export const setIssuePageInfo = ({ commit }, data) => commit(types.SET_ISSUE_PAGE_INFO, data);
+export const setWeightSum = ({ commit }, data) => commit(types.SET_WEIGHT_SUM, data);
 
 export const requestItems = ({ commit }, data) => commit(types.REQUEST_ITEMS, data);
 export const receiveItemsSuccess = ({ commit }, data) => commit(types.RECEIVE_ITEMS_SUCCESS, data);
@@ -122,6 +123,8 @@ export const fetchItems = ({ dispatch }, { parentItem, isSubItem = false }) => {
         parentItem,
         pageInfo: data.group.epic.issues.pageInfo,
       });
+
+      dispatch('setWeightSum', data.group.epic.descendantWeightSum);
 
       if (!isSubItem) {
         dispatch('setChildrenCount', data.group.epic.descendantCounts);

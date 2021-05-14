@@ -120,7 +120,7 @@ module Gitlab
     end
 
     def subscription_future_renewal?
-      return if self_managed? || namespace.nil?
+      return if self_managed? || namespace.nil? || !namespace.gitlab_subscription.present?
 
       ::GitlabSubscriptions::CheckFutureRenewalService.new(namespace: namespace).execute
     end

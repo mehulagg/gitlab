@@ -18,7 +18,7 @@ module Mutations
 
         authorize_admin_rights!(epic)
 
-        ::Issues::UpdateService.new(project, current_user, epic: epic)
+        ::Issues::UpdateService.new(project: project, current_user: current_user, params: { epic: epic })
           .execute(issue)
 
         {

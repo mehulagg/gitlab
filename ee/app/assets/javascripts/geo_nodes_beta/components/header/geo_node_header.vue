@@ -38,7 +38,9 @@ export default {
       return this.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
     },
     statusCheckTimestamp() {
-      return this.node.lastSuccessfulStatusCheckTimestamp * 1000;
+      return this.node.lastSuccessfulStatusCheckTimestamp
+        ? this.node.lastSuccessfulStatusCheckTimestamp * 1000
+        : null;
     },
   },
 };
@@ -68,7 +70,11 @@ export default {
         </div>
         <div class="gl-display-flex gl-align-items-center gl-flex-fill-2">
           <geo-node-health-status :status="node.healthStatus" />
-          <geo-node-last-updated class="gl-ml-2" :status-check-timestamp="statusCheckTimestamp" />
+          <geo-node-last-updated
+            v-if="statusCheckTimestamp"
+            class="gl-ml-2"
+            :status-check-timestamp="statusCheckTimestamp"
+          />
         </div>
       </div>
     </div>

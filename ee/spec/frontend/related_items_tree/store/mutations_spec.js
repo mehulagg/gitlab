@@ -35,6 +35,10 @@ describe('RelatedItemsTree', () => {
             issuesAtRisk: 0,
             issuesOnTrack: 0,
           });
+          expect(state).toHaveProperty('weightSum', {
+            openedIssues: 0,
+            closedIssues: 0,
+          });
         });
       });
 
@@ -698,6 +702,15 @@ describe('RelatedItemsTree', () => {
           mutations[types.RECIEVE_PROJECTS_FAILURE](state);
 
           expect(state.projectsFetchInProgress).toBe(false);
+        });
+      });
+
+      describe(types.SET_WEIGHT_SUM, () => {
+        it('should set `weightSum` within state', () => {
+          const payload = { openedIssues: 10, closedIssues: 5 };
+          mutations[types.SET_WEIGHT_SUM](state, payload);
+
+          expect(state.weightSum).toBe(payload);
         });
       });
     });

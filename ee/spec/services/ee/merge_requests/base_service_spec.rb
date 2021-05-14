@@ -17,7 +17,7 @@ RSpec.describe MergeRequests::BaseService do
     }
   end
 
-  subject { MergeRequests::CreateService.new(project, project.owner, params) }
+  subject { MergeRequests::CreateService.new(project: project, current_user: project.owner, params: params) }
 
   describe '#filter_params' do
     let(:params_filtering_service) { double(:params_filtering_service) }

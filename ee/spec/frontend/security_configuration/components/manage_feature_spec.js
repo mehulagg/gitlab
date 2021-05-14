@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import ManageDastProfiles from 'ee/security_configuration/components/manage_dast_profiles.vue';
 import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import ManageGeneric from 'ee/security_configuration/components/manage_generic.vue';
-import ManageViaMr from 'ee/security_configuration/components/manage_via_mr.vue';
+import ManageViaMr from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
 import {
   REPORT_TYPE_DAST_PROFILES,
   REPORT_TYPE_DEPENDENCY_SCANNING,

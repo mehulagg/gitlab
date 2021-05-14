@@ -120,7 +120,7 @@ This example contains the following:
 - `example.com`: The GitLab domain.
 - `example.io`: The domain GitLab Pages is served from.
 - `192.0.2.1`: The primary IP of your GitLab instance.
-- `192.0.2.2`: The secondary IP, which is dedicated to GitLab Pages.
+- `192.0.2.2`: The secondary IP, which is dedicated to GitLab Pages. It must be different than the primary IP.
 
 NOTE:
 You should not use the GitLab domain to serve user pages. For more information see the [security section](#security).
@@ -310,14 +310,12 @@ world. Custom domains are supported, but no TLS.
 
    ```ruby
    pages_external_url "http://example.io"
-   nginx['listen_addresses'] = ['192.0.2.1']
+   nginx['listen_addresses'] = ['192.0.2.1'] # The primary IP of the GitLab instance
    pages_nginx['enable'] = false
-   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80']
+   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80'] # The secondary IPs for the GitLab Pages daemon
    ```
 
-   where `192.0.2.1` is the primary IP address that GitLab is listening to and
-   `192.0.2.2` and `2001:db8::2` are the secondary IPs the GitLab Pages daemon
-   listens on. If you don't have IPv6, you can omit the IPv6 address.
+   If you don't have IPv6, you can omit the IPv6 address.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
@@ -342,17 +340,15 @@ world. Custom domains and TLS are supported.
 
    ```ruby
    pages_external_url "https://example.io"
-   nginx['listen_addresses'] = ['192.0.2.1']
+   nginx['listen_addresses'] = ['192.0.2.1'] # The primary IP of the GitLab instance
    pages_nginx['enable'] = false
-   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80']
-   gitlab_pages['external_https'] = ['192.0.2.2:443', '[2001:db8::2]:443']
+   gitlab_pages['external_http'] = ['192.0.2.2:80', '[2001:db8::2]:80'] # The secondary IPs for the GitLab Pages daemon
+   gitlab_pages['external_https'] = ['192.0.2.2:443', '[2001:db8::2]:443'] # The secondary IPs for the GitLab Pages daemon
    # Redirect pages from HTTP to HTTPS
    gitlab_pages['redirect_http'] = true
    ```
 
-   where `192.0.2.1` is the primary IP address that GitLab is listening to and
-   `192.0.2.2` and `2001:db8::2` are the secondary IPs where the GitLab Pages daemon
-   listens on. If you don't have IPv6, you can omit the IPv6 address.
+   If you don't have IPv6, you can omit the IPv6 address.
 
 1. If you haven't named your certificate and key `example.io.crt` and `example.io.key` respectively,
 then you need to also add the full paths as shown below:
@@ -1166,6 +1162,17 @@ date > /var/opt/gitlab/gitlab-rails/shared/pages/.update
 ```
 
 If you've customized the Pages storage path, adjust the command above to use your custom path.
+
+### 404 error after promoting a Geo secondary to a primary node
+
+These are due to the Pages files not being among the
+[supported data types](../geo/replication/datatypes.md#limitations-on-replicationverification).
+
+It is possible to copy the subfolders and files in the [Pages path](#change-storage-path)
+to the new primary node to resolve this.
+For example, you can adapt the `rsync` strategy from the
+[moving repositories documenation](../operations/moving_repositories.md).
+Alternatively, run the CI pipelines of those projects that contain a `pages` job again.
 
 ### Failed to connect to the internal GitLab API
 

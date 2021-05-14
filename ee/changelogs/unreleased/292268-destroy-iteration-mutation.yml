@@ -1,0 +1,5 @@
+---
+title: Add support to destroy iterations in GraphQL
+merge_request: 60655
+author:
+type: added

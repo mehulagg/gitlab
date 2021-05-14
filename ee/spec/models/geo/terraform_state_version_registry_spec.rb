@@ -10,4 +10,5 @@ RSpec.describe Geo::TerraformStateVersionRegistry, :geo, type: :model do
   end
 
   include_examples 'a Geo framework registry'
+  include_examples 'a Geo verifiable registry'
 end

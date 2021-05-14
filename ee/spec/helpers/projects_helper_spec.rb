@@ -163,13 +163,13 @@ RSpec.describe ProjectsHelper do
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
           auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix'),
-          scanners: '[{"external_id":"security_vendor","vendor":"Security Vendor","report_type":"SAST"}]'
+          scanners: '[{"id":123,"vendor":"Security Vendor","report_type":"SAST"}]'
         }
       end
 
       before do
         create(:vulnerability, project: project)
-        scanner = create(:vulnerabilities_scanner, project: project, external_id: 'security_vendor')
+        scanner = create(:vulnerabilities_scanner, project: project, id: 123)
         create(:vulnerabilities_finding, project: project, scanner: scanner)
       end
 
@@ -376,6 +376,14 @@ RSpec.describe ProjectsHelper do
           expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
         end
       end
+    end
+  end
+
+  describe '#status_checks_app_data' do
+    subject { helper.status_checks_app_data(project) }
+
+    it 'returns the correct data' do
+      expect(subject[:data]).to eq({ status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id)) })
     end
   end
 end

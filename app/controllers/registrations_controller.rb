@@ -199,8 +199,9 @@ class RegistrationsController < Devise::RegistrationsController
 
     return unless member
 
+    experiment(:invite_signup_page_interaction, actor: member).track(:form_submission)
     experiment('members/invite_email', actor: member).track(:accepted)
   end
 end
 
-RegistrationsController.prepend_if_ee('EE::RegistrationsController')
+RegistrationsController.prepend_mod_with('RegistrationsController')

@@ -11,7 +11,7 @@ RSpec.describe MergeRequests::PushOptionsHandlerService do
   let_it_be(:user3) { create(:user, developer_projects: [project]) }
   let_it_be(:forked_project) { fork_project(project, user1, repository: true) }
 
-  let(:service) { described_class.new(project, user1, changes, push_options) }
+  let(:service) { described_class.new(project: project, current_user: user1, changes: changes, push_options: push_options) }
   let(:source_branch) { 'fix' }
   let(:new_branch_changes) { "#{Gitlab::Git::BLANK_SHA} 570e7b2abdd848b95f2f578043fc23bd6f6fd24d refs/heads/#{source_branch}" }
   let(:existing_branch_changes) { "d14d6c0abdd253381df51a723d58691b2ee1ab08 570e7b2abdd848b95f2f578043fc23bd6f6fd24d refs/heads/#{source_branch}" }

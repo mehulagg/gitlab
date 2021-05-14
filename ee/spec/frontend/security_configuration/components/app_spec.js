@@ -5,7 +5,7 @@ import SecurityConfigurationApp from 'ee/security_configuration/components/app.v
 import ConfigurationTable from 'ee/security_configuration/components/configuration_table.vue';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import stubChildren from 'helpers/stub_children';
-import { scanners } from '~/security_configuration/components/scanners_constants';
+import { scanners } from '~/security_configuration/components/constants';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { generateFeatures } from './helpers';
 
