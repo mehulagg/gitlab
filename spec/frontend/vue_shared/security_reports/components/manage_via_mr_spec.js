@@ -20,6 +20,43 @@ describe('ManageViaMr component', () => {
 
   const findButton = () => wrapper.findComponent(GlButton);
 
+  function createMockApolloProvider(mutation, handler) {
+    const requestHandlers = [[mutation, handler]];
+
+    return createMockApollo(requestHandlers);
+  }
+
+  function createComponent({
+    featureName = 'SAST',
+    featureType = 'sast',
+    isFeatureConfigured = false,
+    variant = undefined,
+    category = undefined,
+    ...options
+  } = {}) {
+    wrapper = extendedWrapper(
+      mount(ManageViaMr, {
+        provide: {
+          projectPath: 'testProjectPath',
+        },
+        propsData: {
+          feature: {
+            name: featureName,
+            type: featureType,
+            configured: isFeatureConfigured,
+          },
+          variant,
+          category,
+        },
+        ...options,
+      }),
+    );
+  }
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   // This component supports different report types/mutations depending on
   // whether it's in a CE or EE context. This makes sure we are only testing
   // the ones available in the current test context.
@@ -42,38 +79,10 @@ describe('ManageViaMr component', () => {
       });
     const pendingHandler = () => new Promise(() => {});
 
-    function createMockApolloProvider(handler) {
-      const requestHandlers = [[mutation, handler]];
-
-      return createMockApollo(requestHandlers);
-    }
-
-    function createComponent({ mockApollo, isFeatureConfigured = false } = {}) {
-      wrapper = extendedWrapper(
-        mount(ManageViaMr, {
-          apolloProvider: mockApollo,
-          provide: {
-            projectPath: 'testProjectPath',
-          },
-          propsData: {
-            feature: {
-              name: featureName,
-              type: featureType,
-              configured: isFeatureConfigured,
-            },
-          },
-        }),
-      );
-    }
-
-    afterEach(() => {
-      wrapper.destroy();
-    });
-
     describe('when feature is configured', () => {
       beforeEach(() => {
-        const mockApollo = createMockApolloProvider(successHandler);
-        createComponent({ mockApollo, isFeatureConfigured: true });
+        const apolloProvider = createMockApolloProvider(mutation, successHandler);
+        createComponent({ apolloProvider, featureName, featureType, isFeatureConfigured: true });
       });
 
       it('it does not render a button', () => {
@@ -83,8 +92,8 @@ describe('ManageViaMr component', () => {
 
     describe('when feature is not configured', () => {
       beforeEach(() => {
-        const mockApollo = createMockApolloProvider(successHandler);
-        createComponent({ mockApollo, isFeatureConfigured: false });
+        const apolloProvider = createMockApolloProvider(mutation, successHandler);
+        createComponent({ apolloProvider, featureName, featureType, isFeatureConfigured: false });
       });
 
       it('it does render a button', () => {
@@ -94,8 +103,8 @@ describe('ManageViaMr component', () => {
 
     describe('given a pending response', () => {
       beforeEach(() => {
-        const mockApollo = createMockApolloProvider(pendingHandler);
-        createComponent({ mockApollo });
+        const apolloProvider = createMockApolloProvider(mutation, pendingHandler);
+        createComponent({ apolloProvider, featureName, featureType });
       });
 
       it('renders spinner correctly', async () => {
@@ -108,8 +117,8 @@ describe('ManageViaMr component', () => {
 
     describe('given a successful response', () => {
       beforeEach(() => {
-        const mockApollo = createMockApolloProvider(successHandler);
-        createComponent({ mockApollo });
+        const apolloProvider = createMockApolloProvider(mutation, successHandler);
+        createComponent({ apolloProvider, featureName, featureType });
       });
 
       it('should call redirect helper with correct value', async () => {
@@ -132,8 +141,8 @@ describe('ManageViaMr component', () => {
       ${errorHandler}         | ${'foo'}
     `('given an error response', ({ handler, message }) => {
       beforeEach(() => {
-        const mockApollo = createMockApolloProvider(handler);
-        createComponent({ mockApollo });
+        const apolloProvider = createMockApolloProvider(mutation, handler);
+        createComponent({ apolloProvider, featureName, featureType });
       });
 
       it('should catch and emit error', async () => {
@@ -141,6 +150,19 @@ describe('ManageViaMr component', () => {
         await waitForPromises();
         expect(wrapper.emitted('error')).toEqual([[message]]);
         expect(findButton().props('loading')).toBe(false);
+      });
+    });
+  });
+
+  describe('button props', () => {
+    it('passes the variant and category props to the GlButton', () => {
+      const variant = 'danger';
+      const category = 'tertiary';
+      createComponent({ variant, category });
+
+      expect(wrapper.findComponent(GlButton).props()).toMatchObject({
+        variant,
+        category,
       });
     });
   });
