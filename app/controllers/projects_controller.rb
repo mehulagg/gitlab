@@ -12,6 +12,8 @@ class ProjectsController < Projects::ApplicationController
 
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
 
+  around_action :shard_write!, only: [:create]
+
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show]
 
   before_action :disable_query_limiting, only: [:show, :create]
@@ -58,7 +60,7 @@ class ProjectsController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def new
-    @namespace = Namespace.find_by(id: params[:namespace_id]) if params[:namespace_id]
+    @namespace = Namespace.sharded_find(params[:namespace_id]) if params[:namespace_id]
     return access_denied! if @namespace && !can?(current_user, :create_projects, @namespace)
 
     @project = Project.new(namespace_id: @namespace&.id)
@@ -317,6 +319,18 @@ class ProjectsController < Projects::ApplicationController
   end
 
   private
+
+  def shard_write!(&block)
+    namespace_id = project_params(attributes: project_params_create_attributes)[:namespace_id]
+
+    if namespace_id.present?
+      parent_group = Group.sharded_find(namespace_id)
+
+      NamespaceShard.sharded_write(namespace: parent_group, &block)
+    else
+      yield
+    end
+  end
 
   # Render project landing depending of which features are available
   # So if page is not available in the list it renders the next page
