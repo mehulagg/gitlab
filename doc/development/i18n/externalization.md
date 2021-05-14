@@ -10,16 +10,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 For working with internationalization (i18n),
 [GNU gettext](https://www.gnu.org/software/gettext/) is used given it's the most
-used tool for this task and there are a lot of applications that help us
-work with it.
+used tool for this task and there are many applications that help us work with it.
 
 NOTE:
-All `rake` commands described on this page must be run on a GitLab instance, usually GDK.
+All `rake` commands described on this page must be run on a GitLab instance. This instance is
+usually the GitLab Development Kit (GDK).
 
-## Setting up GitLab Development Kit (GDK)
+## Setting up the GitLab Development Kit (GDK)
 
-In order to be able to work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
-project you must download and configure it through [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/set-up-gdk.md).
+To work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
+project, you must download and configure it through the [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/set-up-gdk.md).
 
 After you have the GitLab project ready, you can start working on the translation.
 
@@ -27,34 +27,33 @@ After you have the GitLab project ready, you can start working on the translatio
 
 The following tools are used:
 
-1. [`gettext_i18n_rails`](https://github.com/grosser/gettext_i18n_rails): this
-   gem allow us to translate content from models, views and controllers. Also
-   it gives us access to the following Rake tasks:
-   - `rake gettext:find`: Parses almost all the files from the
-     Rails application looking for content that has been marked for
-     translation. Finally, it updates the PO files with the new content that
-     it has found.
-   - `rake gettext:pack`: Processes the PO files and generates the
-     MO files that are binary and are finally used by the application.
+- [`gettext_i18n_rails`](https://github.com/grosser/gettext_i18n_rails):
+  this gem allows us to translate content from models, views, and controllers. It also gives us
+  access to the following Rake tasks:
 
-1. [`gettext_i18n_rails_js`](https://github.com/webhippie/gettext_i18n_rails_js):
-   this gem is useful to make the translations available in JavaScript. It
-   provides the following Rake task:
-   - `rake gettext:po_to_json`: Reads the contents from the PO files and
-     generates JSON files containing all the available translations.
+  - `rake gettext:find`: parses almost all the files from the Rails application looking for content
+    marked for translation. It then updates the PO files with this content.
+  - `rake gettext:pack`: processes the PO files and generates the binary MO files that the
+    application uses.
 
-1. PO editor: there are multiple applications that can help us to work with PO
-   files, a good option is [Poedit](https://poedit.net/download) which is
-   available for macOS, GNU/Linux and Windows.
+- [`gettext_i18n_rails_js`](https://github.com/webhippie/gettext_i18n_rails_js):
+  this gem makes the translations available in JavaScript. It provides the following Rake task:
+
+  - `rake gettext:po_to_json`: reads the contents of the PO files and generates JSON files that
+    contain all the available translations.
+
+- PO editor: there are multiple applications that can help us work with PO files. A good option is
+  [Poedit](https://poedit.net/download),
+  which is available for macOS, GNU/Linux, and Windows.
 
 ## Preparing a page for translation
 
-We basically have 4 types of files:
+There are four file types:
 
-1. Ruby files: basically Models and Controllers.
-1. HAML files: these are the view files.
-1. ERB files: used for email templates.
-1. JavaScript files: we mostly need to work with Vue templates.
+- Ruby files: models and controllers.
+- HAML files: view files.
+- ERB files: used for email templates.
+- JavaScript files: we mostly work with Vue templates.
 
 ### Ruby files
 
@@ -72,7 +71,7 @@ Or:
 hello = "Hello world!"
 ```
 
-You can easily mark that content for translation with:
+You can mark that content for translation with:
 
 ```ruby
 def hello
@@ -86,26 +85,21 @@ Or:
 hello = _("Hello world!")
 ```
 
-Be careful when translating strings at the class or module level since these would only be
-evaluated once at class load time.
-
-For example:
+Be careful when translating strings at the class or module level since these are only evaluated once
+at class load time. For example:
 
 ```ruby
 validates :group_id, uniqueness: { scope: [:project_id], message: _("already shared with this group") }
 ```
 
-This would be translated when the class is loaded and result in the error message
-always being in the default locale.
-
-Active Record's `:message` option accepts a `Proc`, so we can do this instead:
+This is translated when the class loads and results in the error message always being in the default
+locale. Active Record's `:message` option accepts a `Proc`, so do this instead:
 
 ```ruby
 validates :group_id, uniqueness: { scope: [:project_id], message: -> (object, data) { _("already shared with this group") } }
 ```
 
-Messages in the API (`lib/api/` or `app/graphql`) do
-not need to be externalized.
+Messages in the API (`lib/api/` or `app/graphql`) do not need to be externalized.
 
 ### HAML files
 
@@ -145,13 +139,16 @@ import { __ } from '~/locale';
 const label = __('Subscribe');
 ```
 
-In order to test JavaScript translations you have to change the GitLab
-localization to another language than English and you have to generate JSON files
-using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
+To test JavaScript translations you must:
+
+- Change the GitLab localization to a language other than English.
+- Generate JSON files by using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
 
 ### Vue files
 
-In Vue files we make both the `__()` (double underscore parenthesis) function and the `s__()` (namespaced double underscore parenthesis) function available that you can import from the `~/locale` file. For instance:
+In Vue files, we make the `__()` (double underscore parenthesis) and the `s__()` (namespaced double
+underscore parenthesis) functions available. You can therefore import from the `~/locale` file. For
+example:
 
 ```javascript
 import { __, s__ } from '~/locale';
