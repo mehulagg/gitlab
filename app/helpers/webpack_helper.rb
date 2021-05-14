@@ -19,13 +19,14 @@ module WebpackHelper
 
   def webpack_preload_asset_tag(asset, options = {})
     path = Gitlab::Webpack::Manifest.asset_paths(asset).first
-    crossorigin = options.delete(:crossorigin) || 'anonymous'
 
     if options.delete(:prefetch)
-      prefetch_link_tag(path)
+      tag = prefetch_link_tag(path)
     else
-      preload_link_tag(path, options.merge(crossorigin))
+      tag = preload_link_tag(path, options)
     end
+
+    tag
   end
 
   def webpack_controller_bundle_tags
