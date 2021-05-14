@@ -6,7 +6,7 @@ module WikiPages
 
     def execute(page)
       # this class is not thread safe!
-      @old_attributes = page.attributes
+      @old_slug = page.slug
 
       if page.update(@params)
         execute_hooks(page)
@@ -36,7 +36,7 @@ module WikiPages
     end
 
     def slug_for_page(page)
-      @old_attributes[:slug].presence || super
+      @old_slug.presence || super
     end
   end
 end
