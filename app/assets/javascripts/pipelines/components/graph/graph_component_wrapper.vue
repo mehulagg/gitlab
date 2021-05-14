@@ -116,8 +116,8 @@ export default {
           {
             projectPath: this.projectPath,
             pipelineIid: this.pipelineIid,
-            pipelineStages: this.pipeline.stages.length,
-            nbOfDownstreams: this.pipeline.downstream.length,
+            pipelineStages: this.pipeline?.stages?.length || 0,
+            nbOfDownstreams: this.pipeline?.downstream?.length || 0,
           },
         );
       },
