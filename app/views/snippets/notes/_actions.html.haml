@@ -1,7 +1,7 @@
 - if current_user
   - if note.emoji_awardable?
     .note-actions-item
-      = link_to '#', title: _('Add reaction'), class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip", data: { position: 'right' } do
+      = link_to '#', title: _('Add reaction'), class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip", data: { position: 'right', qa_selector: 'emoji_button' } do
         %span{ class: 'link-highlight award-control-icon-neutral' }= sprite_icon('slight-smile')
         %span{ class: 'link-highlight award-control-icon-positive' }= sprite_icon('smiley')
         %span{ class: 'link-highlight award-control-icon-super-positive' }= sprite_icon('smile')
