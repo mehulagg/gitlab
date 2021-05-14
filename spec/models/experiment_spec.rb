@@ -79,7 +79,7 @@ RSpec.describe Experiment do
     context 'when an experiment with the provided name does not exist' do
       it 'creates a new experiment record' do
         allow_next(described_class, name: :experiment_key)
-          .to receive(:record_group_and_variant!).with(group, variant)
+          .to receive(:record_subject_and_variant!).with(group, variant)
 
         expect { add_group }.to change(described_class, :count).by(1)
       end
@@ -235,16 +235,16 @@ RSpec.describe Experiment do
     end
   end
 
-  describe '#record_group_and_variant!' do
+  describe '#record_subject_and_variant!' do
     let_it_be(:group) { create(:group) }
     let_it_be(:variant) { :control }
     let_it_be(:experiment) { create(:experiment) }
 
-    subject(:record_group_and_variant!) { experiment.record_group_and_variant!(group, variant) }
+    subject(:record_subject_and_variant!) { experiment.record_subject_and_variant!(group, variant) }
 
     context 'when no existing experiment_subject record exists for the given group' do
       it 'creates an experiment_subject record' do
-        expect { record_group_and_variant! }.to change(ExperimentSubject, :count).by(1)
+        expect { record_subject_and_variant! }.to change(ExperimentSubject, :count).by(1)
         expect(ExperimentSubject.last.variant).to eq(variant.to_s)
       end
     end
@@ -266,7 +266,7 @@ RSpec.describe Experiment do
 
       context 'but it belonged to a different variant' do
         it 'updates the variant value' do
-          expect { record_group_and_variant! }.to change { experiment_subject.reload.variant }.to('control')
+          expect { record_subject_and_variant! }.to change { experiment_subject.reload.variant }.to('control')
         end
       end
     end

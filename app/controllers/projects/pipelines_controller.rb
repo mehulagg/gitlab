@@ -49,25 +49,26 @@ class Projects::PipelinesController < Projects::ApplicationController
 
     respond_to do |format|
       format.html do
-        experiment(:pipeline_empty_state_templates, actor: current_user) do |e|
-          e.exclude! unless current_user
+        experiment(:pipeline_empty_state_templates, namespace: project.root_ancestor) do |e|
+          e.exclude! unless current_user && can?(current_user, :create_pipeline, project)
           e.exclude! if @pipelines_count.to_i > 0
           e.exclude! if helpers.has_gitlab_ci?(project)
 
-          e.use {}
-          e.try {}
-          e.track(:view, value: project.namespace_id)
+          e.control {}
+          e.candidate {}
+          e.record!
+          e.track(:view)
         end
         experiment(:code_quality_walkthrough, namespace: project.root_ancestor) do |e|
-          e.exclude! unless current_user
-          e.exclude! unless can?(current_user, :create_pipeline, project)
+          e.exclude! unless current_user && can?(current_user, :create_pipeline, project)
           e.exclude! unless project.root_ancestor.recent?
           e.exclude! if @pipelines_count.to_i > 0
           e.exclude! if helpers.has_gitlab_ci?(project)
 
-          e.use {}
-          e.try {}
-          e.track(:view, property: project.root_ancestor.id.to_s)
+          e.control {}
+          e.candidate {}
+          e.record!
+          e.track(:view)
         end
       end
       format.json do
