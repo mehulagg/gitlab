@@ -198,6 +198,9 @@ export default {
     formattedHumanAccess() {
       return (this.mr.humanAccess || '').toLowerCase();
     },
+    hasAlerts() {
+      return this.mr.mergeError || this.mr.allowCollaboration || this.showMergePipelineForkWarning;
+    },
   },
   watch: {
     state(newVal, oldVal) {
@@ -456,6 +459,32 @@ export default {
       :service="service"
     />
     <div class="mr-section-container mr-widget-workflow">
+      <div v-if="hasAlerts" class="gl-overflow-hidden mr-widget-alert-container">
+        <mr-widget-alert-message v-if="mr.mergeError" type="danger" dismissible>
+          <span v-safe-html="mergeError"></span>
+        </mr-widget-alert-message>
+        <mr-widget-alert-message v-if="showMergePipelineForkWarning" type="warning">
+          {{
+            s__(
+              'mrWidget|Fork project merge requests do not create merge request pipelines that validate a post merge result unless invoked by a project member.',
+            )
+          }}
+        </mr-widget-alert-message>
+        <mr-widget-alert-message
+          v-if="mr.allowCollaboration"
+          type="info"
+          help-path="https://google.com"
+        >
+          {{
+            s__(
+              'mrWidget|The fork project allows commits from members who can write to the target branch.',
+            )
+          }}
+          <template #link-content>
+            {{ __('More information') }}
+          </template>
+        </mr-widget-alert-message>
+      </div>
       <!-- <extensions-container :mr="mr" /> -->
       <grouped-codequality-reports-app
         v-if="shouldRenderCodeQuality"
@@ -492,33 +521,11 @@ export default {
         <component :is="componentName" :mr="mr" :service="service" />
 
         <div class="mr-widget-info">
-          <section v-if="shouldRenderCollaborationStatus" class="mr-info-list mr-links">
-            <p>
-              {{ s__('mrWidget|Allows commits from members who can merge to the target branch') }}
-            </p>
-          </section>
-
           <mr-widget-related-links
             v-if="shouldRenderRelatedLinks"
             :state="mr.state"
             :related-links="mr.relatedLinks"
           />
-
-          <mr-widget-alert-message
-            v-if="showMergePipelineForkWarning"
-            type="warning"
-            :help-path="mr.mergeRequestPipelinesHelpPath"
-          >
-            {{
-              s__(
-                'mrWidget|If the last pipeline ran in the fork project, it may be inaccurate. Before merge, we advise running a pipeline in this project.',
-              )
-            }}
-          </mr-widget-alert-message>
-
-          <mr-widget-alert-message v-if="mr.mergeError" type="danger">
-            <span v-safe-html="mergeError"></span>
-          </mr-widget-alert-message>
 
           <source-branch-removal-status v-if="shouldRenderSourceBranchRemovalStatus" />
         </div>
