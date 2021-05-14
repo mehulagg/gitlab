@@ -4,6 +4,10 @@
 .if-not-canonical-namespace: &if-not-canonical-namespace
   if: '$CI_PROJECT_NAMESPACE !~ /^gitlab(-org)?($|\/)/'
 
+.exists-ee: &exists-ee
+  exists:
+    - ee/**/*
+
 .if-not-ee: &if-not-ee
   if: '$CI_PROJECT_NAME !~ /^gitlab(-ee)?$/'
 
