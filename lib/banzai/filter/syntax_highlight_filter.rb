@@ -24,7 +24,8 @@ module Banzai
 
       def highlight_node(node)
         css_classes = +'code highlight js-syntax-highlight'
-        lang, lang_params = parse_lang_params(node.attr('lang'))
+
+        lang, lang_params = parse_lang_params(node.parent.attr('lang')) # `lang` attribute lies in <pre>, not in <code>.
         retried = false
 
         if use_rouge?(lang)

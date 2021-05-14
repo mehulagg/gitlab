@@ -23,24 +23,18 @@ module Banzai
           :VALIDATE_UTF8               # replace illegal sequences with the replacement character U+FFFD.
         ].freeze
 
-        # The `:GITHUB_PRE_LANG` option is not used intentionally because
-        # it renders a fence block with language as `<pre lang="LANG"><code>some code\n</code></pre>`
-        # while GitLab's syntax is `<pre><code lang="LANG">some code\n</code></pre>`.
-        # If in the future the syntax is about to be made GitHub-compatible, please, add `:GITHUB_PRE_LANG` render option below
-        # and remove `code_block` method from `lib/banzai/renderer/common_mark/html.rb`.
         RENDER_OPTIONS = [
-          # as of commonmarker 0.18.0, we need to use :UNSAFE to get the same as the original :DEFAULT
-          # https://github.com/gjtorikian/commonmarker/pull/81
-          :UNSAFE
+          :GITHUB_PRE_LANG, # use GitHub-style <pre lang> for fenced code blocks.
+          :UNSAFE           # allow raw/custom HTML and unsafe links.
         ].freeze
 
         RENDER_OPTIONS_SOURCEPOS = RENDER_OPTIONS + [
-          :SOURCEPOS # enable embedding of source position information
+          :SOURCEPOS # enable embedding of source position information.
         ].freeze
 
         def initialize(context)
           @context  = context
-          @renderer = Banzai::Renderer::CommonMark::HTML.new(options: render_options)
+          @renderer = CommonMarker::HtmlRenderer.new(options: render_options)
         end
 
         def render(text)
