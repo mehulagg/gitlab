@@ -22,7 +22,9 @@ module Gitlab
           .where("traversal_ids = '{}'")
 
         ranged_query.each_batch(of: sub_batch_size) do |sub_batch|
-          sub_batch.update_all('traversal_ids = ARRAY[id]')
+          first, last = sub_batch.pluck(Arel.sql('min(id), max(id)')).first
+          sub_batch.unscoped.where(id: first..last).update_all('traversal_ids = ARRAY[id]')
+
           sleep PAUSE_SECONDS
         end
 
