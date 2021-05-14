@@ -36,14 +36,14 @@ The keywords available for jobs are:
 | [`coverage`](#coverage)             | Code coverage settings for a given job. |
 | [`dependencies`](#dependencies)     | Restrict which artifacts are passed to a specific job by providing a list of jobs to fetch artifacts from. |
 | [`environment`](#environment)       | Name of an environment to which the job deploys. |
-| [`except`](#only--except)             | Control when jobs are not created. |
+| [`except`](#only--except)           | Control when jobs are not created. |
 | [`extends`](#extends)               | Configuration entries that this job inherits from. |
 | [`image`](#image)                   | Use Docker images. |
 | [`include`](#include)               | Include external YAML files. |
 | [`inherit`](#inherit)               | Select which global defaults all jobs inherit. |
 | [`interruptible`](#interruptible)   | Defines if a job can be canceled when made redundant by a newer run. |
 | [`needs`](#needs)                   | Execute jobs earlier than the stage ordering. |
-| [`only`](#only--except)               | Control when jobs are created. |
+| [`only`](#only--except)             | Control when jobs are created. |
 | [`pages`](#pages)                   | Upload the result of a job to use with GitLab Pages. |
 | [`parallel`](#parallel)             | How many instances of a job should be run in parallel. |
 | [`release`](#release)               | Instructs the runner to generate a [release](../../user/project/releases/index.md) object. |
@@ -1615,7 +1615,7 @@ Four keywords can be used with `only` and `except`:
 - [`changes`](#onlychanges--exceptchanges)
 - [`kubernetes`](#onlykubernetes--exceptkubernetes)
 
-See [control jobs with `only` and `except`](../jobs/job_control.md#specify-when-jobs-run-with-only-and-except)
+See [specify when jobs run with `only` and `except`](../jobs/job_control.md#specify-when-jobs-run-with-only-and-except)
 for more details and examples.
 
 #### `only:refs` / `except:refs`
