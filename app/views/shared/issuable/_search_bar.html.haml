@@ -14,6 +14,7 @@
   .issues-details-filters.filtered-search-block.d-flex.flex-column.flex-lg-row{ class: block_css_class }
     .d-flex.flex-column.flex-md-row.flex-grow-1.mb-lg-0.mb-md-2.mb-sm-0.w-100
       - if type == :boards
+        -# needs to be there
         = render "shared/boards/switcher", board: board
       = form_tag page_filter_path, method: :get, class: 'filter-form js-filter-form w-100' do
         - if params[:search].present?
@@ -21,9 +22,10 @@
         - if @can_bulk_update
           .check-all-holder.d-none.d-sm-block.hidden
             = check_box_tag "check-all-issues", nil, false, class: "check-all-issues left"
-            -# Is epic board was guarding this
         - if Feature.enabled?(:boards_filtered_search, @group) && is_epic_board
           #js-board-filtered-search{ data: { full_path: @group&.full_path } }
+        - elsif Feature.enabled?(:issue_boards_filtered_search, @group) && board
+          #js-issue-board-filtered-search
         - else
           .issues-other-filters.filtered-search-wrapper.d-flex.flex-column.flex-md-row
             .filtered-search-box

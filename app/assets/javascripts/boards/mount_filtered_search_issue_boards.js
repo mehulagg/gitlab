@@ -4,7 +4,7 @@ import store from '~/boards/stores';
 import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default (apolloProvider) => {
-  const el = document.getElementById('js-board-filtered-search');
+  const el = document.getElementById('js-issue-board-filtered-search');
   const rawFilterParams = urlParamsToObject(window.location.search);
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {}),

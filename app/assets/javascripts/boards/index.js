@@ -184,10 +184,10 @@ export default () => {
       eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
-      // if (!gon?.features?.issueBoardsFilteredSearch) {
+      if (!gon?.features?.issueBoardsFilteredSearch) {
         this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
         this.filterManager.setup();
-      // }
+      }
 
       this.performSearch();
 
