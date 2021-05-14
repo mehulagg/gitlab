@@ -3,39 +3,34 @@
 require 'spec_helper'
 
 RSpec.describe WebpackHelper do
-  source = 'foo.js'
-  asset_path = "/assets/webpack/#{source}"
+  let(:source) { 'foo.js' }
+  let(:asset_path) { "/assets/webpack/#{source}" }
 
   describe '#prefetch_link_tag' do
-    before do
-      allow(request).to receive(:send_early_hints).and_return(nil)
-    end
-
     it 'returns prefetch link tag' do
-      expect(prefetch_link_tag(source)).to eq('<link rel="prefetch" href="/foo.js">')
+      expect(helper.prefetch_link_tag(source)).to eq("<link rel=\"prefetch\" href=\"/#{source}\">")
     end
   end
 
   describe '#webpack_preload_asset_tag' do
-
     before do
-      allow(Gitlab::Webpack::Manifest).to receive(:asset_paths) { ["#{asset_path}"] }
+      allow(Gitlab::Webpack::Manifest).to receive(:asset_paths).and_return([asset_path])
     end
 
-    it 'preloads by default' do
+    it 'preloads the resource by default' do
       expect(helper).to receive(:preload_link_tag).with(asset_path, {}).and_call_original
 
       output = helper.webpack_preload_asset_tag(source)
 
-      expect(output).to eq('<link rel="preload" href="/assets/webpack/foo.js" as="script" type="text/javascript">')
+      expect(output).to eq("<link rel=\"preload\" href=\"#{asset_path}\" as=\"script\" type=\"text/javascript\">")
     end
 
-    it 'prefetches if explcitely asked' do
+    it 'prefetches the resource if explicitly asked' do
       expect(helper).to receive(:prefetch_link_tag).with(asset_path).and_call_original
 
       output = helper.webpack_preload_asset_tag(source, prefetch: true)
 
-      expect(output).to eq('<link rel="prefetch" href="/assets/webpack/foo.js">')
+      expect(output).to eq("<link rel=\"prefetch\" href=\"#{asset_path}\">")
     end
   end
 end
