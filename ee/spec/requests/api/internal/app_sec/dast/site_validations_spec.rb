@@ -17,7 +17,7 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
           put api(url, developer), params: { event: :pass }
 
           expect(response).to have_gitlab_http_status(:not_found)
-          expect(json_response).to eq('message' => '404 not found')
+          expect(json_response).to eq('message' => '404 Not found')
         end
       end
 
