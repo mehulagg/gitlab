@@ -1,0 +1,5 @@
+---
+title: Add foreign keys to lfs_objects_projects table
+merge_request: 61787
+author:
+type: added

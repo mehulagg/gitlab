@@ -26,7 +26,7 @@ RSpec.describe Lfs::PushService do
     end
 
     it 'does nothing if there are no LFS objects' do
-      lfs_object.destroy!
+      project.lfs_objects = []
 
       expect(lfs_client).not_to receive(:upload!)
 
