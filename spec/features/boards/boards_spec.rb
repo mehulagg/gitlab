@@ -198,6 +198,8 @@ RSpec.describe 'Project issue boards', :js do
       it 'removes all of the same issue to closed' do
         drag(list_from_index: 1, list_to_index: 3)
 
+        live_debug
+
         wait_for_board_cards(2, 7)
         wait_for_board_cards(3, 2)
         wait_for_board_cards(4, 2)
@@ -378,7 +380,7 @@ RSpec.describe 'Project issue boards', :js do
         set_filter("author", user2.username)
         click_filter_link(user2.username)
         submit_filter
-
+      
         wait_for_requests
         wait_for_board_cards(2, 1)
         wait_for_empty_boards((3..4))

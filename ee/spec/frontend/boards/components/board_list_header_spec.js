@@ -14,9 +14,10 @@ localVue.use(Vuex);
 describe('Board List Header Component', () => {
   let store;
   let wrapper;
+  const boardListsTotals = {};
 
   beforeEach(() => {
-    store = new Vuex.Store({ state: { activeId: inactiveId }, getters });
+    store = new Vuex.Store({ state: { activeId: inactiveId, boardListsTotals }, getters });
     jest.spyOn(store, 'dispatch').mockImplementation();
   });
 
