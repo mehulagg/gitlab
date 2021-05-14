@@ -4,10 +4,9 @@ import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
 import waitForPromises from 'helpers/wait_for_promises';
 import { TEST_HOST } from 'spec/test_constants';
-import Api from '~/api';
 import ConfigureFeatureFlagsModal from '~/feature_flags/components/configure_feature_flags_modal.vue';
+import EmptyState from '~/feature_flags/components/empty_state.vue';
 import FeatureFlagsComponent from '~/feature_flags/components/feature_flags.vue';
-import FeatureFlagsTab from '~/feature_flags/components/feature_flags_tab.vue';
 import FeatureFlagsTable from '~/feature_flags/components/feature_flags_table.vue';
 import createStore from '~/feature_flags/store/index';
 import axios from '~/lib/utils/axios_utils';
@@ -27,7 +26,7 @@ describe('Feature flags', () => {
     featureFlagsLimit: '200',
     featureFlagsLimitExceeded: false,
     newFeatureFlagPath: 'feature-flags/new',
-    newUserListPath: '/user-list/new',
+    userListPath: '/user-list',
     unleashApiUrl: `${TEST_HOST}/api/unleash`,
     projectName: 'fakeProjectName',
     errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
@@ -50,14 +49,14 @@ describe('Feature flags', () => {
       store,
       provide,
       stubs: {
-        FeatureFlagsTab,
+        EmptyState,
       },
     });
   };
 
   const configureButton = () => wrapper.find('[data-testid="ff-configure-button"]');
   const newButton = () => wrapper.find('[data-testid="ff-new-button"]');
-  const newUserListButton = () => wrapper.find('[data-testid="ff-new-list-button"]');
+  const userListButton = () => wrapper.find('[data-testid="ff-user-list-button"]');
   const limitAlert = () => wrapper.findComponent(GlAlert);
 
   beforeEach(() => {
@@ -115,7 +114,7 @@ describe('Feature flags', () => {
       canUserConfigure: false,
       canUserRotateToken: false,
       newFeatureFlagPath: null,
-      newUserListPath: null,
+      userListPath: null,
     };
 
     beforeEach((done) => {
@@ -134,8 +133,8 @@ describe('Feature flags', () => {
       expect(newButton().exists()).toBe(false);
     });
 
-    it('does not render new user list button', () => {
-      expect(newUserListButton().exists()).toBe(false);
+    it('does not render view user list button', () => {
+      expect(userListButton().exists()).toBe(false);
     });
   });
 
@@ -191,9 +190,9 @@ describe('Feature flags', () => {
         expect(newButton().exists()).toBe(true);
       });
 
-      it('renders new user list button', () => {
-        expect(newUserListButton().exists()).toBe(true);
-        expect(newUserListButton().attributes('href')).toBe('/user-list/new');
+      it('renders view user list button', () => {
+        expect(userListButton().exists()).toBe(true);
+        expect(userListButton().attributes('href')).toBe(mockData.userListPath);
       });
 
       describe('in feature flags tab', () => {
@@ -249,9 +248,9 @@ describe('Feature flags', () => {
         expect(newButton().exists()).toBe(true);
       });
 
-      it('renders new user list button', () => {
-        expect(newUserListButton().exists()).toBe(true);
-        expect(newUserListButton().attributes('href')).toBe('/user-list/new');
+      it('renders view user list button', () => {
+        expect(userListButton().exists()).toBe(true);
+        expect(userListButton().attributes('href')).toBe(mockData.userListPath);
       });
 
       describe('pagination', () => {
@@ -295,9 +294,9 @@ describe('Feature flags', () => {
       expect(newButton().exists()).toBe(true);
     });
 
-    it('renders new user list button', () => {
-      expect(newUserListButton().exists()).toBe(true);
-      expect(newUserListButton().attributes('href')).toBe('/user-list/new');
+    it('renders view user list button', () => {
+      expect(userListButton().exists()).toBe(true);
+      expect(userListButton().attributes('href')).toBe(mockData.userListPath);
     });
   });
 

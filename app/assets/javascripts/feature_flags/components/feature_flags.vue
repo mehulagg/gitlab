@@ -28,7 +28,7 @@ export default {
     GlModal: GlModalDirective,
   },
   inject: {
-    newUserListPath: { default: '' },
+    userListPath: { default: '' },
     newFeatureFlagPath: { default: '' },
     canUserConfigure: {},
     featureFlagsLimitExceeded: {},
@@ -152,8 +152,8 @@ export default {
     <div :class="topAreaBaseClasses">
       <div class="gl-display-flex gl-flex-direction-column gl-md-display-none!">
         <gl-button
-          v-if="newUserListPath"
-          :href="newUserListPath"
+          v-if="userListPath"
+          :href="userListPath"
           variant="confirm"
           category="tertiary"
           class="gl-mb-3"
@@ -196,12 +196,12 @@ export default {
           class="gl-display-none gl-md-display-flex gl-align-items-center gl-justify-content-end"
         >
           <gl-button
-            v-if="newUserListPath"
-            :href="newUserListPath"
+            v-if="userListPath"
+            :href="userListPath"
             variant="confirm"
             category="tertiary"
             class="gl-mb-0 gl-mr-4"
-            data-testid="ff-new-list-button"
+            data-testid="ff-user-list-button"
           >
             {{ s__('FeatureFlags|View user lists') }}
           </gl-button>
