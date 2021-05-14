@@ -4021,6 +4021,32 @@ Input type: `UpdateRequirementInput`
 | <a id="mutationupdaterequirementerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationupdaterequirementrequirement"></a>`requirement` | [`Requirement`](#requirement) | Requirement after mutation. |
 
+### `Mutation.updateRunner`
+
+Available only when feature flag `runner_graphql_query` is enabled.
+
+Input type: `UpdateRunnerInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationupdaterunneraccesslevel"></a>`accessLevel` | [`CiRunnerAccessLevel!`](#cirunneraccesslevel) | Access level of the runner. |
+| <a id="mutationupdaterunneractive"></a>`active` | [`Boolean!`](#boolean) | Indicates the runner is allowed to receive jobs. |
+| <a id="mutationupdaterunnerclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationupdaterunnerdescription"></a>`description` | [`String`](#string) | Description of the runner. |
+| <a id="mutationupdaterunnerid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner to update. |
+| <a id="mutationupdaterunnerlocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
+| <a id="mutationupdaterunnermaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
+| <a id="mutationupdaterunnerrununtagged"></a>`runUntagged` | [`Boolean!`](#boolean) | Indicates the runner is able to run untagged jobs. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationupdaterunnerclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationupdaterunnererrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.updateSnippet`
 
 Input type: `UpdateSnippetInput`
