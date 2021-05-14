@@ -52,7 +52,6 @@ class GroupsController < Groups::ApplicationController
                      :destroy, :details, :transfer
                    ]
 
-  feature_category :audit_events, [:activity]
   feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
   feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
   feature_category :projects, [:projects]
