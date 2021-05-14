@@ -68,7 +68,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
           e.use {}
           e.try {}
-          e.track(:view, property: project.root_ancestor.id.to_s)
+          e.track(:view)
         end
       end
       format.json do
