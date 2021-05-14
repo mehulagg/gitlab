@@ -16,7 +16,7 @@ export default {
       return this.isEpicBoard ? 'epic' : 'issues';
     },
     itemsCount() {
-      return this.boardListsTotals[this.list.id]?.count || 0;
+      return this.boardListsTotals[this.list.id] || 0;
     },
     itemsTooltipLabel() {
       const { maxIssueCount } = this.list;

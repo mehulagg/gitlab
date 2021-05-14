@@ -76,9 +76,7 @@ export default {
       listId,
       union(state.boardItemsByListId[listId] || [], listData[listId]),
     );
-    Vue.set(state.boardListsTotals, listId, {
-      count: listItemsCount,
-    });
+    Vue.set(state.boardListsTotals, listId, listItemsCount);
     Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
     Vue.set(state.listsFlags[listId], 'isLoading', false);
     Vue.set(state.listsFlags[listId], 'isLoadingMore', false);

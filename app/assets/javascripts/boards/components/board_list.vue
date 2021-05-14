@@ -52,7 +52,7 @@ export default {
     ...mapState(['pageInfoByListId', 'listsFlags', 'boardListsTotals']),
     ...mapGetters(['isEpicBoard']),
     listItemsCount() {
-      return this.boardListsTotals[this.list.id].count;
+      return this.boardListsTotals[this.list.id];
     },
     paginatedIssueText() {
       return sprintf(__('Showing %{pageSize} of %{total} %{issuableType}'), {

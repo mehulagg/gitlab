@@ -99,7 +99,7 @@ export default {
       return !this.list.collapsed || !this.isSwimlanesHeader;
     },
     itemsCount() {
-      return this.boardListsTotals[this.list.id].count;
+      return this.boardListsTotals[this.list.id];
     },
     countIcon() {
       return 'issues';

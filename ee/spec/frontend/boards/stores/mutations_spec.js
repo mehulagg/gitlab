@@ -20,7 +20,7 @@ let state = {
   boardItems: {},
   boardLists: initialBoardListsState,
   boardListsTotals: {
-    [listId1]: 20,
+    [listId1]: 0,
     [listId2]: 8,
   },
 };
