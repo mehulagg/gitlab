@@ -21,6 +21,9 @@ export default (apolloProvider) => {
     },
     store, // TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/324094
     apolloProvider,
-    render: (createElement) => createElement(IssueBoardFilteredSearch, {props: { fullPath: store.state.fullPath, boardType: store.state.boardType } }),
+    render: (createElement) =>
+      createElement(IssueBoardFilteredSearch, {
+        props: { fullPath: store.state.fullPath, boardType: store.state.boardType },
+      }),
   });
 };

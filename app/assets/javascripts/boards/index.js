@@ -185,7 +185,11 @@ export default () => {
     },
     mounted() {
       if (!gon?.features?.issueBoardsFilteredSearch) {
-        this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
+        this.filterManager = new FilteredSearchBoards(
+          boardsStore.filter,
+          true,
+          boardsStore.cantEdit,
+        );
         this.filterManager.setup();
       }
 

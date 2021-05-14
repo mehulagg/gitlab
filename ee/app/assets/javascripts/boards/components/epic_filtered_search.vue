@@ -16,15 +16,21 @@ export default {
   components: { BoardFilteredSearch },
   props: {
     fullPath: {
+      type: String,
       required: true,
     },
     boardType: {
+      type: String,
       required: true,
-    }
+    },
   },
   computed: {
     tokens() {
-      const { fetchLabels, fetchAuthors } = issueBoardFilter(this.$apollo, this.fullPath, this.boardType);
+      const { fetchLabels, fetchAuthors } = issueBoardFilter(
+        this.$apollo,
+        this.fullPath,
+        this.boardType,
+      );
 
       const { label, is, isNot, author } = this.$options.i18n;
       return [
@@ -56,7 +62,7 @@ export default {
         },
       ];
     },
-  }
+  },
 };
 </script>
 

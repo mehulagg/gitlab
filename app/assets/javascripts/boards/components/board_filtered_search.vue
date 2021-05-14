@@ -96,7 +96,6 @@ export default {
         });
       }
 
-
       if (this.filterParams['not[assigneeUsername]']) {
         filteredSearchValue.push({
           type: 'assignee_username',

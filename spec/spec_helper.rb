@@ -281,6 +281,8 @@ RSpec.configure do |config|
       # As we're ready to change `master` usages to `main`, let's enable it
       stub_feature_flags(main_branch_over_master: false)
 
+      stub_feature_flags(issue_boards_filtered_search: false)
+
       # Selectively disable by actor https://docs.gitlab.com/ee/development/feature_flags/#selectively-disable-by-actor
       stub_feature_flags(remove_description_html_in_release_api_override: false)
 

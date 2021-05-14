@@ -1,9 +1,9 @@
 <script>
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
+import issueBoardFilters from '~/boards/issue_board_filters';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import issueBoardFilters from '~/boards/issue_board_filters';
 
 export default {
   i18n: {
@@ -16,16 +16,23 @@ export default {
   components: { BoardFilteredSearch },
   props: {
     fullPath: {
-      required: true
+      type: String,
+      required: true,
     },
     boardType: {
+      type: String,
       required: true,
-    }
+    },
   },
   computed: {
     tokens() {
       const { label, is, isNot, author } = this.$options.i18n;
-      const { fetchAuthors, fetchLabels } = issueBoardFilters(this.$apollo, this.fullPath, this.boardType);
+      const { fetchAuthors, fetchLabels } = issueBoardFilters(
+        this.$apollo,
+        this.fullPath,
+        this.boardType,
+      );
+
       return [
         {
           icon: 'labels',
@@ -61,14 +68,13 @@ export default {
             { value: '=', description: is },
             { value: '!=', description: isNot },
           ],
-          symbol: '@',
           token: AuthorToken,
           unique: true,
           fetchAuthors,
         },
       ];
     },
-  }
+  },
 };
 </script>
 
