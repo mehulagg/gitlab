@@ -25,7 +25,7 @@ RSpec.describe Groups::GroupMembersController do
 
         control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get :index, params: { group_id: group } }
         create_list(:group_member, 5, group: group, created_by: user)
-        create_list(:group_member, 5, :invited, :developer, group: group, created_by: user)
+        create_list(:group_member, 5, :invited, group: group, created_by: user)
         create_list(:group_member, 5, :access_request, group: group)
         # locally 47 vs 52 GDK vs 57 CI
         unresolved_n_plus_ones = 5 # still have a few queries created by can_update/can_remove that should be reduced
