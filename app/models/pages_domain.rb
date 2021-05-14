@@ -13,7 +13,7 @@ class PagesDomain < ApplicationRecord
   enum scope: { instance: 0, group: 1, project: 2 }, _prefix: :scope
   enum usage: { pages: 0, serverless: 1 }, _prefix: :usage
 
-  belongs_to :project
+  belongs_to :project, optional: false
   has_many :acme_orders, class_name: "PagesDomainAcmeOrder"
   has_many :serverless_domain_clusters, class_name: 'Serverless::DomainCluster', inverse_of: :pages_domain
 
