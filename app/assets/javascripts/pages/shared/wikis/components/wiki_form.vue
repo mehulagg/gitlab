@@ -1,5 +1,15 @@
 <script>
-import { GlForm, GlIcon, GlLink, GlButton, GlSprintf, GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlForm,
+  GlIcon,
+  GlLink,
+  GlButton,
+  GlSprintf,
+  GlAlert,
+  GlLoadingIcon,
+  GlModal,
+  GlModalDirective,
+} from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import csrf from '~/lib/utils/csrf';
 import { setUrlFragment } from '~/lib/utils/url_utility';
@@ -22,12 +32,16 @@ export default {
     GlIcon,
     GlLink,
     GlButton,
+    GlModal,
     MarkdownField,
     GlLoadingIcon,
     ContentEditor: () =>
       import(
         /* webpackChunkName: 'content_editor' */ '~/content_editor/components/content_editor.vue'
       ),
+  },
+  directives: {
+    GlModalDirective,
   },
   mixins: [glFeatureFlagMixin()],
   inject: ['formatOptions', 'pageInfo'],
@@ -41,6 +55,7 @@ export default {
       commitMessage: '',
       contentEditor: null,
       isDirty: false,
+      contentEditorFailedToRender: false,
     };
   },
   computed: {
@@ -97,7 +112,11 @@ export default {
     getContentHTML(content) {
       return axios
         .post(this.pageInfo.markdownPreviewPath, { text: content })
-        .then(({ data }) => data.body);
+        .then(({ data }) => data.body)
+        .catch((e) => {
+          this.contentEditorFailedToRender = true;
+          throw e;
+        });
     },
 
     handleFormSubmit() {
@@ -152,8 +171,22 @@ export default {
       this.isContentEditorLoading = false;
     },
 
+    retryInitContentEditor() {
+      this.contentEditorFailedToRender = false;
+      this.initContentEditor();
+    },
+
     switchToOldEditor() {
       this.useContentEditor = false;
+    },
+
+    confirmSwitchToOldEditor() {
+      if (this.contentEditorFailedToRender) {
+        this.contentEditorFailedToRender = false;
+        this.switchToOldEditor();
+      } else {
+        this.$refs.confirmSwitchToOldEditorModal.show();
+      }
     },
   },
 };
@@ -167,24 +200,17 @@ export default {
     @submit="handleFormSubmit"
   >
     <gl-alert
-      v-if="isContentEditorActive"
+      v-if="isContentEditorActive && contentEditorFailedToRender"
       class="gl-mb-6"
       :dismissible="false"
       variant="danger"
-      :primary-button-text="s__('WikiPage|Switch to old editor')"
-      @primaryAction="switchToOldEditor()"
+      :primary-button-text="s__('WikiPage|Retry')"
+      @primaryAction="retryInitContentEditor()"
     >
       <p>
         {{
           s__(
-            "WikiPage|You are editing this page with Content Editor. This editor is in beta and may not display the page's contents properly.",
-          )
-        }}
-      </p>
-      <p>
-        {{
-          s__(
-            "WikiPage|Switching to the old editor will discard any changes you've made in the new editor.",
+            'WikiPage|An error occured while trying to render the content editor. Please try again later.',
           )
         }}
       </p>
@@ -238,7 +264,7 @@ export default {
           s__('WikiPage|Format')
         }}</label>
       </div>
-      <div class="col-sm-10 gl-display-flex gl-flex-wrap">
+      <div class="col-sm-10">
         <select
           id="wiki_format"
           v-model="format"
@@ -250,14 +276,43 @@ export default {
             {{ label }}
           </option>
         </select>
-        <gl-button
-          v-if="showContentEditorButton"
-          category="secondary"
-          variant="confirm"
-          class="gl-mt-4"
-          @click="initContentEditor"
-          >{{ s__('WikiPage|Use new editor') }}</gl-button
-        >
+        <div>
+          <gl-button
+            v-if="showContentEditorButton"
+            category="secondary"
+            variant="confirm"
+            class="gl-mt-4"
+            @click="initContentEditor"
+            >{{ s__('WikiPage|Use new editor') }}</gl-button
+          >
+          <div v-if="isContentEditorActive" class="gl-mt-4 gl-display-flex gl-flex-direction-row">
+            <div class="gl-mr-4">
+              <gl-button category="secondary" variant="confirm" @click="confirmSwitchToOldEditor">{{
+                s__('WikiPage|Switch to old editor')
+              }}</gl-button>
+            </div>
+            <div class="gl-mt-2">
+              <gl-icon name="warning" />
+              {{
+                s__("WikiPage|Switching will discard any changes you've made in the new editor.")
+              }}
+            </div>
+          </div>
+          <gl-modal
+            ref="confirmSwitchToOldEditorModal"
+            modal-id="confirm-switch-to-old-editor"
+            :title="s__('WikiPage|Are you sure you want to switch to the old editor?')"
+            :action-primary="{ text: 'Switch to old editor' }"
+            :action-cancel="{ text: 'Keep editing' }"
+            @primary="switchToOldEditor"
+          >
+            {{
+              s__(
+                "WikiPage|Switching to the old editor will discard any changes you've made in the new editor.",
+              )
+            }}
+          </gl-modal>
+        </div>
       </div>
     </div>
     <div class="form-group row">
@@ -305,8 +360,9 @@ export default {
         <div class="clearfix"></div>
         <div class="error-alert"></div>
 
-        <div v-if="!isContentEditorActive" class="form-text gl-text-gray-600">
+        <div class="form-text gl-text-gray-600">
           <gl-sprintf
+            v-if="!isContentEditorActive"
             :message="
               s__(
                 'WikiPage|To link to a (new) page, simply type %{linkExample}. More examples are in the %{linkStart}documentation%{linkEnd}.',
@@ -327,6 +383,13 @@ export default {
               ></template
             >
           </gl-sprintf>
+          <span v-else>
+            {{
+              s__(
+                "WikiPage|This editor is in beta and may not display the page's contents properly.",
+              )
+            }}
+          </span>
         </div>
       </div>
     </div>
@@ -355,7 +418,7 @@ export default {
         type="submit"
         data-qa-selector="wiki_submit_button"
         data-testid="wiki-submit-button"
-        :disabled="!content || !title"
+        :disabled="!content || !title || contentEditorFailedToRender"
         >{{ submitButtonText }}</gl-button
       >
       <gl-button :href="cancelFormPath" class="float-right">{{ s__('WikiPage|Cancel') }}</gl-button>

@@ -36299,6 +36299,12 @@ msgstr ""
 msgid "WikiPageConflictMessage|Someone edited the page the same time you did. Please check out %{wikiLinkStart}the page%{wikiLinkEnd} and make sure your changes will not unintentionally remove theirs."
 msgstr ""
 
+msgid "WikiPage|An error occured while trying to render the content editor. Please try again later."
+msgstr ""
+
+msgid "WikiPage|Are you sure you want to switch to the old editor?"
+msgstr ""
+
 msgid "WikiPage|Cancel"
 msgstr ""
 
@@ -36323,13 +36329,22 @@ msgstr ""
 msgid "WikiPage|Page title"
 msgstr ""
 
+msgid "WikiPage|Retry"
+msgstr ""
+
 msgid "WikiPage|Save changes"
 msgstr ""
 
 msgid "WikiPage|Switch to old editor"
 msgstr ""
 
-msgid "WikiPage|Switching to the old editor will discard any changes you've made in the new editor."
+msgid "WikiPage|Switching to the old editor will discard any changes you've made in the new editor. "
+msgstr ""
+
+msgid "WikiPage|Switching will discard any changes you've made in the new editor."
+msgstr ""
+
+msgid "WikiPage|This editor is in beta and may not display the page's contents properly."
 msgstr ""
 
 msgid "WikiPage|Tip: You can move this page by adding the path to the beginning of the title."
@@ -36351,9 +36366,6 @@ msgid "WikiPage|Use new editor"
 msgstr ""
 
 msgid "WikiPage|Write your content or drag files here…"
-msgstr ""
-
-msgid "WikiPage|You are editing this page with Content Editor. This editor is in beta and may not display the page's contents properly."
 msgstr ""
 
 msgid "Wikis"
