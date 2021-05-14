@@ -46,7 +46,15 @@ describe('Status checks actions', () => {
     });
   });
 
-  it('renders the remove button', () => {
-    expect(findRemoveBtn().text()).toBe('Remove...');
+  describe('Remove button', () => {
+    it('renders the remove button', () => {
+      expect(findRemoveBtn().text()).toBe('Remove...');
+    });
+
+    it('sends the status check to the delete event', () => {
+      findRemoveBtn().trigger('click');
+
+      expect(wrapper.emitted('delete-status-check')[0][0]).toStrictEqual(statusCheck);
+    });
   });
 });

@@ -30928,6 +30928,9 @@ msgstr ""
 msgid "StatusCheck|Add status check"
 msgstr ""
 
+msgid "StatusCheck|An error occurred deleting the %{name} status check."
+msgstr ""
+
 msgid "StatusCheck|An error occurred fetching the status checks."
 msgstr ""
 

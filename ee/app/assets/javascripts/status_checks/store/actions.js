@@ -38,3 +38,9 @@ export const postStatusCheck = ({ dispatch, rootState }, statusCheck) => {
     .post(statusChecksPath, convertObjectPropsToSnakeCase(statusCheck, { deep: true }))
     .then(() => dispatch('fetchStatusChecks'));
 };
+
+export const deleteStatusCheck = ({ rootState, dispatch }, id) => {
+  const { statusChecksPath } = rootState.settings;
+
+  return axios.delete(`${statusChecksPath}/${id}`).then(() => dispatch('fetchStatusChecks'));
+};

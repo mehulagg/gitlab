@@ -92,4 +92,16 @@ describe('Status checks actions', () => {
       expect(dispatch).toHaveBeenCalledWith('fetchStatusChecks');
     });
   });
+
+  describe('deleteStatusCheck', () => {
+    it(`should DELETE call the API and then dispatch a new fetchStatusChecks`, async () => {
+      const id = 1;
+
+      mockAxios.onPost(statusChecksPath).replyOnce(httpStatusCodes.OK);
+
+      await actions.postStatusCheck({ dispatch, rootState }, id);
+
+      expect(dispatch).toHaveBeenCalledWith('fetchStatusChecks');
+    });
+  });
 });

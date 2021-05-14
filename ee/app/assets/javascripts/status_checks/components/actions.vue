@@ -24,7 +24,11 @@ export default {
     <gl-button data-testid="edit-btn" @click="$emit('update-status-to-check', statusCheck)">
       {{ $options.i18n.editButton }}
     </gl-button>
-    <gl-button class="gl-ml-3" data-testid="remove-btn">
+    <gl-button
+      class="gl-ml-3"
+      data-testid="remove-btn"
+      @click="$emit('delete-status-check', statusCheck)"
+    >
       {{ $options.i18n.removeButton }}
     </gl-button>
   </div>
