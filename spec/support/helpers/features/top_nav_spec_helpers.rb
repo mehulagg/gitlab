@@ -8,7 +8,33 @@ module Spec
       module Features
         module TopNavSpecHelpers
           def open_top_nav
-            find('.js-top-nav-dropdown-toggle').click if Feature.enabled?(:combined_menu)
+            return unless Feature.enabled?(:combined_menu)
+
+            find('.js-top-nav-dropdown-toggle').click
+          end
+
+          def within_top_nav
+            open_top_nav
+
+            within('.js-top-nav-dropdown-menu') do
+              yield
+            end
+          end
+
+          def open_top_nav_projects
+            return unless Feature.enabled?(:combined_menu)
+
+            within_top_nav do
+              click_button('Projects')
+            end
+          end
+
+          def open_top_nav_groups
+            return unless Feature.enabled?(:combined_menu)
+
+            within_top_nav do
+              click_button('Groups')
+            end
           end
         end
       end

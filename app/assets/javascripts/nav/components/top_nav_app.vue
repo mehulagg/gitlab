@@ -34,7 +34,7 @@ export default {
       :text="navData.activeTitle"
       icon="dot-grid"
       :href="null"
-      menu-class="top-nav-dropdown"
+      menu-class="top-nav-dropdown js-top-nav-dropdown-menu"
       toggle-class="top-nav-toggle js-top-nav-dropdown-toggle gl-px-3!"
       no-flip
     >
