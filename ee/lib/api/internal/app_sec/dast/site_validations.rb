@@ -22,7 +22,7 @@ module API
                   success = case params[:event]
                             when 'start'
                               validation.start
-                            when 'fail'
+                            when 'fail_op'
                               validation.fail_op
                             when 'retry'
                               validation.retry
