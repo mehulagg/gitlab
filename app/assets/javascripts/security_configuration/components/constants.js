@@ -138,6 +138,7 @@ export const scanners = [
 
 export const featureToMutationMap = {
   [REPORT_TYPE_SAST]: {
+    mutation: configureSastMutation,
     mutationId: 'configureSast',
     getMutationPayload: (projectPath) => ({
       mutation: configureSastMutation,

@@ -2,13 +2,13 @@ import { GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { featureToMutationMap } from 'ee_else_ce/security_configuration/components/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { humanize } from '~/lib/utils/text_utility';
 import { redirectTo } from '~/lib/utils/url_utility';
-import configureSast from '~/security_configuration/graphql/configure_sast.mutation.graphql';
 import ManageViaMr from '~/vue_shared/security_configuration/components/manage_via_mr.vue';
-import { REPORT_TYPE_SAST } from '~/vue_shared/security_reports/constants';
 import { buildConfigureSecurityFeatureMockFactory } from './apollo_mocks';
 
 jest.mock('~/lib/utils/url_utility');
@@ -19,10 +19,17 @@ describe('ManageViaMr component', () => {
   let wrapper;
 
   const findButton = () => wrapper.findComponent(GlButton);
-  describe.each`
-    featureName | featureType         | mutation         | mutationId
-    ${'SAST'}   | ${REPORT_TYPE_SAST} | ${configureSast} | ${'configureSast'}
-  `('$featureType', ({ featureName, mutation, featureType, mutationId }) => {
+
+  // This component supports different report types/mutations depending on
+  // whether it's in a CE or EE context. This makes sure we are only testing
+  // the ones available in the current test context.
+  const supportedReportTypes = Object.entries(featureToMutationMap).map(
+    ([featureType, { mutation, mutationId }]) => {
+      return [humanize(featureType), featureType, mutation, mutationId];
+    },
+  );
+
+  describe.each(supportedReportTypes)('%s', (featureName, featureType, mutation, mutationId) => {
     const buildConfigureSecurityFeatureMock = buildConfigureSecurityFeatureMockFactory(mutationId);
     const successHandler = async () => buildConfigureSecurityFeatureMock();
     const noSuccessPathHandler = async () =>

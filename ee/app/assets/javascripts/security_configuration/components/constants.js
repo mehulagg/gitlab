@@ -26,6 +26,7 @@ export const CUSTOM_VALUE_MESSAGE = s__(
 export const featureToMutationMap = {
   ...featureToMutationMapCE,
   [REPORT_TYPE_DEPENDENCY_SCANNING]: {
+    mutation: configureDependencyScanningMutation,
     mutationId: 'configureDependencyScanning',
     getMutationPayload: (projectPath) => ({
       mutation: configureDependencyScanningMutation,
@@ -37,6 +38,7 @@ export const featureToMutationMap = {
     }),
   },
   [REPORT_TYPE_SECRET_DETECTION]: {
+    mutation: configureSecretDetectionMutation,
     mutationId: 'configureSecretDetection',
     getMutationPayload: (projectPath) => ({
       mutation: configureSecretDetectionMutation,
