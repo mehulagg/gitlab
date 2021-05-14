@@ -4,11 +4,11 @@ module WebpackHelper
   def prefetch_link_tag(source)
     href = asset_path(source)
 
-    link_tag = tag.link(rel: "prefetch",href: href)
+    link_tag = tag.link(rel: 'prefetch', href: href)
 
     early_hints_link = "<#{href}>; rel=prefetch"
 
-    request.send_early_hints("Link" => early_hints_link) if respond_to?(:request) && request
+    request.send_early_hints("Link" => early_hints_link) if respond_to?(:request)
 
     link_tag
   end
@@ -19,11 +19,12 @@ module WebpackHelper
 
   def webpack_preload_asset_tag(asset, options = {})
     path = Gitlab::Webpack::Manifest.asset_paths(asset).first
+    crossorigin = options.delete(:crossorigin) || 'anonymous'
 
     if options.delete(:prefetch)
       prefetch_link_tag(path)
     else
-      preload_link_tag(path, options)
+      preload_link_tag(path, options.merge(crossorigin))
     end
   end
 
