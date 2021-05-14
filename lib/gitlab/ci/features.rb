@@ -18,11 +18,6 @@ module Gitlab
         Feature.enabled?(:ci_pipeline_status_omit_commit_sha_in_cache_key, project, default_enabled: true)
       end
 
-      # Remove in https://gitlab.com/gitlab-org/gitlab/-/issues/224199
-      def self.store_pipeline_messages?(project)
-        ::Feature.enabled?(:ci_store_pipeline_messages, project, default_enabled: true)
-      end
-
       def self.raise_job_rules_without_workflow_rules_warning?
         ::Feature.enabled?(:ci_raise_job_rules_without_workflow_rules_warning, default_enabled: true)
       end

@@ -1252,8 +1252,6 @@ module Ci
     private
 
     def add_message(severity, content)
-      return unless Gitlab::Ci::Features.store_pipeline_messages?(project)
-
       messages.build(severity: severity, content: content)
     end
 
