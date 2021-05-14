@@ -19,6 +19,8 @@ module API
                 put ':id/transition' do
                   validation = DastSiteValidation.find(params[:id])
 
+                  unauthorized! unless Ability.allowed?(current_user, :create_on_demand_dast_scan, validation.project)
+
                   success = case params[:event]
                             when 'start'
                               validation.start

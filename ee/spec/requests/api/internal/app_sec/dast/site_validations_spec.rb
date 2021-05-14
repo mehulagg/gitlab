@@ -6,7 +6,7 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user, developer_projects: [project]) }
 
-  describe 'PUT /internal/dast/site_validations/:id' do
+  describe 'PUT /internal/dast/site_validations/:id/transition' do
     let(:url) { "/internal/dast/site_validations/#{site_validation.id}/transition" }
 
     context 'when authenticated' do
