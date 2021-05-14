@@ -21,12 +21,10 @@ module WebpackHelper
     path = Gitlab::Webpack::Manifest.asset_paths(asset).first
 
     if options.delete(:prefetch)
-      tag = prefetch_link_tag(path)
+      prefetch_link_tag(path)
     else
-      tag = preload_link_tag(path, options)
+      preload_link_tag(path, options)
     end
-
-    tag
   end
 
   def webpack_controller_bundle_tags
