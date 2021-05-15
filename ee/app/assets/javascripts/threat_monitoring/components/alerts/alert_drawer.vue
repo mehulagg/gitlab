@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/browser';
 import { capitalizeFirstCharacter, splitCamelCase } from '~/lib/utils/text_utility';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import createIssueMutation from '~/vue_shared/alert_details/graphql/mutations/alert_issue_create.mutation.graphql';
 import getAlertDetailsQuery from '~/vue_shared/alert_details/graphql/queries/alert_details.query.graphql';
 import { getContentWrapperHeight } from '../../utils';
@@ -21,7 +22,9 @@ export default {
     GlDrawer,
     GlLink,
     GlSkeletonLoader,
+    SidebarAssigneesWidget,
   },
+  provide: { canUpdate: true },
   inject: ['projectPath'],
   apollo: {
     alertDetails: {
@@ -115,6 +118,9 @@ export default {
     getDrawerHeaderHeight() {
       return getContentWrapperHeight('.js-threat-monitoring-container-wrapper');
     },
+    handleAlertUpdate() {
+      this.$emit('alert-update');
+    },
     handleAlertError({ type, error }) {
       this.errorMessage = this.$options.i18n.ERRORS[type];
       Sentry.captureException(error);
@@ -154,6 +160,14 @@ export default {
     <gl-alert v-if="errored" variant="danger" :dismissible="false" contained>
       {{ errorMessage }}
     </gl-alert>
+    <sidebar-assignees-widget
+      issuable-type="alert"
+      :iid="selectedAlert.iid"
+      :full-path="projectPath"
+      :initial-assignees="selectedAlert.assignees.nodes"
+      :allow-multiple-assignees="false"
+      @assignees-updated="handleAlertUpdate"
+    />
     <div v-if="isLoadingDetails">
       <div v-for="row in $options.ALERT_DETAILS_LOADING_ROWS" :key="row" class="gl-mb-5">
         <gl-skeleton-loader :lines="2" :width="400" />

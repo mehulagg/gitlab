@@ -61,7 +61,7 @@ export default {
       required: false,
       default: IssuableType.Issue,
       validator(value) {
-        return [IssuableType.Issue, IssuableType.MergeRequest].includes(value);
+        return [IssuableType.Issue, IssuableType.MergeRequest, IssuableType.Alert].includes(value);
       },
     },
     issuableId: {
@@ -86,6 +86,9 @@ export default {
     issuable: {
       query() {
         return assigneesQueries[this.issuableType].query;
+      },
+      skip() {
+        return Boolean(assigneesQueries[this.issuableType].skipQuery);
       },
       variables() {
         return this.queryVariables;
@@ -116,13 +119,17 @@ export default {
       };
     },
     assignees() {
-      const currentAssignees = this.$apollo.queries.issuable.loading
-        ? this.initialAssignees
-        : this.issuable?.assignees?.nodes;
+      const currentAssignees =
+        this.$apollo.queries.issuable.loading || this.$apollo.queries.issuable.skip
+          ? this.initialAssignees
+          : this.issuable?.assignees?.nodes;
       return currentAssignees || [];
     },
     assigneeText() {
-      const items = this.$apollo.queries.issuable.loading ? this.initialAssignees : this.selected;
+      const items =
+        this.$apollo.queries.issuable.loading || this.$apollo.queries.issuable.skip
+          ? this.initialAssignees
+          : this.selected;
       if (!items) {
         return __('Assignee');
       }
@@ -160,7 +167,7 @@ export default {
           },
         })
         .then(({ data }) => {
-          this.$emit('assignees-updated', data.issuableSetAssignees.issuable.assignees.nodes);
+          this.$emit('assignees-updated', data.issuableSetAssignees?.issuable?.assignees?.nodes);
           return data;
         })
         .catch(() => {
@@ -240,6 +247,7 @@ export default {
           :allow-multiple-assignees="allowMultipleAssignees"
           :current-user="currentUser"
           :issuable-type="issuableType"
+          :initial-assignees="initialAssignees"
           class="gl-w-full dropdown-menu-user"
           @toggle="collapseWidget"
           @error="showError"

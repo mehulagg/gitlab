@@ -42,7 +42,7 @@ export default {
       type: String,
       required: true,
     },
-    value: {
+    initialAssignees: {
       type: Array,
       required: true,
     },
@@ -73,6 +73,9 @@ export default {
     participants: {
       query() {
         return participantsQueries[this.issuableType].query;
+      },
+      skip() {
+        return Boolean(participantsQueries[this.issuableType].skipQuery);
       },
       variables() {
         return {
@@ -172,15 +175,17 @@ export default {
     },
     selectedFiltered() {
       if (this.shouldShowParticipants) {
-        return this.moveCurrentUserToStart(this.value);
+        return this.moveCurrentUserToStart(this.initialAssignees);
       }
 
       const foundUsernames = this.users.map(({ username }) => username);
-      const filtered = this.value.filter(({ username }) => foundUsernames.includes(username));
+      const filtered = this.initialAssignees.filter(({ username }) =>
+        foundUsernames.includes(username),
+      );
       return this.moveCurrentUserToStart(filtered);
     },
     selectedUserNames() {
-      return this.value.map(({ username }) => username);
+      return this.initialAssignees.map(({ username }) => username);
     },
     unselectedFiltered() {
       return this.users?.filter(({ username }) => !this.selectedUserNames.includes(username)) || [];
@@ -200,7 +205,7 @@ export default {
   },
   methods: {
     selectAssignee(user) {
-      let selected = [...this.value];
+      let selected = [...this.initialAssignees];
       if (!this.allowMultipleAssignees) {
         selected = [user];
       } else {
@@ -209,7 +214,7 @@ export default {
       this.$emit('input', selected);
     },
     unselect(name) {
-      const selected = this.value.filter((user) => user.username !== name);
+      const selected = this.initialAssignees.filter((user) => user.username !== name);
       this.$emit('input', selected);
     },
     focusSearch() {

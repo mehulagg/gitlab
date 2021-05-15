@@ -8,7 +8,9 @@ export default {
   },
   components: { GlButton, GlLoadingIcon },
   inject: {
-    canUpdate: {},
+    canUpdate: {
+      default: false,
+    },
     isClassicSidebar: {
       default: false,
     },

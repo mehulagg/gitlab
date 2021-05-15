@@ -1,8 +1,8 @@
 #import "~/graphql_shared/fragments/alert_note.fragment.graphql"
 
-mutation alertSetAssignees($projectPath: ID!, $assigneeUsernames: [String!]!, $iid: String!) {
+mutation alertSetAssignees($fullPath: ID!, $assigneeUsernames: [String!]!, $iid: String!) {
   alertSetAssignees(
-    input: { iid: $iid, assigneeUsernames: $assigneeUsernames, projectPath: $projectPath }
+    input: { iid: $iid, assigneeUsernames: $assigneeUsernames, projectPath: $fullPath }
   ) {
     errors
     alert {

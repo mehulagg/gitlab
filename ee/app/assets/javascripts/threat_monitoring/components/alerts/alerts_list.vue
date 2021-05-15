@@ -74,6 +74,11 @@ export default {
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
         this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
+        if (this.selectedAlert) {
+          this.selectedAlert = data?.project?.alertManagementAlerts?.nodes?.find(
+            (alert) => alert.iid === this.selectedAlert.iid,
+          );
+        }
       },
       error() {
         this.errored = true;
@@ -152,7 +157,7 @@ export default {
     handleFilterChange(newFilters) {
       this.filters = newFilters;
     },
-    handleStatusUpdate() {
+    handleAlertUpdate() {
       this.$apollo.queries.alerts.refetch();
     },
     hasAssignees(assignees) {
@@ -279,7 +284,7 @@ export default {
           :alert="item"
           :project-path="projectPath"
           @alert-error="handleAlertError"
-          @alert-update="handleStatusUpdate"
+          @alert-update="handleAlertUpdate"
         />
       </template>
 
@@ -313,6 +318,7 @@ export default {
       :is-alert-drawer-open="isAlertDrawerOpen"
       :selected-alert="selectedAlert"
       @deselect-alert="handleAlertDeselect"
+      @alert-update="handleAlertUpdate"
     />
   </div>
 </template>
