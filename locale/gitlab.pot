@@ -11483,9 +11483,6 @@ msgstr ""
 msgid "Diff limits"
 msgstr ""
 
-msgid "Diff view settings"
-msgstr ""
-
 msgid "Difference between start date and now"
 msgstr ""
 
@@ -35871,6 +35868,9 @@ msgid "View page @ "
 msgstr ""
 
 msgid "View performance dashboard."
+msgstr ""
+
+msgid "View preferences"
 msgstr ""
 
 msgid "View project"
