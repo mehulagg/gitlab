@@ -12,7 +12,15 @@ module Constraints
 
       # We intentionally allow SELECT(*) here so result of this query can be used
       # as cache for further Project.find_by_full_path calls within request
-      Project.find_by_full_path(full_path, follow_redirects: request.get?).present?
+      project = Project.find_by_full_path(full_path, follow_redirects: request.get?)
+
+      if project.present?
+        Gitlab::Sharding::Current.set_top_level_namespace!(project.root_ancestor)
+
+        true
+      else
+        false
+      end
     end
   end
 end

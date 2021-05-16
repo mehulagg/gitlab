@@ -38,6 +38,7 @@ class NamespaceShard < ApplicationRecord
     raise "Namespace or shard must be provided" if namespace.nil? && shard.nil?
 
     shard ||= find_shard_from_namespace(namespace)
+    Rails.logger.info "SHARD - #{shard}"
 
     NamespaceShard.connected_to(role: :reading, shard: shard, &block)
   end

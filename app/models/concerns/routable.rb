@@ -14,7 +14,7 @@ module Routable
   #     Routable.find_by_full_path('groupname/projectname') # -> Project
   #
   # Returns a single object, or nil.
-  def self.find_by_full_path(path, follow_redirects: false, route_scope: Route, redirect_route_scope: RedirectRoute)
+  def self.find_by_full_path(path, follow_redirects: false, sharded: false, route_scope: Route, redirect_route_scope: RedirectRoute)
     return unless path.present?
 
     # Case sensitive match first (it's cheaper and the usual case)
@@ -23,8 +23,12 @@ module Routable
     # We need to qualify the columns with the table name, to support both direct lookups on
     # Route/RedirectRoute, and scoped lookups through the Routable classes.
     route =
-      route_scope.find_by(routes: { path: path }) ||
-      route_scope.iwhere(Route.arel_table[:path] => path).take
+      if sharded
+        Route.for_routable_type(route_scope).find_by(path: path)
+      else
+        route_scope.find_by(routes: { path: path }) ||
+          route_scope.iwhere(Route.arel_table[:path] => path).take
+      end
 
     if follow_redirects
       route ||= redirect_route_scope.iwhere(RedirectRoute.arel_table[:path] => path).take
@@ -60,14 +64,21 @@ module Routable
     #
     # Returns a single object, or nil.
     def find_by_full_path(path, follow_redirects: false)
-      # TODO: Optimize these queries by avoiding joins
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/292252
-      Routable.find_by_full_path(
-        path,
-        follow_redirects: follow_redirects,
-        route_scope: includes(:route).references(:routes),
-        redirect_route_scope: joins(:redirect_routes)
-      )
+      NamespaceShard.sharded_read_from_full_path(path) do
+        routable = Routable.find_by_full_path(
+          path,
+          follow_redirects: follow_redirects,
+          sharded: true,
+          route_scope: self.base_class, # Group stores as Namespace in routes
+          redirect_route_scope: joins(:redirect_routes)
+        )
+
+        # Preload root_ancestor for use in constrainers
+        routable.root_ancestor if routable.respond_to?(:root_ancestor)
+
+        # Do not return (user) Namespace for Group.find_by_full_path
+        routable.is_a?(self) ? routable : nil
+      end
     end
 
     # Builds a relation to find multiple objects by their full paths.

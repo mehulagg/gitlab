@@ -1,5 +1,8 @@
 - return unless performance_bar_enabled?
 
+%span{ style: "z-index: 1200; color: #999; position: fixed; top: 0" }
+  = Gitlab::Sharding::Current.top_level_namespace_shard
+
 #js-peek{ data: { env: Peek.env,
          request_id: peek_request_id,
          stats_url: ENV.fetch('GITLAB_PERFORMANCE_BAR_STATS_URL', ''),

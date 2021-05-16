@@ -711,12 +711,6 @@ class Project < NamespaceShard
   scope :for_group_and_its_subgroups, ->(group) { where(namespace_id: group.self_and_descendants.select(:id)) }
 
   class << self
-    def find_by_full_path(path, **kwargs)
-      NamespaceShard.sharded_read_from_full_path(path) do
-        Routable.find_by_full_path(path, **kwargs)
-      end
-    end
-
     # Searches for a list of projects based on the query given in `query`.
     #
     # On PostgreSQL this method uses "ILIKE" to perform a case-insensitive

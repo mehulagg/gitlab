@@ -116,12 +116,6 @@ class Namespace < NamespaceShard
   attr_writer :root_ancestor, :emails_disabled_memoized
 
   class << self
-    def find_by_full_path(path, **kwargs)
-      NamespaceShard.sharded_read_from_full_path(path) do
-        Routable.find_by_full_path(path, **kwargs)
-      end
-    end
-
     def sharded_find(id)
       NamespaceShard.sharded_read_from_namespace_id(id) do
         find(id)
