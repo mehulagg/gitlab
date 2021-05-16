@@ -65,7 +65,7 @@ including:
 
 Backups do not include:
 
-- [Terraform state files](administration/terraform_state.md)
+- [Terraform state files](../administration/terraform_state.md)
 - [Package registry files](../administration/packages/index.md)
 - [Mattermost data](https://docs.mattermost.com/administration/config-settings.html#file-storage)
 
