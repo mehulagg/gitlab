@@ -1,10 +1,7 @@
 # Read more about this feature here: https://docs.gitlab.com/ee/user/application_security/container_scanning/
 
 variables:
-  # Setting this variable will affect all Security templates
-  # (SAST, Dependency Scanning, ...)
-  SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
-  CS_MAJOR_VERSION: 3
+  CS_MAJOR_VERSION: 4
 
 .cs_common:
   stage: test
@@ -14,10 +11,7 @@ variables:
     # file. See https://docs.gitlab.com/ee/user/application_security/container_scanning/index.html#overriding-the-container-scanning-template
     # for details
     GIT_STRATEGY: none
-    # CS_ANALYZER_IMAGE is an undocumented variable used internally to allow QA to
-    # override the analyzer image with a custom value. This may be subject to change or
-    # breakage across GitLab releases.
-    CS_ANALYZER_IMAGE: $SECURE_ANALYZERS_PREFIX/$CS_PROJECT:$CS_MAJOR_VERSION
+    CS_ANALYZER_IMAGE: registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning:$CS_MAJOR_VERSION
   allow_failure: true
   artifacts:
     reports:
@@ -25,26 +19,6 @@ variables:
   dependencies: []
 
 container_scanning:
-  extends: .cs_common
-  variables:
-    # By default, use the latest clair vulnerabilities database, however, allow it to be overridden here with a specific image
-    # to enable container scanning to run offline, or to provide a consistent list of vulnerabilities for integration testing purposes
-    CLAIR_DB_IMAGE_TAG: "latest"
-    CLAIR_DB_IMAGE: "$SECURE_ANALYZERS_PREFIX/clair-vulnerabilities-db:$CLAIR_DB_IMAGE_TAG"
-    CS_PROJECT: 'klar'
-  services:
-    - name: $CLAIR_DB_IMAGE
-      alias: clair-vulnerabilities-db
-  script:
-    - /analyzer run
-  rules:
-    - if: $CONTAINER_SCANNING_DISABLED
-      when: never
-    - if: $CI_COMMIT_BRANCH &&
-          $GITLAB_FEATURES =~ /\bcontainer_scanning\b/ &&
-          $CS_MAJOR_VERSION =~ /^[0-3]$/
-
-container_scanning_new:
   extends: .cs_common
   variables:
     CS_PROJECT: 'container-scanning'
@@ -56,5 +30,4 @@ container_scanning_new:
     - if: $CONTAINER_SCANNING_DISABLED
       when: never
     - if: $CI_COMMIT_BRANCH &&
-          $GITLAB_FEATURES =~ /\bcontainer_scanning\b/ &&
-          $CS_MAJOR_VERSION !~ /^[0-3]$/
+          $GITLAB_FEATURES =~ /\bcontainer_scanning\b/
