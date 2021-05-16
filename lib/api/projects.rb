@@ -660,6 +660,18 @@ module API
           render_api_error!("Failed to transfer project #{user_project.errors.messages}", 400)
         end
       end
+
+      desc 'Show the storage information' do
+        success Entities::ProjectRepositoryStorage
+      end
+      params do
+        requires :id, type: String, desc: 'The ID of a project'
+      end
+      get ':id/storage', feature_category: :projects do
+        authorize! :admin_project, user_project
+
+        present user_project, with: Entities::ProjectRepositoryStorage, current_user: current_user
+      end
     end
   end
 end
