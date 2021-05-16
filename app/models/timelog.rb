@@ -22,6 +22,14 @@ class Timelog < ApplicationRecord
     where('spent_at BETWEEN ? AND ?', start_time, end_time)
   end
 
+  scope :after, -> (start_time) do
+    where('spent_at >= ?', start_time)
+  end
+
+  scope :before, -> (end_time) do
+    where('spent_at <= ?', end_time)
+  end
+
   def issuable
     issue || merge_request
   end

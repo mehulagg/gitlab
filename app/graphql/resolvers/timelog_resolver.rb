@@ -23,9 +23,8 @@ module Resolvers
               description: 'List time-logs within a time range where the logged time is equal to or before endTime.'
 
     def resolve_with_lookahead(**args)
-      return Timelog.none unless timelogs_available_for_user?
-
-      validate_params_presence!(args)
+      validate_args!(args)
+      validate_duplicated_args!(args)
       transformed_args = transform_args(args)
       validate_time_difference!(transformed_args)
 
@@ -41,36 +40,33 @@ module Resolvers
     end
 
     def find_timelogs(args)
-      apply_lookahead(group.timelogs(args[:start_time], args[:end_time]))
+      timelogs = Timelog.in_group(object)
+
+      timelogs =
+        if args.key?(:start_time) && args.key?(:end_time)
+          timelogs.between_times(args[:start_time], args[:end_time])
+        elsif args.key?(:start_time)
+          timelogs.after(args[:start_time])
+        elsif args.key?(:end_time)
+          timelogs.before(args[:end_time])
+        else
+          timelogs
+        end
+
+      apply_lookahead(timelogs)
     end
 
-    def timelogs_available_for_user?
-      group&.user_can_access_group_timelogs?(context[:current_user])
-    end
-
-    def validate_params_presence!(args)
-      message = case time_params_count(args)
-                when 0
-                  'Start and End arguments must be present'
-                when 1
-                  'Both Start and End arguments must be present'
-                when 2
-                  validate_duplicated_args(args)
-                when 3 || 4
-                  'Only Time or Date arguments must be present'
-                end
-
-      raise_argument_error(message) if message
+    def validate_args!(args)
+      raise_argument_error('Both date and time arguments must not be present') if
+        args.key?(:start_time) && args.key?(:start_date) ||
+        args.key?(:end_time) && args.key?(:end_date)
     end
 
     def validate_time_difference!(args)
-      message = if args[:end_time] < args[:start_time]
-                  'Start argument must be before End argument'
-                elsif args[:end_time] - args[:start_time] > 60.days
-                  'The time range period cannot contain more than 60 days'
-                end
-
-      raise_argument_error(message) if message
+      raise_argument_error('Start argument must be before End argument') if
+        args[:start_time] &&
+        args[:end_time] &&
+        args[:end_time] < args[:start_time]
     end
 
     def transform_args(args)
@@ -78,35 +74,21 @@ module Resolvers
 
       time_args = args.except(:start_date, :end_date)
 
-      if time_args.empty?
-        time_args[:start_time] = args[:start_date].beginning_of_day
-        time_args[:end_time] = args[:end_date].end_of_day
-      elsif time_args.key?(:start_time)
-        time_args[:end_time] = args[:end_date].end_of_day
-      elsif time_args.key?(:end_time)
-        time_args[:start_time] = args[:start_date].beginning_of_day
-      end
+      time_args[:start_time] = args[:start_date].beginning_of_day if args[:start_date]
+      time_args[:end_time] = args[:end_date].end_of_day if args[:end_date]
 
       time_args
     end
 
-    def time_params_count(args)
-      [:start_time, :end_time, :start_date, :end_date].count { |param| args.key?(param) }
-    end
-
-    def validate_duplicated_args(args)
+    def validate_duplicated_args!(args)
       if args.key?(:start_time) && args.key?(:start_date) ||
         args.key?(:end_time) && args.key?(:end_date)
-        'Both Start and End arguments must be present'
+        raise_argument_error('Both date and time arguments must not be present')
       end
     end
 
     def raise_argument_error(message)
       raise Gitlab::Graphql::Errors::ArgumentError, message
-    end
-
-    def group
-      @group ||= object.respond_to?(:sync) ? object.sync : object
     end
   end
 end

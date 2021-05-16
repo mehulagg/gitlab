@@ -11,8 +11,8 @@ RSpec.describe Resolvers::TimelogResolver do
 
   context "with a group" do
     let_it_be(:current_user) { create(:user) }
-    let_it_be(:group)              { create(:group) }
-    let_it_be(:project)            { create(:project, :public, group: group) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, :empty_repo, :public, group: group) }
 
     before_all do
       group.add_developer(current_user)
@@ -25,10 +25,10 @@ RSpec.describe Resolvers::TimelogResolver do
 
     describe '#resolve' do
       let_it_be(:issue) { create(:issue, project: project) }
-      let_it_be(:issue2) { create(:issue, project: project) }
+      let_it_be(:merge_request) { create(:merge_request, source_project: project) }
       let_it_be(:timelog1) { create(:issue_timelog, issue: issue, spent_at: 2.days.ago.beginning_of_day) }
-      let_it_be(:timelog2) { create(:issue_timelog, issue: issue2, spent_at: 2.days.ago.end_of_day) }
-      let_it_be(:timelog3) { create(:issue_timelog, issue: issue2, spent_at: 10.days.ago) }
+      let_it_be(:timelog2) { create(:issue_timelog, issue: issue, spent_at: 2.days.ago.end_of_day) }
+      let_it_be(:timelog3) { create(:merge_request_timelog, merge_request: merge_request, spent_at: 10.days.ago) }
 
       let(:args) { { start_time: 6.days.ago, end_time: 2.days.ago.noon } }
 
@@ -68,57 +68,12 @@ RSpec.describe Resolvers::TimelogResolver do
       context 'when arguments are invalid' do
         let_it_be(:error_class) { Gitlab::Graphql::Errors::ArgumentError }
 
-        context 'when no time or date arguments are present' do
-          let(:args) { {} }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Start and End arguments must be present/)
-          end
-        end
-
-        context 'when only start_time is present' do
-          let(:args) { { start_time: 6.days.ago } }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Both Start and End arguments must be present/)
-          end
-        end
-
-        context 'when only end_time is present' do
-          let(:args) { { end_time: 2.days.ago } }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Both Start and End arguments must be present/)
-          end
-        end
-
-        context 'when only start_date is present' do
-          let(:args) { { start_date: 6.days.ago } }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Both Start and End arguments must be present/)
-          end
-        end
-
-        context 'when only end_date is present' do
-          let(:args) { { end_date: 2.days.ago } }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Both Start and End arguments must be present/)
-          end
-        end
-
         context 'when start_time and start_date are present' do
           let(:args) { { start_time: 6.days.ago, start_date: 6.days.ago } }
 
           it 'returns correct error' do
             expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Both Start and End arguments must be present/)
+              .to raise_error(error_class, /Both date and time arguments must not be present/)
           end
         end
 
@@ -127,16 +82,7 @@ RSpec.describe Resolvers::TimelogResolver do
 
           it 'returns correct error' do
             expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Both Start and End arguments must be present/)
-          end
-        end
-
-        context 'when three arguments are present' do
-          let(:args) { { start_date: 6.days.ago, end_date: 2.days.ago, end_time: 2.days.ago } }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /Only Time or Date arguments must be present/)
+              .to raise_error(error_class, /Both date and time arguments must not be present/)
           end
         end
 
@@ -146,15 +92,6 @@ RSpec.describe Resolvers::TimelogResolver do
           it 'returns correct error' do
             expect { resolve_timelogs(**args) }
               .to raise_error(error_class, /Start argument must be before End argument/)
-          end
-        end
-
-        context 'when time range is more than 60 days' do
-          let(:args) { { start_time: 3.months.ago, end_time: 2.days.ago } }
-
-          it 'returns correct error' do
-            expect { resolve_timelogs(**args) }
-              .to raise_error(error_class, /The time range period cannot contain more than 60 days/)
           end
         end
       end
