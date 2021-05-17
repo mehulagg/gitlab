@@ -922,7 +922,6 @@ Stop the processes that are connected to the database. Leave the rest of GitLab
 running:
 
 ```shell
-sudo gitlab-ctl stop unicorn
 sudo gitlab-ctl stop puma
 sudo gitlab-ctl stop sidekiq
 # Verify
@@ -990,7 +989,6 @@ For Docker installations, the restore task can be run from host:
 
 ```shell
 # Stop the processes that are connected to the database
-docker exec -it <name of container> gitlab-ctl stop unicorn
 docker exec -it <name of container> gitlab-ctl stop puma
 docker exec -it <name of container> gitlab-ctl stop sidekiq
 

@@ -8,7 +8,7 @@ module Gitlab
     # LifecycleEvents lets Rails initializers register application startup hooks
     # that are sensitive to forking. For example, to defer the creation of
     # watchdog threads. This lets us abstract away the Unix process
-    # lifecycles of Unicorn, Sidekiq, Puma, Puma Cluster, etc.
+    # lifecycles of Sidekiq, Puma, Puma Cluster, etc.
     #
     # We have the following lifecycle events.
     #
@@ -45,11 +45,6 @@ module Gitlab
     #     Sidekiq/Puma Single: This is not called.
     #
     # - on_before_master_restart (on master process):
-    #
-    #     Unicorn: This will be called before a new master is spun up.
-    #       This is called on forked master before `execve` to become
-    #       a new masterfor Unicorn. This means that this does not really
-    #       affect old master process.
     #
     #     Puma Cluster: This will be called before a new master is spun up.
     #       This is called on `master` process.
@@ -114,7 +109,7 @@ module Gitlab
         end
 
         #
-        # Lifecycle integration methods (called from unicorn.rb, puma.rb, etc.)
+        # Lifecycle integration methods (called from puma.rb, etc.)
         #
         def do_worker_start
           call(:worker_start_hooks, @worker_start_hooks)

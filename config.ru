@@ -5,7 +5,7 @@
 require ::File.expand_path('../config/environment', __FILE__)
 
 def master_process?
-  Prometheus::PidProvider.worker_id.in? %w(unicorn_master puma_master)
+  Prometheus::PidProvider.worker_id == 'puma_master'
 end
 
 warmup do |app|

@@ -15,7 +15,7 @@ module Gitlab
       :rails_runner,
       :rake,
       :sidekiq,
-      :test_suite,
+      :test_suite
     ].freeze
 
     class << self

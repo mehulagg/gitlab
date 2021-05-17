@@ -12,9 +12,8 @@ module Gitlab
         require 'puma_worker_killer'
 
         PumaWorkerKiller.config do |config|
-          # Note! ram is expressed in megabytes (whereas GITLAB_UNICORN_MEMORY_MAX is in bytes)
-          # Importantly RAM is for _all_workers (ie, the cluster),
-          # not each worker as is the case with GITLAB_UNICORN_MEMORY_MAX
+          # Note! RAM is expressed in megabytes.
+          # Importantly, RAM is for _all_workers (ie, the cluster), not each worker
           worker_count = puma_options[:workers] || 1
           # The Puma Worker Killer checks the total RAM used by both the master
           # and worker processes.
