@@ -1,0 +1,5 @@
+---
+title: Fix pipeline complete graphQl field throwing an error
+merge_request: 61899
+author:
+type: fixed
