@@ -21,7 +21,7 @@ RSpec.describe "User deletes branch", :js do
     branch_search.native.send_keys(:enter)
 
     page.within(".js-branch-improve\\/awesome") do
-      accept_alert { find(".btn-default").click }
+      accept_alert { find("[data-testid='remove-branch']").click }
     end
 
     wait_for_requests

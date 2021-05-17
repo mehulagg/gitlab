@@ -27,7 +27,7 @@ RSpec.describe 'Protected Branches', :js do
         find('input[data-testid="branch-search"]').set('fix')
         find('input[data-testid="branch-search"]').native.send_keys(:enter)
 
-        expect(page).to have_css('.btn-default.disabled')
+        expect(page).to have_selector("button[data-testid='remove-branch']")
       end
     end
   end

@@ -172,7 +172,7 @@ RSpec.describe 'Branches' do
 
         expect(page).to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 1)
-        accept_confirm { find('.js-branch-fix .btn-default').click }
+        accept_confirm { find('.js-branch-fix [data-testid="remove-branch"]').click }
 
         expect(page).not_to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 0)
