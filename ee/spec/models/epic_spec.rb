@@ -568,6 +568,14 @@ RSpec.describe Epic do
         expect(epic.to_reference(group_project, full: true)).to eq('group-a&1')
       end
     end
+
+    it 'avoids additional SQL queries' do
+      epic # pre-create the epic
+
+      recorder = ActiveRecord::QueryRecorder.new { epic.to_reference(project) }
+
+      expect(recorder.count).to be_zero
+    end
   end
 
   describe '#has_children?' do
