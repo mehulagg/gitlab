@@ -16,10 +16,11 @@ import {
   selectedProjects,
   customizableStagesAndEvents,
   valueStreams,
+  convertedFormEvents,
 } from '../mock_data';
 
 let state = null;
-const { stages } = customizableStagesAndEvents;
+const { stages, events: formEvents } = customizableStagesAndEvents;
 
 describe('Value Stream Analytics mutations', () => {
   beforeEach(() => {
@@ -59,6 +60,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.INITIALIZE_VALUE_STREAM_SUCCESS}     | ${'isLoading'}               | ${false}
     ${types.REQUEST_STAGE_COUNTS}                | ${'stageCounts'}             | ${{}}
     ${types.RECEIVE_STAGE_COUNTS_ERROR}          | ${'stageCounts'}             | ${{}}
+    ${types.SET_STAGE_EVENTS}                    | ${'formEvents'}              | ${[]}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
 
@@ -95,6 +97,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                       | ${{ selectedValueStream: valueStreams[1] }}
     ${types.SET_PAGINATION}                      | ${pagination}                                            | ${{ pagination: { ...pagination, sort: PAGINATION_SORT_FIELD_END_EVENT, direction: PAGINATION_SORT_DIRECTION_DESC } }}
     ${types.SET_PAGINATION}                      | ${{ ...pagination, sort: 'duration', direction: 'asc' }} | ${{ pagination: { ...pagination, sort: 'duration', direction: 'asc' } }}
+    ${types.SET_STAGE_EVENTS}                    | ${formEvents}                                            | ${{ formEvents: convertedFormEvents }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {

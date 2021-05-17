@@ -18,6 +18,9 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
   },
+  [types.SET_STAGE_EVENTS](state, data = []) {
+    state.formEvents = data.map((ev) => convertObjectPropsToCamelCase(ev, { deep: true }));
+  },
   [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },

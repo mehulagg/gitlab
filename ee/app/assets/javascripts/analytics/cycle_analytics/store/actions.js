@@ -215,7 +215,7 @@ export const setDefaultSelectedStage = ({ dispatch }) =>
 export const receiveGroupStagesSuccess = ({ commit }, stages) =>
   commit(types.RECEIVE_GROUP_STAGES_SUCCESS, stages);
 
-export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
+export const fetchGroupStagesAndEvents = ({ dispatch, commit, getters }) => {
   const {
     currentValueStreamId: valueStreamId,
     currentGroupPath: groupId,
@@ -223,6 +223,7 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
   } = getters;
 
   dispatch('requestGroupStages');
+  commit(types.SET_STAGE_EVENTS, []);
 
   return Api.cycleAnalyticsGroupStagesAndEvents({
     groupId,
@@ -232,7 +233,10 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
       project_ids,
     },
   })
-    .then(({ data: { stages = [] } }) => dispatch('receiveGroupStagesSuccess', stages))
+    .then(({ data: { stages = [], events = [] } }) => {
+      dispatch('receiveGroupStagesSuccess', stages);
+      commit(types.SET_STAGE_EVENTS, events);
+    })
     .catch((error) => {
       throwIfUserForbidden(error);
       return dispatch('receiveGroupStagesError', error);

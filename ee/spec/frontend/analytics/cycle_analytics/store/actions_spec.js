@@ -45,9 +45,6 @@ const mockGetters = {
   currentValueStreamId: () => selectedValueStream.id,
 };
 
-const stageEndpoint = ({ stageId }) =>
-  `/groups/${currentGroup.fullPath}/-/analytics/value_stream_analytics/value_streams/${selectedValueStream.id}/stages/${stageId}`;
-
 jest.mock('~/flash');
 
 describe('Value Stream Analytics actions', () => {
