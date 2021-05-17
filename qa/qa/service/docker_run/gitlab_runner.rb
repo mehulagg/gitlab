@@ -38,6 +38,10 @@ module QA
 
         def register!
           shell <<~CMD.tr("\n", ' ')
+            echo | openssl s_client -CAfile /etc/gitlab.test.crt -connect gitlab.test:443
+          CMD
+
+          shell <<~CMD.tr("\n", ' ')
             docker run -d --rm --entrypoint=/bin/sh
             --network #{runner_network} --name #{@name}
             #{'-v /var/run/docker.sock:/var/run/docker.sock' if @executor == :docker}
