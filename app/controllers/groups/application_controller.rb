@@ -10,10 +10,15 @@ class Groups::ApplicationController < ApplicationController
 
   skip_before_action :authenticate_user!
   before_action :group
+  around_action :sticky_group
   before_action :set_sorting
   requires_cross_project_access
 
   private
+
+  def sticky_group
+    NamespaceShard.sticky_shard(@group) { yield }
+  end
 
   def group
     @group ||= find_routable!(Group, params[:group_id] || params[:id])

@@ -711,8 +711,11 @@ class User < ApplicationRecord
     end
 
     def find_by_full_path(path, follow_redirects: false)
-      namespace = Namespace.for_user.find_by_full_path(path, follow_redirects: follow_redirects)
-      namespace&.owner
+      NamespaceShard.find_first do
+        # TODO: use routes table
+        namespace = Namespace.for_user.find_by_full_path(path, follow_redirects: follow_redirects)
+        namespace&.owner
+      end
     end
 
     def reference_prefix
@@ -1173,9 +1176,9 @@ class User < ApplicationRecord
     ::Group.from("(#{union_sql}) #{::Group.table_name}").any?
   end
 
-  def namespace_id
-    namespace.try :id
-  end
+  # def namespace_id
+  #   namespace.try :id
+  # end
 
   def name_with_username
     "#{name} (#{username})"
@@ -1414,13 +1417,22 @@ class User < ApplicationRecord
     }
   end
 
+  # Read relation
+  def namespace
+    @namespace ||= NamespaceShard.find_first do
+      Namespace.find_by(owner_id: id, type: nil)
+    end
+  end
+
   def ensure_namespace_correct
     if namespace
       namespace.path = username if username_changed?
       namespace.name = name if name_changed?
     else
-      namespace = build_namespace(path: username, name: name)
-      namespace.build_namespace_settings
+      NamespaceShard.random_shard do
+        namespace = build_namespace(path: username, name: name)
+        namespace.build_namespace_settings
+      end
     end
   end
 

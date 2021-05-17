@@ -27,22 +27,25 @@ module Routable
     route =
       if route_target < NamespaceShard
         # sharded routes cannot cross-join
-        Route.for_routable_type(route_target.name).find_by(path: path) ||
-          Route.for_routable_type(route_target.name).iwhere(Route.arel_table[:path] => path).take
+        Route.for_routable_type(route_target.polymorphic_name).find_by(path: path) ||
+          Route.for_routable_type(route_target.polymorphic_name).iwhere(Route.arel_table[:path] => path).take
       else
         route_scope.find_by(routes: { path: path }) ||
           route_scope.iwhere(Route.arel_table[:path] => path).take
       end
 
     if follow_redirects
-      route ||= redirect_route_scope.iwhere(RedirectRoute.arel_table[:path] => path).take
+      route ||= RedirectRoute.iwhere(RedirectRoute.arel_table[:path] => path).take
     end
 
     return unless route
     return route if route.is_a?(Routable)
 
     NamespaceShard.sharded_read_from_namespace_id(route.source_id) do
-      route.source
+      result = route.source
+      Rails.logger.info("route result=#{result}")
+      Rails.logger.info caller
+      result
     end
   end
 
@@ -76,8 +79,8 @@ module Routable
       Routable.find_by_full_path(
         path,
         follow_redirects: follow_redirects,
-        route_scope: includes(:route).references(:routes),
-        redirect_route_scope: joins(:redirect_routes)
+        route_scope: self,
+        redirect_route_scope: self
       )
     end
 

@@ -11,7 +11,7 @@ module Gitlab
         end
 
         def id_to_shard(id)
-          (id >> 10) & (1<<13 - 1)
+          (id >> 10) & ((1<<13) - 1)
         end
       
         # The intention is to eventually lookup from a DB

@@ -13,8 +13,6 @@ class GroupsController < Groups::ApplicationController
 
   respond_to :html
 
-  around_action :shard_write!, only: [:create]
-
   prepend_before_action(only: [:show, :issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
   prepend_before_action :ensure_export_enabled, only: [:export, :download_export]
@@ -229,20 +227,10 @@ class GroupsController < Groups::ApplicationController
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def shard_write!(&block)
-    if group_params[:parent_id].present?
-      parent_group = Group.sharded_find(group_params[:parent_id])
-
-      NamespaceShard.sharded_write(namespace: parent_group, &block)
-    else
-      yield
-    end
-  end
-
   def parent_group
     return unless params[:parent_id].present?
 
-    @parent_group ||= Group.sharded_find(params[:parent_id])
+    @parent_group ||= Group.find(params[:parent_id])
   end
 
   def determine_layout
