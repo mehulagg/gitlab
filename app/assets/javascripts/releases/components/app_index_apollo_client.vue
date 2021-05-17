@@ -1,6 +1,6 @@
 <script>
 import { GlEmptyState, GlLink, GlButton, GlKeysetPagination } from '@gitlab/ui';
-import allReleasesQuery from '~/releases/graphql/queries/all_releases.query.graphql';
+import allReleasesQuery from 'shared_queries/releases/all_releases.query.graphql';
 import { convertAllReleasesGraphQLResponse } from '~/releases/util';
 import { __ } from '~/locale';
 import ReleaseBlock from './release_block.vue';
@@ -64,6 +64,11 @@ export default {
   },
   computed: {
     queryVariables() {
+      return {
+        fullPath: this.projectPath,
+        first: 1,
+      };
+
       let firstLastParams;
       if (!this.cursors.before) {
         firstLastParams = { first: PAGE_SIZE };

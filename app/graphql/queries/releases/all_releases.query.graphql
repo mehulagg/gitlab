@@ -95,6 +95,7 @@ query allReleases(
         ...Release
       }
       pageInfo {
+        __typename
         startCursor
         hasPreviousPage
         hasNextPage
