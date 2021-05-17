@@ -9,7 +9,7 @@ class NamespaceShard < ApplicationRecord
   if configured_database_names.size > 1
     # TODO check that a database named 'primary' exists
     # TODO use `.default_shard`, `.writing_role`, `.reading_role`, rather then fixed symbols
-    sharded_database_names = configured_database_names - ['primary']
+    sharded_database_names = configured_database_names
     connects_to_shards = sharded_database_names.each_with_object({}) { |name, hash| hash[name.to_sym] = { writing: name.to_sym, reading: name.to_sym } }
 
     connects_to shards: connects_to_shards
