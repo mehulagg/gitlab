@@ -7,7 +7,7 @@ module Projects
     DestroyError = Class.new(StandardError)
 
     def async_execute
-      project.update_attribute(:pending_delete, true)
+      project.update_column(:pending_delete, true)
 
       # Ensure no repository +deleted paths are kept,
       # regardless of any issue with the ProjectDestroyWorker
@@ -21,7 +21,8 @@ module Projects
     def execute
       return false unless can?(current_user, :remove_project, project)
 
-      project.update_attribute(:pending_delete, true)
+      project.update_column(:pending_delete, true)
+
       # Flush the cache for both repositories. This has to be done _before_
       # removing the physical repositories as some expiration code depends on
       # Git data (e.g. a list of branch names).

@@ -1,0 +1,5 @@
+---
+title: Avoid callbacks when seting pending_delete on project
+merge_request: 61917
+author:
+type: fixed
