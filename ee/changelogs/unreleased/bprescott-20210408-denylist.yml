@@ -1,0 +1,5 @@
+---
+title: Change use of "blacklist" to "denylist" in push rule check error
+merge_request: 58868
+author:
+type: changed

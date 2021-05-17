@@ -10,6 +10,7 @@ module EE
                   list_assignees_path: board_users_path(board, :json))
     end
 
+    # rubocop:disable Metrics/AbcSize
     override :board_data
     def board_data
       show_feature_promotion = @project && show_promotions? &&
@@ -28,7 +29,7 @@ module EE
         show_promotion: show_feature_promotion,
         can_update: can_update?.to_s,
         can_admin_list: can_admin_list?.to_s,
-        disabled: disabled?.to_s,
+        disabled: board.disabled_for?(current_user).to_s,
         emails_disabled: current_board_parent.emails_disabled?.to_s
       }
 
@@ -53,6 +54,7 @@ module EE
         iteration_feature_available: current_board_namespace.feature_available?(:iterations).to_s
       }
     end
+    # rubocop:enable Metrics/AbcSize
 
     override :can_update?
     def can_update?
@@ -71,13 +73,6 @@ module EE
     override :board_base_url
     def board_base_url
       return group_epic_boards_url(@group) if board.is_a?(::Boards::EpicBoard)
-
-      super
-    end
-
-    override :disabled?
-    def disabled?
-      return false if board.is_a?(::Boards::EpicBoard)
 
       super
     end

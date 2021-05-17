@@ -9,6 +9,8 @@ module Mutations
 
           graphql_name 'BulkFindOrCreateDevopsAdoptionSegments'
 
+          description '**BETA** This endpoint is subject to change without notice.'
+
           argument :namespace_ids, [::Types::GlobalIDType[::Namespace]],
                    required: true,
                    description: 'List of Namespace IDs for the segments.'

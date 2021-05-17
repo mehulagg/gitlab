@@ -599,6 +599,39 @@ describe('Grouped security reports app', () => {
         expect(wrapper.find('[data-testid="dast-ci-job-link"]').exists()).toBe(false);
       });
     });
+
+    it('show download option when scanned resources are not available', () => {
+      mock.onGet(DAST_DIFF_ENDPOINT).reply(200, {
+        ...dastDiffSuccessMock,
+        base_report_out_of_date: true,
+      });
+
+      const summaryWithoutScannedResources = {
+        scannedResourcesCsvPath: 'http://test',
+      };
+
+      createWrapper(
+        {
+          ...props,
+          enabledReports: {
+            dast: true,
+          },
+        },
+        {
+          data: {
+            dastSummary: summaryWithoutScannedResources,
+          },
+        },
+      );
+
+      return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
+        const findDownloadLink = wrapper.find('[data-testid="download-link"]');
+
+        expect(wrapper.text()).toContain('Download scanned resources');
+        expect(findDownloadLink.exists()).toBe(true);
+        expect(findDownloadLink.attributes('href')).toBe('http://test');
+      });
+    });
   });
 
   describe('secret scanning reports', () => {

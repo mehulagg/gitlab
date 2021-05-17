@@ -18,7 +18,6 @@ import { toYmd } from '../shared/utils';
 import { OVERVIEW_STAGE_ID } from './constants';
 
 const EVENT_TYPE_LABEL = 'label';
-const ERROR_NAME_RESERVED = 'is reserved';
 
 export const removeFlash = (type = 'alert') => {
   const flashEl = document.querySelector(`.flash-${type}`);
@@ -357,9 +356,6 @@ export const throwIfUserForbidden = (error) => {
     throw error;
   }
 };
-
-export const isStageNameExistsError = ({ status, errors }) =>
-  status === httpStatus.UNPROCESSABLE_ENTITY && errors?.name?.includes(ERROR_NAME_RESERVED);
 
 export const timeSummaryForPathNavigation = ({ seconds, hours, days, minutes, weeks, months }) => {
   if (months) {

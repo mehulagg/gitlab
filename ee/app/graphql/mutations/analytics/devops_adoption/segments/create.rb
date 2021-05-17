@@ -9,6 +9,8 @@ module Mutations
 
           graphql_name 'CreateDevopsAdoptionSegment'
 
+          description '**BETA** This endpoint is subject to change without notice.'
+
           argument :namespace_id, ::Types::GlobalIDType[::Namespace],
                    required: true,
                    description: 'Namespace ID to set for the segment.'

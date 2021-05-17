@@ -142,6 +142,13 @@ module EE
               null: true,
               description: "The project's push rules settings.",
               method: :push_rule
+
+        field :path_locks,
+              ::Types::PathLockType.connection_type,
+              null: true,
+              description: "The project's path locks.",
+              extras: [:lookahead],
+              resolver: ::Resolvers::PathLocksResolver
       end
 
       def api_fuzzing_ci_configuration

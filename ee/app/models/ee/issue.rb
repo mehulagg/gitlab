@@ -78,7 +78,7 @@ module EE
 
     class_methods do
       def with_api_entity_associations
-        super.preload(:epic)
+        super.preload(epic: { group: :route })
       end
 
       # override

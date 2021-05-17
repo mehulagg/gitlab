@@ -606,6 +606,16 @@ export default {
                 :download-link="dastDownloadLink"
               />
             </template>
+            <template v-else-if="dastDownloadLink">
+              <gl-link
+                download
+                :href="dastDownloadLink"
+                class="gl-ml-1"
+                data-testid="download-link"
+              >
+                ({{ s__('SecurityReports|Download scanned resources') }})
+              </gl-link>
+            </template>
           </summary-row>
           <grouped-issues-list
             v-if="hasDastIssues"

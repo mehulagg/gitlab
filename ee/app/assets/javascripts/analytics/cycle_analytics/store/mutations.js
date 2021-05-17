@@ -18,6 +18,9 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
   },
+  [types.SET_STAGE_EVENTS](state, data = []) {
+    state.formEvents = data.map((ev) => convertObjectPropsToCamelCase(ev, { deep: true }));
+  },
   [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },
@@ -77,21 +80,6 @@ export default {
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
     state.stages = transformRawStages(stages);
   },
-  [types.REQUEST_UPDATE_STAGE](state) {
-    state.isLoading = true;
-  },
-  [types.RECEIVE_UPDATE_STAGE_SUCCESS](state) {
-    state.isLoading = false;
-  },
-  [types.RECEIVE_UPDATE_STAGE_ERROR](state) {
-    state.isLoading = false;
-  },
-  [types.REQUEST_REMOVE_STAGE](state) {
-    state.isLoading = true;
-  },
-  [types.RECEIVE_REMOVE_STAGE_RESPONSE](state) {
-    state.isLoading = false;
-  },
   [types.INITIALIZE_VSA](
     state,
     {
@@ -120,18 +108,6 @@ export default {
   },
   [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
-  },
-  [types.REQUEST_REORDER_STAGE](state) {
-    state.isSavingStageOrder = true;
-    state.errorSavingStageOrder = false;
-  },
-  [types.RECEIVE_REORDER_STAGE_SUCCESS](state) {
-    state.isSavingStageOrder = false;
-    state.errorSavingStageOrder = false;
-  },
-  [types.RECEIVE_REORDER_STAGE_ERROR](state) {
-    state.isSavingStageOrder = false;
-    state.errorSavingStageOrder = true;
   },
   [types.REQUEST_CREATE_VALUE_STREAM](state) {
     state.isCreatingValueStream = true;

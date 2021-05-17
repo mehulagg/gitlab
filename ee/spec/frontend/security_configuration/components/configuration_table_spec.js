@@ -67,7 +67,7 @@ describe('ConfigurationTable component', () => {
       gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
       autoDevopsEnabled: propsData.autoDevopsEnabled,
     });
-    expect(manage.find(ManageFeature).props()).toEqual({ feature });
+    expect(manage.find(ManageFeature).props()).toMatchObject({ feature });
     expect(description.find(GlLink).attributes('href')).toBe(feature.helpPath);
   });
 

@@ -1,7 +1,10 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlTabs, GlTab } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import dateformat from 'dateformat';
+import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
+import API from '~/api';
+import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
@@ -11,6 +14,8 @@ import {
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
+  TRACK_ADOPTION_TAB_CLICK_EVENT,
+  TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
 } from '../constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
@@ -26,6 +31,9 @@ export default {
     GlAlert,
     DevopsAdoptionSection,
     DevopsAdoptionSegmentModal,
+    DevopsScore,
+    GlTabs,
+    GlTab,
   },
   inject: {
     isGroup: {
@@ -34,11 +42,22 @@ export default {
     groupGid: {
       default: null,
     },
+    devopsScoreMetrics: {
+      default: null,
+    },
+    devopsReportDocsPath: {
+      default: '',
+    },
+    noDataImagePath: {
+      default: '',
+    },
   },
   i18n: {
     groupLevelLabel: DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
     ...DEVOPS_ADOPTION_STRINGS.app,
   },
+  trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
+  trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
   maxSegments: MAX_SEGMENTS,
   devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
@@ -63,6 +82,9 @@ export default {
             directDescendantsOnly: false,
           }
         : {},
+      adoptionTabClicked: false,
+      devopsScoreTabClicked: false,
+      selectedTab: 0,
     };
   },
   apollo: {
@@ -88,6 +110,9 @@ export default {
     },
   },
   computed: {
+    isAdmin() {
+      return !this.isGroup;
+    },
     hasGroupData() {
       return Boolean(this.groups?.nodes?.length);
     },
@@ -121,9 +146,15 @@ export default {
     canRenderModal() {
       return this.hasGroupData && !this.isLoading;
     },
+    tabIndexValues() {
+      const tabs = this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab);
+
+      return this.isGroup ? tabs : [...tabs, 'devops-score'];
+    },
   },
   created() {
     this.fetchGroups();
+    this.selectTab();
   },
   beforeDestroy() {
     clearInterval(this.pollingTableData);
@@ -219,19 +250,82 @@ export default {
 
       deleteSegmentsFromCache(cache, ids, this.segmentsQueryVariables);
     },
+    selectTab() {
+      const [value] = getParameterValues('tab');
+
+      if (value) {
+        this.selectedTab = this.tabIndexValues.indexOf(value);
+      }
+    },
+    onTabChange(index) {
+      if (index > 0) {
+        if (index !== this.selectedTab) {
+          const path = mergeUrlParams(
+            { tab: this.tabIndexValues[index] },
+            window.location.pathname,
+          );
+          updateHistory({ url: path, title: window.title });
+        }
+      } else {
+        updateHistory({ url: window.location.pathname, title: window.title });
+      }
+
+      this.selectedTab = index;
+    },
+    trackDevopsScoreTabClick() {
+      if (!this.devopsScoreTabClicked) {
+        API.trackRedisHllUserEvent(this.$options.trackDevopsScoreTabClickEvent);
+        this.devopsScoreTabClicked = true;
+      }
+    },
+    trackDevopsTabClick() {
+      if (!this.adoptionTabClicked) {
+        API.trackRedisHllUserEvent(this.$options.trackDevopsTabClickEvent);
+        this.adoptionTabClicked = true;
+      }
+    },
   },
 };
 </script>
 <template>
-  <div v-if="hasLoadingError">
-    <template v-for="(error, key) in errors">
-      <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
-        {{ $options.i18n[key] }}
-      </gl-alert>
-    </template>
-  </div>
+  <div>
+    <gl-tabs :value="selectedTab" @input="onTabChange">
+      <gl-tab
+        v-for="tab in $options.devopsAdoptionTableConfiguration"
+        :key="tab.title"
+        data-testid="devops-adoption-tab"
+        @click="trackDevopsTabClick"
+      >
+        <template #title>{{ tab.title }}</template>
+        <div v-if="hasLoadingError">
+          <template v-for="(error, key) in errors">
+            <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
+              {{ $options.i18n[key] }}
+            </gl-alert>
+          </template>
+        </div>
 
-  <div v-else>
+        <devops-adoption-section
+          v-else
+          :is-loading="isLoading"
+          :has-segments-data="hasSegmentsData"
+          :timestamp="timestamp"
+          :has-group-data="hasGroupData"
+          :segment-limit-reached="segmentLimitReached"
+          :edit-groups-button-label="editGroupsButtonLabel"
+          :cols="tab.cols"
+          :segments="devopsAdoptionSegments"
+          @segmentsRemoved="deleteSegmentsFromCache"
+          @openAddRemoveModal="openAddRemoveModal"
+        />
+      </gl-tab>
+
+      <gl-tab v-if="isAdmin" data-testid="devops-score-tab" @click="trackDevopsScoreTabClick">
+        <template #title>{{ s__('DevopsReport|DevOps Score') }}</template>
+        <devops-score />
+      </gl-tab>
+    </gl-tabs>
+
     <devops-adoption-segment-modal
       v-if="canRenderModal"
       ref="addRemoveModal"
@@ -240,18 +334,6 @@ export default {
       @segmentsAdded="addSegmentsToCache"
       @segmentsRemoved="deleteSegmentsFromCache"
       @trackModalOpenState="trackModalOpenState"
-    />
-    <devops-adoption-section
-      :is-loading="isLoading"
-      :has-segments-data="hasSegmentsData"
-      :timestamp="timestamp"
-      :has-group-data="hasGroupData"
-      :segment-limit-reached="segmentLimitReached"
-      :edit-groups-button-label="editGroupsButtonLabel"
-      :cols="$options.devopsAdoptionTableConfiguration[0].cols"
-      :segments="devopsAdoptionSegments"
-      @segmentsRemoved="deleteSegmentsFromCache"
-      @openAddRemoveModal="openAddRemoveModal"
     />
   </div>
 </template>

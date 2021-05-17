@@ -213,13 +213,6 @@ export const labelStopEvent = customStageLabelEvents.find(
   (ev) => ev.identifier === labelStartEvent.allowedEndEvents[0],
 );
 
-export const rawCustomStageFormErrors = {
-  name: ['is reserved', 'cant be blank'],
-  start_event_identifier: ['cant be blank'],
-};
-
-export const customStageFormErrors = convertObjectPropsToCamelCase(rawCustomStageFormErrors);
-
 const dateRange = getDatesInRange(startDate, endDate, toYmd);
 
 export const apiTasksByTypeData = getJSONFixture(

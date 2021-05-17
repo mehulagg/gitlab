@@ -663,10 +663,10 @@ msgstr ""
 msgid "%{link_start}Read more%{link_end} about role permissions"
 msgstr ""
 
-msgid "%{link_start}Remove the %{draft_or_wip_snippet} prefix%{link_end} from the title to allow this merge request to be merged when it's ready."
+msgid "%{link_start}Remove the %{draft_snippet} prefix%{link_end} from the title to allow this merge request to be merged when it's ready."
 msgstr ""
 
-msgid "%{link_start}Start the title with %{draft_snippet} or %{wip_snippet}%{link_end} to prevent a merge request that is a work in progress from being merged before it's ready."
+msgid "%{link_start}Start the title with %{draft_snippet}%{link_end} to prevent a merge request that is a work in progress from being merged before it's ready."
 msgstr ""
 
 msgid "%{listToShow}, and %{awardsListLength} more."
@@ -978,6 +978,9 @@ msgstr ""
 msgid "%{user_name} profile page"
 msgstr ""
 
+msgid "%{username} changed the draft status of merge request %{mr_link}"
+msgstr ""
+
 msgid "%{username} has asked for a GitLab account on your instance %{host}:"
 msgstr ""
 
@@ -1039,9 +1042,6 @@ msgid "'%{name}' Value Stream deleted"
 msgstr ""
 
 msgid "'%{name}' Value Stream saved"
-msgstr ""
-
-msgid "'%{name}' stage already exists"
 msgstr ""
 
 msgid "'%{source}' is not a import source"
@@ -11339,9 +11339,6 @@ msgstr ""
 msgid "DevopsAdoption|Adopted"
 msgstr ""
 
-msgid "DevopsAdoption|Adoption"
-msgstr ""
-
 msgid "DevopsAdoption|An error occurred while removing the group. Please try again."
 msgstr ""
 
@@ -11378,6 +11375,9 @@ msgstr ""
 msgid "DevopsAdoption|Deploys"
 msgstr ""
 
+msgid "DevopsAdoption|Dev"
+msgstr ""
+
 msgid "DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin."
 msgstr ""
 
@@ -11405,6 +11405,9 @@ msgstr ""
 msgid "DevopsAdoption|Not adopted"
 msgstr ""
 
+msgid "DevopsAdoption|Ops"
+msgstr ""
+
 msgid "DevopsAdoption|Pipelines"
 msgstr ""
 
@@ -11426,6 +11429,9 @@ msgstr ""
 msgid "DevopsAdoption|Scanning"
 msgstr ""
 
+msgid "DevopsAdoption|Sec"
+msgstr ""
+
 msgid "DevopsAdoption|There was an error enabling the current group. Please refresh the page."
 msgstr ""
 
@@ -11436,9 +11442,6 @@ msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the pag
 msgstr ""
 
 msgid "DevopsAdoption|You cannot remove the group you are currently in."
-msgstr ""
-
-msgid "DevopsReport|Adoption"
 msgstr ""
 
 msgid "DevopsReport|DevOps Score"
@@ -11797,7 +11800,7 @@ msgstr ""
 msgid "Draft merge requests can't be merged."
 msgstr ""
 
-msgid "Drop or %{linkStart}upload%{linkEnd} designs to attach"
+msgid "Drag your designs here or %{linkStart}click to upload%{linkEnd}."
 msgstr ""
 
 msgid "Drop or %{linkStart}upload%{linkEnd} file to attach"
@@ -18354,6 +18357,9 @@ msgid "Issues can be bugs, tasks or ideas to be discussed. Also, issues are sear
 msgstr ""
 
 msgid "Issues closed"
+msgstr ""
+
+msgid "Issues manual ordering is temporarily disabled for technical reasons."
 msgstr ""
 
 msgid "Issues must match this scope to appear in this list."
@@ -30736,12 +30742,6 @@ msgstr ""
 msgid "Stage"
 msgstr ""
 
-msgid "Stage data updated"
-msgstr ""
-
-msgid "Stage removed"
-msgstr ""
-
 msgid "StageName|Build"
 msgstr ""
 
@@ -32743,12 +32743,6 @@ msgstr ""
 msgid "There was a problem fetching users."
 msgstr ""
 
-msgid "There was a problem refreshing the data, please try again"
-msgstr ""
-
-msgid "There was a problem saving your custom stage, please try again"
-msgstr ""
-
 msgid "There was a problem sending the confirmation email"
 msgstr ""
 
@@ -32842,9 +32836,6 @@ msgstr ""
 msgid "There was an error removing the e-mail."
 msgstr ""
 
-msgid "There was an error removing your custom stage, please try again"
-msgstr ""
-
 msgid "There was an error resetting group pipeline minutes."
 msgstr ""
 
@@ -32885,9 +32876,6 @@ msgid "There was an error updating the dashboard, branch name is invalid."
 msgstr ""
 
 msgid "There was an error updating the dashboard, branch named: %{branch} already exists."
-msgstr ""
-
-msgid "There was an error updating the stage order. Please try reloading the page."
 msgstr ""
 
 msgid "There was an error when reseting email token."
@@ -34125,6 +34113,9 @@ msgid "Too many namespaces enabled. You will need to manage them via the console
 msgstr ""
 
 msgid "Too many projects enabled. You will need to manage them via the console or the API."
+msgstr ""
+
+msgid "TopNav|Switch to..."
 msgstr ""
 
 msgid "Topics (optional)"
@@ -37634,9 +37625,6 @@ msgid "Your comment could not be updated! Please check your network connection a
 msgstr ""
 
 msgid "Your comment will be discarded."
-msgstr ""
-
-msgid "Your custom stage '%{title}' was created"
 msgstr ""
 
 msgid "Your dashboard has been copied. You can %{web_ide_link_start}edit it here%{web_ide_link_end}."

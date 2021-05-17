@@ -1,7 +1,7 @@
 - issue = local_assigns.fetch(:issue)
 
 - if issue.weight
-  %span.issuable-weight.gl-display-none.d-sm-inline-block.gl-mr-2.has-tooltip{ data: { container: 'body', qa_selector: 'issuable_weight_content' }, title: _('Weight') }
+  %span.issuable-weight.gl-display-none.d-sm-inline-block.gl-mr-2.has-tooltip{ data: { container: 'body', qa_selector: 'issuable_weight_content', testid: 'weight' }, title: _('Weight') }
     &nbsp;
     = sprite_icon('weight', css_class: 'issue-weight-icon')
     = issue.weight

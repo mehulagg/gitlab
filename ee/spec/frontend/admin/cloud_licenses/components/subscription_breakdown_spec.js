@@ -159,7 +159,13 @@ describe('Subscription Breakdown', () => {
       `(
         'with url is $url and type is $type the sync button is shown: $shouldShow',
         ({ url, type, shouldShow }) => {
-          const provide = { subscriptionSyncPath: url };
+          const provide = {
+            connectivityHelpURL: '',
+            customersPortalUrl: '',
+            licenseUploadPath: '',
+            licenseRemovePath: '',
+            subscriptionSyncPath: url,
+          };
           const props = { subscription: { ...license.ULTIMATE, type } };
           const stubs = { GlCard, SubscriptionDetailsCard };
           createComponent({ props, provide, stubs });
@@ -179,7 +185,13 @@ describe('Subscription Breakdown', () => {
       `(
         'with url is $url and type is $type the upload button is shown: $shouldShow',
         ({ url, type, shouldShow }) => {
-          const provide = { licenseUploadPath: url };
+          const provide = {
+            connectivityHelpURL: '',
+            customersPortalUrl: '',
+            licenseRemovePath: '',
+            subscriptionSyncPath: '',
+            licenseUploadPath: url,
+          };
           const props = { subscription: { ...license.ULTIMATE, type } };
           const stubs = { GlCard, SubscriptionDetailsCard };
           createComponent({ props, provide, stubs });
@@ -194,7 +206,13 @@ describe('Subscription Breakdown', () => {
         ${''}                 | ${false}
         ${undefined}          | ${false}
       `('with url is $url the manage button is shown: $shouldShow', ({ url, shouldShow }) => {
-        const provide = { customersPortalUrl: url };
+        const provide = {
+          connectivityHelpURL: '',
+          licenseUploadPath: '',
+          licenseRemovePath: '',
+          subscriptionSyncPath: '',
+          customersPortalUrl: url,
+        };
         const stubs = { GlCard, SubscriptionDetailsCard };
         createComponent({ provide, stubs });
 
@@ -212,7 +230,13 @@ describe('Subscription Breakdown', () => {
       `(
         'with url is $url and type is $type the remove button is shown: $shouldShow',
         ({ url, type, shouldShow }) => {
-          const provide = { licenseRemovePath: url };
+          const provide = {
+            connectivityHelpURL: '',
+            customersPortalUrl: '',
+            licenseUploadPath: '',
+            subscriptionSyncPath: '',
+            licenseRemovePath: url,
+          };
           const props = { subscription: { ...license.ULTIMATE, type } };
           const stubs = { GlCard, SubscriptionDetailsCard };
           createComponent({ props, provide, stubs });
