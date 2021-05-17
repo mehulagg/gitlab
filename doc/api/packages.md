@@ -8,10 +8,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 This is the API documentation of [GitLab Packages](../administration/packages/index.md). 
 
-When authenticating, you can use a [personal access token](), [project access token](), or a [job token](). 
-
-You cannot use a [Deploy Token]() with the GitLab API. 
-
 ## List packages
 
 ### Within a project
