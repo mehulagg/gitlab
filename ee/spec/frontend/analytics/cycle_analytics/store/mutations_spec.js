@@ -41,11 +41,6 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}
-    ${types.REQUEST_UPDATE_STAGE}                | ${'isLoading'}               | ${true}
-    ${types.RECEIVE_UPDATE_STAGE_SUCCESS}        | ${'isLoading'}               | ${false}
-    ${types.RECEIVE_UPDATE_STAGE_ERROR}          | ${'isLoading'}               | ${false}
-    ${types.REQUEST_REMOVE_STAGE}                | ${'isLoading'}               | ${true}
-    ${types.RECEIVE_REMOVE_STAGE_RESPONSE}       | ${'isLoading'}               | ${false}
     ${types.REQUEST_STAGE_MEDIANS}               | ${'medians'}                 | ${{}}
     ${types.RECEIVE_STAGE_MEDIANS_ERROR}         | ${'medians'}                 | ${{}}
     ${types.REQUEST_CREATE_VALUE_STREAM}         | ${'isCreatingValueStream'}   | ${true}

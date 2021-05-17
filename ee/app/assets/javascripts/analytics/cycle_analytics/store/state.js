@@ -12,9 +12,6 @@ export default () => ({
 
   errorCode: null,
 
-  isSavingStageOrder: false,
-  errorSavingStageOrder: false,
-
   currentGroup: null,
   selectedProjects: [],
   selectedStage: null,
@@ -31,6 +28,7 @@ export default () => ({
   deleteValueStreamError: null,
 
   stages: [],
+  formEvents: [],
   selectedStageError: '',
   summary: [],
   medians: {},
