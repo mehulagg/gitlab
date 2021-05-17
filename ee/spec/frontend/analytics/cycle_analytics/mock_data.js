@@ -73,10 +73,6 @@ export const customizableStagesAndEvents = getJSONFixture(
   fixtureEndpoints.customizableCycleAnalyticsStagesAndEvents,
 );
 
-export const convertedFormEvents = customizableStagesAndEvents.events.map((ev) =>
-  convertObjectPropsToCamelCase(ev, { deep: true }),
-);
-
 const dummyState = {};
 
 export const defaultStageConfig = [

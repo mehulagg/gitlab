@@ -2,12 +2,11 @@ import Api from 'ee/api';
 import createFlash from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
-import { __, sprintf } from '~/locale';
+import { __ } from '~/locale';
 import { FETCH_VALUE_STREAM_DATA, OVERVIEW_STAGE_CONFIG } from '../constants';
 import {
   removeFlash,
   throwIfUserForbidden,
-  isStageNameExistsError,
   checkForDataError,
   flashErrorIfStatusNotOk,
 } from '../utils';
