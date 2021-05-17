@@ -36,11 +36,6 @@ module Gitlab
         !!defined?(::Puma)
       end
 
-      # For unicorn, we need to check for actual server instances to avoid false positives.
-      def unicorn?
-        !!(defined?(::Unicorn) && defined?(::Unicorn::HttpServer))
-      end
-
       def sidekiq?
         !!(defined?(::Sidekiq) && Sidekiq.server?)
       end
@@ -66,7 +61,7 @@ module Gitlab
       end
 
       def web_server?
-        puma? || unicorn?
+        puma?
       end
 
       def action_cable?

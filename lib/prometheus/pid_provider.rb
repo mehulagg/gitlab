@@ -7,8 +7,6 @@ module Prometheus
     def worker_id
       if Gitlab::Runtime.sidekiq?
         sidekiq_worker_id
-      elsif Gitlab::Runtime.unicorn?
-        unicorn_worker_id
       elsif Gitlab::Runtime.puma?
         puma_worker_id
       else

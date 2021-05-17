@@ -124,20 +124,6 @@
     :versions: []
     :when: 2016-04-17 21:49:10.329759000 Z
 - - :license
-  - unicorn
-  - ruby
-  - :who: Connor Shea
-    :why: http://unicorn.bogomips.org/LICENSE.html
-    :versions: []
-    :when: 2016-05-02 05:45:28.817510000 Z
-- - :license
-  - unicorn-worker-killer
-  - ruby
-  - :who: Connor Shea
-    :why: https://github.com/kzk/unicorn-worker-killer/blob/master/LICENSE
-    :versions: []
-    :when: 2016-05-02 05:45:38.323867000 Z
-- - :license
   - unf
   - BSD
   - :who: Connor Shea
@@ -283,8 +269,8 @@
     :when: 2019-09-11 13:08:28.431132000 Z
 - - :permit
   - "(MIT OR CC0-1.0)"
-  - :who: 
-    :why: 
+  - :who:
+    :why:
     :versions: []
     :when: 2019-11-08 10:03:31.787226000 Z
 - - :permit
