@@ -35,16 +35,13 @@ export default {
   },
   computed: {
     currentValue() {
-      return Number(this.value.data);
+      return this.value.data ? Number(this.value.data) : '';
     },
     defaultEpics() {
       return this.config.defaultEpics || DEFAULT_NONE_ANY;
     },
-    idProperty() {
-      return this.config.idProperty || 'id';
-    },
     activeEpic() {
-      return this.epics.find((epic) => epic[this.idProperty] === this.currentValue);
+      return this.epics.find((epic) => epic.id === this.currentValue);
     },
   },
   watch: {
@@ -58,10 +55,10 @@ export default {
     },
   },
   methods: {
-    fetchEpicsBySearchTerm(searchTerm = '') {
+    fetchEpicsBySearchTerm({ epicPath = '', search = '' }) {
       this.loading = true;
       this.config
-        .fetchEpics(searchTerm)
+        .fetchEpics({ epicPath, search })
         .then((response) => {
           this.epics = Array.isArray(response) ? response : response.data;
         })
@@ -71,11 +68,12 @@ export default {
         });
     },
     searchEpics: debounce(function debouncedSearch({ data }) {
-      this.fetchEpicsBySearchTerm(data);
+      const epicPath = this.activeEpic?.web_url;
+      this.fetchEpicsBySearchTerm({ epicPath, search: epicPath ? '' : data });
     }, DEBOUNCE_DELAY),
 
     getEpicDisplayText(epic) {
-      return `${epic.title}::&${epic[this.idProperty]}`;
+      return `${epic.title}::&${epic.iid}`;
     },
   },
 };
@@ -104,8 +102,8 @@ export default {
       <template v-else>
         <gl-filtered-search-suggestion
           v-for="epic in epics"
-          :key="epic[idProperty]"
-          :value="String(epic[idProperty])"
+          :key="epic.id"
+          :value="String(epic.id)"
         >
           {{ epic.title }}
         </gl-filtered-search-suggestion>

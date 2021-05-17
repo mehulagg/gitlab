@@ -120,13 +120,25 @@ export default {
           symbol: '&',
           token: EpicToken,
           operators: OPERATOR_IS_ONLY,
-          idProperty: 'iid',
           defaultEpics: [],
-          fetchEpics: (search = '') => {
-            const number = Number(search);
-            return !search || Number.isNaN(number)
-              ? axios.get(this.listEpicsPath, { params: { search } })
-              : axios.get(joinPaths(this.listEpicsPath, search)).then(({ data }) => [data]);
+          fetchEpics: ({ epicPath = '', search = '' }) => {
+            const epicId = Number(search) || null;
+
+            // No search criteria or path has been provided, fetch all epics.
+            if (!epicPath && !search) {
+              return axios.get(this.listEpicsPath);
+            } else if (epicPath && !search) {
+              // Just epicPath has been provided, fetch a specific epic.
+              return axios.get(epicPath).then(({ data }) => [data]);
+            } else if (!epicPath && epicId) {
+              // Exact epic ID provided, fetch the epic.
+              return axios
+                .get(joinPaths(this.listEpicsPath, `${epicId}`))
+                .then(({ data }) => [data]);
+            }
+
+            // Search for an epic.
+            return axios.get(this.listEpicsPath, { params: { search } });
           },
         },
       ];

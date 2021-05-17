@@ -86,9 +86,12 @@ describe('EpicToken', () => {
       it('calls `config.fetchEpics` with provided searchTerm param', () => {
         jest.spyOn(wrapper.vm.config, 'fetchEpics');
 
-        wrapper.vm.fetchEpicsBySearchTerm('foo');
+        wrapper.vm.fetchEpicsBySearchTerm({ search: 'foo' });
 
-        expect(wrapper.vm.config.fetchEpics).toHaveBeenCalledWith('foo');
+        expect(wrapper.vm.config.fetchEpics).toHaveBeenCalledWith({
+          epicPath: '',
+          search: 'foo',
+        });
       });
 
       it('sets response to `epics` when request is successful', async () => {
@@ -96,7 +99,7 @@ describe('EpicToken', () => {
           data: mockEpics,
         });
 
-        wrapper.vm.fetchEpicsBySearchTerm();
+        wrapper.vm.fetchEpicsBySearchTerm({});
 
         await waitForPromises();
 
@@ -106,7 +109,7 @@ describe('EpicToken', () => {
       it('calls `createFlash` with flash error message when request fails', async () => {
         jest.spyOn(wrapper.vm.config, 'fetchEpics').mockRejectedValue({});
 
-        wrapper.vm.fetchEpicsBySearchTerm('foo');
+        wrapper.vm.fetchEpicsBySearchTerm({ search: 'foo' });
 
         await waitForPromises();
 
@@ -118,7 +121,7 @@ describe('EpicToken', () => {
       it('sets `loading` to false when request completes', async () => {
         jest.spyOn(wrapper.vm.config, 'fetchEpics').mockRejectedValue({});
 
-        wrapper.vm.fetchEpicsBySearchTerm('foo');
+        wrapper.vm.fetchEpicsBySearchTerm({ search: 'foo' });
 
         await waitForPromises();
 

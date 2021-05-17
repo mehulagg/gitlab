@@ -334,7 +334,7 @@ export default {
     fetchEmojis(search) {
       return this.fetchWithCache(this.autocompleteAwardEmojisPath, 'emojis', 'name', search);
     },
-    async fetchEpics(search) {
+    async fetchEpics({ search }) {
       const epics = await this.fetchWithCache(this.groupEpicsPath, 'epics');
       if (!search) {
         return epics.slice(0, MAX_LIST_SIZE);
