@@ -598,10 +598,10 @@ Each feature that accepts data uploads or allows to download them needs to use
 saved directly to Object Storage by Workhorse, and all downloads needs to be served
 by Workhorse.
 
-Performing uploads/downloads via Unicorn/Puma is an expensive operation,
-as it blocks the whole processing slot (worker or thread) for the duration of the upload.
+Performing uploads/downloads via Puma is an expensive operation,
+as it blocks the whole processing slot (thread) for the duration of the upload.
 
-Performing uploads/downloads via Unicorn/Puma also has a problem where the operation
+Performing uploads/downloads via Puma also has a problem where the operation
 can time out, which is especially problematic for slow clients. If clients take a long time
 to upload/download the processing slot might be killed due to request processing
 timeout (usually between 30s-60s).

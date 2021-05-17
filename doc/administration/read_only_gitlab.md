@@ -19,10 +19,10 @@ The configuration for doing so depends on your desired outcome.
 The first thing you'll want to accomplish is to ensure that no changes can be
 made to your repositories. There's two ways you can accomplish that:
 
-- Either stop Unicorn/Puma to make the internal API unreachable:
+- Either stop Puma to make the internal API unreachable:
 
   ```shell
-  sudo gitlab-ctl stop puma  # or unicorn
+  sudo gitlab-ctl stop puma
   ```
 
 - Or, open up a Rails console:

@@ -116,7 +116,7 @@ Similar to the Kubernetes case, if you have scaled out your GitLab cluster to
 use multiple application servers, you should pick a designated node (that isn't
 auto-scaled away) for running the backup Rake task. Because the backup Rake
 task is tightly coupled to the main Rails application, this is typically a node
-on which you're also running Unicorn/Puma or Sidekiq.
+on which you're also running Puma or Sidekiq.
 
 Example output:
 
