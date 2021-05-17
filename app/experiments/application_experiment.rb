@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/NamespacedClass
+  include ::Gitlab::Experimentation::GroupTypes
+
   def enabled?
     return false if Feature::Definition.get(feature_flag_name).nil? # there has to be a feature flag yaml file
     return false unless Gitlab.dev_env_or_com? # we have to be in an environment that allows experiments
@@ -11,6 +13,8 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
 
   def publish(_result = nil)
     return unless should_track? # don't track events for excluded contexts
+
+    Experiment.add_group(name, variant.name, context.value[:namespace]) if context.value[:namespace]
 
     track(:assignment) # track that we've assigned a variant for this context
 
