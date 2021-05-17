@@ -34,12 +34,41 @@ RSpec.describe Groups::SsoController do
       expect(assigns[:group_name]).to eq 'our-group'
     end
 
-    it 'allows account unlinking' do
-      create(:group_saml_identity, saml_provider: saml_provider, user: user)
+    context 'unlinking user' do
+      before do
+        create(:group_saml_identity, saml_provider: saml_provider, user: user)
+        user.update!(provisioned_by_group: saml_provider.group)
+      end
 
-      expect do
-        delete :unlink, params: { group_id: group }
-      end.to change(Identity, :count).by(-1)
+      it 'allows account unlinking' do
+        expect do
+          delete :unlink, params: { group_id: group }
+        end.to change(Identity, :count).by(-1)
+      end
+
+      context 'with block_password_auth_for_saml_users feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'does not sign out user provisioned by this group' do
+          delete :unlink, params: { group_id: group }
+
+          expect(response).to redirect_to(profile_account_path)
+        end
+      end
+
+      context 'with block_password_auth_for_saml_users feature flag switched on' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: true)
+        end
+
+        it 'signs out user provisioned by this group' do
+          delete :unlink, params: { group_id: group }
+
+          expect(subject.current_user).to eq(nil)
+        end
+      end
     end
 
     context 'when SAML is disabled for the group' do

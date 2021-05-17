@@ -59,7 +59,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
     }
 
     Sidekiq::Worker.skipping_transaction_check do
-      merge_request = MergeRequests::CreateService.new(@project, admin, opts).execute
+      merge_request = MergeRequests::CreateService.new(project: @project, current_user: admin, params: opts).execute
       merge_request.save!
       merge_request.approvals.create(approvals)
       merge_request.state = :merged
@@ -67,7 +67,7 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
       merge_request
     end
   rescue ::Gitlab::Access::AccessDeniedError
-    raise ::Gitlab::Access::AccessDeniedError.new("If you are re-creating your GitLab database, you should also delete your old repositories located at $GDK/repositories/@hashed")
+    raise ::Gitlab::Access::AccessDeniedError, "If you are re-creating your GitLab database, you should also delete your old repositories located at $GDK/repositories/@hashed"
   end
 
   def create_pipeline!(project, ref, commit, status)

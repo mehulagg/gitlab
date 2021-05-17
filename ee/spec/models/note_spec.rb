@@ -91,18 +91,6 @@ RSpec.describe Note do
     end
   end
 
-  describe 'scopes' do
-    describe '.with_suggestions' do
-      it 'returns the correct note' do
-        note_with_suggestion = create(:note, suggestions: [create(:suggestion)])
-        note_without_suggestion = create(:note)
-
-        expect(described_class.with_suggestions).to include(note_with_suggestion)
-        expect(described_class.with_suggestions).not_to include(note_without_suggestion)
-      end
-    end
-  end
-
   context 'object storage with background upload' do
     before do
       stub_uploads_object_storage(AttachmentUploader, background_upload: true)

@@ -7,11 +7,12 @@ export const initPaidFeatureCalloutBadge = () => {
 
   if (!el) return undefined;
 
-  const { id } = el.dataset;
+  const { featureName, id } = el.dataset;
 
   return new Vue({
     el,
-    render: (createElement) => createElement(PaidFeatureCalloutBadge, { attrs: { id } }),
+    render: (createElement) =>
+      createElement(PaidFeatureCalloutBadge, { props: { featureName }, attrs: { id } }),
   });
 };
 
@@ -24,6 +25,8 @@ export const initPaidFeatureCalloutPopover = () => {
     containerId,
     daysRemaining,
     featureName,
+    hrefComparePlans,
+    hrefUpgradeToPaid,
     planNameForTrial,
     planNameForUpgrade,
     promoImageAltText,
@@ -39,6 +42,8 @@ export const initPaidFeatureCalloutPopover = () => {
           containerId,
           daysRemaining: Number(daysRemaining),
           featureName,
+          hrefComparePlans,
+          hrefUpgradeToPaid,
           planNameForTrial,
           planNameForUpgrade,
           promoImageAltText,

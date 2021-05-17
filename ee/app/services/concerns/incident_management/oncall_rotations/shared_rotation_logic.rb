@@ -5,6 +5,11 @@ module IncidentManagement
     module SharedRotationLogic
       MAXIMUM_PARTICIPANTS = 100
 
+      def ensure_rotation_is_up_to_date
+        # Ensure shift history is up to date before saving new params
+        IncidentManagement::OncallRotations::PersistShiftsJob.new.perform(oncall_rotation.id)
+      end
+
       def save_participants!
         participants = participants_for(oncall_rotation).each(&:validate!)
 

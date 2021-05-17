@@ -10,6 +10,8 @@ import epicUtils from 'ee/epic/utils/epic_utils';
 
 import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 
+import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+
 import { mockEpicMeta, mockEpicData, mockAncestors } from '../mock_data';
 
 describe('EpicSidebarComponent', () => {
@@ -205,6 +207,10 @@ describe('EpicSidebarComponent', () => {
 
     it('renders labels select element', () => {
       expect(wrapper.find('[data-testid="labels-select"]').exists()).toBe(true);
+    });
+
+    it('renders SidebarSubscriptionsWidget', () => {
+      expect(wrapper.find(SidebarSubscriptionsWidget).exists()).toBe(true);
     });
 
     describe('when sub-epics feature is available', () => {

@@ -30,7 +30,7 @@ module EE
 
       has_many :ldap_group_links, foreign_key: 'group_id', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
       has_many :saml_group_links, foreign_key: 'group_id'
-      has_many :hooks, dependent: :destroy, class_name: 'GroupHook' # rubocop:disable Cop/ActiveRecordDependent
+      has_many :hooks, class_name: 'GroupHook'
 
       has_many :allowed_email_domains, -> { order(id: :asc) }, autosave: true
 
@@ -54,6 +54,8 @@ module EE
 
       has_one :group_wiki_repository
       has_many :repository_storage_moves, class_name: 'Groups::RepositoryStorageMove', inverse_of: :container
+
+      has_many :epic_board_recent_visits, class_name: 'Boards::EpicBoardRecentVisit', inverse_of: :group
 
       belongs_to :file_template_project, class_name: "Project"
 
@@ -105,6 +107,8 @@ module EE
         epics_query = epics.select(:group_id)
         joins("INNER JOIN (#{epics_query.to_sql}) as epics on epics.group_id = namespaces.id")
       end
+
+      scope :user_is_member, -> (user) { id_in(user.authorized_groups(with_minimal_access: false)) }
 
       state_machine :ldap_sync_status, namespace: :ldap_sync, initial: :ready do
         state :ready
@@ -293,31 +297,21 @@ module EE
 
     override :billable_members_count
     def billable_members_count(requested_hosted_plan = nil)
-      billed_user_ids(requested_hosted_plan).count
+      billable_ids = billed_user_ids(requested_hosted_plan)
+
+      billable_ids[:user_ids].count
     end
 
     # For now, we are not billing for members with a Guest role for subscriptions
     # with a Gold/Ultimate plan. The other plans will treat Guest members as a regular member
     # for billing purposes.
     #
-    # We are plucking the user_ids from the "Members" table in an array and
+    # For the user_ids key, we are plucking the user_ids from the "Members" table in an array and
     # converting the array of user_ids to a Set which will have unique user_ids.
     def billed_user_ids(requested_hosted_plan = nil)
-      if ([actual_plan_name, requested_hosted_plan] & [::Plan::GOLD, ::Plan::ULTIMATE]).any?
-        strong_memoize(:billed_user_ids) do
-          (billed_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_project_members.non_guests.distinct.pluck(:user_id) +
-          billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id) +
-          billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)).to_set
-        end
-      else
-        strong_memoize(:non_billed_user_ids) do
-          (billed_group_members.distinct.pluck(:user_id) +
-          billed_project_members.distinct.pluck(:user_id) +
-          billed_shared_group_members.distinct.pluck(:user_id) +
-          billed_invited_group_to_project_members.distinct.pluck(:user_id)).to_set
-        end
-      end
+      exclude_guests = ([actual_plan_name, requested_hosted_plan] & [::Plan::GOLD, ::Plan::ULTIMATE]).any?
+
+      exclude_guests ? billed_user_ids_excluding_guests : billed_user_ids_including_guests
     end
 
     override :supports_events?
@@ -512,6 +506,40 @@ module EE
       return if children.exists?(id: custom_project_templates_group_id)
 
       errors.add(:custom_project_templates_group_id, 'has to be a subgroup of the group')
+    end
+
+    def billed_user_ids_excluding_guests
+      strong_memoize(:billed_user_ids_excluding_guests) do
+        group_member_ids = billed_group_members.non_guests.distinct.pluck(:user_id)
+        project_member_ids = billed_project_members.non_guests.distinct.pluck(:user_id)
+        shared_group_ids = billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id)
+        shared_project_ids = billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)
+
+        {
+          user_ids: (group_member_ids + project_member_ids + shared_group_ids + shared_project_ids).to_set,
+          group_member_user_ids: group_member_ids.to_set,
+          project_member_user_ids: project_member_ids.to_set,
+          shared_group_user_ids: shared_group_ids.to_set,
+          shared_project_user_ids: shared_project_ids.to_set
+        }
+      end
+    end
+
+    def billed_user_ids_including_guests
+      strong_memoize(:billed_user_ids_including_guests) do
+        group_member_ids = billed_group_members.distinct.pluck(:user_id)
+        project_member_ids = billed_project_members.distinct.pluck(:user_id)
+        shared_group_ids = billed_shared_group_members.distinct.pluck(:user_id)
+        shared_project_ids = billed_invited_group_to_project_members.distinct.pluck(:user_id)
+
+        {
+          user_ids: (group_member_ids + project_member_ids + shared_group_ids + shared_project_ids).to_set,
+          group_member_user_ids: group_member_ids.to_set,
+          project_member_user_ids: project_member_ids.to_set,
+          shared_group_user_ids: shared_group_ids.to_set,
+          shared_project_user_ids: shared_project_ids.to_set
+        }
+      end
     end
 
     # Members belonging directly to Group or its subgroups

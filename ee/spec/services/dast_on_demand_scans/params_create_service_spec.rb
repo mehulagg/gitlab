@@ -128,7 +128,7 @@ RSpec.describe DastOnDemandScans::ParamsCreateService do
     end
 
     context 'when the dast_profile is provided' do
-      let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch_name: 'hello-world') }
+      let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch_name: project.default_branch) }
 
       let(:params) { { dast_profile: dast_profile } }
 

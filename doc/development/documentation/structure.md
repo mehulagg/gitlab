@@ -58,6 +58,9 @@ Don't tell them **how** to do this thing. Tell them **what it is**.
 
 If you start describing another topic, start a new concept and link to it.
 
+Also, do not use "Overview" or "Introduction" for the topic title. Instead,
+use a noun or phrase that someone would search for.
+
 Concept topics should be in this format:
 
 ```markdown
@@ -111,9 +114,9 @@ Prerequisites:
 To create an issue:
 
 1. Go to **Issues > List**.
-1. In the top right, click **New issue**.
+1. In the top right, select **New issue**.
 1. Complete the fields. (If you have a reference topic that lists each field, link to it here.)
-1. Click **Create issue**.
+1. Select **Create issue**.
 
 The issue is created. You can view it by going to **Issues > List**.
 ```

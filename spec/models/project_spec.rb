@@ -18,7 +18,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to belong_to(:creator).class_name('User') }
     it { is_expected.to belong_to(:pool_repository) }
     it { is_expected.to have_many(:users) }
-    it { is_expected.to have_many(:services) }
+    it { is_expected.to have_many(:integrations) }
     it { is_expected.to have_many(:events) }
     it { is_expected.to have_many(:merge_requests) }
     it { is_expected.to have_many(:merge_request_metrics).class_name('MergeRequest::Metrics') }
@@ -46,6 +46,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:asana_service) }
     it { is_expected.to have_many(:boards) }
     it { is_expected.to have_one(:campfire_service) }
+    it { is_expected.to have_one(:datadog_service) }
     it { is_expected.to have_one(:discord_service) }
     it { is_expected.to have_one(:drone_ci_service) }
     it { is_expected.to have_one(:emails_on_push_service) }
@@ -113,7 +114,8 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:lfs_file_locks) }
     it { is_expected.to have_many(:project_deploy_tokens) }
     it { is_expected.to have_many(:deploy_tokens).through(:project_deploy_tokens) }
-    it { is_expected.to have_many(:cycle_analytics_stages) }
+    it { is_expected.to have_many(:cycle_analytics_stages).inverse_of(:project) }
+    it { is_expected.to have_many(:value_streams).inverse_of(:project) }
     it { is_expected.to have_many(:external_pull_requests) }
     it { is_expected.to have_many(:sourced_pipelines) }
     it { is_expected.to have_many(:source_pipelines) }
@@ -1076,14 +1078,14 @@ RSpec.describe Project, factory_default: :keep do
     it 'returns nil and does not query services when there is no external issue tracker' do
       project = create(:project)
 
-      expect(project).not_to receive(:services)
+      expect(project).not_to receive(:integrations)
       expect(project.external_issue_tracker).to eq(nil)
     end
 
     it 'retrieves external_issue_tracker querying services and cache it when there is external issue tracker' do
       project = create(:redmine_project)
 
-      expect(project).to receive(:services).once.and_call_original
+      expect(project).to receive(:integrations).once.and_call_original
       2.times { expect(project.external_issue_tracker).to be_a_kind_of(RedmineService) }
     end
   end
@@ -1116,7 +1118,7 @@ RSpec.describe Project, factory_default: :keep do
 
       it 'becomes false when external issue tracker service is destroyed' do
         expect do
-          Service.find(service.id).delete
+          Integration.find(service.id).delete
         end.to change { subject }.to(false)
       end
 
@@ -1133,7 +1135,7 @@ RSpec.describe Project, factory_default: :keep do
 
         it 'does not become false when external issue tracker service is destroyed' do
           expect do
-            Service.find(service.id).delete
+            Integration.find(service.id).delete
           end.not_to change { subject }
         end
 
@@ -1191,7 +1193,7 @@ RSpec.describe Project, factory_default: :keep do
 
       it 'becomes false if the external wiki service is destroyed' do
         expect do
-          Service.find(service.id).delete
+          Integration.find(service.id).delete
         end.to change { subject }.to(false)
       end
 
@@ -5800,16 +5802,16 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'avoids N+1 database queries with more available services' do
-      allow(Service).to receive(:available_services_names).and_return(%w[pushover])
+      allow(Integration).to receive(:available_services_names).and_return(%w[pushover])
       control_count = ActiveRecord::QueryRecorder.new { subject.find_or_initialize_services }
 
-      allow(Service).to receive(:available_services_names).and_call_original
+      allow(Integration).to receive(:available_services_names).and_call_original
       expect { subject.find_or_initialize_services }.not_to exceed_query_limit(control_count)
     end
 
     context 'with disabled services' do
       before do
-        allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
+        allow(Integration).to receive(:available_services_names).and_return(%w[prometheus pushover teamcity])
         allow(subject).to receive(:disabled_services).and_return(%w[prometheus])
       end
 
@@ -5844,11 +5846,11 @@ RSpec.describe Project, factory_default: :keep do
 
   describe '#find_or_initialize_service' do
     it 'avoids N+1 database queries' do
-      allow(Service).to receive(:available_services_names).and_return(%w[prometheus pushover])
+      allow(Integration).to receive(:available_services_names).and_return(%w[prometheus pushover])
 
       control_count = ActiveRecord::QueryRecorder.new { subject.find_or_initialize_service('prometheus') }.count
 
-      allow(Service).to receive(:available_services_names).and_call_original
+      allow(Integration).to receive(:available_services_names).and_call_original
 
       expect { subject.find_or_initialize_service('prometheus') }.not_to exceed_query_limit(control_count)
     end
@@ -6479,13 +6481,13 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe 'with services and chat names' do
+  describe 'with integrations and chat names' do
     subject { create(:project) }
 
-    let(:service) { create(:service, project: subject) }
+    let(:integration) { create(:service, project: subject) }
 
     before do
-      create_list(:chat_name, 5, service: service)
+      create_list(:chat_name, 5, integration: integration)
     end
 
     it 'removes chat names on removal' do
@@ -6824,6 +6826,26 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#parent_loaded?' do
+    let_it_be(:project) { create(:project) }
+
+    before do
+      project.namespace = create(:namespace)
+
+      project.reload
+    end
+
+    it 'is false when the parent is not loaded' do
+      expect(project.parent_loaded?).to be_falsey
+    end
+
+    it 'is true when the parent is loaded' do
+      project.parent
+
+      expect(project.parent_loaded?).to be_truthy
+    end
+  end
+
   describe '#bots' do
     subject { project.bots }
 
@@ -6888,6 +6910,56 @@ RSpec.describe Project, factory_default: :keep do
 
           expect(subject).to be_empty
         end
+      end
+    end
+
+    describe '#activity_path' do
+      it 'returns the project activity_path' do
+        expected_path = "/#{project.namespace.path}/#{project.name}/activity"
+
+        expect(project.activity_path).to eq(expected_path)
+      end
+    end
+  end
+
+  describe '#default_branch_or_main' do
+    let(:project) { create(:project, :repository) }
+
+    it 'returns default branch' do
+      expect(project.default_branch_or_main).to eq(project.default_branch)
+    end
+
+    context 'when default branch is nil' do
+      let(:project) { create(:project, :empty_repo) }
+
+      it 'returns Gitlab::DefaultBranch.value' do
+        expect(project.default_branch_or_main).to eq(Gitlab::DefaultBranch.value)
+      end
+    end
+  end
+
+  describe '#increment_statistic_value' do
+    let(:project) { build_stubbed(:project) }
+
+    subject(:increment) do
+      project.increment_statistic_value(:build_artifacts_size, -10)
+    end
+
+    it 'increments the value' do
+      expect(ProjectStatistics)
+        .to receive(:increment_statistic)
+        .with(project, :build_artifacts_size, -10)
+
+      increment
+    end
+
+    context 'when the project is scheduled for removal' do
+      let(:project) { build_stubbed(:project, pending_delete: true) }
+
+      it 'does not increment the value' do
+        expect(ProjectStatistics).not_to receive(:increment_statistic)
+
+        increment
       end
     end
   end

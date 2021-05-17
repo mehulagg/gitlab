@@ -2,7 +2,7 @@
 import { GlBadge, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
-import { __ } from '~/locale';
+import { __, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
@@ -16,13 +16,30 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [Tracking.mixin()],
+  props: {
+    featureName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
   i18n: {
-    title: __('This feature is part of your GitLab Ultimate trial.'),
+    title: {
+      generic: __('This feature is part of your GitLab Ultimate trial.'),
+      specific: __('The %{featureName} feature is part of your GitLab Ultimate trial.'),
+    },
   },
   data() {
     return {
       tooltipDisabled: false,
     };
+  },
+  computed: {
+    title() {
+      if (this.featureName === '') return this.$options.i18n.title.generic;
+
+      return sprintf(this.$options.i18n.title.specific, { featureName: this.featureName });
+    },
   },
   created() {
     this.debouncedResize = debounce(() => this.onResize(), RESIZE_EVENT_DEBOUNCE_MS);
@@ -55,7 +72,7 @@ export default {
 <template>
   <gl-badge
     v-gl-tooltip="{ disabled: tooltipDisabled }"
-    :title="$options.i18n.title"
+    :title="title"
     tabindex="0"
     size="sm"
     class="feature-highlight-badge"

@@ -10,14 +10,14 @@ module Mutations
                required: false,
                loads: Types::IterationType,
                description: <<~DESC
-                            The iteration to assign to the issue.
+                 The iteration to assign to the issue.
                DESC
 
       def resolve(project_path:, iid:, iteration: nil)
         issue = authorized_find!(project_path: project_path, iid: iid)
         project = issue.project
 
-        ::Issues::UpdateService.new(project, current_user, iteration: iteration)
+        ::Issues::UpdateService.new(project: project, current_user: current_user, params: { iteration: iteration })
           .execute(issue)
 
         {

@@ -18,6 +18,8 @@ export default {
     modalBody: s__(
       'Geo|Removing a Geo secondary node stops the synchronization to that node. Are you sure?',
     ),
+    primarySite: s__('Geo|Primary site'),
+    secondarySite: s__('Geo|Secondary site'),
   },
   components: {
     GlLink,
@@ -42,6 +44,12 @@ export default {
     ...mapState(['nodes', 'isLoading']),
     noNodes() {
       return !this.nodes || this.nodes.length === 0;
+    },
+    primaryNodes() {
+      return this.nodes.filter((n) => n.primary);
+    },
+    secondaryNodes() {
+      return this.nodes.filter((n) => !n.primary);
     },
   },
   created() {
@@ -89,10 +97,25 @@ export default {
       </gl-button>
     </div>
     <gl-loading-icon v-if="isLoading" size="xl" class="gl-mt-5" />
-    <div v-if="!isLoading">
-      <geo-nodes v-for="node in nodes" :key="node.id" :node="node" />
-      <geo-nodes-empty-state v-if="noNodes" :svg-path="geoNodesEmptyStateSvg" />
-    </div>
+    <template v-if="!isLoading">
+      <div v-if="!noNodes">
+        <h4 class="gl-font-lg gl-my-5">{{ $options.i18n.primarySite }}</h4>
+        <geo-nodes
+          v-for="node in primaryNodes"
+          :key="node.id"
+          :node="node"
+          data-testid="primary-nodes"
+        />
+        <h4 class="gl-font-lg gl-my-5">{{ $options.i18n.secondarySite }}</h4>
+        <geo-nodes
+          v-for="node in secondaryNodes"
+          :key="node.id"
+          :node="node"
+          data-testid="secondary-nodes"
+        />
+      </div>
+      <geo-nodes-empty-state v-else :svg-path="geoNodesEmptyStateSvg" />
+    </template>
     <gl-modal
       :modal-id="$options.REMOVE_NODE_MODAL_ID"
       :title="$options.i18n.modalTitle"

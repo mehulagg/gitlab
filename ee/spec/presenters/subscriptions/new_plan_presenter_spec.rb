@@ -7,9 +7,11 @@ RSpec.describe Subscriptions::NewPlanPresenter do
     using RSpec::Parameterized::TableSyntax
 
     where(:legacy_name, :new_title) do
-      'bronze' | 'Bronze'
-      'silver' | 'Premium (Formerly Silver)'
-      'gold'   | 'Ultimate (Formerly Gold)'
+      'bronze'   | 'Bronze'
+      'silver'   | 'Premium (Formerly Silver)'
+      'gold'     | 'Ultimate (Formerly Gold)'
+      'premium'  | 'Premium'
+      'ultimate' | 'Ultimate'
     end
 
     with_them do

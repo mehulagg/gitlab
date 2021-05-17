@@ -547,17 +547,6 @@ RSpec.describe ProjectsController do
         end
 
         it_behaves_like 'no compliance framework is set'
-
-        context 'custom frameworks are disabled' do
-          let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
-          let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
-
-          before do
-            stub_feature_flags(ff_custom_compliance_frameworks: false)
-          end
-
-          it_behaves_like 'no compliance framework is set'
-        end
       end
 
       context 'when licensed' do
@@ -583,41 +572,6 @@ RSpec.describe ProjectsController do
             project.reload
 
             expect(project.compliance_framework_setting.compliance_management_framework).to eq(framework)
-          end
-
-          context 'custom frameworks are disabled' do
-            let(:framework) { ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.last }
-            let(:params) { { compliance_framework_setting_attributes: { framework: framework.identifier } } }
-
-            before do
-              stub_feature_flags(ff_custom_compliance_frameworks: false)
-            end
-
-            it 'sets the compliance framework based on the framework identifier' do
-              put :update,
-                  params: {
-                    namespace_id: project.namespace,
-                    id: project,
-                    project: params
-                  }
-              project.reload
-
-              expect(project.compliance_framework_setting.compliance_management_framework.name).to eq(framework.name)
-            end
-
-            it 'raises an error when using framework IDs for custom frameworks' do
-              framework = create(:compliance_framework, namespace: project.namespace.root_ancestor)
-              params = { compliance_framework_setting_attributes: { framework: framework.id } }
-
-              expect do
-                put :update,
-                    params: {
-                      namespace_id: project.namespace,
-                      id: project,
-                      project: params
-                    }
-              end.to raise_error(KeyError)
-            end
           end
         end
       end

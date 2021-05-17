@@ -65,6 +65,10 @@ module Gitlab
           @definitions ||= load_all!
         end
 
+        def all
+          @all ||= definitions.map { |_key_path, definition| definition }
+        end
+
         def schemer
           @schemer ||= ::JSONSchemer.schema(Pathname.new(METRIC_SCHEMA_PATH))
         end
@@ -117,4 +121,4 @@ module Gitlab
   end
 end
 
-Gitlab::Usage::MetricDefinition.prepend_if_ee('EE::Gitlab::Usage::MetricDefinition')
+Gitlab::Usage::MetricDefinition.prepend_mod_with('Gitlab::Usage::MetricDefinition')

@@ -85,7 +85,7 @@ module API
         confidential = params[:confidential].nil? ? epic.confidential : params[:confidential]
         create_params = { parent_id: epic.id, title: params[:title], confidential: confidential }
 
-        child_epic = ::Epics::CreateService.new(user_group, current_user, create_params).execute
+        child_epic = ::Epics::CreateService.new(group: user_group, current_user: current_user, params: create_params).execute
 
         if child_epic.valid?
           present child_epic, with: EE::API::Entities::LinkedEpic, user: current_user
@@ -101,7 +101,7 @@ module API
       delete ':id/(-/)epics/:epic_iid/epics/:child_epic_id' do
         authorize_can_destroy_epic_link!
 
-        updated_epic = ::Epics::UpdateService.new(user_group, current_user, { parent: nil }).execute(child_epic)
+        updated_epic = ::Epics::UpdateService.new(group: user_group, current_user: current_user, params: { parent: nil }).execute(child_epic)
 
         present updated_epic, with: EE::API::Entities::Epic
       end

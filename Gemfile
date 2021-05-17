@@ -18,7 +18,7 @@ gem 'default_value_for', '~> 3.4.0'
 gem 'pg', '~> 1.1'
 
 gem 'rugged', '~> 1.1'
-gem 'grape-path-helpers', '~> 1.6.1'
+gem 'grape-path-helpers', '~> 1.6.3'
 
 gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.10.0'
@@ -300,7 +300,7 @@ gem 'gon', '~> 6.4.0'
 gem 'request_store', '~> 1.5'
 gem 'base32', '~> 0.3.0'
 
-gem "gitlab-license", "~> 1.4"
+gem 'gitlab-license', '~> 1.5'
 
 # Protect against bruteforcing
 gem 'rack-attack', '~> 6.3.0'
@@ -309,12 +309,12 @@ gem 'rack-attack', '~> 6.3.0'
 gem 'sentry-raven', '~> 3.0'
 
 # PostgreSQL query parsing
-gem 'pg_query', '~> 1.3.0'
+gem 'pg_query', '~> 2.0.3'
 
 gem 'premailer-rails', '~> 1.10.3'
 
 # LabKit: Tracing and Correlation
-gem 'gitlab-labkit', '~> 0.16.2'
+gem 'gitlab-labkit', '~> 0.17.1'
 # Thrift is a dependency of gitlab-labkit, we want a version higher than 0.14.0
 # because of https://gitlab.com/gitlab-org/gitlab/-/issues/321900
 gem 'thrift', '>= 0.14.0'
@@ -478,10 +478,10 @@ group :ed25519 do
 end
 
 # Spamcheck GRPC protocol definitions
-gem 'spamcheck', '~> 0.0.5'
+gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.11.0.pre.rc1'
+gem 'gitaly', '~> 13.12.0.pre.rc1'
 
 gem 'grpc', '~> 1.30.2'
 
@@ -494,7 +494,7 @@ gem 'flipper', '~> 0.17.1'
 gem 'flipper-active_record', '~> 0.17.1'
 gem 'flipper-active_support_cache_store', '~> 0.17.1'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.3'
+gem 'gitlab-experiment', '~> 0.5.4'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

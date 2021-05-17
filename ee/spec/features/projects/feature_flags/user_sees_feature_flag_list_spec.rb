@@ -38,4 +38,16 @@ RSpec.describe 'User sees feature flag list', :js do
       )
     end
   end
+  context 'with too many feature flags' do
+    before do
+      plan_limits = create(:plan_limits, :default_plan)
+      plan_limits.update!(Operations::FeatureFlag.limit_name => 1)
+      create(:operations_feature_flag, :new_version_flag, project: project, active: false)
+    end
+
+    it 'stops users from adding another' do
+      visit(project_feature_flags_path(project))
+      expect(page).to have_text('Feature flags limit reached (1). Delete one or more feature flags before adding new ones.')
+    end
+  end
 end

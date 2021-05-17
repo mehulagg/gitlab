@@ -19,7 +19,6 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
   context 'when authenticated as the namespace owner' do
     before do
       stub_licensed_features(custom_compliance_frameworks: true)
-      stub_feature_flags(ff_custom_compliance_frameworks: true)
     end
 
     let(:current_user) { namespace.owner }
@@ -114,18 +113,6 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
         expect(graphql_data_at(:a, :complianceFrameworks, :nodes, :name)).to contain_exactly('Test1', 'Test2')
         expect(graphql_data_at(:b, :complianceFrameworks, :nodes, :name)).to contain_exactly('GDPR', 'SOX')
         expect(graphql_data_at(:c, :complianceFrameworks, :nodes, :name)).to contain_exactly('SOX')
-      end
-    end
-
-    context 'feature is disabled' do
-      before do
-        stub_feature_flags(ff_custom_compliance_frameworks: false)
-      end
-
-      it 'responds with error when querying a compliance framework' do
-        post_graphql(query, current_user: current_user)
-
-        expect(graphql_errors).to contain_exactly(include('message' => "The resource that you are attempting to access does not exist or you don't have permission to perform this action"))
       end
     end
   end

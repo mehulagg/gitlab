@@ -33,6 +33,8 @@ module Registrations
 
         experiment(:registrations_group_invite, actor: current_user)
           .track(:signup_successful, property: @project.namespace_id.to_s)
+        experiment(:jobs_to_be_done, user: current_user)
+          .track(:create_project, project: @project)
 
         if helpers.in_trial_onboarding_flow?
           record_experiment_user(:trial_onboarding_issues, onboarding_context)

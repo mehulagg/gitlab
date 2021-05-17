@@ -280,6 +280,24 @@ describe('RelatedItemTree', () => {
         });
       });
 
+      describe('setWeightSum', () => {
+        it('set weightSum', () => {
+          const descendantWeightSum = mockQueryResponse.data.group.epic;
+          testAction(
+            actions.setWeightSum,
+            descendantWeightSum,
+            {},
+            [
+              {
+                type: types.SET_WEIGHT_SUM,
+                payload: descendantWeightSum,
+              },
+            ],
+            [],
+          );
+        });
+      });
+
       describe('requestItems', () => {
         it('should set `state.itemsFetchInProgress` to true', () => {
           testAction(
@@ -359,6 +377,7 @@ describe('RelatedItemTree', () => {
             children: { pageInfo: epicPageInfo },
             issues: { pageInfo: issuesPageInfo },
             descendantCounts: epicDescendantCounts,
+            descendantWeightSum,
             healthStatus,
           } = mockQueryResponse.data.group.epic;
 
@@ -408,6 +427,10 @@ describe('RelatedItemTree', () => {
                   parentItem: mockParentItem,
                   pageInfo: issuesPageInfo,
                 },
+              },
+              {
+                type: 'setWeightSum',
+                payload: descendantWeightSum,
               },
               {
                 type: 'setChildrenCount',

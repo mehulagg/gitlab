@@ -3,13 +3,16 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import BlobContent from '~/blob/components/blob_content.vue';
 import BlobHeader from '~/blob/components/blob_header.vue';
+import { SIMPLE_BLOB_VIEWER, RICH_BLOB_VIEWER } from '~/blob/components/constants';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
+import BlobHeaderEdit from './blob_header_edit.vue';
 
 export default {
   components: {
     BlobHeader,
+    BlobHeaderEdit,
     BlobContent,
     GlLoadingIcon,
   },
@@ -21,6 +24,11 @@ export default {
           projectPath: this.projectPath,
           filePath: this.path,
         };
+      },
+      result() {
+        this.switchViewer(
+          this.hasRichViewer && !window.location.hash ? RICH_BLOB_VIEWER : SIMPLE_BLOB_VIEWER,
+        );
       },
       error() {
         createFlash({ message: __('An error occurred while loading the file. Please try again.') });
@@ -44,6 +52,7 @@ export default {
   },
   data() {
     return {
+      activeViewerType: SIMPLE_BLOB_VIEWER,
       project: {
         repository: {
           blobs: {
@@ -69,7 +78,7 @@ export default {
                 canModifyBlob: true,
                 forkPath: '',
                 simpleViewer: {},
-                richViewer: {},
+                richViewer: null,
               },
             ],
           },
@@ -87,10 +96,19 @@ export default {
       return nodes[0] || {};
     },
     viewer() {
-      const viewer = this.blobInfo.richViewer || this.blobInfo.simpleViewer;
-      const { fileType, tooLarge, type } = viewer;
-
-      return { fileType, tooLarge, type };
+      const { richViewer, simpleViewer } = this.blobInfo;
+      return this.activeViewerType === RICH_BLOB_VIEWER ? richViewer : simpleViewer;
+    },
+    hasRichViewer() {
+      return Boolean(this.blobInfo.richViewer);
+    },
+    hasRenderError() {
+      return Boolean(this.viewer.renderError);
+    },
+  },
+  methods: {
+    switchViewer(newViewer) {
+      this.activeViewerType = newViewer || SIMPLE_BLOB_VIEWER;
     },
   },
 };
@@ -99,8 +117,18 @@ export default {
 <template>
   <div>
     <gl-loading-icon v-if="isLoading" />
-    <div v-if="blobInfo && !isLoading">
-      <blob-header :blob="blobInfo" />
+    <div v-if="blobInfo && !isLoading" class="file-holder">
+      <blob-header
+        :blob="blobInfo"
+        :hide-viewer-switcher="!hasRichViewer"
+        :active-viewer-type="viewer.type"
+        :has-render-error="hasRenderError"
+        @viewer-changed="switchViewer"
+      >
+        <template #actions>
+          <blob-header-edit :edit-path="blobInfo.editBlobPath" />
+        </template>
+      </blob-header>
       <blob-content
         :blob="blobInfo"
         :content="blobInfo.rawTextBlob"

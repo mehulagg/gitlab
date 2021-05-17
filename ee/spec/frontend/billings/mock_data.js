@@ -75,6 +75,8 @@ export const mockDataSeats = {
       web_url: 'path/to/administrator',
       email: 'administrator@email.com',
       last_activity_on: '2020-03-01',
+      membership_type: 'group_member',
+      removable: true,
     },
     {
       id: 3,
@@ -84,6 +86,8 @@ export const mockDataSeats = {
       web_url: 'path/to/agustin_walker',
       email: 'agustin_walker@email.com',
       last_activity_on: '2020-03-01',
+      membership_type: 'group_member',
+      removable: true,
     },
     {
       id: 4,
@@ -93,6 +97,8 @@ export const mockDataSeats = {
       web_url: 'path/to/joella_miller',
       last_activity_on: null,
       email: null,
+      membership_type: 'group_invite',
+      removable: false,
     },
   ],
   headers: {
@@ -123,6 +129,8 @@ export const mockTableItems = [
       username: '@root',
       web_url: 'path/to/administrator',
       last_activity_on: '2020-03-01',
+      membership_type: 'group_member',
+      removable: true,
     },
   },
   {
@@ -134,6 +142,8 @@ export const mockTableItems = [
       username: '@lester.orn',
       web_url: 'path/to/agustin_walker',
       last_activity_on: '2020-03-01',
+      membership_type: 'group_member',
+      removable: true,
     },
   },
   {
@@ -145,6 +155,8 @@ export const mockTableItems = [
       username: '@era',
       web_url: 'path/to/joella_miller',
       last_activity_on: null,
+      membership_type: 'group_invite',
+      removable: false,
     },
   },
 ];

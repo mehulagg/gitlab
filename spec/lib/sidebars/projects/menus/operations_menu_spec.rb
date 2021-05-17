@@ -21,9 +21,9 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
     end
 
     context 'when operation feature is enabled' do
-      context 'when menu does not have any menu items' do
+      context 'when menu does not have any renderable menu items' do
         it 'returns false' do
-          allow(subject).to receive(:has_items?).and_return(false)
+          allow(subject).to receive(:has_renderable_items?).and_return(false)
 
           expect(subject.render?).to be false
         end
@@ -54,11 +54,9 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
   end
 
   context 'Menu items' do
-    subject { described_class.new(context).items.index { |e| e.item_id == item_id } }
+    subject { described_class.new(context).renderable_items.index { |e| e.item_id == item_id } }
 
-    describe 'Metrics Dashboard' do
-      let(:item_id) { :metrics }
-
+    shared_examples 'access rights checks' do
       specify { is_expected.not_to be_nil }
 
       describe 'when the user does not have access' do
@@ -66,125 +64,111 @@ RSpec.describe Sidebars::Projects::Menus::OperationsMenu do
 
         specify { is_expected.to be_nil }
       end
+    end
+
+    describe 'Metrics Dashboard' do
+      let(:item_id) { :metrics }
+
+      it_behaves_like 'access rights checks'
     end
 
     describe 'Logs' do
       let(:item_id) { :logs }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        specify { is_expected.to be_nil }
-      end
+      it_behaves_like 'access rights checks'
     end
 
     describe 'Tracing' do
       let(:item_id) { :tracing }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        specify { is_expected.to be_nil }
-      end
+      it_behaves_like 'access rights checks'
     end
 
     describe 'Error Tracking' do
       let(:item_id) { :error_tracking }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        specify { is_expected.to be_nil }
-      end
+      it_behaves_like 'access rights checks'
     end
 
     describe 'Alert Management' do
       let(:item_id) { :alert_management }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        specify { is_expected.to be_nil }
-      end
+      it_behaves_like 'access rights checks'
     end
 
     describe 'Incidents' do
       let(:item_id) { :incidents }
 
-      specify { is_expected.not_to be_nil }
-
-      describe 'when the user does not have access' do
-        let(:user) { nil }
-
-        specify { is_expected.to be_nil }
-      end
+      it_behaves_like 'access rights checks'
     end
 
     describe 'Serverless' do
       let(:item_id) { :serverless }
 
-      specify { is_expected.not_to be_nil }
+      specify { is_expected.to be_nil }
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        specify { is_expected.to be_nil }
+        it_behaves_like 'access rights checks'
       end
     end
 
     describe 'Terraform' do
       let(:item_id) { :terraform }
 
-      specify { is_expected.not_to be_nil }
+      specify { is_expected.to be_nil }
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        specify { is_expected.to be_nil }
+        it_behaves_like 'access rights checks'
       end
     end
 
     describe 'Kubernetes' do
       let(:item_id) { :kubernetes }
 
-      specify { is_expected.not_to be_nil }
+      specify { is_expected.to be_nil }
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        specify { is_expected.to be_nil }
+        it_behaves_like 'access rights checks'
       end
     end
 
     describe 'Environments' do
       let(:item_id) { :environments }
 
-      specify { is_expected.not_to be_nil }
+      specify { is_expected.to be_nil }
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        specify { is_expected.to be_nil }
+        it_behaves_like 'access rights checks'
       end
     end
 
     describe 'Feature Flags' do
       let(:item_id) { :feature_flags }
 
-      specify { is_expected.not_to be_nil }
+      specify { is_expected.to be_nil }
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        specify { is_expected.to be_nil }
+        it_behaves_like 'access rights checks'
       end
     end
 

@@ -11,14 +11,17 @@ import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import IssuesListApp from '~/issues_list/components/issues_list_app.vue';
 import {
+  apiSortParams,
   CREATED_DESC,
+  DUE_DATE_OVERDUE,
   PAGE_SIZE,
   PAGE_SIZE_MANUAL,
-  RELATIVE_POSITION_ASC,
-  sortOptions,
-  sortParams,
+  PARAM_DUE_DATE,
+  RELATIVE_POSITION_DESC,
+  urlSortParams,
 } from '~/issues_list/constants';
 import eventHub from '~/issues_list/eventhub';
+import { getSortOptions } from '~/issues_list/utils';
 import axios from '~/lib/utils/axios_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 
@@ -35,7 +38,9 @@ describe('IssuesListApp component', () => {
     emptyStateSvgPath: 'empty-state.svg',
     endpoint: 'api/endpoint',
     exportCsvPath: 'export/csv/path',
+    hasBlockedIssuesFeature: true,
     hasIssues: true,
+    hasIssueWeightsFeature: true,
     isSignedIn: false,
     issuesPath: 'path/to/issues',
     jiraIntegrationPath: 'jira/integration/path',
@@ -43,7 +48,6 @@ describe('IssuesListApp component', () => {
     projectLabelsPath: 'project/labels/path',
     projectPath: 'path/to/project',
     rssPath: 'rss/path',
-    showImportButton: true,
     showNewIssueLink: true,
     signInPath: 'sign/in/path',
   };
@@ -105,7 +109,7 @@ describe('IssuesListApp component', () => {
         namespace: defaultProvide.projectPath,
         recentSearchesStorageKey: 'issues',
         searchInputPlaceholder: 'Search or filter results…',
-        sortOptions,
+        sortOptions: getSortOptions(true, true),
         initialSortBy: CREATED_DESC,
         tabs: IssuableListTabs,
         currentTab: IssuableStates.Opened,
@@ -142,18 +146,33 @@ describe('IssuesListApp component', () => {
       });
     });
 
-    it('renders csv import/export component', async () => {
-      const search = '?page=1&search=refactor&state=opened&order_by=created_at&sort=desc';
+    describe('csv import/export component', () => {
+      describe('when user is signed in', () => {
+        it('renders', async () => {
+          const search = '?page=1&search=refactor&state=opened&sort=created_date';
 
-      global.jsdom.reconfigure({ url: `${TEST_HOST}${search}` });
+          global.jsdom.reconfigure({ url: `${TEST_HOST}${search}` });
 
-      wrapper = mountComponent({ mountFn: mount });
+          wrapper = mountComponent({
+            provide: { ...defaultProvide, isSignedIn: true },
+            mountFn: mount,
+          });
 
-      await waitForPromises();
+          await waitForPromises();
 
-      expect(findCsvImportExportButtons().props()).toMatchObject({
-        exportCsvPath: `${defaultProvide.exportCsvPath}${search}`,
-        issuableCount: xTotal,
+          expect(findCsvImportExportButtons().props()).toMatchObject({
+            exportCsvPath: `${defaultProvide.exportCsvPath}${search}`,
+            issuableCount: xTotal,
+          });
+        });
+      });
+
+      describe('when user is not signed in', () => {
+        it('does not render', () => {
+          wrapper = mountComponent({ provide: { ...defaultProvide, isSignedIn: false } });
+
+          expect(findCsvImportExportButtons().exists()).toBe(false);
+        });
       });
     });
 
@@ -200,6 +219,16 @@ describe('IssuesListApp component', () => {
   });
 
   describe('initial url params', () => {
+    describe('due_date', () => {
+      it('is set from the url params', () => {
+        global.jsdom.reconfigure({ url: `${TEST_HOST}?${PARAM_DUE_DATE}=${DUE_DATE_OVERDUE}` });
+
+        wrapper = mountComponent();
+
+        expect(findIssuableList().props('urlParams')).toMatchObject({ due_date: DUE_DATE_OVERDUE });
+      });
+    });
+
     describe('page', () => {
       it('is set from the url params', () => {
         const page = 5;
@@ -223,14 +252,14 @@ describe('IssuesListApp component', () => {
     });
 
     describe('sort', () => {
-      it.each(Object.keys(sortParams))('is set as %s from the url params', (sortKey) => {
-        global.jsdom.reconfigure({ url: setUrlParams(sortParams[sortKey], TEST_HOST) });
+      it.each(Object.keys(urlSortParams))('is set as %s from the url params', (sortKey) => {
+        global.jsdom.reconfigure({ url: setUrlParams(urlSortParams[sortKey], TEST_HOST) });
 
         wrapper = mountComponent();
 
         expect(findIssuableList().props()).toMatchObject({
           initialSortBy: sortKey,
-          urlParams: sortParams[sortKey],
+          urlParams: urlSortParams[sortKey],
         });
       });
     });
@@ -369,11 +398,11 @@ describe('IssuesListApp component', () => {
 
         it('shows Jira integration information', () => {
           const paragraphs = wrapper.findAll('p');
-          expect(paragraphs.at(2).text()).toContain(IssuesListApp.i18n.jiraIntegrationTitle);
-          expect(paragraphs.at(3).text()).toContain(
+          expect(paragraphs.at(1).text()).toContain(IssuesListApp.i18n.jiraIntegrationTitle);
+          expect(paragraphs.at(2).text()).toContain(
             'Enable the Jira integration to view your Jira issues in GitLab.',
           );
-          expect(paragraphs.at(4).text()).toContain(
+          expect(paragraphs.at(3).text()).toContain(
             IssuesListApp.i18n.jiraIntegrationSecondaryMessage,
           );
           expect(findGlLink().text()).toBe('Enable the Jira integration');
@@ -512,7 +541,7 @@ describe('IssuesListApp component', () => {
     });
 
     describe('when "sort" event is emitted by IssuableList', () => {
-      it.each(Object.keys(sortParams))(
+      it.each(Object.keys(apiSortParams))(
         'fetches issues with correct params with payload `%s`',
         async (sortKey) => {
           wrapper = mountComponent();
@@ -523,10 +552,10 @@ describe('IssuesListApp component', () => {
 
           expect(axiosMock.history.get[1].params).toEqual({
             page: xPage,
-            per_page: sortKey === RELATIVE_POSITION_ASC ? PAGE_SIZE_MANUAL : PAGE_SIZE,
+            per_page: sortKey === RELATIVE_POSITION_DESC ? PAGE_SIZE_MANUAL : PAGE_SIZE,
             state,
             with_labels_details: true,
-            ...sortParams[sortKey],
+            ...apiSortParams[sortKey],
           });
         },
       );

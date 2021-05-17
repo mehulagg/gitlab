@@ -36,6 +36,25 @@ module LearnGitlabHelper
       Gitlab::Experimentation.in_experiment_group?(:learn_gitlab_b, subject: current_user)
   end
 
+  def onboarding_sections_data
+    {
+      workspace: {
+        svg: image_path("learn_gitlab/section_workspace.svg")
+      },
+      plan: {
+        svg: image_path("learn_gitlab/section_plan.svg")
+      },
+      deploy: {
+        svg: image_path("learn_gitlab/section_deploy.svg")
+      }
+    }
+  end
+
+  def learn_gitlab_onboarding_available?(project)
+    OnboardingProgress.onboarding?(project.namespace) &&
+      LearnGitlab::Project.new(current_user).available?
+  end
+
   private
 
   def action_urls
@@ -49,10 +68,5 @@ module LearnGitlabHelper
 
   def onboarding_progress(project)
     OnboardingProgress.find_by(namespace: project.namespace) # rubocop: disable CodeReuse/ActiveRecord
-  end
-
-  def learn_gitlab_onboarding_available?(project)
-    OnboardingProgress.onboarding?(project.namespace) &&
-      LearnGitlab::Project.new(current_user).available?
   end
 end

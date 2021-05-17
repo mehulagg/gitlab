@@ -7,15 +7,16 @@ RSpec.describe Issues::UpdateService do
 
   let(:project) { create(:project, group: group) }
   let(:issue) { create(:issue, project: project) }
-  let(:user) { issue.author }
+  let(:author) { issue.author }
+  let(:user) { author }
 
   describe 'execute' do
     before do
-      project.add_reporter(user)
+      project.add_reporter(author)
     end
 
     def update_issue(opts)
-      described_class.new(project, user, opts).execute(issue)
+      described_class.new(project: project, current_user: user, params: opts).execute(issue)
     end
 
     context 'refresh epic dates' do
@@ -173,12 +174,13 @@ RSpec.describe Issues::UpdateService do
       let!(:sla_setting) { create(:project_incident_management_setting, :sla_enabled, project: project) }
 
       before do
-        stub_licensed_features(incident_sla: true)
+        stub_licensed_features(incident_sla: true, quality_management: true)
       end
 
       context 'from issue to incident' do
         it 'creates an SLA' do
           expect { update_issue(issue_type: 'incident') }.to change(IssuableSla, :count).by(1)
+          expect(issue.reload).to be_incident
           expect(issue.reload.issuable_sla).to be_present
         end
       end
@@ -189,17 +191,36 @@ RSpec.describe Issues::UpdateService do
 
         it 'does not remove the SLA or create a new one' do
           expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
+          expect(issue.reload.issue_type).to eq('issue')
           expect(issue.reload.issuable_sla).to be_present
         end
       end
 
-      # Not an expected scenario, but covers an SLA-agnostic hypothetical
-      context 'from test_case to issue' do
-        let(:issue) { create(:quality_test_case, project: project) }
+      context 'from issue to restricted issue types' do
+        context 'with permissions' do
+          it 'changes the type' do
+            expect { update_issue(issue_type: 'test_case') }
+              .to change { issue.reload.issue_type }
+              .from('issue')
+              .to('test_case')
+          end
 
-        it 'does nothing' do
-          expect { update_issue(issue_type: 'issue') }.not_to change(IssuableSla, :count)
-          expect(issue.reload.issuable_sla).to be_nil
+          it 'does not create or remove an SLA' do
+            expect { update_issue(issue_type: 'test_case') }.not_to change(IssuableSla, :count)
+            expect(issue.issuable_sla).to be_nil
+          end
+        end
+
+        context 'without sufficient permissions' do
+          let(:user) { create(:user) }
+
+          before do
+            project.add_guest(user)
+          end
+
+          it 'excludes the issue type param' do
+            expect { update_issue(issue_type: 'test_case') }.not_to change { issue.reload.issue_type }
+          end
         end
       end
     end
@@ -360,7 +381,7 @@ RSpec.describe Issues::UpdateService do
     end
 
     it_behaves_like 'issue with epic_id parameter' do
-      let(:execute) { described_class.new(project, user, params).execute(issue) }
+      let(:execute) { described_class.new(project: project, current_user: user, params: params).execute(issue) }
       let(:epic) { create(:epic, group: group) }
     end
 

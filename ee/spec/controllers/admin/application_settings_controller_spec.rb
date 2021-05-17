@@ -326,10 +326,10 @@ RSpec.describe Admin::ApplicationSettingsController do
 
       let!(:task) { create(:elastic_reindexing_task) }
 
-      it 'assigns elasticsearch reindexing task' do
+      it 'assigns last elasticsearch reindexing task' do
         get :advanced_search
 
-        expect(assigns(:elasticsearch_reindexing_task)).to eq(task)
+        expect(assigns(:last_elasticsearch_reindexing_task)).to eq(task)
         expect(response.body).to include("Reindexing Status: #{task.state}")
       end
     end

@@ -1,5 +1,8 @@
 - breadcrumb_title s_("ThreatMonitoring|Threat Monitoring")
 - page_title s_("ThreatMonitoring|Threat Monitoring")
+- @content_wrapper_class = 'js-threat-monitoring-container-wrapper'
+- content_for :monaco_tag do
+  - webpack_preload_asset_tag('monaco', prefetch: true)
 
 - default_environment_id = @project.default_environment&.id || -1
 

@@ -1072,6 +1072,7 @@ GET /projects/:id/groups
 | `skip_groups`               | array of integers | **{dotted-circle}** No | Skip the group IDs passed. |
 | `with_shared`               | boolean           | **{dotted-circle}** No | Include projects shared with this group. Default is `false`. |
 | `shared_min_access_level`   | integer           | **{dotted-circle}** No | Limit to shared groups with at least this [access level](members.md#valid-access-levels). |
+| `shared_visible_only`       | boolean           | **{dotted-circle}** No | Limit to shared groups user has access to. |
 
 ```json
 [
@@ -2221,7 +2222,7 @@ PUT /projects/:id/hooks/:hook_id
 | `tag_push_events`            | boolean        | **{dotted-circle}** No | Trigger hook on tag push events. |
 | `token`                      | string         | **{dotted-circle}** No | Secret token to validate received payloads; this isn't returned in the response. |
 | `url`                        | string         | **{check-circle}** Yes | The hook URL. |
-| `wiki_events`                | boolean        | **{dotted-circle}** No | Trigger hook on wiki events. |
+| `wiki_page_events`           | boolean        | **{dotted-circle}** No | Trigger hook on wiki page events. |
 | `releases_events`            | boolean        | **{dotted-circle}** No | Trigger hook on release events. |
 
 ### Delete project hook

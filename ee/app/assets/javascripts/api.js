@@ -22,14 +22,8 @@ export default {
   cycleAnalyticsValueStreamsPath: '/groups/:id/-/analytics/value_stream_analytics/value_streams',
   cycleAnalyticsValueStreamPath:
     '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id',
-  cycleAnalyticsStageEventsPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/records',
-  cycleAnalyticsStageMedianPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/median',
   cycleAnalyticsStagePath:
     '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id',
-  cycleAnalyticsDurationChartPath:
-    '/groups/:id/-/analytics/value_stream_analytics/value_streams/:value_stream_id/stages/:stage_id/average_duration_chart',
   cycleAnalyticsGroupLabelsPath: '/groups/:namespace_path/-/labels.json',
   codeReviewAnalyticsPath: '/api/:version/analytics/code_review',
   groupActivityIssuesPath: '/api/:version/analytics/group_activity/issues_count',
@@ -47,6 +41,7 @@ export default {
   descendantGroupsPath: '/api/:version/groups/:group_id/descendant_groups',
   projectDeploymentFrequencyAnalyticsPath:
     '/api/:version/projects/:id/analytics/deployment_frequency',
+  projectGroupsPath: '/api/:version/projects/:id/groups.json',
   issueMetricImagesPath: '/api/:version/projects/:id/issues/:issue_iid/metric_images',
   issueMetricSingleImagePath:
     '/api/:version/projects/:id/issues/:issue_iid/metric_images/:image_id',
@@ -169,29 +164,21 @@ export default {
   },
 
   cycleAnalyticsStageEvents({ groupId, valueStreamId, stageId, params = {} }) {
-    const url = Api.buildUrl(this.cycleAnalyticsStageEventsPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId)
-      .replace(':stage_id', stageId);
-
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/records`;
     return axios.get(url, { params });
   },
 
   cycleAnalyticsStageMedian({ groupId, valueStreamId, stageId, params = {} }) {
-    const url = Api.buildUrl(this.cycleAnalyticsStageMedianPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId)
-      .replace(':stage_id', stageId);
-
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/median`;
     return axios.get(url, { params });
   },
 
-  cycleAnalyticsCreateStage({ groupId, valueStreamId, data }) {
-    const url = Api.buildUrl(this.cycleAnalyticsGroupStagesAndEventsPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId);
-
-    return axios.post(url, data);
+  cycleAnalyticsStageCount({ groupId, valueStreamId, stageId, params = {} }) {
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/count`;
+    return axios.get(url, { params });
   },
 
   cycleAnalyticsCreateValueStream(groupId, data) {
@@ -225,27 +212,10 @@ export default {
       .replace(':stage_id', stageId);
   },
 
-  cycleAnalyticsUpdateStage({ groupId, valueStreamId, stageId, data }) {
-    const url = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
-
-    return axios.put(url, data);
-  },
-
-  cycleAnalyticsRemoveStage({ groupId, valueStreamId, stageId }) {
-    const url = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
-
-    return axios.delete(url);
-  },
-
   cycleAnalyticsDurationChart({ groupId, valueStreamId, stageId, params = {} }) {
-    const url = Api.buildUrl(this.cycleAnalyticsDurationChartPath)
-      .replace(':id', groupId)
-      .replace(':value_stream_id', valueStreamId)
-      .replace(':stage_id', stageId);
-
-    return axios.get(url, {
-      params,
-    });
+    const stageBase = this.cycleAnalyticsStageUrl({ groupId, valueStreamId, stageId });
+    const url = `${stageBase}/average_duration_chart`;
+    return axios.get(url, { params });
   },
 
   cycleAnalyticsGroupLabels(groupId, params = { search: null }) {
@@ -439,5 +409,19 @@ export default {
       .replace(':member_id', memberId);
 
     return axios.get(url);
+  },
+
+  projectGroups(id, options) {
+    const url = Api.buildUrl(this.projectGroupsPath).replace(':id', encodeURIComponent(id));
+
+    return axios
+      .get(url, {
+        params: {
+          ...options,
+        },
+      })
+      .then(({ data }) => {
+        return data;
+      });
   },
 };

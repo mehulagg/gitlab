@@ -691,6 +691,12 @@ Gitlab.ee do
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['cron'] ||= '15 3 * * *'
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['job_class'] = 'Vulnerabilities::HistoricalStatistics::DeletionWorker'
+  Settings.cron_jobs['security_create_orchestration_policy_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['security_create_orchestration_policy_worker']['cron'] ||= '*/10 * * * *'
+  Settings.cron_jobs['security_create_orchestration_policy_worker']['job_class'] = 'Security::CreateOrchestrationPolicyWorker'
+  Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker']['cron'] ||= '*/15 * * * *'
+  Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker']['job_class'] = 'Security::OrchestrationPolicyRuleScheduleWorker'
 end
 
 #
@@ -856,6 +862,7 @@ Settings['extra'] ||= Settingslogic.new({})
 Settings.extra['matomo_site_id'] ||= Settings.extra['piwik_site_id'] if Settings.extra['piwik_site_id'].present?
 Settings.extra['matomo_url'] ||= Settings.extra['piwik_url'] if Settings.extra['piwik_url'].present?
 Settings.extra['matomo_disable_cookies'] = false if Settings.extra['matomo_disable_cookies'].nil?
+Settings.extra['maximum_text_highlight_size_kilobytes'] = Settings.extra.fetch('maximum_text_highlight_size_kilobytes', 512).kilobytes
 
 #
 # Rack::Attack settings

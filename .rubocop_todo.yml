@@ -598,7 +598,6 @@ Rails/RenderInline:
 # SupportedStyles: conservative, aggressive
 Rails/ShortI18n:
   Exclude:
-    - 'app/models/project_services/chat_message/pipeline_message.rb'
     - 'app/uploaders/content_type_whitelist.rb'
 
 # Offense count: 1144
@@ -819,14 +818,6 @@ Style/NumericLiteralPrefix:
 # Configuration parameters: PreferredDelimiters.
 Style/PercentLiteralDelimiters:
   Enabled: false
-
-# Offense count: 247
-# Cop supports --auto-correct.
-# Configuration parameters: .
-# SupportedStyles: compact, exploded
-Style/RaiseArgs:
-  Enabled: false
-  EnforcedStyle: exploded
 
 # Offense count: 26
 # Cop supports --auto-correct.

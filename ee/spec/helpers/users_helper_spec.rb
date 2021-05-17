@@ -21,7 +21,7 @@ RSpec.describe UsersHelper do
         allow(helper).to receive(:can?).and_return(false)
 
         allow(::Gitlab).to receive(:com?) { gitlab_com? }
-        allow(user).to receive(:any_namespace_without_trial?) { user_eligible? }
+        allow(user).to receive(:owns_group_without_trial?) { user_eligible? }
         allow(user).to receive(:has_paid_namespace?) { has_paid_namespace? }
       end
 
@@ -58,7 +58,7 @@ RSpec.describe UsersHelper do
           expect(subject).to eq(
             [
               { text: 'Admin', variant: 'success' },
-              { text: "It's you!", variant: nil }
+              { text: "It's you!", variant: 'muted' }
             ]
           )
         end
@@ -85,14 +85,14 @@ RSpec.describe UsersHelper do
             expect(subject).to eq(
               [
                 { text: 'Admin', variant: 'success' },
-                { text: 'Is using seat', variant: 'light' },
-                { text: "It's you!", variant: nil }
+                { text: 'Is using seat', variant: 'neutral' },
+                { text: "It's you!", variant: 'muted' }
               ]
             )
           end
         end
 
-        it { expect(subject).to eq([text: 'Is using seat', variant: 'light']) }
+        it { expect(subject).to eq([text: 'Is using seat', variant: 'neutral']) }
       end
 
       context 'when user does not use a license seat' do

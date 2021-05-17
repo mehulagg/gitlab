@@ -18,8 +18,8 @@ module QA
           end
 
           view 'app/assets/javascripts/ide/components/ide_tree.vue' do
-            element :new_file_button
-            element :new_directory_button
+            element :new_file_button, required: true
+            element :new_directory_button, required: true
           end
 
           view 'app/assets/javascripts/ide/components/ide_tree_list.vue' do
@@ -305,10 +305,30 @@ module QA
           def switch_to_commit_tab
             click_element(:commit_mode_tab)
           end
+
+          def select_file(file_name)
+            # wait for the list of files to load
+            wait_until(reload: true) do
+              has_element?(:file_name_content, file_name: file_name)
+            end
+            click_element(:file_name_content, file_name: file_name)
+          end
+
+          def link_line(line_number)
+            previous_url = page.current_url
+            wait_for_animated_element(:editor_container)
+            within_element(:editor_container) do
+              find('.line-numbers', text: line_number).hover.click
+            end
+            wait_until(max_duration: 5, reload: false) do
+              page.current_url != previous_url
+            end
+            page.current_url.to_s
+          end
         end
       end
     end
   end
 end
 
-QA::Page::Project::WebIDE::Edit.prepend_if_ee('QA::EE::Page::Component::WebIDE::WebTerminalPanel')
+QA::Page::Project::WebIDE::Edit.prepend_mod_with('Page::Component::WebIDE::WebTerminalPanel', namespace: QA)

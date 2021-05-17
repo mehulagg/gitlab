@@ -27,19 +27,20 @@ RSpec.describe Groups::GroupMembersController do
         create_list(:group_member, 5, group: group, created_by: user)
         create_list(:group_member, 5, :invited, :developer, group: group, created_by: user)
         create_list(:group_member, 5, :access_request, group: group)
-        # locally 87 vs 128
-        unresolved_n_plus_ones = 8 # 1 in GDK, 5 in CI hard to say - multiple should likely be lower now
-        # using_license 84 vs 115 = ~13
-        # can_update 82 vs 102 = ~13
-        # can_remove 80 vs 89 = ~13
-        # can_resend 80 + 5 = ~4
-        # solving access level reduced from ~80 to ~50
-        # still have a few queries created by can_update/can_remove that should be reduced
-        multiple_members_threshold = 5
+        # locally 47 vs 52 GDK vs 57 CI
+        unresolved_n_plus_ones = 5 # still have a few queries created by can_update/can_remove that should be reduced
+        multiple_members_threshold = 5 # GDK vs CI difference
 
         expect do
           get :index, params: { group_id: group.reload }
         end.not_to exceed_all_query_limit(control.count).with_threshold(multiple_members_threshold + unresolved_n_plus_ones)
+      end
+
+      it 'avoids extra group_link database queries utilizing pre-loading' do
+        control = ActiveRecord::QueryRecorder.new { get :index, params: { group_id: group } }
+        count_queries = control.occurrences_by_line_method.first[1][:occurrences].any? { |i| i.include?('SELECT 1 AS one FROM "group_group_links" WHERE "group_group_links"') }
+
+        expect(count_queries).to be(false)
       end
     end
   end

@@ -7,11 +7,13 @@ import { ERROR_FETCHING_DATA_HEADER, ERROR_FETCHING_DATA_DESCRIPTION } from '~/e
 import plansQuery from '../../graphql/queries/plans.customer.query.graphql';
 import { planTags, CUSTOMER_CLIENT } from '../constants';
 import Checkout from './checkout.vue';
+import OrderSummary from './order_summary.vue';
 
 export default {
   components: {
     Checkout,
     GlEmptyState,
+    OrderSummary,
     StepOrderApp,
   },
   i18n: {
@@ -59,6 +61,8 @@ export default {
     <template #checkout>
       <checkout :plans="plans" />
     </template>
-    <template #order-summary></template>
+    <template #order-summary>
+      <order-summary :plans="plans" />
+    </template>
   </step-order-app>
 </template>

@@ -59,14 +59,14 @@ RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
       within('.mr-widget-section') do
         expect(page).to have_content("Set by #{user.name} to start a merge train when the pipeline succeeds")
         expect(page).to have_content('The source branch will not be deleted')
-        expect(page).to have_link('Cancel automatic merge')
+        expect(page).to have_link('Cancel')
         expect(page).to have_link('Delete source branch')
       end
     end
 
-    context "when user clicks 'Cancel automatic merge' button" do
+    context "when user clicks 'Cancel' button" do
       before do
-        click_link 'Cancel automatic merge'
+        click_link 'Cancel'
       end
 
       it 'cancels automatic merge' do

@@ -29,4 +29,11 @@ RSpec.describe Boards::EpicBoards::UpdateService, services: true do
   end
 
   it_behaves_like 'board update service'
+
+  it 'tracks epic board name updates' do
+    expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+      .to receive(:track_event).with('g_project_management_users_updating_epic_board_names', values: user.id)
+
+    described_class.new(group, user, name: 'foo').execute(board)
+  end
 end

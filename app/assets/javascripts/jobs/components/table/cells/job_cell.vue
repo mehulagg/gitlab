@@ -1,11 +1,18 @@
 <script>
-import { GlBadge, GlIcon, GlLink } from '@gitlab/ui';
+import { GlBadge, GlIcon, GlLink, GlTooltipDirective } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { s__ } from '~/locale';
 import { SUCCESS_STATUS } from '../../../constants';
 
 export default {
   iconSize: 12,
   badgeSize: 'sm',
+  i18n: {
+    stuckText: s__('Jobs|Job is stuck. Check runners.'),
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   components: {
     GlBadge,
     GlIcon,
@@ -52,6 +59,12 @@ export default {
     isScheduledJob() {
       return Boolean(this.job.scheduledAt);
     },
+    canReadJob() {
+      return this.job?.userPermissions?.readBuild;
+    },
+    jobStuck() {
+      return this.job?.stuck;
+    },
   },
 };
 </script>
@@ -59,9 +72,28 @@ export default {
 <template>
   <div>
     <div class="gl-text-truncate">
-      <gl-link class="gl-text-gray-500!" :href="jobPath" data-testid="job-id">{{ jobId }}</gl-link>
+      <gl-link
+        v-if="canReadJob"
+        class="gl-text-gray-500!"
+        :href="jobPath"
+        data-testid="job-id-link"
+      >
+        {{ jobId }}
+      </gl-link>
 
-      <div class="gl-display-flex gl-align-items-center">
+      <span v-else data-testid="job-id-limited-access">{{ jobId }}</span>
+
+      <gl-icon
+        v-if="jobStuck"
+        v-gl-tooltip="$options.i18n.stuckText"
+        name="warning"
+        :size="$options.iconSize"
+        data-testid="stuck-icon"
+      />
+
+      <div
+        class="gl-display-flex gl-align-items-center gl-lg-justify-content-start gl-justify-content-end"
+      >
         <div v-if="jobRef" class="gl-max-w-15 gl-text-truncate">
           <gl-icon
             v-if="createdByTag"

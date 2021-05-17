@@ -18,8 +18,8 @@ export const initSecurityConfiguration = (el) => {
     containerScanningHelpPath,
     dependencyScanningHelpPath,
     toggleAutofixSettingEndpoint,
-    gitlabCiHistoryPath,
     projectPath,
+    gitlabCiHistoryPath,
   } = el.dataset;
 
   return new Vue({

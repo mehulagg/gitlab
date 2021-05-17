@@ -1,6 +1,6 @@
 <script>
 import { GlTable } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { s__, __ } from '~/locale';
 import CiBadge from '~/vue_shared/components/ci_badge_link.vue';
 import ActionsCell from './cells/actions_cell.vue';
 import DurationCell from './cells/duration_cell.vue';
@@ -11,8 +11,13 @@ const defaultTableClasses = {
   tdClass: 'gl-p-5!',
   thClass: 'gl-bg-transparent! gl-border-b-solid! gl-border-b-gray-100! gl-p-5! gl-border-b-1!',
 };
+// eslint-disable-next-line @gitlab/require-i18n-strings
+const coverageTdClasses = `${defaultTableClasses.tdClass} gl-display-none! gl-lg-display-table-cell!`;
 
 export default {
+  i18n: {
+    emptyText: s__('Jobs|No jobs to show'),
+  },
   fields: [
     {
       key: 'status',
@@ -53,7 +58,8 @@ export default {
     {
       key: 'coverage',
       label: __('Coverage'),
-      ...defaultTableClasses,
+      tdClass: coverageTdClasses,
+      thClass: defaultTableClasses.thClass,
       columnClass: 'gl-w-10p',
     },
     {
@@ -90,6 +96,8 @@ export default {
     :items="jobs"
     :fields="$options.fields"
     :tbody-tr-attr="{ 'data-testid': 'jobs-table-row' }"
+    :empty-text="$options.i18n.emptyText"
+    show-empty
     stacked="lg"
     fixed
   >

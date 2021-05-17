@@ -55,14 +55,19 @@ export default {
       return Array.isArray(ids) ? ids : [ids];
     },
     querystringOptions() {
-      const options = this.options.filter((x) => this.querystringIds.includes(x.id));
-      const hasAllId = this.querystringIds.includes(this.filter.allOption.id);
-
-      if (options.length && !hasAllId) {
-        return options;
+      // If the querystring IDs includes the All option, return an empty array. We'll do this even
+      // if there are other IDs because the special All option takes precedence.
+      if (this.querystringIds.includes(this.filter.allOption.id)) {
+        return [];
       }
 
-      return hasAllId ? [] : this.filter.defaultOptions;
+      const options = this.options.filter((x) => this.querystringIds.includes(x.id));
+      // If the querystring IDs didn't match any options, return the default options.
+      if (!options.length) {
+        return this.filter.defaultOptions;
+      }
+
+      return options;
     },
     showSearchBox() {
       return this.options.length >= this.searchBoxShowThreshold;

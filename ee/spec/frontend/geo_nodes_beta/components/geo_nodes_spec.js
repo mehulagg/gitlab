@@ -25,7 +25,6 @@ describe('GeoNodes', () => {
   });
 
   const findGeoNodesContainer = () => wrapper.find('div');
-  const findGeoSiteTitle = () => wrapper.find('h4');
   const findGeoNodeHeader = () => wrapper.findComponent(GeoNodeHeader);
   const findGeoNodeDetails = () => wrapper.findComponent(GeoNodeDetails);
 
@@ -54,21 +53,6 @@ describe('GeoNodes', () => {
           expect(findGeoNodeDetails().exists()).toBe(false);
         });
       });
-    });
-  });
-
-  describe.each`
-    node             | siteTitle
-    ${MOCK_NODES[0]} | ${'Primary site'}
-    ${MOCK_NODES[1]} | ${'Secondary site'}
-  `(`Site Title`, ({ node, siteTitle }) => {
-    beforeEach(() => {
-      createComponent({ node });
-    });
-
-    it(`is ${siteTitle} when primary is ${node.primary}`, () => {
-      expect(findGeoSiteTitle().exists()).toBe(true);
-      expect(findGeoSiteTitle().text()).toBe(siteTitle);
     });
   });
 });

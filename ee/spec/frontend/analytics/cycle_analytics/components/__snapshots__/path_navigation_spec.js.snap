@@ -92,6 +92,28 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
         </div>
          
         <div
+          class="gl-px-4"
+        >
+          <div
+            class="gl-display-flex gl-justify-content-space-between"
+          >
+            <div
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Items in stage
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              172800 items
+            </div>
+          </div>
+        </div>
+         
+        <div
           class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
         >
           <div
@@ -184,6 +206,28 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
         </div>
          
         <div
+          class="gl-px-4"
+        >
+          <div
+            class="gl-display-flex gl-justify-content-space-between"
+          >
+            <div
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Items in stage
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              86400 items
+            </div>
+          </div>
+        </div>
+         
+        <div
           class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
         >
           <div
@@ -271,6 +315,28 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
               class="gl-pb-4 gl-font-weight-bold"
             >
               
+            </div>
+          </div>
+        </div>
+         
+        <div
+          class="gl-px-4"
+        >
+          <div
+            class="gl-display-flex gl-justify-content-space-between"
+          >
+            <div
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Items in stage
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              129600 items
             </div>
           </div>
         </div>

@@ -20,7 +20,7 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { trimText } from 'helpers/text_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { securityReportDownloadPathsQueryResponse } from 'jest/vue_shared/security_reports/mock_data';
+import { securityReportMergeRequestDownloadPathsQueryResponse } from 'jest/vue_shared/security_reports/mock_data';
 
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -29,7 +29,7 @@ import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/consta
 // Force Jest to transpile and cache
 // eslint-disable-next-line no-unused-vars
 import _Deployment from '~/vue_merge_request_widget/components/deployment/deployment.vue';
-import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_download_paths.query.graphql';
+import securityReportMergeRequestDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_merge_request_download_paths.query.graphql';
 
 import mockData, {
   baseBrowserPerformance,
@@ -781,6 +781,7 @@ describe('ee merge request widget options', () => {
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
+        target_project_full_path: '',
         enabled_reports: {
           coverage_fuzzing: true,
         },
@@ -1037,8 +1038,8 @@ describe('ee merge request widget options', () => {
           propsData: { mrData: gl.mrWidgetData },
           apolloProvider: createMockApollo([
             [
-              securityReportDownloadPathsQuery,
-              async () => ({ data: securityReportDownloadPathsQueryResponse }),
+              securityReportMergeRequestDownloadPathsQuery,
+              async () => ({ data: securityReportMergeRequestDownloadPathsQueryResponse }),
             ],
           ]),
         });

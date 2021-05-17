@@ -19,6 +19,7 @@ module EE
       has_many :approvers, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+      has_many :status_check_responses, class_name: 'MergeRequests::StatusCheckResponse', inverse_of: :merge_request
       has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
         def applicable_to_branch(branch)
           ActiveRecord::Associations::Preloader.new.preload(
@@ -101,6 +102,11 @@ module EE
         grouping_columns = super
         grouping_columns << ::MergeRequest::Metrics.review_time_field if sort.to_s == 'review_time_desc'
         grouping_columns
+      end
+
+      # override
+      def use_separate_indices?
+        Elastic::DataMigrationService.migration_has_finished?(:migrate_merge_requests_to_separate_index)
       end
     end
 

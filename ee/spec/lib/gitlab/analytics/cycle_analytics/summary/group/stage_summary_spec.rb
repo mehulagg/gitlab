@@ -92,9 +92,9 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::Summary::Group::StageSummary d
           issue = project.issues.last
 
           Issues::UpdateService.new(
-            issue.project,
-            user,
-            label_ids: [label1.id, label2.id]
+            project: issue.project,
+            current_user: user,
+            params: { label_ids: [label1.id, label2.id] }
           ).execute(issue)
         end
 

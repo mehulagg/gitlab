@@ -81,6 +81,7 @@ RSpec.describe LicenseHelper do
 
   describe '#cloud_license_view_data' do
     before do
+      stub_const('::EE::SUBSCRIPTIONS_MANAGE_URL', 'subscriptions_manage_url')
       stub_const('::EE::SUBSCRIPTIONS_PLANS_URL', 'subscriptions_plans_url')
 
       allow(helper).to receive(:new_trial_url).and_return('new_trial_url')
@@ -93,9 +94,12 @@ RSpec.describe LicenseHelper do
         allow(License).to receive(:current).and_return(license)
 
         expect(helper.cloud_license_view_data).to eq({ has_active_license: 'true',
+                                                       customers_portal_url: 'subscriptions_manage_url',
                                                        free_trial_path: 'new_trial_url',
                                                        buy_subscription_path: 'subscriptions_plans_url',
-                                                       subscription_sync_path: sync_seat_link_admin_license_path })
+                                                       subscription_sync_path: sync_seat_link_admin_license_path,
+                                                       license_upload_path: new_admin_license_path,
+                                                       license_remove_path: admin_license_path })
       end
     end
 
@@ -104,9 +108,12 @@ RSpec.describe LicenseHelper do
         allow(License).to receive(:current).and_return(nil)
 
         expect(helper.cloud_license_view_data).to eq({ has_active_license: 'false',
+                                                       customers_portal_url: 'subscriptions_manage_url',
                                                        free_trial_path: 'new_trial_url',
                                                        buy_subscription_path: 'subscriptions_plans_url',
-                                                       subscription_sync_path: sync_seat_link_admin_license_path })
+                                                       subscription_sync_path: sync_seat_link_admin_license_path,
+                                                       license_upload_path: new_admin_license_path,
+                                                       license_remove_path: admin_license_path })
       end
     end
   end

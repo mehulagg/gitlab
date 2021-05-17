@@ -32,8 +32,9 @@ class Deployment < ApplicationRecord
   delegate :kubernetes_namespace, to: :deployment_cluster, allow_nil: true
 
   scope :for_environment, -> (environment) { where(environment_id: environment) }
-  scope :for_environment_name, -> (name) do
-    joins(:environment).where(environments: { name: name })
+  scope :for_environment_name, -> (project, name) do
+    where('deployments.environment_id = (?)',
+      Environment.select(:id).where(project: project, name: name).limit(1))
   end
 
   scope :for_status, -> (status) { where(status: status) }
@@ -347,4 +348,4 @@ class Deployment < ApplicationRecord
   end
 end
 
-Deployment.prepend_if_ee('EE::Deployment')
+Deployment.prepend_mod_with('Deployment')

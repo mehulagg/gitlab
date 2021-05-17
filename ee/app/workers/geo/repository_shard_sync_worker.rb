@@ -4,6 +4,7 @@ module Geo
   class RepositoryShardSyncWorker < Geo::Scheduler::Secondary::SchedulerWorker # rubocop:disable Scalability/IdempotentWorker
     sidekiq_options retry: false
     loggable_arguments 0
+    tags :exclude_from_gitlab_com
 
     attr_accessor :shard_name
 

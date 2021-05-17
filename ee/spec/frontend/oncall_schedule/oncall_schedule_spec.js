@@ -207,6 +207,18 @@ describe('On-call schedule', () => {
         expect(dateTimeUtility.nWeeksBefore).toHaveBeenCalledWith(expect.any(Date), 2);
         expect(wrapper.vm.timeframeStartDate).toEqual(mockDate);
       });
+
+      it('should query with a two week timeframe', () => {
+        const expectedVariables = {
+          iids: [mockSchedule.iid],
+          projectPath: 'group/project',
+          startsAt: new Date('2020-07-06'),
+          endsAt: new Date('2020-07-20'),
+        };
+        expect(wrapper.vm.$options.apollo.rotations.variables.bind(wrapper.vm)()).toEqual(
+          expectedVariables,
+        );
+      });
     });
 
     describe('DAYS view', () => {
@@ -227,6 +239,18 @@ describe('On-call schedule', () => {
         findLoadPreviousTimeframeBtn().vm.$emit('click');
         expect(dateTimeUtility.nDaysBefore).toHaveBeenCalledWith(expect.any(Date), 1);
         expect(wrapper.vm.timeframeStartDate).toEqual(mockDate);
+      });
+
+      it('should query with a two week timeframe', () => {
+        const expectedVariables = {
+          iids: [mockSchedule.iid],
+          projectPath: 'group/project',
+          startsAt: new Date('2020-07-06'),
+          endsAt: new Date('2020-07-07'),
+        };
+        expect(wrapper.vm.$options.apollo.rotations.variables.bind(wrapper.vm)()).toEqual(
+          expectedVariables,
+        );
       });
     });
   });

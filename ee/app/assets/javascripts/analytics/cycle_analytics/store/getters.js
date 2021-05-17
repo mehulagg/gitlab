@@ -8,7 +8,7 @@ import {
   DEFAULT_VALUE_STREAM_ID,
   OVERVIEW_STAGE_CONFIG,
   PAGINATION_TYPE,
-  PAGINATION_SORT_FIELD,
+  OVERVIEW_STAGE_ID,
 } from '../constants';
 import { transformStagesForPathNavigation } from '../utils';
 
@@ -49,9 +49,10 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
   };
 };
 
-export const paginationParams = ({ pagination: { page } }) => ({
+export const paginationParams = ({ pagination: { page, sort, direction } }) => ({
   pagination: PAGINATION_TYPE,
-  sort: PAGINATION_SORT_FIELD,
+  sort,
+  direction,
   page,
 });
 
@@ -67,15 +68,22 @@ export const enableCustomOrdering = ({ stages, errorSavingStageOrder }) =>
 export const customStageFormActive = ({ isCreatingCustomStage, isEditingCustomStage }) =>
   Boolean(isCreatingCustomStage || isEditingCustomStage);
 
+export const isOverviewStageSelected = ({ selectedStage }) =>
+  selectedStage?.id === OVERVIEW_STAGE_ID;
+
 /**
  * Until there are controls in place to edit stages outside of the stage table,
  * the path navigation component will only display active stages.
  *
  * https://gitlab.com/gitlab-org/gitlab/-/issues/216227
  */
-export const pathNavigationData = ({ stages, medians, selectedStage }) =>
+export const pathNavigationData = ({ stages, medians, stageCounts, selectedStage }) =>
   transformStagesForPathNavigation({
     stages: [OVERVIEW_STAGE_CONFIG, ...filterStagesByHiddenStatus(stages, false)],
     medians,
+    stageCounts,
     selectedStage,
   });
+
+export const selectedStageCount = ({ selectedStage, stageCounts }) =>
+  stageCounts[selectedStage.id] || null;

@@ -6,7 +6,7 @@ RSpec.describe MergeRequests::CreateService do
   include ProjectForksHelper
 
   let(:project) { create(:project, :repository) }
-  let(:service) { described_class.new(project, user, opts) }
+  let(:service) { described_class.new(project: project, current_user: user, params: opts) }
   let(:opts) do
     {
       title: 'Awesome merge_request',

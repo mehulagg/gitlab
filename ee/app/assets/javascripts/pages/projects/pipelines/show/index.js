@@ -1,3 +1,4 @@
+import initCCValidationRequiredAlert from 'ee/credit_card_validation_required_alert';
 import initPipelineSecurityDashboard from 'ee/security_dashboard/pipeline_init';
 import initPipelines from '~/pages/projects/pipelines/init_pipelines';
 import initPipelineDetails from '~/pipelines/pipeline_details_bundle';
@@ -9,3 +10,4 @@ initPipelineDetails();
 initPipelineSecurityDashboard();
 initLicenseReport();
 initCodequalityReport();
+initCCValidationRequiredAlert();

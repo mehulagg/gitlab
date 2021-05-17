@@ -12,8 +12,6 @@ module Packages
       tags :exclude_from_kubernetes
       deduplicate :until_executing
 
-      idempotent!
-
       def perform(package_file_id)
         package_file = ::Packages::PackageFile.find_by_id(package_file_id)
 
@@ -21,9 +19,9 @@ module Packages
 
         ::Packages::Rubygems::ProcessGemService.new(package_file).execute
 
-      rescue ::Packages::Rubygems::ProcessGemService::ExtractionError => e
+      rescue StandardError => e
         Gitlab::ErrorTracking.log_exception(e, project_id: package_file.project_id)
-        package_file.package.destroy!
+        package_file.package.update_column(:status, :error)
       end
     end
   end

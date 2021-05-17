@@ -13,10 +13,8 @@ RSpec.describe 'Multiple value streams', :js do
     end
   end
 
-  let(:value_stream_selector) { '[data-testid="dropdown-value-streams"]' }
   let(:extended_form_fields_selector) { '[data-testid="extended-form-fields"]' }
   let(:custom_value_stream_name) { "New created value stream" }
-  let(:value_stream_dropdown) { page.find(value_stream_selector) }
   let!(:default_value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'default') }
 
   3.times do |i|
@@ -29,43 +27,11 @@ RSpec.describe 'Multiple value streams', :js do
     sign_in(user)
   end
 
-  def toggle_value_stream_dropdown
-    value_stream_dropdown.click
-  end
-
   def select_value_stream(value_stream_name)
     toggle_value_stream_dropdown
 
     page.find('[data-testid="dropdown-value-streams"]').all('li button').find { |item| item.text == value_stream_name.to_s }.click
     wait_for_requests
-  end
-
-  def add_custom_stage_to_form
-    page.find_button(s_('CreateValueStreamForm|Add another stage')).click
-
-    index = page.all('[data-testid="value-stream-stage-fields"]').length
-    last_stage = page.all('[data-testid="value-stream-stage-fields"]').last
-
-    within last_stage do
-      find('[name*="custom-stage-name-"]').fill_in with: "Cool custom stage - name #{index}"
-      select_dropdown_option_by_value "custom-stage-start-event-", :merge_request_created
-      select_dropdown_option_by_value "custom-stage-end-event-", :merge_request_merged
-    end
-  end
-
-  def create_value_stream
-    fill_in 'create-value-stream-name', with: custom_value_stream_name
-
-    page.find_button(_('Create Value Stream')).click
-    wait_for_requests
-  end
-
-  def create_custom_value_stream
-    toggle_value_stream_dropdown
-    page.find_button(_('Create new Value Stream')).click
-
-    add_custom_stage_to_form
-    create_value_stream
   end
 
   describe 'Create value stream' do
@@ -81,7 +47,7 @@ RSpec.describe 'Multiple value streams', :js do
     end
 
     it 'can create a value stream' do
-      create_value_stream
+      save_value_stream(custom_value_stream_name)
 
       expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
     end
@@ -94,7 +60,7 @@ RSpec.describe 'Multiple value streams', :js do
       page.find("[data-testid='stage-action-hide-3']").click
       page.find("[data-testid='stage-action-hide-1']").click
 
-      create_value_stream
+      save_value_stream(custom_value_stream_name)
 
       expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
       expect(page.find('[data-testid="gl-path-nav"]')).to have_text("Cool custom stage - name")
@@ -105,7 +71,7 @@ RSpec.describe 'Multiple value streams', :js do
     before do
       select_group(group)
 
-      create_custom_value_stream
+      create_custom_value_stream(custom_value_stream_name)
 
       page.find_button(_('Edit')).click
     end

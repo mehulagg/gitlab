@@ -13,6 +13,7 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import { getContentWrapperHeight } from '../utils';
 import EnvironmentPicker from './environment_picker.vue';
 import { CiliumNetworkPolicyKind } from './policy_editor/constants';
 import PolicyDrawer from './policy_editor/policy_drawer.vue';
@@ -132,6 +133,9 @@ export default {
   },
   methods: {
     ...mapActions('networkPolicies', ['fetchPolicies', 'createPolicy', 'updatePolicy']),
+    getDrawerHeaderHeight() {
+      return getContentWrapperHeight('.js-threat-monitoring-container-wrapper');
+    },
     getTimeAgoString(creationTimestamp) {
       if (!creationTimestamp) return '';
       return getTimeago().format(creationTimestamp);
@@ -172,7 +176,6 @@ export default {
   autodevopsNoticeDescription: s__(
     `NetworkPolicies|If you are using Auto DevOps, your %{monospacedStart}auto-deploy-values.yaml%{monospacedEnd} file will not be updated if you change a policy in this section. Auto DevOps users should make changes by following the %{linkStart}Container Network Policy documentation%{linkEnd}.`,
   ),
-  headerHeight: process.env.NODE_ENV === 'development' ? '75px' : '40px',
 };
 </script>
 
@@ -251,7 +254,7 @@ export default {
       ref="editorDrawer"
       :z-index="252"
       :open="hasSelectedPolicy"
-      :header-height="$options.headerHeight"
+      :header-height="getDrawerHeaderHeight()"
       @close="deselectPolicy"
     >
       <template #header>

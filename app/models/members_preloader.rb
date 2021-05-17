@@ -13,8 +13,8 @@ class MembersPreloader
     ActiveRecord::Associations::Preloader.new.preload(members, :created_by)
     ActiveRecord::Associations::Preloader.new.preload(members, user: :status)
     ActiveRecord::Associations::Preloader.new.preload(members, user: :u2f_registrations)
-    ActiveRecord::Associations::Preloader.new.preload(members, user: :webauthn_registrations)
+    ActiveRecord::Associations::Preloader.new.preload(members, user: :webauthn_registrations) if Feature.enabled?(:webauthn)
   end
 end
 
-MembersPreloader.prepend_if_ee('EE::MembersPreloader')
+MembersPreloader.prepend_mod_with('MembersPreloader')

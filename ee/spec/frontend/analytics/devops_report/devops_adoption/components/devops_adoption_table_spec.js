@@ -4,7 +4,10 @@ import { nextTick } from 'vue';
 import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
 import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table_cell_flag.vue';
-import { DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS } from 'ee/analytics/devops_report/devops_adoption/constants';
+import {
+  DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS,
+  DEVOPS_ADOPTION_TABLE_CONFIGURATION,
+} from 'ee/analytics/devops_report/devops_adoption/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { devopsAdoptionSegmentsData, devopsAdoptionTableHeaders } from '../mock_data';
@@ -17,8 +20,8 @@ describe('DevopsAdoptionTable', () => {
 
     wrapper = mount(DevopsAdoptionTable, {
       propsData: {
+        cols: DEVOPS_ADOPTION_TABLE_CONFIGURATION[0].cols,
         segments: devopsAdoptionSegmentsData.nodes,
-        selectedSegment: devopsAdoptionSegmentsData.nodes[0],
       },
       provide,
       directives: {
@@ -33,7 +36,6 @@ describe('DevopsAdoptionTable', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   const findTable = () => wrapper.find(GlTable);
@@ -152,21 +154,14 @@ describe('DevopsAdoptionTable', () => {
       });
     });
 
-    it.each`
-      id                    | field          | flag
-      ${TEST_IDS.ISSUES}    | ${'issues'}    | ${true}
-      ${TEST_IDS.MRS}       | ${'MRs'}       | ${true}
-      ${TEST_IDS.APPROVALS} | ${'approvals'} | ${false}
-      ${TEST_IDS.RUNNERS}   | ${'runners'}   | ${true}
-      ${TEST_IDS.PIPELINES} | ${'pipelines'} | ${false}
-      ${TEST_IDS.DEPLOYS}   | ${'deploys'}   | ${false}
-      ${TEST_IDS.SCANNING}  | ${'scanning'}  | ${false}
-    `('displays the correct $field snapshot value', ({ id, flag }) => {
+    const testCols = DEVOPS_ADOPTION_TABLE_CONFIGURATION[0].cols.map((col) => [col.label, col]);
+
+    it.each(testCols)('displays the cell flag component for %s', (label, { testId }) => {
       createComponent();
 
-      const booleanFlag = findColSubComponent(id, DevopsAdoptionTableCellFlag);
+      const booleanFlag = findColSubComponent(testId, DevopsAdoptionTableCellFlag);
 
-      expect(booleanFlag.props('enabled')).toBe(flag);
+      expect(booleanFlag.exists()).toBe(true);
     });
 
     describe.each`
@@ -201,6 +196,8 @@ describe('DevopsAdoptionTable', () => {
   describe('delete modal integration', () => {
     beforeEach(() => {
       createComponent();
+
+      wrapper.setData({ selectedSegment: devopsAdoptionSegmentsData.nodes[0] });
     });
 
     it('re emits trackModalOpenState with the given value', async () => {

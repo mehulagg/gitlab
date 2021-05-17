@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
-import DueDateSelectors from '~/due_date_select';
+import initDatePicker from '~/behaviors/date_picker';
 import createFlash from '~/flash';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
@@ -65,8 +65,8 @@ export default {
     },
   },
   mounted() {
-    // eslint-disable-next-line no-new
-    new DueDateSelectors();
+    // TODO: utilize GlDatepicker instead of relying on this jQuery behavior
+    initDatePicker();
   },
   methods: {
     save() {

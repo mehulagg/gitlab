@@ -84,6 +84,17 @@ RSpec.describe Registrations::ProjectsController do
         expect(namespace.projects.find_by_name(s_('Learn GitLab'))).to be_import_finished
       end
 
+      it 'tracks an event for the jobs_to_be_done experiment', :experiment do
+        stub_experiments(jobs_to_be_done: :candidate)
+
+        expect(experiment(:jobs_to_be_done)).to track(:create_project, project: an_instance_of(Project))
+          .on_next_instance
+          .for(:candidate)
+          .with_context(user: user)
+
+        subject
+      end
+
       it 'tracks learn gitlab experiments' do
         allow_next_instance_of(::Projects::CreateService) do |service|
           allow(service).to receive(:execute).and_return(first_project)

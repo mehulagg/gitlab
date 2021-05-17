@@ -15,7 +15,7 @@ RSpec.describe Issues::BuildService do
   end
 
   def build_issue(issue_params = {})
-    described_class.new(project, user, issue_params).execute
+    described_class.new(project: project, current_user: user, params: issue_params).execute
   end
 
   context 'with an issue template' do
@@ -51,11 +51,17 @@ RSpec.describe Issues::BuildService do
   end
 
   describe '#execute' do
-    context 'as developer' do
-      it 'sets test_case' do
-        issue = build_issue(issue_type: 'test_case')
+    before do
+      stub_licensed_features(quality_management: true, requirements: true)
+    end
 
-        expect(issue).to be_test_case
+    context 'as developer' do
+      Issue.issue_types.each_key do |issue_type|
+        it "sets the issue type to #{issue_type}" do
+          issue = build_issue(issue_type: issue_type)
+
+          expect(issue.issue_type).to eq(issue_type.to_s)
+        end
       end
     end
 
@@ -63,11 +69,11 @@ RSpec.describe Issues::BuildService do
       let(:user) { guest }
 
       context 'setting issue type' do
-        Issues::BuildService::DISABLED_ISSUE_TYPES.each do |type|
-          it "cannot set #{type}" do
-            issue = build_issue(issue_type: type)
+        [:test_case, :requirement].each do |issue_type|
+          it "cannot set the issue type to #{issue_type}" do
+            issue = build_issue(issue_type: issue_type)
 
-            expect(issue).to be_issue
+            expect(issue.issue_type).to eq('issue')
           end
         end
       end

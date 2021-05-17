@@ -5,12 +5,15 @@ require 'spec_helper'
 RSpec.describe 'Welcome screen', :js do
   let_it_be(:user) { create(:user) }
 
+  let(:experiments) { {} }
+
   context 'when on GitLab.com' do
     let(:user_has_memberships) { false }
     let(:in_subscription_flow) { false }
     let(:in_trial_flow) { false }
 
     before do
+      stub_experiments(experiments)
       allow(Gitlab).to receive(:com?).and_return(true)
       gitlab_sign_in(user)
       allow_any_instance_of(EE::WelcomeHelper).to receive(:user_has_memberships?).and_return(user_has_memberships)
@@ -47,6 +50,20 @@ RSpec.describe 'Welcome screen', :js do
 
       it 'does not show the progress bar' do
         expect(page).not_to have_content('Your profile')
+      end
+    end
+
+    context 'with the jobs_to_be_done experiment' do
+      let(:experiments) { { jobs_to_be_done: :candidate } }
+
+      it 'allows specifying other for the jobs_to_be_done experiment', :experiment do
+        expect(page).not_to have_content('Why are you signing up? (Optional)')
+
+        select 'A different reason', from: 'jobs_to_be_done'
+
+        expect(page).to have_content('Why are you signing up? (Optional)')
+
+        fill_in 'jobs_to_be_done_other', with: 'My reason'
       end
     end
 

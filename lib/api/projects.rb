@@ -618,6 +618,8 @@ module API
         optional :skip_groups, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of group ids to exclude from list'
         optional :with_shared, type: Boolean, default: false,
                  desc: 'Include shared groups'
+        optional :shared_visible_only, type: Boolean, default: false,
+                 desc: 'Limit to shared groups user has access to'
         optional :shared_min_access_level, type: Integer, values: Gitlab::Access.all_values,
                  desc: 'Limit returned shared groups by minimum access level to the project'
         use :pagination
@@ -662,4 +664,4 @@ module API
   end
 end
 
-API::Projects.prepend_if_ee('EE::API::Projects')
+API::Projects.prepend_mod_with('API::Projects')

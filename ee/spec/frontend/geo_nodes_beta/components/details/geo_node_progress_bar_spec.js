@@ -65,5 +65,33 @@ describe('GeoNodeProgressBar', () => {
         });
       });
     });
+
+    describe('popoverTarget', () => {
+      describe('when target prop is null', () => {
+        beforeEach(() => {
+          createComponent();
+        });
+
+        it(`sets the popoverTarget to syncProgress-${MOCK_PRIMARY_VERIFICATION_INFO[0].title}`, () => {
+          expect(findStackedProgressBar().attributes('id')).toBe(
+            `syncProgress-${MOCK_PRIMARY_VERIFICATION_INFO[0].title}`,
+          );
+          expect(findGlPopover().attributes('target')).toBe(
+            `syncProgress-${MOCK_PRIMARY_VERIFICATION_INFO[0].title}`,
+          );
+        });
+      });
+
+      describe('when target prop is set', () => {
+        beforeEach(() => {
+          createComponent({ target: 'test-target' });
+        });
+
+        it('sets the popoverTarget to test-target', () => {
+          expect(findStackedProgressBar().attributes('id')).toBe('test-target');
+          expect(findGlPopover().attributes('target')).toBe('test-target');
+        });
+      });
+    });
   });
 });

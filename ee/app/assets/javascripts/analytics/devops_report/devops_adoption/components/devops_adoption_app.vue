@@ -1,47 +1,39 @@
 <script>
-import {
-  GlLoadingIcon,
-  GlButton,
-  GlSprintf,
-  GlAlert,
-  GlModalDirective,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlAlert, GlTabs, GlTab } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import dateformat from 'dateformat';
+import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
+import API from '~/api';
+import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
   MAX_REQUEST_COUNT,
   MAX_SEGMENTS,
   DATE_TIME_FORMAT,
-  DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
+  DEVOPS_ADOPTION_TABLE_CONFIGURATION,
+  TRACK_ADOPTION_TAB_CLICK_EVENT,
+  TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
 } from '../constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
-import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
+import DevopsAdoptionSection from './devops_adoption_section.vue';
 import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
-import DevopsAdoptionTable from './devops_adoption_table.vue';
 
 export default {
   name: 'DevopsAdoptionApp',
   components: {
     GlAlert,
-    GlLoadingIcon,
-    DevopsAdoptionEmptyState,
+    DevopsAdoptionSection,
     DevopsAdoptionSegmentModal,
-    DevopsAdoptionTable,
-    GlButton,
-    GlSprintf,
-  },
-  directives: {
-    GlModal: GlModalDirective,
-    GlTooltip: GlTooltipDirective,
+    DevopsScore,
+    GlTabs,
+    GlTab,
   },
   inject: {
     isGroup: {
@@ -50,19 +42,29 @@ export default {
     groupGid: {
       default: null,
     },
+    devopsScoreMetrics: {
+      default: null,
+    },
+    devopsReportDocsPath: {
+      default: '',
+    },
+    noDataImagePath: {
+      default: '',
+    },
   },
   i18n: {
     groupLevelLabel: DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
     ...DEVOPS_ADOPTION_STRINGS.app,
   },
+  trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
+  trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
   maxSegments: MAX_SEGMENTS,
-  devopsSegmentModalId: DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
+  devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
     return {
       isLoadingGroups: false,
       isLoadingEnableGroup: false,
       requestCount: 0,
-      selectedSegment: null,
       openModal: false,
       errors: {
         [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
@@ -80,6 +82,9 @@ export default {
             directDescendantsOnly: false,
           }
         : {},
+      adoptionTabClicked: false,
+      devopsScoreTabClicked: false,
+      selectedTab: 0,
     };
   },
   apollo: {
@@ -105,6 +110,9 @@ export default {
     },
   },
   computed: {
+    isAdmin() {
+      return !this.isGroup;
+    },
     hasGroupData() {
       return Boolean(this.groups?.nodes?.length);
     },
@@ -127,28 +135,34 @@ export default {
         this.$apollo.queries.devopsAdoptionSegments.loading
       );
     },
-    modalKey() {
-      return this.selectedSegment?.id;
-    },
     segmentLimitReached() {
-      return this.devopsAdoptionSegments.nodes?.length > this.$options.maxSegments;
-    },
-    addSegmentButtonTooltipText() {
-      return this.segmentLimitReached ? this.$options.i18n.tableHeader.buttonTooltip : false;
+      return this.devopsAdoptionSegments?.nodes?.length > this.$options.maxSegments;
     },
     editGroupsButtonLabel() {
       return this.isGroup
         ? this.$options.i18n.groupLevelLabel
         : this.$options.i18n.tableHeader.button;
     },
+    canRenderModal() {
+      return this.hasGroupData && !this.isLoading;
+    },
+    tabIndexValues() {
+      const tabs = this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab);
+
+      return this.isGroup ? tabs : [...tabs, 'devops-score'];
+    },
   },
   created() {
     this.fetchGroups();
+    this.selectTab();
   },
   beforeDestroy() {
     clearInterval(this.pollingTableData);
   },
   methods: {
+    openAddRemoveModal() {
+      this.$refs.addRemoveModal.openModal();
+    },
     enableGroup() {
       this.isLoadingEnableGroup = true;
 
@@ -226,12 +240,6 @@ export default {
         })
         .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
-    setSelectedSegment(segment) {
-      this.selectedSegment = segment;
-    },
-    clearSelectedSegment() {
-      this.selectedSegment = null;
-    },
     addSegmentsToCache(segments) {
       const { cache } = this.$apollo.getClient();
 
@@ -242,63 +250,90 @@ export default {
 
       deleteSegmentsFromCache(cache, ids, this.segmentsQueryVariables);
     },
+    selectTab() {
+      const [value] = getParameterValues('tab');
+
+      if (value) {
+        this.selectedTab = this.tabIndexValues.indexOf(value);
+      }
+    },
+    onTabChange(index) {
+      if (index > 0) {
+        if (index !== this.selectedTab) {
+          const path = mergeUrlParams(
+            { tab: this.tabIndexValues[index] },
+            window.location.pathname,
+          );
+          updateHistory({ url: path, title: window.title });
+        }
+      } else {
+        updateHistory({ url: window.location.pathname, title: window.title });
+      }
+
+      this.selectedTab = index;
+    },
+    trackDevopsScoreTabClick() {
+      if (!this.devopsScoreTabClicked) {
+        API.trackRedisHllUserEvent(this.$options.trackDevopsScoreTabClickEvent);
+        this.devopsScoreTabClicked = true;
+      }
+    },
+    trackDevopsTabClick() {
+      if (!this.adoptionTabClicked) {
+        API.trackRedisHllUserEvent(this.$options.trackDevopsTabClickEvent);
+        this.adoptionTabClicked = true;
+      }
+    },
   },
 };
 </script>
 <template>
-  <div v-if="hasLoadingError">
-    <template v-for="(error, key) in errors">
-      <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
-        {{ $options.i18n[key] }}
-      </gl-alert>
-    </template>
-  </div>
-  <gl-loading-icon v-else-if="isLoading" size="md" class="gl-my-5" />
-  <div v-else>
+  <div>
+    <gl-tabs :value="selectedTab" @input="onTabChange">
+      <gl-tab
+        v-for="tab in $options.devopsAdoptionTableConfiguration"
+        :key="tab.title"
+        data-testid="devops-adoption-tab"
+        @click="trackDevopsTabClick"
+      >
+        <template #title>{{ tab.title }}</template>
+        <div v-if="hasLoadingError">
+          <template v-for="(error, key) in errors">
+            <gl-alert v-if="error" :key="key" variant="danger" :dismissible="false" class="gl-mt-3">
+              {{ $options.i18n[key] }}
+            </gl-alert>
+          </template>
+        </div>
+
+        <devops-adoption-section
+          v-else
+          :is-loading="isLoading"
+          :has-segments-data="hasSegmentsData"
+          :timestamp="timestamp"
+          :has-group-data="hasGroupData"
+          :segment-limit-reached="segmentLimitReached"
+          :edit-groups-button-label="editGroupsButtonLabel"
+          :cols="tab.cols"
+          :segments="devopsAdoptionSegments"
+          @segmentsRemoved="deleteSegmentsFromCache"
+          @openAddRemoveModal="openAddRemoveModal"
+        />
+      </gl-tab>
+
+      <gl-tab v-if="isAdmin" data-testid="devops-score-tab" @click="trackDevopsScoreTabClick">
+        <template #title>{{ s__('DevopsReport|DevOps Score') }}</template>
+        <devops-score />
+      </gl-tab>
+    </gl-tabs>
+
     <devops-adoption-segment-modal
-      v-if="hasGroupData"
-      :key="modalKey"
+      v-if="canRenderModal"
+      ref="addRemoveModal"
       :groups="groups.nodes"
       :enabled-groups="devopsAdoptionSegments.nodes"
       @segmentsAdded="addSegmentsToCache"
       @segmentsRemoved="deleteSegmentsFromCache"
       @trackModalOpenState="trackModalOpenState"
-    />
-    <div v-if="hasSegmentsData" class="gl-mt-3">
-      <div
-        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-my-3"
-        data-testid="tableHeader"
-      >
-        <span class="gl-text-gray-400">
-          <gl-sprintf :message="$options.i18n.tableHeader.text">
-            <template #timestamp>{{ timestamp }}</template>
-          </gl-sprintf>
-        </span>
-        <span
-          v-if="hasGroupData"
-          v-gl-tooltip.hover="addSegmentButtonTooltipText"
-          data-testid="segmentButtonWrapper"
-        >
-          <gl-button
-            v-gl-modal="$options.devopsSegmentModalId"
-            :disabled="segmentLimitReached"
-            @click="clearSelectedSegment"
-            >{{ editGroupsButtonLabel }}</gl-button
-          ></span
-        >
-      </div>
-      <devops-adoption-table
-        :segments="devopsAdoptionSegments.nodes"
-        :selected-segment="selectedSegment"
-        @set-selected-segment="setSelectedSegment"
-        @segmentsRemoved="deleteSegmentsFromCache"
-        @trackModalOpenState="trackModalOpenState"
-      />
-    </div>
-    <devops-adoption-empty-state
-      v-else
-      :has-groups-data="hasGroupData"
-      @clear-selected-segment="clearSelectedSegment"
     />
   </div>
 </template>

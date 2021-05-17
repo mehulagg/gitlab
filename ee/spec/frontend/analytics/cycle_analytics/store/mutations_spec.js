@@ -1,3 +1,7 @@
+import {
+  PAGINATION_SORT_DIRECTION_DESC,
+  PAGINATION_SORT_FIELD_END_EVENT,
+} from 'ee/analytics/cycle_analytics/constants';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 
@@ -12,6 +16,8 @@ import {
   selectedProjects,
   customizableStagesAndEvents,
   valueStreams,
+  rawCustomStageEvents,
+  camelCasedStageEvents,
 } from '../mock_data';
 
 let state = null;
@@ -33,16 +39,10 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_VALUE_STREAMS}               | ${'isLoadingValueStreams'}   | ${true}
     ${types.RECEIVE_VALUE_STREAMS_ERROR}         | ${'isLoadingValueStreams'}   | ${false}
     ${types.REQUEST_STAGE_DATA}                  | ${'isLoadingStage'}          | ${true}
-    ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isEmptyStage'}            | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isLoadingStage'}          | ${false}
     ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}
-    ${types.REQUEST_UPDATE_STAGE}                | ${'isLoading'}               | ${true}
-    ${types.RECEIVE_UPDATE_STAGE_SUCCESS}        | ${'isLoading'}               | ${false}
-    ${types.RECEIVE_UPDATE_STAGE_ERROR}          | ${'isLoading'}               | ${false}
-    ${types.REQUEST_REMOVE_STAGE}                | ${'isLoading'}               | ${true}
-    ${types.RECEIVE_REMOVE_STAGE_RESPONSE}       | ${'isLoading'}               | ${false}
     ${types.REQUEST_STAGE_MEDIANS}               | ${'medians'}                 | ${{}}
     ${types.RECEIVE_STAGE_MEDIANS_ERROR}         | ${'medians'}                 | ${{}}
     ${types.REQUEST_CREATE_VALUE_STREAM}         | ${'isCreatingValueStream'}   | ${true}
@@ -59,6 +59,9 @@ describe('Value Stream Analytics mutations', () => {
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'selectedValueStream'}     | ${null}
     ${types.INITIALIZE_VALUE_STREAM_SUCCESS}     | ${'isLoading'}               | ${false}
+    ${types.REQUEST_STAGE_COUNTS}                | ${'stageCounts'}             | ${{}}
+    ${types.RECEIVE_STAGE_COUNTS_ERROR}          | ${'stageCounts'}             | ${{}}
+    ${types.SET_STAGE_EVENTS}                    | ${'formEvents'}              | ${[]}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
 
@@ -78,22 +81,24 @@ describe('Value Stream Analytics mutations', () => {
     stages: [{}, { name: "Can't be blank" }, {}, {}, {}, {}, {}, {}],
   };
 
-  const pagination = { page: 10, hasNextPage: true };
+  const pagination = { page: 10, hasNextPage: true, sort: null, direction: null };
 
   it.each`
-    mutation                                     | payload                       | expectedState
-    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }} | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}           | ${{ selectedProjects }}
-    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}     | ${{ startDate, endDate }}
-    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}      | ${{ selectedStage: { id: 'first-stage' } }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}          | ${{ createValueStreamErrors: expectedValueStreamErrors, isCreatingValueStream: false }}
-    ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}          | ${{ createValueStreamErrors: expectedValueStreamErrors, isEditingValueStream: false }}
-    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}      | ${{ deleteValueStreamError: 'Some error occurred' }}
-    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}               | ${{ valueStreams, isLoadingValueStreams: false }}
-    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}         | ${{ selectedValueStream: {} }}
-    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}            | ${{ selectedValueStream: valueStreams[1] }}
-    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}            | ${{ selectedValueStream: valueStreams[1] }}
-    ${types.SET_PAGINATION}                      | ${pagination}                 | ${{ pagination }}
+    mutation                                     | payload                                                  | expectedState
+    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}                            | ${{ featureFlags: { hasDurationChart: true } }}
+    ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                                      | ${{ selectedProjects }}
+    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                                | ${{ startDate, endDate }}
+    ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                                 | ${{ selectedStage: { id: 'first-stage' } }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}                                     | ${{ createValueStreamErrors: expectedValueStreamErrors, isCreatingValueStream: false }}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}                                     | ${{ createValueStreamErrors: expectedValueStreamErrors, isEditingValueStream: false }}
+    ${types.RECEIVE_DELETE_VALUE_STREAM_ERROR}   | ${'Some error occurred'}                                 | ${{ deleteValueStreamError: 'Some error occurred' }}
+    ${types.RECEIVE_VALUE_STREAMS_SUCCESS}       | ${valueStreams}                                          | ${{ valueStreams, isLoadingValueStreams: false }}
+    ${types.SET_SELECTED_VALUE_STREAM}           | ${valueStreams[1].id}                                    | ${{ selectedValueStream: {} }}
+    ${types.RECEIVE_CREATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                       | ${{ selectedValueStream: valueStreams[1] }}
+    ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                       | ${{ selectedValueStream: valueStreams[1] }}
+    ${types.SET_PAGINATION}                      | ${pagination}                                            | ${{ pagination: { ...pagination, sort: PAGINATION_SORT_FIELD_END_EVENT, direction: PAGINATION_SORT_DIRECTION_DESC } }}
+    ${types.SET_PAGINATION}                      | ${{ ...pagination, sort: 'duration', direction: 'asc' }} | ${{ pagination: { ...pagination, sort: 'duration', direction: 'asc' } }}
+    ${types.SET_STAGE_EVENTS}                    | ${rawCustomStageEvents}                                  | ${{ formEvents: camelCasedStageEvents }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {
@@ -172,42 +177,40 @@ describe('Value Stream Analytics mutations', () => {
   });
 
   describe(`${types.RECEIVE_STAGE_MEDIANS_SUCCESS}`, () => {
-    it('sets each id as a key in the median object with the corresponding value and error', () => {
-      const stateWithData = {
+    beforeEach(() => {
+      state = {
         medians: {},
       };
 
-      mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](stateWithData, [
-        { id: 1, value: 20 },
-        { id: 2, value: 10 },
+      mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
+        { id: 1, value: 7580 },
+        { id: 2, value: 434340 },
       ]);
-
-      expect(stateWithData.medians).toEqual({
-        1: { value: 20, error: null },
-        2: { value: 10, error: null },
-      });
     });
 
-    describe('with hasPathNavigation set to true', () => {
-      beforeEach(() => {
-        state = {
-          featureFlags: { hasPathNavigation: true },
-          medians: {},
-        };
+    it('formats each stage median for display in the path navigation', () => {
+      expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
+    });
 
-        mutations[types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, [
-          { id: 1, value: 7580 },
-          { id: 2, value: 434340 },
-        ]);
-      });
+    it('calculates the overview median', () => {
+      expect(state.medians).toMatchObject({ overview: '5d' });
+    });
+  });
 
-      it('formats each stage median for display in the path navigation', () => {
-        expect(state.medians).toMatchObject({ 1: '2h', 2: '5d' });
-      });
+  describe(`${types.RECEIVE_STAGE_COUNTS_SUCCESS}`, () => {
+    beforeEach(() => {
+      state = {
+        stageCounts: {},
+      };
 
-      it('calculates the overview median', () => {
-        expect(state.medians).toMatchObject({ overview: '5d' });
-      });
+      mutations[types.RECEIVE_STAGE_COUNTS_SUCCESS](state, [
+        { id: 1, count: 10 },
+        { id: 2, count: 20 },
+      ]);
+    });
+
+    it('sets each id as a key in the stageCounts object with the corresponding count', () => {
+      expect(state.stageCounts).toMatchObject({ 1: 10, 2: 20 });
     });
   });
 
@@ -217,6 +220,11 @@ describe('Value Stream Analytics mutations', () => {
       selectedProjects,
       createdAfter: '2019-12-31',
       createdBefore: '2020-01-01',
+      pagination: {
+        page: 1,
+        sort: PAGINATION_SORT_FIELD_END_EVENT,
+        direction: PAGINATION_SORT_DIRECTION_DESC,
+      },
     };
 
     it.each`
@@ -229,7 +237,19 @@ describe('Value Stream Analytics mutations', () => {
       state = {};
       mutations[types.INITIALIZE_VSA](state, initialData);
 
-      expect(state[stateKey]).toEqual(expectedState);
+      expect(state[stateKey]).toBe(expectedState);
+    });
+
+    it.each`
+      stateKey       | expectedState
+      ${'page'}      | ${1}
+      ${'sort'}      | ${PAGINATION_SORT_FIELD_END_EVENT}
+      ${'direction'} | ${PAGINATION_SORT_DIRECTION_DESC}
+    `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
+      state = {};
+      mutations[types.INITIALIZE_VSA](state, initialData);
+
+      expect(state.pagination[stateKey]).toBe(expectedState);
     });
   });
 });

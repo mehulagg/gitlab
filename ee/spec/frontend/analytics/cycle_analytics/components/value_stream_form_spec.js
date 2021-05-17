@@ -48,18 +48,11 @@ describe('ValueStreamForm', () => {
     new Vuex.Store({
       state: {
         isCreatingValueStream: false,
+        formEvents,
       },
       actions: {
         createValueStream: createValueStreamMock,
         updateValueStream: updateValueStreamMock,
-      },
-      modules: {
-        customStages: {
-          namespaced: true,
-          state: {
-            formEvents,
-          },
-        },
       },
     });
 

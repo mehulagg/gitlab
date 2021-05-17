@@ -3631,46 +3631,29 @@ RSpec.describe Ci::Build do
     end
 
     let!(:job) { create(:ci_build, :pending, pipeline: pipeline, stage_idx: 1, options: options) }
+    let!(:pre_stage_job) { create(:ci_build, :success, pipeline: pipeline, name: 'test', stage_idx: 0) }
 
-    context 'when validates for dependencies is enabled' do
-      before do
-        stub_feature_flags(ci_validate_build_dependencies_override: false)
-      end
+    context 'when "dependencies" keyword is not defined' do
+      let(:options) { {} }
 
-      let!(:pre_stage_job) { create(:ci_build, :success, pipeline: pipeline, name: 'test', stage_idx: 0) }
-
-      context 'when "dependencies" keyword is not defined' do
-        let(:options) { {} }
-
-        it { expect(job).to have_valid_build_dependencies }
-      end
-
-      context 'when "dependencies" keyword is empty' do
-        let(:options) { { dependencies: [] } }
-
-        it { expect(job).to have_valid_build_dependencies }
-      end
-
-      context 'when "dependencies" keyword is specified' do
-        let(:options) { { dependencies: ['test'] } }
-
-        it_behaves_like 'validation is active'
-      end
+      it { expect(job).to have_valid_build_dependencies }
     end
 
-    context 'when validates for dependencies is disabled' do
+    context 'when "dependencies" keyword is empty' do
+      let(:options) { { dependencies: [] } }
+
+      it { expect(job).to have_valid_build_dependencies }
+    end
+
+    context 'when "dependencies" keyword is specified' do
       let(:options) { { dependencies: ['test'] } }
 
-      before do
-        stub_feature_flags(ci_validate_build_dependencies_override: true)
-      end
-
-      it_behaves_like 'validation is not active'
+      it_behaves_like 'validation is active'
     end
   end
 
   describe 'state transition when build fails' do
-    let(:service) { ::MergeRequests::AddTodoWhenBuildFailsService.new(project, user) }
+    let(:service) { ::MergeRequests::AddTodoWhenBuildFailsService.new(project: project, current_user: user) }
 
     before do
       allow(::MergeRequests::AddTodoWhenBuildFailsService).to receive(:new).and_return(service)
@@ -4714,8 +4697,8 @@ RSpec.describe Ci::Build do
       end
 
       it 'executes services' do
-        allow_next_found_instance_of(Service) do |service|
-          expect(service).to receive(:async_execute)
+        allow_next_found_instance_of(Integration) do |integration|
+          expect(integration).to receive(:async_execute)
         end
 
         build.execute_hooks
@@ -4728,8 +4711,8 @@ RSpec.describe Ci::Build do
       end
 
       it 'does not execute services' do
-        allow_next_found_instance_of(Service) do |service|
-          expect(service).not_to receive(:async_execute)
+        allow_next_found_instance_of(Integration) do |integration|
+          expect(integration).not_to receive(:async_execute)
         end
 
         build.execute_hooks

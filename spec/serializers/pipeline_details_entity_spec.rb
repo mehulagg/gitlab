@@ -32,7 +32,7 @@ RSpec.describe PipelineDetailsEntity do
         expect(subject[:details])
           .to include :duration, :finished_at
         expect(subject[:details])
-          .to include :stages, :artifacts, :has_downloadable_artifacts, :manual_actions, :scheduled_actions
+          .to include :stages, :manual_actions, :scheduled_actions
         expect(subject[:details][:status]).to include :icon, :favicon, :text, :label
       end
 
@@ -68,6 +68,20 @@ RSpec.describe PipelineDetailsEntity do
       context 'user does not have ability to retry pipeline' do
         it 'retryable flag is false' do
           expect(subject[:flags][:retryable]).to eq false
+        end
+      end
+
+      it 'does not contain code_quality_build_path in details' do
+        expect(subject[:details]).not_to include :code_quality_build_path
+      end
+
+      context 'when option code_quality_walkthrough is set and pipeline is a success' do
+        let(:entity) do
+          described_class.represent(pipeline, request: request, code_quality_walkthrough: true)
+        end
+
+        it 'contains details.code_quality_build_path' do
+          expect(subject[:details]).to include :code_quality_build_path
         end
       end
     end
@@ -182,38 +196,6 @@ RSpec.describe PipelineDetailsEntity do
 
         expect(source_jobs[cross_project_pipeline.id][:name]).to eq('cross-project')
         expect(source_jobs[child_pipeline.id][:name]).to eq('child')
-      end
-    end
-
-    it_behaves_like 'public artifacts'
-
-    context 'when pipeline has downloadable artifacts' do
-      subject(:entity) { described_class.represent(pipeline, request: request, disable_artifacts: disable_artifacts).as_json }
-
-      let_it_be(:pipeline) { create(:ci_pipeline, :with_codequality_reports) }
-
-      context 'when disable_artifacts is true' do
-        subject(:entity) { described_class.represent(pipeline, request: request, disable_artifacts: true).as_json }
-
-        it 'excludes artifacts data' do
-          expect(entity[:details]).not_to include(:artifacts)
-        end
-
-        it 'returns true for has_downloadable_artifacts' do
-          expect(entity[:details][:has_downloadable_artifacts]).to eq(true)
-        end
-      end
-
-      context 'when disable_artifacts is false' do
-        subject(:entity) { described_class.represent(pipeline, request: request, disable_artifacts: false).as_json }
-
-        it 'includes artifacts data' do
-          expect(entity[:details]).to include(:artifacts)
-        end
-
-        it 'returns true for has_downloadable_artifacts' do
-          expect(entity[:details][:has_downloadable_artifacts]).to eq(true)
-        end
       end
     end
   end

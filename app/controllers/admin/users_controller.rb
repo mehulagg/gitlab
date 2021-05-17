@@ -7,6 +7,7 @@ class Admin::UsersController < Admin::ApplicationController
   before_action :user, except: [:index, :cohorts, :new, :create]
   before_action :check_impersonation_availability, only: :impersonate
   before_action :ensure_destroy_prerequisites_met, only: [:destroy]
+  before_action :check_ban_user_feature_flag, only: [:ban]
 
   feature_category :users
 
@@ -127,6 +128,24 @@ class Admin::UsersController < Admin::ApplicationController
       redirect_back_or_admin_user(notice: _("Successfully unblocked"))
     else
       redirect_back_or_admin_user(alert: _("Error occurred. User was not unblocked"))
+    end
+  end
+
+  def ban
+    result = Users::BanService.new(current_user).execute(user)
+
+    if result[:status] == :success
+      redirect_back_or_admin_user(notice: _("Successfully banned"))
+    else
+      redirect_back_or_admin_user(alert: _("Error occurred. User was not banned"))
+    end
+  end
+
+  def unban
+    if update_user { |user| user.activate }
+      redirect_back_or_admin_user(notice: _("Successfully unbanned"))
+    else
+      redirect_back_or_admin_user(alert: _("Error occurred. User was not unbanned"))
     end
   end
 
@@ -325,6 +344,10 @@ class Admin::UsersController < Admin::ApplicationController
     access_denied! unless Gitlab.config.gitlab.impersonation_enabled
   end
 
+  def check_ban_user_feature_flag
+    access_denied! unless Feature.enabled?(:ban_user_feature_flag)
+  end
+
   def log_impersonation_event
     Gitlab::AppLogger.info(_("User %{current_user_username} has started impersonating %{username}") % { current_user_username: current_user.username, username: user.username })
   end
@@ -344,4 +367,4 @@ class Admin::UsersController < Admin::ApplicationController
   end
 end
 
-Admin::UsersController.prepend_if_ee('EE::Admin::UsersController')
+Admin::UsersController.prepend_mod_with('Admin::UsersController')

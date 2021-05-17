@@ -65,21 +65,23 @@ RSpec.describe PaidFeatureCalloutHelper do
     subject { helper.paid_feature_badge_data_attrs('some feature') }
 
     it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutBadge component' do
-      is_expected.to eq({ id: 'some-feature-callout' })
+      is_expected.to eq({ id: 'some-feature-callout', feature_name: 'some feature' })
     end
   end
 
   describe '#paid_feature_popover_data_attrs' do
     let(:subscription) { instance_double(GitlabSubscription, plan_title: 'Ultimate') }
-    let(:group) { instance_double(Group, trial_days_remaining: 12, gitlab_subscription: subscription) }
+    let(:group) { instance_double(Group, id: 123, to_param: 'test-group', trial_days_remaining: 12, gitlab_subscription: subscription) }
 
     subject { helper.paid_feature_popover_data_attrs(group: group, feature_name: 'first feature') }
 
     it 'returns the set of data attributes needed to bootstrap the PaidFeatureCalloutPopover component' do
       expected_attrs = {
         container_id: 'first-feature-callout',
-        feature_name: 'first feature',
         days_remaining: 12,
+        feature_name: 'first feature',
+        href_compare_plans: '/groups/test-group/-/billings',
+        href_upgrade_to_paid: '/-/subscriptions/new?namespace_id=123&plan_id=2c92a00d76f0d5060176f2fb0a5029ff',
         plan_name_for_trial: 'Ultimate',
         plan_name_for_upgrade: 'Premium',
         target_id: 'first-feature-callout'

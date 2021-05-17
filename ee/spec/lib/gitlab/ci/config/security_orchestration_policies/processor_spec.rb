@@ -3,11 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
-  subject { described_class.new(config, project, ref).perform }
+  subject { described_class.new(config, project, ref, source).perform }
 
   let_it_be(:config) { { image: 'ruby:3.0.1' } }
 
-  let_it_be(:ref) { 'master' }
+  let(:ref) { 'master' }
+  let(:source) { 'pipeline' }
+
   let_it_be_with_refind(:project) { create(:project, :repository) }
 
   let_it_be(:policies_repository) { create(:project, :repository) }
@@ -33,6 +35,37 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
   before do
     allow_next_instance_of(Repository) do |repository|
       allow(repository).to receive(:blob_data_at).and_return(policy_yml)
+    end
+  end
+
+  shared_examples 'with pipeline source applicable for CI' do
+    let_it_be(:source) { 'ondemand_dast_scan' }
+
+    it 'does not modify the config' do
+      expect(subject).to eq(config)
+    end
+  end
+
+  shared_examples 'when policy is invalid' do
+    let_it_be(:policy_yml) do
+      <<-EOS
+      scan_execution_policy:
+        -  name: Run DAST in every pipeline
+           description: This policy enforces to run DAST for every pipeline within the project
+           enabled: true
+           rules:
+           - type: pipeline
+             branches: "production"
+           actions:
+           - scan: dast
+             site_profile: Site Profile
+             scanner_profile: Scanner Profile
+      EOS
+    end
+
+    it 'does not modify the config', :aggregate_failures do
+      expect(config).not_to receive(:deep_merge)
+      expect(subject).to eq(config)
     end
   end
 
@@ -80,6 +113,9 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
           end
         end
 
+        it_behaves_like 'with pipeline source applicable for CI'
+        it_behaves_like 'when policy is invalid'
+
         context 'when DAST profiles are found' do
           let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, name: 'Scanner Profile') }
           let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project, name: 'Site Profile') }
@@ -119,6 +155,9 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
           it 'extends config with additional jobs' do
             expect(subject).to include(expected_configuration)
           end
+
+          it_behaves_like 'with pipeline source applicable for CI'
+          it_behaves_like 'when policy is invalid'
         end
       end
     end

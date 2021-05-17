@@ -504,6 +504,9 @@ class ApplicationSetting < ApplicationRecord
   validates :whats_new_variant,
             inclusion: { in: ApplicationSetting.whats_new_variants.keys }
 
+  validates :floc_enabled,
+            inclusion: { in: [true, false], message: _('must be a boolean value') }
+
   attr_encrypted :asset_proxy_secret_key,
                  mode: :per_attribute_iv,
                  key: Settings.attr_encrypted_db_key_base_truncated,
@@ -526,6 +529,7 @@ class ApplicationSetting < ApplicationRecord
   attr_encrypted :akismet_api_key, encryption_options_base_32_aes_256_gcm
   attr_encrypted :spam_check_api_key, encryption_options_base_32_aes_256_gcm.merge(encode: false)
   attr_encrypted :elasticsearch_aws_secret_access_key, encryption_options_base_32_aes_256_gcm
+  attr_encrypted :elasticsearch_password, encryption_options_base_32_aes_256_gcm.merge(encode: false)
   attr_encrypted :recaptcha_private_key, encryption_options_base_32_aes_256_gcm
   attr_encrypted :recaptcha_site_key, encryption_options_base_32_aes_256_gcm
   attr_encrypted :slack_app_secret, encryption_options_base_32_aes_256_gcm
@@ -664,4 +668,4 @@ class ApplicationSetting < ApplicationRecord
   end
 end
 
-ApplicationSetting.prepend_if_ee('EE::ApplicationSetting')
+ApplicationSetting.prepend_mod_with('ApplicationSetting')

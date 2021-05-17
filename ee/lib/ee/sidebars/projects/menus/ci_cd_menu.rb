@@ -19,8 +19,10 @@ module EE
           private
 
           def test_cases_menu_item
-            return unless context.project.licensed_feature_available?(:quality_management)
-            return unless can?(context.current_user, :read_issue, context.project)
+            if !context.project.licensed_feature_available?(:quality_management) ||
+              !can?(context.current_user, :read_issue, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :test_cases)
+            end
 
             ::Sidebars::MenuItem.new(
               title: _('Test Cases'),

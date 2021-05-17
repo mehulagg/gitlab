@@ -33,7 +33,11 @@ class Groups::SsoController < Groups::ApplicationController
 
     GroupSaml::Identity::DestroyService.new(linked_identity).execute
 
-    redirect_to profile_account_path
+    if current_user.authorized_by_provisioning_group?(unauthenticated_group)
+      sign_out current_user
+    else
+      redirect_to profile_account_path
+    end
   end
 
   def sign_up_form

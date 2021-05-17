@@ -42,6 +42,10 @@ describe('GeoNodePrimaryOtherInfo', () => {
         expect(findGlCard().exists()).toBe(true);
       });
 
+      it('renders the replication slot WAL section', () => {
+        expect(findReplicationSlotWAL().exists()).toBe(true);
+      });
+
       it('renders the replicationSlots progress bar', () => {
         expect(findGeoNodeProgressBar().exists()).toBe(true);
       });
@@ -53,7 +57,6 @@ describe('GeoNodePrimaryOtherInfo', () => {
       });
 
       it('renders the replicationSlotWAL section correctly', () => {
-        expect(findReplicationSlotWAL().exists()).toBe(true);
         expect(findReplicationSlotWAL().text()).toBe(
           numberToHumanSize(MOCK_NODES[0].replicationSlotsMaxRetainedWalBytes),
         );
@@ -65,8 +68,8 @@ describe('GeoNodePrimaryOtherInfo', () => {
         createComponent({ node: MOCK_NODES[1] });
       });
 
-      it('does not render the replicationSlotWAL section', () => {
-        expect(findReplicationSlotWAL().exists()).toBe(false);
+      it('renders Unknown', () => {
+        expect(findReplicationSlotWAL().text()).toBe('Unknown');
       });
     });
   });

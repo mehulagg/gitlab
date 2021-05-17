@@ -18,7 +18,6 @@ import { toYmd } from '../shared/utils';
 import { OVERVIEW_STAGE_ID } from './constants';
 
 const EVENT_TYPE_LABEL = 'label';
-const ERROR_NAME_RESERVED = 'is reserved';
 
 export const removeFlash = (type = 'alert') => {
   const flashEl = document.querySelector(`.flash-${type}`);
@@ -358,9 +357,6 @@ export const throwIfUserForbidden = (error) => {
   }
 };
 
-export const isStageNameExistsError = ({ status, errors }) =>
-  status === httpStatus.UNPROCESSABLE_ENTITY && errors?.name?.includes(ERROR_NAME_RESERVED);
-
 export const timeSummaryForPathNavigation = ({ seconds, hours, days, minutes, weeks, months }) => {
   if (months) {
     return sprintf(s__('ValueStreamAnalytics|%{value}M'), {
@@ -432,14 +428,21 @@ export const formatMedianValuesWithOverview = (medians = []) => {
  *
  * @param {Array} stages - The stages available to the group / project
  * @param {Object} medians - The median values for the stages available to the group / project
+ * @param {Object} stageCounts - The total item count for the stages available
  * @param {Object} selectedStage - The currently selected stage
  * @returns {Array} An array of stages formatted with data required for the path navigation
  */
-export const transformStagesForPathNavigation = ({ stages, medians, selectedStage }) => {
+export const transformStagesForPathNavigation = ({
+  stages,
+  medians,
+  stageCounts,
+  selectedStage,
+}) => {
   const formattedStages = stages.map((stage) => {
     return {
       metric: medians[stage?.id],
       selected: stage.id === selectedStage.id,
+      stageCount: stageCounts[stage?.id],
       icon: null,
       ...stage,
     };

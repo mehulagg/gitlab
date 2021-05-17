@@ -768,7 +768,14 @@ RSpec.describe Namespace do
       let(:user) { create(:user) }
 
       it 'returns 1' do
-        expect(user.namespace.billed_user_ids).to eq([user.id])
+        expect(user.namespace.billed_user_ids.keys).to eq([
+          :user_ids,
+          :group_member_user_ids,
+          :project_member_user_ids,
+          :shared_group_user_ids,
+          :shared_project_user_ids
+        ])
+        expect(user.namespace.billed_user_ids[:user_ids]).to eq([user.id])
       end
     end
 
@@ -783,13 +790,25 @@ RSpec.describe Namespace do
         group.add_guest(guest)
       end
 
+      subject(:billed_user_ids) { group.billed_user_ids }
+
+      it 'returns a breakdown of billable user ids' do
+        expect(billed_user_ids.keys).to eq([
+          :user_ids,
+          :group_member_user_ids,
+          :project_member_user_ids,
+          :shared_group_user_ids,
+          :shared_project_user_ids
+        ])
+      end
+
       context 'with a ultimate plan' do
         before do
           create(:gitlab_subscription, namespace: group, hosted_plan: ultimate_plan)
         end
 
         it 'does not include guest users and only active users' do
-          expect(group.billed_user_ids).to match_array([developer.id])
+          expect(billed_user_ids[:user_ids]).to match_array([developer.id])
         end
 
         context 'when group has a project and users are invited to it' do
@@ -803,14 +822,19 @@ RSpec.describe Namespace do
             project.add_developer(create(:user, :blocked))
           end
 
-          it 'includes invited active users except guests to the group' do
-            expect(group.billed_user_ids).to match_array([project_developer.id, developer.id])
+          it 'includes invited active users except guests to the group', :aggregate_failures do
+            expect(billed_user_ids[:user_ids]).to match_array([project_developer.id, developer.id])
+            expect(billed_user_ids[:project_member_user_ids]).to match_array([project_developer.id, developer.id])
+            expect(billed_user_ids[:group_member_user_ids]).to match_array([developer.id])
+            expect(billed_user_ids[:shared_group_user_ids]).to match_array([])
+            expect(billed_user_ids[:shared_project_user_ids]).to match_array([])
           end
 
           context 'with project bot users' do
             include_context 'project bot users'
 
-            it { expect(group.billed_user_ids).not_to include(project_bot.id) }
+            it { expect(billed_user_ids[:user_ids]).not_to include(project_bot.id) }
+            it { expect(billed_user_ids[:project_member_user_ids]).not_to include(project_bot.id) }
           end
 
           context 'when group is invited to the project' do
@@ -829,8 +853,12 @@ RSpec.describe Namespace do
                 create(:project_group_link, project: project, group: invited_group)
               end
 
-              it 'includes the only active users except guests of the invited groups' do
-                expect(group.billed_user_ids).to match_array([invited_group_developer.id, project_developer.id, developer.id])
+              it 'includes only active users except guests of the invited groups', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([invited_group_developer.id, project_developer.id, developer.id])
+                expect(billed_user_ids[:shared_group_user_ids]).to match_array([])
+                expect(billed_user_ids[:shared_project_user_ids]).to match_array([invited_group_developer.id, developer.id])
+                expect(billed_user_ids[:group_member_user_ids]).to match_array([developer.id])
+                expect(billed_user_ids[:project_member_user_ids]).to match_array([developer.id, project_developer.id])
               end
             end
 
@@ -839,8 +867,9 @@ RSpec.describe Namespace do
                 create(:project_group_link, :guest, project: project, group: invited_group)
               end
 
-              it 'does not include any members from the invited group' do
-                expect(group.billed_user_ids).to match_array([project_developer.id, developer.id])
+              it 'does not include any members from the invited group', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([project_developer.id, developer.id])
+                expect(billed_user_ids[:shared_project_user_ids]).to be_empty
               end
             end
           end
@@ -860,8 +889,9 @@ RSpec.describe Namespace do
           end
 
           it 'includes active users from the shared group to the billed members', :aggregate_failures do
-            expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id])
-            expect(shared_group.billed_user_ids).not_to include([developer.id])
+            expect(billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, developer.id])
+            expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id])
+            expect(shared_group.billed_user_ids[:user_ids]).not_to include([developer.id])
           end
 
           context 'when subgroup invited another group to collaborate' do
@@ -882,9 +912,10 @@ RSpec.describe Namespace do
               end
 
               it 'includes all the active and non guest users from the shared group', :aggregate_failures do
-                expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id, another_shared_group_developer.id])
-                expect(shared_group.billed_user_ids).not_to include([developer.id])
-                expect(another_shared_group.billed_user_ids).not_to include([developer.id, shared_group_developer.id])
+                expect(billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, developer.id, another_shared_group_developer.id])
+                expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id, another_shared_group_developer.id])
+                expect(shared_group.billed_user_ids[:user_ids]).not_to include([developer.id])
+                expect(another_shared_group.billed_user_ids[:user_ids]).not_to include([developer.id, shared_group_developer.id])
               end
             end
 
@@ -895,8 +926,9 @@ RSpec.describe Namespace do
                                                     shared_group: subgroup })
               end
 
-              it 'does not includes any user from the shared group from the subgroup' do
-                expect(group.billed_user_ids).to match_array([shared_group_developer.id, developer.id])
+              it 'does not includes any user from the shared group from the subgroup', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, developer.id])
+                expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id])
               end
             end
           end
@@ -905,9 +937,12 @@ RSpec.describe Namespace do
 
       context 'with other plans' do
         %i[bronze_plan premium_plan].each do |plan|
-          it 'includes active guest users' do
+          subject(:billed_user_ids) { group.billed_user_ids }
+
+          it 'includes active guest users', :aggregate_failures do
             create(:gitlab_subscription, namespace: group, hosted_plan: send(plan))
-            expect(group.billed_user_ids).to match_array([guest.id, developer.id])
+            expect(billed_user_ids[:user_ids]).to match_array([guest.id, developer.id])
+            expect(billed_user_ids[:group_member_user_ids]).to match_array([guest.id, developer.id])
           end
 
           context 'when group has a project and users invited to it' do
@@ -923,14 +958,16 @@ RSpec.describe Namespace do
               project.add_developer(developer)
             end
 
-            it 'includes invited active users to the group' do
-              expect(group.billed_user_ids).to match_array([guest.id, developer.id, project_guest.id, project_developer.id])
+            it 'includes invited active users to the group', :aggregate_failures do
+              expect(billed_user_ids[:user_ids]).to match_array([guest.id, developer.id, project_guest.id, project_developer.id])
+              expect(billed_user_ids[:project_member_user_ids]).to match_array([developer.id, project_guest.id, project_developer.id])
             end
 
             context 'with project bot users' do
               include_context 'project bot users'
 
-              it { expect(group.billed_user_ids).not_to include(project_bot.id) }
+              it { expect(billed_user_ids[:user_ids]).not_to include(project_bot.id) }
+              it { expect(billed_user_ids[:project_member_user_ids]).not_to include(project_bot.id) }
             end
 
             context 'when group is invited to the project' do
@@ -946,13 +983,21 @@ RSpec.describe Namespace do
                 create(:project_group_link, project: project, group: invited_group)
               end
 
-              it 'includes the unique active users and guests of the invited groups' do
-                expect(group.billed_user_ids).to match_array([guest.id,
-                                                              developer.id,
-                                                              project_guest.id,
-                                                              project_developer.id,
-                                                              invited_group_developer.id,
-                                                              invited_group_guest.id])
+              it 'includes the unique active users and guests of the invited groups', :aggregate_failures do
+                expect(billed_user_ids[:user_ids]).to match_array([
+                  guest.id,
+                  developer.id,
+                  project_guest.id,
+                  project_developer.id,
+                  invited_group_developer.id,
+                  invited_group_guest.id
+                ])
+
+                expect(billed_user_ids[:shared_project_user_ids]).to match_array([
+                  developer.id,
+                  invited_group_developer.id,
+                  invited_group_guest.id
+                ])
               end
             end
           end
@@ -973,8 +1018,9 @@ RSpec.describe Namespace do
             end
 
             it 'includes active users from the shared group including guests', :aggregate_failures do
-              expect(group.billed_user_ids).to match_array([developer.id, guest.id, shared_group_developer.id, shared_group_guest.id])
-              expect(shared_group.billed_user_ids).to match_array([shared_group_developer.id, shared_group_guest.id])
+              expect(billed_user_ids[:user_ids]).to match_array([developer.id, guest.id, shared_group_developer.id, shared_group_guest.id])
+              expect(billed_user_ids[:shared_group_user_ids]).to match_array([shared_group_developer.id, shared_group_guest.id])
+              expect(shared_group.billed_user_ids[:user_ids]).to match_array([shared_group_developer.id, shared_group_guest.id])
             end
           end
         end

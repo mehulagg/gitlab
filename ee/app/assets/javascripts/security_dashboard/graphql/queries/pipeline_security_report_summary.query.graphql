@@ -24,6 +24,12 @@ query($fullPath: ID!, $pipelineIid: ID!) {
         dependencyScanning {
           vulnerabilitiesCount
         }
+        apiFuzzing {
+          vulnerabilitiesCount
+        }
+        coverageFuzzing {
+          vulnerabilitiesCount
+        }
       }
     }
   }

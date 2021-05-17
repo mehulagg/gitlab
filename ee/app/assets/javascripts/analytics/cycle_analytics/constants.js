@@ -43,16 +43,6 @@ export const TASKS_BY_TYPE_FILTERS = {
   LABEL: 'LABEL',
 };
 
-export const STAGE_ACTIONS = {
-  SELECT: 'selectStage',
-  EDIT: 'editStage',
-  REMOVE: 'removeStage',
-  HIDE: 'hideStage',
-  CREATE: 'createStage',
-  UPDATE: 'updateStage',
-  ADD_STAGE: 'showAddStageForm',
-};
-
 export const DEFAULT_VALUE_STREAM_ID = 'default';
 
 export const OVERVIEW_METRICS = {
@@ -75,4 +65,7 @@ export const NOT_ENOUGH_DATA_ERROR = s__(
 );
 
 export const PAGINATION_TYPE = 'keyset';
-export const PAGINATION_SORT_FIELD = 'created_at';
+export const PAGINATION_SORT_FIELD_END_EVENT = 'end_event';
+export const PAGINATION_SORT_FIELD_DURATION = 'duration';
+export const PAGINATION_SORT_DIRECTION_DESC = 'desc';
+export const PAGINATION_SORT_DIRECTION_ASC = 'asc';

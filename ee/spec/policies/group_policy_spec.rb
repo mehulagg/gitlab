@@ -1522,7 +1522,6 @@ RSpec.describe GroupPolicy do
 
       where(:role, :licensed, :feature_flag, :admin_mode, :allowed) do
         :owner      | true  | true  | nil   | true
-        :owner      | true  | false | nil   | false
         :owner      | false | true  | nil   | false
         :owner      | false | false | nil   | false
         :admin      | true  | true  | true  | true
@@ -1538,7 +1537,7 @@ RSpec.describe GroupPolicy do
 
         before do
           stub_licensed_features(licensed_feature => licensed)
-          stub_feature_flags(feature_flag_name => feature_flag)
+          stub_feature_flags(feature_flag_name => feature_flag) if feature_flag_name
           enable_admin_mode!(current_user) if admin_mode
         end
 
@@ -1549,7 +1548,7 @@ RSpec.describe GroupPolicy do
     context ':admin_compliance_framework' do
       let(:policy) { :admin_compliance_framework }
       let(:licensed_feature) { :custom_compliance_frameworks }
-      let(:feature_flag_name) { :ff_custom_compliance_frameworks }
+      let(:feature_flag_name) { nil }
 
       include_examples 'compliance framework permissions'
     end

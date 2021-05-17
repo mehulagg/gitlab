@@ -10,12 +10,13 @@ export default {
   props: {
     status: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   computed: {
     statusUi() {
-      return HEALTH_STATUS_UI[this.status.toLowerCase()];
+      return this.status ? HEALTH_STATUS_UI[this.status.toLowerCase()] : HEALTH_STATUS_UI.unknown;
     },
   },
 };
@@ -24,6 +25,6 @@ export default {
 <template>
   <gl-badge :variant="statusUi.variant">
     <gl-icon :name="statusUi.icon" />
-    <span class="gl-ml-2 gl-font-weight-bold">{{ status }}</span>
+    <span class="gl-ml-2 gl-font-weight-bold">{{ statusUi.text }}</span>
   </gl-badge>
 </template>

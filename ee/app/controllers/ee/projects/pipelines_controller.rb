@@ -12,6 +12,10 @@ module EE
           push_frontend_feature_flag(:usage_data_i_testing_full_code_quality_report_total, project, default_enabled: true)
           push_frontend_feature_flag(:pipeline_security_dashboard_graphql, project, type: :development, default_enabled: :yaml)
         end
+
+        feature_category :license_compliance, [:licenses]
+        feature_category :vulnerability_management, [:security]
+        feature_category :code_quality, [:codequality_report]
       end
 
       def security

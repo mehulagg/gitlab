@@ -18,7 +18,7 @@ module Gitlab
           fpayload = fpayload['flow'].except('time', 'Summary')
           fpayload['l4']['TCP'].delete('flags') if fpayload.dig('l4', 'TCP', 'flags')
 
-          fpayload.to_s
+          fpayload.to_json
         end
       end
     end

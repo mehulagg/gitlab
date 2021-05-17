@@ -1,8 +1,8 @@
 <script>
-import { isListType } from './utils';
+import { isOfTypeList } from './utils';
 
 export default {
-  isListType,
+  isOfTypeList,
   components: {
     ReportItem: () => import('../report_item.vue'),
   },
@@ -15,7 +15,7 @@ export default {
   },
   computed: {
     hasNestedListItems() {
-      return this.items.some(isListType);
+      return this.items.some(isOfTypeList);
     },
   },
 };
@@ -25,7 +25,7 @@ export default {
     <li
       v-for="item in items"
       :key="item.name"
-      :class="{ 'gl-list-style-none!': $options.isListType(item) }"
+      :class="{ 'gl-list-style-none!': $options.isOfTypeList(item) }"
     >
       <report-item :item="item" data-testid="reportItem" />
     </li>

@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline_security_dashboard.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
 import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
+import VulnerabilityReport from 'ee/security_dashboard/components/vulnerability_report.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -14,6 +15,7 @@ const pipelineId = 1234;
 const pipelineIid = 4321;
 const projectId = 5678;
 const sourceBranch = 'feature-branch-1';
+const jobsPath = 'my-jobs-path';
 const vulnerabilitiesEndpoint = '/vulnerabilities';
 const loadingErrorIllustrations = {
   401: '/401.svg',
@@ -25,8 +27,9 @@ describe('Pipeline Security Dashboard component', () => {
   let wrapper;
 
   const findSecurityDashboard = () => wrapper.findComponent(SecurityDashboard);
+  const findVulnerabilityReport = () => wrapper.findComponent(VulnerabilityReport);
 
-  const factory = (options) => {
+  const factory = ({ data, stubs, provide } = {}) => {
     store = new Vuex.Store({
       modules: {
         vulnerabilities: {
@@ -49,21 +52,28 @@ describe('Pipeline Security Dashboard component', () => {
     wrapper = shallowMount(PipelineSecurityDashboard, {
       localVue,
       store,
-      propsData: {
-        dashboardDocumentation,
+      provide: {
+        projectFullPath: 'my-path',
         emptyStateSvgPath,
-        pipelineId,
-        pipelineIid,
+        dashboardDocumentation,
+        pipeline: {
+          id: pipelineId,
+          iid: pipelineIid,
+          jobsPath,
+          sourceBranch,
+        },
+        ...provide,
+      },
+      propsData: {
         projectId,
-        sourceBranch,
         vulnerabilitiesEndpoint,
         loadingErrorIllustrations,
       },
-      ...options,
+      stubs,
       data() {
         return {
           securityReportSummary: {},
-          ...options?.data,
+          ...data,
         };
       },
     });
@@ -81,7 +91,7 @@ describe('Pipeline Security Dashboard component', () => {
     it('dispatches the expected actions', () => {
       expect(store.dispatch.mock.calls).toEqual([
         ['vulnerabilities/setSourceBranch', sourceBranch],
-        ['pipelineJobs/setPipelineJobsPath', ''],
+        ['pipelineJobs/setPipelineJobsPath', jobsPath],
         ['pipelineJobs/setProjectId', 5678],
       ]);
     });
@@ -95,27 +105,23 @@ describe('Pipeline Security Dashboard component', () => {
   });
 
   describe(':pipeline_security_dashboard_graphql feature flag', () => {
-    it('does not show the security layout when the feature flag is on', () => {
+    const factoryWithFeatureFlag = (value) =>
       factory({
         provide: {
           glFeatures: {
-            pipelineSecurityDashboardGraphql: true,
+            pipelineSecurityDashboardGraphql: value,
           },
         },
       });
 
+    it('does not show the security layout when the feature flag is on but the vulnerability report', () => {
+      factoryWithFeatureFlag(true);
       expect(findSecurityDashboard().exists()).toBe(false);
+      expect(findVulnerabilityReport().exists()).toBe(true);
     });
 
     it('shows the security layout when the feature flag is off', () => {
-      factory({
-        provide: {
-          glFeatures: {
-            pipelineSecurityDashboardGraphql: false,
-          },
-        },
-      });
-
+      factoryWithFeatureFlag(false);
       expect(findSecurityDashboard().exists()).toBe(true);
     });
   });

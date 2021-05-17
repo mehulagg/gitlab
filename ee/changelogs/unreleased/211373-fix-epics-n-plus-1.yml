@@ -1,0 +1,5 @@
+---
+title: Fix N+1 in issues API when loading parent epics
+merge_request: 61852
+author:
+type: performance

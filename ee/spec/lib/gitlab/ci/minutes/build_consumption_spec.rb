@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Minutes::BuildConsumption do
   using RSpec::Parameterized::TableSyntax
 
-  let(:consumption) { described_class.new(build) }
+  let(:consumption) { described_class.new(build, build.duration) }
   let(:build) { build_stubbed(:ci_build, runner: runner, project: project) }
 
   let_it_be(:project) { create(:project) }

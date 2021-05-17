@@ -57,6 +57,22 @@ RSpec.describe 'SAML provider settings' do
       expect(response_headers['Content-Type']).to have_content("application/xml")
     end
 
+    context '"Enforce SSO-only authentication for web activity for this group" checkbox' do
+      it 'is checked by default' do
+        visit group_saml_providers_path(group)
+
+        expect(find_field('Enforce SSO-only authentication for web activity for this group')).to be_checked
+      end
+
+      it 'displays warning if unchecked', :js do
+        visit group_saml_providers_path(group)
+
+        uncheck 'Enforce SSO-only authentication for web activity for this group'
+
+        expect(page).to have_content 'Warning - Enabling SSO enforcement can reduce security risks.'
+      end
+    end
+
     it 'allows creation of new provider' do
       visit group_saml_providers_path(group)
 
@@ -75,7 +91,7 @@ RSpec.describe 'SAML provider settings' do
     end
 
     context 'with existing SAML provider' do
-      let!(:saml_provider) { create(:saml_provider, group: group, prohibited_outer_forks: false) }
+      let!(:saml_provider) { create(:saml_provider, group: group, prohibited_outer_forks: false, enforced_sso: true) }
 
       it 'allows provider to be disabled', :js do
         visit group_saml_providers_path(group)
@@ -97,9 +113,10 @@ RSpec.describe 'SAML provider settings' do
       it 'updates the enforced sso setting', :js do
         visit group_saml_providers_path(group)
 
-        check 'Enforce SSO-only authentication for web activity for this group'
+        uncheck 'Enforce SSO-only authentication for web activity for this group'
 
-        expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
+        expect { submit }.to change { saml_provider.reload.enforced_sso }.to(false)
+        expect(page).to have_content 'Warning - Enabling SSO enforcement can reduce security risks.'
       end
 
       context 'enforced_group_managed_accounts enabled', :js do
@@ -111,7 +128,6 @@ RSpec.describe 'SAML provider settings' do
         it 'updates the enforced_group_managed_accounts flag' do
           visit group_saml_providers_path(group)
 
-          check 'Enforce SSO-only authentication for web activity for this group'
           check 'Enforce users to have dedicated group-managed accounts for this group'
 
           expect { submit }.to change { saml_provider.reload.enforced_group_managed_accounts }.to(true)
@@ -120,7 +136,6 @@ RSpec.describe 'SAML provider settings' do
         it 'updates the prohibited_outer_forks flag' do
           visit group_saml_providers_path(group)
 
-          check 'Enforce SSO-only authentication for web activity for this group'
           check 'Enforce users to have dedicated group-managed accounts for this group'
           check 'Prohibit outer forks for this group'
 

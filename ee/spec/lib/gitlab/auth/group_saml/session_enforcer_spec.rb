@@ -150,6 +150,12 @@ RSpec.describe Gitlab::Auth::GroupSaml::SessionEnforcer do
 
           it { is_expected.to be_falsey }
         end
+
+        context 'with project bot' do
+          let(:user) { create(:user, :project_bot) }
+
+          it { is_expected.to be_falsey }
+        end
       end
     end
 

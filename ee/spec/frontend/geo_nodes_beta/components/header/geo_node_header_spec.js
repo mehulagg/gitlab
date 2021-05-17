@@ -43,10 +43,6 @@ describe('GeoNodeHeader', () => {
         expect(findGeoNodeHealthStatus().exists()).toBe(true);
       });
 
-      it('renders the Geo Node Last Updated', () => {
-        expect(findGeoNodeLastUpdated().exists()).toBe(true);
-      });
-
       it('renders the Geo Node Actions', () => {
         expect(findGeoNodeActions().exists()).toBe(true);
       });
@@ -104,6 +100,30 @@ describe('GeoNodeHeader', () => {
 
         it('does not render', () => {
           expect(findCurrentNodeBadge().exists()).toBe(false);
+        });
+      });
+    });
+
+    describe('Last updated', () => {
+      describe('when lastSuccessfulStatusCheckTimestamp exists', () => {
+        beforeEach(() => {
+          createComponent({
+            node: { ...MOCK_NODES[1], lastSuccessfulStatusCheckTimestamp: new Date().getTime() },
+          });
+        });
+
+        it('renders', () => {
+          expect(findGeoNodeLastUpdated().exists()).toBe(true);
+        });
+      });
+
+      describe('when lastSuccessfulStatusCheckTimestamp does not exist', () => {
+        beforeEach(() => {
+          createComponent();
+        });
+
+        it('renders', () => {
+          expect(findGeoNodeLastUpdated().exists()).toBe(false);
         });
       });
     });

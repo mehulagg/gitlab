@@ -190,7 +190,8 @@ module Gitlab
             user_preferences_usage,
             ingress_modsecurity_usage,
             container_expiration_policies_usage,
-            service_desk_counts
+            service_desk_counts,
+            email_campaign_counts
           ).tap do |data|
             data[:snippets] = add(data[:personal_snippets], data[:project_snippets])
           end
@@ -426,13 +427,15 @@ module Gitlab
 
       def services_usage
         # rubocop: disable UsageData/LargeTable:
-        Service.available_services_names.each_with_object({}) do |service_name, response|
-          response["projects_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where(type: "#{service_name}_service".camelize))
-          response["groups_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where(type: "#{service_name}_service".camelize))
-          response["templates_#{service_name}_active".to_sym] = count(Service.active.where(template: true, type: "#{service_name}_service".camelize))
-          response["instances_#{service_name}_active".to_sym] = count(Service.active.where(instance: true, type: "#{service_name}_service".camelize))
-          response["projects_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
-          response["groups_inheriting_#{service_name}_active".to_sym] = count(Service.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: "#{service_name}_service".camelize))
+        Integration.available_services_names.each_with_object({}) do |service_name, response|
+          service_type = Integration.service_name_to_type(service_name)
+
+          response["projects_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where(type: service_type))
+          response["groups_#{service_name}_active".to_sym] = count(Integration.active.where.not(group: nil).where(type: service_type))
+          response["templates_#{service_name}_active".to_sym] = count(Integration.active.where(template: true, type: service_type))
+          response["instances_#{service_name}_active".to_sym] = count(Integration.active.where(instance: true, type: service_type))
+          response["projects_inheriting_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: service_type))
+          response["groups_inheriting_#{service_name}_active".to_sym] = count(Integration.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: service_type))
         end.merge(jira_usage, jira_import_usage)
         # rubocop: enable UsageData/LargeTable:
       end
@@ -574,7 +577,11 @@ module Gitlab
           projects_with_disable_overriding_approvers_per_merge_request: count(::Project.where(time_period.merge(disable_overriding_approvers_per_merge_request: true))),
           projects_without_disable_overriding_approvers_per_merge_request: count(::Project.where(time_period.merge(disable_overriding_approvers_per_merge_request: [false, nil]))),
           remote_mirrors: distinct_count(::Project.with_remote_mirrors.where(time_period), :creator_id),
-          snippets: distinct_count(::Snippet.where(time_period), :author_id)
+          snippets: distinct_count(::Snippet.where(time_period), :author_id),
+          suggestions: distinct_count(::Note.with_suggestions.where(time_period),
+                                      :author_id,
+                                      start: minimum_id(::User),
+                                      finish: maximum_id(::User))
         }.tap do |h|
           if time_period.present?
             h[:merge_requests_users] = merge_requests_users(time_period)
@@ -601,7 +608,7 @@ module Gitlab
           unique_users_all_imports: unique_users_all_imports(time_period),
           bulk_imports: {
             gitlab: DEPRECATED_VALUE,
-            gitlab_v1: count(::BulkImport.where(time_period, source_type: :gitlab))
+            gitlab_v1: count(::BulkImport.where(**time_period, source_type: :gitlab))
           },
           project_imports: project_imports(time_period),
           issue_imports: issue_imports(time_period),
@@ -839,6 +846,28 @@ module Gitlab
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def email_campaign_counts
+        # rubocop:disable UsageData/LargeTable
+        sent_emails = count(Users::InProductMarketingEmail.group(:track, :series))
+        clicked_emails = count(Users::InProductMarketingEmail.where.not(cta_clicked_at: nil).group(:track, :series))
+
+        series_amount = Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.count
+
+        Users::InProductMarketingEmail.tracks.keys.each_with_object({}) do |track, result|
+          # rubocop: enable UsageData/LargeTable:
+          0.upto(series_amount - 1).map do |series|
+            # When there is an error with the query and it's not the Hash we expect, we return what we got from `count`.
+            sent_count = sent_emails.is_a?(Hash) ? sent_emails.fetch([track, series], 0) : sent_emails
+            clicked_count = clicked_emails.is_a?(Hash) ? clicked_emails.fetch([track, series], 0) : clicked_emails
+
+            result["in_product_marketing_email_#{track}_#{series}_sent"] = sent_count
+            result["in_product_marketing_email_#{track}_#{series}_cta_clicked"] = clicked_count
+          end
+        end
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       def unique_visit_service
         strong_memoize(:unique_visit_service) do
           ::Gitlab::Analytics::UniqueVisits.new
@@ -969,4 +998,4 @@ module Gitlab
   end
 end
 
-Gitlab::UsageData.prepend_if_ee('EE::Gitlab::UsageData')
+Gitlab::UsageData.prepend_mod_with('Gitlab::UsageData')

@@ -18,7 +18,10 @@ RSpec.shared_examples 'dashboard ultimate trial callout' do
       allow(Gitlab).to receive(:com?).and_return(true)
     end
 
-    it 'shows dismissable promotion callout if default dashboard', :js do
+    it 'shows dismissable promotion callout if default dashboard for an owner', :js do
+      group = create(:group)
+      group.add_owner(user)
+
       allow_any_instance_of(EE::DashboardHelper).to receive(:user_default_dashboard?).and_return(true)
 
       visit page_path
@@ -26,6 +29,14 @@ RSpec.shared_examples 'dashboard ultimate trial callout' do
       expect(page).to have_selector '.promotion-callout'
 
       find('.promotion-callout .js-close').click
+
+      expect(page).not_to have_selector '.promotion-callout'
+    end
+
+    it 'hides dismissable promotion callout if default dashboard for a non group owner' do
+      allow_any_instance_of(EE::DashboardHelper).to receive(:user_default_dashboard?).and_return(true)
+
+      visit page_path
 
       expect(page).not_to have_selector '.promotion-callout'
     end

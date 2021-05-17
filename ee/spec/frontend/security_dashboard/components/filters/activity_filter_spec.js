@@ -51,7 +51,7 @@ describe('Activity Filter component', () => {
   `(
     'deselects mutually exclusive options when $expectedOption.id is selected',
     async ({ selectedOptions, expectedOption }) => {
-      await wrapper.setData({ selectedOptions });
+      await selectedOptions.map(clickItem);
 
       expectSelectedItems(selectedOptions);
 

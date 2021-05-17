@@ -896,8 +896,9 @@ RSpec.describe EE::NotificationService, :mailer do
   end
 
   context 'IncidentManagement::Oncall' do
+    let_it_be(:user) { create(:user) }
+
     describe '#notify_oncall_users_of_alert' do
-      let_it_be(:user) { create(:user) }
       let_it_be(:alert) { create(:alert_management_alert) }
       let_it_be(:project) { alert.project }
 
@@ -919,6 +920,19 @@ RSpec.describe EE::NotificationService, :mailer do
         expect { subject.notify_oncall_users_of_alert([user], alert) }
           .to change { Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(**tracking_params) }
           .by 1
+      end
+    end
+
+    describe '#oncall_user_removed' do
+      let_it_be(:schedule) { create(:incident_management_oncall_schedule) }
+      let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
+      let_it_be(:participant) { create(:incident_management_oncall_participant, rotation: rotation) }
+
+      it 'sends an email to the owner and participants' do
+        expect(Notify).to receive(:user_removed_from_rotation_email).with(user, rotation, [schedule.project.owner]).once.and_call_original
+        expect(Notify).to receive(:user_removed_from_rotation_email).with(user, rotation, [participant.user]).once.and_call_original
+
+        subject.oncall_user_removed(rotation, user)
       end
     end
   end

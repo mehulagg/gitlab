@@ -107,15 +107,20 @@ export default {
   },
   methods: {
     cellClass(_, x, item) {
-      return item.id === this.currentSubscriptionId ? tdClassHighlight : tdClassBase;
+      return this.isCurrentSubscription(item) ? tdClassHighlight : tdClassBase;
     },
-    rowAttr() {
+    isCurrentSubscription({ id }) {
+      return id === this.currentSubscriptionId;
+    },
+    rowAttr(item) {
       return {
-        'data-testid': 'subscription-history-row',
+        'data-testid': this.isCurrentSubscription(item)
+          ? 'subscription-current'
+          : 'subscription-history-row',
       };
     },
     rowClass(item) {
-      return item.id === this.currentSubscriptionId ? 'gl-font-weight-bold gl-text-blue-500' : '';
+      return this.isCurrentSubscription(item) ? 'gl-font-weight-bold gl-text-blue-500' : '';
     },
   },
 };
@@ -134,6 +139,7 @@ export default {
       :tbody-tr-class="rowClass"
       responsive
       stacked="sm"
+      data-qa-selector="subscription_history"
     >
       <template #cell(type)="{ value }">
         <gl-badge size="md" variant="info">{{ value }}</gl-badge>

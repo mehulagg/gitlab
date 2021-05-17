@@ -37,7 +37,7 @@ module Projects
       service = project.gitlab_slack_application_service
 
       chat_name = ChatName.find_by(
-        service: service.id,
+        service_id: service.id,
         team_id: slack_data['team_id'],
         chat_id: slack_data['user_id']
       )

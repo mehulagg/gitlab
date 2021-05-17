@@ -174,7 +174,7 @@ module Projects
     end
 
     def raise_error(message)
-      raise DestroyError.new(message)
+      raise DestroyError, message
     end
 
     def flush_caches(project)
@@ -183,4 +183,4 @@ module Projects
   end
 end
 
-Projects::DestroyService.prepend_if_ee('EE::Projects::DestroyService')
+Projects::DestroyService.prepend_mod_with('Projects::DestroyService')

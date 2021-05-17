@@ -8,6 +8,8 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
   let_it_be(:sub_group) { create(:group, parent: group) }
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:user_from_sub_group) { create(:user) }
+  let_it_be(:shared_group) { create(:group) }
+  let_it_be(:shared_group_developer) { create(:user) }
 
   before do
     allow(Gitlab).to receive(:com?).and_return(true)
@@ -18,6 +20,9 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
 
     sub_group.add_maintainer(user_from_sub_group)
 
+    shared_group.add_developer(shared_group_developer)
+    create(:group_group_link, { shared_with_group: shared_group, shared_group: group })
+
     sign_in(user)
 
     visit group_seat_usage_path(group)
@@ -27,7 +32,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
   context 'seat usage table' do
     it 'displays correct number of users' do
       within '[data-testid="table"]' do
-        expect(all('tbody tr').count).to eq(3)
+        expect(all('tbody tr').count).to eq(4)
       end
     end
 
@@ -92,6 +97,10 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
           expect(page).to have_button('Remove user', disabled: true)
         end
       end
+
+      it 'does not display the error modal' do
+        expect(page).not_to have_content('Cannot remove user')
+      end
     end
 
     context 'removing the user' do
@@ -113,7 +122,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
         wait_for_all_requests
 
         within '[data-testid="table"]' do
-          expect(all('tbody tr').count).to eq(2)
+          expect(all('tbody tr').count).to eq(3)
         end
 
         expect(page.find('.flash-container')).to have_content('User was successfully removed')
@@ -122,7 +131,7 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
       context 'removing the user from a sub-group' do
         it 'updates the seat table of the parent group' do
           within '[data-testid="table"]' do
-            expect(all('tbody tr').count).to eq(3)
+            expect(all('tbody tr').count).to eq(4)
           end
 
           visit group_group_members_path(sub_group)
@@ -140,9 +149,26 @@ RSpec.describe 'Groups > Billing > Seat Usage', :js do
           wait_for_all_requests
 
           within '[data-testid="table"]' do
-            expect(all('tbody tr').count).to eq(2)
+            expect(all('tbody tr').count).to eq(3)
           end
         end
+      end
+    end
+
+    context 'when cannot remove the user' do
+      let(:shared_user_row) do
+        within '[data-testid="table"]' do
+          find('tr', text: shared_group_developer.name)
+        end
+      end
+
+      it 'displays an error modal' do
+        within shared_user_row do
+          find('[data-testid="user-actions"]').click
+          click_button 'Remove user'
+        end
+
+        expect(page).to have_content('Cannot remove user')
       end
     end
   end

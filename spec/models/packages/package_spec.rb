@@ -173,6 +173,15 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
       end
 
+      context 'helm package' do
+        subject { build(:helm_package) }
+
+        it { is_expected.to allow_value('prometheus').for(:name) }
+        it { is_expected.to allow_value('rook-ceph').for(:name) }
+        it { is_expected.not_to allow_value('a+b').for(:name) }
+        it { is_expected.not_to allow_value('Hé').for(:name) }
+      end
+
       context 'nuget package' do
         subject { build_stubbed(:nuget_package) }
 
@@ -198,6 +207,19 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value("@scope/../../package").for(:name) }
         it { is_expected.not_to allow_value("@scope%2e%2e%fpackage").for(:name) }
         it { is_expected.not_to allow_value("@scope/sub/package").for(:name) }
+      end
+
+      context 'terraform module package' do
+        subject { build_stubbed(:terraform_module_package) }
+
+        it { is_expected.to allow_value('my-module/my-system').for(:name) }
+        it { is_expected.to allow_value('my/module').for(:name) }
+        it { is_expected.not_to allow_value('my-module').for(:name) }
+        it { is_expected.not_to allow_value('My-Module').for(:name) }
+        it { is_expected.not_to allow_value('my_module').for(:name) }
+        it { is_expected.not_to allow_value('my.module').for(:name) }
+        it { is_expected.not_to allow_value('../../../my-module').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy-module').for(:name) }
       end
     end
 
@@ -376,7 +398,17 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value(nil).for(:version) }
       end
 
+      context 'helm package' do
+        subject { build_stubbed(:helm_package) }
+
+        it { is_expected.not_to allow_value(nil).for(:version) }
+        it { is_expected.not_to allow_value('').for(:version) }
+        it { is_expected.to allow_value('v1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3').for(:version) }
+      end
+
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
+      it_behaves_like 'validating version to be SemVer compliant for', :terraform_module_package
 
       context 'nuget package' do
         it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
@@ -474,6 +506,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '.with_package_type' do
+    let!(:package1) { create(:terraform_module_package) }
+    let!(:package2) { create(:npm_package) }
+    let(:package_type) { :terraform_module }
+
+    subject { described_class.with_package_type(package_type) }
+
+    it { is_expected.to eq([package1]) }
+  end
+
+  describe '.without_package_type' do
+    let!(:package1) { create(:npm_package) }
+    let!(:package2) { create(:terraform_module_package) }
+    let(:package_type) { :terraform_module }
+
+    subject { described_class.without_package_type(package_type) }
+
+    it { is_expected.to eq([package1]) }
+  end
+
   context 'version scopes' do
     let!(:package1) { create(:npm_package, version: '1.0.0') }
     let!(:package2) { create(:npm_package, version: '1.0.1') }
@@ -554,22 +606,6 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
-  describe '.processed' do
-    let!(:package1) { create(:nuget_package) }
-    let!(:package2) { create(:npm_package) }
-    let!(:package3) { create(:nuget_package) }
-
-    subject { described_class.processed }
-
-    it { is_expected.to match_array([package1, package2, package3]) }
-
-    context 'with temporary packages' do
-      let!(:package1) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
-
-      it { is_expected.to match_array([package2, package3]) }
-    end
-  end
-
   describe '.limit_recent' do
     let!(:package1) { create(:nuget_package) }
     let!(:package2) { create(:nuget_package) }
@@ -642,27 +678,37 @@ RSpec.describe Packages::Package, type: :model do
       it { is_expected.to match_array([pypi_package]) }
     end
 
-    describe '.displayable' do
+    context 'status scopes' do
       let_it_be(:hidden_package) { create(:maven_package, :hidden) }
       let_it_be(:processing_package) { create(:maven_package, :processing) }
       let_it_be(:error_package) { create(:maven_package, :error) }
 
-      subject { described_class.displayable }
+      describe '.displayable' do
+        subject { described_class.displayable }
 
-      it 'does not include non-displayable packages', :aggregate_failures do
-        is_expected.to include(error_package)
-        is_expected.not_to include(hidden_package)
-        is_expected.not_to include(processing_package)
+        it 'does not include non-displayable packages', :aggregate_failures do
+          is_expected.to include(error_package)
+          is_expected.not_to include(hidden_package)
+          is_expected.not_to include(processing_package)
+        end
       end
-    end
 
-    describe '.with_status' do
-      let_it_be(:hidden_package) { create(:maven_package, :hidden) }
+      describe '.installable' do
+        subject { described_class.installable }
 
-      subject { described_class.with_status(:hidden) }
+        it 'does not include non-displayable packages', :aggregate_failures do
+          is_expected.not_to include(error_package)
+          is_expected.not_to include(hidden_package)
+          is_expected.not_to include(processing_package)
+        end
+      end
 
-      it 'returns packages with specified status' do
-        is_expected.to match_array([hidden_package])
+      describe '.with_status' do
+        subject { described_class.with_status(:hidden) }
+
+        it 'returns packages with specified status' do
+          is_expected.to match_array([hidden_package])
+        end
       end
     end
   end

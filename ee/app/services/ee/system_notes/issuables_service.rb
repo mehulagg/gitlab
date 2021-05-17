@@ -2,6 +2,7 @@
 module EE
   module SystemNotes
     module IssuablesService
+      extend ::Gitlab::Utils::Override
       # Called when the health_status of an Issue is changed
       #
       # Example Note text:
@@ -32,6 +33,15 @@ module EE
         body = 'published this issue to the status page'
 
         create_note(NoteSummary.new(noteable, project, author, body, action: 'published'))
+      end
+
+      override :track_cross_reference_action
+      def track_cross_reference_action
+        super
+
+        counter = ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter
+
+        counter.track_epic_cross_referenced(author: author) if noteable.is_a?(Epic)
       end
     end
   end

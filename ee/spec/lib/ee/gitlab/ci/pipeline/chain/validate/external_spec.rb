@@ -40,9 +40,13 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
       stub_env('EXTERNAL_VALIDATION_SERVICE_URL', validation_service_url)
     end
 
-    it 'respects the defined schema' do
+    it 'respects the defined schema and returns the default plan' do
       expect(::Gitlab::HTTP).to receive(:post) do |_url, params|
         expect(params[:body]).to match_schema('/external_validation', dir: 'ee')
+
+        payload = Gitlab::Json(params[:body])
+        expect(payload.dig('namespace', 'plan')).to eq('default')
+        expect(payload.dig('namespace', 'trial')).to be false
       end
 
       step.perform!
@@ -52,6 +56,22 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
       stub_request(:post, validation_service_url)
 
       expect { step.perform! }.not_to exceed_query_limit(4)
+    end
+
+    context 'with a project in a subgroup' do
+      let(:group) { create(:group_with_plan, plan: :ultimate_plan, trial_ends_on: Date.tomorrow) }
+      let(:subgroup) { create(:group, parent: group) }
+      let(:project) { create(:project, namespace: subgroup, shared_runners_enabled: true) }
+
+      it 'returns an Ultimate plan on trial' do
+        expect(::Gitlab::HTTP).to receive(:post) do |_url, params|
+          payload = Gitlab::Json.parse(params[:body])
+          expect(payload.dig('namespace', 'plan')).to eq('ultimate')
+          expect(payload.dig('namespace', 'trial')).to be true
+        end
+
+        step.perform!
+      end
     end
   end
 end

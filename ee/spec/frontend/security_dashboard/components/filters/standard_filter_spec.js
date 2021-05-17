@@ -66,11 +66,11 @@ describe('Standard Filter component', () => {
   };
 
   afterEach(() => {
-    // Clear out the querystring if one exists. It persists between tests.
-    if (filterQuery()) {
+    wrapper.destroy();
+    // Clear out the querystring if one exists, it persists between tests.
+    if (router.currentRoute.query[filter.id]) {
       wrapper.vm.$router.push('/');
     }
-    wrapper.destroy();
   });
 
   describe('filter options', () => {
@@ -327,7 +327,7 @@ describe('Standard Filter component', () => {
         const ids = optionIdsAt([1, 2, 3]);
         const other = ['6', '7', '8'];
         const query = { [filter.id]: ids, other };
-        router.replace({ query });
+        router.push({ query });
         window.dispatchEvent(new Event('popstate'));
         await wrapper.vm.$nextTick();
 

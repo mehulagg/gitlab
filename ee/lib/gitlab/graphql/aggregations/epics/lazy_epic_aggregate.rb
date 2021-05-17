@@ -19,7 +19,7 @@ module Gitlab
 
             error = validate_facet(aggregate_facet)
             if error
-              raise ArgumentError.new("#{error}. Please specify either #{COUNT} or #{WEIGHT_SUM}")
+              raise ArgumentError, "#{error}. Please specify either #{COUNT} or #{WEIGHT_SUM}"
             end
 
             @facet = aggregate_facet.to_sym

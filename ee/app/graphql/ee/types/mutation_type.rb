@@ -25,6 +25,7 @@ module EE
         mount_mutation ::Mutations::GitlabSubscriptions::Activate
         mount_mutation ::Mutations::Iterations::Create
         mount_mutation ::Mutations::Iterations::Update
+        mount_mutation ::Mutations::Iterations::Delete
         mount_mutation ::Mutations::Iterations::Cadences::Create
         mount_mutation ::Mutations::Iterations::Cadences::Update
         mount_mutation ::Mutations::Iterations::Cadences::Destroy

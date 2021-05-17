@@ -45,8 +45,12 @@ export default {
       <gl-link
         class="gl-text-gray-900 gl-font-weight-bold gl-text-decoration-underline"
         :href="node.url"
-        >{{ node.url }} <gl-icon name="external-link" class="gl-ml-1"
-      /></gl-link>
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ node.url }}
+        <gl-icon name="external-link" class="gl-ml-1" />
+      </gl-link>
     </div>
     <div v-if="node.primary" class="gl-display-flex gl-flex-direction-column gl-lg-my-5">
       <span>{{ $options.i18n.internalUrl }}</span>

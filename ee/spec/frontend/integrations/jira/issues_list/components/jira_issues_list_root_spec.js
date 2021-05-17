@@ -2,13 +2,12 @@ import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 
 import JiraIssuesListRoot from 'ee/integrations/jira/issues_list/components/jira_issues_list_root.vue';
-import { stubComponent } from 'helpers/stub_component';
-
+import waitForPromises from 'helpers/wait_for_promises';
 import createFlash from '~/flash';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
-import { IssuableStates, IssuableListTabs, AvailableSortOptions } from '~/issuable_list/constants';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import httpStatus from '~/lib/utils/http_status';
 
 import { mockProvide, mockJiraIssues } from '../mock_data';
 
@@ -20,31 +19,31 @@ jest.mock('~/issuable_list/constants', () => ({
   AvailableSortOptions: jest.requireActual('~/issuable_list/constants').AvailableSortOptions,
 }));
 
-const createComponent = ({ provide = mockProvide, initialFilterParams = {} } = {}) =>
-  shallowMount(JiraIssuesListRoot, {
-    propsData: {
-      initialFilterParams,
-    },
-    provide,
-    stubs: {
-      IssuableList: stubComponent(IssuableList),
-    },
-  });
+const resolvedValue = {
+  headers: {
+    'x-page': 1,
+    'x-total': 3,
+  },
+  data: mockJiraIssues,
+};
 
 describe('JiraIssuesListRoot', () => {
-  const resolvedValue = {
-    headers: {
-      'x-page': 1,
-      'x-total': 3,
-    },
-    data: mockJiraIssues,
-  };
   let wrapper;
   let mock;
 
+  const findIssuableList = () => wrapper.find(IssuableList);
+
+  const createComponent = ({ provide = mockProvide, initialFilterParams = {} } = {}) => {
+    wrapper = shallowMount(JiraIssuesListRoot, {
+      propsData: {
+        initialFilterParams,
+      },
+      provide,
+    });
+  };
+
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    wrapper = createComponent();
   });
 
   afterEach(() => {
@@ -52,62 +51,22 @@ describe('JiraIssuesListRoot', () => {
     mock.restore();
   });
 
-  describe('computed', () => {
-    describe('showPaginationControls', () => {
-      it.each`
-        issuesListLoading | issuesListLoadFailed | issues            | totalIssues              | returnValue
-        ${true}           | ${false}             | ${[]}             | ${0}                     | ${false}
-        ${false}          | ${true}              | ${[]}             | ${0}                     | ${false}
-        ${false}          | ${false}             | ${mockJiraIssues} | ${mockJiraIssues.length} | ${true}
-      `(
-        'returns $returnValue when issuesListLoading is $issuesListLoading, issuesListLoadFailed is $issuesListLoadFailed, issues is $issues and totalIssues is $totalIssues',
-        ({ issuesListLoading, issuesListLoadFailed, issues, totalIssues, returnValue }) => {
-          wrapper.setData({
-            issuesListLoading,
-            issuesListLoadFailed,
-            issues,
-            totalIssues,
-          });
+  describe('on mount', () => {
+    describe('while loading', () => {
+      it('sets issuesListLoading to `true`', async () => {
+        jest.spyOn(axios, 'get').mockResolvedValue(new Promise(() => {}));
 
-          expect(wrapper.vm.showPaginationControls).toBe(returnValue);
-        },
-      );
-    });
+        createComponent();
 
-    describe('urlParams', () => {
-      it('returns object containing `state`, `page`, `sort` and `search` properties', () => {
-        wrapper.setData({
-          currentState: 'closed',
-          currentPage: 2,
-          sortedBy: 'created_asc',
-          filterParams: {
-            search: 'foo',
-          },
-        });
+        await wrapper.vm.$nextTick();
 
-        expect(wrapper.vm.urlParams).toMatchObject({
-          state: 'closed',
-          page: 2,
-          sort: 'created_asc',
-          search: 'foo',
-        });
-      });
-    });
-  });
-
-  describe('methods', () => {
-    describe('fetchIssues', () => {
-      it('sets issuesListLoading to true and issuesListLoadFailed to false', () => {
-        wrapper.vm.fetchIssues();
-
-        expect(wrapper.vm.issuesListLoading).toBe(true);
-        expect(wrapper.vm.issuesListLoadFailed).toBe(false);
+        const issuableList = findIssuableList();
+        expect(issuableList.props('issuablesLoading')).toBe(true);
       });
 
       it('calls `axios.get` with `issuesFetchPath` and query params', () => {
-        jest.spyOn(axios, 'get').mockResolvedValue(resolvedValue);
-
-        wrapper.vm.fetchIssues();
+        jest.spyOn(axios, 'get');
+        createComponent();
 
         expect(axios.get).toHaveBeenCalledWith(
           mockProvide.issuesFetchPath,
@@ -123,17 +82,30 @@ describe('JiraIssuesListRoot', () => {
           }),
         );
       });
+    });
 
-      it('sets `currentPage` and `totalIssues` from response headers and `issues` & `issuesCount` from response body when request is successful', async () => {
+    describe('when request succeeds', () => {
+      beforeEach(async () => {
         jest.spyOn(axios, 'get').mockResolvedValue(resolvedValue);
 
-        await wrapper.vm.fetchIssues();
+        createComponent();
+        await waitForPromises();
+      });
+
+      it('sets `currentPage` and `totalIssues` from response headers and `issues` & `issuesCount` from response body when request is successful', async () => {
+        const issuableList = findIssuableList();
+        const issuablesProp = issuableList.props('issuables');
+
+        expect(issuableList.props()).toMatchObject({
+          currentPage: resolvedValue.headers['x-page'],
+          previousPage: resolvedValue.headers['x-page'] - 1,
+          nextPage: resolvedValue.headers['x-page'] + 1,
+          totalItems: resolvedValue.headers['x-total'],
+        });
+        expect(issuablesProp).toHaveLength(mockJiraIssues.length);
 
         const firstIssue = convertObjectPropsToCamelCase(mockJiraIssues[0], { deep: true });
-
-        expect(wrapper.vm.currentPage).toBe(resolvedValue.headers['x-page']);
-        expect(wrapper.vm.totalIssues).toBe(resolvedValue.headers['x-total']);
-        expect(wrapper.vm.issues[0]).toEqual({
+        expect(issuablesProp[0]).toEqual({
           ...firstIssue,
           id: 31596,
           author: {
@@ -141,127 +113,181 @@ describe('JiraIssuesListRoot', () => {
             id: 0,
           },
         });
-        expect(wrapper.vm.issuesCount[IssuableStates.Opened]).toBe(3);
       });
 
-      it('sets `issuesListLoadFailed` to true and calls `createFlash` when request fails', async () => {
-        jest.spyOn(axios, 'get').mockRejectedValue({});
-
-        await wrapper.vm.fetchIssues();
-
-        expect(wrapper.vm.issuesListLoadFailed).toBe(true);
-        expect(createFlash).toHaveBeenCalledWith({
-          message: 'An error occurred while loading issues',
-          captureError: true,
-          error: expect.any(Object),
-        });
-      });
-
-      it('sets `issuesListLoading` to false when request completes', async () => {
-        jest.spyOn(axios, 'get').mockRejectedValue({});
-
-        await wrapper.vm.fetchIssues();
-
-        expect(wrapper.vm.issuesListLoading).toBe(false);
+      it('sets issuesListLoading to `false`', () => {
+        const issuableList = findIssuableList();
+        expect(issuableList.props('issuablesLoading')).toBe(false);
       });
     });
 
-    describe('fetchIssuesBy', () => {
-      it('sets provided prop value for given prop name and calls `fetchIssues`', () => {
-        jest.spyOn(wrapper.vm, 'fetchIssues');
+    describe('when request fails', () => {
+      it.each`
+        APIErrorMessage | expectedRenderedErrorMessage
+        ${'API error'}  | ${'API error'}
+        ${undefined}    | ${'An error occurred while loading issues'}
+      `(
+        'calls `createFlash` with "$expectedRenderedErrorMessage" when API responds with "$APIErrorMessage"',
+        async ({ APIErrorMessage, expectedRenderedErrorMessage }) => {
+          jest.spyOn(axios, 'get');
+          mock
+            .onGet(mockProvide.issuesFetchPath)
+            .replyOnce(httpStatus.INTERNAL_SERVER_ERROR, { errors: [APIErrorMessage] });
 
-        wrapper.vm.fetchIssuesBy('currentPage', 2);
+          createComponent();
 
-        expect(wrapper.vm.currentPage).toBe(2);
-        expect(wrapper.vm.fetchIssues).toHaveBeenCalled();
+          await waitForPromises();
+
+          expect(createFlash).toHaveBeenCalledWith({
+            message: expectedRenderedErrorMessage,
+            captureError: true,
+            error: expect.any(Object),
+          });
+        },
+      );
+    });
+  });
+
+  it('renders issuable-list component with correct props', async () => {
+    createComponent({ initialFilterParams: { search: 'foo' } });
+
+    await waitForPromises();
+
+    const issuableList = findIssuableList();
+    expect(issuableList.exists()).toBe(true);
+    expect(issuableList.props()).toMatchSnapshot();
+  });
+
+  describe('issuable-list events', () => {
+    beforeEach(async () => {
+      jest.spyOn(axios, 'get');
+      createComponent();
+      await waitForPromises();
+    });
+
+    it('"click-tab" event executes GET request correctly', async () => {
+      const issuableList = findIssuableList();
+
+      issuableList.vm.$emit('click-tab', 'closed');
+      await waitForPromises();
+
+      expect(axios.get).toHaveBeenCalledWith(mockProvide.issuesFetchPath, {
+        params: {
+          labels: undefined,
+          page: 1,
+          per_page: 2,
+          search: undefined,
+          sort: 'created_desc',
+          state: 'closed',
+          with_labels_details: true,
+        },
+      });
+      expect(issuableList.props('currentTab')).toBe('closed');
+    });
+
+    it('"page-change" event executes GET request correctly', async () => {
+      const mockPage = 2;
+      const issuableList = findIssuableList();
+
+      issuableList.vm.$emit('page-change', mockPage);
+      await waitForPromises();
+
+      expect(axios.get).toHaveBeenCalledWith(mockProvide.issuesFetchPath, {
+        params: {
+          labels: undefined,
+          page: mockPage,
+          per_page: 2,
+          search: undefined,
+          sort: 'created_desc',
+          state: 'opened',
+          with_labels_details: true,
+        },
+      });
+      expect(issuableList.props()).toMatchObject({
+        currentPage: mockPage,
+        previousPage: mockPage - 1,
+        nextPage: mockPage + 1,
+      });
+    });
+
+    it('"sort" event executes GET request correctly', async () => {
+      const mockSortBy = 'updated_asc';
+      const issuableList = findIssuableList();
+
+      issuableList.vm.$emit('sort', mockSortBy);
+      await waitForPromises();
+
+      expect(axios.get).toHaveBeenCalledWith(mockProvide.issuesFetchPath, {
+        params: {
+          labels: undefined,
+          page: 1,
+          per_page: 2,
+          search: undefined,
+          sort: 'created_desc',
+          state: 'opened',
+          with_labels_details: true,
+        },
+      });
+      expect(issuableList.props('initialSortBy')).toBe(mockSortBy);
+    });
+
+    it('filter event sets `filterParams` value and calls fetchIssues', async () => {
+      const mockFilterTerm = 'foo';
+      const issuableList = findIssuableList();
+
+      issuableList.vm.$emit('filter', [
+        {
+          type: 'filtered-search-term',
+          value: {
+            data: mockFilterTerm,
+          },
+        },
+      ]);
+      await waitForPromises();
+
+      expect(axios.get).toHaveBeenCalledWith(mockProvide.issuesFetchPath, {
+        params: {
+          labels: undefined,
+          page: 1,
+          per_page: 2,
+          search: mockFilterTerm,
+          sort: 'created_desc',
+          state: 'opened',
+          with_labels_details: true,
+        },
       });
     });
   });
 
-  describe('template', () => {
-    const getIssuableList = () => wrapper.find(IssuableList);
-
-    it('renders issuable-list component', async () => {
-      wrapper.setData({
-        filterParams: {
-          search: 'foo',
-        },
-      });
-
-      await wrapper.vm.$nextTick();
-
-      expect(getIssuableList().exists()).toBe(true);
-      expect(getIssuableList().props()).toMatchObject({
-        namespace: mockProvide.projectFullPath,
-        tabs: IssuableListTabs,
-        currentTab: 'opened',
-        searchInputPlaceholder: 'Search Jira issues',
-        searchTokens: [],
-        sortOptions: AvailableSortOptions,
-        initialFilterValue: [
-          {
-            type: 'filtered-search-term',
-            value: {
-              data: 'foo',
+  describe('pagination', () => {
+    it.each`
+      scenario                 | issuesListLoadFailed | issues            | shouldShowPaginationControls
+      ${'fails'}               | ${true}              | ${[]}             | ${false}
+      ${'returns no issues'}   | ${false}             | ${[]}             | ${false}
+      ${`returns some issues`} | ${false}             | ${mockJiraIssues} | ${true}
+    `(
+      'sets `showPaginationControls` prop to $shouldShowPaginationControls when request $scenario',
+      async ({ issuesListLoadFailed, issues, shouldShowPaginationControls }) => {
+        jest.spyOn(axios, 'get');
+        mock
+          .onGet(mockProvide.issuesFetchPath)
+          .replyOnce(
+            issuesListLoadFailed ? httpStatus.INTERNAL_SERVER_ERROR : httpStatus.OK,
+            issues,
+            {
+              'x-page': 1,
+              'x-total': 3,
             },
-          },
-        ],
-        initialSortBy: 'created_desc',
-        issuables: [],
-        issuablesLoading: true,
-        showPaginationControls: wrapper.vm.showPaginationControls,
-        defaultPageSize: 2, // mocked value in tests
-        totalItems: 0,
-        currentPage: 1,
-        previousPage: 0,
-        nextPage: 2,
-        urlParams: wrapper.vm.urlParams,
-        recentSearchesStorageKey: 'jira_issues',
-        enableLabelPermalinks: true,
-      });
-    });
+          );
 
-    describe('issuable-list events', () => {
-      beforeEach(() => {
-        jest.spyOn(wrapper.vm, 'fetchIssues');
-      });
+        createComponent();
 
-      it('click-tab event changes currentState value and calls fetchIssues via `fetchIssuesBy`', () => {
-        getIssuableList().vm.$emit('click-tab', 'closed');
+        await waitForPromises();
 
-        expect(wrapper.vm.currentState).toBe('closed');
-        expect(wrapper.vm.fetchIssues).toHaveBeenCalled();
-      });
-
-      it('page-change event changes currentPage value and calls fetchIssues via `fetchIssuesBy`', () => {
-        getIssuableList().vm.$emit('page-change', 2);
-
-        expect(wrapper.vm.currentPage).toBe(2);
-        expect(wrapper.vm.fetchIssues).toHaveBeenCalled();
-      });
-
-      it('sort event changes sortedBy value and calls fetchIssues via `fetchIssuesBy`', () => {
-        getIssuableList().vm.$emit('sort', 'updated_asc');
-
-        expect(wrapper.vm.sortedBy).toBe('updated_asc');
-        expect(wrapper.vm.fetchIssues).toHaveBeenCalled();
-      });
-
-      it('filter event sets `filterParams` value and calls fetchIssues', () => {
-        getIssuableList().vm.$emit('filter', [
-          {
-            type: 'filtered-search-term',
-            value: {
-              data: 'foo',
-            },
-          },
-        ]);
-
-        expect(wrapper.vm.filterParams).toEqual({
-          search: 'foo',
-        });
-        expect(wrapper.vm.fetchIssues).toHaveBeenCalled();
-      });
-    });
+        expect(findIssuableList().props('showPaginationControls')).toBe(
+          shouldShowPaginationControls,
+        );
+      },
+    );
   });
 });

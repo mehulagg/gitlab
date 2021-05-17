@@ -37,6 +37,7 @@ import {
 import { __ } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
 import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
+import { fullBoardId } from './boards_util';
 import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
@@ -96,10 +97,14 @@ export default () => {
       currentUserId: gon.current_user_id || null,
       canUpdate: parseBoolean($boardApp.dataset.canUpdate),
       canAdminList: parseBoolean($boardApp.dataset.canAdminList),
-      labelsFetchPath: $boardApp.dataset.labelsFetchPath,
       labelsManagePath: $boardApp.dataset.labelsManagePath,
       labelsFilterBasePath: $boardApp.dataset.labelsFilterBasePath,
       timeTrackingLimitToHours: parseBoolean($boardApp.dataset.timeTrackingLimitToHours),
+      multipleAssigneesFeatureAvailable: parseBoolean(
+        $boardApp.dataset.multipleAssigneesFeatureAvailable,
+      ),
+      epicFeatureAvailable: parseBoolean($boardApp.dataset.epicFeatureAvailable),
+      iterationFeatureAvailable: parseBoolean($boardApp.dataset.iterationFeatureAvailable),
       weightFeatureAvailable: parseBoolean($boardApp.dataset.weightFeatureAvailable),
       boardWeight: $boardApp.dataset.boardWeight
         ? parseInt($boardApp.dataset.boardWeight, 10)
@@ -135,6 +140,7 @@ export default () => {
     created() {
       this.setInitialBoardData({
         boardId: $boardApp.dataset.boardId,
+        fullBoardId: fullBoardId($boardApp.dataset.boardId),
         fullPath: $boardApp.dataset.fullPath,
         boardType: this.parent,
         disabled: this.disabled,

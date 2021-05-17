@@ -201,6 +201,23 @@ FactoryBot.define do
       end
     end
 
+    factory :helm_package_file do
+      package { association(:helm_package, without_package_files: true) }
+      file_name { "#{package.name}-#{package.version}.tgz" }
+      file_fixture { "spec/fixtures/packages/helm/rook-ceph-v1.5.8.tgz" }
+
+      transient do
+        without_loaded_metadatum { false }
+        channel { 'stable' }
+      end
+
+      after :create do |package_file, evaluator|
+        unless evaluator.without_loaded_metadatum
+          create :helm_file_metadatum, package_file: package_file, channel: evaluator.channel
+        end
+      end
+    end
+
     trait(:jar) do
       file_fixture { 'spec/fixtures/packages/maven/my-app-1.0-20180724.124855-1.jar' }
       file_name { 'my-app-1.0-20180724.124855-1.jar' }
@@ -235,6 +252,13 @@ FactoryBot.define do
       verified_at { Date.current }
       verification_checksum { '4437b5775e61455588a7e5187a2e5c58c680694260bbe5501c235ec690d17f83' }
       size { 400.kilobytes }
+    end
+
+    trait(:terraform_module) do
+      file_fixture { 'spec/fixtures/packages/terraform_module/module-system-v1.0.0.tgz' }
+      file_name { 'module-system-v1.0.0.tgz' }
+      file_sha1 { 'abf850accb1947c0c0e3ef4b441b771bb5c9ae3c' }
+      size { 806.bytes }
     end
 
     trait(:nuget) do

@@ -172,6 +172,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         another_project = create(:project, :repository, creator: another_user)
         create(:remote_mirror, project: another_project, enabled: false)
         create(:snippet, author: user)
+        create(:suggestion, note: create(:note, project: project))
       end
 
       expect(described_class.usage_activity_by_stage_create({})).to include(
@@ -181,7 +182,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_disable_overriding_approvers_per_merge_request: 2,
         projects_without_disable_overriding_approvers_per_merge_request: 6,
         remote_mirrors: 2,
-        snippets: 2
+        snippets: 2,
+        suggestions: 2
       )
       expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
         deploy_keys: 1,
@@ -190,7 +192,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_disable_overriding_approvers_per_merge_request: 1,
         projects_without_disable_overriding_approvers_per_merge_request: 3,
         remote_mirrors: 1,
-        snippets: 1
+        snippets: 1,
+        suggestions: 1
       )
     end
   end
@@ -771,6 +774,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     subject { described_class.usage_counters }
 
     it { is_expected.to include(:kubernetes_agent_gitops_sync) }
+    it { is_expected.to include(:kubernetes_agent_k8s_api_proxy_request) }
     it { is_expected.to include(:static_site_editor_views) }
     it { is_expected.to include(:package_events_i_package_pull_package) }
     it { is_expected.to include(:package_events_i_package_delete_package_by_user) }
@@ -1459,6 +1463,86 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(subject).to eq(service_desk_enabled_projects: 1,
                             service_desk_issues: 2)
+    end
+  end
+
+  describe '.email_campaign_counts' do
+    subject { described_class.send(:email_campaign_counts) }
+
+    context 'when queries time out' do
+      before do
+        allow_any_instance_of(ActiveRecord::Relation)
+          .to receive(:count).and_raise(ActiveRecord::StatementInvalid.new(''))
+      end
+
+      it 'returns -1 for email campaign data' do
+        expected_data = {
+          "in_product_marketing_email_create_0_sent" => -1,
+          "in_product_marketing_email_create_0_cta_clicked" => -1,
+          "in_product_marketing_email_create_1_sent" => -1,
+          "in_product_marketing_email_create_1_cta_clicked" => -1,
+          "in_product_marketing_email_create_2_sent" => -1,
+          "in_product_marketing_email_create_2_cta_clicked" => -1,
+          "in_product_marketing_email_verify_0_sent" => -1,
+          "in_product_marketing_email_verify_0_cta_clicked" => -1,
+          "in_product_marketing_email_verify_1_sent" => -1,
+          "in_product_marketing_email_verify_1_cta_clicked" => -1,
+          "in_product_marketing_email_verify_2_sent" => -1,
+          "in_product_marketing_email_verify_2_cta_clicked" => -1,
+          "in_product_marketing_email_trial_0_sent" => -1,
+          "in_product_marketing_email_trial_0_cta_clicked" => -1,
+          "in_product_marketing_email_trial_1_sent" => -1,
+          "in_product_marketing_email_trial_1_cta_clicked" => -1,
+          "in_product_marketing_email_trial_2_sent" => -1,
+          "in_product_marketing_email_trial_2_cta_clicked" => -1,
+          "in_product_marketing_email_team_0_sent" => -1,
+          "in_product_marketing_email_team_0_cta_clicked" => -1,
+          "in_product_marketing_email_team_1_sent" => -1,
+          "in_product_marketing_email_team_1_cta_clicked" => -1,
+          "in_product_marketing_email_team_2_sent" => -1,
+          "in_product_marketing_email_team_2_cta_clicked" => -1
+        }
+
+        expect(subject).to eq(expected_data)
+      end
+    end
+
+    context 'when there are entries' do
+      before do
+        create(:in_product_marketing_email, track: :create, series: 0, cta_clicked_at: Time.zone.now)
+        create(:in_product_marketing_email, track: :verify, series: 0)
+      end
+
+      it 'gathers email campaign data' do
+        expected_data = {
+          "in_product_marketing_email_create_0_sent" => 1,
+          "in_product_marketing_email_create_0_cta_clicked" => 1,
+          "in_product_marketing_email_create_1_sent" => 0,
+          "in_product_marketing_email_create_1_cta_clicked" => 0,
+          "in_product_marketing_email_create_2_sent" => 0,
+          "in_product_marketing_email_create_2_cta_clicked" => 0,
+          "in_product_marketing_email_verify_0_sent" => 1,
+          "in_product_marketing_email_verify_0_cta_clicked" => 0,
+          "in_product_marketing_email_verify_1_sent" => 0,
+          "in_product_marketing_email_verify_1_cta_clicked" => 0,
+          "in_product_marketing_email_verify_2_sent" => 0,
+          "in_product_marketing_email_verify_2_cta_clicked" => 0,
+          "in_product_marketing_email_trial_0_sent" => 0,
+          "in_product_marketing_email_trial_0_cta_clicked" => 0,
+          "in_product_marketing_email_trial_1_sent" => 0,
+          "in_product_marketing_email_trial_1_cta_clicked" => 0,
+          "in_product_marketing_email_trial_2_sent" => 0,
+          "in_product_marketing_email_trial_2_cta_clicked" => 0,
+          "in_product_marketing_email_team_0_sent" => 0,
+          "in_product_marketing_email_team_0_cta_clicked" => 0,
+          "in_product_marketing_email_team_1_sent" => 0,
+          "in_product_marketing_email_team_1_cta_clicked" => 0,
+          "in_product_marketing_email_team_2_sent" => 0,
+          "in_product_marketing_email_team_2_cta_clicked" => 0
+        }
+
+        expect(subject).to eq(expected_data)
+      end
     end
   end
 

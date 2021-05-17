@@ -288,6 +288,50 @@ RSpec.describe Projects::PipelinesController do
         get :index, params: { namespace_id: project.namespace, project_id: project }
       end
     end
+
+    context 'code_quality_walkthrough experiment' do
+      it 'tracks the view', :experiment do
+        expect(experiment(:code_quality_walkthrough))
+          .to track(:view, property: project.root_ancestor.id.to_s)
+          .with_context(namespace: project.root_ancestor)
+          .on_next_instance
+
+        get :index, params: { namespace_id: project.namespace, project_id: project }
+      end
+    end
+  end
+
+  describe 'GET #show' do
+    render_views
+
+    let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
+
+    subject { get_pipeline_html }
+
+    def get_pipeline_html
+      get :show, params: { namespace_id: project.namespace, project_id: project, id: pipeline }, format: :html
+    end
+
+    def create_build_with_artifacts(stage, stage_idx, name)
+      create(:ci_build, :artifacts, :tags, pipeline: pipeline, stage: stage, stage_idx: stage_idx, name: name)
+    end
+
+    before do
+      create_build_with_artifacts('build', 0, 'job1')
+      create_build_with_artifacts('build', 0, 'job2')
+    end
+
+    it 'avoids N+1 database queries', :request_store do
+      get_pipeline_html
+
+      control_count = ActiveRecord::QueryRecorder.new { get_pipeline_html }.count
+      expect(response).to have_gitlab_http_status(:ok)
+
+      create_build_with_artifacts('build', 0, 'job3')
+
+      expect { get_pipeline_html }.not_to exceed_query_limit(control_count)
+      expect(response).to have_gitlab_http_status(:ok)
+    end
   end
 
   describe 'GET show.json' do
@@ -809,10 +853,7 @@ RSpec.describe Projects::PipelinesController do
   end
 
   describe 'POST retry.json' do
-    let!(:pipeline) { create(:ci_pipeline, :failed, project: project) }
-    let!(:build) { create(:ci_build, :failed, pipeline: pipeline) }
-
-    before do
+    subject(:post_retry) do
       post :retry, params: {
                      namespace_id: project.namespace,
                      project_id: project,
@@ -821,15 +862,41 @@ RSpec.describe Projects::PipelinesController do
                    format: :json
     end
 
-    it 'retries a pipeline without returning any content' do
+    let!(:pipeline) { create(:ci_pipeline, :failed, project: project) }
+    let!(:build) { create(:ci_build, :failed, pipeline: pipeline) }
+
+    let(:worker_spy) { class_spy(::Ci::RetryPipelineWorker) }
+
+    before do
+      stub_const('::Ci::RetryPipelineWorker', worker_spy)
+    end
+
+    it 'retries a pipeline in the background without returning any content' do
+      post_retry
+
       expect(response).to have_gitlab_http_status(:no_content)
-      expect(build.reload).to be_retried
+      expect(::Ci::RetryPipelineWorker).to have_received(:perform_async).with(pipeline.id, user.id)
+    end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(background_pipeline_retry_endpoint: false)
+      end
+
+      it 'retries the pipeline without returning any content' do
+        post_retry
+
+        expect(response).to have_gitlab_http_status(:no_content)
+        expect(build.reload).to be_retried
+      end
     end
 
     context 'when builds are disabled' do
       let(:feature) { ProjectFeature::DISABLED }
 
       it 'fails to retry pipeline' do
+        post_retry
+
         expect(response).to have_gitlab_http_status(:not_found)
       end
     end
@@ -943,49 +1010,26 @@ RSpec.describe Projects::PipelinesController do
       end
     end
 
-    context 'when junit_pipeline_screenshots_view is enabled' do
-      before do
-        stub_feature_flags(junit_pipeline_screenshots_view: project)
-      end
+    context 'when test_report contains attachment and scope is with_attachment as a URL param' do
+      let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
 
-      context 'when test_report contains attachment and scope is with_attachment as a URL param' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
+      it 'returns a test reports with attachment' do
+        get_test_report_json(scope: 'with_attachment')
 
-        it 'returns a test reports with attachment' do
-          get_test_report_json(scope: 'with_attachment')
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["test_suites"]).to be_present
-          expect(json_response["test_suites"].first["test_cases"].first).to include("attachment_url")
-        end
-      end
-
-      context 'when test_report does not contain attachment and scope is with_attachment as a URL param' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
-
-        it 'returns a test reports with empty values' do
-          get_test_report_json(scope: 'with_attachment')
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["test_suites"]).to be_empty
-        end
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response["test_suites"]).to be_present
+        expect(json_response["test_suites"].first["test_cases"].first).to include("attachment_url")
       end
     end
 
-    context 'when junit_pipeline_screenshots_view is disabled' do
-      before do
-        stub_feature_flags(junit_pipeline_screenshots_view: false)
-      end
+    context 'when test_report does not contain attachment and scope is with_attachment as a URL param' do
+      let(:pipeline) { create(:ci_pipeline, :with_test_reports, project: project) }
 
-      context 'when test_report contains attachment and scope is with_attachment as a URL param' do
-        let(:pipeline) { create(:ci_pipeline, :with_test_reports_attachment, project: project) }
+      it 'returns a test reports with empty values' do
+        get_test_report_json(scope: 'with_attachment')
 
-        it 'returns a test reports without attachment_url' do
-          get_test_report_json(scope: 'with_attachment')
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response["test_suites"].first["test_cases"].first).not_to include("attachment_url")
-        end
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response["test_suites"]).to be_empty
       end
     end
 

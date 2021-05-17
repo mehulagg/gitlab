@@ -17,6 +17,7 @@ module Ci
     include FromUnion
     include UpdatedAtFilterable
     include EachBatch
+    include FastDestroyAll::Helpers
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -70,7 +71,9 @@ module Ci
     has_many :deployments, through: :builds
     has_many :environments, -> { distinct }, through: :deployments
     has_many :latest_builds, -> { latest.with_project_and_metadata }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
-    has_many :downloadable_artifacts, -> { not_expired.downloadable.with_job }, through: :latest_builds, source: :job_artifacts
+    has_many :downloadable_artifacts, -> do
+      not_expired.or(where_exists(::Ci::Pipeline.artifacts_locked.where('ci_pipelines.id = ci_builds.commit_id'))).downloadable.with_job
+    end, through: :latest_builds, source: :job_artifacts
 
     has_many :messages, class_name: 'Ci::PipelineMessage', inverse_of: :pipeline
 
@@ -123,6 +126,8 @@ module Ci
     validates :source, exclusion: { in: %w(unknown), unless: :importing? }, on: :create
 
     after_create :keep_around_commits, unless: :importing?
+
+    use_fast_destroy :job_artifacts
 
     # We use `Enums::Ci::Pipeline.sources` here so that EE can more easily extend
     # this `Hash` with new values.
@@ -1076,14 +1081,6 @@ module Ci
       complete? && builds.latest.with_exposed_artifacts.exists?
     end
 
-    def has_downloadable_artifacts?
-      if downloadable_artifacts.loaded?
-        downloadable_artifacts.any?
-      else
-        downloadable_artifacts.exists?
-      end
-    end
-
     def branch_updated?
       strong_memoize(:branch_updated) do
         push_details.branch_updated?
@@ -1101,6 +1098,8 @@ module Ci
           merge_request.modified_paths
         elsif branch_updated?
           push_details.modified_paths
+        elsif external_pull_request? && ::Feature.enabled?(:ci_modified_paths_of_external_prs, project, default_enabled: :yaml)
+          external_pull_request.modified_paths
         end
       end
     end
@@ -1123,6 +1122,10 @@ module Ci
 
     def merge_request?
       merge_request_id.present?
+    end
+
+    def external_pull_request?
+      external_pull_request_id.present?
     end
 
     def detached_merge_request_pipeline?
@@ -1309,4 +1312,4 @@ module Ci
   end
 end
 
-Ci::Pipeline.prepend_if_ee('EE::Ci::Pipeline')
+Ci::Pipeline.prepend_mod_with('Ci::Pipeline')

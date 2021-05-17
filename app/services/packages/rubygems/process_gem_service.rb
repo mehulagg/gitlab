@@ -16,6 +16,7 @@ module Packages
       end
 
       def execute
+        raise ExtractionError, 'Gem was not processed - package_file is not set' unless package_file
         return success if process_gem
 
         error('Gem was not processed')
@@ -26,8 +27,6 @@ module Packages
       attr_reader :package_file
 
       def process_gem
-        return false unless package_file
-
         try_obtain_lease do
           package.transaction do
             rename_package_and_set_version
@@ -107,7 +106,7 @@ module Packages
           Gem::Package.new(File.open(file_path))
         end
       rescue StandardError
-        raise ExtractionError.new('Unable to read gem file')
+        raise ExtractionError, 'Unable to read gem file'
       end
 
       # used by ExclusiveLeaseGuard

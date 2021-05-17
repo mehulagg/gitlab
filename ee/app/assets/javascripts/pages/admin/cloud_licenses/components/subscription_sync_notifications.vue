@@ -2,7 +2,7 @@
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import {
   manualSyncFailureText,
-  manualSyncFailureTitle,
+  connectivityIssue,
   manualSyncSuccessfulTitle,
   notificationType,
 } from '../constants';
@@ -17,7 +17,7 @@ export default {
   i18n: {
     manualSyncSuccessfulTitle,
     manualSyncFailureText,
-    manualSyncFailureTitle,
+    connectivityIssue,
   },
   components: {
     GlAlert,
@@ -62,7 +62,7 @@ export default {
       v-else-if="syncDidFail"
       variant="danger"
       :dismissible="false"
-      :title="$options.i18n.manualSyncFailureTitle"
+      :title="$options.i18n.connectivityIssue"
       data-testid="sync-failure-alert"
     >
       <gl-sprintf :message="$options.i18n.manualSyncFailureText">

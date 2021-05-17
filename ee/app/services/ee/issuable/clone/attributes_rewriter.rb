@@ -15,6 +15,11 @@ module EE
 
         private
 
+        override :blocked_state_event_attributes
+        def blocked_state_event_attributes
+          super.push('issue_id')
+        end
+
         def copy_resource_weight_events
           return unless both_respond_to?(:resource_weight_events)
 

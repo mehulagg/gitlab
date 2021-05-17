@@ -12,7 +12,7 @@ module EE
       prepended do
         scope :latest, -> do
           with(
-            latest_by_project: select(:project_id, 'MAX(date) AS date').group(:project_id)
+            ::Gitlab::SQL::CTE.new(:latest_by_project, select(:project_id, 'MAX(date) AS date').group(:project_id)).to_arel
           )
           .joins(
             'JOIN latest_by_project ON ci_daily_build_group_report_results.date = latest_by_project.date
@@ -30,7 +30,7 @@ module EE
             result[project_id] = {
               average_coverage: average_coverage,
               coverage_count: coverage_count,
-              last_updated_on: date
+              last_updated_on: Date.parse(date.to_s)
             }
           end
         end

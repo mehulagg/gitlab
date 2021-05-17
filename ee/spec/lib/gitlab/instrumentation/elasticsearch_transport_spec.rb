@@ -36,7 +36,8 @@ RSpec.describe ::Gitlab::Instrumentation::ElasticsearchTransport, :elastic, :req
       allow(::Gitlab::PerformanceBar).to receive(:enabled_for_request?).and_return(true)
     end
 
-    it 'parses and tracks the call details' do
+    it 'parses and tracks the call details', :use_clean_rails_memory_store_caching do
+      create(:merge_request, title: "cache warming MR") # Warm cache for checking migrations are finished
       ensure_elasticsearch_index!
 
       ::Gitlab::SafeRequestStore.clear!

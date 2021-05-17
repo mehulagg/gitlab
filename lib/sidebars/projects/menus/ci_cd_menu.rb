@@ -65,7 +65,9 @@ module Sidebars
         end
 
         def pipelines_editor_menu_item
-          return unless context.can_view_pipeline_editor
+          unless context.can_view_pipeline_editor
+            return ::Sidebars::NilMenuItem.new(item_id: :pipelines_editor)
+          end
 
           ::Sidebars::MenuItem.new(
             title: s_('Pipelines|Editor'),
@@ -86,7 +88,9 @@ module Sidebars
         end
 
         def artifacts_menu_item
-          return unless Feature.enabled?(:artifacts_management_page, context.project)
+          unless Feature.enabled?(:artifacts_management_page, context.project)
+            return ::Sidebars::NilMenuItem.new(item_id: :artifacts)
+          end
 
           ::Sidebars::MenuItem.new(
             title: _('Artifacts'),
@@ -111,4 +115,4 @@ module Sidebars
   end
 end
 
-Sidebars::Projects::Menus::CiCdMenu.prepend_if_ee('EE::Sidebars::Projects::Menus::CiCdMenu')
+Sidebars::Projects::Menus::CiCdMenu.prepend_mod_with('Sidebars::Projects::Menus::CiCdMenu')

@@ -1,7 +1,7 @@
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import { PAGE_SIZE } from '~/releases/constants';
-import allReleasesQuery from '~/releases/queries/all_releases.query.graphql';
+import allReleasesQuery from '~/releases/graphql/queries/all_releases.query.graphql';
 import { gqClient, convertAllReleasesGraphQLResponse } from '~/releases/util';
 import * as types from './mutation_types';
 
@@ -45,11 +45,11 @@ export const fetchReleases = ({ dispatch, commit, state }, { before, after }) =>
       },
     })
     .then((response) => {
-      const { data, paginationInfo: graphQlPageInfo } = convertAllReleasesGraphQLResponse(response);
+      const { data, paginationInfo: pageInfo } = convertAllReleasesGraphQLResponse(response);
 
       commit(types.RECEIVE_RELEASES_SUCCESS, {
         data,
-        graphQlPageInfo,
+        pageInfo,
       });
     })
     .catch(() => dispatch('receiveReleasesError'));

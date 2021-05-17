@@ -50,9 +50,9 @@ RSpec.describe 'User sees Scanner profile' do
   end
 
   def fill_in_profile_form
-    fill_in 'profile_name', with: "hello"
-    fill_in 'spider_timeout', with: "1"
-    fill_in 'target_timeout', with: "2"
+    fill_in 'profileName', with: "hello"
+    fill_in 'spiderTimeout', with: "1"
+    fill_in 'targetTimeout', with: "2"
     click_button 'Save profile'
     wait_for_requests
   end

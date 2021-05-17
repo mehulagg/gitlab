@@ -10,13 +10,15 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
     let(:files) { { 'README.txt' => '' } }
     let(:project) { create(:project, :custom_repo, files: files) }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master') }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
       stub_ci_pipeline_yaml_file(template.content)
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -62,18 +64,18 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
             'Java'                 | { 'app.java' => '' }                            | {}                                         | %w(spotbugs-sast)
             'Java with MobSF'      | { 'app.java' => '' }                            | { 'SAST_EXPERIMENTAL_FEATURES' => 'true' } | %w(spotbugs-sast)
             'Java without MobSF'   | { 'AndroidManifest.xml' => '', 'a.java' => '' } | {}                                         | %w(spotbugs-sast)
-            'Javascript'           | { 'app.js' => '' }                              | {}                                         | %w(eslint-sast)
-            'JSX'                  | { 'app.jsx' => '' }                             | {}                                         | %w(eslint-sast)
+            'Javascript'           | { 'app.js' => '' }                              | {}                                         | %w(eslint-sast semgrep-sast)
+            'JSX'                  | { 'app.jsx' => '' }                             | {}                                         | %w(eslint-sast semgrep-sast)
             'Javascript Node'      | { 'package.json' => '' }                        | {}                                         | %w(nodejs-scan-sast)
             'HTML'                 | { 'index.html' => '' }                          | {}                                         | %w(eslint-sast)
             'Kubernetes Manifests' | { 'Chart.yaml' => '' }                          | { 'SCAN_KUBERNETES_MANIFESTS' => 'true' }  | %w(kubesec-sast)
             'Multiple languages'   | { 'app.java' => '', 'app.js' => '' }            | {}                                         | %w(eslint-sast spotbugs-sast)
             'PHP'                  | { 'app.php' => '' }                             | {}                                         | %w(phpcs-security-audit-sast)
-            'Python'               | { 'app.py' => '' }                              | {}                                         | %w(bandit-sast)
+            'Python'               | { 'app.py' => '' }                              | {}                                         | %w(bandit-sast semgrep-sast)
             'Ruby'                 | { 'config/routes.rb' => '' }                    | {}                                         | %w(brakeman-sast)
             'Scala'                | { 'app.scala' => '' }                           | {}                                         | %w(spotbugs-sast)
-            'Typescript'           | { 'app.ts' => '' }                              | {}                                         | %w(eslint-sast)
-            'Typescript JSX'       | { 'app.tsx' => '' }                             | {}                                         | %w(eslint-sast)
+            'Typescript'           | { 'app.ts' => '' }                              | {}                                         | %w(eslint-sast semgrep-sast)
+            'Typescript JSX'       | { 'app.tsx' => '' }                             | {}                                         | %w(eslint-sast semgrep-sast)
             'Visual Basic'         | { 'app.vbproj' => '' }                          | {}                                         | %w(security-code-scan-sast)
           end
 

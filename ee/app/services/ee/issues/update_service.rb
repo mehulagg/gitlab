@@ -64,7 +64,7 @@ module EE
       def handle_promotion(issue)
         return unless params.delete(:promote_to_epic)
 
-        Epics::IssuePromoteService.new(issue.project, current_user).execute(issue)
+        Epics::IssuePromoteService.new(project: issue.project, current_user: current_user).execute(issue)
       end
     end
   end

@@ -205,6 +205,7 @@ class User < ApplicationRecord
   has_one :user_detail
   has_one :user_highest_role
   has_one :user_canonical_email
+  has_one :credit_card_validation, class_name: '::Users::CreditCardValidation'
   has_one :atlassian_identity, class_name: 'Atlassian::Identity'
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
@@ -317,6 +318,7 @@ class User < ApplicationRecord
 
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
+  accepts_nested_attributes_for :credit_card_validation, update_only: true
 
   state_machine :state, initial: :active do
     event :block do
@@ -324,6 +326,7 @@ class User < ApplicationRecord
       transition deactivated: :blocked
       transition ldap_blocked: :blocked
       transition blocked_pending_approval: :blocked
+      transition banned: :blocked
     end
 
     event :ldap_block do
@@ -336,10 +339,15 @@ class User < ApplicationRecord
       transition blocked: :active
       transition ldap_blocked: :active
       transition blocked_pending_approval: :active
+      transition banned: :active
     end
 
     event :block_pending_approval do
       transition active: :blocked_pending_approval
+    end
+
+    event :ban do
+      transition active: :banned
     end
 
     event :deactivate do
@@ -348,7 +356,7 @@ class User < ApplicationRecord
       transition active: :deactivated
     end
 
-    state :blocked, :ldap_blocked, :blocked_pending_approval do
+    state :blocked, :ldap_blocked, :blocked_pending_approval, :banned do
       def blocked?
         true
       end
@@ -375,6 +383,7 @@ class User < ApplicationRecord
   scope :instance_access_request_approvers_to_be_notified, -> { admins.active.order_recent_sign_in.limit(INSTANCE_ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT) }
   scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
   scope :blocked_pending_approval, -> { with_states(:blocked_pending_approval) }
+  scope :banned, -> { with_states(:banned) }
   scope :external, -> { where(external: true) }
   scope :non_external, -> { where(external: false) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
@@ -431,7 +440,7 @@ class User < ApplicationRecord
 
   def preferred_language
     read_attribute('preferred_language') ||
-      I18n.default_locale.to_s.presence_in(Gitlab::I18n::AVAILABLE_LANGUAGES.keys) ||
+      I18n.default_locale.to_s.presence_in(Gitlab::I18n.available_locales) ||
       'en'
   end
 
@@ -596,6 +605,8 @@ class User < ApplicationRecord
         blocked
       when 'blocked_pending_approval'
         blocked_pending_approval
+      when 'banned'
+        banned
       when 'two_factor_disabled'
         without_two_factor
       when 'two_factor_enabled'
@@ -1221,6 +1232,10 @@ class User < ApplicationRecord
 
   def highest_role
     user_highest_role&.highest_access_level || Gitlab::Access::NO_ACCESS
+  end
+
+  def credit_card_validated_at
+    credit_card_validation&.credit_card_validated_at
   end
 
   def accessible_deploy_keys
@@ -2073,4 +2088,4 @@ class User < ApplicationRecord
   end
 end
 
-User.prepend_if_ee('EE::User')
+User.prepend_mod_with('User')

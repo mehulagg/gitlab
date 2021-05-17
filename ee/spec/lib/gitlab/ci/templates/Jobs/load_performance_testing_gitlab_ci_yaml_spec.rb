@@ -19,7 +19,7 @@ RSpec.describe 'Jobs/Load-Performance-Testing.gitlab-ci.yml' do
   end
 
   describe 'the created pipeline' do
-    let(:project) do
+    let_it_be(:project) do
       create(:project, :repository, variables: [
         build(:ci_variable, key: 'CI_KUBERNETES_ACTIVE', value: 'true')
       ])
@@ -34,8 +34,9 @@ RSpec.describe 'Jobs/Load-Performance-Testing.gitlab-ci.yml' do
 
     before do
       stub_ci_pipeline_yaml_file(template)
-
-      allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+      allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
+        allow(worker).to receive(:perform).and_return(true)
+      end
       allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
@@ -72,7 +73,7 @@ RSpec.describe 'Jobs/Load-Performance-Testing.gitlab-ci.yml' do
     end
 
     context 'on merge request' do
-      let(:service) { MergeRequests::CreatePipelineService.new(project, user) }
+      let(:service) { MergeRequests::CreatePipelineService.new(project: project, current_user: user) }
       let(:merge_request) { create(:merge_request, :simple, source_project: project) }
       let(:pipeline) { service.execute(merge_request) }
 

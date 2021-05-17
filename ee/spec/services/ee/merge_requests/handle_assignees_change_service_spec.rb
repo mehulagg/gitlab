@@ -10,7 +10,7 @@ RSpec.describe MergeRequests::HandleAssigneesChangeService do
   let(:old_assignees) { [] }
   let(:options) { {} }
 
-  let(:service) { described_class.new(project, user) }
+  let(:service) { described_class.new(project: project, current_user: user) }
 
   describe '#execute' do
     def execute

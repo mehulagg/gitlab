@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe SlackIntegration do
   describe "Associations" do
-    it { is_expected.to belong_to(:service) }
+    it { is_expected.to belong_to(:integration) }
   end
 
   describe 'Validations' do
@@ -12,6 +12,6 @@ RSpec.describe SlackIntegration do
     it { is_expected.to validate_presence_of(:team_name) }
     it { is_expected.to validate_presence_of(:alias) }
     it { is_expected.to validate_presence_of(:user_id) }
-    it { is_expected.to validate_presence_of(:service) }
+    it { is_expected.to validate_presence_of(:integration) }
   end
 end

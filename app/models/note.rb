@@ -107,6 +107,7 @@ class Note < ApplicationRecord
   scope :fresh, -> { order_created_asc.with_order_id_asc }
   scope :updated_after, ->(time) { where('updated_at > ?', time) }
   scope :with_updated_at, ->(time) { where(updated_at: time) }
+  scope :with_suggestions, -> { joins(:suggestions) }
   scope :inc_author_project, -> { includes(:project, :author) }
   scope :inc_author, -> { includes(:author) }
   scope :with_api_entity_associations, -> { preload(:note_diff_file, :author) }
@@ -638,4 +639,4 @@ class Note < ApplicationRecord
   end
 end
 
-Note.prepend_if_ee('EE::Note')
+Note.prepend_mod_with('Note')

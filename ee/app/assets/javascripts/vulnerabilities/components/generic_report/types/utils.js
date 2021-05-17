@@ -1,4 +1,4 @@
-import { overEvery } from 'lodash';
+import { overEvery, flow } from 'lodash';
 import { REPORT_TYPES } from './constants';
 
 /**
@@ -10,12 +10,28 @@ import { REPORT_TYPES } from './constants';
 const isSupportedType = ({ type }) => Object.values(REPORT_TYPES).includes(type);
 
 /**
+ * Higher order function that accepts a type and returns a function that returns true if the passed in report type matches
+ *
+ * @param {*} typeToCheck
+ * @returns
+ */
+const isOfType = (typeToCheck) => ({ type }) => type === typeToCheck;
+
+/**
  * Check if the given report is of type list
  *
  * @param {{ type: string } } reportItem
  * @returns boolean
  */
-export const isListType = ({ type }) => type === REPORT_TYPES.list;
+export const isOfTypeList = isOfType(REPORT_TYPES.list);
+
+/**
+ * Check if the given report is of type named-list
+ *
+ * @param {{ type: string } } reportItem
+ * @returns boolean
+ */
+export const isOfTypeNamedList = isOfType(REPORT_TYPES.namedList);
 
 /**
  * Check if the current report item is of that list and is not nested deeper than the maximum depth
@@ -23,8 +39,8 @@ export const isListType = ({ type }) => type === REPORT_TYPES.list;
  * @param {number} maxDepth
  * @returns {function}
  */
-const isNotListTypeDeeperThan = (maxDepth) => (item, currentDepth) => {
-  return !isListType(item) || maxDepth > currentDepth + 1;
+const isNotOfTypeListDeeperThan = (maxDepth) => (item, currentDepth) => {
+  return !isOfTypeList(item) || maxDepth > currentDepth + 1;
 };
 
 /**
@@ -44,7 +60,7 @@ const deepFilterListItems = (items, { condition, currentDepth = 0 }) =>
 
     const nextItem = { ...currentItem };
 
-    if (isListType(nextItem)) {
+    if (isOfTypeList(nextItem)) {
       nextItem.items = deepFilterListItems(currentItem.items, {
         condition,
         currentDepth: currentDepth + 1,
@@ -61,7 +77,7 @@ const deepFilterListItems = (items, { condition, currentDepth = 0 }) =>
  * @returns {{*}}
  */
 const filterNestedListsItems = (condition) => ([label, reportItem]) => {
-  const filtered = isListType(reportItem)
+  const filtered = isOfTypeList(reportItem)
     ? {
         ...reportItem,
         items: deepFilterListItems(reportItem.items, { condition }),
@@ -69,6 +85,41 @@ const filterNestedListsItems = (condition) => ([label, reportItem]) => {
     : reportItem;
 
   return [label, filtered];
+};
+
+/**
+ * Takes an entry from the vulnerability's details object and removes unsupported
+ * report types from `named-list` types
+ *
+ * @param {function} filterFn
+ * @param {number} maxDepth
+ * @returns
+ */
+const overEveryNamedListItem = (fn) => ([label, reportItem]) => {
+  const filtered = isOfTypeNamedList(reportItem)
+    ? {
+        ...reportItem,
+        items: fn(reportItem.items),
+      }
+    : reportItem;
+
+  return [label, filtered];
+};
+
+/**
+ * Takes an object of the shape
+ * {
+ *  label1: { ... }
+ *  label2: { ... }
+ * }
+ * and returns an array of the shape
+ * [{ label: 'label1', ...  }, { label: 'label2', ...}]
+ *
+ * @param {*} items
+ * @returns
+ */
+const transformItemsIntoArray = (items) => {
+  return Object.entries(items).map(([label, value]) => ({ ...value, label }));
 };
 
 /**
@@ -84,11 +135,16 @@ const filterNestedListsItems = (condition) => ([label, reportItem]) => {
  */
 export const filterTypesAndLimitListDepth = (data, { maxDepth = 5 } = {}) => {
   const entries = Object.entries(data);
-  const filterCriteria = overEvery([isSupportedType, isNotListTypeDeeperThan(maxDepth)]);
+  const filterCriteria = overEvery([isSupportedType, isNotOfTypeListDeeperThan(maxDepth)]);
 
   const filteredEntries = entries
     .filter(([, reportItem]) => isSupportedType(reportItem))
-    .map(filterNestedListsItems(filterCriteria));
+    .map(
+      flow([
+        filterNestedListsItems(filterCriteria),
+        overEveryNamedListItem(flow([filterTypesAndLimitListDepth, transformItemsIntoArray])),
+      ]),
+    );
 
   return Object.fromEntries(filteredEntries);
 };

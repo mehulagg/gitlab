@@ -6,7 +6,7 @@ module DastSiteValidations
     TokenNotFound = Class.new(StandardError)
 
     def execute!
-      raise PermissionsError.new('Insufficient permissions') unless allowed?
+      raise PermissionsError, 'Insufficient permissions' unless allowed?
 
       return if dast_site_validation.passed?
 
@@ -49,7 +49,7 @@ module DastSiteValidations
     end
 
     def validate!(response)
-      raise TokenNotFound.new('Could not find token') unless token_found?(response)
+      raise TokenNotFound, 'Could not find token' unless token_found?(response)
 
       dast_site_validation.pass
     end

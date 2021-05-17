@@ -68,14 +68,23 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
 
     describe '#downloadable_artifacts' do
-      let(:build) { create(:ci_build, pipeline: pipeline) }
+      let_it_be(:build) { create(:ci_build, pipeline: pipeline) }
+      let_it_be(:downloadable_artifact) { create(:ci_job_artifact, :codequality, job: build) }
+      let_it_be(:expired_artifact) { create(:ci_job_artifact, :junit, :expired, job: build) }
+      let_it_be(:undownloadable_artifact) { create(:ci_job_artifact, :trace, job: build) }
 
-      it 'returns downloadable artifacts that have not expired' do
-        downloadable_artifact = create(:ci_job_artifact, :codequality, job: build)
-        _expired_artifact = create(:ci_job_artifact, :junit, :expired, job: build)
-        _undownloadable_artifact = create(:ci_job_artifact, :trace, job: build)
+      context 'when artifacts are locked' do
+        it 'returns downloadable artifacts including locked artifacts' do
+          expect(pipeline.downloadable_artifacts).to contain_exactly(downloadable_artifact, expired_artifact)
+        end
+      end
 
-        expect(pipeline.downloadable_artifacts).to contain_exactly(downloadable_artifact)
+      context 'when artifacts are unlocked' do
+        it 'returns only downloadable artifacts not expired' do
+          expired_artifact.job.pipeline.unlocked!
+
+          expect(pipeline.reload.downloadable_artifacts).to contain_exactly(downloadable_artifact)
+        end
       end
     end
   end
@@ -1937,6 +1946,30 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
       it 'returns merge request modified paths' do
         expect(pipeline.modified_paths).to match(merge_request.modified_paths)
+      end
+    end
+
+    context 'when source is an external pull request' do
+      let(:pipeline) do
+        create(:ci_pipeline, source: :external_pull_request_event, external_pull_request: external_pull_request)
+      end
+
+      let(:external_pull_request) do
+        create(:external_pull_request, project: project, target_sha: '281d3a7', source_sha: '498214d')
+      end
+
+      it 'returns external pull request modified paths' do
+        expect(pipeline.modified_paths).to match(external_pull_request.modified_paths)
+      end
+
+      context 'when the FF ci_modified_paths_of_external_prs is disabled' do
+        before do
+          stub_feature_flags(ci_modified_paths_of_external_prs: false)
+        end
+
+        it 'returns nil' do
+          expect(pipeline.modified_paths).to be_nil
+        end
       end
     end
   end
@@ -4489,20 +4522,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
 
       expect { multi_build_pipeline.builds_with_failed_tests.map(&:project).map(&:full_path) }
         .not_to exceed_query_limit(control_count)
-    end
-  end
-
-  describe '#has_downloadable_artifacts?' do
-    it 'returns false when when pipeline does not have downloadable artifacts' do
-      pipeline = create(:ci_pipeline, :success)
-
-      expect(pipeline.has_downloadable_artifacts?). to eq(false)
-    end
-
-    it 'returns false when when pipeline does not have downloadable artifacts' do
-      pipeline = create(:ci_pipeline, :with_codequality_reports)
-
-      expect(pipeline.has_downloadable_artifacts?). to eq(true)
     end
   end
 end

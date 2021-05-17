@@ -922,18 +922,16 @@
       allow_failure: true
     - <<: *if-merge-request-title-run-all-rspec
 
-.rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage:
+.rails:rules:default-branch-schedule-nightly--code-backstage:
   rules:
-    - <<: *if-default-branch-schedule-2-hourly
     - <<: *if-default-branch-schedule-nightly
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
 
-.rails:rules:default-branch-schedule-2-hourly-nightly--code-backstage-ee-only:
+.rails:rules:default-branch-schedule-nightly--code-backstage-ee-only:
   rules:
     - <<: *if-not-ee
       when: never
-    - <<: *if-default-branch-schedule-2-hourly
     - <<: *if-default-branch-schedule-nightly
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
@@ -1001,6 +999,16 @@
     # - <<: *if-default-branch-refs  # To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
     - <<: *if-default-refs
       changes: *code-backstage-qa-patterns
+      allow_failure: true
+
+.reports:rules:secret_detection:
+  rules:
+    - if: '$SECRET_DETECTION_DISABLED'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'  # The Secret-Detection template already has a `secret_detection_default_branch` job
+      when: never
+    # - <<: *if-default-branch-refs  # To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
+    - changes: *code-backstage-qa-patterns
       allow_failure: true
 
 .reports:rules:dependency_scanning:

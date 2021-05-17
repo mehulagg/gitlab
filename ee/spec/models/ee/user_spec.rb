@@ -31,6 +31,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:oncall_participants).class_name('IncidentManagement::OncallParticipant') }
     it { is_expected.to have_many(:oncall_rotations).class_name('IncidentManagement::OncallRotation').through(:oncall_participants) }
     it { is_expected.to have_many(:oncall_schedules).class_name('IncidentManagement::OncallSchedule').through(:oncall_rotations) }
+    it { is_expected.to have_many(:epic_board_recent_visits).inverse_of(:user) }
   end
 
   describe 'nested attributes' do
@@ -136,7 +137,7 @@ RSpec.describe User do
 
     it 'returns the user' do
       expect(described_class.find_by_smartcard_identity(smartcard_identity.subject,
-                                             smartcard_identity.issuer))
+                                                        smartcard_identity.issuer))
         .to eq(user)
     end
   end
@@ -753,11 +754,31 @@ RSpec.describe User do
   describe '#allow_password_authentication_for_web?' do
     context 'when user has managing group linked' do
       before do
-        user.managing_group = Group.new
+        user.managing_group = build(:group)
       end
 
       it 'is false' do
         expect(user.allow_password_authentication_for_web?).to eq false
+      end
+    end
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = build(:group)
+      end
+
+      it 'is false' do
+        expect(user.allow_password_authentication_for_web?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is true' do
+          expect(user.allow_password_authentication_for_web?).to eq true
+        end
       end
     end
   end
@@ -765,11 +786,135 @@ RSpec.describe User do
   describe '#allow_password_authentication_for_git?' do
     context 'when user has managing group linked' do
       before do
-        user.managing_group = Group.new
+        user.managing_group = build(:group)
       end
 
       it 'is false' do
         expect(user.allow_password_authentication_for_git?).to eq false
+      end
+    end
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = build(:group)
+      end
+
+      it 'is false' do
+        expect(user.allow_password_authentication_for_git?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is true' do
+          expect(user.allow_password_authentication_for_git?).to eq true
+        end
+      end
+    end
+  end
+
+  describe '#user_authorized_by_provisioning_group?' do
+    context 'when user is provisioned by group' do
+      let(:group) { build(:group) }
+
+      before do
+        user.user_detail.provisioned_by_group = group
+      end
+
+      it 'is true' do
+        expect(user.user_authorized_by_provisioning_group?).to eq true
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+      end
+
+      context 'with feature flag switched on for particular groups' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false when provisioned by group without feature flag' do
+          stub_feature_flags(block_password_auth_for_saml_users: create(:group))
+
+          expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+
+        it 'is true when provisioned by group with feature flag' do
+          stub_feature_flags(block_password_auth_for_saml_users: group)
+
+          expect(user.user_authorized_by_provisioning_group?).to eq true
+        end
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'is false' do
+        expect(user.user_authorized_by_provisioning_group?).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.user_authorized_by_provisioning_group?).to eq false
+        end
+      end
+    end
+  end
+
+  describe '#authorized_by_provisioning_group?' do
+    let_it_be(:group) { create(:group) }
+
+    context 'when user is provisioned by group' do
+      before do
+        user.user_detail.provisioned_by_group = group
+      end
+
+      it 'is true' do
+        expect(user.authorized_by_provisioning_group?(group)).to eq true
+      end
+
+      context 'when other group is provided' do
+        it 'is false' do
+          expect(user.authorized_by_provisioning_group?(create(:group))).to eq false
+        end
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.authorized_by_provisioning_group?(group)).to eq false
+        end
+      end
+    end
+
+    context 'when user is not provisioned by group' do
+      it 'is false' do
+        expect(user.authorized_by_provisioning_group?(group)).to eq false
+      end
+
+      context 'with feature flag switched off' do
+        before do
+          stub_feature_flags(block_password_auth_for_saml_users: false)
+        end
+
+        it 'is false' do
+          expect(user.authorized_by_provisioning_group?(group)).to eq false
+        end
       end
     end
   end
@@ -1105,17 +1250,21 @@ RSpec.describe User do
         before do
           allow(Gitlab::CurrentSettings)
             .to receive(:should_check_namespace_plan?)
-            .and_return(false)
+                  .and_return(false)
         end
 
         it { is_expected.to contain_exactly private_group, project_group, minimal_access_group }
+
+        it 'ignores groups with minimal access if with_minimal_access=false' do
+          expect(user.authorized_groups(with_minimal_access: false)).to contain_exactly(private_group, project_group)
+        end
       end
 
       context 'feature available for specific groups only' do
         before do
           allow(Gitlab::CurrentSettings)
             .to receive(:should_check_namespace_plan?)
-            .and_return(true)
+                  .and_return(true)
           create(:gitlab_subscription, :ultimate, namespace: minimal_access_group)
           create(:group_member, :minimal_access, user: user, source: create(:group))
         end
@@ -1524,6 +1673,90 @@ RSpec.describe User do
 
         it { is_expected.to eq false }
       end
+    end
+  end
+
+  describe '#has_required_credit_card_to_run_pipelines?' do
+    let_it_be(:project) { create(:project) }
+
+    subject { user.has_required_credit_card_to_run_pipelines?(project) }
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:saas, :cc_present, :shared_runners, :plan, :feature_flags, :days_from_release, :result, :description) do
+      # self-hosted
+      nil   | false | :enabled | :paid  | %i[free trial]           | 0  | true  | 'self-hosted paid plan'
+      nil   | false | :enabled | :trial | %i[free trial]           | 0  | true  | 'self-hosted missing CC on trial plan'
+
+      # saas
+      :saas | false | :enabled | :paid  | %i[free trial old_users] | 0  | true  | 'missing CC on paid plan'
+
+      :saas | false | :enabled | :free  | %i[free trial]           | 0  | false | 'missing CC on free plan'
+      :saas | false | nil      | :free  | %i[free trial]           | 0  | true  | 'missing CC on free plan and shared runners disabled'
+      :saas | false | :enabled | :free  | %i[free trial]           | -1 | true  | 'missing CC on free plan but old user'
+      :saas | false | :enabled | :free  | %i[free trial old_users] | -1 | false | 'missing CC on free plan but old user and FF enabled'
+      :saas | false | nil      | :free  | %i[free trial old_users] | -1 | true  | 'missing CC on free plan but old user and FF enabled and shared runners disabled'
+      :saas | true  | :enabled | :free  | %i[free trial]           | 0  | true  | 'present CC on free plan'
+      :saas | false | :enabled | :free  | %i[]                     | 0  | true  | 'missing CC on free plan - FF off'
+
+      :saas | false | :enabled | :trial | %i[free trial]           | 0  | false | 'missing CC on trial plan'
+      :saas | false | nil      | :trial | %i[free trial]           | 0  | true  | 'missing CC on trial plan and shared runners disabled'
+      :saas | false | :enabled | :trial | %i[free trial]           | -1 | true  | 'missing CC on trial plan but old user'
+      :saas | false | :enabled | :trial | %i[free trial old_users] | -1 | false | 'missing CC on trial plan but old user and FF enabled'
+      :saas | false | nil      | :trial | %i[free trial old_users] | -1 | true  | 'missing CC on trial plan but old user and FF enabled and shared runners disabled'
+      :saas | false | :enabled | :trial | %i[]                     | 0  | true  | 'missing CC on trial plan - FF off'
+      :saas | true  | :enabled | :trial | %i[free trial]           | 0  | true  | 'present CC on trial plan'
+    end
+
+    let(:shared_runners_enabled) { shared_runners == :enabled }
+
+    with_them do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(saas == :saas)
+        user.created_at = ::Users::CreditCardValidation::RELEASE_DAY + days_from_release.days
+        allow(user).to receive(:credit_card_validated_at).and_return(Time.current) if cc_present
+        allow(project.namespace).to receive(:free_plan?).and_return(plan == :free)
+        allow(project.namespace).to receive(:trial?).and_return(plan == :trial)
+        project.update!(shared_runners_enabled: shared_runners_enabled)
+        stub_feature_flags(
+          ci_require_credit_card_on_free_plan: feature_flags.include?(:free),
+          ci_require_credit_card_on_trial_plan: feature_flags.include?(:trial),
+          ci_require_credit_card_for_old_users: feature_flags.include?(:old_users))
+      end
+
+      it description do
+        expect(subject).to eq(result)
+      end
+    end
+  end
+
+  describe "#owns_group_without_trial" do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+
+    subject { user.owns_group_without_trial? }
+
+    it 'returns true if owns a group' do
+      group.add_owner(user)
+
+      is_expected.to be(true)
+    end
+
+    it 'returns false if is a member group' do
+      group.add_maintainer(user)
+
+      is_expected.to be(false)
+    end
+
+    it 'returns false if is not a member of any group' do
+      is_expected.to be(false)
+    end
+
+    it 'returns false if owns a group with a plan on a trial with an end date' do
+      group_with_plan = create(:group_with_plan, name: 'trial group', plan: :premium_plan, trial_ends_on: 1.year.from_now)
+      group_with_plan.add_owner(user)
+
+      is_expected.to be(false)
     end
   end
 end

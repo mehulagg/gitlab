@@ -226,6 +226,8 @@ class ProjectPolicy < BasePolicy
     enable :read_insights
   end
 
+  rule { can?(:guest_access) & can?(:create_issue) }.enable :create_incident
+
   # These abilities are not allowed to admins that are not members of the project,
   # that's why they are defined separately.
   rule { guest & can?(:download_code) }.enable :build_download_code
@@ -745,4 +747,4 @@ class ProjectPolicy < BasePolicy
   end
 end
 
-ProjectPolicy.prepend_if_ee('EE::ProjectPolicy')
+ProjectPolicy.prepend_mod_with('ProjectPolicy')

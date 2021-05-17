@@ -49,10 +49,9 @@ class GroupsController < Groups::ApplicationController
 
   feature_category :subgroups, [
                      :index, :new, :create, :show, :edit, :update,
-                     :destroy, :details, :transfer
+                     :destroy, :details, :transfer, :activity
                    ]
 
-  feature_category :audit_events, [:activity]
   feature_category :issue_tracking, [:issues, :issues_calendar, :preview_markdown]
   feature_category :code_review, [:merge_requests, :unfoldered_environment_names]
   feature_category :projects, [:projects]
@@ -365,4 +364,4 @@ class GroupsController < Groups::ApplicationController
   end
 end
 
-GroupsController.prepend_if_ee('EE::GroupsController')
+GroupsController.prepend_mod_with('GroupsController')

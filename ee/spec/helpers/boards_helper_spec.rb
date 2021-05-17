@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe BoardsHelper do
-  let_it_be(:project) { create(:project) }
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
+  let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:project_board) { create(:board, project: project) }
 
   describe '#board_list_data' do
@@ -63,6 +63,28 @@ RSpec.describe BoardsHelper do
         allow(helper).to receive(:can?).with(user, :admin_issue_board_list, project).and_return(false)
       end
 
+      shared_examples 'serializes the availability of a licensed feature' do |feature_name, feature_key|
+        context "when '#{feature_name}' is available" do
+          before do
+            stub_licensed_features({ feature_name => true })
+          end
+
+          it "indicates that the feature is available in a boolean string" do
+            expect(board_data[feature_key]).to eq("true")
+          end
+        end
+
+        context "when '#{feature_name}' is unavailable" do
+          before do
+            stub_licensed_features({ feature_name => false })
+          end
+
+          it "indicates that the feature is unavailable in a boolean string" do
+            expect(board_data[feature_key]).to eq("false")
+          end
+        end
+      end
+
       context 'when no iteration', :aggregate_failures do
         it 'serializes board without iteration' do
           expect(board_data[:board_iteration_title]).to be_nil
@@ -80,6 +102,24 @@ RSpec.describe BoardsHelper do
         it 'serializes board with iteration' do
           expect(board_data[:board_iteration_title]).to eq(iteration.title)
           expect(board_data[:board_iteration_id]).to eq(iteration.id)
+        end
+      end
+
+      context "group and project-level licensed features" do
+        [[:multiple_issue_assignees, :multiple_assignees_feature_available],
+         [:issue_weights, :weight_feature_available],
+         [:board_milestone_lists, :milestone_lists_available],
+         [:board_assignee_lists, :assignee_lists_available],
+         [:scoped_labels, :scoped_labels]].each do |feature_name, feature_key|
+          include_examples "serializes the availability of a licensed feature", feature_name, feature_key
+        end
+      end
+
+      context "group-level licensed features" do
+        [[:board_iteration_lists, :iteration_lists_available],
+         [:epics, :epic_feature_available],
+         [:iterations, :iteration_feature_available]].each do |feature_name, feature_key|
+          include_examples "serializes the availability of a licensed feature", feature_name, feature_key
         end
       end
     end

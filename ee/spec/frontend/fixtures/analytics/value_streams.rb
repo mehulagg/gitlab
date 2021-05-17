@@ -90,17 +90,17 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
     travel_to(5.days.ago) do
       Issues::UpdateService.new(
-        project,
-        user,
-        label_ids: [label.id]
+        project: project,
+        current_user: user,
+        params: { label_ids: [label.id] }
       ).execute(issue)
     end
 
     travel_to(2.days.ago) do
       Issues::UpdateService.new(
-        project,
-        user,
-        label_ids: []
+        project: project,
+        current_user: user,
+        params: { label_ids: [] }
       ).execute(issue)
     end
   end
@@ -152,6 +152,13 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
         expect(response).to be_successful
       end
+
+      it "analytics/value_stream_analytics/stages/#{stage[:name]}/count.json" do
+        stage_id = group.cycle_analytics_stages.find_by(name: stage[:name]).id
+        get(:count, params: params.merge({ id: stage_id }), format: :json)
+
+        expect(response).to be_successful
+      end
     end
 
     it "analytics/value_stream_analytics/stages/label-based-stage/records.json" do
@@ -162,6 +169,12 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
 
     it "analytics/value_stream_analytics/stages/label-based-stage/median.json" do
       get(:median, params: params.merge({ id: label_based_stage.id }), format: :json)
+
+      expect(response).to be_successful
+    end
+
+    it "analytics/value_stream_analytics/stages/label-based-stage/count.json" do
+      get(:count, params: params.merge({ id: label_based_stage.id }), format: :json)
 
       expect(response).to be_successful
     end

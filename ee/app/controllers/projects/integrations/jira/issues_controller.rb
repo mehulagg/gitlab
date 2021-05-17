@@ -106,7 +106,7 @@ module Projects
         def render_request_error(exception)
           log_exception(exception)
 
-          render json: { errors: [_('An error occurred while requesting data from the Jira service')] }, status: :bad_request
+          render json: { errors: [_('An error occurred while requesting data from the Jira service.')] }, status: :bad_request
         end
       end
     end

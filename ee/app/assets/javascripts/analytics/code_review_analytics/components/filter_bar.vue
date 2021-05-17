@@ -1,10 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
-import {
-  DEFAULT_LABEL_NONE,
-  DEFAULT_LABEL_ANY,
-} from '~/vue_shared/components/filtered_search_bar/constants';
+import { DEFAULT_NONE_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
   prepareTokens,
@@ -50,7 +47,7 @@ export default {
           title: __('Label'),
           type: 'labels',
           token: LabelToken,
-          defaultLabels: [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY],
+          defaultLabels: DEFAULT_NONE_ANY,
           initialLabels: this.labelsData,
           unique: false,
           symbol: '~',

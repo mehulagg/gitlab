@@ -11,7 +11,7 @@ module Geo
 
     override :verification_feature_flag_enabled?
     def self.verification_feature_flag_enabled?
-      Feature.enabled?(:geo_package_file_verification, default_enabled: :yaml)
+      true
     end
 
     def carrierwave_uploader
