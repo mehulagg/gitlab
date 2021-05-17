@@ -30,4 +30,3 @@ relevant compliance standards.
 |**[Compliance frameworks](../user/project/settings/index.md#compliance-frameworks)**<br>Create a custom compliance framework at the group level to describe the type of compliance requirements any child project needs to follow. |Premium+|✓|Group|
 |**[Compliance pipelines](../user/project/settings/index.md#compliance-pipeline-configuration)**<br>Define a pipeline configuration to run for any projects with a given compliance framework.|Ultimate|✓|Group|
 |**[Compliance dashboard](../user/compliance/compliance_dashboard/index.md)**<br>Quickly get visibility into the compliance posture of your organization.|Ultimate|✓|Group|
-
