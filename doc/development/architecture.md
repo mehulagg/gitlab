@@ -695,8 +695,7 @@ Sidekiq is a Ruby background job processor that pulls jobs from the Redis queue 
 
 #### Puma
 
-Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
-disabled by default.
+Starting with GitLab 13.0, Puma is the default web server.
 
 - [Project page](https://gitlab.com/gitlab-org/gitlab/blob/master/README.md)
 - Configuration:
@@ -709,23 +708,6 @@ disabled by default.
 - GitLab.com: [Puma](../user/gitlab_com/index.md#puma)
 
 [Puma](https://puma.io/) is a Ruby application server that is used to run the core Rails Application that provides the user facing features in GitLab. Often this displays in process output as `bundle` or `config.ru` depending on the GitLab version.
-
-#### Unicorn
-
-Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
-disabled by default.
-
-- [Project page](https://gitlab.com/gitlab-org/gitlab/blob/master/README.md)
-- Configuration:
-  - [Omnibus](https://docs.gitlab.com/omnibus/settings/unicorn.html)
-  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/webservice/)
-  - [Source](../install/installation.md#configure-it)
-  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
-- Layer: Core Service (Processor)
-- Process: `unicorn`
-- GitLab.com: [Unicorn](../user/gitlab_com/index.md#unicorn)
-
-[Unicorn](https://yhbt.net/unicorn/) is a Ruby application server that is used to run the core Rails Application that provides the user facing features in GitLab. Often this displays in process output as `bundle` or `config.ru` depending on the GitLab version.
 
 #### LDAP Authentication
 
