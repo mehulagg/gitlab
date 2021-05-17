@@ -1,0 +1,16 @@
+---
+name: group_level_protected_environments_alpha
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61575
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/331085
+milestone: '13.12'
+type: development
+group: group::release
+default_enabled: false
+# Important note:
+# This feature is alpha version that was built for allowing prospects
+# to test if it's a proper solution in their SLDC workflow.
+# The alpha version will never be rolled out on gitlab.com globally, nor announced
+# as a new feature in a release blogpost.
+# After the feature has been confirmed as viable solution, we'll spend additional
+# effort to make it GA. There is even a possibility that we remove this feature.
+# See https://gitlab.com/gitlab-org/gitlab/-/issues/215888 for more information.

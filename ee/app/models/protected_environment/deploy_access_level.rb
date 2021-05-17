@@ -15,6 +15,7 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
   belongs_to :user
   belongs_to :group
   belongs_to :protected_environment
+  belongs_to :group_protected_environment
 
   validates :access_level, presence: true, inclusion: { in: ALLOWED_ACCESS_LEVELS }
 

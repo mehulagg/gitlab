@@ -13547,6 +13547,23 @@ CREATE TABLE group_merge_request_approval_settings (
     require_password_to_approve boolean DEFAULT false NOT NULL
 );
 
+CREATE TABLE group_protected_environments (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    group_id bigint NOT NULL,
+    tier smallint NOT NULL
+);
+
+CREATE SEQUENCE group_protected_environments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE group_protected_environments_id_seq OWNED BY group_protected_environments.id;
+
 CREATE TABLE group_repository_storage_moves (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -19775,6 +19792,8 @@ ALTER TABLE ONLY group_group_links ALTER COLUMN id SET DEFAULT nextval('group_gr
 
 ALTER TABLE ONLY group_import_states ALTER COLUMN group_id SET DEFAULT nextval('group_import_states_group_id_seq'::regclass);
 
+ALTER TABLE ONLY group_protected_environments ALTER COLUMN id SET DEFAULT nextval('group_protected_environments_id_seq'::regclass);
+
 ALTER TABLE ONLY group_repository_storage_moves ALTER COLUMN id SET DEFAULT nextval('group_repository_storage_moves_id_seq'::regclass);
 
 ALTER TABLE ONLY historical_data ALTER COLUMN id SET DEFAULT nextval('historical_data_id_seq'::regclass);
@@ -21105,6 +21124,9 @@ ALTER TABLE ONLY group_import_states
 
 ALTER TABLE ONLY group_merge_request_approval_settings
     ADD CONSTRAINT group_merge_request_approval_settings_pkey PRIMARY KEY (group_id);
+
+ALTER TABLE ONLY group_protected_environments
+    ADD CONSTRAINT group_protected_environments_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY group_repository_storage_moves
     ADD CONSTRAINT group_repository_storage_moves_pkey PRIMARY KEY (id);
@@ -23236,6 +23258,10 @@ CREATE INDEX index_group_group_links_on_shared_with_group_id ON group_group_link
 CREATE INDEX index_group_import_states_on_group_id ON group_import_states USING btree (group_id);
 
 CREATE INDEX index_group_import_states_on_user_id ON group_import_states USING btree (user_id) WHERE (user_id IS NOT NULL);
+
+CREATE INDEX index_group_protected_environments_on_group_id ON group_protected_environments USING btree (group_id);
+
+CREATE UNIQUE INDEX index_group_protected_environments_on_group_id_and_tier ON group_protected_environments USING btree (group_id, tier);
 
 CREATE INDEX index_group_repository_storage_moves_on_group_id ON group_repository_storage_moves USING btree (group_id);
 
@@ -26576,6 +26602,9 @@ ALTER TABLE ONLY prometheus_alerts
 
 ALTER TABLE ONLY term_agreements
     ADD CONSTRAINT fk_rails_6ea6520e4a FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY group_protected_environments
+    ADD CONSTRAINT fk_rails_6f17ba50cb FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_compliance_framework_settings
     ADD CONSTRAINT fk_rails_6f5294f16c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

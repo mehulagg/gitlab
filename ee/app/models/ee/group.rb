@@ -24,6 +24,7 @@ module EE
       has_one :saml_provider
       has_many :scim_identities
       has_many :ip_restrictions, autosave: true
+      has_many :protected_environments, inverse_of: :group
       has_one :insight, foreign_key: :namespace_id
       accepts_nested_attributes_for :insight, allow_destroy: true
       has_one :scim_oauth_access_token
