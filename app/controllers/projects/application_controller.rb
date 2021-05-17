@@ -21,7 +21,7 @@ class Projects::ApplicationController < ApplicationController
   private
 
   def sticky_project
-    NamespaceShard.sticky_shard(@project) { yield }
+    NamespaceShard.stick_if_not(project) { yield }
   end
 
   def project

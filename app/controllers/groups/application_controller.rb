@@ -17,7 +17,7 @@ class Groups::ApplicationController < ApplicationController
   private
 
   def sticky_group
-    NamespaceShard.sticky_shard(@group) { yield }
+    NamespaceShard.stick_if_not(group) { yield }
   end
 
   def group

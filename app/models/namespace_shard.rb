@@ -34,9 +34,19 @@ class NamespaceShard < ApplicationRecord
   end
 
   def self.sticky_shard(subject, &block)
-    shard_name = subject&.current_shard || all_shards.sample.to_sym
+    if shard_name = subject&.database_shard_name
+      NamespaceShard.connected_to(role: :writing, shard: shard_name, &block)
+    else
+      NamespaceShard.connected_to(role: :writing, shard: all_shards.sample.to_sym, &block)
+    end
+  end
 
-    NamespaceShard.connected_to(role: :writing, shard: shard_name, &block)
+  def self.stick_if_not(subject, &block)
+    if NamespaceShard.current_shard == :default
+      sticky_shard(subject, &block)
+    else
+      yield
+    end
   end
 
   def self.random_shard(&block)
@@ -67,8 +77,8 @@ class NamespaceShard < ApplicationRecord
   end
 
   def self.find(id)
-    self.find_first { super rescue nil }
-
-    raise ActiveRecord::RecordNotFound
+    result = self.find_first { super rescue nil } 
+    raise ActiveRecord::RecordNotFound unless result
+    result
   end
 end

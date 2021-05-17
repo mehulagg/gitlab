@@ -20,6 +20,7 @@ class GroupsController < Groups::ApplicationController
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
+  around_action :sticky_group, except: [:index, :new, :create]
 
   # Authorize
   before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
@@ -58,10 +59,15 @@ class GroupsController < Groups::ApplicationController
   feature_category :projects, [:projects]
   feature_category :importers, [:export, :download_export]
 
+  around_action :sticky_parent_group, only: [:new, :create]
+  
+  def sticky_parent_group
+    NamespaceShard.sticky_shard(parent_group) { yield }
+  end
+
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
   end
-
   def new
     @group = Group.new(parent: parent_group)
   end

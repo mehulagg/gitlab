@@ -52,6 +52,15 @@ class ProjectsController < Projects::ApplicationController
   feature_category :audit_events, [:activity]
   feature_category :code_review, [:unfoldered_environment_names]
 
+  around_action :sticky_namespace, only: [:new, :create]
+
+  def sticky_namespace
+    namespace_id = params[:namespace_id]
+    namespace_id ||= params.dig(:project, :namespace_id)
+    namespace = Namespace.find(namespace_id)
+    NamespaceShard.sticky_shard(namespace) { yield }
+  end
+
   def index
     redirect_to(current_user ? root_path : explore_root_path)
   end
