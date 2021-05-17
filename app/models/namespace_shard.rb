@@ -12,7 +12,7 @@ class NamespaceShard < ApplicationRecord
     sharded_database_names = configured_database_names - ['primary']
     connects_to_shards = sharded_database_names.each_with_object({}) { |name, hash| hash[name.to_sym] = { writing: name.to_sym, reading: name.to_sym } }
 
-    connects_to shards: default_shard.merge(connects_to_shards)
+    connects_to shards: connects_to_shards
   else
     connects_to shards: default_shard
   end
