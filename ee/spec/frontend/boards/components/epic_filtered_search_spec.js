@@ -4,10 +4,7 @@ import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-<<<<<<< HEAD
 import issueBoardFilters from '~/boards/issue_board_filters';
-=======
->>>>>>> origin/master
 
 describe('EpicFilteredSearch', () => {
   let wrapper;
@@ -15,16 +12,11 @@ describe('EpicFilteredSearch', () => {
 
   const createComponent = ({ initialFilterParams = {} } = {}) => {
     wrapper = shallowMount(EpicFilteredSearch, {
-<<<<<<< HEAD
       provide: { initialFilterParams },
       props: {
         fullPath: '',
         boardType: '',
       },
-=======
-      provide: { initialFilterParams, fullPath: '' },
-      store,
->>>>>>> origin/master
     });
   };
 
@@ -70,11 +62,7 @@ describe('EpicFilteredSearch', () => {
           fetchAuthors,
         },
       ];
-<<<<<<< HEAD
       expect(wrapper.find(BoardFilteredSearch).props('tokens').toString()).toBe(tokens.toString());
-=======
-      expect(wrapper.find(BoardFilteredSearch).props('tokens')).toEqual(tokens);
->>>>>>> origin/master
     });
   });
 });
