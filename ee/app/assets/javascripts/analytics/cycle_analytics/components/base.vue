@@ -130,7 +130,6 @@ export default {
       this.fetchCycleAnalyticsData();
     },
     onStageSelect(stage) {
-      this.hideForm();
       if (stage.slug === OVERVIEW_STAGE_ID) {
         this.setDefaultSelectedStage();
       } else {
