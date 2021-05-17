@@ -172,6 +172,7 @@ export default {
 
 <template>
   <section id="cluster-applications">
+    <p class="warning">In GitLab 14.0, we are deprecating one-click install of GitLab Managed Apps. You will still be able to integrate Prometheus and Elastic Stack with GitLab by enabling the integrations from the integrations tab. Learn more about the application depreciation and cluster integrations.</p>
     <p class="gl-mb-0">
       {{
         s__(`ClusterIntegration|Choose which applications to install on your Kubernetes cluster.`)
