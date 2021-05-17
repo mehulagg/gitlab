@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Issue::Metrics < ApplicationRecord
+class Issue::Metrics < NamespaceShard
   belongs_to :issue
 
   scope :for_issues, ->(issues) { where(issue: issues) }
