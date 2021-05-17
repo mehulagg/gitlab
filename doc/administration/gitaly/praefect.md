@@ -90,6 +90,10 @@ with secure tokens as you complete the setup process.
    Praefect cluster directly; that could lead to data loss.
 1. `PRAEFECT_SQL_PASSWORD`: this password is used by Praefect to connect to
    PostgreSQL.
+1. `PRAEFECT_SQL_PASSWORD_HASH`: the hash of password that is used by PgBouncer.
+   Use `gitlab-ctl pg-password-md5 praefect` to generate the hash. The command
+   asks for the password for `praefect` user. Enter `PRAEFECT_SQL_PASSWORD`
+   plaintext password.
 
 We note in the instructions below where these secrets are required.
 
@@ -114,6 +118,25 @@ failure. The following options are available:
   - Set up a separate [PostgreSQL instance](https://www.postgresql.org/docs/11/high-availability.html).
   - Use a cloud-managed PostgreSQL service. AWS
      [Relational Database Service](https://aws.amazon.com/rds/) is recommended.
+
+#### Automatic preparation
+
+You can instruct Omnibus GitLab to configure Praefect user and database. This is the most convenient way to
+set up PgBouncer. Use the following configuration in `gitlab.rb`:
+
+```ruby
+praefect['create_database'] = true   # This is the default
+praefect['database_dbname'] = 'praefect_production'
+praefect['database_password'] = PRAEFECT_SQL_PASSWORD
+
+praefect['pgbouncer_user'] = 'praefect'
+praefect['pgbouncer_user_password'] = PRAEFECT_SQL_PASSWORD_HASH
+```
+
+This configuration will create `praefect` user and `praefect_production` database. Note that PgBouncer uses
+password hash while Praefect itself works with the plaintext password.
+
+#### Manual preparation
 
 To complete this section you need:
 
@@ -161,63 +184,69 @@ node, using `psql` which is installed by Omnibus GitLab.
 
 The database used by Praefect is now configured.
 
-#### PgBouncer
+#### Using PgBouncer
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
 [PgBouncer](https://www.pgbouncer.org/) in front of the PostgreSQL instance. To do
 this, set the corresponding IP or host address of the PgBouncer instance in
-`/etc/gitlab/gitlab.rb` by changing the following settings:
+`/etc/gitlab/gitlab.rb` by setting `praefect['database_host']` and `praefect['database_port']`.
 
-- `praefect['database_host']`, for the address.
-- `praefect['database_port']`, for the port.
+Praefect requires an additional connection to the PostgreSQL that supports
+[LISTEN](https://www.postgresql.org/docs/11/sql-listen.html) feature. With PgBouncer
+this feature is only available in session pool mode (when `pool_mode = session`) and
+it not supported in transaction pooling mode (when `pool_mode = transaction`).
 
-Because PgBouncer manages resources more efficiently, Praefect still requires a
-direct connection to the PostgreSQL database. It uses the
-[LISTEN](https://www.postgresql.org/docs/11/sql-listen.html)
-feature that is [not supported](https://www.pgbouncer.org/features.html) by
-PgBouncer with `pool_mode = transaction`.
-Set `praefect['database_host_no_proxy']` and `praefect['database_port_no_proxy']`
-to a direct connection, and not a PgBouncer connection.
+To address this, you must either connect Praefect directly to PostgreSQL or configure
+a new PgBouncer connection pool with `pool_mode = session` that connects to the same
+PostgreSQL database.
 
-Save the changes to `/etc/gitlab/gitlab.rb` and
-[reconfigure Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+Praefect can be configured to use different connection parameters for direct access to
+PostgreSQL. Set `praefect['database_direct_host']` and `praefect['database_direct_port']`
+to a direct PostgreSQL connection, and not a PgBouncer connection.
 
-This documentation doesn't provide PgBouncer installation instructions,
-but you can:
+However, we recommend using PgBouncer with session pooling. This documentation does not
+provide PgBouncer installation instructions, but you can find instructions on the
+[official website](https://www.pgbouncer.org/install.html). You can also use the [bundled
+PgBouncer](../postgresql/pgbouncer.md). Its configuration is extensively documented.
 
-- Find instructions on the [official website](https://www.pgbouncer.org/install.html).
-- Use a [Docker image](https://hub.docker.com/r/edoburu/pgbouncer/).
+The following example sets up two separate connection pools, one in session pool mode
+and another in transaction pool mode. 
 
-In addition to the base PgBouncer configuration options, set the following values in
-your `pgbouncer.ini` file:
+```ruby
+pgbouncer['databases'] = {
+  ...
 
-- The [Praefect PostgreSQL database](#postgresql) in the `[databases]` section:
+  praefect_production: {
+    host: POSTGRESQL_SERVER_ADDRESS,
+    user: 'praefect',
+    password: PRAEFECT_SQL_PASSWORD_HASH,
+    pool_mode: 'transaction'
+  }
+  praefect_production_direct: {
+    host: POSTGRESQL_SERVER_ADDRESS,
+    user: 'praefect',
+    password: PRAEFECT_SQL_PASSWORD_HASH,
+    pool_mode: 'session'
+  },
 
-   ```ini
-   [databases]
-   * = host=POSTGRESQL_SERVER_ADDRESS port=5432 auth_user=praefect
-   ```
+  ...
+}
+```
 
-- [`pool_mode`](https://www.pgbouncer.org/config.html#pool_mode)
-  and [`ignore_startup_parameters`](https://www.pgbouncer.org/config.html#ignore_startup_parameters)
-  in the `[pgbouncer]` section:
+Both `praefect_production` and `praefect_production_direct` use the same database endpoint
+but use different [pool modes](https://www.pgbouncer.org/config.html#pool_mode). This
+will create the following `[databases]` section for PgBouncer:
 
-   ```ini
-   [pgbouncer]
-   pool_mode = transaction
-   ignore_startup_parameters = extra_float_digits
-   ```
+```ini
+[databases]
+praefect_production = host=POSTGRESQL_SERVER_ADDRESS auth_user=praefect pool_mode=transaction
+praefect_production_direct = host=POSTGRESQL_SERVER_ADDRESS auth_user=praefect pool_mode=session
+```
 
-The `praefect` user and its password should be included in the file (default is
-`userlist.txt`) used by PgBouncer if the [`auth_file`](https://www.pgbouncer.org/config.html#auth_file)
+NOTE: 
+When you are using manual configuation, the `praefect` user and its password should be included in
+the file (default is `userlist.txt`) used by PgBouncer if the [`auth_file`](https://www.pgbouncer.org/config.html#auth_file)
 configuration option is set.
-
-NOTE:
-By default PgBouncer uses port `6432` to accept incoming
-connections. You can change it by setting the [`listen_port`](https://www.pgbouncer.org/config.html#listen_port)
-configuration option. We recommend setting it to the default port value (`5432`) used by
-PostgreSQL instances. Otherwise you should change the configuration parameter
-`praefect['database_port']` for each Praefect instance to the correct value.
 
 ### Praefect
 
