@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class IssueAssignee < ApplicationRecord
+class IssueAssignee < NamespaceShard
   extend SuppressCompositePrimaryKeyWarning
 
   belongs_to :issue
