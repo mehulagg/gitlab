@@ -104,7 +104,7 @@ export default {
     },
     getFilterParams(filters = []) {
       const notFilters = filters.filter((item) => item.value.operator === '!=');
-      const equalsFilters = filters.filter((item) => item.value.operator === '=');
+      const equalsFilters = filters.filter((item) => item?.value?.operator === '=' || item.type === 'filtered-search-term');
 
       return { ...this.generateParams(equalsFilters), not: { ...this.generateParams(notFilters) } };
     },
