@@ -67,10 +67,6 @@ export default {
       );
     },
     shouldShowMergeImmediatelyDropdown() {
-      if (this.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
-        return true;
-      }
-
       return this.isPipelineActive && !this.stateData.onlyAllowMergeIfPipelineSucceeds;
     },
     isMergeImmediatelyDangerous() {
