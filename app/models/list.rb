@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class List < ApplicationRecord
+class List < NamespaceShard
   include Boards::Listable
   include Importable
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Board < ApplicationRecord
+class Board < NamespaceShard
   belongs_to :group
   belongs_to :project
 

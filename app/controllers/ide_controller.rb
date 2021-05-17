@@ -7,6 +7,8 @@ class IdeController < ApplicationController
   include StaticObjectExternalStorageCSP
   include Gitlab::Utils::StrongMemoize
 
+  around_action :sticky_project
+
   before_action do
     push_frontend_feature_flag(:build_service_proxy)
     push_frontend_feature_flag(:schema_linting)
@@ -21,6 +23,10 @@ class IdeController < ApplicationController
   end
 
   private
+
+  def sticky_project
+    NamespaceShard.sticky_shard(project) { yield }
+  end
 
   def define_index_vars
     return unless project
