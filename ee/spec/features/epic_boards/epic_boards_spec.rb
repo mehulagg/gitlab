@@ -298,8 +298,8 @@ RSpec.describe 'epic boards', :js do
       wait_for_requests
 
       expect(page).to have_content('Epic1')
-      expect(page).to_not have_content('Epic2')
-      expect(page).to_not have_content('Epic3')
+      expect(page).not_to have_content('Epic2')
+      expect(page).not_to have_content('Epic3')
     end
   end
 
