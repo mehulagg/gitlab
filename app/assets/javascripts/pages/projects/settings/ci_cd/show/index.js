@@ -7,6 +7,7 @@ import registrySettingsApp from '~/packages_and_registries/settings/project/regi
 import { initInstallRunner } from '~/pages/shared/mount_runner_instructions';
 import initSharedRunnersToggle from '~/projects/settings/mount_shared_runners_toggle';
 import initSettingsPanels from '~/settings_panels';
+import initTokenAccess from '~/token_access';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -38,4 +39,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initArtifactsSettings();
   initSharedRunnersToggle();
   initInstallRunner();
+  initTokenAccess();
 });

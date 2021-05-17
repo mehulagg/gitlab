@@ -2038,6 +2038,9 @@ msgstr ""
 msgid "Add previously merged commits"
 msgstr ""
 
+msgid "Add project"
+msgstr ""
+
 msgid "Add projects"
 msgstr ""
 
@@ -5675,6 +5678,9 @@ msgstr ""
 msgid "CI/CD configuration file"
 msgstr ""
 
+msgid "CI/CD|No projects have been added to the scope"
+msgstr ""
+
 msgid "CICDAnalytics|%{percent}%{percentSymbol}"
 msgstr ""
 
@@ -5707,6 +5713,9 @@ msgstr ""
 msgid "CICD|Add a %{kubernetes_cluster_link_start}Kubernetes cluster integration%{link_end} with a domain, or create an AUTO_DEVOPS_PLATFORM_TARGET CI variable."
 msgstr ""
 
+msgid "CICD|Add an existing project to the scope"
+msgstr ""
+
 msgid "CICD|Auto DevOps"
 msgstr ""
 
@@ -5729,6 +5738,12 @@ msgid "CICD|Deployment strategy"
 msgstr ""
 
 msgid "CICD|Jobs"
+msgstr ""
+
+msgid "CICD|Limit CI_JOB_TOKEN access"
+msgstr ""
+
+msgid "CICD|Manage which projects can use this project's CI_JOB_TOKEN CI/CD variable for API access"
 msgstr ""
 
 msgid "CICD|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
@@ -9022,6 +9037,9 @@ msgid "Control emails linked to your account"
 msgstr ""
 
 msgid "Control the display of third party offers."
+msgstr ""
+
+msgid "Control which projects can use the CI_JOB_TOKEN CI/CD variable for API access to this project. It is a security risk to disable this feature, because unauthorized projects may attempt to retrieve an active token and access the API."
 msgstr ""
 
 msgid "Cookie domain"
@@ -28574,6 +28592,9 @@ msgstr ""
 msgid "Search for a user"
 msgstr ""
 
+msgid "Search for project"
+msgstr ""
+
 msgid "Search for projects, issues, etc."
 msgstr ""
 
@@ -34110,6 +34131,9 @@ msgid "Toggles :%{name}: emoji award."
 msgstr ""
 
 msgid "Token"
+msgstr ""
+
+msgid "Token Access"
 msgstr ""
 
 msgid "Token valid until revoked"
