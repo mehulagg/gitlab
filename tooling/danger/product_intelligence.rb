@@ -52,7 +52,7 @@ module Tooling
       end
 
       def dictionary_changed_file
-        all_changed_files.grep(%r{(doc/development/usage_ping/dictionary.md)})
+        all_changed_files.grep(%r{(doc/development/usage_ping/dictionary\.md)})
       end
 
       def metrics_changed_files
@@ -73,7 +73,7 @@ module Tooling
           'data-track-action'
         )
         all_changed_files.select do |file|
-          matching_files?(file, extension: '.rb', pattern: %r{Gitlab::Tracking\.event}) ||
+          matching_files?(file, extension: '.rb', pattern: %r{Gitlab::Tracking\.(event|enabled\?|snowplow_options)$}) ||
             matching_files?(file, extension: '.js', pattern: js_patterns) ||
             matching_files?(file, extension: '.vue', pattern: js_patterns) ||
             matching_files?(file, extension: '.haml', pattern: %r{data: \{ track})
