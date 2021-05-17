@@ -41,11 +41,8 @@ module Routable
     return unless route
     return route if route.is_a?(Routable)
 
-    NamespaceShard.sharded_read_from_namespace_id(route.source_id) do
-      result = route.source
-      Rails.logger.info("route result=#{result}")
-      Rails.logger.info caller
-      result
+    NamespaceShard.read_for_id(route.source_id) do
+      route.source
     end
   end
 

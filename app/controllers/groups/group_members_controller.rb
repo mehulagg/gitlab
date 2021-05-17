@@ -12,8 +12,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
     %i[index leave request_access]
   end
 
-  around_action :shard!, only: [:index]
-
   # Authorize
   before_action :authorize_admin_group_member!, except: admin_not_required_endpoints
 
@@ -55,10 +53,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
   alias_method :membershipable, :group
 
   private
-
-  def shard!(&block)
-    NamespaceShard.sharded_read(namespace: group, &block)
-  end
 
   def preload_max_access
     return unless current_user

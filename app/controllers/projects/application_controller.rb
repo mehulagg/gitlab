@@ -7,6 +7,7 @@ class Projects::ApplicationController < ApplicationController
 
   skip_before_action :authenticate_user!
   before_action :project
+  around_action :sticky_project
   before_action :repository
   layout 'project'
 
@@ -18,6 +19,10 @@ class Projects::ApplicationController < ApplicationController
   end
 
   private
+
+  def sticky_project
+    NamespaceShard.sticky_shard(@project) { yield }
+  end
 
   def project
     return @project if @project

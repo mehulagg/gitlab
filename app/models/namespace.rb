@@ -116,12 +116,6 @@ class Namespace < NamespaceShard
   attr_writer :root_ancestor, :emails_disabled_memoized
 
   class << self
-    def sharded_find(id)
-      NamespaceShard.sharded_read_from_namespace_id(id) do
-        find(id)
-      end
-    end
-
     def by_path(path)
       find_by('lower(path) = :value', value: path.downcase)
     end

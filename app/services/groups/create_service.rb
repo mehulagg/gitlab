@@ -54,7 +54,7 @@ module Groups
     def parent_group
       return unless params[:parent_id].present?
 
-      @parent_group ||= Group.sharded_find(params[:parent_id])
+      @parent_group ||= Group.find(params[:parent_id])
     end
 
     def after_build_hook(group, params)

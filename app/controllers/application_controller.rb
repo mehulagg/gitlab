@@ -44,7 +44,6 @@ class ApplicationController < ActionController::Base
   before_action :auth_user
 
   prepend_around_action :set_current_context
-  prepend_around_action :shard_read!
 
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
   around_action :set_locale
@@ -132,20 +131,6 @@ class ApplicationController < ActionController::Base
   end
 
   protected
-
-  def top_level_namespace_shard
-    Gitlab::Sharding::Current.top_level_namespace_shard
-  end
-
-  def shard_read!(&block)
-    if top_level_namespace_shard
-      # TODO sharded_read fails with ActiveRecord::ReadOnlyError in some places,
-      # e.g. lib/gitlab/markdown_cache/active_record/extension.rb:41
-      NamespaceShard.sharded_write(shard: top_level_namespace_shard, &block)
-    else
-      yield
-    end
-  end
 
   def workhorse_excluded_content_types
     @workhorse_excluded_content_types ||= %w(text/html application/json)
