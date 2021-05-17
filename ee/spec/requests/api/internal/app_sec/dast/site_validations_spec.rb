@@ -90,10 +90,18 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
             end
           end
 
-          it_behaves_like 'it transitions', :start
-          it_behaves_like 'it transitions', :fail_op
-          it_behaves_like 'it transitions', :retry
-          it_behaves_like 'it transitions', :pass
+          context 'when the state transition is valid' do
+            let(:event_param) { :start }
+
+            it 'updates the record' do
+              expect { subject }.to change { site_validation.reload.state }.from('pending').to('inprogress')
+            end
+
+            it_behaves_like 'it transitions', :start
+            it_behaves_like 'it transitions', :fail_op
+            it_behaves_like 'it transitions', :retry
+            it_behaves_like 'it transitions', :pass
+          end
         end
       end
     end
