@@ -5,6 +5,13 @@ module API
     module AppSec
       module Dast
         class SiteValidations < ::API::Base
+          helpers ::API::Helpers::JobsHelper
+
+          before do
+            authenticate!
+            validate_current_authenticated_job!
+          end
+
           feature_category :dynamic_application_security_testing
 
           namespace :internal do
@@ -13,13 +20,13 @@ module API
                 desc 'Transition a DAST site validation.' do
                   detail 'Transitions a DAST site validation to a new state.'
                 end
+                route_setting :authentication, job_token_allowed: true
                 params do
                   requires :event, type: String, desc: 'The transition event.'
                 end
                 put ':id/transition' do
                   validation = DastSiteValidation.find(params[:id])
-
-                  unauthorized! unless Ability.allowed?(current_user, :create_on_demand_dast_scan, validation.project)
+                  authorize!(:create_on_demand_dast_scan, validation.project)
 
                   success = case params[:event]
                             when 'start'
@@ -32,7 +39,7 @@ module API
                               validation.pass
                             end
 
-                  render_api_error!('Could not update DAST site validation', 400) unless success
+                  bad_request!('Could not update DAST site validation') unless success
 
                   status 200, { state: validation.state }
                 end

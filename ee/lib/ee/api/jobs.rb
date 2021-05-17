@@ -12,7 +12,7 @@ module EE
           end
           route_setting :authentication, job_token_allowed: true
           get '/allowed_agents', feature_category: :kubernetes_management do
-            validate_current_authenticated_job
+            validate_current_authenticated_job!
 
             status 200
 

@@ -3,6 +3,7 @@
 module API
   class Jobs < ::API::Base
     include PaginationParams
+    helpers ::API::Helpers::JobsHelper
 
     before { authenticate! }
 
@@ -173,7 +174,7 @@ module API
       end
       route_setting :authentication, job_token_allowed: true
       get '', feature_category: :continuous_integration do
-        validate_current_authenticated_job
+        validate_current_authenticated_job!
 
         present current_authenticated_job, with: Entities::Ci::Job
       end
@@ -192,12 +193,6 @@ module API
         builds.where(status: available_statuses && scope)
       end
       # rubocop: enable CodeReuse/ActiveRecord
-
-      def validate_current_authenticated_job
-        # current_authenticated_job will be nil if user is using
-        # a valid authentication (like PRIVATE-TOKEN) that is not CI_JOB_TOKEN
-        not_found!('Job') unless current_authenticated_job
-      end
     end
   end
 end
