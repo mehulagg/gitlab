@@ -30,11 +30,13 @@ When updating the version of an existing library, skip to [vetting a library](#v
 
 A merge request's **author** responsbilities are:
 - Before adding a new library, evaluate it as described in [introducing a new library](#adding-a-new-library). Document the result of the evaluation for the MR reviewer.
-- Before assigning to a reviewer, vet the dependency as described in [vetting a library](#vetting-a-library). If the library passes the vetting, continue to assign the MR to the reviewer.
+- Add labels to the MR. If your MR adds, updates, and/or removes libraries add the label(s) ~"dependeny addition", ~"dependeny update", ~"dependeny removal", respectively.
+- Before assigning to a reviewer, vet the dependency as described in [vetting a library](#vetting-a-library). If the library passes the vetting, add the label ~"dependency-review:awaiting" and continue to assign the MR to the reviewer.
 
 A merge request's **reviewers** responsbilities are:
 - In case the MR adds a new library, check that the author evaluated the library as described in [introducing a new library](#adding-a-new-library) and that the evaluation is sound.
 - Vet the dependency as described in [vetting a library](#vetting-a-library). If no issues are identified, proceed with merging the changes.
+- Once the review is completed, add the label "dependency-review:completed".
 
 ## Adding a new library
 
