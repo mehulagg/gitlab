@@ -11183,6 +11183,39 @@ ALTER SEQUENCE public.boards_epic_board_positions_id_seq OWNED BY public.boards_
 
 
 --
+-- Name: boards_epic_board_recent_visits; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.boards_epic_board_recent_visits (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    epic_board_id bigint NOT NULL,
+    group_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: boards_epic_board_recent_visits_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.boards_epic_board_recent_visits_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: boards_epic_board_recent_visits_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.boards_epic_board_recent_visits_id_seq OWNED BY public.boards_epic_board_recent_visits.id;
+
+
+--
 -- Name: boards_epic_boards; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -17321,6 +17354,71 @@ CREATE SEQUENCE public.in_product_marketing_emails_id_seq
 --
 
 ALTER SEQUENCE public.in_product_marketing_emails_id_seq OWNED BY public.in_product_marketing_emails.id;
+
+
+--
+-- Name: incident_management_escalation_policies; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.incident_management_escalation_policies (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    name text NOT NULL,
+    description text,
+    CONSTRAINT check_510b2a5258 CHECK ((char_length(description) <= 160)),
+    CONSTRAINT check_9a26365850 CHECK ((char_length(name) <= 72))
+);
+
+
+--
+-- Name: incident_management_escalation_policies_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.incident_management_escalation_policies_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: incident_management_escalation_policies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.incident_management_escalation_policies_id_seq OWNED BY public.incident_management_escalation_policies.id;
+
+
+--
+-- Name: incident_management_escalation_rules; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.incident_management_escalation_rules (
+    id bigint NOT NULL,
+    policy_id bigint NOT NULL,
+    oncall_schedule_id bigint NOT NULL,
+    status smallint NOT NULL,
+    elapsed_time_seconds integer NOT NULL
+);
+
+
+--
+-- Name: incident_management_escalation_rules_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.incident_management_escalation_rules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: incident_management_escalation_rules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.incident_management_escalation_rules_id_seq OWNED BY public.incident_management_escalation_rules.id;
 
 
 --
@@ -27031,6 +27129,13 @@ ALTER TABLE ONLY public.boards_epic_board_positions ALTER COLUMN id SET DEFAULT 
 
 
 --
+-- Name: boards_epic_board_recent_visits id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.boards_epic_board_recent_visits ALTER COLUMN id SET DEFAULT nextval('public.boards_epic_board_recent_visits_id_seq'::regclass);
+
+
+--
 -- Name: boards_epic_boards id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -28162,6 +28267,20 @@ ALTER TABLE ONLY public.import_failures ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.in_product_marketing_emails ALTER COLUMN id SET DEFAULT nextval('public.in_product_marketing_emails_id_seq'::regclass);
+
+
+--
+-- Name: incident_management_escalation_policies id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_policies ALTER COLUMN id SET DEFAULT nextval('public.incident_management_escalation_policies_id_seq'::regclass);
+
+
+--
+-- Name: incident_management_escalation_rules id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_rules ALTER COLUMN id SET DEFAULT nextval('public.incident_management_escalation_rules_id_seq'::regclass);
 
 
 --
@@ -30663,6 +30782,14 @@ ALTER TABLE ONLY public.boards_epic_board_positions
 
 
 --
+-- Name: boards_epic_board_recent_visits boards_epic_board_recent_visits_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.boards_epic_board_recent_visits
+    ADD CONSTRAINT boards_epic_board_recent_visits_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: boards_epic_boards boards_epic_boards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -32092,6 +32219,22 @@ ALTER TABLE ONLY public.in_product_marketing_emails
 
 ALTER TABLE ONLY public.incident_management_oncall_shifts
     ADD CONSTRAINT inc_mgmnt_no_overlapping_oncall_shifts EXCLUDE USING gist (rotation_id WITH =, tstzrange(starts_at, ends_at, '[)'::text) WITH &&);
+
+
+--
+-- Name: incident_management_escalation_policies incident_management_escalation_policies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_policies
+    ADD CONSTRAINT incident_management_escalation_policies_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: incident_management_escalation_rules incident_management_escalation_rules_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_rules
+    ADD CONSTRAINT incident_management_escalation_rules_pkey PRIMARY KEY (id);
 
 
 --
@@ -34871,6 +35014,13 @@ CREATE INDEX idx_ci_pipelines_artifacts_locked ON public.ci_pipelines USING btre
 
 
 --
+-- Name: idx_container_exp_policies_on_project_id_next_run_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at ON public.container_expiration_policies USING btree (project_id, next_run_at) WHERE (enabled = true);
+
+
+--
 -- Name: idx_container_exp_policies_on_project_id_next_run_at_enabled; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35925,6 +36075,27 @@ CREATE INDEX index_boards_epic_board_positions_on_epic_id ON public.boards_epic_
 --
 
 CREATE INDEX index_boards_epic_board_positions_on_scoped_relative_position ON public.boards_epic_board_positions USING btree (epic_board_id, epic_id, relative_position);
+
+
+--
+-- Name: index_boards_epic_board_recent_visits_on_epic_board_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_boards_epic_board_recent_visits_on_epic_board_id ON public.boards_epic_board_recent_visits USING btree (epic_board_id);
+
+
+--
+-- Name: index_boards_epic_board_recent_visits_on_group_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_boards_epic_board_recent_visits_on_group_id ON public.boards_epic_board_recent_visits USING btree (group_id);
+
+
+--
+-- Name: index_boards_epic_board_recent_visits_on_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_boards_epic_board_recent_visits_on_user_id ON public.boards_epic_board_recent_visits USING btree (user_id);
 
 
 --
@@ -37892,6 +38063,13 @@ CREATE INDEX index_environments_on_state_and_auto_stop_at ON public.environments
 --
 
 CREATE UNIQUE INDEX index_epic_board_list_preferences_on_user_and_list ON public.boards_epic_list_user_preferences USING btree (user_id, epic_list_id);
+
+
+--
+-- Name: index_epic_board_recent_visits_on_user_group_and_board; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_epic_board_recent_visits_on_user_group_and_board ON public.boards_epic_board_recent_visits USING btree (user_id, group_id, epic_board_id);
 
 
 --
@@ -40415,10 +40593,31 @@ CREATE INDEX index_on_namespaces_lower_path ON public.namespaces USING btree (lo
 
 
 --
+-- Name: index_on_oncall_schedule_escalation_rule; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_on_oncall_schedule_escalation_rule ON public.incident_management_escalation_rules USING btree (oncall_schedule_id);
+
+
+--
 -- Name: index_on_pages_metadata_not_migrated; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_on_pages_metadata_not_migrated ON public.project_pages_metadata USING btree (project_id) WHERE ((deployed = true) AND (pages_deployment_id IS NULL));
+
+
+--
+-- Name: index_on_policy_schedule_status_elapsed_time_escalation_rules; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_on_policy_schedule_status_elapsed_time_escalation_rules ON public.incident_management_escalation_rules USING btree (policy_id, oncall_schedule_id, status, elapsed_time_seconds);
+
+
+--
+-- Name: index_on_project_id_escalation_policy_name_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_on_project_id_escalation_policy_name_unique ON public.incident_management_escalation_policies USING btree (project_id, name);
 
 
 --
@@ -45468,27 +45667,11 @@ ALTER TABLE ONLY public.ci_test_cases
 
 
 --
--- Name: issues fk_05f1e72feb; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.issues
-    ADD CONSTRAINT fk_05f1e72feb FOREIGN KEY (author_id) REFERENCES public.users(id) ON DELETE SET NULL;
-
-
---
 -- Name: merge_requests fk_06067f5644; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.merge_requests
     ADD CONSTRAINT fk_06067f5644 FOREIGN KEY (latest_merge_request_diff_id) REFERENCES public.merge_request_diffs(id) ON DELETE SET NULL;
-
-
---
--- Name: projects fk_0a31cca0b8; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.projects
-    ADD CONSTRAINT fk_0a31cca0b8 FOREIGN KEY (marked_for_deletion_by_user_id) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --
@@ -45740,14 +45923,6 @@ ALTER TABLE ONLY public.notes
 
 
 --
--- Name: members fk_2e88fb7ce9; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.members
-    ADD CONSTRAINT fk_2e88fb7ce9 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
 -- Name: lists fk_30f2a831f4; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -45961,14 +46136,6 @@ ALTER TABLE ONLY public.vulnerability_feedback
 
 ALTER TABLE ONLY public.deploy_keys_projects
     ADD CONSTRAINT fk_58a901ca7e FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
-
-
---
--- Name: issue_assignees fk_5e0c8d9154; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.issue_assignees
-    ADD CONSTRAINT fk_5e0c8d9154 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -46828,14 +46995,6 @@ ALTER TABLE ONLY public.geo_event_log
 
 
 --
--- Name: issues fk_c63cbf6c25; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.issues
-    ADD CONSTRAINT fk_c63cbf6c25 FOREIGN KEY (closed_by_id) REFERENCES public.users(id) ON DELETE SET NULL;
-
-
---
 -- Name: issue_links fk_c900194ff2; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -47332,14 +47491,6 @@ ALTER TABLE ONLY public.project_import_data
 
 
 --
--- Name: issues fk_ffed080f01; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.issues
-    ADD CONSTRAINT fk_ffed080f01 FOREIGN KEY (updated_by_id) REFERENCES public.users(id) ON DELETE SET NULL;
-
-
---
 -- Name: geo_event_log fk_geo_event_log_on_geo_event_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -47753,6 +47904,14 @@ ALTER TABLE ONLY public.packages_build_infos
 
 ALTER TABLE ONLY public.security_orchestration_policy_rule_schedules
     ADD CONSTRAINT fk_rails_17ade83f17 FOREIGN KEY (security_orchestration_policy_configuration_id) REFERENCES public.security_orchestration_policy_configurations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: incident_management_escalation_rules fk_rails_17dbea07a6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_rules
+    ADD CONSTRAINT fk_rails_17dbea07a6 FOREIGN KEY (policy_id) REFERENCES public.incident_management_escalation_policies(id) ON DELETE CASCADE;
 
 
 --
@@ -49796,6 +49955,14 @@ ALTER TABLE ONLY public.packages_pypi_metadata
 
 
 --
+-- Name: boards_epic_board_recent_visits fk_rails_96c2c18642; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.boards_epic_board_recent_visits
+    ADD CONSTRAINT fk_rails_96c2c18642 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: packages_dependency_links fk_rails_96ef1c00d3; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -50244,6 +50411,14 @@ ALTER TABLE ONLY public.merge_trains
 
 
 --
+-- Name: incident_management_escalation_rules fk_rails_b3c9c17bd4; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_rules
+    ADD CONSTRAINT fk_rails_b3c9c17bd4 FOREIGN KEY (oncall_schedule_id) REFERENCES public.incident_management_oncall_schedules(id) ON DELETE CASCADE;
+
+
+--
 -- Name: application_settings fk_rails_b53e481273; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -50481,6 +50656,14 @@ ALTER TABLE ONLY public.pages_deployments
 
 ALTER TABLE ONLY public.merge_request_user_mentions
     ADD CONSTRAINT fk_rails_c440b9ea31 FOREIGN KEY (note_id) REFERENCES public.notes(id) ON DELETE CASCADE;
+
+
+--
+-- Name: boards_epic_board_recent_visits fk_rails_c4dcba4a3e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.boards_epic_board_recent_visits
+    ADD CONSTRAINT fk_rails_c4dcba4a3e FOREIGN KEY (group_id) REFERENCES public.namespaces(id) ON DELETE CASCADE;
 
 
 --
@@ -50900,6 +51083,14 @@ ALTER TABLE ONLY public.serverless_domain_cluster
 
 
 --
+-- Name: incident_management_escalation_policies fk_rails_e5b513daa7; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.incident_management_escalation_policies
+    ADD CONSTRAINT fk_rails_e5b513daa7 FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
 -- Name: vulnerability_external_issue_links fk_rails_e5ba7f7b13; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -50953,6 +51144,14 @@ ALTER TABLE ONLY public.draft_notes
 
 ALTER TABLE ONLY public.namespace_package_settings
     ADD CONSTRAINT fk_rails_e773444769 FOREIGN KEY (namespace_id) REFERENCES public.namespaces(id) ON DELETE CASCADE;
+
+
+--
+-- Name: boards_epic_board_recent_visits fk_rails_e77911cf03; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.boards_epic_board_recent_visits
+    ADD CONSTRAINT fk_rails_e77911cf03 FOREIGN KEY (epic_board_id) REFERENCES public.boards_epic_boards(id) ON DELETE CASCADE;
 
 
 --
