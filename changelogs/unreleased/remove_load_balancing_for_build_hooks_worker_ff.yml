@@ -1,0 +1,5 @@
+---
+title: Utilize load balancing capabilities for BuildHooksWorker
+merge_request: 61905
+author:
+type: performance
