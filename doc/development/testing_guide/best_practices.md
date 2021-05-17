@@ -907,7 +907,7 @@ copy the same schema to `spec/fixtures/product_intelligence/` directory.
 1. From the schema, remove `"$schema"` key and value. We do not need it for specs
 and spec fails if we keep the key as it tries to look for the schema in the URL.
 1. Use the following snippet to call the matcher:
-```rb
+```ruby
 match_snowplow_context_schema(schema_path: '<filename from step 1>', context: <Context Hash> )
 ```
 ### Table-based / Parameterized tests
