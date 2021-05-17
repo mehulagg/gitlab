@@ -46,7 +46,7 @@ made to your repositories. There's two ways you can accomplish that:
 ## Shut down the GitLab UI
 
 If you don't mind shutting down the GitLab UI, then the easiest approach is to
-stop `sidekiq` and `puma`/`unicorn`, and you'll effectively ensure that no
+stop `sidekiq` and `puma`, and you'll effectively ensure that no
 changes can be made to GitLab:
 
 ```shell
