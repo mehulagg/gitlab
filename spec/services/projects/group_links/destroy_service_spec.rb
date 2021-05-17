@@ -15,20 +15,47 @@ RSpec.describe Projects::GroupLinks::DestroyService, '#execute' do
   end
 
   context 'project authorizations refresh' do
-    it 'calls AuthorizedProjectUpdate::RefreshProjectAuthorizationsService synchronously to update project authorizations' do
-      expect_next_instance_of(AuthorizedProjectUpdate::RefreshProjectAuthorizationsService, group_link.project) do |service|
-        expect(service).to(receive(:execute))
+    context 'when the feature flag `use_specialized_worker_for_project_auth_recalculation` is enabled' do
+      before do
+        stub_feature_flags(use_specialized_worker_for_project_auth_recalculation: true)
       end
 
-      subject.execute(group_link)
+      it 'calls AuthorizedProjectUpdate::ProjectRecalculateWorker to update project authorizations' do
+        expect(AuthorizedProjectUpdate::ProjectRecalculateWorker)
+          .to receive(:perform_async).with(group_link.project.id)
+
+        subject.execute(group_link)
+      end
+
+      it 'updates project authorizations of users who had access to the project via the group share', :sidekiq_inline do
+        group.add_maintainer(user)
+
+        expect { subject.execute(group_link) }.to(
+          change { Ability.allowed?(user, :read_project, project) }
+            .from(true).to(false))
+      end
     end
 
-    it 'updates project authorizations of users who had access to the project via the group share' do
-      group.add_maintainer(user)
+    context 'when the feature flag `use_specialized_worker_for_project_auth_recalculation` is disabled' do
+      before do
+        stub_feature_flags(use_specialized_worker_for_project_auth_recalculation: false)
+      end
 
-      expect { subject.execute(group_link) }.to(
-        change { Ability.allowed?(user, :read_project, project) }
-          .from(true).to(false))
+      it 'calls UserProjectAccessChangedService to update project authorizations' do
+        expect_next_instance_of(UserProjectAccessChangedService) do |service|
+          expect(service).to receive(:execute)
+        end
+
+        subject.execute(group_link)
+      end
+
+      it 'updates project authorizations of users who had access to the project via the group share' do
+        group.add_maintainer(user)
+
+        expect { subject.execute(group_link) }.to(
+          change { Ability.allowed?(user, :read_project, project) }
+            .from(true).to(false))
+      end
     end
   end
 

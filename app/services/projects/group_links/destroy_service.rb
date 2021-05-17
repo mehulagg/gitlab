@@ -13,14 +13,18 @@ module Projects
         end
 
         group_link.destroy.tap do |link|
-          refresh_project_authorizations_synchronously(link.project)
+          if Feature.enabled?(:use_specialized_worker_for_project_auth_recalculation)
+            refresh_project_authorizations_asynchronously(link.project)
+          else
+            link.group.refresh_members_authorized_projects
+          end
         end
       end
 
       private
 
-      def refresh_project_authorizations_synchronously(project)
-        AuthorizedProjectUpdate::RefreshProjectAuthorizationsService.new(project).execute
+      def refresh_project_authorizations_asynchronously(project)
+        AuthorizedProjectUpdate::ProjectRecalculateWorker.perform_async(project.id)
       end
     end
   end

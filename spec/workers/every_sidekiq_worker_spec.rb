@@ -128,6 +128,7 @@ RSpec.describe 'Every Sidekiq worker' do
         'AuthorizedKeysWorker' => 3,
         'AuthorizedProjectUpdate::ProjectCreateWorker' => 3,
         'AuthorizedProjectUpdate::ProjectGroupLinkCreateWorker' => 3,
+        'AuthorizedProjectUpdate::ProjectRecalculateWorker' => 3,
         'AuthorizedProjectUpdate::UserRefreshOverUserRangeWorker' => 3,
         'AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker' => 3,
         'AuthorizedProjectsWorker' => 3,

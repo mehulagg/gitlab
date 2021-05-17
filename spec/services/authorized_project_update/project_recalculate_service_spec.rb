@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe AuthorizedProjectUpdate::RefreshProjectAuthorizationsService do
+RSpec.describe AuthorizedProjectUpdate::ProjectRecalculateService do
   include ExclusiveLeaseHelpers
 
   let_it_be(:project) { create(:project) }

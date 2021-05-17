@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module AuthorizedProjectUpdate
-  class RefreshProjectAuthorizationsService
+  class ProjectRecalculateService
     # Service for refreshing all the authorizations to a particular project.
+    BATCH_SIZE = 1000
     include Gitlab::Utils::StrongMemoize
 
     def initialize(project)
@@ -52,9 +53,15 @@ module AuthorizedProjectUpdate
 
     def fresh_authorizations
       strong_memoize(:fresh_authorizations) do
+        result = []
+
         Projects::Members::EffectiveAccessLevelFinder.new(project)
           .execute
-          .map { |member| [member.user_id, member.access_level] }
+          .each_batch(of: BATCH_SIZE, column: :user_id) do |members|
+            result << members.map { |member| [member.user_id, member.access_level] }
+          end
+
+        result.flatten(1)
       end
     end
 

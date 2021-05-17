@@ -1,6 +1,0 @@
----
-title: Use specialized service class to refresh project authorizations on project-group
-  share removal
-merge_request: 60904
-author:
-type: performance
