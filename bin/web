@@ -4,13 +4,10 @@ set -e
 
 cd $(dirname $0)/..
 
+#TODO: maybe we could remove this entirely, because we only allow Puma now
 case "$USE_WEB_SERVER" in
   puma|"") # and the "" defines default
     exec bin/web_puma "$@"
-    ;;
-
-  unicorn)
-    exec bin/web_unicorn "$@"
     ;;
 
   *)

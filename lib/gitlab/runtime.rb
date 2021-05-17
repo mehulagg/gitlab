@@ -16,7 +16,6 @@ module Gitlab
       :rake,
       :sidekiq,
       :test_suite,
-      :unicorn
     ].freeze
 
     class << self

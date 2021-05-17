@@ -16,5 +16,5 @@ sed -i "s/https: false/https: <%= gitlab_url.scheme == 'https' %>/" config/gitla
 # No need for config file. Will be taken care of by REDIS_URL env variable
 rm config/resque.yml
 
-# Set default unicorn.rb file
-echo "" > config/unicorn.rb
+# Set default puma.rb file
+echo "" > config/puma.rb
