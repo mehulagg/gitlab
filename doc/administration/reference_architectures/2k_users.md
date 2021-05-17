@@ -84,7 +84,7 @@ To set up GitLab and its components to accommodate up to 2,000 users:
 1. [Configure Gitaly](#configure-gitaly), which provides access to the Git
    repositories.
 1. [Configure the main GitLab Rails application](#configure-gitlab-rails)
-   to run Puma/Unicorn, Workhorse, GitLab Shell, and to serve all frontend
+   to run Puma, Workhorse, GitLab Shell, and to serve all frontend
    requests (which include UI, API, and Git over HTTP/SSH).
 1. [Configure Prometheus](#configure-prometheus) to monitor your GitLab
    environment.

@@ -24,10 +24,6 @@ module Gitlab
     # @param [Float|Proc] sleep_sec: Either a number of seconds to sleep, or
     #                                a proc that computes the sleep time given the number of preceding attempts
     #                               (from 1 to retries - 1)
-    #
-    # Note: It's basically discouraged to use this method in a unicorn thread,
-    #       because this ties up all thread related resources until all `retries` are consumed.
-    #       This could potentially eat up all connection pools.
     def in_lock(key, ttl: 1.minute, retries: 10, sleep_sec: 0.01.seconds)
       raise ArgumentError, 'Key needs to be specified' unless key
 
