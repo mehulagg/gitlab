@@ -9,9 +9,10 @@ module MergeRequests
     def execute(merge_request)
       return merge_request unless current_user&.can?(:update_merge_request, merge_request)
 
-      old_assignees = merge_request.assignees
+      old_assignees = merge_request.assignees.to_a
       old_ids = old_assignees.map(&:id)
       new_ids = new_assignee_ids(merge_request)
+      return merge_request if merge_request.errors.any?
       return merge_request if new_ids.size != update_attrs[:assignee_ids].size
       return merge_request if old_ids.to_set == new_ids.to_set # no-change
 

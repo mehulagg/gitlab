@@ -7,7 +7,7 @@ module MergeRequests
         .perform_async(
           merge_request.id,
           current_user.id,
-          old_assignees.map(&:id),
+          old_assignees.map(&:id).to_a,
           options
         )
     end

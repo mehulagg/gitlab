@@ -7,8 +7,8 @@ class MergeRequests::HandleAssigneesChangeWorker
 
   feature_category :code_review
   urgency :high
-  deduplicate :until_executed
-  idempotent!
+  # deduplicate :until_executed
+  # idempotent!
 
   def perform(merge_request_id, user_id, old_assignee_ids, options = {})
     merge_request = MergeRequest.find(merge_request_id)

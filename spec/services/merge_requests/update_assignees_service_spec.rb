@@ -42,13 +42,29 @@ RSpec.describe MergeRequests::UpdateAssigneesService do
         it 'removes all assignees' do
           expect { update_merge_request }.to change(merge_request, :assignees).to([])
         end
+
+        it 'enqueues the correct background work' do
+          expect_next(MergeRequests::HandleAssigneesChangeService, project: project, current_user: user) do |service|
+            expect(service)
+              .to receive(:async_execute)
+              .with(merge_request, [user3], execute_hooks: true)
+          end
+        end
       end
 
-      context 'the assignee_ids parameter is the empty list' do
+      context 'when the assignee_ids parameter is the empty list' do
         let(:opts) { { assignee_ids: [] } }
 
         it 'removes all assignees' do
           expect { update_merge_request }.to change(merge_request, :assignees).to([])
+        end
+
+        it 'enqueues the correct background work' do
+          expect_next(MergeRequests::HandleAssigneesChangeService, project: project, current_user: user) do |service|
+            expect(service)
+              .to receive(:async_execute)
+              .with(merge_request, [user3], execute_hooks: true)
+          end
         end
       end
 

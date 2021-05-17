@@ -2299,7 +2299,7 @@
   :urgency: :high
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: true
+  :idempotent: false
   :tags: []
 - :name: merge_requests_resolve_todos
   :worker_name: MergeRequests::ResolveTodosWorker
