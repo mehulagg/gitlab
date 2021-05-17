@@ -1523,27 +1523,6 @@ kubectl port-forward svc/kibana-kibana 5601:5601
 
 Then, you can visit Kibana at `http://localhost:5601`.
 
-### Fluentd
-
-> Introduced in GitLab 12.10 for project- and group-level clusters.
-
-[Fluentd](https://www.fluentd.org/) is an open source data collector, which enables
-you to unify the data collection and consumption to better use and understand
-your data. Fluentd sends logs in syslog format.
-
-To enable Fluentd:
-
-1. Navigate to **Operations > Kubernetes** and click
-   **Applications**. Enter a host, port, and protocol
-   for sending the WAF logs with syslog.
-1. Provide the host domain name or URL in **SIEM Hostname**.
-1. Provide the host port number in **SIEM Port**.
-1. Select a **SIEM Protocol**.
-1. Select at least one of the available logs (such as WAF or Cilium).
-1. Click **Save changes**.
-
-![Fluentd input fields](img/fluentd_v13_0.png)
-
 ## Upgrading applications
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24789) in GitLab 11.8.

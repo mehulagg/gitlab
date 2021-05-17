@@ -28,7 +28,7 @@ users define profiles for these technologies.
 
 See the [installation guide](quick_start_guide.md) for the recommended steps to install the
 Container Host Security capabilities. This guide shows the recommended way of installing Container
-Host Security through GMAv2. However, it's also possible to do a manual installation through our
+Host Security through Cluster Management Project. However, it's also possible to do a manual installation through our
 Helm chart.
 
 ## Features
