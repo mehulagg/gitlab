@@ -2,4 +2,4 @@
 title: Resolve Remove `subscribed` from GraphQL boards list query
 merge_request: 61881
 author:
-type: changed
+type: performance
