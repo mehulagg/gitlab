@@ -1,6 +1,7 @@
 include:
   - template: Jobs/Code-Quality.gitlab-ci.yml
-#   - template: Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 #   - template: Security/Dependency-Scanning.gitlab-ci.yml
 #   - template: Security/DAST.gitlab-ci.yml
 
@@ -12,59 +13,6 @@ code_quality:
     paths:
       - gl-code-quality-report.json  # GitLab-specific
   rules: !reference [".reports:rules:code_quality", rules]
-
-# We need to duplicate this job's definition because the rules
-# defined in the extended jobs rely on local YAML anchors
-# (`*if-default-refs`)
-.sast:
-  extends:
-    - .default-retry
-    - .reports:rules:sast
-  stage: test
-  # `needs: []` starts the job immediately in the pipeline
-  # https://docs.gitlab.com/ee/ci/yaml/README.html#needs
-  needs: []
-  artifacts:
-    paths:
-      - gl-sast-report.json  # GitLab-specific
-    reports:
-      sast: gl-sast-report.json
-    expire_in: 1 week  # GitLab-specific
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    SAST_ANALYZER_IMAGE_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
-    SAST_ANALYZER_IMAGE_TAG: 2
-    SAST_BRAKEMAN_LEVEL: 2  # GitLab-specific
-    SAST_EXCLUDED_PATHS: qa,spec,doc,ee/spec,config/gitlab.yml.example  # GitLab-specific
-    SAST_DISABLE_BABEL: "true"
-  script:
-    - /analyzer run
-
-brakeman-sast:
-  extends: .sast
-  image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/brakeman:$SAST_ANALYZER_IMAGE_TAG"
-
-eslint-sast:
-  extends: .sast
-  image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/eslint:$SAST_ANALYZER_IMAGE_TAG"
-
-nodejs-scan-sast:
-  extends: .sast
-  image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/nodejs-scan:$SAST_ANALYZER_IMAGE_TAG"
-
-secrets-sast:
-  extends: .sast
-  image:
-    name: "$SAST_ANALYZER_IMAGE_PREFIX/secrets:3"
-  artifacts:
-    paths:
-      - gl-secret-detection-report.json  # GitLab-specific
-    reports:
-      sast: gl-secret-detection-report.json
-    expire_in: 1 week  # GitLab-specific
 
 # We need to duplicate this job's definition because the rules
 # defined in the extended jobs rely on local YAML anchors
