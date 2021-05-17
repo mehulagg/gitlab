@@ -18,7 +18,11 @@ class NamespaceShard < ApplicationRecord
   end
 
   def database_shard_id
-    self.class.id_to_shard(id) if id
+    ::Gitlab::Sharding::Current.id_to_shard(id) if id
+  end
+
+  def database_shard_name
+    ::Gitlab::Sharding::Current.id_to_shard_name(id) if id
   end
 
   def self.sharded_read_from_namespace_id(namespace_id, &block)
@@ -72,17 +76,8 @@ class NamespaceShard < ApplicationRecord
     end
   end
 
-  def self.id_to_shard(id)
-    (id >> 10) & (1<<13 - 1)
-  end
-
   # The intention is to eventually lookup from a DB
   def self.find_shard_from_namespace_id(namespace_id)
-    shard_id = id_to_shard(namespace_id.to_i)
-    if shard_id > 0
-      :"shard_#{shard_id}"
-    else
-      :primary
-    end
+    ::Gitlab::Sharding::Current.id_to_shard_name(namespace_id.to_i)
   end
 end
