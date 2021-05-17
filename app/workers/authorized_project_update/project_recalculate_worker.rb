@@ -8,10 +8,9 @@ module AuthorizedProjectUpdate
 
     feature_category :authentication_and_authorization
     urgency :high
-    weight 2
     queue_namespace :authorized_projects
 
-    deduplicate :until_executing
+    deduplicate :until_executing, including_scheduled: true
     idempotent!
 
     def perform(project_id)

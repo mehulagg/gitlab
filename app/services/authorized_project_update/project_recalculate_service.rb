@@ -3,7 +3,6 @@
 module AuthorizedProjectUpdate
   class ProjectRecalculateService
     # Service for refreshing all the authorizations to a particular project.
-    BATCH_SIZE = 1000
     include Gitlab::Utils::StrongMemoize
 
     def initialize(project)
@@ -11,18 +10,6 @@ module AuthorizedProjectUpdate
     end
 
     def execute
-      until uuid = lease.try_obtain
-        sleep(0.1)
-      end
-
-      begin
-        execute_without_lease
-      ensure
-        Gitlab::ExclusiveLease.cancel(lease_key, uuid)
-      end
-    end
-
-    def execute_without_lease
       refresh_authorizations if needs_refresh?
       ServiceResponse.success
     end
@@ -30,14 +17,6 @@ module AuthorizedProjectUpdate
     private
 
     attr_reader :project
-
-    def lease_key
-      "refresh_project_authorizations:#{project.id}"
-    end
-
-    def lease
-      Gitlab::ExclusiveLease.new(lease_key, timeout: 1.minute.to_i)
-    end
 
     def needs_refresh?
       user_ids_to_remove.any? ||
@@ -53,15 +32,9 @@ module AuthorizedProjectUpdate
 
     def fresh_authorizations
       strong_memoize(:fresh_authorizations) do
-        result = []
-
         Projects::Members::EffectiveAccessLevelFinder.new(project)
           .execute
-          .each_batch(of: BATCH_SIZE, column: :user_id) do |members|
-            result << members.map { |member| [member.user_id, member.access_level] }
-          end
-
-        result.flatten(1)
+          .pluck(:user_id, 'MAX(access_level)') # rubocop: disable CodeReuse/ActiveRecord
       end
     end
 
