@@ -1271,8 +1271,8 @@ If you get a 500 response from Pages and encounter an error similar to:
 ERRO[0145] cannot serve from disk                        error="gitlab: disk access is disabled via enable-disk=false" project_id=27 source_path="file:///shared/pages/@hashed/67/06/670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf/pages_deployments/14/artifacts.zip" source_type=zip
 ```
 
-It means that **GitLab Rails** is telling Pages to serve content from a location on disk.
-However, **GitLab Pages** was configured to disable disk access.
+It means that GitLab Rails is telling GitLab Pages to serve content from a location on disk,
+however, GitLab Pages was configured to disable disk access.
 
 To enable disk access:
 
