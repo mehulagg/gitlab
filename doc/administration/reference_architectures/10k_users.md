@@ -1538,7 +1538,6 @@ To configure the Praefect nodes, on each one:
    redis['enable'] = false
    nginx['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
    grafana['enable'] = false
@@ -1667,7 +1666,6 @@ On each node:
    redis['enable'] = false
    nginx['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
    grafana['enable'] = false
@@ -2235,7 +2233,6 @@ To configure the Monitoring node:
    redis_exporter['enable'] = false
    sidekiq['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    node_exporter['enable'] = false
    gitlab_exporter['enable'] = false
 

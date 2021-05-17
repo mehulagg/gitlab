@@ -51,14 +51,14 @@ changes can be made to GitLab:
 
 ```shell
 sudo gitlab-ctl stop sidekiq
-sudo gitlab-ctl stop puma  # or unicorn
+sudo gitlab-ctl stop puma
 ```
 
 When you're ready to revert this:
 
 ```shell
 sudo gitlab-ctl start sidekiq
-sudo gitlab-ctl start puma  # or unicorn
+sudo gitlab-ctl start puma
 ```
 
 ## Make the database read-only

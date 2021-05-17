@@ -155,7 +155,7 @@ Disable GitLab CI after upgrading to 8.0.
 ```shell
 # On your CI server:
 # Omnibus
-sudo gitlab-ctl stop ci-unicorn
+sudo gitlab-ctl stop ci-puma
 sudo gitlab-ctl stop ci-sidekiq
 
 # Source
@@ -254,7 +254,7 @@ sudo -u git -H bundle exec rake ci:migrate RAILS_ENV=production
 ```shell
 # On your GitLab server:
 # Omnibus
-sudo gitlab-ctl hup unicorn
+sudo gitlab-ctl hup puma
 sudo gitlab-ctl restart sidekiq
 
 # Source

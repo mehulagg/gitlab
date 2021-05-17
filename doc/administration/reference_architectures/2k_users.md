@@ -351,7 +351,6 @@ Omnibus:
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    postgresql['enable'] = false
    nginx['enable'] = false
    prometheus['enable'] = false
@@ -457,7 +456,6 @@ To configure the Gitaly server, on the server node you want to use for Gitaly:
    redis['enable'] = false
    nginx['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
    grafana['enable'] = false
@@ -791,7 +789,6 @@ running [Prometheus](../monitoring/prometheus/index.md) and
    redis_exporter['enable'] = false
    sidekiq['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    node_exporter['enable'] = false
    gitlab_exporter['enable'] = false
 
