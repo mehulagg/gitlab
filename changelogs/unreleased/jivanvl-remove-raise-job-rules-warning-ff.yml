@@ -1,0 +1,5 @@
+---
+title: Raise job rules without workflow warnings by default
+merge_request: 61945
+author:
+type: changed
