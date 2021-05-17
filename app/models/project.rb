@@ -356,7 +356,7 @@ class Project < ApplicationRecord
   has_many :terraform_states, class_name: 'Terraform::State', inverse_of: :project
 
   # GitLab Pages
-  has_many :pages_domains
+  has_many :pages_domains, dependent: :delete_all
   has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
   # we need to clean up files, not only remove records
   has_many :pages_deployments, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
