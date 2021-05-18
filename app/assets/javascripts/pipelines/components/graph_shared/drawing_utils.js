@@ -60,32 +60,47 @@ export const generateLinksData = ({ links }, containerID, modifier = '') => {
       paddingTop +
       sourceNodeCoordinates.height / 2;
 
-    // Start point
-    path.moveTo(sourceNodeX, sourceNodeY);
+    const sourceNodeLeftX = sourceNodeCoordinates.left - containerCoordinates.x - paddingLeft;
 
-    // Make cross-stages lines a straight line all the way
-    // until we can safely draw the bezier to look nice.
-    // The adjustment number here is a magic number to make things
-    // look nice and should change if the padding changes. This goes well
-    // with gl-px-6. gl-px-8 is more like 100.
-    const straightLineDestinationX = targetNodeX - 60;
-    const controlPointX = straightLineDestinationX + (targetNodeX - straightLineDestinationX) / 2;
+    // If the source and target X values are the same,
+    // it means the nodes are in the same column so we
+    // use a different drawing algorithm
+    if (sourceNodeLeftX === targetNodeX) {
+      const firstPoint = sourceNodeLeftX - 30;
+      // Start point
+      path.moveTo(sourceNodeLeftX, sourceNodeY);
 
-    if (straightLineDestinationX > 0) {
-      path.lineTo(straightLineDestinationX, sourceNodeY);
+      path.lineTo(firstPoint, sourceNodeY);
+      path.lineTo(firstPoint, targetNodeY);
+      path.lineTo(targetNodeX, targetNodeY);
+    } else {
+      // Start point
+      path.moveTo(sourceNodeX, sourceNodeY);
+
+      // Make cross-stages lines a straight line all the way
+      // until we can safely draw the bezier to look nice.
+      // The adjustment number here is a magic number to make things
+      // look nice and should change if the padding changes. This goes well
+      // with gl-px-6. gl-px-8 is more like 100.
+      const straightLineDestinationX = targetNodeX - 60;
+      const controlPointX = straightLineDestinationX + (targetNodeX - straightLineDestinationX) / 2;
+
+      if (straightLineDestinationX > 0) {
+        path.lineTo(straightLineDestinationX, sourceNodeY);
+      }
+
+      // Add bezier curve. The first 4 coordinates are the 2 control
+      // points to create the curve, and the last one is the end point (x, y).
+      // We want our control points to be in the middle of the line
+      path.bezierCurveTo(
+        controlPointX,
+        sourceNodeY,
+        controlPointX,
+        targetNodeY,
+        targetNodeX,
+        targetNodeY,
+      );
     }
-
-    // Add bezier curve. The first 4 coordinates are the 2 control
-    // points to create the curve, and the last one is the end point (x, y).
-    // We want our control points to be in the middle of the line
-    path.bezierCurveTo(
-      controlPointX,
-      sourceNodeY,
-      controlPointX,
-      targetNodeY,
-      targetNodeX,
-      targetNodeY,
-    );
 
     return {
       ...link,
