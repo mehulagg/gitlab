@@ -1,0 +1,6 @@
+---
+title: Render "Discover" link for the "Security & Compliance" menu item under the correct
+  conditions
+merge_request: 62019
+author:
+type: fixed
