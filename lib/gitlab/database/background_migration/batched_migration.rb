@@ -7,6 +7,8 @@ module Gitlab
         JOB_CLASS_MODULE = 'Gitlab::BackgroundMigration'
         BATCH_CLASS_MODULE = "#{JOB_CLASS_MODULE}::BatchingStrategies"
 
+        NotFound = Class.new(ArgumentError)
+
         self.table_name = :batched_background_migrations
 
         has_many :batched_jobs, foreign_key: :batched_background_migration_id
@@ -25,10 +27,19 @@ module Gitlab
           paused: 0,
           active: 1,
           finished: 3,
-          failed: 4
+          failed: 4,
+          withdrawn: 5
         }
 
         attribute :pause_ms, :integer, default: 100
+
+        def self.find_for_configuration(job_class_name, table_name, column_name, job_arguments)
+          for_configuration(job_class_name, table_name, column_name, job_arguments).first!
+        rescue ActiveRecord::RecordNotFound
+          raise NotFound, "Couldn't batched background migration with configuration: " \
+              "job_class_name: #{job_class_name}, table_name: #{table_name}, column_name: #{column_name}, " \
+              "job_arguments: #{job_arguments.inspect}"
+        end
 
         def self.active_migration
           active.queue_order.first

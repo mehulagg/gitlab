@@ -381,4 +381,14 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
       expect(actual).to contain_exactly(migration)
     end
   end
+
+  describe '.find_for_configuration' do
+    it 'throws NotFound error if such migration does not exists' do
+      expect do
+        described_class.find_for_configuration('MyJobClass', :projects, :id, [:some, :other, :arguments])
+      end.to raise_error described_class::NotFound, "Couldn't batched background migration with configuration: " \
+      "job_class_name: MyJobClass, table_name: projects, column_name: id, " \
+      "job_arguments: #{[:some, :other, :arguments].inspect}"
+    end
+  end
 end

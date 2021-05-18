@@ -281,4 +281,101 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigrationRunner do
       end
     end
   end
+
+  describe '#finalize' do
+    let(:migration_wrapper) { Gitlab::Database::BackgroundMigration::BatchedMigrationWrapper.new }
+
+    let(:migration_helpers) { ActiveRecord::Migration.new }
+    let(:table_name) { :test_table }
+    let(:column_name) { :some_id }
+    let(:job_arguments) { [:some_id, :some_id_convert_to_bigint] }
+
+    let(:migration_status) { :active }
+
+    let!(:batched_migration) do
+      create(
+        :batched_background_migration,
+        status: migration_status,
+        max_value: 8,
+        batch_size: 2,
+        sub_batch_size: 1,
+        interval: 0,
+        table_name: table_name,
+        column_name: column_name,
+        job_arguments: job_arguments,
+        pause_ms: 0
+      )
+    end
+
+    before do
+      migration_helpers.create_table table_name, id: false do |t|
+        t.integer :some_id, primary_key: true
+        t.integer :some_id_convert_to_bigint
+      end
+
+      migration_helpers.execute("INSERT INTO #{table_name} VALUES (1, 1), (2, 2), (3, NULL), (4, NULL), (5, NULL), (6, NULL)")
+    end
+
+    context 'when the migration is not yet completed' do
+      before do
+        create(
+          :batched_background_migration_job, batched_migration: batched_migration,
+          status: :succeeded,
+          min_value: 1,
+          max_value: 2,
+          batch_size: 2,
+          sub_batch_size: 1,
+          pause_ms: 0
+        )
+
+        create(
+          :batched_background_migration_job, batched_migration: batched_migration,
+          status: :pending,
+          min_value: 3,
+          max_value: 4,
+          batch_size: 2,
+          sub_batch_size: 1,
+          pause_ms: 0
+        )
+      end
+
+      it 'completes the migration' do
+        expect(Gitlab::Database::BackgroundMigration::BatchedMigration).to receive(:find_for_configuration)
+          .with('CopyColumnUsingBackgroundMigrationJob', table_name, column_name, job_arguments)
+          .and_return(batched_migration)
+
+        expect(batched_migration).to receive(:withdrawn!).and_call_original
+
+        expect do
+          runner.finalize(
+            batched_migration.job_class_name,
+            table_name,
+            column_name,
+            job_arguments
+          )
+        end.to change { batched_migration.reload.status }.from('active').to('finished')
+
+        expect(batched_migration.batched_jobs).to all(be_succeeded)
+      end
+    end
+
+    context 'when the migration is already finished' do
+      let(:migration_status) { :finished }
+
+      it 'is a no-op' do
+        expect(Gitlab::Database::BackgroundMigration::BatchedMigration).to receive(:find_for_configuration)
+          .with('CopyColumnUsingBackgroundMigrationJob', table_name, column_name, job_arguments)
+          .and_return(batched_migration)
+
+        expect(batched_migration).not_to receive(:withdrawn!)
+
+        runner.finalize(
+          batched_migration.job_class_name,
+          table_name,
+          column_name,
+          job_arguments
+        )
+      end
+    end
+  end
 end

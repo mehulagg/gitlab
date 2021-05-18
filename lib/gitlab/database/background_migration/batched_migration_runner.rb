@@ -4,6 +4,10 @@ module Gitlab
   module Database
     module BackgroundMigration
       class BatchedMigrationRunner
+        def self.finalize(job_class_name, table_name, column_name, job_arguments)
+          new.finalize(job_class_name, table_name, column_name, job_arguments)
+        end
+
         def initialize(migration_wrapper = BatchedMigrationWrapper.new)
           @migration_wrapper = migration_wrapper
         end
@@ -37,11 +41,22 @@ module Gitlab
             raise 'this method is not intended for use in real environments'
           end
 
-          while migration.active?
-            run_migration_job(migration)
+          run_migration_while(migration, :active)
+        end
 
-            migration.reload_last_job
-          end
+        # Finalize migration for given configuration.
+        #
+        # If the migration is already finished, do nothing. Otherwise change its status to `withdrawn`
+        # in order to prevent it being picked up by the background worker. Perform all pending jobs,
+        # then keep running until migration is finished.
+        def finalize(job_class_name, table_name, column_name, job_arguments)
+          migration = BatchedMigration.find_for_configuration(job_class_name, table_name, column_name, job_arguments)
+          return if migration.finished?
+
+          migration.withdrawn!
+          migration.batched_jobs.pending.each { |job| migration_wrapper.perform(job) }
+
+          run_migration_while(migration, :withdrawn)
         end
 
         private
@@ -88,6 +103,14 @@ module Gitlab
             active_migration.failed!
           else
             active_migration.finished!
+          end
+        end
+
+        def run_migration_while(migration, status)
+          while migration.status == status.to_s
+            run_migration_job(migration)
+
+            migration.reload_last_job
           end
         end
       end

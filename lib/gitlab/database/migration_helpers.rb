@@ -1091,6 +1091,11 @@ module Gitlab
         execute("DELETE FROM batched_background_migrations WHERE #{conditions}")
       end
 
+      def finalize_conversion_of_integer_to_bigint(table_name, job_arguments, column_name: :id)
+        Gitlab::Database::BackgroundMigration::BatchedMigrationRunner
+          .finalize('CopyColumnUsingBackgroundMigrationJob', table_name, column_name, job_arguments)
+      end
+
       # Returns an Array containing the indexes for the given column
       def indexes_for(table, column)
         column = column.to_s

@@ -2001,6 +2001,17 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#finalize_conversion_of_integer_to_bigint' do
+    it 'delegates finalizing migration to BatchedMigrationRunner' do
+      job_arguments = [:id, :id_convert_to_bigint]
+
+      expect(Gitlab::Database::BackgroundMigration::BatchedMigrationRunner)
+        .to receive(:finalize).with('CopyColumnUsingBackgroundMigrationJob', :test_table, :some_id, job_arguments)
+
+      model.finalize_conversion_of_integer_to_bigint(:test_table, job_arguments, column_name: :some_id)
+    end
+  end
+
   describe '#index_exists_by_name?' do
     it 'returns true if an index exists' do
       ActiveRecord::Base.connection.execute(
