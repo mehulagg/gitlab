@@ -15359,9 +15359,6 @@ msgstr ""
 msgid "Go full screen"
 msgstr ""
 
-msgid "Go to Webhooks"
-msgstr ""
-
 msgid "Go to commits"
 msgstr ""
 
@@ -36360,9 +36357,6 @@ msgid "Webhooks Help"
 msgstr ""
 
 msgid "Webhooks allow you to trigger a URL if, for example, new code is pushed or a new issue is created. You can configure webhooks to listen for specific events like pushes, issues or merge requests. Group webhooks will apply to all projects in a group, allowing you to standardize webhook functionality across your entire group."
-msgstr ""
-
-msgid "Webhooks have moved. They can now be found under the Settings menu."
 msgstr ""
 
 msgid "Webhooks|Comments"
