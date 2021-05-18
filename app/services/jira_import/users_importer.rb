@@ -31,25 +31,19 @@ module JiraImport
       @users_mapper_service ||= user_mapper_service_factory
     end
 
-    def deployment_type
-      # TODO: use project.jira_service.deployment_type value when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37003 is merged
-      @deployment_type ||= client.ServerInfo.all.deploymentType
-    end
-
-    def client
-      @client ||= project.jira_service.client
-    end
-
     def user_mapper_service_factory
-      # TODO: use deployment_type enum from jira service when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37003 is merged
-      case deployment_type.upcase
-      when JiraService::DEPLOYMENT_TYPES[:server]
+      case deployment_type
+      when "server"
         ServerUsersMapperService.new(user, project, start_at)
-      when JiraService::DEPLOYMENT_TYPES[:cloud]
+      when "cloud"
         CloudUsersMapperService.new(user, project, start_at)
       else
         raise ArgumentError
       end
+    end
+
+    def deployment_type
+      @deployment_type ||= project.jira_service.data_fields.deployment_type
     end
   end
 end

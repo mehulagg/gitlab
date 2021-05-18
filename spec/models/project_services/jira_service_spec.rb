@@ -117,7 +117,8 @@ RSpec.describe JiraService do
     let(:params) do
       {
         project: project,
-        url: url, api_url: api_url,
+        url: url,
+        api_url: api_url,
         username: username, password: password,
         jira_issue_transition_id: transition_id
       }
@@ -162,8 +163,20 @@ RSpec.describe JiraService do
       context 'Unknown instance' do
         let(:server_info_results) { { 'deploymentType' => 'FutureCloud' } }
 
-        it 'is detected' do
-          expect(jira_service.jira_tracker_data.deployment_unknown?).to be_truthy
+        context 'URL ends in atlassian.net' do
+          let(:api_url) { 'http://example-api.atlassian.net' }
+
+          it 'is set to cloud' do
+            expect(jira_service.jira_tracker_data.deployment_cloud?).to be_truthy
+          end
+        end
+
+        context 'URL is something else' do
+          let(:api_url) { 'http://my-jira-api.someserver.com' }
+
+          it 'is set to server' do
+            expect(jira_service.jira_tracker_data.deployment_server?).to be_truthy
+          end
         end
       end
     end

@@ -10,11 +10,7 @@ class JiraService < IssueTrackerService
 
   PROJECTS_PER_PAGE = 50
 
-  # TODO: use jira_service.deployment_type enum when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37003 is merged
-  DEPLOYMENT_TYPES = {
-    server: 'SERVER',
-    cloud: 'CLOUD'
-  }.freeze
+  JIRA_CLOUD_REGEX = %r{^https?://[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?\.atlassian\.net$}ix.freeze
 
   validates :url, public_url: true, presence: true, if: :activated?
   validates :api_url, public_url: true, allow_blank: true
@@ -524,7 +520,18 @@ class JiraService < IssueTrackerService
     when 'Cloud'
       data_fields.deployment_cloud!
     else
-      data_fields.deployment_unknown!
+      set_deployment_type_from_url
+    end
+  end
+
+  def set_deployment_type_from_url
+    # If API-based detection methods fail here then
+    # we can only assume it's either Cloud or Server
+    # based on the URL being *.atlassian.net
+    if client_url.match? JIRA_CLOUD_REGEX
+      data_fields.deployment_cloud!
+    else
+      data_fields.deployment_server!
     end
   end
 

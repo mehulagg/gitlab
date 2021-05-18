@@ -1,0 +1,5 @@
+---
+title: Determine Jira deployment_type based on URL
+merge_request: 62040
+author:
+type: fixed
