@@ -124,7 +124,7 @@ module API
                 end
 
                 get do
-                  track_package_event('pull_package', :terraform_module)
+                  track_package_event('pull_package', :terraform_module, project: package.project, namespace: current_user.namespace, user: current_user)
 
                   present_carrierwave_file!(package_file.file)
                 end
@@ -183,7 +183,7 @@ module API
 
                 render_api_error!(result[:message], result[:http_status]) if result[:status] == :error
 
-                track_package_event('push_package', :terraform_module)
+                track_package_event('push_package', :terraform_module, project: authorized_user_project, user: current_user, namespace: current_user.namespace)
 
                 created!
               rescue ObjectStorage::RemoteStoreError => e
