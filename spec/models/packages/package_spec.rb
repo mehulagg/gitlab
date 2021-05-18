@@ -729,17 +729,101 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '.order_project_name scopes' do
+    let_it_be(:project) { create(:project, name: 'aaa' ) }
+    let_it_be(:project2) { create(:project, name: 'bbb' ) }
+    let_it_be(:package1) { create(:package, project: project ) }
+    let_it_be(:package2) { create(:package, project: project2 ) }
+    let_it_be(:package3) { create(:package, project: project2 ) }
+    let_it_be(:package4) { create(:package, project: project ) }
+
+    shared_examples 'order_project_name scope' do
+      it 'orders packages by their projects name ascending' do
+        expect(Packages::Package.order_project_name).to eq([package1, package4, package2, package3])
+      end
+    end
+
+    context 'with arel scope feature flag enabled' do
+      it_behaves_like 'order_project_name scope'
+
+      it 'orders packages by their projects name descending' do
+        expect(Packages::Package.order_project_name_desc).to eq([package3, package2, package4, package1])
+      end
+    end
+
+    context 'with feature flag disabled' do
+      before do
+        stub_feature_flags(arel_package_scopes: false)
+      end
+
+      it_behaves_like 'order_project_name scope'
+
+      it 'orders packages by their projects name descending' do
+        expect(Packages::Package.order_project_name_desc).to eq([package2, package3, package1, package4])
+      end
+    end
+  end
+
+  describe '.order_project_path scopes' do
+    let_it_be(:project) { create(:project, path: 'aaa' ) }
+    let_it_be(:project2) { create(:project, path: 'bbb' ) }
+    let_it_be(:package1) { create(:package, project: project ) }
+    let_it_be(:package2) { create(:package, project: project2 ) }
+    let_it_be(:package3) { create(:package, project: project2 ) }
+    let_it_be(:package4) { create(:package, project: project ) }
+
+    shared_examples 'order_project_path scope' do
+      it 'orders packages by their projects path asc, then package id asc' do
+        expect(Packages::Package.order_project_path).to eq([package1, package4, package2, package3])
+      end
+    end
+
+    shared_examples 'order_project_path_desc scope' do
+      it 'orders packages by their projects path desc, then package id desc' do
+        expect(Packages::Package.order_project_path_desc).to eq([package3, package2, package4, package1])
+      end
+    end
+
+    context 'with arel scope feature flag enabled' do
+      it_behaves_like 'order_project_path scope'
+      it_behaves_like 'order_project_path_desc scope'
+    end
+
+    context 'with feature flag disabled' do
+      before do
+        stub_feature_flags(arel_package_scopes: false)
+      end
+
+      it_behaves_like 'order_project_path scope'
+      it_behaves_like 'order_project_path_desc scope'
+    end
+  end
+
   describe '.order_by_package_file' do
     let_it_be(:project) { create(:project) }
     let_it_be(:package1) { create(:maven_package, project: project) }
     let_it_be(:package2) { create(:maven_package, project: project) }
 
-    it 'orders packages their associated package_file\'s created_at date', :aggregate_failures do
-      expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2])
+    shared_examples 'order_by_package_file scope' do
+      it 'orders packages their associated package_file\'s created_at date', :aggregate_failures do
+        expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2])
 
-      create(:package_file, :xml, package: package1)
+        create(:package_file, :xml, package: package1)
 
-      expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2, package1])
+        expect(project.packages.order_by_package_file).to match_array([package1, package1, package1, package2, package2, package2, package1])
+      end
+    end
+
+    context 'with arel scope feature flag enabled' do
+      it_behaves_like 'order_by_package_file scope'
+    end
+
+    context 'with feature flag disabled' do
+      before do
+        stub_feature_flags(arel_package_scopes: false)
+      end
+
+      it_behaves_like 'order_by_package_file scope'
     end
   end
 
