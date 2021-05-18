@@ -60,10 +60,9 @@ module Mutations
         end
 
         def oncall_schedule_id_for_iid(iid)
-          # binding.pry
           schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iid).execute&.first
 
-          raise Gitlab::Graphql::Errors::ArgumentError, "The oncall schedule for iid #{iid} could not be found" unless schedule
+          raise Gitlab::Graphql::Errors::ResourceNotAvailable, "The oncall schedule for iid #{iid} could not be found" unless schedule
 
           schedule.id
         end
@@ -76,7 +75,7 @@ module Mutations
         end
 
         def raise_project_not_found
-          raise Gitlab::Graphql::Errors::ArgumentError, 'The project could not be found'
+          raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'The project could not be found'
         end
       end
     end

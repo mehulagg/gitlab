@@ -43,7 +43,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
         stub_licensed_features(oncall_schedules: true)
       end
 
-      it_behaves_like 'returns an error', 'Your license does not support escalation policies'
+      it_behaves_like 'returns an error', 'Escalation policies are not supported for this project'
     end
 
     context 'project has feature' do
@@ -73,7 +73,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
             args[:rules] = []
           end
 
-          it_behaves_like 'returns an error', "Rules can't be blank"
+          it_behaves_like 'returns an error', "A rule must be provided to create an escalation policy"
         end
 
         context 'scheule that does not belong to the project' do
@@ -84,7 +84,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
           end
 
           it 'raises an erorr' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ArgumentError, 'The oncall schedule for iid 2 could not be found')
+            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, 'The oncall schedule for iid 2 could not be found')
           end
         end
       end
