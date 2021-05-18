@@ -28313,6 +28313,18 @@ msgstr ""
 msgid "Runners|New runner, has not connected yet"
 msgstr ""
 
+msgid "Runners|Not connected"
+msgstr ""
+
+msgid "Runners|Offline"
+msgstr ""
+
+msgid "Runners|Online"
+msgstr ""
+
+msgid "Runners|Paused"
+msgstr ""
+
 msgid "Runners|Platform"
 msgstr ""
 
