@@ -2,7 +2,7 @@
 
 module Gitlab
   module BackgroundMigration
-    # A job to set namespaces.traversal_ids in sub-batches, of all namespaces
+    # A job to set namespaces.8 in sub-batches, of all namespaces
     # without a parent and not already set.
     # rubocop:disable Style/Documentation
     class BackfillNamespaceTraversalIdsRoots
@@ -19,7 +19,7 @@ module Gitlab
       def perform(start_id, end_id, sub_batch_size)
         ranged_query = Namespace.base_query
           .where(id: start_id..end_id)
-          .where("traversal_ids = '{}'")
+          .where("traversal_ids8 = '{}'")
 
         ranged_query.each_batch(of: sub_batch_size) do |sub_batch|
           first, last = sub_batch.pluck(Arel.sql('min(id), max(id)')).first
@@ -29,8 +29,8 @@ module Gitlab
           Namespace.unscoped
                    .base_query
                    .where(id: first..last)
-                   .where("traversal_ids = '{}'")
-                   .update_all('traversal_ids = ARRAY[id]')
+                   .where("traversal_ids8 = '{}'")
+                   .update_all('traversal_ids8 = ARRAY[id]')
 
           sleep PAUSE_SECONDS
         end

@@ -2,7 +2,7 @@
 
 module Gitlab
   module BackgroundMigration
-    # A job to set namespaces.traversal_ids in sub-batches, of all namespaces with
+    # A job to set namespaces.traversal_ids8 in sub-batches, of all namespaces with
     # a parent and not already set.
     # rubocop:disable Style/Documentation
     class BackfillNamespaceTraversalIdsChildren
@@ -24,10 +24,10 @@ module Gitlab
 
           update_sql = <<~SQL
             UPDATE namespaces
-            SET traversal_ids = calculated_ids.traversal_ids
+            SET traversal_ids8 = calculated_ids.traversal_ids8
             FROM #{calculated_traversal_ids(ranged_query)} calculated_ids
             WHERE namespaces.id = calculated_ids.id
-              AND namespaces.traversal_ids = '{}'
+              AND namespaces.traversal_ids8 = '{}'
           SQL
           ActiveRecord::Base.connection.execute(update_sql)
 
@@ -58,7 +58,7 @@ module Gitlab
               )
             )
             SELECT flat_hierarchy.source_id as id,
-                   array_agg(flat_hierarchy.namespace_id ORDER BY flat_hierarchy.height DESC) as traversal_ids
+                   array_agg(flat_hierarchy.namespace_id ORDER BY flat_hierarchy.height DESC) as traversal_ids8
             FROM (SELECT * FROM cte FOR UPDATE) flat_hierarchy
             GROUP BY flat_hierarchy.source_id
           )

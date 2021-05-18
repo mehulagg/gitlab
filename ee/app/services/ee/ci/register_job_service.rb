@@ -79,7 +79,7 @@ module EE
       def all_namespaces
         if traversal_ids_enabled?
           ::Namespace
-            .where('namespaces.id = project_namespaces.traversal_ids[1]')
+            .where('namespaces.id = project_namespaces.traversal_ids8[1]')
             .joins('INNER JOIN namespaces as project_namespaces ON project_namespaces.id = projects.namespace_id')
         else
           namespaces = ::Namespace.reorder(nil).where('namespaces.id = projects.namespace_id')

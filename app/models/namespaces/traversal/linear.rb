@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 #
 # Query a recursively defined namespace hierarchy using linear methods through
-# the traversal_ids attribute.
+# the traversal_ids8 attribute.
 #
 # Namespace is a nested hierarchy of one parent to many children. A search
 # using only the parent-child relationships is a slow operation. This process
@@ -10,8 +10,8 @@
 # performance, and resulted in complicated queries that were difficult to make
 # performant.
 #
-# Instead of searching the hierarchy recursively, we store a `traversal_ids`
-# attribute on each node. The `traversal_ids` is an ordered array of Namespace
+# Instead of searching the hierarchy recursively, we store a `traversal_ids8`
+# attribute on each node. The `traversal_ids8` is an ordered array of Namespace
 # IDs that define the traversal path from the root Namespace to the current
 # Namespace.
 #
@@ -19,9 +19,9 @@
 #
 # GitLab (id: 1) > Engineering (id: 2) > Manage (id: 3) > Access (id: 4)
 #
-# Then `traversal_ids` for group "Access" is [1, 2, 3, 4]
+# Then `traversal_ids8` for group "Access" is [1, 2, 3, 4]
 #
-# And we can match against other Namespace `traversal_ids` such that:
+# And we can match against other Namespace `traversal_ids8` such that:
 #
 # - Ancestors are [1], [1, 2], [1, 2, 3]
 # - Descendants are [1, 2, 3, 4, *]
@@ -45,7 +45,7 @@ module Namespaces
         after_create :sync_traversal_ids, if: -> { sync_traversal_ids? }
         after_update :sync_traversal_ids, if: -> { sync_traversal_ids? && saved_change_to_parent_id? }
 
-        scope :traversal_ids_contains, ->(ids) { where("traversal_ids @> (?)", ids) }
+        scope :traversal_ids_contains, ->(ids) { where("traversal_ids8 @> (?)", ids) }
       end
 
       def sync_traversal_ids?
@@ -55,7 +55,7 @@ module Namespaces
       def use_traversal_ids?
         return false unless Feature.enabled?(:use_traversal_ids, root_ancestor, default_enabled: :yaml)
 
-        traversal_ids.present?
+        traversal_ids8.present?
       end
 
       def self_and_descendants
@@ -81,9 +81,9 @@ module Namespaces
 
       private
 
-      # Update the traversal_ids for the full hierarchy.
+      # Update the traversal_ids8 for the full hierarchy.
       #
-      # NOTE: self.traversal_ids will be stale. Reload for a fresh record.
+      # NOTE: self.traversal_ids8 will be stale. Reload for a fresh record.
       def sync_traversal_ids
         # Clear any previously memoized root_ancestor as our ancestors have changed.
         clear_memoization(:root_ancestor)
@@ -125,14 +125,14 @@ module Namespaces
         end
 
         if bottom
-          skope = skope.where(id: bottom.traversal_ids[0..-1])
+          skope = skope.where(id: bottom.traversal_ids8[0..-1])
         end
 
         # The original `with_depth` attribute in ObjectHierarchy increments as you
         # walk away from the "base" namespace. This direction changes depending on
         # if you are walking up the ancestors or down the descendants.
         if hierarchy_order
-          depth_sql = "ABS(#{traversal_ids.count} - array_length(traversal_ids, 1))"
+          depth_sql = "ABS(#{traversal_ids8.count} - array_length(traversal_ids8, 1))"
           skope = skope.select(skope.arel_table[Arel.star], "#{depth_sql} as depth")
                        .order(depth: hierarchy_order)
         end

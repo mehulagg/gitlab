@@ -14988,7 +14988,8 @@ CREATE TABLE namespaces (
     shared_runners_enabled boolean DEFAULT true NOT NULL,
     allow_descendants_override_disabled_shared_runners boolean DEFAULT false NOT NULL,
     traversal_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
-    delayed_project_removal boolean DEFAULT false NOT NULL
+    delayed_project_removal boolean DEFAULT false NOT NULL,
+    traversal_ids8 bigint[] DEFAULT '{}'::bigint[] NOT NULL
 );
 
 CREATE SEQUENCE namespaces_id_seq
