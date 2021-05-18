@@ -66,9 +66,9 @@ class Namespace
 
       <<~SQL
       WITH RECURSIVE cte(id, traversal_ids8, cycle) AS (
-        VALUES(#{root_id}, ARRAY[#{root_id}], false)
+        VALUES(#{root_id}, ARRAY[#{root_id}]::bigint[], false)
       UNION ALL
-        SELECT n.id, cte.traversal_ids8 || n.id, n.id = ANY(cte.traversal_ids8)
+        SELECT n.id, cte.traversal_ids8 || n.id::bigint, n.id = ANY(cte.traversal_ids8)
         FROM namespaces n, cte
         WHERE n.parent_id = cte.id AND NOT cycle
       )
