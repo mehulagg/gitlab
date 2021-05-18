@@ -4692,7 +4692,6 @@ RSpec.describe Project, factory_default: :keep do
     specify do
       expect(subject).to include
       [
-        { key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false },
         { key: 'CI_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false }
       ]
     end
@@ -4705,7 +4704,6 @@ RSpec.describe Project, factory_default: :keep do
       it do
         expect(subject).to include
         [
-          { key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: 'random.yml', public: true, masked: false }
         ]
       end

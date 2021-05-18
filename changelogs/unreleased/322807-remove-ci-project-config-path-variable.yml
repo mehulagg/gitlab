@@ -1,0 +1,5 @@
+---
+title: Remove CI_PROJECT_CONFIG_PATH variable
+merge_request: 61977
+author:
+type: removed
