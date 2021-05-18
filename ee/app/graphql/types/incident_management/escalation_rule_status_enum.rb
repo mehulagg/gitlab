@@ -6,7 +6,7 @@ module Types
       graphql_name 'EscalationRuleStatus'
       description 'Escalation rule statuses'
 
-      ::IncidentManagement::EscalationRule.statuses.keys.each do |status|
+      ::IncidentManagement::EscalationRule.statuses.each_key do |status|
         value status.to_s.upcase, value: status, description: "#{::AlertManagement::Alert::STATUS_DESCRIPTIONS[status]}."
       end
     end

@@ -20,7 +20,7 @@ module IncidentManagement
       end
 
       def error_no_license
-        error(_('Your license does not support escalation policies'))
+        error(_('Escalation policies are not supported for this project'))
       end
     end
   end
