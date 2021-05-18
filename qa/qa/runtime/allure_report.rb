@@ -3,47 +3,70 @@
 module QA
   module Runtime
     class AllureReport
-      # Configure allure reports
-      #
-      # @return [void]
-      def self.configure!
-        return unless ENV["GENERATE_ALLURE_REPORT"] == "true"
+      class << self
+        # Configure allure reports
+        #
+        # @return [void]
+        def configure!
+          return unless ENV["GENERATE_ALLURE_REPORT"] == "true"
 
-        require "allure-rspec"
+          require "allure-rspec"
 
-        AllureRspec.configure do |config|
-          config.results_directory = "tmp/allure-results"
-          config.clean_results_directory = true
+          configure_allure
+          configure_attachments
+          configure_rspec
         end
 
-        Capybara::Screenshot.after_save_screenshot do |path|
-          Allure.add_attachment(
-            name: "screenshot",
-            source: File.open(path),
-            type: Allure::ContentType::PNG,
-            test_case: true
-          )
-        end
-        Capybara::Screenshot.after_save_html do |path|
-          Allure.add_attachment(
-            name: "html",
-            source: File.open(path),
-            type: "text/html",
-            test_case: true
-          )
+        private
+
+        # Configure allure reporter
+        #
+        # @return [void]
+        def configure_allure
+          AllureRspec.configure do |config|
+            config.results_directory = "tmp/allure-results"
+            config.clean_results_directory = true
+          end
         end
 
-        RSpec.configure do |config|
-          config.formatter = AllureRspecFormatter
+        # Set up failure screenshot attachments
+        #
+        # @return [void]
+        def configure_attachments
+          Capybara::Screenshot.after_save_screenshot do |path|
+            Allure.add_attachment(
+              name: "screenshot",
+              source: File.open(path),
+              type: Allure::ContentType::PNG,
+              test_case: true
+            )
+          end
+          Capybara::Screenshot.after_save_html do |path|
+            Allure.add_attachment(
+              name: "html",
+              source: File.open(path),
+              type: "text/html",
+              test_case: true
+            )
+          end
+        end
 
-          config.before do |example|
-            testcase = example.metadata[:testcase]
-            example.tms("Testcase", testcase) if testcase
+        # Configure rspec
+        #
+        # @return [void]
+        def configure_rspec
+          RSpec.configure do |config|
+            config.formatter = AllureRspecFormatter
 
-            issue = example.metadata.dig(:quarantine, :issue)
-            example.issue("Issue", issue) if issue
+            config.before do |example|
+              testcase = example.metadata[:testcase]
+              example.tms("Testcase", testcase) if testcase
 
-            example.add_link(name: "Job(#{ENV['CI_JOB_NAME']})", url: ENV["CI_JOB_URL"]) if ENV["CI"]
+              issue = example.metadata.dig(:quarantine, :issue)
+              example.issue("Issue", issue) if issue
+
+              example.add_link(name: "Job(#{ENV['CI_JOB_NAME']})", url: ENV["CI_JOB_URL"]) if ENV["CI"]
+            end
           end
         end
       end
