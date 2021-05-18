@@ -24,7 +24,6 @@ export default {
     GlToggle,
     SidebarEditableItem,
   },
-  inject: ['canUpdate'],
   props: {
     iid: {
       type: String,
@@ -102,6 +101,9 @@ export default {
         parent: this.parentIsGroup ? 'group' : 'project',
       });
     },
+    isLoggedIn() {
+      return Boolean(gon.current_user_id);
+    },
   },
   methods: {
     setSubscribed(subscribed) {
@@ -174,7 +176,7 @@ export default {
       <gl-toggle
         :value="subscribed"
         :is-loading="isLoading"
-        :disabled="emailsDisabled || !canUpdate"
+        :disabled="emailsDisabled || !isLoggedIn"
         class="hide-collapsed gl-ml-auto"
         data-testid="subscription-toggle"
         :label="$options.i18n.notifications"
