@@ -31,7 +31,8 @@ class JiraConnect::AppDescriptorController < JiraConnect::ApplicationController
       scopes: %w(READ WRITE DELETE),
       apiVersion: 1,
       apiMigrations: {
-        gdpr: true
+        gdpr: true,
+        'context-qsh': true
       }
     }
   end
