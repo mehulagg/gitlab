@@ -10,6 +10,8 @@ module Types
       value 'CREATED_ASC', 'Ordered by created_at in ascending order.', value: :created_asc
       value 'NAME_DESC', 'Ordered by name in descending order.', value: :name_desc
       value 'NAME_ASC', 'Ordered by name in ascending order.', value: :name_asc
+      value 'PROJECT_PATH_DESC', 'Ordered by project path in descending order.', value: :project_path_desc
+      value 'PROJECT_PATH_ASC', 'Ordered by project path in ascending order.', value: :project_path_asc
       value 'VERSION_DESC', 'Ordered by version in descending order.', value: :version_desc
       value 'VERSION_ASC', 'Ordered by version in ascending order.', value: :version_asc
       value 'TYPE_DESC', 'Ordered by type in descending order.', value: :type_desc

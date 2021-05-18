@@ -14370,6 +14370,8 @@ Values for sorting group packages.
 | <a id="packagegroupsortcreated_desc"></a>`CREATED_DESC` | Ordered by created_at in descending order. |
 | <a id="packagegroupsortname_asc"></a>`NAME_ASC` | Ordered by name in ascending order. |
 | <a id="packagegroupsortname_desc"></a>`NAME_DESC` | Ordered by name in descending order. |
+| <a id="packagegroupsortproject_path_asc"></a>`PROJECT_PATH_ASC` | Ordered by project path in ascending order. |
+| <a id="packagegroupsortproject_path_desc"></a>`PROJECT_PATH_DESC` | Ordered by project path in descending order. |
 | <a id="packagegroupsorttype_asc"></a>`TYPE_ASC` | Ordered by type in ascending order. |
 | <a id="packagegroupsorttype_desc"></a>`TYPE_DESC` | Ordered by type in descending order. |
 | <a id="packagegroupsortversion_asc"></a>`VERSION_ASC` | Ordered by version in ascending order. |
@@ -14385,6 +14387,8 @@ Values for sorting package.
 | <a id="packagesortcreated_desc"></a>`CREATED_DESC` | Ordered by created_at in descending order. |
 | <a id="packagesortname_asc"></a>`NAME_ASC` | Ordered by name in ascending order. |
 | <a id="packagesortname_desc"></a>`NAME_DESC` | Ordered by name in descending order. |
+| <a id="packagesortproject_path_asc"></a>`PROJECT_PATH_ASC` | Ordered by project path in ascending order. |
+| <a id="packagesortproject_path_desc"></a>`PROJECT_PATH_DESC` | Ordered by project path in descending order. |
 | <a id="packagesorttype_asc"></a>`TYPE_ASC` | Ordered by type in ascending order. |
 | <a id="packagesorttype_desc"></a>`TYPE_DESC` | Ordered by type in descending order. |
 | <a id="packagesortversion_asc"></a>`VERSION_ASC` | Ordered by version in ascending order. |
