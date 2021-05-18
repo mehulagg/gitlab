@@ -2,10 +2,12 @@
 
 module Mutations
   # This module overrides authorized_resource? method so make sure that
-  # the class where this module in included doesn't rely on other `authorize`
+  # the class where this module is included doesn't rely on other `authorize`
   # definitions
   module ResolvesSubscription
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
+
     included do
       argument :subscribed_state,
                GraphQL::BOOLEAN_TYPE,
@@ -13,6 +15,7 @@ module Mutations
                description: 'The desired state of the subscription.'
     end
 
+    override :authorized_resource?
     def authorized_resource?(subscribable)
       return false if subscribable.nil?
 
