@@ -1177,4 +1177,14 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       let(:issuable) { described_class.new(project: project, current_user: user, params: params).execute(existing_merge_request) }
     end
   end
+
+  describe 'handle_changes' do
+    it "does not try to mark as unchecked if it's already unchecked" do
+
+      # if merge_request.previous_changes.include?('target_branch') ||
+      #     merge_request.previous_changes.include?('source_branch')
+      #   merge_request.mark_as_unchecked unless merge_request.unchecked?
+      # end
+    end
+  end
 end
