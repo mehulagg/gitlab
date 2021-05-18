@@ -1,6 +1,6 @@
 ---
 title: Disable enabled cleanup policies if they are linked to a policy with no container
   images
-merge_request:
+merge_request: 61983
 author:
 type: performance

@@ -3,7 +3,7 @@
 class DisableExpirationPoliciesLinkedToNoContainerImages < ActiveRecord::Migration[6.0]
   disable_ddl_transaction!
 
-  BATCH_SIZE = 2000
+  BATCH_SIZE = 1000
 
   class ContainerExpirationPolicy < ActiveRecord::Base
     include ::EachBatch
@@ -26,8 +26,8 @@ class DisableExpirationPoliciesLinkedToNoContainerImages < ActiveRecord::Migrati
                            )
       )
 
-    policies.each_batch(of: BATCH_SIZE) do |batch, index|
-      policies.update_all(enabled: false)
+    policies.each_batch(of: BATCH_SIZE) do |batch, _|
+      batch.update_all(enabled: false)
     end
   end
 
