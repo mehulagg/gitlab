@@ -37267,6 +37267,9 @@ msgstr ""
 msgid "You have insufficient permissions to create an HTTP integration for this project"
 msgstr ""
 
+msgid "You have insufficient permissions to create an escalation policy for this project"
+msgstr ""
+
 msgid "You have insufficient permissions to create an on-call schedule for this project"
 msgstr ""
 
@@ -37667,6 +37670,9 @@ msgid "Your issues are being imported. Once finished, you'll get a confirmation 
 msgstr ""
 
 msgid "Your issues will be imported in the background. Once finished, you'll get a confirmation email."
+msgstr ""
+
+msgid "Your license does not support escalation policies"
 msgstr ""
 
 msgid "Your license does not support on-call rotations"

@@ -107,10 +107,25 @@ RSpec.describe 'getting Incident Management escalation policies' do
         it 'returns the correct properties of the escalation policy' do
           policy_data = graphql_data.dig('project', 'incidentManagementEscalationPolicy')
 
+          last_policy_rule = policy.rules.last
+
           expect(policy_data).to include(
             'id' => policy.to_global_id.to_s,
             'name' => policy.name,
-            'description' => policy.description
+            'description' => policy.description,
+            'rules' => [
+              {
+                'id' => last_policy_rule.to_global_id.to_s,
+                'elapsedTimeSeconds' => last_policy_rule.elapsed_time_seconds,
+                'status' => last_policy_rule.status.upcase,
+                'oncallSchedule' => {
+                  'iid' => last_policy_rule.oncall_schedule.iid.to_s,
+                  'name' => last_policy_rule.oncall_schedule.name,
+                  'description' => last_policy_rule.oncall_schedule.description,
+                  'timezone' => last_policy_rule.oncall_schedule.timezone
+                }
+              }
+            ]
           )
         end
       end
