@@ -572,6 +572,9 @@ Settings.cron_jobs['ssh_keys_expiring_soon_notification_worker']['job_class'] = 
 Settings.cron_jobs['users_deactivate_dormant_users_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['users_deactivate_dormant_users_worker']['cron'] ||= '21,42 0-4 * * *'
 Settings.cron_jobs['users_deactivate_dormant_users_worker']['job_class'] = 'Users::DeactivateDormantUsersWorker'
+Settings.cron_jobs['ci_delete_unit_tests_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ci_delete_unit_tests_worker']['cron'] ||= '0 0 * * *'
+Settings.cron_jobs['ci_delete_unit_tests_worker']['job_class'] = 'Ci::DeleteUnitTestsWorker'
 
 Gitlab.com do
   Settings.cron_jobs['batched_background_migrations_worker'] ||= Settingslogic.new({})
@@ -691,6 +694,12 @@ Gitlab.ee do
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['cron'] ||= '15 3 * * *'
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['job_class'] = 'Vulnerabilities::HistoricalStatistics::DeletionWorker'
+  Settings.cron_jobs['security_create_orchestration_policy_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['security_create_orchestration_policy_worker']['cron'] ||= '*/10 * * * *'
+  Settings.cron_jobs['security_create_orchestration_policy_worker']['job_class'] = 'Security::CreateOrchestrationPolicyWorker'
+  Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker']['cron'] ||= '*/15 * * * *'
+  Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker']['job_class'] = 'Security::OrchestrationPolicyRuleScheduleWorker'
 end
 
 #

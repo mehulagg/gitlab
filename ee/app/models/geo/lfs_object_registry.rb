@@ -13,7 +13,7 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   belongs_to :lfs_object, class_name: 'LfsObject'
 
   def self.registry_consistency_worker_enabled?
-    if ::Feature.enabled?(:geo_lfs_object_replication)
+    if ::Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
       replicator_class.enabled?
     else
       true
@@ -21,7 +21,7 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   end
 
   def self.failed
-    if Feature.enabled?(:geo_lfs_object_replication)
+    if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
       with_state(:failed)
     else
       where(success: false).where.not(retry_count: nil)
@@ -29,7 +29,7 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   end
 
   def self.never_attempted_sync
-    if Feature.enabled?(:geo_lfs_object_replication)
+    if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
       pending.where(last_synced_at: nil)
     else
       where(success: false, retry_count: nil)
@@ -37,7 +37,7 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   end
 
   def self.retry_due
-    if Feature.enabled?(:geo_lfs_object_replication)
+    if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
       where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current)))
     else
       where('retry_at is NULL OR retry_at < ?', Time.current)
@@ -45,7 +45,7 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   end
 
   def self.synced
-    if Feature.enabled?(:geo_lfs_object_replication)
+    if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
       with_state(:synced).or(where(success: true))
     else
       where(success: true)

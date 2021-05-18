@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe "Manage", :requires_admin do
-    describe "Group bulk import" do
+  RSpec.describe 'Manage', :requires_admin do
+    describe 'Group bulk import' do
       let!(:api_client) { Runtime::API::Client.as_admin }
       let!(:user) do
         Resource::User.fabricate_via_api! do |usr|
@@ -26,34 +26,36 @@ module QA
         end
       end
 
+      let!(:subgroup) do
+        Resource::Group.fabricate_via_api! do |group|
+          group.api_client = api_client
+          group.sandbox = source_group
+          group.path = "subgroup-for-import-#{SecureRandom.hex(4)}"
+        end
+      end
+
       let(:imported_group) do
         Resource::Group.new.tap do |group|
           group.api_client = api_client
           group.path = source_group.path
-        end.reload!
-      rescue Resource::ApiFabricator::ResourceNotFoundError
-        nil
+        end
       end
 
-      # Return subset of fields for comparing groups
-      #
-      # @param [Resource::Group, nil] group
-      # @return [Hash]
-      def comparable_group(group)
-        group&.api_resource&.except(
-          :id,
-          :web_url,
-          :visibility,
-          :full_name,
-          :full_path,
-          :created_at,
-          :parent_id,
-          :runners_token
-        )
+      let(:imported_subgroup) do
+        Resource::Group.new.tap do |group|
+          group.api_client = api_client
+          group.sandbox = imported_group
+          group.path = subgroup.path
+        end
+      end
+
+      def staging?
+        Runtime::Scenario.gitlab_address.include?('staging.gitlab.com')
       end
 
       before(:all) do
         Runtime::Feature.enable(:bulk_import)
+        Runtime::Feature.enable(:top_level_group_creation_enabled) if staging?
       end
 
       before do
@@ -66,17 +68,17 @@ module QA
       end
 
       it(
-        "performs bulk group import from another gitlab instance",
-        testcase: "https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785",
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/330344
-        exclude: { job: ["ce:relative_url", "ee:relative_url"] }
+        'performs bulk group import from another gitlab instance',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
+        exclude: { job: ['ce:relative_url', 'ee:relative_url'] } # https://gitlab.com/gitlab-org/gitlab/-/issues/330344
       ) do
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
 
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
-            expect(comparable_group(imported_group)).to eq(comparable_group(source_group))
+            expect(imported_group).to eq(source_group)
+            expect(imported_subgroup).to eq(subgroup)
           end
         end
       end
@@ -88,6 +90,7 @@ module QA
 
       after(:all) do
         Runtime::Feature.disable(:bulk_import)
+        Runtime::Feature.disable(:top_level_group_creation_enabled) if staging?
       end
     end
   end

@@ -24,6 +24,7 @@ const fixtureEndpoints = {
   customizableCycleAnalyticsStagesAndEvents: 'analytics/value_stream_analytics/stages.json', // customizable stages and events endpoint
   stageEvents: (stage) => `analytics/value_stream_analytics/stages/${stage}/records.json`,
   stageMedian: (stage) => `analytics/value_stream_analytics/stages/${stage}/median.json`,
+  stageCount: (stage) => `analytics/value_stream_analytics/stages/${stage}/count.json`,
   recentActivityData: 'analytics/metrics/value_stream_analytics/summary.json',
   timeMetricsData: 'analytics/metrics/value_stream_analytics/time_summary.json',
   groupLabels: 'api/group_labels.json',
@@ -36,6 +37,7 @@ export const endpoints = {
   durationData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/average_duration_chart/,
   stageData: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/records/,
   stageMedian: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/median/,
+  stageCount: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages\/\w+\/count/,
   baseStagesEndpoint: /analytics\/value_stream_analytics\/value_streams\/\w+\/stages$/,
   tasksByTypeData: /analytics\/type_of_work\/tasks_by_type/,
   tasksByTypeTopLabelsData: /analytics\/type_of_work\/tasks_by_type\/top_labels/,
@@ -142,6 +144,29 @@ export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id, val
   };
 }, {});
 
+export const rawStageCounts = defaultStages.map((id) => ({
+  id,
+  ...getJSONFixture(fixtureEndpoints.stageCount(id)),
+}));
+
+// Once https://gitlab.com/gitlab-org/gitlab/-/issues/328422 is fixed
+// we should be able to use the rawStageCounts for building
+// the stage counts mock data
+/*
+export const stageCounts = rawStageCounts.reduce(
+  (acc, { id, value }) => ({
+    ...acc,
+    [id]: value,
+  }),
+  {},
+);
+*/
+
+export const stageCounts = rawStageMedians.reduce((acc, { id, value }) => {
+  const { id: stageId } = getStageByTitle(dummyState.stages, id);
+  return { ...acc, [stageId]: value };
+}, {});
+
 export const endDate = new Date(2019, 0, 14);
 export const startDate = getDateInPast(endDate, DEFAULT_DAYS_IN_PAST);
 
@@ -188,13 +213,6 @@ export const labelStopEvent = customStageLabelEvents.find(
   (ev) => ev.identifier === labelStartEvent.allowedEndEvents[0],
 );
 
-export const rawCustomStageFormErrors = {
-  name: ['is reserved', 'cant be blank'],
-  start_event_identifier: ['cant be blank'],
-};
-
-export const customStageFormErrors = convertObjectPropsToCamelCase(rawCustomStageFormErrors);
-
 const dateRange = getDatesInRange(startDate, endDate, toYmd);
 
 export const apiTasksByTypeData = getJSONFixture(
@@ -215,6 +233,7 @@ export const transformedTasksByTypeData = getTasksByTypeData(apiTasksByTypeData)
 export const transformedStagePathData = transformStagesForPathNavigation({
   stages: [{ ...OVERVIEW_STAGE_CONFIG }, ...allowedStages],
   medians,
+  stageCounts,
   selectedStage: issueStage,
 });
 

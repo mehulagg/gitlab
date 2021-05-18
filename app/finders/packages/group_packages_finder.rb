@@ -26,12 +26,12 @@ module Packages
         .including_project_route
         .including_tags
         .for_projects(group_projects_visible_to_current_user.select(:id))
-        .processed
         .sort_by_attribute("#{params[:order_by]}_#{params[:sort]}")
 
       packages = filter_with_version(packages)
       packages = filter_by_package_type(packages)
       packages = filter_by_package_name(packages)
+      packages = filter_by_package_version(packages)
       installable_only ? packages.installable : filter_by_status(packages)
     end
 

@@ -57,6 +57,18 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
       it 'does not mark the user as provisioned' do
         expect(find_and_update.provisioned_by_group).to be_nil
       end
+
+      context 'when the user has multiple group saml identities' do
+        let(:saml_provider2) { create(:saml_provider) }
+
+        before do
+          create(:group_saml_identity, extern_uid: uid, saml_provider: saml_provider2, user: identity.user)
+        end
+
+        it 'returns the user' do
+          expect(find_and_update).to eq identity.user
+        end
+      end
     end
 
     context 'with no matching user identity' do

@@ -1,14 +1,14 @@
 <script>
 import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelector from './profile_selector.vue';
+import ScannerProfileSummary from './scanner_profile_summary.vue';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
   components: {
     ProfileSelector,
+    ScannerProfileSummary,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     scannerProfilesLibraryPath: {
       default: '',
@@ -22,6 +22,16 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    selectedProfile: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    hasConflict: {
+      type: Boolean,
+      required: false,
+      default: null,
     },
   },
   computed: {
@@ -56,7 +66,11 @@ export default {
     <template #new-profile>{{ s__('OnDemandScans|Create new scanner profile') }}</template>
     <template #manage-profile>{{ s__('OnDemandScans|Manage scanner profiles') }}</template>
     <template #summary>
-      <slot name="summary"></slot>
+      <scanner-profile-summary
+        v-if="selectedProfile"
+        :profile="selectedProfile"
+        :has-conflict="hasConflict"
+      />
     </template>
   </profile-selector>
 </template>

@@ -149,8 +149,8 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'Operations main link' do
-    let(:user) { create(:user) }
+  describe 'Monitor main link' do
+    let_it_be(:user) { create(:user) }
 
     before do
       project.project_feature.update!(builds_access_level: feature)
@@ -165,7 +165,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'links to feature flags page' do
         render
 
-        expect(rendered).to have_link('Operations', href: project_feature_flags_path(project))
+        expect(rendered).to have_link('Monitor', href: project_feature_flags_path(project))
       end
     end
 
@@ -175,7 +175,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'links to metrics page' do
         render
 
-        expect(rendered).to have_link('Operations', href: metrics_project_environments_path(project))
+        expect(rendered).to have_link('Monitor', href: metrics_project_environments_path(project))
       end
     end
   end
@@ -404,11 +404,11 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       allow(view).to receive(:current_user).and_return(user)
     end
 
-    describe 'Operations' do
+    describe 'Monitor' do
       it 'links to settings page' do
         render
 
-        expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+        expect(rendered).to have_link('Monitor', href: project_settings_operations_path(project))
       end
 
       context 'when user is not authorized' do
@@ -417,7 +417,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         it 'does not display the link' do
           render
 
-          expect(rendered).not_to have_link('Operations', href: project_settings_operations_path(project))
+          expect(rendered).not_to have_link('Monitor', href: project_settings_operations_path(project))
         end
       end
     end

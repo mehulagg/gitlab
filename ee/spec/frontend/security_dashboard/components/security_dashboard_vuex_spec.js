@@ -52,6 +52,7 @@ describe('Security Dashboard component', () => {
       },
       propsData: {
         dashboardDocumentation: '',
+        projectFullPath: '/path',
         vulnerabilitiesEndpoint,
         pipelineId,
         ...props,

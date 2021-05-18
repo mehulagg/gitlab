@@ -66,9 +66,10 @@ describe('Standard Filter component', () => {
   };
 
   afterEach(() => {
+    wrapper.destroy();
     // Clear out the querystring if one exists, it persists between tests.
-    if (filterQuery()) {
-      router.replace('/');
+    if (router.currentRoute.query[filter.id]) {
+      wrapper.vm.$router.push('/');
     }
   });
 
@@ -117,17 +118,11 @@ describe('Standard Filter component', () => {
   });
 
   describe('loading prop', () => {
-    it.each([true, false])(
-      `sets the filter body loading prop to %s and emits the expected event data`,
-      (loading) => {
-        const query = { [filter.id]: optionIdsAt([1, 3, 5]) };
-        router.replace({ query });
-        createWrapper({}, { loading });
+    it.each([true, false])(`sets the filter body loading prop to %s`, (loading) => {
+      createWrapper({}, { loading });
 
-        expect(filterBody().props('loading')).toBe(loading);
-        expect(wrapper.emitted('filter-changed')[0][0]).toEqual(query);
-      },
-    );
+      expect(filterBody().props('loading')).toBe(loading);
+    });
   });
 
   describe('selecting options', () => {
@@ -191,8 +186,12 @@ describe('Standard Filter component', () => {
   });
 
   describe('filter querystring', () => {
-    const updateQuerystring = (ids) => {
+    const updateQuerystring = async (ids) => {
+      // window.history.back() won't change the location nor fire the popstate event, so we need
+      // to fake it by doing it manually.
       router.replace({ query: { [filter.id]: ids } });
+      window.dispatchEvent(new Event('popstate'));
+      await wrapper.vm.$nextTick();
     };
 
     describe('clicking on items', () => {
@@ -328,25 +327,12 @@ describe('Standard Filter component', () => {
         const ids = optionIdsAt([1, 2, 3]);
         const other = ['6', '7', '8'];
         const query = { [filter.id]: ids, other };
-        router.replace({ query });
+        router.push({ query });
+        window.dispatchEvent(new Event('popstate'));
         await wrapper.vm.$nextTick();
 
         expectSelectedItems([1, 2, 3]);
         expect(wrapper.vm.$route.query.other).toEqual(other);
-      });
-
-      it('does not emit a filter-changed event if the querystring change was not for the current filter', async () => {
-        const query = { [filter.id]: optionIdsAt([2, 5]) };
-        router.replace({ query });
-        createWrapper();
-
-        expect(wrapper.emitted('filter-changed')).toHaveLength(1);
-
-        query.other = [1, 2, 3];
-        router.push({ query });
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.emitted('filter-changed')).toHaveLength(1);
       });
     });
   });

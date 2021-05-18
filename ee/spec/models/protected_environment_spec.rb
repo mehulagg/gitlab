@@ -131,6 +131,43 @@ RSpec.describe ProtectedEnvironment do
     end
   end
 
+  describe '.for_environment' do
+    let_it_be(:project, reload: true) { create(:project) }
+    let_it_be(:environment) { build(:environment, name: 'production', project: project) }
+    let_it_be(:protected_environment) { create(:protected_environment, name: 'production', project: project) }
+
+    subject { described_class.for_environment(environment) }
+
+    it { is_expected.to eq([protected_environment]) }
+
+    it 'caches result', :request_store do
+      described_class.for_environment(environment).to_a
+
+      expect { described_class.for_environment(environment).to_a }
+        .not_to exceed_query_limit(0)
+    end
+
+    context 'when environment is a different name' do
+      let_it_be(:environment) { build(:environment, name: 'staging', project: project) }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when environment exists in a different project' do
+      let_it_be(:environment) { build(:environment, name: 'production', project: create(:project)) }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when environment does not exist' do
+      let(:environment) { }
+
+      it 'raises an error' do
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
   def create_deploy_access_level(**opts)
     protected_environment.deploy_access_levels.create(**opts)
   end

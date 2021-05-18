@@ -18,7 +18,7 @@ module QA
                 element :group_issues_item
                 element :group_sidebar
                 element :group_sidebar_submenu
-                element :group_settings_item
+                element :group_settings
               end
 
               view 'app/views/layouts/nav/sidebar/_wiki_link.html.haml' do
@@ -33,6 +33,7 @@ module QA
 
               view 'ee/app/views/groups/ee/_settings_nav.html.haml' do
                 element :ldap_synchronization_link
+                element :billing_link
               end
               view 'ee/app/views/layouts/nav/ee/_epic_link.html.haml' do
                 element :group_epics_link
@@ -95,7 +96,7 @@ module QA
           end
 
           def go_to_ldap_sync_settings
-            hover_element(:group_settings_item) do
+            hover_element(:group_settings) do
               within_submenu(:group_sidebar_submenu) do
                 click_element(:ldap_synchronization_link)
               end
@@ -117,7 +118,7 @@ module QA
           end
 
           def click_group_general_settings_item
-            hover_element(:group_settings_item) do
+            hover_element(:group_settings) do
               within_submenu(:group_sidebar_submenu) do
                 click_element(:general_settings_link)
               end
@@ -157,6 +158,14 @@ module QA
           def click_group_wiki_link
             within_sidebar do
               click_element(:wiki_link)
+            end
+          end
+
+          def go_to_billing
+            hover_element(:group_settings) do
+              within_submenu(:group_sidebar_submenu) do
+                click_element(:billing_link)
+              end
             end
           end
         end

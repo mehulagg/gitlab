@@ -1,0 +1,5 @@
+---
+title: Fixed robocop offense for ee/spec/services/approval_rules/*
+merge_request: 61829
+author: Suraj Tripathi @surajtripathy07
+type: fixed

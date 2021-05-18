@@ -7,7 +7,11 @@ module GroupsHelper
       groups#details
       groups#activity
       groups#subgroups
-    ]
+    ].tap do |paths|
+      break paths if Feature.disabled?(:sidebar_refactor, current_user, default_enabled: :yaml)
+
+      paths.concat(['labels#index', 'group_members#index'])
+    end
   end
 
   def group_settings_nav_link_paths

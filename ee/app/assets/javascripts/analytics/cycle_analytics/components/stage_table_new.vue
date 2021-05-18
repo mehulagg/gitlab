@@ -1,5 +1,13 @@
 <script>
-import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlPagination, GlTable } from '@gitlab/ui';
+import {
+  GlEmptyState,
+  GlIcon,
+  GlLink,
+  GlLoadingIcon,
+  GlPagination,
+  GlTable,
+  GlBadge,
+} from '@gitlab/ui';
 import { __ } from '~/locale';
 import {
   NOT_ENOUGH_DATA_ERROR,
@@ -31,6 +39,7 @@ export default {
     GlLoadingIcon,
     GlPagination,
     GlTable,
+    GlBadge,
     TotalTime,
   },
   props: {
@@ -45,6 +54,11 @@ export default {
     stageEvents: {
       type: Array,
       required: true,
+    },
+    stageCount: {
+      type: Number,
+      required: false,
+      default: null,
     },
     noDataSvgPath: {
       type: String,
@@ -157,6 +171,10 @@ export default {
       :empty-text="emptyStateMessage"
       @sort-changed="onSort"
     >
+      <template #head(end_event)="data">
+        <span>{{ data.label }}</span
+        ><gl-badge v-if="stageCount" class="gl-ml-2" size="sm">{{ stageCount }}</gl-badge>
+      </template>
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
           <div v-if="item.id" data-testid="vsa-stage-content">

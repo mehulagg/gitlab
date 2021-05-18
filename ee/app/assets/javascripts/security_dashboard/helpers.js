@@ -36,7 +36,7 @@ export const createScannerOption = (vendor, reportType) => {
   const type = reportType.toUpperCase();
 
   return {
-    id: gon.features?.customSecurityScanners ? `${vendor}.${type}` : type,
+    id: `${vendor}.${type}`,
     reportType: reportType.toUpperCase(),
     name: convertReportType(reportType),
     scannerIds: [],
@@ -45,7 +45,7 @@ export const createScannerOption = (vendor, reportType) => {
 
 export const scannerFilter = {
   name: s__('SecurityReports|Scanner'),
-  id: gon.features?.customSecurityScanners ? 'scanner' : 'reportType',
+  id: 'scanner',
   options: Object.keys(REPORT_TYPES).map((x) => createScannerOption(DEFAULT_SCANNER, x)),
   allOption: BASE_FILTERS.report_type,
   defaultOptions: [],

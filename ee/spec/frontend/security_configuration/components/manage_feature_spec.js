@@ -73,7 +73,7 @@ describe('ManageFeature component', () => {
     });
 
     it('passes through props to expected component', () => {
-      expect(component.props()).toEqual({ feature });
+      expect(component.props()).toMatchObject({ feature });
     });
   });
 

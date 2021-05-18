@@ -311,9 +311,6 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
             <!---->
           </a>
            
-          <div>
-            Scanner profile #1's summary
-          </div>
         </div>
         <!---->
         <!---->

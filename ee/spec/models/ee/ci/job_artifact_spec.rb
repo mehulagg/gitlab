@@ -18,7 +18,7 @@ RSpec.describe Ci::JobArtifact do
       job_artifact = create(:ee_ci_job_artifact, :archive)
 
       expect do
-        job_artifact.destroy
+        job_artifact.destroy!
       end.to change { Geo::JobArtifactDeletedEvent.count }.by(1)
     end
   end
@@ -174,7 +174,7 @@ RSpec.describe Ci::JobArtifact do
     with_them do
       subject(:job_artifact_included) { described_class.replicables_for_current_secondary(ci_job_artifact).exists? }
 
-      let(:project) { create(*project_factory) }
+      let(:project) { create(*project_factory) } # rubocop:disable Rails/SaveBang
       let(:ci_build) { create(:ci_build, project: project) }
       let(:node) do
         create(:geo_node_with_selective_sync_for,

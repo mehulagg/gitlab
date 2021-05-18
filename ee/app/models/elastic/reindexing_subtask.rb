@@ -8,4 +8,6 @@ class Elastic::ReindexingSubtask < ApplicationRecord
   has_many :slices, class_name: 'Elastic::ReindexingSlice', foreign_key: :elastic_reindexing_subtask_id
 
   validates :index_name_from, :index_name_to, presence: true
+
+  scope :order_by_alias_name_asc, -> { order(alias_name: :asc) }
 end

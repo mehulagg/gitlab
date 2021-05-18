@@ -2,6 +2,7 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import ProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
 import OnDemandScansScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
+import ScannerProfileSummary from 'ee/on_demand_scans/components/profile_selector/scanner_profile_summary.vue';
 import { scannerProfiles } from '../../mocks/mock_data';
 
 const TEST_LIBRARY_PATH = '/test/scanner/profiles/library/path';
@@ -59,6 +60,16 @@ describe('OnDemandScansScannerProfileSelector', () => {
     createFullComponent();
 
     expect(wrapper.element).toMatchSnapshot();
+  });
+
+  it('render summary component ', () => {
+    const selectedProfile = profiles[0];
+
+    createComponent({
+      propsData: { profiles, value: selectedProfile.id, selectedProfile },
+    });
+
+    expect(wrapper.findComponent(ScannerProfileSummary).exists()).toBe(true);
   });
 
   it('sets listeners on profile selector component', () => {

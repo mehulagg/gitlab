@@ -30,7 +30,11 @@ FactoryBot.define do
     notify_admins_at { expires_at }
 
     licensee do
-      { "Name" => generate(:name) }
+      {
+         "Name" => generate(:name),
+         "Email" => generate(:email),
+         "Company" => "Company name"
+      }
     end
 
     restrictions do

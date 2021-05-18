@@ -90,6 +90,7 @@ module EE
     def status_checks_app_data(project)
       {
         data: {
+          project_id: project.id,
           status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
         }
       }

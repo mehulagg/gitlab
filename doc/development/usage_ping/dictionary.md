@@ -154,6 +154,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `analytics_unique_visits.i_analytics_dev_ops_adoption`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210423005644_i_analytics_dev_ops_adoption.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers:
+
 ### `analytics_unique_visits.i_analytics_dev_ops_score`
 
 Unique visitors to /-/instance_statistics/dev_ops_score
@@ -261,6 +273,18 @@ Group: `group::optimize`
 Status: `data_available`
 
 Tiers: `free`
+
+### `analytics_unique_visits.users_viewing_analytics_group_devops_adoption`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210428142406_users_viewing_analytics_group_devops_adoption.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `compliance_unique_visits.a_compliance_audit_events_api`
 
@@ -456,7 +480,7 @@ Tiers: `free`
 
 ### `counts.auto_devops_enabled`
 
-Projects with Auto DevOps template enabled
+Projects with Auto DevOps template enabled (excluding implicit Auto DevOps enabled and Auto DevOps template includes)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175229_auto_devops_enabled.yml)
 
@@ -464,7 +488,7 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.boards`
 
@@ -792,7 +816,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.clusters_disabled`
 
-Total GitLab Managed disabled clusters
+Number of Kubernetes clusters attached to GitLab currently disabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175242_clusters_disabled.yml)
 
@@ -804,7 +828,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.clusters_enabled`
 
-Total GitLab Managed clusters currently enabled
+Number of Kubernetes clusters attached to GitLab currently enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175234_clusters_enabled.yml)
 
@@ -2134,6 +2158,294 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `counts.in_product_marketing_email_create_0_cta_clicked`
+
+Total clicks on the create track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510201919_in_product_marketing_email_create_0_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_create_0_sent`
+
+Total sent emails of the create track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510201537_in_product_marketing_email_create_0_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_create_1_cta_clicked`
+
+Total clicks on the create track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202356_in_product_marketing_email_create_1_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_create_1_sent`
+
+Total sent emails of the create track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202148_in_product_marketing_email_create_1_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_create_2_cta_clicked`
+
+Total clicks on the create track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202724_in_product_marketing_email_create_2_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_create_2_sent`
+
+Total sent emails of the create track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202604_in_product_marketing_email_create_2_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_team_0_cta_clicked`
+
+Total clicks on the team track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203143_in_product_marketing_email_team_0_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_team_0_sent`
+
+Total sent emails of the team track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203134_in_product_marketing_email_team_0_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_team_1_cta_clicked`
+
+Total clicks on the team track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203203_in_product_marketing_email_team_1_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_team_1_sent`
+
+Total sent emails of the team track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203153_in_product_marketing_email_team_1_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_team_2_cta_clicked`
+
+Total clicks on the team track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203223_in_product_marketing_email_team_2_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_team_2_sent`
+
+Total sent emails of the team track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203213_in_product_marketing_email_team_2_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_trial_0_cta_clicked`
+
+Total clicks on the verify trial's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203044_in_product_marketing_email_trial_0_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_trial_0_sent`
+
+Total sent emails of the trial track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203035_in_product_marketing_email_trial_0_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_trial_1_cta_clicked`
+
+Total clicks on the trial track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203104_in_product_marketing_email_trial_1_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_trial_1_sent`
+
+Total sent emails of the trial track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203054_in_product_marketing_email_trial_1_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_trial_2_cta_clicked`
+
+Total clicks on the trial track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203124_in_product_marketing_email_trial_2_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_trial_2_sent`
+
+Total sent emails of the trial track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203114_in_product_marketing_email_trial_2_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_verify_0_cta_clicked`
+
+Total clicks on the verify track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202943_in_product_marketing_email_verify_0_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_verify_0_sent`
+
+Total sent emails of the verify track's first email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202807_in_product_marketing_email_verify_0_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_verify_1_cta_clicked`
+
+Total clicks on the verify track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203005_in_product_marketing_email_verify_1_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_verify_1_sent`
+
+Total sent emails of the verify track's second email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202955_in_product_marketing_email_verify_1_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_verify_2_cta_clicked`
+
+Total clicks on the verify track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203025_in_product_marketing_email_verify_2_cta_clicked.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.in_product_marketing_email_verify_2_sent`
+
+Total sent emails of the verify track's third email
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203015_in_product_marketing_email_verify_2_sent.yml)
+
+Group: `group::activation`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `counts.in_review_folder`
 
 Missing description
@@ -2892,7 +3204,7 @@ Tiers: `free`
 
 ### `counts.kubernetes_agent_gitops_sync`
 
-Count of GitOps Sync events
+Count of events when an Agent is asked to synchronize the manifests or its configuration
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175328_kubernetes_agent_gitops_sync.yml)
 
@@ -2916,7 +3228,7 @@ Tiers: `premium`, `ultimate`
 
 ### `counts.kubernetes_agents`
 
-Count of Kubernetes agents
+Count of Kubernetes registered agents
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175316_kubernetes_agents.yml)
 
@@ -3753,6 +4065,42 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `counts.package_events_i_package_terraform_module_delete_package`
+
+Total count of Terraform Module packages delete events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210410012200_package_events_i_package_terraform_module_delete_package.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_terraform_module_pull_package`
+
+Total count of pull Terraform Module packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210410012202_package_events_i_package_terraform_module_pull_package.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_terraform_module_push_package`
+
+Total count of push Terraform Module packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210410012204_package_events_i_package_terraform_module_push_package.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.packages`
 
@@ -5204,7 +5552,7 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_terraform_states`
 
@@ -5216,7 +5564,7 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_tracing_enabled`
 
@@ -6032,11 +6380,11 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.terraform_states`
 
-Count of GitLab Managed Terraform States used
+Count of GitLab Managed Terraform States
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175326_terraform_states.yml)
 
@@ -6044,7 +6392,7 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.todos`
 
@@ -6238,6 +6586,42 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `counts_monthly.aggregated_metrics.code_review_category_monthly_active_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427102618_code_review_category_monthly_active_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts_monthly.aggregated_metrics.code_review_extension_category_monthly_active_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427103010_code_review_extension_category_monthly_active_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts_monthly.aggregated_metrics.code_review_group_monthly_active_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427103119_code_review_group_monthly_active_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `counts_monthly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
 Missing description
@@ -6405,6 +6789,42 @@ Group: `group::release`
 Status: `data_available`
 
 Tiers: `free`
+
+### `counts_weekly.aggregated_metrics.code_review_category_monthly_active_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210427103407_code_review_category_monthly_active_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts_weekly.aggregated_metrics.code_review_extension_category_monthly_active_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210427103452_code_review_extension_category_monthly_active_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts_weekly.aggregated_metrics.code_review_group_monthly_active_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210427103328_code_review_group_monthly_active_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
@@ -7764,15 +8184,15 @@ Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_secrets_management.i_ci_secrets_management_vault_build_created_monthly`
 
-Missing description
+Monthly active users creating pipelines that that have the Vault JWT with it.'
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184251_i_ci_secrets_management_vault_build_created_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184251_i_ci_secrets_management_vault_build_created_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_secrets_management.i_ci_secrets_management_vault_build_created_weekly`
 
@@ -7836,15 +8256,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_build_monthly`
 
-Missing description
+Count of pipelines using the Auto Build template
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184534_p_ci_templates_auto_devops_build_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_build_weekly`
 
@@ -7860,15 +8280,15 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_deploy_latest_monthly`
 
-Missing description
+Count of pipelines using the latest Auto Deploy template
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184542_p_ci_templates_auto_devops_deploy_latest_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_deploy_latest_weekly`
 
@@ -7884,15 +8304,15 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_deploy_monthly`
 
-Missing description
+Count of pipelines using the stable Auto Deploy template
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184538_p_ci_templates_auto_devops_deploy_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_deploy_weekly`
 
@@ -7908,15 +8328,15 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_monthly`
 
-Missing description
+Count of pipelines using the Auto DevOps template
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184523_p_ci_templates_auto_devops_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_auto_devops_weekly`
 
@@ -7980,15 +8400,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_build_monthly`
 
-Missing description
+Count of pipelines with implicit Auto Build runs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184502_p_ci_templates_implicit_auto_devops_build_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_build_weekly`
 
@@ -8004,15 +8424,15 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_deploy_monthly`
 
-Missing description
+Count of pipelines with implicit Auto Deploy runs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184506_p_ci_templates_implicit_auto_devops_deploy_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_deploy_weekly`
 
@@ -8028,15 +8448,15 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_monthly`
 
-Missing description
+Count of pipelines with implicit Auto DevOps runs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184458_p_ci_templates_implicit_auto_devops_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_weekly`
 
@@ -8148,15 +8568,15 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_terraform_base_latest_monthly`
 
-Missing description
+Count of pipelines that include the terraform base template from GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184555_p_ci_templates_terraform_base_latest_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_terraform_base_latest_weekly`
 
@@ -9898,6 +10318,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.deploy_token_packages.i_package_terraform_module_deploy_token_monthly`
+
+Number of distinct users authorized via deploy token creating Terraform Module packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210410012206_i_package_terraform_module_deploy_token_monthly.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.deploy_token_packages.i_package_terraform_module_deploy_token_weekly`
+
+Number of distinct users authorized via deploy token creating Terraform Module packages in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210410012207_i_package_terraform_module_deploy_token_weekly.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_monthly`
 
 Missing description
@@ -11074,30 +11518,6 @@ Status: `data_available`
 
 Tiers:
 
-### `redis_hll_counters.incident_management.i_incident_management_oncall_notification_sent_monthly`
-
-Count of unique users to receive a notification while on-call
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210405222005_i_incident_management_oncall_notification_sent_monthly.yml)
-
-Group: `group::monitor`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
-### `redis_hll_counters.incident_management.i_incident_management_oncall_notification_sent_weekly`
-
-Count of unique users to receive a notification while on-call
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210405220139_i_incident_management_oncall_notification_sent_weekly.yml)
-
-Group: `group::monitor`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
 Missing description
@@ -11481,6 +11901,30 @@ Group: `group::health`
 Status: `data_available`
 
 Tiers:
+
+### `redis_hll_counters.incident_management_oncall.i_incident_management_oncall_notification_sent_monthly`
+
+Count of unique users to receive a notification while on-call
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210405222005_i_incident_management_oncall_notification_sent_monthly.yml)
+
+Group: `group::monitor`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.incident_management_oncall.i_incident_management_oncall_notification_sent_weekly`
+
+Count of unique users to receive a notification while on-call
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210405220139_i_incident_management_oncall_notification_sent_weekly.yml)
+
+Group: `group::monitor`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.issues_edit.g_project_management_issue_added_to_epic_monthly`
 
@@ -12343,6 +12787,30 @@ Weekly unique user count having merge requests which contains the CI config file
 Group: `group::pipeline authoring`
 
 Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.pipeline_authoring.pipeline_authoring_total_unique_counts_monthly`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427105033_pipeline_authoring_total_unique_counts_monthly.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.pipeline_authoring.pipeline_authoring_total_unique_counts_weekly`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210427105030_pipeline_authoring_total_unique_counts_weekly.yml)
+
+Group: ``
+
+Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -14268,15 +14736,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.terraform.p_terraform_state_api_unique_users_monthly`
 
-Missing description
+Monthly active users of GitLab Managed Terraform states
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184259_p_terraform_state_api_unique_users_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.terraform.p_terraform_state_api_unique_users_weekly`
 
@@ -14866,6 +15334,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.user_packages.i_package_terraform_module_user_monthly`
+
+Number of distinct users creating Terraform Module packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210410012208_i_package_terraform_module_user_monthly.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.user_packages.i_package_terraform_module_user_weekly`
+
+Number of distinct users creating Terraform Module packages in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210410012209_i_package_terraform_module_user_weekly.yml)
+
+Group: `group::configure`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.user_packages.user_packages_total_unique_counts_monthly`
 
 Missing description
@@ -15266,39 +15758,39 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_exact_required_approvers`
 
-Missing description
+Number of approval rules with the exact number of required approvers.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183355_approval_project_rules_with_exact_required_approvers.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183355_approval_project_rules_with_exact_required_approvers.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_less_approvers_than_required`
 
-Missing description
+Number of approval rules with fewer approvers than required.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183354_approval_project_rules_with_less_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183354_approval_project_rules_with_less_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_more_approvers_than_required`
 
-Missing description
+Number of approval rules with more approvers than required.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183352_approval_project_rules_with_more_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183352_approval_project_rules_with_more_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.approval_project_rules_with_target_branch`
 
@@ -15374,15 +15866,15 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.merge_requests_with_overridden_project_rules`
 
-Missing description
+Number of merge requests that have overridden rules created at the project level.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183339_merge_requests_with_overridden_project_rules.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183339_merge_requests_with_overridden_project_rules.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.merge_requests_with_required_codeowners`
 
@@ -15575,6 +16067,18 @@ Group: `group::geo`
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
+
+### `usage_activity_by_stage.enablement.geo_secondary_web_oauth_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210427212450_geo_secondary_web_oauth_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.bulk_imports.gitlab`
 
@@ -16936,7 +17440,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.configure.clusters_management_project`
 
-Total GitLab Managed clusters with defined cluster management project
+Number of Kubernetes clusters with clusters management project being set
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175413_clusters_management_project.yml)
 
@@ -17056,7 +17560,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.configure.projects_slack_notifications_active`
 
-Unique projects with Slack webhook enabled
+Unique projects created in the past 28 days that have Slack notifications enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175436_projects_slack_notifications_active.yml)
 
@@ -17064,11 +17568,11 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.configure.projects_slack_slash_active`
 
-Unique projects with Slack ‘/’ commands enabled
+Unique projects created in the past 28 days that have Slack ‘/’ commands enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175437_projects_slack_slash_active.yml)
 
@@ -17076,7 +17580,7 @@ Group: `group::configure`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.configure.projects_with_prometheus_alerts`
 
@@ -17212,39 +17716,39 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_exact_required_approvers`
 
-Missing description
+Number of approval rules with the exact number of required approvers.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183622_approval_project_rules_with_exact_required_approvers.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183622_approval_project_rules_with_exact_required_approvers.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_less_approvers_than_required`
 
-Missing description
+Number of approval rules with fewer approvers than required.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183620_approval_project_rules_with_less_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183620_approval_project_rules_with_less_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_more_approvers_than_required`
 
-Missing description
+Number of approval rules with more approvers than required.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183618_approval_project_rules_with_more_approvers_than_required.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183618_approval_project_rules_with_more_approvers_than_required.yml)
 
-Group: ``
+Group: `group::source code`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules_with_target_branch`
 
@@ -17521,6 +18025,18 @@ Group: `group::source code`
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
+
+### `usage_activity_by_stage_monthly.enablement.geo_secondary_web_oauth_users`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427213346_geo_secondary_web_oauth_users.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.bulk_imports.gitlab`
 

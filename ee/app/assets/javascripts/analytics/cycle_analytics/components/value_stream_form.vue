@@ -93,8 +93,7 @@ export default {
     };
   },
   computed: {
-    ...mapState({ isCreating: 'isCreatingValueStream' }),
-    ...mapState('customStages', ['formEvents']),
+    ...mapState({ isCreating: 'isCreatingValueStream', formEvents: 'formEvents' }),
     isValueStreamNameValid() {
       return !this.nameError?.length;
     },

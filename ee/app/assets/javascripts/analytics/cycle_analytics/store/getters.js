@@ -77,9 +77,13 @@ export const isOverviewStageSelected = ({ selectedStage }) =>
  *
  * https://gitlab.com/gitlab-org/gitlab/-/issues/216227
  */
-export const pathNavigationData = ({ stages, medians, selectedStage }) =>
+export const pathNavigationData = ({ stages, medians, stageCounts, selectedStage }) =>
   transformStagesForPathNavigation({
     stages: [OVERVIEW_STAGE_CONFIG, ...filterStagesByHiddenStatus(stages, false)],
     medians,
+    stageCounts,
     selectedStage,
   });
+
+export const selectedStageCount = ({ selectedStage, stageCounts }) =>
+  stageCounts[selectedStage.id] || null;

@@ -20,31 +20,30 @@ RSpec.describe 'API-Fuzzing.latest.gitlab-ci.yml' do
     # names between development and production is also quite small making it
     # easy to miss during review.
     it 'uses the production repository' do
-      expect( contents.include?(production_registry) ).to be true
+      expect(contents.include?(production_registry)).to be true
     end
 
     it 'doesn\'t use the staging repository' do
-      expect( contents.include?(staging_registry) ).to be false
+      expect(contents.include?(staging_registry)).to be false
     end
   end
 
   describe 'the created pipeline' do
+    let_it_be(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
+
     let(:default_branch) { 'master' }
     let(:pipeline_branch) { default_branch }
-    let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_branch ) }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_branch) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     context 'when no stages' do
       before do
         stub_ci_pipeline_yaml_file(template.content)
-
         allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
           allow(worker).to receive(:perform).and_return(true)
         end
-
         allow(project).to receive(:default_branch).and_return(default_branch)
       end
 
@@ -80,7 +79,7 @@ RSpec.describe 'API-Fuzzing.latest.gitlab-ci.yml' do
       end
 
       context 'when project has Ultimate license' do
-        let(:license) { create(:license, plan: License::ULTIMATE_PLAN) }
+        let(:license) { build(:license, plan: License::ULTIMATE_PLAN) }
 
         before do
           allow(License).to receive(:current).and_return(license)

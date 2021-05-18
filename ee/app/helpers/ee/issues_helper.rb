@@ -47,7 +47,8 @@ module EE
       data = super.merge!(
         has_blocked_issues_feature: project.feature_available?(:blocked_issues).to_s,
         has_issuable_health_status_feature: project.feature_available?(:issuable_health_status).to_s,
-        has_issue_weights_feature: project.feature_available?(:issue_weights).to_s
+        has_issue_weights_feature: project.feature_available?(:issue_weights).to_s,
+        has_multiple_issue_assignees_feature: project.feature_available?(:multiple_issue_assignees).to_s
       )
 
       if project.feature_available?(:epics) && project.group

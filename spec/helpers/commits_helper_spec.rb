@@ -289,4 +289,46 @@ RSpec.describe CommitsHelper do
       }
     end
   end
+
+  describe "#commit_partial_cache_key" do
+    subject(:cache_key) { helper.commit_partial_cache_key(commit, ref: ref, merge_request: merge_request, request: request) }
+
+    let(:commit) { create(:commit).present(current_user: user) }
+    let(:commit_status) { Gitlab::Ci::Status::Running.new(pipeline, user) }
+    let(:pipeline) { create(:ci_pipeline, :running) }
+    let(:user) { create(:user) }
+    let(:ref) { "master" }
+    let(:merge_request) { nil }
+    let(:request) { double(xhr?: true) }
+    let(:current_path) { "test" }
+
+    before do
+      expect(commit).to receive(:status_for).with(ref).and_return(commit_status)
+      assign(:path, current_path)
+    end
+
+    it { is_expected.to be_an(Array) }
+    it { is_expected.to include(commit) }
+    it { is_expected.to include(commit.author) }
+    it { is_expected.to include(ref) }
+
+    it do
+      is_expected.to include(
+        {
+          merge_request: merge_request,
+          pipeline_status: commit_status,
+          xhr: true,
+          controller: "commits",
+          path: current_path
+        }
+      )
+    end
+
+    describe "final cache key output" do
+      subject { ActiveSupport::Cache.expand_cache_key(cache_key) }
+
+      it { is_expected.to include(commit.cache_key) }
+      it { is_expected.to include(pipeline.cache_key) }
+    end
+  end
 end

@@ -208,7 +208,7 @@ module EE
         }
       ]
 
-      if ::Feature.disabled?(:geo_lfs_object_replication)
+      if ::Feature.disabled?(:geo_lfs_object_replication, default_enabled: :yaml)
         replicable_types.insert(2, {
           data_type: 'blob',
           data_type_title: _('File'),

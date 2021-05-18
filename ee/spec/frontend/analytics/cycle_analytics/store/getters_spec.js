@@ -16,6 +16,7 @@ import {
   transformedStagePathData,
   issueStage,
   stageMedians,
+  stageCounts,
   basePaginationResult,
   initialPaginationState,
 } from '../mock_data';
@@ -215,6 +216,7 @@ describe('Value Stream Analytics getters', () => {
         stages: allowedStages,
         medians: stageMedians,
         selectedStage: issueStage,
+        stageCounts,
       };
 
       expect(getters.pathNavigationData(state)).toEqual(transformedStagePathData);
@@ -238,6 +240,18 @@ describe('Value Stream Analytics getters', () => {
       const page = 10;
       state = { pagination: { ...initialPaginationState, page } };
       expect(getters.paginationParams(state)).toEqual({ ...basePaginationResult, page });
+    });
+  });
+
+  describe('selectedStageCount', () => {
+    it('returns the count when a value exist for the given stage', () => {
+      state = { selectedStage: { id: 1 }, stageCounts: { 1: 10, 2: 20 } };
+      expect(getters.selectedStageCount(state)).toEqual(10);
+    });
+
+    it('returns null if there is no value for the given stage', () => {
+      state = { selectedStage: { id: 3 }, stageCounts: { 1: 10, 2: 20 } };
+      expect(getters.selectedStageCount(state)).toEqual(null);
     });
   });
 });

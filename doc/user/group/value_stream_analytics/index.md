@@ -59,7 +59,7 @@ To filter results:
 1. Select a parameter to filter by.
 1. Select a value from the autocompleted results, or type to refine the results.
 
-![Value stream analytics filter bar](img/vsa_filter_bar_v13_3.png "Active filter bar for value stream analytics")
+![Value stream analytics filter bar](img/vsa_filter_bar_v13_12.png "Active filter bar for value stream analytics")
 
 ### Date ranges
 
@@ -92,7 +92,7 @@ keep this slight change in mind.
 
 You can learn more about these metrics in our [analytics definitions](../../analytics/index.md).
 
-![Value stream analytics time metrics](img/vsa_time_metrics_v13_0.png "Time metrics for value stream analytics")
+![Value stream analytics time metrics](img/vsa_time_metrics_v13_12.png "Time metrics for value stream analytics")
 
 ## How the stages are measured
 
@@ -124,7 +124,7 @@ How this works, behind the scenes:
    etc.
 
 To sum up, anything that doesn't follow [GitLab flow](../../../topics/gitlab_flow.md) is not tracked and the
-Value Stream Analytics dashboard doesn not present any data for:
+Value Stream Analytics dashboard does not present any data for:
 
 - Merge requests that do not close an issue.
 - Issues not labeled with a label present in the Issue Board or for issues not assigned a milestone.
@@ -191,7 +191,7 @@ A few notes:
   cycles, calculate their median time and the result is what the dashboard of
   Value Stream Analytics is showing.
 
-## Customizable Stages
+## Custom value streams
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12196) in GitLab 12.9.
 
@@ -226,6 +226,8 @@ Hovering over a stage item displays a popover with the following information:
 
 - Start event description for the given stage
 - End event description
+- Median time items took to complete the stage
+- Number of items that completed the stage
 
 ### Stream overview
 
@@ -256,6 +258,9 @@ The stage table shows a list of related workflow items for the selected stage. T
 - Merge requests
 - Pipelines
 
+A little badge next to the workflow items table header shows the number of workflow items that
+completed the selected stage.
+
 The stage table also includes the **Time** column, which shows how long it takes each item to pass
 through the selected value stream stage.
 
@@ -270,85 +275,6 @@ To see which items the stage most recently, sort by the work item column on the 
 
 The table displays up to 20 items at a time. If there are more than 20 items, you can use the
 **Prev** and **Next** buttons to navigate through the pages.
-
-### Adding a stage
-
-In the following example we're creating a new stage that measures and tracks issues from creation
-time until they are closed.
-
-1. Navigate to your group's **Analytics > Value Stream**.
-1. Click the **Add a stage** button.
-1. Fill in the new stage form:
-   - Name: Issue start to finish.
-   - Start event: Issue created.
-   - End event: Issue closed.
-1. Click the **Add stage** button.
-
-![New Value Stream Analytics Stage](img/new_vsm_stage_v12_9.png "Form for creating a new stage")
-
-The new stage is persisted and it will always show up on the Value Stream Analytics page for your
-group.
-
-If you want to alter or delete the stage, you can easily do that for customized stages by:
-
-1. Hovering over the stage.
-1. Clicking the vertical ellipsis (**{ellipsis_v}**) button that appears.
-
-![Value Stream Analytics Stages](img/vsm_stage_list_v12_9.png)
-
-Creating a custom stage requires specifying two events:
-
-- A start.
-- An end.
-
-Be careful to choose a start event that occurs *before* your end event. For example, consider a
-stage that:
-
-- Started when an issue is added to a board.
-- Ended when the issue is created.
-
-This stage would not work because the end event has already happened when the start event occurs.
-To prevent such invalid stages, the UI prohibits incompatible start and end events. After you select
-the start event, the stop event dropdown will only list the compatible events.
-
-### Re-ordering stages
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/196698) in GitLab 12.10.
-
-Once a custom stage has been added, you can "drag and drop" stages to rearrange their order. These
-changes are automatically saved to the system.
-
-### Label based stages
-
-The pre-defined start and end events can cover many use cases involving both issues and merge requests.
-
-For supporting more complex workflows, use stages based on group labels. These events are based on
-labels being added or removed. In particular, [scoped labels](../../project/labels.md#scoped-labels)
-are useful for complex workflows.
-
-In this example, we'd like to measure more accurate code review times. The workflow is the following:
-
-- When the code review starts, the reviewer adds `workflow::code_review_start` label to the merge request.
-- When the code review is finished, the reviewer adds `workflow::code_review_complete` label to the merge request.
-
-Creating a new stage called "Code Review":
-
-![New Label Based Value Stream Analytics Stage](img/label_based_stage_vsm_v12_9.png "Creating a label based Value Stream Analytics Stage")
-
-### Hiding unused stages
-
-Sometimes certain default stages are not relevant to a team. In this case, you can easily hide stages
-so they no longer appear in the list. To hide stages:
-
-1. Add a custom stage to activate customizability.
-1. Hover over the default stage you want to hide.
-1. Click the vertical ellipsis (**{ellipsis_v}**) button that appears and select **Hide stage**.
-
-To recover a default stage that was previously hidden:
-
-1. Click **Add a stage** button.
-1. In the top right corner open the **Recover hidden stage** dropdown.
-1. Select a stage.
 
 ### Creating a value stream
 
@@ -369,7 +295,7 @@ To create a value stream:
    - You can [customize the stages](#creating-a-value-stream-with-stages)
 1. Click the **Create Value Stream** button.
 
-![New value stream](img/new_value_stream_v13_3.png "Creating a new value stream")
+![New value stream](img/new_value_stream_v13_12.png "Creating a new value stream")
 
 #### Creating a value stream with stages
 
@@ -385,15 +311,52 @@ add stages as desired.
 
 To create a value stream with stages:
 
-1. Navigate to your group's **Analytics > Value Stream**.
-1. Find and select the Value Stream dropdown. Select **Create new Value Stream**.
+1. Go to your group and select **Analytics > Value Stream**.
+1. Select the Value Stream dropdown and select **Create new Value Stream**.
 1. Select either **Create from default template** or **Create from no template**.
-   - Default stages in the value stream can be hidden or re-ordered
+   - Default stages in the value stream can be hidden or re-ordered.
+
      ![Default stage actions](img/vsa_default_stage_v13_10.png "Default stage actions")
-   - New stages can be added by clicking the 'Add another stage' button
+
+   - New stages can be added by clicking the 'Add another stage' button.
    - The name, start and end events for the stage can be selected
+
      ![Custom stage actions](img/vsa_custom_stage_v13_10.png "Custom stage actions")
 1. Select the **Create Value Stream** button to save the value stream.
+
+#### Label-based stages
+
+The pre-defined start and end events can cover many use cases involving both issues and merge requests.
+
+In more complex workflows, use stages based on group labels. These events are based on
+added or removed labels. In particular, [scoped labels](../../project/labels.md#scoped-labels)
+are useful for complex workflows.
+
+In this example, we'd like to measure times for deployment from a staging environment to production. The workflow is the following:
+
+- When the code is deployed to staging, the `workflow::staging` label is added to the merge request.
+- When the code is deployed to production, the `workflow::production` label is added to the merge request.
+
+![Label Based Value Stream Analytics Stage](img/vsa_label_based_stage_v14_0.png "Creating a label based Value Stream Analytics Stage")
+
+### Editing a value stream
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267537) in GitLab 13.10.
+
+After you create a value stream, you can customize it to suit your purposes. To edit a value stream:
+
+1. Go to your group and select **Analytics > Value Stream**.
+1. Find and select the relevant value stream from the value stream dropdown. 
+1. Next to the value stream dropdown, select **Edit**.
+   The edit form is populated with the value stream details.
+1. Optional:
+    - Rename the value stream.
+    - Hide or re-order default stages.
+    - Remove existing custom stages.
+    - Add new stages by selecting the 'Add another stage' button
+    - Select the start and end events for the stage.
+1. Optional. To undo any modifications, select **Restore value stream defaults**.
+1. Select **Save Value Stream**.
 
 ### Deleting a value stream
 
@@ -406,7 +369,7 @@ To delete a custom value stream:
 1. Click the **Delete (name of value stream)**.
 1. Click the **Delete** button to confirm.
 
-![Delete value stream](img/delete_value_stream_v13_4.png "Deleting a custom value stream")
+![Delete value stream](img/delete_value_stream_v13_12.png "Deleting a custom value stream")
 
 ## Days to completion chart
 

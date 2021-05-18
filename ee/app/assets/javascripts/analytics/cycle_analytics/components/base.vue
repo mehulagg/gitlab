@@ -49,8 +49,6 @@ export default {
       'featureFlags',
       'isLoading',
       'isLoadingStage',
-      // NOTE: we can remove the `isEmptyStage` field when we remove the existing stage table
-      'isEmptyStage',
       'currentGroup',
       'selectedProjects',
       'selectedStage',
@@ -65,9 +63,6 @@ export default {
       'selectedValueStream',
       'pagination',
     ]),
-    // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
-    // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
-    ...mapState('customStages', ['isCreatingCustomStage', 'formEvents']),
     ...mapGetters([
       'hasNoAccessError',
       'currentGroupPath',
@@ -77,8 +72,8 @@ export default {
       'cycleAnalyticsRequestParams',
       'pathNavigationData',
       'isOverviewStageSelected',
+      'selectedStageCount',
     ]),
-    ...mapGetters('customStages', ['customStageFormActive']),
     shouldRenderEmptyState() {
       return !this.currentGroup && !this.isLoading;
     },
@@ -120,7 +115,6 @@ export default {
       };
     },
   },
-
   methods: {
     ...mapActions([
       'fetchCycleAnalyticsData',
@@ -129,43 +123,19 @@ export default {
       'setSelectedStage',
       'setDefaultSelectedStage',
       'setDateRange',
-      'removeStage',
-      'updateStage',
-      'reorderStage',
       'updateStageTablePagination',
     ]),
-    ...mapActions('customStages', ['hideForm', 'showCreateForm', 'showEditForm', 'createStage']),
     onProjectsSelect(projects) {
       this.setSelectedProjects(projects);
       this.fetchCycleAnalyticsData();
     },
     onStageSelect(stage) {
-      this.hideForm();
       if (stage.slug === OVERVIEW_STAGE_ID) {
         this.setDefaultSelectedStage();
       } else {
         this.setSelectedStage(stage);
         this.fetchStageData(stage.slug);
       }
-    },
-    onShowAddStageForm() {
-      this.showCreateForm();
-    },
-    onShowEditStageForm(initData = {}) {
-      this.setSelectedStage(initData);
-      this.showEditForm(initData);
-    },
-    onCreateCustomStage(data) {
-      this.createStage(data);
-    },
-    onUpdateCustomStage(data) {
-      this.updateStage(data);
-    },
-    onRemoveStage(id) {
-      this.removeStage(id);
-    },
-    onStageReorder(data) {
-      this.reorderStage(data);
     },
     onHandleUpdatePagination(data) {
       this.updateStageTablePagination(data);
@@ -262,6 +232,7 @@ export default {
           :is-loading="isLoading || isLoadingStage"
           :stage-events="currentStageEvents"
           :selected-stage="selectedStage"
+          :stage-count="selectedStageCount"
           :empty-state-message="selectedStageError"
           :no-data-svg-path="noDataSvgPath"
           :pagination="pagination"

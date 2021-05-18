@@ -16,9 +16,33 @@ class DeleteNotesFromOriginalIndex < Elastic::Migration
 
   def migrate
     retry_attempt = migration_state[:retry_attempt].to_i
+    task_id = migration_state[:task_id]
 
     if retry_attempt >= MAX_ATTEMPTS
       fail_migration_halt_error!(retry_attempt: retry_attempt)
+      return
+    end
+
+    if task_id
+      response = helper.task_status(task_id: task_id)
+
+      if response['completed']
+        log "Removing notes from the original index is completed for task_id:#{task_id}"
+
+        set_migration_state(
+          retry_attempt: retry_attempt,
+          task_id: nil
+        )
+
+        # since delete_by_query is using wait_for_completion = false, the task must be cleaned up
+        # in Elasticsearch system .tasks index
+        helper.client.delete(index: '.tasks', type: 'task', id: task_id)
+      else
+        log "Removing notes from the original index is still in progress for task_id:#{task_id}"
+      end
+
+      log_raise "Failed to delete notes: #{response['failures']}" if response['failures'].present?
+
       return
     end
 
@@ -27,14 +51,24 @@ class DeleteNotesFromOriginalIndex < Elastic::Migration
       return
     end
 
-    response = client.delete_by_query(index: helper.target_name, body: QUERY_BODY)
+    log "Launching delete by query"
+    response = client.delete_by_query(index: helper.target_name, body: QUERY_BODY, conflicts: 'proceed', wait_for_completion: false)
 
-    log_raise "Failed to delete notes: #{response['failures']}" if response['failures'].present?
+    log_raise "Failed to delete notes with task_id:#{task_id} - #{response['failures']}" if response['failures'].present?
+
+    task_id = response['task']
+    log "Removing notes from the original index is started with task_id:#{task_id}"
+
+    set_migration_state(
+      retry_attempt: retry_attempt,
+      task_id: task_id
+    )
   rescue StandardError => e
     log "migrate failed, increasing migration_state retry_attempt: #{retry_attempt} error:#{e.class}:#{e.message}"
 
     set_migration_state(
-      retry_attempt: retry_attempt + 1
+      retry_attempt: retry_attempt + 1,
+      task_id: nil
     )
 
     raise e
@@ -43,8 +77,8 @@ class DeleteNotesFromOriginalIndex < Elastic::Migration
   def completed?
     helper.refresh_index
 
-    results = client.search(index: helper.target_name, body: QUERY_BODY.merge(size: 0))
-    total_remaining = results.dig('hits', 'total', 'value')
+    results = client.count(index: helper.target_name, body: QUERY_BODY)
+    total_remaining = results.dig('count')
     log "Checking to see if migration is completed based on index counts remaining:#{total_remaining}"
 
     total_remaining == 0

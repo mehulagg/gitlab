@@ -39,7 +39,7 @@ export default {
     },
     statusCheckTimestamp() {
       return this.node.lastSuccessfulStatusCheckTimestamp
-        ? this.node.lastSuccessfulStatusCheckTimestamp * 1000
+        ? this.node.lastSuccessfulStatusCheckTimestamp * 1000 // Converting timestamp to ms
         : null;
     },
   },

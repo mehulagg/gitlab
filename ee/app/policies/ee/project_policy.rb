@@ -18,6 +18,9 @@ module EE
       with_scope :subject
       condition(:requirements_available) { @subject.feature_available?(:requirements) & access_allowed_to?(:requirements) }
 
+      with_scope :subject
+      condition(:quality_management_available) { @subject.feature_available?(:quality_management) }
+
       condition(:compliance_framework_available) { @subject.feature_available?(:compliance_framework, @user) }
 
       with_scope :global
@@ -359,6 +362,8 @@ module EE
       end
 
       rule { requirements_available & owner }.enable :destroy_requirement
+
+      rule { quality_management_available & can?(:reporter_access) & can?(:create_issue) }.enable :create_test_case
 
       rule { compliance_framework_available & can?(:maintainer_access) }.enable :admin_compliance_framework
 

@@ -128,8 +128,41 @@ class Project < ApplicationRecord
   after_initialize :use_hashed_storage
   after_create :check_repository_absence!
 
-  acts_as_ordered_taggable
-  alias_method :topics, :tag_list
+  acts_as_ordered_taggable_on :topics
+  # The 'tag_list' alias and the 'has_many' associations are required during the 'tags -> topics' migration
+  # TODO: eliminate 'tag_list', 'topic_taggings' and 'tags' in the further process of the migration
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/331081
+  alias_attribute :tag_list, :topic_list
+  has_many :topic_taggings, -> { includes(:tag).order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
+                     as: :taggable,
+                     class_name: 'ActsAsTaggableOn::Tagging',
+                     after_add: :dirtify_tag_list,
+                     after_remove: :dirtify_tag_list
+  has_many :topics, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
+                     class_name: 'ActsAsTaggableOn::Tag',
+                     through: :topic_taggings,
+                     source: :tag
+  has_many :tags, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
+                     class_name: 'ActsAsTaggableOn::Tag',
+                     through: :topic_taggings,
+                     source: :tag
+
+  # Overwriting 'topic_list' and 'topic_list=' is necessary to ensure functionality during the background migration [1].
+  # [1] https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61237
+  # TODO: remove 'topic_list' and 'topic_list=' once the background migration is complete
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/331081
+  def topic_list
+    # Return both old topics (context 'tags') and new topics (context 'topics')
+    tag_list_on('tags') + tag_list_on('topics')
+  end
+
+  def topic_list=(new_tags)
+    # Old topics with context 'tags' are added as new topics with context 'topics'
+    super(new_tags)
+
+    # Remove old topics with context 'tags'
+    set_tag_list_on('tags', '')
+  end
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
@@ -153,11 +186,12 @@ class Project < ApplicationRecord
   has_one :asana_service, class_name: 'Integrations::Asana'
   has_one :assembla_service, class_name: 'Integrations::Assembla'
   has_one :bamboo_service, class_name: 'Integrations::Bamboo'
-  has_one :campfire_service
-  has_one :datadog_service
+  has_one :campfire_service, class_name: 'Integrations::Campfire'
+  has_one :confluence_service, class_name: 'Integrations::Confluence'
+  has_one :datadog_service, class_name: 'Integrations::Datadog'
+  has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
   has_one :discord_service
   has_one :drone_ci_service
-  has_one :emails_on_push_service
   has_one :ewm_service
   has_one :pipelines_email_service
   has_one :irker_service
@@ -176,7 +210,6 @@ class Project < ApplicationRecord
   has_one :youtrack_service
   has_one :custom_issue_tracker_service
   has_one :bugzilla_service
-  has_one :confluence_service
   has_one :external_wiki_service
   has_one :prometheus_service, inverse_of: :project
   has_one :mock_ci_service
@@ -335,7 +368,8 @@ class Project < ApplicationRecord
   has_one :ci_cd_settings, class_name: 'ProjectCiCdSetting', inverse_of: :project, autosave: true, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_many :remote_mirrors, inverse_of: :project
-  has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::ProjectStage'
+  has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::ProjectStage', inverse_of: :project
+  has_many :value_streams, class_name: 'Analytics::CycleAnalytics::ProjectValueStream', inverse_of: :project
 
   has_many :external_pull_requests, inverse_of: :project
 
@@ -829,6 +863,10 @@ class Project < ApplicationRecord
     end
 
     super
+  end
+
+  def parent_loaded?
+    association(:namespace).loaded?
   end
 
   def project_setting
@@ -2416,7 +2454,7 @@ class Project < ApplicationRecord
   end
 
   def access_request_approvers_to_be_notified
-    members.maintainers.order_recent_sign_in.limit(ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT)
+    members.maintainers.connected_to_user.order_recent_sign_in.limit(ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT)
   end
 
   def pages_lookup_path(trim_prefix: nil, domain: nil)
@@ -2535,7 +2573,7 @@ class Project < ApplicationRecord
   def default_branch_or_main
     return default_branch if default_branch
 
-    Feature.enabled?(:main_branch_over_master, self, default_enabled: :yaml) ? 'main' : 'master'
+    Gitlab::DefaultBranch.value(object: self)
   end
 
   def ci_config_path_or_default
@@ -2572,6 +2610,12 @@ class Project < ApplicationRecord
 
   def activity_path
     Gitlab::Routing.url_helpers.activity_project_path(self)
+  end
+
+  def increment_statistic_value(statistic, delta)
+    return if pending_delete?
+
+    ProjectStatistics.increment_statistic(self, statistic, delta)
   end
 
   private

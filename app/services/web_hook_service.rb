@@ -27,6 +27,7 @@ class WebHookService
 
   REQUEST_BODY_SIZE_LIMIT = 25.megabytes
   GITLAB_EVENT_HEADER = 'X-Gitlab-Event'
+  MAX_FAILURES = 100
 
   attr_accessor :hook, :data, :hook_name, :request_options
 
@@ -90,7 +91,11 @@ class WebHookService
   end
 
   def async_execute
-    WebHookWorker.perform_async(hook.id, data, hook_name)
+    if rate_limited?(hook)
+      log_rate_limit(hook)
+    else
+      WebHookWorker.perform_async(hook.id, data, hook_name)
+    end
   end
 
   private
@@ -141,7 +146,7 @@ class WebHookService
       next_backoff = hook.next_backoff
       hook.update!(disabled_until: next_backoff.from_now, backoff_count: hook.backoff_count + 1)
     else
-      hook.update!(recent_failures: hook.recent_failures + 1)
+      hook.update!(recent_failures: hook.recent_failures + 1) if hook.recent_failures < MAX_FAILURES
     end
   end
 
@@ -168,5 +173,35 @@ class WebHookService
     return '' unless response.body
 
     response.body.encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
+  end
+
+  def rate_limited?(hook)
+    return false unless Feature.enabled?(:web_hooks_rate_limit, default_enabled: :yaml)
+    return false if rate_limit.nil?
+
+    Gitlab::ApplicationRateLimiter.throttled?(
+      :web_hook_calls,
+      scope: [hook],
+      threshold: rate_limit
+    )
+  end
+
+  def rate_limit
+    @rate_limit ||= hook.rate_limit
+  end
+
+  def log_rate_limit(hook)
+    payload = {
+      message: 'Webhook rate limit exceeded',
+      hook_id: hook.id,
+      hook_type: hook.type,
+      hook_name: hook_name
+    }
+
+    Gitlab::AuthLogger.error(payload)
+
+    # Also log into application log for now, so we can use this information
+    # to determine suitable limits for gitlab.com
+    Gitlab::AppLogger.error(payload)
   end
 end

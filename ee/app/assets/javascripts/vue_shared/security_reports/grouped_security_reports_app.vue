@@ -3,7 +3,6 @@ import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import { once } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
-import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import { fetchPolicies } from '~/lib/graphql';
 import { mrStates } from '~/mr_popover/constants';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
@@ -12,7 +11,7 @@ import SummaryRow from '~/reports/components/summary_row.vue';
 import { LOADING } from '~/reports/constants';
 import Tracking from '~/tracking';
 import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
-import ArtifactDownload from './components/artifact_download.vue';
+import MrArtifactDownload from './components/artifact_downloads/merge_request_artifact_download.vue';
 import DastModal from './components/dast_modal.vue';
 import IssueModal from './components/modal.vue';
 import { securityReportTypeEnumToReportType } from './constants';
@@ -34,7 +33,7 @@ import {
 export default {
   store: createStore(),
   components: {
-    ArtifactDownload,
+    MrArtifactDownload,
     GroupedIssuesList,
     ReportSection,
     SummaryRow,
@@ -44,7 +43,6 @@ export default {
     GlLink,
     DastModal,
     GlButton,
-    FuzzingArtifactsDownload,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -277,7 +275,6 @@ export default {
       'secretDetectionStatusIcon',
     ]),
     ...mapGetters(MODULE_API_FUZZING, ['groupedApiFuzzingText', 'apiFuzzingStatusIcon']),
-    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
     },
@@ -447,7 +444,10 @@ export default {
     },
   },
   summarySlots: ['success', 'error', 'loading'],
-  reportTypes: securityReportTypeEnumToReportType,
+  reportTypes: {
+    API_FUZZING: [securityReportTypeEnumToReportType.API_FUZZING],
+    COVERAGE_FUZZING: [securityReportTypeEnumToReportType.COVERAGE_FUZZING],
+  },
 };
 </script>
 <template>
@@ -606,6 +606,16 @@ export default {
                 :download-link="dastDownloadLink"
               />
             </template>
+            <template v-else-if="dastDownloadLink">
+              <gl-link
+                download
+                :href="dastDownloadLink"
+                class="gl-ml-1"
+                data-testid="download-link"
+              >
+                ({{ s__('SecurityReports|Download scanned resources') }})
+              </gl-link>
+            </template>
           </summary-row>
           <grouped-issues-list
             v-if="hasDastIssues"
@@ -651,10 +661,11 @@ export default {
             <template #summary>
               <security-summary :message="groupedCoverageFuzzingText" />
             </template>
-            <fuzzing-artifacts-download
-              v-if="hasFuzzingArtifacts"
-              :jobs="fuzzingJobsWithArtifact"
-              :project-id="projectId"
+            <mr-artifact-download
+              v-if="shouldShowDownloadGuidance"
+              :report-types="$options.reportTypes.COVERAGE_FUZZING"
+              :target-project-full-path="targetProjectFullPath"
+              :mr-iid="mrIid"
             />
           </summary-row>
 
@@ -680,9 +691,9 @@ export default {
               <security-summary :message="groupedApiFuzzingText" />
             </template>
 
-            <artifact-download
+            <mr-artifact-download
               v-if="shouldShowDownloadGuidance"
-              :report-types="[$options.reportTypes.API_FUZZING]"
+              :report-types="$options.reportTypes.API_FUZZING"
               :target-project-full-path="targetProjectFullPath"
               :mr-iid="mrIid"
             />

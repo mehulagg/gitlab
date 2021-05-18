@@ -10,6 +10,7 @@ import { mockSortedBy, mockTimeframeInitialDate } from 'ee_jest/roadmap/mock_dat
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { visitUrl, mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
@@ -163,7 +164,7 @@ describe('RoadmapFilters', () => {
       ];
       let filteredSearchBar;
 
-      const operators = [{ value: '=', description: 'is', default: 'true' }];
+      const operators = OPERATOR_IS_ONLY;
 
       const filterTokens = [
         {

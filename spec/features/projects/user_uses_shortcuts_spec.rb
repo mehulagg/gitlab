@@ -178,32 +178,52 @@ RSpec.describe 'User uses shortcuts', :js do
     end
   end
 
-  context 'when navigating to the Operations pages' do
-    it 'redirects to the Metrics page' do
-      find('body').native.send_key('g')
-      find('body').native.send_key('l')
-
-      expect(page).to have_active_navigation('Operations')
-      expect(page).to have_active_sub_navigation('Metrics')
-    end
-
+  context 'when navigating to the Deployments page' do
     it 'redirects to the Environments page' do
       find('body').native.send_key('g')
       find('body').native.send_key('e')
 
-      expect(page).to have_active_navigation('Operations')
+      expect(page).to have_active_navigation('Deployments')
       expect(page).to have_active_sub_navigation('Environments')
+    end
+  end
+
+  context 'when navigating to the Monitor pages' do
+    it 'redirects to the Metrics page' do
+      find('body').native.send_key('g')
+      find('body').native.send_key('l')
+
+      expect(page).to have_active_navigation('Monitor')
+      expect(page).to have_active_sub_navigation('Metrics')
     end
 
     context 'when feature flag :sidebar_refactor is disabled' do
-      it 'redirects to the Kubernetes page with active Operations' do
+      before do
         stub_feature_flags(sidebar_refactor: false)
+      end
 
+      it 'redirects to the Operations page' do
+        find('body').native.send_key('g')
+        find('body').native.send_key('l')
+
+        expect(page).to have_active_navigation('Operations')
+        expect(page).to have_active_sub_navigation('Metrics')
+      end
+
+      it 'redirects to the Kubernetes page with active Operations' do
         find('body').native.send_key('g')
         find('body').native.send_key('k')
 
         expect(page).to have_active_navigation('Operations')
         expect(page).to have_active_sub_navigation('Kubernetes')
+      end
+
+      it 'redirects to the Environments page' do
+        find('body').native.send_key('g')
+        find('body').native.send_key('e')
+
+        expect(page).to have_active_navigation('Operations')
+        expect(page).to have_active_sub_navigation('Environments')
       end
     end
   end

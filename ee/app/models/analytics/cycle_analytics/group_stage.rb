@@ -13,7 +13,7 @@ module Analytics
       alias_attribute :parent, :group
       alias_attribute :parent_id, :group_id
 
-      scope :by_value_stream, -> (value_stream) { where(group_value_stream_id: value_stream.id) }
+      alias_attribute :value_stream_id, :group_value_stream_id
 
       def self.relative_positioning_query_base(stage)
         where(group_id: stage.group_id)

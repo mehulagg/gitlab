@@ -311,9 +311,6 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             <!---->
           </a>
            
-          <div>
-            Site profile #1's summary
-          </div>
         </div>
         <!---->
         <!---->

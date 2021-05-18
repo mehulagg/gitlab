@@ -13,16 +13,19 @@ module AppSec
           return ServiceResponse.error(message: _('Scanner profile not found for given parameters')) unless dast_scanner_profile
           return ServiceResponse.error(message: _('Cannot modify %{profile_name} referenced in security policy') % { profile_name: dast_scanner_profile.name }) if referenced_in_security_policy?(dast_scanner_profile)
 
-          update_args = {
+          old_params = dast_scanner_profile.attributes.symbolize_keys
+          params = {
             name: profile_name,
             target_timeout: target_timeout,
-            spider_timeout: spider_timeout
-          }
-          update_args[:scan_type] = scan_type if scan_type
-          update_args[:use_ajax_spider] = use_ajax_spider unless use_ajax_spider.nil?
-          update_args[:show_debug_messages] = show_debug_messages unless show_debug_messages.nil?
+            spider_timeout: spider_timeout,
+            scan_type: scan_type,
+            use_ajax_spider: use_ajax_spider,
+            show_debug_messages: show_debug_messages
+          }.compact
 
-          if dast_scanner_profile.update(update_args)
+          if dast_scanner_profile.update(params)
+            create_audit_events(dast_scanner_profile, params, old_params)
+
             ServiceResponse.success(payload: dast_scanner_profile)
           else
             ServiceResponse.error(message: dast_scanner_profile.errors.full_messages)
@@ -45,6 +48,23 @@ module AppSec
 
         def find_dast_scanner_profile(id)
           DastScannerProfilesFinder.new(project_ids: [project.id], ids: [id]).execute.first
+        end
+
+        def create_audit_events(profile, params, old_params)
+          params.each do |property, new_value|
+            old_value = old_params[property]
+
+            next if old_value == new_value
+
+            AuditEventService.new(current_user, project, {
+              change: "DAST scanner profile #{property}",
+              from: old_value,
+              to: new_value,
+              target_id: profile.id,
+              target_type: profile.class.name,
+              target_details: profile.name
+            }).security_event
+          end
         end
       end
     end

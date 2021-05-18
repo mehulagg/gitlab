@@ -11,11 +11,14 @@ import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import IssuesListApp from '~/issues_list/components/issues_list_app.vue';
 import {
+  apiSortParams,
   CREATED_DESC,
+  DUE_DATE_OVERDUE,
   PAGE_SIZE,
   PAGE_SIZE_MANUAL,
-  RELATIVE_POSITION_ASC,
-  sortParams,
+  PARAM_DUE_DATE,
+  RELATIVE_POSITION_DESC,
+  urlSortParams,
 } from '~/issues_list/constants';
 import eventHub from '~/issues_list/eventhub';
 import { getSortOptions } from '~/issues_list/utils';
@@ -146,7 +149,7 @@ describe('IssuesListApp component', () => {
     describe('csv import/export component', () => {
       describe('when user is signed in', () => {
         it('renders', async () => {
-          const search = '?page=1&search=refactor&state=opened&order_by=created_at&sort=desc';
+          const search = '?page=1&search=refactor&state=opened&sort=created_date';
 
           global.jsdom.reconfigure({ url: `${TEST_HOST}${search}` });
 
@@ -216,6 +219,16 @@ describe('IssuesListApp component', () => {
   });
 
   describe('initial url params', () => {
+    describe('due_date', () => {
+      it('is set from the url params', () => {
+        global.jsdom.reconfigure({ url: `${TEST_HOST}?${PARAM_DUE_DATE}=${DUE_DATE_OVERDUE}` });
+
+        wrapper = mountComponent();
+
+        expect(findIssuableList().props('urlParams')).toMatchObject({ due_date: DUE_DATE_OVERDUE });
+      });
+    });
+
     describe('page', () => {
       it('is set from the url params', () => {
         const page = 5;
@@ -239,14 +252,14 @@ describe('IssuesListApp component', () => {
     });
 
     describe('sort', () => {
-      it.each(Object.keys(sortParams))('is set as %s from the url params', (sortKey) => {
-        global.jsdom.reconfigure({ url: setUrlParams(sortParams[sortKey], TEST_HOST) });
+      it.each(Object.keys(urlSortParams))('is set as %s from the url params', (sortKey) => {
+        global.jsdom.reconfigure({ url: setUrlParams(urlSortParams[sortKey], TEST_HOST) });
 
         wrapper = mountComponent();
 
         expect(findIssuableList().props()).toMatchObject({
           initialSortBy: sortKey,
-          urlParams: sortParams[sortKey],
+          urlParams: urlSortParams[sortKey],
         });
       });
     });
@@ -528,7 +541,7 @@ describe('IssuesListApp component', () => {
     });
 
     describe('when "sort" event is emitted by IssuableList', () => {
-      it.each(Object.keys(sortParams))(
+      it.each(Object.keys(apiSortParams))(
         'fetches issues with correct params with payload `%s`',
         async (sortKey) => {
           wrapper = mountComponent();
@@ -539,10 +552,10 @@ describe('IssuesListApp component', () => {
 
           expect(axiosMock.history.get[1].params).toEqual({
             page: xPage,
-            per_page: sortKey === RELATIVE_POSITION_ASC ? PAGE_SIZE_MANUAL : PAGE_SIZE,
+            per_page: sortKey === RELATIVE_POSITION_DESC ? PAGE_SIZE_MANUAL : PAGE_SIZE,
             state,
             with_labels_details: true,
-            ...sortParams[sortKey],
+            ...apiSortParams[sortKey],
           });
         },
       );

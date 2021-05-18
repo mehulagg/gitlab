@@ -40,7 +40,7 @@ You can also manage branches using the
 See also:
 
 - [Branches API](../../../../api/branches.md), for information on operating on repository branches using the GitLab API.
-- [GitLab Flow](../../../../university/training/gitlab_flow.md) documentation.
+- [GitLab Flow](../../../../topics/gitlab_flow.md) documentation.
 - [Getting started with Git](../../../../topics/git/index.md) and GitLab.
 
 ## Compare
@@ -103,7 +103,7 @@ Sometimes when you have hundreds of branches you may want a more flexible matchi
 
 ![Before swap revisions](img/swap_revisions_before_v13_12.png)
 
-The Swap revisions feature allows you to swap the Source and Target revisions. When the Swap revisions button is clicked, the selected revisions for Source and Targed will be swapped.
+The Swap revisions feature allows you to swap the Source and Target revisions. When the Swap revisions button is clicked, the selected revisions for Source and Target will be swapped.
 
 ![After swap revisions](img/swap_revisions_after_v13_12.png)
 

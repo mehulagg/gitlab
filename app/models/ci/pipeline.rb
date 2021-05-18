@@ -17,6 +17,7 @@ module Ci
     include FromUnion
     include UpdatedAtFilterable
     include EachBatch
+    include FastDestroyAll::Helpers
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -125,6 +126,8 @@ module Ci
     validates :source, exclusion: { in: %w(unknown), unless: :importing? }, on: :create
 
     after_create :keep_around_commits, unless: :importing?
+
+    use_fast_destroy :job_artifacts
 
     # We use `Enums::Ci::Pipeline.sources` here so that EE can more easily extend
     # this `Hash` with new values.
@@ -1095,6 +1098,8 @@ module Ci
           merge_request.modified_paths
         elsif branch_updated?
           push_details.modified_paths
+        elsif external_pull_request? && ::Feature.enabled?(:ci_modified_paths_of_external_prs, project, default_enabled: :yaml)
+          external_pull_request.modified_paths
         end
       end
     end
@@ -1117,6 +1122,10 @@ module Ci
 
     def merge_request?
       merge_request_id.present?
+    end
+
+    def external_pull_request?
+      external_pull_request_id.present?
     end
 
     def detached_merge_request_pipeline?
@@ -1246,8 +1255,6 @@ module Ci
     private
 
     def add_message(severity, content)
-      return unless Gitlab::Ci::Features.store_pipeline_messages?(project)
-
       messages.build(severity: severity, content: content)
     end
 

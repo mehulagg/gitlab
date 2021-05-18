@@ -1,0 +1,5 @@
+---
+title: Fix Rails/SaveBang Rubocop offenses for ee models
+merge_request: 61709
+author: Suraj Tripathi @surajtripathy07
+type: fixed

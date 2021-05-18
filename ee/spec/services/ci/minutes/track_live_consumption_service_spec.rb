@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
   let(:project) { create(:project, :private, shared_runners_enabled: true, namespace: namespace) }
   let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
-  let(:build) { create(:ci_build, :running, project: project, runner: runner) }
+  let(:user) { create(:user) }
+  let(:build) { create(:ci_build, :running, project: project, runner: runner, user: user) }
   let(:runner) { create(:ci_runner, :instance) }
 
   let(:service) { described_class.new(build) }
@@ -53,9 +54,11 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
       it 'logs event' do
         expect(Gitlab::AppLogger).to receive(:info).with(
           message: 'Build dropped due to CI minutes limit exceeded',
+          namespace: project.root_namespace.name,
           project_path: project.full_path,
           build_id: build.id,
-          user_id: build.user_id)
+          user_id: user.id,
+          username: user.username)
 
         subject
       end

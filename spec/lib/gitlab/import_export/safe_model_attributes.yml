@@ -102,6 +102,7 @@ ProjectLabel:
 - template
 - description
 - priority
+- remove_on_close
 Milestone:
 - id
 - title
@@ -208,6 +209,7 @@ MergeRequest:
 - discussion_locked
 - allow_maintainer_to_push
 - merge_ref_sha
+- draft
 MergeRequestDiff:
 - id
 - state

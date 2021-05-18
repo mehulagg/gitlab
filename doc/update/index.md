@@ -107,6 +107,10 @@ Sidekiq::Queue.new("background_migration").size
 Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.size
 ```
 
+### Batched background migrations
+
+See the documentation on [batched background migrations](../user/admin_area/monitoring/background_migrations.md).
+
 ### What do I do if my background migrations are stuck?
 
 WARNING:
@@ -144,7 +148,7 @@ If you upgrade your GitLab instance while the GitLab Runner is processing jobs, 
 
 As for the artifacts, the GitLab Runner will attempt to upload them three times, after which the job will eventually fail.
 
-To address the above two scenario's, it is adviced to do the following prior to upgrading:
+To address the above two scenario's, it is advised to do the following prior to upgrading:
 
 1. Plan your maintenance.
 1. Pause your runners.
@@ -369,6 +373,36 @@ and [Helm Chart deployments](https://docs.gitlab.com/charts/). They come with ap
 
 Git 2.31.x and later is required. We recommend you use the
 [Git version provided by Gitaly](../install/installation.md#git).
+
+### 13.9.0
+
+We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/324160)
+that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3.
+We are working on a patch, but until a fixed version is released, you can manually complete
+the zero-downtime upgrade:
+
+1. Before running the final `sudo gitlab-rake db:migrate` command on the deploy node,
+   execute the following queries using the PostgreSQL console (or `sudo gitlab-psql`)
+   to drop the problematic triggers:
+
+   ```sql
+   drop trigger trigger_e40a6f1858e6 on application_settings;
+   drop trigger trigger_0d588df444c8 on application_settings;
+   drop trigger trigger_1572cbc9a15f on application_settings;
+   drop trigger trigger_22a39c5c25f3 on application_settings;
+   ```
+
+1. Run the final migrations:
+
+   ```shell
+   sudo gitlab-rake db:migrate
+   ```
+
+If you have already run the final `sudo gitlab-rake db:migrate` command on the deploy node and have
+encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you can still
+follow the previous steps to complete the update.
+
+More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
 ### 13.6.0
 

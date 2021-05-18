@@ -1,0 +1,5 @@
+---
+title: Remove old scanner filter and only use new filter on vulnerability report page
+merge_request: 61959
+author:
+type: added

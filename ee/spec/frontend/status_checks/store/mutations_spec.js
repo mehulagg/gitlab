@@ -19,11 +19,23 @@ describe('Status checks mutations', () => {
     });
   });
 
+  describe(types.SET_SETTINGS, () => {
+    it('sets the settings', () => {
+      expect(state.settings).toStrictEqual({});
+
+      const settings = { projectId: '12345', statusChecksPath: 'foo/bar/baz' };
+
+      mutations[types.SET_SETTINGS](state, settings);
+
+      expect(state.settings).toStrictEqual(settings);
+    });
+  });
+
   describe(types.SET_STATUS_CHECKS, () => {
     it('sets the statusChecks', () => {
-      const statusChecks = [{ name: 'Foo' }, { name: 'Bar' }];
-
       expect(state.statusChecks).toStrictEqual([]);
+
+      const statusChecks = [{ name: 'Foo' }, { name: 'Bar' }];
 
       mutations[types.SET_STATUS_CHECKS](state, statusChecks);
 

@@ -2,6 +2,7 @@ import { mount, shallowMount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import ProfileSelector from 'ee/on_demand_scans/components/profile_selector/profile_selector.vue';
 import OnDemandScansSiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
+import SiteProfileSummary from 'ee/on_demand_scans/components/profile_selector/site_profile_summary.vue';
 import { siteProfiles } from '../../mocks/mock_data';
 
 const TEST_LIBRARY_PATH = '/test/site/profiles/library/path';
@@ -66,6 +67,26 @@ describe('OnDemandScansSiteProfileSelector', () => {
     createFullComponent();
 
     expect(wrapper.element).toMatchSnapshot();
+  });
+
+  describe('profile summary', () => {
+    it('is rendered when a profile is selected', () => {
+      const selectedProfile = profiles[0];
+
+      createComponent({
+        propsData: { profiles, value: selectedProfile.id, selectedProfile },
+      });
+
+      expect(wrapper.findComponent(SiteProfileSummary).exists()).toBe(true);
+    });
+
+    it('is not rendered when no profile is selected', () => {
+      createComponent({
+        propsData: { profiles, selectedProfile: null },
+      });
+
+      expect(wrapper.findComponent(SiteProfileSummary).exists()).toBe(false);
+    });
   });
 
   it('sets listeners on profile selector component', () => {

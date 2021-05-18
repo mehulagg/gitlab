@@ -27,6 +27,7 @@ RSpec.describe MergeRequest do
     it { is_expected.to have_many(:approval_rules) }
     it { is_expected.to have_many(:approval_merge_request_rule_sources).through(:approval_rules) }
     it { is_expected.to have_many(:approval_project_rules).through(:approval_merge_request_rule_sources) }
+    it { is_expected.to have_many(:status_check_responses).class_name('MergeRequests::StatusCheckResponse').inverse_of(:merge_request) }
 
     describe 'approval_rules association' do
       describe '#applicable_to_branch' do

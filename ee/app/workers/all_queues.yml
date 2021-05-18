@@ -368,6 +368,24 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: cronjob:security_create_orchestration_policy
+  :worker_name: Security::CreateOrchestrationPolicyWorker
+  :feature_category: :security_orchestration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: cronjob:security_orchestration_policy_rule_schedule
+  :worker_name: Security::OrchestrationPolicyRuleScheduleWorker
+  :feature_category: :security_orchestration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:sync_seat_link
   :worker_name: SyncSeatLinkWorker
   :feature_category: :license

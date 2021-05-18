@@ -45,8 +45,7 @@ module Types
       field :lfs_object_registries, ::Types::Geo::LfsObjectRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::LfsObjectRegistriesResolver,
-            description: 'Find LFS object registries on this Geo node.',
-            feature_flag: :geo_lfs_object_replication
+            description: 'Find LFS object registries on this Geo node.'
       field :pipeline_artifact_registries, ::Types::Geo::PipelineArtifactRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::PipelineArtifactRegistriesResolver,

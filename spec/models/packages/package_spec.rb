@@ -208,6 +208,19 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value("@scope%2e%2e%fpackage").for(:name) }
         it { is_expected.not_to allow_value("@scope/sub/package").for(:name) }
       end
+
+      context 'terraform module package' do
+        subject { build_stubbed(:terraform_module_package) }
+
+        it { is_expected.to allow_value('my-module/my-system').for(:name) }
+        it { is_expected.to allow_value('my/module').for(:name) }
+        it { is_expected.not_to allow_value('my-module').for(:name) }
+        it { is_expected.not_to allow_value('My-Module').for(:name) }
+        it { is_expected.not_to allow_value('my_module').for(:name) }
+        it { is_expected.not_to allow_value('my.module').for(:name) }
+        it { is_expected.not_to allow_value('../../../my-module').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy-module').for(:name) }
+      end
     end
 
     describe '#version' do
@@ -395,6 +408,7 @@ RSpec.describe Packages::Package, type: :model do
       end
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
+      it_behaves_like 'validating version to be SemVer compliant for', :terraform_module_package
 
       context 'nuget package' do
         it_behaves_like 'validating version to be SemVer compliant for', :nuget_package
@@ -492,6 +506,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '.with_package_type' do
+    let!(:package1) { create(:terraform_module_package) }
+    let!(:package2) { create(:npm_package) }
+    let(:package_type) { :terraform_module }
+
+    subject { described_class.with_package_type(package_type) }
+
+    it { is_expected.to eq([package1]) }
+  end
+
+  describe '.without_package_type' do
+    let!(:package1) { create(:npm_package) }
+    let!(:package2) { create(:terraform_module_package) }
+    let(:package_type) { :terraform_module }
+
+    subject { described_class.without_package_type(package_type) }
+
+    it { is_expected.to eq([package1]) }
+  end
+
   context 'version scopes' do
     let!(:package1) { create(:npm_package, version: '1.0.0') }
     let!(:package2) { create(:npm_package, version: '1.0.1') }
@@ -569,22 +603,6 @@ RSpec.describe Packages::Package, type: :model do
 
     it 'does not include nuget temporary packages' do
       expect(subject).to eq([package1])
-    end
-  end
-
-  describe '.processed' do
-    let!(:package1) { create(:nuget_package) }
-    let!(:package2) { create(:npm_package) }
-    let!(:package3) { create(:nuget_package) }
-
-    subject { described_class.processed }
-
-    it { is_expected.to match_array([package1, package2, package3]) }
-
-    context 'with temporary packages' do
-      let!(:package1) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
-
-      it { is_expected.to match_array([package2, package3]) }
     end
   end
 

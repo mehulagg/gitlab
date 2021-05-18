@@ -89,7 +89,9 @@ export default {
     >
       <gl-sprintf :message="$options.i18n.howToActivateSubscription">
         <template #link="{ content }">
-          <gl-link :href="$options.links.adminLicenseUrl" target="_blank">{{ content }}</gl-link>
+          <gl-link :href="$options.links.subscriptionActivationHelpLink" target="_blank">{{
+            content
+          }}</gl-link>
         </template>
       </gl-sprintf>
     </gl-alert>

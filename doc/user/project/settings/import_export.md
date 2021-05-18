@@ -39,7 +39,7 @@ Note the following:
   The Importing GitLab version must be greater than or equal to the Exporting GitLab version.
 - Imports fail unless the import and export GitLab instances are
   compatible as described in the [Version history](#version-history).
-- Exports are generated in your configured `shared_path`, a temporary [shared directory](../../../development/shared_files.md)
+- Exports are generated in your configured `shared_path`, a temporary shared directory,
   and are moved to your configured `uploads_directory`. Every 24 hours, a specific worker deletes these export files.
 - Group members are exported as project members, as long as the user has
   maintainer or administrator access to the group where the exported project lives.
@@ -47,6 +47,8 @@ Note the following:
 - Imported users can be mapped by their primary email on self-managed instances, if an administrative user (not an owner) does the import.
   Otherwise, a supplementary comment is left to mention that the original author and
   the MRs, notes, or issues are owned by the importer.
+  - For project migration imports performed over GitLab.com Groups, preserving author information is
+    possible through a [professional services engagement](https://about.gitlab.com/services/migration/).
 - If an imported project contains merge requests originating from forks,
   then new branches associated with such merge requests are created
   within a project during the import/export. Thus, the number of branches

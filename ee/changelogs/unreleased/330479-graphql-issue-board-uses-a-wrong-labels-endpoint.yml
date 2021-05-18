@@ -1,0 +1,5 @@
+---
+title: Display labels from sub groups and projects when using epics swimlanes
+merge_request: 61423
+author:
+type: fixed

@@ -125,6 +125,7 @@ project_members:
 - source
 - project
 merge_requests:
+- status_check_responses
 - subscriptions
 - award_emoji
 - author
@@ -342,8 +343,9 @@ project:
 - external_approval_rules
 - taggings
 - base_tags
-- tag_taggings
 - tags
+- topic_taggings
+- topics
 - chat_services
 - cluster
 - clusters
@@ -351,6 +353,7 @@ project:
 - cluster_project
 - creator
 - cycle_analytics_stages
+- value_streams
 - group
 - namespace
 - management_clusters

@@ -9,7 +9,7 @@ RSpec.describe EE::ProtectedRef do
 
       2.times do
         group = create(:group)
-        protected_branch.project.project_group_links.create(group: group)
+        protected_branch.project.project_group_links.create!(group: group)
         protected_branch.merge_access_levels.create!(group: group)
       end
 
@@ -19,7 +19,7 @@ RSpec.describe EE::ProtectedRef do
         protected_branch.push_access_levels.create!(user: user)
       end
 
-      protected_branch.destroy
+      protected_branch.destroy!
 
       expect(ProtectedBranch::MergeAccessLevel.count).to be(0)
       expect(ProtectedBranch::PushAccessLevel.count).to be(0)

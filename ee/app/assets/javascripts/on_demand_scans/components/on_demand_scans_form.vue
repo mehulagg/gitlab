@@ -14,14 +14,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import {
-  SCAN_TYPE_LABEL,
-  SCAN_TYPE,
-} from 'ee/security_configuration/dast_scanner_profiles/constants';
-import {
-  EXCLUDED_URLS_SEPARATOR,
-  TARGET_TYPES,
-} from 'ee/security_configuration/dast_site_profiles_form/constants';
+import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
@@ -32,7 +25,6 @@ import RefSelector from '~/ref/components/ref_selector.vue';
 import { REF_TYPE_BRANCHES } from '~/ref/constants';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import validation from '~/vue_shared/directives/validation';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
 import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
 import {
@@ -47,7 +39,6 @@ import {
 } from '../settings';
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
-import ProfileSelectorSummaryCell from './profile_selector/summary_cell.vue';
 
 export const ON_DEMAND_SCANS_STORAGE_KEY = 'on-demand-scans-new-form';
 
@@ -72,13 +63,11 @@ const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) =>
 });
 
 export default {
-  SCAN_TYPE_LABEL,
   enabledRefTypes: [REF_TYPE_BRANCHES],
   saveAndRunScanBtnId: 'scan-submit-button',
   saveScanBtnId: 'scan-save-button',
   components: {
     RefSelector,
-    ProfileSelectorSummaryCell,
     ScannerProfileSelector,
     SiteProfileSelector,
     GlAlert,
@@ -98,7 +87,6 @@ export default {
     GlTooltip: GlTooltipDirective,
     validation: validation(),
   },
-  mixins: [glFeatureFlagsMixin()],
   apollo: {
     scannerProfiles: createProfilesApolloOptions(
       'scannerProfiles',
@@ -234,12 +222,6 @@ export default {
         selectedBranch,
       };
     },
-    hasExcludedUrls() {
-      return this.selectedSiteProfile.excludedUrls?.length > 0;
-    },
-    targetTypeValue() {
-      return TARGET_TYPES[this.selectedSiteProfile.targetType].text;
-    },
     storageKey() {
       return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
     },
@@ -333,7 +315,6 @@ export default {
       this.selectedScannerProfileId = this.selectedScannerProfileId ?? selectedScannerProfileId;
     },
   },
-  EXCLUDED_URLS_SEPARATOR,
 };
 </script>
 
@@ -460,103 +441,16 @@ export default {
         v-model="selectedScannerProfileId"
         class="gl-mb-5"
         :profiles="scannerProfiles"
-      >
-        <template v-if="selectedScannerProfile" #summary>
-          <div class="row">
-            <profile-selector-summary-cell
-              :class="{ 'gl-text-red-500': hasProfilesConflict }"
-              :label="s__('DastProfiles|Scan mode')"
-              :value="$options.SCAN_TYPE_LABEL[selectedScannerProfile.scanType]"
-            />
-          </div>
-          <div class="row">
-            <profile-selector-summary-cell
-              :label="s__('DastProfiles|Spider timeout')"
-              :value="n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout || 0)"
-            />
-            <profile-selector-summary-cell
-              :label="s__('DastProfiles|Target timeout')"
-              :value="n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout || 0)"
-            />
-          </div>
-          <div class="row">
-            <profile-selector-summary-cell
-              :label="s__('DastProfiles|AJAX spider')"
-              :value="selectedScannerProfile.useAjaxSpider ? __('On') : __('Off')"
-            />
-            <profile-selector-summary-cell
-              :label="s__('DastProfiles|Debug messages')"
-              :value="
-                selectedScannerProfile.showDebugMessages
-                  ? s__('DastProfiles|Show debug messages')
-                  : s__('DastProfiles|Hide debug messages')
-              "
-            />
-          </div>
-        </template>
-      </scanner-profile-selector>
+        :selected-profile="selectedScannerProfile"
+        :has-conflict="hasProfilesConflict"
+      />
       <site-profile-selector
         v-model="selectedSiteProfileId"
         class="gl-mb-5"
         :profiles="siteProfiles"
-      >
-        <template v-if="selectedSiteProfile" #summary>
-          <div class="row">
-            <profile-selector-summary-cell
-              :class="{ 'gl-text-red-500': hasProfilesConflict }"
-              :label="s__('DastProfiles|Target URL')"
-              :value="selectedSiteProfile.targetUrl"
-            />
-            <profile-selector-summary-cell
-              v-if="glFeatures.securityDastSiteProfilesApiOption"
-              :label="s__('DastProfiles|Site type')"
-              :value="targetTypeValue"
-            />
-          </div>
-          <template v-if="glFeatures.securityDastSiteProfilesAdditionalFields">
-            <template v-if="selectedSiteProfile.auth.enabled">
-              <div class="row">
-                <profile-selector-summary-cell
-                  :label="s__('DastProfiles|Authentication URL')"
-                  :value="selectedSiteProfile.auth.url"
-                />
-              </div>
-              <div class="row">
-                <profile-selector-summary-cell
-                  :label="s__('DastProfiles|Username')"
-                  :value="selectedSiteProfile.auth.username"
-                />
-                <profile-selector-summary-cell
-                  :label="s__('DastProfiles|Password')"
-                  value="••••••••"
-                />
-              </div>
-              <div class="row">
-                <profile-selector-summary-cell
-                  :label="s__('DastProfiles|Username form field')"
-                  :value="selectedSiteProfile.auth.usernameField"
-                />
-                <profile-selector-summary-cell
-                  :label="s__('DastProfiles|Password form field')"
-                  :value="selectedSiteProfile.auth.passwordField"
-                />
-              </div>
-            </template>
-            <div class="row">
-              <profile-selector-summary-cell
-                v-if="hasExcludedUrls"
-                :label="s__('DastProfiles|Excluded URLs')"
-                :value="selectedSiteProfile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
-              />
-              <profile-selector-summary-cell
-                v-if="selectedSiteProfile.requestHeaders"
-                :label="s__('DastProfiles|Request headers')"
-                :value="__('[Redacted]')"
-              />
-            </div>
-          </template>
-        </template>
-      </site-profile-selector>
+        :selected-profile="selectedSiteProfile"
+        :has-conflict="hasProfilesConflict"
+      />
 
       <gl-alert
         v-if="hasProfilesConflict"

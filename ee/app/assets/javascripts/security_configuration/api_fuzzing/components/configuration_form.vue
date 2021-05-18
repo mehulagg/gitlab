@@ -70,7 +70,7 @@ export default {
       scanMode: {
         field: 'scanMode',
         label: s__('APIFuzzing|Scan mode'),
-        description: s__('APIFuzzing|There are two ways to perform scans.'),
+        description: s__('APIFuzzing|There are three ways to perform scans.'),
         value: '',
         defaultText: s__('APIFuzzing|Choose a method'),
         options: this.apiFuzzingCiConfiguration.scanModes.map((value) => ({

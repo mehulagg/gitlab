@@ -222,7 +222,7 @@ the pipeline configuration, the last mention of the variable takes precedence.
 ### Overriding SAST jobs
 
 WARNING:
-Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#onlyexcept-basic)
+Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#only--except)
 is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
 
 To override a job definition, (for example, change properties like `variables` or `dependencies`),
@@ -517,8 +517,6 @@ removed, or promoted to regular features at any time.
 Experimental features available are:
 
 - Enable scanning of iOS and Android apps using the [MobSF analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/mobsf/).
-- Enable the [semgrep analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep/).
-  - Semgrep may be inconsistent when reporting vulnerabilities found in minified JavaScript files.
 
 #### Enable experimental features
 
@@ -653,6 +651,7 @@ registry.gitlab.com/gitlab-org/security-products/analyzers/nodejs-scan:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/phpcs-security-audit:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/pmd-apex:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/security-code-scan:2
+registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/sobelow:2
 registry.gitlab.com/gitlab-org/security-products/analyzers/spotbugs:2
 ```
@@ -682,7 +681,7 @@ Support for custom certificate authorities was introduced in the following versi
 | `phpcs-security-audit` | [v2.8.2](https://gitlab.com/gitlab-org/security-products/analyzers/phpcs-security-audit/-/releases/v2.8.2) |
 | `pmd-apex`             | [v2.1.0](https://gitlab.com/gitlab-org/security-products/analyzers/pmd-apex/-/releases/v2.1.0)             |
 | `security-code-scan`   | [v2.7.3](https://gitlab.com/gitlab-org/security-products/analyzers/security-code-scan/-/releases/v2.7.3)   |
-| `semgrep`              | [v0.0.1](https://gitlab.com/gitlab-org/security-products/analyzers/security-code-scan/-/releases/v0.0.1)   |
+| `semgrep`              | [v0.0.1](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep/-/releases/v0.0.1)   |
 | `sobelow`              | [v2.2.0](https://gitlab.com/gitlab-org/security-products/analyzers/sobelow/-/releases/v2.2.0)              |
 | `spotbugs`             | [v2.7.1](https://gitlab.com/gitlab-org/security-products/analyzers/spotbugs/-/releases/v2.7.1)             |
 
@@ -711,7 +710,7 @@ documentation for instructions.
 
 ## Running SAST in SELinux
 
-By default SAST analyzers are supported in GitLab instances hosted on SELinux. Adding a `before_script` in an [overriden SAST job](#overriding-sast-jobs) may not work as runners hosted on SELinux have restricted permissions.
+By default SAST analyzers are supported in GitLab instances hosted on SELinux. Adding a `before_script` in an [overridden SAST job](#overriding-sast-jobs) may not work as runners hosted on SELinux have restricted permissions.
 
 ## Troubleshooting
 

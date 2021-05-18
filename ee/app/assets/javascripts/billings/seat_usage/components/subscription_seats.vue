@@ -6,6 +6,7 @@ import {
   GlButton,
   GlDropdown,
   GlDropdownItem,
+  GlModal,
   GlModalDirective,
   GlIcon,
   GlPagination,
@@ -20,6 +21,9 @@ import {
   AVATAR_SIZE,
   SEARCH_DEBOUNCE_MS,
   REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
+  CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
 } from 'ee/billings/seat_usage/constants';
 import { s__ } from '~/locale';
 import RemoveBillableMemberModal from './remove_billable_member_modal.vue';
@@ -37,6 +41,7 @@ export default {
     GlButton,
     GlDropdown,
     GlDropdownItem,
+    GlModal,
     GlIcon,
     GlPagination,
     GlSearchBoxByType,
@@ -118,6 +123,13 @@ export default {
         this.resetBillableMembers();
       }
     },
+    displayRemoveMemberModal(user) {
+      if (user.removable) {
+        this.setBillableMemberToRemove(user);
+      } else {
+        this.$refs.cannotRemoveModal.show();
+      }
+    },
   },
   i18n: {
     emailNotVisibleTooltipText: s__(
@@ -127,6 +139,9 @@ export default {
   avatarSize: AVATAR_SIZE,
   fields: FIELDS,
   removeBillableMemberModalId: REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  cannotRemoveModalId: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_ID,
+  cannotRemoveModalTitle: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_TITLE,
+  cannotRemoveModalText: CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT,
 };
 </script>
 
@@ -218,7 +233,8 @@ export default {
         <gl-dropdown icon="ellipsis_h" right data-testid="user-actions">
           <gl-dropdown-item
             v-gl-modal="$options.removeBillableMemberModalId"
-            @click="setBillableMemberToRemove(data.item.user)"
+            data-testid="remove-user"
+            @click="displayRemoveMemberModal(data.item.user)"
           >
             {{ __('Remove user') }}
           </gl-dropdown-item>
@@ -243,5 +259,17 @@ export default {
       v-if="billableMemberToRemove"
       :modal-id="$options.removeBillableMemberModalId"
     />
+
+    <gl-modal
+      ref="cannotRemoveModal"
+      :modal-id="$options.cannotRemoveModalId"
+      :title="$options.cannotRemoveModalTitle"
+      :action-primary="{ text: __('Okay') }"
+      static
+    >
+      <p>
+        {{ $options.cannotRemoveModalText }}
+      </p>
+    </gl-modal>
   </section>
 </template>

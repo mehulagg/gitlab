@@ -2,6 +2,7 @@
 
 class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
   belongs_to :segment, inverse_of: :snapshots
+  belongs_to :namespace, optional: true
 
   validates :segment, presence: true
   validates :recorded_at, presence: true
@@ -28,6 +29,9 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
 
   scope :for_month, -> (month_date) { where(end_time: month_date.end_of_month) }
   scope :not_finalized, -> { where(arel_table[:recorded_at].lteq(arel_table[:end_time])) }
+
+  # Remove in %14.0 with https://gitlab.com/gitlab-org/gitlab/-/issues/329521
+  before_save -> { self.namespace = segment.namespace }
 
   def start_time
     end_time.beginning_of_month
