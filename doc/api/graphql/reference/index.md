@@ -2155,6 +2155,26 @@ Input type: `EscalationPolicyCreateInput`
 | <a id="mutationescalationpolicycreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationescalationpolicycreateescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
 
+### `Mutation.escalationPolicyDestroy`
+
+Input type: `EscalationPolicyDestroyInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicydestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicydestroyid"></a>`id` | [`IncidentManagementEscalationPolicyID!`](#incidentmanagementescalationpolicyid) | The escalation policy internal ID to remove. |
+| <a id="mutationescalationpolicydestroyprojectpath"></a>`projectPath` | [`ID!`](#id) | The project to remove the escalation policy from. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicydestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicydestroyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationescalationpolicydestroyescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
+
 ### `Mutation.exportRequirements`
 
 Input type: `ExportRequirementsInput`
@@ -11214,7 +11234,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ##### `Project.incidentManagementEscalationPolicy`
 
-Incident Management escalation policies of the project.
+Incident Management escalation policy of the project.
 
 Returns [`EscalationPolicyType`](#escalationpolicytype).
 
