@@ -23656,6 +23656,8 @@ CREATE INDEX index_namespaces_on_shared_and_extra_runners_minutes_limit ON names
 
 CREATE INDEX index_namespaces_on_traversal_ids ON namespaces USING gin (traversal_ids);
 
+CREATE INDEX index_namespaces_on_traversal_ids8 ON namespaces USING gin (traversal_ids8);
+
 CREATE INDEX index_namespaces_on_type_and_id_partial ON namespaces USING btree (type, id) WHERE (type IS NOT NULL);
 
 CREATE INDEX index_non_requested_project_members_on_source_id_and_type ON members USING btree (source_id, source_type) WHERE ((requested_at IS NULL) AND ((type)::text = 'ProjectMember'::text));
