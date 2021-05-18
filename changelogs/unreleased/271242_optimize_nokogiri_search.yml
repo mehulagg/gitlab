@@ -1,0 +1,5 @@
+---
+title: Optimize Nokogiri search for post-processing pipeline
+merge_request: 61994
+author:
+type: performance
