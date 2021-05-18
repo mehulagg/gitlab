@@ -5,3 +5,9 @@
       = sprite_icon('dot-grid', css_class: "dropdown-icon")
       = view_model[:activeTitle]
       = sprite_icon('chevron-down')
+
+%ul.hidden
+  - view_model[:shortcuts].each do |shortcut|
+    %li.hidden
+      = link_to shortcut[:href], class: shortcut[:css_class] do
+        = shortcut[:title]
