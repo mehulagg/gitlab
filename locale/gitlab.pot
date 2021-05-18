@@ -2859,9 +2859,6 @@ msgid_plural "Alerts"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Alert integrations"
-msgstr ""
-
 msgid "AlertManagement|Acknowledged"
 msgstr ""
 
@@ -12217,6 +12214,9 @@ msgstr ""
 msgid "Enable authenticated API request rate limit"
 msgstr ""
 
+msgid "Enable authentication"
+msgstr ""
+
 msgid "Enable automatic repository housekeeping (git repack, git gc)"
 msgstr ""
 
@@ -12419,6 +12419,9 @@ msgid "Enter number of issues"
 msgstr ""
 
 msgid "Enter one or more user ID separated by commas"
+msgstr ""
+
+msgid "Enter the"
 msgstr ""
 
 msgid "Enter the %{name} description"
@@ -15515,10 +15518,10 @@ msgstr ""
 msgid "GrafanaIntegration|Active"
 msgstr ""
 
-msgid "GrafanaIntegration|Enter the Grafana API token."
+msgid "GrafanaIntegration|Enter the base URL of the Grafana instance."
 msgstr ""
 
-msgid "GrafanaIntegration|Enter the base URL of the Grafana instance."
+msgid "GrafanaIntegration|Grafana API token."
 msgstr ""
 
 msgid "GrafanaIntegration|Grafana URL"
@@ -17355,6 +17358,9 @@ msgstr ""
 msgid "IncidentSettings|Alert integration"
 msgstr ""
 
+msgid "IncidentSettings|Fine-tune incident settings and set up integrations with external tools to help better manage incidents."
+msgstr ""
+
 msgid "IncidentSettings|Grafana integration"
 msgstr ""
 
@@ -17368,9 +17374,6 @@ msgid "IncidentSettings|Introduce a countdown timer in incident issues to better
 msgstr ""
 
 msgid "IncidentSettings|PagerDuty integration"
-msgstr ""
-
-msgid "IncidentSettings|Set up integrations with external tools to help better manage incidents."
 msgstr ""
 
 msgid "IncidentSettings|Time limit"
@@ -20871,10 +20874,10 @@ msgstr ""
 msgid "MetricsSettings|External dashboard URL"
 msgstr ""
 
-msgid "MetricsSettings|Manage Metrics Dashboard settings."
+msgid "MetricsSettings|Manage metrics dashboard settings."
 msgstr ""
 
-msgid "MetricsSettings|Metrics dashboard"
+msgid "MetricsSettings|Metrics"
 msgstr ""
 
 msgid "MetricsSettings|UTC (Coordinated Universal Time)"
