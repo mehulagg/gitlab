@@ -1,7 +1,7 @@
 <script>
-import DOMPurify from 'dompurify';
-import { GlBadge, GlIcon, GlLink, GlSafeHtmlDirective, GlButton } from '@gitlab/ui';
+import { GlBadge, GlIcon, GlLink, GlButton } from '@gitlab/ui';
 import { dateInWords, isValidDate } from '~/lib/utils/datetime_utility';
+import safeHtml from '../utils/safe_html';
 
 export default {
   components: {
@@ -11,7 +11,7 @@ export default {
     GlButton,
   },
   directives: {
-    SafeHtml: GlSafeHtmlDirective,
+    SafeHtml: safeHtml,
   },
   props: {
     feature: {
@@ -31,15 +31,6 @@ export default {
       return dateInWords(date);
     },
   },
-  beforeMount() {
-    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-      node.setAttribute('target', '_blank');
-      node.setAttribute('rel', 'noopener');
-    });
-  },
-  afterMount() {
-    DOMPurify.removeHook('afterSanitizeAttributes');
-  }
 };
 </script>
 
