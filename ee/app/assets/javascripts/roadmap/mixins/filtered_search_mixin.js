@@ -62,6 +62,7 @@ export default {
           symbol: '~',
           token: LabelToken,
           operators: OPERATOR_IS_ONLY,
+          recentTokenValuesStorageKey: `${this.groupFullPath}-epics-recent-tokens-label_name`,
           fetchLabels: (search = '') => {
             const params = {
               only_group_labels: true,
