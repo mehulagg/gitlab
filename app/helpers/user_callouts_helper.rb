@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module UserCalloutsHelper
-  ADMIN_INTEGRATIONS_MOVED = 'admin_integrations_moved'
   GKE_CLUSTER_INTEGRATION = 'gke_cluster_integration'
   GCP_SIGNUP_OFFER = 'gcp_signup_offer'
   SUGGEST_POPOVER_DISMISSED = 'suggest_popover_dismissed'
@@ -12,10 +11,6 @@ module UserCalloutsHelper
   FEATURE_FLAGS_NEW_VERSION = 'feature_flags_new_version'
   REGISTRATION_ENABLED_CALLOUT = 'registration_enabled_callout'
   UNFINISHED_TAG_CLEANUP_CALLOUT = 'unfinished_tag_cleanup_callout'
-
-  def show_admin_integrations_moved?
-    !user_dismissed?(ADMIN_INTEGRATIONS_MOVED)
-  end
 
   def show_gke_cluster_integration_callout?(project)
     active_nav_link?(controller: sidebar_operations_paths) &&

@@ -14564,7 +14564,6 @@ Name of the feature that the callout is for.
 | ----- | ----------- |
 | <a id="usercalloutfeaturenameenumaccount_recovery_regular_check"></a>`ACCOUNT_RECOVERY_REGULAR_CHECK` | Callout feature name for account_recovery_regular_check. |
 | <a id="usercalloutfeaturenameenumactive_user_count_threshold"></a>`ACTIVE_USER_COUNT_THRESHOLD` | Callout feature name for active_user_count_threshold. |
-| <a id="usercalloutfeaturenameenumadmin_integrations_moved"></a>`ADMIN_INTEGRATIONS_MOVED` | Callout feature name for admin_integrations_moved. |
 | <a id="usercalloutfeaturenameenumbuy_pipeline_minutes_notification_dot"></a>`BUY_PIPELINE_MINUTES_NOTIFICATION_DOT` | Callout feature name for buy_pipeline_minutes_notification_dot. |
 | <a id="usercalloutfeaturenameenumcanary_deployment"></a>`CANARY_DEPLOYMENT` | Callout feature name for canary_deployment. |
 | <a id="usercalloutfeaturenameenumcluster_security_warning"></a>`CLUSTER_SECURITY_WARNING` | Callout feature name for cluster_security_warning. |
