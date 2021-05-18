@@ -313,8 +313,8 @@ RSpec.describe Group do
     end
   end
 
-  context 'traversal_ids on create' do
-    context 'default traversal_ids' do
+  context 'traversal_ids8 on create' do
+    context 'default traversal_ids8' do
       let(:group) { build(:group) }
 
       before do
@@ -322,7 +322,7 @@ RSpec.describe Group do
         group.reload
       end
 
-      it { expect(group.traversal_ids).to eq [group.id] }
+      it { expect(group.traversal_ids8).to eq [group.id] }
     end
 
     context 'has a parent' do
@@ -334,8 +334,8 @@ RSpec.describe Group do
         reload_models(parent, group)
       end
 
-      it { expect(parent.traversal_ids).to eq [parent.id] }
-      it { expect(group.traversal_ids).to eq [parent.id, group.id] }
+      it { expect(parent.traversal_ids8).to eq [parent.id] }
+      it { expect(group.traversal_ids8).to eq [parent.id, group.id] }
     end
 
     context 'has a parent update before save' do
@@ -349,30 +349,30 @@ RSpec.describe Group do
         reload_models(parent, group)
       end
 
-      it 'avoid traversal_ids race condition' do
-        expect(parent.traversal_ids).to eq [new_grandparent.id, parent.id]
-        expect(group.traversal_ids).to eq [new_grandparent.id, parent.id, group.id]
+      it 'avoid traversal_ids8 race condition' do
+        expect(parent.traversal_ids8).to eq [new_grandparent.id, parent.id]
+        expect(group.traversal_ids8).to eq [new_grandparent.id, parent.id, group.id]
       end
     end
   end
 
-  context 'traversal_ids on update' do
+  context 'traversal_ids8 on update' do
     context 'parent is updated' do
       let(:new_parent) { create(:group) }
 
       subject {group.update!(parent: new_parent, name: 'new name') }
 
-      it_behaves_like 'update on column', :traversal_ids
+      it_behaves_like 'update on column', :traversal_ids8
     end
 
     context 'parent is not updated' do
       subject { group.update!(name: 'new name') }
 
-      it_behaves_like 'no update on column', :traversal_ids
+      it_behaves_like 'no update on column', :traversal_ids8
     end
   end
 
-  context 'traversal_ids on ancestral update' do
+  context 'traversal_ids8 on ancestral update' do
     context 'update multiple ancestors before save' do
       let(:parent) { create(:group) }
       let(:group) { create(:group, parent: parent) }
@@ -387,11 +387,11 @@ RSpec.describe Group do
         reload_models(parent, group, new_grandparent, new_parent)
       end
 
-      it 'avoids traversal_ids race condition' do
-        expect(parent.traversal_ids).to eq [parent.id]
-        expect(group.traversal_ids).to eq [new_grandparent.id, new_parent.id, group.id]
-        expect(new_grandparent.traversal_ids).to eq [new_grandparent.id]
-        expect(new_parent.traversal_ids).to eq [new_grandparent.id, new_parent.id]
+      it 'avoids traversal_ids8 race condition' do
+        expect(parent.traversal_ids8).to eq [parent.id]
+        expect(group.traversal_ids8).to eq [new_grandparent.id, new_parent.id, group.id]
+        expect(new_grandparent.traversal_ids8).to eq [new_grandparent.id]
+        expect(new_parent.traversal_ids8).to eq [new_grandparent.id, new_parent.id]
       end
     end
 
@@ -415,11 +415,11 @@ RSpec.describe Group do
         let!(:old_parent) { create(:group, parent: root) }
         let!(:new_parent) { create(:group, parent: root) }
 
-        it 'updates traversal_ids' do
-          expect(group.traversal_ids).to eq [root.id, new_parent.id, group.id]
+        it 'updates traversal_ids8' do
+          expect(group.traversal_ids8).to eq [root.id, new_parent.id, group.id]
         end
 
-        it_behaves_like 'hierarchy with traversal_ids'
+        it_behaves_like 'hierarchy with traversal_ids8'
         it_behaves_like 'locked row' do
           let(:row) { root }
         end
@@ -430,8 +430,8 @@ RSpec.describe Group do
         let!(:new_parent) { create(:group) }
         let!(:group) { create(:group, parent: old_parent) }
 
-        it 'updates traversal_ids' do
-          expect(group.traversal_ids).to eq [new_parent.id, group.id]
+        it 'updates traversal_ids8' do
+          expect(group.traversal_ids8).to eq [new_parent.id, group.id]
         end
 
         it_behaves_like 'locked rows' do
@@ -441,13 +441,13 @@ RSpec.describe Group do
         context 'old hierarchy' do
           let(:root) { old_parent.root_ancestor }
 
-          it_behaves_like 'hierarchy with traversal_ids'
+          it_behaves_like 'hierarchy with traversal_ids8'
         end
 
         context 'new hierarchy' do
           let(:root) { new_parent.root_ancestor }
 
-          it_behaves_like 'hierarchy with traversal_ids'
+          it_behaves_like 'hierarchy with traversal_ids8'
         end
       end
 
@@ -455,15 +455,15 @@ RSpec.describe Group do
         let!(:old_parent) { nil }
         let!(:new_parent) { create(:group) }
 
-        it 'updates traversal_ids' do
-          expect(group.traversal_ids).to eq [new_parent.id, group.id]
+        it 'updates traversal_ids8' do
+          expect(group.traversal_ids8).to eq [new_parent.id, group.id]
         end
 
         it_behaves_like 'locked rows' do
           let(:rows) { [group, new_parent] }
         end
 
-        it_behaves_like 'hierarchy with traversal_ids' do
+        it_behaves_like 'hierarchy with traversal_ids8' do
           let(:root) { new_parent }
         end
       end
@@ -472,15 +472,15 @@ RSpec.describe Group do
         let!(:old_parent) { create(:group) }
         let!(:new_parent) { nil }
 
-        it 'updates traversal_ids' do
-          expect(group.traversal_ids).to eq [group.id]
+        it 'updates traversal_ids8' do
+          expect(group.traversal_ids8).to eq [group.id]
         end
 
         it_behaves_like 'locked rows' do
           let(:rows) { [old_parent, group] }
         end
 
-        it_behaves_like 'hierarchy with traversal_ids' do
+        it_behaves_like 'hierarchy with traversal_ids8' do
           let(:root) { group }
         end
       end
@@ -496,9 +496,9 @@ RSpec.describe Group do
         parent_group.update(parent: new_grandparent)
       end
 
-      it 'updates traversal_ids for all descendants' do
-        expect(parent_group.reload.traversal_ids).to eq [new_grandparent.id, parent_group.id]
-        expect(group.reload.traversal_ids).to eq [new_grandparent.id, parent_group.id, group.id]
+      it 'updates traversal_ids8 for all descendants' do
+        expect(parent_group.reload.traversal_ids8).to eq [new_grandparent.id, parent_group.id]
+        expect(group.reload.traversal_ids8).to eq [new_grandparent.id, parent_group.id, group.id]
       end
     end
   end
@@ -514,15 +514,15 @@ RSpec.describe Group do
       it_behaves_like 'namespace traversal'
 
       describe '#self_and_descendants' do
-        it { expect(group.self_and_descendants.to_sql).not_to include 'traversal_ids @>' }
+        it { expect(group.self_and_descendants.to_sql).not_to include 'traversal_ids8 @>' }
       end
 
       describe '#descendants' do
-        it { expect(group.descendants.to_sql).not_to include 'traversal_ids @>' }
+        it { expect(group.descendants.to_sql).not_to include 'traversal_ids8 @>' }
       end
 
       describe '#ancestors' do
-        it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
+        it { expect(group.ancestors.to_sql).not_to include 'traversal_ids8 <@' }
       end
     end
 
@@ -530,11 +530,11 @@ RSpec.describe Group do
       it_behaves_like 'namespace traversal'
 
       describe '#self_and_descendants' do
-        it { expect(group.self_and_descendants.to_sql).to include 'traversal_ids @>' }
+        it { expect(group.self_and_descendants.to_sql).to include 'traversal_ids8 @>' }
       end
 
       describe '#descendants' do
-        it { expect(group.descendants.to_sql).to include 'traversal_ids @>' }
+        it { expect(group.descendants.to_sql).to include 'traversal_ids8 @>' }
       end
 
       describe '#ancestors' do
@@ -549,7 +549,7 @@ RSpec.describe Group do
             stub_feature_flags(use_traversal_ids_for_ancestors: false)
           end
 
-          it { expect(group.ancestors.to_sql).not_to include 'traversal_ids <@' }
+          it { expect(group.ancestors.to_sql).not_to include 'traversal_ids8 <@' }
         end
       end
     end
@@ -2004,7 +2004,7 @@ RSpec.describe Group do
           before do
             stub_feature_flags(use_traversal_ids: true)
 
-            group_child_3.reload # make sure traversal_ids are reloaded
+            group_child_3.reload # make sure traversal_ids8 are reloaded
           end
 
           include_examples 'correct ancestor order'

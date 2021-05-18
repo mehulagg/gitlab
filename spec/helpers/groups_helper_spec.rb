@@ -116,7 +116,7 @@ RSpec.describe GroupsHelper do
         before do
           stub_feature_flags(use_traversal_ids: true)
 
-          very_deep_nested_group.reload # make sure traversal_ids are reloaded
+          very_deep_nested_group.reload # make sure traversal_ids8 are reloaded
         end
 
         include_examples 'correct ancestor order'

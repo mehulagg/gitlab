@@ -45,7 +45,7 @@ RSpec.shared_examples 'namespace traversal' do
     let_it_be(:very_deep_nested_group) { create(:group, parent: deep_nested_group) }
 
     it 'returns the correct ancestors' do
-      # #reload is called to make sure traversal_ids are reloaded
+      # #reload is called to make sure traversal_ids8 are reloaded
       expect(very_deep_nested_group.reload.ancestors).to contain_exactly(group, nested_group, deep_nested_group)
       expect(deep_nested_group.reload.ancestors).to contain_exactly(group, nested_group)
       expect(nested_group.reload.ancestors).to contain_exactly(group)

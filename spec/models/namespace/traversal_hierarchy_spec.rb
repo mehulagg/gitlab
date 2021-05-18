@@ -49,7 +49,7 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
     subject { hierarchy.incorrect_traversal_ids }
 
     before do
-      Namespace.update_all(traversal_ids: [])
+      Namespace.update_all(traversal_ids8: [])
     end
 
     it { is_expected.to match_array Namespace.all }
@@ -62,7 +62,7 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model do
 
     it { expect(hierarchy.incorrect_traversal_ids).to be_empty }
 
-    it_behaves_like 'hierarchy with traversal_ids'
+    it_behaves_like 'hierarchy with traversal_ids8'
     it_behaves_like 'locked row' do
       let(:recorded_queries) { ActiveRecord::QueryRecorder.new }
       let(:row) { root }

@@ -637,7 +637,7 @@ RSpec.describe Integration do
                   before do
                     stub_feature_flags(use_traversal_ids: true)
 
-                    sub_subgroup.reload # make sure traversal_ids are reloaded
+                    sub_subgroup.reload # make sure traversal_ids8 are reloaded
                   end
 
                   include_examples 'correct ancestor order'

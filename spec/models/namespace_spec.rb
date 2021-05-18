@@ -199,8 +199,8 @@ RSpec.describe Namespace do
     it { is_expected.to include_module(Namespaces::Traversal::Linear) }
   end
 
-  context 'traversal_ids on create' do
-    context 'default traversal_ids' do
+  context 'traversal_ids8 on create' do
+    context 'default traversal_ids8' do
       let(:namespace) { build(:namespace) }
 
       before do
@@ -208,7 +208,7 @@ RSpec.describe Namespace do
         namespace.reload
       end
 
-      it { expect(namespace.traversal_ids).to eq [namespace.id] }
+      it { expect(namespace.traversal_ids8).to eq [namespace.id] }
     end
   end
 

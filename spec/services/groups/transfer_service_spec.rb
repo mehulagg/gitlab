@@ -603,7 +603,7 @@ RSpec.describe Groups::TransferService do
           create(:group_member, :owner, group: new_parent_group, user: user)
           create(:group, :private, parent: group, require_two_factor_authentication: true)
           group.update!(require_two_factor_authentication: true)
-          new_parent_group.reload # make sure traversal_ids are reloaded
+          new_parent_group.reload # make sure traversal_ids8 are reloaded
         end
 
         it 'does not update group two factor authentication setting' do

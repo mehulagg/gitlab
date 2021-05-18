@@ -47,7 +47,7 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        context 'with traversal_ids enabled' do
+        context 'with traversal_ids8 enabled' do
           before do
             stub_feature_flags(sync_traversal_ids: true)
             stub_feature_flags(traversal_ids_for_quota_calculation: true)
@@ -56,7 +56,7 @@ RSpec.describe Ci::RegisterJobService do
           it { is_expected.to be_kind_of(Ci::Build) }
         end
 
-        context 'with traversal_ids disabled' do
+        context 'with traversal_ids8 disabled' do
           before do
             stub_feature_flags(traversal_ids_for_quota_calculation: false)
           end
@@ -77,7 +77,7 @@ RSpec.describe Ci::RegisterJobService do
             shared_runners_seconds: runners_minutes_used * 60)
         end
 
-        context 'with traversal_ids enabled' do
+        context 'with traversal_ids8 enabled' do
           before do
             stub_feature_flags(sync_traversal_ids: true)
             stub_feature_flags(traversal_ids_for_quota_calculation: true)
@@ -86,7 +86,7 @@ RSpec.describe Ci::RegisterJobService do
           it { is_expected.to be_nil }
         end
 
-        context 'with traversal_ids disabled' do
+        context 'with traversal_ids8 disabled' do
           before do
             stub_feature_flags(traversal_ids_for_quota_calculation: false)
           end
