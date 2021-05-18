@@ -398,6 +398,8 @@ export const multiNote = {
   },
 };
 
+export const nonExistantJob = 'non_existant_job';
+
 /*
   It is important that the base include parallel jobs
   as well as non-parallel jobs with spaces in the name to prevent
@@ -653,6 +655,18 @@ export const mockParsedGraphQLNodes = [
       {
         name: 'production_d',
         needs: ['canary_c'],
+      },
+    ],
+    __typename: 'CiGroup',
+  },
+  {
+    category: 'production',
+    name: 'production_e',
+    size: 1,
+    jobs: [
+      {
+        name: 'production_e',
+        needs: [nonExistantJob],
       },
     ],
     __typename: 'CiGroup',
