@@ -156,11 +156,11 @@ class ChatNotificationService < Integration
   def notify_label?(data)
     return true unless SUPPORTED_EVENTS_FOR_LABEL_FILTER.include?(data[:object_kind]) && labels_to_be_notified.present?
 
-    labels = data.dig(:issue, :labels) || data.dig(:merge_request, :labels)
+    labels = data[:labels] || data.dig(:issue, :labels) || data.dig(:merge_request, :labels) || data.dig(:object_attributes, :labels)
 
     return false if labels.nil?
 
-    matching_labels = labels_to_be_notified_list & labels.pluck(:title)
+    matching_labels = labels_to_be_notified_list & labels.map { |label_hash| label_hash.with_indifferent_access[:title] }
 
     if labels_to_be_notified_behavior == MATCH_ALL_LABELS
       labels_to_be_notified_list.difference(matching_labels).empty?
