@@ -5,6 +5,8 @@ module ProtectedEnvironments
     # Limited to 20 per performance reasons
     # rubocop: disable CodeReuse/ActiveRecord
     def execute(name)
+      return [] unless project_container?
+
       project
         .environments
         .where.not(name: project.protected_environments.select(:name))

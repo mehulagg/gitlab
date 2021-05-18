@@ -6,7 +6,7 @@ module EE
 
       override :enqueue
       def enqueue(build)
-        if build.instantized_environment&.protected_from?(build.user)
+        if build.persisted_environment&.protected_from?(build.user)
           return build.drop!(:protected_environment_failure)
         end
 

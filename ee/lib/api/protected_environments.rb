@@ -65,7 +65,7 @@ module API
         # original issue - https://github.com/ruby-grape/grape/issues/1874
         declared_params[:deploy_access_levels_attributes] = declared_params.delete(:deploy_access_levels)
         protected_environment = ::ProtectedEnvironments::CreateService
-                                  .new(user_project, current_user, declared_params).execute
+                                  .new(container: user_project, current_user: current_user, params: declared_params).execute
 
         if protected_environment.persisted?
           present protected_environment, with: ::EE::API::Entities::ProtectedEnvironment, project: user_project
@@ -82,7 +82,7 @@ module API
       end
       delete ':id/protected_environments/:name', requirements: ENVIRONMENT_ENDPOINT_REQUIREMENTS do
         destroy_conditionally!(protected_environment) do
-          ::ProtectedEnvironments::DestroyService.new(user_project, current_user).execute(protected_environment)
+          ::ProtectedEnvironments::DestroyService.new(container: user_project, current_user: current_user).execute(protected_environment)
         end
       end
     end

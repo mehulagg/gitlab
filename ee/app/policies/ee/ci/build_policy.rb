@@ -7,11 +7,11 @@ module EE
       prepended do
         # overriding
         condition(:protected_environment) do
-          @subject.instantized_environment&.protected_from?(user)
+          @subject.persisted_environment&.protected_from?(user)
         end
 
         condition(:reporter_has_access_to_protected_environment) do
-          @subject.instantized_environment&.protected_by?(user) &&
+          @subject.persisted_environment&.protected_by?(user) &&
             can?(:reporter_access, @subject.project)
         end
 
