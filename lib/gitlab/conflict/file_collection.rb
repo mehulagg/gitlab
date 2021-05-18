@@ -36,6 +36,9 @@ module Gitlab
         @files ||= resolver.conflicts.map do |conflict_file|
           Gitlab::Conflict::File.new(conflict_file, merge_request: merge_request)
         end
+      rescue Gitlab::Git::Conflict::Resolver::ConflictSideMissing
+        # Return empty array when conflict side is missing
+        []
       end
 
       def can_be_resolved_in_ui?

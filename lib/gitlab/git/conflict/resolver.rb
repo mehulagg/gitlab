@@ -19,7 +19,7 @@ module Gitlab
           @conflicts ||= wrapped_gitaly_errors do
             gitaly_conflicts_client(@target_repository).list_conflict_files.to_a
           end
-        rescue GRPC::FailedPrecondition => e
+        rescue Gitlab::Git::FailedPrecondition => e
           raise Gitlab::Git::Conflict::Resolver::ConflictSideMissing, e.message
         rescue GRPC::BadStatus => e
           raise Gitlab::Git::CommandError, e

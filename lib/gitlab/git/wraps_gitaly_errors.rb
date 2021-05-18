@@ -11,6 +11,8 @@ module Gitlab
         raise ArgumentError, e
       rescue GRPC::DeadlineExceeded => e
         raise Gitlab::Git::CommandTimedOut, e
+      rescue GRPC::FailedPrecondition => e
+        raise Gitlab::Git::FailedPrecondition, e
       rescue GRPC::BadStatus => e
         raise Gitlab::Git::CommandError, e
       end

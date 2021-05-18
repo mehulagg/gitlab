@@ -18,6 +18,7 @@ module Gitlab
     OSError = Class.new(BaseError)
     UnknownRef = Class.new(BaseError)
     CommandTimedOut = Class.new(CommandError)
+    FailedPrecondition = Class.new(BaseError)
 
     class << self
       include Gitlab::EncodingHelper
