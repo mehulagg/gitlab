@@ -34,13 +34,13 @@ module SubscriptionsHelper
     GitlabSubscriptions::FetchSubscriptionPlansService.new(plan: :free).execute
       .map(&:symbolize_keys)
       .reject { |plan_data| plan_data[:free] }
-      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name) }
+      .map { |plan_data| plan_data.slice(:id, :code, :price_per_year, :deprecated, :name, :hide_card) }
   end
 
   def subscription_available_plans
     return plans_data unless ::Feature.enabled?(:hide_deprecated_billing_plans)
 
-    plans_data.reject { |plan_data| plan_data[:deprecated] }
+    plans_data.reject { |plan_data| plan_data[:deprecated] || plan_data[:hide_card] }
   end
 
   def present_groups(groups)

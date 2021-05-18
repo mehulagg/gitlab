@@ -83,27 +83,20 @@ RSpec.describe SubscriptionsHelper do
       it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"deprecated":true,"name":"Bronze Plan"}]') }
     end
 
-    context 'when ff purchase_deprecated_plans is enabled' do
-      before do
-        stub_feature_flags(hide_deprecated_billing_plans: true)
+    context 'when bronze_plan is must be hidden' do
+      let(:bronze_plan) do
+        {
+          "id" => "bronze_id",
+          "name" => "Bronze Plan",
+          "deprecated" => false,
+          "hide_card" => true,
+          "free" => false,
+          "code" => "bronze",
+          "price_per_year" => 48.0
+        }
       end
 
-      it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"name":"Bronze Plan"}]') }
-
-      context 'when bronze_plan is deprecated' do
-        let(:bronze_plan) do
-          {
-            "id" => "bronze_id",
-            "name" => "Bronze Plan",
-            "deprecated" => true,
-            "free" => false,
-            "code" => "bronze",
-            "price_per_year" => 48.0
-          }
-        end
-
-        it { is_expected.to include(available_plans: '[]') }
-      end
+      it { is_expected.not_to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"deprecated":true,"name":"Bronze Plan"}]') }
     end
   end
 
