@@ -33,7 +33,7 @@ installation.
 
 - [LDAP](../administration/auth/ldap/index.md): Configure LDAP to be used as
   an authentication mechanism for GitLab.
-- [SAML and OAuth](../integration/omniauth.html): Authenticate via online services like Okta, Google, Azure AD, and more.
+- [SAML and OAuth](../integration/omniauth.md): Authenticate via online services like Okta, Google, Azure AD, and more.
 
 ## Backup and upgrade
 
