@@ -677,6 +677,20 @@ variables:
 Because the template is [evaluated before](../../../ci/yaml/README.md#include) the pipeline
 configuration, the last mention of the variable takes precedence.
 
+#### Enabling and disabling rules
+
+A complete list of the rules that DAST uses to scan for vulnerabilities can be
+found in the [ZAP docs](https://www.zaproxy.org/docs/alerts/).
+
+`DAST_EXCLUDE_RULES` will disable the rules with the given IDs.
+
+`DAST_ONLY_INCLUDE_RULES` will restrict the set of rules used in the scan to
+those with the given IDs.
+
+By default, several rules are disabled because they either take a long time to
+run or frequently generate false positives. The complete list of disabled rules
+can be found in [LINK_TO_FILE](to_be_filled_in).
+
 ### Available variables
 
 DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
