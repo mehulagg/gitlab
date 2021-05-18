@@ -13,9 +13,9 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillNamespaceTraversalIdsChildre
     it 'backfills traversal_ids for child namespaces' do
       described_class.new.perform(1, 3, 5)
 
-      expect(user_namespace.reload.traversal_ids).to eq([])
-      expect(root_group.reload.traversal_ids).to eq([])
-      expect(sub_group.reload.traversal_ids).to eq([root_group.id, sub_group.id])
+      expect(user_namespace.reload.traversal_ids8).to eq([])
+      expect(root_group.reload.traversal_ids8).to eq([])
+      expect(sub_group.reload.traversal_ids8).to eq([root_group.id, sub_group.id])
     end
   end
 end
