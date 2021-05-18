@@ -97,7 +97,7 @@ ones.
 
 Prerequisites:
 
-- Ensure the badge image URL directly points to the image.
+- A valid URL that points directly to the desired image for the badge.
   If the image is located in a GitLab repository, use the raw link to the image.
 
 Using placeholders, here is an example badge image URL referring to a raw image at the root of a repository:
@@ -105,6 +105,14 @@ Using placeholders, here is an example badge image URL referring to a raw image 
 ```plaintext
 https://gitlab.example.com/<project_path>/-/raw/<default_branch>/my-image.svg
 ```
+
+To add a new badge to a group or project with a custom image:
+
+1. Navigate to your group or project's **Settings > General > Badges**.
+1. Under **Name**, enter the desired name for the badge.
+1. Under **Link**, enter the URL that the badge should point to.
+1. Under **Badge image URL**, enter the URL that points directly to the custom image that should be displayed.
+1. Submit the badge by clicking the **Add badge** button.
 
 To learn how to use custom images generated via a pipeline, see our documentation on
 [accessing the latest job artifacts by URL](../../ci/pipelines/job_artifacts.md#access-the-latest-job-artifacts-by-url).
