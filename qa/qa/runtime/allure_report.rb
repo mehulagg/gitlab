@@ -59,6 +59,8 @@ module QA
             config.formatter = AllureRspecFormatter
 
             config.before do |example|
+              next if example.attempts && example.attempts > 0
+
               testcase = example.metadata[:testcase]
               example.tms("Testcase", testcase) if testcase
 
