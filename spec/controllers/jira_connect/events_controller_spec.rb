@@ -90,6 +90,16 @@ RSpec.describe JiraConnect::EventsController do
         it 'deletes the installation' do
           expect { subject }.to change { JiraConnectInstallation.count }.by(-1)
         end
+
+        context 'and the installation has an instance_url set' do
+          let!(:installation) { create(:jira_connect_installation, instance_url: 'http://example.com') }
+
+          it 'schedules a ForwardEventWorker background job and keeps the installation' do
+            expect(JiraConnect::ForwardEventWorker).to receive(:perform_async).with(installation.id, "JWT #{auth_token}")
+
+            expect { subject }.not_to change(JiraConnectInstallation, :count)
+          end
+        end
       end
     end
   end

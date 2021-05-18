@@ -19,7 +19,9 @@ class JiraConnect::EventsController < JiraConnect::ApplicationController
   end
 
   def uninstalled
-    if current_jira_installation.destroy
+    if current_jira_installation.instance_url
+      JiraConnect::ForwardEventWorker.perform_async(current_jira_installation.id, request.headers['Authorization'])
+    elsif current_jira_installation.destroy
       head :ok
     else
       head :unprocessable_entity
