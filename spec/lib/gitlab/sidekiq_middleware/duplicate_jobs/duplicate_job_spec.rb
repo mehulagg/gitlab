@@ -12,10 +12,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::DuplicateJob, :clean_gi
   let(:job) { { 'class' => 'AuthorizedProjectsWorker', 'args' => [1], 'jid' => '123' } }
   let(:queue) { 'authorized_projects' }
 
-  let(:idempotency_key) do
-    hash = Digest::SHA256.hexdigest("#{job['class']}:#{job['args'].join('-')}")
-    "#{Gitlab::Redis::Queues::SIDEKIQ_NAMESPACE}:duplicate:#{queue}:#{hash}"
-  end
+  let(:idempotency_key) { duplicate_job.__send__(:idempotency_key) }
 
   describe '#schedule' do
     it 'calls schedule on the strategy' do
@@ -88,6 +85,21 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::DuplicateJob, :clean_gi
         expect { duplicate_job.delete! }
           .to change { read_idempotency_key_with_ttl(idempotency_key) }
                 .from(['existing-key', -1])
+                .to([nil, -2])
+      end
+    end
+
+    context 'confusing arguments' do
+      let(:job) { { 'class' => 'AuthorizedProjectsWorker', 'args' => [{ an_arg: "as a hash"}], 'jid' => '123' } }
+
+      it 'removes the key when deserialized by sidekiq' do
+        duplicate_job.check!
+
+        deserialized_job = Sidekiq.load_json(Sidekiq.dump_json(job))
+        deserialized_duplicate_job = described_class.new(deserialized_job, queue)
+
+        expect { deserialized_duplicate_job.delete! }
+          .to change { read_idempotency_key_with_ttl(idempotency_key) }
                 .to([nil, -2])
       end
     end

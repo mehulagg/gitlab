@@ -129,7 +129,7 @@ module Gitlab
         end
 
         def idempotency_string
-          "#{worker_class_name}:#{arguments.join('-')}"
+          "#{worker_class_name}:#{Sidekiq.dump_json(arguments)}"
         end
       end
     end
