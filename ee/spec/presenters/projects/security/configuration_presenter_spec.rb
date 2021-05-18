@@ -266,6 +266,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
   def configuration_path(type)
     {
+      dast: project_security_configuration_dast_path(project),
       dast_profiles: project_security_configuration_dast_scans_path(project),
       sast: project_security_configuration_sast_path(project),
       api_fuzzing: project_security_configuration_api_fuzzing_path(project)

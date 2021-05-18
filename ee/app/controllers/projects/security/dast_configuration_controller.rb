@@ -2,16 +2,15 @@
 
 module Projects
   module Security
-    class ApiFuzzingConfigurationController < Projects::ApplicationController
+    class DastConfigurationController < Projects::ApplicationController
       include SecurityAndCompliancePermissions
       include SecurityDashboardsPermissions
 
       alias_method :vulnerable, :project
 
-      feature_category :fuzz_testing
+      feature_category :dynamic_application_security_testing
 
       def show
-        not_found unless Feature.enabled?(:dast_configuration_ui, @project, default_enabled: :yaml)
       end
     end
   end

@@ -90,6 +90,7 @@ module Projects
       def configuration_path(type)
         {
           sast: project_security_configuration_sast_path(project),
+          dast: ::Feature.enabled?(:dast_configuration_ui, project, default_enabled: :yaml) ? project_security_configuration_dast_path(project) : nil,
           dast_profiles: project_security_configuration_dast_scans_path(project),
           api_fuzzing: project_security_configuration_api_fuzzing_path(project)
         }[type]
