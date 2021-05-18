@@ -1,0 +1,5 @@
+---
+title: Reduce memory consumption when an API exception goes to Sentry
+merge_request:
+author:
+type: performance
