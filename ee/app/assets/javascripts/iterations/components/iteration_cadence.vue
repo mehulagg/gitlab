@@ -106,7 +106,6 @@ export default {
 
 <template>
   <li>
-    <<<<<<< HEAD
     <gl-button
       data-testid="accordion-button"
       variant="link"
@@ -131,8 +130,5 @@ export default {
         </li>
       </ol>
     </gl-collapse>
-    =======
-    {{ title }}
-    >>>>>>> 20c562286cc9d3418a9b97842b4bedb14d788614
   </li>
 </template>
