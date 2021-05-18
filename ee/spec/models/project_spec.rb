@@ -1086,25 +1086,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#any_active_runners?' do
-    let!(:shared_runner) { create(:ci_runner, :instance) }
-
-    it { expect(project.any_active_runners?).to be_truthy }
-
-    context 'with used pipeline minutes' do
-      let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
-      let(:project) do
-        create(:project,
-               namespace: namespace,
-               shared_runners_enabled: true)
-      end
-
-      it 'does not have any active runners' do
-        expect(project.any_active_runners?).to be_falsey
-      end
-    end
-  end
-
   describe '#any_online_runners?' do
     let!(:shared_runner) { create(:ci_runner, :instance, :online) }
 
