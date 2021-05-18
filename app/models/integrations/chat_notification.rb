@@ -91,7 +91,6 @@ module Integrations
     end
 
     def execute(data)
-      # binding.pry
       return unless supported_events.include?(data[:object_kind])
 
       return unless notify_label?(data)

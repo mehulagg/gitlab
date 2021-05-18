@@ -53,7 +53,6 @@ RSpec.shared_examples "chat integration" do |integration_name|
       end
 
       it "calls #{integration_name} API" do
-        # binding.pry
         result = subject.execute(sample_data)
 
         expect(result).to be(true)
