@@ -51,7 +51,7 @@
     - if can?(current_user, :push_code, @project)
       - if branch.name == @project.repository.root_ref
         - delete_default_branch_tooltip = s_('Branches|The default branch cannot be deleted')
-        %span.gl-display-inline-block.has-tooltip{title: delete_default_branch_tooltip }
+        %span.gl-display-inline-block.has-tooltip{ title: delete_default_branch_tooltip }
           %button{ class: "gl-button btn btn-default btn-icon disabled", disabled: true, 'aria-label' => delete_default_branch_tooltip, 'data-testid': "remove-branch" }
             = sprite_icon('remove', css_class: 'gl-button-icon gl-icon')
       - elsif protected_branch?(@project, branch)
