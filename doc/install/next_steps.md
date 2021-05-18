@@ -14,16 +14,6 @@ installation.
 - [SMTP](https://docs.gitlab.com/omnibus/settings/smtp.html): Configure SMTP
   for proper email notifications support.
 
-## Security
-
-- [Secure GitLab](../security/README.md#securing-your-gitlab-installation):
-  Recommended practices to secure your GitLab instance.
-
-## Authentication
-
-- [LDAP](../administration/auth/ldap/index.md): Configure LDAP to be used as
-  an authentication mechanism for GitLab.
-
 ## CI/CD
 
 - [Set up runners](https://docs.gitlab.com/runner/): Set up one or more GitLab
@@ -33,6 +23,17 @@ installation.
 - [GitLab Registry](../administration/packages/container_registry.md): With the
   GitLab Container Registry, every project can have its own space to store Docker
   images.
+
+## Security
+
+- [Secure GitLab](../security/README.md#securing-your-gitlab-installation):
+  Recommended practices to secure your GitLab instance.
+
+## Authentication
+
+- [LDAP](../administration/auth/ldap/index.md): Configure LDAP to be used as
+  an authentication mechanism for GitLab.
+- [SAML and OAuth](../integration/omniauth.html): Authenticate via online services like Okta, Google, Azure AD, and more.
 
 ## Backup and upgrade
 
@@ -44,20 +45,20 @@ installation.
   policies governing version naming, as well as release pace for major, minor, patch,
   and security releases.
 
+## License
+
+- [Upload a license](../user/admin_area/license.md) or [start a free trial](https://about.gitlab.com/free-trial/):
+  Activate all GitLab Enterprise Edition functionality with a license.
+- [Pricing](https://about.gitlab.com/pricing/): Pricing for the different tiers.
+
+## Cross-repo Code Search
+
+- [Advanced Search](../integration/elasticsearch.md): Leverage Elasticsearch for
+  faster, more advanced code search across your entire GitLab instance.
+
 ## Scaling and replication
 
 - [Scaling GitLab](../administration/reference_architectures/index.md):
   GitLab supports several different types of clustering.
 - [Geo replication](../administration/geo/index.md):
   Geo is the solution for widely distributed development teams.
-
-## Search
-
-- [Advanced Search](../integration/elasticsearch.md): Leverage Elasticsearch for
-  faster, more advanced code search across your entire GitLab instance.
-
-## License
-
-- [Upload a license](../user/admin_area/license.md) or [start a free trial](https://about.gitlab.com/free-trial/):
-  Activate all GitLab Enterprise Edition functionality with a license.
-- [Pricing](https://about.gitlab.com/pricing/): Pricing for the different tiers.
