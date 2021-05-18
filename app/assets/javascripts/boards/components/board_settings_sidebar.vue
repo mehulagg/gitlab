@@ -7,12 +7,13 @@ import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import eventHub from '~/sidebar/event_hub';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import SetFromTop from './set_from_top.vue';
 
 // NOTE: need to revisit how we handle headerHeight, because we have so many different header and footer options.
 export default {
-  headerHeight: process.env.NODE_ENV === 'development' ? '75px' : '40px',
   listSettingsText: __('List settings'),
   components: {
+    SetFromTop,
     GlButton,
     GlDrawer,
     GlLabel,
@@ -84,43 +85,45 @@ export default {
 </script>
 
 <template>
-  <gl-drawer
-    v-if="showSidebar"
-    class="js-board-settings-sidebar"
-    :open="isSidebarOpen"
-    :header-height="$options.headerHeight"
-    @close="unsetActiveId"
-  >
-    <template #header>{{ $options.listSettingsText }}</template>
-    <template v-if="isSidebarOpen">
-      <div v-if="boardListType === ListType.label">
-        <label class="js-list-label gl-display-block">{{ listTypeTitle }}</label>
-        <gl-label
-          :title="activeListLabel.title"
-          :background-color="activeListLabel.color"
-          :scoped="showScopedLabels(activeListLabel)"
-        />
-      </div>
+  <set-from-top #default="{ heightFromTop }">
+    <gl-drawer
+      v-if="showSidebar"
+      class="js-board-settings-sidebar"
+      :open="isSidebarOpen"
+      :header-height="heightFromTop"
+      @close="unsetActiveId"
+    >
+      <template #header>{{ $options.listSettingsText }}</template>
+      <template v-if="isSidebarOpen">
+        <div v-if="boardListType === ListType.label">
+          <label class="js-list-label gl-display-block">{{ listTypeTitle }}</label>
+          <gl-label
+            :title="activeListLabel.title"
+            :background-color="activeListLabel.color"
+            :scoped="showScopedLabels(activeListLabel)"
+          />
+        </div>
 
-      <board-settings-list-types
-        v-else
-        :active-list="activeList"
-        :board-list-type="boardListType"
-      />
-      <board-settings-sidebar-wip-limit
-        v-if="isWipLimitsOn"
-        :max-issue-count="activeList.maxIssueCount"
-      />
-      <div v-if="canAdminList && !activeList.preset && activeList.id" class="gl-mt-4">
-        <gl-button
-          variant="danger"
-          category="secondary"
-          icon="remove"
-          data-testid="remove-list"
-          @click.stop="deleteBoard"
-          >{{ __('Remove list') }}
-        </gl-button>
-      </div>
-    </template>
-  </gl-drawer>
+        <board-settings-list-types
+          v-else
+          :active-list="activeList"
+          :board-list-type="boardListType"
+        />
+        <board-settings-sidebar-wip-limit
+          v-if="isWipLimitsOn"
+          :max-issue-count="activeList.maxIssueCount"
+        />
+        <div v-if="canAdminList && !activeList.preset && activeList.id" class="gl-mt-4">
+          <gl-button
+            variant="danger"
+            category="secondary"
+            icon="remove"
+            data-testid="remove-list"
+            @click.stop="deleteBoard"
+            >{{ __('Remove list') }}
+          </gl-button>
+        </div>
+      </template>
+    </gl-drawer>
+  </set-from-top>
 </template>

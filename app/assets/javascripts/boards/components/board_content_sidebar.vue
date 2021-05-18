@@ -7,13 +7,12 @@ import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sideb
 import BoardSidebarTimeTracker from '~/boards/components/sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
-import { contentTop } from '~/lib/utils/common_utils';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+import SetFromTop from './set_from_top.vue';
 
 export default {
-  headerHeight: `${contentTop()}px`,
   components: {
     GlDrawer,
     BoardSidebarTitle,
@@ -24,6 +23,7 @@ export default {
     BoardSidebarDueDate,
     SidebarSubscriptionsWidget,
     BoardSidebarMilestoneSelect,
+    SetFromTop,
     BoardSidebarEpicSelect: () =>
       import('ee_component/boards/components/sidebar/board_sidebar_epic_select.vue'),
     BoardSidebarWeightInput: () =>
@@ -73,10 +73,11 @@ export default {
 </script>
 
 <template>
+<set-from-top #default="{ heightFromTop }">
   <gl-drawer
     v-if="showSidebar"
     :open="isSidebarOpen"
-    :header-height="$options.headerHeight"
+    :header-height="heightFromTop"
     @close="handleClose"
   >
     <template #header>{{ __('Issue details') }}</template>
@@ -119,4 +120,5 @@ export default {
       />
     </template>
   </gl-drawer>
+</set-from-top>
 </template>
