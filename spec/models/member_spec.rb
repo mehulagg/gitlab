@@ -502,7 +502,7 @@ RSpec.describe Member do
           expect(member.expires_at).to eq(Date.new(2016, 9, 22))
         end
 
-        described_class.access_levels.each do |sym_key, int_access_level|
+        Gitlab::Access.sym_options.each do |sym_key, int_access_level|
           it "accepts the :#{sym_key} symbol as access level" do
             expect(source.users).not_to include(user)
 

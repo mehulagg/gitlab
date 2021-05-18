@@ -11,19 +11,6 @@ module EE
       end
     end
 
-    class_methods do
-      extend ::Gitlab::Utils::Override
-
-      override :set_member_attributes
-      def set_member_attributes(member, access_level, current_user: nil, expires_at: nil, ldap: false)
-        super
-
-        member.attributes = {
-          ldap: ldap
-        }
-      end
-    end
-
     override :notification_service
     def notification_service
       if ldap

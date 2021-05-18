@@ -32,10 +32,6 @@ class GroupMember < Member
     Gitlab::Access.options_with_owner
   end
 
-  def self.access_levels
-    Gitlab::Access.sym_options_with_owner
-  end
-
   def group
     source
   end

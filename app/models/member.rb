@@ -226,48 +226,15 @@ class Member < ApplicationRecord
     end
 
     def add_user(source, user, access_level, existing_members: nil, current_user: nil, expires_at: nil, ldap: false)
-      # rubocop: disable CodeReuse/ServiceClass
-      # `user` can be either a User object, User ID or an email to be invited
-      member = retrieve_member(source, user, existing_members)
-      access_level = retrieve_access_level(access_level)
-
-      return member unless can_update_member?(current_user, member)
-
-      set_member_attributes(
-        member,
-        access_level,
-        current_user: current_user,
-        expires_at: expires_at,
-        ldap: ldap
-      )
-
-      if member.request?
-        ::Members::ApproveAccessRequestService.new(
-          current_user,
-          access_level: access_level
-        ).execute(
-          member,
-          skip_authorization: ldap,
-          skip_log_audit_event: ldap
-        )
-      else
-        member.save
-      end
-
-      member
-      # rubocop: enable CodeReuse/ServiceClass
-    end
-
-    # Populates the attributes of a member.
-    #
-    # This logic resides in a separate method so that EE can extend this logic,
-    # without having to patch the `add_user` method directly.
-    def set_member_attributes(member, access_level, current_user: nil, expires_at: nil, ldap: false)
-      member.attributes = {
-        created_by: member.created_by || current_user,
-        access_level: access_level,
-        expires_at: expires_at
-      }
+      klass = "Members::#{source.class.name}MemberCreator".constantize
+      creator = klass.new(source,
+                          user,
+                          access_level,
+                          existing_members: existing_members,
+                          current_user: current_user,
+                          expires_at: expires_at,
+                          ldap: ldap)
+      creator.execute
     end
 
     def add_users(source, users, access_level, current_user: nil, expires_at: nil)
@@ -287,10 +254,6 @@ class Member < ApplicationRecord
           )
         end
       end
-    end
-
-    def access_levels
-      Gitlab::Access.sym_options
     end
 
     def valid_email?(email)
@@ -325,39 +288,6 @@ class Member < ApplicationRecord
       end
 
       [emails, users, existing_members]
-    end
-
-    # This method is used to find users that have been entered into the "Add members" field.
-    # These can be the User objects directly, their IDs, their emails, or new emails to be invited.
-    def retrieve_user(user)
-      return user if user.is_a?(User)
-
-      return User.find_by(id: user) if user.is_a?(Integer)
-
-      User.find_by(email: user) || user
-    end
-
-    def retrieve_member(source, user, existing_members)
-      user = retrieve_user(user)
-
-      if user.is_a?(User)
-        if existing_members
-          existing_members[user.id] || source.members.build(user_id: user.id)
-        else
-          source.members_and_requesters.find_or_initialize_by(user_id: user.id)
-        end
-      else
-        source.members.build(invite_email: user)
-      end
-    end
-
-    def retrieve_access_level(access_level)
-      access_levels.fetch(access_level) { access_level.to_i }
-    end
-
-    def can_update_member?(current_user, member)
-      # There is no current user for bulk actions, in which case anything is allowed
-      !current_user || current_user.can?(:"update_#{member.type.underscore}", member)
     end
   end
 

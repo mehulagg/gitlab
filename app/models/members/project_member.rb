@@ -80,12 +80,6 @@ class ProjectMember < Member
     def access_level_roles
       Gitlab::Access.options
     end
-
-    private
-
-    def can_update_member?(current_user, member)
-      super || (member.owner? && member.new_record?)
-    end
   end
 
   def project
