@@ -1,36 +1,98 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
-<div>
-  Issue details
-  <boardsidebartitle-stub />
-   
-  <sidebarassigneeswidget-stub
-    fullpath="gitlab-org/gitlab-test"
-    iid="27"
-    initialassignees="[object Object],[object Object]"
-    issuabletype="issue"
-  />
-   
-  <sidebardropdownwidget-stub
-    attrworkspacepath="gitlab-org"
-    data-testid="sidebar-epic"
-    iid="27"
-    issuableattribute="epic"
-    issuabletype="issue"
-    workspacepath="gitlab-org/gitlab-test"
-  />
-   
-  <div>
-    <sidebardropdownwidget-stub
-      attrworkspacepath="gitlab-org/gitlab-test"
-      data-testid="sidebar-milestones"
+<mounting-portal-stub
+  append="true"
+  mountto="#js-right-sidebar-portal"
+  name="right-sidebar"
+  order="0"
+  slotprops="[object Object]"
+  tag="DIV"
+  targetslotprops="[object Object]"
+  targettag="div"
+  to="9246829"
+>
+  <div
+    class="gl-absolute"
+  >
+    Issue details
+    <board-sidebar-title-stub />
+
+    <sidebar-assignees-widget-stub
+      fullpath="gitlab-org/gitlab-test"
+      iid="27"
+      initialassignees="[object Object],[object Object]"
+      issuabletype="issue"
+    />
+
+    <board-editable-item-stub
+      class="epic"
+      data-testid="sidebar-epic"
+      handleoffclick="true"
+      title="Epic"
+    >
+
+      <epics-select-stub
+        canedit="true"
+        class="gl-w-full"
+        epicissueid="0"
+        groupid="1"
+        initialepic="[object Object]"
+        issueid="0"
+        variant="standalone"
+      />
+    </board-editable-item-stub>
+
+    <div>
+      <board-sidebar-milestone-select-stub />
+
+      <div
+        class="gl-mt-5"
+        data-qa-selector="iteration_container"
+      >
+        <sidebar-editable-item-stub
+          canedit="true"
+          data-testid="iteration-edit-link"
+          title="Iteration"
+          tracking="[object Object]"
+        />
+      </div>
+    </div>
+
+    <board-sidebar-time-tracker-stub
+      class="swimlanes-sidebar-time-tracker"
+    />
+
+    <board-sidebar-due-date-stub />
+
+    <board-sidebar-labels-select-stub
+      class="labels"
+    />
+
+    <board-editable-item-stub
+      class="weight"
+      data-testid="sidebar-weight"
+      handleoffclick="true"
+      title="Weight"
+    >
+
+      <gl-form-stub>
+        <gl-form-input-stub
+          min="0"
+          placeholder="Enter a number"
+          type="number"
+        />
+      </gl-form-stub>
+    </board-editable-item-stub>
+
+    <sidebar-confidentiality-widget-stub
+      fullpath="gitlab-org/gitlab-test"
       iid="27"
       issuableattribute="milestone"
       issuabletype="issue"
       workspacepath="gitlab-org/gitlab-test"
     />
-     
+
     <sidebardropdownwidget-stub
       attrworkspacepath="gitlab-org"
       class="gl-mt-5"
@@ -42,38 +104,5 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
       workspacepath="gitlab-org/gitlab-test"
     />
   </div>
-   
-  <boardsidebartimetracker-stub
-    class="swimlanes-sidebar-time-tracker"
-  />
-   
-  <sidebardatewidget-stub
-    data-testid="sidebar-due-date"
-    datetype="dueDate"
-    fullpath="gitlab-org/gitlab-test"
-    iid="27"
-    issuabletype="issue"
-  />
-   
-  <boardsidebarlabelsselect-stub
-    class="labels"
-  />
-   
-  <boardsidebarweightinput-stub
-    class="weight"
-  />
-   
-  <sidebarconfidentialitywidget-stub
-    fullpath="gitlab-org/gitlab-test"
-    iid="27"
-    issuabletype="issue"
-  />
-   
-  <sidebarsubscriptionswidget-stub
-    data-testid="sidebar-notifications"
-    fullpath="gitlab-org/gitlab-test"
-    iid="27"
-    issuabletype="issue"
-  />
-</div>
+</mounting-portal-stub>
 `;

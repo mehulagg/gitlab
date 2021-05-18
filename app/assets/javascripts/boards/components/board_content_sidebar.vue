@@ -1,12 +1,12 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
+import { MountingPortal } from 'portal-vue';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import SidebarDropdownWidget from 'ee_else_ce/sidebar/components/sidebar_dropdown_widget.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarTimeTracker from '~/boards/components/sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
-import { contentTop } from '~/lib/utils/common_utils';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
@@ -14,7 +14,6 @@ import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sideb
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
-  headerHeight: `${contentTop()}px`,
   components: {
     GlDrawer,
     BoardSidebarTitle,
@@ -25,6 +24,7 @@ export default {
     BoardSidebarLabelsSelect,
     SidebarSubscriptionsWidget,
     SidebarDropdownWidget,
+    MountingPortal,
     BoardSidebarWeightInput: () =>
       import('ee_component/boards/components/sidebar/board_sidebar_weight_input.vue'),
     IterationSidebarDropdownWidget: () =>
@@ -73,33 +73,18 @@ export default {
 </script>
 
 <template>
-  <gl-drawer
-    v-if="showSidebar"
-    :open="isSidebarOpen"
-    :header-height="$options.headerHeight"
-    @close="handleClose"
-  >
-    <template #header>{{ __('Issue details') }}</template>
-    <template #default>
-      <board-sidebar-title />
-      <sidebar-assignees-widget
-        :iid="activeBoardItem.iid"
-        :full-path="fullPath"
-        :initial-assignees="activeBoardItem.assignees"
-        :allow-multiple-assignees="multipleAssigneesFeatureAvailable"
-        @assignees-updated="setAssignees"
-      />
-      <sidebar-dropdown-widget
-        v-if="epicFeatureAvailable"
-        :iid="activeBoardItem.iid"
-        issuable-attribute="epic"
-        :workspace-path="projectPathForActiveIssue"
-        :attr-workspace-path="groupPathForActiveIssue"
-        :issuable-type="issuableType"
-        data-testid="sidebar-epic"
-      />
-      <div>
-        <sidebar-dropdown-widget
+  <mounting-portal mount-to="#js-right-sidebar-portal" name="right-sidebar" append>
+    <gl-drawer
+      v-if="showSidebar"
+      v-bind="$attrs"
+      class="gl-absolute"
+      :open="isSidebarOpen"
+      @close="handleClose"
+    >
+      <template #header>{{ __('Issue details') }}</template>
+      <template #default>
+        <board-sidebar-title />
+        <sidebar-assignees-widget
           :iid="activeBoardItem.iid"
           issuable-attribute="milestone"
           :workspace-path="projectPathForActiveIssue"
@@ -132,7 +117,6 @@ export default {
             data-qa-selector="iteration_container"
           />
         </template>
-      </div>
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <sidebar-date-widget
         :iid="activeBoardItem.iid"
@@ -156,4 +140,5 @@ export default {
       />
     </template>
   </gl-drawer>
+  </mounting-portal>
 </template>

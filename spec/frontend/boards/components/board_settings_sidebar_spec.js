@@ -3,6 +3,7 @@ import { GlDrawer, GlLabel } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { MountingPortal } from 'portal-vue';
 import Vuex from 'vuex';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardSettingsSidebar from '~/boards/components/board_settings_sidebar.vue';
@@ -56,6 +57,12 @@ describe('BoardSettingsSidebar', () => {
       createComponent();
 
       expect(findDrawer().exists()).toBe(true);
+    });
+
+    it('finds a MountingPortal component', () => {
+      createComponent();
+
+      expect(wrapper.find(MountingPortal).exists()).toBe(true);
     });
 
     describe('on close', () => {
