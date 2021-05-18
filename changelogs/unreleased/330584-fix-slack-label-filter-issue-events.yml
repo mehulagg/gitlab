@@ -1,0 +1,5 @@
+---
+title: Fix Slack integration label filter for issue events
+merge_request: 62035
+author:
+type: fixed
