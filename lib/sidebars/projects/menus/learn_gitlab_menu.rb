@@ -52,7 +52,6 @@ module Sidebars
 
         override :render?
         def render?
-          return true
           context.learn_gitlab_experiment_enabled
         end
       end
