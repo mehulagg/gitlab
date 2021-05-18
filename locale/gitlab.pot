@@ -11573,6 +11573,9 @@ msgstr ""
 msgid "Discover GitLab Geo"
 msgstr ""
 
+msgid "Discover Security & Compliance"
+msgstr ""
+
 msgid "Discover projects, groups and snippets. Share your projects with others"
 msgstr ""
 
