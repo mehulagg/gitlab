@@ -509,7 +509,7 @@ export default {
       input.projectPath = fullPath;
     }
 
-    const placeholderIssue = formatIssue({ ...issueInput, id: placeholderId });
+    const placeholderIssue = formatIssue({ ...issueInput, id: placeholderId, isLoading: true });
     dispatch('addListItem', { list, item: placeholderIssue, position: 0 });
 
     gqlClient

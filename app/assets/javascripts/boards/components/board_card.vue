@@ -63,9 +63,10 @@ export default {
     data-qa-selector="board_card"
     :class="{
       'multi-select': multiSelectVisible,
-      'user-can-drag': !disabled && item.id,
+      'user-can-drag': (!disabled && item.id) || item.isLoading,
       'is-disabled': disabled || !item.id,
       'is-active': isActive,
+      'gl-cursor-not-allowed gl-bg-gray-10': item.isLoading,
     }"
     :index="index"
     :data-item-id="item.id"
