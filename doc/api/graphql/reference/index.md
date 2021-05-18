@@ -14559,7 +14559,7 @@ Possible states of a user.
 | Value | Description |
 | ----- | ----------- |
 | <a id="visibilityscopesenuminternal"></a>`internal` | The snippet is visible for any logged in user except external users. |
-| <a id="visibilityscopesenumprivate"></a>`private` | The snippet is visible only the snippet creator. |
+| <a id="visibilityscopesenumprivate"></a>`private` | The snippet is visible only to the snippet creator. |
 | <a id="visibilityscopesenumpublic"></a>`public` | The snippet can be accessed without any authentication. |
 
 ### `VulnerabilityDismissalReason`
