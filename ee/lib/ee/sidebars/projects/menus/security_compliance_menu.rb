@@ -11,6 +11,7 @@ module EE
           def configure_menu_items
             return false unless can?(context.current_user, :access_security_and_compliance, context.project)
 
+            add_item(discover_project_security_menu_item)
             add_item(security_dashboard_menu_item)
             add_item(vulnerability_report_menu_item)
             add_item(on_demand_scans_menu_item)
@@ -26,17 +27,12 @@ module EE
 
           override :link
           def link
-            return project_security_discover_path(context.project) unless has_items?
+            return project_security_discover_path(context.project) if discover_project_security_menu_item.render?
             return security_dashboard_menu_item.link if security_dashboard_menu_item.render?
             return audit_events_menu_item.link if audit_events_menu_item.render?
             return dependencies_menu_item.link if dependencies_menu_item.render?
 
-            renderable_items.first.link
-          end
-
-          override :render?
-          def render?
-            super || context.show_discover_project_security
+            renderable_items.first&.link
           end
 
           private
@@ -58,6 +54,21 @@ module EE
           def render_configuration_menu_item?
             super ||
               (context.project.licensed_feature_available?(:security_dashboard) && can?(context.current_user, :read_project_security_dashboard, context.project))
+          end
+
+          def discover_project_security_menu_item
+            strong_memoize(:discover_project_security_menu_item) do
+              unless context.show_discover_project_security
+                next ::Sidebars::NilMenuItem.new(item_id: :discover_project_security)
+              end
+
+              ::Sidebars::MenuItem.new(
+                title: _('Discover Security & Compliance'),
+                link: project_security_discover_path(context.project),
+                active_routes: { path: 'projects/security/discover#show' },
+                item_id: :discover_project_security
+              )
+            end
           end
 
           def security_dashboard_menu_item
