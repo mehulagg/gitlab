@@ -22,9 +22,9 @@ module Gitlab
 
         lfs_objects_projects_without_lfs_object.delete_all
 
-        Project.where(id: project_ids).pluck(:id).each do |project_id|
-          ProjectCacheWorker.perform_async(project_id, [], [:lfs_objects_size])
-        end
+        # Project.where(id: project_ids).pluck(:id).each do |project_id|
+        #   ProjectCacheWorker.perform_async(project_id, [], [:lfs_objects_size])
+        # end
       end
 
       def cleanup_lfs_objects_projects_without_project(start_id, end_id)

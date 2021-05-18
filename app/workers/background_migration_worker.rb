@@ -90,7 +90,7 @@ class BackgroundMigrationWorker # rubocop:disable Scalability/IdempotentWorker
   end
 
   def always_perform?
-    Rails.env.test?
+    true
   end
 
   # Returns true if the database is healthy enough to allow the migration to be
