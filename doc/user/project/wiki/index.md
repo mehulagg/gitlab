@@ -260,7 +260,7 @@ To hide the link to an external wiki:
 
 1. In your project, go to **Settings > Integrations**.
 1. Select **External wiki**.
-1. Unselect **Enable integration**.
+1. Deselect **Enable integration**.
 1. Select **Save changes**.
 
 ## Disable the project's wiki
