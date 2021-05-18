@@ -70,6 +70,18 @@ class NamespaceShard < ApplicationRecord
     nil
   end
 
+  def self.find_all(&block)
+    results = []
+
+    all_shards.each do |shard_name|
+      NamespaceShard.connected_to(role: :reading, shard: shard_name.to_sym) do
+        results += block.call
+      end
+    end
+
+    results
+  end
+
   def self.read_for_id(id, &block)
     shard_name = ::Gitlab::Sharding::Current.id_to_shard_name(id)
 
