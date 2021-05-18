@@ -27,8 +27,8 @@ module Sidebars
           }
         end
 
-        override :nav_link_html_options
-        def nav_link_html_options
+        override :extra_nav_link_html_options
+        def extra_nav_link_html_options
           { class: 'home' }
         end
 
