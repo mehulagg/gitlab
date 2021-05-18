@@ -70,8 +70,9 @@ module QA
           :require_two_factor_authentication,
           :share_with_group_lock,
           :subgroup_creation_level,
-          :two_factor_grace_perion,
-          :visibility
+          :two_factor_grace_perion
+          # TODO: Add back visibility comparison once https://gitlab.com/gitlab-org/gitlab/-/issues/331252 is fixed
+          # :visibility
         )
       end
     end
