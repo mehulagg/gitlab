@@ -1430,8 +1430,8 @@ class User < ApplicationRecord
       namespace.name = name if name_changed?
     else
       NamespaceShard.random_shard do
-        namespace = build_namespace(path: username, name: name)
-        namespace.build_namespace_settings
+        @namespace = build_namespace(path: username, name: name)
+        @namespace.build_namespace_settings
       end
     end
   end
