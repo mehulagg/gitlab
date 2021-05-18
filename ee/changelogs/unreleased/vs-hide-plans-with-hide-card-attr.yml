@@ -1,0 +1,5 @@
+---
+title: Hide billing plans with truthy hide_card attribute
+merge_request:
+author:
+type: fixed
