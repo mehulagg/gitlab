@@ -78,13 +78,11 @@ export default {
     </div>
     <div class="settings-content">
       <form>
-        <gl-form-checkbox
-          id="grafana-integration-enabled"
-          v-model="integrationEnabled"
-          class="mb-4"
-        >
-          {{ s__('GrafanaIntegration|Active') }}
-        </gl-form-checkbox>
+        <gl-form-group :label="__('Enable authentication')" label-for="grafana-integration-enabled">
+          <gl-form-checkbox id="grafana-integration-enabled" v-model="integrationEnabled">
+            {{ s__('GrafanaIntegration|Active') }}
+          </gl-form-checkbox>
+        </gl-form-group>
         <gl-form-group
           :label="s__('GrafanaIntegration|Grafana URL')"
           label-for="grafana-url"
@@ -95,18 +93,18 @@ export default {
         <gl-form-group :label="s__('GrafanaIntegration|API token')" label-for="grafana-token">
           <gl-form-input id="grafana-token" v-model="localGrafanaToken" />
           <p class="form-text text-muted">
-            {{ s__('GrafanaIntegration|Enter the Grafana API token.') }}
+            {{ __('Enter the') }}
             <a
               href="https://grafana.com/docs/http_api/auth/#create-api-token"
               target="_blank"
               rel="noopener noreferrer"
             >
-              {{ __('More information.') }}
+              {{ s__('GrafanaIntegration|Grafana API token.') }}
               <gl-icon name="external-link" class="vertical-align-middle" />
             </a>
           </p>
         </gl-form-group>
-        <gl-button variant="success" category="primary" @click="updateGrafanaIntegration">
+        <gl-button variant="confirm" category="primary" @click="updateGrafanaIntegration">
           {{ __('Save changes') }}
         </gl-button>
       </form>

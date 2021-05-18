@@ -43,14 +43,18 @@ exports[`grafana integration component default state to match the default snapsh
     class="settings-content"
   >
     <form>
-      <gl-form-checkbox-stub
-        class="mb-4"
-        id="grafana-integration-enabled"
+      <gl-form-group-stub
+        label="Enable authentication"
+        label-for="grafana-integration-enabled"
       >
+        <gl-form-checkbox-stub
+          id="grafana-integration-enabled"
+        >
+          
+          Active
         
-        Active
-      
-      </gl-form-checkbox-stub>
+        </gl-form-checkbox-stub>
+      </gl-form-group-stub>
        
       <gl-form-group-stub
         description="Enter the base URL of the Grafana instance."
@@ -77,7 +81,7 @@ exports[`grafana integration component default state to match the default snapsh
           class="form-text text-muted"
         >
           
-          Enter the Grafana API token.
+          Enter the
           
           <a
             href="https://grafana.com/docs/http_api/auth/#create-api-token"
@@ -85,7 +89,7 @@ exports[`grafana integration component default state to match the default snapsh
             target="_blank"
           >
             
-            More information.
+            Grafana API token.
             
             <gl-icon-stub
               class="vertical-align-middle"
@@ -101,7 +105,7 @@ exports[`grafana integration component default state to match the default snapsh
         category="primary"
         icon=""
         size="medium"
-        variant="success"
+        variant="confirm"
       >
         
         Save changes

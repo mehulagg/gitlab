@@ -8421,6 +8421,9 @@ msgstr ""
 msgid "Configuration"
 msgstr ""
 
+msgid "Configuration help"
+msgstr ""
+
 msgid "Configure GitLab runners to start using the Web Terminal. %{helpStart}Learn more.%{helpEnd}"
 msgstr ""
 
@@ -12125,6 +12128,9 @@ msgid "EmailsOnPushService|tanuki@example.com gitlab@example.com"
 msgstr ""
 
 msgid "Embed"
+msgstr ""
+
+msgid "Embed an image of your existing Jaeger server in GitLab. %{link_start_tag}Learn more%{link_end_tag}."
 msgstr ""
 
 msgid "Empty file"
@@ -18524,9 +18530,6 @@ msgstr ""
 msgid "Jaeger URL"
 msgstr ""
 
-msgid "Jaeger tracing"
-msgstr ""
-
 msgid "Jan"
 msgstr ""
 
@@ -19301,9 +19304,6 @@ msgid "Learn how to enable synchronization"
 msgstr ""
 
 msgid "Learn more"
-msgstr ""
-
-msgid "Learn more about %{link_start_tag}Jaeger configuration%{link_end_tag}."
 msgstr ""
 
 msgid "Learn more about %{username}"
@@ -31049,9 +31049,6 @@ msgid "StatusPage|Status page"
 msgstr ""
 
 msgid "StatusPage|Status page URL"
-msgstr ""
-
-msgid "StatusPage|Status page frontend documentation"
 msgstr ""
 
 msgid "StatusPage|To publish incidents to an external status page, GitLab stores a JSON file in your Amazon S3 account at a location that your external status page service can access. Make sure to also set up %{docsLink}"

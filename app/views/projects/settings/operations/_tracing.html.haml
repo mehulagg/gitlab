@@ -4,7 +4,7 @@
 %section.settings.border-0.no-animate
   .settings-header{ :class => "border-top" }
     %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only
-      = _("Jaeger tracing")
+      = _("Tracing")
     %button.btn.btn-default.gl-button.js-settings-toggle{ type: 'button' }
       = _('Expand')
     %p
@@ -30,5 +30,5 @@
             - jaeger_help_url = "https://www.jaegertracing.io/docs/getting-started/"
             - link_start_tag = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: jaeger_help_url }
             - link_end_tag = "#{sprite_icon('external-link', css_class: 'ml-1 vertical-align-middle')}</a>".html_safe
-            = _("Learn more about %{link_start_tag}Jaeger configuration%{link_end_tag}.").html_safe % { link_start_tag: link_start_tag, link_end_tag: link_end_tag }
+            = _("Embed an image of your existing Jaeger server in GitLab. %{link_start_tag}Learn more%{link_end_tag}.").html_safe % { link_start_tag: link_start_tag, link_end_tag: link_end_tag }
       = f.submit _('Save changes'), class: 'gl-button btn btn-confirm'
