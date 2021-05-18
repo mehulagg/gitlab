@@ -38,10 +38,6 @@ describe('Scanner Filter component', () => {
 
   const createWrapper = () => {
     filter = cloneDeep(scannerFilter);
-    filter.options = filter.options.map((option) => ({
-      ...option,
-      id: `GitLab.${option.id}`,
-    }));
 
     wrapper = shallowMount(ScannerFilter, {
       localVue,
@@ -50,10 +46,6 @@ describe('Scanner Filter component', () => {
       provide: { scanners },
     });
   };
-
-  beforeEach(() => {
-    gon.features = { customSecurityScanners: true };
-  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -113,7 +105,7 @@ describe('Scanner Filter component', () => {
 
   it('emits filter-changed event with expected data for selected options', async () => {
     const ids = ['GitLab.SAST', 'Custom.SAST'];
-    router.replace({ query: { [filter.id]: ids } });
+    router.replace({ query: { [scannerFilter.id]: ids } });
     const selectedScanners = scanners.filter((x) => ids.includes(`${x.vendor}.${x.report_type}`));
     createWrapper();
     await wrapper.vm.$nextTick();
