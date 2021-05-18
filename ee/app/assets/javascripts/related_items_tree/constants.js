@@ -59,4 +59,4 @@ export const issueHealthStatusCSSMapping = {
   needsAttention: 'status-needs-attention',
 };
 
-export const trackingNewIssue = 'g_product_planning_epic_new_issue_added_from_epic';
+export const trackingAddedIssue = 'g_project_management_epic_issue_added_from_epic';
