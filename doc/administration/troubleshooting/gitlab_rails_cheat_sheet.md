@@ -341,6 +341,16 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
 end
 ```
 
+### Find projects using an SQL query
+
+You can find and store an array of projects based on an SQL query with `Project.find_by_sql`:
+
+```ruby
+# Finds projects that end with '%ject'
+projects = Project.find_by_sql("SELECT * FROM projects WHERE name LIKE '%ject'")
+=> [#<Project id:12 root/my-first-project>>, #<Project id:13 root/my-second-project>>]
+```
+
 ## Wikis
 
 ### Recreate
@@ -692,6 +702,16 @@ emails = [email1, email2]
 emails.each do |e|
   delete_bad_scim(e,'GROUPPATH')
 end
+```
+
+### Find groups using an SQL query
+
+You can find and store an array of groups based on an SQL query with `Group.find_by_sql`:
+
+```ruby
+# Finds groups and subgroups that end with '%oup'
+Group.find_by_sql("SELECT * FROM namespaces WHERE name LIKE '%oup'")
+=> [#<Group id:3 @test-group>, #<Group id:4 @template-group/template-subgroup>]
 ```
 
 ## Routes
