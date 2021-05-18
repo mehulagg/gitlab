@@ -134,12 +134,16 @@ module Projects
     end
 
     def refresh_permissions
-      # This ensures we only schedule 1 job for every user that has access to
-      # the namespaces.
-      user_ids = @old_namespace.user_ids_for_project_authorizations |
-        @new_namespace.user_ids_for_project_authorizations
+      if Feature.enabled?(:use_specialized_worker_for_project_auth_recalculation)
+        AuthorizedProjectUpdate::ProjectRecalculateWorker.perform_async(project.id)
+      else
+        # This ensures we only schedule 1 job for every user that has access to
+        # the namespaces.
+        user_ids = @old_namespace.user_ids_for_project_authorizations |
+          @new_namespace.user_ids_for_project_authorizations
 
-      UserProjectAccessChangedService.new(user_ids).execute
+        UserProjectAccessChangedService.new(user_ids).execute
+      end
     end
 
     def rollback_side_effects
