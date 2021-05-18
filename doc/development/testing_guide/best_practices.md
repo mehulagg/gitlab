@@ -851,24 +851,35 @@ using expectations, or dependency injection along with stubs, to avoid the need
 for modifications. If you have no other choice, an `around` block like the global
 variables example can be used, but avoid this if at all possible.
 
-#### Elasticsearch
+#### Elasticsearch specs
 
-Specs that require Elasticsearch must be marked with the `:elastic` trait. This will 
-create and delete indices between examples to ensure a clean index so there is no possibility of test data pollution. 
-Most tests for Elasticsearch logic relate to creating data in Postgres, waiting for it to be indexed in Elasticsearch, 
-searching for that data, and asserting that the test gives the expected result. There are some exceptions where tests are 
-checking for more structural changes to the index which aren't individual records. 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61171) in GitLab 14.0.
+
+Specs that require Elasticsearch must be marked with the `:elastic` trait. This
+creates and deletes indices between examples to ensure a clean index, so that there is no room
+for polluting the tests with nonessential data.
+Most tests for Elasticsearch logic relate to:
+
+- Creating data in Postgres, waiting for it to be indexed in Elasticsearch.
+- Searching for that data.
+- Ensuring that the test gives the expected result.
+
+There are some exceptions, such as checking for structural changes rather than individual records in an index. 
 
 The `:elastic_with_delete_by_query` trait was added to reduce run time for pipelines by creating and deleting indices
 at the start and end of each context only. The [Elasticsearch DeleteByQuery API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html) 
 is used to delete data in all indices in between examples to ensure a clean index.
 
-NOTE:
-Elasticsearch indexing uses [`Gitlab::Redis::SharedState`](../../../ee/development/redis.md#gitlabrediscachesharedstatequeues) therefore it is recommended to use
+Note that Elasticsearch indexing uses [`Gitlab::Redis::SharedState`](../../../ee/development/redis.md#gitlabrediscachesharedstatequeues).
+Therefore, it is recommended to use
 `:clean_gitlab_redis_shared_state` in conjunction with the Elasticsearch traits.
 
-Specs using Elasticsearch require data to be created in Postgres and then index that data into Elasticsearch.
-The Application Settings for Elasticsearch are disabled by default and must be enabled for search and indexing to work in specs.
+Specs using Elasticsearch require:
+
+- Create data in Postgres and then index it into Elasticsearch.
+- Enable Application Settings for Elasticsearch (which is disabled by default).
+
+To do so, use:
 
 ```ruby
 before do
@@ -876,10 +887,10 @@ before do
 end
 ```
 
-Additionally the `ensure_elasticsearch_index!` method is provided to overcome the asynchronous nature of Elasticsearch. 
+Additionally, you can use the `ensure_elasticsearch_index!` method to overcome the asynchronous nature of Elasticsearch.
 It uses the [Elasticsearch Refresh API](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc)
 to make sure all operations performed on an index since the last refresh are available for search. This method is typically
-called after loading data into Postgres to make sure the data is indexed and searchable.
+called after loading data into Postgres to ensure the data is indexed and searchable.
 
 #### Test Snowplow events
 
