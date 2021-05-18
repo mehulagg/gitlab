@@ -10,7 +10,7 @@ This page is specific to the review of libraries (i.e. Ruby gems, Node.js module
 [code review guide](code_review.md) for broader advice and best
 practices for code review in general.
 
-Whenever new libraries are introduced or existing libraries are updated, the guidelines for reviewing libraries described on this page have to be followed. The goal of this process is to ensure that all libraries that our code relies on meet our standards for performance, security, and complicance.
+Whenever new libraries are introduced or existing libraries are updated, the guidelines for reviewing libraries described on this page have to be followed. The goal of this process is to ensure that all libraries that our code relies on meet our standards for performance, security, and compliance.
 
 ## General Process
 
@@ -19,7 +19,7 @@ The library review guidelines have to be followed when an MR changes:
 - a library manifest (e.g. `Gemfile`, `package.json`, `go.mod`)
 - a lockfile (e.g. `Gemfile.lock`, `yarn.lock`, `go.sum`)
 
-The process differs based on if an MR introduces a new library or if an MR updates the version an existing library. When introducing a new library, please follow the procedure documented in:
+The process differs based on if an MR introduces a new library or if an MR updates the version of an existing library. When introducing a new library, please follow the procedure documented in:
 
 - [Introducing a new library](#adding-a-new-library)
 - [Vetting a library](#vetting-a-library)
@@ -28,7 +28,7 @@ When updating the version of an existing library, skip to [vetting a library](#v
 
 ## Roles and Responsibilities
 
-A merge request's **author** responsbilities are:
+A merge request's **author** responsibilities are:
 - Before adding a new library, evaluate it as described in [introducing a new library](#adding-a-new-library). Document the result of the evaluation for the MR reviewer.
 - Add labels to the MR. If your MR adds, updates, and/or removes libraries add the label(s) ~"dependeny addition", ~"dependeny update", ~"dependeny removal", respectively.
 - Before assigning to a reviewer, vet the dependency as described in [vetting a library](#vetting-a-library). If the library passes the vetting, add the label ~"dependency-review:awaiting" and continue to assign the MR to the reviewer.
@@ -40,13 +40,13 @@ A merge request's **reviewers** responsbilities are:
 
 ## Adding a new library
 
-Adding a new library is an important decision. Implications and alternatives should be carefully considered. Keep in mind that adding a new library creates additional maintaince effort for keeping the library up-to-date and it will need to be replaced when it reaches the end of life. Also be aware of the security implications: Having another library in our dependency tree is another vector of attack (a library might have unknown vulnerabilites, could get compromissed, etc.). Before adding a new library consider alternatives such as implementing the functionality yourself. For example, if you only use a small utility function of a library with a large code base, it might be better to implement the functionality yourself instead of adding a large library.
+Adding a new library is an important decision. Implications and alternatives should be carefully considered. Keep in mind that adding a new library creates additional maintenance effort for keeping the library up-to-date and it will need to be replaced when it reaches its end of life. Also be aware of the security implications: Having another library in our dependency tree is another vector of attack (a library might have unknown vulnerabilities, could get compromised, etc.). Before adding a new library consider alternatives such as implementing the functionality yourself. For example, if you only use a small utility function of a library with a large code base, it might be better to implement the functionality yourself instead of adding a large library.
 
 If adding a new library cannot be avoided, create a short-list of libraries that implement the desired functionality and evaluate them for:
 
 - Activity volume: Is the project being actively maintained? Are there new releases and issues being closed?
 - Maintainer: Are the maintainers responsive on issues and MRs/PRs? Is it maintained by a single person or a group or an organization?
-- No unpatched vulnerabilities: Does the library have unpatched and publicly-known vulnerabilities or relies on dependencies with unpatched vulnerabilities?
+- No unpatched vulnerabilities: Does the library have unpatched and publicly-known vulnerabilities or rely on dependencies with unpatched vulnerabilities?
 - Project maturity: Does the project have sufficient documentation? Does it have processes established, e.g. for contributing and reporting bugs?
 
 If your merge request includes adding a new JavaScript library (*1*), you also need to do the following:
@@ -66,8 +66,8 @@ Code contained in libraries needs to be vetted for security issues. This process
 
 1. Inspect the findings of security scanners. The scanners are executed in CI jobs and their findings are available as job artifacts and/or in the MR Security Widget. The findings of the following scanners have to be inspected:
   - *[GitLab Dependency Scanning](https://docs.gitlab.com/ee/user/application_security/dependency_scanning/).* If Dependency Scanning reports a vulnerability for the added library, or any of its sub-libraries, check if a newer version of the library exists that patches the vulnerabilities. If no such version exists, the library should not be added. (ToDo: do we need an exception process for adding libs with known vulns?)
-  - *[Package Hunter](https://gitlab.com/gitlab-com/gl-security/security-research/package-hunter)*. Package Hunter findings indicate that a library might contain malicious code or other undesired behavior (e.g. a binary is downloaded and executed form a 3rd party server without checking it's integrity first). Any Package Hunter findings should be triaged before the MR is merged. Please involve the Security Engineering and Research team if you are unsure how to proceed with the triage.
-  - *[untamper-my-lockfile](https://gitlab.com/gitlab-org/frontend/untamper-my-lockfile/)*. If this job is failing, do not merge the MR. Instead, ping the Security Engineering and Research team on the MR.
+  - *[Package Hunter](https://gitlab.com/gitlab-com/gl-security/security-research/package-hunter)*. Package Hunter findings indicate that a library might contain malicious code or other undesired behavior (e.g. a binary is downloaded and executed from a 3rd party server without checking it's integrity first). Any Package Hunter findings should be triaged before the MR is merged. Please involve the Security Engineering and Research team if you are unsure how to proceed with the triage.
+  - *[untamper-my-lockfile](https://gitlab.com/gitlab-org/frontend/untamper-my-lockfile/)*. This tool attempts to identify situations where the `yarn.lock` file was tampered with. If this job is failing, do not merge the MR. Instead, ping the Security Engineering and Research team on the MR.
 2. Inspect Code: All library code should be reviewed for malicious or otherwise problematic code, just as you would do for any other MR with code changes. When inspecting the code, take care to inspect the actual code that is distributed (i.e. the code contained in a Gem or Node.js package). **DO NOT** review the code in the code repository associated with a library. There is no guarantee that the code in the repository matches the distributed code. There are several services which allow to inspect the distributed library code. For example, for Gems there is diffend.io ([example](https://my.diffend.io/gems/aliyun-sdk/0.7.1/0.8.0)) and for Node.js there is app.renovatebot.com ([example](https://app.renovatebot.com/package-diff?name=copy-webpack-plugin&from=5.0.5&to=5.1.2)).
 If the vetted library is vendored (i.e. its code is checked into the repository), the usual tools for reviewing code hosted in a repository should be used.
 
