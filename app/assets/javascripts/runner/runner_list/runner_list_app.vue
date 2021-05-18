@@ -1,5 +1,6 @@
 <script>
 import * as Sentry from '@sentry/browser';
+import RunnerFilteredSearchBar from '../components/runner_filtered_search_bar.vue';
 import RunnerList from '../components/runner_list.vue';
 import RunnerManualSetupHelp from '../components/runner_manual_setup_help.vue';
 import RunnerTypeHelp from '../components/runner_type_help.vue';
@@ -7,6 +8,7 @@ import getRunnersQuery from '../graphql/get_runners.query.graphql';
 
 export default {
   components: {
+    RunnerFilteredSearchBar,
     RunnerList,
     RunnerManualSetupHelp,
     RunnerTypeHelp,
@@ -23,12 +25,17 @@ export default {
   },
   data() {
     return {
+      // TODO Set the inital state from the URL
+      filterParameters: {},
       runners: [],
     };
   },
   apollo: {
     runners: {
       query: getRunnersQuery,
+      variables() {
+        return this.filterParameters;
+      },
       update({ runners }) {
         return runners?.nodes || [];
       },
@@ -47,11 +54,13 @@ export default {
   },
   methods: {
     captureException(err) {
-      // console.log('captureException', err);
       Sentry.withScope((scope) => {
         scope.setTag('component', 'runner_list_app');
         Sentry.captureException(err);
       });
+    },
+    onFilter(newFilterParameters) {
+      this.filterParameters = newFilterParameters;
     },
   },
 };
@@ -66,6 +75,8 @@ export default {
         <runner-manual-setup-help :registration-token="registrationToken" />
       </div>
     </div>
+
+    <runner-filtered-search-bar namespace="admin_runners" @onFilter="onFilter" />
 
     <div v-if="!runnersLoading && !runners.length" class="gl-text-center gl-p-5">
       {{ __('No runners found') }}

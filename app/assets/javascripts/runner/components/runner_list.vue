@@ -95,7 +95,7 @@ export default {
       stacked="md"
       fixed
     >
-      <template #table-busy>
+      <template v-if="!runners.length" #table-busy>
         <gl-skeleton-loader />
       </template>
 

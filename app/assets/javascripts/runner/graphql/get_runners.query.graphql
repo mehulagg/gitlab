@@ -1,5 +1,5 @@
-query getRunners {
-  runners {
+query getRunners($status: CiRunnerStatus, $type: CiRunnerType) {
+  runners(status: $status, type: $type) {
     nodes {
       id
       description
