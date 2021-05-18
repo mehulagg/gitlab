@@ -33,5 +33,7 @@ class DisableExpirationPoliciesLinkedToNoContainerImages < ActiveRecord::Migrati
 
   def down
     # this migration is irreversible
+
+    # we can't accuretaly know which policies were previously enabled during `#up`
   end
 end
