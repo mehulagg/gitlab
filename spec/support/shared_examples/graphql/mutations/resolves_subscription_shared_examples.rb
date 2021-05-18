@@ -8,8 +8,6 @@ RSpec.shared_examples 'a subscribeable graphql resource' do
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
-  specify { expect(described_class).to require_graphql_authorizations(permission_name) }
-
   describe '#resolve' do
     let(:subscribe) { true }
     let(:mutated_resource) { subject[resource.class.name.underscore.to_sym] }
@@ -20,9 +18,9 @@ RSpec.shared_examples 'a subscribeable graphql resource' do
       expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
     end
 
-    context 'when the user can update the resource' do
+    context 'when the user can read the resource' do
       before do
-        resource.project.add_developer(user)
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PUBLIC)
       end
 
       it 'subscribes to the resource' do

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module Mutations
+  # This module overrides authorized_resource? method so make sure that
+  # the class where this module in included doesn't rely on other `authorize`
+  # definitions
   module ResolvesSubscription
     extend ActiveSupport::Concern
     included do
@@ -8,6 +11,12 @@ module Mutations
                GraphQL::BOOLEAN_TYPE,
                required: true,
                description: 'The desired state of the subscription.'
+    end
+
+    def authorized_resource?(subscribable)
+      return false if subscribable.nil?
+
+      Ability.allowed?(context[:current_user], :"read_#{subscribable.to_ability_name}", subscribable)
     end
 
     def resolve(project_path:, iid:, subscribed_state:)
