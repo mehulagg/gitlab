@@ -53,14 +53,16 @@ module Gitlab
 
         @started_at = System.monotonic_time
 
-        yield
-      ensure
+        result = yield
+
         @finished_at = System.monotonic_time
 
         observe(:gitlab_transaction_duration_seconds, duration) do
           buckets SMALL_BUCKETS
         end
 
+        result
+      ensure
         Thread.current[THREAD_KEY] = nil
       end
 

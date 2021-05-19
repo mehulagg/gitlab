@@ -1,0 +1,5 @@
+---
+title: Don't record duration for failing requests.
+merge_request: 62091
+author:
+type: fixed

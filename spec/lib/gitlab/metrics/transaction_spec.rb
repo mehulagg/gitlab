@@ -25,6 +25,10 @@ RSpec.describe Gitlab::Metrics::Transaction do
       expect { |b| transaction.run(&b) }.to yield_control
     end
 
+    it 'returns the result of the yielded block' do
+      expect(transaction.run { 'result' }).to eq('result')
+    end
+
     it 'stores the transaction in the current thread' do
       transaction.run do
         expect(described_class.current).to eq(transaction)
@@ -35,6 +39,18 @@ RSpec.describe Gitlab::Metrics::Transaction do
       transaction.run { }
 
       expect(described_class.current).to be_nil
+    end
+
+    it 'records a duration when the transaction succeeded' do
+      expect(transaction).to receive(:observe).with(:gitlab_transaction_duration_seconds, kind_of(Numeric))
+
+      transaction.run { }
+    end
+
+    it 'does not record a duration when the transaction failed' do
+      expect(transaction).not_to receive(:observe)
+
+      expect { transaction.run { raise 'request failed' } }.to raise_error('request failed')
     end
   end
 
