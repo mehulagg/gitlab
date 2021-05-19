@@ -1,5 +1,6 @@
 ---
 redirect_to: 'https://about.gitlab.com/handbook/product/product-intelligence-guide/'
+remove_date: ''
 ---
 
 This document was moved to [another location](https://about.gitlab.com/handbook/product/product-intelligence-guide/).

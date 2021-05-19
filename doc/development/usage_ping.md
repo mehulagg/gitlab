@@ -1,5 +1,6 @@
 ---
 redirect_to: 'usage_ping/index.md'
+remove_date: '2021-05-23'
 ---
 
 This document was moved to [another location](usage_ping/index.md).

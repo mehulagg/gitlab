@@ -1,5 +1,6 @@
 ---
 redirect_to: 'snowplow/index.md'
+remove_date: '2021-06-31'
 ---
 This document was moved to [another location](snowplow/index.md).
 <!-- This redirect file can be deleted after 2021-06-31. -->
