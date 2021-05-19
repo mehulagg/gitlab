@@ -70,7 +70,7 @@ module Ci
     has_many :trigger_requests, dependent: :destroy, foreign_key: :commit_id # rubocop:disable Cop/ActiveRecordDependent
     has_many :variables, class_name: 'Ci::PipelineVariable'
     has_many :deployments, through: :builds, disable_joins: true
-    has_many :environments, -> { distinct }, through: :deployments, disable_joins: true
+    has_many :environments, -> { distinct }, through: :deployments
     has_many :latest_builds, -> { latest.with_project_and_metadata }, foreign_key: :commit_id, inverse_of: :pipeline, class_name: 'Ci::Build'
     has_many :downloadable_artifacts, -> do
       not_expired.or(where_exists(::Ci::Pipeline.artifacts_locked.where('ci_pipelines.id = ci_builds.commit_id'))).downloadable.with_job
