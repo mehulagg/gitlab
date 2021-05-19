@@ -239,7 +239,7 @@
       %fieldset
         .form-group
           = f.label :slice_multiplier, _('Slice multiplier'), class: 'label-bold'
-          = f.number_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.slice_multiplier
+          = f.number_field :elasticsearch_slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.slice_multiplier
           .form-text.gl-text-gray-600.gl-mt-0
             - slice_multiplier_link_url = help_page_path('integration/elasticsearch.md', anchor: 'slice-multiplier')
             - slice_multiplier_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: slice_multiplier_link_url }
@@ -247,7 +247,7 @@
 
         .form-group
           = f.label :max_slices_running, _('Maximum running slices'), class: 'label-bold'
-          = f.number_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.max_slices_running
+          = f.number_field :elasticsearch_max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.max_slices_running
           .form-text.gl-text-gray-600.gl-mt-0
             - max_slices_running_link_url = help_page_path('integration/elasticsearch.md', anchor: 'maximum-running-slices')
             - max_slices_running_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: max_slices_running_link_url }

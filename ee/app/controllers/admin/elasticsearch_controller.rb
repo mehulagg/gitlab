@@ -68,6 +68,11 @@ class Admin::ElasticsearchController < Admin::ApplicationController
   end
 
   def trigger_reindexing_params
-    params.require(:elastic_reindexing_task).permit(%i(max_slices_running slice_multiplier))
+    permitted_params = params.require(:elastic_reindexing_task).permit(%i(elasticsearch_max_slices_running elasticsearch_slice_multiplier))
+    trigger_reindexing_params = {}
+    trigger_reindexing_params[:max_slices_running] = permitted_params[:elasticsearch_max_slices_running] if permitted_params.has_key?(:elasticsearch_max_slices_running)
+    trigger_reindexing_params[:slice_multiplier] = permitted_params[:elasticsearch_slice_multiplier] if permitted_params.has_key?(:elasticsearch_slice_multiplier)
+
+    trigger_reindexing_params
   end
 end
