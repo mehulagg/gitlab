@@ -7,6 +7,7 @@ import {
   GlTooltipDirective,
   GlLoadingIcon,
   GlIcon,
+  GlHoverLoadDirective,
 } from '@gitlab/ui';
 import { escapeRegExp } from 'lodash';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
@@ -15,6 +16,7 @@ import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getRefMixin from '../../mixins/get_ref';
 import commitQuery from '../../queries/commit.query.graphql';
+import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {
@@ -28,6 +30,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    GlHoverLoad: GlHoverLoadDirective,
   },
   apollo: {
     commit: {
@@ -101,6 +104,7 @@ export default {
   data() {
     return {
       commit: null,
+      isPreloaded: false,
     };
   },
   computed: {
@@ -139,6 +143,16 @@ export default {
       return this.commit && this.commit.lockLabel;
     },
   },
+  methods: {
+    handlePreload() {
+      if(this.isPreloaded) {
+        return;
+      }
+
+      axios.get(this.url);
+      this.isPreloaded = true;
+    },
+  },
 };
 </script>
 
@@ -155,6 +169,7 @@ export default {
         }"
         class="tree-item-link str-truncated"
         data-qa-selector="file_name_link"
+        v-gl-hover-load="handlePreload"
       >
         <file-icon
           :file-name="fullPath"
