@@ -21,7 +21,7 @@ export default {
 </script>
 
 <template>
-  <section>
+  <section class="gl-mt-5">
     <p>
       <gl-sprintf :message="$options.i18n.helpText">
         <template #docsLink="{ content }">
