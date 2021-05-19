@@ -1,8 +1,5 @@
+import { thWidthClass } from '~/lib/utils/table_utility';
 import { __, s__ } from '~/locale';
-
-export const DEFAULT_TH_CLASSES =
-  'gl-bg-transparent! gl-border-b-solid! gl-border-b-gray-100! gl-p-5! gl-border-b-1!';
-const thWidthClass = (width) => `gl-w-${width}p ${DEFAULT_TH_CLASSES}`;
 
 export const FIELDS = [
   {
