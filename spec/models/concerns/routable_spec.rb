@@ -165,37 +165,6 @@ RSpec.describe Group, 'Routable', :with_clean_rails_cache do
     end
   end
 
-  describe '#parent_loaded?' do
-    before do
-      group.parent = create(:group)
-      group.save!
-
-      group.reload
-    end
-
-    it 'is false when the parent is not loaded' do
-      expect(group.parent_loaded?).to be_falsey
-    end
-
-    it 'is true when the parent is loaded' do
-      group.parent
-
-      expect(group.parent_loaded?).to be_truthy
-    end
-  end
-
-  describe '#route_loaded?' do
-    it 'is false when the route is not loaded' do
-      expect(group.route_loaded?).to be_falsey
-    end
-
-    it 'is true when the route is loaded' do
-      group.route
-
-      expect(group.route_loaded?).to be_truthy
-    end
-  end
-
   describe '#full_path' do
     it { expect(group.full_path).to eq(group.path) }
     it { expect(nested_group.full_path).to eq("#{group.full_path}/#{nested_group.path}") }
@@ -259,7 +228,4 @@ end
 def forcibly_hit_cached_lookup(record, method)
   stub_feature_flags(cached_route_lookups: true)
   expect(record).to receive(:persisted?).and_return(true)
-  expect(record).to receive(:route_loaded?).and_return(false)
-  expect(record).to receive(:parent_loaded?).and_return(false)
-  expect(Gitlab::Cache).to receive(:fetch_once).with([record.cache_key, method]).and_call_original
 end

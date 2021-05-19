@@ -865,10 +865,6 @@ class Project < ApplicationRecord
     super
   end
 
-  def parent_loaded?
-    association(:namespace).loaded?
-  end
-
   def project_setting
     super.presence || build_project_setting
   end
