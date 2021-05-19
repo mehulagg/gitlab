@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
-class CommitStatus < ApplicationRecord
+class CommitStatus < Ci::ApplicationRecord
   include Ci::HasStatus
   include Importable
   include AfterCommitQueue
   include Presentable
   include EnumWithNil
   include BulkInsertableAssociations
-
-  self.table_name = 'ci_builds'
 
   belongs_to :user
   belongs_to :project
