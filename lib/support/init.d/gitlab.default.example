@@ -40,7 +40,7 @@ gitlab_workhorse_pid_path="$pid_path/gitlab-workhorse.pid"
 # socket. To listen on TCP connections (needed by Apache) change to:
 # '-listenNetwork tcp -listenAddr 127.0.0.1:8181'
 #
-# The -authBackend setting tells gitlab-workhorse where it can reach Puma.
+# The -authBackend setting tells gitlab-workhorse where it can reach the GitLab Rails application.
 # For relative URL support change to:
 # '-authBackend http://127.0.0.1/8080/gitlab'
 # Read more in http://doc.gitlab.com/ce/install/relative_url.html
