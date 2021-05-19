@@ -6,9 +6,12 @@ event = event.present
 
 xml.entry do
   xml.id      "tag:#{request.host},#{event.created_at.strftime("%Y-%m-%d")}:#{event.id}"
-  xml.link    href: event_feed_url(event)
   xml.title   truncate(event_feed_title(event), length: 80)
   xml.updated event.updated_at.xmlschema
+
+  if event_url = event_feed_url(event)
+    xml.link href: event_url
+  end
 
   # We're deliberately re-using "event.author" here since this data is
   # eager-loaded. This allows us to re-use the user object's Email address,
