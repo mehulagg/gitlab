@@ -238,7 +238,7 @@ Feature.disable(:geo_lfs_object_replication)
 
 #### Limitation of verification of external Object Storage
 
-GitLab managed Object Storage replication support [is in beta](object_storage.md). 
+GitLab managed Object Storage replication support [is in beta](object_storage.md#enabling-gitlab-managed-object-storage-replication). 
 
 Locally stored files are verified but externally stored files are not.
 
