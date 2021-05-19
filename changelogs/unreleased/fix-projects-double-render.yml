@@ -1,0 +1,5 @@
+---
+title: Fix double render in project's git URL redirect
+merge_request: 62053
+author:
+type: fixed
