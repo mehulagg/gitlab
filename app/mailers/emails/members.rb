@@ -60,11 +60,19 @@ module Emails
           subject(s_("MemberInviteEmail|Invitation to join the %{project_or_group} %{project_or_group_name}") % { project_or_group: member_source.human_name, project_or_group_name: member_source.model_name.singular })
         end
 
-      member_email_with_layout(
-        to: member.invite_email,
-        subject: subject_line,
-        layout: 'unknown_user_mailer'
-      )
+      custom_headers = if Gitlab.dev_env_or_com?
+                         {
+                           'X-Mailgun-Tag' => 'invite_email',
+                           'X-Mailgun-Variables' => { 'invite_token' => @token }
+                         }
+                       else
+                         {}
+                       end
+
+      mail(to: member.invite_email, subject: subject_line, **custom_headers) do |format|
+        format.html { render layout: 'unknown_user_mailer' }
+        format.text { render layout: 'unknown_user_mailer' }
+      end
     end
 
     def member_invited_reminder_email(member_source_type, member_id, token, reminder_index)
