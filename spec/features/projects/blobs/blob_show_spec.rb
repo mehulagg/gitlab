@@ -192,6 +192,15 @@ RSpec.describe 'File blob', :js do
           expect(page.find('.file-title-name').text).to eq('application.js')
         end
       end
+
+      it 'sucessfully change ref when ref name matches the project name' do
+        project.repository.create_branch(project.name)
+
+        visit_blob('files/js/application.js', ref: project.name)
+        switch_ref_to('master')
+
+        expect(page.find('.file-title-name').text).to eq('application.js')
+      end
     end
 
     context 'visiting with a line number anchor' do
