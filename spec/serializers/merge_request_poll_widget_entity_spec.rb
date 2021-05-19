@@ -235,16 +235,6 @@ RSpec.describe MergeRequestPollWidgetEntity do
         it 'returns false' do
           expect(subject[:mergeable]).to eq(false)
         end
-
-        context 'when check_mergeability_async_in_widget is disabled' do
-          before do
-            stub_feature_flags(check_mergeability_async_in_widget: false)
-          end
-
-          it 'calculates mergeability and returns true' do
-            expect(subject[:mergeable]).to eq(true)
-          end
-        end
       end
     end
   end

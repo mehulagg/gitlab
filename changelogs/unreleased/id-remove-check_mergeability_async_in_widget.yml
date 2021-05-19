@@ -1,0 +1,5 @@
+---
+title: Move async mergeability check into widget
+merge_request: 62076
+author:
+type: performance

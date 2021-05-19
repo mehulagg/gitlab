@@ -44,7 +44,6 @@ class Projects::MergeRequests::ContentController < Projects::MergeRequests::Appl
   end
 
   def check_mergeability_async!
-    return unless Feature.enabled?(:check_mergeability_async_in_widget, merge_request.project, default_enabled: :yaml)
     return if params[:async_mergeability_check].blank?
 
     merge_request.check_mergeability(async: true)
