@@ -40,21 +40,20 @@ module QA
                               file_path: '.gitlab-ci.yml',
                               content:
                                   <<~YAML
-                                  build:
-                                    image: docker:19.03.12
-                                    stage: build
-                                    services:
-                                      - name: docker:19.03.12-dind
-                                        command: ["--insecure-registry=$CI_REGISTRY"]
-                                    variables:
-                                      IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-                                      DOCKER_TLS_CERTDIR: "/certs"
-                                    script:
-                                      - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-                                      - docker build -t $IMAGE_TAG .
-                                      - docker push $IMAGE_TAG
-                                    tags:
-                                      - "runner-for-#{project.name}"
+                                    build:
+                                      image: docker:19.03.12
+                                      stage: build
+                                      services:
+                                        - name: docker:19.03.12-dind
+                                          command: ["--insecure-registry", "gitlab.test:5050"]                                       
+                                      variables:
+                                        IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+                                      script:
+                                        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+                                        - docker build -t $IMAGE_TAG .
+                                        - docker push $IMAGE_TAG
+                                      tags:
+                                        - "runner-for-#{project.name}"
                                   YAML
                           }])
         end
