@@ -29,6 +29,7 @@ export const summary = [
 ];
 
 const issueStage = {
+  id: 'issue',
   title: 'Issue',
   name: 'issue',
   legend: '',
@@ -37,6 +38,7 @@ const issueStage = {
 };
 
 const planStage = {
+  id: 'plan',
   title: 'Plan',
   name: 'plan',
   legend: '',
@@ -45,6 +47,7 @@ const planStage = {
 };
 
 const codeStage = {
+  id: 'code',
   title: 'Code',
   name: 'code',
   legend: '',
@@ -53,6 +56,7 @@ const codeStage = {
 };
 
 const testStage = {
+  id: 'test',
   title: 'Test',
   name: 'test',
   legend: '',
@@ -61,6 +65,7 @@ const testStage = {
 };
 
 const reviewStage = {
+  id: 'review',
   title: 'Review',
   name: 'review',
   legend: '',
@@ -69,6 +74,7 @@ const reviewStage = {
 };
 
 const stagingStage = {
+  id: 'staging',
   title: 'Staging',
   name: 'staging',
   legend: '',
@@ -85,6 +91,7 @@ export const selectedStage = {
     'The issue stage shows the time it takes from creating an issue to assigning the issue to a milestone, or add the issue to a list on your Issue Board. Begin creating issues to see data for this stage.',
   component: 'stage-issue-component',
   slug: 'issue',
+  id: 'issue',
 };
 
 export const stats = [issueStage, planStage, codeStage, testStage, reviewStage, stagingStage];
@@ -206,7 +213,7 @@ export const convertedEvents = rawEvents.map((ev) =>
   convertObjectPropsToCamelCase(ev, { deep: true }),
 );
 
-export const pathNavIssueMetric = 388800;
+export const pathNavIssueMetric = 172800;
 
 export const stageMediansWithNumericIds = rawStageMedians.reduce((acc, { id, value }) => {
   const { id: stageId } = getStageByTitle(convertedData.stages, id);

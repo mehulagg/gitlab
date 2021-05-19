@@ -1,17 +1,10 @@
 import { roundToNearestHalf, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { dasherize } from '~/lib/utils/text_utility';
 import { unescape } from 'lodash';
 import { sanitize } from '~/lib/dompurify';
-import {
-  newDate,
-  dayAfter,
-  secondsToDays,
-  getDatesInRange,
-  parseSeconds,
-} from '~/lib/utils/datetime_utility';
+import { parseSeconds } from '~/lib/utils/datetime_utility';
+import { dasherize } from '~/lib/utils/text_utility';
 import { __, s__, sprintf } from '../locale';
 import DEFAULT_EVENT_OBJECTS from './default_event_objects';
-import { OVERVIEW_STAGE_ID } from './constants';
 
 const EMPTY_STAGE_TEXTS = {
   issue: __(

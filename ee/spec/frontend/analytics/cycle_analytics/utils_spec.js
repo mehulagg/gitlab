@@ -17,12 +17,11 @@ import {
   toggleSelectedLabel,
   prepareTimeMetricsData,
   prepareStageErrors,
-  timeSummaryForPathNavigation,
   formatMedianValuesWithOverview,
-  medianTimeToParsedSeconds,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
 import { rawStageMedians } from 'jest/cycle_analytics/mock_data';
+import { medianTimeToParsedSeconds } from '~/cycle_analytics/utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import { slugify } from '~/lib/utils/text_utility';
 import {
@@ -361,37 +360,6 @@ describe('Value Stream Analytics utils', () => {
         { description: 'Is a value that is good' },
         { description: '' },
       ]);
-    });
-  });
-
-  describe('timeSummaryForPathNavigation', () => {
-    it.each`
-      unit         | value   | result
-      ${'months'}  | ${1.5}  | ${'1.5M'}
-      ${'weeks'}   | ${1.25} | ${'1.5w'}
-      ${'days'}    | ${2}    | ${'2d'}
-      ${'hours'}   | ${10}   | ${'10h'}
-      ${'minutes'} | ${20}   | ${'20m'}
-      ${'seconds'} | ${10}   | ${'<1m'}
-      ${'seconds'} | ${0}    | ${'-'}
-    `('will format $value $unit to $result', ({ unit, value, result }) => {
-      expect(timeSummaryForPathNavigation({ [unit]: value })).toEqual(result);
-    });
-  });
-
-  describe('medianTimeToParsedSeconds', () => {
-    it.each`
-      value      | result
-      ${1036800} | ${'1w'}
-      ${259200}  | ${'3d'}
-      ${172800}  | ${'2d'}
-      ${86400}   | ${'1d'}
-      ${1000}    | ${'16m'}
-      ${61}      | ${'1m'}
-      ${59}      | ${'<1m'}
-      ${0}       | ${'-'}
-    `('will correctly parse $value seconds into $result', ({ value, result }) => {
-      expect(medianTimeToParsedSeconds(value)).toEqual(result);
     });
   });
 
