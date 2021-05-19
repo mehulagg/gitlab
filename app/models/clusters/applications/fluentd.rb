@@ -12,10 +12,13 @@ module Clusters
       include ::Clusters::Concerns::ApplicationStatus
       include ::Clusters::Concerns::ApplicationVersion
       include ::Clusters::Concerns::ApplicationData
+      include IgnorableColumns
 
       default_value_for :version, VERSION
       default_value_for :port, 514
       default_value_for :protocol, :tcp
+
+      ignore_column :waf_log_enabled, remove_with: '14.2', remove_after: '2021-07-22'
 
       enum protocol: { tcp: 0, udp: 1 }
 
