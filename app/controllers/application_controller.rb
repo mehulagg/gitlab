@@ -50,7 +50,6 @@ class ApplicationController < ActionController::Base
   around_action :set_session_storage
   around_action :set_current_admin
 
-
   after_action :set_page_title_header, if: :json_request?
   after_action :limit_session_time, if: -> { !current_user }
 

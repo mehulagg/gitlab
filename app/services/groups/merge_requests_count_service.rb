@@ -11,7 +11,7 @@ module Groups
 
     def relation_for_count
       MergeRequestsFinder
-      .new(user, group_id: group, state: 'opened', non_archived: true, include_subgroups: true)
+      .new(user, group_id: group.id, state: 'opened', non_archived: true, include_subgroups: true)
       .execute
     end
 

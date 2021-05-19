@@ -20,7 +20,6 @@ class GroupsController < Groups::ApplicationController
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
-  around_action :sticky_group, except: [:index, :new, :create]
 
   # Authorize
   before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
@@ -59,17 +58,12 @@ class GroupsController < Groups::ApplicationController
   feature_category :projects, [:projects]
   feature_category :importers, [:export, :download_export]
 
-  around_action :sticky_parent_group, only: [:new, :create]
-  
-  def sticky_parent_group
-    NamespaceShard.sticky_shard(parent_group) { yield }
-  end
-
   def index
     redirect_to(current_user ? dashboard_groups_path : explore_groups_path)
   end
+
   def new
-    @group = Group.new(parent: parent_group)
+    @group = Group.new(params.permit(:parent_id))
   end
 
   def create
@@ -223,8 +217,9 @@ class GroupsController < Groups::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def authorize_create_group!
-    allowed = if parent_group
-                can?(current_user, :create_subgroup, parent_group)
+    allowed = if params[:parent_id].present?
+                parent = Group.find_by(id: params[:parent_id])
+                can?(current_user, :create_subgroup, parent)
               else
                 can?(current_user, :create_group)
               end
@@ -232,12 +227,6 @@ class GroupsController < Groups::ApplicationController
     render_404 unless allowed
   end
   # rubocop: enable CodeReuse/ActiveRecord
-
-  def parent_group
-    return unless params[:parent_id].present?
-
-    @parent_group ||= Group.find(params[:parent_id])
-  end
 
   def determine_layout
     if [:new, :create].include?(action_name.to_sym)

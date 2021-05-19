@@ -7,13 +7,9 @@ module IssuableCollectionsAction
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def issues
-    # We can in future find all groups first to scan fewer shards
-    issues = NamespaceShard.find_all do
-      issuables_collection.non_archived
-    end
-
-    # TODO https://gitlab.com/gitlab-org/gitlab/-/issues/331125
-    @issues = Kaminari.paginate_array(issues).page(params[:page])
+    @issues = issuables_collection
+              .non_archived
+              .page(params[:page])
 
     @issuable_meta_data = Gitlab::IssuableMetadata.new(current_user, @issues).data
 

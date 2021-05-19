@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Member < NamespaceShard
+class Member < ApplicationRecord
   include EachBatch
   include AfterCommitQueue
   include Sortable

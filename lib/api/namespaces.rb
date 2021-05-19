@@ -67,7 +67,7 @@ module API
       get ':namespace/exists', requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
         namespace_path = params[:namespace]
 
-        exists = NamespaceShard.find_first { Namespace.by_parent(params[:parent_id]).filter_by_path(namespace_path).exists? }
+        exists = Namespace.by_parent(params[:parent_id]).filter_by_path(namespace_path).exists?
         suggestions = exists ? [Namespace.clean_path(namespace_path)] : []
 
         present :exists, exists

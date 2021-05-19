@@ -16,8 +16,6 @@
         .home-panel-metadata.d-flex.align-items-center.text-secondary
           %span
             = _("Group ID: %{group_id}") % { group_id: @group.id }
-            %span.access-request-links.gl-ml-3
-              = _("/ %{shard_id}") % { shard_id: @group.database_shard_name }
           - if current_user
             %span.access-request-links.gl-ml-3
               = render 'shared/members/access_request_links', source: @group

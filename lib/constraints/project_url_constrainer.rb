@@ -12,13 +12,7 @@ module Constraints
 
       # We intentionally allow SELECT(*) here so result of this query can be used
       # as cache for further Project.find_by_full_path calls within request
-      project = Project.find_by_full_path(full_path, follow_redirects: request.get?)
-
-      if project.present?
-        true
-      else
-        false
-      end
+      Project.find_by_full_path(full_path, follow_redirects: request.get?).present?
     end
   end
 end

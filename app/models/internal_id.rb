@@ -15,7 +15,7 @@
 # In order to leverage InternalId for other usages, the idea is to
 # * Add `usage` value to enum
 # * (Optionally) add columns to `internal_ids` if needed for scope.
-class InternalId < NamespaceShard
+class InternalId < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
 
   belongs_to :project

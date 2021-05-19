@@ -2,7 +2,7 @@
 
 require 'carrierwave/orm/activerecord'
 
-class Issue < NamespaceShard
+class Issue < ApplicationRecord
   include AtomicInternalId
   include IidRoutes
   include Issuable

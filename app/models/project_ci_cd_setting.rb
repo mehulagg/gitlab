@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectCiCdSetting < NamespaceShard
+class ProjectCiCdSetting < ApplicationRecord
   belongs_to :project, inverse_of: :ci_cd_settings
 
   DEFAULT_GIT_DEPTH = 50

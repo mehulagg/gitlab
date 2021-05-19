@@ -32,15 +32,13 @@ module RoutableActions
   def routable_authorized?(routable, extra_authorization_proc)
     return false unless routable
 
-    routable.with_shard do
-      action = :"read_#{routable.class.to_s.underscore}"
-      return false unless can?(current_user, action, routable)
+    action = :"read_#{routable.class.to_s.underscore}"
+    return false unless can?(current_user, action, routable)
 
-      if extra_authorization_proc
-        extra_authorization_proc.call(routable)
-      else
-        true
-      end
+    if extra_authorization_proc
+      extra_authorization_proc.call(routable)
+    else
+      true
     end
   end
 

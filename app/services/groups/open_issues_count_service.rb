@@ -31,7 +31,7 @@ module Groups
     def relation_for_count
       IssuesFinder.new(
         user,
-        group_id: group,
+        group_id: group.id,
         state: 'opened',
         non_archived: true,
         include_subgroups: true,

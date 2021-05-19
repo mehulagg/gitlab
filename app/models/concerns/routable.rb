@@ -22,28 +22,17 @@ module Routable
     #
     # We need to qualify the columns with the table name, to support both direct lookups on
     # Route/RedirectRoute, and scoped lookups through the Routable classes.
-    route_target = route_scope.respond_to?(:klass) ? route_scope.klass : route_scope
-
     route =
-      if route_target < NamespaceShard
-        # sharded routes cannot cross-join
-        Route.for_routable_type(route_target.polymorphic_name).find_by(path: path) ||
-          Route.for_routable_type(route_target.polymorphic_name).iwhere(Route.arel_table[:path] => path).take
-      else
-        route_scope.find_by(routes: { path: path }) ||
-          route_scope.iwhere(Route.arel_table[:path] => path).take
-      end
+      route_scope.find_by(routes: { path: path }) ||
+      route_scope.iwhere(Route.arel_table[:path] => path).take
 
     if follow_redirects
-      route ||= RedirectRoute.iwhere(RedirectRoute.arel_table[:path] => path).take
+      route ||= redirect_route_scope.iwhere(RedirectRoute.arel_table[:path] => path).take
     end
 
     return unless route
-    return route if route.is_a?(Routable)
 
-    NamespaceShard.read_for_id(route.source_id) do
-      route.source
-    end
+    route.is_a?(Routable) ? route : route.source
   end
 
   included do
@@ -76,8 +65,8 @@ module Routable
       Routable.find_by_full_path(
         path,
         follow_redirects: follow_redirects,
-        route_scope: self,
-        redirect_route_scope: self
+        route_scope: includes(:route).references(:routes),
+        redirect_route_scope: joins(:redirect_routes)
       )
     end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Milestone < NamespaceShard
+class Milestone < ApplicationRecord
   include Sortable
   include Timebox
   include Milestoneish

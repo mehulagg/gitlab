@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Label < NamespaceShard
+class Label < ApplicationRecord
   include CacheMarkdownField
   include Referable
   include Subscribable
