@@ -1020,39 +1020,39 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.design_management_designs_create`
 
-Missing description
+Number of designs that were created
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180740_design_management_designs_create.yml)
 
-Group: `group::knowledge`
+Group: `group::product planning`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.design_management_designs_delete`
 
-Missing description
+Number of designs that were deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180743_design_management_designs_delete.yml)
 
-Group: `group::knowledge`
+Group: `group::product planning`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.design_management_designs_update`
 
-Missing description
+Number of updates to designs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180741_design_management_designs_update.yml)
 
-Group: `group::knowledge`
+Group: `group::product planning`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.environments`
 
@@ -1125,54 +1125,6 @@ Group: `group::progressive delivery`
 Status: `data_available`
 
 Tiers: `free`
-
-### `counts.g_project_management_users_checking_epic_task_monthly`
-
-Counts of MAU checking epic task
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421080207_g_project_management_users_checking_epic_task_monthly.yml)
-
-Group: `group::product planning`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
-### `counts.g_project_management_users_checking_epic_task_weekly`
-
-Counts of WAU checking epic task
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210421075943_g_project_management_users_checking_epic_task_weekly.yml)
-
-Group: `group::product planning`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
-### `counts.g_project_management_users_unchecking_epic_task_monthly`
-
-Counts of MAU unchecking epic task
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421102516_g_project_management_users_unchecking_epic_task_monthly.yml)
-
-Group: `group::product planning`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
-
-### `counts.g_project_management_users_unchecking_epic_task_weekly`
-
-Counts of WAU unchecking epic task
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210421102812_g_project_management_users_unchecking_epic_task_weekly.yml)
-
-Group: `group::product planning`
-
-Status: `implemented`
-
-Tiers: `premium`, `ultimate`
 
 ### `counts.geo_event_log_max_id`
 
@@ -10678,6 +10630,30 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `redis_hll_counters.epic_boards_usage.epic_boards_usage_total_unique_counts_monthly`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210507171840_epic_boards_usage_total_unique_counts_monthly.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
+### `redis_hll_counters.epic_boards_usage.epic_boards_usage_total_unique_counts_weekly`
+
+Missing description
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210507171838_epic_boards_usage_total_unique_counts_weekly.yml)
+
+Group: ``
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
 ### `redis_hll_counters.epic_boards_usage.g_project_management_users_creating_epic_boards_monthly`
 
 Count of MAU creating epic boards
@@ -11391,6 +11367,54 @@ Tiers: `premium`, `ultimate`
 Counts of WAU manually updating fixed start date
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210329043402_g_project_management_users_updating_fixed_epic_start_date_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.project_management_users_checking_epic_task_monthly`
+
+Counts of MAU checking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421080207_g_project_management_users_checking_epic_task_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.project_management_users_checking_epic_task_weekly`
+
+Counts of WAU checking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210421075943_g_project_management_users_checking_epic_task_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.project_management_users_unchecking_epic_task_monthly`
+
+Counts of MAU unchecking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421102516_g_project_management_users_unchecking_epic_task_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.project_management_users_unchecking_epic_task_weekly`
+
+Counts of WAU unchecking epic task
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210421102812_g_project_management_users_unchecking_epic_task_weekly.yml)
 
 Group: `group::product planning`
 
@@ -17596,15 +17620,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_design_management`
 
-Missing description
+Monthly active users for design management
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180745_action_monthly_active_users_design_management.yml)
 
-Group: `group::knowledge`
+Group: `group::product planning`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_git_write`
 
@@ -18061,6 +18085,18 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage_monthly.manage.custom_compliance_frameworks`
+
+Monthly count of all custom compliance framework labels
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210507165054_custom_compliance_frameworks.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.events`
 
