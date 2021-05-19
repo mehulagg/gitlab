@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Monitor application performance **(FREE)**
 
 GitLab provides a variety of tools to help operate and maintain
-your applications:
+your applications.
 
 ## Measure reliability and stability with metrics
 
