@@ -1,6 +1,4 @@
 module DynamicShards
-  SHARDS = 4
-
   def database_configuration
     super.to_h do |env, config|
       if config.is_a?(Hash) && config.all? { |_, v| v.is_a?(Hash) }
@@ -10,12 +8,9 @@ module DynamicShards
       end
 
       shards = {
-        "primary" => config.merge(database: "#{config["database"]}_primary")
+        "primary" => config.merge(database: "#{config["database"]}_primary"),
+        "ci" => config.merge(database: "#{config["database"]}_ci")
       }
-
-      (1..SHARDS).each do |shard|
-        shards["shard_#{shard}"] = config.merge(database: "#{config["database"]}_shard_#{shard}")
-      end
 
       [env, shards]
     end
