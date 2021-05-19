@@ -46,3 +46,5 @@ ALTER TABLE ONLY ci_triggers ADD CONSTRAINT fk_e8e10d1964 FOREIGN KEY (owner_id)
 ALTER TABLE ONLY ci_daily_build_group_report_results ADD CONSTRAINT fk_fd1858fefd FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 ALTER TABLE ONLY ci_pipelines ADD CONSTRAINT fk_190998ef09 FOREIGN KEY (external_pull_request_id) REFERENCES external_pull_requests(id) ON DELETE SET NULL;
 ALTER TABLE ONLY ci_runner_namespaces ADD CONSTRAINT fk_rails_f9d9ed3308 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_chat_data ADD CONSTRAINT fk_rails_f300456b63 FOREIGN KEY (chat_name_id) REFERENCES chat_names(id) ON DELETE CASCADE;
