@@ -2,37 +2,30 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User views iteration' do
-  let_it_be(:now) { Time.now }
+RSpec.describe 'User views iteration cadences', :js do
+  let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:cadence) { create(:iterations_cadence, group: group) }
-  let_it_be(:iteration) { create(:iteration, :skip_future_date_validation, iid: 1, id: 2, group: group, title: 'Correct Iteration', description: 'iteration description', start_date: now - 1.day, due_date: now) }
-  let_it_be(:issue) { create(:issue, project: project, iteration: iteration, labels: [label1]) }
+  let_it_be(:other_cadence) { create(:iterations_cadence, group: group) }
+  let_it_be(:iteration_in_cadence) { create(:iteration, group: group, iterations_cadence: cadence) }
+  let_it_be(:iteration_in_other_cadence) { create(:iteration, group: group, iterations_cadence: other_cadence) }
   
-  context 'with license', :js do
-    before do
-      stub_licensed_features(iterations: true)
-    end
-
-    it 'shows iteration cadences page' do
-      visit group_iterations_cadences_path(iteration.group)
-
-      expect(page).to have_title('Iteration cadences')
-      expect(page).to have_content(cadence.title)
-    end 
+  before do
+    stub_licensed_features(iterations: true)
   end
 
-  context 'without license' do
-    before do
-      stub_licensed_features(iterations: false)
-      sign_in(user)
-    end
+  it 'shows iteration cadences with iterations when expanded', :aggregate_failures do
+    visit group_iteration_cadences_path(group)
 
-    it 'shows page not found' do
-      visit group_iterations_cadences_path(iteration.group)
+    expect(page).to have_title('Iteration cadences')
+    expect(page).to have_content(cadence.title)
+    expect(page).to have_content(other_cadence.title)
+    expect(page).not_to have_content(iteration_in_cadence.title)
+    expect(page).not_to have_content(iteration_in_other_cadence.title)
 
-      expect(page).to have_title('Not Found')
-      expect(page).to have_content('Page Not Found')
-    end
+    click_button cadence.title
+
+    expect(page).to have_content(iteration_in_cadence.title)
+    expect(page).not_to have_content(iteration_in_other_cadence.title)
   end
 end
