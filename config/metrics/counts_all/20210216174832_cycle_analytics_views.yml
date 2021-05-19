@@ -11,6 +11,7 @@ time_frame: all
 data_source: redis
 distribution:
 - ce
+- ee
 tier:
 - free
 skip_validation: true
