@@ -6,10 +6,7 @@ fragment IssueNode on Issue {
   title
   referencePath: reference(full: true)
   dueDate
-  timeEstimate
-  totalTimeSpent
   humanTimeEstimate
-  humanTotalTimeSpent
   emailsDisabled
   confidential
   webUrl
