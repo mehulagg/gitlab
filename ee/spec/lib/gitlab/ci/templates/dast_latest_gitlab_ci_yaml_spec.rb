@@ -84,6 +84,15 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
           context 'when no specification provided' do
             include_examples 'includes dast job'
           end
+
+          context 'when pipeline is a merge request pipeline' do
+            before do
+              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '')
+            end
+
+            include_examples 'includes dast job'
+          end
+
         end
       end
 
@@ -97,12 +106,28 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
             create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
           end
 
+          context 'when pipeline is a merge request pipeline' do
+            before do
+              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '')
+            end
+
+            include_examples 'includes dast job'
+          end
+
           include_examples 'includes dast job'
         end
 
         context 'when DAST_API_SPECIFICATION is present' do
           before do
             create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://my.api/api-specification.yml')
+          end
+
+          context 'when pipeline is a merge request pipeline' do
+            before do
+              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '')
+            end
+
+            include_examples 'includes dast job'
           end
 
           include_examples 'includes dast job'
