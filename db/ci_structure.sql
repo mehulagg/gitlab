@@ -925,6 +925,55 @@ CREATE TABLE schema_migrations (
 
 ALTER TABLE ONLY schema_migrations ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
 
+CREATE TABLE taggings (
+    id integer NOT NULL,
+    tag_id integer,
+    taggable_id integer,
+    taggable_type character varying,
+    tagger_id integer,
+    tagger_type character varying,
+    context character varying,
+    created_at timestamp without time zone
+);
+
+CREATE SEQUENCE taggings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE taggings_id_seq OWNED BY taggings.id;
+
+CREATE TABLE tags (
+    id integer NOT NULL,
+    name character varying,
+    taggings_count integer DEFAULT 0
+);
+
+CREATE SEQUENCE tags_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE tags_id_seq OWNED BY tags.id;
+
+ALTER TABLE ONLY taggings ALTER COLUMN id SET DEFAULT nextval('taggings_id_seq'::regclass);
+ALTER TABLE ONLY tags ALTER COLUMN id SET DEFAULT nextval('tags_id_seq'::regclass);
+
+ALTER TABLE ONLY taggings ADD CONSTRAINT taggings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY tags ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
+
+CREATE INDEX index_taggings_on_tag_id ON taggings USING btree (tag_id);
+CREATE INDEX index_taggings_on_taggable_id_and_taggable_type ON taggings USING btree (taggable_id, taggable_type);
+CREATE INDEX index_taggings_on_taggable_id_and_taggable_type_and_context ON taggings USING btree (taggable_id, taggable_type, context);
+CREATE UNIQUE INDEX index_tags_on_name ON tags USING btree (name);
+CREATE INDEX index_tags_on_name_trigram ON tags USING gin (name gin_trgm_ops);
+
+CREATE UNIQUE INDEX taggings_idx ON taggings USING btree (tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type);
+
 ALTER TABLE ONLY ci_build_needs ADD CONSTRAINT ci_build_needs_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY ci_build_pending_states ADD CONSTRAINT ci_build_pending_states_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY ci_build_report_results ADD CONSTRAINT ci_build_report_results_pkey PRIMARY KEY (build_id);
