@@ -174,14 +174,14 @@ export default {
       />
       <gl-link
         v-if="hasTimeSpent"
-        v-gl-modal="'time-tracking-report'"
+        v-gl-modal="`time-tracking-report-${issuableId}`"
         data-testid="reportLink"
         href="#"
         class="btn-link"
         >{{ __('Time tracking report') }}</gl-link
       >
       <gl-modal
-        modal-id="time-tracking-report"
+        :modal-id="`time-tracking-report-${issuableId}`"
         :title="__('Time tracking report')"
         :hide-footer="true"
       >
