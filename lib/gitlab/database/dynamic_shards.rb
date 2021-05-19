@@ -10,7 +10,7 @@ module DynamicShards
       end
 
       shards = {
-        "primary" => config.merge(database: "#{config["database"]}_primary")
+        "primary" => config.merge(database: "#{config["database"]}_shard_primary")
       }
 
       (1..SHARDS).each do |shard|

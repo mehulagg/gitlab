@@ -17,6 +17,14 @@ class NamespaceShard < ApplicationRecord
     connects_to shards: default_shard
   end
 
+  def self.default_shard
+    RequestStore[:current_shard] || super
+  end
+
+  def self.set_current_shard(shard_name)
+    RequestStore[:current_shard] = shard_name
+  end
+
   def with_shard(&block)
     NamespaceShard.connected_to(role: :writing, shard: database_shard_name, &block)
   end
