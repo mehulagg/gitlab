@@ -1,3 +1,3 @@
-import initDASTConfiguration from 'ee/security_configuration/dast';
+import initDastConfiguration from 'ee/security_configuration';
 
-initDASTConfiguration();
+initDastConfiguration();

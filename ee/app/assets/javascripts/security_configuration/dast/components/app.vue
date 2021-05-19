@@ -1,6 +1,7 @@
 <script>
 import { GlTab, GlTabs } from '@gitlab/ui';
 import DastScanConfiguration from './scan_configuration.vue';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -20,7 +21,7 @@ export default {
     tabSettings() {
       return [
         {
-          title: 'Scan Configuration',
+          title: s__('DastConfig|Scan Configuration'),
         },
       ];
     },

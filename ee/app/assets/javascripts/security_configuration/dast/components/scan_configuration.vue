@@ -13,7 +13,6 @@ export default {
     },
   },
   i18n: {
-    title: s__('DastConfig|Scan Configuration'),
     helpText: s__(`
       DastConfig|Customize DAST settings to suit your requirements. Configuration changes made here override these provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{docsLinkStart}GitLab DAST documentation%{docsLinkEnd}.`),
   },
