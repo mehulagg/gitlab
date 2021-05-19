@@ -17160,7 +17160,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.omniauth_providers`
 
-Number of unique user logins using an OmiAuth provider `https://docs.gitlab.com/ee/integration/omniauth.html#omniauth`
+Number of unique user logins using an OmniAuth provider `https://docs.gitlab.com/ee/integration/omniauth.html#omniauth`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183627_omniauth_providers.yml)
 
