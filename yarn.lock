@@ -908,9 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1269287019/artifacts/raw/gitlab-ui.nfriend-add-url-aware-tab-control.tgz":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1277407667/artifacts/raw/gitlab-ui.nfriend-add-url-aware-tab-control.tgz":
   version "29.26.0"
-  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1269287019/artifacts/raw/gitlab-ui.nfriend-add-url-aware-tab-control.tgz#7292ecd55a328b2cc06362ed4fe4218a81b12019"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1277407667/artifacts/raw/gitlab-ui.nfriend-add-url-aware-tab-control.tgz#0a60bda4d6e5daf18f37222641cb546fd2b2e0c1"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
