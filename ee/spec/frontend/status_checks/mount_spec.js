@@ -9,7 +9,7 @@ jest.mock('~/flash');
 
 describe('mountStatusChecks', () => {
   const projectId = '12345';
-  const statusChecksPath = '/api/v4/projects/1/external_approval_rules';
+  const statusChecksPath = '/api/v4/projects/1/external_status_checks';
   const dispatch = jest.fn();
   let el;
 

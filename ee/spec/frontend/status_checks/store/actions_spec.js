@@ -5,7 +5,7 @@ import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 
-const statusChecksPath = '/api/v4/projects/1/external_approval_rules';
+const statusChecksPath = '/api/v4/projects/1/external_status_checks';
 const rootState = { settings: { statusChecksPath } };
 const commit = jest.fn();
 const dispatch = jest.fn();

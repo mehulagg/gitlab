@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
-  subject { build(:external_approval_rule) }
+RSpec.describe MergeRequests::ExternalStatusCheck, type: :model do
+  subject { build(:external_status_check) }
 
   describe 'Associations' do
     it { is_expected.to belong_to(:project) }

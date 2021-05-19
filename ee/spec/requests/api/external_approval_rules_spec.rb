@@ -7,10 +7,10 @@ RSpec.describe ::API::ExternalApprovalRules do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:rule) { create(:external_approval_rule, project: project, name: 'Rule 2', external_url: 'https://rule2.example') }
-  let(:collection_url) { "/projects/#{project.id}/external_approval_rules" }
-  let(:single_object_url) { "/projects/#{project.id}/external_approval_rules/#{rule.id}" }
+  let(:collection_url) { "/projects/#{project.id}/external_status_checks" }
+  let(:single_object_url) { "/projects/#{project.id}/external_status_checks/#{rule.id}" }
 
-  describe 'DELETE projects/:id/external_approval_rules/:rule_id' do
+  describe 'DELETE projects/:id/external_status_checks/:rule_id' do
     before do
       stub_licensed_features(compliance_approval_gates: true)
     end
@@ -48,7 +48,7 @@ RSpec.describe ::API::ExternalApprovalRules do
     end
   end
 
-  describe 'GET projects/:id/external_approval_rules' do
+  describe 'GET projects/:id/external_status_checks' do
     let_it_be(:rule) { create(:external_approval_rule, project: project, name: 'Rule 1', external_url: "http://rule1.example") }
     let_it_be(:protected_branches) { create_list(:protected_branch, 3, project: project) }
 
@@ -101,7 +101,7 @@ RSpec.describe ::API::ExternalApprovalRules do
     end
   end
 
-  describe 'POST projects/:id/external_approval_rules' do
+  describe 'POST projects/:id/external_status_checks' do
     context 'successfully creating new external approval rule' do
       before do
         stub_feature_flags(ff_compliance_approval_gates: true)
@@ -109,7 +109,7 @@ RSpec.describe ::API::ExternalApprovalRules do
       end
 
       subject do
-        post api("/projects/#{project.id}/external_approval_rules", project.owner), params: attributes_for(:external_approval_rule)
+        post api("/projects/#{project.id}/external_status_checks", project.owner), params: attributes_for(:external_approval_rule)
       end
 
       it 'creates a new external approval rule' do
@@ -123,7 +123,7 @@ RSpec.describe ::API::ExternalApprovalRules do
         end
 
         subject do
-          post api("/projects/#{project.id}/external_approval_rules", project.owner), params: params
+          post api("/projects/#{project.id}/external_status_checks", project.owner), params: params
         end
 
         it 'returns expected status code' do
@@ -168,7 +168,7 @@ RSpec.describe ::API::ExternalApprovalRules do
         end
 
         it 'returns the correct status code' do
-          post api("/projects/#{project.id}/external_approval_rules", (project_owner ? project.owner : build(:user))), params: attributes_for(:external_approval_rule)
+          post api("/projects/#{project.id}/external_status_checks", (project_owner ? project.owner : build(:user))), params: attributes_for(:external_approval_rule)
 
           expect(response).to have_gitlab_http_status(status)
         end
@@ -176,7 +176,7 @@ RSpec.describe ::API::ExternalApprovalRules do
     end
   end
 
-  describe 'PUT projects/:id/external_approval_rules/:rule_id' do
+  describe 'PUT projects/:id/external_status_checks/:rule_id' do
     let(:params) { { external_url: 'http://newvalue.com', name: 'new name' } }
 
     context 'successfully updating external approval rule' do

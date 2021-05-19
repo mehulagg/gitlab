@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalApprovalRules::UpdateService do
+RSpec.describe ExternalStatusChecks::UpdateService do
   let_it_be(:project) { create(:project) }
   let_it_be(:rule) { create(:external_approval_rule, project: project) }
   let_it_be(:protected_branch) { create(:protected_branch, project: project) }

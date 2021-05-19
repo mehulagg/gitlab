@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ExternalApprovalRules
+module ExternalStatusChecks
   class UpdateService < BaseContainerService
     def execute
       return unauthorized_error_response unless current_user.can?(:admin_project, container)

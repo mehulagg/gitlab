@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalApprovalRules::DestroyService do
+RSpec.describe ExternalStatusChecks::DestroyService do
   let_it_be(:project) { create(:project) }
   let_it_be(:rule) { create(:external_approval_rule, project: project) }
   let(:current_user) { project.owner }

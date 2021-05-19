@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ExternalApprovalRules
+module ExternalStatusChecks
   class CreateService < BaseContainerService
     def execute
       return ServiceResponse.error(message: 'Failed to create rule', payload: { errors: ['Not allowed'] }, http_status: :unauthorized) unless current_user.can?(:admin_project, container)

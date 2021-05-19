@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ApprovalRules
-  class ExternalApprovalRule < ApplicationRecord
-    self.table_name = 'external_approval_rules'
+module MergeRequests
+  class ExternalStatusCheck < ApplicationRecord
+    self.table_name = 'external_status_checks'
     scope :with_api_entity_associations, -> { preload(:protected_branches) }
 
     belongs_to :project
