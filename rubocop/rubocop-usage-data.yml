@@ -39,6 +39,11 @@ UsageData/LargeTable:
     - :arel_table
     - :minimum
     - :maximum
+UsageData/HistogramWithLargeTable:
+  Enabled: true
+  Include:
+    - 'lib/gitlab/usage_data.rb'
+    - 'ee/lib/ee/gitlab/usage_data.rb'
 UsageData/DistinctCountByLargeForeignKey:
   Enabled: true
   Include:
