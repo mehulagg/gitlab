@@ -55,7 +55,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
 
       context 'when write was not performed' do
         before do
-          allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:performed_write?).and_return(false)
+          allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:use_primary?).and_return(false)
         end
 
         it 'passes database_replica_location' do
@@ -69,7 +69,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
 
       context 'when write was performed' do
         before do
-          allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:performed_write?).and_return(true)
+          allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:use_primary?).and_return(true)
         end
 
         it 'passes primary write location', :aggregate_failures do
