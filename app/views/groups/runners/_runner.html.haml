@@ -11,9 +11,9 @@
       - else
         %span.badge.badge-pill.gl-badge.sm.badge-info
           = _('specific')
-      - if runner.locked?
-        %span.badge.badge-pill.gl-badge.sm.badge-warning
-          = _('locked')
+        - if runner.locked?
+          %span.badge.badge-pill.gl-badge.sm.badge-warning
+            = _('locked')
       - unless runner.active?
         %span.badge.badge-pill.gl-badge.sm.badge-danger
           = _('paused')
