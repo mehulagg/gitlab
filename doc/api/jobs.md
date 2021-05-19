@@ -801,7 +801,7 @@ Example of response
 ```
 
 NOTE:
-It's currently not possible to erase archived jobs via API. Please follow these instructions: [Delete job artifacts and logs from jobs completed before a specific date](https://docs.gitlab.com/ee/administration/job_artifacts.html#delete-job-artifacts-and-logs-from-jobs-completed-before-a-specific-date) to erase them via [Rails console](https://docs.gitlab.com/ee/administration/operations/rails_console.html).
+It's currently not possible to erase archived jobs via API. Please follow these instructions: [Delete job artifacts and logs from jobs completed before a specific date](../administration/job_artifacts.md#delete-job-artifacts-and-logs-from-jobs-completed-before-a-specific-date) to erase them via [Rails console](../administration/operations/rails_console.md).
 
 ## Play a job
 
