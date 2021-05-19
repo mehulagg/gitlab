@@ -39,8 +39,8 @@ describe('IssuesListApp component', () => {
     endpoint: 'api/endpoint',
     exportCsvPath: 'export/csv/path',
     hasBlockedIssuesFeature: true,
-    hasIssues: true,
     hasIssueWeightsFeature: true,
+    hasProjectIssues: true,
     isSignedIn: false,
     issuesPath: 'path/to/issues',
     jiraIntegrationPath: 'jira/integration/path',
@@ -320,7 +320,7 @@ describe('IssuesListApp component', () => {
         beforeEach(async () => {
           global.jsdom.reconfigure({ url: `${TEST_HOST}?search=no+results` });
 
-          wrapper = mountComponent({ provide: { hasIssues: true }, mountFn: mount });
+          wrapper = mountComponent({ provide: { hasProjectIssues: true }, mountFn: mount });
 
           await waitForPromises();
         });
@@ -336,7 +336,7 @@ describe('IssuesListApp component', () => {
 
       describe('when "Open" tab has no issues', () => {
         beforeEach(async () => {
-          wrapper = mountComponent({ provide: { hasIssues: true }, mountFn: mount });
+          wrapper = mountComponent({ provide: { hasProjectIssues: true }, mountFn: mount });
 
           await waitForPromises();
         });
@@ -356,7 +356,7 @@ describe('IssuesListApp component', () => {
             url: setUrlParams({ state: IssuableStates.Closed }, TEST_HOST),
           });
 
-          wrapper = mountComponent({ provide: { hasIssues: true }, mountFn: mount });
+          wrapper = mountComponent({ provide: { hasProjectIssues: true }, mountFn: mount });
 
           await waitForPromises();
         });
@@ -374,7 +374,7 @@ describe('IssuesListApp component', () => {
       describe('when user is logged in', () => {
         beforeEach(() => {
           wrapper = mountComponent({
-            provide: { hasIssues: false, isSignedIn: true },
+            provide: { hasProjectIssues: false, isSignedIn: true },
             mountFn: mount,
           });
         });
@@ -413,7 +413,7 @@ describe('IssuesListApp component', () => {
       describe('when user is logged out', () => {
         beforeEach(() => {
           wrapper = mountComponent({
-            provide: { hasIssues: false, isSignedIn: false },
+            provide: { hasProjectIssues: false, isSignedIn: false },
           });
         });
 
