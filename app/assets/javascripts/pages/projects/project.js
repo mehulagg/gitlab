@@ -40,6 +40,18 @@ export default class Project {
       $(this).parents('.auto-devops-implicitly-enabled-banner').remove();
       return e.preventDefault();
     });
+    $('.nav-sidebar li[data-track-action]').on('click', function () {
+      const sidebarCollapsed = $('.nav-sidebar').hasClass('js-sidebar-collapsed');
+      const subMenuList = $(this).parent('.sidebar-sub-level-items');
+
+      if (subMenuList.length) {
+        $(this).data('track-value', subMenuList.hasClass('fly-out-list') ? 'fly-out' : 'expanded');
+      }else{
+        $(this).data('track-value', $(this).hasClass('is-showing-fly-out') ? 'fly-out' : 'expanded');
+      }
+
+      $(this).data('track-context', sidebarCollapsed ? 'sidebar_collapsed' : 'sidebar_expanded');
+    });
 
     Project.projectSelectDropdown();
   }
