@@ -14,7 +14,7 @@ module Security
     belongs_to :scan, inverse_of: :findings, optional: false
     belongs_to :scanner, class_name: 'Vulnerabilities::Scanner', inverse_of: :security_findings, optional: false
 
-    has_one :build, through: :scan
+    has_one :build, through: :scan, disable_joins: true
 
     enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
     enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
@@ -23,7 +23,7 @@ module Security
     validates :uuid, presence: true
 
     scope :by_uuid, -> (uuids) { where(uuid: uuids) }
-    scope :by_build_ids, -> (build_ids) { joins(scan: :build).where(ci_builds: { id: build_ids }) }
+    scope :by_build_ids, -> (build_ids) { joins(:scan).where(security_scans: { build_id: build_ids }) }
     scope :by_project_fingerprints, -> (fingerprints) { where(project_fingerprint: fingerprints) }
     scope :by_severity_levels, -> (severity_levels) { where(severity: severity_levels) }
     scope :by_confidence_levels, -> (confidence_levels) { where(confidence: confidence_levels) }
