@@ -2,7 +2,7 @@
 import { GlIcon, GlEmptyState, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import Cookies from 'js-cookie';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
+import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
 import { __ } from '~/locale';
 import banner from './banner.vue';
 import stageCodeComponent from './stage_code_component.vue';
@@ -132,7 +132,7 @@ export default {
         For now we can use the `withStageCounts` flag to ensure we don't display empty stage counts
         Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/326705
       -->
-      <div class="card">
+      <div class="card" data-testid="vsa-stage-overview-metrics">
         <div class="card-header">{{ __('Recent Project Activity') }}</div>
         <div class="d-flex justify-content-between">
           <div v-for="item in summary" :key="item.title" class="gl-flex-grow-1 gl-text-center">
@@ -163,7 +163,7 @@ export default {
           </div>
         </div>
       </div>
-      <div class="stage-panel-container">
+      <div class="stage-panel-container" data-testid="vsa-stage-table">
         <div class="card stage-panel gl-px-5">
           <div class="card-header border-bottom-0">
             <nav class="col-headers">

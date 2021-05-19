@@ -6,7 +6,6 @@ import {
   selectedStage,
 } from '../mock_data';
 
-// TODO: move path navigation component to CE ee/spec/frontend/analytics/cycle_analytics/components/path_navigation_spec.js
 describe('Value stream analytics getters', () => {
   describe('pathNavigationData', () => {
     it('returns the transformed data', () => {

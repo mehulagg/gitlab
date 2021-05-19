@@ -1,16 +1,17 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
+import { PROJECTS_PER_PAGE } from '../constants';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
 import Metrics from './metrics.vue';
-import PathNavigation from './path_navigation.vue';
 import StageTableNew from './stage_table_new.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';

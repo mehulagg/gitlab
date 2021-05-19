@@ -43,7 +43,7 @@ const planStage = {
   name: 'plan',
   legend: '',
   description: 'Time before an issue starts implementation',
-  value: 'about 21 hours',
+  value: 75600,
 };
 
 const codeStage = {
@@ -52,7 +52,7 @@ const codeStage = {
   name: 'code',
   legend: '',
   description: 'Time until first merge request',
-  value: '2 days',
+  value: 172800,
 };
 
 const testStage = {
@@ -61,7 +61,7 @@ const testStage = {
   name: 'test',
   legend: '',
   description: 'Total test time for all commits/merges',
-  value: 'about 5 hours',
+  value: 17550,
 };
 
 const reviewStage = {
@@ -79,7 +79,7 @@ const stagingStage = {
   name: 'staging',
   legend: '',
   description: 'From merge request merge until deploy to production',
-  value: '2 days',
+  value: 172800,
 };
 
 export const selectedStage = {
@@ -91,7 +91,6 @@ export const selectedStage = {
     'The issue stage shows the time it takes from creating an issue to assigning the issue to a milestone, or add the issue to a list on your Issue Board. Begin creating issues to see data for this stage.',
   component: 'stage-issue-component',
   slug: 'issue',
-  id: 'issue',
 };
 
 export const stats = [issueStage, planStage, codeStage, testStage, reviewStage, stagingStage];

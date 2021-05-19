@@ -1,5 +1,4 @@
 import { isNumber } from 'lodash';
-import { OVERVIEW_STAGE_ID } from 'ee/analytics/cycle_analytics/constants';
 import {
   isStartEvent,
   isLabelEvent,
@@ -21,6 +20,7 @@ import {
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
 import { rawStageMedians } from 'jest/cycle_analytics/mock_data';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { medianTimeToParsedSeconds } from '~/cycle_analytics/utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import { slugify } from '~/lib/utils/text_utility';

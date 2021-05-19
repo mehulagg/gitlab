@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PathNavigation displays correctly loading is false matches the snapshot 1`] = `
+exports[`Project PathNavigation displays correctly loading is false matches the snapshot 1`] = `
 <div
   class="gl-path-nav"
   data-testid="gl-path-nav"
@@ -35,35 +35,16 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
       id="path-6-item-0"
     >
       <button
-        class="gl-path-button"
-      >
-        <svg
-          aria-hidden="true"
-          class="gl-mr-2 gl-icon s16"
-          data-testid="gl-path-item-icon"
-          role="img"
-        >
-          <use
-            href="#home"
-          />
-        </svg>
-        
-        Overview
-        <!---->
-      </button>
-       
-    </li>
-    <li
-      class="gl-path-nav-list-item"
-      id="path-6-item-1"
-    >
-      <button
         class="gl-path-button gl-path-active-item-indigo"
       >
         <!---->
         
         Issue
-        <!---->
+        <span
+          class="gl-font-weight-normal gl-pl-2"
+        >
+          172800
+        </span>
       </button>
        
       <div
@@ -88,7 +69,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             <div
               class="gl-pb-4 gl-font-weight-bold"
             >
-              
+              172800
             </div>
           </div>
         </div>
@@ -110,7 +91,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             <div
               class="gl-pb-4 gl-font-weight-bold"
             >
-              172800 items
+              -
             </div>
           </div>
         </div>
@@ -118,53 +99,87 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
         <div
           class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
         >
-          <div
-            class="gl-display-flex gl-flex-direction-row"
-          >
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label"
-            >
-              
-            Start
-          
-            </div>
-             
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
-            >
-              <p
-                data-sourcepos="1:1-1:13"
-                dir="auto"
-              >
-                Issue created
-              </p>
-            </div>
-          </div>
+          <!---->
            
+          <!---->
+        </div>
+        Issue
+      </div>
+    </li>
+    <li
+      class="gl-path-nav-list-item"
+      id="path-6-item-1"
+    >
+      <button
+        class="gl-path-button"
+      >
+        <!---->
+        
+        Plan
+        <span
+          class="gl-font-weight-normal gl-pl-2"
+        >
+          86400
+        </span>
+      </button>
+       
+      <div
+        class="gl-popover"
+        data-testid="stage-item-popover"
+      >
+         
+        <div
+          class="gl-px-4"
+        >
           <div
-            class="gl-display-flex gl-flex-direction-row"
+            class="gl-display-flex gl-justify-content-space-between"
           >
             <div
-              class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label"
+              class="gl-pr-4 gl-pb-4"
             >
               
-            Stop
+            Stage time (median)
           
             </div>
              
             <div
-              class="gl-display-flex gl-flex-direction-column stage-event-description"
+              class="gl-pb-4 gl-font-weight-bold"
             >
-              <p
-                data-sourcepos="1:1-1:71"
-                dir="auto"
-              >
-                Issue first associated with a milestone or issue first added to a board
-              </p>
+              86400
             </div>
           </div>
         </div>
-        Issue
+         
+        <div
+          class="gl-px-4"
+        >
+          <div
+            class="gl-display-flex gl-justify-content-space-between"
+          >
+            <div
+              class="gl-pr-4 gl-pb-4"
+            >
+              
+            Items in stage
+          
+            </div>
+             
+            <div
+              class="gl-pb-4 gl-font-weight-bold"
+            >
+              -
+            </div>
+          </div>
+        </div>
+         
+        <div
+          class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
+        >
+          <!---->
+           
+          <!---->
+        </div>
+        Plan
       </div>
     </li>
     <li
@@ -176,122 +191,12 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
       >
         <!---->
         
-        Plan
-        <!---->
-      </button>
-       
-      <div
-        class="gl-popover"
-        data-testid="stage-item-popover"
-      >
-         
-        <div
-          class="gl-px-4"
-        >
-          <div
-            class="gl-display-flex gl-justify-content-space-between"
-          >
-            <div
-              class="gl-pr-4 gl-pb-4"
-            >
-              
-            Stage time (median)
-          
-            </div>
-             
-            <div
-              class="gl-pb-4 gl-font-weight-bold"
-            >
-              
-            </div>
-          </div>
-        </div>
-         
-        <div
-          class="gl-px-4"
-        >
-          <div
-            class="gl-display-flex gl-justify-content-space-between"
-          >
-            <div
-              class="gl-pr-4 gl-pb-4"
-            >
-              
-            Items in stage
-          
-            </div>
-             
-            <div
-              class="gl-pb-4 gl-font-weight-bold"
-            >
-              86400 items
-            </div>
-          </div>
-        </div>
-         
-        <div
-          class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
-        >
-          <div
-            class="gl-display-flex gl-flex-direction-row"
-          >
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label"
-            >
-              
-            Start
-          
-            </div>
-             
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
-            >
-              <p
-                data-sourcepos="1:1-1:71"
-                dir="auto"
-              >
-                Issue first associated with a milestone or issue first added to a board
-              </p>
-            </div>
-          </div>
-           
-          <div
-            class="gl-display-flex gl-flex-direction-row"
-          >
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label"
-            >
-              
-            Stop
-          
-            </div>
-             
-            <div
-              class="gl-display-flex gl-flex-direction-column stage-event-description"
-            >
-              <p
-                data-sourcepos="1:1-1:33"
-                dir="auto"
-              >
-                Issue first mentioned in a commit
-              </p>
-            </div>
-          </div>
-        </div>
-        Plan
-      </div>
-    </li>
-    <li
-      class="gl-path-nav-list-item"
-      id="path-6-item-3"
-    >
-      <button
-        class="gl-path-button"
-      >
-        <!---->
-        
         Code
-        <!---->
+        <span
+          class="gl-font-weight-normal gl-pl-2"
+        >
+          129600
+        </span>
       </button>
        
       <div
@@ -316,7 +221,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             <div
               class="gl-pb-4 gl-font-weight-bold"
             >
-              
+              129600
             </div>
           </div>
         </div>
@@ -338,7 +243,7 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
             <div
               class="gl-pb-4 gl-font-weight-bold"
             >
-              129600 items
+              -
             </div>
           </div>
         </div>
@@ -346,51 +251,9 @@ exports[`PathNavigation displays correctly loading is false matches the snapshot
         <div
           class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50"
         >
-          <div
-            class="gl-display-flex gl-flex-direction-row"
-          >
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pr-4 gl-pb-4 metric-label"
-            >
-              
-            Start
-          
-            </div>
-             
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pb-4 stage-event-description"
-            >
-              <p
-                data-sourcepos="1:1-1:33"
-                dir="auto"
-              >
-                Issue first mentioned in a commit
-              </p>
-            </div>
-          </div>
+          <!---->
            
-          <div
-            class="gl-display-flex gl-flex-direction-row"
-          >
-            <div
-              class="gl-display-flex gl-flex-direction-column gl-pr-4 metric-label"
-            >
-              
-            Stop
-          
-            </div>
-             
-            <div
-              class="gl-display-flex gl-flex-direction-column stage-event-description"
-            >
-              <p
-                data-sourcepos="1:1-1:21"
-                dir="auto"
-              >
-                Merge request created
-              </p>
-            </div>
-          </div>
+          <!---->
         </div>
         Code
       </div>
