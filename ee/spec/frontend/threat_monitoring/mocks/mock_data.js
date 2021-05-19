@@ -114,6 +114,12 @@ export const formattedMockNetworkPolicyStatisticsResponse = {
 export const mockAlerts = [
   {
     iid: '01',
+    title: 'Issue 01',
+    severity: 'HIGH',
+    status: 'TRIGGERED',
+    startedAt: '2020-11-19T18:36:23Z',
+    eventCount: '1',
+    issue: { iid: '5', state: 'opened', title: 'Issue 01', webUrl: 'http://test.com/05' },
     assignees: {
       nodes: [
         {
@@ -125,46 +131,36 @@ export const mockAlerts = [
         },
       ],
     },
-    eventCount: '1',
-    issueIid: null,
-    issue: { iid: '5', state: 'opened', title: 'Issue 01', webUrl: 'http://test.com/05' },
-    title: 'Issue 01',
-    severity: 'HIGH',
-    status: 'TRIGGERED',
-    startedAt: '2020-11-19T18:36:23Z',
   },
   {
     iid: '02',
-    eventCount: '2',
-    assignees: { nodes: [] },
-    issueIid: null,
-    issue: { iid: '6', state: 'closed', title: 'Issue 02', webUrl: 'http://test.com/06' },
-    severity: 'CRITICAL',
     title: 'Issue 02',
+    severity: 'CRITICAL',
     status: 'ACKNOWLEDGED',
     startedAt: '2020-11-16T21:59:28Z',
+    eventCount: '2',
+    issue: { iid: '6', state: 'closed', title: 'Issue 02', webUrl: 'http://test.com/06' },
+    assignees: { nodes: [] },
   },
   {
     iid: '03',
-    eventCount: '3',
-    assignees: { nodes: [] },
-    issueIid: null,
-    issue: null,
-    severity: 'MEDIUM',
     title: 'Issue 03',
+    severity: 'MEDIUM',
     status: 'RESOLVED',
     startedAt: '2020-11-13T20:03:04Z',
+    eventCount: '3',
+    issue: null,
+    assignees: { nodes: [] },
   },
   {
     iid: '04',
-    assignees: { nodes: [] },
-    issueIid: null,
-    issue: null,
-    severity: 'LOW',
-    eventCount: '4',
     title: 'Issue 04',
+    severity: 'LOW',
     status: 'IGNORED',
     startedAt: '2020-10-29T13:37:55Z',
+    eventCount: '4',
+    issue: null,
+    assignees: { nodes: [] },
   },
 ];
 
@@ -176,10 +172,20 @@ export const mockPageInfo = {
 };
 
 export const mockAlertDetails = {
-  iid: '01',
-  issue: { webUrl: '/#/-/issues/02' },
-  title: 'dropingress',
-  monitorTool: 'Cilium',
+  ...mockAlerts[0],
+  createdAt: '2020-10-29T13:37:55Z',
+  monitoringTool: 'Cilium',
+  metricsDashboardUrl: 'www.test.com',
+  service: '',
+  description: 'triggered alert',
+  updatedAt: '2020-10-29T13:37:55Z',
+  endedAt: null,
+  hosts: [],
+  environment: null,
+  details: {},
+  runbook: null,
+  todos: { nodes: [{ id: 'gid://gitlab/Todo/5984130' }] },
+  notes: { nodes: [] },
 };
 
 export const mockL7Manifest = `apiVersion: cilium.io/v2
