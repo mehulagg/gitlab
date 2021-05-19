@@ -5,7 +5,7 @@ import SecurityConfigurationApp from './components/app.vue';
 import NewSecurityConfigurationApp from './components/new_app.vue';
 import { augmentFeatures } from './utils';
 
-export const initStaticSecurityConfiguration = (el) => {
+export const initNewSecurityConfiguration = (el) => {
   if (!el) {
     return null;
   }
@@ -18,26 +18,38 @@ export const initStaticSecurityConfiguration = (el) => {
 
   const { projectPath, upgradePath, features } = el.dataset;
 
-  if (gon.features.securityConfigurationRedesign) {
-    const { securityFeatures, complianceFeatures } = augmentFeatures(features);
+  const { securityFeatures, complianceFeatures } = augmentFeatures(features);
 
-    return new Vue({
-      el,
-      apolloProvider,
-      provide: {
-        projectPath,
-        upgradePath,
-      },
-      render(createElement) {
-        return createElement(NewSecurityConfigurationApp, {
-          props: {
-            securityFeatures,
-            complianceFeatures,
-          },
-        });
-      },
-    });
+  return new Vue({
+    el,
+    apolloProvider,
+    provide: {
+      projectPath,
+      upgradePath,
+    },
+    render(createElement) {
+      return createElement(NewSecurityConfigurationApp, {
+        props: {
+          securityFeatures,
+          complianceFeatures,
+        },
+      });
+    },
+  });
+};
+
+export const initStaticSecurityConfiguration = (el) => {
+  if (!el) {
+    return null;
   }
+
+  Vue.use(VueApollo);
+
+  const apolloProvider = new VueApollo({
+    defaultClient: createDefaultClient(),
+  });
+
+  const { projectPath, upgradePath } = el.dataset;
 
   return new Vue({
     el,
