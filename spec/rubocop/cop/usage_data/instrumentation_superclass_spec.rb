@@ -24,7 +24,7 @@ RSpec.describe RuboCop::Cop::UsageData::InstrumentationSuperclass do
     end
 
     context 'when inheriting from some other superclass' do
-      it 'does not register an offense' do
+      it 'registers an offense' do
         expect_offense(<<~CODE)
           class NewMetric < BaseMetric; end
                             ^^^^^^^^^^ #{msg}
@@ -47,7 +47,7 @@ RSpec.describe RuboCop::Cop::UsageData::InstrumentationSuperclass do
     end
 
     context 'when inheriting from some other superclass' do
-      it 'does not register an offense' do
+      it 'registers an offense' do
         expect_offense(<<~CODE)
           NewMetric = Class.new(BaseMetric)
                                 ^^^^^^^^^^ #{msg}
