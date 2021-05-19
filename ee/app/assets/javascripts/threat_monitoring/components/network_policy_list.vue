@@ -259,7 +259,7 @@ export default {
     >
       <template #header>
         <div>
-          <h3 class="gl-mb-3">{{ selectedPolicy.name }}</h3>
+          <h3 class="gl-mt-0 gl-mb-3">{{ selectedPolicy.name }}</h3>
           <div>
             <gl-button ref="cancelButton" @click="deselectPolicy">{{ __('Cancel') }}</gl-button>
             <gl-button

@@ -139,7 +139,7 @@ export default {
     @close="$emit('deselect-alert')"
   >
     <template #header>
-      <h5 class="gl-mt-2 gl-mb-5">{{ selectedAlert.title }}</h5>
+      <h5 class="gl-mt-0 gl-mb-5">{{ selectedAlert.title }}</h5>
       <div>
         <gl-link v-if="hasIssue" :href="alertIssuePath" data-testid="issue-link">
           {{ issueText }}
