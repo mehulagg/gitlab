@@ -77,7 +77,7 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
    - Project's **Operations > Kubernetes** page, for a project-level cluster.
    - Group's **Kubernetes** page, for a group-level cluster.
    - **Admin Area > Kubernetes**, for an instance-level cluster.
-1. Click **Add Kubernetes cluster**.
+1. Click **Integrate with a cluster certificate**.
 1. Under the **Create new cluster** tab, click **Amazon EKS** to display an
    `Account ID` and `External ID` needed for later steps.
 1. In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an IAM policy:
