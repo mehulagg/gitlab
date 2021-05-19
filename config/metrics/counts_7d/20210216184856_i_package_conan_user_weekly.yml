@@ -6,7 +6,7 @@ product_stage: package
 product_group: group::package
 product_category: package registry
 value_type: number
-status: data_not_available
+status: data_available
 time_frame: 7d
 data_source:
 distribution:
