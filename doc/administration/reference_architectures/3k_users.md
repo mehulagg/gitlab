@@ -44,8 +44,7 @@ For a full list of reference architectures, see
 
 NOTE:
 
-- Components marked with \* can be optionally run as reputable
-third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. 
+- Components marked with \* can be optionally run as reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. 
 Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
 - Components marked with \*\* can be optionally run as reputable
 third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
