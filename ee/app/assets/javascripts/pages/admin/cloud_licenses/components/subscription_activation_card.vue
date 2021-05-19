@@ -5,7 +5,9 @@ import { activateSubscription, howToActivateSubscription, uploadLegacyLicense } 
 import SubscriptionActivationErrors from './subscription_activation_errors.vue';
 import SubscriptionActivationForm from './subscription_activation_form.vue';
 
-export const adminLicenseUrl = helpPagePath('/user/admin_area/license');
+export const adminLicenseUrl = helpPagePath('/user/admin_area/license', {
+  anchor: 'activate-gitlab-ee-with-an-activation-code',
+});
 
 export default {
   name: 'SubscriptionActivationCard',
