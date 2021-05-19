@@ -67,7 +67,19 @@ export default {
         </div>
       </gl-tab>
       <gl-tab :title="$options.i18n.compliance">
-        {{ __('Compliance goes here') }}
+        <div class="row">
+          <div class="col-lg-5">
+            <h4 class="gl-mt-0">{{ $options.i18n.compliance }}</h4>
+          </div>
+          <div class="col-lg-7">
+            <feature-card
+              v-for="feature in complianceFeatures"
+              :key="feature.type"
+              :feature="feature"
+              class="gl-mb-6"
+            />
+          </div>
+        </div>
       </gl-tab>
     </gl-tabs>
   </article>
