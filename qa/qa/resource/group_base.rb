@@ -14,6 +14,15 @@ module QA
       attribute :name
       attribute :full_path
 
+      # Get group labels
+      #
+      # @return [Array<Hash>]
+      def labels
+        parse_body(api_get_from("/groups/#{id}/labels")).map do |label|
+          label.except(:id)
+        end
+      end
+
       # API post path
       #
       # @return [String]

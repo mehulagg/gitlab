@@ -59,6 +59,17 @@ module QA
       end
 
       before do
+        Resource::GroupLabel.fabricate_via_api! do |label|
+          label.api_client = api_client
+          label.group = source_group
+          label.title = "source-group-#{SecureRandom.hex(4)}"
+        end
+        Resource::GroupLabel.fabricate_via_api! do |label|
+          label.api_client = api_client
+          label.group = subgroup
+          label.title = "subgroup-#{SecureRandom.hex(4)}"
+        end
+
         sandbox.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
         source_group.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
 
@@ -79,8 +90,12 @@ module QA
 
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
+
             expect(imported_group).to eq(source_group)
+            expect(imported_group.labels).to eq(source_group.labels)
+
             expect(imported_subgroup).to eq(subgroup)
+            expect(imported_subgroup.labels).to eq(subgroup.labels)
           end
         end
       end
