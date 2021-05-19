@@ -70,6 +70,11 @@ module Types
           null: true,
           description: "URL to the vulnerability's details page."
 
+    field :state,
+          type: VulnerabilityStateEnum,
+          null: true,
+          description: "The finding status."
+
     def location
       object.location&.merge(report_type: object.report_type)
     end
