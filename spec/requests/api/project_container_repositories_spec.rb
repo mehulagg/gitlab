@@ -94,6 +94,7 @@ RSpec.describe API::ProjectContainerRepositories do
 
   describe 'GET /projects/:id/registry/repositories' do
     let(:url) { "/projects/#{project.id}/registry/repositories" }
+    let(:user) { api_user }
 
     ['using API user', 'using job token'].each do |context|
       context context do
@@ -115,6 +116,7 @@ RSpec.describe API::ProjectContainerRepositories do
   describe 'DELETE /projects/:id/registry/repositories/:repository_id' do
     let(:method) { :delete }
     let(:url) { "/projects/#{project.id}/registry/repositories/#{root_repository.id}" }
+    let(:user) { api_user }
 
     ['using API user', 'using job token'].each do |context|
       context context do
@@ -154,6 +156,7 @@ RSpec.describe API::ProjectContainerRepositories do
 
         context 'for reporter' do
           let(:api_user) { reporter }
+          let(:user) { api_user }
 
           before do
             stub_container_registry_tags(repository: root_repository.path, tags: %w(rootA latest))
@@ -193,6 +196,7 @@ RSpec.describe API::ProjectContainerRepositories do
           let(:params) do
             { name_regex_delete: 'v10.*' }
           end
+          let(:user) { api_user }
 
           it_behaves_like 'rejected container repository access', :developer, :forbidden
           it_behaves_like 'rejected container repository access', :anonymous, :not_found
@@ -405,7 +409,7 @@ RSpec.describe API::ProjectContainerRepositories do
               subject
 
               expect(response).to have_gitlab_http_status(:ok)
-              expect_snowplow_event(category: described_class.name, action: 'delete_tag')
+              expect_snowplow_event(category: described_class.name, action: 'delete_tag', project: project, user: api_user, namespace: api_user.namespace)
             end
           end
 
@@ -421,7 +425,7 @@ RSpec.describe API::ProjectContainerRepositories do
               subject
 
               expect(response).to have_gitlab_http_status(:ok)
-              expect_snowplow_event(category: described_class.name, action: 'delete_tag')
+              expect_snowplow_event(category: described_class.name, action: 'delete_tag', project: project, user: api_user, namespace: api_user.namespace)
             end
           end
         end
