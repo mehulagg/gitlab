@@ -253,7 +253,7 @@ Verification for Versioned Terraform States is available for locally stored file
 
 ##### Enable or disable verification for Versioned Terraform States **(PREMIUM SELF)**
 
-Verification for locally stored Versioned Terraform State files  is behind a feature flag `geo_terraform_state_version_verification`, enabled by default.
+Verification for locally stored Versioned Terraform State files is behind a feature flag `geo_terraform_state_version_verification`, enabled by default.
 
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can opt to disable it.
 
