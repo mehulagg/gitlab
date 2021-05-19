@@ -125,6 +125,7 @@ project_members:
 - source
 - project
 merge_requests:
+- status_check_responses
 - subscriptions
 - award_emoji
 - author
@@ -351,6 +352,7 @@ project:
 - cluster_project
 - creator
 - cycle_analytics_stages
+- value_streams
 - group
 - namespace
 - management_clusters

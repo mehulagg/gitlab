@@ -2,6 +2,7 @@
 
 module Security
   class OrchestrationPolicyConfiguration < ApplicationRecord
+    include EachBatch
     include Gitlab::Utils::StrongMemoize
 
     self.table_name = 'security_orchestration_policy_configurations'
@@ -9,6 +10,11 @@ module Security
     POLICY_PATH = '.gitlab/security-policies/policy.yml'
     POLICY_SCHEMA_PATH = 'ee/app/validators/json_schemas/security_orchestration_policy.json'
     POLICY_LIMIT = 5
+
+    RULE_TYPES = {
+      pipeline: 'pipeline',
+      schedule: 'schedule'
+    }.freeze
 
     ON_DEMAND_SCANS = %w[dast].freeze
 
@@ -24,6 +30,10 @@ module Security
     validates :security_policy_management_project, presence: true
 
     scope :for_project, -> (project_id) { where(project_id: project_id) }
+    scope :with_outdated_configuration, -> do
+      joins(:security_policy_management_project)
+        .where(arel_table[:configured_at].lt(Project.arel_table[:last_repository_updated_at]).or(arel_table[:configured_at].eq(nil)))
+    end
 
     def enabled?
       ::Feature.enabled?(:security_orchestration_policies_configuration, project)
@@ -58,6 +68,16 @@ module Security
 
     def active_policy_names_with_dast_scanner_profile(profile_name)
       active_policy_names_with_dast_profiles.dig(:scanner_profiles, profile_name)
+    end
+
+    def policy_last_updated_by
+      strong_memoize(:policy_last_updated_by) do
+        policy_repo.last_commit_for_path(default_branch_or_main, POLICY_PATH)&.author
+      end
+    end
+
+    def delete_all_schedules
+      rule_schedules.delete_all(:delete_all)
     end
 
     private
@@ -107,7 +127,7 @@ module Security
 
     def applicable_for_branch?(policy, ref)
       policy[:rules].any? do |rule|
-        rule[:type] == 'pipeline' && rule[:branches].any? { |branch| RefMatcher.new(branch).matches?(ref) }
+        rule[:type] == RULE_TYPES[:pipeline] && rule[:branches].any? { |branch| RefMatcher.new(branch).matches?(ref) }
       end
     end
   end

@@ -8,7 +8,10 @@ import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
-import { DEFAULT_LABEL_ANY } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  DEFAULT_LABEL_ANY,
+  OPERATOR_IS_ONLY,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
@@ -286,7 +289,7 @@ export default {
           unique: false,
           symbol: '@',
           token: AuthorToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchPath: this.projectPath,
           fetchAuthors: Api.projectUsers.bind(Api),
         },
@@ -296,7 +299,7 @@ export default {
           title: __('Status'),
           unique: true,
           token: StatusToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
         },
       ];
     },

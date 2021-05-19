@@ -8,7 +8,11 @@ import { DEFAULT_FILTERS } from 'ee/threat_monitoring/components/alerts/constant
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
-import { defaultQuerySpy, emptyQuerySpy, loadingQuerySpy } from '../../mocks/mock_apollo';
+import {
+  getAlertsQuerySpy,
+  emptyGetAlertsQuerySpy,
+  loadingQuerySpy,
+} from '../../mocks/mock_apollo';
 import { mockAlerts, mockPageInfo } from '../../mocks/mock_data';
 
 let localVue;
@@ -54,7 +58,7 @@ describe('AlertsList component', () => {
   const findGlIntersectionObserver = () => wrapper.findComponent(GlIntersectionObserver);
   const findGlSkeletonLoading = () => wrapper.findComponent(GlSkeletonLoading);
 
-  const createWrapper = ({ $apollo, apolloSpy = defaultQuerySpy, data, stubs = {} } = {}) => {
+  const createWrapper = ({ $apollo, apolloSpy = getAlertsQuerySpy, data, stubs = {} } = {}) => {
     let apolloOptions;
     if ($apollo) {
       apolloOptions = {
@@ -80,6 +84,7 @@ describe('AlertsList component', () => {
         projectPath: DEFAULT_PROJECT_PATH,
       },
       stubs: {
+        AlertDrawer: true,
         AlertStatus: true,
         AlertFilters: true,
         GlAlert: true,
@@ -186,27 +191,11 @@ describe('AlertsList component', () => {
 
       it.each`
         description                                 | id   | text             | link
-        ${'when an issue is created and is open'}   | ${0} | ${'#5'}          | ${'/#/-/issues/incident/5'}
-        ${'when an issue is created and is closed'} | ${1} | ${'#6 (closed)'} | ${'/#/-/issues/incident/6'}
+        ${'when an issue is created and is open'}   | ${0} | ${'#5'}          | ${mockAlerts[0].issue.webUrl}
+        ${'when an issue is created and is closed'} | ${1} | ${'#6 (closed)'} | ${mockAlerts[1].issue.webUrl}
       `('displays the correct text $description', ({ id, text, link }) => {
         expect(findIssueColumnAt(id).text()).toBe(text);
         expect(findIssueColumnAt(id).find('a').attributes('href')).toBe(link);
-      });
-
-      describe('gon.relative_url_root', () => {
-        beforeAll(() => {
-          gon.relative_url_root = '/test';
-        });
-
-        afterEach(() => {
-          gon.relative_url_root = '';
-        });
-
-        it('creates the correct href when the gon.relative_url_root is set', () => {
-          expect(findIssueColumnAt(0).find('a').attributes('href')).toBe(
-            '/test/#/-/issues/incident/5',
-          );
-        });
       });
     });
 
@@ -235,7 +224,7 @@ describe('AlertsList component', () => {
 
   describe('empty state', () => {
     beforeEach(() => {
-      createWrapper({ apolloSpy: emptyQuerySpy });
+      createWrapper({ apolloSpy: emptyGetAlertsQuerySpy });
     });
 
     it('does show the empty state', () => {

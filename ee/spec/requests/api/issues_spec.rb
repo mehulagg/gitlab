@@ -269,6 +269,28 @@ RSpec.describe API::Issues, :mailer do
         expect_response_contain_exactly(iteration_1_issue.id)
       end
     end
+
+    it 'avoids N+1 queries' do
+      stub_licensed_features(epics: true)
+
+      group.add_developer(user)
+
+      subgroup_1 = create(:group, parent: group)
+      subgroup_1_project = create(:project, group: subgroup_1)
+
+      create(:issue, project: subgroup_1_project, epic: create(:epic, group: subgroup_1))
+
+      get api("/groups/#{group.id}/issues", user)
+
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/groups/#{group.id}/issues", user) }
+
+      subgroup_2 = create(:group, parent: group)
+      subgroup_2_project = create(:project, group: subgroup_2)
+
+      create(:issue, project: subgroup_2_project, epic: create(:epic, group: subgroup_2))
+
+      expect { get api("/groups/#{group.id}/issues", user) }.not_to exceed_query_limit(control_count)
+    end
   end
 
   describe "GET /projects/:id/issues" do

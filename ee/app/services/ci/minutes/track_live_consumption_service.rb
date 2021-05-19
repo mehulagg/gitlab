@@ -30,10 +30,11 @@ module Ci
 
           ::Gitlab::AppLogger.info(
             message: 'Build dropped due to CI minutes limit exceeded',
+            namespace: root_namespace.name,
             project_path: build.project.full_path,
             build_id: build.id,
-            user_id: build.user_id
-          )
+            user_id: build.user_id,
+            username: build.user&.username)
 
           ServiceResponse.success(message: 'Build dropped due to CI minutes limit exceeded', payload: { current_balance: new_balance })
         else

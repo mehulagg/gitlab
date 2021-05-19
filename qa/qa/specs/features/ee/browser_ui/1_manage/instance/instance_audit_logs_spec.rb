@@ -111,7 +111,7 @@ module QA
           Page::Admin::Menu.perform(&:go_to_users_overview)
           Page::Admin::Overview::Users::Index.perform do |index|
             index.search_user(user_for_impersonation.username)
-            index.click_user(user_for_impersonation.username)
+            index.click_user(user_for_impersonation.name)
           end
 
           Page::Admin::Overview::Users::Show.perform(&:click_impersonate_user)

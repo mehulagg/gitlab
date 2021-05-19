@@ -102,7 +102,8 @@ export const DEVOPS_ADOPTION_GROUP_COL_LABEL = __('Group');
 
 export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
   {
-    title: s__('DevopsAdoption|Adoption'),
+    title: s__('DevopsAdoption|Dev'),
+    tab: 'dev',
     cols: [
       {
         key: 'issueOpened',
@@ -122,6 +123,24 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
         testId: 'approvalsCol',
       },
+    ],
+  },
+  {
+    title: s__('DevopsAdoption|Sec'),
+    tab: 'sec',
+    cols: [
+      {
+        key: 'securityScanSucceeded',
+        label: s__('DevopsAdoption|Scanning'),
+        tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
+        testId: 'scanningCol',
+      },
+    ],
+  },
+  {
+    title: s__('DevopsAdoption|Ops'),
+    tab: 'ops',
+    cols: [
       {
         key: 'runnerConfigured',
         label: s__('DevopsAdoption|Runners'),
@@ -140,12 +159,10 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         tooltip: s__('DevopsAdoption|At least 1 deploy'),
         testId: 'deploysCol',
       },
-      {
-        key: 'securityScanSucceeded',
-        label: s__('DevopsAdoption|Scanning'),
-        tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
-        testId: 'scanningCol',
-      },
     ],
   },
 ];
+
+export const TRACK_ADOPTION_TAB_CLICK_EVENT = 'i_analytics_dev_ops_adoption';
+
+export const TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT = 'i_analytics_dev_ops_score';

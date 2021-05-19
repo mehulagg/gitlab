@@ -15,7 +15,8 @@ module EE
         feature_category :global_search, [:advanced_search]
 
         def elasticsearch_reindexing_task
-          @elasticsearch_reindexing_task = Elastic::ReindexingTask.last
+          @last_elasticsearch_reindexing_task = Elastic::ReindexingTask.last
+          @elasticsearch_reindexing_task = Elastic::ReindexingTask.new
         end
 
         def elasticsearch_index_settings

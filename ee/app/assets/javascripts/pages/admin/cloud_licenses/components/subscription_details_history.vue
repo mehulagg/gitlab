@@ -139,6 +139,7 @@ export default {
       :tbody-tr-class="rowClass"
       responsive
       stacked="sm"
+      data-qa-selector="subscription_history"
     >
       <template #cell(type)="{ value }">
         <gl-badge size="md" variant="info">{{ value }}</gl-badge>

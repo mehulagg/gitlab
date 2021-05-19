@@ -106,7 +106,7 @@ export const mockAlerts = [
     },
     eventCount: '1',
     issueIid: null,
-    issue: { iid: '5', state: 'opened', title: 'Issue 01' },
+    issue: { iid: '5', state: 'opened', title: 'Issue 01', webUrl: 'http://test.com/05' },
     title: 'Issue 01',
     severity: 'HIGH',
     status: 'TRIGGERED',
@@ -117,7 +117,7 @@ export const mockAlerts = [
     eventCount: '2',
     assignees: { nodes: [] },
     issueIid: null,
-    issue: { iid: '6', state: 'closed', title: 'Issue 02' },
+    issue: { iid: '6', state: 'closed', title: 'Issue 02', webUrl: 'http://test.com/06' },
     severity: 'CRITICAL',
     title: 'Issue 02',
     status: 'ACKNOWLEDGED',
@@ -152,4 +152,11 @@ export const mockPageInfo = {
   hasNextPage: true,
   hasPreviousPage: false,
   startCursor: 'eyJpZCI6IjM5Iiwic3RhcnRlZF9hdCI6IjIwMjAtMTItMDQgMTg6MDE6MDcuNzY1ODgyMDAwIFVUQyJ9',
+};
+
+export const mockAlertDetails = {
+  iid: '01',
+  issue: { webUrl: '/#/-/issues/02' },
+  title: 'dropingress',
+  monitorTool: 'Cilium',
 };

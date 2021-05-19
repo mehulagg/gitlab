@@ -33,11 +33,11 @@ describe('CreditCardValidationRequiredAlert', () => {
   });
 
   it('renders title', () => {
-    expect(findGlAlert().attributes('title')).toBe('User Verification Required');
+    expect(findGlAlert().attributes('title')).toBe('User validation required');
   });
 
   it('renders description', () => {
-    expect(findGlAlert().text()).toContain('As a user on a free or trial namespace');
+    expect(findGlAlert().text()).toContain('To use free pipeline minutes');
   });
 
   it('renders danger alert', () => {

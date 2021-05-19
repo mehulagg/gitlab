@@ -43,16 +43,6 @@ export const TASKS_BY_TYPE_FILTERS = {
   LABEL: 'LABEL',
 };
 
-export const STAGE_ACTIONS = {
-  SELECT: 'selectStage',
-  EDIT: 'editStage',
-  REMOVE: 'removeStage',
-  HIDE: 'hideStage',
-  CREATE: 'createStage',
-  UPDATE: 'updateStage',
-  ADD_STAGE: 'showAddStageForm',
-};
-
 export const DEFAULT_VALUE_STREAM_ID = 'default';
 
 export const OVERVIEW_METRICS = {

@@ -17,6 +17,16 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
     it { is_expected.to validate_uniqueness_of(:namespace) }
   end
 
+  describe '#display_namespace' do
+    subject { build(:devops_adoption_segment) }
+
+    it 'fills display_namespace with namespace on save' do
+      expect do
+        subject.save!
+      end.to change { subject.display_namespace }.to(subject.namespace)
+    end
+  end
+
   describe '.ordered_by_name' do
     subject(:segments) { described_class.ordered_by_name }
 

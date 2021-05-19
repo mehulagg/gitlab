@@ -3,7 +3,7 @@ import { reportTypeToSecurityReportTypeEnum } from 'ee/vue_shared/security_repor
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import SecurityReportDownloadDropdown from '~/vue_shared/security_reports/components/security_report_download_dropdown.vue';
-import securityReportDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_pipeline_download_paths.query.graphql';
+import securityReportPipelineDownloadPathsQuery from '~/vue_shared/security_reports/queries/security_report_pipeline_download_paths.query.graphql';
 import { extractSecurityReportArtifactsFromPipeline } from '~/vue_shared/security_reports/utils';
 
 export default {
@@ -34,11 +34,11 @@ export default {
   },
   apollo: {
     reportArtifacts: {
-      query: securityReportDownloadPathsQuery,
+      query: securityReportPipelineDownloadPathsQuery,
       variables() {
         return {
           projectPath: this.targetProjectFullPath,
-          iid: String(this.mrIid),
+          iid: String(this.pipelineIid),
           reportTypes: this.reportTypes.map(
             (reportType) => reportTypeToSecurityReportTypeEnum[reportType],
           ),
@@ -75,8 +75,11 @@ export default {
 </script>
 
 <template>
-  <security-report-download-dropdown
-    :artifacts="reportArtifacts"
-    :loading="isLoadingReportArtifacts"
-  />
+  <div>
+    <slot name="label"></slot>
+    <security-report-download-dropdown
+      :artifacts="reportArtifacts"
+      :loading="isLoadingReportArtifacts"
+    />
+  </div>
 </template>

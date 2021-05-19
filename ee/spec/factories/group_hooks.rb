@@ -3,6 +3,7 @@
 FactoryBot.define do
   factory :group_hook do
     url { generate(:url) }
+    group
 
     trait :all_events_enabled do
       push_events { true }

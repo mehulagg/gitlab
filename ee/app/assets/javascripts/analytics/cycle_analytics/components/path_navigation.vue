@@ -37,6 +37,9 @@ export default {
     showPopover({ id }) {
       return id && id !== OVERVIEW_STAGE_ID;
     },
+    hasStageCount({ stageCount }) {
+      return stageCount !== null;
+    },
   },
   popoverOptions: {
     triggers: 'hover',
@@ -62,6 +65,19 @@ export default {
               {{ s__('ValueStreamEvent|Stage time (median)') }}
             </div>
             <div class="gl-pb-4 gl-font-weight-bold">{{ pathItem.metric }}</div>
+          </div>
+        </div>
+        <div class="gl-px-4">
+          <div class="gl-display-flex gl-justify-content-space-between">
+            <div class="gl-pr-4 gl-pb-4">
+              {{ s__('ValueStreamEvent|Items in stage') }}
+            </div>
+            <div class="gl-pb-4 gl-font-weight-bold">
+              <template v-if="hasStageCount(pathItem)">{{
+                n__('%d item', '%d items', pathItem.stageCount)
+              }}</template>
+              <template v-else>-</template>
+            </div>
           </div>
         </div>
         <div class="gl-px-4 gl-pt-4 gl-border-t-1 gl-border-t-solid gl-border-gray-50">

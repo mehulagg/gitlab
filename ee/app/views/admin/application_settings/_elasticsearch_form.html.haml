@@ -3,12 +3,14 @@
 - elastic_helper = Gitlab::Elastic::Helper.default
 - elasticsearch_available = elastic_helper.ping?
 
-%section.settings.expanded.as-elasticsearch.no-animate#js-elasticsearch-settings{ data: { qa_selector: 'elasticsearch_tab' } }
+%section.settings.as-elasticsearch.no-animate#js-elasticsearch-settings{ class: ('expanded' if expanded_by_default?), data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
     %h4
       = _('Advanced Search')
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button', data: { qa_selector: 'expand_advanced_search_button' } }
+      = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
-      = _('Advanced Search with Elasticsearch')
+      = _('Configure settings for Advanced Search with Elasticsearch.')
 
   .settings-content
     = form_for @application_setting, url: advanced_search_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
@@ -48,7 +50,7 @@
               .form-group
                 .form-check
                 - pending_migrations = elasticsearch_available && Elastic::DataMigrationService.pending_migrations? && Gitlab::CurrentSettings.elasticsearch_pause_indexing?
-                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations || @elasticsearch_reindexing_task&.in_progress?
+                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations || @last_elasticsearch_reindexing_task&.in_progress?
                 = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: disable_checkbox
                 = f.label :elasticsearch_pause_indexing, class: 'form-check-label' do
                   = _('Pause Elasticsearch indexing')
@@ -69,6 +71,13 @@
               = f.text_field :elasticsearch_url, value: @application_setting.elasticsearch_url.join(', '), class: 'form-control gl-form-input', placeholder: 'http://localhost:9200', data: { qa_selector: 'url_field' }
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201").')
+
+            .form-group
+              = f.label :elasticsearch_username, _('Username (for password-protected Elasticsearch servers)'), class: 'label-bold'
+              = f.text_field :elasticsearch_username, value: @application_setting.elasticsearch_username, class: 'form-control gl-form-input', data: { qa_selector: 'username_field' }
+            .form-group
+              = f.label :elasticsearch_password, _('Password (for password-protected Elasticsearch servers)'), class: 'label-bold'
+              = f.password_field :elasticsearch_password, value: (@application_setting.elasticsearch_password.present? ? ApplicationSetting::MASK_PASSWORD : ''), class: 'form-control gl-form-input', data: { qa_selector: 'password_field' }
 
             .form-group
               = f.label :elasticsearch_shards, _('Number of Elasticsearch shards and replicas (per index)'), class: 'gl-font-weight-bold'
@@ -127,35 +136,6 @@
               .form-text.gl-text-gray-600.gl-mt-0
                 = _('Elasticsearch HTTP client timeout value in seconds.')
                 = _('Setting this to 0 means using the system default timeout value.')
-
-        .gl-card.gl-bg-gray-10.gl-mb-6
-          .gl-card-body
-            %h4= _('Elasticsearch zero-downtime reindexing')
-            = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: "gl-button btn btn-info", disabled: @elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to reindex?') }, method: :post
-            .form-text.gl-text-gray-600
-              = _('This feature should be used with an index that was created after 13.0')
-            - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
-              .form-text.gl-text-red-500.gl-mt-0
-                = _("Unused, previous indices: %{index_names} will be deleted after %{time} automatically.") % { index_names: task.subtasks.map(&:index_name_from).join(', '), time: task.delete_original_index_at }
-                = link_to _('Cancel index deletion'), admin_elasticsearch_cancel_index_deletion_path(task_id: task.id), class: 'gl-mb-2', method: :post
-            - if @elasticsearch_reindexing_task
-              %h5= _('Reindexing Status: %{status}') % { status: @elasticsearch_reindexing_task.state }
-              - if @elasticsearch_reindexing_task.error_message
-                %p= _('Error: %{error_message}') % { error_message: @elasticsearch_reindexing_task.error_message }
-              - @elasticsearch_reindexing_task.subtasks.each do |subtask|
-                .gl-card-body.form-group
-                  %h5= subtask.alias_name
-                  - expected_documents = subtask.documents_count
-                  - if subtask.elastic_task
-                    %p= _('Task ID: %{elastic_task}') % { elastic_task: subtask.elastic_task }
-                  - if expected_documents
-                    - processed_documents = subtask.documents_count_target
-                    %p= _('Expected documents: %{expected_documents}') % { expected_documents: expected_documents }
-                    - if processed_documents && expected_documents
-                      - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
-                      %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
-                      .progress
-                        .progress-bar{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
 
         .gl-card.gl-bg-gray-10.gl-mb-6
           .gl-card-body
@@ -244,3 +224,56 @@
                 = _('AWS Secret Access Key. Only required if not using role instance credentials')
 
       = f.submit _('Save changes'), class: "gl-button btn btn-confirm", data: { qa_selector: 'submit_button' }
+
+%section.settings.as-elasticsearch-reindexing.no-animate#js-elasticsearch-reindexing{ class: ('expanded' if expanded_by_default?) }
+  .settings-header
+    %h4
+      = _('Elasticsearch zero-downtime reindexing')
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
+      = expanded_by_default? ? _('Collapse') : _('Expand')
+    %p
+      = _('Trigger cluster reindexing. This feature should be used with an index that was created after 13.0.')
+
+  .settings-content
+    = form_for @elasticsearch_reindexing_task, url: admin_elasticsearch_trigger_reindexing_path, method: :post, html: { class: 'fieldset-form' } do |f|
+      %fieldset
+        .form-group
+          = f.label :slice_multiplier, _('Slice multiplier'), class: 'label-bold'
+          = f.number_field :slice_multiplier, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.slice_multiplier
+          .form-text.gl-text-gray-600.gl-mt-0
+            - slice_multiplier_link_url = help_page_path('integration/elasticsearch.md', anchor: 'slice-multiplier')
+            - slice_multiplier_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: slice_multiplier_link_url }
+            = _('Used to calculate the number of slices during reindexing. The multiplier will be applied to the number of shards per index. Learn more about %{slice_multiplier_link_start}slice multiplier configuration%{slice_multiplier_link_end}.').html_safe % { slice_multiplier_link_start: slice_multiplier_link_start, slice_multiplier_link_end: '</a>'.html_safe }
+
+        .form-group
+          = f.label :max_slices_running, _('Maximum running slices'), class: 'label-bold'
+          = f.number_field :max_slices_running, class: 'form-control gl-form-input', value: @elasticsearch_reindexing_task.max_slices_running
+          .form-text.gl-text-gray-600.gl-mt-0
+            - max_slices_running_link_url = help_page_path('integration/elasticsearch.md', anchor: 'maximum-running-slices')
+            - max_slices_running_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: max_slices_running_link_url }
+            = _('The maximum number of slices allowed to run concurrently during Elasticsearch reindexing. Learn more about %{max_slices_running_link_start}maximum running slices configuration%{max_slices_link_end}.').html_safe % { max_slices_running_link_start: max_slices_running_link_start, max_slices_link_end: '</a>'.html_safe }
+
+        = f.submit _('Trigger cluster reindexing'), class: "gl-button btn btn-info", disabled: @last_elasticsearch_reindexing_task&.in_progress?, data: { confirm: _('Are you sure you want to reindex?') }
+        .form-text.gl-text-gray-600
+        - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
+          .form-text.gl-text-red-500.gl-mt-0
+            = _("Unused, previous indices: %{index_names} will be deleted after %{time} automatically.") % { index_names: task.subtasks.map(&:index_name_from).join(', '), time: task.delete_original_index_at }
+            = link_to _('Cancel index deletion'), admin_elasticsearch_cancel_index_deletion_path(task_id: task.id), class: 'gl-mb-2', method: :post
+        - if @last_elasticsearch_reindexing_task
+          %h5= _('Reindexing Status: %{status} (Slice multiplier: %{multiplier}, Maximum running slices: %{max_slices})') % { status: @last_elasticsearch_reindexing_task.state, max_slices: @last_elasticsearch_reindexing_task.max_slices_running, multiplier: @last_elasticsearch_reindexing_task.slice_multiplier }
+          - if @last_elasticsearch_reindexing_task.error_message
+            %p= _('Error: %{error_message}') % { error_message: @last_elasticsearch_reindexing_task.error_message }
+          - @last_elasticsearch_reindexing_task.subtasks.order_by_alias_name_asc.each do |subtask|
+            .gl-card-body.form-group
+              %h5= subtask.alias_name
+              - expected_documents = subtask.documents_count
+              - if subtask.elastic_task
+                %p= _('Task ID: %{elastic_task}') % { elastic_task: subtask.elastic_task }
+              - if expected_documents
+                - processed_documents = subtask.documents_count_target
+                %p= _('Expected documents: %{expected_documents}') % { expected_documents: expected_documents }
+                - if processed_documents && expected_documents
+                  - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
+                  %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
+                  .progress
+                    .progress-bar{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }

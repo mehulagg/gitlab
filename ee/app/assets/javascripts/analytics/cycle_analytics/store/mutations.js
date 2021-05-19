@@ -18,6 +18,9 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
   },
+  [types.SET_STAGE_EVENTS](state, data = []) {
+    state.formEvents = data.map((ev) => convertObjectPropsToCamelCase(ev, { deep: true }));
+  },
   [types.REQUEST_VALUE_STREAM_DATA](state) {
     state.isLoading = true;
   },
@@ -31,19 +34,16 @@ export default {
   },
   [types.REQUEST_STAGE_DATA](state) {
     state.isLoadingStage = true;
-    state.isEmptyStage = false;
     state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
     state.currentStageEvents = events.map((fields) =>
       convertObjectPropsToCamelCase(fields, { deep: true }),
     );
-    state.isEmptyStage = !events.length;
     state.isLoadingStage = false;
     state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_ERROR](state, message) {
-    state.isEmptyStage = true;
     state.isLoadingStage = false;
     state.selectedStageError = message;
   },
@@ -56,6 +56,21 @@ export default {
   [types.RECEIVE_STAGE_MEDIANS_ERROR](state) {
     state.medians = {};
   },
+  [types.REQUEST_STAGE_COUNTS](state) {
+    state.stageCounts = {};
+  },
+  [types.RECEIVE_STAGE_COUNTS_SUCCESS](state, stageCounts = []) {
+    state.stageCounts = stageCounts.reduce(
+      (acc, { id, count }) => ({
+        ...acc,
+        [id]: count,
+      }),
+      {},
+    );
+  },
+  [types.RECEIVE_STAGE_COUNTS_ERROR](state) {
+    state.stageCounts = {};
+  },
   [types.REQUEST_GROUP_STAGES](state) {
     state.stages = [];
   },
@@ -64,21 +79,6 @@ export default {
   },
   [types.RECEIVE_GROUP_STAGES_SUCCESS](state, stages) {
     state.stages = transformRawStages(stages);
-  },
-  [types.REQUEST_UPDATE_STAGE](state) {
-    state.isLoading = true;
-  },
-  [types.RECEIVE_UPDATE_STAGE_SUCCESS](state) {
-    state.isLoading = false;
-  },
-  [types.RECEIVE_UPDATE_STAGE_ERROR](state) {
-    state.isLoading = false;
-  },
-  [types.REQUEST_REMOVE_STAGE](state) {
-    state.isLoading = true;
-  },
-  [types.RECEIVE_REMOVE_STAGE_RESPONSE](state) {
-    state.isLoading = false;
   },
   [types.INITIALIZE_VSA](
     state,
@@ -108,18 +108,6 @@ export default {
   },
   [types.INITIALIZE_VALUE_STREAM_SUCCESS](state) {
     state.isLoading = false;
-  },
-  [types.REQUEST_REORDER_STAGE](state) {
-    state.isSavingStageOrder = true;
-    state.errorSavingStageOrder = false;
-  },
-  [types.RECEIVE_REORDER_STAGE_SUCCESS](state) {
-    state.isSavingStageOrder = false;
-    state.errorSavingStageOrder = false;
-  },
-  [types.RECEIVE_REORDER_STAGE_ERROR](state) {
-    state.isSavingStageOrder = false;
-    state.errorSavingStageOrder = true;
   },
   [types.REQUEST_CREATE_VALUE_STREAM](state) {
     state.isCreatingValueStream = true;

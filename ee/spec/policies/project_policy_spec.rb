@@ -12,7 +12,7 @@ RSpec.describe ProjectPolicy do
   subject { described_class.new(current_user, project) }
 
   before do
-    stub_licensed_features(license_scanning: true)
+    stub_licensed_features(license_scanning: true, quality_management: true)
   end
 
   context 'basic permissions' do
@@ -190,7 +190,7 @@ RSpec.describe ProjectPolicy do
       end
 
       it 'disables boards permissions' do
-        expect_disallowed :admin_issue_board
+        expect_disallowed :admin_issue_board, :create_test_case
       end
     end
   end
@@ -1354,6 +1354,41 @@ RSpec.describe ProjectPolicy do
     let(:resource) { project }
   end
 
+  describe 'Quality Management test case' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:policy) { :create_test_case }
+
+    where(:role, :admin_mode, :allowed) do
+      :guest      | nil   | false
+      :reporter   | nil   | true
+      :developer  | nil   | true
+      :maintainer | nil   | true
+      :owner      | nil   | true
+      :admin      | false | false
+      :admin      | true  | true
+    end
+
+    before do
+      stub_licensed_features(quality_management: true)
+      enable_admin_mode!(current_user) if admin_mode
+    end
+
+    with_them do
+      let(:current_user) { public_send(role) }
+
+      it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+
+      context 'with unavailable license' do
+        before do
+          stub_licensed_features(quality_management: false)
+        end
+
+        it { is_expected.to(be_disallowed(policy)) }
+      end
+    end
+  end
+
   describe ':compliance_framework_available' do
     using RSpec::Parameterized::TableSyntax
 
@@ -1563,7 +1598,7 @@ RSpec.describe ProjectPolicy do
     before do
       allow(project.root_namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
       allow(project).to receive(:design_management_enabled?).and_return(true)
-      stub_licensed_features(security_dashboard: true, license_scanning: true)
+      stub_licensed_features(security_dashboard: true, license_scanning: true, quality_management: true)
     end
 
     context 'when the group has exceeded its storage limit' do

@@ -492,7 +492,7 @@ class GeoNodeStatus < ApplicationRecord
 
   def load_lfs_objects_data
     return unless lfs_objects_replication_enabled
-    return if Feature.enabled?(:geo_lfs_object_replication)
+    return if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
 
     self.lfs_objects_count = lfs_objects_finder.registry_count
     self.lfs_objects_synced_count = lfs_objects_finder.synced_count

@@ -64,5 +64,9 @@ module Boards
     def weight
       nil
     end
+
+    def disabled_for?(current_user)
+      false
+    end
   end
 end

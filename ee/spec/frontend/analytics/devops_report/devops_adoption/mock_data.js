@@ -101,26 +101,6 @@ export const devopsAdoptionTableHeaders = [
   },
   {
     index: 4,
-    label: 'Runners',
-    tooltip: 'Runner configured for project/group',
-  },
-  {
-    index: 5,
-    label: 'Pipelines',
-    tooltip: 'At least 1 pipeline successfully run',
-  },
-  {
-    index: 6,
-    label: 'Deploys',
-    tooltip: 'At least 1 deploy',
-  },
-  {
-    index: 7,
-    label: 'Scanning',
-    tooltip: 'At least 1 security scan of any type run in pipeline',
-  },
-  {
-    index: 8,
     label: '',
     tooltip: null,
   },

@@ -61,8 +61,6 @@ describe('Scanner Filter component', () => {
     if (router.currentRoute.query[filter.id]) {
       router.replace('/');
     }
-
-    wrapper.destroy();
   });
 
   it('shows the correct dropdown items', () => {

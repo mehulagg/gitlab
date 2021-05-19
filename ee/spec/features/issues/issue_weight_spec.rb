@@ -3,25 +3,16 @@
 require 'spec_helper'
 
 RSpec.describe 'Issue weight', :js do
-  let(:project) { create(:project, :public) }
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:user) { create(:user) }
 
-  it 'shows weight on issue list row' do
-    create(:issue, project: project, weight: 2)
-
-    visit project_issues_path(project)
-
-    page.within(first('.issuable-info')) do
-      expect(page).to have_selector('[data-testid="weight"]')
-      expect(page).to have_content(2)
-    end
+  before do
+    project.add_developer(user)
+    sign_in(user)
   end
 
   it 'allows user to update weight from none to something' do
-    user = create(:user)
     issue = create(:issue, author: user, project: project)
-
-    project.add_developer(user)
-    sign_in(user)
 
     visit project_issue_path(project, issue)
 
@@ -39,11 +30,7 @@ RSpec.describe 'Issue weight', :js do
   end
 
   it 'allows user to update weight from one value to another' do
-    user = create(:user)
     issue = create(:issue, author: user, project: project, weight: 2)
-
-    project.add_developer(user)
-    sign_in(user)
 
     visit project_issue_path(project, issue)
 
@@ -61,11 +48,7 @@ RSpec.describe 'Issue weight', :js do
   end
 
   it 'allows user to remove weight' do
-    user = create(:user)
     issue = create(:issue, author: user, project: project, weight: 5)
-
-    project.add_developer(user)
-    sign_in(user)
 
     visit project_issue_path(project, issue)
 

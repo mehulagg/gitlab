@@ -5,13 +5,12 @@ import axios from '~/lib/utils/axios_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
-
-import { FilterTokenOperators } from '../constants';
 
 export default {
   inject: ['groupFullPath', 'groupMilestonesPath', 'listEpicsPath'],
@@ -52,7 +51,7 @@ export default {
           unique: true,
           symbol: '@',
           token: AuthorToken,
-          operators: FilterTokenOperators,
+          operators: OPERATOR_IS_ONLY,
           fetchAuthors: Api.users.bind(Api),
         },
         {
@@ -62,7 +61,7 @@ export default {
           unique: false,
           symbol: '~',
           token: LabelToken,
-          operators: FilterTokenOperators,
+          operators: OPERATOR_IS_ONLY,
           fetchLabels: (search = '') => {
             const params = {
               only_group_labels: true,
@@ -86,7 +85,7 @@ export default {
           unique: true,
           symbol: '%',
           token: MilestoneToken,
-          operators: FilterTokenOperators,
+          operators: OPERATOR_IS_ONLY,
           fetchMilestones: (search = '') => {
             return axios.get(this.groupMilestonesPath).then(({ data }) => {
               // TODO: Remove below condition check once either of the following is supported.
@@ -107,7 +106,7 @@ export default {
           title: __('Confidential'),
           unique: true,
           token: GlFilteredSearchToken,
-          operators: FilterTokenOperators,
+          operators: OPERATOR_IS_ONLY,
           options: [
             { icon: 'eye-slash', value: true, title: __('Yes') },
             { icon: 'eye', value: false, title: __('No') },
@@ -120,7 +119,7 @@ export default {
           unique: true,
           symbol: '&',
           token: EpicToken,
-          operators: FilterTokenOperators,
+          operators: OPERATOR_IS_ONLY,
           idProperty: 'iid',
           defaultEpics: [],
           fetchEpics: (search = '') => {
@@ -140,7 +139,7 @@ export default {
           title: __('My-Reaction'),
           unique: true,
           token: EmojiToken,
-          operators: FilterTokenOperators,
+          operators: OPERATOR_IS_ONLY,
           fetchEmojis: (search = '') => {
             return axios
               .get(`${gon.relative_url_root || ''}/-/autocomplete/award_emojis`)

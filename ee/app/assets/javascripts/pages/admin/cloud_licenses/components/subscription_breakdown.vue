@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlModalDirective } from '@gitlab/ui';
-import { pick, some } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import {
   enterActivationCode,
@@ -70,7 +69,7 @@ export default {
   },
   computed: {
     canManageSubscription() {
-      return this.customersPortalUrl;
+      return this.customersPortalUrl && this.hasSubscription;
     },
     canSyncSubscription() {
       return this.subscriptionSyncPath && this.isCloudType;
@@ -94,15 +93,11 @@ export default {
       return this.subscription.type === subscriptionType.LEGACY;
     },
     shouldShowFooter() {
-      return some(
-        pick(this, [
-          'hasSubscription',
-          'canDeleteSubscription',
-          'canManageSubscription',
-          'canSyncSubscription',
-          'canUploadSubscription',
-        ]),
-        Boolean,
+      return (
+        this.canRemoveLicense ||
+        this.canManageSubscription ||
+        this.canSyncSubscription ||
+        this.canUploadLicense
       );
     },
     subscriptionHistory() {

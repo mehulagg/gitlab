@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'epics swimlanes sidebar', :js do
+  include BoardHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:project, reload: true) { create(:project, :public, group: group) }
@@ -46,15 +48,6 @@ RSpec.describe 'epics swimlanes sidebar', :js do
 
     it_behaves_like 'issue boards sidebar'
     it_behaves_like 'issue boards sidebar EE'
-  end
-
-  def load_epic_swimlanes
-    page.within('.board-swimlanes-toggle-wrapper') do
-      page.find('.dropdown-toggle').click
-      page.find('.dropdown-item', text: 'Epic').click
-    end
-
-    wait_for_requests
   end
 
   def first_card

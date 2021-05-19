@@ -1,5 +1,6 @@
 <script>
 import { GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import { slugifyWithUnderscore } from '~/lib/utils/text_utility';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { copySubscriptionIdButtonText } from '../constants';
 
@@ -60,6 +61,9 @@ export default {
     placeHolderPosition(index) {
       return (index - 1) * placeholderHeightFactor;
     },
+    qaSelectorValue(label) {
+      return slugifyWithUnderscore(label.toLowerCase());
+    },
   },
 };
 </script>
@@ -73,7 +77,11 @@ export default {
     </template>
 
     <template #cell(value)="{ item, value }">
-      <p class="gl-relative" data-testid="details-content">
+      <p
+        class="gl-relative"
+        data-testid="details-content"
+        :data-qa-selector="qaSelectorValue(item.label)"
+      >
         {{ value || '-' }}
         <clipboard-button
           v-if="item.canCopy"

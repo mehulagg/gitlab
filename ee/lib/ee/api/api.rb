@@ -13,6 +13,7 @@ module EE
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
         mount ::API::ExternalApprovalRules
+        mount ::API::StatusChecks
         mount ::API::ProjectApprovalSettings
         mount ::API::Dora::Metrics
         mount ::API::EpicIssues

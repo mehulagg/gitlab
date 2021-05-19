@@ -424,6 +424,7 @@ module EE
     def requires_credit_card_to_run_pipelines?(project)
       return false unless ::Gitlab.com?
       return false unless created_after_credit_card_release_day?(project)
+      return false unless project.shared_runners_enabled
 
       root_namespace = project.root_namespace
       if root_namespace.free_plan?

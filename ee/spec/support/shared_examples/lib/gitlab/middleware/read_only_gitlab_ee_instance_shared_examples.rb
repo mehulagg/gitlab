@@ -32,6 +32,13 @@ RSpec.shared_examples 'write access for a read-only GitLab (EE) instance' do
           expect(response).not_to be_redirect
           expect(subject).not_to disallow_request
         end
+
+        it "expects a POST #{description} URL with a trailing slash to be allowed" do
+          response = request.post("#{path}/")
+
+          expect(response).not_to be_redirect
+          expect(subject).not_to disallow_request
+        end
       end
     end
   end

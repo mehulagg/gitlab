@@ -1,0 +1,5 @@
+---
+title: Display descendant projects of a group when creating issues in epic swimlanes
+merge_request: 61456
+author:
+type: fixed

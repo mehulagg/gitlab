@@ -182,9 +182,9 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
 
     it 'zero-downtime reindexing shows popup', :js do
-      page.within('.as-elasticsearch') do
+      page.within('.as-elasticsearch-reindexing') do
         expect(page).to have_content 'Trigger cluster reindexing'
-        click_link 'Trigger cluster reindexing'
+        click_button 'Trigger cluster reindexing'
       end
 
       text = page.driver.browser.switch_to.alert.text

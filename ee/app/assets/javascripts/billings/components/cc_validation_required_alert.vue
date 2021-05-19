@@ -5,17 +5,17 @@ import AccountVerificationModal from './account_verification_modal.vue';
 
 const i18n = {
   successAlert: {
-    title: s__('Billings|User successfully verified'),
+    title: s__('Billings|User successfully validated'),
     text: s__(
-      'Billings|Your user account has been successfully verified. You will now be able to run pipelines on any free or trial namespace.',
+      'Billings|Your user account has been successfully validated. You can now use free pipeline minutes.',
     ),
   },
   dangerAlert: {
-    title: s__('Billings|User Verification Required'),
-    text: s__(`Billings|As a user on a free or trial namespace, you'll need to verify your account with a credit card to run pipelines. This is required to help prevent
-cryptomining attacks on GitLab infrastructure.
+    title: s__('Billings|User validation required'),
+    text: s__(`Billings|To use free pipeline minutes, you'll need to validate your account with a credit card.
+    This is required to discourage and reduce abuse on GitLab infrastructure.
 %{strongStart}GitLab will not charge or store your credit card, it will only be used for validation.%{strongEnd}`),
-    primaryButtonText: s__('Billings|Verify account'),
+    primaryButtonText: s__('Billings|Validate account'),
   },
 };
 

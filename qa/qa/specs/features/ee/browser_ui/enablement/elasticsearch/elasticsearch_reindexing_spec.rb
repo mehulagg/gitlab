@@ -13,13 +13,15 @@ module QA
         end
       end
 
-      before do
+      before(:all) do
         Flow::Login.while_signed_in_as_admin do
           QA::EE::Resource::Settings::Elasticsearch.fabricate_via_browser_ui!
         end
 
         Runtime::Search.assert_elasticsearch_responding
+      end
 
+      before do
         Flow::Login.sign_in
 
         Resource::Repository::ProjectPush.fabricate! do |push|

@@ -55,7 +55,7 @@ module QA
           expect_error_on_push(file: large_file,
             error: 'File "file" is larger than the allowed size of 1 MB')
           expect_error_on_push(file: wrongly_named_file,
-            error: Regexp.escape("File name #{@file_name_limitation} was blacklisted by the pattern #{@file_name_limitation}"))
+            error: Regexp.escape("File name #{@file_name_limitation} was prohibited by the pattern #{@file_name_limitation}"))
         end
 
         it 'restricts users by email format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/652' do
@@ -86,7 +86,7 @@ module QA
           }]
 
           expect_error_on_push(file: secret_file,
-            error: Regexp.escape('File name id_rsa was blacklisted by the pattern id_rsa$'))
+            error: Regexp.escape('File name id_rsa was prohibited by the pattern id_rsa$'))
         end
 
         it 'restricts removal of tag', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/650' do

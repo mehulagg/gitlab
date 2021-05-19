@@ -34,7 +34,7 @@ describe('Seat usage table getters', () => {
     });
 
     describe('when data is available', () => {
-      it('returns user details statep', () => {
+      it('returns user details state', () => {
         state.userDetails[0] = {
           isLoading: false,
           items: mockMemberDetails,

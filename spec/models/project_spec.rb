@@ -46,6 +46,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:asana_service) }
     it { is_expected.to have_many(:boards) }
     it { is_expected.to have_one(:campfire_service) }
+    it { is_expected.to have_one(:datadog_service) }
     it { is_expected.to have_one(:discord_service) }
     it { is_expected.to have_one(:drone_ci_service) }
     it { is_expected.to have_one(:emails_on_push_service) }
@@ -113,7 +114,8 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:lfs_file_locks) }
     it { is_expected.to have_many(:project_deploy_tokens) }
     it { is_expected.to have_many(:deploy_tokens).through(:project_deploy_tokens) }
-    it { is_expected.to have_many(:cycle_analytics_stages) }
+    it { is_expected.to have_many(:cycle_analytics_stages).inverse_of(:project) }
+    it { is_expected.to have_many(:value_streams).inverse_of(:project) }
     it { is_expected.to have_many(:external_pull_requests) }
     it { is_expected.to have_many(:sourced_pipelines) }
     it { is_expected.to have_many(:source_pipelines) }
@@ -6824,6 +6826,26 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#parent_loaded?' do
+    let_it_be(:project) { create(:project) }
+
+    before do
+      project.namespace = create(:namespace)
+
+      project.reload
+    end
+
+    it 'is false when the parent is not loaded' do
+      expect(project.parent_loaded?).to be_falsey
+    end
+
+    it 'is true when the parent is loaded' do
+      project.parent
+
+      expect(project.parent_loaded?).to be_truthy
+    end
+  end
+
   describe '#bots' do
     subject { project.bots }
 
@@ -6903,11 +6925,6 @@ RSpec.describe Project, factory_default: :keep do
   describe '#default_branch_or_main' do
     let(:project) { create(:project, :repository) }
 
-    before do
-      # Stubbing it as true since the FF disabled for tests globally
-      stub_feature_flags(main_branch_over_master: true)
-    end
-
     it 'returns default branch' do
       expect(project.default_branch_or_main).to eq(project.default_branch)
     end
@@ -6915,18 +6932,34 @@ RSpec.describe Project, factory_default: :keep do
     context 'when default branch is nil' do
       let(:project) { create(:project, :empty_repo) }
 
-      it 'returns main' do
-        expect(project.default_branch_or_main).to eq('main')
+      it 'returns Gitlab::DefaultBranch.value' do
+        expect(project.default_branch_or_main).to eq(Gitlab::DefaultBranch.value)
       end
+    end
+  end
 
-      context 'main_branch_over_master is disabled' do
-        before do
-          stub_feature_flags(main_branch_over_master: false)
-        end
+  describe '#increment_statistic_value' do
+    let(:project) { build_stubbed(:project) }
 
-        it 'returns master' do
-          expect(project.default_branch_or_main).to eq('master')
-        end
+    subject(:increment) do
+      project.increment_statistic_value(:build_artifacts_size, -10)
+    end
+
+    it 'increments the value' do
+      expect(ProjectStatistics)
+        .to receive(:increment_statistic)
+        .with(project, :build_artifacts_size, -10)
+
+      increment
+    end
+
+    context 'when the project is scheduled for removal' do
+      let(:project) { build_stubbed(:project, pending_delete: true) }
+
+      it 'does not increment the value' do
+        expect(ProjectStatistics).not_to receive(:increment_statistic)
+
+        increment
       end
     end
   end

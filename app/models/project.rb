@@ -153,11 +153,12 @@ class Project < ApplicationRecord
   has_one :asana_service, class_name: 'Integrations::Asana'
   has_one :assembla_service, class_name: 'Integrations::Assembla'
   has_one :bamboo_service, class_name: 'Integrations::Bamboo'
-  has_one :campfire_service
-  has_one :datadog_service
+  has_one :campfire_service, class_name: 'Integrations::Campfire'
+  has_one :confluence_service, class_name: 'Integrations::Confluence'
+  has_one :datadog_service, class_name: 'Integrations::Datadog'
+  has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
   has_one :discord_service
   has_one :drone_ci_service
-  has_one :emails_on_push_service
   has_one :ewm_service
   has_one :pipelines_email_service
   has_one :irker_service
@@ -176,7 +177,6 @@ class Project < ApplicationRecord
   has_one :youtrack_service
   has_one :custom_issue_tracker_service
   has_one :bugzilla_service
-  has_one :confluence_service
   has_one :external_wiki_service
   has_one :prometheus_service, inverse_of: :project
   has_one :mock_ci_service
@@ -335,7 +335,8 @@ class Project < ApplicationRecord
   has_one :ci_cd_settings, class_name: 'ProjectCiCdSetting', inverse_of: :project, autosave: true, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
   has_many :remote_mirrors, inverse_of: :project
-  has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::ProjectStage'
+  has_many :cycle_analytics_stages, class_name: 'Analytics::CycleAnalytics::ProjectStage', inverse_of: :project
+  has_many :value_streams, class_name: 'Analytics::CycleAnalytics::ProjectValueStream', inverse_of: :project
 
   has_many :external_pull_requests, inverse_of: :project
 
@@ -829,6 +830,10 @@ class Project < ApplicationRecord
     end
 
     super
+  end
+
+  def parent_loaded?
+    association(:namespace).loaded?
   end
 
   def project_setting
@@ -2535,7 +2540,7 @@ class Project < ApplicationRecord
   def default_branch_or_main
     return default_branch if default_branch
 
-    Feature.enabled?(:main_branch_over_master, self, default_enabled: :yaml) ? 'main' : 'master'
+    Gitlab::DefaultBranch.value(object: self)
   end
 
   def ci_config_path_or_default
@@ -2572,6 +2577,12 @@ class Project < ApplicationRecord
 
   def activity_path
     Gitlab::Routing.url_helpers.activity_project_path(self)
+  end
+
+  def increment_statistic_value(statistic, delta)
+    return if pending_delete?
+
+    ProjectStatistics.increment_statistic(self, statistic, delta)
   end
 
   private

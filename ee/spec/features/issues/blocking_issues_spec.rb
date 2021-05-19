@@ -20,16 +20,6 @@ RSpec.describe 'Blocking issues count' do
     create(:issue_link, source: issue2, target: blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
   end
 
-  it 'shows blocking issue counts on issue list row' do
-    page.within(".issues-list") do
-      page.within("li.issue:nth-child(2)") do
-        expect(page).to have_content('blocks one issue')
-        expect(page).to have_selector('[data-testid="blocking-issues"]')
-        expect(page.find('[data-testid="blocking-issues"]')).to have_content('1')
-      end
-    end
-  end
-
   it 'sorts by blocking', :js do
     find('.filter-dropdown-container .dropdown').click
 

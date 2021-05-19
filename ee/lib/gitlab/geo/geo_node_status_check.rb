@@ -256,7 +256,7 @@ module Gitlab
       end
 
       def print_lfs_objects_status
-        return if Feature.enabled?(:geo_lfs_object_replication)
+        return if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
 
         print 'LFS Objects: '.rjust(GEO_STATUS_COLUMN_WIDTH)
         show_failed_value(current_node_status.lfs_objects_failed_count)

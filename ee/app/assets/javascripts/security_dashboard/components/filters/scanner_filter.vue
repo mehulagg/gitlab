@@ -81,6 +81,8 @@ export default {
       this.selectedOptions = options.every((option) => this.selectedSet.has(option))
         ? without(this.selectedOptions, ...options)
         : union(this.selectedOptions, options);
+
+      this.updateQuerystring();
     },
   },
 };

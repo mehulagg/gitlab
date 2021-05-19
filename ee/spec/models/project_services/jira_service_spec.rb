@@ -52,24 +52,6 @@ RSpec.describe JiraService do
       it { is_expected.to be_falsey }
     end
 
-    context 'when jira integration is not available for the project' do
-      before do
-        stub_feature_flags(jira_for_vulnerabilities: false)
-      end
-
-      context 'when vulnerabilities_enabled is set to false' do
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when vulnerabilities_enabled is set to true' do
-        before do
-          jira_service.vulnerabilities_enabled = true
-        end
-
-        it { is_expected.to eq(false) }
-      end
-    end
-
     context 'when jira integration is available for the project' do
       before do
         stub_licensed_features(jira_vulnerabilities_integration: true)

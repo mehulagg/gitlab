@@ -15,7 +15,7 @@ RSpec.describe 'admin/dev_ops_report/show.html.haml' do
     it 'disables the feature' do
       render
 
-      expect(rendered).not_to have_selector('#devops-adoption')
+      expect(rendered).not_to have_selector('.js-devops-adoption')
     end
   end
 
@@ -25,7 +25,7 @@ RSpec.describe 'admin/dev_ops_report/show.html.haml' do
 
       render
 
-      expect(rendered).to have_selector('#devops-adoption')
+      expect(rendered).to have_selector('.js-devops-adoption')
     end
   end
 end

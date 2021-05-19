@@ -66,10 +66,41 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
 
     describe 'Releases' do
-      it 'has a link to the project releases path' do
+      it 'does not have a link to the project releases path' do
         render
 
-        expect(rendered).to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-project-releases')
+        expect(rendered).not_to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-project-releases')
+      end
+
+      context 'when feature flag :sidebar refactor is disabled' do
+        it 'has a link to the project releases path' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(rendered).to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-project-releases')
+        end
+      end
+    end
+
+    describe 'Labels' do
+      let(:page) { Nokogiri::HTML.parse(rendered) }
+
+      it 'has a link to the labels path' do
+        render
+
+        expect(page.at_css('.shortcuts-project').parent.css('[aria-label="Labels"]')).not_to be_empty
+        expect(rendered).to have_link('Labels', href: project_labels_path(project))
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        it 'does not have the labels menu item' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(page.at_css('.shortcuts-project').parent.css('[aria-label="Labels"]')).to be_empty
+        end
       end
     end
   end
@@ -181,10 +212,23 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
 
     describe 'Labels' do
-      it 'has a link to the labels path' do
+      let(:page) { Nokogiri::HTML.parse(rendered) }
+
+      it 'does not have a link to the labels page' do
         render
 
-        expect(rendered).to have_link('Labels', href: project_labels_path(project))
+        expect(page.at_css('.shortcuts-issues').parent.css('[aria-label="Labels"]')).to be_empty
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        it 'has a link to the labels page' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(page.at_css('.shortcuts-issues').parent.css('[aria-label="Labels"]')).not_to be_empty
+          expect(rendered).to have_link('Labels', href: project_labels_path(project))
+        end
       end
     end
 
@@ -248,21 +292,35 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Labels' do
-    context 'when issues are not enabled' do
-      it 'has a link to the labels path' do
-        project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+    it 'does not show the labels menu' do
+      project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
 
-        render
+      render
 
-        expect(rendered).to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
-      end
+      expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
     end
 
-    context 'when issues are enabled' do
-      it 'does not have a link to the labels path' do
-        render
+    context 'when feature flag :sidebar_refactor is disabled' do
+      before do
+        stub_feature_flags(sidebar_refactor: false)
+      end
 
-        expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+      context 'when issues are not enabled' do
+        it 'has a link to the labels path' do
+          project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
+
+          render
+
+          expect(rendered).to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+        end
+      end
+
+      context 'when issues are enabled' do
+        it 'does not have a link to the labels path' do
+          render
+
+          expect(rendered).not_to have_link('Labels', href: project_labels_path(project), class: 'shortcuts-labels')
+        end
       end
     end
   end
@@ -365,6 +423,86 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
 
       it 'security configuration link is visible' do
         expect(rendered).to have_link('Configuration', href: project_security_configuration_path(project))
+      end
+    end
+  end
+
+  describe 'Deployments' do
+    let(:page) { Nokogiri::HTML.parse(rendered) }
+
+    describe 'Feature Flags' do
+      it 'has a link to the feature flags page' do
+        render
+
+        expect(page.at_css('.shortcuts-deployments').parent.css('[aria-label="Feature Flags"]')).not_to be_empty
+        expect(rendered).to have_link('Feature Flags', href: project_feature_flags_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the feature flags page' do
+          render
+
+          expect(rendered).not_to have_link('Feature Flags')
+        end
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        it 'does not have a Feature Flags menu item' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(rendered).not_to have_selector('.shortcuts-deployments')
+        end
+      end
+    end
+
+    describe 'Environments' do
+      it 'has a link to the environments page' do
+        render
+
+        expect(page.at_css('.shortcuts-deployments').parent.css('[aria-label="Environments"]')).not_to be_empty
+        expect(rendered).to have_link('Environments', href: project_environments_path(project))
+      end
+
+      describe 'when the user does not have access' do
+        let(:user) { nil }
+
+        it 'does not have a link to the environments page' do
+          render
+
+          expect(rendered).not_to have_link('Environments')
+        end
+      end
+
+      context 'when feature flag :sidebar_refactor is disabled' do
+        it 'does not have a Environments menu item' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(rendered).not_to have_selector('.shortcuts-deployments')
+        end
+      end
+    end
+
+    describe 'Releases' do
+      it 'has a link to the project releases path' do
+        render
+
+        expect(rendered).to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-deployments-releases')
+      end
+
+      context 'when feature flag :sidebar refactor is disabled' do
+        it 'does not have a link to the project releases path' do
+          stub_feature_flags(sidebar_refactor: false)
+
+          render
+
+          expect(rendered).not_to have_link('Releases', href: project_releases_path(project), class: 'shortcuts-deployments-releases')
+        end
       end
     end
   end
@@ -562,37 +700,67 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
 
     describe 'Environments' do
-      it 'has a link to the environments page' do
+      let(:page) { Nokogiri::HTML.parse(rendered) }
+
+      it 'does not have a link to the environments page' do
         render
 
-        expect(rendered).to have_link('Environments', href: project_environments_path(project))
+        expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Environments"]')).to be_empty
       end
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        it 'does not have a link to the environments page' do
+        it 'has a link to the environments page' do
           render
 
-          expect(rendered).not_to have_link('Environments')
+          expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Environments"]')).not_to be_empty
+          expect(rendered).to have_link('Environments', href: project_environments_path(project))
+        end
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          it 'does not have a link to the environments page' do
+            render
+
+            expect(rendered).not_to have_link('Environments')
+          end
         end
       end
     end
 
     describe 'Feature Flags' do
-      it 'has a link to the feature flags page' do
+      let(:page) { Nokogiri::HTML.parse(rendered) }
+
+      it 'does not have a link to the feature flags page' do
         render
 
-        expect(rendered).to have_link('Feature Flags', href: project_feature_flags_path(project))
+        expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Feature Flags"]')).to be_empty
       end
 
-      describe 'when the user does not have access' do
-        let(:user) { nil }
+      context 'when feature flag :sidebar_refactor is disabled' do
+        before do
+          stub_feature_flags(sidebar_refactor: false)
+        end
 
-        it 'does not have a link to the feature flags page' do
+        it 'has a link to the feature flags page' do
           render
 
-          expect(rendered).not_to have_link('Feature Flags')
+          expect(page.at_css('.shortcuts-operations').parent.css('[aria-label="Feature Flags"]')).not_to be_empty
+          expect(rendered).to have_link('Feature Flags', href: project_feature_flags_path(project))
+        end
+
+        describe 'when the user does not have access' do
+          let(:user) { nil }
+
+          it 'does not have a link to the feature flags page' do
+            render
+
+            expect(rendered).not_to have_link('Feature Flags')
+          end
         end
       end
     end

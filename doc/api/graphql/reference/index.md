@@ -85,7 +85,7 @@ Returns [`DesignManagement!`](#designmanagement).
 
 ### `Query.devopsAdoptionSegments`
 
-Get configured DevOps adoption segments on the instance.
+Get configured DevOps adoption segments on the instance. **BETA** This endpoint is subject to change without notice.
 
 Returns [`DevopsAdoptionSegmentConnection`](#devopsadoptionsegmentconnection).
 
@@ -742,6 +742,8 @@ Input type: `BoardListUpdateLimitMetricsInput`
 
 ### `Mutation.bulkFindOrCreateDevopsAdoptionSegments`
 
+**BETA** This endpoint is subject to change without notice.
+
 Input type: `BulkFindOrCreateDevopsAdoptionSegmentsInput`
 
 #### Arguments
@@ -1073,6 +1075,8 @@ Input type: `CreateCustomEmojiInput`
 | <a id="mutationcreatecustomemojierrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.createDevopsAdoptionSegment`
+
+**BETA** This endpoint is subject to change without notice.
 
 Input type: `CreateDevopsAdoptionSegmentInput`
 
@@ -1654,6 +1658,8 @@ Input type: `DeleteAnnotationInput`
 | <a id="mutationdeleteannotationerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.deleteDevopsAdoptionSegment`
+
+**BETA** This endpoint is subject to change without notice.
 
 Input type: `DeleteDevopsAdoptionSegmentInput`
 
@@ -5800,6 +5806,29 @@ The edge type for [`PackageTag`](#packagetag).
 | <a id="packagetagedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="packagetagedgenode"></a>`node` | [`PackageTag`](#packagetag) | The item at the end of the edge. |
 
+#### `PathLockConnection`
+
+The connection type for [`PathLock`](#pathlock).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockconnectionedges"></a>`edges` | [`[PathLockEdge]`](#pathlockedge) | A list of edges. |
+| <a id="pathlockconnectionnodes"></a>`nodes` | [`[PathLock]`](#pathlock) | A list of nodes. |
+| <a id="pathlockconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `PathLockEdge`
+
+The edge type for [`PathLock`](#pathlock).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="pathlockedgenode"></a>`node` | [`PathLock`](#pathlock) | The item at the end of the edge. |
+
 #### `PipelineArtifactRegistryConnection`
 
 The connection type for [`PipelineArtifactRegistry`](#pipelineartifactregistry).
@@ -8024,6 +8053,8 @@ A specific version in which designs were added, modified or deleted.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="designversionauthor"></a>`author` | [`UserCore!`](#usercore) | Author of the version. |
+| <a id="designversioncreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the version was created. |
 | <a id="designversiondesigns"></a>`designs` | [`DesignConnection!`](#designconnection) | All designs that were changed in the version. (see [Connections](#connections)) |
 | <a id="designversionid"></a>`id` | [`ID!`](#id) | ID of the design version. |
 | <a id="designversionsha"></a>`sha` | [`ID!`](#id) | SHA of the design version. |
@@ -8608,7 +8639,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ##### `GeoNode.lfsObjectRegistries`
 
-Find LFS object registries on this Geo node. Available only when feature flag `geo_lfs_object_replication` is enabled.
+Find LFS object registries on this Geo node.
 
 Returns [`LfsObjectRegistryConnection`](#lfsobjectregistryconnection).
 
@@ -9107,7 +9138,11 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="grouppackagesincludeversionless"></a>`includeVersionless` | [`Boolean`](#boolean) | Include versionless packages. |
+| <a id="grouppackagespackagename"></a>`packageName` | [`String`](#string) | Search a package by name. |
+| <a id="grouppackagespackagetype"></a>`packageType` | [`PackageTypeEnum`](#packagetypeenum) | Filter a package by type. |
 | <a id="grouppackagessort"></a>`sort` | [`PackageGroupSort`](#packagegroupsort) | Sort packages by this criteria. |
+| <a id="grouppackagesstatus"></a>`status` | [`PackageStatus`](#packagestatus) | Filter a package by status. |
 
 ##### `Group.projects`
 
@@ -10452,6 +10487,19 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="notepermissionsrepositionnote"></a>`repositionNote` | [`Boolean!`](#boolean) | Indicates the user can perform `reposition_note` on this resource. |
 | <a id="notepermissionsresolvenote"></a>`resolveNote` | [`Boolean!`](#boolean) | Indicates the user can perform `resolve_note` on this resource. |
 
+### `NugetMetadata`
+
+Nuget metadata.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="nugetmetadataiconurl"></a>`iconUrl` | [`String!`](#string) | Icon URL of the Nuget package. |
+| <a id="nugetmetadataid"></a>`id` | [`PackagesNugetMetadatumID!`](#packagesnugetmetadatumid) | ID of the metadatum. |
+| <a id="nugetmetadatalicenseurl"></a>`licenseUrl` | [`String!`](#string) | License URL of the Nuget package. |
+| <a id="nugetmetadataprojecturl"></a>`projectUrl` | [`String!`](#string) | Project URL of the Nuget package. |
+
 ### `OncallParticipantType`
 
 The rotation participant and color palette.
@@ -10607,6 +10655,18 @@ Information about pagination in a connection.
 | <a id="pageinfohaspreviouspage"></a>`hasPreviousPage` | [`Boolean!`](#boolean) | When paginating backwards, are there more items?. |
 | <a id="pageinfostartcursor"></a>`startCursor` | [`String`](#string) | When paginating backwards, the cursor to continue. |
 
+### `PathLock`
+
+Represents a file or directory in the project repository that has been locked.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockid"></a>`id` | [`PathLockID!`](#pathlockid) | ID of the path lock. |
+| <a id="pathlockpath"></a>`path` | [`String`](#string) | The locked path. |
+| <a id="pathlockuser"></a>`user` | [`UserCore`](#usercore) | The user that has locked this path. |
+
 ### `Pipeline`
 
 #### Fields
@@ -10619,6 +10679,7 @@ Information about pagination in a connection.
 | <a id="pipelinecodequalityreports"></a>`codeQualityReports` | [`CodeQualityDegradationConnection`](#codequalitydegradationconnection) | Code Quality degradations reported on the pipeline. (see [Connections](#connections)) |
 | <a id="pipelinecommitpath"></a>`commitPath` | [`String`](#string) | Path to the commit that triggered the pipeline. |
 | <a id="pipelinecommittedat"></a>`committedAt` | [`Time`](#time) | Timestamp of the pipeline's commit. |
+| <a id="pipelinecomplete"></a>`complete` | [`Boolean!`](#boolean) | Indicates if a pipeline is complete. |
 | <a id="pipelineconfigsource"></a>`configSource` | [`PipelineConfigSourceEnum`](#pipelineconfigsourceenum) | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE, COMPLIANCE_SOURCE). |
 | <a id="pipelinecoverage"></a>`coverage` | [`Float`](#float) | Coverage percentage. |
 | <a id="pipelinecreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of the pipeline's creation. |
@@ -10821,6 +10882,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectonlyallowmergeifpipelinesucceeds"></a>`onlyAllowMergeIfPipelineSucceeds` | [`Boolean`](#boolean) | Indicates if merge requests of the project can only be merged with successful jobs. |
 | <a id="projectopenissuescount"></a>`openIssuesCount` | [`Int`](#int) | Number of open issues for the project. |
 | <a id="projectpath"></a>`path` | [`String!`](#string) | Path of the project. |
+| <a id="projectpathlocks"></a>`pathLocks` | [`PathLockConnection`](#pathlockconnection) | The project's path locks. (see [Connections](#connections)) |
 | <a id="projectpipelineanalytics"></a>`pipelineAnalytics` | [`PipelineAnalytics`](#pipelineanalytics) | Pipeline analytics. |
 | <a id="projectprintingmergerequestlinkenabled"></a>`printingMergeRequestLinkEnabled` | [`Boolean`](#boolean) | Indicates if a link to create or view a merge request should display after a push to Git repositories of the project from the command line. |
 | <a id="projectpublicjobs"></a>`publicJobs` | [`Boolean`](#boolean) | Indicates if there is public access to pipelines and job details of the project, including output logs and artifacts. |
@@ -11362,7 +11424,11 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="projectpackagesincludeversionless"></a>`includeVersionless` | [`Boolean`](#boolean) | Include versionless packages. |
+| <a id="projectpackagespackagename"></a>`packageName` | [`String`](#string) | Search a package by name. |
+| <a id="projectpackagespackagetype"></a>`packageType` | [`PackageTypeEnum`](#packagetypeenum) | Filter a package by type. |
 | <a id="projectpackagessort"></a>`sort` | [`PackageSort`](#packagesort) | Sort packages by this criteria. |
+| <a id="projectpackagesstatus"></a>`status` | [`PackageStatus`](#packagestatus) | Filter a package by status. |
 
 ##### `Project.pipeline`
 
@@ -11631,6 +11697,7 @@ Represents a Project Membership.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectpermissionsadminoperations"></a>`adminOperations` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_operations` on this resource. |
+| <a id="projectpermissionsadminpathlocks"></a>`adminPathLocks` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_path_locks` on this resource. |
 | <a id="projectpermissionsadminproject"></a>`adminProject` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_project` on this resource. |
 | <a id="projectpermissionsadminremotemirror"></a>`adminRemoteMirror` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_remote_mirror` on this resource. |
 | <a id="projectpermissionsadminwiki"></a>`adminWiki` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_wiki` on this resource. |
@@ -14224,6 +14291,7 @@ Values for sorting package.
 | <a id="packagetypeenumnuget"></a>`NUGET` | Packages from the Nuget package manager. |
 | <a id="packagetypeenumpypi"></a>`PYPI` | Packages from the PyPI package manager. |
 | <a id="packagetypeenumrubygems"></a>`RUBYGEMS` | Packages from the Rubygems package manager. |
+| <a id="packagetypeenumterraform_module"></a>`TERRAFORM_MODULE` | Packages from the Terraform Module package manager. |
 
 ### `PipelineConfigSourceEnum`
 
@@ -14485,8 +14553,8 @@ State of a test report.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="typeenumpersonal"></a>`personal` |  |
-| <a id="typeenumproject"></a>`project` |  |
+| <a id="typeenumpersonal"></a>`personal` | Snippet created independent of any project. |
+| <a id="typeenumproject"></a>`project` | Snippet related to a specific project. |
 
 ### `UserCalloutFeatureNameEnum`
 
@@ -15013,6 +15081,12 @@ A `PackagesMavenMetadatumID` is a global ID. It is encoded as a string.
 
 An example `PackagesMavenMetadatumID` is: `"gid://gitlab/Packages::Maven::Metadatum/1"`.
 
+### `PackagesNugetMetadatumID`
+
+A `PackagesNugetMetadatumID` is a global ID. It is encoded as a string.
+
+An example `PackagesNugetMetadatumID` is: `"gid://gitlab/Packages::Nuget::Metadatum/1"`.
+
 ### `PackagesPackageFileID`
 
 A `PackagesPackageFileID` is a global ID. It is encoded as a string.
@@ -15024,6 +15098,12 @@ An example `PackagesPackageFileID` is: `"gid://gitlab/Packages::PackageFile/1"`.
 A `PackagesPackageID` is a global ID. It is encoded as a string.
 
 An example `PackagesPackageID` is: `"gid://gitlab/Packages::Package/1"`.
+
+### `PathLockID`
+
+A `PathLockID` is a global ID. It is encoded as a string.
+
+An example `PathLockID` is: `"gid://gitlab/PathLock/1"`.
 
 ### `PayloadAlertFieldPathSegment`
 
@@ -15149,6 +15229,7 @@ One of:
 - [`ComposerMetadata`](#composermetadata)
 - [`ConanMetadata`](#conanmetadata)
 - [`MavenMetadata`](#mavenmetadata)
+- [`NugetMetadata`](#nugetmetadata)
 
 #### `VulnerabilityDetail`
 

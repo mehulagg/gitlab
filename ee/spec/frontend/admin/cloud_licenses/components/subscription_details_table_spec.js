@@ -60,6 +60,7 @@ describe('Subscription Details Table', () => {
     beforeEach(() => {
       createComponent([
         {
+          label: 'label',
           value: 'Something to copy',
           canCopy: true,
         },

@@ -2,8 +2,8 @@
 import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
 import {
-  DEFAULT_LABEL_NONE,
-  DEFAULT_LABEL_ANY,
+  OPERATOR_IS_ONLY,
+  DEFAULT_NONE_ANY,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
@@ -49,7 +49,7 @@ export default {
           initialMilestones: this.milestonesData,
           unique: true,
           symbol: '%',
-          operators: [{ value: '=', description: 'is', default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchMilestones: this.fetchMilestones,
         },
         {
@@ -57,11 +57,11 @@ export default {
           title: __('Label'),
           type: 'labels',
           token: LabelToken,
-          defaultLabels: [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY],
+          defaultLabels: DEFAULT_NONE_ANY,
           initialLabels: this.labelsData,
           unique: false,
           symbol: '~',
-          operators: [{ value: '=', description: 'is', default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchLabels: this.fetchLabels,
         },
         {
@@ -71,7 +71,7 @@ export default {
           token: AuthorToken,
           initialAuthors: this.authorsData,
           unique: true,
-          operators: [{ value: '=', description: 'is', default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchAuthors: this.fetchAuthors,
         },
         {
@@ -82,7 +82,7 @@ export default {
           defaultAuthors: [],
           initialAuthors: this.assigneesData,
           unique: false,
-          operators: [{ value: '=', description: 'is', default: 'true' }],
+          operators: OPERATOR_IS_ONLY,
           fetchAuthors: this.fetchAssignees,
         },
       ];

@@ -56,8 +56,9 @@ module Gitlab
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
+    foss_eager_load_paths = config.eager_load_paths.dup.freeze
     load_paths = lambda do |dir:|
-      ext_paths = config.eager_load_paths.each_with_object([]) do |path, memo|
+      ext_paths = foss_eager_load_paths.each_with_object([]) do |path, memo|
         ext_path = config.root.join(dir, Pathname.new(path).relative_path_from(config.root))
         memo << ext_path.to_s
       end
@@ -84,6 +85,7 @@ module Gitlab
     # Rake tasks ignore the eager loading settings, so we need to set the
     # autoload paths explicitly
     config.autoload_paths = config.eager_load_paths.dup
+    config.autoload_paths.push("#{config.root}/lib/generators")
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -145,6 +147,7 @@ module Gitlab
       encrypted_key
       import_url
       elasticsearch_url
+      elasticsearch_password
       search
       jwt
       otp_attempt
