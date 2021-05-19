@@ -33,7 +33,7 @@ module Vulnerabilities
     has_many :remediations, through: :finding_remediations
 
     has_many :finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :finding, foreign_key: 'occurrence_id'
-    has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
+    has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline', disable_joins: true
 
     has_many :signatures, class_name: 'Vulnerabilities::FindingSignature', inverse_of: :finding
 
