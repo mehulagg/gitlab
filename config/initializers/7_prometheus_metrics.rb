@@ -49,9 +49,7 @@ if !Rails.env.test? && Gitlab::Metrics.prometheus_metrics_enabled?
 
     ::Prometheus::Client.reinitialize_on_pid_change(force: true)
 
-    if Gitlab::Runtime.unicorn?
-      Gitlab::Metrics::Samplers::UnicornSampler.instance(Settings.monitoring.unicorn_sampler_interval).start
-    elsif Gitlab::Runtime.puma?
+    if Gitlab::Runtime.puma?
       Gitlab::Metrics::Samplers::PumaSampler.instance.start
     end
 
