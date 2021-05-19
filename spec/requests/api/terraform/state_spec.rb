@@ -157,7 +157,7 @@ RSpec.describe API::Terraform::State do
           expect(Gitlab::Json.parse(response.body)).to be_empty
         end
 
-        context 'on Unicorn', :unicorn do
+        context 'on Puma', :puma do
           it 'updates the state' do
             expect { request }.to change { Terraform::State.count }.by(0)
 
@@ -201,7 +201,7 @@ RSpec.describe API::Terraform::State do
           expect(Gitlab::Json.parse(response.body)).to be_empty
         end
 
-        context 'on Unicorn', :unicorn do
+        context 'on Puma', :puma do
           it 'creates a new state' do
             expect { request }.to change { Terraform::State.count }.by(1)
 

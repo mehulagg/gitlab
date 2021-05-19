@@ -294,8 +294,8 @@ RSpec.shared_examples 'rejects invalid upload_url params' do
   end
 end
 
-RSpec.shared_examples 'successful response when using Unicorn' do
-  context 'on Unicorn', :unicorn do
+RSpec.shared_examples 'successful response when using Puma' do
+  context 'on Puma', :puma do
     it 'returns successfully' do
       subject
 
@@ -372,7 +372,7 @@ RSpec.shared_examples 'recipe upload_urls endpoint' do
 
   it_behaves_like 'rejects invalid recipe'
   it_behaves_like 'rejects invalid upload_url params'
-  it_behaves_like 'successful response when using Unicorn'
+  it_behaves_like 'successful response when using Puma'
 
   it 'returns a set of upload urls for the files requested' do
     subject
@@ -434,7 +434,7 @@ RSpec.shared_examples 'package upload_urls endpoint' do
 
   it_behaves_like 'rejects invalid recipe'
   it_behaves_like 'rejects invalid upload_url params'
-  it_behaves_like 'successful response when using Unicorn'
+  it_behaves_like 'successful response when using Puma'
 
   it 'returns a set of upload urls for the files requested' do
     expected_response = {
