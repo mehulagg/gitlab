@@ -1,8 +1,9 @@
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { securityFeatures, complianceFeatures } from './components/constants';
 
 export const augmentFeatures = (features = []) => {
   const featuresByType = features.reduce((acc, feature) => {
-    acc[feature.type] = feature;
+    acc[feature.type] = convertObjectPropsToCamelCase(feature);
     return acc;
   }, {});
 
