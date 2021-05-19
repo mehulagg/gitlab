@@ -51,7 +51,10 @@ module Ci
       # Getting all runners from the group itself and all its descendants
       descendant_projects = Project.for_group_and_its_subgroups(@group)
 
-      @runners = Ci::Runner.belonging_to_group_or_project(@group.self_and_descendants, descendant_projects)
+      # TODO: CI Vertical
+      descendant_projects_ids = descendant_projects.ids
+
+      @runners = Ci::Runner.belonging_to_group_or_project(@group.self_and_descendants, descendant_projects_ids)
     end
 
     def filter_by_status!
