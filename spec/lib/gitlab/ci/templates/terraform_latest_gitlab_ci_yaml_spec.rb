@@ -23,9 +23,8 @@ RSpec.describe 'Terraform.latest.gitlab-ci.yml' do
       let(:build_names) { pipeline.builds.pluck(:name) }
 
       before do
-        stub_application_setting(default_branch_name: default_branch)
         stub_ci_pipeline_yaml_file(template.content)
-        allow_next_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
+        allow_any_instance_of(Ci::BuildScheduleWorker).to receive(:perform).and_return(true)
       end
 
       context 'on the default branch' do

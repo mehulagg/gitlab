@@ -21,7 +21,6 @@ RSpec.describe 'Managed-Cluster-Applications.gitlab-ci.yml' do
 
       before do
         stub_ci_pipeline_yaml_file(template.content)
-        stub_application_setting(default_branch_name: default_branch)
       end
 
       context 'for a default branch' do
