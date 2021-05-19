@@ -17160,41 +17160,6 @@ CREATE SEQUENCE system_note_metadata_id_seq
 
 ALTER SEQUENCE system_note_metadata_id_seq OWNED BY system_note_metadata.id;
 
-CREATE TABLE taggings (
-    id integer NOT NULL,
-    tag_id integer,
-    taggable_id integer,
-    taggable_type character varying,
-    tagger_id integer,
-    tagger_type character varying,
-    context character varying,
-    created_at timestamp without time zone
-);
-
-CREATE SEQUENCE taggings_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE taggings_id_seq OWNED BY taggings.id;
-
-CREATE TABLE tags (
-    id integer NOT NULL,
-    name character varying,
-    taggings_count integer DEFAULT 0
-);
-
-CREATE SEQUENCE tags_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE tags_id_seq OWNED BY tags.id;
-
 CREATE TABLE term_agreements (
     id integer NOT NULL,
     term_id integer NOT NULL,
@@ -19136,10 +19101,6 @@ ALTER TABLE ONLY suggestions ALTER COLUMN id SET DEFAULT nextval('suggestions_id
 
 ALTER TABLE ONLY system_note_metadata ALTER COLUMN id SET DEFAULT nextval('system_note_metadata_id_seq'::regclass);
 
-ALTER TABLE ONLY taggings ALTER COLUMN id SET DEFAULT nextval('taggings_id_seq'::regclass);
-
-ALTER TABLE ONLY tags ALTER COLUMN id SET DEFAULT nextval('tags_id_seq'::regclass);
-
 ALTER TABLE ONLY term_agreements ALTER COLUMN id SET DEFAULT nextval('term_agreements_id_seq'::regclass);
 
 ALTER TABLE ONLY terraform_state_versions ALTER COLUMN id SET DEFAULT nextval('terraform_state_versions_id_seq'::regclass);
@@ -20205,10 +20166,6 @@ ALTER TABLE ONLY subscriptions ADD CONSTRAINT subscriptions_pkey PRIMARY KEY (id
 ALTER TABLE ONLY suggestions ADD CONSTRAINT suggestions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY system_note_metadata ADD CONSTRAINT system_note_metadata_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY taggings ADD CONSTRAINT taggings_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY tags ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY term_agreements ADD CONSTRAINT term_agreements_pkey PRIMARY KEY (id);
 
@@ -22675,16 +22632,6 @@ CREATE UNIQUE INDEX index_system_note_metadata_on_description_version_id ON syst
 
 CREATE UNIQUE INDEX index_system_note_metadata_on_note_id ON system_note_metadata USING btree (note_id);
 
-CREATE INDEX index_taggings_on_tag_id ON taggings USING btree (tag_id);
-
-CREATE INDEX index_taggings_on_taggable_id_and_taggable_type ON taggings USING btree (taggable_id, taggable_type);
-
-CREATE INDEX index_taggings_on_taggable_id_and_taggable_type_and_context ON taggings USING btree (taggable_id, taggable_type, context);
-
-CREATE UNIQUE INDEX index_tags_on_name ON tags USING btree (name);
-
-CREATE INDEX index_tags_on_name_trigram ON tags USING gin (name gin_trgm_ops);
-
 CREATE INDEX index_term_agreements_on_term_id ON term_agreements USING btree (term_id);
 
 CREATE INDEX index_term_agreements_on_user_id ON term_agreements USING btree (user_id);
@@ -23052,8 +22999,6 @@ CREATE INDEX partial_index_deployments_for_project_id_and_tag ON deployments USI
 CREATE UNIQUE INDEX snippet_user_mentions_on_snippet_id_and_note_id_index ON snippet_user_mentions USING btree (snippet_id, note_id);
 
 CREATE UNIQUE INDEX snippet_user_mentions_on_snippet_id_index ON snippet_user_mentions USING btree (snippet_id) WHERE (note_id IS NULL);
-
-CREATE UNIQUE INDEX taggings_idx ON taggings USING btree (tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type);
 
 CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree (user_id, term_id);
 
