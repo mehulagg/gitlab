@@ -1,0 +1,5 @@
+---
+title: Fix incorrect path parsing when name ends with ref
+merge_request: 62101
+author:
+type: fixed
