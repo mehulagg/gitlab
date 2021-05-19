@@ -284,7 +284,7 @@ export default {
         ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
         : { ...filterParams, epicId },
       after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
-      first: forSwimlanes ? undefined : 20,
+      first: forSwimlanes ? undefined : 10,
     };
 
     if (getters.isEpicBoard) {
