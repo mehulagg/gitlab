@@ -43,7 +43,7 @@ module Gitlab
       end
 
       def shard_id
-        NamespaceShard.current_shard
+        # NamespaceShard.current_shard
       end
     end
   end
