@@ -324,7 +324,7 @@ class Project < ApplicationRecord
   has_many :job_artifacts, class_name: 'Ci::JobArtifact'
   has_many :pipeline_artifacts, class_name: 'Ci::PipelineArtifact', inverse_of: :project
   has_many :runner_projects, class_name: 'Ci::RunnerProject', inverse_of: :project
-  has_many :runners, through: :runner_projects, source: :runner, class_name: 'Ci::Runner', disable_joins: true
+  has_many :runners, through: :runner_projects, source: :runner, class_name: 'Ci::Runner'
   has_many :variables, class_name: 'Ci::Variable'
   has_many :triggers, class_name: 'Ci::Trigger'
   has_many :environments
