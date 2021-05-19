@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.user_auth_by_provider.google_oauth2
-description: Number of unique user logins  using Google OAuth2 authentication `https://docs.gitlab.com/ee/integration/google.html#google-oauth2-omniauth-provider`
+description: Number of unique user logins using Google OAuth2 authentication `https://docs.gitlab.com/ee/integration/google.html#google-oauth2-omniauth-provider`
 product_section: dev
 product_stage: manage
 product_group: group::access

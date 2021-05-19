@@ -1082,7 +1082,7 @@ Total count of groups as of usage ping snapshot
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180750_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15048,11 +15048,11 @@ Tiers: `premium`
 
 ### `usage_activity_by_stage.manage.groups`
 
-Missing description
+Number of groups `https://docs.gitlab.com/ee/user/group/#groups`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180756_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15192,11 +15192,11 @@ Tiers:
 
 ### `usage_activity_by_stage.manage.ldap_keys`
 
-Missing description
+Number of user SHH public keys synced from LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#ldap-sync-configuration-settings`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180800_ldap_keys.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15216,11 +15216,11 @@ Tiers:
 
 ### `usage_activity_by_stage.manage.ldap_users`
 
-Missing description
+Number of users synced from LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#user-sync`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180801_ldap_users.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15228,11 +15228,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.omniauth_providers`
 
-Missing description
+Number of unique user logins using OmniAuth provider authentication `https://docs.gitlab.com/ee/integration/omniauth.html#omniauth`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183400_omniauth_providers.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15480,11 +15480,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.google_oauth2`
 
-Missing description
+Number of unique user logins using Google OAuth2 authentication `https://docs.gitlab.com/ee/integration/google.html#google-oauth2-omniauth-provider`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183410_google_oauth2.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15492,11 +15492,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.standard`
 
-Missing description
+Number of unique user logins using password authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183408_standard.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15504,11 +15504,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor`
 
-Missing description
+Number of users logging in using two factor authentication `https://gitlab.com/-/profile/two_factor_auth`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183402_two-factor.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15516,11 +15516,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-u2f-device`
 
-Missing description
+Number of unique users logins using two factor authentication via a U2F device `https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html#u2f-device`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183404_two-factor-via-u2f-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15528,11 +15528,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-webauthn-device`
 
-Missing description
+Number of unique user logins using two factor authentication via a WebAuthn device `https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html#webauthn-device`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183406_two-factor-via-webauthn-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -15540,11 +15540,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.users_created`
 
-Missing description
+Number of users `https://docs.gitlab.com/ee/user/profile/account/create_accounts.html#creating-users`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180758_users_created.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -16980,11 +16980,11 @@ Tiers:
 
 ### `usage_activity_by_stage_monthly.manage.groups`
 
-Missing description
+Number of groups created per month `https://docs.gitlab.com/ee/user/group/#groups`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180816_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17124,11 +17124,11 @@ Tiers:
 
 ### `usage_activity_by_stage_monthly.manage.ldap_keys`
 
-Missing description
+Number of user SHH public keys synced from LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#ldap-sync-configuration-settings`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17148,11 +17148,11 @@ Tiers:
 
 ### `usage_activity_by_stage_monthly.manage.ldap_users`
 
-Missing description
+Number of users synced from LDAP `https://docs.gitlab.com/ee/administration/auth/ldap/#user-sync`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180822_ldap_users.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17160,11 +17160,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.omniauth_providers`
 
-Missing description
+Number of unique user logins using an OmiAuth provider `https://docs.gitlab.com/ee/integration/omniauth.html#omniauth`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183627_omniauth_providers.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17412,11 +17412,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.google_oauth2`
 
-Missing description
+Number of unique user logins using Google OAuth authentication `https://docs.gitlab.com/ee/integration/google.html#google-oauth2-omniauth-provider`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183636_google_oauth2.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17424,11 +17424,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.standard`
 
-Missing description
+Number of unique user logins using passwor authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183634_standard.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17436,11 +17436,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor`
 
-Missing description
+Number of unique user logins using two factor authentication `https://gitlab.com/-/profile/two_factor_auth`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183629_two-factor.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17448,11 +17448,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor-via-u2f-device`
 
-Missing description
+Number of unique user logins using two factor via a U2F device `https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html#u2f-device`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183631_two-factor-via-u2f-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17460,11 +17460,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor-via-webauthn-device`
 
-Missing description
+Number of unique user logins using two factor via a WebAuthn device `https://docs.gitlab.com/ee/user/profile/account/two_factor_authentication.html#webauthn-device`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183633_two-factor-via-webauthn-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
@@ -17472,11 +17472,11 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.users_created`
 
-Number of users created in the month
+Number of users `https://docs.gitlab.com/ee/user/profile/account/create_accounts.html#creating-users`
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180818_users_created.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
