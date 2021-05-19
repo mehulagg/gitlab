@@ -64,7 +64,6 @@ class GeoNodeStatus < ApplicationRecord
     repositories_replication_enabled
     repositories_synced_count
     repositories_failed_count
-    lfs_objects_replication_enabled
     attachments_replication_enabled
     attachments_count
     attachments_synced_count
@@ -132,12 +131,6 @@ class GeoNodeStatus < ApplicationRecord
     wikis_verified_count: 'Number of wikis verified on secondary',
     wikis_verification_failed_count: 'Number of wikis failed to verify on secondary',
     wikis_checksum_mismatch_count: 'Number of wikis that checksum mismatch on secondary',
-    lfs_objects_replication_enabled: 'Boolean denoting if replication is enabled for LFS Objects',
-    lfs_objects_count: 'Total number of syncable LFS objects available on primary',
-    lfs_objects_synced_count: 'Number of syncable LFS objects synced on secondary',
-    lfs_objects_failed_count: 'Number of syncable LFS objects failed to sync on secondary',
-    lfs_objects_registry_count: 'Number of LFS objects in the registry',
-    lfs_objects_synced_missing_on_primary_count: 'Number of LFS objects marked as synced due to the file missing on the primary',
     job_artifacts_replication_enabled: 'Boolean denoting if replication is enabled for Job Artifacts',
     job_artifacts_count: 'Total number of syncable job artifacts available on primary',
     job_artifacts_synced_count: 'Number of syncable job artifacts synced on secondary',
@@ -298,7 +291,6 @@ class GeoNodeStatus < ApplicationRecord
       self.container_repositories_replication_enabled = Geo::ContainerRepositoryRegistry.replication_enabled?
       self.design_repositories_replication_enabled = Geo::DesignRegistry.replication_enabled?
       self.job_artifacts_replication_enabled = Geo::JobArtifactRegistry.replication_enabled?
-      self.lfs_objects_replication_enabled = Geo::LfsObjectRegistry.replication_enabled?
       self.repositories_replication_enabled = Geo::ProjectRegistry.replication_enabled?
     end
   end
@@ -446,7 +438,6 @@ class GeoNodeStatus < ApplicationRecord
     self.repository_deleted_max_id = Geo::RepositoryDeletedEvent.maximum(:id)
     self.repository_renamed_max_id = Geo::RepositoryRenamedEvent.maximum(:id)
     self.repositories_changed_max_id = Geo::RepositoriesChangedEvent.maximum(:id)
-    self.lfs_object_deleted_max_id = Geo::LfsObjectDeletedEvent.maximum(:id)
     self.job_artifact_deleted_max_id = Geo::JobArtifactDeletedEvent.maximum(:id)
     self.hashed_storage_migrated_max_id = Geo::HashedStorageMigratedEvent.maximum(:id)
     self.hashed_storage_attachments_max_id = Geo::HashedStorageAttachmentsEvent.maximum(:id)
@@ -473,7 +464,6 @@ class GeoNodeStatus < ApplicationRecord
     self.cursor_last_event_date = Geo::EventLog.find_by(id: self.cursor_last_event_id)&.created_at
 
     load_repositories_data
-    load_lfs_objects_data
     load_job_artifacts_data
     load_attachments_data
     load_container_registry_data
@@ -488,17 +478,6 @@ class GeoNodeStatus < ApplicationRecord
     self.repositories_failed_count = Geo::ProjectRegistry.sync_failed(:repository).count
     self.wikis_synced_count = Geo::ProjectRegistry.synced(:wiki).count
     self.wikis_failed_count = Geo::ProjectRegistry.sync_failed(:wiki).count
-  end
-
-  def load_lfs_objects_data
-    return unless lfs_objects_replication_enabled
-    return if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
-
-    self.lfs_objects_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_count = lfs_objects_finder.synced_count
-    self.lfs_objects_failed_count = lfs_objects_finder.failed_count
-    self.lfs_objects_registry_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.synced_missing_on_primary_count
   end
 
   def load_job_artifacts_data
@@ -617,10 +596,6 @@ class GeoNodeStatus < ApplicationRecord
 
   def attachments_finder
     @attachments_finder ||= Geo::AttachmentRegistryFinder.new
-  end
-
-  def lfs_objects_finder
-    @lfs_objects_finder ||= Geo::LfsObjectLegacyRegistryFinder.new
   end
 
   def job_artifacts_finder
