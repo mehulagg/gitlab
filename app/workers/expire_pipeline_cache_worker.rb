@@ -9,6 +9,7 @@ class ExpirePipelineCacheWorker
   queue_namespace :pipeline_cache
   urgency :high
   worker_resource_boundary :cpu
+  data_consistency :delayed, feature_flag: :load_balancing_for_expire_pipeline_cache_worker
 
   idempotent!
 
