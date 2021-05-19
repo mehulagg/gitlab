@@ -35,6 +35,11 @@ export default {
 
 <template>
   <div v-gl-tooltip.hover :title="description">
-    <gl-icon :size="12" :name="severityIcon" :class="severityClass" />
+    <!-- TODO: add `gl-stroke-white` utility class to gitlab-ui so this icon can have a border -->
+    <!-- TODO: figure out how to avoid squishing the border of the round icon -->
+    <!-- TODO: add "severity: [severity]" to the tooltip -->
+    <!-- TODO: use a popover instead of a tooltip if we need to display richer content? -->
+    <!-- TODO: implement modal that opens on click to show details, make element look more clickable -->
+    <gl-icon :size="12" :name="severityIcon" :class="severityClass" class="gl-stroke-white" />
   </div>
 </template>
