@@ -51,6 +51,11 @@ export default {
       default: false,
       required: false,
     },
+    issuableId: {
+      type: String,
+      required: false,
+      default: '',
+    },
     /*
       In issue list, "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
       The actual hiding is controlled with css classes:
@@ -180,7 +185,7 @@ export default {
         :title="__('Time tracking report')"
         :hide-footer="true"
       >
-        <time-tracking-report :limit-to-hours="limitToHours" />
+        <time-tracking-report :limit-to-hours="limitToHours" :issuable-id="issuableId" />
       </gl-modal>
       <transition name="help-state-toggle">
         <time-tracking-help-state v-if="showHelpState" />
