@@ -46,8 +46,11 @@ export default class Project {
 
       if (subMenuList.length) {
         $(this).data('track-value', subMenuList.hasClass('fly-out-list') ? 'fly-out' : 'expanded');
-      }else{
-        $(this).data('track-value', $(this).hasClass('is-showing-fly-out') ? 'fly-out' : 'expanded');
+      } else {
+        $(this).data(
+          'track-value',
+          $(this).hasClass('is-showing-fly-out') ? 'fly-out' : 'expanded',
+        );
       }
 
       $(this).data('track-context', sidebarCollapsed ? 'sidebar_collapsed' : 'sidebar_expanded');
