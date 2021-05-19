@@ -32,7 +32,13 @@ module Gitlab
         Timeout.timeout(TIMEOUT_LIMIT) do
           stdin, stdout, stderr, wait_thr = Open3.popen3(command, pgroup: true)
           stdin.close
-          pgrp = Process.getpgid(wait_thr[:pid])
+
+          pgrp = begin
+            Process.getpgid(wait_thr[:pid])
+          rescue Errno::ESRCH
+            nil
+          end
+
           status = wait_thr.value
 
           if status.success?
