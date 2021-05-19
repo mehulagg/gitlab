@@ -507,7 +507,22 @@ module API
           '500 Internal Server Error'
         end
 
-      rack_response({ 'message' => response_message }.to_json, 500)
+
+      rack_response({ 'message' => response_message }.to_json, 500, default_headers)
+    end
+
+    def default_headers
+      {
+        'X-Frame-Options' => 'SAMEORIGIN',
+        'X-Content-Type-Options' => 'nosniff',
+        Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER => endpoint_feature_category
+      }
+    end
+
+    # Endpoint feature_category
+    def endpoint_feature_category
+      api_endpoint = env['api.endpoint']
+      api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
     end
 
     # project helpers

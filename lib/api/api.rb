@@ -42,17 +42,13 @@ module API
     version 'v4', using: :path
 
     before do
-      header['X-Frame-Options'] = 'SAMEORIGIN'
-      header['X-Content-Type-Options'] = 'nosniff'
+      defaults.each do |header_key, header_value|
+        header[header_key] = header_value
+      end
     end
 
     before do
       coerce_nil_params_to_array!
-
-      api_endpoint = env['api.endpoint']
-      feature_category = api_endpoint.options[:for].try(:feature_category_for_app, api_endpoint).to_s
-
-      header[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
 
       Gitlab::ApplicationContext.push(
         user: -> { @current_user },
@@ -61,7 +57,7 @@ module API
         runner: -> { @current_runner || @runner },
         caller_id: api_endpoint.endpoint_id,
         remote_ip: request.ip,
-        feature_category: feature_category
+        feature_category: endpoint_feature_category
       )
     end
 
