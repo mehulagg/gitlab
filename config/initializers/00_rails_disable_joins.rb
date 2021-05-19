@@ -132,6 +132,35 @@ module DisableJoins
       end
   end
 
+  module DelegateCache
+    def relation_delegate_class(klass)
+      @relation_delegate_cache2[klass] || super
+    end
+
+    def initialize_relation_delegate_cache_disable_joins
+      @relation_delegate_cache2 = {}
+
+      [
+        DisableJoinsAssociationRelation
+      ].each do |klass|
+        delegate = Class.new(klass) {
+          include ::ActiveRecord::Delegation::ClassSpecificRelation
+        }
+        include_relation_methods(delegate)
+        mangled_name = klass.name.gsub("::", "_")
+        const_set mangled_name, delegate
+        private_constant mangled_name
+
+        @relation_delegate_cache2[klass] = delegate
+      end
+    end
+
+    def inherited(child_class)
+      child_class.initialize_relation_delegate_cache_disable_joins
+      super
+    end
+  end
+
   class DisableJoinsAssociationRelation < ::ActiveRecord::Relation # :nodoc:
     TOO_MANY_RECORDS = 5000
 
@@ -177,3 +206,4 @@ ActiveRecord::Associations::Builder::HasMany.prepend(DisableJoins::HasMany)
 ActiveRecord::Associations::HasOneThroughAssociation.prepend(DisableJoins::HasOneThroughAssociation)
 ActiveRecord::Associations::HasManyThroughAssociation.prepend(DisableJoins::HasManyThroughAssociation)
 ActiveRecord::Associations::Preloader::ThroughAssociation.prepend(DisableJoins::PreloaderThroughAssociation)
+ActiveRecord::Base.extend(DisableJoins::DelegateCache)
