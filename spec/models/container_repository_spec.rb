@@ -364,7 +364,7 @@ RSpec.describe ContainerRepository do
     let_it_be(:repository1) { create(:container_repository, :cleanup_ongoing, expiration_policy_started_at: 1.day.ago) }
     let_it_be(:repository2) { create(:container_repository, :cleanup_ongoing, expiration_policy_started_at: 25.minutes.ago) }
     let_it_be(:repository3) { create(:container_repository, :cleanup_ongoing, expiration_policy_started_at: 1.week.ago) }
-    let_it_be(:repository2) { create(:container_repository, :cleanup_unscheduled, expiration_policy_started_at: 25.minutes.ago) }
+    let_it_be(:repository4) { create(:container_repository, :cleanup_unscheduled, expiration_policy_started_at: 25.minutes.ago) }
 
     subject { described_class.with_stale_ongoing_cleanup(27.minutes.ago) }
 
