@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
 import SecurityConfigurationApp from './components/app.vue';
 import NewSecurityConfigurationApp from './components/new_app.vue';
 import { augmentFeatures } from './utils';
@@ -16,7 +17,15 @@ export const initNewSecurityConfiguration = (el) => {
     defaultClient: createDefaultClient(),
   });
 
-  const { projectPath, upgradePath, features } = el.dataset;
+  const {
+    upgradePath,
+    features,
+    autoDevopsHelpPagePath,
+    autoDevopsPath,
+    latestPipelinePath,
+    projectPath,
+    gitlabCiHistoryPath,
+  } = el.dataset;
 
   const { securityFeatures, complianceFeatures } = augmentFeatures(features);
 
@@ -30,6 +39,17 @@ export const initNewSecurityConfiguration = (el) => {
     render(createElement) {
       return createElement(NewSecurityConfigurationApp, {
         props: {
+          ...parseBooleanDataAttributes(el, [
+            'autoDevopsEnabled',
+            'canEnableAutoDevops',
+            'gitlabCiPresent',
+          ]),
+          autoDevopsHelpPagePath,
+          autoDevopsPath,
+          features,
+          latestPipelinePath,
+          projectPath,
+          gitlabCiHistoryPath,
           securityFeatures,
           complianceFeatures,
         },

@@ -1,3 +1,11 @@
-import { initStaticSecurityConfiguration } from '~/security_configuration';
+import {
+  initStaticSecurityConfiguration,
+  initNewSecurityConfiguration,
+} from '~/security_configuration';
 
-initStaticSecurityConfiguration(document.querySelector('#js-security-configuration-static'));
+const el = document.querySelector('#js-security-configuration-static');
+if (gon.features.securityConfigurationRedesign) {
+  initNewSecurityConfiguration(el);
+} else {
+  initStaticSecurityConfiguration(el);
+}
