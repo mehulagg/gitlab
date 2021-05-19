@@ -917,6 +917,13 @@ module Ci
       ).base_and_descendants.select(:id)
     end
 
+    def same_family_environments
+      pipelines = Pipeline.where(id: same_family_pipeline_ids)
+      environment_ids = pipelines.includes(:deployments).pluck(:'deployments.environment_id')
+
+      Environment.where(id: environment_ids)
+    end
+
     def build_with_artifacts_in_self_and_descendants(name)
       builds_in_self_and_descendants
         .ordered_by_pipeline # find job in hierarchical order

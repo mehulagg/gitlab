@@ -3162,6 +3162,55 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
     end
   end
 
+  describe '#same_family_environments' do
+    subject { pipeline.same_family_environments }
+
+    context 'when pipeline is not child nor parent' do
+      let!(:pipeline) { create(:ci_pipeline, :created) }
+      let!(:build) { create(:ci_build, :with_deployment, :deploy_to_production, pipeline: pipeline) }
+
+      it 'returns just the pipeline environment' do
+        expect(subject).to contain_exactly(build.deployment.environment)
+      end
+    end
+
+    context 'when pipeline is in an extended family' do
+      let!(:pipeline) { create(:ci_pipeline, child_of: parent) }
+      let!(:build) { create(:ci_build, :with_deployment, :deploy_to_production, pipeline: pipeline) }
+
+      let!(:parent) { create(:ci_pipeline) }
+      let!(:parent_build) { create(:ci_build, :with_deployment, environment: 'staging', pipeline: parent) }
+
+      let!(:child) { create(:ci_pipeline, child_of: pipeline) }
+      let!(:child_build) { create(:ci_build, :with_deployment, environment: 'canary', pipeline: child) }
+
+      let!(:sibling) { create(:ci_pipeline, child_of: parent) }
+      let!(:sibling_build) { create(:ci_build, :with_deployment, environment: 'review', pipeline: sibling) }
+
+      let!(:grandchild) { create(:ci_pipeline, child_of: child) }
+      let!(:grandchild_build) { create(:ci_build, :with_deployment, environment: 'test', pipeline: grandchild) }
+
+      it 'returns all related environments' do
+        expected_environments = [
+          build.deployment.environment,
+          parent_build.deployment.environment,
+          child_build.deployment.environment,
+          sibling_build.deployment.environment,
+          grandchild_build.deployment.environment
+        ]
+        expect(subject).to match_array(expected_environments)
+      end
+    end
+
+    context 'when pipeline has no environment' do
+      let!(:pipeline) { create(:ci_pipeline, :created) }
+
+      it 'returns empty' do
+        expect(subject).to be_empty
+      end
+    end
+  end
+
   describe '#root_ancestor' do
     subject { pipeline.root_ancestor }
 
