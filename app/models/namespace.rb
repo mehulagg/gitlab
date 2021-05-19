@@ -273,7 +273,8 @@ class Namespace < ApplicationRecord
   # Includes pipelines from this namespace and pipelines from all subgroups
   # that belongs to this namespace
   def all_pipelines
-    Ci::Pipeline.where(project: all_projects)
+    # TODO: CI Vertical
+    Ci::Pipeline.where(project: all_projects.ids)
   end
 
   def has_parent?
