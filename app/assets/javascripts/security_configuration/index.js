@@ -27,7 +27,9 @@ export const initNewSecurityConfiguration = (el) => {
     gitlabCiHistoryPath,
   } = el.dataset;
 
-  const { securityFeatures, complianceFeatures } = augmentFeatures(JSON.parse(features));
+  const { securityFeatures, complianceFeatures } = augmentFeatures(
+    features ? JSON.parse(features) : [],
+  );
 
   return new Vue({
     el,
