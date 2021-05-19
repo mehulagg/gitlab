@@ -490,17 +490,6 @@ class GeoNodeStatus < ApplicationRecord
     self.wikis_failed_count = Geo::ProjectRegistry.sync_failed(:wiki).count
   end
 
-  def load_lfs_objects_data
-    return unless lfs_objects_replication_enabled
-    return if Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml)
-
-    self.lfs_objects_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_count = lfs_objects_finder.synced_count
-    self.lfs_objects_failed_count = lfs_objects_finder.failed_count
-    self.lfs_objects_registry_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.synced_missing_on_primary_count
-  end
-
   def load_job_artifacts_data
     return unless job_artifacts_replication_enabled
 

@@ -37,9 +37,5 @@ module EE
         with_files_stored_locally
       end
     end
-
-    def log_geo_deleted_event
-      ::Geo::LfsObjectDeletedEventStore.new(self).create! if ::Feature.disabled?(:geo_lfs_object_replication, default_enabled: :yaml)
-    end
   end
 end

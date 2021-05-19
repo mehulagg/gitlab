@@ -65,22 +65,6 @@ RSpec.describe EE::API::Entities::GeoNodeStatus do
     end
   end
 
-  describe '#lfs_objects_synced_in_percentage' do
-    context 'LFS with SSF is disabled' do
-      before do
-        stub_feature_flags(geo_lfs_object_replication: false)
-      end
-
-      it 'formats as percentage' do
-        geo_node_status.assign_attributes(lfs_objects_registry_count: 256,
-                                          lfs_objects_failed_count: 12,
-                                          lfs_objects_synced_count: 123)
-
-        expect(subject[:lfs_objects_synced_in_percentage]).to eq '48.05%'
-      end
-    end
-  end
-
   describe '#job_artifacts_synced_in_percentage' do
     it 'formats as percentage' do
       geo_node_status.assign_attributes(job_artifacts_count: 256,

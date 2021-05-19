@@ -12,7 +12,6 @@ RSpec.describe Geo::FileDownloadDispatchWorker, :geo, :use_sql_query_cache_for_t
   before do
     stub_current_geo_node(secondary)
     stub_exclusive_lease(renew: true)
-    stub_feature_flags(geo_lfs_object_replication: false)
     allow_next_instance_of(described_class) do |instance|
       allow(instance).to receive(:over_time?).and_return(false)
     end

@@ -208,17 +208,6 @@ module EE
         }
       ]
 
-      if ::Feature.disabled?(:geo_lfs_object_replication, default_enabled: :yaml)
-        replicable_types.insert(2, {
-          data_type: 'blob',
-          data_type_title: _('File'),
-          title: _('LFS object'),
-          title_plural: _('LFS objects'),
-          name: 'lfs_object',
-          name_plural: 'lfs_objects'
-        })
-      end
-
       # Adds all the SSF Data Types automatically
       enabled_replicator_classes.each do |replicator_class|
         replicable_types.push(
