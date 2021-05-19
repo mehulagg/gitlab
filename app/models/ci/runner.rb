@@ -87,13 +87,19 @@ module Ci
         groups = Gitlab::ObjectHierarchy.new(groups).base_and_ancestors
       end
 
-      joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: groups })
+      # TODO: CI vertical
+      group_ids = groups.pluck(:id)
+
+      joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: group_ids })
     }
 
     scope :belonging_to_group_or_project, -> (group_id, project_id) {
       groups = ::Group.where(id: group_id)
 
-      group_runners = joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: groups })
+      # TODO: CI vertical
+      group_ids = groups.pluck(:id)
+
+      group_runners = joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: group_ids })
       project_runners = joins(:runner_projects).where(ci_runner_projects: { project_id: project_id })
 
       union_sql = ::Gitlab::SQL::Union.new([group_runners, project_runners]).to_sql
@@ -104,8 +110,10 @@ module Ci
     scope :belonging_to_parent_group_of_project, -> (project_id) {
       project_groups = ::Group.joins(:projects).where(projects: { id: project_id })
       hierarchy_groups = Gitlab::ObjectHierarchy.new(project_groups).base_and_ancestors
+      # TODO: CI vertical
+      hierarchy_groups_ids = hierarchy_groups.pluck(:id)
 
-      joins(:groups).where(namespaces: { id: hierarchy_groups })
+      joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: hierarchy_groups_ids })
     }
 
     scope :owned_or_instance_wide, -> (project_id) do
