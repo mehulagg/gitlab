@@ -148,11 +148,43 @@ module Gitlab
             conditions_for_column(column_definition, value).each do |condition|
               column_definitions_after_index = reversed_column_definitions.last(column_definitions.reverse.size - i - 1)
 
-              equal_conditon_for_rest = column_definitions_after_index.map do |definition|
-                definition.column_expression.eq(values[definition.attribute_name])
+              products_a = []
+              products_b = []
+              products = []
+              column_definitions_after_index.map do |definition|
+                cc1 = Arel::Nodes::And.new([
+                    definition.column_expression.eq(build_quoted(values[definition.attribute_name]))
+                  ])
+                cc2 = Arel::Nodes::And.new([
+                  definition.column_expression.eq(nil),
+                  build_quoted(values[definition.attribute_name]).eq(nil)
+                ])
+
+                products_a << cc1
+                products_b << cc2
+                products << [cc1, cc2]
               end
 
-              where_values << Arel::Nodes::Grouping.new(Arel::Nodes::And.new([condition, *equal_conditon_for_rest].compact))
+              arr = []
+
+              products.each_with_index do |v, i|
+                products.each_with_index do |vv, j|
+                  arr << [v.first, vv.last] if i != j
+                  arr << [v.first, vv.first] if i != j
+                end
+              end
+
+              if products.size == 1
+                arr = [[products.first.first], [products.last.last]]
+              end
+
+              if products.empty?
+                where_values << Arel::Nodes::Grouping.new(Arel::Nodes::And.new([condition].compact))
+              else
+                arr.each do |arrs|
+                  where_values << Arel::Nodes::Grouping.new(Arel::Nodes::And.new([condition, *arrs].compact))
+                end
+              end
             end
           end
 
@@ -164,15 +196,25 @@ module Gitlab
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
-        def apply_cursor_conditions(scope, values = {}, options = { use_union_optimization: false })
+        def apply_cursor_conditions(scope, values = {}, options = { use_union_optimization: false, use_recursive_union_with_multi_index_scan: false })
           values ||= {}
           transformed_values = values.with_indifferent_access
-          scope = apply_custom_projections(scope)
+          scope = apply_custom_projections(scope.dup)
 
           where_values = build_where_values(transformed_values)
 
           if options[:use_union_optimization] && where_values.size > 1
             build_union_query(scope, where_values).reorder(self)
+          elsif options[:use_recursive_union_with_multi_index_scan]
+            opts = options[:use_recursive_union_with_multi_index_scan]
+
+            Gitlab::Pagination::Keyset::RecursiveUnionWithMultiIndexScan.new(
+              **{
+                scope: scope,
+                order: self,
+                values: values
+              }.merge(opts)
+            ).execute
           else
             scope.where(build_or_query(where_values)) # rubocop: disable CodeReuse/ActiveRecord
           end
@@ -198,19 +240,33 @@ module Gitlab
           scope
         end
 
+        def build_quoted(value)
+          if value.instance_of?(Arel::Nodes::SqlLiteral)
+            value
+          else
+            Arel::Nodes.build_quoted(value)
+          end
+        end
+
+        def not_eq(value_a, value_b)
+          Arel::Nodes::InfixOperation.new(Arel.sql('IS DISTINCT FROM'), value_a, value_b)
+        end
+
         def conditions_for_column(column_definition, value)
           conditions = []
           # Depending on the order, build a query condition fragment for taking the next rows
-          if column_definition.distinct? || (!column_definition.distinct? && value.present?)
-            conditions << compare_column_with_value(column_definition, value)
-          end
+          conditions << if column_definition.distinct?
+                          compare_column_with_value(column_definition, value)
+                        else
+                          Arel::Nodes::And.new([compare_column_with_value(column_definition, value), not_eq(build_quoted(value), build_quoted(nil))])
+                        end
 
           # When the column is nullable, additional conditions for NULL a NOT NULL values are necessary.
           # This depends on the position of the nulls (top or bottom of the resultset).
-          if column_definition.nulls_first? && value.blank?
-            conditions << column_definition.column_expression.not_eq(nil)
-          elsif column_definition.nulls_last? && value.present?
-            conditions << column_definition.column_expression.eq(nil)
+          if column_definition.nulls_first?
+            conditions << Arel::Nodes::And.new([column_definition.column_expression.not_eq(nil), build_quoted(value).eq(nil)])
+          elsif column_definition.nulls_last?
+            conditions << Arel::Nodes::And.new([column_definition.column_expression.eq(nil), build_quoted(value).not_eq(nil)])
           end
 
           conditions
