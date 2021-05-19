@@ -236,10 +236,39 @@ To disable it:
 Feature.disable(:geo_lfs_object_replication)
 ```
 
-#### Limitation of verification of external Object Storage
+#### Limitation of verification for external Object Storage
 
 GitLab managed Object Storage replication support [is in beta](object_storage.md#enabling-gitlab-managed-object-storage-replication). 
 
 Locally stored files are verified but externally stored files are not.
 
-Versioned Terraform States verification for local files ([introduced in 13.12](https://gitlab.com/gitlab-org/gitlab/-/issues/329963)) is behind a feature flag `geo_terraform_state_version_verification`, enabled by default.
+#### Verification for Versioned Terraform States
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/322886) in GitLab 13.12.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/330023) in GitLab 13.12.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-verification-for-versioned-terraform-states). **(PREMIUM SELF)**
+
+WARNING:
+Verification for Versioned Terraform States is available for locally stored file, but not for remote stored files.
+
+##### Enable or disable verification for Versioned Terraform States **(PREMIUM SELF)**
+
+Verification for locally stored Versioned Terraform State files  is behind a feature flag `geo_terraform_state_version_verification`, enabled by default.
+
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can opt to disable it.
+
+
+
+To enable it:
+
+```ruby
+Feature.enable(:geo_terraform_state_version_verification)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:geo_terraform_state_version_replication)
+```
+
+
