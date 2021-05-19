@@ -71,6 +71,12 @@ describe('~/nav/components/top_nav_container_view.vue', () => {
       createComponent();
     });
 
+    it('does not inherit extra attrs', () => {
+      expect(wrapper.attributes()).toEqual({
+        class: expect.any(String),
+      });
+    });
+
     it('renders frequent items app', () => {
       expect(findFrequentItemsApp()).toEqual({
         vuexModule: DEFAULT_PROPS.frequentItemsVuexModule,
