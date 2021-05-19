@@ -13,6 +13,8 @@ class Analytics::CycleAnalytics::GroupValueStream < ApplicationRecord
   scope :preload_associated_models, -> { includes(:group, stages: [:group, :end_event_label, :start_event_label]) }
 
   def custom?
+    return true if persisted?
+
     name != Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
   end
 end
