@@ -14,7 +14,7 @@ to block user IP addresses.
 You can prevent brute-force passwords attacks, scrapers, or any other offenders
 by throttling requests from IP addresses that are making large volumes of requests.
 If you find throttling is not enough to protect you against abusive clients,
-Rack Attack offers IP whitelisting, blacklisting, Fail2ban style filtering, and
+Rack Attack offers IP allowlisting, denylisting, Fail2ban style filtering, and
 tracking.
 
 For more information on how to use these options see the [Rack Attack README](https://github.com/kickstarter/rack-attack/blob/master/README.md).
@@ -92,7 +92,7 @@ No response headers are provided.
    ```ruby
    gitlab_rails['rack_attack_git_basic_auth'] = {
      'enabled' => true,
-     'ip_whitelist' => ["127.0.0.1"],
+     'ip_allowlist' => ["127.0.0.1"],
      'maxretry' => 10, # Limit the number of Git HTTP authentication attempts per IP
      'findtime' => 60, # Reset the auth attempt counter per IP after 60 seconds
      'bantime' => 3600 # Ban an IP for one hour (3600s) after too many auth attempts
@@ -108,14 +108,14 @@ No response headers are provided.
 The following settings can be configured:
 
 - `enabled`: By default this is set to `false`. Set this to `true` to enable Rack Attack.
-- `ip_whitelist`: Whitelist any IPs from being blocked. They must be formatted as strings within a Ruby array.
+- `ip_allowlist`: allowlist any IPs from being blocked. They must be formatted as strings within a Ruby array.
   CIDR notation is supported in GitLab v12.1 and up.
   For example, `["127.0.0.1", "127.0.0.2", "127.0.0.3", "192.168.0.1/24"]`.
 - `maxretry`: The maximum amount of times a request can be made in the
   specified time.
 - `findtime`: The maximum amount of time that failed requests can count against an IP
-  before it's blacklisted (in seconds).
-- `bantime`: The total amount of time that a blacklisted IP is blocked (in
+  before it's denylisted (in seconds).
+- `bantime`: The total amount of time that a denylisted IP is blocked (in
   seconds).
 
 **Installations from source**
@@ -154,14 +154,14 @@ In case you want to remove a blocked IP, follow these steps:
    grep "Rack_Attack" /var/log/gitlab/gitlab-rails/auth.log
    ```
 
-1. Since the blacklist is stored in Redis, you need to open up `redis-cli`:
+1. Since the denylist is stored in Redis, you need to open up `redis-cli`:
 
    ```shell
    /opt/gitlab/embedded/bin/redis-cli -s /var/opt/gitlab/redis/redis.socket
    ```
 
 1. You can remove the block using the following syntax, replacing `<ip>` with
-   the actual IP that is blacklisted:
+   the actual IP that is denylisted:
 
    ```plaintext
    del cache:gitlab:rack::attack:allow2ban:ban:<ip>
@@ -173,19 +173,19 @@ In case you want to remove a blocked IP, follow these steps:
    keys *rack::attack*
    ```
 
-1. Optionally, add the IP to the whitelist to prevent it from being blacklisted
+1. Optionally, add the IP to the allowlist to prevent it from being denylisted
    again (see [settings](#settings)).
 
 ## Troubleshooting
 
-### Rack attack is blacklisting the load balancer
+### Rack attack is denylisting the load balancer
 
 Rack Attack may block your load balancer if all traffic appears to come from
 the load balancer. In that case, you must:
 
 1. [Configure `nginx[real_ip_trusted_addresses]`](https://docs.gitlab.com/omnibus/settings/nginx.html#configuring-gitlab-trusted_proxies-and-the-nginx-real_ip-module).
    This keeps users' IPs from being listed as the load balancer IPs.
-1. Whitelist the load balancer's IP address(es) in the Rack Attack [settings](#settings).
+1. allowlist the load balancer's IP address(es) in the Rack Attack [settings](#settings).
 1. Reconfigure GitLab:
 
    ```shell
