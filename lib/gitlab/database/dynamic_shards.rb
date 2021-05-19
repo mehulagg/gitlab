@@ -8,8 +8,13 @@ module DynamicShards
       end
 
       shards = {
-        "primary" => config.merge(database: "#{config["database"]}_primary"),
-        "ci" => config.merge(database: "#{config["database"]}_ci")
+        "primary" => config.merge(
+          database: "#{config["database"]}_primary"
+          ),
+        "ci" => config.merge(
+          database: "#{config["database"]}_ci",
+          migrations_paths: "db/migrate_ci"
+        )
       }
 
       [env, shards]
