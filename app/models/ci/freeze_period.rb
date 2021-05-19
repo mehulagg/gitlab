@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module Ci
-  class FreezePeriod < ApplicationRecord
+  class FreezePeriod < Ci::ApplicationRecord
     include StripAttribute
+
     self.table_name = 'ci_freeze_periods'
 
     default_scope { order(created_at: :asc) } # rubocop:disable Cop/DefaultScope
