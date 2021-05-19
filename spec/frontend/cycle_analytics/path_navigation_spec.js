@@ -1,5 +1,6 @@
 import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import Component from '~/cycle_analytics/components/path_navigation.vue';
 import { transformedProjectStagePathData, selectedStage } from './mock_data';
 
@@ -7,26 +8,34 @@ describe('Project PathNavigation', () => {
   let wrapper = null;
 
   const createComponent = (props) => {
-    return mount(Component, {
-      propsData: {
-        stages: transformedProjectStagePathData,
-        selectedStage,
-        loading: false,
-        ...props,
-      },
-    });
+    return extendedWrapper(
+      mount(Component, {
+        propsData: {
+          stages: transformedProjectStagePathData,
+          selectedStage,
+          loading: false,
+          ...props,
+        },
+      }),
+    );
   };
 
-  const pathNavigationTitles = () => {
-    return wrapper.findAll('.gl-path-button');
+  const findPathNavigation = () => {
+    return wrapper.findByTestId('gl-path-nav');
   };
 
-  const pathNavigationItems = () => {
-    return wrapper.findAll('.gl-path-nav-list-item');
+  const findPathNavigationItems = () => {
+    return findPathNavigation().findAll('li');
+  };
+
+  const findPathNavigationTitles = () => {
+    return findPathNavigation()
+      .findAll('li button')
+      .wrappers.map((w) => w.html());
   };
 
   const clickItemAt = (index) => {
-    pathNavigationTitles().at(index).trigger('click');
+    findPathNavigationItems().at(index).find('button').trigger('click');
   };
 
   beforeEach(() => {
@@ -61,9 +70,17 @@ describe('Project PathNavigation', () => {
           expect(wrapper.find(GlSkeletonLoading).exists()).toBe(false);
         });
 
-        // TODO: make this test more granular
-        it('matches the snapshot', () => {
-          expect(wrapper.element).toMatchSnapshot();
+        it('renders each stage', () => {
+          const result = findPathNavigationTitles();
+          expect(result.length).toBe(transformedProjectStagePathData.length);
+        });
+
+        it('renders each stage with its median', () => {
+          const result = findPathNavigationTitles();
+          transformedProjectStagePathData.forEach(({ title, metric }, index) => {
+            expect(result[index]).toContain(title);
+            expect(result[index]).toContain(metric);
+          });
         });
 
         describe('popovers', () => {
@@ -72,7 +89,7 @@ describe('Project PathNavigation', () => {
           });
 
           it('renders popovers for all stages', () => {
-            const pathItemContent = pathNavigationItems().wrappers;
+            const pathItemContent = findPathNavigationItems().wrappers;
 
             pathItemContent.forEach((stage) => {
               expect(stage.find('[data-testid="stage-item-popover"]').exists()).toBe(true);

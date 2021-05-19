@@ -117,7 +117,6 @@ export default {
   <div class="cycle-analytics">
     <path-navigation
       v-if="shouldDisplayPathNavigation"
-      :key="`path_navigation_key_${pathNavigationData.length}`"
       class="js-path-navigation gl-w-full gl-pb-2"
       :loading="isLoading"
       :stages="pathNavigationData"
