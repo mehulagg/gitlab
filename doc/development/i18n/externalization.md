@@ -742,7 +742,7 @@ bin/rake gettext:regenerate
 This command updates `locale/gitlab.pot` file with the newly externalized
 strings and remove any strings that aren't used anymore. You should check this
 file in. Once the changes are on the default branch, they are picked up by
-[CrowdIn](https://translate.gitlab.com) and be presented for
+[CrowdIn](https://translate.gitlab.com) and will be presented for
 translation.
 
 We don't need to check in any changes to the `locale/[language]/gitlab.po` files.
