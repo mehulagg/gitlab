@@ -39,4 +39,12 @@ RSpec.describe ProjectHook do
       expect(hook.rate_limit).to be(100)
     end
   end
+
+  describe '#application_context' do
+    let_it_be(:hook) { create(:project_hook) }
+
+    it 'includes the project' do
+      expect(hook.application_context).to eq(project: hook.project)
+    end
+  end
 end

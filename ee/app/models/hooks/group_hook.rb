@@ -42,4 +42,9 @@ class GroupHook < WebHook
   def rate_limit
     group.actual_limits.limit_for(:web_hook_calls)
   end
+
+  override :application_context
+  def application_context
+    { namespace: group }
+  end
 end

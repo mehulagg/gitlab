@@ -80,6 +80,12 @@ class WebHook < ApplicationRecord
     nil
   end
 
+  # Custom attributes to be included in the worker context.
+  # Overridden in ProjectHook and GroupHook.
+  def application_context
+    {}
+  end
+
   private
 
   def web_hooks_disable_failed?
