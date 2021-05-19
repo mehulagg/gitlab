@@ -45,12 +45,55 @@ namespace :gitlab do
       File.open(old_path, 'w') do |post|
         post.puts '---'
         post.puts "redirect_to: '#{new_path}'"
+        post.puts "remove_date: '#{date}'"
         post.puts '---'
         post.puts
         post.puts "This file was moved to [another location](#{new_path})."
         post.puts
         post.puts "<!-- This redirect file can be deleted after <#{date}>. -->"
         post.puts "<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->"
+      end
+    end
+
+    desc 'GitLab | Docs | Clean up old redirects'
+    task :clean_redirects do
+      require "yaml"
+
+      # Get the current date
+      date = Time.now.utc.strftime('%Y-%m-%d')
+      month_day = Time.now.utc.strftime('%Y-%m')
+
+      # Find the files to be deleted
+      files_to_be_deleted = `grep -R "This redirect file can be deleted after" doc/ | grep #{month_day} | cut -d ":" -f 1`.split("\n")
+
+      #
+      # Iterate over the files to be deleted and print the needed
+      # YAML entries for the Docs site redirects.
+      #
+      files_to_be_deleted.each do |f|
+        frontmatter = YAML.safe_load(File.read(f))
+        redirect = frontmatter["redirect_to"]
+        remove_date = frontmatter["remove_date"]
+
+        old_path = f.gsub(%r(\.md), '.html').gsub(%r(doc\/), '/ee/')
+
+        #
+        # Calculate new path:
+        #   1. Create a new Pathname of the file
+        #   2. Use dirname to get all but the last component of the path
+        #   3. Join with the redirect_to entry
+        #   4. Substitute:
+        #      - '.md' => '.html'
+        #      - 'doc/' => '/ee/'
+        #
+        new_path = Pathname.new(f).dirname.join(redirect).to_s.gsub(%r(\.md), '.html').gsub(%r(doc\/), '/ee/')
+
+        # Check if the removal date is before today
+        if remove_date < date
+          puts "- from: #{old_path}"
+          puts "  to: #{new_path}"
+          puts "  remove_date: #{remove_date}"
+        end
       end
     end
   end
