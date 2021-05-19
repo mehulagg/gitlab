@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Ci
-  class BuildTraceSection < ApplicationRecord
+  class BuildTraceSection < Ci::ApplicationRecord
     extend SuppressCompositePrimaryKeyWarning
-    extend Gitlab::Ci::Model
 
     belongs_to :build, class_name: 'Ci::Build'
     belongs_to :project
