@@ -11,7 +11,7 @@ module Dast
     has_many :secret_variables, through: :dast_site_profile, class_name: 'Dast::SiteProfileSecretVariable'
 
     has_many :dast_profiles_pipelines, class_name: 'Dast::ProfilesPipeline', foreign_key: :dast_profile_id, inverse_of: :dast_profile
-    has_many :ci_pipelines, class_name: 'Ci::Pipeline', through: :dast_profiles_pipelines
+    has_many :ci_pipelines, class_name: 'Ci::Pipeline', through: :dast_profiles_pipelines, disable_joins: true
 
     validates :description, length: { maximum: 255 }
     validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }, presence: true
