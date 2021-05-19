@@ -13,7 +13,7 @@ RSpec.describe 'pypi package details' do
     it 'has the correct metadata' do
       expect(metadata_response).to include(
         'id' => global_id_of(package.pypi_metadatum),
-        'requiredPython' => package.pypi_metadatum.required_python,
+        'requiredPython' => package.pypi_metadatum.required_python
       )
     end
 
