@@ -9,9 +9,12 @@ module DynamicShards
         next config
       end
 
+      # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
+      primary_db = config["database"] == "gitlabhq_test" ? "gitlabhq_test" : "#{config["database"]}_primary"
+
       shards = {
         "primary" => config.merge(
-          database: "#{config["database"]}_primary"
+          database: primary_db
         ),
         "ci" => config.merge(
           database: "#{config["database"]}_ci",
