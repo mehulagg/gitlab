@@ -9,10 +9,10 @@ import {
   howToActivateSubscription,
 } from '../constants';
 
-export const troubleshootingHelpLink = helpPagePath('user/admin_area/license.html', {
-  anchor: 'troubleshooting',
-});
 export const subscriptionActivationHelpLink = helpPagePath('user/admin_area/license.html');
+export const troubleshootingHelpLink = helpPagePath('user/admin_area/license.html', {
+  anchor: 'there-is-a-connectivity-issue',
+});
 
 export default {
   name: 'SubscriptionActivationErrors',

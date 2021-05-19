@@ -124,6 +124,6 @@ export const connectivityErrorAlert = {
     'CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription.',
   ),
   helpText: s__(
-    'CloudLicense|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
+    'CloudLicense|There is a connectivity issue. You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
   ),
 };
