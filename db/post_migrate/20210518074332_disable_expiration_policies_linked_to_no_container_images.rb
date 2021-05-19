@@ -11,23 +11,17 @@ class DisableExpirationPoliciesLinkedToNoContainerImages < ActiveRecord::Migrati
     self.table_name = 'container_expiration_policies'
   end
 
-  class ContainerRepository < ActiveRecord::Base
-    self.table_name = 'container_repositories'
-  end
-
   def up
-    policies = ContainerExpirationPolicy
-      .where(enabled: true)
-      .where.not(
-        'EXISTS (?)',
-        ContainerRepository.select(1)
-                           .where(
-                             'container_repositories.project_id = container_expiration_policies.project_id'
-                           )
-      )
-
-    policies.each_batch(of: BATCH_SIZE) do |batch, _|
-      batch.update_all(enabled: false)
+    ContainerExpirationPolicy.where(enabled: true).each_batch(of: BATCH_SIZE) do |batch, _|
+      sql = <<-SQL
+        WITH batched_relation AS (#{batch.limit(BATCH_SIZE).to_sql})
+        UPDATE container_expiration_policies
+        SET enabled = FALSE
+        FROM batched_relation
+        WHERE container_expiration_policies.project_id = batched_relation.project_id
+        AND NOT EXISTS (SELECT 1 FROM "container_repositories" WHERE container_repositories.project_id = container_expiration_policies.project_id)
+      SQL
+      execute(sql)
     end
   end
 
