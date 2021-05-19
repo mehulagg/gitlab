@@ -83,9 +83,9 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqClientMiddleware do
     end
 
     shared_examples_for 'database location was already provided' do |provided_database_location, other_location|
-      shared_examples_for 'does not set database location again' do |write_performed|
+      shared_examples_for 'does not set database location again' do |use_primary|
         before do
-          allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:performed_write?).and_return(write_performed)
+          allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:use_primary?).and_return(use_primary)
         end
 
         it 'does not set database locations again' do
