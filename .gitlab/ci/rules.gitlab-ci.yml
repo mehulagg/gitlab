@@ -1045,7 +1045,7 @@
   rules:
     - <<: *if-default-branch-schedule-2-hourly
     - <<: *if-merge-request
-      changes: ["yarn.lock"]
+      changes: ["yarn.lock", "Gemfile.lock"]
 
 .reports:rules:license_scanning:
   rules:
