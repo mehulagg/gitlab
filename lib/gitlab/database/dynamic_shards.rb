@@ -1,5 +1,7 @@
 module DynamicShards
   def database_configuration
+    puts "Dynamic Shards"
+
     super.to_h do |env, config|
       if config.is_a?(Hash) && config.all? { |_, v| v.is_a?(Hash) }
         # if all hash, it means that this is new multi-database spec
@@ -10,7 +12,7 @@ module DynamicShards
       shards = {
         "primary" => config.merge(
           database: "#{config["database"]}_primary"
-          ),
+        ),
         "ci" => config.merge(
           database: "#{config["database"]}_ci",
           migrations_paths: "db/migrate_ci"

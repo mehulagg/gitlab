@@ -136,7 +136,7 @@ end
 # In development mode, we turn off eager loading when we're running
 # `rails generate migration` because eager loading short-circuits the
 # loading of our custom migration templates.
-if Gitlab::Metrics.enabled? && !Rails.env.test? && !(Rails.env.development? && defined?(Rails::Generators))
+if false && Gitlab::Metrics.enabled? && !Rails.env.test? && !(Rails.env.development? && defined?(Rails::Generators))
   require 'pathname'
   require 'connection_pool'
   require 'method_source'
