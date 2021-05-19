@@ -1,0 +1,5 @@
+---
+title: Fix pipeline header actions from showing when user does not have permission
+merge_request: 62137
+author:
+type: fixed
