@@ -6,15 +6,12 @@ import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue'
 import { stubComponent } from 'helpers/stub_component';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import getters from '~/boards/stores/getters';
-import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import {
   mockIssue3 as mockIssueWithoutEpic,
   mockIssueWithEpic,
   mockAssignedEpic,
 } from '../../mock_data';
-
-jest.mock('~/flash');
 
 const mockGroupId = 7;
 
@@ -35,7 +32,9 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       epicsCacheById: {},
       epicFetchInProgress: false,
     },
-    actionsMock = {},
+    actionsMock = {
+      setError: jest.fn(),
+    },
   } = {}) => {
     store = new Vuex.Store({
       state: initialState,
@@ -151,10 +150,12 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
       createWrapper();
 
+      jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
+
       await wrapper.vm.$nextTick();
 
-      expect(createFlash).toHaveBeenCalledTimes(1);
-      expect(createFlash).toHaveBeenCalledWith({
+      expect(wrapper.vm.setError).toHaveBeenCalledTimes(1);
+      expect(wrapper.vm.setError).toHaveBeenCalledWith({
         message: wrapper.vm.$options.i18n.fetchEpicError,
         error: 'mayday',
         captureError: true,
@@ -172,7 +173,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
       });
 
       createWrapper();
-
+      jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
       await wrapper.vm.$nextTick();
 
       expect(findEpicLink().isVisible()).toBe(true);
@@ -226,7 +227,7 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
         createStore();
         createWrapper();
         jest.spyOn(wrapper.vm, 'setActiveIssueEpic').mockImplementation();
-
+        jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
         findEpicSelect().vm.$emit('epicSelect', null);
 
         await wrapper.vm.$nextTick();
@@ -278,12 +279,14 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
 
     createWrapper();
 
+    jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
+
     findEpicSelect().vm.$emit('epicSelect', { id: 'foo' });
 
     await wrapper.vm.$nextTick();
 
-    expect(createFlash).toHaveBeenCalledTimes(1);
-    expect(createFlash).toHaveBeenCalledWith({
+    expect(wrapper.vm.setError).toHaveBeenCalledTimes(1);
+    expect(wrapper.vm.setError).toHaveBeenCalledWith({
       message: wrapper.vm.$options.i18n.updateEpicError,
       error: 'mayday',
       captureError: true,

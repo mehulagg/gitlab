@@ -3,7 +3,6 @@ import { GlButton, GlFormInput } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import { inactiveId } from '~/boards/constants';
-import createFlash from '~/flash';
 import { __, n__ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 
@@ -49,7 +48,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['unsetActiveId', 'updateListWipLimit']),
+    ...mapActions(['unsetActiveId', 'updateListWipLimit', 'setError']),
     showInput() {
       this.edit = true;
       this.currentWipLimit = this.maxIssueCount > 0 ? this.maxIssueCount : null;
@@ -84,7 +83,7 @@ export default {
           })
           .catch(() => {
             this.unsetActiveId();
-            createFlash({
+            this.setError({
               message: __('Something went wrong while updating your list settings'),
             });
           })
@@ -104,7 +103,7 @@ export default {
         })
         .catch(() => {
           this.unsetActiveId();
-          createFlash({
+          this.setError({
             message: __('Something went wrong while updating your list settings'),
           });
         })

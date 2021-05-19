@@ -3,7 +3,6 @@ import { GlLink } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, s__ } from '~/locale';
 import { fullEpicId } from '../../boards_util';
@@ -54,7 +53,7 @@ export default {
           try {
             await this.fetchEpicForActiveIssue();
           } catch (e) {
-            createFlash({
+            this.setError({
               message: this.$options.i18n.fetchEpicError,
               error: e,
               captureError: true,
@@ -65,7 +64,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveIssueEpic', 'fetchEpicForActiveIssue']),
+    ...mapActions(['setActiveIssueEpic', 'fetchEpicForActiveIssue', 'setError']),
     handleOpen() {
       if (!this.epicFetchInProgress) {
         this.$refs.epicSelect.toggleFormDropdown();
@@ -89,7 +88,11 @@ export default {
       try {
         await this.setActiveIssueEpic(epicId);
       } catch (e) {
-        createFlash({ message: this.$options.i18n.updateEpicError, error: e, captureError: true });
+        this.setError({
+          message: this.$options.i18n.updateEpicError,
+          error: e,
+          captureError: true,
+        });
       }
     },
   },

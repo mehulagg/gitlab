@@ -1,7 +1,6 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import createFlash from '~/flash';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, n__, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
@@ -86,7 +85,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['updateBoardEpicUserPreferences']),
+    ...mapActions(['updateBoardEpicUserPreferences', 'setError']),
     toggleCollapsed() {
       this.isCollapsed = !this.isCollapsed;
 
@@ -94,7 +93,7 @@ export default {
         collapsed: this.isCollapsed,
         epicId: this.epic.id,
       }).catch(() => {
-        createFlash({ message: __('Unable to save your preference'), captureError: true });
+        this.setError({ message: __('Unable to save your preference'), captureError: true });
       });
     },
   },
