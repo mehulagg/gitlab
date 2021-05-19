@@ -9,7 +9,7 @@ import createDiffsStore from '~/diffs/store/modules';
 
 const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
 
-function createComponent({ withCodequality = true }) {
+function createComponent({ withCodequality = true, provide = {} }) {
   const file = getReadableFile();
   const localVue = createLocalVue();
 
@@ -48,6 +48,7 @@ function createComponent({ withCodequality = true }) {
       isFirstFile: false,
       isLastFile: false,
     },
+    provide,
   });
 
   return {
@@ -72,6 +73,19 @@ describe('EE DiffFile', () => {
 
       it('shows the code quality badge', () => {
         expect(wrapper.find(CodeQualityBadge).exists()).toBe(true);
+      });
+    });
+
+    describe('when the feature flag for the next iteration is enabled', () => {
+      beforeEach(() => {
+        ({ wrapper } = createComponent({
+          withCodequality: true,
+          provide: { glFeatures: { codequalityMrDiffAnnotations: true } },
+        }));
+      });
+
+      it('does not show the code quality badge', () => {
+        expect(wrapper.find(CodeQualityBadge).exists()).toBe(false);
       });
     });
 

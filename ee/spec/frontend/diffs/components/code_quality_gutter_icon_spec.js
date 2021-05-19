@@ -15,7 +15,7 @@ describe('EE CodeQualityGutterIcon', () => {
 
   const findIcon = () => wrapper.findComponent(GlIcon);
 
-  const createComponent = (props = {}, provide = {}, extendStore = () => {}) => {
+  const createComponent = (props = {}, extendStore = () => {}) => {
     store = createDiffsStore();
     store.state.diffs.codequalityDiff = codequalityDiff;
 
@@ -23,7 +23,6 @@ describe('EE CodeQualityGutterIcon', () => {
 
     wrapper = shallowMount(CodeQualityGutterIcon, {
       propsData: { ...props },
-      provide,
       store,
     });
   };
@@ -32,38 +31,22 @@ describe('EE CodeQualityGutterIcon', () => {
     wrapper.destroy();
   });
 
-  describe('with feature flag enabled', () => {
-    it.each`
-      severity
-      ${'info'}
-      ${'minor'}
-      ${'major'}
-      ${'critical'}
-      ${'blocker'}
-      ${'unknown'}
-    `('shows icon for $severity degradation', ({ severity }) => {
-      createComponent(
-        { codequality: [{ severity }] },
-        { glFeatures: { codequalityMrDiffAnnotations: true } },
-      );
+  it.each`
+    severity
+    ${'info'}
+    ${'minor'}
+    ${'major'}
+    ${'critical'}
+    ${'blocker'}
+    ${'unknown'}
+  `('shows icon for $severity degradation', ({ severity }) => {
+    createComponent({ codequality: [{ severity }] });
 
-      expect(findIcon().exists()).toBe(true);
-      expect(findIcon().attributes()).toEqual({
-        class: SEVERITY_CLASSES[severity],
-        name: SEVERITY_ICONS[severity],
-        size: '12',
-      });
-    });
-  });
-
-  describe('without feature flag enabled', () => {
-    it('does not show an icon', () => {
-      createComponent(
-        { codequality: [{ severity: 'critical' }] },
-        { glFeatures: { codequalityMrDiffAnnotations: false } },
-      );
-
-      expect(findIcon().exists()).toBe(false);
+    expect(findIcon().exists()).toBe(true);
+    expect(findIcon().attributes()).toEqual({
+      class: SEVERITY_CLASSES[severity],
+      name: SEVERITY_ICONS[severity],
+      size: '12',
     });
   });
 });

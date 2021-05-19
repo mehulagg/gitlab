@@ -91,6 +91,20 @@ export default {
       if (!this.line.right) return {};
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
     },
+    showCodequalityLeft() {
+      return (
+        this.glFeatures.codequalityMrDiffAnnotations &&
+        this.inline &&
+        this.line.left?.codequality?.length > 0
+      );
+    },
+    showCodequalityRight() {
+      return (
+        this.glFeatures.codequalityMrDiffAnnotations &&
+        !this.inline &&
+        this.line.right?.codequality?.length > 0
+      );
+    },
     classNameMapCellLeft() {
       return utils.classNameMapCell({
         line: this.line.left,
@@ -272,7 +286,10 @@ export default {
           class="diff-td line-coverage left-side"
         ></div>
         <div class="diff-td line-codequality left-side" :class="[...parallelViewLeftLineType]">
-          <code-quality-gutter-icon v-if="inline" :codequality="line.left.codequality" />
+          <code-quality-gutter-icon
+            v-if="showCodequalityLeft"
+            :codequality="line.left.codequality"
+          />
         </div>
         <div
           :id="line.left.line_code"
@@ -384,7 +401,10 @@ export default {
           class="diff-td line-codequality right-side"
           :class="[line.right.type, { hll: isHighlighted, hll: isCommented }]"
         >
-          <code-quality-gutter-icon :codequality="line.right.codequality" />
+          <code-quality-gutter-icon
+            v-if="showCodequalityRight"
+            :codequality="line.right.codequality"
+          />
         </div>
         <div
           :id="line.right.line_code"
