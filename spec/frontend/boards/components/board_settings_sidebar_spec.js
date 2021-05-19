@@ -6,6 +6,7 @@ import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import BoardSettingsSidebar from '~/boards/components/board_settings_sidebar.vue';
+import SetFromTop from '~/boards/components/set_from_top.vue';
 import { inactiveId, LIST } from '~/boards/constants';
 import { createStore } from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
@@ -56,6 +57,12 @@ describe('BoardSettingsSidebar', () => {
       createComponent();
 
       expect(findDrawer().exists()).toBe(true);
+    });
+
+    it('finds a SetFromTop component', () => {
+      createComponent();
+
+      expect(wrapper.find(SetFromTop).exists()).toBe(true);
     });
 
     describe('on close', () => {

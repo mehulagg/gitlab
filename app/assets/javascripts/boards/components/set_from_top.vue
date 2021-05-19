@@ -5,7 +5,7 @@ export default {
   data() {
     return {
       heightFromTop: '40px', // default header height
-    }
+    };
   },
   mounted() {
     this.observeHeaderChange();
@@ -15,7 +15,7 @@ export default {
       const ob = new MutationObserver(() => {
         const target = document.querySelector('#js-peek');
 
-        if(document.body.contains(target)) {
+        if (document.body.contains(target)) {
           ob.disconnect();
 
           this.heightFromTop = `${contentTop()}px`;
@@ -24,7 +24,7 @@ export default {
 
       ob.observe(document.body, { childList: true });
     },
-  }
+  },
 };
 </script>
 

@@ -73,52 +73,52 @@ export default {
 </script>
 
 <template>
-<set-from-top #default="{ heightFromTop }">
-  <gl-drawer
-    v-if="showSidebar"
-    :open="isSidebarOpen"
-    :header-height="heightFromTop"
-    @close="handleClose"
-  >
-    <template #header>{{ __('Issue details') }}</template>
-    <template #default>
-      <board-sidebar-title />
-      <sidebar-assignees-widget
-        :iid="activeBoardItem.iid"
-        :full-path="fullPath"
-        :initial-assignees="activeBoardItem.assignees"
-        :allow-multiple-assignees="multipleAssigneesFeatureAvailable"
-        @assignees-updated="setAssignees"
-      />
-      <board-sidebar-epic-select v-if="epicFeatureAvailable" class="epic" />
-      <div>
-        <board-sidebar-milestone-select />
-        <sidebar-iteration-widget
-          v-if="iterationFeatureAvailable"
+  <set-from-top #default="{ heightFromTop }">
+    <gl-drawer
+      v-if="showSidebar"
+      :open="isSidebarOpen"
+      :header-height="heightFromTop"
+      @close="handleClose"
+    >
+      <template #header>{{ __('Issue details') }}</template>
+      <template #default>
+        <board-sidebar-title />
+        <sidebar-assignees-widget
           :iid="activeBoardItem.iid"
-          :workspace-path="projectPathForActiveIssue"
-          :iterations-workspace-path="groupPathForActiveIssue"
-          :issuable-type="issuableType"
-          class="gl-mt-5"
+          :full-path="fullPath"
+          :initial-assignees="activeBoardItem.assignees"
+          :allow-multiple-assignees="multipleAssigneesFeatureAvailable"
+          @assignees-updated="setAssignees"
         />
-      </div>
-      <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
-      <board-sidebar-due-date />
-      <board-sidebar-labels-select class="labels" />
-      <board-sidebar-weight-input v-if="weightFeatureAvailable" class="weight" />
-      <sidebar-confidentiality-widget
-        :iid="activeBoardItem.iid"
-        :full-path="fullPath"
-        :issuable-type="issuableType"
-        @confidentialityUpdated="setActiveItemConfidential($event)"
-      />
-      <sidebar-subscriptions-widget
-        :iid="activeBoardItem.iid"
-        :full-path="fullPath"
-        :issuable-type="issuableType"
-        data-testid="sidebar-notifications"
-      />
-    </template>
-  </gl-drawer>
-</set-from-top>
+        <board-sidebar-epic-select v-if="epicFeatureAvailable" class="epic" />
+        <div>
+          <board-sidebar-milestone-select />
+          <sidebar-iteration-widget
+            v-if="iterationFeatureAvailable"
+            :iid="activeBoardItem.iid"
+            :workspace-path="projectPathForActiveIssue"
+            :iterations-workspace-path="groupPathForActiveIssue"
+            :issuable-type="issuableType"
+            class="gl-mt-5"
+          />
+        </div>
+        <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
+        <board-sidebar-due-date />
+        <board-sidebar-labels-select class="labels" />
+        <board-sidebar-weight-input v-if="weightFeatureAvailable" class="weight" />
+        <sidebar-confidentiality-widget
+          :iid="activeBoardItem.iid"
+          :full-path="fullPath"
+          :issuable-type="issuableType"
+          @confidentialityUpdated="setActiveItemConfidential($event)"
+        />
+        <sidebar-subscriptions-widget
+          :iid="activeBoardItem.iid"
+          :full-path="fullPath"
+          :issuable-type="issuableType"
+          data-testid="sidebar-notifications"
+        />
+      </template>
+    </gl-drawer>
+  </set-from-top>
 </template>

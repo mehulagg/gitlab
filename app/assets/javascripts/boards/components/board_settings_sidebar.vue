@@ -9,7 +9,6 @@ import eventHub from '~/sidebar/event_hub';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import SetFromTop from './set_from_top.vue';
 
-// NOTE: need to revisit how we handle headerHeight, because we have so many different header and footer options.
 export default {
   listSettingsText: __('List settings'),
   components: {

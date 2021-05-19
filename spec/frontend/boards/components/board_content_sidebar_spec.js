@@ -7,6 +7,8 @@ import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_d
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
+import SetFromTop from '~/boards/components/set_from_top.vue';
+
 import { ISSUABLE } from '~/boards/constants';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import { mockIssue, mockIssueGroupPath, mockIssueProjectPath } from '../mock_data';
@@ -85,6 +87,10 @@ describe('BoardContentSidebar', () => {
 
   it('confirms we render GlDrawer', () => {
     expect(wrapper.find(GlDrawer).exists()).toBe(true);
+  });
+
+  it('confirms we render SetFromTop', () => {
+    expect(wrapper.find(SetFromTop).exists()).toBe(true);
   });
 
   it('does not render GlDrawer when isSidebarOpen is false', () => {
