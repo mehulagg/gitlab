@@ -257,8 +257,6 @@ Verification for locally stored Versioned Terraform State files  is behind a fea
 
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can opt to disable it.
 
-
-
 To enable it:
 
 ```ruby
@@ -270,5 +268,3 @@ To disable it:
 ```ruby
 Feature.disable(:geo_terraform_state_version_replication)
 ```
-
-
