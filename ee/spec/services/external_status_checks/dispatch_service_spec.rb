@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalApprovalRules::DispatchService do
-  let_it_be(:rule) { build_stubbed(:external_approval_rule, external_url: 'https://test.example.com/callback') }
+RSpec.describe ExternalStatusChecks::DispatchService do
+  let_it_be(:rule) { build_stubbed(:external_status_check, external_url: 'https://test.example.com/callback') }
 
   subject { described_class.new(rule, {}).execute }
 

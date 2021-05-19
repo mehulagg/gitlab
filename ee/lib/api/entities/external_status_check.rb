@@ -2,7 +2,7 @@
 
 module API
   module Entities
-    class ExternalApprovalRule < Grape::Entity
+    class ExternalStatusCheck < Grape::Entity
       expose :id
       expose :name
       expose :project_id

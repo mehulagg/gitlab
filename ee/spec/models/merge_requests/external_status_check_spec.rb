@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
-  subject { build(:external_approval_rule) }
+RSpec.describe MergeRequests::ExternalStatusCheck, type: :model do
+  subject { build(:external_status_check) }
 
   describe 'Associations' do
     it { is_expected.to belong_to(:project) }
@@ -23,7 +23,7 @@ RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
   end
 
   describe 'approved?' do
-    let_it_be(:rule) { create(:external_approval_rule) }
+    let_it_be(:rule) { create(:external_status_check) }
     let_it_be(:merge_request) { create(:merge_request) }
 
     let(:project) { merge_request.source_project }
@@ -31,13 +31,13 @@ RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
     subject { rule.approved?(merge_request, merge_request.source_branch_sha) }
 
     context 'when a rule has a positive status check response' do
-      let_it_be(:status_check_response) { create(:status_check_response, merge_request: merge_request, external_approval_rule: rule, sha: merge_request.source_branch_sha) }
+      let_it_be(:status_check_response) { create(:status_check_response, merge_request: merge_request, external_status_check: rule, sha: merge_request.source_branch_sha) }
 
       it { is_expected.to be true }
 
       context 'when a rule also has a positive check response from an old sha' do
         before do
-          create(:status_check_response, merge_request: merge_request, external_approval_rule: rule, sha: 'abc1234')
+          create(:status_check_response, merge_request: merge_request, external_status_check: rule, sha: 'abc1234')
         end
 
         it { is_expected.to be true }
@@ -50,7 +50,7 @@ RSpec.describe ApprovalRules::ExternalApprovalRule, type: :model do
 
     context 'when a rule has a positive status check response from an old sha' do
       before do
-        create(:status_check_response, merge_request: merge_request, external_approval_rule: rule, sha: 'abc123')
+        create(:status_check_response, merge_request: merge_request, external_status_check: rule, sha: 'abc123')
       end
 
       it { is_expected.to be false }

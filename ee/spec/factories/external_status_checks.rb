@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :external_approval_rule, class: 'ApprovalRules::ExternalApprovalRule' do
+  factory :external_status_check, class: 'MergeRequests::ExternalStatusCheck' do
     project
     external_url { FFaker::Internet.http_url }
 

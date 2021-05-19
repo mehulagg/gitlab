@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalApprovalRules::CreateService do
+RSpec.describe ExternalStatusChecks::CreateService do
   let_it_be(:project) { create(:project) }
   let_it_be(:protected_branch) { create(:protected_branch, project: project) }
   let(:user) { project.owner }
@@ -24,7 +24,7 @@ RSpec.describe ExternalApprovalRules::CreateService do
     end
 
     it 'does not create a new rule' do
-      expect { subject }.not_to change { ApprovalRules::ExternalApprovalRule.count }
+      expect { subject }.not_to change { MergeRequests::ExternalStatusCheck.count }
     end
   end
 
@@ -36,7 +36,7 @@ RSpec.describe ExternalApprovalRules::CreateService do
     end
 
     it 'does not create a new rule' do
-      expect { subject }.not_to change { ApprovalRules::ExternalApprovalRule.count }
+      expect { subject }.not_to change { MergeRequests::ExternalStatusCheck.count }
     end
 
     it 'responds with the expected errors' do
@@ -48,7 +48,7 @@ RSpec.describe ExternalApprovalRules::CreateService do
 
   context 'successfully creating approval rule' do
     it 'creates a new ExternalApprovalRule' do
-      expect { subject }.to change { ApprovalRules::ExternalApprovalRule.count }.by(1)
+      expect { subject }.to change { MergeRequests::ExternalStatusCheck.count }.by(1)
     end
 
     it 'is successful' do
@@ -58,7 +58,7 @@ RSpec.describe ExternalApprovalRules::CreateService do
     it 'includes the newly created rule in its payload' do
       rule = subject.payload[:rule]
 
-      expect(rule).to be_a(ApprovalRules::ExternalApprovalRule)
+      expect(rule).to be_a(MergeRequests::ExternalStatusCheck)
       expect(rule.project).to eq(project)
       expect(rule.external_url).to eq('https://external_url.text/hello.json')
       expect(rule.name).to eq 'Test'

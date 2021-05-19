@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-module ExternalApprovalRules
-  class UpdateService < BaseContainerService
-    def execute
+module ExternalStatusChecks
+  class DestroyService < BaseContainerService
+    def execute(rule)
       return unauthorized_error_response unless current_user.can?(:admin_project, container)
 
-      if rule.update(resource_params)
-        ServiceResponse.success(payload: { rule: rule })
+      if rule.destroy
+        ServiceResponse.success
       else
-        ServiceResponse.error(message: 'Failed to update rule',
+        ServiceResponse.error(message: 'Failed to destroy rule',
                               payload: { errors: rule.errors.full_messages },
                               http_status: :unprocessable_entity)
       end
@@ -16,17 +16,9 @@ module ExternalApprovalRules
 
     private
 
-    def resource_params
-      params.slice(:name, :external_url, :protected_branch_ids)
-    end
-
-    def rule
-      container.external_approval_rules.find(params[:rule_id])
-    end
-
     def unauthorized_error_response
       ServiceResponse.error(
-        message: 'Failed to update rule',
+        message: 'Failed to destroy rule',
         payload: { errors: ['Not allowed'] },
         http_status: :unauthorized
       )

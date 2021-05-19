@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
-module ApprovalRules
-  class ExternalApprovalRule < ApplicationRecord
-    self.table_name = 'external_approval_rules'
+module MergeRequests
+  class ExternalStatusCheck < ApplicationRecord
+    self.table_name = 'external_status_checks'
+
+    include IgnorableColumns
+    ignore_column :external_approval_rule_id, remove_with: '14.3', remove_after: '2021-09-22'
+
     scope :with_api_entity_associations, -> { preload(:protected_branches) }
 
     belongs_to :project
@@ -16,7 +20,7 @@ module ApprovalRules
     end
 
     def approved?(merge_request, sha)
-      merge_request.status_check_responses.where(external_approval_rule: self, sha: sha).exists?
+      merge_request.status_check_responses.where(external_status_check: self, sha: sha).exists?
     end
 
     def to_h

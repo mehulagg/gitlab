@@ -4,27 +4,33 @@ require 'spec_helper'
 
 RSpec.describe API::StatusChecks do
   include AccessMatchersForRequest
+  using RSpec::Parameterized::TableSyntax
 
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:rule) { create(:external_approval_rule, project: project) }
-  let_it_be(:rule_2) { create(:external_approval_rule, project: project) }
-
+  let_it_be(:rule) { create(:external_status_check, project: project) }
+  let_it_be(:rule_2) { create(:external_status_check, project: project) }
   let_it_be(:merge_request) { create(:merge_request, source_project: project) }
   let_it_be(:project_maintainer) { create(:user) }
 
+  let(:single_object_url) { "/projects/#{project.id}/external_status_checks/#{rule.id}" }
+  let(:collection_url) { "/projects/#{project.id}/external_status_checks" }
   let(:sha) { merge_request.source_branch_sha }
   let(:user) { project_maintainer }
 
-  subject { post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_check_responses", user), params: { external_approval_rule_id: rule.id, sha: sha } }
+  subject { post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_check_responses", user), params: { external_status_check_id: rule.id, sha: sha } }
 
   describe 'permissions' do
+    before do
+      stub_licensed_features(compliance_approval_gates: true)
+    end
+
     it { expect { subject }.to be_allowed_for(:maintainer).of(project) }
     it { expect { subject }.to be_allowed_for(:developer).of(project) }
     it { expect { subject }.to be_denied_for(:reporter).of(project) }
   end
 
   describe 'GET :id/merge_requests/:merge_request_iid/status_checks' do
-    subject { get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_checks", user), params: { external_approval_rule_id: rule.id, sha: sha } }
+    subject { get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_checks", user), params: { external_status_check_id: rule.id, sha: sha } }
 
     context 'feature flag is disabled' do
       before do
@@ -40,11 +46,12 @@ RSpec.describe API::StatusChecks do
 
     context 'when current_user has access' do
       before do
+        stub_licensed_features(compliance_approval_gates: true)
         project.add_user(project_maintainer, :maintainer)
       end
 
       context 'when merge request has received status check responses' do
-        let!(:status_check_response) { create(:status_check_response, external_approval_rule: rule, merge_request: merge_request, sha: sha) }
+        let!(:status_check_response) { create(:status_check_response, external_status_check: rule, merge_request: merge_request, sha: sha) }
 
         it 'returns a 200' do
           subject
@@ -69,7 +76,7 @@ RSpec.describe API::StatusChecks do
   end
 
   describe 'POST :id/:merge_requests/:merge_request_iid/status_check_responses' do
-    subject { post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_check_responses", user), params: { external_approval_rule_id: rule.id, sha: sha } }
+    subject { post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/status_check_responses", user), params: { external_status_check_id: rule.id, sha: sha } }
 
     context 'feature flag is disabled' do
       before do
@@ -85,6 +92,7 @@ RSpec.describe API::StatusChecks do
 
     context 'when user has access' do
       before do
+        stub_licensed_features(compliance_approval_gates: true)
         project.add_user(project_maintainer, :maintainer)
       end
 
@@ -97,7 +105,7 @@ RSpec.describe API::StatusChecks do
       it 'returns the status checks as JSON' do
         subject
 
-        expect(json_response.keys).to contain_exactly('id', 'merge_request', 'external_approval_rule')
+        expect(json_response.keys).to contain_exactly('id', 'merge_request', 'external_status_check')
       end
 
       it 'creates new StatusCheckResponse with correct attributes' do
@@ -125,6 +133,253 @@ RSpec.describe API::StatusChecks do
           subject
 
           expect(response).to have_gitlab_http_status(:unauthorized)
+        end
+      end
+    end
+  end
+
+  describe 'DELETE projects/:id/external_status_checks/:check_id' do
+    before do
+      stub_licensed_features(compliance_approval_gates: true)
+    end
+
+    it 'deletes the specified rule' do
+      expect do
+        delete api(single_object_url, project.owner)
+      end.to change { MergeRequests::ExternalStatusCheck.count }.by(-1)
+    end
+
+    context 'when feature is disabled, unlicensed or user has permission' do
+      where(:licensed, :flag, :project_owner, :status) do
+        false | false | false | :not_found
+        false | false | true  | :unauthorized
+        false | true  | true  | :unauthorized
+        false | true  | false | :not_found
+        true  | false | false | :not_found
+        true  | false | true  | :unauthorized
+        true  | true  | false | :not_found
+        true  | true  | true  | :success
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: flag)
+          stub_licensed_features(compliance_approval_gates: licensed)
+        end
+
+        it 'returns the correct status code' do
+          delete api(single_object_url, (project_owner ? project.owner : build(:user)))
+
+          expect(response).to have_gitlab_http_status(status)
+        end
+      end
+    end
+  end
+
+  describe 'POST projects/:id/external_status_checks' do
+    context 'successfully creating new external approval rule' do
+      before do
+        stub_feature_flags(ff_compliance_approval_gates: true)
+        stub_licensed_features(compliance_approval_gates: true)
+      end
+
+      subject do
+        post api("/projects/#{project.id}/external_status_checks", project.owner), params: attributes_for(:external_status_check)
+      end
+
+      it 'creates a new external approval rule' do
+        expect { subject }.to change { MergeRequests::ExternalStatusCheck.count }.by(1)
+      end
+
+      context 'with protected branches' do
+        let_it_be(:protected_branch) { create(:protected_branch, project: project) }
+
+        let(:params) do
+          { name: 'New rule', external_url: 'https://gitlab.com/test/example.json', protected_branch_ids: protected_branch.id }
+        end
+
+        subject do
+          post api("/projects/#{project.id}/external_status_checks", project.owner), params: params
+        end
+
+        it 'returns expected status code' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:created)
+        end
+
+        it 'creates protected branch records' do
+          subject
+
+          expect(MergeRequests::ExternalStatusCheck.last.protected_branches.count).to eq 1
+        end
+
+        it 'responds with expected JSON' do
+          subject
+
+          expect(json_response['id']).not_to be_nil
+          expect(json_response['name']).to eq('New rule')
+          expect(json_response['external_url']).to eq('https://gitlab.com/test/example.json')
+          expect(json_response['protected_branches'].size).to eq(1)
+        end
+      end
+    end
+
+    context 'when feature is disabled, unlicensed or user has permission' do
+      where(:licensed, :flag, :project_owner, :status) do
+        false | false | false | :not_found
+        false | false | true  | :unauthorized
+        false | true  | true  | :unauthorized
+        false | true  | false | :not_found
+        true  | false | false | :not_found
+        true  | false | true  | :unauthorized
+        true  | true  | false | :not_found
+        true  | true  | true  | :created
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: flag)
+          stub_licensed_features(compliance_approval_gates: licensed)
+        end
+
+        it 'returns the correct status code' do
+          post api("/projects/#{project.id}/external_status_checks", (project_owner ? project.owner : build(:user))), params: attributes_for(:external_status_check)
+
+          expect(response).to have_gitlab_http_status(status)
+        end
+      end
+    end
+  end
+
+  describe 'GET projects/:id/external_status_checks' do
+    let_it_be(:protected_branches) { create_list(:protected_branch, 3, project: project) }
+
+    before_all do
+      create(:external_status_check) # Creating an orphaned rule to make sure project scoping works as expected
+    end
+
+    before do
+      stub_licensed_features(compliance_approval_gates: true)
+    end
+
+    it 'responds with expected JSON', :aggregate_failures do
+      get api(collection_url, project.owner)
+
+      expect(json_response.size).to eq(2)
+      expect(json_response.map { |r| r['name'] }).to contain_exactly('rule 1', 'rule 2')
+    end
+
+    it 'paginates correctly' do
+      get api(collection_url, project.owner), params: { per_page: 1 }
+
+      expect_paginated_array_response([1])
+    end
+
+    context 'when feature is disabled, unlicensed or user has permission' do
+      where(:licensed, :flag, :project_owner, :status) do
+        false | false | false | :not_found
+        false | false | true  | :unauthorized
+        false | true  | true  | :unauthorized
+        false | true  | false | :not_found
+        true  | false | false | :not_found
+        true  | false | true  | :unauthorized
+        true  | true  | false | :not_found
+        true  | true  | true  | :success
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: flag)
+          stub_licensed_features(compliance_approval_gates: licensed)
+        end
+
+        it 'returns the correct status code' do
+          get api(collection_url, (project_owner ? project.owner : build(:user)))
+
+          expect(response).to have_gitlab_http_status(status)
+        end
+      end
+    end
+  end
+
+  describe 'PUT projects/:id/external_status_checks/:check_id' do
+    let(:params) { { external_url: 'http://newvalue.com', name: 'new name' } }
+
+    context 'successfully updating external approval rule' do
+      before do
+        stub_feature_flags(ff_compliance_approval_gates: true)
+        stub_licensed_features(compliance_approval_gates: true)
+      end
+
+      subject do
+        put api(single_object_url, project.owner), params: params
+      end
+
+      it 'updates an approval rule' do
+        expect { subject }.to change { rule.reload.external_url }.to eq('http://newvalue.com')
+      end
+
+      it 'responds with correct http status' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:success)
+      end
+
+      context 'with protected branches' do
+        let_it_be(:protected_branch) { create(:protected_branch, project: project) }
+
+        let(:params) do
+          { name: 'New rule', external_url: 'https://gitlab.com/test/example.json', protected_branch_ids: protected_branch.id }
+        end
+
+        subject do
+          put api(single_object_url, project.owner), params: params
+        end
+
+        it 'returns expected status code' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:success)
+        end
+
+        it 'creates protected branch records' do
+          expect { subject }.to change { MergeRequests::ExternalStatusCheck.last.protected_branches }
+        end
+
+        it 'responds with expected JSON', :aggregate_failures do
+          subject
+
+          expect(json_response['id']).not_to be_nil
+          expect(json_response['name']).to eq('New rule')
+          expect(json_response['external_url']).to eq('https://gitlab.com/test/example.json')
+          expect(json_response['protected_branches'].size).to eq(1)
+        end
+      end
+    end
+
+    context 'when feature is disabled, unlicensed or user has permission' do
+      where(:licensed, :flag, :project_owner, :status) do
+        false | false | false | :not_found
+        false | false | true  | :unauthorized
+        false | true  | true  | :unauthorized
+        false | true  | false | :not_found
+        true  | false | false | :not_found
+        true  | false | true  | :unauthorized
+        true  | true  | false | :not_found
+        true  | true  | true  | :success
+      end
+
+      with_them do
+        before do
+          stub_feature_flags(ff_compliance_approval_gates: flag)
+          stub_licensed_features(compliance_approval_gates: licensed)
+        end
+
+        it 'returns the correct status code' do
+          put api(single_object_url, (project_owner ? project.owner : build(:user))), params: attributes_for(:external_status_check)
+
+          expect(response).to have_gitlab_http_status(status)
         end
       end
     end

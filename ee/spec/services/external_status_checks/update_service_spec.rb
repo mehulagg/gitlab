@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe ExternalApprovalRules::UpdateService do
+RSpec.describe ExternalStatusChecks::UpdateService do
   let_it_be(:project) { create(:project) }
-  let_it_be(:rule) { create(:external_approval_rule, project: project) }
+  let_it_be(:check) { create(:external_status_check, project: project) }
   let_it_be(:protected_branch) { create(:protected_branch, project: project) }
   let(:current_user) { project.owner }
-  let(:params) { { id: project.id, rule_id: rule.id, external_url: 'http://newvalue.com', name: 'new name', protected_branch_ids: [protected_branch.id] } }
+  let(:params) { { id: project.id, check_id: check.id, external_url: 'http://newvalue.com', name: 'new name', protected_branch_ids: [protected_branch.id] } }
 
   subject { described_class.new(container: project, current_user: current_user, params: params).execute }
 
@@ -15,11 +15,11 @@ RSpec.describe ExternalApprovalRules::UpdateService do
     it 'updates an approval rule' do
       subject
 
-      rule.reload
+      check.reload
 
-      expect(rule.external_url).to eq('http://newvalue.com')
-      expect(rule.name).to eq('new name')
-      expect(rule.protected_branches).to contain_exactly(protected_branch)
+      expect(check.external_url).to eq('http://newvalue.com')
+      expect(check.name).to eq('new name')
+      expect(check.protected_branches).to contain_exactly(protected_branch)
     end
 
     it 'is successful' do
@@ -31,7 +31,7 @@ RSpec.describe ExternalApprovalRules::UpdateService do
     let_it_be(:current_user) { create(:user) }
 
     it 'does not change an approval rule' do
-      expect { subject }.not_to change { rule.name }
+      expect { subject }.not_to change { check.name }
     end
 
     it 'is unsuccessful' do

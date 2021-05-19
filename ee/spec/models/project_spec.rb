@@ -878,7 +878,7 @@ RSpec.describe Project do
   end
 
   describe '#execute_external_compliance_hooks' do
-    let_it_be(:rule) { create(:external_approval_rule) }
+    let_it_be(:rule) { create(:external_status_check) }
 
     it 'enqueues the correct number of workers' do
       allow(rule).to receive(:async_execute).once

@@ -112,7 +112,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   end
 
   context 'with a status check' do
-    let_it_be(:rule) { create(:external_approval_rule, project: project) }
+    let_it_be(:rule) { create(:external_status_check, project: project) }
 
     it 'updates the status check' do
       visit edit_project_path(project)

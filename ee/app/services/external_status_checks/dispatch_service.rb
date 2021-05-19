@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ExternalApprovalRules
+module ExternalStatusChecks
   class DispatchService
     REQUEST_BODY_SIZE_LIMIT = 25.megabytes
 
