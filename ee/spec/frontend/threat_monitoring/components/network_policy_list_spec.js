@@ -1,8 +1,7 @@
-import { GlTable, GlToggle } from '@gitlab/ui';
+import { GlTable } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
 import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
-import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 import createStore from 'ee/threat_monitoring/store';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { mockPoliciesResponse } from '../mocks/mock_data';
@@ -41,9 +40,6 @@ describe('NetworkPolicyList component', () => {
   const findTableEmptyState = () => wrapper.find({ ref: 'tableEmptyState' });
   const findEditorDrawer = () => wrapper.find({ ref: 'editorDrawer' });
   const findPolicyEditor = () => wrapper.find({ ref: 'policyEditor' });
-  const findPolicyToggle = () => wrapper.find(GlToggle);
-  const findApplyButton = () => wrapper.find({ ref: 'applyButton' });
-  const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
   const findAutodevopsAlert = () => wrapper.find('[data-testid="autodevopsAlert"]');
 
   beforeEach(() => {
@@ -173,103 +169,6 @@ spec:
       const policyEditor = findPolicyEditor();
       expect(policyEditor.exists()).toBe(true);
       expect(policyEditor.attributes('value')).toBe(mockData[0].manifest);
-    });
-
-    it('renders network policy toggle', () => {
-      const policyToggle = findPolicyToggle();
-      expect(policyToggle.exists()).toBe(true);
-      expect(policyToggle.props()).toMatchObject({
-        label: NetworkPolicyList.i18n.enforcementStatus,
-        value: mockData[0].isEnabled,
-      });
-    });
-
-    it('renders disabled apply button', () => {
-      const applyButton = findApplyButton();
-      expect(applyButton.exists()).toBe(true);
-      expect(applyButton.props('disabled')).toBe(true);
-    });
-
-    it('renders closed editor drawer on Cancel button click', () => {
-      const cancelButton = findCancelButton();
-      expect(cancelButton.exists()).toBe(true);
-      cancelButton.vm.$emit('click');
-
-      return wrapper.vm.$nextTick().then(() => {
-        const editorDrawer = findEditorDrawer();
-        expect(editorDrawer.exists()).toBe(true);
-        expect(editorDrawer.props('open')).toBe(false);
-      });
-    });
-
-    describe('given there is a policy change', () => {
-      beforeEach(() => {
-        findPolicyEditor().vm.$emit('input', 'foo');
-      });
-
-      it('renders enabled apply button', () => {
-        const applyButton = findApplyButton();
-        expect(applyButton.exists()).toBe(true);
-        expect(applyButton.props('disabled')).toBe(false);
-      });
-
-      it('dispatches updatePolicy action on apply button click', () => {
-        findApplyButton().vm.$emit('click');
-
-        expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/updatePolicy', {
-          environmentId: -1,
-          policy: mockData[0],
-        });
-      });
-
-      describe('given there is an updatePolicy error', () => {
-        beforeEach(() => {
-          jest.spyOn(store, 'dispatch').mockRejectedValue();
-        });
-
-        it('reverts isEnabled change', () => {
-          const initial = mockData[0].isEnabled;
-
-          findApplyButton().vm.$emit('click');
-
-          const policyToggle = findPolicyToggle();
-          expect(policyToggle.exists()).toBe(true);
-          expect(policyToggle.props('value')).toBe(initial);
-        });
-      });
-
-      describe('given theres is a predefined policy change', () => {
-        beforeEach(() => {
-          factory({
-            data: () => ({
-              selectedPolicyName: 'drop-outbound',
-              initialManifest: mockData[0].manifest,
-              initialEnforcementStatus: mockData[0].isEnabled,
-            }),
-          });
-        });
-
-        it('dispatches createPolicy action on apply button click', () => {
-          findApplyButton().vm.$emit('click');
-
-          expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
-            environmentId: -1,
-            policy: PREDEFINED_NETWORK_POLICIES[0],
-          });
-        });
-      });
-    });
-
-    describe('given there is a policy enforcement status change', () => {
-      beforeEach(() => {
-        findPolicyToggle().vm.$emit('change', false);
-      });
-
-      it('renders enabled apply button', () => {
-        const applyButton = findApplyButton();
-        expect(applyButton.exists()).toBe(true);
-        expect(applyButton.props('disabled')).toBe(false);
-      });
     });
   });
 
