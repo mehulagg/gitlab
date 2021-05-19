@@ -55,6 +55,7 @@ export const devopsAdoptionSegmentsData = {
         pipelineSucceeded: false,
         deploySucceeded: false,
         securityScanSucceeded: false,
+        codeOwnersUsedCount: false,
         recordedAt: '2020-10-31T23:59:59Z',
         __typename: 'latestSnapshot',
       },
@@ -101,6 +102,11 @@ export const devopsAdoptionTableHeaders = [
   },
   {
     index: 4,
+    label: 'Codeowners',
+    tooltip: 'Codeowners enabled for at least 1 project',
+  },
+  {
+    index: 5,
     label: '',
     tooltip: null,
   },

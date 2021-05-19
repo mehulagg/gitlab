@@ -123,6 +123,12 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
         testId: 'approvalsCol',
       },
+      {
+        key: 'codeOwnersUsedCount',
+        label: s__('DevopsAdoption|Codeowners'),
+        tooltip: s__('DevopsAdoption|Codeowners enabled for at least 1 project'),
+        testId: 'codeownersCol',
+      },
     ],
   },
   {

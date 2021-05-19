@@ -11375,6 +11375,12 @@ msgstr ""
 msgid "DevopsAdoption|At least 1 security scan of any type run in pipeline"
 msgstr ""
 
+msgid "DevopsAdoption|Codeowners"
+msgstr ""
+
+msgid "DevopsAdoption|Codeowners enabled for at least 1 project"
+msgstr ""
+
 msgid "DevopsAdoption|Confirm remove Group"
 msgstr ""
 
