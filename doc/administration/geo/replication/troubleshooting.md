@@ -756,6 +756,23 @@ this command reports `ERROR - Replication is not up-to-date` even if
 replication is actually up-to-date. If replication and verification output
 shows that it is complete, you can add `--skip-preflight-checks` to make the command complete promotion. This bug was fixed in GitLab 13.8 and later.
 
+### Errors when using `--skip-preflight-checks` or `--force`
+
+Message: `get_ctl_options': invalid option: --skip-preflight-checks (OptionParser::InvalidOption)`
+or `get_ctl_options': invalid option: --force (OptionParser::InvalidOption)`.
+
+Before 13.5, this could happen with XFS or filesystems that list files in lexical order, because the
+load order of the Omnibus command files can be different than expected, and a global function would get redefined.
+More details can be found in [the related issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6076)
+
+The workaround is to manually run the preflight checks and promote the DB, which can be accomplished by running
+the following commands on the Geo secondary site:
+
+1. `gitlab-ctl promotion-preflight-checks`
+1. `/opt/gitlab/embedded/bin/gitlab-pg-ctl promote`
+1. `gitlab-ctl reconfigure`
+1. `gitlab-rake geo:set_secondary_as_primary`
+
 ## Expired artifacts
 
 If you notice for some reason there are more artifacts on the Geo
