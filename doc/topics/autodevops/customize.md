@@ -257,7 +257,7 @@ the [GitLab 12.10 based templates](https://gitlab.com/gitlab-org/auto-devops-v12
 
 ## Using images hosted on a local docker registry
 
-Many AutoDevOps jobs can be configured to run in an [offline enviornment](https://docs.gitlab.com/ee/user/application_security/offline_deployments).
+Many AutoDevOps jobs can be configured to run in an [offline enviornment](../ee/user/application_security/offline_deployments.md).
 
 This requires copying the required AutoDevOps docker images from Docker Hun and `registry.gitlab.com` to their local GitLab container registry. Once the images are hosted and avaialble in a local registry, edit `.gitlab-ci.yml` to point to the locally-hosted images. For example:
 
@@ -266,7 +266,7 @@ include:
   - template: Auto-DevOps.gitlab-ci.yml
 
 variables:
-  REGISTRY_URL: "registry.gregmyers.me"
+  REGISTRY_URL: "registry.gitlab.example"
 
 build:
   image: "$REGISTRY_URL/docker/auto-build-image:v0.6.0"
