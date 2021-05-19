@@ -170,7 +170,7 @@ export const securityFeatures = [
     available: true,
 
     // This field should come _only_ from the backend
-    // canEnableByMergeRequest: true,
+    canEnableByMergeRequest: true,
   },
   {
     name: DAST_NAME,
