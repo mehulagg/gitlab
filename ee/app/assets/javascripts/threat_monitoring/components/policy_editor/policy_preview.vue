@@ -39,11 +39,6 @@ export default {
 
 <template>
   <gl-tabs v-model="selectedTab" content-class="gl-pt-0">
-    <gl-tab :title="s__('NetworkPolicies|.yaml')">
-      <pre class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none">{{
-        policyYaml
-      }}</pre>
-    </gl-tab>
     <gl-tab :title="s__('NetworkPolicies|Rule')">
       <div
         v-if="policyDescription"
@@ -55,6 +50,11 @@ export default {
           >{{ $options.i18n.PARSING_ERROR_MESSAGE }}
         </gl-alert>
       </div>
+    </gl-tab>
+    <gl-tab :title="s__('NetworkPolicies|.yaml')">
+      <pre class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none">{{
+        policyYaml
+      }}</pre>
     </gl-tab>
   </gl-tabs>
 </template>
