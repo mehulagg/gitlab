@@ -23,7 +23,6 @@ module IncidentManagement
 
     def oncall_schedule_same_project_as_policy
       return unless oncall_schedule_id
-
       return if oncall_schedule.project_id == policy.project_id
 
       errors.add(:oncall_schedule_id, _('Schedule must be from the same project as the policy'))
