@@ -18,6 +18,7 @@ describe('Issuable Time Tracker', () => {
     humanTimeEstimate: '2h 46m',
     humanTimeSpent: '1h 23m',
     limitToHours: false,
+    issuableId: '1',
   };
 
   const mountComponent = ({ props = {} } = {}) =>
@@ -26,6 +27,9 @@ describe('Issuable Time Tracker', () => {
       directives: { GlTooltip: createMockDirective() },
       stubs: {
         transition: stubTransition(),
+      },
+      provide: {
+        issuableType: 'issue',
       },
     });
 
