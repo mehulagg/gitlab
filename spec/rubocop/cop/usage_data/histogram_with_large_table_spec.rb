@@ -24,17 +24,16 @@ RSpec.describe RuboCop::Cop::UsageData::HistogramWithLargeTable do
     end
 
     context 'when calling histogram(::Ci::Build)' do
-      it 'does not register an offense' do
+      it 'registers an offense' do
         expect_offense(<<~CODE)
-          histogram(::Ci::Build.active, buckets: 1..100)
+          histogram(::Ci::Build, buckets: 1..100)
           ^^^^^^^^^ #{msg} Ci::Build
         CODE
       end
     end
 
     context 'when calling histogram(Ci::Build.active)' do
-      it 'does not register an offense' do
-        expect_no_offenses('hist(Ci::Build.active, :project_id, buckets: 1..100)')
+      it 'registers an offense' do
         expect_offense(<<~CODE)
           histogram(Ci::Build.active)
           ^^^^^^^^^ #{msg} Ci::Build
