@@ -73,6 +73,7 @@ module Gitlab
         end
 
         def connection
+          # TODO: CI Vertical: model.connection
           ActiveRecord::Base.connection
         end
       end

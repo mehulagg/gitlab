@@ -6,7 +6,7 @@ module EE
 
     class_methods do
       def begin_transaction
-        puts "EE::BeforeAllAdapter.begin_transaction"
+        #puts "EE::BeforeAllAdapter.begin_transaction"
         super
 
         # TODO: CI Vertical: Geo should use many databases of Rails 6
@@ -16,7 +16,7 @@ module EE
       end
 
       def rollback_transaction
-        puts "EE::BeforeAllAdapter.rollback_transaction"
+        #puts "EE::BeforeAllAdapter.rollback_transaction"
         super
 
         # TODO: CI Vertical: Geo should use many databases of Rails 6
