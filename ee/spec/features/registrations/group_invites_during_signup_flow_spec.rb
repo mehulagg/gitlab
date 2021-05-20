@@ -6,13 +6,10 @@ RSpec.describe 'User is able to invite members to group during signup', :js, :ex
   include Select2Helper
 
   let_it_be(:user) { create(:user) }
-  let(:trial_during_signup) { true }
   let(:path_params) { {} }
 
   before do
     allow(Gitlab).to receive(:dev_env_or_com?).and_return(true)
-    stub_experiment(trial_during_signup: trial_during_signup)
-    stub_experiment_for_subject(trial_during_signup: trial_during_signup)
     stub_experiments(registrations_group_invite: :invite_page)
     sign_in(user)
   end
@@ -46,14 +43,10 @@ RSpec.describe 'User is able to invite members to group during signup', :js, :ex
     end
   end
 
-  context 'when trial during signup is not enabled' do
-    let(:trial_during_signup) { false }
+  it 'validates group invites are displayed as separate page' do
+    create_group_through_form
 
-    it 'validates group invites are displayed as separate page' do
-      create_group_through_form
-
-      expect_group_invites_page
-    end
+    expect_group_invites_page
   end
 
   context 'when in trial_onboarding_flow' do

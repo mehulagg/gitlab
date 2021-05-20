@@ -41,7 +41,7 @@
         .row
           .form-group.col-sm-12
             = render partial: 'shared/groups/visibility_level', locals: { f: f }
-        - if !in_trial_onboarding_flow? && experiment_enabled?(:trial_during_signup)
+        - if !in_trial_onboarding_flow?
           = render partial: 'shared/groups/trial_form'
         - else
           - experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|

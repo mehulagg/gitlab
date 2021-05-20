@@ -5,12 +5,11 @@ require 'spec_helper'
 RSpec.describe 'registrations/group_invites/new' do
   let(:group) { build(:group) }
   let(:trial_onboarding_flow) { false }
-  let(:trial_during_signup_flow) { false }
 
   before do
     assign(:group, group)
     allow(view).to receive(:in_trial_onboarding_flow?).and_return(trial_onboarding_flow)
-    allow(view).to receive(:in_trial_during_signup_flow?).and_return(trial_during_signup_flow)
+    allow(view).to receive(:in_trial_during_signup_flow?).and_return(true)
 
     render
   end
@@ -31,8 +30,6 @@ RSpec.describe 'registrations/group_invites/new' do
   end
 
   context 'in trial flow' do
-    let(:trial_during_signup_flow) { true }
-
     it 'show the trial activation' do
       expect(rendered).to have_content('Congratulations, your free trial is activated.')
     end
