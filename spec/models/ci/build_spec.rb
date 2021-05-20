@@ -3942,8 +3942,6 @@ RSpec.describe Ci::Build do
   end
 
   describe '.matches_tag_ids' do
-    let_it_be(:build, reload: true) { create(:ci_build, project: project, user: user) }
-
     let(:tag_ids) { ::ActsAsTaggableOn::Tag.named_any(tag_list).ids }
 
     subject { described_class.where(id: build).matches_tag_ids(tag_ids) }
