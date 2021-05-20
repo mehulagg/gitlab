@@ -7,6 +7,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
   expose :id, :report_type, :name, :severity, :confidence
   expose :scanner, using: Vulnerabilities::ScannerEntity
   expose :identifiers, using: Vulnerabilities::IdentifierEntity
+  expose :evidence, using: Vulnerabilities::Finding::EvidenceEntity
   expose :project_fingerprint
   expose :uuid
   expose :create_jira_issue_url do |occurrence|
@@ -33,7 +34,7 @@ class Vulnerabilities::FindingEntity < Grape::Entity
     expose :location
     expose :remediations
     expose :solution
-    expose(:evidence) { |model, _| model.evidence[:summary] }
+    # expose(:evidence) { |model, _| model.evidence[:summary] }
     expose(:request, using: Vulnerabilities::RequestEntity) { |model, _| model.evidence[:request] }
     expose(:response, using: Vulnerabilities::ResponseEntity) { |model, _| model.evidence[:response] }
     expose(:evidence_source) { |model, _| model.evidence[:source] }

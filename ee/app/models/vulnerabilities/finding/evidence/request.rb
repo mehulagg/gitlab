@@ -9,6 +9,8 @@ module Vulnerabilities
         belongs_to :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :request, foreign_key: 'vulnerability_finding_evidence_id', optional: false
         has_many :headers, class_name: 'Vulnerabilities::Finding::Evidence::Header', inverse_of: :request, foreign_key: 'vulnerability_finding_evidence_request_id'
 
+        accepts_nested_attributes_for :headers
+
         validates :method, length: { maximum: 32 }
         validates :url, length: { maximum: 2048 }
         validates :body, length: { maximum: 2048 }
