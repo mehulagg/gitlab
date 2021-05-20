@@ -185,7 +185,7 @@ class Project < ApplicationRecord
   # Project integrations
   has_one :asana_integration, class_name: 'Integrations::Asana'
   has_one :assembla_integration, class_name: 'Integrations::Assembla'
-  has_one :bamboo_service, class_name: 'Integrations::Bamboo'
+  has_one :bamboo_integration, class_name: 'Integrations::Bamboo'
   has_one :bugzilla_service, class_name: 'Integrations::Bugzilla'
   has_one :campfire_service, class_name: 'Integrations::Campfire'
   has_one :confluence_service, class_name: 'Integrations::Confluence'

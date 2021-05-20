@@ -384,7 +384,7 @@ project:
 - hangouts_chat_service
 - unify_circuit_service
 - buildkite_service
-- bamboo_service
+- bamboo_integration
 - teamcity_service
 - pushover_service
 - jira_service
