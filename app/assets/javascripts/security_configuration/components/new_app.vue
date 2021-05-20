@@ -52,7 +52,7 @@ export default {
         <div class="row">
           <div class="col-lg-5">
             <h4 class="gl-mt-0">{{ $options.i18n.securityTesting }}</h4>
-            <p>{{ $options.i18n.securityTestingDescription }}</p>
+            <p class="gl-line-height-20">{{ $options.i18n.securityTestingDescription }}</p>
             <!-- TODO: add Configuration history link. This will require Ruby
               work to move the gitlab_ci_present to FOSS -->
           </div>
