@@ -94,17 +94,23 @@ sast: # none of these attributes can be overriden by a developer's local .gitlab
   variables:
     FOO: sast
   stage: pre-compliance
+  rules:
+        - when: always
   script:
   - echo "running $FOO"
 
 sanity check:
   stage: pre-deploy-compliance
+  rules:
+        - when: always
   script:
   - echo "running $FOO"
 
 
 audit trail:
   stage: post-compliance
+  rules:
+        - when: always
   script:
   - echo "running $FOO"
 
@@ -112,6 +118,25 @@ include: # Execute individual project's configuration
   project: '$CI_PROJECT_PATH'
   file: '$CI_PROJECT_CONFIG_PATH'
 ```
+
+#### Ensuring compliance jobs are always run
+Compliance pipelines use GitLab's CI system to give you incredible amount of flexibility
+for defining any sort of compliance jobs you like. Depending on what your goals, these jobs
+can be extended by end-users or configured to not allow modification afterwards.
+
+At a high-level, if a value in a compliance job is set, it cannot be changed or overridden
+by project-level configurations. If a value is not present in a compliance job, a project-level
+configuration may set it though. This could be desirable or not depending on your use case.
+
+There are a few best practices for ensuring that these jobs are always run exactly
+as you define them and that downstream, project-level pipeline configurations
+cannot change them.
+
+1. Add a `rules:when:always` block to each of your compliance jobs.
+    - This ensures that they will always be run.
+1. Explicitly set any variables the job may reference.
+    - This ensures that project-level pipeline configurations do not set them and alter their behavior.
+    - This includes any jobs that drive the logic of your job as well as any Gitlab pre-defined [job keywords](https://docs.gitlab.com/ee/ci/yaml/README.html#job-keywords).
 
 ### Sharing and permissions
 
