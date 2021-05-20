@@ -14,7 +14,7 @@ class DisableExpirationPoliciesLinkedToNoContainerImages < ActiveRecord::Migrati
   def up
     ContainerExpirationPolicy.where(enabled: true).each_batch(of: BATCH_SIZE) do |batch, _|
       sql = <<-SQL
-        WITH batched_relation AS (#{batch.limit(BATCH_SIZE).to_sql})
+        WITH batched_relation AS MATERIALIZED (#{batch.select(:project_id).limit(BATCH_SIZE).to_sql})
         UPDATE container_expiration_policies
         SET enabled = FALSE
         FROM batched_relation
