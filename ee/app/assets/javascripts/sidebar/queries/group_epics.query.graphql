@@ -1,0 +1,12 @@
+#import "./epic.fragment.graphql"
+
+query issueEpics($fullPath: ID!, $title: String, $state: EpicState) {
+  workspace: group(fullPath: $fullPath) {
+    attributes: epics(search: $title, state: $state) {
+      nodes {
+        ...EpicFragment
+        state
+      }
+    }
+  }
+}

@@ -1,6 +1,9 @@
 import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
+import groupEpicsQuery from './queries/group_epics.query.graphql';
 import groupIterationsQuery from './queries/group_iterations.query.graphql';
+import projectIssueEpicMutation from './queries/project_issue_epic.mutation.graphql';
+import projectIssueEpicQuery from './queries/project_issue_epic.query.graphql';
 import projectIssueIterationMutation from './queries/project_issue_iteration.mutation.graphql';
 import projectIssueIterationQuery from './queries/project_issue_iteration.query.graphql';
 
@@ -74,5 +77,18 @@ export const issuableIterationQueries = {
 export const iterationsQueries = {
   [IssuableType.Issue]: {
     query: groupIterationsQuery,
+  },
+};
+
+export const issuableEpicQueries = {
+  [IssuableType.Issue]: {
+    query: projectIssueEpicQuery,
+    mutation: projectIssueEpicMutation,
+  },
+};
+
+export const epicsQueries = {
+  [IssuableType.Issue]: {
+    query: groupEpicsQuery,
   },
 };

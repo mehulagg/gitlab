@@ -1,0 +1,5 @@
+fragment EpicFragment on Epic {
+  id
+  title
+  webUrl
+}
