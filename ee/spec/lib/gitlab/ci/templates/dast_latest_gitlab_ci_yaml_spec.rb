@@ -87,10 +87,27 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
 
           context 'when pipeline is a merge request pipeline' do
             before do
-              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '')
+              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '1')
             end
 
             include_examples 'includes dast job'
+          end
+
+          context 'when pipeline is a branch pipeline with no merge request' do
+            before do
+              create(:ci_variable, project: project, key: 'CI_COMMIT_BRANCH', value: 'feature-branch')
+            end
+
+            include_examples 'includes dast job'
+          end
+
+          context 'when pipeline is a branch pipeline with a merge request' do
+            before do
+              create(:ci_variable, project: project, key: 'CI_COMMIT_BRANCH', value: 'feature-branch')
+              create(:ci_variable, project: project, key: 'CI_OPEN_MERGE_REQUESTS', value: 'true')
+            end
+
+            include_examples 'includes no jobs'
           end
         end
       end
@@ -105,28 +122,12 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
             create(:ci_variable, project: project, key: 'DAST_WEBSITE', value: 'http://example.com')
           end
 
-          context 'when pipeline is a merge request pipeline' do
-            before do
-              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '')
-            end
-
-            include_examples 'includes dast job'
-          end
-
           include_examples 'includes dast job'
         end
 
         context 'when DAST_API_SPECIFICATION is present' do
           before do
             create(:ci_variable, project: project, key: 'DAST_API_SPECIFICATION', value: 'http://my.api/api-specification.yml')
-          end
-
-          context 'when pipeline is a merge request pipeline' do
-            before do
-              create(:ci_variable, project: project, key: 'CI_MERGE_REQUEST_IID', value: '')
-            end
-
-            include_examples 'includes dast job'
           end
 
           include_examples 'includes dast job'
