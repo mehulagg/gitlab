@@ -22,6 +22,7 @@ export default {
     :title="$options.i18n.title"
     :button-text="$options.i18n.buttonText"
     :button-link="upgradePath"
+    v-on="$listeners"
   >
     <p>{{ $options.i18n.body }}</p>
   </gl-banner>

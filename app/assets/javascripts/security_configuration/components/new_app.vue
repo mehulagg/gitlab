@@ -4,10 +4,12 @@ import { __, s__ } from '~/locale';
 import FeatureCard from './feature_card.vue';
 import SectionLayout from './section_layout.vue';
 import UpgradeBanner from './upgrade_banner.vue';
+import DismissibleUserCallout from '~/vue_shared/components/dismissible_user_callout.vue';
 
 export default {
   name: 'SecurityConfigurationApp',
   components: {
+    DismissibleUserCallout,
     GlLink,
     GlSprintf,
     GlTab,
@@ -72,7 +74,14 @@ export default {
       <h1 class="gl-font-size-h1">{{ $options.i18n.securityConfiguration }}</h1>
     </header>
 
-    <upgrade-banner v-if="showUpgradeBanner" />
+    <dismissible-user-callout
+      v-if="showUpgradeBanner"
+      feature-name="security_configuration_upgrade_banner"
+    >
+      <template #default="{ dismiss }">
+        <upgrade-banner @close="dismiss" />
+      </template>
+    </dismissible-user-callout>
 
     <gl-tabs content-class="gl-pt-6">
       <gl-tab :title="$options.i18n.securityTesting">
