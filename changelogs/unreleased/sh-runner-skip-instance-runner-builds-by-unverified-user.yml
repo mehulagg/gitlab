@@ -1,0 +1,5 @@
+---
+title: Prevent shared runners from picking builds by unverified GitLab.com users
+merge_request:
+author:
+type: fixed

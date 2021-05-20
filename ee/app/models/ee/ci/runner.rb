@@ -4,6 +4,7 @@ module EE
   module Ci
     module Runner
       extend ActiveSupport::Concern
+      extend ::Gitlab::Utils::Override
 
       def tick_runner_queue
         ##
@@ -45,6 +46,15 @@ module EE
         ::Gitlab::VisibilityLevel.options.values.reject do |visibility_level|
           minutes_cost_factor(visibility_level) > 0
         end
+      end
+
+      override :matches_build?
+      def matches_build?(build)
+        return super unless ::Gitlab.com?
+        return super unless instance_type?
+        return super unless build.user.present?
+
+        build.user.has_required_credit_card_to_run_pipelines?(build.project) && super
       end
 
       class_methods do

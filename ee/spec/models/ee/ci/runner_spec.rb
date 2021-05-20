@@ -82,6 +82,69 @@ RSpec.describe EE::Ci::Runner do
     end
   end
 
+  describe '#matches_build?' do
+    let_it_be(:ultimate_plan) { create(:ultimate_plan) }
+    let_it_be(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
+    let_it_be(:runner) { create(:ci_runner, :instance) }
+
+    let(:namespace) { create(:namespace) }
+    let(:user) { create(:user) }
+    let(:project) { create(:project, namespace: namespace, creator: user) }
+    let(:build) { create(:ci_build, project: project, user: user) }
+    let(:project_runner) { create(:ci_runner, :project, projects: [project]) }
+
+    describe 'credit card requirement' do
+      before do
+        create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan)
+      end
+
+      shared_examples 'matches the build' do
+        it 'returns true for both runners' do
+          expect(runner.matches_build?(build)).to be true
+          expect(project_runner.matches_build?(build)).to be true
+        end
+      end
+
+      it_behaves_like 'matches the build'
+
+      context 'when credit card is required' do
+        context 'when project is on free plan' do
+          before do
+            allow(::Gitlab).to receive(:com?).and_return(true)
+            namespace.gitlab_subscription.update!(hosted_plan: create(:free_plan))
+            user.created_at = ::Users::CreditCardValidation::RELEASE_DAY
+          end
+
+          context 'when user has credit card' do
+            before do
+              allow(user).to receive(:credit_card_validated_at).and_return(Time.current)
+            end
+
+            it_behaves_like 'matches the build'
+          end
+
+          context 'when user does not have credit card' do
+            it 'returns false for the instance runner' do
+              expect(runner.matches_build?(build)).to be false
+            end
+
+            it 'returns true for the project runner' do
+              expect(project_runner.matches_build?(build)).to be true
+            end
+
+            context 'when feature flag is disabled' do
+              before do
+                stub_feature_flags(ci_require_credit_card_on_free_plan: false)
+              end
+
+              it_behaves_like 'matches the build'
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe `#visibility_levels_without_minutes_quota` do
     subject { runner.visibility_levels_without_minutes_quota }
 
