@@ -472,7 +472,6 @@ class GeoNodeStatus < ApplicationRecord
     self.cursor_last_event_date = Geo::EventLog.find_by(id: self.cursor_last_event_id)&.created_at
 
     load_repositories_data
-    load_lfs_objects_data
     load_job_artifacts_data
     load_attachments_data
     load_container_registry_data
