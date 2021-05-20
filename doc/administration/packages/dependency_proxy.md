@@ -36,7 +36,7 @@ To enable the dependency proxy feature:
 
 1. After the installation is complete, update the Global `appConfig` to enable the feature. 
 
-```yml
+```yaml
 global:
   appConfig:
     dependencyProxy:
