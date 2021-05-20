@@ -54,6 +54,9 @@ module Gitlab
                             ActiveRecord::Base.connection
                           end
 
+        # TODO: CI Vertical: debug if we can not use it
+        # puts "#with_correct_connection: #{table_name}: current=#{self.connection.connection_klass}, previous=#{previous_connection.connection_klass}"
+
         result = yield
 
         self.connection = previous_connection
