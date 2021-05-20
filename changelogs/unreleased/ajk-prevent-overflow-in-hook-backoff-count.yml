@@ -1,0 +1,5 @@
+---
+title: Prevent overflows in WebHook#backoff_count
+merge_request: 62202
+author:
+type: fixed
