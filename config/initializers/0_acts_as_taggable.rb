@@ -8,4 +8,11 @@ ActsAsTaggableOn.tags_counter = false
 
 # validate that counter cache is disabled
 raise "Counter cache is not disabled" if
-    ActsAsTaggableOn::Tagging.reflections["tag"].options[:counter_cache]
+  ActsAsTaggableOn::Tagging.reflections["tag"].options[:counter_cache]
+
+# TODO: CI Vertical: Make taggings/tags to live in CI database
+[::ActsAsTaggableOn::Tag, ::ActsAsTaggableOn::Tagging].each do |model|
+  model.abstract_class = true
+  model.connects_to database: { writing: :ci, reading: :ci }
+  model.abstract_class = false
+end
