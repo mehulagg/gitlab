@@ -444,13 +444,13 @@ There are several tools for developing and testing Snowplow Event
 
 **{check-circle}** Available, **{status_preparing}** In progress, **{dotted-circle}** Not Planned
 
-### Test Frontend Events
+### Test frontend events
 
-To test frontend events in development you need to 
+To test frontend events in development: 
 
-- [Enable Snowplow in the admin area](#enabling-snowplow)
-- Turn off any AdBlockers that would prevent loading snowplow JS on your environment
-- Turn off "Do Not Track" (DNT) in your browser
+- [Enable Snowplow in the admin area](#enabling-snowplow).
+- Turn off any ad blockers that would prevent Snowplow JS from loading in your environment.
+- Turn off "Do Not Track" (DNT) in your browser.
 
 #### Snowplow Analytics Debugger Chrome Extension
 
