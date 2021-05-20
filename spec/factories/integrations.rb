@@ -85,7 +85,7 @@ FactoryBot.define do
     confluence_url { 'https://example.atlassian.net/wiki' }
   end
 
-  factory :bugzilla_service, class: 'Integrations::Bugzilla' do
+  factory :bugzilla_integration, class: 'Integrations::Bugzilla' do
     project
     active { true }
     issue_tracker

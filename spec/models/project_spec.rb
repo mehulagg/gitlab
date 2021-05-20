@@ -64,7 +64,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:redmine_service) }
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_service) }
-    it { is_expected.to have_one(:bugzilla_service) }
+    it { is_expected.to have_one(:bugzilla_integration) }
     it { is_expected.to have_one(:ewm_service) }
     it { is_expected.to have_one(:external_wiki_service) }
     it { is_expected.to have_one(:confluence_service) }

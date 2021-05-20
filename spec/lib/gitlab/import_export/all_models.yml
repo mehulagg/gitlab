@@ -391,7 +391,7 @@ project:
 - redmine_service
 - youtrack_service
 - custom_issue_tracker_service
-- bugzilla_service
+- bugzilla_integration
 - ewm_service
 - external_wiki_service
 - mock_ci_service
