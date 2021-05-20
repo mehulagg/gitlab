@@ -48,7 +48,7 @@ module Gitlab
 
         # TODO: CI Vertical
         # TODO: This is a little hacky and we'd prefer to use the model somehow to get the right connection but we may not have models available in this context
-        self.connection = if table_name.to_s.start_with?("ci_")
+        self.connection = if table_name.to_s.start_with?("ci_") || table_name.to_s == "tags" || table_name.to_s == "taggings"
                             ::Ci::ApplicationRecord.connection
                           else
                             ActiveRecord::Base.connection

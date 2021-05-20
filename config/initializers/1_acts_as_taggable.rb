@@ -12,7 +12,11 @@ raise "Counter cache is not disabled" if
 
 # TODO: CI Vertical: Make taggings/tags to live in CI database
 [::ActsAsTaggableOn::Tag, ::ActsAsTaggableOn::Tagging].each do |model|
-  model.abstract_class = true
-  model.connects_to database: { writing: :ci, reading: :ci }
-  model.abstract_class = false
+  # We need to re-use connection specification, as each `connects_to` set-ups
+  # a separate connection pool
+  # model.abstract_class = true
+  # model.connects_to database: { writing: :ci, reading: :ci }
+  # model.abstract_class = false
+
+  model.connection_specification_name = Ci::ApplicationRecord.connection_specification_name
 end
