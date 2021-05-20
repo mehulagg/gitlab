@@ -1226,6 +1226,14 @@ class User < ApplicationRecord
     end
   end
 
+  def omniauth_user?
+    if identities.loaded?
+      identities.find { |identity| Gitlab::Auth::OAuth::Provider.omniauth_provider?(identity.provider) && !identity.extern_uid.nil? }
+    else
+      identities.with_provider(Gitlab::Auth::OAuth::Provider.providers)
+    end
+  end
+
   def ldap_identity
     @ldap_identity ||= identities.find_by(["provider LIKE ?", "ldap%"])
   end

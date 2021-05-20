@@ -45,6 +45,12 @@ module Gitlab
           name.to_s.start_with?('ldap')
         end
 
+        def self.omniauth_provider?(name)
+          return false unless name
+
+          providers.include?(name.to_sym)
+        end
+
         def self.sync_profile_from_provider?(provider)
           return true if ldap_provider?(provider)
 

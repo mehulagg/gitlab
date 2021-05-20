@@ -470,6 +470,7 @@ module EE
 
     def perform_user_cap_check
       return unless ::Gitlab::CurrentSettings.should_apply_user_signup_cap?
+      return if omniauth_user?
 
       run_after_commit do
         SetUserStatusBasedOnUserCapSettingWorker.perform_async(id)
