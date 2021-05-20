@@ -1,0 +1,5 @@
+---
+title: Remove delayed_perform_for_build_hooks_worker feature flag
+merge_request: 62196
+author:
+type: other
