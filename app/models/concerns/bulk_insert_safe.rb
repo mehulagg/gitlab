@@ -142,6 +142,10 @@ module BulkInsertSafe
         end
 
       # Handle insertions for tables with a composite primary key
+      # TODO: CI Vertical
+      # Should we actually change this to just `connection` to use current
+      # model connection? It doesn't actually seem to matter since the
+      # `schema_cache` appears to be shared
       primary_keys = ActiveRecord::Base.connection.schema_cache.primary_keys(table_name)
       if unique_by.blank? && primary_key != primary_keys
         unique_by = primary_keys
