@@ -1,10 +1,11 @@
 <script>
-import { GlTab, GlTabs } from '@gitlab/ui';
+import { GlLink, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import FeatureCard from './feature_card.vue';
 
 export default {
   components: {
+    GlLink,
     GlTab,
     GlTabs,
     FeatureCard,
@@ -18,9 +19,26 @@ export default {
       type: Array,
       required: true,
     },
+    gitlabCiPresent: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    gitlabCiHistoryPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+  },
+  computed: {
+    canViewCiHistory() {
+      return Boolean(this.gitlabCiPresent && this.gitlabCiHistoryPath);
+    },
   },
   i18n: {
     compliance: s__('SecurityConfiguration|Compliance'),
+    configurationHistory: s__('SecurityConfiguration|Configuration history'),
+    securityConfiguration: __('Security Configuration'),
     securityTesting: s__('SecurityConfiguration|Security testing'),
 
     // TODO: Need different description for non-Ultimate, as statuses won't be available
@@ -31,7 +49,6 @@ export default {
       scan for the default branch, any subsequent feature branch you create
       will include the scan.`,
     ),
-    securityConfiguration: __('Security Configuration'),
   },
 };
 </script>
@@ -53,8 +70,9 @@ export default {
           <div class="col-lg-5">
             <h4 class="gl-mt-0">{{ $options.i18n.securityTesting }}</h4>
             <p class="gl-line-height-20">{{ $options.i18n.securityTestingDescription }}</p>
-            <!-- TODO: add Configuration history link. This will require Ruby
-              work to move the gitlab_ci_present to FOSS -->
+            <gl-link v-if="canViewCiHistory" :href="gitlabCiHistoryPath">{{
+              $options.i18n.configurationHistory
+            }}</gl-link>
           </div>
           <div class="col-lg-7">
             <feature-card
