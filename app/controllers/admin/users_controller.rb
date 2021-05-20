@@ -46,7 +46,6 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def edit
-    user.credit_card_validation || user.build_credit_card_validation
     user
   end
 
@@ -210,13 +209,6 @@ class Admin::UsersController < Admin::ApplicationController
       user_params_with_pass.merge!(password_params)
     end
 
-    cc_validation = params.dig(:user, :credit_card_validation_attributes, :credit_card_validated_at)
-    if cc_validation == "1" && !user.credit_card_validated_at
-      user_params_with_pass[:credit_card_validation_attributes] = { credit_card_validated_at: Time.zone.now }
-    elsif cc_validation == "0" && user.credit_card_validated_at
-      user.credit_card_validation.destroy
-    end
-
     respond_to do |format|
       result = Users::UpdateService.new(current_user, user_params_with_pass.merge(user: user)).execute do |user|
         user.skip_reconfirmation!
@@ -338,7 +330,8 @@ class Admin::UsersController < Admin::ApplicationController
       :twitter,
       :username,
       :website_url,
-      :note
+      :note,
+      credit_card_validation_attributes: [:credit_card_validated_at]
     ]
   end
 

@@ -652,72 +652,31 @@ RSpec.describe Admin::UsersController do
       end
     end
 
-    context 'when updating validate user account' do
-      let(:params) do
-        {
-          id: user.to_param,
-          user: user_params
-        }
+    context 'credit card validation' do
+      context 'with credit card validation param' do
+        it 'updates credit card validation for user' do
+          params = {
+            id: user.to_param,
+            user: { credit_card_validation_attributes: { credit_card_validated_at: "1" } }
+          }
+
+          freeze_time do
+            post :update, params: params
+
+            expect(user.credit_card_validated_at).to eq(Time.zone.now)
+          end
+        end
       end
 
-      shared_examples 'no credit card validation param' do
-        let(:user_params) { { name: 'foo' } }
+      context 'without credit card validation param' do
+        it 'does not create credit card validation' do
+          params = {
+            id: user.to_param,
+            user: { name: 'foo' }
+          }
 
-        it 'does not change credit card validation' do
           expect { post :update, params: params }.not_to change(Users::CreditCardValidation, :count)
         end
-      end
-
-      context 'when user has a credit card validation' do
-        before do
-          user.create_credit_card_validation!(credit_card_validated_at: Time.zone.now)
-        end
-
-        context 'with unchecked credit card validation' do
-          let(:user_params) do
-            { credit_card_validation_attributes: { credit_card_validated_at: '0' } }
-          end
-
-          it 'deletes credit_card_validation' do
-            expect { post :update, params: params }.to change { Users::CreditCardValidation.count }.by(-1)
-          end
-        end
-
-        context 'with checked credit card validation' do
-          let(:user_params) do
-            { credit_card_validation_attributes: { credit_card_validated_at: '1' } }
-          end
-
-          it 'does not change credit_card_validated_at' do
-            expect { post :update, params: params }.not_to change { user.credit_card_validated_at }
-          end
-        end
-
-        it_behaves_like 'no credit card validation param'
-      end
-
-      context 'when user does not have a credit card validation' do
-        context 'with checked credit card validation' do
-          let(:user_params) do
-            { credit_card_validation_attributes: { credit_card_validated_at: '1' } }
-          end
-
-          it 'creates new credit card validation' do
-            expect { post :update, params: params }.to change { Users::CreditCardValidation.count }.by 1
-          end
-        end
-
-        context 'with unchecked credit card validation' do
-          let(:user_params) do
-            { credit_card_validation_attributes: { credit_card_validated_at: '0' } }
-          end
-
-          it 'does not blow up' do
-            expect { post :update, params: params }.not_to change(Users::CreditCardValidation, :count)
-          end
-        end
-
-        it_behaves_like 'no credit card validation param'
       end
     end
   end
