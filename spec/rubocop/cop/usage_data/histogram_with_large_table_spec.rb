@@ -5,12 +5,12 @@ require 'fast_spec_helper'
 require_relative '../../../../rubocop/cop/usage_data/histogram_with_large_table'
 
 RSpec.describe RuboCop::Cop::UsageData::HistogramWithLargeTable do
-  let(:large_tables) { %i[issues ci_builds] }
+  let(:high_traffic_models) { %i[Issue Ci::Build] }
   let(:msg) { 'Use one of the count, distinct_count methods for counting on' }
 
   let(:config) do
-    RuboCop::Config.new('Migration/UpdateLargeTable' => {
-                          'HighTrafficTables' => large_tables
+    RuboCop::Config.new('UsageData/HistogramWithLargeTable' => {
+                          'HighTrafficModels' => high_traffic_models,
                         })
   end
 

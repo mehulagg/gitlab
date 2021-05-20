@@ -12,8 +12,6 @@ module RuboCop
       # histogram(Issue, buckets: 1..100)
       # histogram(User.active, buckets: 1..100)
       class HistogramWithLargeTable < RuboCop::Cop::Cop
-        include RuboCop::MigrationHelpers
-
         MSG = 'Avoid histogram method on %{model_name}'
 
         # Match one level const as Issue, Gitlab
@@ -56,9 +54,11 @@ module RuboCop
         private
 
         def large_table?(model)
-          table_name = model.to_s.constantize.table_name
+          high_traffic_models.include?(model.to_s)
+        end
 
-          high_traffic_tables.include?(table_name)
+        def high_traffic_models
+          cop_config['HighTrafficModels'] || []
         end
       end
     end
