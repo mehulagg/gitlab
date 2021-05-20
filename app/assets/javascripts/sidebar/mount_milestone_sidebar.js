@@ -35,7 +35,7 @@ export default class SidebarMilestone {
             humanTimeEstimate,
             humanTimeSpent,
             limitToHours: parseBoolean(limitToHours),
-            issuableId: iid.toString(),
+            issuableId: id.toString(),
           },
         }),
     });
