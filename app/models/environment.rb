@@ -29,7 +29,15 @@ class Environment < ApplicationRecord
   has_one :last_pipeline, through: :last_deployable, source: 'pipeline'
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus', disable_joins: true
-  has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
+
+
+  # TODO: CI Vertical
+  # For some reason the disable_joins on the has_one was not preventing joins
+  #has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline', disable_joins: true
+  def last_visible_pipeline
+    last_visible_deployable&.pipeline
+  end
+
   has_one :upcoming_deployment, -> { running.distinct_on_environment }, class_name: 'Deployment', inverse_of: :environment
   has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
