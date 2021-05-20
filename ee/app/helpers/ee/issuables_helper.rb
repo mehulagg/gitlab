@@ -62,7 +62,7 @@ module EE
         sprite_icon(
           'tanuki-verified',
           size: 16,
-          css_class: 'gl-text-purple d-block'
+          css_class: 'gl-text-purple-600 d-block'
         )
       end
     end

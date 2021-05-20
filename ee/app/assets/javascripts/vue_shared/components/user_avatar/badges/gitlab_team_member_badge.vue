@@ -22,6 +22,6 @@ export default {
     :aria-label="$options.gitlabTeamMemberLabel"
     class="d-inline-block align-middle"
   >
-    <gl-icon name="tanuki-verified" class="gl-text-purple d-block" />
+    <gl-icon name="tanuki-verified" class="gl-text-purple-600 d-block" />
   </span>
 </template>
