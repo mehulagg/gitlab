@@ -140,7 +140,7 @@ include: # Execute individual project's configuration
 #### Ensuring compliance jobs are always run
 Compliance pipelines use GitLab's CI system to give you incredible amount of flexibility
 for defining any sort of compliance jobs you like. Depending on what your goals, these jobs
-can be extended by end-users or configured to not allow modification afterwards.
+can be modified by end-users or configured to be non-modifiable.
 
 At a high-level, if a value in a compliance job is set, it cannot be changed or overridden
 by project-level configurations. If a value is not present in a compliance job, a project-level
