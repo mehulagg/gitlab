@@ -220,7 +220,7 @@ class Integration < ApplicationRecord
   end
 
   # used as part of the renaming effort
-  RENAMED_TO_INTEGRATION = %w[asana assembla bamboo]
+  RENAMED_TO_INTEGRATION = %w[asana assembla bamboo].freeze
 
   def self.available_integration_names(**args)
     available_services_names(**args)
