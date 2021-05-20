@@ -129,8 +129,7 @@ module QA
     def disable_optional_jobs(project)
       %w[
         CODE_QUALITY_DISABLED LICENSE_MANAGEMENT_DISABLED
-        SAST_DISABLED DAST_DISABLED DEPENDENCY_SCANNING_DISABLED
-        CONTAINER_SCANNING_DISABLED
+        SAST_DISABLED DAST_DISABLED CONTAINER_SCANNING_DISABLED
       ].each do |key|
         Resource::CiVariable.fabricate_via_api! do |resource|
           resource.project = project
