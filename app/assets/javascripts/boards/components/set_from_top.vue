@@ -4,7 +4,8 @@ import { contentTop } from '~/lib/utils/common_utils';
 export default {
   data() {
     return {
-      heightFromTop: '40px', // default header height
+      heightFromTop: `${contentTop()}px`, // default header height
+      ob: {},
     };
   },
   mounted() {
@@ -12,18 +13,20 @@ export default {
   },
   methods: {
     observeHeaderChange() {
-      const ob = new MutationObserver(() => {
+      this.ob = new MutationObserver(() => {
         const target = document.querySelector('#js-peek');
-
         if (document.body.contains(target)) {
-          ob.disconnect();
+          this.ob.disconnect();
 
           this.heightFromTop = `${contentTop()}px`;
         }
       });
 
-      ob.observe(document.body, { childList: true });
+      this.ob.observe(document.body, { childList: true });
     },
+  },
+  destroyed() {
+    this.ob?.disconnect();
   },
 };
 </script>

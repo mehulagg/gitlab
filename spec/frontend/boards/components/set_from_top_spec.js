@@ -2,12 +2,9 @@ import { shallowMount } from '@vue/test-utils';
 import { useMockMutationObserver } from 'helpers/mock_dom_observer';
 import waitForPromises from 'helpers/wait_for_promises';
 import SetFromTop from '~/boards/components/set_from_top.vue';
+import { contentTop } from '~/lib/utils/common_utils';
 
-jest.mock('~/lib/utils/common_utils', () => {
-  return {
-    contentTop: () => '77',
-  };
-});
+jest.mock('~/lib/utils/common_utils');
 const { trigger: triggerMutation } = useMockMutationObserver();
 
 const triggerChildMutation = () => {
@@ -22,11 +19,17 @@ const createPerfBar = () => {
 
   triggerChildMutation();
 };
-describe('BoardContentSidebar', () => {
+
+describe('SetFromTop', () => {
   let wrapper;
 
   const createComponent = () => {
     wrapper = shallowMount(SetFromTop, {
+      data() {
+        return {
+          heightFromTop: '40px',
+        };
+      },
       scopedSlots: {
         default: '<span data-testid="from-top">{{props.heightFromTop}}</span>',
       },
@@ -41,15 +44,19 @@ describe('BoardContentSidebar', () => {
     wrapper.destroy();
   });
 
-  it('renders the headerFromTop value', () => {
+  it('calls contentTop on render', () => {
+    expect(contentTop).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders value of heightFromTop in the scoped slot', () => {
     expect(wrapper.text()).toContain('40px');
   });
 
-  it('sets scoped slot text to be the value of contentTop', async () => {
+  it('contentTop should be called a second time after mutation is called for recalculation', async () => {
     createPerfBar();
 
     await waitForPromises();
 
-    expect(wrapper.text()).toBe('77px');
+    expect(contentTop).toHaveBeenCalledTimes(2);
   });
 });

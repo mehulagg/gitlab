@@ -3,11 +3,11 @@ import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { stubComponent } from 'helpers/stub_component';
 import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
+import SetFromTop from '~/boards/components/set_from_top.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
-import SetFromTop from '~/boards/components/set_from_top.vue';
 
 import { ISSUABLE } from '~/boards/constants';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
