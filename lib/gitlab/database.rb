@@ -215,7 +215,7 @@ module Gitlab
     # Bulk inserts a number of rows into a table, optionally returning their
     # IDs.
     #
-    # table - The name of the table to insert the rows into.
+    # table - The ActiveRecord::Base model to insert the rows into.
     # rows - An Array of Hash instances, each mapping the columns to their
     #        values.
     # return_ids - When set to true the return value will be an Array of IDs of
@@ -238,8 +238,12 @@ module Gitlab
         end
       end
 
+      # Use correct table name and connection
+      table_name = table.respond_to?(:table_name) ? table.table_name : table
+      table_connection = table.respond_to?(:connection) ? table.connection : connection
+
       sql = <<-EOF
-        INSERT INTO #{table} (#{columns.join(', ')})
+        INSERT INTO #{table_name} (#{columns.join(', ')})
         VALUES #{tuples.map { |tuple| "(#{tuple.join(', ')})" }.join(', ')}
       EOF
 
@@ -247,7 +251,7 @@ module Gitlab
 
       sql = "#{sql} RETURNING id" if return_ids
 
-      result = connection.execute(sql)
+      result = table_connection.execute(sql)
 
       if return_ids
         result.values.map { |tuple| tuple[0].to_i }
