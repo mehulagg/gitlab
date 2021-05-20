@@ -9,6 +9,4 @@
 
 if Gitlab::Runtime.puma?
   Puma::Cluster.prepend(::Gitlab::Cluster::Mixins::PumaCluster)
-elsif Gitlab::Runtime.unicorn?
-  Unicorn::HttpServer.prepend(::Gitlab::Cluster::Mixins::UnicornHttpServer)
 end
