@@ -151,7 +151,7 @@ as you define them and that downstream, project-level pipeline configurations
 cannot change them.
 
 1. Add a `rules:when:always` block to each of your compliance jobs.
-    - This ensures that they will always be run.
+    - This ensures they are non-modifiable and will always be run.
 1. Explicitly set any variables the job may reference.
     - This ensures that project-level pipeline configurations do not set them and alter their behavior.
     - This includes any jobs that drive the logic of your job.
