@@ -59,7 +59,8 @@ class CommitStatus < Ci::ApplicationRecord
   scope :with_pipeline, -> { joins(:pipeline) }
 
   scope :for_project_paths, -> (paths) do
-    where(project: Project.where_full_path_in(Array(paths)))
+    # TODO: CI Vertical: cross-shard join
+    where(project: Project.where_full_path_in(Array(paths)).ids)
   end
 
   scope :with_preloads, -> do
