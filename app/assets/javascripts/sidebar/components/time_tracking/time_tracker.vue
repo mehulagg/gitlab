@@ -183,7 +183,7 @@ export default {
       <template v-if="isTimeReportSupported">
         <gl-link
           v-if="hasTimeSpent"
-          v-gl-modal="`time-tracking-report`"
+          v-gl-modal="'time-tracking-report'"
           data-testid="reportLink"
           href="#"
           class="btn-link"
