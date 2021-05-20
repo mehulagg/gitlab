@@ -102,6 +102,7 @@ export default {
           :title="metric.label"
           :unit="metric.unit || ''"
           :should-animate="true"
+          :animation-decimal-places="1"
           tabindex="0"
         />
         <gl-popover :target="metric.key" placement="bottom">
