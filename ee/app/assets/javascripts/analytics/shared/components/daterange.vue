@@ -54,9 +54,14 @@ export default {
   },
   data() {
     return {
-      maxDateRangeTooltip: sprintf(__('Date range cannot exceed %{maxDateRange} days.'), {
-        maxDateRange: this.maxDateRange,
-      }),
+      maxDateRangeTooltip: sprintf(
+        __(
+          'Data is shown for workflow items created during the selected date range. Date range cannot exceed %{maxDateRange} days.',
+        ),
+        {
+          maxDateRange: this.maxDateRange,
+        },
+      ),
     };
   },
   computed: {

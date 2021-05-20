@@ -10458,6 +10458,9 @@ msgstr ""
 msgid "DastSiteValidation|You will not be able to run active scans against %{url}."
 msgstr ""
 
+msgid "Data is shown for workflow items created during the selected date range. Date range cannot exceed %{maxDateRange} days."
+msgstr ""
+
 msgid "Data is still calculating..."
 msgstr ""
 
@@ -10477,9 +10480,6 @@ msgid "Date picker"
 msgstr ""
 
 msgid "Date range"
-msgstr ""
-
-msgid "Date range cannot exceed %{maxDateRange} days."
 msgstr ""
 
 msgid "Date range must be shorter than %{max_range} days."
