@@ -187,7 +187,7 @@ class Project < ApplicationRecord
   has_one :assembla_integration, class_name: 'Integrations::Assembla'
   has_one :bamboo_integration, class_name: 'Integrations::Bamboo'
   has_one :bugzilla_integration, class_name: 'Integrations::Bugzilla'
-  has_one :campfire_service, class_name: 'Integrations::Campfire'
+  has_one :campfire_integration, class_name: 'Integrations::Campfire'
   has_one :confluence_service, class_name: 'Integrations::Confluence'
   has_one :custom_issue_tracker_service, class_name: 'Integrations::CustomIssueTracker'
   has_one :datadog_service, class_name: 'Integrations::Datadog'

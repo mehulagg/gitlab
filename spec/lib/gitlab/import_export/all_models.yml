@@ -362,7 +362,7 @@ project:
 - boards
 - last_event
 - integrations
-- campfire_service
+- campfire_integration
 - confluence_service
 - datadog_service
 - discord_service
