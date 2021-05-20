@@ -49,9 +49,6 @@ export default {
     configurationHistory: s__('SecurityConfiguration|Configuration history'),
     securityConfiguration: __('Security Configuration'),
     securityTesting: s__('SecurityConfiguration|Security testing'),
-
-    // TODO: Need different description for non-Ultimate, as statuses won't be available
-    // FIXME: Add link around "latest pipeline"
     securityTestingDescription: s__(
       `SecurityConfiguration|The status of the tools only applies to the
       default branch and is based on the %{linkStart}latest pipeline%{linkEnd}.
