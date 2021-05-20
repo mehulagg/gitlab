@@ -55,9 +55,9 @@
         = ff.label s_("AdminUsers|Validate user account")
       .col-sm-10.gl-display-flex.gl-align-items-baseline
         = ff.check_box :credit_card_validated_at, checked: @user.credit_card_validated_at.present?
-        %div.gl-pl-2
-          %div.light
+        .gl-pl-2
+          .light
             = s_('AdminUsers|User is validated and can use free CI minutes on shared runners.')
-          %div.text-muted
+          .text-muted
             = s_('AdminUsers|A user can validate themselves by inputting a credit/debit card, or an admin can manually validate a user.')
 
