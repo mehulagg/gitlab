@@ -34,16 +34,20 @@ To enable the dependency proxy feature:
 
 **Helm chart installations**
 
-1. After the installation is complete, update the `appConfig` to enable the feature.
+1. After the installation is complete, update the Global `appConfig` to enable the feature. 
 
-   ```yml
-   dependencyProxy:
+```yml
+global:
+  appConfig:
+    dependencyProxy:
       enabled: true
       bucket: gitlab-dependency-proxy
       connection: {}
        secret:
        key:
-   ```
+```
+
+Read more about how to [configure Charts using Globals](https://docs.gitlab.com/charts/charts/globals.html#configure-appconfig-settings).
 
 **Installations from source**
 
