@@ -14,6 +14,8 @@ export default {
     ),
     learnMore: __('Learn more'),
     progressBarTitle: s__('Geo|%{title} checksum progress'),
+    checksummed: s__('Geo|Checksummed'),
+    nothingToChecksum: s__('Geo|Nothing to checksum'),
   },
   components: {
     GlCard,
@@ -64,6 +66,8 @@ export default {
         class="gl-mt-3"
         :title="sprintf($options.i18n.progressBarTitle, { title: bar.title })"
         :values="bar.values"
+        :success-label="$options.i18n.checksummed"
+        :unavailable-label="$options.i18n.nothingToChecksum"
       />
     </div>
   </gl-card>

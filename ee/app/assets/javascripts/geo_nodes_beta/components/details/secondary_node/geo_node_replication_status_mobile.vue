@@ -38,6 +38,8 @@ export default {
         :title="sprintf(translations.progressBarVerifTitle, { component: item.component })"
         :target="`mobile-verification-progress-${item.component}`"
         :values="item.verificationValues"
+        :success-label="translations.verified"
+        :unavailable-label="translations.nothingToVerify"
       />
       <span v-else class="gl-text-gray-400 gl-font-sm">{{ translations.nA }}</span>
     </div>

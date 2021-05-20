@@ -66,6 +66,24 @@ describe('GeoNodeProgressBar', () => {
       });
     });
 
+    describe('when status counts labels are over written', () => {
+      const expectedUiCounts = ['Total 0', 'label1 0', 'label2 0', 'label3 0'];
+      const values = { success: 0, failed: 0, total: 0 };
+
+      beforeEach(() => {
+        createComponent({
+          successLabel: 'label1',
+          queuedLabel: 'label2',
+          failedLabel: 'label3',
+          values,
+        });
+      });
+
+      it('uses the custom labels instead of the default', () => {
+        expect(findCounts().wrappers.map((w) => w.text())).toStrictEqual(expectedUiCounts);
+      });
+    });
+
     describe('popoverTarget', () => {
       describe('when target prop is null', () => {
         beforeEach(() => {
