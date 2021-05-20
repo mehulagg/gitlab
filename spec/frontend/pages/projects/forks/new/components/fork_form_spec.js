@@ -44,6 +44,7 @@ describe('ForkForm component', () => {
     projectPath: 'project-name',
     projectDescription: 'some project description',
     projectVisibility: 'private',
+    restrictedVisibilityLevels: [],
   };
 
   const mockGetRequest = (data = {}, statusCode = httpStatus.OK) => {
@@ -229,35 +230,83 @@ describe('ForkForm component', () => {
       expect(wrapper.findAll(GlFormRadio)).toHaveLength(3);
     });
 
-    it.each`
-      project       | namespace     | privateIsDisabled | internalIsDisabled | publicIsDisabled
-      ${'private'}  | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
-      ${'private'}  | ${'internal'} | ${undefined}      | ${'true'}          | ${'true'}
-      ${'private'}  | ${'public'}   | ${undefined}      | ${'true'}          | ${'true'}
-      ${'internal'} | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
-      ${'internal'} | ${'internal'} | ${undefined}      | ${undefined}       | ${'true'}
-      ${'internal'} | ${'public'}   | ${undefined}      | ${undefined}       | ${'true'}
-      ${'public'}   | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
-      ${'public'}   | ${'internal'} | ${undefined}      | ${undefined}       | ${'true'}
-      ${'public'}   | ${'public'}   | ${undefined}      | ${undefined}       | ${undefined}
-    `(
-      'sets appropriate radio button disabled state',
-      async ({ project, namespace, privateIsDisabled, internalIsDisabled, publicIsDisabled }) => {
-        mockGetRequest();
-        createComponent(
-          {
-            projectVisibility: project,
-          },
-          {
-            form: { fields: { namespace: { value: { visibility: namespace } } } },
-          },
-        );
+    // Question:
+    // - private project with restrictedVisibilityLevel = [0] <-- in which case everything is disabled 😱
+    // - what happens if restricted level is all checked <-- in which case everything is disabled 😱
+    describe('with restrictedVisibilityLevels', () => {
+      it.each`
+        project       | namespace     | privateIsDisabled | internalIsDisabled | publicIsDisabled | restrictedVisibilityLevels
+        ${'private'}  | ${'private'}  | ${'true'}         | ${'true'}          | ${'true'}        | ${[0]}
+        ${'internal'} | ${'internal'} | ${'true'}         | ${undefined}       | ${'true'}        | ${[0]}
+        ${'public'}   | ${'public'}   | ${'true'}         | ${undefined}       | ${undefined}     | ${[0]}
+        ${'private'}  | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}        | ${[10]}
+        ${'internal'} | ${'internal'} | ${undefined}      | ${'true'}          | ${'true'}        | ${[10]}
+        ${'public'}   | ${'public'}   | ${undefined}      | ${'true'}          | ${undefined}     | ${[10]}
+        ${'private'}  | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}        | ${[20]}
+        ${'internal'} | ${'internal'} | ${undefined}      | ${undefined}       | ${'true'}        | ${[20]}
+        ${'public'}   | ${'public'}   | ${undefined}      | ${undefined}       | ${'true'}        | ${[20]}
+        ${'private'}  | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}        | ${[10, 20]}
+        ${'internal'} | ${'internal'} | ${undefined}      | ${'true'}          | ${'true'}        | ${[10, 20]}
+        ${'public'}   | ${'public'}   | ${undefined}      | ${'true'}          | ${'true'}        | ${[10, 20]}
+      `(
+        'sets appropriate radio button disabled state',
+        async ({
+          project,
+          namespace,
+          privateIsDisabled,
+          internalIsDisabled,
+          publicIsDisabled,
+          restrictedVisibilityLevels,
+        }) => {
+          mockGetRequest();
+          createComponent(
+            {
+              projectVisibility: project,
+              restrictedVisibilityLevels,
+            },
+            {
+              form: { fields: { namespace: { value: { visibility: namespace } } } },
+            },
+          );
 
-        expect(findPrivateRadio().attributes('disabled')).toBe(privateIsDisabled);
-        expect(findInternalRadio().attributes('disabled')).toBe(internalIsDisabled);
-        expect(findPublicRadio().attributes('disabled')).toBe(publicIsDisabled);
-      },
-    );
+          expect(findPrivateRadio().attributes('disabled')).toBe(privateIsDisabled);
+          expect(findInternalRadio().attributes('disabled')).toBe(internalIsDisabled);
+          expect(findPublicRadio().attributes('disabled')).toBe(publicIsDisabled);
+        },
+      );
+    });
+
+    describe('with no restrictedVisibilityLevels', () => {
+      it.each`
+        project       | namespace     | privateIsDisabled | internalIsDisabled | publicIsDisabled
+        ${'private'}  | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
+        ${'private'}  | ${'internal'} | ${undefined}      | ${'true'}          | ${'true'}
+        ${'private'}  | ${'public'}   | ${undefined}      | ${'true'}          | ${'true'}
+        ${'internal'} | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
+        ${'internal'} | ${'internal'} | ${undefined}      | ${undefined}       | ${'true'}
+        ${'internal'} | ${'public'}   | ${undefined}      | ${undefined}       | ${'true'}
+        ${'public'}   | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
+        ${'public'}   | ${'internal'} | ${undefined}      | ${undefined}       | ${'true'}
+        ${'public'}   | ${'public'}   | ${undefined}      | ${undefined}       | ${undefined}
+      `(
+        'sets appropriate radio button disabled state',
+        async ({ project, namespace, privateIsDisabled, internalIsDisabled, publicIsDisabled }) => {
+          mockGetRequest();
+          createComponent(
+            {
+              projectVisibility: project,
+            },
+            {
+              form: { fields: { namespace: { value: { visibility: namespace } } } },
+            },
+          );
+
+          expect(findPrivateRadio().attributes('disabled')).toBe(privateIsDisabled);
+          expect(findInternalRadio().attributes('disabled')).toBe(internalIsDisabled);
+          expect(findPublicRadio().attributes('disabled')).toBe(publicIsDisabled);
+        },
+      );
+    });
   });
 
   describe('onSubmit', () => {

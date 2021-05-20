@@ -32,6 +32,12 @@ const ALLOWED_VISIBILITY = {
   public: [INTERNAL_VISIBILITY, PRIVATE_VISIBILITY, PUBLIC_VISIBILITY],
 };
 
+const VISIBILITY_LEVEL = {
+  0: 'private',
+  10: 'internal',
+  20: 'public',
+};
+
 const initFormField = ({ value, required = true, skipValidation = false }) => ({
   value,
   required,
@@ -95,6 +101,10 @@ export default {
       type: String,
       required: true,
     },
+    restrictedVisibilityLevels: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     const form = {
@@ -126,6 +136,9 @@ export default {
   computed: {
     projectUrl() {
       return `${gon.gitlab_url}/`;
+    },
+    instanceRestrictedVisibility() {
+      return this.restrictedVisibilityLevels.map((level) => VISIBILITY_LEVEL[level]);
     },
     projectAllowedVisibility() {
       return ALLOWED_VISIBILITY[this.projectVisibility];
@@ -188,6 +201,7 @@ export default {
     },
     isVisibilityLevelDisabled(visibilityLevel) {
       return !(
+        !this.instanceRestrictedVisibility.includes(visibilityLevel) &&
         this.projectAllowedVisibility.includes(visibilityLevel) &&
         this.namespaceAllowedVisibility.includes(visibilityLevel)
       );
