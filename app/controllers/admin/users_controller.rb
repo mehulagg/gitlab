@@ -46,6 +46,7 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def edit
+    user.credit_card_validation || user.build_credit_card_validation
     user
   end
 

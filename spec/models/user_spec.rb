@@ -5332,13 +5332,13 @@ RSpec.describe User do
     context 'when user is initialized' do
       let(:user) { build(:user) }
 
-      it { expect(user.credit_card_validation).to be_present }
+      it { expect(user.credit_card_validation).to_not be_present }
     end
 
     context 'when create user without credit card validation' do
       let(:user) { create(:user) }
 
-      it { expect(user.credit_card_validation).not_to be_persisted }
+      it { expect(user.credit_card_validation).not_to be_present }
     end
 
     context 'when user credit card validation exists' do

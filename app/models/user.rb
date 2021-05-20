@@ -1243,7 +1243,7 @@ class User < ApplicationRecord
   end
 
   def credit_card_validated_at
-    credit_card_validation.credit_card_validated_at
+    credit_card_validation&.credit_card_validated_at
   end
 
   def accessible_deploy_keys
@@ -1857,10 +1857,6 @@ class User < ApplicationRecord
 
   def requires_usage_stats_consent?
     self.admin? && 7.days.ago > self.created_at && !has_current_license? && User.single_user? && !consented_usage_stats?
-  end
-
-  def credit_card_validation
-    super.presence || build_credit_card_validation
   end
 
   # Avoid migrations only building user preference object when needed.
