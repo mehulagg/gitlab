@@ -222,15 +222,8 @@ describe('SubscriptionTable component', () => {
           });
         });
 
-        let testDescription;
-
-        switch (expected) {
-          case 'true':
-            testDescription = 'renders the button';
-            break;
-          default:
-            testDescription = 'does not render the button';
-        }
+        const testDescription =
+          expected === true ? 'renders the button' : 'does not render the button';
 
         it(testDescription, () => {
           expect(findUpgradeButton().exists()).toBe(expected);
