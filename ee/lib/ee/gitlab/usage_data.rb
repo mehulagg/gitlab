@@ -397,8 +397,9 @@ module EE
           start_id, finish_id = min_max_security_scan_id(time_period)
 
           ::Security::Scan.scan_types.each do |name, scan_type|
+            # TODO: CI Vertical: cross-join to build
             relation = ::Security::Scan
-                         .latest_successful_by_build
+                         #TODO:.latest_successful_by_build
                          .by_scan_types(scan_type)
                          .where(security_scans: time_period)
 
@@ -418,11 +419,13 @@ module EE
           start = minimum_id(::Security::Scan, :build_id)
           finish = maximum_id(::Security::Scan, :build_id)
 
+          # TODO: CI Vertical: cross-join to CommitStatus
+
           {}.tap do |secure_jobs|
             ::Security::Scan.scan_types.each do |name, scan_type|
-              secure_jobs["#{name}_scans".to_sym] = count(::Security::Scan.joins(:build)
+              secure_jobs["#{name}_scans".to_sym] = count(::Security::Scan#TODO:.joins(:build)
                 .where(scan_type: scan_type)
-                .merge(::CommitStatus.latest.success)
+                #TODO:.merge(::CommitStatus.latest.success)
                 .where(time_period), :build_id, start: start, finish: finish)
             end
           end
@@ -436,8 +439,9 @@ module EE
           start_id, finish_id = min_max_security_scan_id(time_period)
 
           ::Security::Scan.scan_types.each do |name, scan_type|
+            # TODO: CI Vertical: cross-join to build
             relation = ::Security::Scan
-                         .latest_successful_by_build
+                         #TODO:.latest_successful_by_build
                          .by_scan_types(scan_type)
                          .where(security_scans: time_period)
 
