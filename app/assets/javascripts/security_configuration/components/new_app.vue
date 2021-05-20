@@ -3,6 +3,7 @@ import { GlLink, GlSprintf, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import FeatureCard from './feature_card.vue';
 import SectionLayout from './section_layout.vue';
+import UpgradeBanner from './upgrade_banner.vue';
 
 export default {
   name: 'SecurityConfigurationApp',
@@ -13,6 +14,7 @@ export default {
     GlTabs,
     FeatureCard,
     SectionLayout,
+    UpgradeBanner,
   },
   props: {
     securityFeatures: {
@@ -43,6 +45,11 @@ export default {
     canViewCiHistory() {
       return Boolean(this.gitlabCiPresent && this.gitlabCiHistoryPath);
     },
+    showUpgradeBanner() {
+      return [...this.securityFeatures, ...this.complianceFeatures].some(
+        ({ available }) => !available,
+      );
+    },
   },
   i18n: {
     compliance: s__('SecurityConfiguration|Compliance'),
@@ -65,8 +72,7 @@ export default {
       <h1 class="gl-font-size-h1">{{ $options.i18n.securityConfiguration }}</h1>
     </header>
 
-    <!-- TODO: Add upgrade banner CTA - show if any features are unavailable?
-    -->
+    <upgrade-banner v-if="showUpgradeBanner" />
 
     <gl-tabs content-class="gl-pt-6">
       <gl-tab :title="$options.i18n.securityTesting">
