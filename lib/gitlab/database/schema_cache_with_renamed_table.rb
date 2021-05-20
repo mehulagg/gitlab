@@ -18,22 +18,47 @@ module Gitlab
       end
 
       def primary_keys(table_name)
-        super(underlying_table(table_name))
+        with_correct_connection(table_name) do
+          super(underlying_table(table_name))
+        end
       end
 
       def columns(table_name)
-        super(underlying_table(table_name))
+        with_correct_connection(table_name) do
+          super(underlying_table(table_name))
+        end
       end
 
       def columns_hash(table_name)
-        super(underlying_table(table_name))
+        with_correct_connection(table_name) do
+          super(underlying_table(table_name))
+        end
       end
 
       def indexes(table_name)
-        super(underlying_table(table_name))
+        with_correct_connection(table_name) do
+          super(underlying_table(table_name))
+        end
       end
 
       private
+
+      def with_correct_connection(table_name)
+        previous_connection = connection
+
+        # TODO: This is a little hacky and we'd prefer to use the model somehow to get the right connection but we may not have models available in this context
+        self.connection = if table_name.to_s.start_with?("ci_")
+                            ::Ci::ApplicationRecord.connection
+                          else
+                            ActiveRecord::Base.connection
+                          end
+
+        result = yield
+
+        self.connection = previous_connection
+
+        result
+      end
 
       def underlying_table(table_name)
         renamed_tables_cache.fetch(table_name, table_name)
@@ -42,7 +67,9 @@ module Gitlab
       def renamed_tables_cache
         @renamed_tables ||= begin
           Gitlab::Database::TABLES_TO_BE_RENAMED.select do |old_name, new_name|
-            ActiveRecord::Base.connection.view_exists?(old_name)
+            with_correct_connection(old_name) do
+              connection.view_exists?(old_name)
+            end
           end
         end
       end
