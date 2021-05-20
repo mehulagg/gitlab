@@ -12,9 +12,12 @@ module DbCleaner
   end
 
   def setup_database_cleaner
-    # TODO: CI Vertical
     DatabaseCleaner[:active_record, { connection: ActiveRecord::Base }]
+
+    # TODO: CI Vertical
     DatabaseCleaner[:active_record, { connection: ::Ci::ApplicationRecord }]
+
+    TestProf::BeforeAll.adapter = ::BeforeAllAdapter
   end
 end
 
