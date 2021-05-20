@@ -15,7 +15,7 @@ export default class SidebarMilestone {
       humanTimeEstimate,
       humanTimeSpent,
       limitToHours,
-      iid,
+      id,
     } = el.dataset;
 
     // eslint-disable-next-line no-new
