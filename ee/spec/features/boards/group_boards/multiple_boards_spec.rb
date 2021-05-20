@@ -58,7 +58,6 @@ RSpec.describe 'Multiple Issue Boards', :js do
 
     before do
       stub_licensed_features(multiple_group_issue_boards: true)
-      stub_feature_flags(graphql_board_lists: false)
     end
 
     it_behaves_like 'multiple issue boards'

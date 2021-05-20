@@ -112,7 +112,7 @@ export default {
       </div>
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
       <board-sidebar-due-date />
-      <board-sidebar-labels-select class="labels" />
+      <board-sidebar-labels-select class="block labels" />
       <board-sidebar-weight-input v-if="weightFeatureAvailable" class="weight" />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"
