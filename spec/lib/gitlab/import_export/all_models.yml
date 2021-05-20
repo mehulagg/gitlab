@@ -376,7 +376,7 @@ project:
 - pivotaltracker_service
 - prometheus_service
 - flowdock_service
-- assembla_service
+- assembla_integration
 - asana_integration
 - slack_service
 - microsoft_teams_service
