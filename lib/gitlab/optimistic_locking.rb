@@ -11,7 +11,8 @@ module Gitlab
       retry_attempts = 0
 
       begin
-        ActiveRecord::Base.transaction do
+        # TODO: CI Vertical, use transaction on a object
+        subject.transaction do
           yield(subject)
         end
       rescue ActiveRecord::StaleObjectError

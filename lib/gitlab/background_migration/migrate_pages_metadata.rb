@@ -21,6 +21,7 @@ module Gitlab
           LIMIT 1
         SQL
 
+        # TODO: CI Vertical: likely we can pluck, since 
         select_from = relation
           .select("projects.id", "COALESCE((#{successful_pages_deploy}), FALSE)")
           .to_sql
