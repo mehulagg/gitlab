@@ -214,7 +214,7 @@ describe('Issuable Time Tracker', () => {
       });
 
       describe('When time spent', () => {
-        it('link should appear on issue', async () => {
+        it('link should appear on issue', () => {
           wrapper = mountComponent();
           expect(findReportLink().exists()).toBe(true);
         });
