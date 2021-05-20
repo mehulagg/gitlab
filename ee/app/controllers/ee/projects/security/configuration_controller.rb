@@ -26,23 +26,6 @@ module EE
           feature_category :static_application_security_testing
         end
 
-        # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        override :show
-        def show
-          return super unless security_dashboard_feature_enabled? && can_read_security_dashboard?
-
-          @configuration = ::Projects::Security::ConfigurationPresenter.new(project,
-                                                                            auto_fix_permission: auto_fix_authorized?,
-                                                                            current_user: current_user)
-          respond_to do |format|
-            format.html
-            format.json do
-              render status: :ok, json: @configuration.to_h
-            end
-          end
-        end
-        # rubocop:enable Gitlab/ModuleWithInstanceVariables
-
         def auto_fix
           service = ::Security::Configuration::SaveAutoFixService.new(project, auto_fix_params[:feature])
 
