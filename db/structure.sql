@@ -152,6 +152,16 @@ BEGIN
 END;
 $$;
 
+CREATE FUNCTION trigger_aebe8b822ad3() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW."id_convert_to_bigint" := NEW."id";
+  NEW."taggable_id_convert_to_bigint" := NEW."taggable_id";
+  RETURN NEW;
+END;
+$$;
+
 CREATE FUNCTION trigger_be1804f21693() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -18197,7 +18207,9 @@ CREATE TABLE taggings (
     tagger_id integer,
     tagger_type character varying,
     context character varying,
-    created_at timestamp without time zone
+    created_at timestamp without time zone,
+    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    taggable_id_convert_to_bigint bigint
 );
 
 CREATE SEQUENCE taggings_id_seq
@@ -25237,6 +25249,8 @@ CREATE TRIGGER trigger_51ab7cef8934 BEFORE INSERT OR UPDATE ON ci_builds_runner_
 CREATE TRIGGER trigger_69523443cc10 BEFORE INSERT OR UPDATE ON events FOR EACH ROW EXECUTE FUNCTION trigger_69523443cc10();
 
 CREATE TRIGGER trigger_8485e97c00e3 BEFORE INSERT OR UPDATE ON ci_sources_pipelines FOR EACH ROW EXECUTE FUNCTION trigger_8485e97c00e3();
+
+CREATE TRIGGER trigger_aebe8b822ad3 BEFORE INSERT OR UPDATE ON taggings FOR EACH ROW EXECUTE FUNCTION trigger_aebe8b822ad3();
 
 CREATE TRIGGER trigger_be1804f21693 BEFORE INSERT OR UPDATE ON ci_job_artifacts FOR EACH ROW EXECUTE FUNCTION trigger_be1804f21693();
 
