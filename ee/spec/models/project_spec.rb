@@ -1888,7 +1888,7 @@ RSpec.describe Project do
         end
 
         it 'schedules a full index of the wiki repository' do
-          expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+          expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, true)
 
           project.after_import
         end
