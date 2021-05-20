@@ -4,7 +4,7 @@ import api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { diffViewerModes } from '~/ide/constants';
 import axios from '~/lib/utils/axios_utils';
-import { handleLocationHash, historyPushState, scrollToElement } from '~/lib/utils/common_utils';
+import { handleLocationHash, scrollToElement } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import Poll from '~/lib/utils/poll';
 import { mergeUrlParams, getLocationHash } from '~/lib/utils/url_utility';
@@ -359,12 +359,8 @@ export const startRenderDiffsQueue = ({ state, commit }) => {
 
 export const setRenderIt = ({ commit }, file) => commit(types.RENDER_FILE, file);
 
-export const setInlineDiffViewType = ({ commit }) => {
-  commit(types.SET_DIFF_VIEW_TYPE, INLINE_DIFF_VIEW_TYPE);
-
+export const setInlineDiffViewType = () => {
   Cookies.set(DIFF_VIEW_COOKIE_NAME, INLINE_DIFF_VIEW_TYPE);
-  const url = mergeUrlParams({ view: INLINE_DIFF_VIEW_TYPE }, window.location.href);
-  historyPushState(url);
 
   if (window.gon?.features?.diffSettingsUsageData) {
     api.trackRedisHllUserEvent(TRACKING_CLICK_DIFF_VIEW_SETTING);
@@ -372,12 +368,8 @@ export const setInlineDiffViewType = ({ commit }) => {
   }
 };
 
-export const setParallelDiffViewType = ({ commit }) => {
-  commit(types.SET_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE);
-
+export const setParallelDiffViewType = () => {
   Cookies.set(DIFF_VIEW_COOKIE_NAME, PARALLEL_DIFF_VIEW_TYPE);
-  const url = mergeUrlParams({ view: PARALLEL_DIFF_VIEW_TYPE }, window.location.href);
-  historyPushState(url);
 
   if (window.gon?.features?.diffSettingsUsageData) {
     api.trackRedisHllUserEvent(TRACKING_CLICK_DIFF_VIEW_SETTING);
@@ -546,9 +538,7 @@ export const closeDiffFileCommentForm = ({ commit }, fileHash) => {
   commit(types.CLOSE_DIFF_FILE_COMMENT_FORM, fileHash);
 };
 
-export const setRenderTreeList = ({ commit }, renderTreeList) => {
-  commit(types.SET_RENDER_TREE_LIST, renderTreeList);
-
+export const setRenderTreeList = (_, renderTreeList) => {
   localStorage.setItem(TREE_LIST_STORAGE_KEY, renderTreeList);
 
   if (window.gon?.features?.diffSettingsUsageData) {
@@ -562,17 +552,10 @@ export const setRenderTreeList = ({ commit }, renderTreeList) => {
   }
 };
 
-export const setShowWhitespace = ({ commit }, { showWhitespace, pushState = false }) => {
-  commit(types.SET_SHOW_WHITESPACE, showWhitespace);
+export const setShowWhitespace = (_, showWhitespace) => {
   const w = showWhitespace ? SHOW_WHITESPACE : NO_SHOW_WHITESPACE;
 
   Cookies.set(DIFF_WHITESPACE_COOKIE_NAME, w);
-
-  if (pushState) {
-    historyPushState(mergeUrlParams({ w }, window.location.href));
-  }
-
-  notesEventHub.$emit('refetchDiffData');
 
   if (window.gon?.features?.diffSettingsUsageData) {
     api.trackRedisHllUserEvent(TRACKING_CLICK_WHITESPACE_SETTING);
@@ -792,9 +775,8 @@ export const navigateToDiffFileIndex = ({ commit, state }, index) => {
   commit(types.VIEW_DIFF_FILE, fileHash);
 };
 
-export const setFileByFile = ({ state, commit }, { fileByFile }) => {
+export const setFileByFile = ({ state }, { fileByFile }) => {
   const fileViewMode = fileByFile ? DIFF_VIEW_FILE_BY_FILE : DIFF_VIEW_ALL_FILES;
-  commit(types.SET_FILE_BY_FILE, fileByFile);
   Cookies.set(DIFF_FILE_BY_FILE_COOKIE_NAME, fileViewMode);
 
   if (window.gon?.features?.diffSettingsUsageData) {

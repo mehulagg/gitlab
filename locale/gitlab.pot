@@ -27196,6 +27196,9 @@ msgstr ""
 msgid "Release|Something went wrong while saving the release details."
 msgstr ""
 
+msgid "Reload to apply"
+msgstr ""
+
 msgid "Remediations"
 msgstr ""
 
