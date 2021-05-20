@@ -55,7 +55,8 @@ export default {
     },
     issuableId: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     /*
       In issue list, "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
@@ -101,7 +102,10 @@ export default {
       return Boolean(this.showHelp);
     },
     isTimeReportSupported() {
-      return [IssuableType.Issue, IssuableType.MergeRequest].includes(this.issuableType);
+      return (
+        [IssuableType.Issue, IssuableType.MergeRequest].includes(this.issuableType) &&
+        this.issuableId
+      );
     },
   },
   created() {
