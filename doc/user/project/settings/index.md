@@ -136,7 +136,11 @@ cannot change them.
     - This ensures that they will always be run.
 1. Explicitly set any variables the job may reference.
     - This ensures that project-level pipeline configurations do not set them and alter their behavior.
-    - This includes any jobs that drive the logic of your job as well as any Gitlab pre-defined [job keywords](https://docs.gitlab.com/ee/ci/yaml/README.html#job-keywords).
+    - This includes any jobs that drive the logic of your job.
+1. Explicitly set the container image file to run the job in.
+    - This ensures that your script steps execute in the correct environment.
+1. Explicitly set any relevant Gitlab pre-defined [job keywords](https://docs.gitlab.com/ee/ci/yaml/README.html#job-keywords).
+    - This ensures that your job uses the settings you intend and that they are not overriden by project-level pipelines.
 
 ### Sharing and permissions
 
