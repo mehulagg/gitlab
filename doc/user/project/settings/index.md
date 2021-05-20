@@ -138,7 +138,7 @@ include: # Execute individual project's configuration
 ```
 
 #### Ensuring compliance jobs are always run
-Compliance pipelines use GitLab's CI system to give you incredible amount of flexibility
+Compliance pipelines use the GitLab CI system to give you incredible amount of flexibility
 for defining any sort of compliance jobs you like. Depending on what your goals, these jobs
 can be modified by end-users or configured to be non-modifiable.
 
