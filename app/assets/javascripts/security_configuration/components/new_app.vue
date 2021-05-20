@@ -63,8 +63,7 @@ export default {
 <template>
   <article>
     <header>
-      <!-- TODO: h1? -->
-      <h4 class="gl-my-5">{{ $options.i18n.securityConfiguration }}</h4>
+      <h1 class="gl-font-size-h1">{{ $options.i18n.securityConfiguration }}</h1>
     </header>
 
     <!-- TODO: Add upgrade banner CTA - show if any features are unavailable?
@@ -75,7 +74,7 @@ export default {
       <gl-tab :title="$options.i18n.securityTesting">
         <div class="row">
           <div class="col-lg-5">
-            <h4 class="gl-mt-0">{{ $options.i18n.securityTesting }}</h4>
+            <h2 class="gl-font-size-h2 gl-mt-0">{{ $options.i18n.securityTesting }}</h2>
             <p v-if="latestPipelinePath" class="gl-line-height-20">
               <gl-sprintf :message="$options.i18n.securityTestingDescription">
                 <template #link="{ content }">
@@ -83,9 +82,11 @@ export default {
                 </template>
               </gl-sprintf>
             </p>
-            <gl-link v-if="canViewCiHistory" :href="gitlabCiHistoryPath">{{
-              $options.i18n.configurationHistory
-            }}</gl-link>
+            <p v-if="canViewCiHistory">
+              <gl-link :href="gitlabCiHistoryPath">{{
+                $options.i18n.configurationHistory
+              }}</gl-link>
+            </p>
           </div>
           <div class="col-lg-7">
             <feature-card
@@ -100,7 +101,7 @@ export default {
       <gl-tab :title="$options.i18n.compliance">
         <div class="row">
           <div class="col-lg-5">
-            <h4 class="gl-mt-0">{{ $options.i18n.compliance }}</h4>
+            <h2 class="gl-font-size-h2 gl-mt-0">{{ $options.i18n.compliance }}</h2>
           </div>
           <div class="col-lg-7">
             <feature-card
