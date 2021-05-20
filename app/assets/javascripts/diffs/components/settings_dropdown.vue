@@ -54,7 +54,7 @@ export default {
     right
   >
     <div class="gl-new-dropdown-header gl-border-b-0!">
-      <p class="gl-new-dropdown-header-top">{{ __('View preferences') }}</p>
+      <p class="gl-new-dropdown-header-top">{{ $options.i18n.viewPreferences }}</p>
     </div>
     <div class="gl-px-3">
       <span class="gl-font-weight-bold gl-display-block gl-mb-2">{{ __('File browser') }}</span>
