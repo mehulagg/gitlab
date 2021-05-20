@@ -1,5 +1,5 @@
 ---
-key_path: redis_hll_counters.ci_templates.ci_templates_total_unique_counts_monthly
+key_path: redis_hll_counters.ci_templates.ci_templates_total_unique_counts_weekly
 description: Total count of pipelines runs
 product_section: ops
 product_stage: configure
@@ -7,7 +7,7 @@ product_group: group::configure
 product_category: infrastructure_as_code
 value_type: number
 status: data_available
-time_frame: 28d
+time_frame: 7d
 data_source: redis_hll
 distribution:
 - ce
