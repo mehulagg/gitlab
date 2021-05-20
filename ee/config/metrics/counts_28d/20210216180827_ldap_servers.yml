@@ -8,7 +8,7 @@ product_category: product_category:authentication_and_authorization
 value_type: number
 status: data_available
 time_frame: 28d
-data_source:
+data_source: database
 distribution:
 - ee
 tier: [free]
