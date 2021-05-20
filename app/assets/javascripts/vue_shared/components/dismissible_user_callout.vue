@@ -28,17 +28,21 @@ export default {
     },
   },
   computed: {
+    featureNameEnumValue() {
+      return this.featureName.toUpperCase();
+    },
     loading() {
       return this.$apollo.queries.callouts.loading || this.mutationIsLoading;
     },
     slotProps() {
-      return {
-        loading: this.loading,
-        dismiss: this.dismiss,
-      };
+      return { dismiss: this.dismiss };
     },
     showCallout() {
-      return !this.localIsDismissed && !this.callouts.includes(this.featureName);
+      return !(
+        this.loading ||
+        this.localIsDismissed ||
+        this.callouts.includes(this.featureNameEnumValue)
+      );
     },
   },
   methods: {
