@@ -93,26 +93,44 @@ variables: # can be overriden by a developer's local .gitlab-ci.yml
 sast: # none of these attributes can be overriden by a developer's local .gitlab-ci.yml
   variables:
     FOO: sast
+  image: ruby:2.6
   stage: pre-compliance
   rules:
         - when: always
+  allow_failure: false
+  before_script:
+  - echo "No before scripts."  
   script:
   - echo "running $FOO"
+  after_script:
+  - echo "No after scripts."
 
 sanity check:
+  image: ruby:2.6
   stage: pre-deploy-compliance
   rules:
         - when: always
+  allow_failure: false
+  before_script:
+  - echo "No before scripts."  
   script:
   - echo "running $FOO"
+  after_script:
+  - echo "No after scripts."
 
 
 audit trail:
+  image: ruby:2.6
   stage: post-compliance
   rules:
         - when: always
+  allow_failure: false
+  before_script:
+  - echo "No before scripts."  
   script:
   - echo "running $FOO"
+  after_script:
+  - echo "No after scripts."
 
 include: # Execute individual project's configuration
   project: '$CI_PROJECT_PATH'
