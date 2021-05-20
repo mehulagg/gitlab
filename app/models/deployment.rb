@@ -48,7 +48,8 @@ class Deployment < ApplicationRecord
   scope :stoppable, -> { where.not(on_stop: nil).where.not(deployable_id: nil).success }
   scope :active, -> { where(status: %i[created running]) }
   scope :older_than, -> (deployment) { where('deployments.id < ?', deployment.id) }
-  scope :with_deployable, -> { joins('INNER JOIN ci_builds ON ci_builds.id = deployments.deployable_id').preload(:deployable) }
+  # TODO: CI Vertical remove join
+  scope :with_deployable, -> { preload(:deployable) }
   scope :with_api_entity_associations, -> { preload({ deployable: { runner: [], tags: [], user: [], job_artifacts_archive: [] } }) }
 
   scope :finished_after, ->(date) { where('finished_at >= ?', date) }
