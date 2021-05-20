@@ -308,7 +308,8 @@ class Project < ApplicationRecord
   has_many :ci_pipelines,
           -> { ci_sources },
           class_name: 'Ci::Pipeline',
-          inverse_of: :project
+          inverse_of: :project,
+          dependent: :delete_all
   has_many :stages, class_name: 'Ci::Stage', inverse_of: :project
   has_many :ci_refs, class_name: 'Ci::Ref', inverse_of: :project
 
