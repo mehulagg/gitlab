@@ -25,14 +25,11 @@ export const initNewSecurityConfiguration = (el) => {
     latestPipelinePath,
     projectPath,
     gitlabCiHistoryPath,
-    canToggleAutoFixSettings,
   } = el.dataset;
 
   const { securityFeatures, complianceFeatures } = augmentFeatures(
     features ? JSON.parse(features) : [],
   );
-
-  console.log({ canToggleAutoFixSettings });
 
   return new Vue({
     el,

@@ -19,7 +19,7 @@ module Projects
           help_page_path: help_page_path('user/application_security/index'),
           latest_pipeline_path: latest_pipeline_path,
           auto_fix_enabled: autofix_enabled,
-          can_toggle_auto_fix_settings: "FOSS",
+          can_toggle_auto_fix_settings: auto_fix_permission,
           gitlab_ci_present: project.uses_default_ci_config?,
           gitlab_ci_history_path: gitlab_ci_history_path,
           auto_fix_user_path: '/' # TODO: real link will be updated with https://gitlab.com/gitlab-org/gitlab/-/issues/215669
@@ -103,5 +103,3 @@ module Projects
     end
   end
 end
-
-Projects::Security::ConfigurationPresenter.prepend_mod_with('Projects::Security::ConfigurationPresenter')

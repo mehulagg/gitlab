@@ -13,16 +13,6 @@ module Projects
 
       def show
         render_403 unless can?(current_user, :read_security_configuration, project)
-
-        @configuration = ::Projects::Security::ConfigurationPresenter.new(project,
-                                                                          auto_fix_permission: auto_fix_authorized?,
-                                                                          current_user: current_user)
-        respond_to do |format|
-          format.html
-          format.json do
-            render status: :ok, json: @configuration.to_h
-          end
-        end
       end
     end
   end
