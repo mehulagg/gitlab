@@ -34,7 +34,7 @@ module AlertManagement
     belongs_to :environment, optional: true
 
     has_many :alert_assignees, inverse_of: :alert
-    has_many :assignees, through: :alert_assignees
+    has_many :assignees, through: :alert_assignees, class_name: 'User'
 
     has_many :notes, as: :noteable, inverse_of: :noteable, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
     has_many :ordered_notes, -> { fresh }, as: :noteable, class_name: 'Note'

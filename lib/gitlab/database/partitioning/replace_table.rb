@@ -31,6 +31,7 @@ module Gitlab
 
         delegate :execute, :quote_table_name, :quote_column_name, to: :connection
         def connection
+          # TODO: CI Vertical: model.connection
           @connection ||= ActiveRecord::Base.connection
         end
 

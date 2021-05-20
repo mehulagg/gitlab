@@ -180,6 +180,7 @@ class Environment < ApplicationRecord
     #
     # NOTE: The count of environments should be small~medium (e.g. < 5000)
     def stop_actions
+      # TODO: CI Vertical: cross-join between environments/deployments and ci_builds
       cte = cte_for_deployments_with_stop_action
       ci_builds = Ci::Build.arel_table
 
