@@ -377,7 +377,7 @@ project:
 - prometheus_service
 - flowdock_service
 - assembla_service
-- asana_service
+- asana_integration
 - slack_service
 - microsoft_teams_service
 - mattermost_service

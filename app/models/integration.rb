@@ -210,6 +210,7 @@ class Integration < ApplicationRecord
 
   # Returns a list of available service names.
   # Example: ["asana", ...]
+  # @deprecated
   def self.available_services_names(include_project_specific: true, include_dev: true)
     service_names = services_names
     service_names += project_specific_services_names if include_project_specific
@@ -218,8 +219,20 @@ class Integration < ApplicationRecord
     service_names.sort_by(&:downcase)
   end
 
-  def self.services_names
+  # used as part of the renaming effort
+  RENAMED_TO_INTEGRATION = %w[asana]
+
+  def self.available_integration_names(**args)
+    available_services_names(**args)
+      .select { RENAMED_TO_INTEGRATION.include?(_1) }
+  end
+
+  def self.integration_names
     INTEGRATION_NAMES
+  end
+
+  def self.services_names
+    integration_names
   end
 
   def self.dev_services_names
@@ -240,6 +253,18 @@ class Integration < ApplicationRecord
     end
   end
 
+  def self.available_integration_types(include_project_specific: true, include_dev: true)
+    available_integration_names(include_project_specific: include_project_specific, include_dev: include_dev).map do |name|
+      integration_name_to_type(name)
+    end
+  end
+
+  def self.integration_type_for_service_type(type_name)
+    name = type_name.chomp(type_name)
+
+    integration_name_to_type(name) if RENAMED_TO_INTEGRATION.include?(name)
+  end
+
   # Returns the model for the given service name.
   # Example: "asana" => Integrations::Asana
   def self.service_name_to_model(name)
@@ -251,6 +276,10 @@ class Integration < ApplicationRecord
   # Example: "asana" => "AsanaService"
   def self.service_name_to_type(name)
     "#{name}_service".camelize
+  end
+
+  def self.integration_name_to_type(name)
+    "#{name}_integration".camelize
   end
 
   # Returns the model for the given STI type.

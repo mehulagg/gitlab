@@ -183,7 +183,7 @@ class Project < ApplicationRecord
   has_many :boards
 
   # Project integrations
-  has_one :asana_service, class_name: 'Integrations::Asana'
+  has_one :asana_integration, class_name: 'Integrations::Asana'
   has_one :assembla_service, class_name: 'Integrations::Assembla'
   has_one :bamboo_service, class_name: 'Integrations::Bamboo'
   has_one :bugzilla_service, class_name: 'Integrations::Bugzilla'
