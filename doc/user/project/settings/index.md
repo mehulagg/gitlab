@@ -157,7 +157,7 @@ cannot change them.
     - This includes any jobs that drive the logic of your job.
 1. Explicitly set the container image file to run the job in.
     - This ensures that your script steps execute in the correct environment.
-1. Explicitly set any relevant Gitlab pre-defined [job keywords](../../ci/yaml/README.md#job-keywords).
+1. Explicitly set any relevant GitLab pre-defined [job keywords](../../ci/yaml/README.md#job-keywords).
     - This ensures that your job uses the settings you intend and that they are not overriden by project-level pipelines.
 
 ### Sharing and permissions
