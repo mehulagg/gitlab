@@ -1,11 +1,13 @@
 <script>
-import { GlLink, GlTab, GlTabs } from '@gitlab/ui';
+import { GlLink, GlSprintf, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import FeatureCard from './feature_card.vue';
 
 export default {
+  name: 'SecurityConfigurationApp',
   components: {
     GlLink,
+    GlSprintf,
     GlTab,
     GlTabs,
     FeatureCard,
@@ -29,6 +31,11 @@ export default {
       required: false,
       default: '',
     },
+    latestPipelinePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     canViewCiHistory() {
@@ -45,9 +52,9 @@ export default {
     // FIXME: Add link around "latest pipeline"
     securityTestingDescription: s__(
       `SecurityConfiguration|The status of the tools only applies to the
-      default branch and is based on the latest pipeline. Once you've enabled a
-      scan for the default branch, any subsequent feature branch you create
-      will include the scan.`,
+      default branch and is based on the %{linkStart}latest pipeline%{linkEnd}.
+      Once you've enabled a scan for the default branch, any subsequent feature
+      branch you create will include the scan.`,
     ),
   },
 };
@@ -69,7 +76,13 @@ export default {
         <div class="row">
           <div class="col-lg-5">
             <h4 class="gl-mt-0">{{ $options.i18n.securityTesting }}</h4>
-            <p class="gl-line-height-20">{{ $options.i18n.securityTestingDescription }}</p>
+            <p v-if="latestPipelinePath" class="gl-line-height-20">
+              <gl-sprintf :message="$options.i18n.securityTestingDescription">
+                <template #link="{ content }">
+                  <gl-link :href="latestPipelinePath">{{ content }}</gl-link>
+                </template>
+              </gl-sprintf>
+            </p>
             <gl-link v-if="canViewCiHistory" :href="gitlabCiHistoryPath">{{
               $options.i18n.configurationHistory
             }}</gl-link>
