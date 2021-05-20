@@ -446,7 +446,6 @@ class GeoNodeStatus < ApplicationRecord
     self.repository_deleted_max_id = Geo::RepositoryDeletedEvent.maximum(:id)
     self.repository_renamed_max_id = Geo::RepositoryRenamedEvent.maximum(:id)
     self.repositories_changed_max_id = Geo::RepositoriesChangedEvent.maximum(:id)
-    self.lfs_object_deleted_max_id = Geo::LfsObjectDeletedEvent.maximum(:id)
     self.job_artifact_deleted_max_id = Geo::JobArtifactDeletedEvent.maximum(:id)
     self.hashed_storage_migrated_max_id = Geo::HashedStorageMigratedEvent.maximum(:id)
     self.hashed_storage_attachments_max_id = Geo::HashedStorageAttachmentsEvent.maximum(:id)

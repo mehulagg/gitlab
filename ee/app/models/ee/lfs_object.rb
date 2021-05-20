@@ -37,5 +37,8 @@ module EE
         with_files_stored_locally
       end
     end
+
+    def log_geo_deleted_event
+    end
   end
 end
