@@ -1,5 +1,11 @@
 <script>
-import { GlDropdown, GlDropdownItem, GlDropdownText, GlSearchBoxByType } from '@gitlab/ui';
+import {
+  GlAvatarLabeled,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownText,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
 import { debounce } from 'lodash';
 import Api from '~/api';
 import { s__ } from '~/locale';
@@ -8,6 +14,7 @@ import { SEARCH_DELAY } from '../constants';
 export default {
   name: 'GroupSelect',
   components: {
+    GlAvatarLabeled,
     GlDropdown,
     GlDropdownItem,
     GlDropdownText,
@@ -93,7 +100,13 @@ export default {
         :name="group.name"
         @click="selectGroup(group)"
       >
-        {{ group.name }}
+        <gl-avatar-labeled
+          :label="group.name"
+          :src="group.avatarUrl"
+          :entity-id="group.id"
+          :entity-name="group.name"
+          :size="48"
+        />
       </gl-dropdown-item>
       <gl-dropdown-text v-if="isFetchResultEmpty && !isFetching" data-testid="empty-result-message">
         <span class="gl-text-gray-500">{{ $options.i18n.emptySearchResult }}</span>
