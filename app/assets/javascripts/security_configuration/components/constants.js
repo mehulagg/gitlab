@@ -87,6 +87,10 @@ export const COVERAGE_FUZZING_HELP_PATH = helpPagePath(
 export const API_FUZZING_NAME = __('API Fuzzing');
 export const API_FUZZING_DESCRIPTION = __('Find bugs in your code with API fuzzing.');
 export const API_FUZZING_HELP_PATH = helpPagePath('user/application_security/api_fuzzing/index');
+export const API_FUZZING_CONFIG_HELP_PATH = helpPagePath(
+  'user/application_security/api_fuzzing/index',
+  { anchor: 'enable-web-api-fuzzing' },
+);
 
 export const LICENSE_COMPLIANCE_NAME = __('License Compliance');
 export const LICENSE_COMPLIANCE_DESCRIPTION = __(
@@ -215,7 +219,7 @@ export const securityFeatures = [
     name: API_FUZZING_NAME,
     description: API_FUZZING_DESCRIPTION,
     helpPath: API_FUZZING_HELP_PATH,
-    // configurationHelpPath: API_FUZZING_CONFIG_HELP_PATH,
+    configurationHelpPath: API_FUZZING_CONFIG_HELP_PATH,
     type: REPORT_TYPE_API_FUZZING,
   },
   {
