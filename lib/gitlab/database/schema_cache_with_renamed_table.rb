@@ -46,6 +46,7 @@ module Gitlab
       def with_correct_connection(table_name)
         previous_connection = connection
 
+        # TODO: CI Vertical
         # TODO: This is a little hacky and we'd prefer to use the model somehow to get the right connection but we may not have models available in this context
         self.connection = if table_name.to_s.start_with?("ci_")
                             ::Ci::ApplicationRecord.connection

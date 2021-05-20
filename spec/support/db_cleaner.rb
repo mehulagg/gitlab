@@ -12,6 +12,7 @@ module DbCleaner
   end
 
   def setup_database_cleaner
+    # TODO: CI Vertical
     DatabaseCleaner[:active_record, { connection: ActiveRecord::Base }]
     DatabaseCleaner[:active_record, { connection: ::Ci::ApplicationRecord }]
   end
