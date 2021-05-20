@@ -1,0 +1,5 @@
+---
+title: Add attribute 'topics' in place of 'tag_list' for creating/updating a project
+merge_request: 62191
+author: Jonas Wälter @wwwjon
+type: deprecated
