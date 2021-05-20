@@ -149,7 +149,6 @@ We recommend:
 - **Unique User Identifier (Name identifier)** set to `user.objectID`.
 - **nameid-format** set to persistent.
 
-NOTE: 
 If you are planning on configuring [Group Sync](#group-sync), please make sure to customize the name of the group claim and set it to either `groups` or `Groups`. Please see our [troubleshooting section](../../../administration/troubleshooting/group_saml_scim.md#azure-active-directory) for an example.
 
 ### Okta setup notes
