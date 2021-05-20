@@ -11,6 +11,9 @@ export default {
   mounted() {
     this.observeHeaderChange();
   },
+  destroyed() {
+    this.ob?.disconnect();
+  },
   methods: {
     observeHeaderChange() {
       this.ob = new MutationObserver(() => {
@@ -24,9 +27,6 @@ export default {
 
       this.ob.observe(document.body, { childList: true });
     },
-  },
-  destroyed() {
-    this.ob?.disconnect();
   },
 };
 </script>
