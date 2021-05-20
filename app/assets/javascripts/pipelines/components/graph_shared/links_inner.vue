@@ -34,6 +34,11 @@ export default {
       required: false,
       default: 'gl-stroke-gray-200',
     },
+    hideLinksOnHover: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     highlightedJob: {
       type: String,
       required: false,
@@ -79,6 +84,9 @@ export default {
       }
 
       return [];
+    },
+    fadeoutLinkClass() {
+      return this.hideLinksOnHover ? 'gl-opacity-0' : 'gl-opacity-3';
     },
     viewBox() {
       return [0, 0, this.containerMeasurements.width, this.containerMeasurements.height];
@@ -131,7 +139,7 @@ export default {
     getLinkClasses(link) {
       return [
         this.isLinkHighlighted(link.ref) ? 'gl-stroke-blue-400' : this.defaultLinkColor,
-        { 'gl-opacity-3': this.hasHighlightedJob && !this.isLinkHighlighted(link.ref) },
+        { [this.fadeoutLinkClass]: this.hasHighlightedJob && !this.isLinkHighlighted(link.ref) },
       ];
     },
   },

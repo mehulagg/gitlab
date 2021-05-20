@@ -144,6 +144,7 @@ export default {
         :container-id="containerId"
         :container-measurements="measurements"
         :highlighted-job="highlightedJob"
+        hide-links-on-hover
         @highlightedJobsChange="updateHighlightedJobs"
         @error="onError"
       >
