@@ -95,6 +95,10 @@ export const LICENSE_COMPLIANCE_DESCRIPTION = __(
 export const LICENSE_COMPLIANCE_HELP_PATH = helpPagePath(
   'user/compliance/license_compliance/index',
 );
+export const LICENSE_COMPLIANCE_CONFIG_HELP_PATH = helpPagePath(
+  'user/compliance/license_compliance/index',
+  { anchor: 'configuration' },
+);
 
 export const UPGRADE_CTA = s__(
   'SecurityConfiguration|Available with %{linkStart}upgrade or free trial%{linkEnd}',
@@ -228,6 +232,7 @@ export const complianceFeatures = [
     name: LICENSE_COMPLIANCE_NAME,
     description: LICENSE_COMPLIANCE_DESCRIPTION,
     helpPath: LICENSE_COMPLIANCE_HELP_PATH,
+    configurationHelpPath: LICENSE_COMPLIANCE_CONFIG_HELP_PATH,
     type: REPORT_TYPE_LICENSE_COMPLIANCE,
   },
 ];
