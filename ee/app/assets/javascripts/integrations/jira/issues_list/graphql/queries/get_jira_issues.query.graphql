@@ -1,0 +1,11 @@
+query jiraIssues($projectPath: ID!, $search: String) {
+  project(fullPath: $projectPath) {
+    issues(search: $search) {
+      edges {
+        node {
+          title
+        }
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { IssuableStates } from '~/issuable_list/constants';
 import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import JiraIssuesListApp from './components/jira_issues_list_root.vue';
+import apolloProvider from './graphql';
 
 export default function initJiraIssuesList({ mountPointSelector }) {
   const mountPointEl = document.querySelector(mountPointSelector);
@@ -32,6 +33,7 @@ export default function initJiraIssuesList({ mountPointSelector }) {
       initialState,
       initialSortBy,
     },
+    apolloProvider,
     render: (createElement) =>
       createElement(JiraIssuesListApp, {
         props: {
