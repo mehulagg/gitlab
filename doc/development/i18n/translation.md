@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Translating GitLab
 
 For managing the translation process, we use [CrowdIn](https://crowdin.com).
-To contribute translations at [translate.gitlab.com](https://translate.gitlab.com),
+To contribute translations at [`translate.gitlab.com`](https://translate.gitlab.com),
 you must create a CrowdIn account. You may create a new account or use any of their supported
 sign-in services.
 
@@ -57,7 +57,7 @@ example, in French, `OpenedNDaysAgo|Opened` is translated to `Ouvert•e`, not
 
 You should treat some technical terms like proper nouns and not translate them. Technical terms that
 should always be in English are noted in the glossary when using
-[translate.gitlab.com](https://translate.gitlab.com).
+[`translate.gitlab.com`](https://translate.gitlab.com).
 This helps maintain a logical connection and consistency between tools (for example, a Git client)
 and GitLab.
 
