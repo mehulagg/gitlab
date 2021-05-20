@@ -81,7 +81,7 @@
 - title: Group-level deployment frequency CI/CD chart
   body: | 
     As part of our efforts to natively support [DORA4 metrics](https://docs.gitlab.com/ee/user/analytics/ci_cd_analytics.html#devops-research-and-assessment-dora-key-metrics) in GitLab, the group-level deployment frequency chart is now available. This chart will show the aggregated deployment frequency metrics for all the projects that are part of the group, and allow you to get a full picture of the deployment frequency across multiple projects and teams, so that you can comprehend their efficiency more accurately. Monitoring deployment frequency helps you understand the efficiency of your deployments over time, find bottlenecks, and focus on improvement areas that span across your projects and teams.
-  stage: verify
+  stage: Release
   self-managed: true
   gitlab-com: true
   packages: [Ultimate]
