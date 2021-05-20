@@ -13,6 +13,7 @@ end
 begin
   Gitlab::Database::Partitioning::PartitionManager.new.sync_partitions unless ENV['DISABLE_POSTGRES_PARTITION_CREATION_ON_STARTUP']
 rescue ActiveRecord::ActiveRecordError, PG::Error => e
+  # TODO: CI Vertical
   puts "initializers/postgres_partitioning failed: #{e.message}"
   puts e.backtrace.join("\n")
   # ignore - happens when Rake tasks yet have to create a database, e.g. for testing
