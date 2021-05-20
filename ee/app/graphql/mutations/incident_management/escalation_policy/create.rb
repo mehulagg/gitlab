@@ -52,19 +52,23 @@ module Mutations
         def prepare_rules_attributes(args)
           args[:rules_attributes] = args.delete(:rules).map(&:to_h)
 
+          iids = args[:rules_attributes].collect { |rule| rule[:oncall_schedule_iid] }
+          found_schedules = schedules_for_iids(iids)
+
           args[:rules_attributes].each do |rule|
-            rule[:oncall_schedule_id] = oncall_schedule_id_for_iid(rule.delete(:oncall_schedule_iid))
+            iid = rule.delete(:oncall_schedule_iid)&.to_i
+            rule[:oncall_schedule] = found_schedules[iid]
+
+            raise Gitlab::Graphql::Errors::ResourceNotAvailable, "The oncall schedule for iid #{iid} could not be found" unless rule[:oncall_schedule]
           end
 
           args
         end
 
-        def oncall_schedule_id_for_iid(iid)
-          schedule = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iid).execute&.first
+        def schedules_for_iids(iids)
+          schedules = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iids).execute
 
-          raise Gitlab::Graphql::Errors::ResourceNotAvailable, "The oncall schedule for iid #{iid} could not be found" unless schedule
-
-          schedule.id
+          schedules.index_by(&:iid)
         end
 
         def response(result)
