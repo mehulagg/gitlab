@@ -121,6 +121,7 @@ review-stop:
     QA_ARTIFACTS_DIR: "${CI_PROJECT_DIR}/qa"
     QA_CAN_TEST_GIT_PROTOCOL_V2: "false"
     QA_DEBUG: "true"
+    QA_GENERATE_ALLURE_REPORT: "true"
     GITLAB_USERNAME: "root"
     GITLAB_PASSWORD: "${REVIEW_APPS_ROOT_PASSWORD}"
     GITLAB_ADMIN_USERNAME: "root"
@@ -128,7 +129,6 @@ review-stop:
     GITHUB_ACCESS_TOKEN: "${REVIEW_APPS_QA_GITHUB_ACCESS_TOKEN}"
     EE_LICENSE: "${REVIEW_APPS_EE_LICENSE}"
     SIGNUP_DISABLED: "true"
-    GENERATE_ALLURE_REPORT: "true"
   before_script:
     - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
     - export CI_ENVIRONMENT_URL="$(cat environment_url.txt)"
@@ -149,7 +149,7 @@ review-stop:
   stage: post-qa
   variables:
     GIT_STRATEGY: none
-    STORAGE_CREDENTIALS: $CI_ALLURE_REPORT_GCS_CREDENTIALS
+    STORAGE_CREDENTIALS: $QA_ALLURE_REPORT_GCS_CREDENTIALS
   script:
     - |
       allure-report-publisher upload gcs \

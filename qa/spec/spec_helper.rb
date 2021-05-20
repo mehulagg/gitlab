@@ -4,6 +4,7 @@ require_relative '../qa'
 require 'rspec/retry'
 require 'rspec-parameterized'
 require 'active_support/core_ext/hash'
+require 'active_support/core_ext/object/blank'
 
 if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
   require 'knapsack'

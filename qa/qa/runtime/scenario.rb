@@ -19,17 +19,15 @@ module QA
 
         define_singleton_method(attribute) do
           attributes[attribute.to_sym].tap do |value|
-            if value.to_s.empty?
-              raise ArgumentError, "Empty `#{attribute}` attribute!"
-            end
+            raise ArgumentError, "Empty `#{attribute}` attribute!" if value.to_s.empty?
           end
         end
       end
 
       def from_env(var)
-        return unless var
+        return if var.blank?
 
-        JSON.parse(Runtime::Env.runtime_scenario_attributes).each { |k, v| define(k, v) }
+        JSON.parse(var).each { |k, v| define(k, v) }
       end
 
       def method_missing(name, *)
