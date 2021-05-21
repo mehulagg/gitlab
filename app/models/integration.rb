@@ -272,6 +272,16 @@ class Integration < ApplicationRecord
     service_type_to_model(type)
   end
 
+  # Returns the attribute for the given service name.
+  # Example: 'asana' => 'asana_integration'
+  def self.service_method(name)
+    if RENAMED_TO_INTEGRATION.include?(name)
+      "#{name}_integration".to_sym
+    else
+      "#{name}_service".to_sym
+    end
+  end
+
   # Returns the STI type for the given service name.
   # Example: "asana" => "AsanaService"
   def self.service_name_to_type(name)

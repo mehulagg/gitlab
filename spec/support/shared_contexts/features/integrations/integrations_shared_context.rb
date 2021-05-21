@@ -5,7 +5,7 @@ Integration.available_services_names.each do |service|
     include JiraServiceHelper if service == 'jira'
 
     let(:dashed_service) { service.dasherize }
-    let(:service_method) { "#{service}_service".to_sym }
+    let(:service_method) { Integration.service_method(service) }
     let(:service_klass) { Integration.service_name_to_model(service) }
     let(:service_instance) { service_klass.new }
     let(:service_fields) { service_instance.fields }
