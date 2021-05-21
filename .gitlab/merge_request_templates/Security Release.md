@@ -16,7 +16,7 @@ See [the general developer security release guidelines](https://gitlab.com/gitla
 - [ ] Merge request targets `master`, or a versioned stable branch (`X-Y-stable-ee`).
 - [ ] Milestone is set for the version this merge request applies to. A closed milestone can be assigned via [quick actions].
 - [ ] Title of this merge request is the same as for all backports.
-- [ ] A [CHANGELOG entry] is added without a `merge_request` value, with `type` set to `security`
+- [ ] A [CHANGELOG entry] has been included.
 - [ ] For the MR targeting `master`:
   - [ ] Assign to a reviewer and maintainer, per our [Code Review process].
   - [ ] Ensure it's approved according to our [Approval Guidelines].
