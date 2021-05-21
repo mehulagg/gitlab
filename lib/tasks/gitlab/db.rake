@@ -1,5 +1,16 @@
 # frozen_string_literal: true
 
+# # TODO: CI Vertical: A manual load was required due to undefined constant
+# require 'gitlab/null_request_store.rb'
+# require 'gitlab/safe_request_store.rb'
+# require 'gitlab/logger.rb'
+# require 'gitlab/json_logger.rb'
+# require 'gitlab/app_text_logger.rb'
+# require 'gitlab/app_json_logger.rb'
+# require 'gitlab/multi_destination_logger.rb'
+# require 'gitlab/app_logger.rb'
+# require 'gitlab/database/partitioning/partition_creator.rb'
+
 namespace :gitlab do
   namespace :db do
     desc 'GitLab | DB | Manually insert schema migration version'
@@ -117,8 +128,13 @@ namespace :gitlab do
     end
 
     desc 'Create missing dynamic database partitions'
-    task create_dynamic_partitions: :environment do
-      Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+    task :create_dynamic_partitions: :environment do
+      # TODO: CI Vertical: Debug creation of partitions
+      # TODO: These models are not properly registered via initializer
+      ActiveRecord::Base.logger = Logger.new(STDOUT)
+
+      puts ::Gitlab::Database::Partitioning::PartitionCreator.models
+      ::Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
     end
 
     # This is targeted towards deploys and upgrades of GitLab.
