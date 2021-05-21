@@ -147,10 +147,11 @@ The pipeline now executes the jobs as configured.
 > [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/30101) GitLab 13.7.
 
 You can use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
-keywords to define [variables](../variables/README.md) that are prefilled when running
-a pipeline manually.
+keywords to define
+[top-level variables](../variables/README.md##create-a-custom-cicd-variable-in-the-gitlab-ciyml-file)
+that are prefilled when running a pipeline manually.
 
-In pipelines triggered manually, the **Run pipelines** page displays all variables
+In pipelines triggered manually, the **Run pipelines** page displays all top-level variables
 with a `description` and `value` defined in the `.gitlab-ci.yml` file. The values
 can then be modified if needed, which overrides the value for that single pipeline run.
 
@@ -163,6 +164,8 @@ variables:
     value: "staging"  # Deploy to staging by default
     description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
 ```
+
+This feature does not work with job-level variables.
 
 ### Run a pipeline by using a URL query string
 
