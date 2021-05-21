@@ -50,7 +50,7 @@
   self-managed: true
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
-  url: https://gitlab.com/gitlab-org/gitlab/-/issues/32107
+  url: https://docs.gitlab.com/ee/api/packages.html#delete-a-package-file
   image_url: https://about.gitlab.com/images/growth/package.png
   published_at: 2021-05-22
   release: 13.12
