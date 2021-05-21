@@ -38,6 +38,10 @@ export default {
       type: String,
       required: true,
     },
+    restrictedVisibilityLevels: {
+      type: Array,
+      required: true,
+    },
   },
 };
 </script>
