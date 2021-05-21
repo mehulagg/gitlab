@@ -1,0 +1,5 @@
+---
+title: Remove the FF *_unique_users_pushing_mr_ciconfigfile
+merge_request: 62283
+author:
+type: removed
