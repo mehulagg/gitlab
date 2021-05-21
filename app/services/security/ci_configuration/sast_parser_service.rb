@@ -128,7 +128,7 @@ module Security
         Gitlab::Ci::Variables::Helpers.inherit_yaml_variables(
           from: root_variables,
           to: attributes[:job_variables],
-          inheritance: attributes[:root_variables_inheritance] || true
+          inheritance: attributes.fetch(:root_variables_inheritance, true)
         )
       end
     end
