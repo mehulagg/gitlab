@@ -103,7 +103,7 @@ RSpec.describe 'Branches' do
         visit project_branches_filtered_path(project, state: 'all')
 
         expect(all('.all-branches').last).to have_selector('li', count: 20)
-        accept_confirm { first('.js-branch-item .btn-danger').click }
+        accept_confirm { first('.js-branch-item button[aria-label="Delete branch"]').click }
 
         expect(all('.all-branches').last).to have_selector('li', count: 19)
       end
@@ -172,7 +172,7 @@ RSpec.describe 'Branches' do
 
         expect(page).to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 1)
-        accept_confirm { find('.js-branch-fix [data-testid="remove-branch"]').click }
+        accept_confirm { find('.js-branch-fix button[aria-label="Delete branch"]').click }
 
         expect(page).not_to have_content('fix')
         expect(find('.all-branches')).to have_selector('li', count: 0)

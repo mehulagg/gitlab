@@ -333,7 +333,7 @@ RSpec.describe 'Environment' do
       visit project_branches_filtered_path(project, state: 'all', search: 'feature')
 
       remove_branch_with_hooks(project, user, 'feature') do
-        page.within('.js-branch-feature') { find("[data-testid='remove-branch']").click }
+        page.within('.js-branch-feature') { find(".gl-button[aria-label='Delete branch']").click }
       end
 
       visit_environment(environment)
