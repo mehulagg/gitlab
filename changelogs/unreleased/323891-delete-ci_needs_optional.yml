@@ -1,0 +1,5 @@
+---
+title: Remove the FF ci_needs_optional
+merge_request: 62282
+author:
+type: removed
