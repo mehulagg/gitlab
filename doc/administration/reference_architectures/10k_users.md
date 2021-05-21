@@ -2404,6 +2404,7 @@ future with further specific cloud provider details.
 | Supporting services such as NGINX, Prometheus, etc... | 2        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
 
 NOTE:
+
 - (1) Nodes configuration is shown as it is forced to ensure pod vcpu / memory ratios and avoid scaling during **performance testing**.
 In production deployments there is no need to assign pods to nodes. A minimum of three nodes in three different availability zones is strongly recommended to align with resilient cloud architecture practices.
 
