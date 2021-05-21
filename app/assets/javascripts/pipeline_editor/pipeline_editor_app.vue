@@ -56,7 +56,7 @@ export default {
 
   apollo: {
     initialCiFileContent: {
-      fetchPolicy: fetchPolicies.NETWORK,
+      fetchPolicy: fetchPolicies.NETWORK_ONLY,
       query: getBlobContent,
       // If it's a brand new file, we don't want to fetch the content.
       // Then when the user commits the first time, the query would run
