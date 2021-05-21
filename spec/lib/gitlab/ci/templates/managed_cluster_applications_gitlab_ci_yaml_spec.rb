@@ -12,7 +12,7 @@ RSpec.describe 'Managed-Cluster-Applications.gitlab-ci.yml' do
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_branch ) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
-    let(:pipeline_branch) { 'master' }
+    let(:pipeline_branch) { 'main' }
 
     before do
       stub_ci_pipeline_yaml_file(template.content)
