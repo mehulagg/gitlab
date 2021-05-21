@@ -1,0 +1,5 @@
+---
+title: Remove the FF usage_data_unique_users_committing_ciconfigfile
+merge_request: 62284
+author:
+type: removed
