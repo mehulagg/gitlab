@@ -17,14 +17,14 @@
         - else
           = s_('SetStatusModal|Set status')
   - if current_user_menu?(:start_trial)
-    %li
+    %li.gl-font-base
       %a.trial-link{ href: trials_link_url }
         = s_("CurrentUser|Start an Ultimate trial")
         = emoji_icon('rocket')
   - if current_user_menu?(:settings)
-    %li
+    %li.gl-font-base
       = link_to s_("CurrentUser|Edit profile"), profile_path, data: { qa_selector: 'edit_profile_link' }
-    %li
+    %li.gl-font-base
       = link_to s_("CurrentUser|Preferences"), profile_preferences_path
   = render_if_exists 'layouts/header/buy_pipeline_minutes', project: @project, namespace: @group
   = render_if_exists 'layouts/header/upgrade'
