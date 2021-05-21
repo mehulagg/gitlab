@@ -170,7 +170,17 @@ RSpec.describe API::Users do
       expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['message']).to eq({ "identities.provider" => ["can't be blank"] })
     end
-  end
+
+    ## FIX
+    it 'contains provisioned_by_group_id parameter' do
+      before do
+        user.update!(provisioned_by_group: saml_provider.group)
+      end
+      get api("/users/#{user.id}", admin)
+
+      expect(json_response).to have_key('provisioned_by_group_id')
+    end
+end
 
   describe 'GET /user/:id' do
     context 'when authenticated' do
@@ -226,6 +236,12 @@ RSpec.describe API::Users do
           get api("/users/#{user.id}", user)
 
           expect(json_response).not_to have_key('is_auditor')
+        end
+
+        it 'does not contain provisioned_by_group_id parameter' do
+          get api("/users/#{user.id}", user)
+
+          expect(json_response).not_to have_key('provisioned_by_group_id')
         end
       end
     end
