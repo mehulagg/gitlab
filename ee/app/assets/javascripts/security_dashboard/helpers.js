@@ -43,6 +43,14 @@ export const createScannerOption = (vendor, reportType) => {
   };
 };
 
+export const pipelineScannerFilter = {
+  name: s__('SecurityReports|Scanner'),
+  id: 'reportType',
+  options: parseOptions(REPORT_TYPES),
+  allOption: BASE_FILTERS.report_type,
+  defaultOptions: [],
+};
+
 export const scannerFilter = {
   name: s__('SecurityReports|Scanner'),
   id: 'scanner',

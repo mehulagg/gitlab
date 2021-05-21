@@ -32,11 +32,8 @@ export default () => {
     [LOADING_VULNERABILITIES_ERROR_CODES.FORBIDDEN]: emptyStateForbiddenSvgPath,
   };
 
-  const router = createRouter();
-
   return new Vue({
     el,
-    router,
     apolloProvider,
     store: createDashboardStore({
       dashboardType: DASHBOARD_TYPES.PIPELINE,
