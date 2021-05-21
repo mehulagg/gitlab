@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.users_created
-description: Number of users in an instance (need Dev to validate)
+description: Number of keys created (need Dev to validate)
 product_section: dev
 product_stage: manage
 product_group: group::access
