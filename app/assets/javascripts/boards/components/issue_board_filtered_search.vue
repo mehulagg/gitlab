@@ -10,6 +10,7 @@ export default {
     search: __('Search'),
     label: __('Label'),
     author: __('Author'),
+    assignee: __('Assignee'),
     is: __('is'),
     isNot: __('is not'),
   },
@@ -26,7 +27,7 @@ export default {
   },
   computed: {
     tokens() {
-      const { label, is, isNot, author } = this.$options.i18n;
+      const { label, is, isNot, author, assignee } = this.$options.i18n;
       const { fetchAuthors, fetchLabels } = issueBoardFilters(
         this.$apollo,
         this.fullPath,
@@ -62,7 +63,7 @@ export default {
         },
         {
           icon: 'user',
-          title: 'Assignee',
+          title: assignee,
           type: 'assignee_username',
           operators: [
             { value: '=', description: is },

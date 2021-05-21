@@ -1,22 +1,23 @@
 import groupBoardAssignees from 'ee/boards/graphql/group_board_assignees.query.graphql';
 import projectBoardAssignees from 'ee/boards/graphql/project_board_assignees.query.graphql';
+import { BoardType } from './constants';
 import boardLabels from './graphql/board_labels.query.graphql';
 
 export default (apollo, fullPath, boardType) => {
   const transformLabels = ({ data }) => {
-    return boardType === 'group'
-      ? () => data.group?.labels.nodes || []
+    return boardType === BoardType.group
+      ? data.group?.labels.nodes || []
       : data.project?.labels.nodes || [];
   };
 
-  const boardAssignees = () => {
-    return boardType === 'group' ? groupBoardAssignees : projectBoardAssignees;
+  const boardAssigneesQuery = () => {
+    return boardType === BoardType.group ? groupBoardAssignees : projectBoardAssignees;
   };
 
   const fetchAuthors = (authorsSearchTerm) => {
     return apollo
       .query({
-        query: boardAssignees(),
+        query: boardAssigneesQuery(),
         variables: {
           fullPath,
           search: authorsSearchTerm,
@@ -32,8 +33,8 @@ export default (apollo, fullPath, boardType) => {
         variables: {
           fullPath,
           search: labelSearchTerm,
-          isGroup: boardType === 'group',
-          isProject: boardType === 'project',
+          isGroup: boardType === BoardType.group,
+          isProject: boardType === BoardType.project,
         },
       })
       .then(transformLabels);

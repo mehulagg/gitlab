@@ -23,7 +23,7 @@ export default (apolloProvider) => {
     apolloProvider,
     render: (createElement) =>
       createElement(IssueBoardFilteredSearch, {
-        props: { fullPath: store.state.fullPath, boardType: store.state.boardType },
+        props: { fullPath: store.state?.fullPath || '', boardType: store.state?.boardType || '' },
       }),
   });
 };

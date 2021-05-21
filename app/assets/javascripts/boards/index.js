@@ -24,6 +24,7 @@ import '~/boards/filters/due_date_filters';
 import { issuableTypes } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
 import FilteredSearchBoards from '~/boards/filtered_search_boards';
+import initBoardsFilteredSearch from '~/boards/mount_filtered_search_issue_boards';
 import store from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
 import toggleFocusMode from '~/boards/toggle_focus';
@@ -40,7 +41,6 @@ import introspectionQueryResultData from '~/sidebar/fragmentTypes.json';
 import { fullBoardId } from './boards_util';
 import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
-import initiBoardsFilteredSearch from '~/boards/mount_filtered_search_issue_boards';
 
 Vue.use(VueApollo);
 
@@ -79,7 +79,7 @@ export default () => {
   }
 
   if (gon?.features?.issueBoardsFilteredSearch) {
-    initiBoardsFilteredSearch(apolloProvider);
+    initBoardsFilteredSearch(apolloProvider);
   }
 
   if (!gon?.features?.graphqlBoardLists) {
