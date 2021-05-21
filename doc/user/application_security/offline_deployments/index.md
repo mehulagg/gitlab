@@ -136,12 +136,6 @@ repository. To update the GitLab security scanners and signatures, it's necessar
 regularly. GitLab provides a way to [schedule pipelines](../../../ci/pipelines/schedules.md). For
 example, you can set this up to download and store the Docker images every week.
 
-Some images can be updated more frequently than others. For example, the [vulnerability database](https://hub.docker.com/r/arminc/clair-db/tags)
-for Container Scanning is updated daily. To update this single image, create a new Scheduled
-Pipeline that runs daily and set `SECURE_BINARIES_ANALYZERS` to `clair-vulnerabilities-db`. Only
-this job is triggered, and the image is updated daily and made available in the project
-registry.
-
 #### Using the secure bundle created
 
 The project using the `Secure-Binaries.gitlab-ci.yml` template should now host all the required

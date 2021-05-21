@@ -294,7 +294,6 @@ keytab
 keytabs
 Kibana
 Kinesis
-Klar
 Knative
 Kramdown
 Kroki
