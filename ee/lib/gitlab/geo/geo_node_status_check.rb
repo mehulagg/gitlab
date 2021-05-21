@@ -49,7 +49,6 @@ module Gitlab
         print_verified_repositories
         print_wikis_status
         print_verified_wikis
-        print_lfs_objects_status
         print_attachments_status
         print_ci_job_artifacts_status
         print_container_repositories_status

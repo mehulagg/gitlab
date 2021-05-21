@@ -173,7 +173,7 @@ RSpec.describe GeoNodeStatus, :geo do
   describe '#attachments_failed_count' do
     it 'counts failed avatars, attachment, personal snippets and files' do
       # These two should be ignored
-      create(:geo_lfs_object_registry, :with_lfs_object, :failed)
+      create(:geo_lfs_object_registry, :failed)
       create(:geo_upload_registry, :with_file)
 
       create(:geo_upload_registry, :with_file, :failed, file_type: :personal_file)

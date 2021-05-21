@@ -99,7 +99,6 @@ module Geo
         repositories_changed_event ||
         hashed_storage_migrated_event ||
         hashed_storage_attachments_event ||
-        lfs_object_deleted_event ||
         job_artifact_deleted_event ||
         upload_deleted_event ||
         reset_checksum_event ||

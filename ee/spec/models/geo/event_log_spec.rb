@@ -100,13 +100,6 @@ RSpec.describe Geo::EventLog, type: :model do
       expect(subject.event).to eq hashed_storage_attachments_event
     end
 
-    it 'returns lfs_object_deleted_event when set' do
-      lfs_object_deleted_event = build(:geo_lfs_object_deleted_event)
-      subject.lfs_object_deleted_event = lfs_object_deleted_event
-
-      expect(subject.event).to eq lfs_object_deleted_event
-    end
-
     it 'returns job_artifact_deleted_event when set' do
       job_artifact_deleted_event = build(:geo_job_artifact_deleted_event)
       subject.job_artifact_deleted_event = job_artifact_deleted_event
