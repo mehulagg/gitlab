@@ -151,6 +151,89 @@ be re-entered if the environment is re-protected.
 
 For more information, see [Deployment safety](deployment_safety.md).
 
+## Group-level protected environments
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/215888) in [GitLab Premium](https://about.gitlab.com/pricing/) 14.0.
+> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#anchor-to-section). **(FREE SELF)**
+
+This in-development feature might not be available for your use. There can be
+[risks when enabling features still in development](../../user/feature_flags.md#risks-when-enabling-features-still-in-development).
+Refer to this feature's version history for more details.
+
+Typically, large enterprise organiations have an explicit permission boundary between [developers and operators](https://about.gitlab.com/topics/devops/). Developers build and test their code/application, and operators deploy and monitor the application. The permission of each group is carefully configured in order to avoid unauthorized users gain an access to a critical component.
+
+Speaking this permissions in [Continuous Deployment/Delivery (CD)](https://docs.gitlab.com/ee/ci/environments/) context, we can illustrate the permissions of allowance of deployments in the following table:
+| Environment | Developer | Operator | Category |
+|-------------|-----------|----------|----------|
+| Development | Allowed |  | Lower Environment |
+| Testing | Allowed |  | Lower Environment |
+| Staging | Disallowed | Allowed | Higher Environment |
+| Produciton | Disallowed | Allowed | Higher Environment |
+
+(Reference: [Deployment environments](https://en.wikipedia.org/wiki/Deployment_environment))
+
+GitLab CD has a bunch of [deployment safety](https://docs.gitlab.com/ee/ci/environments/deployment_safety.html) features to ensure that the deployments can only be proceeded by the right group at the right time. However, we don't have a solution at the organization/group-level yet. In a large organization, they host thousands of projects under the group, so for example, making sure that all of the [project-level protected environments](#protecting-environments) are properly configured is not scalable solution. Developers might accidentally change the configuration.
+
+We introduce a group-level deployment permission configuration. This is conceptually same with [project-level protected environments](#protecting-environments), but this feature is built at group-level. Here are the main points of the feature spec:
+
+* Users who have [maintainer role](../../user/permissions.md) (or above) at a group can access to the group-level protected environments configuration.
+* Users who have [developer role](../../user/permissions.md) (or below) at a group can *NOT* access to the configuration.
+* If a deployer is about to run a deployment job in a project and allowed to deploy to the environment, the deployment job will be proceeded.
+* If a deployer is about to run a deployment job in a project but disallowed to deploy to the environment, the deployment job fails with a message.
+* Regarding [sub-groups](https://docs.gitlab.com/ee/user/group/subgroups/) (i.e. a group under a group), if a higher group has configured the group-level protected environment, the lower groups can't override it.
+* [Project-level protected environments](#protecting-environments) can be combined with this feature. If both group-level and project-level environments configurations exist, the deployer must be allowed in **both** rulesets. The project-level config is still used by developers to do a fine-graned tuning for their lower environments, but still, they can't access to the higher environments.
+
+### The GitLab Roles in a group, sub-groups and belonging projects
+
+The idea of this approach is to separete the operator's resource and developer's resource by depending on the group > project hierarchy, meaning that the organization must properly configure the [GitLab Roles](../../user/permissions.md). Here is an example of role setup:
+
+* **Operator group** is assigned to the top-level group as `Maintainer` role, meaning they can configure the oraganization-wide deployment ruleset. This effectively protect group-level resources, such as [group-level clusters](../../user/group/clusters/index.md) and [group-level runners](../runners/README.md#group-runners).
+
+* **Develoepr group** is assigned to the top-level group as `Developer` role, meaning they don't have an access to the configuration.
+* In a subsequent project of the group, **developer group** can be promoted to `Maintainer` role, meaning they have an access to project configuration to setup deployments to lower environments.
+
+### Access Control Spec
+
+The group-level configuration can define authorization spec flexibily that takes the following paramter:
+| Name | Type | Description |
+|------|------|-------------|
+| Deployment Tier | Enum | One of `production`, `staging`, `testing`, `development` or `other`. See more in the [doc](https://docs.gitlab.com/ee/ci/environments/#deployment-tier-of-environments). |
+| Allowed to deploy | Roles/Users/Groups | GitLab Roles (Developers + Maintainers or Maintainers), specific users or groups. |
+
+Example configuration:
+| Deployment Tier | Allowed to deploy | Access Control Type       |
+|-----------------|-------------------| -------------------       |
+| `production`    | `@operator-group` | Group-based access control |
+| `staging`       | `@operator-group` | Group-based access control |
+
+### Configuration interface
+
+Users can configure the group-level protected environments via [Rest API](../../api/group_protected_environments.md).
+
+We also have a plan to suport UI. See https://gitlab.com/gitlab-org/gitlab/-/issues/325249.
+
+### Enable or disable Group-level protected environments **(FREE SELF)**
+
+Group-level protected environments is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:group_level_protected_environments)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:group_level_protected_environments)
+```
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
