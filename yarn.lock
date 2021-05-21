@@ -908,10 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@29.28.0":
-  version "29.28.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-29.28.0.tgz#3444f6d26114f503d78b85fca67b5cc340a4a667"
-  integrity sha512-7jHqbnEy3P5J/G0/b+Nu+iw8XSOyTWLvyOEtNdFpBras1RxCE3C4AnPyGT7jei+WafTQN2Vzxz8VIgAxZ6PPvg==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1281590656/artifacts/raw/gitlab-ui.1104-use-glbutton-to-remove-label.tgz":
+  version "29.27.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1281590656/artifacts/raw/gitlab-ui.1104-use-glbutton-to-remove-label.tgz#b3bfb967e6978269bfaa05942541b74a8c82f362"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
