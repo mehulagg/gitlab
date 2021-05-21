@@ -18,10 +18,6 @@ module Gitlab
         Feature.enabled?(:ci_pipeline_status_omit_commit_sha_in_cache_key, project, default_enabled: true)
       end
 
-      def self.merge_base_pipeline_for_metrics_comparison?(project)
-        Feature.enabled?(:merge_base_pipeline_for_metrics_comparison, project, default_enabled: :yaml)
-      end
-
       def self.raise_job_rules_without_workflow_rules_warning?
         ::Feature.enabled?(:ci_raise_job_rules_without_workflow_rules_warning, default_enabled: true)
       end
