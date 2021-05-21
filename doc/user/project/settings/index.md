@@ -130,7 +130,7 @@ audit trail:
   script:
   - echo "running $FOO"
   after_script:
-  - echo "No after scripts."
+  - "# No after scripts."
 
 include: # Execute individual project's configuration
   project: '$CI_PROJECT_PATH'
