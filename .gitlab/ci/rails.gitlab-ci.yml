@@ -17,6 +17,7 @@
     - run_timed_command "gem install knapsack --no-document"
     - run_timed_command "scripts/gitaly-test-spawn"
     - source ./scripts/rspec_helpers.sh
+    - run_timed_command "RAILS_ENV=test bundle exec rake db:migrate"
 
 .minimal-rspec-tests:
   variables:
