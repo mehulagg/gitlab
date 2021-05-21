@@ -11,7 +11,7 @@ module EE
 
         # TODO: CI Vertical: Geo should use many databases of Rails 6
         if ::Gitlab::Geo.geo_database_configured?
-          ::Geo::BaseRegistry.connection.begin_transaction
+          ::Geo::BaseRegistry.connection.begin_transaction(joinable: false)
         end
       end
 
