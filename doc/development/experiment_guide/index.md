@@ -65,7 +65,7 @@ with the findings of the team and an easier to use API.
 
 Some experiments may require you to add custom icons or illustrations to our codebase.
 This process is lengthy and at this stage, the outcome of the experiment uncertain.
-Therefore, you should postpone this effort until the experiment cleanup process.
+Therefore, you should postpone this effort until the [experiment cleanup process](https://about.gitlab.com/handbook/engineering/development/growth/#experiment-cleanup-issue).
 
 We recommend the following workflow:
 
