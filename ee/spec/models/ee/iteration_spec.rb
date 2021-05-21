@@ -461,4 +461,14 @@ RSpec.describe Iteration do
     let(:open_on_left) { min_date - 100.days }
     let(:open_on_right) { max_date + 100.days }
   end
+
+  context 'when closing iteration' do
+    let_it_be(:iteration) { create(:iteration, group: group, start_date: 4.days.from_now, due_date: 1.week.from_now) }
+
+    it 'triggers roll-over issues worker' do
+      expect(Iterations::RollOverIssuesWorker).to receive(:perform_async).with([iteration.id])
+
+      iteration.close!
+    end
+  end
 end

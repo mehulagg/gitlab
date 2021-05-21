@@ -22,6 +22,8 @@ module EE
     prepended do
       include AtomicInternalId
       include Timebox
+      include EachBatch
+      include AfterCommitQueue
 
       attr_accessor :skip_future_date_validation
       attr_accessor :skip_project_validation
@@ -69,6 +71,12 @@ module EE
 
         event :close do
           transition [:upcoming, :started] => :closed
+        end
+
+        after_transition any => [:closed] do |iteration|
+          iteration.run_after_commit do
+            Iterations::RollOverIssuesWorker.perform_async([iteration.id])
+          end
         end
 
         state :upcoming, value: Iteration::STATE_ENUM_MAP[:upcoming]
