@@ -1,19 +1,18 @@
 import {
-  BLOCKING_ISSUES_DESC,
   CREATED_ASC,
   CREATED_DESC,
   DUE_DATE_ASC,
   DUE_DATE_DESC,
   DUE_DATE_VALUES,
   filters,
+  LABEL_PRIORITY_ASC,
   LABEL_PRIORITY_DESC,
   MILESTONE_DUE_ASC,
   MILESTONE_DUE_DESC,
   NORMAL_FILTER,
-  POPULARITY_ASC,
-  POPULARITY_DESC,
+  PRIORITY_ASC,
   PRIORITY_DESC,
-  RELATIVE_POSITION_DESC,
+  RELATIVE_POSITION_ASC,
   SPECIAL_FILTER,
   SPECIAL_FILTER_VALUES,
   UPDATED_ASC,
@@ -27,17 +26,17 @@ import { __ } from '~/locale';
 import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
 
 export const getSortKey = (sort) =>
-  Object.keys(urlSortParams).find((key) => urlSortParams[key].sort === sort);
+  Object.keys(urlSortParams).find((key) => urlSortParams[key] === sort);
 
 export const getDueDateValue = (value) => (DUE_DATE_VALUES.includes(value) ? value : undefined);
 
-export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) => {
+export const getSortOptions = (hasIssueWeightsFeature) => {
   const sortOptions = [
     {
       id: 1,
       title: __('Priority'),
       sortDirection: {
-        ascending: PRIORITY_DESC,
+        ascending: PRIORITY_ASC,
         descending: PRIORITY_DESC,
       },
     },
@@ -73,19 +72,20 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
         descending: DUE_DATE_DESC,
       },
     },
-    {
-      id: 6,
-      title: __('Popularity'),
-      sortDirection: {
-        ascending: POPULARITY_ASC,
-        descending: POPULARITY_DESC,
-      },
-    },
+    // TODO add back in once GraphQL has POPULARITY sort option
+    // {
+    //   id: 6,
+    //   title: __('Popularity'),
+    //   sortDirection: {
+    //     ascending: POPULARITY_ASC,
+    //     descending: POPULARITY_DESC,
+    //   },
+    // },
     {
       id: 7,
       title: __('Label priority'),
       sortDirection: {
-        ascending: LABEL_PRIORITY_DESC,
+        ascending: LABEL_PRIORITY_ASC,
         descending: LABEL_PRIORITY_DESC,
       },
     },
@@ -93,8 +93,8 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       id: 8,
       title: __('Manual'),
       sortDirection: {
-        ascending: RELATIVE_POSITION_DESC,
-        descending: RELATIVE_POSITION_DESC,
+        ascending: RELATIVE_POSITION_ASC,
+        descending: RELATIVE_POSITION_ASC,
       },
     },
   ];
@@ -110,16 +110,17 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
     });
   }
 
-  if (hasBlockedIssuesFeature) {
-    sortOptions.push({
-      id: 10,
-      title: __('Blocking'),
-      sortDirection: {
-        ascending: BLOCKING_ISSUES_DESC,
-        descending: BLOCKING_ISSUES_DESC,
-      },
-    });
-  }
+  // TODO add back in once GraphQL has BLOCKING_ISSUES sort option
+  // if (hasBlockedIssuesFeature) {
+  //   sortOptions.push({
+  //     id: 10,
+  //     title: __('Blocking'),
+  //     sortDirection: {
+  //       ascending: BLOCKING_ISSUES_DESC,
+  //       descending: BLOCKING_ISSUES_DESC,
+  //     },
+  //   });
+  // }
 
   return sortOptions;
 };

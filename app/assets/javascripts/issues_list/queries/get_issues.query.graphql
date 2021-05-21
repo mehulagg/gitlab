@@ -1,0 +1,60 @@
+query($projectPath: ID!, $search: String, $sort: IssueSort, $state: IssuableState) {
+  project(fullPath: $projectPath) {
+    issues(search: $search, sort: $sort, state: $state) {
+      nodes {
+        id
+        iid
+        blockedByCount
+        closedAt
+        confidential
+        createdAt
+        downvotes
+        dueDate
+        healthStatus
+        humanTimeEstimate
+        moved
+        title
+        updatedAt
+        upvotes
+        userDiscussionsCount
+        webUrl
+        weight
+        assignees {
+          nodes {
+            id
+            avatarUrl
+            name
+            username
+            webUrl
+          }
+        }
+        author {
+          id
+          avatarUrl
+          name
+          username
+          webUrl
+        }
+        labels {
+          nodes {
+            id
+            color
+            title
+            description
+          }
+        }
+        milestone {
+          id
+          dueDate
+          startDate
+          webPath
+          title
+        }
+        taskCompletionStatus {
+          completedCount
+          count
+        }
+      }
+    }
+  }
+}

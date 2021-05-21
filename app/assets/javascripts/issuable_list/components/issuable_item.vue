@@ -73,14 +73,20 @@ export default {
       return JSON.stringify(this.labels.map((label) => label.id));
     },
     assignees() {
-      return this.issuable.assignees || [];
+      return this.issuable.assignees?.nodes || this.issuable.assignees || [];
     },
     createdAt() {
+      if (!this.issuable.createdAt) {
+        return __('created');
+      }
       return sprintf(__('created %{timeAgo}'), {
         timeAgo: getTimeago().format(this.issuable.createdAt),
       });
     },
     updatedAt() {
+      if (!this.issuable.updatedAt) {
+        return '';
+      }
       return sprintf(__('updated %{timeAgo}'), {
         timeAgo: getTimeago().format(this.issuable.updatedAt),
       });

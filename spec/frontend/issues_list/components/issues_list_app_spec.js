@@ -17,7 +17,7 @@ import {
   PAGE_SIZE,
   PAGE_SIZE_MANUAL,
   PARAM_DUE_DATE,
-  RELATIVE_POSITION_DESC,
+  RELATIVE_POSITION_ASC,
   urlSortParams,
 } from '~/issues_list/constants';
 import eventHub from '~/issues_list/eventhub';
@@ -552,7 +552,7 @@ describe('IssuesListApp component', () => {
 
           expect(axiosMock.history.get[1].params).toEqual({
             page: xPage,
-            per_page: sortKey === RELATIVE_POSITION_DESC ? PAGE_SIZE_MANUAL : PAGE_SIZE,
+            per_page: sortKey === RELATIVE_POSITION_ASC ? PAGE_SIZE_MANUAL : PAGE_SIZE,
             state,
             with_labels_details: true,
             ...apiSortParams[sortKey],

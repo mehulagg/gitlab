@@ -26,11 +26,12 @@ import {
   PARAM_PAGE,
   PARAM_SORT,
   PARAM_STATE,
-  RELATIVE_POSITION_DESC,
+  RELATIVE_POSITION_ASC,
   UPDATED_DESC,
   URL_PARAM,
   urlSortParams,
 } from '~/issues_list/constants';
+import getIssuesQuery from '~/issues_list/queries/get_issues.query.graphql';
 import {
   convertToParams,
   convertToSearchQuery,
@@ -173,12 +174,28 @@ export default {
       totalIssues: 0,
     };
   },
+  apollo: {
+    issues: {
+      query: getIssuesQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+          search: this.searchQuery,
+          sort: this.sortKey,
+          state: this.state,
+        };
+      },
+      update: ({ project }) => project.issues.nodes,
+      error: () => createFlash({ message: this.$options.i18n.errorFetchingIssues }),
+      // skip: true,
+    },
+  },
   computed: {
     isBulkEditButtonDisabled() {
       return this.showBulkEditSidebar || !this.issues.length;
     },
     isManualOrdering() {
-      return this.sortKey === RELATIVE_POSITION_DESC;
+      return this.sortKey === RELATIVE_POSITION_ASC;
     },
     isOpenTab() {
       return this.state === IssuableStates.Opened;
@@ -308,8 +325,8 @@ export default {
         due_date: this.dueDateFilter,
         page: this.page,
         search: this.searchQuery,
+        sort: urlSortParams[this.sortKey],
         state: this.state,
-        ...urlSortParams[this.sortKey],
         ...this.urlFilterParams,
       };
     },
@@ -365,6 +382,7 @@ export default {
       return axios.get(this.autocompleteUsersPath, { params: { search } });
     },
     fetchIssues() {
+      return undefined;
       if (!this.hasIssues) {
         return undefined;
       }
@@ -401,7 +419,7 @@ export default {
       return `${this.exportCsvPath}${window.location.search}`;
     },
     getStatus(issue) {
-      if (issue.closedAt && issue.movedToId) {
+      if (issue.closedAt && (issue.movedToId || issue.moved)) {
         return this.$options.i18n.closedMoved;
       }
       if (issue.closedAt) {
@@ -503,7 +521,7 @@ export default {
       :tabs="$options.IssuableListTabs"
       :current-tab="state"
       :tab-counts="tabCounts"
-      :issuables-loading="isLoading"
+      :issuables-loading="isLoading || $apollo.loading"
       :is-manual-ordering="isManualOrdering"
       :show-bulk-edit-sidebar="showBulkEditSidebar"
       :show-pagination-controls="showPaginationControls"
@@ -593,7 +611,7 @@ export default {
         </li>
         <blocking-issues-count
           class="gl-display-none gl-sm-display-block"
-          :blocking-issues-count="issuable.blockingIssuesCount"
+          :blocking-issues-count="issuable.blockingIssuesCount || issuable.blockedByCount"
           :is-list-item="true"
         />
       </template>
