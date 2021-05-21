@@ -18,6 +18,7 @@ import {
   SPECIAL_FILTER_VALUES,
   UPDATED_ASC,
   UPDATED_DESC,
+  URL_PARAM,
   urlSortParams,
   WEIGHT_ASC,
   WEIGHT_DESC,
@@ -182,21 +183,10 @@ const getFilterType = (data, tokenType = '') =>
     ? SPECIAL_FILTER
     : NORMAL_FILTER;
 
-export const convertToParams = (filterTokens, paramType) =>
-  filterTokens
-    .filter((token) => token.type !== FILTERED_SEARCH_TERM)
-    .reduce((acc, token) => {
-      const filterType = getFilterType(token.value.data, token.type);
-      const param = filters[token.type][paramType][token.value.operator]?.[filterType];
-      return Object.assign(acc, {
-        [param]: acc[param] ? [acc[param], token.value.data].flat() : token.value.data,
-      });
-    }, {});
-
 const isIterationSpecialValue = (tokenType, value) =>
   tokenType === 'iteration' && SPECIAL_FILTER_VALUES.includes(value);
 
-export const convertToGraphQlParams = (filterTokens) => {
+export const convertToApiParams = (filterTokens) => {
   const params = {};
   const not = {};
 
@@ -216,6 +206,17 @@ export const convertToGraphQlParams = (filterTokens) => {
 
   return Object.keys(not).length ? Object.assign(params, { not }) : params;
 };
+
+export const convertToUrlParams = (filterTokens) =>
+  filterTokens
+    .filter((token) => token.type !== FILTERED_SEARCH_TERM)
+    .reduce((acc, token) => {
+      const filterType = getFilterType(token.value.data, token.type);
+      const param = filters[token.type][URL_PARAM][token.value.operator]?.[filterType];
+      return Object.assign(acc, {
+        [param]: acc[param] ? [acc[param], token.value.data].flat() : token.value.data,
+      });
+    }, {});
 
 export const convertToSearchQuery = (filterTokens) =>
   filterTokens

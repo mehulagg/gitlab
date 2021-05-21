@@ -10,7 +10,7 @@ import {
 } from 'jest/issues_list/mock_data';
 import { API_PARAM, DUE_DATE_VALUES, URL_PARAM, urlSortParams } from '~/issues_list/constants';
 import {
-  convertToParams,
+  convertToUrlParams,
   convertToSearchQuery,
   getDueDateValue,
   getFilterTokens,
@@ -82,21 +82,21 @@ describe('getFilterTokens', () => {
 
 describe('convertToParams', () => {
   it('returns api params given filtered tokens', () => {
-    expect(convertToParams(filteredTokens, API_PARAM)).toEqual(apiParams);
+    expect(convertToUrlParams(filteredTokens, API_PARAM)).toEqual(apiParams);
   });
 
   it('returns api params given filtered tokens with special values', () => {
-    expect(convertToParams(filteredTokensWithSpecialValues, API_PARAM)).toEqual(
+    expect(convertToUrlParams(filteredTokensWithSpecialValues, API_PARAM)).toEqual(
       apiParamsWithSpecialValues,
     );
   });
 
   it('returns url params given filtered tokens', () => {
-    expect(convertToParams(filteredTokens, URL_PARAM)).toEqual(urlParams);
+    expect(convertToUrlParams(filteredTokens, URL_PARAM)).toEqual(urlParams);
   });
 
   it('returns url params given filtered tokens with special values', () => {
-    expect(convertToParams(filteredTokensWithSpecialValues, URL_PARAM)).toEqual(
+    expect(convertToUrlParams(filteredTokensWithSpecialValues, URL_PARAM)).toEqual(
       urlParamsWithSpecialValues,
     );
   });

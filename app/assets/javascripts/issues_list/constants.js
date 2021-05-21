@@ -138,9 +138,6 @@ export const UPDATED_DESC = 'UPDATED_DESC';
 export const WEIGHT_ASC = 'WEIGHT_ASC';
 export const WEIGHT_DESC = 'WEIGHT_DESC';
 
-const SORT_ASC = 'asc';
-const SORT_DESC = 'desc';
-
 const PRIORITY_ASC_SORT = 'priority_asc';
 const CREATED_DATE_SORT = 'created_date';
 const CREATED_ASC_SORT = 'created_asc';
@@ -153,76 +150,6 @@ const LABEL_PRIORITY_ASC_SORT = 'label_priority_asc';
 const POPULARITY_ASC_SORT = 'popularity_asc';
 const WEIGHT_DESC_SORT = 'weight_desc';
 const BLOCKING_ISSUES_DESC_SORT = 'blocking_issues_desc';
-const BLOCKING_ISSUES = 'blocking_issues';
-
-// delete?
-export const apiSortParams = {
-  [PRIORITY_DESC]: {
-    order_by: PRIORITY,
-    sort: SORT_DESC,
-  },
-  [CREATED_ASC]: {
-    order_by: CREATED_AT,
-    sort: SORT_ASC,
-  },
-  [CREATED_DESC]: {
-    order_by: CREATED_AT,
-    sort: SORT_DESC,
-  },
-  [UPDATED_ASC]: {
-    order_by: UPDATED_AT,
-    sort: SORT_ASC,
-  },
-  [UPDATED_DESC]: {
-    order_by: UPDATED_AT,
-    sort: SORT_DESC,
-  },
-  [MILESTONE_DUE_ASC]: {
-    order_by: MILESTONE_DUE,
-    sort: SORT_ASC,
-  },
-  [MILESTONE_DUE_DESC]: {
-    order_by: MILESTONE_DUE,
-    sort: SORT_DESC,
-  },
-  [DUE_DATE_ASC]: {
-    order_by: DUE_DATE,
-    sort: SORT_ASC,
-  },
-  [DUE_DATE_DESC]: {
-    order_by: DUE_DATE,
-    sort: SORT_DESC,
-  },
-  [POPULARITY_ASC]: {
-    order_by: POPULARITY,
-    sort: SORT_ASC,
-  },
-  [POPULARITY_DESC]: {
-    order_by: POPULARITY,
-    sort: SORT_DESC,
-  },
-  [LABEL_PRIORITY_DESC]: {
-    order_by: LABEL_PRIORITY,
-    sort: SORT_DESC,
-  },
-  [RELATIVE_POSITION_ASC]: {
-    order_by: RELATIVE_POSITION,
-    per_page: 100,
-    sort: SORT_ASC,
-  },
-  [WEIGHT_ASC]: {
-    order_by: WEIGHT,
-    sort: SORT_ASC,
-  },
-  [WEIGHT_DESC]: {
-    order_by: WEIGHT,
-    sort: SORT_DESC,
-  },
-  [BLOCKING_ISSUES_DESC]: {
-    order_by: BLOCKING_ISSUES,
-    sort: SORT_DESC,
-  },
-};
 
 export const urlSortParams = {
   [PRIORITY_ASC]: PRIORITY_ASC_SORT,
@@ -314,10 +241,8 @@ export const filters = {
   },
   my_reaction_emoji: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'my_reaction_emoji',
-        [SPECIAL_FILTER]: 'my_reaction_emoji',
-      },
+      [NORMAL_FILTER]: 'my_reaction_emoji',
+      [SPECIAL_FILTER]: 'my_reaction_emoji',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -328,9 +253,7 @@ export const filters = {
   },
   confidential: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'confidential',
-      },
+      [NORMAL_FILTER]: 'confidential',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {

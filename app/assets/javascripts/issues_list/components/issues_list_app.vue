@@ -7,7 +7,6 @@ import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
-  apiSortParams,
   CREATED_DESC,
   i18n,
   MAX_LIST_SIZE,
@@ -17,21 +16,20 @@ import {
   PARAM_STATE,
   RELATIVE_POSITION_ASC,
   UPDATED_DESC,
-  URL_PARAM,
   urlSortParams,
 } from '~/issues_list/constants';
 import getIssuesQuery from '~/issues_list/queries/get_issues.query.graphql';
 import {
-  convertToGraphQlParams,
-  convertToParams,
+  convertToApiParams,
   convertToSearchQuery,
+  convertToUrlParams,
   getDueDateValue,
   getFilterTokens,
   getSortKey,
   getSortOptions,
 } from '~/issues_list/utils';
 import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase, getParameterByName } from '~/lib/utils/common_utils';
+import { getParameterByName } from '~/lib/utils/common_utils';
 import {
   DEFAULT_NONE_ANY,
   OPERATOR_IS_ONLY,
@@ -84,9 +82,6 @@ export default {
       default: false,
     },
     emptyStateSvgPath: {
-      default: '',
-    },
-    endpoint: {
       default: '',
     },
     exportCsvPath: {
@@ -152,7 +147,6 @@ export default {
       dueDateFilter: getDueDateValue(getParameterByName(PARAM_DUE_DATE)),
       exportCsvPathWithQuery: this.getExportCsvPathWithQuery(),
       filterTokens: getFilterTokens(window.location.search),
-      isLoading: false,
       issues: [],
       page: 1,
       pageInfo: {},
@@ -182,12 +176,12 @@ export default {
       result({ data }) {
         this.pageInfo = data.project.issues.pageInfo;
         this.totalIssues = data.project.issues.count;
+        this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
       },
       error() {
         createFlash({ message: this.$options.i18n.errorFetchingIssues });
       },
       debounce: 200,
-      // skip: true,
     },
   },
   computed: {
@@ -201,10 +195,10 @@ export default {
       return this.state === IssuableStates.Opened;
     },
     apiFilterParams() {
-      return convertToGraphQlParams(this.filterTokens);
+      return convertToApiParams(this.filterTokens);
     },
     urlFilterParams() {
-      return convertToParams(this.filterTokens, URL_PARAM);
+      return convertToUrlParams(this.filterTokens);
     },
     searchQuery() {
       return convertToSearchQuery(this.filterTokens) || undefined;
@@ -337,7 +331,6 @@ export default {
   },
   mounted() {
     eventHub.$on('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
-    this.fetchIssues();
   },
   beforeDestroy() {
     eventHub.$off('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
@@ -385,45 +378,11 @@ export default {
     fetchUsers(search) {
       return axios.get(this.autocompleteUsersPath, { params: { search } });
     },
-    fetchIssues() {
-      return undefined;
-      if (!this.hasIssues) {
-        return undefined;
-      }
-
-      this.isLoading = true;
-
-      return axios
-        .get(this.endpoint, {
-          params: {
-            due_date: this.dueDateFilter,
-            page: this.page,
-            per_page: PAGE_SIZE,
-            search: this.searchQuery,
-            state: this.state,
-            with_labels_details: true,
-            ...apiSortParams[this.sortKey],
-            ...this.apiFilterParams,
-          },
-        })
-        .then(({ data, headers }) => {
-          this.page = Number(headers['x-page']);
-          this.totalIssues = Number(headers['x-total']);
-          this.issues = data.map((issue) => convertObjectPropsToCamelCase(issue, { deep: true }));
-          this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
-        })
-        .catch(() => {
-          createFlash({ message: this.$options.i18n.errorFetchingIssues });
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
-    },
     getExportCsvPathWithQuery() {
       return `${this.exportCsvPath}${window.location.search}`;
     },
     getStatus(issue) {
-      if (issue.closedAt && (issue.movedToId || issue.moved)) {
+      if (issue.closedAt && issue.moved) {
         return this.$options.i18n.closedMoved;
       }
       if (issue.closedAt) {
@@ -460,11 +419,9 @@ export default {
         this.page = 1;
       }
       this.state = state;
-      this.fetchIssues();
     },
     handleFilter(filter) {
       this.filterTokens = filter;
-      this.fetchIssues();
     },
     handlePageChange(page) {
       if (page > this.page) {
@@ -480,7 +437,6 @@ export default {
       }
 
       this.page = page;
-      this.fetchIssues();
     },
     handleReorder({ newIndex, oldIndex }) {
       const issueToMove = this.issues[oldIndex];
@@ -517,7 +473,6 @@ export default {
     },
     handleSort(value) {
       this.sortKey = value;
-      this.fetchIssues();
     },
     toggleBulkEditSidebar(showBulkEditSidebar) {
       this.showBulkEditSidebar = showBulkEditSidebar;
@@ -540,11 +495,10 @@ export default {
       :tabs="$options.IssuableListTabs"
       :current-tab="state"
       :tab-counts="tabCounts"
-      :issuables-loading="isLoading || $apollo.loading"
+      :issuables-loading="$apollo.loading"
       :is-manual-ordering="isManualOrdering"
       :show-bulk-edit-sidebar="showBulkEditSidebar"
       :show-pagination-controls="showPaginationControls"
-      :total-items="totalIssues"
       :current-page="page"
       :previous-page="Number(pageInfo.hasPreviousPage)"
       :next-page="Number(pageInfo.hasNextPage)"
@@ -630,7 +584,7 @@ export default {
         </li>
         <blocking-issues-count
           class="gl-display-none gl-sm-display-block"
-          :blocking-issues-count="issuable.blockingIssuesCount || issuable.blockedByCount"
+          :blocking-issues-count="issuable.blockedByCount"
           :is-list-item="true"
         />
       </template>
