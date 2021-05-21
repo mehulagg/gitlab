@@ -69,8 +69,8 @@ Therefore, you should postpone this effort until the experiment cleanup process.
 
 We recommend the following workflow:
 
-- Add icons/illustrations as `.svg` files in the `/app/assets/images` (or EE) path within the GitLab repository.
-- Use `image_tag` or `image_path` to render it via the asset pipeline.
-- As part of the clean-up process **if** the experiment is a success, designers would add the new illustrations/icons to the Pajamas UI kit. 
-Engineers could then add it to the [SVG library](https://gitlab-org.gitlab.io/gitlab-svgs/) and modify the implementation based on our 
-[Frontend Development Guidelines](../fe_guide/icons.md#usage-in-hamlrails-2). ](../fe_guide/icons.md#usage-in-hamlrails-2). 
+1. Add an icon or illustration as an `.svg` file in the `/app/assets/images` (or EE) path in the GitLab repository.
+1. Use `image_tag` or `image_path` to render it via the asset pipeline.
+1. **If the experiment is a success**, designers add the new icon or illustration to the Pajamas UI kit as part of the cleanup process.
+   Engineers can then add it to the [SVG library](https://gitlab-org.gitlab.io/gitlab-svgs/) and modify the implementation based on the
+   [Frontend Development Guidelines](../fe_guide/icons.md#usage-in-hamlrails-2).
