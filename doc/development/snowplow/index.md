@@ -575,7 +575,7 @@ For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.c
 
 ### Troubleshooting
 
-To overcome Content security policy warnings you can disable them in `config/gitlab.yml`. 
+To overcome Content security policy warnings when using an external host, you can allow it by modifying `config/gitlab.yml` and add the according host for `connect_src`, e.g for `https://snowplow.trx.gitlab.net`
 
 ```yaml
 development:
