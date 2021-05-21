@@ -148,7 +148,7 @@ The pipeline now executes the jobs as configured.
 
 You can use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
 keywords to define
-[top-level variables](../variables/README.md##create-a-custom-cicd-variable-in-the-gitlab-ciyml-file)
+[top-level variables](../variables/README.md#create-a-custom-cicd-variable-in-the-gitlab-ciyml-file)
 that are prefilled when running a pipeline manually.
 
 In pipelines triggered manually, the **Run pipelines** page displays all top-level variables
