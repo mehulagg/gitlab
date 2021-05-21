@@ -24,7 +24,6 @@ module API
 
     helpers do
       def path_exists?(path)
-        # return true when FF disabled so that processing the request is not stopped
         return false if path.blank?
 
         Packages::Maven::Metadatum.with_path(path)
