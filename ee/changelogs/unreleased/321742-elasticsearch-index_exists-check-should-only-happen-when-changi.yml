@@ -1,5 +1,0 @@
----
-title: Only check index status if modifying Advanced Search form
-merge_request: 62135
-author:
-type: fixed
