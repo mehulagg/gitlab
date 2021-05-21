@@ -34,7 +34,7 @@ RSpec.describe UpdateUndefinedConfidenceFromOccurrences, :migration do
                         external_id: 'SECURITY_0',
                         name: 'SECURITY_IDENTIFIER 0')
 
-    scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: 123, external_id: 'trivy', name: 'Security Scanner')
 
     vulnerabilities.create!(id: vul1[:id],
                             confidence: 0,
@@ -83,7 +83,7 @@ RSpec.describe UpdateUndefinedConfidenceFromOccurrences, :migration do
                         external_id: 'SECURITY_0',
                         name: 'SECURITY_IDENTIFIER 0')
 
-    scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: 123, external_id: 'trivy', name: 'Security Scanner')
 
     vulnerabilities.create!(id: vul1[:id],
                             confidence: 0,

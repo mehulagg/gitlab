@@ -11,8 +11,8 @@
       "confidence": "Unknown",
       "solution": "Upgrade musl from 1.1.18-r3 to 1.1.18-r4",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -42,9 +42,9 @@
   "remediations": [],
   "scan": {
     "scanner": {
-      "id": "clair",
-      "name": "Clair",
-      "url": "https://github.com/coreos/clair",
+      "id": "trivy",
+      "name": "Trivy",
+      "url": "https://github.com/aquasecurity/trivy",
       "vendor": {
         "name": "GitLab"
       },
