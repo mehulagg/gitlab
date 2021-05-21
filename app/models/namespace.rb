@@ -271,7 +271,16 @@ class Namespace < ApplicationRecord
   # Includes projects from this namespace and projects from all subgroups
   # that belongs to this namespace
   def all_projects
-    namespace = user? ? self : self_and_descendants
+    namespace = if user?
+                  self
+                else
+                  if self.use_traversal_ids?
+                    self_and_descendants.select('traversal_ids[array_length(traversal_ids, 1)] AS id')
+                  else
+                    self_and_descendants
+                  end
+                end
+
     Project.where(namespace: namespace)
   end
 

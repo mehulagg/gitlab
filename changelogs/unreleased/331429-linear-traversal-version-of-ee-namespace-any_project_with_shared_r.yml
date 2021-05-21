@@ -1,0 +1,5 @@
+---
+title: Add linear queries to Namespace#all_projects
+merge_request: 62268
+author:
+type: performance
