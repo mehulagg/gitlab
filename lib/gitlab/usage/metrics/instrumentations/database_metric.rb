@@ -43,6 +43,14 @@ module Gitlab
                     finish: self.class.metric_finish&.call)
           end
 
+          def suggested_name
+            Gitlab::Usage::Metrics::NameSuggestion.for(
+              self.class.metric_operation,
+              relation: relation,
+              column: self.class.column
+            )
+          end
+
           def relation
             self.class.metric_relation.call.where(time_constraints)
           end
