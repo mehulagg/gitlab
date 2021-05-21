@@ -2,7 +2,6 @@
 import { GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import Alerts from './alerts/alerts.vue';
 import NetworkPolicyList from './network_policy_list.vue';
 import NoEnvironmentEmptyState from './no_environment_empty_state.vue';
@@ -23,7 +22,6 @@ export default {
     NetworkPolicyList,
     NoEnvironmentEmptyState,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: ['documentationPath'],
   props: {
     defaultEnvironmentId: {
@@ -51,11 +49,6 @@ export default {
       // environment id only means that infrastructure *might* be set up.
       isSetUpMaybe: this.isValidEnvironmentId(this.defaultEnvironmentId),
     };
-  },
-  computed: {
-    showAlertsTab() {
-      return this.glFeatures.threatMonitoringAlerts;
-    },
   },
   created() {
     if (this.isSetUpMaybe) {
@@ -106,11 +99,7 @@ export default {
     </header>
 
     <gl-tabs content-class="gl-pt-0">
-      <gl-tab
-        v-if="showAlertsTab"
-        :title="s__('ThreatMonitoring|Alerts')"
-        data-testid="threat-monitoring-alerts-tab"
-      >
+      <gl-tab :title="s__('ThreatMonitoring|Alerts')" data-testid="threat-monitoring-alerts-tab">
         <alerts />
       </gl-tab>
       <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">

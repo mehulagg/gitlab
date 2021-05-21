@@ -19,11 +19,6 @@ module EE
           class_methods do
             extend ::Gitlab::Utils::Override
 
-            override :known_payload_keys
-            def known_payload_keys
-              super + DB_LOAD_BALANCING_COUNTERS
-            end
-
             override :db_counter_payload
             def db_counter_payload
               super.tap do |payload|

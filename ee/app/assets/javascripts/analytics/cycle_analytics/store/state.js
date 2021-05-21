@@ -10,11 +10,7 @@ export default () => ({
   isLoading: false,
   isLoadingStage: false,
 
-  isEmptyStage: false,
   errorCode: null,
-
-  isSavingStageOrder: false,
-  errorSavingStageOrder: false,
 
   currentGroup: null,
   selectedProjects: [],
@@ -32,6 +28,7 @@ export default () => ({
   deleteValueStreamError: null,
 
   stages: [],
+  formEvents: [],
   selectedStageError: '',
   summary: [],
   medians: {},
@@ -43,4 +40,5 @@ export default () => ({
     sort: PAGINATION_SORT_FIELD_END_EVENT,
     direction: PAGINATION_SORT_DIRECTION_DESC,
   },
+  stageCounts: {},
 });

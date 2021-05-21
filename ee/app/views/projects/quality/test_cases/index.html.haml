@@ -2,7 +2,7 @@
 - page_title _('Test Cases')
 - @content_class = 'project-test-cases'
 
-#js-test-cases-list{ data: { can_create_test_case: can?(current_user, :create_issue, @project).to_s,
+#js-test-cases-list{ data: { can_create_test_case: can?(current_user, :create_test_case, @project).to_s,
   initial_state: params[:state],
   page: params[:page],
   prev: params[:prev],

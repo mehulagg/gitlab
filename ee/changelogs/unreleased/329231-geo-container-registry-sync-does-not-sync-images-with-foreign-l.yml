@@ -1,5 +1,0 @@
----
-title: Geo - Skip download of blobs with foreign layers
-merge_request: 61072
-author:
-type: fixed

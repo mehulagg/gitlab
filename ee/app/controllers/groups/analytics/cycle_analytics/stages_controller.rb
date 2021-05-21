@@ -9,8 +9,8 @@ module Groups
 
         before_action :load_group
         before_action :load_value_stream
-        before_action :validate_params, only: %i[median average records duration_chart average_duration_chart count]
-        before_action :authorize_read_group_stage, only: %i[median average records duration_chart average_duration_chart count]
+        before_action :validate_params, only: %i[median average records average_duration_chart count]
+        before_action :authorize_read_group_stage, only: %i[median average records average_duration_chart count]
 
         def index
           return render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
@@ -56,10 +56,6 @@ module Groups
           end
 
           render json: serialized_records
-        end
-
-        def duration_chart
-          render json: ::Analytics::CycleAnalytics::DurationChartItemEntity.represent(data_collector.duration_chart_data)
         end
 
         def average_duration_chart

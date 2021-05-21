@@ -1,36 +1,35 @@
 import {
-  BLOCKING_ISSUES_ASC,
   BLOCKING_ISSUES_DESC,
   CREATED_ASC,
   CREATED_DESC,
   DUE_DATE_ASC,
   DUE_DATE_DESC,
-  FILTERED_SEARCH_TERM,
+  DUE_DATE_VALUES,
   filters,
-  LABEL_PRIORITY_ASC,
   LABEL_PRIORITY_DESC,
   MILESTONE_DUE_ASC,
   MILESTONE_DUE_DESC,
   NORMAL_FILTER,
   POPULARITY_ASC,
   POPULARITY_DESC,
-  PRIORITY_ASC,
   PRIORITY_DESC,
-  RELATIVE_POSITION_ASC,
-  sortParams,
+  RELATIVE_POSITION_DESC,
   SPECIAL_FILTER,
   SPECIAL_FILTER_VALUES,
   UPDATED_ASC,
   UPDATED_DESC,
+  urlSortParams,
   WEIGHT_ASC,
   WEIGHT_DESC,
 } from '~/issues_list/constants';
+import { isPositiveInteger } from '~/lib/utils/number_utils';
 import { __ } from '~/locale';
+import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
 
-export const getSortKey = (orderBy, sort) =>
-  Object.keys(sortParams).find(
-    (key) => sortParams[key].order_by === orderBy && sortParams[key].sort === sort,
-  );
+export const getSortKey = (sort) =>
+  Object.keys(urlSortParams).find((key) => urlSortParams[key].sort === sort);
+
+export const getDueDateValue = (value) => (DUE_DATE_VALUES.includes(value) ? value : undefined);
 
 export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) => {
   const sortOptions = [
@@ -38,7 +37,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       id: 1,
       title: __('Priority'),
       sortDirection: {
-        ascending: PRIORITY_ASC,
+        ascending: PRIORITY_DESC,
         descending: PRIORITY_DESC,
       },
     },
@@ -86,7 +85,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       id: 7,
       title: __('Label priority'),
       sortDirection: {
-        ascending: LABEL_PRIORITY_ASC,
+        ascending: LABEL_PRIORITY_DESC,
         descending: LABEL_PRIORITY_DESC,
       },
     },
@@ -94,8 +93,8 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       id: 8,
       title: __('Manual'),
       sortDirection: {
-        ascending: RELATIVE_POSITION_ASC,
-        descending: RELATIVE_POSITION_ASC,
+        ascending: RELATIVE_POSITION_DESC,
+        descending: RELATIVE_POSITION_DESC,
       },
     },
   ];
@@ -116,7 +115,7 @@ export const getSortOptions = (hasIssueWeightsFeature, hasBlockedIssuesFeature) 
       id: 10,
       title: __('Blocking'),
       sortDirection: {
-        ascending: BLOCKING_ISSUES_ASC,
+        ascending: BLOCKING_ISSUES_DESC,
         descending: BLOCKING_ISSUES_DESC,
       },
     });
@@ -172,28 +171,20 @@ export const getFilterTokens = (locationSearch) => {
   return filterTokens.concat(searchTokens);
 };
 
-const getFilterType = (data) =>
-  SPECIAL_FILTER_VALUES.includes(data) ? SPECIAL_FILTER : NORMAL_FILTER;
+const getFilterType = (data, tokenType = '') =>
+  SPECIAL_FILTER_VALUES.includes(data) ||
+  (tokenType === 'assignee_username' && isPositiveInteger(data))
+    ? SPECIAL_FILTER
+    : NORMAL_FILTER;
 
-export const convertToApiParams = (filterTokens) =>
+export const convertToParams = (filterTokens, paramType) =>
   filterTokens
     .filter((token) => token.type !== FILTERED_SEARCH_TERM)
     .reduce((acc, token) => {
-      const filterType = getFilterType(token.value.data);
-      const apiParam = filters[token.type].apiParam[token.value.operator][filterType];
+      const filterType = getFilterType(token.value.data, token.type);
+      const param = filters[token.type][paramType][token.value.operator]?.[filterType];
       return Object.assign(acc, {
-        [apiParam]: acc[apiParam] ? `${acc[apiParam]},${token.value.data}` : token.value.data,
-      });
-    }, {});
-
-export const convertToUrlParams = (filterTokens) =>
-  filterTokens
-    .filter((token) => token.type !== FILTERED_SEARCH_TERM)
-    .reduce((acc, token) => {
-      const filterType = getFilterType(token.value.data);
-      const urlParam = filters[token.type].urlParam[token.value.operator]?.[filterType];
-      return Object.assign(acc, {
-        [urlParam]: acc[urlParam] ? acc[urlParam].concat(token.value.data) : [token.value.data],
+        [param]: acc[param] ? [acc[param], token.value.data].flat() : token.value.data,
       });
     }, {});
 

@@ -1,12 +1,13 @@
 - @content_class = 'limit-container-width' unless fluid_layout
-- page_title _('Operations Settings')
-- breadcrumb_title _('Operations Settings')
+- title = Feature.enabled?(:sidebar_refactor, current_user, default_enabled: :yaml) ? _('Monitor Settings') : _('Operations Settings')
+- page_title title
+- breadcrumb_title title
 
+= render 'projects/settings/operations/metrics_dashboard'
+= render 'projects/settings/operations/tracing'
+= render 'projects/settings/operations/error_tracking'
 = render 'projects/settings/operations/alert_management'
 = render 'projects/settings/operations/incidents'
-= render 'projects/settings/operations/error_tracking'
-= render 'projects/settings/operations/prometheus', service: prometheus_service if Feature.enabled?(:settings_operations_prometheus_service)
-= render 'projects/settings/operations/metrics_dashboard'
 = render 'projects/settings/operations/grafana_integration'
-= render 'projects/settings/operations/tracing'
 = render_if_exists 'projects/settings/operations/status_page'
+= render 'projects/settings/operations/prometheus', service: prometheus_service if Feature.enabled?(:settings_operations_prometheus_service)

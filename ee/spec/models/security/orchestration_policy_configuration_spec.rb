@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Security::OrchestrationPolicyConfiguration do
   let_it_be(:security_policy_management_project) { create(:project, :repository) }
 
-  let!(:security_orchestration_policy_configuration) do
+  let(:security_orchestration_policy_configuration) do
     create(:security_orchestration_policy_configuration, security_policy_management_project: security_policy_management_project)
   end
 
@@ -28,14 +28,26 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
   end
 
   describe '.for_project' do
-    let!(:security_orchestration_policy_configuration_1) { create(:security_orchestration_policy_configuration) }
-    let!(:security_orchestration_policy_configuration_2) { create(:security_orchestration_policy_configuration) }
-    let!(:security_orchestration_policy_configuration_3) { create(:security_orchestration_policy_configuration) }
+    let_it_be(:security_orchestration_policy_configuration_1) { create(:security_orchestration_policy_configuration) }
+    let_it_be(:security_orchestration_policy_configuration_2) { create(:security_orchestration_policy_configuration) }
+    let_it_be(:security_orchestration_policy_configuration_3) { create(:security_orchestration_policy_configuration) }
 
     subject { described_class.for_project([security_orchestration_policy_configuration_2.project, security_orchestration_policy_configuration_3.project]) }
 
     it 'returns configuration for given projects' do
       is_expected.to contain_exactly(security_orchestration_policy_configuration_2, security_orchestration_policy_configuration_3)
+    end
+  end
+
+  describe '.with_outdated_configuration' do
+    let!(:security_orchestration_policy_configuration_1) { create(:security_orchestration_policy_configuration, configured_at: nil) }
+    let!(:security_orchestration_policy_configuration_2) { create(:security_orchestration_policy_configuration, configured_at: Time.zone.now - 1.hour) }
+    let!(:security_orchestration_policy_configuration_3) { create(:security_orchestration_policy_configuration, configured_at: Time.zone.now + 1.hour) }
+
+    subject { described_class.with_outdated_configuration }
+
+    it 'returns configuration with outdated configurations' do
+      is_expected.to contain_exactly(security_orchestration_policy_configuration_1, security_orchestration_policy_configuration_2)
     end
   end
 
@@ -363,6 +375,39 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
 
     it 'returns list of policy names where site profile is referenced' do
       expect(security_orchestration_policy_configuration.active_policy_names_with_dast_scanner_profile('Scanner Profile')).to contain_exactly('Run DAST in every pipeline')
+    end
+  end
+
+  describe '#policy_last_updated_by' do
+    let(:commit) { create(:commit, author: security_policy_management_project.owner) }
+
+    subject(:policy_last_updated_by) { security_orchestration_policy_configuration.policy_last_updated_by }
+
+    before do
+      allow(security_policy_management_project).to receive(:repository).and_return(repository)
+      allow(repository).to receive(:last_commit_for_path).with(default_branch, Security::OrchestrationPolicyConfiguration::POLICY_PATH).and_return(commit)
+    end
+
+    context 'when last commit to policy file exists' do
+      it { is_expected.to eq(security_policy_management_project.owner) }
+    end
+
+    context 'when last commit to policy file does not exist' do
+      let(:commit) {}
+
+      it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#delete_all_schedules' do
+    let(:rule_schedule) { create(:security_orchestration_policy_rule_schedule, security_orchestration_policy_configuration: security_orchestration_policy_configuration) }
+
+    subject(:delete_all_schedules) { security_orchestration_policy_configuration.delete_all_schedules }
+
+    it 'deletes all schedules belonging to configuration' do
+      delete_all_schedules
+
+      expect(security_orchestration_policy_configuration.rule_schedules).to be_empty
     end
   end
 end

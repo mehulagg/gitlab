@@ -38,8 +38,6 @@ module Tooling
 
         %r{\A(ee/)?config/feature_flags/} => :feature_flag,
 
-        %r{\A(ee/)?(changelogs/unreleased)(-ee)?/} => :changelog,
-
         %r{\Adoc/development/usage_ping/dictionary\.md\z} => [:docs, :product_intelligence],
         %r{\Adoc/.*(\.(md|png|gif|jpg))\z} => :docs,
         %r{\A(CONTRIBUTING|LICENSE|MAINTENANCE|PHILOSOPHY|PROCESS|README)(\.md)?\z} => :docs,
@@ -76,11 +74,11 @@ module Tooling
         )\z}x => %i[frontend engineering_productivity],
 
         %r{\A(ee/)?db/(geo/)?(migrate|post_migrate)/} => [:database, :migration],
-        %r{\A(ee/)?db/(?!fixtures)[^/]+} => :database,
-        %r{\A(ee/)?lib/gitlab/(database|background_migration|sql|github_import)(/|\.rb)} => :database,
-        %r{\A(app/services/authorized_project_update/find_records_due_for_refresh_service)(/|\.rb)} => :database,
-        %r{\A(app/models/project_authorization|app/services/users/refresh_authorized_projects_service)(/|\.rb)} => :database,
-        %r{\A(ee/)?app/finders/} => :database,
+        %r{\A(ee/)?db/(?!fixtures)[^/]+} => [:database],
+        %r{\A(ee/)?lib/gitlab/(database|background_migration|sql|github_import)(/|\.rb)} => [:database, :backend],
+        %r{\A(app/services/authorized_project_update/find_records_due_for_refresh_service)(/|\.rb)} => [:database, :backend],
+        %r{\A(app/models/project_authorization|app/services/users/refresh_authorized_projects_service)(/|\.rb)} => [:database, :backend],
+        %r{\A(ee/)?app/finders/} => [:database, :backend],
         %r{\Arubocop/cop/migration(/|\.rb)} => :database,
 
         %r{\A(\.gitlab-ci\.yml\z|\.gitlab\/ci)} => :engineering_productivity,
@@ -168,7 +166,7 @@ module Tooling
       end
 
       def all_ee_changes
-        helper.all_changed_files.grep(%r{\Aee/})
+        changes.files.grep(%r{\Aee/})
       end
 
       def project_name

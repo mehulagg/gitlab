@@ -48,7 +48,7 @@ export default {
       />
       <div class="gl-display-flex ml-lg-auto p-2">
         <slot name="buttons"></slot>
-        <div class="pl-md-6">
+        <div class="pl-md-6 gl-pt-1">
           <gl-toggle v-model="hideDismissed" :label="$options.i18n.toggleLabel" />
         </div>
       </div>

@@ -294,7 +294,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 2,
             gitlab_migration: 2,
             gitlab_project: 2,
-            manifest: 2
+            manifest: 2,
+            total: 18
           },
           issue_imports: {
             jira: 2,
@@ -341,7 +342,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             gitlab: 1,
             gitlab_migration: 1,
             gitlab_project: 1,
-            manifest: 1
+            manifest: 1,
+            total: 9
           },
           issue_imports: {
             jira: 1,
@@ -371,7 +373,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             csv: Gitlab::UsageData::DEPRECATED_VALUE
           },
           groups_imported: Gitlab::UsageData::DEPRECATED_VALUE
-
         }
       )
     end
@@ -706,10 +707,9 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
   end
 
   describe '.system_usage_data_monthly' do
-    let_it_be(:project) { create(:project) }
+    let_it_be(:project) { create(:project, created_at: 3.days.ago) }
 
     before do
-      project = create(:project)
       env = create(:environment)
       create(:package, project: project, created_at: 3.days.ago)
       create(:package, created_at: 2.months.ago, project: project)
@@ -742,6 +742,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(counts_monthly[:personal_snippets]).to eq(1)
       expect(counts_monthly[:project_snippets]).to eq(1)
       expect(counts_monthly[:projects_with_alerts_created]).to eq(1)
+      expect(counts_monthly[:projects]).to eq(1)
       expect(counts_monthly[:packages]).to eq(1)
       expect(counts_monthly[:promoted_issues]).to eq(1)
     end
@@ -1332,7 +1333,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'i_analytics_dev_ops_score' => 123,
           'i_analytics_instance_statistics' => 123,
           'p_analytics_merge_request' => 123,
-          'g_analytics_merge_request' => 123,
           'i_analytics_dev_ops_adoption' => 123,
           'users_viewing_analytics_group_devops_adoption' => 123,
           'analytics_unique_visits_for_any_target' => 543,
@@ -1463,6 +1463,88 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(subject).to eq(service_desk_enabled_projects: 1,
                             service_desk_issues: 2)
+    end
+  end
+
+  describe '.email_campaign_counts' do
+    subject { described_class.send(:email_campaign_counts) }
+
+    context 'when queries time out' do
+      before do
+        allow_any_instance_of(ActiveRecord::Relation)
+          .to receive(:count).and_raise(ActiveRecord::StatementInvalid.new(''))
+      end
+
+      it 'returns -1 for email campaign data' do
+        expected_data = {
+          "in_product_marketing_email_create_0_sent" => -1,
+          "in_product_marketing_email_create_0_cta_clicked" => -1,
+          "in_product_marketing_email_create_1_sent" => -1,
+          "in_product_marketing_email_create_1_cta_clicked" => -1,
+          "in_product_marketing_email_create_2_sent" => -1,
+          "in_product_marketing_email_create_2_cta_clicked" => -1,
+          "in_product_marketing_email_verify_0_sent" => -1,
+          "in_product_marketing_email_verify_0_cta_clicked" => -1,
+          "in_product_marketing_email_verify_1_sent" => -1,
+          "in_product_marketing_email_verify_1_cta_clicked" => -1,
+          "in_product_marketing_email_verify_2_sent" => -1,
+          "in_product_marketing_email_verify_2_cta_clicked" => -1,
+          "in_product_marketing_email_trial_0_sent" => -1,
+          "in_product_marketing_email_trial_0_cta_clicked" => -1,
+          "in_product_marketing_email_trial_1_sent" => -1,
+          "in_product_marketing_email_trial_1_cta_clicked" => -1,
+          "in_product_marketing_email_trial_2_sent" => -1,
+          "in_product_marketing_email_trial_2_cta_clicked" => -1,
+          "in_product_marketing_email_team_0_sent" => -1,
+          "in_product_marketing_email_team_0_cta_clicked" => -1,
+          "in_product_marketing_email_team_1_sent" => -1,
+          "in_product_marketing_email_team_1_cta_clicked" => -1,
+          "in_product_marketing_email_team_2_sent" => -1,
+          "in_product_marketing_email_team_2_cta_clicked" => -1,
+          "in_product_marketing_email_experience_0_sent" => -1
+        }
+
+        expect(subject).to eq(expected_data)
+      end
+    end
+
+    context 'when there are entries' do
+      before do
+        create(:in_product_marketing_email, track: :create, series: 0, cta_clicked_at: Time.zone.now)
+        create(:in_product_marketing_email, track: :verify, series: 0)
+      end
+
+      it 'gathers email campaign data' do
+        expected_data = {
+          "in_product_marketing_email_create_0_sent" => 1,
+          "in_product_marketing_email_create_0_cta_clicked" => 1,
+          "in_product_marketing_email_create_1_sent" => 0,
+          "in_product_marketing_email_create_1_cta_clicked" => 0,
+          "in_product_marketing_email_create_2_sent" => 0,
+          "in_product_marketing_email_create_2_cta_clicked" => 0,
+          "in_product_marketing_email_verify_0_sent" => 1,
+          "in_product_marketing_email_verify_0_cta_clicked" => 0,
+          "in_product_marketing_email_verify_1_sent" => 0,
+          "in_product_marketing_email_verify_1_cta_clicked" => 0,
+          "in_product_marketing_email_verify_2_sent" => 0,
+          "in_product_marketing_email_verify_2_cta_clicked" => 0,
+          "in_product_marketing_email_trial_0_sent" => 0,
+          "in_product_marketing_email_trial_0_cta_clicked" => 0,
+          "in_product_marketing_email_trial_1_sent" => 0,
+          "in_product_marketing_email_trial_1_cta_clicked" => 0,
+          "in_product_marketing_email_trial_2_sent" => 0,
+          "in_product_marketing_email_trial_2_cta_clicked" => 0,
+          "in_product_marketing_email_team_0_sent" => 0,
+          "in_product_marketing_email_team_0_cta_clicked" => 0,
+          "in_product_marketing_email_team_1_sent" => 0,
+          "in_product_marketing_email_team_1_cta_clicked" => 0,
+          "in_product_marketing_email_team_2_sent" => 0,
+          "in_product_marketing_email_team_2_cta_clicked" => 0,
+          "in_product_marketing_email_experience_0_sent" => 0
+        }
+
+        expect(subject).to eq(expected_data)
+      end
     end
   end
 

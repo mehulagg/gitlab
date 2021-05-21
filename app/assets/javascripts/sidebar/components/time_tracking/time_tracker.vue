@@ -1,10 +1,12 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlLink, GlModal, GlModalDirective } from '@gitlab/ui';
+import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
 import eventHub from '../../event_hub';
 import TimeTrackingCollapsedState from './collapsed_state.vue';
 import TimeTrackingComparisonPane from './comparison_pane.vue';
 import TimeTrackingHelpState from './help_state.vue';
+import TimeTrackingReport from './report.vue';
 import TimeTrackingSpentOnlyPane from './spent_only_pane.vue';
 
 export default {
@@ -15,11 +17,18 @@ export default {
   },
   components: {
     GlIcon,
+    GlLink,
+    GlModal,
     TimeTrackingCollapsedState,
     TimeTrackingSpentOnlyPane,
     TimeTrackingComparisonPane,
     TimeTrackingHelpState,
+    TimeTrackingReport,
   },
+  directives: {
+    GlModal: GlModalDirective,
+  },
+  inject: ['issuableType'],
   props: {
     timeEstimate: {
       type: Number,
@@ -43,6 +52,11 @@ export default {
       type: Boolean,
       default: false,
       required: false,
+    },
+    issuableId: {
+      type: String,
+      required: false,
+      default: '',
     },
     /*
       In issue list, "time-tracking-collapsed-state" is always rendered even if the sidebar isn't collapsed.
@@ -86,6 +100,12 @@ export default {
     },
     showHelpState() {
       return Boolean(this.showHelp);
+    },
+    isTimeReportSupported() {
+      return (
+        [IssuableType.Issue, IssuableType.MergeRequest].includes(this.issuableType) &&
+        this.issuableId
+      );
     },
   },
   created() {
@@ -160,6 +180,23 @@ export default {
         :time-estimate-human-readable="humanTimeEstimate"
         :limit-to-hours="limitToHours"
       />
+      <template v-if="isTimeReportSupported">
+        <gl-link
+          v-if="hasTimeSpent"
+          v-gl-modal="'time-tracking-report'"
+          data-testid="reportLink"
+          href="#"
+          class="btn-link"
+          >{{ __('Time tracking report') }}</gl-link
+        >
+        <gl-modal
+          modal-id="time-tracking-report"
+          :title="__('Time tracking report')"
+          :hide-footer="true"
+        >
+          <time-tracking-report :limit-to-hours="limitToHours" :issuable-id="issuableId" />
+        </gl-modal>
+      </template>
       <transition name="help-state-toggle">
         <time-tracking-help-state v-if="showHelpState" />
       </transition>

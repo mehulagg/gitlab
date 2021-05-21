@@ -5,7 +5,9 @@ import { activateSubscription, howToActivateSubscription, uploadLegacyLicense } 
 import SubscriptionActivationErrors from './subscription_activation_errors.vue';
 import SubscriptionActivationForm from './subscription_activation_form.vue';
 
-export const adminLicenseUrl = helpPagePath('/user/admin_area/license');
+export const activateSubscriptionUrl = helpPagePath('/user/admin_area/license', {
+  anchor: 'activate-gitlab-ee-with-an-activation-code',
+});
 
 export default {
   name: 'SubscriptionActivationCard',
@@ -23,7 +25,7 @@ export default {
   },
   inject: ['licenseUploadPath'],
   links: {
-    adminLicenseUrl,
+    activateSubscriptionUrl,
   },
   data() {
     return {
@@ -51,7 +53,12 @@ export default {
     <p class="gl-mb-0 gl-px-5 gl-pt-5">
       <gl-sprintf :message="$options.i18n.howToActivateSubscription">
         <template #link="{ content }">
-          <gl-link :href="$options.links.adminLicenseUrl" target="_blank">{{ content }}</gl-link>
+          <gl-link
+            data-testid="activate-subscription-link"
+            :href="$options.links.activateSubscriptionUrl"
+            target="_blank"
+            >{{ content }}</gl-link
+          >
         </template>
       </gl-sprintf>
     </p>

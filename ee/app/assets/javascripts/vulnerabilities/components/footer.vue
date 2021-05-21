@@ -223,7 +223,7 @@ export default {
       />
     </div>
     <related-jira-issues
-      v-if="glFeatures.jiraForVulnerabilities && createJiraIssueUrl"
+      v-if="createJiraIssueUrl || glFeatures.createVulnerabilityJiraIssueViaGraphql"
       class="gl-mt-6"
     />
     <related-issues

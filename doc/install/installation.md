@@ -45,6 +45,15 @@ You can select the branch in the version dropdown in the top left corner of GitL
 
 If the highest number stable branch is unclear, check the [GitLab blog](https://about.gitlab.com/blog/) for installation guide links by version.
 
+## Software requirements
+
+| Software | Minimum version | Notes |
+| -------- | --------------- | ----- |
+| [Ruby](#2-ruby)     | `2.7`             | From GitLab 13.6, Ruby 2.7 is required. Ruby 3.0 is not supported yet (see [the relevant epic](https://gitlab.com/groups/gitlab-org/-/epics/5149) for the current status). You must use the standard MRI implementation of Ruby. We love [JRuby](https://www.jruby.org/) and [Rubinius](https://github.com/rubinius/rubinius#the-rubinius-language-platform), but GitLab needs several Gems that have native extensions. |
+| [Go](#3-go) | `1.15` | |
+| [Git](#git) | `2.31.x` | From GitLab 13.11, Git 2.31.x and later is required. It's highly recommended that you use the [Git version provided by Gitaly](#git). |
+| [Node.js](#4-node) | `12.22.1` | GitLab uses [webpack](https://webpack.js.org/) to compile frontend assets. Node.js 14.x is recommended, as it's faster. You can check which version you're running with `node -v`. You need to update it to a newer version if needed. |
+
 ## GitLab directory structure
 
 This is the main directory structure you end up with following the instructions
@@ -111,9 +120,6 @@ sudo apt-get install -y build-essential zlib1g-dev libyaml-dev libssl-dev libgdb
   libreadline-dev libncurses5-dev libffi-dev curl openssh-server libxml2-dev libxslt-dev \
   libcurl4-openssl-dev libicu-dev logrotate rsync python-docutils pkg-config cmake runit-systemd
 ```
-
-Ubuntu 14.04 (Trusty Tahr) doesn't have the `libre2-dev` package available, but
-you can [install re2 manually](https://github.com/google/re2/wiki/Install).
 
 If you want to use Kerberos for user authentication, install `libkrb5-dev`
 (if you don't know what Kerberos is, you can assume you don't need it):
@@ -210,7 +216,7 @@ sudo apt-get install -y libimage-exiftool-perl
 ## 2. Ruby
 
 The Ruby interpreter is required to run GitLab.
-See the [requirements page](requirements.md#ruby-versions) for the minimum
+See the [requirements section of this page](#software-requirements) for the minimum
 Ruby requirements.
 
 The use of Ruby version managers such as [`RVM`](https://rvm.io/), [`rbenv`](https://github.com/rbenv/rbenv) or [`chruby`](https://github.com/postmodern/chruby) with GitLab
@@ -220,12 +226,6 @@ below to use a system Ruby.
 
 Linux distributions generally have older versions of Ruby available, so these
 instructions are designed to install Ruby from the official source code.
-
-Remove the old Ruby 1.8 if present:
-
-```shell
-sudo apt-get remove ruby1.8
-```
 
 Download Ruby and compile it:
 
@@ -242,7 +242,7 @@ sudo make install
 
 ## 3. Go
 
-In GitLab 8.0 and later, GitLab has several daemons written in Go. To install
+GitLab has several daemons written in Go. To install
 GitLab we need a Go compiler. The instructions below assume you use 64-bit
 Linux. You can find downloads for other platforms at the [Go download
 page](https://golang.org/dl).
@@ -251,21 +251,21 @@ page](https://golang.org/dl).
 # Remove former Go installation folder
 sudo rm -rf /usr/local/go
 
-curl --remote-name --progress-bar "https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz"
-echo '512103d7ad296467814a6e3f635631bd35574cab3369a97a323c9a585ccaa569  go1.13.5.linux-amd64.tar.gz' | shasum -a256 -c - && \
-  sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
+curl --remote-name --progress-bar "https://dl.google.com/go/go1.15.12.linux-amd64.tar.gz"
+echo 'bbdb935699e0b24d90e2451346da76121b2412d30930eabcd80907c230d098b7  go1.15.12.linux-amd64.tar.gz' | shasum -a256 -c - && \
+  sudo tar -C /usr/local -xzf go1.15.12.linux-amd64.tar.gz
 sudo ln -sf /usr/local/go/bin/{go,godoc,gofmt} /usr/local/bin/
-rm go1.13.5.linux-amd64.tar.gz
+rm go1.15.12.linux-amd64.tar.gz
 ```
 
 ## 4. Node
 
-In GitLab 8.17 and later, GitLab requires the use of Node to compile JavaScript
+GitLab requires the use of Node to compile JavaScript
 assets, and Yarn to manage JavaScript dependencies. The current minimum
 requirements for these are:
 
-- `node` >= v10.14.2. (We recommend node 14.x as it is faster)
-- `yarn` >= v1.10.0.
+- `node` >= v12.22.1. (We recommend node 14.x as it is faster)
+- `yarn` = v1.22.x (Yarn 2 is not supported yet)
 
 In many distributions,
 the versions provided by the official package repositories are out of date, so

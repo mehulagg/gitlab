@@ -7,6 +7,8 @@
 module Ci
   module Minutes
     class Quota
+      include Gitlab::Utils::StrongMemoize
+
       Report = Struct.new(:used, :limit, :status)
 
       def initialize(namespace)
@@ -61,7 +63,9 @@ module Ci
       end
 
       def namespace_eligible?
-        namespace.root? && namespace.any_project_with_shared_runners_enabled?
+        strong_memoize(:namespace_eligible) do
+          namespace.root? && namespace.any_project_with_shared_runners_enabled?
+        end
       end
 
       def current_balance

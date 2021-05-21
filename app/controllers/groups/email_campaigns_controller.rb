@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Groups::EmailCampaignsController < Groups::ApplicationController
-  include InProductMarketingHelper
-
   EMAIL_CAMPAIGNS_SCHEMA_URL = 'iglu:com.gitlab/email_campaigns/jsonschema/1-0-0'
 
   feature_category :navigation
@@ -18,11 +16,13 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
 
   def track_click
     if Gitlab.com?
+      message = Gitlab::Email::Message::InProductMarketing.for(@track).new(group: group, user: current_user, series: @series)
+
       data = {
         namespace_id: group.id,
         track: @track.to_s,
         series: @series,
-        subject_line: subject_line(@track, @series)
+        subject_line: message.subject_line
       }
       context = SnowplowTracker::SelfDescribingJson.new(EMAIL_CAMPAIGNS_SCHEMA_URL, data)
 
@@ -58,8 +58,9 @@ class Groups::EmailCampaignsController < Groups::ApplicationController
     @series = params[:series]&.to_i
 
     track_valid = @track.in?(Namespaces::InProductMarketingEmailsService::TRACKS.keys)
-    series_valid = @series.in?(0..Namespaces::InProductMarketingEmailsService::INTERVAL_DAYS.size - 1)
+    return render_404 unless track_valid
 
-    render_404 unless track_valid && series_valid
+    series_valid = @series.in?(0..Namespaces::InProductMarketingEmailsService::TRACKS[@track][:interval_days].size - 1)
+    render_404 unless series_valid
   end
 end

@@ -12,6 +12,10 @@ RSpec.describe Admin::RunnersController do
   describe '#index' do
     render_views
 
+    before do
+      stub_feature_flags(runner_list_view_vue_ui: false)
+    end
+
     it 'lists all runners' do
       get :index
 
@@ -33,6 +37,17 @@ RSpec.describe Admin::RunnersController do
       expect(response).to have_gitlab_http_status(:ok)
       expect(response.body).to have_content('tag1')
       expect(response.body).to have_content('tag2')
+    end
+
+    it 'paginates runners' do
+      stub_const("Admin::RunnersController::NUMBER_OF_RUNNERS_PER_PAGE", 1)
+
+      create(:ci_runner)
+
+      get :index
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(assigns(:runners).count).to be(1)
     end
   end
 

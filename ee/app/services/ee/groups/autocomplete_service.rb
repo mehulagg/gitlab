@@ -2,6 +2,7 @@
 module EE
   module Groups
     module AutocompleteService
+      # rubocop: disable CodeReuse/ActiveRecord
       def epics(confidential_only: false)
         finder_params = { group_id: group.id }
         finder_params[:confidential] = true if confidential_only.present?
@@ -10,8 +11,10 @@ module EE
         # See https://gitlab.com/gitlab-org/gitlab/issues/6837
         EpicsFinder.new(current_user, finder_params)
           .execute
+          .preload(:group)
           .select(:iid, :title, :group_id)
       end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def vulnerabilities
         ::Autocomplete::VulnerabilitiesAutocompleteFinder

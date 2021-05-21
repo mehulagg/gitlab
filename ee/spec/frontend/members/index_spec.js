@@ -8,7 +8,7 @@ describe('initMembersApp', () => {
 
   const createVm = () => {
     vm = initMembersApp(el, {
-      namespace: MEMBER_TYPES.user,
+      [MEMBER_TYPES.user]: {},
     });
   };
 

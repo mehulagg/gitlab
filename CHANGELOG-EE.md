@@ -1,4 +1,235 @@
+**NOTE:** This file is no longer used for GitLab Enterprise Edition changelog
+entries. Starting with May 22nd, 2021 all changelog entries are found in
+[CHANGELOG.md](CHANGELOG.md)
+
 Please view this file on the master branch, on stable branches it's out of date.
+
+## 13.12.0 (2021-05-22)
+
+### Security (1 change)
+
+- Upgrade the GitLab Elasticsearch Indexer version to 2.10.0. !60690
+
+### Removed (1 change)
+
+- Remove docker-in-docker job from API Fuzzing CI template. !60054
+
+### Fixed (60 changes, 20 of them are from the community)
+
+- Eagerly associate DastSiteProfile and DastSiteValidation on create. !53800
+- Hide "Renew" button for trial subscription on group billing page. !55796 (Kev @KevSlashNull)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/workers. !58070 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/support. !58074 (Abdul Wadood @abdulwd)
+- Fix Rails/SaveBang rubocop offenses in ee/spec/mailers. !58097 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/support. !58292 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in todo_service_spec.rb. !58310 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/projects. !58330 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/dora. !58353 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/award_emojis. !58356 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/lib/gitlab/elastic. !58381 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/graphql/types. !58385 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/graphsql/mutations. !58390 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/issues. !58396 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/groups. !58398 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/dashboards. !58399 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/features/boards. !58401 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/controllers/projects. !58410 (Abdul Wadood @abdulwd)
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/controllers/groups. !58412 (Abdul Wadood @abdulwd)
+- Support filtering by assignee wildcard in epic swimlanes. !59348
+- Fix minor UX issues with "group by" within iteration report. !59522
+- Fix creating an MR when a project approval rule has no approvers. !59671
+- Make the MergeReportsService more reliable. !59682
+- Create link to Threat Monitoring Alert for threat management alerts. !59724
+- Lock the order of the Search scope tabs. !59777
+- Provide fix for inconsistent blocking of sso-user git actions. !59872
+- Fix Swimlanes sticky headers. !59944
+- Add hide-collapsed class for elements under the else-if scope. !60021
+- Rename License#cloud? to License#cloud_license?. !60065
+- Fix the bug that DB multi-request stickiness doesn't stick as expected. !60246
+- Fix stage table loading with a deep linked stage. !60261
+- Stop checking repository check status on Geo secondary. !60323
+- Fix incorrect ordering of audit events on MR approval changes. !60508
+- Fix ArgumentError for bulk insert. !60543
+- Switch load_balancing_atomic_replica feature flag on by default. !60574
+- Fix badge variants in admin/users table. !60592
+- Resolve Geo: Secondaries are orphaning artifact files. !60644
+- Fix API elasticsearch settings update. !60740
+- Fix group-level "Projects with releases" stat when value is 0. !60752
+- Check if an issue is already linked to the same vulnerability before creating the issue link. !60753
+- Update lock timeout in ElasticCommitIndexerWorker. !60768
+- Prevent errors when promoting issues to epics. !60860
+- Refetch VSA stage data when filters change. !60991
+- Geo - Skip download of blobs with foreign layers. !61072
+- Return correct trial status in CI external pipeline validation. !61104
+- Fix trial registration terms message. !61162
+- Fix occasionally invisible burndown charts. !61335
+- Fix error caused by enforcing SSO-Only Authentication for Git Activity for PAT tokens. !61348
+- Fix dropdown not closing on status update. !61404
+- Geo - Fix replication for for empty projects. !61419
+- Display labels from sub groups and projects when using epics swimlanes. !61423
+- Display descendant projects of a group when creating issues in epic swimlanes. !61456
+- Fix broken threat alert issue link. !61705
+- Fix Rails/SaveBang Rubocop offenses for ee models. !61709 (Suraj Tripathi @surajtripathy07)
+- Fix sign-in when user has multiple group saml identities. !61717
+- Fix policy list drawer height. !61738
+- Fixed robocop offense for ee/spec/services/approval_rules/*. !61829 (Suraj Tripathi @surajtripathy07)
+- Remove unncessary group SAML identity assignment. !61921
+- Check credit card requirement when retrying a CI build on GitLab.com. !62050
+- Fix DAST Profile Summary edit button alignment. !62057
+
+### Deprecated (1 change)
+
+- Mark 3 group-level Merge Request Analytics metrics as removed. !60175
+
+### Changed (67 changes, 3 of them are from the community)
+
+- Allow using Jira for tracking vulnerabilities. !55952
+- Add improved branch validation when creating and updating Dast::Profiles in GraphQL. !56053
+- Migrate LFS object replication to use self service framework. !56286
+- Advanced Search: allow standalone shard/replica settings. !57567
+- Move to btn-confirm from btn-success in trials directory. !57960 (Yogi (@yo))
+- Move to btn-confirm from btn-success in application_settings directory. !58025 (Yogi (@yo))
+- Add gl-form-input for project issue template settings. !58046 (Yogi (@yo))
+- Add scannerId field to group vulnerabilities query. !58156
+- Add scannerId field to project vulnerabilities query. !58157
+- Assignee color for dark mode. !58501
+- Migrate spinner class to gl-spinner class. !58706
+- Change use of "blacklist" to "denylist" in push rule check error. !58868
+- Remove ff_custom_compliance_frameworks flag. !58884
+- Always display submit button for DAST Scanner Profile form. !59243
+- Update text on project-level DORA 4 charts. !59310
+- VSA - Update duration chart to use averages. !59453
+- Unsurface Subscription portal API error messages. !59487
+- Protect cloud licenses from being removed. !59576
+- Remove ultimate trial banner for users that are not already a group admin. !59611
+- Update Secure Merge-Request Widget Alignment. !59644
+- Add pagination to the VSA stage table. !59650
+- Update ci-cd settings buttons to conform to pajamas. !59695
+- Show default group name in epic tree. !59725
+- Denormalize project permissions to merge request in Elasticsearch. !59731
+- Replace metric card with GlSingleStat in VSA. !59732
+- Add display label and tooltip for nested fields in mapping builder. !59793
+- Convert SAML setting toggles to checkboxes and update UI text. !59823
+- Add Elasticsearch migration to backfill project permissions on MRs. !59836
+- Add defaults for DAST Scanner Profile timeout fields. !59999
+- Fix tier for instance and group DevOps Adoption. !60032
+- Pin API Fuzzing CI template to v1. !60057
+- Use SECURE_ANALYZERS_PREFIX variable for API Fuzzing. !60059
+- Move defaults into script for DAST API. !60064
+- Pin DAST API to major version 1. !60068
+- Improve approvals modal translation strings. !60108
+- Move API Fuzzing variable defaults into script. !60171
+- Use SECURE_ANALYZERS_PREFIX in DAST API image URL. !60308
+- Sync gitlab version during seat link. !60362
+- Return an appropriate error message when failing to remove billable members. !60404
+- Remove the value_stream_analytics_path_navigation feature flag. !60449
+- Display wider variety of error messages when Jira Issues List fails. !60455
+- New policy starts out with a rule by default. !60464
+- Avoid use of Elasticsearch joins in Global Merge Request searches. !60467
+- Add API Fuzzing image to Secure-Binaries template. !60499
+- Speed up Elastic AddNewDataToMergeRequestsDocuments migration. !60563
+- Return billable member relationship to a group in REST API. !60600
+- Show scanner warning at the top of the Vulnerability Report. !60716
+- Customize settings for Advanced Search reindex operations. !60730
+- Move group-level release statistics into tab. !60749
+- Default enable SSO-only authentication for web activity and add warning if it is disabled. !60868
+- Only send in-product emails to free groups. !60906
+- Use DORA deployment frequency metric in Value Stream Analytics. !60927
+- Adds an expand/collapse transition when showing/hiding the bulk action section in the vulnerability lists. !60944
+- Disable pause indexing checkbox if a reindex is in progress. !60953
+- Expose is_auditor user role via API. !61058
+- Artifact download migration to graphql. !61169
+- Geo: Release verification for Terraform States. !61263
+- Update API Fuzzing form labels. !61267
+- Verify phone number format in trial form. !61350
+- Add a new badge for billable membership types. !61366
+- Delete Merge Requests from original ES index. !61394
+- Delete Notes from original ES index. !61399
+- Add a new error modal for billable member removal. !61509
+- Add option to downlaod DAST scanned resources in MR Security Reports. !61551
+- Expose whether a BillableMember is removable. !61566
+- Update API fuzzing configuration form labels. !61618
+- Change notes removal migration to use ES tasks. !61798
+
+### Performance (13 changes)
+
+- Refactor project-level protected environments for performance optimization. !58633
+- Resolve created_by and oncall_schedule n+1's in group member index. !59756
+- Deduplicate Geo cronjobs. !59799
+- Don't use Elasticsearch join for group/project MR searches. !60249
+- Apply optimizations to merge request reference rendering. !60500
+- Fix GraphQL N+1 performance issue when loading a Project's DAST Profiles. !60554
+- Migration to move merge requests to separate Elasticsearch index. !60586
+- Add GraphQL aggregate to prevent N+1 query on DAST profiles. !61024
+- Improves performance of VulnerabilityReportsComparer. !61200
+- Optimize number of SQL queries when listing epics. !61372
+- Upgrade the GitLab Elasticsearch Indexer version to v2.11.0. !61737
+- Fix N+1 in issues API when loading parent epics. !61852
+- Minimize number of SQL queries on epic autocompletion. !61885
+
+### Added (44 changes)
+
+- Introduce security report schema validation. !58667
+- Add the ability to automatically create a basic configuration MR for Secret Detection via the Security Configuration page. !58687
+- Epic board lists can now be destroyed via GraphQL. !58719
+- Add GraphQL mutation that allows to update epic boards lists. !58782
+- “Security Center project selector returns projects and gives the ability to add project for Auditor user”. !58841
+- Add tests for the details table. !59357
+- Remove user from rotation if they are removed from a project or group. !59427
+- Display relevant titles for the VSA stage table. !59485
+- Add stage time to path popovers in group level VSA. !59606
+- Remove :credential_inventory_gpg_keys feature flag. !59658
+- Support board issue filtering by weight and iteration_id in GraphQL. !59703
+- Add group level DevOps adoption usage ping. !59738
+- Create incident column for threat alerts. !59821
+- Hide display of certain plans on billings page. !60137
+- Add diff component to generic report schemas. !60188
+- Audit DAST scanner profile updates. !60287
+- Add provisioned by group info in user admin. !60315
+- Add assignee column to threat alert list. !60340
+- Track epic board user events (viewing, creating and updating titles). !60357
+- Add support for rendering "named-list" types on generic vulnerability reports. !60370
+- Added award emoji to epics REST API. !60410
+- Allow trial plans to behave paid plan. !60496
+- Add DAST API CI template. !60546
+- Add stage count to group-level VSA. !60598
+- Enable group devops adoption by default. !60638
+- Add support to destroy iterations in GraphQL. !60655
+- Add total distinct count of compliance frameworks to usage ping. !60697
+- Add sorting to the VSA stage table. !60793
+- Track checking/unchecking tasks on epics. !60846
+- Enable DAST on-demand API scan support by default. !60876
+- Compare live vs actual CI minutes consumption and record it as a Prometheus metric. !60949
+- Add recursive weight to epic tree. !60990
+- Add group-level deployment frequency charts. !61053
+- Create threat alert drawer. !61183
+- Expose Path Locks in the GraphQL API. !61380
+- Log when build is dropped due to CI minutes exceeded. !61381
+- Add codequality reports endpoint to graphql. !61383
+- Render text and value generic report types on vulnerability report. !61727
+- Show code quality badges on MR diff file headers. !61810
+- Allow the users to upload binaries to MobSF. !61814
+- Add Coverage and API Fuzzing vuln count summaries. !61827
+- Add alert status change dropdown to drawer. !61832
+- Add generic report section to pipeline vulnerability-detail modal. !61851
+- Remove old scanner filter and only use new filter on vulnerability report page. !61959
+
+### Other (9 changes, 1 of them is from the community)
+
+- Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/helpers. !58383 (Abdul Wadood @abdulwd)
+- Track epic cross reference on usage ping. !59804
+- Track epic parent changes via usage ping. !60079
+- Track epic emoji award via usage ping. !60787
+- Refactor alert details sidebar CSS. !60960
+- Track users removing epic emoji via usage ping. !60989
+- Replace relative license expiry date with full date. !61481
+- Make DevOps Adoption API as beta. !61512
+- Remove group_level_release_statistics flag. !61806
+
+
+## 13.11.4 (2021-05-14)
+
+- No changes.
 
 ## 13.11.3 (2021-04-30)
 

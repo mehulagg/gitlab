@@ -1,5 +1,0 @@
----
-title: Fix ArgumentError for bulk insert
-merge_request: 60543
-author:
-type: fixed

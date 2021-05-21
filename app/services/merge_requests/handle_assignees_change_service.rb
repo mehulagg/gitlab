@@ -3,17 +3,13 @@
 module MergeRequests
   class HandleAssigneesChangeService < MergeRequests::BaseService
     def async_execute(merge_request, old_assignees, options = {})
-      if Feature.enabled?(:async_handle_merge_request_assignees_change, merge_request.target_project, default_enabled: :yaml)
-        MergeRequests::HandleAssigneesChangeWorker
-          .perform_async(
-            merge_request.id,
-            current_user.id,
-            old_assignees.map(&:id),
-            options
-          )
-      else
-        execute(merge_request, old_assignees, options)
-      end
+      MergeRequests::HandleAssigneesChangeWorker
+        .perform_async(
+          merge_request.id,
+          current_user.id,
+          old_assignees.map(&:id),
+          options.stringify_keys # see: https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/1090
+        )
     end
 
     def execute(merge_request, old_assignees, options = {})

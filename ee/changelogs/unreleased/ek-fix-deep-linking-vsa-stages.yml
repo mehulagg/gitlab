@@ -1,5 +1,0 @@
----
-title: Fix stage table loading with a deep linked stage
-merge_request: 60261
-author:
-type: fixed

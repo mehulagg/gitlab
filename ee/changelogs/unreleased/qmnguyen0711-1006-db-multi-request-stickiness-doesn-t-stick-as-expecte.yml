@@ -1,5 +1,0 @@
----
-title: Fix the bug that DB multi-request stickiness doesn't stick as expected
-merge_request: 60246
-author:
-type: fixed

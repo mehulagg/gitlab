@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::DropInvalidVulnerabilities, schema: 20201110110454 do
+  let_it_be(:background_migration_jobs) { table(:background_migration_jobs) }
   let_it_be(:namespace) { table(:namespaces).create!(name: 'user', path: 'user') }
   let_it_be(:users) { table(:users) }
   let_it_be(:user) { create_user! }
@@ -47,14 +48,32 @@ RSpec.describe Gitlab::BackgroundMigration::DropInvalidVulnerabilities, schema: 
     )
   end
 
-  subject { described_class.new.perform(vulnerability_with_finding.id, vulnerability_without_finding.id) }
+  let(:succeeded_status) { 1 }
+  let(:pending_status) { 0 }
 
   it 'drops Vulnerabilities without any Findings' do
     expect(vulnerabilities.pluck(:id)).to eq([vulnerability_with_finding.id, vulnerability_without_finding.id])
 
-    expect { subject }.to change(vulnerabilities, :count).by(-1)
+    expect { subject.perform(vulnerability_with_finding.id, vulnerability_without_finding.id) }.to change(vulnerabilities, :count).by(-1)
 
     expect(vulnerabilities.pluck(:id)).to eq([vulnerability_with_finding.id])
+  end
+
+  it 'marks jobs as done' do
+    background_migration_jobs.create!(
+      class_name: 'DropInvalidVulnerabilities',
+      arguments: [vulnerability_with_finding.id, vulnerability_with_finding.id]
+    )
+
+    background_migration_jobs.create!(
+      class_name: 'DropInvalidVulnerabilities',
+      arguments: [vulnerability_without_finding.id, vulnerability_without_finding.id]
+    )
+
+    subject.perform(vulnerability_with_finding.id, vulnerability_with_finding.id)
+
+    expect(background_migration_jobs.first.status).to eq(succeeded_status)
+    expect(background_migration_jobs.second.status).to eq(pending_status)
   end
 
   private

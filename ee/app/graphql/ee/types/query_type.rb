@@ -59,7 +59,7 @@ module EE
 
         field :devops_adoption_segments, ::Types::Admin::Analytics::DevopsAdoption::SegmentType.connection_type,
               null: true,
-              description: 'Get configured DevOps adoption segments on the instance.',
+              description: 'Get configured DevOps adoption segments on the instance. **BETA** This endpoint is subject to change without notice.',
               resolver: ::Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
 
         field :current_license, ::Types::Admin::CloudLicenses::CurrentLicenseType,

@@ -3,31 +3,25 @@
 require 'spec_helper'
 
 RSpec.describe Backup::Repositories do
-  let(:progress) { StringIO.new }
+  let(:progress) { spy(:stdout) }
+  let(:strategy) { spy(:strategy) }
 
-  subject { described_class.new(progress) }
-
-  before do
-    allow(progress).to receive(:puts)
-    allow(progress).to receive(:print)
-
-    allow_next_instance_of(described_class) do |instance|
-      allow(instance).to receive(:progress).and_return(progress)
-    end
-  end
+  subject { described_class.new(progress, strategy: strategy) }
 
   describe '#dump' do
     context 'hashed storage' do
       let_it_be(:project) { create(:project, :repository) }
       let_it_be(:group) { create(:group, :wiki_repo) }
 
-      it 'creates repository bundles', :aggregate_failures do
+      it 'calls enqueue for each repository type', :aggregate_failures do
         create(:wiki_page, container: group)
 
         subject.dump(max_concurrency: 1, max_storage_concurrency: 1)
 
-        expect(File).to exist(File.join(Gitlab.config.backup.path, 'repositories', project.disk_path + '.bundle'))
-        expect(File).to exist(File.join(Gitlab.config.backup.path, 'repositories', group.wiki.disk_path + '.bundle'))
+        expect(strategy).to have_received(:start).with(:create)
+        expect(strategy).to have_received(:enqueue).with(project, Gitlab::GlRepository::PROJECT)
+        expect(strategy).to have_received(:enqueue).with(group, Gitlab::GlRepository::WIKI)
+        expect(strategy).to have_received(:wait)
       end
     end
 
@@ -37,16 +31,18 @@ RSpec.describe Backup::Repositories do
       it 'creates the expected number of threads' do
         expect(Thread).not_to receive(:new)
 
+        expect(strategy).to receive(:start).with(:create)
         groups.each do |group|
-          expect(subject).to receive(:dump_group).with(group).and_call_original
+          expect(strategy).to receive(:enqueue).with(group, Gitlab::GlRepository::WIKI)
         end
+        expect(strategy).to receive(:wait)
 
         subject.dump(max_concurrency: 1, max_storage_concurrency: 1)
       end
 
       describe 'command failure' do
-        it 'dump_group raises an error' do
-          allow(subject).to receive(:dump_group).and_raise(IOError)
+        it 'enqueue_group raises an error' do
+          allow(strategy).to receive(:enqueue).with(anything, Gitlab::GlRepository::WIKI).and_raise(IOError)
 
           expect { subject.dump(max_concurrency: 1, max_storage_concurrency: 1) }.to raise_error(IOError)
         end
@@ -76,24 +72,13 @@ RSpec.describe Backup::Repositories do
     let_it_be(:project) { create(:project) }
     let_it_be(:group) { create(:group) }
 
-    let(:next_path_to_bundle) do
-      [
-        Rails.root.join('spec/fixtures/lib/backup/wiki_repo.bundle'),
-        Rails.root.join('spec/fixtures/lib/backup/project_repo.bundle')
-      ].to_enum
-    end
-
-    it 'restores repositories from bundles', :aggregate_failures do
-      allow_next_instance_of(described_class::BackupRestore) do |backup_restore|
-        allow(backup_restore).to receive(:path_to_bundle).and_return(next_path_to_bundle.next)
-      end
-
+    it 'calls enqueue for each repository type', :aggregate_failures do
       subject.restore
 
-      collect_commit_shas = -> (repo) { repo.commits('master', limit: 10).map(&:sha) }
-
-      expect(collect_commit_shas.call(project.repository)).to eq(['393a7d860a5a4c3cc736d7eb00604e3472bb95ec'])
-      expect(collect_commit_shas.call(group.wiki.repository)).to eq(['c74b9948d0088d703ee1fafeddd9ed9add2901ea'])
+      expect(strategy).to have_received(:start).with(:restore)
+      expect(strategy).to have_received(:enqueue).with(project, Gitlab::GlRepository::PROJECT)
+      expect(strategy).to have_received(:enqueue).with(group, Gitlab::GlRepository::WIKI)
+      expect(strategy).to have_received(:wait)
     end
   end
 end

@@ -34,13 +34,13 @@ export const resolvers = {
       return SubscriptionsApi.createSubscription(groupId, customer, subscription);
     },
     updateState: (_, { input }, { cache }) => {
-      const { state: oldState } = cache.readQuery({ query: STATE_QUERY });
+      const oldState = cache.readQuery({ query: STATE_QUERY });
 
       const state = produce(oldState, (draftState) => {
         merge(draftState, input);
       });
 
-      cache.writeQuery({ query: STATE_QUERY, data: { state } });
+      cache.writeQuery({ query: STATE_QUERY, data: state });
     },
   },
 };

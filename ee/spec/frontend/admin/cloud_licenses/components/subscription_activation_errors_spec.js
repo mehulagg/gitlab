@@ -45,8 +45,10 @@ describe('SubscriptionActivationErrors', () => {
     it('shows some help links', () => {
       const alert = findConnectivityErrorAlert();
 
-      expect(alert.findAll(GlLink).at(0).props('href')).toBe(subscriptionActivationHelpLink);
-      expect(alert.findAll(GlLink).at(1).props('href')).toBe(troubleshootingHelpLink);
+      expect(alert.findAllComponents(GlLink).at(0).props('href')).toBe(
+        subscriptionActivationHelpLink,
+      );
+      expect(alert.findAllComponents(GlLink).at(1).props('href')).toBe(troubleshootingHelpLink);
     });
 
     it('does not show other alerts', () => {
@@ -61,6 +63,12 @@ describe('SubscriptionActivationErrors', () => {
 
     it('shows a general error alert', () => {
       expect(findGeneralErrorAlert().props('title')).toBe(generalActivationError);
+    });
+
+    it('shows a help link', () => {
+      expect(findGeneralErrorAlert().findComponent(GlLink).props('href')).toBe(
+        subscriptionActivationHelpLink,
+      );
     });
 
     it('shows a a text to help the user', () => {

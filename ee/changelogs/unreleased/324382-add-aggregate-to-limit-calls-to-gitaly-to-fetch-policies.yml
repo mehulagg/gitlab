@@ -1,5 +1,0 @@
----
-title: Add GraphQL aggregate to prevent N+1 query on DAST profiles
-merge_request: 61024
-author:
-type: performance

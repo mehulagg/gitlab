@@ -1,5 +1,0 @@
----
-title: Return correct trial status in CI external pipeline validation
-merge_request: 61104
-author:
-type: fixed

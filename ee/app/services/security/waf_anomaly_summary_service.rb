@@ -50,17 +50,17 @@ module Security
     end
 
     def elasticsearch_client
-      @elasticsearch_client ||= application_elastic_stack&.elasticsearch_client(timeout: @options[:timeout])
+      @elasticsearch_client ||= elastic_stack_adapter&.elasticsearch_client(timeout: @options[:timeout])
     end
 
     private
 
-    def application_elastic_stack
-      @application_elastic_stack ||= @cluster&.application_elastic_stack
+    def elastic_stack_adapter
+      @elastic_stack_adapter ||= @cluster&.elastic_stack_adapter
     end
 
     def chart_above_v3?
-      application_elastic_stack.chart_above_v3?
+      elastic_stack_adapter.chart_above_v3?
     end
 
     def body

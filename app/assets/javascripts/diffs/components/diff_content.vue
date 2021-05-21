@@ -1,6 +1,7 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapInline, mapParallel } from 'ee_else_ce/diffs/components/diff_row_utils';
 import DiffFileDrafts from '~/batch_comments/components/diff_file_drafts.vue';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import { diffViewerModes } from '~/ide/constants';
@@ -15,7 +16,6 @@ import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_
 import { IMAGE_DIFF_POSITION_TYPE } from '../constants';
 import { getDiffMode } from '../store/utils';
 import DiffDiscussions from './diff_discussions.vue';
-import { mapInline, mapParallel } from './diff_row_utils';
 import DiffView from './diff_view.vue';
 import ImageDiffOverlay from './image_diff_overlay.vue';
 import InlineDiffView from './inline_diff_view.vue';
@@ -49,14 +49,13 @@ export default {
     },
   },
   computed: {
-    ...mapState({
-      projectPath: (state) => state.diffs.projectPath,
-    }),
+    ...mapState('diffs', ['projectPath']),
     ...mapGetters('diffs', [
       'isInlineView',
       'isParallelView',
       'getCommentFormForDiffFile',
       'diffLines',
+      'fileLineCodequality',
     ]),
     ...mapGetters(['getNoteableData', 'noteableType', 'getUserData']),
     diffMode() {

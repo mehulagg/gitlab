@@ -65,6 +65,37 @@ RSpec.describe Admin::Geo::NodesController do
         expect(response).not_to redirect_to(:forbidden)
       end
     end
+
+    context 'without :geo_nodes_beta feature flag' do
+      before do
+        stub_feature_flags(geo_nodes_beta: false)
+        go
+      end
+
+      it 'sets @nodes and @node variables' do
+        expect(subject.instance_variable_get(:@nodes)).to eq(GeoNode.all.order(:id))
+        expect(subject.instance_variable_get(:@node)).to be_an_instance_of(GeoNode)
+      end
+    end
+
+    context 'with :geo_nodes_beta feature flag' do
+      before do
+        stub_feature_flags(geo_nodes_beta: true)
+        go
+      end
+
+      it 'does not set @nodes and @node variables' do
+        expect(subject.instance_variable_get(:@nodes)).to be_nil
+        expect(subject.instance_variable_get(:@node)).to be_nil
+      end
+    end
+
+    it 'pushes :geo_nodes_beta feature flag to the frontend' do
+      allow(subject).to receive(:push_frontend_feature_flag).and_call_original
+      expect(subject).to receive(:push_frontend_feature_flag).with(:geo_nodes_beta)
+
+      go
+    end
   end
 
   describe '#create' do

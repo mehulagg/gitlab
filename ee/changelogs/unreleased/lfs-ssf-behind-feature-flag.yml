@@ -1,5 +1,0 @@
----
-title: Migrate LFS object replication to use self service framework
-merge_request: 56286
-author:
-type: changed

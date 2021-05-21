@@ -51,6 +51,26 @@ RSpec.describe AppSec::Dast::ScannerProfiles::DestroyService do
         expect(payload).to be_a(DastScannerProfile)
       end
 
+      it 'audits the deletion' do
+        profile = payload
+
+        audit_event = AuditEvent.last
+
+        aggregate_failures do
+          expect(audit_event.author).to eq(user)
+          expect(audit_event.entity).to eq(project)
+          expect(audit_event.target_id).to eq(profile.id)
+          expect(audit_event.target_type).to eq('DastScannerProfile')
+          expect(audit_event.target_details).to eq(profile.name)
+          expect(audit_event.details).to eq({
+            remove: 'DAST scanner profile',
+            target_id: profile.id,
+            target_type: 'DastScannerProfile',
+            target_details: profile.name
+          })
+        end
+      end
+
       context 'when the dast_scanner_profile doesn\'t exist' do
         let(:dast_scanner_profile_id) do
           Gitlab::GlobalId.build(nil, model_name: 'DastScannerProfile', id: 'does_not_exist')

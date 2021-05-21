@@ -1,5 +1,0 @@
----
-title: Fix Rails/SaveBang rubocop offenses in ee/spec/mailers
-merge_request: 58097
-author: Abdul Wadood @abdulwd
-type: fixed

@@ -52,8 +52,6 @@ namespace :admin do
 
     resources :nodes, only: [:index, :create, :new, :edit, :update]
 
-    resources :nodes_beta, only: [:index]
-
     scope '/replication' do
       get '/', to: redirect(path: 'admin/geo/replication/projects')
 

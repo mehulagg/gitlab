@@ -14,7 +14,6 @@ import {
 import { mapState, mapActions } from 'vuex';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { s__, __, sprintf } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import EnvironmentPicker from '../environment_picker.vue';
 import {
   EditorModeRule,
@@ -59,7 +58,6 @@ export default {
     DimDisableContainer,
   },
   directives: { GlModal: GlModalDirective },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     threatMonitoringPath: {
       type: String,
@@ -134,9 +132,6 @@ export default {
       return this.isEditing
         ? s__('NetworkPolicies|Save changes')
         : s__('NetworkPolicies|Create policy');
-    },
-    showAlertsPicker() {
-      return this.glFeatures.threatMonitoringAlerts;
     },
     deleteModalTitle() {
       return sprintf(s__('NetworkPolicies|Delete policy: %{policy}'), { policy: this.policy.name });
@@ -345,11 +340,7 @@ export default {
           </template>
 
           <policy-action-picker />
-          <policy-alert-picker
-            v-if="showAlertsPicker"
-            :policy-alert="policyAlert"
-            @update-alert="handleAlertUpdate"
-          />
+          <policy-alert-picker :policy-alert="policyAlert" @update-alert="handleAlertUpdate" />
         </dim-disable-container>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-5 col-xl-4">

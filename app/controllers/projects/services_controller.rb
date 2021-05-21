@@ -11,9 +11,6 @@ class Projects::ServicesController < Projects::ApplicationController
   before_action :web_hook_logs, only: [:edit, :update]
   before_action :set_deprecation_notice_for_prometheus_service, only: [:edit, :update]
   before_action :redirect_deprecated_prometheus_service, only: [:update]
-  before_action only: :edit do
-    push_frontend_feature_flag(:jira_for_vulnerabilities, @project, type: :development, default_enabled: :yaml)
-  end
 
   respond_to :html
 
@@ -88,7 +85,7 @@ class Projects::ServicesController < Projects::ApplicationController
 
   def integration
     @integration ||= @project.find_or_initialize_service(params[:id])
-    @service ||= @integration # TODO: remove references to @service
+    @service ||= @integration # TODO: remove references to @service https://gitlab.com/gitlab-org/gitlab/-/issues/329759
   end
   alias_method :service, :integration
 

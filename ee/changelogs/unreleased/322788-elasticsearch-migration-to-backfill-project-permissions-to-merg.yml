@@ -1,5 +1,0 @@
----
-title: Add Elasticsearch migration to backfill project permissions on MRs
-merge_request: 59836
-author:
-type: changed

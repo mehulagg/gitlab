@@ -9,6 +9,22 @@ module IssuesHelper
     classes.join(' ')
   end
 
+  def issue_manual_ordering_class
+    is_sorting_by_relative_position = @sort == 'relative_position'
+
+    if is_sorting_by_relative_position && !issue_repositioning_disabled?
+      "manual-ordering"
+    end
+  end
+
+  def issue_repositioning_disabled?
+    if @group
+      @group.root_ancestor.issue_repositioning_disabled?
+    elsif @project
+      @project.root_namespace.issue_repositioning_disabled?
+    end
+  end
+
   def status_box_class(item)
     if item.try(:expired?)
       'status-box-expired'
@@ -181,7 +197,7 @@ module IssuesHelper
       initial_email: project.new_issuable_address(current_user, 'issue'),
       is_signed_in: current_user.present?.to_s,
       issues_path: project_issues_path(project),
-      jira_integration_path: help_page_url('user/project/integrations/jira', anchor: 'view-jira-issues'),
+      jira_integration_path: help_page_url('integration/jira/', anchor: 'view-jira-issues'),
       markdown_help_path: help_page_path('user/markdown'),
       max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
       new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.try(:id), milestone_id: finder.milestones.first.try(:id) }),

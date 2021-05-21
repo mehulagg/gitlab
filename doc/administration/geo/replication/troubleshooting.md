@@ -756,6 +756,30 @@ this command reports `ERROR - Replication is not up-to-date` even if
 replication is actually up-to-date. If replication and verification output
 shows that it is complete, you can add `--skip-preflight-checks` to make the command complete promotion. This bug was fixed in GitLab 13.8 and later.
 
+### Errors when using `--skip-preflight-checks` or `--force`
+
+Before GitLab 13.5, you could bump into one of the following errors when using
+`--skip-preflight-checks` or `--force`:
+
+```plaintext
+get_ctl_options': invalid option: --skip-preflight-checks (OptionParser::InvalidOption)
+
+get_ctl_options': invalid option: --force (OptionParser::InvalidOption)
+```
+
+This can happen with XFS or filesystems that list files in lexical order, because the
+load order of the Omnibus command files can be different than expected, and a global function would get redefined.
+More details can be found in [the related issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6076).
+
+The workaround is to manually run the preflight checks and promote the database, by running
+the following commands on the Geo secondary site:
+
+```shell
+sudo gitlab-ctl promotion-preflight-checks
+sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
+sudo gitlab-ctl reconfigure
+sudo gitlab-rake geo:set_secondary_as_primary
+
 ## Expired artifacts
 
 If you notice for some reason there are more artifacts on the Geo
@@ -853,6 +877,11 @@ To resolve this issue:
   using IPv6 to send its status to the **primary** node. If it is, add an entry to
   the **primary** node using IPv4 in the `/etc/hosts` file. Alternatively, you should
   [enable IPv6 on the **primary** node](https://docs.gitlab.com/omnibus/settings/nginx.html#setting-the-nginx-listen-address-or-addresses).
+
+### Geo Admin Area shows 'Unknown' for health status and 'Request failed with status code 401'
+
+If using a load balancer, ensure that the load balancer's URL is set as the `external_url` in the
+`/etc/gitlab/gitlab.rb` of the nodes behind the load balancer.
 
 ### GitLab Pages return 404 errors after promoting
 

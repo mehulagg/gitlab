@@ -132,6 +132,19 @@ module EE
               extras: [:lookahead],
               resolver: ::Resolvers::IncidentManagement::OncallScheduleResolver
 
+        field :incident_management_escalation_policies,
+              ::Types::IncidentManagement::EscalationPolicyType.connection_type,
+              null: true,
+              description: 'Incident Management escalation policies of the project.',
+              extras: [:lookahead],
+              resolver: ::Resolvers::IncidentManagement::EscalationPoliciesResolver
+
+        field :incident_management_escalation_policy,
+              ::Types::IncidentManagement::EscalationPolicyType,
+              null: true,
+              description: 'Incident Management escalation policy of the project.',
+              resolver: ::Resolvers::IncidentManagement::EscalationPoliciesResolver.single
+
         field :api_fuzzing_ci_configuration,
               ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
               null: true,
@@ -142,6 +155,13 @@ module EE
               null: true,
               description: "The project's push rules settings.",
               method: :push_rule
+
+        field :path_locks,
+              ::Types::PathLockType.connection_type,
+              null: true,
+              description: "The project's path locks.",
+              extras: [:lookahead],
+              resolver: ::Resolvers::PathLocksResolver
       end
 
       def api_fuzzing_ci_configuration

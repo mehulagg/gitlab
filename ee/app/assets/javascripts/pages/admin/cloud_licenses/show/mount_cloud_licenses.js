@@ -33,7 +33,7 @@ export default () => {
     subscriptionSyncPath,
   } = el.dataset;
   const connectivityHelpURL = helpPagePath('/user/admin_area/license.html', {
-    anchor: 'activate-gitlab-ee-with-a-license',
+    anchor: 'there-is-a-connectivity-issue',
   });
 
   return new Vue({

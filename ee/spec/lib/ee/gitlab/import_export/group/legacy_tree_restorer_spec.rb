@@ -44,6 +44,17 @@ RSpec.describe Gitlab::ImportExport::Group::LegacyTreeRestorer do
       end
     end
 
+    context 'epic labels' do
+      it 'has epic labels' do
+        label = group.epics.first.labels.first
+
+        expect(group.epics.first.labels.count).to eq(1)
+        expect(label.title).to eq('title')
+        expect(label.description).to eq('description')
+        expect(label.color).to eq('#cd2c5c')
+      end
+    end
+
     context 'board lists' do
       it 'has milestone & assignee lists' do
         lists = group.boards.find_by(name: 'first board').lists

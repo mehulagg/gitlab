@@ -190,7 +190,8 @@ module Gitlab
             user_preferences_usage,
             ingress_modsecurity_usage,
             container_expiration_policies_usage,
-            service_desk_counts
+            service_desk_counts,
+            email_campaign_counts
           ).tap do |data|
             data[:snippets] = add(data[:personal_snippets], data[:project_snippets])
           end
@@ -231,6 +232,7 @@ module Gitlab
             successful_deployments: deployment_count(Deployment.success.where(last_28_days_time_period)),
             failed_deployments: deployment_count(Deployment.failed.where(last_28_days_time_period)),
             # rubocop: enable UsageData/LargeTable:
+            projects: count(Project.where(last_28_days_time_period), start: minimum_id(Project), finish: maximum_id(Project)),
             packages: count(::Packages::Package.where(last_28_days_time_period)),
             personal_snippets: count(PersonalSnippet.where(last_28_days_time_period)),
             project_snippets: count(ProjectSnippet.where(last_28_days_time_period)),
@@ -426,7 +428,7 @@ module Gitlab
 
       def services_usage
         # rubocop: disable UsageData/LargeTable:
-        Integration.available_services_names.each_with_object({}) do |service_name, response|
+        Integration.available_services_names(include_dev: false).each_with_object({}) do |service_name, response|
           service_type = Integration.service_name_to_type(service_name)
 
           response["projects_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where(type: service_type))
@@ -845,6 +847,27 @@ module Gitlab
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
+      # rubocop: disable CodeReuse/ActiveRecord
+      def email_campaign_counts
+        # rubocop:disable UsageData/LargeTable
+        sent_emails = count(Users::InProductMarketingEmail.group(:track, :series))
+        clicked_emails = count(Users::InProductMarketingEmail.where.not(cta_clicked_at: nil).group(:track, :series))
+
+        Users::InProductMarketingEmail.tracks.keys.each_with_object({}) do |track, result|
+          # rubocop: enable UsageData/LargeTable:
+          series_amount = Namespaces::InProductMarketingEmailsService::TRACKS[track.to_sym][:interval_days].count
+          0.upto(series_amount - 1).map do |series|
+            # When there is an error with the query and it's not the Hash we expect, we return what we got from `count`.
+            sent_count = sent_emails.is_a?(Hash) ? sent_emails.fetch([track, series], 0) : sent_emails
+            clicked_count = clicked_emails.is_a?(Hash) ? clicked_emails.fetch([track, series], 0) : clicked_emails
+
+            result["in_product_marketing_email_#{track}_#{series}_sent"] = sent_count
+            result["in_product_marketing_email_#{track}_#{series}_cta_clicked"] = clicked_count unless track == 'experience'
+          end
+        end
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
       def unique_visit_service
         strong_memoize(:unique_visit_service) do
           ::Gitlab::Analytics::UniqueVisits.new
@@ -894,7 +917,7 @@ module Gitlab
       end
 
       def project_imports(time_period)
-        {
+        counters = {
           gitlab_project: projects_imported_count('gitlab_project', time_period),
           gitlab: projects_imported_count('gitlab', time_period),
           github: projects_imported_count('github', time_period),
@@ -905,6 +928,10 @@ module Gitlab
           manifest: projects_imported_count('manifest', time_period),
           gitlab_migration: count(::BulkImports::Entity.where(time_period).project_entity) # rubocop: disable CodeReuse/ActiveRecord
         }
+
+        counters[:total] = add(*counters.values)
+
+        counters
       end
 
       def projects_imported_count(from, time_period)

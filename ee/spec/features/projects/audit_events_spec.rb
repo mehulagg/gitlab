@@ -147,12 +147,10 @@ RSpec.describe 'Projects > Audit Events', :js do
         click_button 'Save changes'
       end
 
-      wait_for('Save is completed') do
-        page.has_content?('was successfully updated', wait: 0)
-      end
+      wait_for_all_requests
 
       page.within('.qa-project-sidebar') do
-        find(:link, text: 'Security & Compliance').click
+        click_link 'Security & Compliance'
         click_link 'Audit Events'
       end
 

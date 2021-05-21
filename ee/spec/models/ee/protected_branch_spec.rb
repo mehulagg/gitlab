@@ -47,7 +47,7 @@ RSpec.describe ProtectedBranch do
       it "does not count a group-based #{human_association_name} with an `access_level` set" do
         group = create(:group)
         protected_branch = create(:protected_branch, default_access_level: false)
-        protected_branch.project.project_group_links.create(group: group)
+        protected_branch.project.project_group_links.create!(group: group)
 
         protected_branch.send(association_name) << build(factory_name, group: group, access_level: Gitlab::Access::MAINTAINER)
         protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
@@ -93,8 +93,8 @@ RSpec.describe ProtectedBranch do
         first_protected_branch = create(:protected_branch, default_access_level: false)
         second_protected_branch = create(:protected_branch, default_access_level: false)
 
-        first_protected_branch.project.project_group_links.create(group: group)
-        second_protected_branch.project.project_group_links.create(group: group)
+        first_protected_branch.project.project_group_links.create!(group: group)
+        second_protected_branch.project.project_group_links.create!(group: group)
 
         first_protected_branch.send(association_name) << build(factory_name, group: group)
         second_protected_branch.send(association_name) << build(factory_name, group: group)
@@ -109,7 +109,7 @@ RSpec.describe ProtectedBranch do
 
       it "ignores the `access_level` while validating a group-based #{human_association_name}" do
         protected_branch = create(:protected_branch, default_access_level: false)
-        protected_branch.project.project_group_links.create(group: group)
+        protected_branch.project.project_group_links.create!(group: group)
 
         protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
         protected_branch.send(association_name) << build(factory_name, group: group, access_level: Gitlab::Access::MAINTAINER)

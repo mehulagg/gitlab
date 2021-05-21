@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe ApprovalRules::UpdateService do
   let(:project) { create(:project) }
   let(:user) { project.creator }
-  let(:approval_rule) { target.approval_rules.create(name: 'foo', approvals_required: 2) }
+  let(:approval_rule) { target.approval_rules.create!(name: 'foo', approvals_required: 2) }
 
   shared_examples 'editable' do
     let(:new_approvers) { create_list(:user, 2) }

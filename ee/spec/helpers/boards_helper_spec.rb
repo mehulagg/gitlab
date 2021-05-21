@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe BoardsHelper do
-  let_it_be(:project) { create(:project) }
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
+  let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:project_board) { create(:board, project: project) }
 
   describe '#board_list_data' do
@@ -105,15 +105,22 @@ RSpec.describe BoardsHelper do
         end
       end
 
-      [[:multiple_issue_assignees, :multiple_assignees_feature_available],
-       [:issue_weights, :weight_feature_available],
-       [:board_milestone_lists, :milestone_lists_available],
-       [:board_assignee_lists, :assignee_lists_available],
-       [:board_iteration_lists, :iteration_lists_available],
-       [:epics, :epic_feature_available],
-       [:iterations, :iteration_feature_available],
-       [:scoped_labels, :scoped_labels]].each do |feature_name, feature_key|
-        include_examples "serializes the availability of a licensed feature", feature_name, feature_key
+      context "group and project-level licensed features" do
+        [[:multiple_issue_assignees, :multiple_assignees_feature_available],
+         [:issue_weights, :weight_feature_available],
+         [:board_milestone_lists, :milestone_lists_available],
+         [:board_assignee_lists, :assignee_lists_available],
+         [:scoped_labels, :scoped_labels]].each do |feature_name, feature_key|
+          include_examples "serializes the availability of a licensed feature", feature_name, feature_key
+        end
+      end
+
+      context "group-level licensed features" do
+        [[:board_iteration_lists, :iteration_lists_available],
+         [:epics, :epic_feature_available],
+         [:iterations, :iteration_feature_available]].each do |feature_name, feature_key|
+          include_examples "serializes the availability of a licensed feature", feature_name, feature_key
+        end
       end
     end
 

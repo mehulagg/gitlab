@@ -38,13 +38,21 @@ RSpec.describe Admin::DevOpsReportController do
       sign_in(user)
     end
 
-    context 'when devops_adoption tab selected' do
-      it 'tracks devops_adoption usage event' do
+    shared_examples 'tracks usage event' do |event, tab|
+      it "tracks #{event} usage event for #{tab}" do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter)
-          .to receive(:track_event).with('i_analytics_dev_ops_adoption', values: kind_of(String))
+          .to receive(:track_event).with(event, values: kind_of(String))
 
-        get :show, params: { tab: 'devops-adoption' }, format: :html
+        get :show, params: { tab: tab }, format: :html
       end
+    end
+
+    context 'when browsing to specific tabs' do
+      ['', 'dev', 'sec', 'ops'].each do |tab|
+        it_behaves_like 'tracks usage event', 'i_analytics_dev_ops_adoption', tab
+      end
+
+      it_behaves_like 'tracks usage event', 'i_analytics_dev_ops_score', 'devops-score'
     end
   end
 end

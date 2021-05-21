@@ -117,8 +117,8 @@ To list users matching a specific criteria, click on one of the following tabs o
 - **2FA Enabled**
 - **2FA Disabled**
 - **External**
-- **[Blocked](blocking_unblocking_users.md)**
-- **[Deactivated](activating_deactivating_users.md)**
+- **[Blocked](moderate_users.md#blocking-a-user)**
+- **[Deactivated](moderate_users.md#deactivating-a-user)**
 - **Without projects**
 
 For each user, the following are listed:
@@ -126,6 +126,7 @@ For each user, the following are listed:
 1. Username
 1. Email address
 1. Project membership count
+1. Group membership count ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/276215) in GitLab 13.12)
 1. Date of account creation
 1. Date of last activity
 

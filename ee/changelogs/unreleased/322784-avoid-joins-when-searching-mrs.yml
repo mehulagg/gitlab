@@ -1,5 +1,0 @@
----
-title: Don't use Elasticsearch join for group/project MR searches
-merge_request: 60249
-author:
-type: performance

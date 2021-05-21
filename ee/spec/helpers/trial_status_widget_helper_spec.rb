@@ -37,7 +37,7 @@ RSpec.describe TrialStatusWidgetHelper do
         expect(data_attrs).to match(
           shared_expected_attrs.merge(
             group_name: 'Pants Group',
-            purchase_href: '/-/subscriptions/new?namespace_id=123&plan_id=2c92a0fc5a83f01d015aa6db83c45aac',
+            purchase_href: '/-/subscriptions/new?namespace_id=123&plan_id=2c92a0ff76f0d5250176f2f8c86f305a',
             target_id: shared_expected_attrs[:container_id],
             trial_end_date: Date.parse('2021-01-30')
           )

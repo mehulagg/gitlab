@@ -43,6 +43,7 @@ import {
   pathNavIssueMetric,
   timeMetricsData,
   rawStageMedians,
+  stageCounts,
 } from './mock_data';
 
 const labelEventIds = labelEvents.map((ev) => ev.identifier);
@@ -346,6 +347,7 @@ describe('Value Stream Analytics utils', () => {
       stages,
       medians: stageMediansWithNumericIds,
       selectedStage: issueStage,
+      stageCounts,
     });
 
     describe('transforms the data as expected', () => {

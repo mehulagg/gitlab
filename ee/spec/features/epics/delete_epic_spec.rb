@@ -31,10 +31,10 @@ RSpec.describe 'Delete Epic', :js do
     end
 
     it 'deletes the issue and redirect to epic list' do
-      page.accept_alert 'Delete this epic and all descendants?' do
-        find(:button, text: 'Delete epic').click
-      end
+      find('.qa-delete-button').click
+      wait_for_requests
 
+      find('.js-modal-action-primary').click
       wait_for_requests
 
       expect(find('.issuable-list')).not_to have_content(epic.title)

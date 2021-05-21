@@ -1,5 +1,0 @@
----
-title: Remove user from rotation if they are removed from a project or group
-merge_request: 59427
-author:
-type: added

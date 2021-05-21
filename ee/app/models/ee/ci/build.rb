@@ -48,8 +48,11 @@ module EE
       def variables
         strong_memoize(:variables) do
           super.tap do |collection|
-            if pipeline.triggered_for_ondemand_dast_scan? && pipeline.dast_profile
-              collection.concat(pipeline.dast_profile.ci_variables)
+            if pipeline.triggered_for_ondemand_dast_scan?
+              # Subject to change. Please see gitlab-org/gitlab#330950 for more info.
+              profile = pipeline.dast_profile || pipeline.dast_site_profile
+
+              collection.concat(profile.ci_variables)
             end
           end
         end

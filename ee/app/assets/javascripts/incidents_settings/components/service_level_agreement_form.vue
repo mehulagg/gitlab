@@ -148,7 +148,7 @@ export default {
           {{ $options.i18n.validFeedback }}
         </template>
       </gl-form-group>
-      <gl-button variant="success" type="submit" :disabled="disableSubmit" :loading="loading">
+      <gl-button variant="confirm" type="submit" :disabled="disableSubmit" :loading="loading">
         {{ __('Save changes') }}
       </gl-button>
     </gl-form>

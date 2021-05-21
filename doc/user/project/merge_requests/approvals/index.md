@@ -10,14 +10,15 @@ disqus_identifier: 'https://docs.gitlab.com/ee/user/project/merge_requests/merge
 
 > Redesign [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1979) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.8 and [feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/10685) in 12.0.
 
-Successful projects depend on code reviews. Merge request approvals clearly communicate
-someone's ability to merge proposed changes. Approvals [are optional](#optional-approvals)
-in GitLab Free, but you can require them for your project in higher tiers.
+You can configure your merge requests so that they must be approved before
+they can be merged. You can do this by creating [rules](rules.md) or by specifying
+a list of users who act as [code owners](../../code_owners.md) for specific files.
 
-Merge request approvals are configured at the project level. Administrator users
-of self-managed GitLab installations can also configure
-[instance-level approval rules](../../../admin_area/merge_requests_approvals.md)
-that cannot be overridden on a project-level basis.
+You can configure merge request approvals for each project. In higher GitLab tiers,
+Administrators of self-managed GitLab instances can configure approvals
+[for the entire instance](../../../admin_area/merge_requests_approvals.md).
+
+## How approvals work
 
 With [merge request approval rules](rules.md), you can set the minimum number of
 required approvals before work can merge into your project. You can also extend these
@@ -25,19 +26,20 @@ rules to define what types of users can approve work. Some examples of rules you
 
 - Users with specific permissions can always approve work.
 - [Code owners](../../code_owners.md) can approve work for files they own.
-- Users with specific permissions can approve work, even if they don't have merge rights
+- Users with specific permissions can approve work,
+  [even if they don't have merge rights](rules.md#merge-request-approval-segregation-of-duties)
   to the repository.
 - Users with specific permissions can be allowed or denied the ability
-  to override approval rules on a specific merge request.
+  to [override approval rules on a specific merge request](rules.md#edit-or-override-merge-request-approval-rules).
 
 You can also configure additional [settings for merge request approvals](settings.md)
 for more control of the level of oversight and security your project needs, including:
 
-- Prevent users from overriding a merge request approval rule.
-- Reset approvals when new code is pushed.
-- Allow (or disallow) authors and committers to approve their own merge requests.
-- Require password authentication when approving.
-- Require security team approval.
+- [Prevent users from overriding a merge request approval rule.](settings.md#prevent-overrides-of-default-approvals)
+- [Reset approvals when new code is pushed.](settings.md#reset-approvals-on-push)
+- Allow (or disallow) [authors and committers](settings.md) to approve their own merge requests.
+- [Require password authentication when approving.](settings.md#require-authentication-for-approvals)
+- [Require security team approval.](settings.md#security-approvals-in-merge-requests)
 
 You can configure your merge request approval rules and settings through the GitLab
 user interface or [with the API](../../../../api/merge_request_approvals.md).
@@ -62,10 +64,10 @@ such as merge conflicts, [pending discussions](../../../discussions/index.md#onl
 or a [failed CI/CD pipeline](../merge_when_pipeline_succeeds.md).
 
 To prevent merge request authors from approving their own merge requests,
-enable [**Prevent author approval**](settings.md#allowing-merge-request-authors-to-approve-their-own-merge-requests)
+enable [**Prevent author approval**](settings.md#prevent-authors-from-approving-their-own-work)
 in your project's settings.
 
-If you enable [approval rule overrides](settings.md#prevent-overriding-default-approvals),
+If you enable [approval rule overrides](settings.md#prevent-overrides-of-default-approvals),
 merge requests created before a change to default approval rules are not affected.
 The only exceptions are changes to the [target branch](rules.md#approvals-for-protected-branches)
 of the rule.
@@ -117,7 +119,7 @@ You can modify your external approval rules
 
 The lack of an external approval doesn't block the merging of a merge request.
 
-When [approval rule overrides](settings.md#prevent-overriding-default-approvals) are allowed,
+When [approval rule overrides](settings.md#prevent-overrides-of-default-approvals) are allowed,
 changes to default approval rules will **not** be applied to existing
 merge requests, except for changes to the [target branch](rules.md#approvals-for-protected-branches)
 of the rule.

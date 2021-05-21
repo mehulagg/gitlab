@@ -10,6 +10,7 @@ RSpec.describe Gitlab::ImportExport::Group::LegacyTreeSaver do
     let_it_be(:parent_epic) { create(:epic, group: group) }
     let_it_be(:epic) { create(:epic, group: group, parent: parent_epic) }
     let_it_be(:epic_event) { create(:event, :created, target: epic, group: group, author: user) }
+    let_it_be(:epic_label_link) { create(:label_link, label: label, target: epic) }
     let_it_be(:epic_push_event) { create(:event, :pushed, target: epic, group: group, author: user) }
     let_it_be(:milestone) { create(:milestone, group: group) }
     let_it_be(:board) { create(:board, group: group, assignee: user, labels: [label]) }
@@ -98,6 +99,15 @@ RSpec.describe Gitlab::ImportExport::Group::LegacyTreeSaver do
 
         award_emoji = epic_json['notes'].first['award_emoji'].first
         expect(award_emoji['name']).to eq(epic_note_emoji.name)
+      end
+
+      it 'saves epic labels' do
+        expect_successful_save(group_tree_saver)
+
+        epic_label = epic_json['label_links'].first['label']
+        expect(epic_label['title']).to eq(label.title)
+        expect(epic_label['description']).to eq(label.description)
+        expect(epic_label['color']).to eq(label.color)
       end
     end
 

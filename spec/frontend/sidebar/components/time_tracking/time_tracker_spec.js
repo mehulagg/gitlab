@@ -10,6 +10,7 @@ describe('Issuable Time Tracker', () => {
   const findComparisonMeter = () => findByTestId('compareMeter').attributes('title');
   const findCollapsedState = () => findByTestId('collapsedState');
   const findTimeRemainingProgress = () => findByTestId('timeRemainingProgress');
+  const findReportLink = () => findByTestId('reportLink');
 
   const defaultProps = {
     timeEstimate: 10_000, // 2h 46m
@@ -17,14 +18,18 @@ describe('Issuable Time Tracker', () => {
     humanTimeEstimate: '2h 46m',
     humanTimeSpent: '1h 23m',
     limitToHours: false,
+    issuableId: '1',
   };
 
-  const mountComponent = ({ props = {} } = {}) =>
+  const mountComponent = ({ props = {}, issuableType = 'issue' } = {}) =>
     mount(TimeTracker, {
       propsData: { ...defaultProps, ...props },
       directives: { GlTooltip: createMockDirective() },
       stubs: {
         transition: stubTransition(),
+      },
+      provide: {
+        issuableType,
       },
     });
 
@@ -189,6 +194,40 @@ describe('Issuable Time Tracker', () => {
         const correctText = 'No estimate or time spent';
         expect(pane.exists()).toBe(true);
         expect(pane.text().trim()).toBe(correctText);
+      });
+    });
+
+    describe('Time tracking report', () => {
+      describe('When no time spent', () => {
+        beforeEach(() => {
+          wrapper = mountComponent({
+            props: {
+              timeSpent: 0,
+              timeSpentHumanReadable: '',
+            },
+          });
+        });
+
+        it('link should not appear', () => {
+          expect(findReportLink().exists()).toBe(false);
+        });
+      });
+
+      describe('When time spent', () => {
+        it('link should appear on issue', () => {
+          wrapper = mountComponent();
+          expect(findReportLink().exists()).toBe(true);
+        });
+
+        it('link should appear on merge request', () => {
+          wrapper = mountComponent({ issuableType: 'merge_request' });
+          expect(findReportLink().exists()).toBe(true);
+        });
+
+        it('link should not appear on milestone', () => {
+          wrapper = mountComponent({ issuableType: 'milestone' });
+          expect(findReportLink().exists()).toBe(false);
+        });
       });
     });
 

@@ -37,7 +37,7 @@ export default {
     activeLabel: s__('StatusPage|Active'),
     url: {
       label: s__('StatusPage|Status page URL'),
-      linkText: s__('StatusPage|Status page frontend documentation'),
+      linkText: __('Configuration help'),
     },
     bucket: {
       label: s__('StatusPage|S3 Bucket name'),
@@ -67,7 +67,9 @@ export default {
       { key: 'awsSecretKey', updateFn: 'setStatusPageSecretAccessKey' },
     ]),
     statusPageHelpUrl() {
-      return helpPagePath('operations/incident_management/status_page');
+      return helpPagePath('/operations/incident_management/status_page', {
+        anchor: 'configure-gitlab-with-cloud-provider-information',
+      });
     },
   },
   methods: {
@@ -190,7 +192,7 @@ export default {
         <gl-button
           ref="submitBtn"
           :disabled="loading"
-          variant="success"
+          variant="confirm"
           category="primary"
           type="submit"
           class="js-no-auto-disable"

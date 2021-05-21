@@ -168,7 +168,10 @@ func singleJoiningSlash(a, b string) string {
 
 // joinURLPath is taken from reverseproxy.go:joinURLPath
 func joinURLPath(a *url.URL, b string) (path string, rawpath string) {
-	if a.RawPath == "" && b == "" {
+	// Avoid adding a trailing slash if the suffix is empty
+	if b == "" {
+		return a.Path, a.RawPath
+	} else if a.RawPath == "" {
 		return singleJoiningSlash(a.Path, b), ""
 	}
 
@@ -305,7 +308,7 @@ func (api *API) PreAuthorizeHandler(next HandleFunc, suffix string) http.Handler
 			return
 		}
 
-		httpResponse.Body.Close() // Free up the Unicorn worker
+		httpResponse.Body.Close() // Free up the Puma thread
 
 		copyAuthHeader(httpResponse, w)
 
@@ -344,7 +347,7 @@ func copyAuthHeader(httpResponse *http.Response, w http.ResponseWriter) {
 
 func passResponseBack(httpResponse *http.Response, w http.ResponseWriter, r *http.Request) {
 	// NGINX response buffering is disabled on this path (with
-	// X-Accel-Buffering: no) but we still want to free up the Unicorn worker
+	// X-Accel-Buffering: no) but we still want to free up the Puma thread
 	// that generated httpResponse as fast as possible. To do this we buffer
 	// the entire response body in memory before sending it on.
 	responseBody, err := bufferResponse(httpResponse.Body)
@@ -352,7 +355,7 @@ func passResponseBack(httpResponse *http.Response, w http.ResponseWriter, r *htt
 		helper.Fail500(w, r, err)
 		return
 	}
-	httpResponse.Body.Close() // Free up the Unicorn worker
+	httpResponse.Body.Close() // Free up the Puma thread
 	bytesTotal.Add(float64(responseBody.Len()))
 
 	for k, v := range httpResponse.Header {

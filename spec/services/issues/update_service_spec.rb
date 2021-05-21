@@ -158,6 +158,90 @@ RSpec.describe Issues::UpdateService, :mailer do
         end
       end
 
+      context 'changing issue_type' do
+        let!(:label_1) { create(:label, project: project, title: 'incident') }
+        let!(:label_2) { create(:label, project: project, title: 'missed-sla') }
+
+        before do
+          stub_licensed_features(quality_management: true)
+        end
+
+        context 'from issue to incident' do
+          it 'adds a `incident` label if one does not exist' do
+            expect { update_issue(issue_type: 'incident') }.to change(issue.labels, :count).by(1)
+            expect(issue.labels.pluck(:title)).to eq(['incident'])
+          end
+
+          context 'for an issue with multiple labels' do
+            let(:issue) { create(:incident, project: project, labels: [label_1]) }
+
+            before do
+              update_issue(issue_type: 'incident')
+            end
+
+            it 'does not add an `incident` label if one already exist' do
+              expect(issue.labels).to eq([label_1])
+            end
+          end
+
+          context 'filtering the incident label' do
+            let(:params) { { add_label_ids: [] } }
+
+            before do
+              update_issue(issue_type: 'incident')
+            end
+
+            it 'creates and add a incident label id to add_label_ids' do
+              expect(issue.label_ids).to contain_exactly(label_1.id)
+            end
+          end
+        end
+
+        context 'from incident to issue' do
+          let(:issue) { create(:incident, project: project) }
+
+          context 'for an incident with multiple labels' do
+            let(:issue) { create(:incident, project: project, labels: [label_1, label_2]) }
+
+            before do
+              update_issue(issue_type: 'issue')
+            end
+
+            it 'removes an `incident` label if one exists on the incident' do
+              expect(issue.labels).to eq([label_2])
+            end
+          end
+
+          context 'filtering the incident label' do
+            let(:issue) { create(:incident, project: project, labels: [label_1, label_2]) }
+            let(:params) { { label_ids: [label_1.id, label_2.id], remove_label_ids: [] } }
+
+            before do
+              update_issue(issue_type: 'issue')
+            end
+
+            it 'adds an incident label id to remove_label_ids for it to be removed' do
+              expect(issue.label_ids).to contain_exactly(label_2.id)
+            end
+          end
+        end
+
+        context 'from issue to restricted issue types' do
+          context 'without sufficient permissions' do
+            let(:user) { create(:user) }
+
+            before do
+              project.add_guest(user)
+            end
+
+            it 'does nothing to the labels' do
+              expect { update_issue(issue_type: 'issue') }.not_to change(issue.labels, :count)
+              expect(issue.reload.labels).to eq([])
+            end
+          end
+        end
+      end
+
       it 'updates open issue counter for assignees when issue is reassigned' do
         update_issue(assignee_ids: [user2.id])
 
@@ -165,20 +249,38 @@ RSpec.describe Issues::UpdateService, :mailer do
         expect(user2.assigned_open_issues_count).to eq 1
       end
 
-      it 'sorts issues as specified by parameters' do
-        issue1 = create(:issue, project: project, assignees: [user3])
-        issue2 = create(:issue, project: project, assignees: [user3])
+      context 'when changing relative position' do
+        let(:issue1) { create(:issue, project: project, assignees: [user3]) }
+        let(:issue2) { create(:issue, project: project, assignees: [user3]) }
 
-        [issue, issue1, issue2].each do |issue|
-          issue.move_to_end
-          issue.save!
+        before do
+          [issue, issue1, issue2].each do |issue|
+            issue.move_to_end
+            issue.save!
+          end
         end
 
-        opts[:move_between_ids] = [issue1.id, issue2.id]
+        it 'sorts issues as specified by parameters' do
+          opts[:move_between_ids] = [issue1.id, issue2.id]
 
-        update_issue(opts)
+          update_issue(opts)
 
-        expect(issue.relative_position).to be_between(issue1.relative_position, issue2.relative_position)
+          expect(issue.relative_position).to be_between(issue1.relative_position, issue2.relative_position)
+        end
+
+        context 'when block_issue_positioning flag is enabled' do
+          before do
+            stub_feature_flags(block_issue_repositioning: true)
+          end
+
+          it 'raises error' do
+            old_position = issue.relative_position
+            opts[:move_between_ids] = [issue1.id, issue2.id]
+
+            expect { update_issue(opts) }.to raise_error(::Gitlab::RelativePositioning::IssuePositioningDisabled)
+            expect(issue.reload.relative_position).to eq(old_position)
+          end
+        end
       end
 
       it 'does not rebalance even if needed if the flag is disabled' do
@@ -207,7 +309,7 @@ RSpec.describe Issues::UpdateService, :mailer do
 
         opts[:move_between_ids] = [issue1.id, issue2.id]
 
-        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, nil, project.root_namespace.id)
 
         update_issue(opts)
         expect(issue.relative_position).to be_between(issue1.relative_position, issue2.relative_position)
@@ -221,7 +323,7 @@ RSpec.describe Issues::UpdateService, :mailer do
 
         opts[:move_between_ids] = [issue1.id, issue2.id]
 
-        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, nil, project.root_namespace.id)
 
         update_issue(opts)
         expect(issue.relative_position).to be_between(issue1.relative_position, issue2.relative_position)
@@ -235,7 +337,7 @@ RSpec.describe Issues::UpdateService, :mailer do
 
         opts[:move_between_ids] = [issue1.id, issue2.id]
 
-        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, nil, project.root_namespace.id)
 
         update_issue(opts)
         expect(issue.relative_position).to be_between(issue1.relative_position, issue2.relative_position)
@@ -1024,10 +1126,8 @@ RSpec.describe Issues::UpdateService, :mailer do
           stub_feature_flags(broadcast_issue_updates: feature_flag_enabled)
 
           if should_broadcast
-            expect(IssuesChannel).to receive(:broadcast_to).with(issue, event: 'updated')
             expect(GraphqlTriggers).to receive(:issuable_assignees_updated).with(issue)
           else
-            expect(IssuesChannel).not_to receive(:broadcast_to)
             expect(GraphqlTriggers).not_to receive(:issuable_assignees_updated).with(issue)
           end
 

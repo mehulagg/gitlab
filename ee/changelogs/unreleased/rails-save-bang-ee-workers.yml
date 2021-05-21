@@ -1,5 +1,0 @@
----
-title: Fix Rails/SaveBang rubocop offenses in ee/spec/workers
-merge_request: 58070
-author: Abdul Wadood @abdulwd
-type: fixed

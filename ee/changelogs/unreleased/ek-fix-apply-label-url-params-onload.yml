@@ -1,5 +1,0 @@
----
-title: Refetch VSA stage data when filters change
-merge_request: 60991
-author:
-type: fixed

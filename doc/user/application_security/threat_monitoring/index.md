@@ -165,7 +165,8 @@ button at the bottom of the editor.
 
 ### Configuring Network Policy Alerts
 
-> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) and [enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/287676) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) and [enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/287676) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
+> - The feature flag was removed and the Threat Monitoring Alerts Project was [made generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/287676) in GitLab 14.0.
 
 You can use policy alerts to track your policy's impact. Alerts are only available if you've
 [installed](../../clusters/agent/repository.md)
@@ -186,42 +187,30 @@ There are two ways to create policy alerts:
 
 Once added, the UI updates and displays a warning about the dangers of too many alerts.
 
-#### Enable or disable Policy Alerts **(ULTIMATE)**
-
-Policy Alerts is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:threat_monitoring_alerts)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:threat_monitoring_alerts)
-```
-
 ### Container Network Policy Alert list
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3438) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.9.
 
-The policy alert list displays your policy's alert activity. You can sort the list by the
-**Date and time** column, and the **Status** column. Use the selector menu in the **Status** column
-to set the status for each alert:
+The policy alert list displays your policy's alert activity. You can sort the list by these columns:
+
+- Date and time
+- Events
+- Status
+
+You can filter the list with the **Policy Name** filter and the **Status** filter at the top. Use
+the selector menu in the **Status** column to set the status for each alert:
 
 - Unreviewed
 - In review
 - Resolved
 - Dismissed
 
-By default, the list doesn't display resolved or dismissed alerts. To show these alerts, clear the
-checkbox **Hide dismissed alerts**.
+By default, the list doesn't display resolved or dismissed alerts.
 
 ![Policy Alert List](img/threat_monitoring_policy_alert_list_v13_12.png)
+
+Clicking an alert's row opens the alert drawer, which shows more information about the alert. A user
+can also create an incident from the alert and update the alert status in the alert drawer.
 
 Clicking an alert's name takes the user to the [alert details page](../../../operations/incident_management/alerts.md#alert-details-page).
 

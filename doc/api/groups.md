@@ -722,17 +722,20 @@ Example response:
 }
 ```
 
-### Disabling the results limit
+### Disable the results limit **(FREE SELF)**
 
-The 100 results limit can be disabled if it breaks integrations developed using GitLab
-12.4 and earlier.
+The 100 results limit can break integrations developed using GitLab 12.4 and earlier.
 
-To disable the limit while migrating to using the [list a group's projects](#list-a-groups-projects) endpoint, ask a GitLab administrator
-with Rails console access to run the following command:
+For GitLab 12.5 to GitLab 13.12, the limit can be disabled while migrating to using the
+[list a group's projects](#list-a-groups-projects) endpoint.
+
+Ask a GitLab administrator with Rails console access to run the following command:
 
 ```ruby
 Feature.disable(:limit_projects_in_groups_api)
 ```
+
+For GitLab 14.0 and later, the [limit cannot be disabled](https://gitlab.com/gitlab-org/gitlab/-/issues/257829).
 
 ## New group
 
@@ -918,18 +921,20 @@ Example response:
 }
 ```
 
-### Disabling the results limit
+### Disable the results limit **(FREE SELF)**
 
-The 100 results limit can be disabled if it breaks integrations developed using GitLab
-12.4 and earlier.
+The 100 results limit can break integrations developed using GitLab 12.4 and earlier.
 
-To disable the limit while migrating to using the
-[list a group's projects](#list-a-groups-projects) endpoint, ask a GitLab administrator
-with Rails console access to run the following command:
+For GitLab 12.5 to GitLab 13.12, the limit can be disabled while migrating to using the
+[list a group's projects](#list-a-groups-projects) endpoint.
+
+Ask a GitLab administrator with Rails console access to run the following command:
 
 ```ruby
 Feature.disable(:limit_projects_in_groups_api)
 ```
+
+For GitLab 14.0 and later, the [limit cannot be disabled](https://gitlab.com/gitlab-org/gitlab/-/issues/257829).
 
 ### Options for `shared_runners_setting`
 
@@ -1087,7 +1092,7 @@ POST /groups/:id/hooks
 | `confidential_note_events`   | boolean        | no       | Trigger hook on confidential note events |
 | `job_events`                 | boolean        | no       | Trigger hook on job events |
 | `pipeline_events`            | boolean        | no       | Trigger hook on pipeline events |
-| `wiki_page_events`           | boolean        | no       | Trigger hook on wiki events |
+| `wiki_page_events`           | boolean        | no       | Trigger hook on wiki page events |
 | `deployment_events`          | boolean        | no       | Trigger hook on deployment events |
 | `releases_events`            | boolean        | no       | Trigger hook on release events |
 | `subgroup_events`            | boolean        | no       | Trigger hook on subgroup events |
@@ -1116,7 +1121,7 @@ PUT /groups/:id/hooks/:hook_id
 | `confidential_note_events`   | boolean        | no       | Trigger hook on confidential note events |
 | `job_events`                 | boolean        | no       | Trigger hook on job events |
 | `pipeline_events`            | boolean        | no       | Trigger hook on pipeline events |
-| `wiki_events`                | boolean        | no       | Trigger hook on wiki events |
+| `wiki_page_events`           | boolean        | no       | Trigger hook on wiki page events |
 | `deployment_events`          | boolean        | no       | Trigger hook on deployment events |
 | `releases_events`            | boolean        | no       | Trigger hook on release events |
 | `subgroup_events`            | boolean        | no       | Trigger hook on subgroup events |

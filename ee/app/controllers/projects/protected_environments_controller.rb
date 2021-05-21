@@ -6,7 +6,7 @@ class Projects::ProtectedEnvironmentsController < Projects::ApplicationControlle
   feature_category :continuous_delivery
 
   def create
-    protected_environment = ::ProtectedEnvironments::CreateService.new(@project, current_user, protected_environment_params).execute
+    protected_environment = ::ProtectedEnvironments::CreateService.new(container: @project, current_user: current_user, params: protected_environment_params).execute
 
     if protected_environment.persisted?
       flash[:notice] = s_('ProtectedEnvironment|Your environment has been protected.')
@@ -18,7 +18,7 @@ class Projects::ProtectedEnvironmentsController < Projects::ApplicationControlle
   end
 
   def update
-    result = ::ProtectedEnvironments::UpdateService.new(@project, current_user, protected_environment_params).execute(@protected_environment)
+    result = ::ProtectedEnvironments::UpdateService.new(container: @project, current_user: current_user, params: protected_environment_params).execute(@protected_environment)
 
     if result
       render json: @protected_environment, status: :ok, include: :deploy_access_levels
@@ -28,7 +28,7 @@ class Projects::ProtectedEnvironmentsController < Projects::ApplicationControlle
   end
 
   def destroy
-    result = ::ProtectedEnvironments::DestroyService.new(@project, current_user).execute(@protected_environment)
+    result = ::ProtectedEnvironments::DestroyService.new(container: @project, current_user: current_user).execute(@protected_environment)
 
     if result
       flash[:notice] = s_('ProtectedEnvironment|Your environment has been unprotected')
@@ -40,7 +40,7 @@ class Projects::ProtectedEnvironmentsController < Projects::ApplicationControlle
   end
 
   def search
-    unprotected_environment_names = ::ProtectedEnvironments::SearchService.new(@project, current_user).execute(search_params[:query])
+    unprotected_environment_names = ::ProtectedEnvironments::SearchService.new(container: @project, current_user: current_user).execute(search_params[:query])
 
     render json: unprotected_environment_names, status: :ok
   end

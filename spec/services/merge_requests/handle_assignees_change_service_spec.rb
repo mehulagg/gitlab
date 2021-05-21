@@ -6,7 +6,7 @@ RSpec.describe MergeRequests::HandleAssigneesChangeService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
   let_it_be(:assignee) { create(:user) }
-  let_it_be(:merge_request) { create(:merge_request, author: user, source_project: project, assignees: [assignee]) }
+  let_it_be_with_reload(:merge_request) { create(:merge_request, author: user, source_project: project, assignees: [assignee]) }
   let_it_be(:old_assignees) { create_list(:user, 3) }
 
   let(:options) { {} }
@@ -38,18 +38,6 @@ RSpec.describe MergeRequests::HandleAssigneesChangeService do
 
       async_execute
     end
-
-    context 'when async_handle_merge_request_assignees_change feature is disabled' do
-      before do
-        stub_feature_flags(async_handle_merge_request_assignees_change: false)
-      end
-
-      it 'calls #execute' do
-        expect(service).to receive(:execute).with(merge_request, old_assignees, options)
-
-        async_execute
-      end
-    end
   end
 
   describe '#execute' do
@@ -57,13 +45,27 @@ RSpec.describe MergeRequests::HandleAssigneesChangeService do
       service.execute(merge_request, old_assignees, options)
     end
 
+    let(:note) { merge_request.notes.system.last }
+    let(:removed_note) { "unassigned #{old_assignees.map(&:to_reference).to_sentence}" }
+
+    context 'when unassigning all users' do
+      before do
+        merge_request.update!(assignee_ids: [])
+      end
+
+      it 'creates assignee note' do
+        execute
+
+        expect(note).not_to be_nil
+        expect(note.note).to eq removed_note
+      end
+    end
+
     it 'creates assignee note' do
       execute
 
-      note = merge_request.notes.last
-
       expect(note).not_to be_nil
-      expect(note.note).to include "assigned to #{assignee.to_reference} and unassigned #{old_assignees.map(&:to_reference).to_sentence}"
+      expect(note.note).to include "assigned to #{assignee.to_reference} and #{removed_note}"
     end
 
     it 'sends email notifications to old and new assignees', :mailer, :sidekiq_inline do

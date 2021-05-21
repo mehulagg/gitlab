@@ -9,7 +9,7 @@ module Projects
       include RendersNotes
 
       before_action do
-        push_frontend_feature_flag(:jira_for_vulnerabilities, @project, default_enabled: :yaml)
+        push_frontend_feature_flag(:create_vulnerability_jira_issue_via_graphql, @project, default_enabled: :yaml)
       end
 
       before_action :vulnerability, except: :index

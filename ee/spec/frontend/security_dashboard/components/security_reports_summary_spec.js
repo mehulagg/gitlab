@@ -84,6 +84,8 @@ describe('Security reports summary component', () => {
     ${{ sast: { vulnerabilitiesCount: 123 } }}               | ${'SAST'}
     ${{ containerScanning: { vulnerabilitiesCount: 123 } }}  | ${'Container Scanning'}
     ${{ dependencyScanning: { vulnerabilitiesCount: 123 } }} | ${'Dependency Scanning'}
+    ${{ apiFuzzing: { vulnerabilitiesCount: 123 } }}         | ${'API Fuzzing'}
+    ${{ coverageFuzzing: { vulnerabilitiesCount: 123 } }}    | ${'Coverage Fuzzing'}
   `('shows user-friendly scanner name for $string', ({ summaryProp, string }) => {
     createWrapper({
       propsData: {
@@ -100,6 +102,8 @@ describe('Security reports summary component', () => {
     ${{ sast: null }}               | ${'SAST'}
     ${{ containerScanning: null }}  | ${'Container Scanning'}
     ${{ dependencyScanning: null }} | ${'Dependency Scanning'}
+    ${{ apiFuzzing: null }}         | ${'API Fuzzing'}
+    ${{ coverageFuzzing: null }}    | ${'Coverage Fuzzing'}
   `('does not show $report report if scanner did not run', ({ summaryProp, report }) => {
     createWrapper({
       propsData: {

@@ -47,7 +47,13 @@ module TrialStatusWidgetHelper
   end
 
   def ultimate_subscription_path_for_group(group)
-    # Hard-coding the plan_id to the Ultimate plan on production & staging
-    new_subscriptions_path(namespace_id: group.id, plan_id: '2c92a0fc5a83f01d015aa6db83c45aac')
+    # NOTE: We are okay hard-coding the production value for the Ulitmate 1-year
+    # SaaS plan ID while this is all part of an active experiment. If & when the
+    # experiment is deemed a success, part of the clean-up effort will be to
+    # pull the value directly from the CustomersDot API. Value taken from
+    # https://gitlab.com/gitlab-org/customers-gitlab-com/blob/7177f13c478ef623b779d6635c4a58ee650b7884/config/application.yml#L207
+    zuora_ultimate_plan_id = '2c92a0ff76f0d5250176f2f8c86f305a'
+
+    new_subscriptions_path(namespace_id: group.id, plan_id: zuora_ultimate_plan_id)
   end
 end

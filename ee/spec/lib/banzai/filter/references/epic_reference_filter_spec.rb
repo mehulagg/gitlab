@@ -261,4 +261,34 @@ RSpec.describe Banzai::Filter::References::EpicReferenceFilter do
       expect(doc(text).css('a').first.attr('class')).to eq('gfm gfm-epic has-tooltip')
     end
   end
+
+  context 'checking N+1' do
+    let(:epic2) { create(:epic, group: another_group) }
+    let(:project) { create(:project, group: another_group) }
+    let(:full_ref_text) { "#{epic.group.full_path}&#{epic.iid}" }
+    let(:context) { { project: nil, group: group } }
+
+    it 'does not have N+1 per multiple references per group', :use_sql_query_cache do
+      markdown = "#{epic.to_reference} &9999990"
+
+      # warm up
+      reference_filter(markdown, context)
+
+      control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+        reference_filter(markdown, context)
+      end.count
+
+      markdown = "#{epic.to_reference} #{epic.group.full_path}&9999991 #{epic.group.full_path}&9999992 &9999993 #{epic2.to_reference(group)} #{epic2.group.full_path}&9999991 something/cool&12"
+
+      # Since we're not batching queries across groups,
+      # we have to account for that.
+      # 1 for both groups, 1 for epics in each group == 3
+      # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/330359
+      max_count = control_count + 1
+
+      expect do
+        reference_filter(markdown, context)
+      end.not_to exceed_all_query_limit(max_count)
+    end
+  end
 end

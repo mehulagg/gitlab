@@ -13,6 +13,7 @@ module EE
         mount ::API::AuditEvents
         mount ::API::ProjectApprovalRules
         mount ::API::ExternalApprovalRules
+        mount ::API::StatusChecks
         mount ::API::ProjectApprovalSettings
         mount ::API::Dora::Metrics
         mount ::API::EpicIssues
@@ -51,6 +52,8 @@ module EE
         mount ::API::ResourceIterationEvents
         mount ::API::Iterations
         mount ::API::GroupRepositoryStorageMoves
+
+        mount ::API::Internal::AppSec::Dast::SiteValidations
       end
     end
   end

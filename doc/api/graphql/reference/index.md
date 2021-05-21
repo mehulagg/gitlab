@@ -85,7 +85,7 @@ Returns [`DesignManagement!`](#designmanagement).
 
 ### `Query.devopsAdoptionSegments`
 
-Get configured DevOps adoption segments on the instance.
+Get configured DevOps adoption segments on the instance. **BETA** This endpoint is subject to change without notice.
 
 Returns [`DevopsAdoptionSegmentConnection`](#devopsadoptionsegmentconnection).
 
@@ -321,6 +321,25 @@ Returns [`RunnerSetup`](#runnersetup).
 | <a id="queryrunnersetupgroupid"></a>`groupId` **{warning-solid}** | [`GroupID`](#groupid) | **Deprecated** in 13.11. No longer used. |
 | <a id="queryrunnersetupplatform"></a>`platform` | [`String!`](#string) | Platform to generate the instructions for. |
 | <a id="queryrunnersetupprojectid"></a>`projectId` **{warning-solid}** | [`ProjectID`](#projectid) | **Deprecated** in 13.11. No longer used. |
+
+### `Query.runners`
+
+Find runners visible to the current user. Available only when feature flag `runner_graphql_query` is enabled.
+
+Returns [`CiRunnerConnection`](#cirunnerconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="queryrunnerssort"></a>`sort` | [`CiRunnerSort`](#cirunnersort) | Sort order of results. |
+| <a id="queryrunnersstatus"></a>`status` | [`CiRunnerStatus`](#cirunnerstatus) | Filter runners by status. |
+| <a id="queryrunnerstaglist"></a>`tagList` | [`[String!]`](#string) | Filter by tags associated with the runner (comma-separated or array). |
+| <a id="queryrunnerstype"></a>`type` | [`CiRunnerType`](#cirunnertype) | Filter runners by type. |
 
 ### `Query.snippets`
 
@@ -742,6 +761,8 @@ Input type: `BoardListUpdateLimitMetricsInput`
 
 ### `Mutation.bulkFindOrCreateDevopsAdoptionSegments`
 
+**BETA** This endpoint is subject to change without notice.
+
 Input type: `BulkFindOrCreateDevopsAdoptionSegmentsInput`
 
 #### Arguments
@@ -1073,6 +1094,8 @@ Input type: `CreateCustomEmojiInput`
 | <a id="mutationcreatecustomemojierrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.createDevopsAdoptionSegment`
+
+**BETA** This endpoint is subject to change without notice.
 
 Input type: `CreateDevopsAdoptionSegmentInput`
 
@@ -1654,6 +1677,8 @@ Input type: `DeleteAnnotationInput`
 | <a id="mutationdeleteannotationerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.deleteDevopsAdoptionSegment`
+
+**BETA** This endpoint is subject to change without notice.
 
 Input type: `DeleteDevopsAdoptionSegmentInput`
 
@@ -4594,6 +4619,29 @@ The edge type for [`CiJob`](#cijob).
 | <a id="cijobedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="cijobedgenode"></a>`node` | [`CiJob`](#cijob) | The item at the end of the edge. |
 
+#### `CiRunnerConnection`
+
+The connection type for [`CiRunner`](#cirunner).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="cirunnerconnectionedges"></a>`edges` | [`[CiRunnerEdge]`](#cirunneredge) | A list of edges. |
+| <a id="cirunnerconnectionnodes"></a>`nodes` | [`[CiRunner]`](#cirunner) | A list of nodes. |
+| <a id="cirunnerconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `CiRunnerEdge`
+
+The edge type for [`CiRunner`](#cirunner).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="cirunneredgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="cirunneredgenode"></a>`node` | [`CiRunner`](#cirunner) | The item at the end of the edge. |
+
 #### `CiStageConnection`
 
 The connection type for [`CiStage`](#cistage).
@@ -5150,6 +5198,29 @@ The edge type for [`EpicList`](#epiclist).
 | ---- | ---- | ----------- |
 | <a id="epiclistedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="epiclistedgenode"></a>`node` | [`EpicList`](#epiclist) | The item at the end of the edge. |
+
+#### `EscalationPolicyTypeConnection`
+
+The connection type for [`EscalationPolicyType`](#escalationpolicytype).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationpolicytypeconnectionedges"></a>`edges` | [`[EscalationPolicyTypeEdge]`](#escalationpolicytypeedge) | A list of edges. |
+| <a id="escalationpolicytypeconnectionnodes"></a>`nodes` | [`[EscalationPolicyType]`](#escalationpolicytype) | A list of nodes. |
+| <a id="escalationpolicytypeconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `EscalationPolicyTypeEdge`
+
+The edge type for [`EscalationPolicyType`](#escalationpolicytype).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationpolicytypeedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="escalationpolicytypeedgenode"></a>`node` | [`EscalationPolicyType`](#escalationpolicytype) | The item at the end of the edge. |
 
 #### `EventConnection`
 
@@ -5799,6 +5870,29 @@ The edge type for [`PackageTag`](#packagetag).
 | ---- | ---- | ----------- |
 | <a id="packagetagedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="packagetagedgenode"></a>`node` | [`PackageTag`](#packagetag) | The item at the end of the edge. |
+
+#### `PathLockConnection`
+
+The connection type for [`PathLock`](#pathlock).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockconnectionedges"></a>`edges` | [`[PathLockEdge]`](#pathlockedge) | A list of edges. |
+| <a id="pathlockconnectionnodes"></a>`nodes` | [`[PathLock]`](#pathlock) | A list of nodes. |
+| <a id="pathlockconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `PathLockEdge`
+
+The edge type for [`PathLock`](#pathlock).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="pathlockedgenode"></a>`node` | [`PathLock`](#pathlock) | The item at the end of the edge. |
 
 #### `PipelineArtifactRegistryConnection`
 
@@ -8024,6 +8118,8 @@ A specific version in which designs were added, modified or deleted.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="designversionauthor"></a>`author` | [`UserCore!`](#usercore) | Author of the version. |
+| <a id="designversioncreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the version was created. |
 | <a id="designversiondesigns"></a>`designs` | [`DesignConnection!`](#designconnection) | All designs that were changed in the version. (see [Connections](#connections)) |
 | <a id="designversionid"></a>`id` | [`ID!`](#id) | ID of the design version. |
 | <a id="designversionsha"></a>`sha` | [`ID!`](#id) | SHA of the design version. |
@@ -8536,6 +8632,32 @@ Check permissions for the current user on an epic.
 | <a id="epicpermissionsreadepiciid"></a>`readEpicIid` | [`Boolean!`](#boolean) | Indicates the user can perform `read_epic_iid` on this resource. |
 | <a id="epicpermissionsupdateepic"></a>`updateEpic` | [`Boolean!`](#boolean) | Indicates the user can perform `update_epic` on this resource. |
 
+### `EscalationPolicyType`
+
+Represents an escalation policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationpolicytypedescription"></a>`description` | [`String`](#string) | The description of the escalation policy. |
+| <a id="escalationpolicytypeid"></a>`id` | [`IncidentManagementEscalationPolicyID`](#incidentmanagementescalationpolicyid) | ID of the escalation policy. |
+| <a id="escalationpolicytypename"></a>`name` | [`String`](#string) | The name of the escalation policy. |
+| <a id="escalationpolicytyperules"></a>`rules` | [`[EscalationRuleType!]`](#escalationruletype) | Steps of the escalation policy. |
+
+### `EscalationRuleType`
+
+Represents an escalation rule for an escalation policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationruletypeelapsedtimeseconds"></a>`elapsedTimeSeconds` | [`Int`](#int) | The time in seconds before the rule is activated. |
+| <a id="escalationruletypeid"></a>`id` | [`IncidentManagementEscalationRuleID`](#incidentmanagementescalationruleid) | ID of the escalation policy. |
+| <a id="escalationruletypeoncallschedule"></a>`oncallSchedule` | [`IncidentManagementOncallSchedule`](#incidentmanagementoncallschedule) | The on-call schedule to notify. |
+| <a id="escalationruletypestatus"></a>`status` | [`EscalationRuleStatus`](#escalationrulestatus) | The status required to prevent the rule from activating. |
+
 ### `Event`
 
 Representing an event.
@@ -8608,7 +8730,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ##### `GeoNode.lfsObjectRegistries`
 
-Find LFS object registries on this Geo node. Available only when feature flag `geo_lfs_object_replication` is enabled.
+Find LFS object registries on this Geo node.
 
 Returns [`LfsObjectRegistryConnection`](#lfsobjectregistryconnection).
 
@@ -9107,7 +9229,11 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="grouppackagesincludeversionless"></a>`includeVersionless` | [`Boolean`](#boolean) | Include versionless packages. |
+| <a id="grouppackagespackagename"></a>`packageName` | [`String`](#string) | Search a package by name. |
+| <a id="grouppackagespackagetype"></a>`packageType` | [`PackageTypeEnum`](#packagetypeenum) | Filter a package by type. |
 | <a id="grouppackagessort"></a>`sort` | [`PackageGroupSort`](#packagegroupsort) | Sort packages by this criteria. |
+| <a id="grouppackagesstatus"></a>`status` | [`PackageStatus`](#packagestatus) | Filter a package by status. |
 
 ##### `Group.projects`
 
@@ -9273,8 +9399,8 @@ Contains release-related statistics about a group.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="groupreleasestatsreleasescount"></a>`releasesCount` | [`Int`](#int) | Total number of releases in all descendant projects of the group. Will always return `null` if `group_level_release_statistics` feature flag is disabled. |
-| <a id="groupreleasestatsreleasespercentage"></a>`releasesPercentage` | [`Int`](#int) | Percentage of the group's descendant projects that have at least one release. Will always return `null` if `group_level_release_statistics` feature flag is disabled. |
+| <a id="groupreleasestatsreleasescount"></a>`releasesCount` | [`Int`](#int) | Total number of releases in all descendant projects of the group. |
+| <a id="groupreleasestatsreleasespercentage"></a>`releasesPercentage` | [`Int`](#int) | Percentage of the group's descendant projects that have at least one release. |
 
 ### `GroupStats`
 
@@ -10452,6 +10578,19 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="notepermissionsrepositionnote"></a>`repositionNote` | [`Boolean!`](#boolean) | Indicates the user can perform `reposition_note` on this resource. |
 | <a id="notepermissionsresolvenote"></a>`resolveNote` | [`Boolean!`](#boolean) | Indicates the user can perform `resolve_note` on this resource. |
 
+### `NugetMetadata`
+
+Nuget metadata.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="nugetmetadataiconurl"></a>`iconUrl` | [`String!`](#string) | Icon URL of the Nuget package. |
+| <a id="nugetmetadataid"></a>`id` | [`PackagesNugetMetadatumID!`](#packagesnugetmetadatumid) | ID of the metadatum. |
+| <a id="nugetmetadatalicenseurl"></a>`licenseUrl` | [`String!`](#string) | License URL of the Nuget package. |
+| <a id="nugetmetadataprojecturl"></a>`projectUrl` | [`String!`](#string) | Project URL of the Nuget package. |
+
 ### `OncallParticipantType`
 
 The rotation participant and color palette.
@@ -10607,6 +10746,18 @@ Information about pagination in a connection.
 | <a id="pageinfohaspreviouspage"></a>`hasPreviousPage` | [`Boolean!`](#boolean) | When paginating backwards, are there more items?. |
 | <a id="pageinfostartcursor"></a>`startCursor` | [`String`](#string) | When paginating backwards, the cursor to continue. |
 
+### `PathLock`
+
+Represents a file or directory in the project repository that has been locked.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pathlockid"></a>`id` | [`PathLockID!`](#pathlockid) | ID of the path lock. |
+| <a id="pathlockpath"></a>`path` | [`String`](#string) | The locked path. |
+| <a id="pathlockuser"></a>`user` | [`UserCore`](#usercore) | The user that has locked this path. |
+
 ### `Pipeline`
 
 #### Fields
@@ -10619,6 +10770,7 @@ Information about pagination in a connection.
 | <a id="pipelinecodequalityreports"></a>`codeQualityReports` | [`CodeQualityDegradationConnection`](#codequalitydegradationconnection) | Code Quality degradations reported on the pipeline. (see [Connections](#connections)) |
 | <a id="pipelinecommitpath"></a>`commitPath` | [`String`](#string) | Path to the commit that triggered the pipeline. |
 | <a id="pipelinecommittedat"></a>`committedAt` | [`Time`](#time) | Timestamp of the pipeline's commit. |
+| <a id="pipelinecomplete"></a>`complete` | [`Boolean!`](#boolean) | Indicates if a pipeline is complete. |
 | <a id="pipelineconfigsource"></a>`configSource` | [`PipelineConfigSourceEnum`](#pipelineconfigsourceenum) | Configuration source of the pipeline (UNKNOWN_SOURCE, REPOSITORY_SOURCE, AUTO_DEVOPS_SOURCE, WEBIDE_SOURCE, REMOTE_SOURCE, EXTERNAL_PROJECT_SOURCE, BRIDGE_SOURCE, PARAMETER_SOURCE, COMPLIANCE_SOURCE). |
 | <a id="pipelinecoverage"></a>`coverage` | [`Float`](#float) | Coverage percentage. |
 | <a id="pipelinecreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of the pipeline's creation. |
@@ -10806,6 +10958,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projecthttpurltorepo"></a>`httpUrlToRepo` | [`String`](#string) | URL to connect to the project via HTTPS. |
 | <a id="projectid"></a>`id` | [`ID!`](#id) | ID of the project. |
 | <a id="projectimportstatus"></a>`importStatus` | [`String`](#string) | Status of import background job of the project. |
+| <a id="projectincidentmanagementescalationpolicies"></a>`incidentManagementEscalationPolicies` | [`EscalationPolicyTypeConnection`](#escalationpolicytypeconnection) | Incident Management escalation policies of the project. (see [Connections](#connections)) |
 | <a id="projectissuesenabled"></a>`issuesEnabled` | [`Boolean`](#boolean) | Indicates if Issues are enabled for the current user. |
 | <a id="projectjiraimportstatus"></a>`jiraImportStatus` | [`String`](#string) | Status of Jira import background job of the project. |
 | <a id="projectjiraimports"></a>`jiraImports` | [`JiraImportConnection`](#jiraimportconnection) | Jira imports into the project. (see [Connections](#connections)) |
@@ -10821,6 +10974,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectonlyallowmergeifpipelinesucceeds"></a>`onlyAllowMergeIfPipelineSucceeds` | [`Boolean`](#boolean) | Indicates if merge requests of the project can only be merged with successful jobs. |
 | <a id="projectopenissuescount"></a>`openIssuesCount` | [`Int`](#int) | Number of open issues for the project. |
 | <a id="projectpath"></a>`path` | [`String!`](#string) | Path of the project. |
+| <a id="projectpathlocks"></a>`pathLocks` | [`PathLockConnection`](#pathlockconnection) | The project's path locks. (see [Connections](#connections)) |
 | <a id="projectpipelineanalytics"></a>`pipelineAnalytics` | [`PipelineAnalytics`](#pipelineanalytics) | Pipeline analytics. |
 | <a id="projectprintingmergerequestlinkenabled"></a>`printingMergeRequestLinkEnabled` | [`Boolean`](#boolean) | Indicates if a link to create or view a merge request should display after a push to Git repositories of the project from the command line. |
 | <a id="projectpublicjobs"></a>`publicJobs` | [`Boolean`](#boolean) | Indicates if there is public access to pipelines and job details of the project, including output logs and artifacts. |
@@ -11077,6 +11231,18 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectenvironmentsname"></a>`name` | [`String`](#string) | Name of the environment. |
 | <a id="projectenvironmentssearch"></a>`search` | [`String`](#string) | Search query for environment name. |
 | <a id="projectenvironmentsstates"></a>`states` | [`[String!]`](#string) | States of environments that should be included in result. |
+
+##### `Project.incidentManagementEscalationPolicy`
+
+Incident Management escalation policy of the project.
+
+Returns [`EscalationPolicyType`](#escalationpolicytype).
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectincidentmanagementescalationpolicyid"></a>`id` | [`IncidentManagementEscalationPolicyID!`](#incidentmanagementescalationpolicyid) | ID of the escalation policy. |
 
 ##### `Project.incidentManagementOncallSchedules`
 
@@ -11362,7 +11528,11 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="projectpackagesincludeversionless"></a>`includeVersionless` | [`Boolean`](#boolean) | Include versionless packages. |
+| <a id="projectpackagespackagename"></a>`packageName` | [`String`](#string) | Search a package by name. |
+| <a id="projectpackagespackagetype"></a>`packageType` | [`PackageTypeEnum`](#packagetypeenum) | Filter a package by type. |
 | <a id="projectpackagessort"></a>`sort` | [`PackageSort`](#packagesort) | Sort packages by this criteria. |
+| <a id="projectpackagesstatus"></a>`status` | [`PackageStatus`](#packagestatus) | Filter a package by status. |
 
 ##### `Project.pipeline`
 
@@ -11631,6 +11801,7 @@ Represents a Project Membership.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectpermissionsadminoperations"></a>`adminOperations` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_operations` on this resource. |
+| <a id="projectpermissionsadminpathlocks"></a>`adminPathLocks` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_path_locks` on this resource. |
 | <a id="projectpermissionsadminproject"></a>`adminProject` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_project` on this resource. |
 | <a id="projectpermissionsadminremotemirror"></a>`adminRemoteMirror` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_remote_mirror` on this resource. |
 | <a id="projectpermissionsadminwiki"></a>`adminWiki` | [`Boolean!`](#boolean) | Indicates the user can perform `admin_wiki` on this resource. |
@@ -11815,6 +11986,7 @@ Represents the source code attached to a release in a particular format.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="repositorydiskpath"></a>`diskPath` | [`String`](#string) | Shows a disk path of the repository. |
 | <a id="repositoryempty"></a>`empty` | [`Boolean!`](#boolean) | Indicates repository has no visible content. |
 | <a id="repositoryexists"></a>`exists` | [`Boolean!`](#boolean) | Indicates a corresponding Git repository exists on disk. |
 | <a id="repositoryrootref"></a>`rootRef` | [`String`](#string) | Default branch of the repository. |
@@ -13580,6 +13752,15 @@ Values for YAML processor result.
 | <a id="cirunneraccesslevelnot_protected"></a>`NOT_PROTECTED` | A runner that is not protected. |
 | <a id="cirunneraccesslevelref_protected"></a>`REF_PROTECTED` | A runner that is ref protected. |
 
+### `CiRunnerSort`
+
+Values for sorting runners.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="cirunnersortcontacted_asc"></a>`CONTACTED_ASC` | Ordered by contacted_at in ascending order. |
+| <a id="cirunnersortcreated_desc"></a>`CREATED_DESC` | Ordered by created_date in descending order. |
+
 ### `CiRunnerStatus`
 
 | Value | Description |
@@ -13846,6 +14027,15 @@ Epic ID wildcard values.
 | ----- | ----------- |
 | <a id="epicwildcardidany"></a>`ANY` | Any epic is assigned. |
 | <a id="epicwildcardidnone"></a>`NONE` | No epic is assigned. |
+
+### `EscalationRuleStatus`
+
+Escalation rule statuses.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="escalationrulestatusacknowledged"></a>`ACKNOWLEDGED` | . |
+| <a id="escalationrulestatusresolved"></a>`RESOLVED` | . |
 
 ### `EventAction`
 
@@ -14224,6 +14414,7 @@ Values for sorting package.
 | <a id="packagetypeenumnuget"></a>`NUGET` | Packages from the Nuget package manager. |
 | <a id="packagetypeenumpypi"></a>`PYPI` | Packages from the PyPI package manager. |
 | <a id="packagetypeenumrubygems"></a>`RUBYGEMS` | Packages from the Rubygems package manager. |
+| <a id="packagetypeenumterraform_module"></a>`TERRAFORM_MODULE` | Packages from the Terraform Module package manager. |
 
 ### `PipelineConfigSourceEnum`
 
@@ -14411,10 +14602,10 @@ Type of a snippet blob input action.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="snippetblobactionenumcreate"></a>`create` |  |
-| <a id="snippetblobactionenumdelete"></a>`delete` |  |
-| <a id="snippetblobactionenummove"></a>`move` |  |
-| <a id="snippetblobactionenumupdate"></a>`update` |  |
+| <a id="snippetblobactionenumcreate"></a>`create` | Create a snippet blob. |
+| <a id="snippetblobactionenumdelete"></a>`delete` | Delete a snippet blob. |
+| <a id="snippetblobactionenummove"></a>`move` | Move a snippet blob. |
+| <a id="snippetblobactionenumupdate"></a>`update` | Update a snippet blob. |
 
 ### `Sort`
 
@@ -14485,8 +14676,8 @@ State of a test report.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="typeenumpersonal"></a>`personal` |  |
-| <a id="typeenumproject"></a>`project` |  |
+| <a id="typeenumpersonal"></a>`personal` | Snippet created independent of any project. |
+| <a id="typeenumproject"></a>`project` | Snippet related to a specific project. |
 
 ### `UserCalloutFeatureNameEnum`
 
@@ -14546,9 +14737,9 @@ Possible states of a user.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="visibilityscopesenuminternal"></a>`internal` |  |
-| <a id="visibilityscopesenumprivate"></a>`private` |  |
-| <a id="visibilityscopesenumpublic"></a>`public` |  |
+| <a id="visibilityscopesenuminternal"></a>`internal` | The snippet is visible for any logged in user except external users. |
+| <a id="visibilityscopesenumprivate"></a>`private` | The snippet is visible only to the snippet creator. |
+| <a id="visibilityscopesenumpublic"></a>`public` | The snippet can be accessed without any authentication. |
 
 ### `VulnerabilityDismissalReason`
 
@@ -14893,6 +15084,18 @@ Represents a unique identifier that is Base64 obfuscated. It is often used to re
 
 An ISO 8601-encoded date.
 
+### `IncidentManagementEscalationPolicyID`
+
+A `IncidentManagementEscalationPolicyID` is a global ID. It is encoded as a string.
+
+An example `IncidentManagementEscalationPolicyID` is: `"gid://gitlab/IncidentManagement::EscalationPolicy/1"`.
+
+### `IncidentManagementEscalationRuleID`
+
+A `IncidentManagementEscalationRuleID` is a global ID. It is encoded as a string.
+
+An example `IncidentManagementEscalationRuleID` is: `"gid://gitlab/IncidentManagement::EscalationRule/1"`.
+
 ### `IncidentManagementOncallParticipantID`
 
 A `IncidentManagementOncallParticipantID` is a global ID. It is encoded as a string.
@@ -15013,6 +15216,12 @@ A `PackagesMavenMetadatumID` is a global ID. It is encoded as a string.
 
 An example `PackagesMavenMetadatumID` is: `"gid://gitlab/Packages::Maven::Metadatum/1"`.
 
+### `PackagesNugetMetadatumID`
+
+A `PackagesNugetMetadatumID` is a global ID. It is encoded as a string.
+
+An example `PackagesNugetMetadatumID` is: `"gid://gitlab/Packages::Nuget::Metadatum/1"`.
+
 ### `PackagesPackageFileID`
 
 A `PackagesPackageFileID` is a global ID. It is encoded as a string.
@@ -15024,6 +15233,12 @@ An example `PackagesPackageFileID` is: `"gid://gitlab/Packages::PackageFile/1"`.
 A `PackagesPackageID` is a global ID. It is encoded as a string.
 
 An example `PackagesPackageID` is: `"gid://gitlab/Packages::Package/1"`.
+
+### `PathLockID`
+
+A `PathLockID` is a global ID. It is encoded as a string.
+
+An example `PathLockID` is: `"gid://gitlab/PathLock/1"`.
 
 ### `PayloadAlertFieldPathSegment`
 
@@ -15149,6 +15364,7 @@ One of:
 - [`ComposerMetadata`](#composermetadata)
 - [`ConanMetadata`](#conanmetadata)
 - [`MavenMetadata`](#mavenmetadata)
+- [`NugetMetadata`](#nugetmetadata)
 
 #### `VulnerabilityDetail`
 

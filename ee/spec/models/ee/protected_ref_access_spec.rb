@@ -17,7 +17,7 @@ RSpec.describe EE::ProtectedRefAccess do
 
       before do
         project.add_developer(user)
-        project.project_group_links.create(group: group)
+        project.project_group_links.create!(group: group)
       end
 
       it "#{included_in_class} includes {described_class}" do
@@ -104,8 +104,8 @@ RSpec.describe EE::ProtectedRefAccess do
 
       it "doesn't require access_level if group specified" do
         subject = build(factory_name, access_level: nil, group: create(:group))
-        subject.project.save
-        subject.project.project_group_links.create(group: subject.group)
+        subject.project.save!
+        subject.project.project_group_links.create!(group: subject.group)
 
         expect(subject).to be_valid
       end

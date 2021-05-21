@@ -6,6 +6,9 @@ class DastSiteProfile < ApplicationRecord
 
   has_many :secret_variables, class_name: 'Dast::SiteProfileSecretVariable'
 
+  has_many :dast_site_profiles_pipelines, class_name: 'Dast::SiteProfilesPipeline', foreign_key: :dast_site_profile_id, inverse_of: :dast_site_profile
+  has_many :ci_pipelines, class_name: 'Ci::Pipeline', through: :dast_site_profiles_pipelines
+
   validates :excluded_urls, length: { maximum: 25 }
   validates :auth_url, addressable_url: true, length: { maximum: 1024 }, allow_nil: true
   validates :auth_username_field, :auth_password_field, :auth_username, length: { maximum: 255 }
@@ -24,6 +27,10 @@ class DastSiteProfile < ApplicationRecord
   enum target_type: { website: 0, api: 1 }
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
+
+  def ci_variables
+    ::Gitlab::Ci::Variables::Collection.new(secret_variables)
+  end
 
   def status
     return DastSiteValidation::NONE_STATE unless dast_site_validation

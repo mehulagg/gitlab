@@ -62,7 +62,6 @@ spec:
           ...propsData,
         },
         provide: {
-          glFeatures: { threatMonitoringAlerts: false },
           ...provide,
         },
         store,
@@ -121,6 +120,10 @@ spec:
     });
   });
 
+  it('renders the policy alert picker', () => {
+    expect(findPolicyAlertPicker().exists()).toBe(true);
+  });
+
   it('does not render yaml editor', () => {
     expect(findYamlEditor().exists()).toBe(false);
   });
@@ -131,10 +134,6 @@ spec:
 
   it('does not render delete button', () => {
     expect(findDeletePolicy().exists()).toBe(false);
-  });
-
-  it('does not render the policy alert picker', () => {
-    expect(findPolicyAlertPicker().exists()).toBe(false);
   });
 
   describe('given .yaml editor mode is enabled', () => {
@@ -431,14 +430,6 @@ spec:
   });
 
   describe('add alert picker', () => {
-    beforeEach(() => {
-      factory({ provide: { glFeatures: { threatMonitoringAlerts: true } } });
-    });
-
-    it('does render the policy alert picker', () => {
-      expect(findPolicyAlertPicker().exists()).toBe(true);
-    });
-
     it('adds a policy annotation on alert addition', async () => {
       await modifyPolicyAlert({ isAlertEnabled: true });
       expect(store.dispatch).toHaveBeenLastCalledWith('networkPolicies/createPolicy', {

@@ -253,6 +253,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `gitlab_server`                         | Server to use for authentication when access control is enabled; defaults to GitLab `external_url`. |
 | `headers`                               | Specify any additional http headers that should be sent to the client with each response. Multiple headers can be given as an array, header and value as one string, for example `['my-header: myvalue', 'my-other-header: my-other-value']` |
 | `inplace_chroot`                        | On [systems that don't support bind-mounts](index.md#additional-configuration-for-docker-container), this instructs GitLab Pages to `chroot` into its `pages_path` directory. Some caveats exist when using in-place `chroot`; refer to the GitLab Pages [README](https://gitlab.com/gitlab-org/gitlab-pages/blob/master/README.md#caveats) for more information. |
+| `enable_disk`                           | Allows the GitLab Pages daemon to serve content from disk. Shall be disabled if shared disk storage isn't available. |
 | `insecure_ciphers`                      | Use default list of cipher suites, may contain insecure ones like 3DES and RC4. |
 | `internal_gitlab_server`                | Internal GitLab server address used exclusively for API requests. Useful if you want to send that traffic over an internal load balancer. Defaults to GitLab `external_url`. |
 | `listen_proxy`                          | The addresses to listen on for reverse-proxy requests. Pages binds to these addresses' network sockets and receives incoming requests from them. Sets the value of `proxy_pass` in `$nginx-dir/conf/gitlab-pages.conf`. |
@@ -830,8 +831,8 @@ or persistent errors, or the Pages Daemon serving old content.
 NOTE:
 Expiry, interval and timeout flags use [Golang's duration formatting](https://golang.org/pkg/time/#ParseDuration).
 A duration string is a possibly signed sequence of decimal numbers,
-each with optional fraction and a unit suffix, such as "300ms", "1.5h" or "2h45m".
-Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+each with optional fraction and a unit suffix, such as `300ms`, `1.5h` or `2h45m`.
+Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`.
 
 Examples:
 
@@ -864,13 +865,6 @@ configuration is tried to be resolved automatically before reporting an error.
 
 ### Object storage settings
 
-WARNING:
-With the following settings, Pages uses both NFS and Object Storage locations when deploying the
-site. **Do not remove the existing NFS mount used by Pages** when applying these settings. For more
-information, see the epics
-[3901](https://gitlab.com/groups/gitlab-org/-/epics/3901#how-to-test-object-storage-integration-in-beta)
-and [3910](https://gitlab.com/groups/gitlab-org/-/epics/3910).
-
 The following settings are:
 
 - Nested under `pages:` and then `object_store:` on source installations.
@@ -881,6 +875,10 @@ The following settings are:
 | `enabled` | Whether object storage is enabled. | `false` |
 | `remote_directory` | The name of the bucket where Pages site content is stored. | |
 | `connection` | Various connection options described below. | |
+
+NOTE:
+If you want to stop using and disconnect the NFS server, you need to [explicitly disable
+local storage](#disable-pages-local-storage), and it's only possible after upgrading to GitLab 13.11.
 
 #### S3-compatible connection settings
 
@@ -915,6 +913,8 @@ In Omnibus installations:
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure)
    for the changes to take effect.
 
+1. [Migrate existing Pages deployments to object storage.](#migrate-pages-deployments-to-object-storage)
+
 In installations from source:
 
 1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
@@ -934,9 +934,11 @@ In installations from source:
 1. Save the file and [restart GitLab](../restart_gitlab.md#installations-from-source)
    for the changes to take effect.
 
+1. [Migrate existing Pages deployments to object storage.](#migrate-pages-deployments-to-object-storage)
+
 ## ZIP storage
 
-In GitLab 14.0 the underlaying storage format of GitLab Pages is changing from
+In GitLab 14.0 the underlying storage format of GitLab Pages is changing from
 files stored directly in disk to a single ZIP archive per project.
 
 These ZIP archives can be stored either locally on disk storage or on the [object storage](#using-object-storage) if it is configured.
@@ -1018,6 +1020,43 @@ After the migration to object storage is performed, you can choose to revert you
 ```shell
 sudo gitlab-rake gitlab:pages:deployments:migrate_to_local
 ```
+
+### Disable Pages local storage
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/301159) in GitLab 13.11.
+
+If you use [object storage](#using-object-storage), disable local storage:
+
+1. Edit `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_rails['pages_local_store_enabled'] = false
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+Starting from GitLab 13.12, this setting also disables the [legacy storage](#migrate-legacy-storage-to-zip-storage), so if you were using NFS to serve Pages, you can completely disconnect from it.
+
+## Migrate GitLab Pages to 14.0
+
+In GitLab 14.0 a number of breaking changes are introduced which may require some user intervention.
+The steps below describe the best way to migrate without causing any downtime for your GitLab instance.
+
+If you run GitLab on a single server, then most likely you will not notice any problem after
+upgrading to GitLab 14.0, but it may be safer to follow the steps anyway.
+If you run GitLab on a single server, then most likely the upgrade process to 14.0 will go smoothly for you. Regardless, we recommend everyone follow the migration steps to ensure a successful upgrade.
+If at any point you run into issues, consult the [troubleshooting section](#troubleshooting).
+
+To migrate GitLab Pages to GitLab 14.0:
+
+1. If your current GitLab version is lower than 13.12, then you first need to upgrade to 13.12.
+Upgrading directly to 14.0 may cause downtime for some web-sites hosted on GitLab Pages
+until you finish the following steps.
+1. Enable the [API-based configuration](#gitlab-api-based-configuration), which
+is the default starting from GitLab 14.0. Skip this step if you're already running GitLab 14.0 or above.
+1. If you want to store your pages content in the [object storage](#using-object-storage), make sure to configure it.
+If you want to store the pages content locally or continue using an NFS server, skip this step.
+1. [Migrate legacy storage to ZIP storage.](#migrate-legacy-storage-to-zip-storage)
 
 ## Backup
 
@@ -1171,7 +1210,7 @@ These are due to the Pages files not being among the
 It is possible to copy the subfolders and files in the [Pages path](#change-storage-path)
 to the new primary node to resolve this.
 For example, you can adapt the `rsync` strategy from the
-[moving repositories documenation](../operations/moving_repositories.md).
+[moving repositories documentation](../operations/moving_repositories.md).
 Alternatively, run the CI pipelines of those projects that contain a `pages` job again.
 
 ### Failed to connect to the internal GitLab API
@@ -1261,3 +1300,24 @@ Once added, reconfigure with `sudo gitlab-ctl reconfigure` and restart GitLab wi
 
 Verify that the **Callback URL**/Redirect URI in the GitLab Pages [System OAuth application](../../integration/oauth_provider.md#instance-wide-applications)
 is using the protocol (HTTP or HTTPS) that `pages_external_url` is configured to use.
+
+### 500 error `cannot serve from disk`
+
+If you get a 500 response from Pages and encounter an error similar to:
+
+```plaintext
+ERRO[0145] cannot serve from disk                        error="gitlab: disk access is disabled via enable-disk=false" project_id=27 source_path="file:///shared/pages/@hashed/67/06/670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf/pages_deployments/14/artifacts.zip" source_type=zip
+```
+
+It means that GitLab Rails is telling GitLab Pages to serve content from a location on disk,
+however, GitLab Pages was configured to disable disk access.
+
+To enable disk access:
+
+1. Enable disk access for GitLab Pages in `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['enable_disk'] = true
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).

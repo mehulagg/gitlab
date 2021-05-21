@@ -6,6 +6,8 @@ module Elastic
 
     delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?, :space_requirements?, :space_required_bytes, to: :migration
 
+    ELASTICSEARCH_SIZE = 25
+
     def initialize(version:, name:, filename:)
       @version = version
       @name = name
@@ -57,7 +59,7 @@ module Elastic
     def self.load_versions(completed:)
       helper = Gitlab::Elastic::Helper.default
       helper.client
-            .search(index: helper.migrations_index_name, body: { query: { term: { completed: completed } } })
+            .search(index: helper.migrations_index_name, body: { query: { term: { completed: completed } }, size: ELASTICSEARCH_SIZE })
             .dig('hits', 'hits')
             .map { |v| v['_id'].to_i }
     rescue Elasticsearch::Transport::Transport::Errors::NotFound

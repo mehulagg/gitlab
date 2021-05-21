@@ -37,7 +37,7 @@ module Sidebars
         private
 
         def list_menu_item
-          if Feature.enabled?(:sidebar_refactor, context.current_user)
+          if Feature.enabled?(:sidebar_refactor, context.current_user, default_enabled: :yaml)
             return ::Sidebars::NilMenuItem.new(item_id: :requirements_list)
           end
 

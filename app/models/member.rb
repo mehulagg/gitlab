@@ -92,11 +92,13 @@ class Member < ApplicationRecord
       .reorder(nil)
   end
 
+  scope :connected_to_user, -> { where.not(user_id: nil) }
+
   # This scope is exclusively used to get the members
   # that can possibly have project_authorization records
   # to projects/groups.
   scope :authorizable, -> do
-    where.not(user_id: nil)
+    connected_to_user
       .non_request
       .non_minimal_access
   end
@@ -164,10 +166,10 @@ class Member < ApplicationRecord
   after_create :send_invite, if: :invite?, unless: :importing?
   after_create :send_request, if: :request?, unless: :importing?
   after_create :create_notification_setting, unless: [:pending?, :importing?]
-  after_create :post_create_hook, unless: [:pending?, :importing?]
-  after_update :post_update_hook, unless: [:pending?, :importing?]
+  after_create :post_create_hook, unless: [:pending?, :importing?], if: :hook_prerequisites_met?
+  after_update :post_update_hook, unless: [:pending?, :importing?], if: :hook_prerequisites_met?
   after_destroy :destroy_notification_setting
-  after_destroy :post_destroy_hook, unless: :pending?
+  after_destroy :post_destroy_hook, unless: :pending?, if: :hook_prerequisites_met?
   after_commit :refresh_member_authorized_projects
 
   default_value_for :notification_level, NotificationSetting.levels[:global]
@@ -334,7 +336,7 @@ class Member < ApplicationRecord
 
       return User.find_by(id: user) if user.is_a?(Integer)
 
-      User.find_by(email: user) || user
+      User.find_by_any_email(user) || user
     end
 
     def retrieve_member(source, user, existing_members)
@@ -379,6 +381,12 @@ class Member < ApplicationRecord
 
   def pending?
     invite? || request?
+  end
+
+  def hook_prerequisites_met?
+    # It is essential that an associated user record exists
+    # so that we can successfully fire any member related hooks/notifications.
+    user.present?
   end
 
   def accept_request

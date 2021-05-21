@@ -169,4 +169,22 @@ RSpec.describe SystemHook do
       hook.async_execute(data, hook_name)
     end
   end
+
+  describe '#rate_limit' do
+    let(:hook) { build(:system_hook) }
+
+    it 'returns nil' do
+      expect(hook.rate_limit).to be_nil
+    end
+  end
+
+  describe '#application_context' do
+    let(:hook) { build(:system_hook) }
+
+    it 'includes the type' do
+      expect(hook.application_context).to eq(
+        related_class: 'SystemHook'
+      )
+    end
+  end
 end

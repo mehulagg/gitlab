@@ -287,6 +287,20 @@ RSpec.describe 'epic boards', :js do
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
     end
+
+    it 'can search for an epic in the search bar' do
+      fill_in 'Search', with: 'Epic 1'
+
+      page.within('[data-testid="epic-filtered-search"]') do
+        find('input').native.send_keys(:return)
+      end
+
+      wait_for_requests
+
+      expect(page).to have_content('Epic1')
+      expect(page).not_to have_content('Epic2')
+      expect(page).not_to have_content('Epic3')
+    end
   end
 
   def visit_epic_boards_page

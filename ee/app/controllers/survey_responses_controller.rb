@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class SurveyResponsesController < ApplicationController
-  SURVEY_RESPONSE_SCHEMA_URL = 'iglu:com.gitlab/survey_response/jsonschema/1-0-0'
+  SURVEY_RESPONSE_SCHEMA_URL = 'iglu:com.gitlab/survey_response/jsonschema/1-0-1'
   CALENDLY_INVITE_LINK = 'https://calendly.com/mkarampalas/gitlab-user-onboarding-research'
 
   before_action :track_response, only: :index
@@ -27,7 +27,8 @@ class SurveyResponsesController < ApplicationController
       email: params[:email],
       name: params[:name],
       username: params[:username],
-      response: params[:response]
+      response: params[:response],
+      onboarding_progress: to_number(params[:onboarding_progress])
     }.compact
 
     context = SnowplowTracker::SelfDescribingJson.new(SURVEY_RESPONSE_SCHEMA_URL, data)

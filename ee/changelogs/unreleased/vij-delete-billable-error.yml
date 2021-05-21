@@ -1,5 +1,0 @@
----
-title: Return an appropriate error message when failing to remove billable members
-merge_request: 60404
-author:
-type: changed

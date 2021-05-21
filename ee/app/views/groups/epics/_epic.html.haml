@@ -2,7 +2,9 @@
   .issuable-info-container
     - if @can_bulk_update
       .issue-check.hidden
-        = check_box_tag dom_id(epic, "selected"), nil, false, 'data-id' => epic.id, class: "selected-issuable"
+        - checkbox_id = dom_id(epic, "selected")
+        %label.gl-sr-only{ for: checkbox_id }= epic.title
+        = check_box_tag checkbox_id, nil, false, 'data-id' => epic.id, class: "selected-issuable"
     .issuable-main-info
       .issue-title.title
         %span.issue-title-text{ data: { qa_selector: 'epic_title_text' } }

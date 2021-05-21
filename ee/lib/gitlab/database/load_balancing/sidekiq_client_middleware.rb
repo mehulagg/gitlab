@@ -24,9 +24,9 @@ module Gitlab
 
           job['worker_data_consistency'] = worker_class.get_data_consistency
 
-          return if worker_class.get_data_consistency == :always
+          return unless worker_class.utilizes_load_balancing_capabilities?
 
-          if Session.current.performed_write?
+          if Session.current.use_primary?
             job['database_write_location'] = load_balancer.primary_write_location
           else
             job['database_replica_location'] = load_balancer.host.database_replica_location

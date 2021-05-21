@@ -1,5 +1,0 @@
----
-title: Fix RSpec/EmptyLineAfterFinalLetItBe rubocop offenses in ee/spec/services/award_emojis
-merge_request: 58356
-author: Abdul Wadood @abdulwd
-type: fixed

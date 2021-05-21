@@ -11,6 +11,7 @@ module Ci
     include Importable
     include Ci::HasRef
     include IgnorableColumns
+    include TaggableQueries
 
     BuildArchivedError = Class.new(StandardError)
 
@@ -37,6 +38,7 @@ module Ci
 
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
+    has_one :queuing_entry, class_name: 'Ci::PendingBuild', foreign_key: :build_id
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
     has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
@@ -294,11 +296,19 @@ module Ci
         end
       end
 
-      after_transition any => [:pending] do |build|
+      # rubocop:disable CodeReuse/ServiceClass
+      after_transition any => [:pending] do |build, transition|
+        Ci::UpdateBuildQueueService.new.push(build, transition)
+
         build.run_after_commit do
           BuildQueueWorker.perform_async(id)
         end
       end
+
+      after_transition pending: any do |build, transition|
+        Ci::UpdateBuildQueueService.new.pop(build, transition)
+      end
+      # rubocop:enable CodeReuse/ServiceClass
 
       after_transition pending: :running do |build|
         build.deployment&.run
@@ -366,6 +376,33 @@ module Ci
         else
           build.deployment&.cancel
         end
+      end
+    end
+
+    def self.build_matchers(project)
+      unique_params = [
+        :protected,
+        Arel.sql("(#{arel_tag_names_array.to_sql})")
+      ]
+
+      group(*unique_params).pluck('array_agg(id)', *unique_params).map do |values|
+        Gitlab::Ci::Matching::BuildMatcher.new({
+          build_ids: values[0],
+          protected: values[1],
+          tag_list: values[2],
+          project: project
+        })
+      end
+    end
+
+    def build_matcher
+      strong_memoize(:build_matcher) do
+        Gitlab::Ci::Matching::BuildMatcher.new({
+          protected: protected?,
+          tag_list: tag_list,
+          build_ids: [id],
+          project: project
+        })
       end
     end
 
@@ -706,22 +743,14 @@ module Ci
     end
 
     def any_runners_online?
-      if Feature.enabled?(:runners_cached_states, project, default_enabled: :yaml)
-        cache_for_online_runners do
-          project.any_online_runners? { |runner| runner.match_build_if_online?(self) }
-        end
-      else
-        project.any_active_runners? { |runner| runner.match_build_if_online?(self) }
+      cache_for_online_runners do
+        project.any_online_runners? { |runner| runner.match_build_if_online?(self) }
       end
     end
 
     def any_runners_available?
-      if Feature.enabled?(:runners_cached_states, project, default_enabled: :yaml)
-        cache_for_available_runners do
-          project.active_runners.exists?
-        end
-      else
-        project.any_active_runners?
+      cache_for_available_runners do
+        project.active_runners.exists?
       end
     end
 
@@ -1027,6 +1056,14 @@ module Ci
 
     def exit_codes_defined?
       options.dig(:allow_failure_criteria, :exit_codes).present?
+    end
+
+    def all_queuing_entries
+      # We can have only one queuing entry, because there is a unique index on
+      # `build_id`, but we need a relation to remove this single queuing entry
+      # more efficiently in a single statement without actually load data.
+
+      ::Ci::PendingBuild.where(build_id: self.id)
     end
 
     protected

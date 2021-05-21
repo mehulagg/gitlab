@@ -41,9 +41,9 @@ RSpec.describe ProjectGroupLink do
     context 'protected environments' do
       let!(:protected_environment) do
         ProtectedEnvironments::CreateService.new(
-          project,
-          project.owner,
-          attributes_for(
+          container: project,
+          current_user: project.owner,
+          params: attributes_for(
             :protected_environment,
             deploy_access_levels_attributes: [{ group_id: group.id }, { user_id: user.id }]
           )

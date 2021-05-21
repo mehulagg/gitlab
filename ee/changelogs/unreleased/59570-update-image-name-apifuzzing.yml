@@ -1,5 +1,0 @@
----
-title: Use SECURE_ANALYZERS_PREFIX variable for API Fuzzing
-merge_request: 60059
-author:
-type: changed

@@ -1,6 +1,6 @@
 import { GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { createLocalVue } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_app.vue';
@@ -9,13 +9,17 @@ import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adopti
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEFAULT_POLLING_INTERVAL,
+  DEVOPS_ADOPTION_TABLE_CONFIGURATION,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
 import bulkFindOrCreateDevopsAdoptionSegmentsMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
 import devopsAdoptionSegments from 'ee/analytics/devops_report/devops_adoption/graphql/queries/devops_adoption_segments.query.graphql';
 import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
+import API from '~/api';
 import {
   groupNodes,
   nextGroupNode,
@@ -84,7 +88,7 @@ describe('DevopsAdoptionApp', () => {
   function createComponent(options = {}) {
     const { mockApollo, data = {}, provide = {} } = options;
 
-    return shallowMount(DevopsAdoptionApp, {
+    return shallowMountExtended(DevopsAdoptionApp, {
       localVue,
       apolloProvider: mockApollo,
       provide,
@@ -93,6 +97,8 @@ describe('DevopsAdoptionApp', () => {
       },
     });
   }
+
+  const findDevopsScoreTab = () => wrapper.findByTestId('devops-score-tab');
 
   afterEach(() => {
     wrapper.destroy();
@@ -441,6 +447,92 @@ describe('DevopsAdoptionApp', () => {
         wrapper.vm.$destroy();
 
         expect(window.clearInterval).toHaveBeenCalledWith(mockIntervalId);
+      });
+    });
+  });
+
+  describe('tabs', () => {
+    const eventTrackingBehaviour = (testId, event) => {
+      describe('event tracking', () => {
+        it(`tracks the ${event} event when clicked`, () => {
+          jest.spyOn(API, 'trackRedisHllUserEvent');
+
+          expect(API.trackRedisHllUserEvent).not.toHaveBeenCalled();
+
+          wrapper.findByTestId(testId).vm.$emit('click');
+
+          expect(API.trackRedisHllUserEvent).toHaveBeenCalledWith(event);
+        });
+
+        it('only tracks the event once', () => {
+          jest.spyOn(API, 'trackRedisHllUserEvent');
+
+          expect(API.trackRedisHllUserEvent).not.toHaveBeenCalled();
+
+          const { vm } = wrapper.findByTestId(testId);
+          vm.$emit('click');
+          vm.$emit('click');
+
+          expect(API.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
+        });
+      });
+    };
+
+    const defaultDevopsAdoptionTabBehavior = () => {
+      describe('devops adoption tabs', () => {
+        it('displays the configured number of tabs', () => {
+          expect(wrapper.findAllByTestId('devops-adoption-tab')).toHaveLength(
+            DEVOPS_ADOPTION_TABLE_CONFIGURATION.length,
+          );
+        });
+
+        it('displays the devops section component with the tab', () => {
+          expect(
+            wrapper.findByTestId('devops-adoption-tab').find(DevopsAdoptionSection).exists(),
+          ).toBe(true);
+        });
+
+        eventTrackingBehaviour('devops-adoption-tab', 'i_analytics_dev_ops_adoption');
+      });
+    };
+
+    describe('admin level', () => {
+      beforeEach(() => {
+        const mockApollo = createMockApolloProvider();
+        wrapper = createComponent({ mockApollo });
+      });
+
+      defaultDevopsAdoptionTabBehavior();
+
+      describe('devops score tab', () => {
+        it('displays the devops score tab', () => {
+          expect(findDevopsScoreTab().exists()).toBe(true);
+        });
+
+        it('displays the devops score component', () => {
+          expect(findDevopsScoreTab().find(DevopsScore).exists()).toBe(true);
+        });
+
+        eventTrackingBehaviour('devops-score-tab', 'i_analytics_dev_ops_score');
+      });
+    });
+
+    describe('group level', () => {
+      beforeEach(() => {
+        const mockApollo = createMockApolloProvider();
+        wrapper = createComponent({
+          mockApollo,
+          provide: {
+            isGroup: true,
+            groupGid: devopsAdoptionSegmentsData.nodes[0].namespace.id,
+          },
+        });
+      });
+
+      defaultDevopsAdoptionTabBehavior();
+
+      it('does not display the devops score tab', () => {
+        expect(findDevopsScoreTab().exists()).toBe(false);
       });
     });
   });

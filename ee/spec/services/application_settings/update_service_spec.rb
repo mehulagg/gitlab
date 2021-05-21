@@ -63,6 +63,16 @@ RSpec.describe ApplicationSettings::UpdateService do
             expect { service.execute }.not_to raise_error
           end
         end
+
+        context 'when modifying a non Advanced Search setting' do
+          let(:opts) { { repository_size_limit: '100' } }
+
+          it 'does not check index_exists' do
+            expect(helper).not_to receive(:create_empty_index)
+
+            service.execute
+          end
+        end
       end
     end
 

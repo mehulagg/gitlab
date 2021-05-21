@@ -1,5 +1,0 @@
----
-title: Eagerly associate DastSiteProfile and DastSiteValidation on create
-merge_request: 53800
-author:
-type: fixed

@@ -8,6 +8,8 @@ require_relative '../lib/gitlab'
 require_relative '../lib/gitlab/utils'
 require_relative '../config/initializers/0_inject_enterprise_edition_module'
 
+require 'chemlab'
+
 module QA
   ##
   # Helper classes to represent frequently used sequences of actions
@@ -65,6 +67,7 @@ module QA
     autoload :ApiFabricator, 'qa/resource/api_fabricator'
     autoload :Base, 'qa/resource/base'
 
+    autoload :GroupBase, 'qa/resource/group_base'
     autoload :Sandbox, 'qa/resource/sandbox'
     autoload :Group, 'qa/resource/group'
     autoload :Issue, 'qa/resource/issue'
@@ -427,6 +430,7 @@ module QA
 
     module Alert
       autoload :AutoDevopsAlert, 'qa/page/alert/auto_devops_alert'
+      autoload :FreeTrial, 'qa/page/alert/free_trial'
     end
 
     module Layout
@@ -536,6 +540,11 @@ module QA
       module Project
         autoload :Templates, 'qa/page/component/project/templates'
       end
+    end
+
+    module Trials
+      autoload :New, 'qa/page/trials/new'
+      autoload :Select, 'qa/page/trials/select'
     end
 
     module Modal

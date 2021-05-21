@@ -15,6 +15,7 @@ RSpec.describe Analytics::CycleAnalytics::GroupStage do
   end
 
   it_behaves_like 'value stream analytics stage' do
+    let(:factory) { :cycle_analytics_group_stage }
     let(:parent) { create(:group) }
     let(:parent_name) { :group }
   end

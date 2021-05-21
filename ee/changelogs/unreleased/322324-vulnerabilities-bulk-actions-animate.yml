@@ -1,5 +1,0 @@
----
-title: Adds an expand/collapse transition when showing/hiding the bulk action section in the vulnerability lists.
-merge_request: 60944
-author:
-type: changed

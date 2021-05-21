@@ -33,12 +33,12 @@ export default {
 <template>
   <div
     v-if="!$apollo.loading"
-    class="checkout gl-flex gl-flex-column gl-justify-content-between w-100"
+    class="checkout gl-display-flex gl-flex-direction-column gl-justify-content-between w-100"
   >
     <div class="full-width">
       <progress-bar v-if="isNewUser" :steps="$options.steps" :current-step="$options.currentStep" />
       <div class="flash-container"></div>
-      <h2 class="gl-mt-4 gl-mb-3 gl-mb-lg-5">{{ $options.i18n.checkout }}</h2>
+      <h2 class="gl-mt-6 gl-mb-7 gl-mb-lg-5">{{ $options.i18n.checkout }}</h2>
       <subscription-details :plans="plans" />
     </div>
   </div>

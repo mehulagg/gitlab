@@ -249,29 +249,6 @@ RSpec.describe Projects::ThreatMonitoringController do
         sign_in(user)
       end
 
-      context 'with threat_monitoring feature and threat_monitoring_alerts feature flag' do
-        using RSpec::Parameterized::TableSyntax
-
-        where(:feature_flag, :feature, :http_status) do
-          false | false | :not_found
-          false | true  | :not_found
-          true | false | :not_found
-          true | true | :ok
-        end
-
-        with_them do
-          before do
-            stub_licensed_features(threat_monitoring: feature)
-            stub_feature_flags(threat_monitoring_alerts: feature_flag)
-          end
-          specify do
-            subject
-
-            expect(response).to have_gitlab_http_status(http_status)
-          end
-        end
-      end
-
       context 'when feature is available' do
         before do
           stub_licensed_features(threat_monitoring: true)
@@ -299,6 +276,18 @@ RSpec.describe Projects::ThreatMonitoringController do
 
             expect(response).to have_gitlab_http_status(:not_found)
           end
+        end
+      end
+
+      context 'when feature is not available' do
+        before do
+          stub_licensed_features(threat_monitoring: false)
+        end
+
+        it 'returns 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end

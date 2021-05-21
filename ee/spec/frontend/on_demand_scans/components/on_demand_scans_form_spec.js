@@ -534,6 +534,8 @@ describe('OnDemandScansForm', () => {
   });
 
   describe('scanner profile summary', () => {
+    const [{ id }] = scannerProfiles;
+
     beforeEach(() => {
       createComponent({
         provide: {
@@ -544,6 +546,12 @@ describe('OnDemandScansForm', () => {
       });
     });
 
+    it('renders profile summary when a valid profile is selected', async () => {
+      await selectScannerProfile({ id });
+
+      expect(findProfileSummary().exists()).toBe(true);
+    });
+
     it('does not render the summary provided an invalid profile ID', async () => {
       await selectScannerProfile({ id: 'gid://gitlab/DastScannerProfile/123' });
 
@@ -552,7 +560,7 @@ describe('OnDemandScansForm', () => {
   });
 
   describe('site profile summary', () => {
-    const [authEnabledProfile] = siteProfiles;
+    const [{ id }] = siteProfiles;
 
     beforeEach(() => {
       createComponent({
@@ -565,22 +573,10 @@ describe('OnDemandScansForm', () => {
       });
     });
 
-    it('renders all fields correctly', async () => {
-      await selectSiteProfile(authEnabledProfile);
-      const summary = wrapper.find(SiteProfileSelector).text();
-      const defaultPassword = '••••••••';
-      const defaultRequestHeaders = '[Redacted]';
-      const defaultSiteType = 'Website';
+    it('renders profile summary when a valid profile is selected', async () => {
+      await selectSiteProfile({ id });
 
-      expect(summary).toMatch(authEnabledProfile.targetUrl);
-      expect(summary).toMatch(authEnabledProfile.excludedUrls.join(','));
-      expect(summary).toMatch(authEnabledProfile.auth.url);
-      expect(summary).toMatch(authEnabledProfile.auth.username);
-      expect(summary).toMatch(authEnabledProfile.auth.usernameField);
-      expect(summary).toMatch(authEnabledProfile.auth.passwordField);
-      expect(summary).toMatch(defaultPassword);
-      expect(summary).toMatch(defaultRequestHeaders);
-      expect(summary).toMatch(defaultSiteType);
+      expect(findProfileSummary().exists()).toBe(true);
     });
 
     it('does not render the summary provided an invalid profile ID', async () => {

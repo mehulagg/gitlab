@@ -98,6 +98,9 @@ Note the following when promoting a secondary:
 - If you encounter an `ActiveRecord::RecordInvalid: Validation failed: Name has already been taken`
   error message during this process, for more information, see this
   [troubleshooting advice](../replication/troubleshooting.md#fixing-errors-during-a-failover-or-when-promoting-a-secondary-to-a-primary-node).
+- If you run into errors when using `--force` or `--skip-preflight-checks` before 13.5 during this process,
+  for more information, see this
+  [troubleshooting advice](../replication/troubleshooting.md#errors-when-using---skip-preflight-checks-or---force).
 
 #### Promoting a **secondary** node running on a single machine
 
@@ -537,13 +540,13 @@ Data that was created on the primary while the secondary was paused will be lost
 
 1. Update the existing cluster configuration.
 
-   You can retrieve the existing config with Helm:
+   You can retrieve the existing configuration with Helm:
 
    ```shell
    helm --namespace gitlab get values gitlab-geo > gitlab.yaml
    ```
 
-   The existing config will contain a section for Geo that should resemble:
+   The existing configuration will contain a section for Geo that should resemble:
 
    ```yaml
    geo:
@@ -562,7 +565,7 @@ Data that was created on the primary while the secondary was paused will be lost
 
    You can remove the entire `psql` section if the cluster will remain as a primary site, this refers to the tracking database and will be ignored whilst the cluster is acting as a primary site.
 
-   Update the cluster with the new config:
+   Update the cluster with the new configuration:
 
    ```shell
    helm upgrade --install --version <current Chart version> gitlab-geo gitlab/gitlab --namespace gitlab -f gitlab.yaml

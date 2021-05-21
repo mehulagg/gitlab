@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Package' do
-    describe 'Container Registry', only: { subdomain: %i[staging pre] } do
+    describe 'Container Registry', :reliable, only: { subdomain: %i[staging pre] } do
       let(:project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-with-registry'
@@ -30,6 +30,8 @@ module QA
               DOCKER_TLS_CERTDIR: "/certs"
               DOCKER_TLS_VERIFY: 1
               DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+            before_script:
+              - until docker info; do sleep 1; done 
             script:
               - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
               - docker build -t $IMAGE_TAG .

@@ -62,7 +62,7 @@ module DastOnDemandScans
     end
 
     def default_config
-      { dast_profile: dast_profile, branch: branch }
+      { dast_profile: dast_profile, dast_site_profile: dast_site_profile, branch: branch }
     end
 
     def target_config

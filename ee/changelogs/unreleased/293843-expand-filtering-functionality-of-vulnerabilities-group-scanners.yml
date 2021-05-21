@@ -1,5 +1,0 @@
----
-title: Add scannerId field to group vulnerabilities query
-merge_request: 58156
-author:
-type: changed

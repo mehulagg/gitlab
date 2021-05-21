@@ -152,7 +152,7 @@ Lint/MissingCopEnableDirective:
 Lint/MixedRegexpCaptureTypes:
   Exclude:
     - 'app/models/alert_management/alert.rb'
-    - 'app/models/project_services/ewm_service.rb'
+    - 'app/models/integrations/ewm.rb'
     - 'app/uploaders/file_uploader.rb'
     - 'ee/lib/gitlab/code_owners/reference_extractor.rb'
     - 'lib/gitlab/ci/pipeline/expression/lexeme/string.rb'
@@ -598,7 +598,6 @@ Rails/RenderInline:
 # SupportedStyles: conservative, aggressive
 Rails/ShortI18n:
   Exclude:
-    - 'app/models/project_services/chat_message/pipeline_message.rb'
     - 'app/uploaders/content_type_whitelist.rb'
 
 # Offense count: 1144

@@ -25,7 +25,7 @@ module Gitlab
 
         def requires_primary?(worker_class, job)
           return true unless worker_class.include?(::ApplicationWorker)
-          return true if worker_class.get_data_consistency == :always
+          return true unless worker_class.utilizes_load_balancing_capabilities?
           return true unless worker_class.get_data_consistency_feature_flag_enabled?
 
           location = job['database_write_location'] || job['database_replica_location']

@@ -1,5 +1,0 @@
----
-title: Fix group-level "Projects with releases" stat when value is 0
-merge_request: 60752
-author:
-type: fixed

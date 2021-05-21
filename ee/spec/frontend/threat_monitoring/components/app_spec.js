@@ -45,7 +45,6 @@ describe('ThreatMonitoringApp component', () => {
         },
         provide: {
           documentationPath,
-          glFeatures: { threatMonitoringAlerts: false },
           ...provide,
         },
         store,
@@ -131,15 +130,11 @@ describe('ThreatMonitoringApp component', () => {
     it('renders the network policy tab', () => {
       expect(findNetworkPolicyTab().element).toMatchSnapshot();
     });
-
-    it('does not show the alert tab', () => {
-      expect(findAlertTab().exists()).toBe(false);
-    });
   });
 
   describe('alerts tab', () => {
     beforeEach(() => {
-      factory({ provide: { glFeatures: { threatMonitoringAlerts: true } } });
+      factory();
     });
     it('shows the alerts tab', () => {
       expect(findAlertTab().exists()).toBe(true);

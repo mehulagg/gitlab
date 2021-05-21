@@ -17,6 +17,14 @@ const TEST_DATA = {
     before: 'foo',
     after: 'bar',
   },
+  [REPORT_TYPES.text]: {
+    name: 'some-string-field',
+    value: 'some-value',
+  },
+  [REPORT_TYPES.value]: {
+    name: 'some-numeric-field',
+    value: 15,
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {

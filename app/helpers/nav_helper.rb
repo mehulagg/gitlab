@@ -12,7 +12,6 @@ module NavHelper
   def page_with_sidebar_class
     class_name = page_gutter_class
     class_name << 'page-with-contextual-sidebar' if defined?(@left_sidebar) && @left_sidebar
-    class_name << 'sidebar-refactoring' if Feature.enabled?(:sidebar_refactor, current_user)
     class_name << 'page-with-icon-sidebar' if collapsed_sidebar? && @left_sidebar
     class_name -= ['right-sidebar-expanded'] if defined?(@right_sidebar) && !@right_sidebar
 
@@ -61,7 +60,7 @@ module NavHelper
   end
 
   def admin_monitoring_nav_links
-    %w(system_info background_jobs health_check requests_profiles)
+    %w(system_info background_migrations background_jobs health_check requests_profiles)
   end
 
   def admin_analytics_nav_links
@@ -69,7 +68,14 @@ module NavHelper
   end
 
   def group_issues_sub_menu_items
-    %w(groups#issues labels#index milestones#index boards#index boards#show)
+    %w[
+      groups#issues
+      milestones#index
+      boards#index
+      boards#show
+    ].tap do |paths|
+      paths << 'labels#index' if Feature.disabled?(:sidebar_refactor, current_user, default_enabled: :yaml)
+    end
   end
 
   private

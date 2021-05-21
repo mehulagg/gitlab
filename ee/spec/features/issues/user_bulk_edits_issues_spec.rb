@@ -17,11 +17,11 @@ RSpec.describe 'Issues > Bulk edit issues' do
   shared_examples 'bulk edit option in sidebar' do |context|
     it 'is present when bulk edit is enabled' do
       enable_bulk_update(context)
-      expect(page).to have_css('.issuable-sidebar')
+      expect(page).to have_css('aside[aria-label="Bulk update"]')
     end
 
     it 'is not present when bulk edit is disabled' do
-      expect(page).not_to have_css('.issuable-sidebar')
+      expect(page).not_to have_css('aside[aria-label="Bulk update"]')
     end
   end
 
@@ -33,8 +33,10 @@ RSpec.describe 'Issues > Bulk edit issues' do
     context 'epic', :js do
       context 'to all issues' do
         before do
-          check 'check-all-issues'
-          open_epic_dropdown [epic.title]
+          check 'Select all'
+          click_button 'Select epic'
+          wait_for_requests
+          click_button epic.title
           update_issues
         end
 
@@ -46,8 +48,10 @@ RSpec.describe 'Issues > Bulk edit issues' do
 
       context 'to a issue' do
         before do
-          check "selected_issue_#{issue1.id}"
-          open_epic_dropdown [epic.title]
+          check issue1.title
+          click_button 'Select epic'
+          wait_for_requests
+          click_button epic.title
           update_issues
         end
 
@@ -67,8 +71,9 @@ RSpec.describe 'Issues > Bulk edit issues' do
     context 'health_status', :js do
       context 'to all issues' do
         before do
-          check 'check-all-issues'
-          open_health_status_dropdown ['On track']
+          check 'Select all'
+          click_button 'Select health status'
+          click_button 'On track'
           update_issues
         end
 
@@ -80,8 +85,9 @@ RSpec.describe 'Issues > Bulk edit issues' do
 
       context 'to an issue' do
         before do
-          check "selected_issue_#{issue1.id}"
-          open_health_status_dropdown ['At risk']
+          check issue1.title
+          click_button 'Select health status'
+          click_button 'At risk'
           update_issues
         end
 
@@ -100,8 +106,10 @@ RSpec.describe 'Issues > Bulk edit issues' do
       end
       context 'to all issues' do
         before do
-          check 'check-all-issues'
-          open_iteration_dropdown ['Iteration 1']
+          check 'Select all'
+          click_button 'Select iteration'
+          wait_for_requests
+          click_button 'Iteration 1'
           update_issues
         end
 
@@ -142,8 +150,8 @@ RSpec.describe 'Issues > Bulk edit issues' do
   shared_examples 'bulk edit health_status with insufficient permissions' do
     it 'cannot bulk assign health_status', :aggregate_failures do
       expect(page).not_to have_button 'Edit issues'
-      expect(page).not_to have_css '.check-all-issues'
-      expect(page).not_to have_css '.issue-check'
+      expect(page).not_to have_unchecked_field 'Select all'
+      expect(page).not_to have_unchecked_field issue1.title
     end
   end
 
@@ -200,33 +208,6 @@ RSpec.describe 'Issues > Bulk edit issues' do
     end
   end
 
-  def open_epic_dropdown(items = [])
-    page.within('.issues-bulk-update') do
-      click_button 'Select epic'
-      items.map do |item|
-        find('.gl-new-dropdown-item', text: item).click
-      end
-    end
-  end
-
-  def open_health_status_dropdown(items = [])
-    page.within('.issues-bulk-update') do
-      click_button 'Select health status'
-      items.map do |item|
-        find('[data-testid="health-status-dropdown-item"]', text: item).click
-      end
-    end
-  end
-
-  def open_iteration_dropdown(items = [])
-    page.within('.issues-bulk-update') do
-      click_button 'Select iteration'
-      items.map do |item|
-        find('.dropdown-item', text: item).click
-      end
-    end
-  end
-
   def update_issues
     click_button 'Update all'
     wait_for_requests
@@ -240,6 +221,8 @@ RSpec.describe 'Issues > Bulk edit issues' do
     else
       visit issues_group_path(group)
     end
+
+    wait_for_requests
 
     click_button 'Edit issues'
   end

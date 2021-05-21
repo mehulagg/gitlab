@@ -1,5 +1,0 @@
----
-title: Provide fix for inconsistent blocking of sso-user git actions
-merge_request: 59872
-author:
-type: fixed

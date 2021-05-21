@@ -22,18 +22,5 @@ RSpec.describe ElasticClusterReindexingCronWorker do
 
       expect(subject.perform).to eq(false)
     end
-
-    # support currently running reindexing processes during an upgrade
-    it 'calls the legacy service if subtask has elastic_task populated' do
-      task = create(:elastic_reindexing_task)
-      create(:elastic_reindexing_subtask, elastic_reindexing_task: task, elastic_task: 'test')
-      expect(Elastic::ReindexingTask).to receive(:current).and_return(task)
-
-      expect_next_instance_of(Elastic::LegacyReindexingService) do |service|
-        expect(service).to receive(:execute).and_return(false)
-      end
-
-      subject.perform
-    end
   end
 end

@@ -86,7 +86,7 @@ export default {
     data-qa-selector="remove_billable_member_modal"
     :ok-disabled="!canSubmit"
     @primary="removeBillableMember"
-    @canceled="setBillableMemberToRemove(null)"
+    @hide="setBillableMemberToRemove(null)"
   >
     <p>
       <gl-sprintf :message="modalText">

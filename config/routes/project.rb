@@ -267,6 +267,15 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
         get '/cycle_analytics', to: redirect('%{namespace_id}/%{project_id}/-/value_stream_analytics')
 
+        namespace :analytics do
+          resource :cycle_analytics, only: :show, path: 'value_stream_analytics'
+          scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
+            resources :value_streams, only: [:index] do
+              resources :stages, only: [:index]
+            end
+          end
+        end
+
         concerns :clusterable
 
         namespace :serverless do
@@ -377,7 +386,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         # The wiki and repository routing contains wildcard characters so
         # its preferable to keep it below all other project routes
         draw :repository_scoped
-        draw :repository
         draw :wiki
 
         namespace :import do
@@ -575,6 +583,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Introduced in 12.0.
       # Should be removed with https://gitlab.com/gitlab-org/gitlab/issues/28848.
       Gitlab::Routing.redirect_legacy_paths(self, :mirror, :tags, :hooks,
+                                            :commits, :commit, :find_file, :files, :compare,
                                             :cycle_analytics, :mattermost, :variables, :triggers,
                                             :environments, :protected_environments, :error_tracking, :alert_management,
                                             :tracing,

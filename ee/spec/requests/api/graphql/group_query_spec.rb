@@ -249,8 +249,6 @@ RSpec.describe 'getting group information' do
         QUERY
       end
 
-      let(:group_level_release_statistics) { true }
-
       let(:query) do
         graphql_query_for('group', { 'fullPath' => group.full_path }, query_fields)
       end
@@ -260,8 +258,6 @@ RSpec.describe 'getting group information' do
       end
 
       before do
-        stub_feature_flags(group_level_release_statistics: group_level_release_statistics)
-
         group.add_guest(guest_user)
 
         post_graphql(query, current_user: current_user)
@@ -333,20 +329,6 @@ RSpec.describe 'getting group information' do
         let_it_be(:group) { create(:group, :public) }
 
         it_behaves_like 'correct access to release statistics'
-      end
-
-      context 'when the group_level_release_statistics feature flag is disabled' do
-        let_it_be(:group) { create(:group, :public) }
-
-        let(:current_user) { guest_user }
-        let(:group_level_release_statistics) { false }
-
-        it 'returns null for both statistics' do
-          expect(release_stats).to match(
-            releasesCount: nil,
-            releasesPercentage: nil
-          )
-        end
       end
     end
   end

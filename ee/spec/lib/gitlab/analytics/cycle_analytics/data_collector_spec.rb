@@ -104,16 +104,6 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
       expect(round_to_days(data_collector.median.seconds)).to eq(10)
     end
 
-    describe '#duration_chart_data' do
-      subject { data_collector.duration_chart_data }
-
-      it 'loads data ordered by event time' do
-        days = subject.map { |item| round_to_days(item.duration_in_seconds) }
-
-        expect(days).to eq([15, 10, 5])
-      end
-    end
-
     describe '#duration_chart_average_data' do
       subject { data_collector.duration_chart_average_data }
 
@@ -359,7 +349,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         let(:end_event_identifier) { :merge_request_merged }
 
         def create_data_for_start_event(example_class)
-          create(:merge_request, :closed, source_project: example_class.project)
+          create(:merge_request, :unique_branches, :opened, source_project: example_class.project)
         end
 
         def create_data_for_end_event(mr, example_class)
@@ -374,7 +364,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         let(:end_event_identifier) { :merge_request_first_deployed_to_production }
 
         def create_data_for_start_event(example_class)
-          create(:merge_request, :closed, source_project: example_class.project).tap do |mr|
+          create(:merge_request, :unique_branches, :opened, source_project: example_class.project).tap do |mr|
             mr.metrics.update!(merged_at: Time.now)
           end
         end
@@ -391,7 +381,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         let(:end_event_identifier) { :merge_request_merged }
 
         def create_data_for_start_event(example_class)
-          create(:merge_request, :merged, source_project: example_class.project).tap do |mr|
+          create(:merge_request, :unique_branches, :opened, source_project: example_class.project).tap do |mr|
             mr.metrics.update!(first_commit_at: Time.now)
           end
         end
@@ -408,7 +398,7 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         let(:end_event_identifier) { :merge_request_last_build_finished }
 
         def create_data_for_start_event(example_class)
-          create(:merge_request, :closed, source_project: example_class.project).tap do |mr|
+          create(:merge_request, :unique_branches, :opened, source_project: example_class.project).tap do |mr|
             mr.metrics.update!(latest_build_started_at: Time.now)
           end
         end

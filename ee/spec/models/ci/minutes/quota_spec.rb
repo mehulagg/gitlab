@@ -423,5 +423,17 @@ RSpec.describe Ci::Minutes::Quota do
         end
       end
     end
+
+    it 'does not trigger N+1 queries when called multiple times' do
+      # memoizes the result
+      quota.namespace_eligible?
+
+      # count
+      actual = ActiveRecord::QueryRecorder.new do
+        quota.namespace_eligible?
+      end
+
+      expect(actual.count).to eq(0)
+    end
   end
 end

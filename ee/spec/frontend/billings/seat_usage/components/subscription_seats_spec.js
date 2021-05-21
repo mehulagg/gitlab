@@ -6,11 +6,14 @@ import {
   GlAvatarLabeled,
   GlSearchBoxByType,
   GlBadge,
+  GlModal,
 } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import SubscriptionSeats from 'ee/billings/seat_usage/components/subscription_seats.vue';
+import { CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT } from 'ee/billings/seat_usage/constants';
 import { mockDataSeats, mockTableItems } from 'ee_jest/billings/mock_data';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -18,6 +21,7 @@ localVue.use(Vuex);
 const actionSpies = {
   fetchBillableMembersList: jest.fn(),
   resetBillableMembers: jest.fn(),
+  setBillableMemberToRemove: jest.fn(),
 };
 
 const providedFields = {
@@ -53,10 +57,12 @@ describe('Subscription Seats', () => {
     mountFn = shallowMount,
     initialGetters = {},
   } = {}) => {
-    return mountFn(SubscriptionSeats, {
-      store: fakeStore({ initialState, initialGetters }),
-      localVue,
-    });
+    return extendedWrapper(
+      mountFn(SubscriptionSeats, {
+        store: fakeStore({ initialState, initialGetters }),
+        localVue,
+      }),
+    );
   };
 
   const findTable = () => wrapper.find(GlTable);
@@ -68,6 +74,9 @@ describe('Subscription Seats', () => {
 
   const findSearchBox = () => wrapper.find(GlSearchBoxByType);
   const findPagination = () => wrapper.find(GlPagination);
+
+  const findAllRemoveUserItems = () => wrapper.findAllByTestId('remove-user');
+  const findErrorModal = () => wrapper.findComponent(GlModal);
 
   const serializeUser = (rowWrapper) => {
     const avatarLink = rowWrapper.find(GlAvatarLink);
@@ -150,6 +159,20 @@ describe('Subscription Seats', () => {
       expect(pagination.props()).toMatchObject({
         perPage: 5,
         totalItems: 300,
+      });
+    });
+
+    describe('with error modal', () => {
+      it('does not render the model if the user is not removable', async () => {
+        await findAllRemoveUserItems().at(0).trigger('click');
+
+        expect(findErrorModal().html()).toBe('');
+      });
+
+      it('renders the error modal if the user is removable', async () => {
+        await findAllRemoveUserItems().at(2).trigger('click');
+
+        expect(findErrorModal().text()).toContain(CANNOT_REMOVE_BILLABLE_MEMBER_MODAL_CONTENT);
       });
     });
   });

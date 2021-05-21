@@ -8,6 +8,8 @@ RSpec.describe Mutations::Dast::Profiles::Update do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_profile, reload: true) { create(:dast_profile, project: project) }
+  let_it_be(:new_dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:new_dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
   let(:dast_profile_gid) { dast_profile.to_global_id }
   let(:run_after_update) { false }
@@ -18,8 +20,8 @@ RSpec.describe Mutations::Dast::Profiles::Update do
       name: SecureRandom.hex,
       description: SecureRandom.hex,
       branch_name: project.default_branch,
-      dast_site_profile_id: global_id_of(create(:dast_site_profile, project: project)),
-      dast_scanner_profile_id: global_id_of(create(:dast_scanner_profile, project: project)),
+      dast_site_profile_id: global_id_of(new_dast_site_profile),
+      dast_scanner_profile_id: global_id_of(new_dast_scanner_profile),
       run_after_update: run_after_update
     }
   end

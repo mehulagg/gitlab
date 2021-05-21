@@ -1,6 +1,0 @@
----
-title: Default enable SSO-only authentication for web activity and add warning if
-  it is disabled
-merge_request: 60868
-author:
-type: changed

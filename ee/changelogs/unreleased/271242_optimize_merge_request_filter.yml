@@ -1,5 +1,0 @@
----
-title: Apply optimizations to merge request reference rendering
-merge_request: 60500
-author:
-type: performance

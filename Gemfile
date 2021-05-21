@@ -92,7 +92,7 @@ gem 'net-ldap', '~> 0.16.3'
 
 # API
 gem 'grape', '~> 1.5.2'
-gem 'grape-entity', '~> 0.7.1'
+gem 'grape-entity', '~> 0.9.0'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
@@ -341,7 +341,6 @@ group :metrics do
 
   # Prometheus
   gem 'prometheus-client-mmap', '~> 0.12.0'
-  gem 'raindrops', '~> 0.18'
 end
 
 group :development do
@@ -360,9 +359,9 @@ end
 group :development, :test do
   gem 'deprecation_toolkit', '~> 1.5.1', require: false
   gem 'bullet', '~> 6.1.3'
-  gem 'gitlab-pry-byebug', platform: :mri, require: ['pry-byebug', 'pry-byebug/pry_remote_ext']
+  gem 'pry-byebug'
   gem 'pry-rails', '~> 0.3.9'
-  gem 'pry-remote'
+  gem 'pry-shell', '~> 0.4.0'
 
   gem 'awesome_print', require: false
 

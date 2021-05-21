@@ -53,7 +53,7 @@ RSpec.describe Appearance do
           appearance = create(:appearance, :with_header_logo, :with_logo)
 
           expect do
-            appearance.update(header_logo: fixture_file_upload('spec/fixtures/rails_sample.jpg'))
+            appearance.update!(header_logo: fixture_file_upload('spec/fixtures/rails_sample.jpg'))
           end.to change(Geo::UploadDeletedEvent, :count).by(1)
         end
       end

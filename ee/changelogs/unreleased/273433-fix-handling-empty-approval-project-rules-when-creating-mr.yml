@@ -1,5 +1,0 @@
----
-title: Fix creating an MR when a project approval rule has no approvers
-merge_request: 59671
-author:
-type: fixed

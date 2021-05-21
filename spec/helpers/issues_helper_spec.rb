@@ -309,7 +309,7 @@ RSpec.describe IssuesHelper do
         initial_email: project.new_issuable_address(current_user, 'issue'),
         is_signed_in: current_user.present?.to_s,
         issues_path: project_issues_path(project),
-        jira_integration_path: help_page_url('user/project/integrations/jira', anchor: 'view-jira-issues'),
+        jira_integration_path: help_page_url('integration/jira/', anchor: 'view-jira-issues'),
         markdown_help_path: help_page_path('user/markdown'),
         max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
         new_issue_path: new_project_issue_path(project, issue: { assignee_id: finder.assignee.id, milestone_id: finder.milestones.first.id }),
@@ -338,6 +338,67 @@ RSpec.describe IssuesHelper do
     context 'when user is anonymous' do
       it_behaves_like 'issues list data' do
         let(:current_user) { nil }
+      end
+    end
+  end
+
+  describe '#issue_manual_ordering_class' do
+    context 'when sorting by relative position' do
+      before do
+        assign(:sort, 'relative_position')
+      end
+
+      it 'returns manual ordering class' do
+        expect(helper.issue_manual_ordering_class).to eq("manual-ordering")
+      end
+
+      context 'when manual sorting disabled' do
+        before do
+          allow(helper).to receive(:issue_repositioning_disabled?).and_return(true)
+        end
+
+        it 'returns nil' do
+          expect(helper.issue_manual_ordering_class).to eq(nil)
+        end
+      end
+    end
+  end
+
+  describe '#issue_repositioning_disabled?' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+
+    subject { helper.issue_repositioning_disabled? }
+
+    context 'for project' do
+      before do
+        assign(:project, project)
+      end
+
+      it { is_expected.to eq(false) }
+
+      context 'when block_issue_repositioning feature flag is enabled' do
+        before do
+          stub_feature_flags(block_issue_repositioning: group)
+        end
+
+        it { is_expected.to eq(true) }
+      end
+    end
+
+    context 'for group' do
+      before do
+        assign(:group, group)
+      end
+
+      it { is_expected.to eq(false) }
+
+      context 'when block_issue_repositioning feature flag is enabled' do
+        before do
+          stub_feature_flags(block_issue_repositioning: group)
+        end
+
+        it { is_expected.to eq(true) }
       end
     end
   end

@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
+import issueBoardFilters from '~/boards/issue_board_filters';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
-import issueBoardFilters from '~/boards/issue_board_filters';
 
 describe('EpicFilteredSearch', () => {
   let wrapper;

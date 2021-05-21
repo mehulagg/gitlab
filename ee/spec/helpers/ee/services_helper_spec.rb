@@ -62,21 +62,9 @@ RSpec.describe EE::ServicesHelper do
         end
       end
 
-      context 'when flag is disabled for jira_for_vulnerabilities' do
-        before do
-          stub_licensed_features(jira_issues_integration: true, jira_vulnerabilities_integration: true)
-          stub_feature_flags(jira_for_vulnerabilities: false)
-        end
-
-        it 'includes show_jira_issues_integration' do
-          is_expected.to include(jira_fields.merge(show_jira_issues_integration: 'true'))
-        end
-      end
-
       context 'when all flags are enabled' do
         before do
           stub_licensed_features(jira_issues_integration: true, jira_vulnerabilities_integration: true)
-          stub_feature_flags(jira_for_vulnerabilities: true)
         end
 
         it 'includes all Jira fields' do

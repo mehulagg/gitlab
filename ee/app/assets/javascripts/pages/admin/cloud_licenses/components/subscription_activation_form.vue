@@ -155,9 +155,9 @@ export default {
         >
           <gl-sprintf :message="$options.i18n.acceptTerms">
             <template #link="{ content }">
-              <gl-link href="https://about.gitlab.com/terms/" target="_blank"
-                >{{ content }}
-              </gl-link>
+              <gl-link href="https://about.gitlab.com/terms/" target="_blank">{{
+                content
+              }}</gl-link>
             </template>
           </gl-sprintf>
         </gl-form-checkbox>

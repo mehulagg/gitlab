@@ -1141,10 +1141,36 @@ RSpec.describe Issue do
   end
 
   context "relative positioning" do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, group: group) }
+    let_it_be(:issue1) { create(:issue, project: project, relative_position: nil) }
+    let_it_be(:issue2) { create(:issue, project: project, relative_position: nil) }
+
     it_behaves_like "a class that supports relative positioning" do
       let_it_be(:project) { reusable_project }
       let(:factory) { :issue }
       let(:default_params) { { project: project } }
+    end
+
+    it 'is not blocked for repositioning by default' do
+      expect(issue1.blocked_for_repositioning?).to eq(false)
+    end
+
+    context 'when block_issue_repositioning flag is enabled for group' do
+      before do
+        stub_feature_flags(block_issue_repositioning: group)
+      end
+
+      it 'is blocked for repositioning' do
+        expect(issue1.blocked_for_repositioning?).to eq(true)
+      end
+
+      it 'does not move issues with null position' do
+        payload = [issue1, issue2]
+
+        expect { described_class.move_nulls_to_end(payload) }.to raise_error(Gitlab::RelativePositioning::IssuePositioningDisabled)
+        expect { described_class.move_nulls_to_start(payload) }.to raise_error(Gitlab::RelativePositioning::IssuePositioningDisabled)
+      end
     end
   end
 
@@ -1261,15 +1287,33 @@ RSpec.describe Issue do
       end
     end
 
-    let(:project) { build_stubbed(:project_empty_repo) }
-    let(:issue) { build_stubbed(:issue, relative_position: 100, project: project) }
+    shared_examples 'schedules issues rebalancing' do
+      let(:issue) { build_stubbed(:issue, relative_position: 100, project: project) }
 
-    it 'schedules rebalancing if we time-out when moving' do
-      lhs = build_stubbed(:issue, relative_position: 99, project: project)
-      to_move = build(:issue, project: project)
-      expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project.id)
+      it 'schedules rebalancing if we time-out when moving' do
+        lhs = build_stubbed(:issue, relative_position: 99, project: project)
+        to_move = build(:issue, project: project)
+        expect(IssueRebalancingWorker).to receive(:perform_async).with(nil, project_id, namespace_id)
 
-      expect { to_move.move_between(lhs, issue) }.to raise_error(ActiveRecord::QueryCanceled)
+        expect { to_move.move_between(lhs, issue) }.to raise_error(ActiveRecord::QueryCanceled)
+      end
+    end
+
+    context 'when project in user namespace' do
+      let(:project) { build_stubbed(:project_empty_repo) }
+      let(:project_id) { project.id }
+      let(:namespace_id) { nil }
+
+      it_behaves_like 'schedules issues rebalancing'
+    end
+
+    context 'when project in a group namespace' do
+      let(:group) { create(:group) }
+      let(:project) { build_stubbed(:project_empty_repo, group: group) }
+      let(:project_id) { nil }
+      let(:namespace_id) { group.id }
+
+      it_behaves_like 'schedules issues rebalancing'
     end
   end
 

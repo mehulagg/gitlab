@@ -19,6 +19,7 @@ module QA
         QA::Resource::User.new.tap do |user|
           user.username = 'user_3'
           user.email = 'user_3@example.com'
+          user.name = 'User Three'
         end
       end
 
@@ -43,7 +44,7 @@ module QA
 
         expect(page).to have_text("You have to confirm your email address before continuing")
 
-        QA::Flow::User.confirm_user(user.email)
+        QA::Flow::User.confirm_user(user)
 
         visit_group_sso_url
 
@@ -85,13 +86,13 @@ module QA
       end
 
       after do
+        Flow::Saml.remove_saml_idp_service(saml_idp_service)
+
         Runtime::Feature.remove(:group_administration_nav_item)
 
         user.remove_via_api!
 
         group.remove_via_api!
-
-        Flow::Saml.remove_saml_idp_service(saml_idp_service)
 
         page.visit Runtime::Scenario.gitlab_address
         Page::Main::Menu.perform(&:sign_out_if_signed_in)

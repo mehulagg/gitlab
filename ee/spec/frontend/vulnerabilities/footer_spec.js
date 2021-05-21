@@ -284,33 +284,40 @@ describe('Vulnerability Footer', () => {
   describe('related jira issues', () => {
     const relatedJiraIssues = () => wrapper.find(RelatedJiraIssues);
 
-    describe('with `createJiraIssueUrl` not provided', () => {
-      beforeEach(() => {
-        createWrapper();
-      });
-
-      it('does not show related jira issues', () => {
-        expect(relatedJiraIssues().exists()).toBe(false);
-      });
-    });
-
-    describe('with `createJiraIssueUrl` provided', () => {
-      beforeEach(() => {
-        createWrapper(
-          {},
-          {
-            provide: {
-              createJiraIssueUrl: 'http://foo',
-              glFeatures: { jiraForVulnerabilities: true },
+    describe.each`
+      createJiraIssueUrl | createVulnerabilityJiraIssueViaGraphql | shouldShowRelatedJiraIssues
+      ${'http://foo'}    | ${false}                               | ${true}
+      ${'http://foo'}    | ${true}                                | ${true}
+      ${''}              | ${true}                                | ${true}
+      ${''}              | ${false}                               | ${false}
+    `(
+      'with createVulnerabilityJiraIssueViaGraphql set to "$createVulnerabilityJiraIssueViaGraphql"',
+      ({
+        createJiraIssueUrl,
+        createVulnerabilityJiraIssueViaGraphql,
+        shouldShowRelatedJiraIssues,
+      }) => {
+        beforeEach(() => {
+          createWrapper(
+            {},
+            {
+              provide: {
+                createJiraIssueUrl,
+                glFeatures: {
+                  createVulnerabilityJiraIssueViaGraphql,
+                },
+              },
             },
-          },
-        );
-      });
+          );
+        });
 
-      it('shows related jira issues', () => {
-        expect(relatedJiraIssues().exists()).toBe(true);
-      });
-    });
+        it(`${
+          shouldShowRelatedJiraIssues ? 'should' : 'should not'
+        } show related Jira issues`, () => {
+          expect(relatedJiraIssues().exists()).toBe(shouldShowRelatedJiraIssues);
+        });
+      },
+    );
   });
 
   describe('detection note', () => {

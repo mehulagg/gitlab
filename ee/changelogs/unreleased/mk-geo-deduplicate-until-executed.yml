@@ -1,5 +1,0 @@
----
-title: Deduplicate Geo cronjobs
-merge_request: 59799
-author:
-type: performance

@@ -23,7 +23,7 @@ module EE
         elasticsearch_project_ids = params.delete(:elasticsearch_project_ids)
 
         if result = super
-          find_or_create_elasticsearch_index
+          find_or_create_elasticsearch_index if params.keys.any? { |key| key.to_s.start_with?('elasticsearch') }
           update_elasticsearch_containers(ElasticsearchIndexedNamespace, elasticsearch_namespace_ids)
           update_elasticsearch_containers(ElasticsearchIndexedProject, elasticsearch_project_ids)
           update_elasticsearch_index_settings(number_of_replicas: elasticsearch_replicas, number_of_shards: elasticsearch_shards)

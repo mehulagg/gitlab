@@ -17,6 +17,7 @@ module Ci
     include FromUnion
     include UpdatedAtFilterable
     include EachBatch
+    include FastDestroyAll::Helpers
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -125,6 +126,8 @@ module Ci
     validates :source, exclusion: { in: %w(unknown), unless: :importing? }, on: :create
 
     after_create :keep_around_commits, unless: :importing?
+
+    use_fast_destroy :job_artifacts
 
     # We use `Enums::Ci::Pipeline.sources` here so that EE can more easily extend
     # this `Hash` with new values.
@@ -657,15 +660,9 @@ module Ci
     # Return a hash of file type => array of 1 job artifact
     def latest_report_artifacts
       ::Gitlab::SafeRequestStore.fetch("pipeline:#{self.id}:latest_report_artifacts") do
-        # Note we use read_attribute(:project_id) to read the project
-        # ID instead of self.project_id. The latter appears to load
-        # the Project model. This extra filter doesn't appear to
-        # affect query plan but included to ensure we don't leak the
-        # wrong informaiton.
         ::Ci::JobArtifact.where(
           id: job_artifacts.with_reports
             .select('max(ci_job_artifacts.id) as id')
-            .where(project_id: self.read_attribute(:project_id))
             .group(:file_type)
         )
           .preload(:job)
@@ -1095,6 +1092,8 @@ module Ci
           merge_request.modified_paths
         elsif branch_updated?
           push_details.modified_paths
+        elsif external_pull_request? && ::Feature.enabled?(:ci_modified_paths_of_external_prs, project, default_enabled: :yaml)
+          external_pull_request.modified_paths
         end
       end
     end
@@ -1117,6 +1116,10 @@ module Ci
 
     def merge_request?
       merge_request_id.present?
+    end
+
+    def external_pull_request?
+      external_pull_request_id.present?
     end
 
     def detached_merge_request_pipeline?
@@ -1246,8 +1249,6 @@ module Ci
     private
 
     def add_message(severity, content)
-      return unless Gitlab::Ci::Features.store_pipeline_messages?(project)
-
       messages.build(severity: severity, content: content)
     end
 

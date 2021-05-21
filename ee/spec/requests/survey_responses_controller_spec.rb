@@ -17,7 +17,8 @@ RSpec.describe SurveyResponsesController do
         instance_id: 'foo',
         response: 'response text',
         bla: 'bar',
-        show_invite_link: 'true'
+        show_invite_link: 'true',
+        onboarding_progress: '4'
       }
     end
 
@@ -43,11 +44,14 @@ RSpec.describe SurveyResponsesController do
                 data:
                 {
                   survey_id: 123,
-                  response: 'response text'
+                  response: 'response text',
+                  onboarding_progress: 4
                 }
               }
             ]
           )
+
+          match_snowplow_context_schema(schema_path: 'survey_response_schema', context: { response: 'response text', survey_id: 123, onboarding_progress: 4 } )
         end
       end
     end

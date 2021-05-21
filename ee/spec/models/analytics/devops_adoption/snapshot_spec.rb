@@ -57,4 +57,14 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
       expect(segment.start_time).to eq(expected_start_time)
     end
   end
+
+  describe '#namespace' do
+    subject { build(:devops_adoption_snapshot) }
+
+    it 'fills namespace with segments namespace on save' do
+      expect do
+        subject.save!
+      end.to change { subject.namespace }.to(subject.segment.namespace)
+    end
+  end
 end

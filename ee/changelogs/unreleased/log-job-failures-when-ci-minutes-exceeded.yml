@@ -1,5 +1,0 @@
----
-title: Log when build is dropped due to CI minutes exceeded
-merge_request: 61381
-author:
-type: added

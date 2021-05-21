@@ -87,7 +87,11 @@
       "updated_at": "2019-11-20T17:27:41.118Z",
       "name": "first board",
       "milestone_id": -2,
-      "milestone": {"id": -2, "name":  "#upcoming", "title":  "Upcoming"},
+      "milestone": {
+        "id": -2,
+        "name": "#upcoming",
+        "title": "Upcoming"
+      },
       "group_id": 4351,
       "weight": null,
       "labels": [],
@@ -289,6 +293,24 @@
           "created_at": "2019-11-05T15:37:21.287Z",
           "updated_at": "2019-11-05T15:37:21.287Z"
         }
+      ],
+      "label_links": [
+        {
+          "id": 1,
+          "label_id": 2,
+          "target_id": 3,
+          "target_type": "Epic",
+          "created_at": "2021-04-14 14:42:21.717503",
+          "updated_at": "2021-04-14 14:42:21.717503",
+          "label": {
+            "title": "title",
+            "description": "description",
+            "color": "#cd2c5c",
+            "created_at": "2021-04-14 14:42:21.717503",
+            "updated_at": "2021-04-14 14:42:21.717503",
+            "type": "GroupLabel"
+          }
+        }
       ]
     },
     {
@@ -321,7 +343,25 @@
       "state": "closed",
       "start_date_sourcing_epic_id": null,
       "due_date_sourcing_epic_id": null,
-      "notes": []
+      "notes": [],
+      "label_links": [
+        {
+          "id": 1,
+          "label_id": 2,
+          "target_id": 3,
+          "target_type": "Epic",
+          "created_at": "2021-04-14 14:42:21.717503",
+          "updated_at": "2021-04-14 14:42:21.717503",
+          "label": {
+            "title": "title",
+            "description": "description",
+            "color": "#cd2c5c",
+            "created_at": "2021-04-14 14:42:21.717503",
+            "updated_at": "2021-04-14 14:42:21.717503",
+            "type": "GroupLabel"
+          }
+        }
+      ]
     }
   ]
 }

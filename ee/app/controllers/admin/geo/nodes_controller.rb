@@ -3,11 +3,16 @@
 class Admin::Geo::NodesController < Admin::Geo::ApplicationController
   before_action :check_license!, except: :index
   before_action :load_node, only: [:edit, :update]
+  before_action only: [:index] do
+    push_frontend_feature_flag(:geo_nodes_beta)
+  end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def index
-    @nodes = GeoNode.all.order(:id)
-    @node = GeoNode.new
+    if Feature.disabled?(:geo_nodes_beta)
+      @nodes = GeoNode.all.order(:id)
+      @node = GeoNode.new
+    end
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

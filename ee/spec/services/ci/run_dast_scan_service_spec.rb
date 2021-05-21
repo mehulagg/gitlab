@@ -6,6 +6,7 @@ RSpec.describe Ci::RunDastScanService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, creator: user) }
   let_it_be(:dast_profile) { create(:dast_profile) }
+  let_it_be(:dast_site_profile) { dast_profile.dast_site_profile }
   let_it_be(:branch) { project.default_branch }
   let_it_be(:spider_timeout) { 42 }
   let_it_be(:target_timeout) { 21 }
@@ -35,7 +36,8 @@ RSpec.describe Ci::RunDastScanService do
         auth_username_field: 'session[username]',
         auth_password_field: 'session[password]',
         auth_username: 'tanuki',
-        dast_profile: dast_profile
+        dast_profile: dast_profile,
+        dast_site_profile: dast_site_profile
       )
     end
 
@@ -175,23 +177,37 @@ RSpec.describe Ci::RunDastScanService do
         expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
-      it 'associates the dast_profile with the pipeline' do
-        expect(pipeline.dast_profile).to eq(dast_profile)
-      end
-
-      context 'when no dast_profile is provided' do
-        let(:dast_profile) { nil }
-
-        it 'does not create a new association' do
-          expect(pipeline.dast_profile).to be_nil
-        end
-      end
-
-      context 'when creating the association betweeen the dast_profile and the pipeline fails' do
-        let_it_be(:dast_profile) { build(:dast_site_profile) }
+      shared_examples 'transactional creation' do
+        let_it_be(:type_mismatch) { build(:dast_scanner_profile) }
 
         it 'does not create a Ci::Pipeline' do
           expect { subject }.to raise_error(ActiveRecord::AssociationTypeMismatch).and change { Ci::Pipeline.count }.by(0)
+        end
+      end
+
+      context 'when the dast_profile and dast_site_profile are provided' do
+        it 'associates the dast_profile with the pipeline' do
+          expect(pipeline.dast_profile).to eq(dast_profile)
+        end
+
+        it 'does associate the dast_site_profile with the pipeline' do
+          expect(pipeline.dast_site_profile).to be_nil
+        end
+
+        it_behaves_like 'transactional creation' do
+          let_it_be(:dast_profile) { type_mismatch }
+        end
+      end
+
+      context 'when the dast_site_profile is provided' do
+        let(:dast_profile) { nil }
+
+        it 'associates the dast_site_profile with the pipeline' do
+          expect(pipeline.dast_site_profile).to eq(dast_site_profile)
+        end
+
+        it_behaves_like 'transactional creation' do
+          let_it_be(:dast_site_profile) { type_mismatch }
         end
       end
 

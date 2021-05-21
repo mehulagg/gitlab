@@ -42,7 +42,9 @@ Array [
       "avatarLabeled": Object {
         "size": "32",
         "src": "path/to/img_joella_miller",
-        "text": "Joella Miller  @era",
+        "text": "Joella Miller  
+                Group invite
+               @era",
       },
       "avatarLink": Object {
         "alt": "Joella Miller",

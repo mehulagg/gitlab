@@ -139,18 +139,18 @@ RSpec.describe Tooling::Danger::ProjectHelper do
       'db/post_migrate/foo'                                       | [:database, :migration]
       'ee/db/geo/migrate/foo'                                     | [:database, :migration]
       'ee/db/geo/post_migrate/foo'                                | [:database, :migration]
-      'app/models/project_authorization.rb'                       | [:database]
-      'app/services/users/refresh_authorized_projects_service.rb' | [:database]
-      'app/services/authorized_project_update/find_records_due_for_refresh_service.rb' | [:database]
-      'lib/gitlab/background_migration.rb'                        | [:database]
-      'lib/gitlab/background_migration/foo'                       | [:database]
-      'ee/lib/gitlab/background_migration/foo'                    | [:database]
-      'lib/gitlab/database.rb'                                    | [:database]
-      'lib/gitlab/database/foo'                                   | [:database]
-      'ee/lib/gitlab/database/foo'                                | [:database]
-      'lib/gitlab/github_import.rb'                               | [:database]
-      'lib/gitlab/github_import/foo'                              | [:database]
-      'lib/gitlab/sql/foo'                                        | [:database]
+      'app/models/project_authorization.rb'                       | [:database, :backend]
+      'app/services/users/refresh_authorized_projects_service.rb' | [:database, :backend]
+      'app/services/authorized_project_update/find_records_due_for_refresh_service.rb' | [:database, :backend]
+      'lib/gitlab/background_migration.rb'                        | [:database, :backend]
+      'lib/gitlab/background_migration/foo'                       | [:database, :backend]
+      'ee/lib/gitlab/background_migration/foo'                    | [:database, :backend]
+      'lib/gitlab/database.rb'                                    | [:database, :backend]
+      'lib/gitlab/database/foo'                                   | [:database, :backend]
+      'ee/lib/gitlab/database/foo'                                | [:database, :backend]
+      'lib/gitlab/github_import.rb'                               | [:database, :backend]
+      'lib/gitlab/github_import/foo'                              | [:database, :backend]
+      'lib/gitlab/sql/foo'                                        | [:database, :backend]
       'rubocop/cop/migration/foo'                                 | [:database]
 
       'db/fixtures/foo.rb'                                 | [:backend]
@@ -162,8 +162,6 @@ RSpec.describe Tooling::Danger::ProjectHelper do
       'workhorse/main.go' | [:workhorse]
       'workhorse/internal/upload/upload.go' | [:workhorse]
 
-      'changelogs/foo'    | [:none]
-      'ee/changelogs/foo' | [:none]
       'locale/gitlab.pot' | [:none]
 
       'FOO'          | [:unknown]
@@ -256,7 +254,9 @@ RSpec.describe Tooling::Danger::ProjectHelper do
     subject { project_helper.all_ee_changes }
 
     it 'returns all changed files starting with ee/' do
-      expect(fake_helper).to receive(:all_changed_files).and_return(%w[fr/ee/beer.rb ee/wine.rb ee/lib/ido.rb ee.k])
+      changes = double
+      expect(project_helper).to receive(:changes).and_return(changes)
+      expect(changes).to receive(:files).and_return(%w[fr/ee/beer.rb ee/wine.rb ee/lib/ido.rb ee.k])
 
       is_expected.to match_array(%w[ee/wine.rb ee/lib/ido.rb])
     end

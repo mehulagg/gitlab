@@ -47,6 +47,8 @@ RSpec.describe 'GEO Nodes', :geo do
 
     describe 'Geo Nodes admin screen' do
       it "has a 'Replication details' button on listed secondary geo nodes pointing to correct URL", :js do
+        # TODO: Remove this spec when geo_nodes_beta is removed as this UI element is removed in new UI.
+        stub_feature_flags(geo_nodes_beta: false)
         visit admin_geo_nodes_path
 
         expect(page).to have_content(geo_primary.url)

@@ -1,4 +1,5 @@
 @import 'page_bundles/mixins_and_variables_and_functions';
+@import '../components/generic_vulnerability_report';
 
 $security-filter-height: 90px;
 $selection-summary-height: 66px;
@@ -117,86 +118,5 @@ $selection-summary-with-error-height: 118px;
 
   .card.with-error + table thead.below-selection-summary th {
     @include sticky-top-positioning($security-filter-height + $selection-summary-with-error-height);
-  }
-}
-
-.generic-report-container {
-  @include gl-display-grid;
-
-  grid-template-columns: max-content auto;
-}
-
-.generic-report-row {
-  display: contents;
-
-  &:last-child .generic-report-column {
-    @include gl-border-b-0;
-  }
-}
-
-.generic-report-column {
-  @include gl-px-3;
-  @include gl-py-5;
-  @include gl-border-b-1;
-  @include gl-border-b-solid;
-  @include gl-border-gray-100;
-
-  &:first-child {
-    max-width: 15rem;
-  }
-}
-
-.generic-report-list {
-  margin-bottom: 0 !important;
-
-  li {
-    @include gl-ml-0;
-    @include gl-list-style-none;
-  }
-
-  &.generic-report-list-nested li {
-    @include gl-ml-5;
-    list-style-type: disc;
-  }
-}
-
-.generic-report-named-list {
-  @include gl-display-grid;
-  grid-template-columns: max-content auto;
-  margin: 0 !important;
-
-  > .generic-report-named-list-item {
-    display: contents;
-  }
-}
-
-.generic-report-named-list-item {
-  @include gl-list-style-none;
-  margin: 0 !important;
-
-  .generic-report-named-list-label,
-  .generic-report-named-list-value {
-    @include gl-m-0;
-    @include gl-display-flex;
-    @include gl-pr-5;
-    @include gl-py-3;
-    @include gl-border-b-1;
-    @include gl-border-b-solid;
-    @include gl-border-gray-100;
-  }
-
-  &:first-child {
-    > .generic-report-named-list-label,
-    > .generic-report-named-list-value {
-      @include gl-pt-0;
-    }
-  }
-
-  &:last-child {
-    > .generic-report-named-list-label,
-    > .generic-report-named-list-value {
-      @include gl-pb-0;
-      @include gl-border-b-0;
-    }
   }
 }

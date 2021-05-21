@@ -132,7 +132,7 @@ export default {
           :title="$options.i18n.editProfileLabel"
           :aria-label="$options.i18n.editProfileLabel"
           :href="selectedProfile.editPath"
-          class="gl-absolute gl-right-7"
+          class="gl-absolute gl-right-7 gl-z-index-1"
         />
         <slot name="summary"></slot>
       </div>

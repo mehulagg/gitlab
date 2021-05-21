@@ -1948,6 +1948,30 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         expect(pipeline.modified_paths).to match(merge_request.modified_paths)
       end
     end
+
+    context 'when source is an external pull request' do
+      let(:pipeline) do
+        create(:ci_pipeline, source: :external_pull_request_event, external_pull_request: external_pull_request)
+      end
+
+      let(:external_pull_request) do
+        create(:external_pull_request, project: project, target_sha: '281d3a7', source_sha: '498214d')
+      end
+
+      it 'returns external pull request modified paths' do
+        expect(pipeline.modified_paths).to match(external_pull_request.modified_paths)
+      end
+
+      context 'when the FF ci_modified_paths_of_external_prs is disabled' do
+        before do
+          stub_feature_flags(ci_modified_paths_of_external_prs: false)
+        end
+
+        it 'returns nil' do
+          expect(pipeline.modified_paths).to be_nil
+        end
+      end
+    end
   end
 
   describe '#all_worktree_paths' do
@@ -2702,7 +2726,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
           pipeline2.cancel_running
         end
 
-        extra_update_queries = 3 # transition ... => :canceled
+        extra_update_queries = 4 # transition ... => :canceled, queue pop
         extra_generic_commit_status_validation_queries = 2 # name_uniqueness_across_types
 
         expect(control2.count).to eq(control1.count + extra_update_queries + extra_generic_commit_status_validation_queries)
@@ -3209,18 +3233,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
       pipeline.add_error_message('The error message')
 
       expect(pipeline.messages.map(&:content)).to contain_exactly('The error message')
-    end
-
-    context 'when feature flag ci_store_pipeline_messages is disabled' do
-      before do
-        stub_feature_flags(ci_store_pipeline_messages: false)
-      end
-
-      it 'does not add pipeline error message' do
-        pipeline.add_error_message('The error message')
-
-        expect(pipeline.messages).to be_empty
-      end
     end
   end
 

@@ -1,13 +1,11 @@
 <script>
 import { GlButton, GlTable } from '@gitlab/ui';
 import { mapState } from 'vuex';
+import { DEFAULT_TH_CLASSES } from '~/lib/utils/constants';
+import { thWidthClass } from '~/lib/utils/table_utility';
 import { __, s__ } from '~/locale';
 import Actions from './actions.vue';
 import Branch from './branch.vue';
-
-const DEFAULT_TH_CLASSES =
-  'gl-bg-transparent! gl-border-b-solid! gl-border-b-gray-100! gl-p-5! gl-border-b-1!';
-const thWidthClass = (width) => `gl-w-${width}p ${DEFAULT_TH_CLASSES}`;
 
 export const i18n = {
   addButton: s__('StatusCheck|Add status check'),

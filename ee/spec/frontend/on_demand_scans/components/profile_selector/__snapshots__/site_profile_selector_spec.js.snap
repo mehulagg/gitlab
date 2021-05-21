@@ -292,7 +292,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
         >
           <a
             aria-label="Edit profile"
-            class="btn gl-absolute gl-right-7 btn-default btn-md gl-button btn-icon"
+            class="btn gl-absolute gl-right-7 gl-z-index-1 btn-default btn-md gl-button btn-icon"
             href="/site_profiles/edit/1"
             title="Edit profile"
           >
@@ -311,9 +311,6 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             <!---->
           </a>
            
-          <div>
-            Site profile #1's summary
-          </div>
         </div>
         <!---->
         <!---->

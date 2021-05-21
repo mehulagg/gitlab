@@ -1,5 +1,5 @@
 <script>
-import { GlPopover } from '@gitlab/ui';
+import { GlButton, GlPopover } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { __, n__, s__, sprintf } from '~/locale';
@@ -8,7 +8,13 @@ import Tracking from '~/tracking';
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
 
 export default {
+  tracking: {
+    action: 'click_button',
+    labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
+    property: 'experiment:highlight_paid_features_during_active_trial',
+  },
   components: {
+    GlButton,
     GlPopover,
   },
   mixins: [Tracking.mixin()],
@@ -23,6 +29,14 @@ export default {
       required: true,
     },
     featureName: {
+      type: String,
+      required: true,
+    },
+    hrefComparePlans: {
+      type: String,
+      required: true,
+    },
+    hrefUpgradeToPaid: {
       type: String,
       required: true,
     },
@@ -54,6 +68,9 @@ export default {
       disabled: false,
     };
   },
+  i18n: {
+    compareAllButtonTitle: s__('BillingPlans|Compare all plans'),
+  },
   computed: {
     popoverTitle() {
       const i18nPopoverTitle = n__(
@@ -77,6 +94,13 @@ export default {
         planNameForUpgrade: this.planNameForUpgrade,
       });
     },
+    upgradeButtonTitle() {
+      const i18nUpgradeButtonTitle = s__('BillingPlans|Upgrade to GitLab %{planNameForUpgrade}');
+
+      return sprintf(i18nUpgradeButtonTitle, {
+        planNameForUpgrade: this.planNameForUpgrade,
+      });
+    },
   },
   created() {
     this.debouncedResize = debounce(() => this.onResize(), RESIZE_EVENT_DEBOUNCE_MS);
@@ -95,7 +119,7 @@ export default {
     onShown() {
       this.track('popover_shown', {
         label: `feature_highlight_popover:${this.featureName}`,
-        property: 'experiment:highlight_paid_features_during_active_trial',
+        property: this.$options.tracking.property,
       });
     },
     updateDisabledState() {
@@ -128,5 +152,38 @@ export default {
     </div>
 
     {{ popoverContent }}
+
+    <div class="gl-mt-5">
+      <gl-button
+        :href="hrefUpgradeToPaid"
+        target="_blank"
+        category="primary"
+        variant="confirm"
+        size="small"
+        class="gl-mb-0"
+        block
+        data-testid="upgradeBtn"
+        :data-track-action="$options.tracking.action"
+        :data-track-label="$options.tracking.labels.upgrade"
+        :data-track-property="$options.tracking.property"
+      >
+        <span class="gl-font-sm">{{ upgradeButtonTitle }}</span>
+      </gl-button>
+      <gl-button
+        :href="hrefComparePlans"
+        target="_blank"
+        category="secondary"
+        variant="confirm"
+        size="small"
+        class="gl-mb-0"
+        block
+        data-testid="compareBtn"
+        :data-track-action="$options.tracking.action"
+        :data-track-label="$options.tracking.labels.compare"
+        :data-track-property="$options.tracking.property"
+      >
+        <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
+      </gl-button>
+    </div>
   </gl-popover>
 </template>

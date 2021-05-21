@@ -3,6 +3,7 @@ import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
+import createJiraIssue from 'ee/vue_shared/security_reports/components/create_jira_issue.vue';
 import RelatedJiraIssues, { i18n } from 'ee/vulnerabilities/components/related_jira_issues.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import axios from '~/lib/utils/axios_utils';
@@ -34,8 +35,18 @@ describe('EE RelatedJiraIssues Component', () => {
     },
   ];
 
-  const createWrapper = (mountFn) => () => {
-    return extendedWrapper(mountFn(RelatedJiraIssues, { provide: defaultProvide }));
+  const createWrapper = (mountFn, { createVulnerabilityJiraIssueViaGraphql = true } = {}) => () => {
+    return extendedWrapper(
+      mountFn(RelatedJiraIssues, {
+        provide: {
+          ...defaultProvide,
+          ...{ vulnerabilityId: 1 },
+          glFeatures: {
+            createVulnerabilityJiraIssueViaGraphql,
+          },
+        },
+      }),
+    );
   };
   const createFullWrapper = createWrapper(mount);
   const createShallowWrapper = createWrapper(shallowMount);
@@ -57,10 +68,12 @@ describe('EE RelatedJiraIssues Component', () => {
   const withinComponent = () => within(wrapper.element);
   const findAlert = () => wrapper.findComponent(GlAlert);
   const findRelatedJiraIssuesCount = () => wrapper.findByTestId('related-jira-issues-count');
-  const findCreateJiraIssueLink = () => wrapper.findByTestId('create-new-jira-issue');
+  const findCreateJiraIssueLink = () => wrapper.findByTestId('create-new-jira-issue-link');
   const findRelatedJiraIssuesSection = () => wrapper.findByTestId('related-jira-issues-section');
   const withinRelatedJiraIssuesSection = () => within(findRelatedJiraIssuesSection().element);
-
+  const findShowCreateJiraIssueErrorAlert = () =>
+    wrapper.findByTestId('create-jira-issue-error-alert');
+  const findCreateJiraIssueComponent = () => wrapper.findComponent(createJiraIssue);
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
@@ -85,7 +98,6 @@ describe('EE RelatedJiraIssues Component', () => {
 
       it('shows a message describing the error', () => {
         const expectedLinkText = sprintf(i18n.fetchErrorMessage, { linkStart: '', linkEnd: '' });
-
         expect(findAlert().text()).toBe(expectedLinkText);
       });
 
@@ -124,13 +136,45 @@ describe('EE RelatedJiraIssues Component', () => {
         ).not.toBe(undefined);
       });
 
-      it('shows a link to create a new Jira issues', () => {
-        const createNewJiraIssueLink = findCreateJiraIssueLink();
+      describe('when createVulnerabilityJiraIssueViaGraphql Flag is on', () => {
+        it('shows createJiraIssue Component when createVulnerabilityJiraIssueViaGraphql Flag is true', () => {
+          expect(findCreateJiraIssueComponent().exists()).toBe(true);
+        });
 
-        expect(createNewJiraIssueLink.exists()).toBe(true);
-        expect(createNewJiraIssueLink.attributes('href')).toBe(defaultProvide.createJiraIssueUrl);
-        expect(createNewJiraIssueLink.props('icon')).toBe('external-link');
-        expect(createNewJiraIssueLink.text()).toMatch(i18n.createNewIssueLinkText);
+        it('does not show CreateJiraIssueButton when createVulnerabilityJiraIssueViaGraphql Flag is true ', () => {
+          expect(findCreateJiraIssueLink().exists()).toBe(false);
+        });
+      });
+
+      describe('when createVulnerabilityJiraIssueViaGraphql Flag is off', () => {
+        beforeEach(async () => {
+          wrapper = await withResponse(
+            createWrapper(mount, { createVulnerabilityJiraIssueViaGraphql: false }),
+            {
+              statusCode: httpStatusCodes,
+            },
+          );
+        });
+
+        it('does not show createJiraIssue Component when createVulnerabilityJiraIssueViaGraphql Flag is false ', () => {
+          expect(findCreateJiraIssueComponent().exists()).toBe(false);
+        });
+
+        it('shows CreateJiraIssueButton when createVulnerabilityJiraIssueViaGraphql Flag is true', () => {
+          expect(findCreateJiraIssueLink().exists()).toBe(true);
+        });
+      });
+
+      it('should not show showCreateJiraIssueErrorAlert Banner', () => {
+        expect(findShowCreateJiraIssueErrorAlert().exists()).toBe(false);
+      });
+
+      it('shows showCreateJiraIssueErrorAlert Banner when createJiraIssue emits an error', async () => {
+        findCreateJiraIssueComponent().vm.$emit('create-jira-issue-error', 'test-error-message');
+        await nextTick();
+        const alert = findShowCreateJiraIssueErrorAlert();
+        expect(alert.exists()).toBe(true);
+        expect(alert.text()).toMatch('test-error-message');
       });
     });
 

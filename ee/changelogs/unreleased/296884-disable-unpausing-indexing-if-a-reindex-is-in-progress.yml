@@ -1,5 +1,0 @@
----
-title: Disable pause indexing checkbox if a reindex is in progress
-merge_request: 60953
-author:
-type: changed

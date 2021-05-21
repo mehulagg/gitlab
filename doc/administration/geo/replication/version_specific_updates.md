@@ -11,12 +11,37 @@ Review this page for update instructions for your version. These steps
 accompany the [general steps](updating_the_geo_nodes.md#general-update-steps)
 for updating Geo nodes.
 
+## Updating to GitLab 13.11
+
+We found an [issue with Git clone/pull through HTTP(s)](https://gitlab.com/gitlab-org/gitlab/-/issues/330787) on Geo secondaries and on any GitLab instance if maintenance mode is enabled. This was caused by a regression in GitLab Workhorse. This is fixed in the [GitLab 13.11.4 patch release](https://about.gitlab.com/releases/2021/05/14/gitlab-13-11-4-released/). To avoid this issue, upgrade to GitLab 13.11.4 or later. 
+
 ## Updating to GitLab 13.9
 
 We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/324160)
 that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3.
-We are working on a patch and recommend delaying any upgrade attempt until a fixed version
-is released.
+We are working on a patch, but until a fixed version is released, you can manually complete
+the zero-downtime upgrade:
+
+1. Before running the final `sudo gitlab-rake db:migrate` command on the deploy node,
+   execute the following queries using the PostgreSQL console (or `sudo gitlab-psql`)
+   to drop the problematic triggers:
+
+   ```sql
+   drop trigger trigger_e40a6f1858e6 on application_settings;
+   drop trigger trigger_0d588df444c8 on application_settings;
+   drop trigger trigger_1572cbc9a15f on application_settings;
+   drop trigger trigger_22a39c5c25f3 on application_settings;
+   ```
+
+1. Run the final migrations:
+
+   ```shell
+   sudo gitlab-rake db:migrate
+   ```
+
+If you have already run the final `sudo gitlab-rake db:migrate` command on the deploy node and have
+encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you can still
+follow the previous steps to complete the update.
 
 More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
@@ -56,6 +81,12 @@ In GitLab 13.3, promoting a secondary node to a primary while the secondary is
 paused fails. Do not pause replication before promoting a secondary. If the
 node is paused, be sure to resume before promoting. To avoid this issue,
 upgrade to GitLab 13.4 or later.
+
+WARNING:
+Promoting the database during a failover can fail on XFS and filesystems ordering files lexically,
+when using `--force` or `--skip-preflight-checks`, due to [an issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6076) fixed in 13.5.
+The [troubleshooting steps](troubleshooting.md#errors-when-using---skip-preflight-checks-or---force)
+contain a workaround if you run into errors during the failover.
 
 ## Updating to GitLab 13.2
 

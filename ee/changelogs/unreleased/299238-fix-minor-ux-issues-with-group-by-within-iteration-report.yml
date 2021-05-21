@@ -1,5 +1,0 @@
----
-title: Fix minor UX issues with "group by" within iteration report
-merge_request: 59522
-author:
-type: fixed

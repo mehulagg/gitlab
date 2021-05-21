@@ -129,6 +129,7 @@ The following metrics are available:
 | `pipeline_graph_links_per_job_ratio`                             | Histogram   | 13.9    | Ratio of links to job per graph                                                                                       |                                                           |
 | `gitlab_ci_pipeline_security_orchestration_policy_processing_duration_seconds` | Histogram   | 13.12    | Time in seconds it takes to process Security Policies in CI/CD pipeline                                                                    |                                                           |
 | `gitlab_ci_difference_live_vs_actual_minutes`                    | Histogram   | 13.12    | Difference between CI minute consumption counted while jobs were running (live) vs when jobs are complete (actual). Used to enforce CI minute consumption limits on long running jobs. | `plan` |
+| `gitlab_spamcheck_request_duration_seconds`                      | Histogram   | 13.12   | The duration for requests between Rails and the anti-spam engine                                                        |                                                           |
 
 ## Metrics controlled by a feature flag
 
@@ -307,19 +308,7 @@ Some basic Ruby runtime metrics are available:
 | `ruby_process_proportional_memory_bytes` | Gauge     | 13.0  | Memory usage by process (PSS/Proportional Set Size) |
 | `ruby_process_start_time_seconds`        | Gauge     | 12.0  | UNIX timestamp of process start time |
 
-## Unicorn Metrics
-
-Unicorn specific metrics, when Unicorn is used.
-
-| Metric                       | Type  | Since | Description                                        |
-|:-----------------------------|:------|:------|:---------------------------------------------------|
-| `unicorn_active_connections` | Gauge | 11.0  | The number of active Unicorn connections (workers) |
-| `unicorn_queued_connections` | Gauge | 11.0  | The number of queued Unicorn connections           |
-| `unicorn_workers`            | Gauge | 12.0  | The number of Unicorn workers                      |
-
 ## Puma Metrics
-
-When Puma is used instead of Unicorn, the following metrics are available:
 
 | Metric                            | Type    | Since | Description |
 |:--------------------------------- |:------- |:----- |:----------- |
@@ -351,8 +340,8 @@ instance (`cache`, `shared_state` etc.).
 ## Metrics shared directory
 
 The GitLab Prometheus client requires a directory to store metrics data shared between multi-process services.
-Those files are shared among all instances running under Unicorn server.
-The directory must be accessible to all running Unicorn's processes, or
+Those files are shared among all instances running under Puma server.
+The directory must be accessible to all running Puma's processes, or
 metrics can't function correctly.
 
 This directory's location is configured using environment variable `prometheus_multiproc_dir`.

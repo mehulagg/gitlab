@@ -39,6 +39,8 @@ export default {
         // Toggle the option's existence in the array.
         this.selectedOptions = xor(this.selectedOptions, [option]);
       }
+
+      this.updateQuerystring();
     },
   },
   NO_ACTIVITY,

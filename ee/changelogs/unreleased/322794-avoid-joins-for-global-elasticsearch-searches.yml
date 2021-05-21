@@ -1,5 +1,0 @@
----
-title: Avoid use of Elasticsearch joins in Global Merge Request searches
-merge_request: 60467
-author:
-type: changed

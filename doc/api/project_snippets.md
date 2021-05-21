@@ -16,7 +16,7 @@ Constants for snippet visibility levels are:
 
 | visibility | Description |
 | ---------- | ----------- |
-| `private`  | The snippet is visible only the snippet creator |
+| `private`  | The snippet is visible only to the snippet creator |
 | `internal` | The snippet is visible for any logged in user except [external users](../user/permissions.md#external-users) |
 | `public`   | The snippet can be accessed without any authentication |
 
@@ -225,7 +225,7 @@ Parameters:
 
 - `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
 - `snippet_id` (required) - The ID of a project's snippet
-- `ref` (required) - The name of a branch, tag or commit, such as `master`
+- `ref` (required) - The name of a branch, tag or commit, such as `main`
 - `file_path` (required) - The URL-encoded path to the file, such as `snippet%2Erb`
 
 Example request:

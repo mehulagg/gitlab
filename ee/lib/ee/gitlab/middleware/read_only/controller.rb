@@ -79,7 +79,7 @@ module EE
           end
 
           def geo_proxy_git_http_route?
-            return unless request.path.end_with?('.git/git-receive-pack')
+            return unless request_path.end_with?('.git/git-receive-pack')
 
             ALLOWLISTED_GIT_READ_WRITE_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
           end
@@ -98,8 +98,8 @@ module EE
 
           def lfs_locks_route?
             # Calling route_hash may be expensive. Only do it if we think there's a possible match
-            unless request.path.end_with?('/info/lfs/locks', '/info/lfs/locks/verify') ||
-                %r{/info/lfs/locks/\d+/unlock\z}.match?(request.path)
+            unless request_path.end_with?('/info/lfs/locks', '/info/lfs/locks/verify') ||
+                %r{/info/lfs/locks/\d+/unlock\z}.match?(request_path)
               return false
             end
 

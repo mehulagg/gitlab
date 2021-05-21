@@ -1,6 +1,0 @@
----
-title: Check if an issue is already linked to the same vulnerability before creating
-  the issue link
-merge_request: 60753
-author:
-type: fixed

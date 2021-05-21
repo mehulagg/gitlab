@@ -1,5 +1,0 @@
----
-title: Optimize number of SQL queries when listing epics.
-merge_request: 61372
-author:
-type: performance

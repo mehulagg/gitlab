@@ -1,5 +1,0 @@
----
-title: Fix incorrect ordering of audit events on MR approval changes
-merge_request: 60508
-author:
-type: fixed

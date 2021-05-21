@@ -1,5 +1,0 @@
----
-title: Remove docker-in-docker job from API Fuzzing CI template
-merge_request: 60054
-author:
-type: removed

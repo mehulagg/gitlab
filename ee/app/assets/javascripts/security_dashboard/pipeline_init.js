@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import PipelineSecurityDashboard from './components/pipeline_security_dashboard.vue';
 import apolloProvider from './graphql/provider';
+import createRouter from './router';
 import createDashboardStore from './store';
 import { DASHBOARD_TYPES } from './store/constants';
 import { LOADING_VULNERABILITIES_ERROR_CODES } from './store/modules/vulnerabilities/constants';
@@ -31,8 +32,11 @@ export default () => {
     [LOADING_VULNERABILITIES_ERROR_CODES.FORBIDDEN]: emptyStateForbiddenSvgPath,
   };
 
+  const router = createRouter();
+
   return new Vue({
     el,
+    router,
     apolloProvider,
     store: createDashboardStore({
       dashboardType: DASHBOARD_TYPES.PIPELINE,

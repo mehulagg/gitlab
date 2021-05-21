@@ -9,7 +9,7 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def index
-    render json: Analytics::CycleAnalytics::GroupValueStreamSerializer.new.represent(value_streams)
+    render json: Analytics::CycleAnalytics::ValueStreamSerializer.new.represent(value_streams)
   end
 
   def create
@@ -75,7 +75,7 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def serialize_value_stream(result)
-    Analytics::CycleAnalytics::GroupValueStreamSerializer.new.represent(result.payload[:value_stream])
+    Analytics::CycleAnalytics::ValueStreamSerializer.new.represent(result.payload[:value_stream])
   end
 
   def serialize_value_stream_error(result)

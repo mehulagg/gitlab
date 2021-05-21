@@ -65,7 +65,7 @@ export default {
     <div class="col-md-6 gl-mb-5">
       <gl-card data-testid="users-in-subscription">
         <header>
-          <h2>{{ usersInSubscription }}</h2>
+          <h2 data-qa-selector="users_in_subscription">{{ usersInSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
             {{ $options.i18n.usersInSubscriptionTitle }}
           </h5>
@@ -79,7 +79,7 @@ export default {
     <div class="col-md-6 gl-mb-5">
       <gl-card data-testid="billable-users">
         <header>
-          <h2>{{ billableUsers }}</h2>
+          <h2 data-qa-selector="billable_users">{{ billableUsers }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
             {{ $options.i18n.billableUsersTitle }}
           </h5>
@@ -99,7 +99,7 @@ export default {
     <div class="col-md-6 gl-mb-5">
       <gl-card data-testid="maximum-users">
         <header>
-          <h2>{{ maximumUsers }}</h2>
+          <h2 data-qa-selector="maximum_users">{{ maximumUsers }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
             {{ $options.i18n.maximumUsersTitle }}
           </h5>
@@ -113,7 +113,7 @@ export default {
     <div class="col-md-6 gl-mb-5">
       <gl-card data-testid="users-over-license">
         <header>
-          <h2>{{ usersOverSubscription }}</h2>
+          <h2 data-qa-selector="users_over_subscription">{{ usersOverSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
             {{ $options.i18n.usersOverSubscriptionTitle }}
           </h5>

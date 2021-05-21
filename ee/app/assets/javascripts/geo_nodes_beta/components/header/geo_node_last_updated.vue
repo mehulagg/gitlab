@@ -47,10 +47,6 @@ export default {
         link: HELP_NODE_HEALTH_URL,
       };
     },
-    timeAgo() {
-      const time = this.statusCheckTimestamp;
-      return new Date(time).toString();
-    },
   },
 };
 </script>
@@ -60,7 +56,7 @@ export default {
     <span class="gl-text-gray-500" data-testid="last-updated-main-text">
       <gl-sprintf :message="$options.i18n.timeAgoMainText">
         <template #timeAgo>
-          <time-ago :time="timeAgo" />
+          <time-ago :time="statusCheckTimestamp" />
         </template>
       </gl-sprintf>
     </span>
@@ -74,7 +70,7 @@ export default {
       <p class="gl-font-base">
         <gl-sprintf :message="$options.i18n.timeAgoPopoverText">
           <template #timeAgo>
-            <time-ago :time="timeAgo" />
+            <time-ago :time="statusCheckTimestamp" />
           </template>
         </gl-sprintf>
       </p>

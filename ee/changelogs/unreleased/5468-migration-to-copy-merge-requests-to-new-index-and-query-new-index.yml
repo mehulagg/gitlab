@@ -1,5 +1,0 @@
----
-title: Migration to move merge requests to separate Elasticsearch index
-merge_request: 60586
-author:
-type: performance

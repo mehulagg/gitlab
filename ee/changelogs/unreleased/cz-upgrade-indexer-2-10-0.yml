@@ -1,5 +1,0 @@
----
-title: Upgrade the GitLab Elasticsearch Indexer version to 2.10.0
-merge_request: 60690
-author:
-type: security

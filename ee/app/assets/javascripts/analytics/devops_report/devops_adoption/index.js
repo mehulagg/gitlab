@@ -8,7 +8,13 @@ export default () => {
 
   if (!el) return false;
 
-  const { emptyStateSvgPath, groupId } = el.dataset;
+  const {
+    emptyStateSvgPath,
+    groupId,
+    devopsScoreMetrics,
+    devopsReportDocsPath,
+    noDataImagePath,
+  } = el.dataset;
 
   const isGroup = Boolean(groupId);
 
@@ -19,6 +25,9 @@ export default () => {
       emptyStateSvgPath,
       isGroup,
       groupGid: isGroup ? convertToGraphQLId(TYPE_GROUP, groupId) : null,
+      devopsScoreMetrics: isGroup ? null : JSON.parse(devopsScoreMetrics),
+      devopsReportDocsPath,
+      noDataImagePath,
     },
     render(h) {
       return h(DevopsAdoptionApp);

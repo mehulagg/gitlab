@@ -21,6 +21,8 @@ namespace :admin do
       get :keys
       put :block
       put :unblock
+      put :ban
+      put :unban
       put :deactivate
       put :activate
       put :unlock
@@ -93,6 +95,7 @@ namespace :admin do
 
   get :instance_review, to: 'instance_review#index'
 
+  resources :background_migrations, only: [:index]
   resource :health_check, controller: 'health_check', only: [:show]
   resource :background_jobs, controller: 'background_jobs', only: [:show]
 
@@ -101,7 +104,6 @@ namespace :admin do
 
   resources :projects, only: [:index]
 
-  get '/instance_statistics', to: redirect('admin/usage_trends')
   resources :usage_trends, only: :index
   resource :dev_ops_report, controller: 'dev_ops_report', only: :show
   resources :cohorts, only: :index

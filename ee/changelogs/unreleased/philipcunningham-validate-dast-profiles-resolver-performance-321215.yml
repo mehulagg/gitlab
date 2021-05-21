@@ -1,5 +1,0 @@
----
-title: Fix GraphQL N+1 performance issue when loading a Project's DAST Profiles
-merge_request: 60554
-author:
-type: performance

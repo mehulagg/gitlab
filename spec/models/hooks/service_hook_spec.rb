@@ -22,4 +22,22 @@ RSpec.describe ServiceHook do
       hook.execute(data)
     end
   end
+
+  describe '#rate_limit' do
+    let(:hook) { build(:service_hook) }
+
+    it 'returns nil' do
+      expect(hook.rate_limit).to be_nil
+    end
+  end
+
+  describe '#application_context' do
+    let(:hook) { build(:service_hook) }
+
+    it 'includes the type' do
+      expect(hook.application_context).to eq(
+        related_class: 'ServiceHook'
+      )
+    end
+  end
 end

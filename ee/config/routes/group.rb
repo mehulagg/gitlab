@@ -28,7 +28,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         resources :stages, only: [:index, :create, :update, :destroy] do
           member do
             get :average_duration_chart
-            get :duration_chart
             get :median
             get :average
             get :records
@@ -39,7 +38,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
               get :average_duration_chart
-              get :duration_chart
               get :median
               get :average
               get :records

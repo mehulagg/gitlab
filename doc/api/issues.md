@@ -27,7 +27,7 @@ When requested across groups or projects, it's expected to be the same as the `f
 
 ## List issues
 
-> Moved `weight` to GitLab Premium in 13.9.
+> The `weight` property moved to GitLab Premium in 13.9.
 
 Get all issues the authenticated user has access to. By default it
 returns only issues created by the current user. To get all issues,
@@ -233,7 +233,7 @@ that closed the issue still exists.
 
 ## List group issues
 
-> Moved `weight` to GitLab Premium in 13.9.
+> The `weight` property moved to GitLab Premium in 13.9.
 
 Get a list of a group's issues.
 
@@ -437,7 +437,7 @@ the issue still exists.
 
 ## List project issues
 
-> Moved `weight` to GitLab Premium in 13.9.
+> The `weight` property moved to GitLab Premium in 13.9.
 
 Get a list of a project's issues.
 
@@ -972,7 +972,7 @@ the issue still exists.
 
 ## New issue
 
-> Moved `weight` to GitLab Premium in 13.9.
+> The `weight` property moved to GitLab Premium in 13.9.
 
 Creates a new project issue.
 
@@ -996,7 +996,7 @@ POST /projects/:id/issues
 | `issue_type`                              | string         | no       | The type of issue. One of `issue`, `incident`, or `test_case`. Default is `issue`. |
 | `labels`                                  | string         | no       | Comma-separated label names for an issue  |
 | `merge_request_to_resolve_discussions_of` | integer        | no       | The IID of a merge request in which to resolve all issues. This fills out the issue with a default description and mark all discussions as resolved. When passing a description or title, these values take precedence over the default values.|
-| `milestone_id`                            | integer        | no       | The global ID of a milestone to assign issue  |
+| `milestone_id`                            | integer        | no       | The global ID of a milestone to assign issue. To find the `milestone_id` associated with a milestone, view an issue with the milestone assigned and [use the API](#single-project-issue) to retrieve the issue's details. |
 | `title`                                   | string         | yes      | The title of an issue |
 | `weight` **(PREMIUM)**                    | integer        | no       | The weight of the issue. Valid values are greater than or equal to 0. |
 
@@ -1127,7 +1127,7 @@ See [Issues rate limits](../user/admin_area/settings/rate_limit_on_issues_creati
 
 ## Edit issue
 
-> Moved `weight` to GitLab Premium in 13.9.
+> The `weight` property moved to GitLab Premium in 13.9.
 
 Updates an existing project issue. This call is also used to mark an issue as
 closed.

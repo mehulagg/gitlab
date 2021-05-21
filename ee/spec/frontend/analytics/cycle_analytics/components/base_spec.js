@@ -158,39 +158,39 @@ describe('Value Stream Analytics component', () => {
   }
 
   const displaysProjectsDropdownFilter = (flag) => {
-    expect(wrapper.find(ProjectsDropdownFilter).exists()).toBe(flag);
+    expect(wrapper.findComponent(ProjectsDropdownFilter).exists()).toBe(flag);
   };
 
   const displaysDateRangePicker = (flag) => {
-    expect(wrapper.find(Daterange).exists()).toBe(flag);
+    expect(wrapper.findComponent(Daterange).exists()).toBe(flag);
   };
 
   const displaysMetrics = (flag) => {
-    expect(wrapper.find(Metrics).exists()).toBe(flag);
+    expect(wrapper.findComponent(Metrics).exists()).toBe(flag);
   };
 
   const displaysStageTable = (flag) => {
-    expect(wrapper.find(StageTableNew).exists()).toBe(flag);
+    expect(wrapper.findComponent(StageTableNew).exists()).toBe(flag);
   };
 
   const displaysDurationChart = (flag) => {
-    expect(wrapper.find(DurationChart).exists()).toBe(flag);
+    expect(wrapper.findComponent(DurationChart).exists()).toBe(flag);
   };
 
   const displaysTypeOfWork = (flag) => {
-    expect(wrapper.find(TypeOfWorkCharts).exists()).toBe(flag);
+    expect(wrapper.findComponent(TypeOfWorkCharts).exists()).toBe(flag);
   };
 
   const displaysPathNavigation = (flag) => {
-    expect(wrapper.find(PathNavigation).exists()).toBe(flag);
+    expect(wrapper.findComponent(PathNavigation).exists()).toBe(flag);
   };
 
   const displaysFilterBar = (flag) => {
-    expect(wrapper.find(FilterBar).exists()).toBe(flag);
+    expect(wrapper.findComponent(FilterBar).exists()).toBe(flag);
   };
 
   const displaysValueStreamSelect = (flag) => {
-    expect(wrapper.find(ValueStreamSelect).exists()).toBe(flag);
+    expect(wrapper.findComponent(ValueStreamSelect).exists()).toBe(flag);
   };
 
   describe('without a group', () => {
@@ -207,7 +207,7 @@ describe('Value Stream Analytics component', () => {
     });
 
     it('displays an empty state', () => {
-      const emptyState = wrapper.find(GlEmptyState);
+      const emptyState = wrapper.findComponent(GlEmptyState);
 
       expect(emptyState.exists()).toBe(true);
       expect(emptyState.props('svgPath')).toBe(emptyStateSvgPath);
@@ -255,7 +255,7 @@ describe('Value Stream Analytics component', () => {
     });
 
     it('renders the no access information', () => {
-      const emptyState = wrapper.find(GlEmptyState);
+      const emptyState = wrapper.findComponent(GlEmptyState);
 
       expect(emptyState.exists()).toBe(true);
       expect(emptyState.props('svgPath')).toBe(noAccessSvgPath);
@@ -304,13 +304,13 @@ describe('Value Stream Analytics component', () => {
     });
 
     it('hides the empty state', () => {
-      expect(wrapper.find(GlEmptyState).exists()).toBe(false);
+      expect(wrapper.findComponent(GlEmptyState).exists()).toBe(false);
     });
 
     it('displays the projects filter', () => {
       displaysProjectsDropdownFilter(true);
 
-      expect(wrapper.find(ProjectsDropdownFilter).props()).toEqual(
+      expect(wrapper.findComponent(ProjectsDropdownFilter).props()).toEqual(
         expect.objectContaining({
           queryParams: wrapper.vm.projectsQueryParams,
           multiSelect: wrapper.vm.$options.multiProjectSelect,

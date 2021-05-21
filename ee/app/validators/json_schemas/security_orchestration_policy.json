@@ -36,7 +36,8 @@
                           "properties": {
                               "type": {
                                   "enum": [
-                                      "pipeline"
+                                      "pipeline",
+                                      "schedule"
                                   ],
                                   "type": "string"
                               },
@@ -47,7 +48,20 @@
                                       "minLength": 1,
                                       "type": "string"
                                   }
-                              }
+                              },
+                             "cadence": {
+                                  "type": "string"
+                             }
+                          },
+                          "if": {
+                                "properties": {
+                                    "type": {
+                                        "const": "schedule"
+                                    }
+                                }
+                          },
+                          "then": {
+                                "required": ["cadence"]
                           },
                           "additionalProperties": false
                       }

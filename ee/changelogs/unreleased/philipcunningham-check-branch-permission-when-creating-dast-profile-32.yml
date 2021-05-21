@@ -1,6 +1,0 @@
----
-title: Add improved branch validation when creating and updating Dast::Profiles
-  in GraphQL
-merge_request: 56053
-author:
-type: changed

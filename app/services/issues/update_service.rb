@@ -28,7 +28,6 @@ module Issues
       # because we do allow users that cannot admin issues to set confidential flag when creating an issue
       unless can_admin_issuable?(issue)
         params.delete(:confidential)
-        params.delete(:issue_type)
       end
     end
 
@@ -41,10 +40,6 @@ module Issues
         user: current_user,
         action: :update
       ).execute(spam_params: spam_params)
-    end
-
-    def after_update(issue)
-      IssuesChannel.broadcast_to(issue, event: 'updated') if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
     end
 
     def handle_changes(issue, options)
@@ -105,6 +100,8 @@ module Issues
     end
 
     def handle_move_between_ids(issue)
+      issue.check_repositioning_allowed! if params[:move_between_ids]
+
       super
 
       rebalance_if_needed(issue)
@@ -206,6 +203,16 @@ module Issues
 
     def create_confidentiality_note(issue)
       SystemNoteService.change_issue_confidentiality(issue, issue.project, current_user)
+    end
+
+    override :add_incident_label?
+    def add_incident_label?(issue)
+      issue.issue_type != params[:issue_type] && !issue.incident?
+    end
+
+    override :remove_incident_label?
+    def remove_incident_label?(issue)
+      issue.issue_type != params[:issue_type] && issue.incident?
     end
   end
 end

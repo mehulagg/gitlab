@@ -1,5 +1,0 @@
----
-title: Use SECURE_ANALYZERS_PREFIX in DAST API image URL
-merge_request: 60308
-author:
-type: changed

@@ -18,12 +18,7 @@ class ElasticClusterReindexingCronWorker
       task = Elastic::ReindexingTask.current
       break false unless task
 
-      # support currently running reindexing processes during an upgrade
-      if task.subtasks.where.not(elastic_task: nil).any? # rubocop: disable CodeReuse/ActiveRecord
-        legacy_service.execute
-      else
-        service.execute
-      end
+      service.execute
     end
   end
 
@@ -31,9 +26,5 @@ class ElasticClusterReindexingCronWorker
 
   def service
     Elastic::ClusterReindexingService.new
-  end
-
-  def legacy_service
-    Elastic::LegacyReindexingService.new
   end
 end

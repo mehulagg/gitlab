@@ -17,6 +17,7 @@ import getAlertsQuery from '~/graphql_shared/queries/get_alerts.query.graphql';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { joinPaths } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import AlertDrawer from './alert_drawer.vue';
 import AlertFilters from './alert_filters.vue';
 import AlertStatus from './alert_status.vue';
 import {
@@ -39,6 +40,7 @@ export default {
     CLOSED,
   },
   components: {
+    AlertDrawer,
     AlertStatus,
     AlertFilters,
     GlAlert,
@@ -56,6 +58,9 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  provide: {
+    statuses: STATUSES,
+  },
   inject: ['documentationPath', 'projectPath'],
   apollo: {
     alerts: {
@@ -72,6 +77,11 @@ export default {
       update: ({ project }) => project?.alertManagementAlerts.nodes || [],
       result({ data }) {
         this.pageInfo = data?.project?.alertManagementAlerts?.pageInfo || {};
+        if (this.selectedAlert) {
+          this.selectedAlert = data?.project?.alertManagementAlerts?.nodes?.find(
+            (alert) => alert.iid === this.selectedAlert.iid,
+          );
+        }
       },
       error() {
         this.errored = true;
@@ -84,8 +94,10 @@ export default {
       errored: false,
       errorMsg: '',
       filters: DEFAULT_FILTERS,
+      isAlertDrawerOpen: false,
       isErrorAlertDismissed: false,
       pageInfo: {},
+      selectedAlert: null,
       sort: 'STARTED_AT_DESC',
       sortBy: 'startedAt',
       sortDesc: true,
@@ -134,17 +146,12 @@ export default {
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
-    getIssueMeta({ issue: { iid, state } }) {
-      return {
-        state: state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '',
-        link: joinPaths(
-          gon.relative_url_root || '/',
-          this.projectPath,
-          '-',
-          'issues/incident',
-          iid,
-        ),
-      };
+    getIssueState({ issue: { state } }) {
+      return state === 'closed' ? `(${this.$options.i18n.CLOSED})` : '';
+    },
+    handleAlertDeselect() {
+      this.isAlertDrawerOpen = false;
+      this.selectedAlert = null;
     },
     handleAlertError(msg) {
       this.errored = true;
@@ -161,6 +168,10 @@ export default {
     },
     alertDetailsUrl({ iid }) {
       return joinPaths(window.location.pathname, 'alerts', iid);
+    },
+    openAlertDrawer(data) {
+      this.isAlertDrawerOpen = true;
+      this.selectedAlert = data;
     },
   },
 };
@@ -201,6 +212,7 @@ export default {
       sort-icon-left
       responsive
       show-empty
+      @row-clicked="openAlertDrawer"
       @sort-changed="fetchSortedData"
     >
       <template #cell(startedAt)="{ item }">
@@ -234,9 +246,9 @@ export default {
             v-if="item.issue"
             v-gl-tooltip
             :title="item.issue.title"
-            :href="getIssueMeta(item).link"
+            :href="item.issue.webUrl"
           >
-            #{{ item.issue.iid }} {{ getIssueMeta(item).state }}
+            #{{ item.issue.iid }} {{ getIssueState(item) }}
           </gl-link>
           <span v-else>-</span>
         </div>
@@ -304,5 +316,12 @@ export default {
       <gl-loading-icon v-if="isLoadingAlerts" size="md" />
       <span v-else>&nbsp;</span>
     </gl-intersection-observer>
+    <alert-drawer
+      v-if="selectedAlert"
+      :is-alert-drawer-open="isAlertDrawerOpen"
+      :selected-alert="selectedAlert"
+      @alert-update="handleStatusUpdate"
+      @deselect-alert="handleAlertDeselect"
+    />
   </div>
 </template>

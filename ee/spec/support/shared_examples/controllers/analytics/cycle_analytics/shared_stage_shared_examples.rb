@@ -251,23 +251,7 @@ RSpec.shared_examples 'Value Stream Analytics Stages controller' do
       end
     end
 
-    describe 'GET #duration_chart' do
-      subject { get :duration_chart, params: params }
-
-      it 'matches the response schema' do
-        fake_result = [double(MergeRequest, duration_in_seconds: 10, finished_at: Time.current)]
-        expect_any_instance_of(Gitlab::Analytics::CycleAnalytics::DataForDurationChart).to receive(:load).and_return(fake_result)
-
-        subject
-
-        expect(response).to match_response_schema('analytics/cycle_analytics/duration_chart', dir: 'ee')
-      end
-
-      include_examples 'Value Stream Analytics data endpoint examples'
-      include_examples 'group permission check on the controller level'
-    end
-
-    describe 'GET #duration_chart' do
+    describe 'GET #average_duration_chart' do
       subject { get :average_duration_chart, params: params }
 
       it 'matches the response schema' do

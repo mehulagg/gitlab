@@ -16,6 +16,8 @@ import {
   selectedProjects,
   customizableStagesAndEvents,
   valueStreams,
+  rawCustomStageEvents,
+  camelCasedStageEvents,
 } from '../mock_data';
 
 let state = null;
@@ -37,16 +39,10 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_VALUE_STREAMS}               | ${'isLoadingValueStreams'}   | ${true}
     ${types.RECEIVE_VALUE_STREAMS_ERROR}         | ${'isLoadingValueStreams'}   | ${false}
     ${types.REQUEST_STAGE_DATA}                  | ${'isLoadingStage'}          | ${true}
-    ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isEmptyStage'}            | ${true}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isLoadingStage'}          | ${false}
     ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}
-    ${types.REQUEST_UPDATE_STAGE}                | ${'isLoading'}               | ${true}
-    ${types.RECEIVE_UPDATE_STAGE_SUCCESS}        | ${'isLoading'}               | ${false}
-    ${types.RECEIVE_UPDATE_STAGE_ERROR}          | ${'isLoading'}               | ${false}
-    ${types.REQUEST_REMOVE_STAGE}                | ${'isLoading'}               | ${true}
-    ${types.RECEIVE_REMOVE_STAGE_RESPONSE}       | ${'isLoading'}               | ${false}
     ${types.REQUEST_STAGE_MEDIANS}               | ${'medians'}                 | ${{}}
     ${types.RECEIVE_STAGE_MEDIANS_ERROR}         | ${'medians'}                 | ${{}}
     ${types.REQUEST_CREATE_VALUE_STREAM}         | ${'isCreatingValueStream'}   | ${true}
@@ -63,6 +59,9 @@ describe('Value Stream Analytics mutations', () => {
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'deleteValueStreamError'}  | ${null}
     ${types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS} | ${'selectedValueStream'}     | ${null}
     ${types.INITIALIZE_VALUE_STREAM_SUCCESS}     | ${'isLoading'}               | ${false}
+    ${types.REQUEST_STAGE_COUNTS}                | ${'stageCounts'}             | ${{}}
+    ${types.RECEIVE_STAGE_COUNTS_ERROR}          | ${'stageCounts'}             | ${{}}
+    ${types.SET_STAGE_EVENTS}                    | ${'formEvents'}              | ${[]}
   `('$mutation will set $stateKey=$value', ({ mutation, stateKey, value }) => {
     mutations[mutation](state);
 
@@ -99,6 +98,7 @@ describe('Value Stream Analytics mutations', () => {
     ${types.RECEIVE_UPDATE_VALUE_STREAM_SUCCESS} | ${valueStreams[1]}                                       | ${{ selectedValueStream: valueStreams[1] }}
     ${types.SET_PAGINATION}                      | ${pagination}                                            | ${{ pagination: { ...pagination, sort: PAGINATION_SORT_FIELD_END_EVENT, direction: PAGINATION_SORT_DIRECTION_DESC } }}
     ${types.SET_PAGINATION}                      | ${{ ...pagination, sort: 'duration', direction: 'asc' }} | ${{ pagination: { ...pagination, sort: 'duration', direction: 'asc' } }}
+    ${types.SET_STAGE_EVENTS}                    | ${rawCustomStageEvents}                                  | ${{ formEvents: camelCasedStageEvents }}
   `(
     '$mutation with payload $payload will update state with $expectedState',
     ({ mutation, payload, expectedState }) => {
@@ -194,6 +194,23 @@ describe('Value Stream Analytics mutations', () => {
 
     it('calculates the overview median', () => {
       expect(state.medians).toMatchObject({ overview: '5d' });
+    });
+  });
+
+  describe(`${types.RECEIVE_STAGE_COUNTS_SUCCESS}`, () => {
+    beforeEach(() => {
+      state = {
+        stageCounts: {},
+      };
+
+      mutations[types.RECEIVE_STAGE_COUNTS_SUCCESS](state, [
+        { id: 1, count: 10 },
+        { id: 2, count: 20 },
+      ]);
+    });
+
+    it('sets each id as a key in the stageCounts object with the corresponding count', () => {
+      expect(state.stageCounts).toMatchObject({ 1: 10, 2: 20 });
     });
   });
 

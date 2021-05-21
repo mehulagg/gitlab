@@ -323,8 +323,6 @@ RSpec.describe Ci::Build do
   describe '#enqueue' do
     let(:build) { create(:ci_build, :created) }
 
-    subject { build.enqueue }
-
     before do
       allow(build).to receive(:any_unmet_prerequisites?).and_return(has_prerequisites)
       allow(Ci::PrepareBuildService).to receive(:perform_async)
@@ -334,9 +332,15 @@ RSpec.describe Ci::Build do
       let(:has_prerequisites) { true }
 
       it 'transitions to preparing' do
-        subject
+        build.enqueue
 
         expect(build).to be_preparing
+      end
+
+      it 'does not push build to the queue' do
+        build.enqueue
+
+        expect(::Ci::PendingBuild.all.count).to be_zero
       end
     end
 
@@ -344,17 +348,57 @@ RSpec.describe Ci::Build do
       let(:has_prerequisites) { false }
 
       it 'transitions to pending' do
-        subject
+        build.enqueue
 
         expect(build).to be_pending
+      end
+
+      it 'pushes build to a queue' do
+        build.enqueue
+
+        expect(build.queuing_entry).to be_present
+      end
+
+      context 'when build status transition fails' do
+        before do
+          ::Ci::Build.find(build.id).update_column(:lock_version, 100)
+        end
+
+        it 'does not push build to a queue' do
+          expect { build.enqueue! }
+            .to raise_error(ActiveRecord::StaleObjectError)
+
+          expect(build.queuing_entry).not_to be_present
+        end
+      end
+
+      context 'when there is a queuing entry already present' do
+        before do
+          ::Ci::PendingBuild.create!(build: build, project: build.project)
+        end
+
+        it 'does not raise an error' do
+          expect { build.enqueue! }.not_to raise_error
+          expect(build.reload.queuing_entry).to be_present
+        end
+      end
+
+      context 'when both failure scenario happen at the same time' do
+        before do
+          ::Ci::Build.find(build.id).update_column(:lock_version, 100)
+          ::Ci::PendingBuild.create!(build: build, project: build.project)
+        end
+
+        it 'raises stale object error exception' do
+          expect { build.enqueue! }
+            .to raise_error(ActiveRecord::StaleObjectError)
+        end
       end
     end
   end
 
   describe '#enqueue_preparing' do
     let(:build) { create(:ci_build, :preparing) }
-
-    subject { build.enqueue_preparing }
 
     before do
       allow(build).to receive(:any_unmet_prerequisites?).and_return(has_unmet_prerequisites)
@@ -364,9 +408,10 @@ RSpec.describe Ci::Build do
       let(:has_unmet_prerequisites) { false }
 
       it 'transitions to pending' do
-        subject
+        build.enqueue_preparing
 
         expect(build).to be_pending
+        expect(build.queuing_entry).to be_present
       end
     end
 
@@ -374,9 +419,10 @@ RSpec.describe Ci::Build do
       let(:has_unmet_prerequisites) { true }
 
       it 'remains in preparing' do
-        subject
+        build.enqueue_preparing
 
         expect(build).to be_preparing
+        expect(build.queuing_entry).not_to be_present
       end
     end
   end
@@ -401,6 +447,36 @@ RSpec.describe Ci::Build do
       it 'does not change build status' do
         expect(build.actionize).to be false
         expect(build.reload).to be_pending
+      end
+    end
+  end
+
+  describe '#run' do
+    context 'when build has been just created' do
+      let(:build) { create(:ci_build, :created) }
+
+      it 'creates queuing entry and then removes it' do
+        build.enqueue!
+        expect(build.queuing_entry).to be_present
+
+        build.run!
+        expect(build.reload.queuing_entry).not_to be_present
+      end
+    end
+
+    context 'when build status transition fails' do
+      let(:build) { create(:ci_build, :pending) }
+
+      before do
+        ::Ci::PendingBuild.create!(build: build, project: build.project)
+        ::Ci::Build.find(build.id).update_column(:lock_version, 100)
+      end
+
+      it 'does not remove build from a queue' do
+        expect { build.run! }
+          .to raise_error(ActiveRecord::StaleObjectError)
+
+        expect(build.queuing_entry).to be_present
       end
     end
   end
@@ -586,28 +662,10 @@ RSpec.describe Ci::Build do
       end
     end
 
-    context 'with runners_cached_states feature flag enabled' do
-      before do
-        stub_feature_flags(runners_cached_states: true)
-      end
+    it 'caches the result in Redis' do
+      expect(Rails.cache).to receive(:fetch).with(['has-online-runners', build.id], expires_in: 1.minute)
 
-      it 'caches the result in Redis' do
-        expect(Rails.cache).to receive(:fetch).with(['has-online-runners', build.id], expires_in: 1.minute)
-
-        build.any_runners_online?
-      end
-    end
-
-    context 'with runners_cached_states feature flag disabled' do
-      before do
-        stub_feature_flags(runners_cached_states: false)
-      end
-
-      it 'does not cache' do
-        expect(Rails.cache).not_to receive(:fetch).with(['has-online-runners', build.id], expires_in: 1.minute)
-
-        build.any_runners_online?
-      end
+      build.any_runners_online?
     end
   end
 
@@ -624,28 +682,10 @@ RSpec.describe Ci::Build do
       it { is_expected.to be_truthy }
     end
 
-    context 'with runners_cached_states feature flag enabled' do
-      before do
-        stub_feature_flags(runners_cached_states: true)
-      end
+    it 'caches the result in Redis' do
+      expect(Rails.cache).to receive(:fetch).with(['has-available-runners', build.project.id], expires_in: 1.minute)
 
-      it 'caches the result in Redis' do
-        expect(Rails.cache).to receive(:fetch).with(['has-available-runners', build.project.id], expires_in: 1.minute)
-
-        build.any_runners_available?
-      end
-    end
-
-    context 'with runners_cached_states feature flag disabled' do
-      before do
-        stub_feature_flags(runners_cached_states: false)
-      end
-
-      it 'does not cache' do
-        expect(Rails.cache).not_to receive(:fetch).with(['has-available-runners', build.project.id], expires_in: 1.minute)
-
-        build.any_runners_available?
-      end
+      build.any_runners_available?
     end
   end
 
@@ -4986,5 +5026,68 @@ RSpec.describe Ci::Build do
 
       it { is_expected.to be_truthy }
     end
+  end
+
+  describe '.build_matchers' do
+    let_it_be(:pipeline) { create(:ci_pipeline, :protected) }
+
+    subject(:matchers) { pipeline.builds.build_matchers(pipeline.project) }
+
+    context 'when the pipeline is empty' do
+      it 'does not throw errors' do
+        is_expected.to eq([])
+      end
+    end
+
+    context 'when the pipeline has builds' do
+      let_it_be(:build_without_tags) do
+        create(:ci_build, pipeline: pipeline)
+      end
+
+      let_it_be(:build_with_tags) do
+        create(:ci_build, pipeline: pipeline, tag_list: %w[tag1 tag2])
+      end
+
+      let_it_be(:other_build_with_tags) do
+        create(:ci_build, pipeline: pipeline, tag_list: %w[tag2 tag1])
+      end
+
+      it { expect(matchers.size).to eq(2) }
+
+      it 'groups build ids' do
+        expect(matchers.map(&:build_ids)).to match_array([
+          [build_without_tags.id],
+          match_array([build_with_tags.id, other_build_with_tags.id])
+        ])
+      end
+
+      it { expect(matchers.map(&:tag_list)).to match_array([[], %w[tag1 tag2]]) }
+
+      it { expect(matchers.map(&:protected?)).to all be_falsey }
+
+      context 'when the builds are protected' do
+        before do
+          pipeline.builds.update_all(protected: true)
+        end
+
+        it { expect(matchers).to all be_protected }
+      end
+    end
+  end
+
+  describe '#build_matcher' do
+    let_it_be(:build) do
+      build_stubbed(:ci_build, tag_list: %w[tag1 tag2])
+    end
+
+    subject(:matcher) { build.build_matcher }
+
+    it { expect(matcher.build_ids).to eq([build.id]) }
+
+    it { expect(matcher.tag_list).to match_array(%w[tag1 tag2]) }
+
+    it { expect(matcher.protected?).to eq(build.protected?) }
+
+    it { expect(matcher.project).to eq(build.project) }
   end
 end

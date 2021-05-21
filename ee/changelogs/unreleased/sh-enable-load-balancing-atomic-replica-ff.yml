@@ -1,5 +1,0 @@
----
-title: Switch load_balancing_atomic_replica feature flag on by default
-merge_request: 60574
-author:
-type: fixed

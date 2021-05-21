@@ -11,6 +11,9 @@ Development guides that are specific to CI/CD are listed here.
 
 If you are creating new CI/CD templates, please read [the development guide for GitLab CI/CD templates](templates.md).
 
+See the [CI/CD YAML reference documentation guide](cicd_reference_documentation_guide.md)
+to learn how to update the [reference page](../../ci/yaml/README.md).
+
 ## CI Architecture overview
 
 The following is a simplified diagram of the CI architecture. Some details are left out in order to focus on
@@ -182,17 +185,3 @@ Watch a walkthrough of this feature in details in the video below.
 <figure class="video-container">
   <iframe src="https://www.youtube.com/embed/NmdWRGT8kZg" frameborder="0" allowfullscreen="true"> </iframe>
 </figure>
-
-## External pipeline validation service
-
-The [external CI/CD pipeline validation service](../../administration/external_pipeline_validation.md)
-is available for use on self-managed GitLab instances, but is not in use on GitLab.com.
-It is configured with [environment variables](../../administration/environment_variables.md)
-on the instance.
-
-To enable the feature on GitLab.com, enable the `ci_external_validation_service`
-[feature flag](../feature_flags/index.md). The valid "Not accepted" response code
-for GitLab.com is `406` only.
-
-For more details, see the linked issues and MRs in the
-[feature flag rollout issue](https://gitlab.com/gitlab-org/gitlab/-/issues/325982).

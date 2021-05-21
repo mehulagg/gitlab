@@ -8,7 +8,7 @@ module Mutations
 
         graphql_name 'CreateTestCase'
 
-        authorize :admin_issue
+        authorize :create_test_case
 
         argument :title, GraphQL::STRING_TYPE,
                  required: true,

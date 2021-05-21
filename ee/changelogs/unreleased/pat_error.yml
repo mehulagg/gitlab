@@ -1,5 +1,0 @@
----
-title: Fix error caused by enforcing SSO-Only Authentication for Git Activity for PAT tokens
-merge_request: 61348
-author:
-type: fixed

@@ -45,6 +45,8 @@
 - - authorized_project_update
   - 1
 - - authorized_projects
+  - 1
+- - authorized_projects
   - 2
 - - auto_devops
   - 2
@@ -152,8 +154,6 @@
   - 1
 - - geo
   - 1
-- - git_garbage_collect
-  - 1
 - - github_import_advance_stage
   - 1
 - - github_importer
@@ -219,8 +219,6 @@
 - - merge_request_mergeability_check
   - 1
 - - merge_request_reset_approvals
-  - 1
-- - merge_requests_assignees_change
   - 1
 - - merge_requests_delete_source_branch
   - 1

@@ -5,8 +5,9 @@ require 'spec_helper'
 RSpec.describe WebHookService do
   include StubRequests
 
-  let(:project) { create(:project) }
-  let(:project_hook) { create(:project_hook) }
+  let_it_be(:project) { create(:project) }
+  let_it_be_with_reload(:project_hook) { create(:project_hook, project: project) }
+
   let(:headers) do
     {
       'Content-Type' => 'application/json',
@@ -60,12 +61,8 @@ RSpec.describe WebHookService do
   end
 
   describe '#execute' do
-    before do
-      project.hooks << [project_hook]
-    end
-
     context 'when token is defined' do
-      let(:project_hook) { create(:project_hook, :token) }
+      let_it_be(:project_hook) { create(:project_hook, :token) }
 
       it 'POSTs to the webhook URL' do
         stub_full_request(project_hook.url, method: :post)
@@ -89,8 +86,8 @@ RSpec.describe WebHookService do
     end
 
     context 'when auth credentials are present' do
-      let(:url) {'https://example.org'}
-      let(:project_hook) { create(:project_hook, url: 'https://demo:demo@example.org/') }
+      let_it_be(:url) {'https://example.org'}
+      let_it_be(:project_hook) { create(:project_hook, url: 'https://demo:demo@example.org/') }
 
       it 'uses the credentials' do
         stub_full_request(url, method: :post)
@@ -104,8 +101,8 @@ RSpec.describe WebHookService do
     end
 
     context 'when auth credentials are partial present' do
-      let(:url) {'https://example.org'}
-      let(:project_hook) { create(:project_hook, url: 'https://demo@example.org/') }
+      let_it_be(:url) {'https://example.org'}
+      let_it_be(:project_hook) { create(:project_hook, url: 'https://demo@example.org/') }
 
       it 'uses the credentials anyways' do
         stub_full_request(url, method: :post)
@@ -131,11 +128,10 @@ RSpec.describe WebHookService do
     end
 
     it 'handles exceptions' do
-      exceptions = [
-        SocketError, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::ECONNREFUSED,
-        Errno::EHOSTUNREACH, Net::OpenTimeout, Net::ReadTimeout,
-        Gitlab::HTTP::BlockedUrlError, Gitlab::HTTP::RedirectionTooDeep
+      exceptions = Gitlab::HTTP::HTTP_ERRORS + [
+        Gitlab::Json::LimitedEncoder::LimitExceeded, URI::InvalidURIError
       ]
+
       exceptions.each do |exception_class|
         exception = exception_class.new('Exception message')
         project_hook.enable!
@@ -147,7 +143,7 @@ RSpec.describe WebHookService do
     end
 
     context 'when url is not encoded' do
-      let(:project_hook) { create(:project_hook, url: 'http://server.com/my path/') }
+      let_it_be(:project_hook) { create(:project_hook, url: 'http://server.com/my path/') }
 
       it 'handles exceptions' do
         expect(service_instance.execute).to eq(status: :error, message: 'bad URI(is not URI?): "http://server.com/my path/"')
@@ -240,6 +236,25 @@ RSpec.describe WebHookService do
         it 'does not change the disabled_until attribute' do
           expect { service_instance.execute }.not_to change(project_hook, :disabled_until)
         end
+
+        it 'does not allow the failure count to overflow' do
+          project_hook.update!(recent_failures: 32767)
+
+          expect { service_instance.execute }.not_to change(project_hook, :recent_failures)
+        end
+
+        context 'when the web_hooks_disable_failed FF is disabled' do
+          before do
+            # Hook will only be executed if the flag is disabled.
+            stub_feature_flags(web_hooks_disable_failed: false)
+          end
+
+          it 'does not allow the failure count to overflow' do
+            project_hook.update!(recent_failures: 32767)
+
+            expect { service_instance.execute }.not_to change(project_hook, :recent_failures)
+          end
+        end
       end
 
       context 'with exception' do
@@ -263,9 +278,10 @@ RSpec.describe WebHookService do
           expect { service_instance.execute }.not_to change(project_hook, :recent_failures)
         end
 
-        it 'sets the disabled_until attribute' do
-          expect { service_instance.execute }
-            .to change(project_hook, :disabled_until).to(project_hook.next_backoff.from_now)
+        it 'backs off' do
+          expect(project_hook).to receive(:backoff!).and_call_original
+
+          expect { service_instance.execute }.to change(project_hook, :disabled_until)
         end
 
         it 'increases the backoff count' do
@@ -280,10 +296,6 @@ RSpec.describe WebHookService do
           it 'sets the disabled_until attribute' do
             expect { service_instance.execute }.to change(project_hook, :disabled_until).to(1.day.from_now)
           end
-
-          it 'sets the last_backoff attribute' do
-            expect { service_instance.execute }.to change(project_hook, :backoff_count).by(1)
-          end
         end
 
         context 'when we have backed-off many many times' do
@@ -293,10 +305,6 @@ RSpec.describe WebHookService do
 
           it 'sets the disabled_until attribute' do
             expect { service_instance.execute }.to change(project_hook, :disabled_until).to(1.day.from_now)
-          end
-
-          it 'sets the last_backoff attribute' do
-            expect { service_instance.execute }.to change(project_hook, :backoff_count).by(1)
           end
         end
       end
@@ -321,12 +329,112 @@ RSpec.describe WebHookService do
   end
 
   describe '#async_execute' do
-    let(:system_hook) { create(:system_hook) }
+    def expect_to_perform_worker(hook)
+      expect(WebHookWorker).to receive(:perform_async).with(hook.id, data, 'push_hooks')
+    end
 
-    it 'enqueue WebHookWorker' do
-      expect(WebHookWorker).to receive(:perform_async).with(project_hook.id, data, 'push_hooks')
+    def expect_to_rate_limit(hook, threshold:, throttled: false)
+      expect(Gitlab::ApplicationRateLimiter).to receive(:throttled?)
+        .with(:web_hook_calls, scope: [hook], threshold: threshold)
+        .and_return(throttled)
+    end
 
-      described_class.new(project_hook, data, 'push_hooks').async_execute
+    context 'when rate limiting is not configured' do
+      it 'queues a worker without tracking the call' do
+        expect(Gitlab::ApplicationRateLimiter).not_to receive(:throttled?)
+        expect_to_perform_worker(project_hook)
+
+        service_instance.async_execute
+      end
+    end
+
+    context 'when rate limiting is configured' do
+      let_it_be(:threshold) { 3 }
+      let_it_be(:plan_limits) { create(:plan_limits, :default_plan, web_hook_calls: threshold) }
+
+      it 'queues a worker and tracks the call' do
+        expect_to_rate_limit(project_hook, threshold: threshold)
+        expect_to_perform_worker(project_hook)
+
+        service_instance.async_execute
+      end
+
+      context 'when the hook is throttled (via mock)' do
+        before do
+          expect_to_rate_limit(project_hook, threshold: threshold, throttled: true)
+        end
+
+        it 'does not queue a worker and logs an error' do
+          expect(WebHookWorker).not_to receive(:perform_async)
+
+          payload = {
+            message: 'Webhook rate limit exceeded',
+            hook_id: project_hook.id,
+            hook_type: 'ProjectHook',
+            hook_name: 'push_hooks'
+          }
+
+          expect(Gitlab::AuthLogger).to receive(:error).with(payload)
+          expect(Gitlab::AppLogger).to receive(:error).with(payload)
+
+          service_instance.async_execute
+        end
+      end
+
+      context 'when the hook is throttled (via Redis)', :clean_gitlab_redis_cache do
+        before do
+          # Set a high interval to avoid intermittent failures in CI
+          allow(Gitlab::ApplicationRateLimiter).to receive(:rate_limits).and_return(
+            web_hook_calls: { interval: 1.day }
+          )
+
+          expect_to_perform_worker(project_hook).exactly(threshold).times
+
+          threshold.times { service_instance.async_execute }
+        end
+
+        it 'stops queueing workers and logs errors' do
+          expect(Gitlab::AuthLogger).to receive(:error).twice
+          expect(Gitlab::AppLogger).to receive(:error).twice
+
+          2.times { service_instance.async_execute }
+        end
+
+        it 'still queues workers for other hooks' do
+          other_hook = create(:project_hook)
+
+          expect_to_perform_worker(other_hook)
+
+          described_class.new(other_hook, data, :push_hooks).async_execute
+        end
+      end
+
+      context 'when the feature flag is disabled' do
+        before do
+          stub_feature_flags(web_hooks_rate_limit: false)
+        end
+
+        it 'queues a worker without tracking the call' do
+          expect(Gitlab::ApplicationRateLimiter).not_to receive(:throttled?)
+          expect_to_perform_worker(project_hook)
+
+          service_instance.async_execute
+        end
+      end
+    end
+
+    context 'when hook has custom context attributes' do
+      it 'includes the attributes in the worker context' do
+        expect(WebHookWorker).to receive(:perform_async) do
+          expect(Gitlab::ApplicationContext.current).to include(
+            'meta.project' => project_hook.project.full_path,
+            'meta.root_namespace' => project.root_ancestor.path,
+            'meta.related_class' => 'ProjectHook'
+          )
+        end
+
+        service_instance.async_execute
+      end
     end
   end
 end
