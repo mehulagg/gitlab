@@ -139,12 +139,24 @@ export default {
       return Math.min(this.projectVisibilityLevel, this.namespaceVisibilityLevel);
     },
     allowedVisibilityLevels() {
-      return Object.entries(VISIBILITY_LEVEL).reduce((levels, [key, value]) => {
-        if (value <= this.visibilityLevelCap) {
-          levels.push(key);
-        }
-        return levels;
-      }, []);
+      const allowedLevels = Object.entries(VISIBILITY_LEVEL).reduce(
+        (levels, [levelName, levelValue]) => {
+          if (
+            !this.restrictedVisibilityLevels.includes(levelValue) &&
+            levelValue <= this.visibilityLevelCap
+          ) {
+            levels.push(levelName);
+          }
+          return levels;
+        },
+        [],
+      );
+
+      if (!allowedLevels.length) {
+        return [PRIVATE_VISIBILITY];
+      }
+
+      return allowedLevels;
     },
     visibilityLevels() {
       return [
@@ -153,14 +165,14 @@ export default {
           value: PRIVATE_VISIBILITY,
           icon: 'lock',
           help: s__('ForkProject|The project can be accessed without any authentication.'),
-          disabled: this.isVisibilityDisabled(PRIVATE_VISIBILITY),
+          disabled: this.isVisibilityLevelDisabled(PRIVATE_VISIBILITY),
         },
         {
           text: s__('ForkProject|Internal'),
           value: INTERNAL_VISIBILITY,
           icon: 'shield',
           help: s__('ForkProject|The project can be accessed by any logged in user.'),
-          disabled: this.isVisibilityDisabled(INTERNAL_VISIBILITY),
+          disabled: this.isVisibilityLevelDisabled(INTERNAL_VISIBILITY),
         },
         {
           text: s__('ForkProject|Public'),
@@ -169,7 +181,7 @@ export default {
           help: s__(
             'ForkProject|Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group.',
           ),
-          disabled: this.isVisibilityDisabled(PUBLIC_VISIBILITY),
+          disabled: this.isVisibilityLevelDisabled(PUBLIC_VISIBILITY),
         },
       ];
     },
@@ -192,7 +204,7 @@ export default {
       const { data } = await axios.get(this.endpoint);
       this.namespaces = data.namespaces;
     },
-    isVisibilityDisabled(visibility) {
+    isVisibilityLevelDisabled(visibility) {
       return !this.allowedVisibilityLevels.includes(visibility);
     },
     async onSubmit() {
