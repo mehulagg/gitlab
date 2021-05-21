@@ -5,6 +5,16 @@ query getProjectIssues(
   $search: String
   $sort: IssueSort
   $state: IssuableState
+  $assigneeId: String
+  $authorUsername: String
+  $assigneeUsernames: [String!]
+  $milestoneTitle: [String]
+  $labelName: [String]
+  $iterationId: [ID]
+  $iterationWildcardId: IterationWildcardId
+  $epicId: String
+  $weight: String
+  $not: NegatedIssueFilterInput
   $beforeCursor: String
   $afterCursor: String
   $firstPageSize: Int
@@ -15,11 +25,22 @@ query getProjectIssues(
       search: $search
       sort: $sort
       state: $state
+      assigneeId: $assigneeId
+      authorUsername: $authorUsername
+      assigneeUsernames: $assigneeUsernames
+      milestoneTitle: $milestoneTitle
+      labelName: $labelName
+      iterationId: $iterationId
+      iterationWildcardId: $iterationWildcardId
+      epicId: $epicId
+      weight: $weight
+      not: $not
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize
       last: $lastPageSize
     ) {
+      count
       pageInfo {
         ...PageInfo
       }

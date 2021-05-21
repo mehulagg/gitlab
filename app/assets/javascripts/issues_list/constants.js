@@ -257,12 +257,7 @@ export const SPECIAL_FILTER_VALUES = [FILTER_NONE, FILTER_ANY, FILTER_CURRENT];
 export const filters = {
   author_username: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'author_username',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[author_username]',
-      },
+      [NORMAL_FILTER]: 'authorUsername',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -275,13 +270,8 @@ export const filters = {
   },
   assignee_username: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'assignee_username',
-        [SPECIAL_FILTER]: 'assignee_id',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[assignee_username]',
-      },
+      [NORMAL_FILTER]: 'assigneeUsernames',
+      [SPECIAL_FILTER]: 'assigneeId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -296,12 +286,7 @@ export const filters = {
   },
   milestone: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'milestone',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[milestone]',
-      },
+      [NORMAL_FILTER]: 'milestoneTitle',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -314,16 +299,13 @@ export const filters = {
   },
   labels: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'labels',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[labels]',
-      },
+      [NORMAL_FILTER]: 'labelName',
+      [SPECIAL_FILTER]: 'labelName',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'label_name[]',
+        [SPECIAL_FILTER]: 'label_name[]',
       },
       [OPERATOR_IS_NOT]: {
         [NORMAL_FILTER]: 'not[label_name][]',
@@ -358,33 +340,23 @@ export const filters = {
   },
   iteration: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'iteration_title',
-        [SPECIAL_FILTER]: 'iteration_id',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[iteration_title]',
-      },
+      [NORMAL_FILTER]: 'iterationId',
+      [SPECIAL_FILTER]: 'iterationWildcardId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'iteration_title',
+        [NORMAL_FILTER]: 'iteration_id',
         [SPECIAL_FILTER]: 'iteration_id',
       },
       [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[iteration_title]',
+        [NORMAL_FILTER]: 'not[iteration_id]',
       },
     },
   },
   epic_id: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'epic_id',
-        [SPECIAL_FILTER]: 'epic_id',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[epic_id]',
-      },
+      [NORMAL_FILTER]: 'epicId',
+      [SPECIAL_FILTER]: 'epicId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -398,13 +370,8 @@ export const filters = {
   },
   weight: {
     [API_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'weight',
-        [SPECIAL_FILTER]: 'weight',
-      },
-      [OPERATOR_IS_NOT]: {
-        [NORMAL_FILTER]: 'not[weight]',
-      },
+      [NORMAL_FILTER]: 'weight',
+      [SPECIAL_FILTER]: 'weight',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {

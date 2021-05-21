@@ -1,4 +1,5 @@
 import {
+  API_PARAM,
   CREATED_ASC,
   CREATED_DESC,
   DUE_DATE_ASC,
@@ -23,7 +24,10 @@ import {
 } from '~/issues_list/constants';
 import { isPositiveInteger } from '~/lib/utils/number_utils';
 import { __ } from '~/locale';
-import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  FILTERED_SEARCH_TERM,
+  OPERATOR_IS_NOT,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 
 export const getSortKey = (sort) =>
   Object.keys(urlSortParams).find((key) => urlSortParams[key] === sort);
@@ -188,6 +192,30 @@ export const convertToParams = (filterTokens, paramType) =>
         [param]: acc[param] ? [acc[param], token.value.data].flat() : token.value.data,
       });
     }, {});
+
+const isIterationSpecialValue = (tokenType, value) =>
+  tokenType === 'iteration' && SPECIAL_FILTER_VALUES.includes(value);
+
+export const convertToGraphQlParams = (filterTokens) => {
+  const params = {};
+  const not = {};
+
+  filterTokens
+    .filter((token) => token.type !== FILTERED_SEARCH_TERM)
+    .forEach((token) => {
+      const filterType = getFilterType(token.value.data, token.type);
+      const field = filters[token.type][API_PARAM][filterType];
+      const obj = token.value.operator === OPERATOR_IS_NOT ? not : params;
+      const data = isIterationSpecialValue(token.type, token.value.data)
+        ? token.value.data.toUpperCase()
+        : token.value.data;
+      Object.assign(obj, {
+        [field]: obj[field] ? [obj[field], token.value.data].flat() : data,
+      });
+    });
+
+  return Object.keys(not).length ? Object.assign(params, { not }) : params;
+};
 
 export const convertToSearchQuery = (filterTokens) =>
   filterTokens

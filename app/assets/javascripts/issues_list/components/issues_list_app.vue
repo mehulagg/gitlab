@@ -1,22 +1,12 @@
 <script>
-import {
-  GlButton,
-  GlEmptyState,
-  GlFilteredSearchToken,
-  GlIcon,
-  GlLink,
-  GlSprintf,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlIcon, GlLink, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import { toNumber } from 'lodash';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
 import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
-  API_PARAM,
   apiSortParams,
   CREATED_DESC,
   i18n,
@@ -32,6 +22,7 @@ import {
 } from '~/issues_list/constants';
 import getIssuesQuery from '~/issues_list/queries/get_issues.query.graphql';
 import {
+  convertToGraphQlParams,
   convertToParams,
   convertToSearchQuery,
   getDueDateValue,
@@ -46,16 +37,13 @@ import {
   OPERATOR_IS_ONLY,
   TOKEN_TITLE_ASSIGNEE,
   TOKEN_TITLE_AUTHOR,
-  TOKEN_TITLE_CONFIDENTIAL,
   TOKEN_TITLE_EPIC,
   TOKEN_TITLE_ITERATION,
   TOKEN_TITLE_LABEL,
   TOKEN_TITLE_MILESTONE,
-  TOKEN_TITLE_MY_REACTION,
   TOKEN_TITLE_WEIGHT,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
-import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
 import IterationToken from '~/vue_shared/components/filtered_search_bar/tokens/iteration_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
@@ -187,13 +175,17 @@ export default {
           sort: this.sortKey,
           state: this.state,
           ...this.pageParams,
+          ...this.apiFilterParams,
         };
       },
       update: ({ project }) => project.issues.nodes,
       result({ data }) {
         this.pageInfo = data.project.issues.pageInfo;
+        this.totalIssues = data.project.issues.count;
       },
-      error: () => createFlash({ message: this.$options.i18n.errorFetchingIssues }),
+      error() {
+        createFlash({ message: this.$options.i18n.errorFetchingIssues });
+      },
       debounce: 200,
       // skip: true,
     },
@@ -209,7 +201,7 @@ export default {
       return this.state === IssuableStates.Opened;
     },
     apiFilterParams() {
-      return convertToParams(this.filterTokens, API_PARAM);
+      return convertToGraphQlParams(this.filterTokens);
     },
     urlFilterParams() {
       return convertToParams(this.filterTokens, URL_PARAM);
@@ -227,6 +219,7 @@ export default {
           dataType: 'user',
           unique: true,
           defaultAuthors: [],
+          operators: OPERATOR_IS_ONLY,
           fetchAuthors: this.fetchUsers,
         },
         {
@@ -253,30 +246,31 @@ export default {
           title: TOKEN_TITLE_LABEL,
           icon: 'labels',
           token: LabelToken,
-          defaultLabels: [],
+          defaultLabels: DEFAULT_NONE_ANY,
           fetchLabels: this.fetchLabels,
         },
-        {
-          type: 'my_reaction_emoji',
-          title: TOKEN_TITLE_MY_REACTION,
-          icon: 'thumb-up',
-          token: EmojiToken,
-          unique: true,
-          operators: OPERATOR_IS_ONLY,
-          fetchEmojis: this.fetchEmojis,
-        },
-        {
-          type: 'confidential',
-          title: TOKEN_TITLE_CONFIDENTIAL,
-          icon: 'eye-slash',
-          token: GlFilteredSearchToken,
-          unique: true,
-          operators: OPERATOR_IS_ONLY,
-          options: [
-            { icon: 'eye-slash', value: 'yes', title: this.$options.i18n.confidentialYes },
-            { icon: 'eye', value: 'no', title: this.$options.i18n.confidentialNo },
-          ],
-        },
+        // TODO add back in once GraphQL supports these filters
+        // {
+        //   type: 'my_reaction_emoji',
+        //   title: TOKEN_TITLE_MY_REACTION,
+        //   icon: 'thumb-up',
+        //   token: EmojiToken,
+        //   unique: true,
+        //   operators: OPERATOR_IS_ONLY,
+        //   fetchEmojis: this.fetchEmojis,
+        // },
+        // {
+        //   type: 'confidential',
+        //   title: TOKEN_TITLE_CONFIDENTIAL,
+        //   icon: 'eye-slash',
+        //   token: GlFilteredSearchToken,
+        //   unique: true,
+        //   operators: OPERATOR_IS_ONLY,
+        //   options: [
+        //     { icon: 'eye-slash', value: 'yes', title: this.$options.i18n.confidentialYes },
+        //     { icon: 'eye', value: 'no', title: this.$options.i18n.confidentialNo },
+        //   ],
+        // },
       ];
 
       if (this.projectIterationsPath) {
@@ -383,7 +377,10 @@ export default {
       return this.fetchWithCache(this.projectMilestonesPath, 'milestones', 'title', search, true);
     },
     fetchIterations(search) {
-      return axios.get(this.projectIterationsPath, { params: { search } });
+      const number = Number(search);
+      return !search || Number.isNaN(number)
+        ? axios.get(this.projectIterationsPath, { params: { search } })
+        : axios.get(this.projectIterationsPath, { params: { id: number } });
     },
     fetchUsers(search) {
       return axios.get(this.autocompleteUsersPath, { params: { search } });
