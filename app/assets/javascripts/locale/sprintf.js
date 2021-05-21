@@ -15,7 +15,9 @@ export default (input, parameters, escapeParameters = true) => {
   let output = input;
 
   if (parameters) {
-    Object.keys(parameters).forEach((parameterName) => {
+    const mappedParameters = new Map(Object.entries(parameters));
+
+    mappedParameters.forEach((key, parameterName) => {
       const parameterValue = parameters[parameterName];
       const escapedParameterValue = escapeParameters ? escape(parameterValue) : parameterValue;
       output = output.replace(new RegExp(`%{${parameterName}}`, 'g'), escapedParameterValue);
