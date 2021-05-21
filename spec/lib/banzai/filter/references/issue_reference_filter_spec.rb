@@ -27,6 +27,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
   end
 
   describe 'performance' do
+    let(:group) { create(:group, :public) }
+    let(:project) { create(:project, :public, group: group) }
     let(:another_issue) { create(:issue, project: project) }
 
     it 'does not have a N+1 query problem' do
@@ -34,6 +36,10 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter do
       multiple_references = "Issues #{issue.to_reference} and #{another_issue.to_reference}"
 
       control_count = ActiveRecord::QueryRecorder.new { reference_filter(single_reference).to_html }.count
+
+      create(:group_member, group: group)
+      create(:project_member, project: project)
+      create(:project_group_link, project: project)
 
       expect { reference_filter(multiple_references).to_html }.not_to exceed_query_limit(control_count)
     end
