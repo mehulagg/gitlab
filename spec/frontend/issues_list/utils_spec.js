@@ -16,11 +16,12 @@ import {
   getFilterTokens,
   getSortKey,
   getSortOptions,
+  convertToApiParams,
 } from '~/issues_list/utils';
 
 describe('getSortKey', () => {
   it.each(Object.keys(urlSortParams))('returns %s given the correct inputs', (sortKey) => {
-    const { sort } = urlSortParams[sortKey];
+    const sort = urlSortParams[sortKey];
     expect(getSortKey(sort)).toBe(sortKey);
   });
 });
@@ -38,19 +39,13 @@ describe('getDueDateValue', () => {
 describe('getSortOptions', () => {
   describe.each`
     hasIssueWeightsFeature | hasBlockedIssuesFeature | length | containsWeight | containsBlocking
-    ${false}               | ${false}                | ${8}   | ${false}       | ${false}
-    ${true}                | ${false}                | ${9}   | ${true}        | ${false}
-    ${false}               | ${true}                 | ${9}   | ${false}       | ${true}
-    ${true}                | ${true}                 | ${10}  | ${true}        | ${true}
+    ${false}               | ${false}                | ${7}   | ${false}       | ${false}
+    ${true}                | ${false}                | ${8}   | ${true}        | ${false}
+    ${false}               | ${true}                 | ${7}   | ${false}       | ${true}
+    ${true}                | ${true}                 | ${8}   | ${true}        | ${true}
   `(
     'when hasIssueWeightsFeature=$hasIssueWeightsFeature and hasBlockedIssuesFeature=$hasBlockedIssuesFeature',
-    ({
-      hasIssueWeightsFeature,
-      hasBlockedIssuesFeature,
-      length,
-      containsWeight,
-      containsBlocking,
-    }) => {
+    ({ hasIssueWeightsFeature, hasBlockedIssuesFeature, length, containsWeight }) => {
       const sortOptions = getSortOptions(hasIssueWeightsFeature, hasBlockedIssuesFeature);
 
       it('returns the correct length of sort options', () => {
@@ -59,10 +54,6 @@ describe('getSortOptions', () => {
 
       it(`${containsWeight ? 'contains' : 'does not contain'} weight option`, () => {
         expect(sortOptions.some((option) => option.title === 'Weight')).toBe(containsWeight);
-      });
-
-      it(`${containsBlocking ? 'contains' : 'does not contain'} blocking option`, () => {
-        expect(sortOptions.some((option) => option.title === 'Blocking')).toBe(containsBlocking);
       });
     },
   );
@@ -80,25 +71,23 @@ describe('getFilterTokens', () => {
   });
 });
 
-describe('convertToParams', () => {
+describe('convertToApiParams', () => {
   it('returns api params given filtered tokens', () => {
-    expect(convertToUrlParams(filteredTokens, API_PARAM)).toEqual(apiParams);
+    expect(convertToApiParams(filteredTokens)).toEqual(apiParams);
   });
 
   it('returns api params given filtered tokens with special values', () => {
-    expect(convertToUrlParams(filteredTokensWithSpecialValues, API_PARAM)).toEqual(
-      apiParamsWithSpecialValues,
-    );
+    expect(convertToApiParams(filteredTokensWithSpecialValues)).toEqual(apiParamsWithSpecialValues);
   });
+});
 
+describe('convertToUrlParams', () => {
   it('returns url params given filtered tokens', () => {
-    expect(convertToUrlParams(filteredTokens, URL_PARAM)).toEqual(urlParams);
+    expect(convertToUrlParams(filteredTokens)).toEqual(urlParams);
   });
 
   it('returns url params given filtered tokens with special values', () => {
-    expect(convertToUrlParams(filteredTokensWithSpecialValues, URL_PARAM)).toEqual(
-      urlParamsWithSpecialValues,
-    );
+    expect(convertToUrlParams(filteredTokensWithSpecialValues)).toEqual(urlParamsWithSpecialValues);
   });
 });
 

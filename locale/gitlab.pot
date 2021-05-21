@@ -5206,9 +5206,6 @@ msgstr[1] ""
 msgid "Blocked issue"
 msgstr ""
 
-msgid "Blocking"
-msgstr ""
-
 msgid "Blocking issues"
 msgstr ""
 
@@ -24736,9 +24733,6 @@ msgid "Policy project doesn't exist"
 msgstr ""
 
 msgid "Polling interval multiplier"
-msgstr ""
-
-msgid "Popularity"
 msgstr ""
 
 msgid "Port"
