@@ -101,7 +101,6 @@ export const i18n = {
 export const JIRA_IMPORT_SUCCESS_ALERT_HIDE_MAP_KEY = 'jira-import-success-alert-hide-map';
 
 export const PARAM_DUE_DATE = 'due_date';
-export const PARAM_PAGE = 'page';
 export const PARAM_SORT = 'sort';
 export const PARAM_STATE = 'state';
 

@@ -23,7 +23,6 @@ import {
   MAX_LIST_SIZE,
   PAGE_SIZE,
   PARAM_DUE_DATE,
-  PARAM_PAGE,
   PARAM_SORT,
   PARAM_STATE,
   RELATIVE_POSITION_ASC,
@@ -167,7 +166,11 @@ export default {
       filterTokens: getFilterTokens(window.location.search),
       isLoading: false,
       issues: [],
-      page: toNumber(getParameterByName(PARAM_PAGE)) || 1,
+      page: 1,
+      pageInfo: {},
+      pageParams: {
+        firstPageSize: PAGE_SIZE,
+      },
       showBulkEditSidebar: false,
       sortKey: getSortKey(getParameterByName(PARAM_SORT)) || defaultSortKey,
       state: state || IssuableStates.Opened,
@@ -183,10 +186,15 @@ export default {
           search: this.searchQuery,
           sort: this.sortKey,
           state: this.state,
+          ...this.pageParams,
         };
       },
       update: ({ project }) => project.issues.nodes,
+      result({ data }) {
+        this.pageInfo = data.project.issues.pageInfo;
+      },
       error: () => createFlash({ message: this.$options.i18n.errorFetchingIssues }),
+      debounce: 200,
       // skip: true,
     },
   },
@@ -323,7 +331,6 @@ export default {
     urlParams() {
       return {
         due_date: this.dueDateFilter,
-        page: this.page,
         search: this.searchQuery,
         sort: urlSortParams[this.sortKey],
         state: this.state,
@@ -450,6 +457,9 @@ export default {
     },
     handleClickTab(state) {
       if (this.state !== state) {
+        this.pageParams = {
+          firstPageSize: PAGE_SIZE,
+        };
         this.page = 1;
       }
       this.state = state;
@@ -460,6 +470,18 @@ export default {
       this.fetchIssues();
     },
     handlePageChange(page) {
+      if (page > this.page) {
+        this.pageParams = {
+          afterCursor: this.pageInfo.endCursor,
+          firstPageSize: PAGE_SIZE,
+        };
+      } else {
+        this.pageParams = {
+          beforeCursor: this.pageInfo.startCursor,
+          lastPageSize: PAGE_SIZE,
+        };
+      }
+
       this.page = page;
       this.fetchIssues();
     },
@@ -527,8 +549,8 @@ export default {
       :show-pagination-controls="showPaginationControls"
       :total-items="totalIssues"
       :current-page="page"
-      :previous-page="page - 1"
-      :next-page="page + 1"
+      :previous-page="Number(pageInfo.hasPreviousPage)"
+      :next-page="Number(pageInfo.hasNextPage)"
       :url-params="urlParams"
       @click-tab="handleClickTab"
       @filter="handleFilter"
