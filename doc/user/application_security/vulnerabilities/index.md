@@ -127,6 +127,7 @@ the issue that resolves or mitigates a vulnerability, and the other way around.
 Linked issues are shown in the Vulnerability Report and the vulnerability's page.
 
 NOTE:
+
 - The vulnerability page shows related issues, but the issue page doesn't show the vulnerability it's related to.
 - An issue can only be related to one vulnerability at a time.
 - Issues can be linked across groups and projects.
