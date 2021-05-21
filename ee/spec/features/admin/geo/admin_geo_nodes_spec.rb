@@ -33,33 +33,15 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
   end
 
   describe 'index' do
-    context 'without :geo_nodes_beta FF' do
-      before do
-        stub_feature_flags(geo_nodes_beta: false)
-        visit admin_geo_nodes_path
-        wait_for_requests
-      end
-
-      it 'shows all public Geo Nodes and create new node link' do
-        expect(page).to have_link('New node', href: new_admin_geo_node_path)
-        page.within(find('.card', match: :first)) do
-          expect(page).to have_content(geo_node.url)
-        end
-      end
+    before do
+      visit admin_geo_nodes_path
+      wait_for_requests
     end
 
-    context 'with :geo_nodes_beta FF' do
-      before do
-        stub_feature_flags(geo_nodes_beta: true)
-        visit admin_geo_nodes_path
-        wait_for_requests
-      end
-
-      it 'shows all public Geo Nodes and create new node link' do
-        expect(page).to have_link('Add site', href: new_admin_geo_node_path)
-        page.within(find('.geo-node-core-details-grid-columns', match: :first)) do
-          expect(page).to have_content(geo_node.url)
-        end
+    it 'shows all public Geo Nodes and create new node link' do
+      expect(page).to have_link('Add site', href: new_admin_geo_node_path)
+      page.within(find('.geo-node-core-details-grid-columns', match: :first)) do
+        expect(page).to have_content(geo_node.url)
       end
     end
 

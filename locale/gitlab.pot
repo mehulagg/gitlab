@@ -9762,9 +9762,6 @@ msgstr ""
 msgid "Current forks will keep their visibility level."
 msgstr ""
 
-msgid "Current node"
-msgstr ""
-
 msgid "Current node must be the primary node or you will be locking yourself out"
 msgstr ""
 
@@ -14483,145 +14480,13 @@ msgstr ""
 msgid "Geo Nodes"
 msgstr ""
 
-msgid "Geo Nodes|Cannot remove a primary node if there is a secondary node"
-msgstr ""
-
 msgid "Geo Replication"
 msgstr ""
 
 msgid "Geo Settings"
 msgstr ""
 
-msgid "Geo nodes are paused using a command run on the node"
-msgstr ""
-
 msgid "Geo sites"
-msgstr ""
-
-msgid "GeoNodeStatusEvent|%{timeAgoStr} (%{pendingEvents} events)"
-msgstr ""
-
-msgid "GeoNodeSyncStatus|Node is failing or broken."
-msgstr ""
-
-msgid "GeoNodeSyncStatus|Node is slow, overloaded, or it just recovered after an outage."
-msgstr ""
-
-msgid "GeoNodes|Consult Geo troubleshooting information"
-msgstr ""
-
-msgid "GeoNodes|Data replication lag"
-msgstr ""
-
-msgid "GeoNodes|Does not match the primary storage configuration"
-msgstr ""
-
-msgid "GeoNodes|Full"
-msgstr ""
-
-msgid "GeoNodes|GitLab version"
-msgstr ""
-
-msgid "GeoNodes|GitLab version does not match the primary node version"
-msgstr ""
-
-msgid "GeoNodes|Health status"
-msgstr ""
-
-msgid "GeoNodes|Internal URL"
-msgstr ""
-
-msgid "GeoNodes|Last event ID processed by cursor"
-msgstr ""
-
-msgid "GeoNodes|Last event ID seen from primary"
-msgstr ""
-
-msgid "GeoNodes|Learn more about Geo node statuses"
-msgstr ""
-
-msgid "GeoNodes|Loading nodes"
-msgstr ""
-
-msgid "GeoNodes|New node"
-msgstr ""
-
-msgid "GeoNodes|Node Authentication was successfully repaired."
-msgstr ""
-
-msgid "GeoNodes|Node URL"
-msgstr ""
-
-msgid "GeoNodes|Node was successfully removed."
-msgstr ""
-
-msgid "GeoNodes|Node's status was updated %{timeAgo}."
-msgstr ""
-
-msgid "GeoNodes|Pausing replication stops the sync process. Are you sure?"
-msgstr ""
-
-msgid "GeoNodes|Removing a Geo primary node stops the synchronization to all nodes. Are you sure?"
-msgstr ""
-
-msgid "GeoNodes|Removing a Geo secondary node stops the synchronization to that node. Are you sure?"
-msgstr ""
-
-msgid "GeoNodes|Replicated data is verified with the %{nodeText} using checksums"
-msgstr ""
-
-msgid "GeoNodes|Replication slot WAL"
-msgstr ""
-
-msgid "GeoNodes|Replication slots"
-msgstr ""
-
-msgid "GeoNodes|Replication status"
-msgstr ""
-
-msgid "GeoNodes|Selective (%{syncLabel})"
-msgstr ""
-
-msgid "GeoNodes|Selective synchronization"
-msgstr ""
-
-msgid "GeoNodes|Something went wrong while changing node status"
-msgstr ""
-
-msgid "GeoNodes|Something went wrong while fetching nodes"
-msgstr ""
-
-msgid "GeoNodes|Something went wrong while removing node"
-msgstr ""
-
-msgid "GeoNodes|Something went wrong while repairing node"
-msgstr ""
-
-msgid "GeoNodes|Storage config"
-msgstr ""
-
-msgid "GeoNodes|Sync settings"
-msgstr ""
-
-msgid "GeoNodes|Unused slots"
-msgstr ""
-
-msgid "GeoNodes|Updated %{timeAgo}"
-msgstr ""
-
-msgid "GeoNodes|Used slots"
-msgstr ""
-
-msgid "GeoNodes|With %{geo} you can install a special read-only and replicated instance anywhere. Before you add nodes, follow the %{instructions} in the exact order they appear."
-msgstr ""
-
-msgid "GeoNodes|You have configured Geo nodes using an insecure HTTP connection. We recommend the use of HTTPS."
-msgstr ""
-
-msgid "GeoNodes|primary node"
-msgstr ""
-
-msgid "GeoNodes|secondary nodes"
 msgstr ""
 
 msgid "Geo|%{component} synced"
@@ -14631,12 +14496,6 @@ msgid "Geo|%{component} verified"
 msgstr ""
 
 msgid "Geo|%{eventId} (%{timeAgo})"
-msgstr ""
-
-msgid "Geo|%{itemTitle} checksum progress"
-msgstr ""
-
-msgid "Geo|%{itemTitle} verification progress"
 msgstr ""
 
 msgid "Geo|%{label} can't be blank"
@@ -14816,9 +14675,6 @@ msgstr ""
 msgid "Geo|Pending verification"
 msgstr ""
 
-msgid "Geo|Please refer to Geo Troubleshooting."
-msgstr ""
-
 msgid "Geo|Primary node"
 msgstr ""
 
@@ -14928,9 +14784,6 @@ msgid "Geo|Synchronization"
 msgstr ""
 
 msgid "Geo|Synchronization failed - %{error}"
-msgstr ""
-
-msgid "Geo|Synchronization of %{itemTitle} is disabled."
 msgstr ""
 
 msgid "Geo|Synchronization settings"
@@ -16092,9 +15945,6 @@ msgid "Groups"
 msgstr ""
 
 msgid "Groups (%{count})"
-msgstr ""
-
-msgid "Groups (%{groups})"
 msgstr ""
 
 msgid "Groups and projects"
@@ -19334,9 +19184,6 @@ msgid "Learn how to %{link_start}contribute to the built-in templates%{link_end}
 msgstr ""
 
 msgid "Learn how to %{no_packages_link_start}publish and share your packages%{no_packages_link_end} with GitLab."
-msgstr ""
-
-msgid "Learn how to enable synchronization"
 msgstr ""
 
 msgid "Learn more"
@@ -22598,9 +22445,6 @@ msgstr ""
 msgid "Nothing to preview."
 msgstr ""
 
-msgid "Nothing to synchronize"
-msgstr ""
-
 msgid "Notification events"
 msgstr ""
 
@@ -22733,9 +22577,6 @@ msgid "Novice"
 msgstr ""
 
 msgid "Nuget metadatum must have at least license_url, project_url or icon_url set"
-msgstr ""
-
-msgid "Number of %{itemTitle}"
 msgstr ""
 
 msgid "Number of Elasticsearch shards and replicas (per index)"
@@ -23842,9 +23683,6 @@ msgid "Pause"
 msgstr ""
 
 msgid "Pause Elasticsearch indexing"
-msgstr ""
-
-msgid "Pause replication"
 msgstr ""
 
 msgid "Paused"
@@ -27325,13 +27163,7 @@ msgstr ""
 msgid "Remove milestone"
 msgstr ""
 
-msgid "Remove node"
-msgstr ""
-
 msgid "Remove parent epic from an epic"
-msgstr ""
-
-msgid "Remove primary node"
 msgstr ""
 
 msgid "Remove priority"
@@ -27347,9 +27179,6 @@ msgid "Remove runner"
 msgstr ""
 
 msgid "Remove secondary email"
-msgstr ""
-
-msgid "Remove secondary node"
 msgstr ""
 
 msgid "Remove spent time"
@@ -27499,9 +27328,6 @@ msgstr ""
 msgid "Reopens this %{quick_action_target}."
 msgstr ""
 
-msgid "Repair authentication"
-msgstr ""
-
 msgid "Replace"
 msgstr ""
 
@@ -27515,15 +27341,6 @@ msgid "Replaces the clone URL root."
 msgstr ""
 
 msgid "Replication"
-msgstr ""
-
-msgid "Replication details"
-msgstr ""
-
-msgid "Replication enabled"
-msgstr ""
-
-msgid "Replication paused"
 msgstr ""
 
 msgid "Reply by email"
@@ -29892,9 +29709,6 @@ msgstr ""
 msgid "SeverityWidget|There was an error while updating severity."
 msgstr ""
 
-msgid "Shards (%{shards})"
-msgstr ""
-
 msgid "Shards to synchronize"
 msgstr ""
 
@@ -31645,16 +31459,10 @@ msgstr ""
 msgid "Symbolic link"
 msgstr ""
 
-msgid "Sync information"
-msgstr ""
-
 msgid "Sync now"
 msgstr ""
 
 msgid "Synced"
-msgstr ""
-
-msgid "Synchronization disabled"
 msgstr ""
 
 msgid "Synchronization settings"
@@ -35813,9 +35621,6 @@ msgid "Various settings that affect GitLab performance."
 msgstr ""
 
 msgid "Verification concurrency limit"
-msgstr ""
-
-msgid "Verification information"
 msgstr ""
 
 msgid "Verification status"
