@@ -69,7 +69,7 @@ describe('~/nav/components/top_nav_container_view.vue', () => {
   );
 
   describe('default', () => {
-    const EXTRA_ATTRS = { 'data-test-attribute': 'foo ' };
+    const EXTRA_ATTRS = { 'data-test-attribute': 'foo' };
 
     beforeEach(() => {
       createComponent({}, { attrs: EXTRA_ATTRS });
