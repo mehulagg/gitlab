@@ -7,6 +7,6 @@
 #
 # Follow-up the issue: https://gitlab.com/gitlab-org/gitlab/issues/34107
 
-if Gitlab::Runtime.puma?
-  Puma::Cluster.prepend(::Gitlab::Cluster::Mixins::PumaCluster)
-end
+return unless Gitlab::Runtime.puma?
+
+Puma::Cluster.prepend(::Gitlab::Cluster::Mixins::PumaCluster)
