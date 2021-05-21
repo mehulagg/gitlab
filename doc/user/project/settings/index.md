@@ -112,7 +112,7 @@ sanity check:
         - when: always
   allow_failure: false
   before_script:
-  - echo "No before scripts."  
+  - "# No before scripts."  
   script:
   - echo "running $FOO"
   after_script:
