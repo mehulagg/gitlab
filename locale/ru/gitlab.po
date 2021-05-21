@@ -560,7 +560,7 @@ msgstr[2] ""
 msgstr[3] ""
 
 msgid "%{completedWeight} of %{totalWeight} weight completed"
-msgstr "Завершено %{completedWeight} из %{totalWeight} приоритета"
+msgstr "Завершено %{completedWeight} из %{totalWeight} единиц веса"
 
 msgid "%{containerScanningLinkStart}Container Scanning%{containerScanningLinkEnd} and/or %{dependencyScanningLinkStart}Dependency Scanning%{dependencyScanningLinkEnd} must be enabled. %{securityBotLinkStart}GitLab-Security-Bot%{securityBotLinkEnd} will be the author of the auto-created merge request. %{moreInfoLinkStart}More information%{moreInfoLinkEnd}."
 msgstr ""
@@ -682,8 +682,8 @@ msgstr ""
 msgid "%{gitlab_experience_text}. We won't share this information with anyone."
 msgstr ""
 
-msgid "%{global_id} is not a valid ID for %{expected_types}."
-msgstr ""
+msgid "%{global_id} is not a valid ID for %{expected_type}."
+msgstr "%{global_id} не является допустимым ID для %{expected_type}."
 
 msgid "%{group_docs_link_start}Groups%{group_docs_link_end} allow you to manage and collaborate across multiple projects. Members of a group have access to all of its projects."
 msgstr "%{group_docs_link_start}Группы%{group_docs_link_end} позволяют управлять несколькими проектами и сотрудничать с ними. Члены группы имеют доступ ко всем ее проектам."
@@ -894,7 +894,7 @@ msgid "%{openedIssues} open, %{closedIssues} closed"
 msgstr "%{openedIssues} открыто, %{closedIssues} закрыто"
 
 msgid "%{percentage}%% weight completed"
-msgstr "%{percentage}%% приоритета завершено"
+msgstr "%{percentage}%% веса завершено"
 
 msgid "%{percent}%% complete"
 msgstr "%{percent}%% выполнено"
@@ -1097,13 +1097,13 @@ msgid "%{totalMemory} (%{freeSpacePercentage}%{percentSymbol} free)"
 msgstr ""
 
 msgid "%{totalWeight} total weight"
-msgstr "общий приоритет %{totalWeight}"
+msgstr "общий вес %{totalWeight}"
 
 msgid "%{total_warnings} warning(s) found:"
 msgstr ""
 
 msgid "%{total} open issue weight"
-msgstr "приоритет открытого обсуждения %{total}"
+msgstr "вес открытого обсуждения %{total}"
 
 msgid "%{total} warnings found: showing first %{warningsDisplayed}"
 msgstr ""
@@ -1308,7 +1308,7 @@ msgstr[2] "- Пользователи"
 msgstr[3] "- Пользователи"
 
 msgid "- of - weight completed"
-msgstr "- из - приоритета завершено"
+msgstr "- из - единиц веса завершено"
 
 msgid "- show less"
 msgstr "- свернуть"
@@ -2611,7 +2611,7 @@ msgid "AdminStatistics|Issues"
 msgstr "Обсуждения"
 
 msgid "AdminStatistics|Merge requests"
-msgstr ""
+msgstr "Запросы на слияние"
 
 msgid "AdminStatistics|Milestones"
 msgstr "Этапы"
@@ -3620,7 +3620,7 @@ msgid "An error occurred when updating the issue due date"
 msgstr ""
 
 msgid "An error occurred when updating the issue weight"
-msgstr "Произошла ошибка при обновлении приоритета обсуждения"
+msgstr "Произошла ошибка при обновлении весa обсуждения"
 
 msgid "An error occurred when updating the title"
 msgstr ""
@@ -4287,7 +4287,7 @@ msgid "ApprovalRule|Approvers"
 msgstr "Утверждающие"
 
 msgid "ApprovalRule|Examples: QA, Security."
-msgstr ""
+msgstr "например, QA, Security."
 
 msgid "ApprovalRule|Name"
 msgstr "Имя"
@@ -4570,10 +4570,10 @@ msgid "AsanaService|Add commit messages as comments to Asana tasks."
 msgstr ""
 
 msgid "AsanaService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
-msgstr ""
+msgstr "Список веток, разделенных запятыми, будет проверен автоматически. Оставьте пустым, чтобы выбрать все ветки."
 
 msgid "AsanaService|User Personal Access Token. User must have access to the task. All comments are attributed to this user."
-msgstr ""
+msgstr "Личный токен доступа пользователя. Пользователь должен иметь права создавать задачи. Bсе комментарии будут отнесены к этому пользователю."
 
 msgid "Ascending"
 msgstr "По возрастанию"
@@ -4642,7 +4642,7 @@ msgid "Assigned Issues"
 msgstr "Назначенные обсуждения"
 
 msgid "Assigned merge requests"
-msgstr ""
+msgstr "Назначенные запросы на слияние"
 
 msgid "Assigned projects"
 msgstr ""
@@ -5130,7 +5130,7 @@ msgid "BambooService|Bamboo URL"
 msgstr ""
 
 msgid "BambooService|Bamboo build plan key."
-msgstr ""
+msgstr "Ключ плана сборки Bamboo"
 
 msgid "BambooService|Bamboo service root URL."
 msgstr ""
@@ -5139,10 +5139,10 @@ msgid "BambooService|Run CI/CD pipelines with Atlassian Bamboo."
 msgstr ""
 
 msgid "BambooService|Run CI/CD pipelines with Atlassian Bamboo. You must set up automatic revision labeling and a repository trigger in Bamboo. %{docs_link}"
-msgstr ""
+msgstr "Run CI/CD pipelines with Atlassian Bamboo. Вы должны настроить автоматическое присвоение меток ревизиям и триггер репозитория в сервисе Bamboo."
 
 msgid "BambooService|The user with API access to the Bamboo server."
-msgstr ""
+msgstr "Пользователь с доступом через API к Bamboo серверу."
 
 msgid "Based on"
 msgstr ""
@@ -5193,7 +5193,7 @@ msgid "BillingPlans|%{group_name} is currently using the %{plan_name}."
 msgstr ""
 
 msgid "BillingPlans|@%{user_name} you are currently using the %{plan_name}."
-msgstr ""
+msgstr "@%{user_name}, сейчас вы используете тарифный план %{plan_name}."
 
 msgid "BillingPlans|Congratulations, your free trial is activated."
 msgstr ""
@@ -5724,7 +5724,7 @@ msgid "Burndown chart"
 msgstr "Диаграмма сгорания"
 
 msgid "BurndownChartLabel|Open issue weight"
-msgstr "Открыть приоритет задачи"
+msgstr "Bес открытых обсуждений"
 
 msgid "BurndownChartLabel|Open issues"
 msgstr "Открыть обсуждения"
@@ -6781,13 +6781,13 @@ msgid "Clear templates search input"
 msgstr "Очистить шаблоны ввода данных для поиска"
 
 msgid "Clear weight"
-msgstr "Очистить приоритет"
+msgstr "Удалить вес"
 
 msgid "Cleared weight."
-msgstr "Приоритет очищен."
+msgstr "Вес удалён."
 
 msgid "Clears weight."
-msgstr "Очищает приоритет."
+msgstr "Удаляет вес."
 
 msgid "Click %{link_start}here%{link_end} to view the request."
 msgstr ""
@@ -6868,7 +6868,7 @@ msgid "Close %{tabname}"
 msgstr "Закрыть %{tabname}"
 
 msgid "Close design"
-msgstr ""
+msgstr "Закрыть дизайн"
 
 msgid "Close epic"
 msgstr "Завершить цель"
@@ -9116,7 +9116,7 @@ msgid "ContributionAnalytics|Last week"
 msgstr "Последняя неделя"
 
 msgid "ContributionAnalytics|Merge requests"
-msgstr ""
+msgstr "Запросы на слияние"
 
 msgid "ContributionAnalytics|No issues for the selected time period."
 msgstr "Нет задач для выбранного периода."
@@ -12184,7 +12184,7 @@ msgid "Email sent"
 msgstr ""
 
 msgid "Email the pipeline status to a list of recipients."
-msgstr ""
+msgstr "Отправить по электронной почте сообщение о статусе сборочной списку получателей."
 
 msgid "Email updates (optional)"
 msgstr ""
@@ -12250,13 +12250,13 @@ msgid "EmailsOnPushService|Emails on push"
 msgstr ""
 
 msgid "EmailsOnPushService|Emails separated by whitespace."
-msgstr ""
+msgstr "Письма, разделенные пробелами."
 
 msgid "EmailsOnPushService|Send from committer"
 msgstr "Отправить от автора коммита"
 
 msgid "EmailsOnPushService|Send notifications from the committer's email address if the domain matches the domain used by your GitLab instance (such as %{domains})."
-msgstr ""
+msgstr "Отправлять уведомления с адреса электронной почты автора коммита, если домен совпадает с доменом используемым вашим GitLab инсталом (например, %{domains})."
 
 msgid "EmailsOnPushService|can't exceed %{recipients_limit}"
 msgstr ""
@@ -12577,7 +12577,7 @@ msgid "Enter the number of seconds, or other human-readable input, like \"1 hour
 msgstr ""
 
 msgid "Enter weights for storages for new repositories."
-msgstr ""
+msgstr "Введите веса хранилищ для новых репозиториев."
 
 msgid "Enter your password to approve"
 msgstr "Для продолжения введите свой пароль"
@@ -12883,7 +12883,7 @@ msgid "Epics let you manage your portfolio of projects more efficiently and with
 msgstr "Цели позволят вам управлять портфелем проектов более эффективно и с меньшими усилиями"
 
 msgid "Epics, issues, and merge requests"
-msgstr ""
+msgstr "Цели, обсуждения и запросы на слияние"
 
 msgid "Epics|%{startDate} – %{dueDate}"
 msgstr ""
@@ -13099,7 +13099,7 @@ msgid "Error occurred while updating the issue status"
 msgstr "Произошла ошибка при обновлении статуса обсуждения"
 
 msgid "Error occurred while updating the issue weight"
-msgstr "Произошла ошибка при изменении приоритета задачи"
+msgstr "Произошла ошибка при изменении весa обсуждения"
 
 msgid "Error occurred. A blocked user cannot be deactivated"
 msgstr "Произошла ошибка. Заблокированный пользователь не может быть деактивирован"
@@ -13186,22 +13186,22 @@ msgid "ErrorTracking|Active"
 msgstr "Активно"
 
 msgid "ErrorTracking|After adding your Auth Token, select the Connect button to load projects."
-msgstr ""
+msgstr "После добавления вашего токена авторизации, выберите кнопку «Подключиться» для загрузки проектов."
 
 msgid "ErrorTracking|Auth Token"
 msgstr "Токен аутентификации"
 
 msgid "ErrorTracking|Click Connect to reestablish the connection to Sentry and activate the dropdown."
-msgstr ""
+msgstr "Нажмите кнопку \"Подключиться\", чтобы восстановить подключение к Sentry и активировать выпадающий список."
 
 msgid "ErrorTracking|Connection failed. Check Auth Token and try again."
-msgstr ""
+msgstr "Ошибка подключения. Проверьте токен аутентификации и повторите попытку."
 
 msgid "ErrorTracking|Enable error tracking"
 msgstr ""
 
 msgid "ErrorTracking|If you self-host Sentry, enter your Sentry instance's full URL. If you use Sentry's hosted solution, enter https://sentry.io"
-msgstr ""
+msgstr "Если вы размещаете Sentry самостоятельно, введите полный URL-адрес вашего экземпляра Sentry. Если вы используете решение на инфраструктуре Sentry, введите https://sentry.io"
 
 msgid "ErrorTracking|No projects available"
 msgstr "Нет доступных проектов"
@@ -13210,7 +13210,7 @@ msgid "ErrorTracking|Select project"
 msgstr "Выбрать проект"
 
 msgid "ErrorTracking|To enable project selection, enter a valid Auth Token."
-msgstr ""
+msgstr "Чтобы включить выбор проекта, введите правильный токен аутентификации."
 
 msgid "Errors"
 msgstr "Ошибки"
@@ -13531,10 +13531,10 @@ msgid "ExternalAuthorizationService|When no classification label is set the defa
 msgstr ""
 
 msgid "ExternalWikiService|External wiki"
-msgstr ""
+msgstr "Внешняя wiki"
 
 msgid "ExternalWikiService|External wiki URL"
-msgstr ""
+msgstr "Внешней URL wiki"
 
 msgid "ExternalWikiService|Link to an external wiki from the sidebar."
 msgstr ""
@@ -15894,10 +15894,10 @@ msgid "GroupSAML|Default membership role"
 msgstr ""
 
 msgid "GroupSAML|Enable SAML authentication for this group"
-msgstr ""
+msgstr "Включить аутентификацию SAML для этой группы"
 
 msgid "GroupSAML|Enforce SSO-only authentication for Git activity for this group"
-msgstr ""
+msgstr "Принудительно использовать SSO-аутентификацию для Git действий в этой группы."
 
 msgid "GroupSAML|Enforce SSO-only authentication for web activity for this group"
 msgstr ""
@@ -18315,7 +18315,7 @@ msgid "Issue was closed by %{name} %{reason}"
 msgstr "Обсуждение было закрыто %{name} %{reason}"
 
 msgid "Issue weight"
-msgstr "Приоритет обсуждения"
+msgstr "Вес обсуждения"
 
 msgid "Issue(s) already assigned"
 msgstr ""
@@ -18417,7 +18417,7 @@ msgid "Issues Rate Limits"
 msgstr ""
 
 msgid "Issues and merge requests"
-msgstr ""
+msgstr "Обсуждения и запросы на слияние"
 
 msgid "Issues can be bugs, tasks or ideas to be discussed. Also, issues are searchable and filterable."
 msgstr "Обсуждениями могут быть ошибки, задачи или идеи. Также, по обсуждениям можно выполнять поиск и отбор."
@@ -18753,10 +18753,10 @@ msgid "JiraService|Use Jira as this project's issue tracker."
 msgstr ""
 
 msgid "JiraService|Use a password for server version and an API token for cloud version."
-msgstr ""
+msgstr "Используйте пароль для серверной версии и API-токен для облачной версии."
 
 msgid "JiraService|Use a username for server version and an email for cloud version."
-msgstr ""
+msgstr "Используйте имя пользователя для серверной версии и адрес электронной почты для облачной версии."
 
 msgid "JiraService|Use custom transitions"
 msgstr ""
@@ -22251,7 +22251,7 @@ msgid "No estimate or time spent"
 msgstr "Нет оценочного или потраченного времени"
 
 msgid "No file chosen."
-msgstr ""
+msgstr "Файл не выбран."
 
 msgid "No file hooks found."
 msgstr ""
@@ -23966,7 +23966,7 @@ msgid "PipelineCharts|An unknown error occurred while processing CI/CD analytics
 msgstr ""
 
 msgid "PipelineCharts|CI/CD Analytics"
-msgstr ""
+msgstr "Аналитика CI/CD"
 
 msgid "PipelineCharts|Failed:"
 msgstr "Неудача:"
@@ -24071,7 +24071,7 @@ msgid "Pipelines|Child pipeline"
 msgstr ""
 
 msgid "Pipelines|Clear runner caches"
-msgstr ""
+msgstr "Очистить runner кэши"
 
 msgid "Pipelines|Copy trigger token"
 msgstr ""
@@ -24488,7 +24488,7 @@ msgid "Please enter a valid number"
 msgstr "Пожалуйста введите правильное число"
 
 msgid "Please enter or upload a valid license."
-msgstr ""
+msgstr "Пожалуйста, введите или загрузите действительную лицензию."
 
 msgid "Please fill in a descriptive name for your group."
 msgstr ""
@@ -25112,7 +25112,7 @@ msgid "Profiles|Main settings"
 msgstr "Основные настройки"
 
 msgid "Profiles|No file chosen."
-msgstr ""
+msgstr "Файл не выбран."
 
 msgid "Profiles|Notification email"
 msgstr "Электронная почта уведомлений"
@@ -25673,7 +25673,7 @@ msgid "ProjectSettings|Do not allow"
 msgstr "Не разрешать"
 
 msgid "ProjectSettings|Enable \"Delete source branch\" option by default"
-msgstr ""
+msgstr "Включить опцию \"Удалить исходную ветку\" по умолчанию"
 
 msgid "ProjectSettings|Enable merge trains"
 msgstr ""
@@ -25685,7 +25685,7 @@ msgid "ProjectSettings|Encourage"
 msgstr ""
 
 msgid "ProjectSettings|Every merge creates a merge commit."
-msgstr ""
+msgstr "Каждое слияние создает коммит слияния"
 
 msgid "ProjectSettings|Every project can have its own space to store its Docker images"
 msgstr "Каждый проект может иметь своё собственное пространство для хранения образов Docker"
@@ -25697,7 +25697,7 @@ msgid "ProjectSettings|Everyone"
 msgstr "Каждый"
 
 msgid "ProjectSettings|Existing merge requests and protected branches are not affected."
-msgstr ""
+msgstr "Существующие запросы на слияние и защищенные ветки не затрагиваются."
 
 msgid "ProjectSettings|Failed to protect the tag"
 msgstr "Не удалось защитить метку"
@@ -25709,7 +25709,7 @@ msgid "ProjectSettings|Fast-forward merge"
 msgstr "Быстрое слияние"
 
 msgid "ProjectSettings|Fast-forward merges only."
-msgstr ""
+msgstr "Только быстрые слияния."
 
 msgid "ProjectSettings|Forks"
 msgstr "Ответвления"
@@ -25763,7 +25763,7 @@ msgid "ProjectSettings|Merge suggestions"
 msgstr "Предложения по слиянию"
 
 msgid "ProjectSettings|No merge commits are created."
-msgstr ""
+msgstr "Коммиты слияния не создались."
 
 msgid "ProjectSettings|Note: the container registry is always visible when a project is public"
 msgstr "Примечание: реестр контейнеров всегда виден, если проект публичный"
@@ -25829,7 +25829,7 @@ msgid "ProjectSettings|Show default award emojis"
 msgstr ""
 
 msgid "ProjectSettings|Show link to create or view a merge request when pushing from the command line"
-msgstr ""
+msgstr "Показать ссылку для создания или просмотра запроса на слияние при отправке из командной строки"
 
 msgid "ProjectSettings|Skipped pipelines are considered successful"
 msgstr ""
@@ -25856,13 +25856,13 @@ msgid "ProjectSettings|Target project"
 msgstr ""
 
 msgid "ProjectSettings|The commit message used when applying merge request suggestions. %{link_start}Learn more about suggestions.%{link_end}"
-msgstr ""
+msgstr "Сообщение коммита используется, чтобы применять предложения запроса на слияние"
 
 msgid "ProjectSettings|The default target project for merge requests created in this fork project."
 msgstr ""
 
 msgid "ProjectSettings|These checks must pass before merge requests can be merged."
-msgstr ""
+msgstr "Эти проверки должны пройти, прежде чем запросы на слияние будут объединены."
 
 msgid "ProjectSettings|This project"
 msgstr ""
@@ -25919,7 +25919,7 @@ msgid "ProjectSettings|When pipelines for merge requests are enabled in the CI/C
 msgstr ""
 
 msgid "ProjectSettings|When there is a merge conflict, the user is given the option to rebase."
-msgstr ""
+msgstr "Когда возникают конфликты слияния, пользователю предоставляется возможность объединить изменения, сделанные в одной ветке, с другой веткой."
 
 msgid "ProjectSettings|Wiki"
 msgstr "Wiki"
@@ -26411,10 +26411,10 @@ msgid "Promotions|Weight"
 msgstr ""
 
 msgid "Promotions|Weighting your issue"
-msgstr "Обозначить приоритет обсуждения"
+msgstr "Установка веса обсуждения"
 
 msgid "Promotions|When you have a lot of issues, it can be hard to get an overview. By adding a weight to your issues, you can get a better idea of the effort, cost, required time, or value of each, and so better manage them."
-msgstr "При большом количестве обсуждений сложно оценить общую картину. Добавив приоритет к вашим обсуждениям, вы можете получить лучшее представление о затрачиваемых усилиях, времени, стоимости или значимости каждого из них и, таким образом, лучше ими управлять."
+msgstr "При большом количестве обсуждений сложно оценить общую картину. Добавив вес к вашим обсуждениям, вы можете получить лучшее представление о затрачиваемых усилиях, времени, стоимости или значимости каждого из них и, таким образом, лучше ими управлять."
 
 msgid "Promotions|With Contribution Analytics you can have an overview for the activity of issues, merge requests, and push events of your organization and its members."
 msgstr ""
@@ -26909,7 +26909,7 @@ msgid "Reduce this project’s visibility?"
 msgstr "Уменьшить область видимости этого проекта?"
 
 msgid "Reference"
-msgstr ""
+msgstr "Ссылка"
 
 msgid "References"
 msgstr ""
@@ -29699,10 +29699,10 @@ msgid "Set verification limit and frequency."
 msgstr ""
 
 msgid "Set weight"
-msgstr "Установить приоритет"
+msgstr "Установить вес"
 
 msgid "Set weight to %{weight}."
-msgstr "Установить приоритет на %{weight}."
+msgstr "Установить вес в следующее количество единиц: %{weight}."
 
 msgid "Set what should be replicated by this secondary node."
 msgstr ""
@@ -29768,7 +29768,7 @@ msgid "Sets time estimate to %{time_estimate}."
 msgstr "Задаёт оценку времени в %{time_estimate}."
 
 msgid "Sets weight to %{weight}."
-msgstr "Устанавливает приоритет на %{weight}."
+msgstr "Устанавливает вес в следующее количество единиц: %{weight}."
 
 msgid "Setting"
 msgstr ""
@@ -30010,7 +30010,7 @@ msgid "Sidebar|Only numeral characters allowed"
 msgstr ""
 
 msgid "Sidebar|Weight"
-msgstr "Приоритет"
+msgstr "Вес"
 
 msgid "Sign in"
 msgstr "Вход"
@@ -30517,7 +30517,7 @@ msgid "SortOptions|Least popular"
 msgstr "Наименее популярный"
 
 msgid "SortOptions|Less weight"
-msgstr "Сначала с меньшим приоритетом"
+msgstr "Сначала с меньшим весом"
 
 msgid "SortOptions|Manual"
 msgstr "Ручная"
@@ -30532,7 +30532,7 @@ msgid "SortOptions|Milestone due soon"
 msgstr "Веха, наступающая раньше"
 
 msgid "SortOptions|More weight"
-msgstr "Сначала с большим приоритетом"
+msgstr "Сначала с большим весом"
 
 msgid "SortOptions|Most popular"
 msgstr "Наиболее популярный"
@@ -30613,7 +30613,7 @@ msgid "SortOptions|Version"
 msgstr "По версии"
 
 msgid "SortOptions|Weight"
-msgstr "Приоритет"
+msgstr "Вес"
 
 msgid "Source"
 msgstr "Источник"
@@ -30997,7 +30997,7 @@ msgid "StatusPage|Status page frontend documentation"
 msgstr ""
 
 msgid "StatusPage|To publish incidents to an external status page, GitLab stores a JSON file in your Amazon S3 account at a location that your external status page service can access. Make sure to also set up %{docsLink}"
-msgstr ""
+msgstr "Чтобы публиковать инциденты на внешней странице состояния, GitLab будет хранить JSON-файл в вашем аккаунте Amazon S3, расположенный так, чтобы быть доступным для службы, обеспечивающей работу страницы состояния. Убедитесь также, что вы настроили %{docsLink}"
 
 msgid "StatusPage|configuration documentation"
 msgstr ""
@@ -31988,7 +31988,7 @@ msgid "TestReports|There are no test suites to show."
 msgstr "Нет тестовых наборов для отображения."
 
 msgid "TestReports|There are no tests to display"
-msgstr ""
+msgstr "Нет тестов для отображения"
 
 msgid "TestReports|There was an error fetching the summary."
 msgstr ""
@@ -33909,7 +33909,7 @@ msgid "To only use CI/CD features for an external repository, choose %{strong_op
 msgstr ""
 
 msgid "To open Jaeger from GitLab to view tracing from the %{link} page, add a URL to your Jaeger server."
-msgstr ""
+msgstr "Чтобы открыть Jaeger из GitLab и просматривать трассировку, привяжите страницу %{link} к своему Jaeger серверу."
 
 msgid "To pass variables to the triggered pipeline, add %{code_start}variables[VARIABLE]=VALUE%{code_end} to the API request."
 msgstr ""
@@ -34098,7 +34098,7 @@ msgid "Total users"
 msgstr ""
 
 msgid "Total weight"
-msgstr "Итоговый приоритет"
+msgstr "Общий вес"
 
 msgid "Total: %{total}"
 msgstr "Всего: %{total}"
@@ -34219,7 +34219,7 @@ msgid "Trials|You can apply your trial to a new group or an existing group."
 msgstr ""
 
 msgid "Trials|You won't get a free trial right now but you can always resume this process by selecting your avatar and choosing 'Start an Ultimate trial'"
-msgstr ""
+msgstr "Вы не получите бесплатный пробный период прямо сейчас, но вы всегда можете продолжить этот процесс, нажав на свой аватар и выбрав \"Начать Ultimate пробный период\""
 
 msgid "Trials|Your trial ends on %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the features of GitLab %{planName}. To keep those features after your trial ends, you’ll need to buy a subscription. (You can also choose GitLab Premium if it meets your needs.)"
 msgstr ""
@@ -36432,10 +36432,10 @@ msgid "Weeks"
 msgstr "Недели"
 
 msgid "Weight"
-msgstr "Приоритет"
+msgstr "Вес"
 
 msgid "Weight %{weight}"
-msgstr "Приоритет %{weight}"
+msgstr "Вес %{weight}"
 
 msgid "Welcome back! Your account had been deactivated due to inactivity but is now reactivated."
 msgstr "Добро пожаловать! Ваша учётная запись была деактивирована из-за неактивности, но сейчас восстановлена."
@@ -39071,7 +39071,7 @@ msgid "remove start date"
 msgstr ""
 
 msgid "remove weight"
-msgstr "удалить приоритет"
+msgstr "удалить вес"
 
 msgid "removed a Zoom call from this issue"
 msgstr ""
