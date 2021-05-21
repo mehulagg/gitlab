@@ -116,7 +116,7 @@ sanity check:
   script:
   - echo "running $FOO"
   after_script:
-  - echo "No after scripts."
+  - "# No after scripts."
 
 
 audit trail:
