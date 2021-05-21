@@ -14560,11 +14560,16 @@ State of a Sentry error.
 
 | Value | Description |
 | ----- | ----------- |
+| <a id="servicetypeasana_integration"></a>`ASANA_INTEGRATION` | AsanaIntegration integration. |
 | <a id="servicetypeasana_service"></a>`ASANA_SERVICE` | AsanaService type. |
+| <a id="servicetypeassembla_integration"></a>`ASSEMBLA_INTEGRATION` | AssemblaIntegration integration. |
 | <a id="servicetypeassembla_service"></a>`ASSEMBLA_SERVICE` | AssemblaService type. |
+| <a id="servicetypebamboo_integration"></a>`BAMBOO_INTEGRATION` | BambooIntegration integration. |
 | <a id="servicetypebamboo_service"></a>`BAMBOO_SERVICE` | BambooService type. |
+| <a id="servicetypebugzilla_integration"></a>`BUGZILLA_INTEGRATION` | BugzillaIntegration integration. |
 | <a id="servicetypebugzilla_service"></a>`BUGZILLA_SERVICE` | BugzillaService type. |
 | <a id="servicetypebuildkite_service"></a>`BUILDKITE_SERVICE` | BuildkiteService type. |
+| <a id="servicetypecampfire_integration"></a>`CAMPFIRE_INTEGRATION` | CampfireIntegration integration. |
 | <a id="servicetypecampfire_service"></a>`CAMPFIRE_SERVICE` | CampfireService type. |
 | <a id="servicetypeconfluence_service"></a>`CONFLUENCE_SERVICE` | ConfluenceService type. |
 | <a id="servicetypecustom_issue_tracker_service"></a>`CUSTOM_ISSUE_TRACKER_SERVICE` | CustomIssueTrackerService type. |

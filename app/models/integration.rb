@@ -260,7 +260,7 @@ class Integration < ApplicationRecord
   end
 
   def self.integration_type_for_service_type(type_name)
-    name = type_name.chomp(type_name)
+    name = type_name.chomp('Service').downcase
 
     integration_name_to_type(name) if RENAMED_TO_INTEGRATION.include?(name)
   end
