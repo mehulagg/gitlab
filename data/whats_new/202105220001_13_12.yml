@@ -36,7 +36,7 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsexpire_in
-  image_url: https://about.gitlab.com/images/sdlc-icons/verify.svg
+  image_url: https://about.gitlab.com/images/growth/verify.png
   published_at: 2021-05-22
   release: 13.12
 - title: Delete associated package files via API
@@ -51,7 +51,7 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://gitlab.com/gitlab-org/gitlab/-/issues/32107
-  image_url: https://about.gitlab.com/images/sdlc-icons/package.svg
+  image_url: https://about.gitlab.com/images/growth/package.png
   published_at: 2021-05-22
   release: 13.12
 - title: Configuration tool for Secret Detection
@@ -109,7 +109,7 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/application_security/sast/#supported-languages-and-frameworks
-  image_url: https://about.gitlab.com/images/sdlc-icons/verify.svg
+  image_url: https://about.gitlab.com/images/growth/verify.png
   published_at: 2021-05-22
   release: 13.12
 - title: Instance-level Federated Learning of Cohorts (FLoC) opt-in
@@ -122,6 +122,6 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/admin_area/floc.html
-  image_url: https://about.gitlab.com/images/sdlc-icons/enablement.svg
+  image_url: https://about.gitlab.com/images/growth/enablement.png
   published_at: 2021-05-22
   release: 13.12
