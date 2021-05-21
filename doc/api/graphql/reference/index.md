@@ -11676,8 +11676,8 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="projectservicesactive"></a>`active` | [`Boolean`](#boolean) | Indicates if the service is active. |
-| <a id="projectservicestype"></a>`type` | [`ServiceType`](#servicetype) | Class name of the service. |
+| <a id="projectservicesactive"></a>`active` | [`Boolean`](#boolean) | Indicates if the integration is active. |
+| <a id="projectservicestype"></a>`type` | [`ServiceType`](#servicetype) | Type of integration. |
 
 ##### `Project.snippets`
 
@@ -13597,10 +13597,10 @@ Values for sorting alerts.
 | <a id="alertmanagementalertsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
 | <a id="alertmanagementalertsortupdated_time_asc"></a>`UPDATED_TIME_ASC` | Created time by ascending order. |
 | <a id="alertmanagementalertsortupdated_time_desc"></a>`UPDATED_TIME_DESC` | Created time by descending order. |
-| <a id="alertmanagementalertsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="alertmanagementalertsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="alertmanagementalertsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="alertmanagementalertsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="alertmanagementalertsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="alertmanagementalertsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="alertmanagementalertsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="alertmanagementalertsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `AlertManagementDomainFilter`
 
@@ -13870,10 +13870,10 @@ Values for sorting container repositories.
 | <a id="containerrepositorysortname_desc"></a>`NAME_DESC` | Name by descending order. |
 | <a id="containerrepositorysortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="containerrepositorysortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="containerrepositorysortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="containerrepositorysortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="containerrepositorysortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="containerrepositorysortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="containerrepositorysortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="containerrepositorysortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="containerrepositorysortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="containerrepositorysortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `ContainerRepositoryStatus`
 
@@ -13995,10 +13995,10 @@ Roadmap sort values.
 | <a id="epicsortend_date_desc"></a>`END_DATE_DESC` | Sort by end date in descending order. |
 | <a id="epicsortstart_date_asc"></a>`START_DATE_ASC` | Sort by start date in ascending order. |
 | <a id="epicsortstart_date_desc"></a>`START_DATE_DESC` | Sort by start date in descending order. |
-| <a id="epicsortend_date_asc"></a>`end_date_asc` **{warning-solid}** | **Deprecated:** Use END_DATE_ASC. Deprecated in 13.11. |
-| <a id="epicsortend_date_desc"></a>`end_date_desc` **{warning-solid}** | **Deprecated:** Use END_DATE_DESC. Deprecated in 13.11. |
-| <a id="epicsortstart_date_asc"></a>`start_date_asc` **{warning-solid}** | **Deprecated:** Use START_DATE_ASC. Deprecated in 13.11. |
-| <a id="epicsortstart_date_desc"></a>`start_date_desc` **{warning-solid}** | **Deprecated:** Use START_DATE_DESC. Deprecated in 13.11. |
+| <a id="epicsortend_date_asc"></a>`end_date_asc` **{warning-solid}** | **Deprecated** in 13.11. Use END_DATE_ASC. |
+| <a id="epicsortend_date_desc"></a>`end_date_desc` **{warning-solid}** | **Deprecated** in 13.11. Use END_DATE_DESC. |
+| <a id="epicsortstart_date_asc"></a>`start_date_asc` **{warning-solid}** | **Deprecated** in 13.11. Use START_DATE_ASC. |
+| <a id="epicsortstart_date_desc"></a>`start_date_desc` **{warning-solid}** | **Deprecated** in 13.11. Use START_DATE_DESC. |
 
 ### `EpicState`
 
@@ -14127,10 +14127,10 @@ Values for sorting issues.
 | <a id="issuesortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
 | <a id="issuesortweight_asc"></a>`WEIGHT_ASC` | Weight by ascending order. |
 | <a id="issuesortweight_desc"></a>`WEIGHT_DESC` | Weight by descending order. |
-| <a id="issuesortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="issuesortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="issuesortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="issuesortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="issuesortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="issuesortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="issuesortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="issuesortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `IssueState`
 
@@ -14280,10 +14280,10 @@ Values for sorting merge requests.
 | <a id="mergerequestsortpriority_desc"></a>`PRIORITY_DESC` | Priority by descending order. |
 | <a id="mergerequestsortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="mergerequestsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="mergerequestsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="mergerequestsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="mergerequestsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="mergerequestsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="mergerequestsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="mergerequestsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="mergerequestsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="mergerequestsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `MergeRequestState`
 
@@ -14560,17 +14560,17 @@ State of a Sentry error.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="servicetypeasana_integration"></a>`ASANA_INTEGRATION` | AsanaIntegration integration. |
-| <a id="servicetypeasana_service"></a>`ASANA_SERVICE` | AsanaService type. |
-| <a id="servicetypeassembla_integration"></a>`ASSEMBLA_INTEGRATION` | AssemblaIntegration integration. |
-| <a id="servicetypeassembla_service"></a>`ASSEMBLA_SERVICE` | AssemblaService type. |
-| <a id="servicetypebamboo_integration"></a>`BAMBOO_INTEGRATION` | BambooIntegration integration. |
-| <a id="servicetypebamboo_service"></a>`BAMBOO_SERVICE` | BambooService type. |
-| <a id="servicetypebugzilla_integration"></a>`BUGZILLA_INTEGRATION` | BugzillaIntegration integration. |
-| <a id="servicetypebugzilla_service"></a>`BUGZILLA_SERVICE` | BugzillaService type. |
+| <a id="servicetypeasana_integration"></a>`ASANA_INTEGRATION` | Integration with Asana. |
+| <a id="servicetypeasana_service"></a>`ASANA_SERVICE` **{warning-solid}** | **Deprecated** in 14.0. This was renamed. Use: [`ServiceType.ASANA_INTEGRATION`](#servicetypeasana_integration). |
+| <a id="servicetypeassembla_integration"></a>`ASSEMBLA_INTEGRATION` | Integration with Assembla. |
+| <a id="servicetypeassembla_service"></a>`ASSEMBLA_SERVICE` **{warning-solid}** | **Deprecated** in 14.0. This was renamed. Use: [`ServiceType.ASSEMBLA_INTEGRATION`](#servicetypeassembla_integration). |
+| <a id="servicetypebamboo_integration"></a>`BAMBOO_INTEGRATION` | Integration with Bamboo. |
+| <a id="servicetypebamboo_service"></a>`BAMBOO_SERVICE` **{warning-solid}** | **Deprecated** in 14.0. This was renamed. Use: [`ServiceType.BAMBOO_INTEGRATION`](#servicetypebamboo_integration). |
+| <a id="servicetypebugzilla_integration"></a>`BUGZILLA_INTEGRATION` | Integration with Bugzilla. |
+| <a id="servicetypebugzilla_service"></a>`BUGZILLA_SERVICE` **{warning-solid}** | **Deprecated** in 14.0. This was renamed. Use: [`ServiceType.BUGZILLA_INTEGRATION`](#servicetypebugzilla_integration). |
 | <a id="servicetypebuildkite_service"></a>`BUILDKITE_SERVICE` | BuildkiteService type. |
-| <a id="servicetypecampfire_integration"></a>`CAMPFIRE_INTEGRATION` | CampfireIntegration integration. |
-| <a id="servicetypecampfire_service"></a>`CAMPFIRE_SERVICE` | CampfireService type. |
+| <a id="servicetypecampfire_integration"></a>`CAMPFIRE_INTEGRATION` | Integration with Campfire. |
+| <a id="servicetypecampfire_service"></a>`CAMPFIRE_SERVICE` **{warning-solid}** | **Deprecated** in 14.0. This was renamed. Use: [`ServiceType.CAMPFIRE_INTEGRATION`](#servicetypecampfire_integration). |
 | <a id="servicetypeconfluence_service"></a>`CONFLUENCE_SERVICE` | ConfluenceService type. |
 | <a id="servicetypecustom_issue_tracker_service"></a>`CUSTOM_ISSUE_TRACKER_SERVICE` | CustomIssueTrackerService type. |
 | <a id="servicetypedatadog_service"></a>`DATADOG_SERVICE` | DatadogService type. |
@@ -14622,10 +14622,10 @@ Common sort values.
 | <a id="sortcreated_desc"></a>`CREATED_DESC` | Created at descending order. |
 | <a id="sortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="sortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="sortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="sortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="sortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="sortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="sortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="sortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="sortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="sortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `TestCaseStatus`
 
