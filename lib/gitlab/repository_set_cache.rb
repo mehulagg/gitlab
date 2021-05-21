@@ -14,6 +14,11 @@ module Gitlab
     end
 
     def cache_key(type)
+      "#{type}:#{namespace}:set"
+    end
+
+    # NOTE Remove as part of #331319
+    def new_cache_key(type)
       super("#{type}:#{namespace}")
     end
 

@@ -11,6 +11,10 @@ module Gitlab
     end
 
     def cache_key(key)
+      "#{cache_namespace}:#{key}:set"
+    end
+
+    def new_cache_key(key)
       super(key)
     end
 
