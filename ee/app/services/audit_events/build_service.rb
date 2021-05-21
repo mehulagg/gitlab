@@ -34,7 +34,8 @@ module AuditEvents
         base_payload.merge(
           details: base_details_payload.merge(
             ip_address: ip_address,
-            entity_path: @scope.full_path
+            entity_path: @scope.full_path,
+            custom_message: message
           ),
           ip_address: ip_address
         )
@@ -45,8 +46,8 @@ module AuditEvents
 
     def base_payload
       {
-        author_id: @author.id,
-        author_name: @author.name,
+        author_id: author.id,
+        author_name: author.name,
         entity_id: @scope.id,
         entity_type: @scope.class.name,
         created_at: DateTime.current
@@ -55,7 +56,7 @@ module AuditEvents
 
     def base_details_payload
       {
-        author_name: @author.name,
+        author_name: author.name,
         target_id: @target.id,
         target_type: @target.class.name,
         target_details: @target.name,
@@ -63,8 +64,20 @@ module AuditEvents
       }
     end
 
+    def author
+      @author.impersonated? ? Gitlab::Audit::ImpersonatedAuthor.new(@author) : @author
+    end
+
+    def message
+      if author.is_a?(::Gitlab::Audit::ImpersonatedAuthor)
+        "#{@message} (by #{author.impersonated_by})"
+      else
+        @message
+      end
+    end
+
     def ip_address
-      @ip_address.presence || @author.current_sign_in_ip
+      @ip_address.presence || author.current_sign_in_ip
     end
   end
 end

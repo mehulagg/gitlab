@@ -58,6 +58,29 @@ RSpec.describe AuditEvents::BuildService do
           expect(event.ip_address).to eq(author.current_sign_in_ip)
         end
       end
+
+      context 'when author is impersonated' do
+        let(:impersonator) { build(:user, name: 'Agent Donald', current_sign_in_ip: '8.8.8.8') }
+        let(:author) { build(:author, impersonator: impersonator) }
+
+        it 'sets author to impersonated user', :aggregate_failures do
+          expect(event.author_id).to eq(author.id)
+          expect(event.author_name).to eq(author.name)
+        end
+
+        it 'includes impersonator name in message' do
+          expect(event.details[:custom_message])
+            .to eq('Added an interesting field from project Gotham (by Agent Donald)')
+        end
+
+        context 'when IP address is not provided' do
+          let(:ip_address) { nil }
+
+          it 'uses impersonator current_sign_in_ip' do
+            expect(event.ip_address).to eq(impersonator.current_sign_in_ip)
+          end
+        end
+      end
     end
 
     context 'when not licensed' do

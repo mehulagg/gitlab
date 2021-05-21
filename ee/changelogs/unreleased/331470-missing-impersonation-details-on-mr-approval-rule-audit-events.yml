@@ -1,0 +1,5 @@
+---
+title: Missing impersonation details on MR approval rule audit events
+merge_request: 62257
+author:
+type: fixed
