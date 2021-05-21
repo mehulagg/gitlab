@@ -106,7 +106,7 @@ export default {
   watch: {
     boardItems() {
       this.$nextTick(() => {
-        this.showCount = this.scrollHeight() + 10 > Math.ceil(this.listHeight());
+        this.showCount = this.scrollHeight() > Math.ceil(this.listHeight());
       });
     },
   },
