@@ -1,0 +1,5 @@
+---
+title: Remove unicorn-worker-killer gem and relations
+merge_request:
+author:
+type: removed
