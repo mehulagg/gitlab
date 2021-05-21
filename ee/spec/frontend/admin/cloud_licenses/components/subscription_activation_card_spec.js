@@ -1,6 +1,8 @@
-import { GlCard } from '@gitlab/ui';
+import { GlCard, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import SubscriptionActivationCard from 'ee/pages/admin/cloud_licenses/components/subscription_activation_card.vue';
+import SubscriptionActivationCard, {
+  activateSubscriptionUrl,
+} from 'ee/pages/admin/cloud_licenses/components/subscription_activation_card.vue';
 import SubscriptionActivationErrors from 'ee/pages/admin/cloud_licenses/components/subscription_activation_errors.vue';
 import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
@@ -15,6 +17,7 @@ describe('CloudLicenseApp', () => {
   const findSubscriptionActivationForm = () => wrapper.findComponent(SubscriptionActivationForm);
   const findSubscriptionActivationErrors = () =>
     wrapper.findComponent(SubscriptionActivationErrors);
+  const findActivateSubscriptionLink = () => wrapper.findByTestId('activate-subscription-link');
   const findUploadLink = () => wrapper.findByTestId('upload-license-link');
 
   const createComponent = ({ props = {}, stubs = {}, provide = {} } = {}) => {
@@ -50,11 +53,15 @@ describe('CloudLicenseApp', () => {
 
   describe('with an upload legacy license link', () => {
     beforeEach(() => {
-      createComponent({ stubs: { GlCard } });
+      createComponent({ stubs: { GlCard, GlSprintf } });
     });
 
     it('shows a link when provided', () => {
       expect(findUploadLink().text()).toBe('Upload a legacy license');
+    });
+
+    it('shows an help link', () => {
+      expect(findActivateSubscriptionLink().attributes('href')).toBe(activateSubscriptionUrl);
     });
 
     it('provides the correct path', () => {
