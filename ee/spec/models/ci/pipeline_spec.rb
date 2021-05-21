@@ -99,14 +99,10 @@ RSpec.describe Ci::Pipeline do
 
     before do
       stub_licensed_features(license_scanning: true)
-      stub_feature_flags(drop_license_management_artifact: false)
+      create(:ee_ci_build, :license_scanning, pipeline: pipeline)
     end
 
-    [:license_scanning, :license_management].each do |artifact_type|
-      let!(:build) { create(:ee_ci_build, artifact_type, pipeline: pipeline) }
-
-      it { is_expected.to be_truthy }
-    end
+    it { is_expected.to be_truthy }
   end
 
   describe '#security_reports' do

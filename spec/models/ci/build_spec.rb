@@ -111,10 +111,6 @@ RSpec.describe Ci::Build do
   describe '.with_downloadable_artifacts' do
     subject { described_class.with_downloadable_artifacts }
 
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
-
     context 'when job does not have a downloadable artifact' do
       let!(:job) { create(:ci_build) }
 
@@ -126,6 +122,8 @@ RSpec.describe Ci::Build do
     ::Ci::JobArtifact::DOWNLOADABLE_TYPES.each do |type|
       context "when job has a #{type} artifact" do
         it 'returns the job' do
+          pp ::Ci::JobArtifact::INTERNAL_TYPES
+          pp ::Ci::JobArtifact::REPORT_TYPES
           job = create(:ci_build)
           create(
             :ci_job_artifact,

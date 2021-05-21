@@ -281,7 +281,6 @@ RSpec.describe MergeRequest do
       :container_scanning  | :with_container_scanning_reports  | :container_scanning
       :dast                | :with_dast_reports                | :dast
       :dependency_scanning | :with_dependency_scanning_reports | :dependency_scanning
-      :license_scanning    | :with_license_management_reports  | :license_scanning
       :license_scanning    | :with_license_scanning_reports    | :license_scanning
       :coverage_fuzzing    | :with_coverage_fuzzing_reports    | :coverage_fuzzing
       :secret_detection    | :with_secret_detection_reports    | :secret_detection
@@ -292,7 +291,6 @@ RSpec.describe MergeRequest do
       subject { merge_request.enabled_reports[report_type] }
 
       before do
-        stub_feature_flags(drop_license_management_artifact: false)
         stub_licensed_features({ feature => true })
       end
 
