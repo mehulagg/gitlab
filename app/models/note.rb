@@ -206,10 +206,6 @@ class Note < ApplicationRecord
         .where(noteable_type: type, noteable_id: ids)
     end
 
-    def search(query)
-      fuzzy_search(query, [:note])
-    end
-
     # Override the `Sortable` module's `.simple_sorts` to remove name sorting,
     # as a `Note` does not have any property that correlates to a "name".
     override :simple_sorts
