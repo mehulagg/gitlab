@@ -126,10 +126,13 @@ module EE
     end
 
     def iterations_finder_params
-      IterationsFinder.params_for_parent(params.parent, include_ancestors: true).merge!(
+      {
+        parent: params.parent,
+        include_ancestors: true,
         state: 'opened',
         start_date: Date.today,
-        end_date: Date.today)
+        end_date: Date.today
+      }
     end
   end
 end

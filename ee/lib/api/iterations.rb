@@ -23,10 +23,12 @@ module API
       end
 
       def iterations_finder_params(parent)
-        IterationsFinder.params_for_parent(parent, include_ancestors: params[:include_ancestors]).merge!(
+        {
+          parent: parent,
+          include_ancestors: params[:include_ancestors],
           state: params[:state],
           search_title: params[:search]
-        )
+        }
       end
     end
 
