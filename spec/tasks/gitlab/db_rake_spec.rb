@@ -316,7 +316,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
 
       allow(instrumentation).to receive(:observe).and_yield
 
-      allow(Dir).to receive(:mkdir)
+      allow(Dir).to receive(:mkdir_p)
       allow(File).to receive(:exist?).with(directory).and_return(false)
       stub_const('Gitlab::Database::Migrations::Instrumentation::RESULT_DIR', directory)
     end
@@ -325,10 +325,10 @@ RSpec.describe 'gitlab:db namespace rake task' do
       FileUtils.rm_rf([directory])
     end
 
-    it 'fails when the directory already exists' do
-      expect(File).to receive(:exist?).with(directory).and_return(true)
+    it 'creates directory when it doesn\'t already exist' do
+      expect(Dir).to receive(:mkdir_p)
 
-      expect { subject }.to raise_error(/Directory exists/)
+      subject
     end
 
     it 'instruments the pending migration' do
