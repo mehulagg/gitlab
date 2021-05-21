@@ -1,5 +1,5 @@
 ---
-title: Update Unicorn-related binaries and init.d config
+title: Remove start-up scripts for Unicorn web server
 merge_request: 62289
 author:
 type: removed
