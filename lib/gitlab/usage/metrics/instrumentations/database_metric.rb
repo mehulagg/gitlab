@@ -47,6 +47,10 @@ module Gitlab
             self.class.metric_relation.call.where(time_constraints)
           end
 
+          def to_sql
+            Gitlab::Usage::Metrics::Query.for(self.class.metric_operation, reltion, column)
+          end
+
           private
 
           def time_constraints
