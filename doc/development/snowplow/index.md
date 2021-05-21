@@ -573,6 +573,20 @@ Snowplow Mini can be used for testing frontend and backend events on a productio
 
 For GitLab.com, we're setting up a [QA and Testing environment](https://gitlab.com/gitlab-org/telemetry/-/issues/266) using Snowplow Mini.
 
+### Troubleshooting
+
+To overcome Content security policy warnings you can disable them in `config/gitlab.yml`. 
+
+```yaml
+development:
+  <<: *base
+  gitlab:
+    content_security_policy:
+      enabled: true
+      directives:
+        connect_src: "'self' http://localhost:* http://127.0.0.1:* ws://localhost:* wss://localhost:* ws://127.0.0.1:* https://snowplow.trx.gitlab.net/"
+```
+
 ## Snowplow Schemas
 
 ### `gitlab_standard`
