@@ -43,10 +43,8 @@ it up using [Helm](https://helm.sh/) as follows:
 kubectl create ns gitlab-managed-apps
 
 # Download Helm chart values that is compatible with the requirements above.
-# You should substitute the tag that corresponds to the GitLab version in the URL
-# - https://gitlab.com/gitlab-org/gitlab/-/raw/<tag>/vendor/prometheus/values.yaml
-#
-wget https://gitlab.com/gitlab-org/gitlab/-/raw/v13.9.0-ee/vendor/prometheus/values.yaml
+# These are included in the Cluster Management project template.
+wget https://gitlab.com/gitlab-org/project-templates/cluster-management/-/raw/master/applications/prometheus/values.yaml
 
 # Add the Prometheus community Helm chart repository
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -103,10 +101,8 @@ running:
 kubectl create namespace gitlab-managed-apps
 
 # Download Helm chart values that is compatible with the requirements above.
-# You should substitute the tag that corresponds to the GitLab version in the URL
-# - https://gitlab.com/gitlab-org/gitlab/-/raw/<tag>/vendor/elastic_stack/values.yaml
-#
-wget https://gitlab.com/gitlab-org/gitlab/-/raw/v13.9.0-ee/vendor/elastic_stack/values.yaml
+# These are included in the Cluster Management project template.
+wget https://gitlab.com/gitlab-org/project-templates/cluster-management/-/raw/master/applications/elastic-stack/values.yaml
 
 # Add the GitLab Helm chart repository
 helm repo add gitlab https://charts.gitlab.io
