@@ -61,9 +61,13 @@ Historical Context: `Experimentation Module` was built iteratively with the need
 appeared while implementing Growth sub-department experiments, while GLEX was built
 with the findings of the team and an easier to use API.
 
-### Experimenting with new icons and illustrations
+### Add new icons and illustrations for experiments
 
-Some experiments may require adding custom icons or illustrations to our codebase. As this process is lengthy and at this stage, the outcome of the experiment uncertain, we should postpone this effort to the experiment clean-up process. We recommend the following workflow:
+Some experiments may require you to add custom icons or illustrations to our codebase.
+This process is lengthy and at this stage, the outcome of the experiment uncertain.
+Therefore, you should postpone this effort until the experiment cleanup process.
+
+We recommend the following workflow:
 
 - Add icons/illustrations as `.svg` files in the `/app/assets/images` (or EE) path within the GitLab repository.
 - Use `image_tag` or `image_path` to render it via the asset pipeline.
