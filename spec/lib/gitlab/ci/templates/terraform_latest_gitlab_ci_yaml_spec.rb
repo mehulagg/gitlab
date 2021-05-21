@@ -10,7 +10,7 @@ RSpec.describe 'Terraform.latest.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Terraform.latest') }
 
   describe 'the created pipeline' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { 'main' }
     let(:pipeline_branch) { default_branch }
     let(:project) { create(:project, :custom_repo, files: { 'README.md' => '' }) }
     let(:user) { project.owner }
