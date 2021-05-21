@@ -1,10 +1,10 @@
 ---
 key_path: usage_activity_by_stage.manage.groups
-description:
+description: Number of groups in an instance (Need Dev to confirm)
 product_section: dev
-product_stage:
-product_group: group::manage
-product_category:
+product_stage: manage
+product_group: group::access
+product_category: subgroups
 value_type: number
 status: data_available
 time_frame: all
@@ -13,4 +13,3 @@ distribution:
 - ce
 tier:
 - free
-skip_validation: true
