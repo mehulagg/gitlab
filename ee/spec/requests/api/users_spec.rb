@@ -180,7 +180,7 @@ RSpec.describe API::Users do
 
       expect(json_response).to have_key('provisioned_by_group_id')
     end
-end
+  end
 
   describe 'GET /user/:id' do
     context 'when authenticated' do
