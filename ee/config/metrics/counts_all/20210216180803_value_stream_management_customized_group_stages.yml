@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.manage.value_stream_management_customized_group_stages
-description:
+description: Tracks users that are creating custom stages in a value stream in group-level value stream analytics.
 product_section: dev
 product_stage:
 product_group: group::manage
@@ -11,5 +11,5 @@ time_frame: all
 data_source:
 distribution:
 - ee
-tier: []
+tier: [premium, ultimate]
 skip_validation: true
