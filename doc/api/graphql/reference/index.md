@@ -13696,6 +13696,8 @@ Values for sorting runners.
 | Value | Description |
 | ----- | ----------- |
 | <a id="cirunnersortcontacted_asc"></a>`CONTACTED_ASC` | Ordered by contacted_at in ascending order. |
+| <a id="cirunnersortcontacted_desc"></a>`CONTACTED_DESC` | Ordered by contacted_at in descending order. |
+| <a id="cirunnersortcreated_asc"></a>`CREATED_ASC` | Ordered by created_date in ascending order. |
 | <a id="cirunnersortcreated_desc"></a>`CREATED_DESC` | Ordered by created_date in descending order. |
 
 ### `CiRunnerStatus`
