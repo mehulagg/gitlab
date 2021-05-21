@@ -35,13 +35,13 @@ full list of reference architectures, see
 | Object storage                           | n/a         | n/a                     | n/a              | n/a           | n/a       |
 | NFS server (optional, not recommended)(4)| 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`   | `F4s v2`  |
 
-NOTE:
-
-- (1) can be optionally run as reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
-- (2) can be optionally run as reputable third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
-- (3) can be optionally run as reputable third party load balancing services (LB PaaS). AWS ELB is known to work.
-- (4) can be optionally run as reputable third party object storage (storage PaaS). Google Cloud Storage and AWS S3 are known to work.
-- For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
+> **Table Footnotes:**
+>
+> - (1) can be optionally run as reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
+> - (2) can be optionally run as reputable third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
+> - (3) can be optionally run as reputable third party load balancing services (LB PaaS). AWS ELB is known to work.
+> - (4) can be optionally run as reputable third party object storage (storage PaaS). Google Cloud Storage and AWS S3 are known to work.
+> - For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 50k

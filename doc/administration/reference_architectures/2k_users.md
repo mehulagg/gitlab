@@ -27,7 +27,7 @@ For a full list of reference architectures, see
 | Object storage                           | n/a    | n/a                     | n/a             | n/a          | n/a      |
 | NFS server (optional, not recommended)(4)| 1      | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`  | `c5.xlarge`  | `F4s v2` |
 
-> Table Footnotes:
+> **Table Footnotes:**
 >
 > - (1) can be optionally run as reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
 > - (2) can be optionally run as reputable third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
