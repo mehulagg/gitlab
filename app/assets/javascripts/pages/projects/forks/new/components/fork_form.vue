@@ -113,7 +113,6 @@ export default {
         }),
         visibility: initFormField({
           value: this.projectVisibility,
-          skipValidation: true,
         }),
       },
     };
@@ -322,7 +321,11 @@ export default {
       />
     </gl-form-group>
 
-    <gl-form-group>
+    <gl-form-group
+      v-validation:[form.showValidation]
+      :invalid-feedback="s__('ForkProject|Please select a visibility level')"
+      :state="form.fields.visibility.state"
+    >
       <label>
         {{ s__('ForkProject|Visibility level') }}
         <gl-link :href="visibilityHelpPath" target="_blank">
