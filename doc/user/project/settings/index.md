@@ -103,7 +103,7 @@ sast: # none of these attributes can be overriden by a developer's local .gitlab
   script:
   - echo "running $FOO"
   after_script:
-  - echo "No after scripts."
+  - "# No after scripts."
 
 sanity check:
   image: ruby:2.6
