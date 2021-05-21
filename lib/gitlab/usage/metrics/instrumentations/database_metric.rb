@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+1# frozen_string_literal: true
 
 module Gitlab
   module Usage
@@ -45,6 +45,18 @@ module Gitlab
 
           def to_sql
             Gitlab::Usage::Metrics::Query.for(self.class.metric_operation, relation, self.class.column)
+          end
+
+          def suggested_name
+            Gitlab::Usage::Metrics::NameSuggestion.for(
+              self.class.metric_operation,
+              relation: relation,
+              column: self.class.column
+            )
+          end
+
+          def relation
+            self.class.metric_relation.call.where(time_constraints)
           end
 
           private
