@@ -197,14 +197,30 @@ RSpec.describe MergeRequest do
   end
 
   describe '#has_denied_policies?' do
+    let(:project) { create(:project, :repository) }
+    let(:current_user) { project.users.first }
     subject { merge_request.has_denied_policies? }
+
+    let!(:base_pipeline) do
+      create(:ee_ci_pipeline,
+             :with_license_scanning_report,
+             project: project,
+             ref: merge_request.target_branch,
+             sha: merge_request.diff_base_sha)
+    end
 
     context 'without existing pipeline' do
       it { is_expected.to be_falsey }
     end
 
     context 'with existing pipeline' do
+      let(:mit_license) { build(:software_license, :mit, spdx_identifier: nil) }
+      let(:report_diff) { { data: { 'new_licenses' => [ mit_license ] } } }
+
       before do
+        synchronous_reactive_cache(merge_request)
+        allow(merge_request).to receive(:current_user).and_return(nil)
+        allow(merge_request).to receive(:compare_license_scanning_reports).and_return(report_diff)
         stub_licensed_features(license_scanning: true)
       end
 
@@ -216,7 +232,6 @@ RSpec.describe MergeRequest do
 
       context 'with license_scanning report' do
         let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project) }
-        let(:mit_license) { build(:software_license, :mit, spdx_identifier: nil) }
 
         context 'without denied policy' do
           it { is_expected.to be_falsey }
@@ -239,7 +254,17 @@ RSpec.describe MergeRequest do
             project.software_license_policies << denied_policy
           end
 
-          it { is_expected.to be_truthy }
+          context 'when the MR pipeline report' do
+            context 'added the denied license' do
+              it { is_expected.to be_truthy }
+            end
+
+            context 'did not add the denied license' do
+              let(:report_diff) { { data: { 'new_licenses' => [ build(:software_license, :apache_2_0, spdx_identifier: nil) ] } } }
+
+              it { is_expected.to be_falsey }
+            end
+          end
 
           context 'with disabled licensed feature' do
             before do
