@@ -1,0 +1,8 @@
+---
+name: prevent_retry_of_retried_jobs
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '13.13'
+type: development
+group: group::continuous integration
+default_enabled: false

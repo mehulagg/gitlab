@@ -469,7 +469,11 @@ module Ci
     end
 
     def retryable?
-      !archived? && (success? || failed? || canceled?)
+      if Feature.enabled?(:prevent_retry_of_retried_jobs, project, default_enabled: :yaml)
+        !archived? && !retried && (success? || failed? || canceled?)
+      else
+        !archived? && (success? || failed? || canceled?)
+      end
     end
 
     def retries_count
