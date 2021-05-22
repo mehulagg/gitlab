@@ -46,6 +46,7 @@ module IconsHelper
         :svg,
         content_tag(:use, '', { 'xlink:href' => "#{sprite_icon_path}##{icon_name}" } ),
         class: css_classes.empty? ? nil : css_classes.join(' '),
+        style: 'pointer-events: none',
         data: { testid: "#{icon_name}-icon" }
       )
     end
