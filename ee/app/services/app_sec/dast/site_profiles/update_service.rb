@@ -29,9 +29,11 @@ module AppSec
             handle_secret_variable!(params, :request_headers, ::Dast::SiteProfileSecretVariable::REQUEST_HEADERS)
             handle_secret_variable!(params, :auth_password, ::Dast::SiteProfileSecretVariable::PASSWORD)
 
-            params.compact!
+            old_params = dast_site_profile.attributes.symbolize_keys
 
+            params.compact!
             dast_site_profile.update!(params)
+            create_audit_events(params, old_params)
 
             ServiceResponse.success(payload: dast_site_profile)
           end
@@ -93,6 +95,22 @@ module AppSec
           response
         end
         # rubocop: enable CodeReuse/ActiveRecord
+
+        def create_audit_events(params, old_params)
+          params.each do |property, new_value|
+            old_value = old_params[property]
+
+            next if old_value == new_value
+
+            ::Gitlab::Audit::Auditor.audit(
+              name: 'dast_site_profile_update',
+              author: current_user,
+              scope: project,
+              target: dast_site_profile,
+              message: "Changed DAST site profile #{property} from #{old_value} to #{new_value}"
+            )
+          end
+        end
       end
     end
   end
