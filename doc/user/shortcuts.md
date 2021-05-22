@@ -72,7 +72,7 @@ relatively quickly to work, and they take you to another page in the project.
 | <kbd>g</kbd> + <kbd>f</kbd> | Go to the [project files](#project-files) list (**Repository > Files**). |
 | <kbd>t</kbd>                | Go to the project file search page. (**Repository > Files**, select **Find Files**). |
 | <kbd>g</kbd> + <kbd>c</kbd> | Go to the project commits list (**Repository > Commits**). |
-| <kbd>g</kbd> + <kbd>n</kbd> | Go to the [repository graph](#repository-history-graph) page (**Repository > Graph**). |
+| <kbd>g</kbd> + <kbd>n</kbd> | Go to the [repository graph](#repository-graph) page (**Repository > Graph**). |
 | <kbd>g</kbd> + <kbd>d</kbd> | Go to repository charts (**Analytics > Repository Analytics**). |
 | <kbd>g</kbd> + <kbd>i</kbd> | Go to the project issues list (**Issues > List**). |
 | <kbd>i</kbd>                | Go to the New Issue page (**Issues**, select **New Issue** ). |
