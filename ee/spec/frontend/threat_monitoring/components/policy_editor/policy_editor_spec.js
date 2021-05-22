@@ -72,7 +72,6 @@ spec:
   };
 
   const findRuleEditor = () => wrapper.findByTestId('rule-editor');
-  const findYamlEditor = () => wrapper.findByTestId('yaml-editor');
   const findPreview = () => wrapper.find(PolicyPreview);
   const findAddRuleButton = () => wrapper.findByTestId('add-rule');
   const findYAMLParsingAlert = () => wrapper.findByTestId('parsing-alert');
@@ -125,7 +124,7 @@ spec:
   });
 
   it('does not render yaml editor', () => {
-    expect(findYamlEditor().exists()).toBe(false);
+    expect(findNetworkPolicyEditor().exists()).toBe(false);
   });
 
   it('does not render parsing error alert', () => {
@@ -150,9 +149,8 @@ spec:
     });
 
     it('renders yaml editor', () => {
-      const editor = findYamlEditor();
+      const editor = findNetworkPolicyEditor();
       expect(editor.exists()).toBe(true);
-      expect(editor.element).toMatchSnapshot();
     });
 
     it('updates policy on yaml editor value change', async () => {
