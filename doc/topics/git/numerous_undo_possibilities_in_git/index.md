@@ -255,7 +255,7 @@ commits `A-B-C-D` and you want to modify something introduced in commit `B`.
 
 ### Redoing the undo
 
-You can recall detached local commits. However, not all previous commits are available, because
+You can recall previous local commits. However, not all previous commits are available, because
 Git regularly [cleans the commits that are unreachable by branches or tags](https://git-scm.com/book/en/v2/Git-Internals-Maintenance-and-Data-Recovery).
 
 To view repository history and track prior commits, run `git reflog show`. For example:
