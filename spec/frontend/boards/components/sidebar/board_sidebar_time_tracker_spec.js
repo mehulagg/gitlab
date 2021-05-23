@@ -26,7 +26,6 @@ describe('BoardSidebarTimeTracker', () => {
     store = createStore();
     store.state.boardItems = {
       1: {
-        id: 1,
         timeEstimate: 3600,
         totalTimeSpent: 1800,
         humanTimeEstimate: '1h',
@@ -53,7 +52,6 @@ describe('BoardSidebarTimeTracker', () => {
         humanTimeSpent: '30min',
         limitToHours: timeTrackingLimitToHours,
         showCollapsed: false,
-        issuableId: '1',
       });
     },
   );

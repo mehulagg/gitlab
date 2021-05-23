@@ -383,13 +383,8 @@ function mountTimeTrackingComponent() {
   new Vue({
     el,
     apolloProvider,
-    provide: { issuableType },
-    render: (createElement) =>
-      createElement(SidebarTimeTracking, {
-        props: {
-          issuableId: id.toString(),
-        },
-      }),
+    provide: { issuableId: id, issuableType },
+    render: (createElement) => createElement(SidebarTimeTracking, {}),
   });
 }
 

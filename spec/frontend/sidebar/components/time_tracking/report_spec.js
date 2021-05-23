@@ -36,7 +36,7 @@ describe('Issuable Time Tracking Report', () => {
         issuableId: 1,
         issuableType,
       },
-      propsData: { limitToHours, issuableId: '1' },
+      propsData: { limitToHours },
       localVue,
       apolloProvider: fakeApollo,
     });

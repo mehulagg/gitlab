@@ -13,16 +13,12 @@ export default {
     GlLoadingIcon,
     GlTable,
   },
-  inject: ['issuableType'],
+  inject: ['issuableId', 'issuableType'],
   props: {
     limitToHours: {
       type: Boolean,
       default: false,
       required: false,
-    },
-    issuableId: {
-      type: String,
-      required: true,
     },
   },
   data() {

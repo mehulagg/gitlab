@@ -15,7 +15,6 @@ export default {
 
 <template>
   <issuable-time-tracker
-    :issuable-id="activeBoardItem.id.toString()"
     :time-estimate="activeBoardItem.timeEstimate"
     :time-spent="activeBoardItem.totalTimeSpent"
     :human-time-estimate="activeBoardItem.humanTimeEstimate"
