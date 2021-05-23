@@ -43,7 +43,9 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
         stub_licensed_features(oncall_schedules: true)
       end
 
-      it_behaves_like 'returns an error', 'Escalation policies are not supported for this project'
+      it 'raises an erorr' do
+        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, 'Escalation policies are not supported for this project')
+      end
     end
 
     context 'project has feature' do

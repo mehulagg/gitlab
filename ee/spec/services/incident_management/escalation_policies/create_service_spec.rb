@@ -78,16 +78,6 @@ RSpec.describe IncidentManagement::EscalationPolicies::CreateService do
 
         it_behaves_like 'error response', "Rules[0] oncall schedule can't be blank"
       end
-
-      context 'schedule is not of the same project' do
-        let(:other_schedule) { create(:incident_management_oncall_schedule) }
-
-        before do
-          rule_params[0][:oncall_schedule_id] = other_schedule.id
-        end
-
-        it_behaves_like 'error response', 'Rules[0] oncall schedule Schedule must be from the same project as the policy'
-      end
     end
 
     context 'valid params' do

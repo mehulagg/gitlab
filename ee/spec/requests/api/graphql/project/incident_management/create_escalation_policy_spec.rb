@@ -63,7 +63,7 @@ RSpec.describe 'creating escalation policy' do
       it 'raises an error' do
         resolve
 
-        expect(json_response['errors'][0]['message']).to eq("The oncall schedule for iid 1 could not be found")
+        expect_graphql_errors_to_include("The oncall schedule for iid 1 could not be found")
       end
     end
 
@@ -87,7 +87,7 @@ RSpec.describe 'creating escalation policy' do
       it 'raises an error' do
         resolve
 
-        expect(mutation_response['errors'][0]).to eq("Escalation policies are not supported for this project")
+        expect_graphql_errors_to_include("Escalation policies are not supported for this project")
       end
     end
   end

@@ -28568,9 +28568,6 @@ msgstr ""
 msgid "Schedule a new pipeline"
 msgstr ""
 
-msgid "Schedule must be from the same project as the policy"
-msgstr ""
-
 msgid "Scheduled"
 msgstr ""
 
