@@ -305,7 +305,7 @@ You can undo remote changes and change history.
 
 Even with an updated history, old commits can still be
 accessed by commit SHA, at least until all repositories perform
-the automated cleanup of detached commits.
+the automated cleanup of detached commits, or cleanup is run manually. Even the cleanup might not remove old commits if there are still refs pointing to them.
 
 ![Modifying history causes problems on remote branch](img/rebase_reset.png)
 
