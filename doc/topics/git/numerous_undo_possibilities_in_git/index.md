@@ -212,8 +212,6 @@ which clashes with what other developers have locally.
 
 ### Undo staged local changes with history modification
 
-You can rewrite history in Git, but you should avoid it. It can cause problems
-when multiple developers are contributing to the same codebase.
 
 The following tasks rewrite Git history.
 
