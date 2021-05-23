@@ -308,10 +308,7 @@ git checkout -b new-path-of-feature
 
 ## Undo remote changes while changing history
 
-You can undo remote changes and change history when you want to remove things
-like secret keys, passwords, and SSH keys. You should not undo changes
-and change the history to hide mistakes, because
-debugging becomes more difficult. 
+You can undo remote changes and change history.
 
 Even with an updated history, old commits can still be
 accessed by commit SHA, at least until all repositories perform
