@@ -339,10 +339,8 @@ Never modify the commit history of `master` or shared branch.
 
 ### How to change history
 
-After you know what you want to modify (how far in history or which range of
-old commits), use `git rebase -i`. This command displays all the commits from the
-current version to chosen commit ID and allow modification, squashing, deletion
-of that commits.
+You can modify history by using `git rebase -i`. This command allows modification, squashing, deletion
+of commits.
 
 ```shell
 $ git rebase -i <commit1-SHA>..<commit3-SHA>
