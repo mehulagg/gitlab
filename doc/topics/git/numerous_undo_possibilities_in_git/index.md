@@ -212,7 +212,6 @@ which clashes with what other developers have locally.
 
 ### Undo staged local changes with history modification
 
-
 The following tasks rewrite Git history.
 
 #### Delete a specific commit
