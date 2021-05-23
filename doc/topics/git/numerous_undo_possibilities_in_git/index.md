@@ -222,7 +222,7 @@ The following tasks rewrite Git history.
 You can delete a specific commit. For example, if you have
 commits `A-B-C-D` and you want to delete commit `B`.
 
-1. Rebase the range from current commit `D` to `A`:
+1. Rebase the range from current commit `D` to `B`:
 
   ```shell
   git rebase -i A
@@ -242,7 +242,7 @@ commits `A-B-C-D` and you want to modify something introduced in commit `B`.
 1. Rebase the range from current commit `D` to `A`:
 
    ```shell
-   git rebase -i
+   git rebase -i A
    ```
 
    A list of commits is displayed in your editor.
@@ -314,7 +314,7 @@ like secret keys, passwords, and SSH keys. You should not undo changes
 and change the history to hide mistakes, because
 debugging becomes more difficult. 
 
-Even with an updated history, commits can still be
+Even with an updated history, old commits can still be
 accessed by commit SHA, at least until all repositories perform
 the automated cleanup of detached commits.
 
