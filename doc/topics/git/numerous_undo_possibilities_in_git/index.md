@@ -225,7 +225,7 @@ commits `A-B-C-D` and you want to delete commit `B`.
 1. Rebase the range from current commit `D` to `A`:
 
   ```shell
-  git rebase -i
+  git rebase -i A
   ```
 
   A list of commits is displayed in your editor.
