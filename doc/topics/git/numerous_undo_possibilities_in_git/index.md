@@ -338,6 +338,8 @@ Never modify the commit history of `master` or shared branch.
 
 You can modify history by using `git rebase -i`. This command allows modification, squashing, deletion
 of commits.
+
+```shell
 #
 # Commands:
 # p, pick = use commit
