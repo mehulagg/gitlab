@@ -279,34 +279,36 @@ eb37e74 HEAD@{6}: rebase -i (pick): Commit C
 This output shows the repository history, including:
 
 - The commit SHA.
-- How many commits ago the commit was made (`HEAD@{12}` was 12 commits ago).
+- How many `HEAD`-changing operations ago the commit was made (`HEAD@{12}` was 12 commits ago).
 - The action that was taken, for example, commit, rebase, merge.
-- A description of the action.
+- A description of the action that changed `HEAD`.
 
 ## Undo remote changes without changing history
 
 To undo changes in the remote repository, you can create a new commit with the changes you
 want to undo. You should follow this process, which preserves the history and
-provides a clear timeline and development structure.
+provides a clear timeline and development structure. However, you only
+need to follow this procedure if your work was merged into a branch that
+other developers are using as the base for their work (for example, `main`).
 
 ![Use revert to keep branch flowing](img/revert.png)
 
 To revert changes introduced in a specific `commit-SHA`:
 
 ```shell
-git revert <commit-B-SHA>
+git revert B
 ```
 
 To create a new branch:
 
 ```shell
-git checkout <commit-B-SHA>
+git checkout B
 git checkout -b new-path-of-feature
 ```
 
 ## Undo remote changes while changing history
 
-You can undo remote changes and change history when you want to hide things
+You can undo remote changes and change history when you want to remove things
 like secret keys, passwords, and SSH keys. You should not undo changes
 and change the history to hide mistakes, because
 debugging becomes more difficult. 
@@ -338,7 +340,7 @@ Never modify the commit history of `master` or shared branch.
 ### How to change history
 
 After you know what you want to modify (how far in history or which range of
-old commits), use `git rebase -i <commit-SHA>`. This command displays all the commits from the
+old commits), use `git rebase -i`. This command displays all the commits from the
 current version to chosen commit ID and allow modification, squashing, deletion
 of that commits.
 
