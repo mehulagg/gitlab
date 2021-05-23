@@ -299,13 +299,6 @@ To revert changes introduced in a specific `commit-SHA`:
 git revert B
 ```
 
-To create a new branch:
-
-```shell
-git checkout B
-git checkout -b new-path-of-feature
-```
-
 ## Undo remote changes while changing history
 
 You can undo remote changes and change history.
