@@ -324,7 +324,7 @@ the automated cleanup of detached commits.
 You should not change the history when you're working in a public branch
 or a branch that might be used by other developers.
 When you contribute to large open source repositories like [GitLab](https://gitlab.com/gitlab-org/gitlab)),
-you can squash your commits into a single one for a cleaner contribution.
+you can squash your commits into a single one.
 
 A feature branch of a merge request is a public branch and might be used by
 other developers, but project process and rules might allow or require
@@ -341,14 +341,6 @@ Never modify the commit history of `master` or shared branch.
 
 You can modify history by using `git rebase -i`. This command allows modification, squashing, deletion
 of commits.
-
-```shell
-$ git rebase -i <commit1-SHA>..<commit3-SHA>
-pick <commit1-SHA> <commit1-commit-message>
-pick <commit2-SHA> <commit2-commit-message>
-pick <commit3-SHA> <commit3-commit-message>
-
-# Rebase commit1-SHA..commit3-SHA onto <commit4-SHA> (3 command(s))
 #
 # Commands:
 # p, pick = use commit
