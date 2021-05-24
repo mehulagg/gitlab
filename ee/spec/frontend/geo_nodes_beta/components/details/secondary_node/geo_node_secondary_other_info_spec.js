@@ -92,6 +92,7 @@ describe('GeoNodeSecondaryOtherInfo', () => {
       describe.each`
         lastEvent                                                | text
         ${{ lastEventId: null, lastEventTimestamp: null }}       | ${'Unknown'}
+        ${{ lastEventId: 1, lastEventTimestamp: 0 }}             | ${'1'}
         ${{ lastEventId: 1, lastEventTimestamp: MOCK_JUST_NOW }} | ${'1 (just now)'}
       `(`last event`, ({ lastEvent, text }) => {
         beforeEach(() => {
@@ -106,6 +107,7 @@ describe('GeoNodeSecondaryOtherInfo', () => {
       describe.each`
         lastCursorEvent                                                      | text
         ${{ cursorLastEventId: null, cursorLastEventTimestamp: null }}       | ${'Unknown'}
+        ${{ cursorLastEventId: 1, cursorLastEventTimestamp: 0 }}             | ${'1'}
         ${{ cursorLastEventId: 1, cursorLastEventTimestamp: MOCK_JUST_NOW }} | ${'1 (just now)'}
       `(`last cursor event`, ({ lastCursorEvent, text }) => {
         beforeEach(() => {
