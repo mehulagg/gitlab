@@ -6596,7 +6596,7 @@ Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.i_testing_paid_monthly_active_user_total`
 
@@ -6812,7 +6812,7 @@ Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.i_testing_paid_monthly_active_user_total`
 
