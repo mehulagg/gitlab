@@ -8,7 +8,9 @@ import {
   GlButton,
   GlSkeletonLoader,
   GlTooltipDirective,
+  GlAvatar,
 } from '@gitlab/ui';
+import { truncateNamespace } from '~/lib/utils/text_utility';
 import { __ } from '~/locale';
 import { ANY_OPTION } from '../constants';
 
@@ -25,6 +27,7 @@ export default {
     GlIcon,
     GlButton,
     GlSkeletonLoader,
+    GlAvatar,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -35,12 +38,12 @@ export default {
       required: false,
       default: "__('Filter')",
     },
-    selectedDisplayValue: {
+    name: {
       type: String,
       required: false,
       default: 'name',
     },
-    itemsDisplayValue: {
+    fullName: {
       type: String,
       required: false,
       default: 'name',
@@ -75,6 +78,9 @@ export default {
     resetDropdown() {
       this.$emit('change', ANY_OPTION);
     },
+    truncateNamespace(namespace) {
+      return truncateNamespace(namespace);
+    },
   },
   ANY_OPTION,
 };
@@ -91,7 +97,7 @@ export default {
   >
     <template #button-content>
       <span class="dropdown-toggle-text gl-flex-grow-1 gl-text-truncate">
-        {{ selectedItem[selectedDisplayValue] }}
+        {{ selectedItem[name] }}
       </span>
       <gl-loading-icon v-if="loading" inline class="gl-mr-3" />
       <gl-button
@@ -134,7 +140,13 @@ export default {
         :is-checked="isSelected(item)"
         @click="$emit('change', item)"
       >
-        {{ item[itemsDisplayValue] }}
+        <div class="gl-display-flex gl-align-items-center">
+          <gl-avatar :src="item.avatar_url" :entity-name="item[name]" shape="rect" :size="32" />
+          <div class="gl-display-flex gl-flex-direction-column">
+            <span class="gl-font-weight-bold">{{ item[name] }}</span>
+            <span class="gl-font-sm gl-text-gray-700">{{ truncateNamespace(item[fullName]) }}</span>
+          </div>
+        </div>
       </gl-dropdown-item>
     </div>
     <div v-if="loading" class="gl-mx-4 gl-mt-3">
