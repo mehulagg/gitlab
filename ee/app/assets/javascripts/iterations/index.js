@@ -75,8 +75,10 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
     apolloProvider,
     render(createElement) {
       return createElement(IterationReport, {
-        props: {
+        provide: {
           fullPath,
+        },
+        props: {
           hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
           iterationId,
           labelsFetchPath,

@@ -45,6 +45,9 @@ describe('Iterations report', () => {
       localVue,
       apolloProvider: mockApollo,
       propsData: props,
+      provide: {
+        fullPath: props.fullPath,
+      },
       stubs: {
         GlLoadingIcon,
         GlTab,
@@ -113,6 +116,9 @@ describe('Iterations report', () => {
         $apollo: {
           queries: { iteration: { loading } },
         },
+      },
+      provide: {
+        fullPath: props.fullPath,
       },
       stubs: {
         GlLoadingIcon,

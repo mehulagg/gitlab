@@ -64,11 +64,12 @@ export default {
     },
   },
   mixins: [glFeatureFlagsMixin()],
+  inject: ['fullPath'],
   props: {
-    fullPath: {
-      type: String,
-      required: true,
-    },
+    // fullPath: {
+    //   type: String,
+    //   required: true,
+    // },
     hasScopedLabelsFeature: {
       type: Boolean,
       required: false,

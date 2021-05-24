@@ -119,6 +119,7 @@ export default {
             v-for="cadence in cadences"
             :key="cadence.id"
             :cadence-id="cadence.id"
+            :duration-in-weeks="cadence.durationInWeeks"
             :title="cadence.title"
           />
         </ul>
