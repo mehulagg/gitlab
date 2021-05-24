@@ -9,12 +9,17 @@ RSpec.describe StuckCiJobsWorker do
   let!(:job) { create :ci_build, runner: runner }
   let(:worker_lease_key) { StuckCiJobsWorker::EXCLUSIVE_LEASE_KEY }
   let(:worker_lease_uuid) { SecureRandom.uuid }
+  let(:created_at) { }
+  let(:updated_at) { }
 
   subject(:worker) { described_class.new }
 
   before do
     stub_exclusive_lease(worker_lease_key, worker_lease_uuid)
-    job.update!(status: status, updated_at: updated_at)
+    job_attributes = { status: status }
+    job_attributes[:created_at] = created_at if created_at
+    job_attributes[:updated_at] = updated_at if updated_at
+    job.update!(job_attributes)
   end
 
   shared_examples 'job is dropped' do
@@ -63,20 +68,20 @@ RSpec.describe StuckCiJobsWorker do
         allow_any_instance_of(Ci::Build).to receive(:stuck?).and_return(false)
       end
 
-      context 'when job was not updated for more than 1 day ago' do
-        let(:updated_at) { 2.days.ago }
+      context 'when job was created_at more than 1 day ago' do
+        let(:created_at) { 2.days.ago }
 
         it_behaves_like 'job is dropped'
       end
 
-      context 'when job was updated in less than 1 day ago' do
-        let(:updated_at) { 6.hours.ago }
+      context 'when job was created less than 1 day ago' do
+        let(:created_at) { 6.hours.ago }
 
         it_behaves_like 'job is unchanged'
       end
 
-      context 'when job was not updated for more than 1 hour ago' do
-        let(:updated_at) { 2.hours.ago }
+      context 'when job was created more than 1 hour ago' do
+        let(:created_at) { 2.hours.ago }
 
         it_behaves_like 'job is unchanged'
       end
@@ -88,14 +93,14 @@ RSpec.describe StuckCiJobsWorker do
       end
 
       context 'when job was not updated for more than 1 hour ago' do
-        let(:updated_at) { 2.hours.ago }
+        let(:created_at) { 2.hours.ago }
 
         it_behaves_like 'job is dropped'
       end
 
       context 'when job was updated in less than 1
        hour ago' do
-        let(:updated_at) { 30.minutes.ago }
+        let(:created_at) { 30.minutes.ago }
 
         it_behaves_like 'job is unchanged'
       end
@@ -121,7 +126,7 @@ RSpec.describe StuckCiJobsWorker do
   %w(success skipped failed canceled).each do |status|
     context "when job is #{status}" do
       let(:status) { status }
-      let(:updated_at) { 2.days.ago }
+      let(:created_at) { 2.days.ago }
 
       it_behaves_like 'job is unchanged'
     end
@@ -143,7 +148,7 @@ RSpec.describe StuckCiJobsWorker do
 
   describe 'drop stale scheduled builds' do
     let(:status) { 'scheduled' }
-    let(:updated_at) { }
+    let(:created_at) { }
 
     context 'when scheduled at 2 hours ago but it is not executed yet' do
       let!(:job) { create(:ci_build, :scheduled, scheduled_at: 2.hours.ago) }
@@ -184,7 +189,7 @@ RSpec.describe StuckCiJobsWorker do
 
   describe 'exclusive lease' do
     let(:status) { 'running' }
-    let(:updated_at) { 2.days.ago }
+    let(:created_at) { 2.days.ago }
     let(:worker2) { described_class.new }
 
     it 'is guard by exclusive lease when executed concurrently' do
