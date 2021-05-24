@@ -176,16 +176,6 @@ variables:
   CLAIR_TRACE: true
 ```
 
-Trivy:
-
-```yaml
-include:
-  - template: Container-Scanning.gitlab-ci.yml
-
-variables:
-  TRIVY_DEBUG: true
-```
-
 This example [includes](../../../ci/yaml/README.md#include) the container scanning template and
 enables version `2` of the analyzer:
 
@@ -228,7 +218,6 @@ You can [configure](#customizing-the-container-scanning-settings) both analyzers
 | `REGISTRY_INSECURE`            | `"false"`     | Allow [Klar](https://github.com/optiopay/klar) to access insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | Clair |
 | `SECURE_ANALYZERS_PREFIX`      | `"registry.gitlab.com/gitlab-org/security-products/analyzers"` | Set the Docker registry base address from which to download the analyzer. | Both |
 | `SECURE_LOG_LEVEL`             | `info`        | Set the minimum logging level. Messages of this logging level or higher are output. From highest to lowest severity, the logging levels are: `fatal`, `error`, `warn`, `info`, `debug`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10880) in GitLab 13.1. | Both |
-| `TRIVY_DEBUG`                  | `"false"`     | Set to true to enable more verbose output from the Trivy process. | Trivy |
 
 ### Overriding the container scanning template
 
@@ -256,17 +245,6 @@ include:
 container_scanning:
   variables:
     CLAIR_TRACE: true
-```
-
-This example sets `TRIVY_DEBUG` to `true`, which is specific to Trivy:
-
-```yaml
-include:
-  - template: Container-Scanning.gitlab-ci.yml
-
-container_scanning_new:
-  variables:
-    TRIVY_DEBUG: true
 ```
 
 WARNING:
