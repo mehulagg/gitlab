@@ -79,11 +79,11 @@ class Projects::CompareController < Projects::ApplicationController
   private
 
   def validate_refs!
-    valid = [head_ref, start_ref].map { |ref| valid_ref?(ref) }
+    invalid = [head_ref, start_ref].filter { |ref| not valid_ref?(ref) }
 
-    return if valid.all?
+    return if invalid.empty?
 
-    flash[:alert] = "Invalid branch name"
+    invalid.each { |ref| flash[:alert] = "Invalid branch name: #{ref}" }
     redirect_to project_compare_index_path(source_project)
   end
 

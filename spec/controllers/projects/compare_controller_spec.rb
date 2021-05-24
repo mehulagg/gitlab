@@ -149,14 +149,17 @@ RSpec.describe Projects::CompareController do
     end
 
     context 'when the target ref is invalid' do
+      invalid_from = 'improve%2Fawesome'
+      invalid_to   = "master%' AND 2554=4423 AND '%'='"
+
       let(:from_project_id) { nil }
-      let(:from_ref) { 'improve%2Fawesome' }
-      let(:to_ref) { "master%' AND 2554=4423 AND '%'='" }
+      let(:from_ref) { invalid_from }
+      let(:to_ref) { invalid_to }
 
       it 'shows a flash message and redirects' do
         show_request
 
-        expect(flash[:alert]).to eq('Invalid branch name')
+        expect(flash[:alert]).to include(invalid_from, invalid_to)
         expect(response).to have_gitlab_http_status(:found)
       end
     end
