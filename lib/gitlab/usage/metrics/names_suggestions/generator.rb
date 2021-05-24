@@ -41,7 +41,7 @@ module Gitlab
             end
 
             def add(*args)
-              Gitlab::Usage::Metrics::NameSuggestion.for(:add, relation: args)
+              "add_#{args.join('_and_')}"
             end
           end
         end

@@ -17,8 +17,6 @@ module Gitlab
               name_suggestion(column: column, relation: relation, prefix: 'count_distinct', distinct: :distinct)
             when :estimate_batch_distinct_count
               name_suggestion(column: column, relation: relation, prefix: 'estimate_distinct_count')
-            when :add
-              "add_#{relation.join('_and_')}"
             when :sum
               name_suggestion(column: column, relation: relation, prefix: 'sum')
             when :redis

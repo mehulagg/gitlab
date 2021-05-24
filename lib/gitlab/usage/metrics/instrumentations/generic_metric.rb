@@ -25,6 +25,14 @@ module Gitlab
               self.class.metric_value.call
             end
           end
+
+          def suggested_name
+            Gitlab::Usage::Metrics::NameSuggestion.for(
+              :alt,
+              relation: nil,
+              column: nil
+            )
+          end
         end
       end
     end
