@@ -187,17 +187,21 @@ class Project < ApplicationRecord
   has_one :assembla_service, class_name: 'Integrations::Assembla'
   has_one :bamboo_service, class_name: 'Integrations::Bamboo'
   has_one :bugzilla_service, class_name: 'Integrations::Bugzilla'
+  has_one :buildkite_service, class_name: 'Integrations::Buildkite'
   has_one :campfire_service, class_name: 'Integrations::Campfire'
   has_one :confluence_service, class_name: 'Integrations::Confluence'
   has_one :custom_issue_tracker_service, class_name: 'Integrations::CustomIssueTracker'
   has_one :datadog_service, class_name: 'Integrations::Datadog'
+  has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
   has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
   has_one :ewm_service, class_name: 'Integrations::Ewm'
+  has_one :jenkins_service, class_name: 'Integrations::Jenkins'
   has_one :jira_service, class_name: 'Integrations::Jira'
+  has_one :mock_ci_service, class_name: 'Integrations::MockCi'
   has_one :redmine_service, class_name: 'Integrations::Redmine'
+  has_one :teamcity_service, class_name: 'Integrations::Teamcity'
   has_one :youtrack_service, class_name: 'Integrations::Youtrack'
   has_one :discord_service
-  has_one :drone_ci_service
   has_one :pipelines_email_service
   has_one :irker_service
   has_one :pivotaltracker_service
@@ -206,13 +210,9 @@ class Project < ApplicationRecord
   has_one :mattermost_service
   has_one :slack_slash_commands_service
   has_one :slack_service
-  has_one :buildkite_service
-  has_one :teamcity_service
   has_one :pushover_service
-  has_one :jenkins_service
   has_one :external_wiki_service
   has_one :prometheus_service, inverse_of: :project
-  has_one :mock_ci_service
   has_one :mock_monitoring_service
   has_one :microsoft_teams_service
   has_one :packagist_service
