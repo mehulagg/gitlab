@@ -30,7 +30,7 @@
     },
     "status": {
       "type": ["string"],
-      "enum": ["data_available", "implemented", "not_used", "deprecated", "removed"]
+      "enum": ["data_available", "implemented", "not_used", "deprecated", "removed", "broken"]
     },
     "milestone": {
       "type": ["string", "null"],
@@ -41,6 +41,9 @@
       "pattern": "^[0-9]+\\.[0-9]+$"
     },
     "introduced_by_url": {
+      "type": ["string", "null"]
+    },
+    "repair_issue_url": {
       "type": ["string", "null"]
     },
     "options": {
