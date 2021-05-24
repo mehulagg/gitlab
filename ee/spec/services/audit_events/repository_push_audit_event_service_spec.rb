@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AuditEvents::RepositoryPushAuditEventService do
+RSpec.describe AuditEvents::RepositoryPushAuditEventService do
   let(:user) { create(:user, :with_sign_ins) }
   let(:entity) { create(:project) }
   let(:entity_type) { 'Project' }

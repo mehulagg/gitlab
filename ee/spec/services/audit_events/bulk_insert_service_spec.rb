@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AuditEvents::BulkInsertService do
+RSpec.describe AuditEvents::BulkInsertService do
   let(:user) { create(:user) }
   let(:entity) { create(:project) }
   let(:entity_type) { 'Project' }
@@ -11,7 +11,7 @@ RSpec.describe EE::AuditEvents::BulkInsertService do
   let(:to) { 'a7bce79c3a8cb367877b53e315799b69acb700fo' }
   let!(:collection) do
     Array.new(3).map do
-      EE::AuditEvents::RepositoryPushAuditEventService.new(user, entity, target_ref, from, to)
+      AuditEvents::RepositoryPushAuditEventService.new(user, entity, target_ref, from, to)
     end
   end
 

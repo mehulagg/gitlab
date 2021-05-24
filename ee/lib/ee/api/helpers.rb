@@ -130,7 +130,7 @@ module EE
 
       override :send_git_archive
       def send_git_archive(repository, **kwargs)
-        EE::AuditEvents::RepositoryDownloadStartedAuditEventService.new(
+        AuditEvents::RepositoryDownloadStartedAuditEventService.new(
           current_user,
           repository.project,
           ip_address

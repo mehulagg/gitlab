@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AuditEvents::ImpersonationAuditEventService do
+RSpec.describe AuditEvents::ImpersonationAuditEventService do
   let(:impersonator) { create(:user) }
   let(:ip_address) { '127.0.0.1' }
   let(:message) { 'Impersonation Started' }

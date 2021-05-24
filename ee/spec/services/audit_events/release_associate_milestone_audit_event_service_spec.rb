@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AuditEvents::ReleaseAssociateMilestoneAuditEventService do
+RSpec.describe AuditEvents::ReleaseAssociateMilestoneAuditEventService do
   describe '#security_event' do
     context 'with no milestones' do
       include_examples 'logs the release audit event' do

@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AuditEvents::ReleaseArtifactsDownloadedAuditEventService do
+RSpec.describe AuditEvents::ReleaseUpdatedAuditEventService do
   describe '#security_event' do
     include_examples 'logs the release audit event' do
       let(:release) { create(:release, project: entity) }
-      let(:custom_message) { 'Repository External Resource Download Started' }
+      let(:custom_message) { "Updated Release #{release.tag}" }
     end
   end
 end

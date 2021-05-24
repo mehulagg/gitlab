@@ -5,7 +5,7 @@ module EE
     module Loggable
       def log_audit_event(protected_branch_service, action)
         if protected_branch_service.errors.blank?
-          ::EE::AuditEvents::ProtectedBranchAuditEventService
+          ::AuditEvents::ProtectedBranchAuditEventService
             .new(current_user, protected_branch_service, action)
             .security_event
         end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AuditEvents::ProtectedBranchAuditEventService, :request_store do
+RSpec.describe AuditEvents::ProtectedBranchAuditEventService, :request_store do
   let(:merge_level) { 'Maintainers' }
   let(:push_level) { 'No one' }
   let_it_be(:author) { create(:user, :with_sign_ins) }
