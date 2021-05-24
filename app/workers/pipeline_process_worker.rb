@@ -10,7 +10,6 @@ class PipelineProcessWorker
   feature_category :continuous_integration
   urgency :high
   loggable_arguments 1
-  data_consistency :delayed, feature_flag: :load_balancing_for_pipeline_process_worker
 
   deduplicate :until_executed
   idempotent!
