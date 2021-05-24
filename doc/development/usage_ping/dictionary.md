@@ -6588,7 +6588,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
-Missing description
+Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
 
@@ -6804,7 +6804,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
-Missing description
+Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183211_compliance_features_track_unique_visits_union.yml)
 
