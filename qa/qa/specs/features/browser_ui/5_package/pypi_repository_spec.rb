@@ -26,10 +26,9 @@ module QA
         end
       end
 
-      let(:gitlab_address_with_port) do
-        uri = URI.parse(Runtime::Scenario.gitlab_address)
-        "#{uri.scheme}://#{uri.host}:#{uri.port}"
-      end
+      let(:uri) { URI.parse(Runtime::Scenario.gitlab_address) }
+      let(:gitlab_address_with_port) { "#{uri.scheme}://#{uri.host}:#{uri.port}" }
+      let(:gitlab_host_with_port) { "#{uri.host}:#{uri.port}" }
 
       before do
         Flow::Login.sign_in
