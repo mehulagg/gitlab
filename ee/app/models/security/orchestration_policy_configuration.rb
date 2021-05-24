@@ -76,8 +76,20 @@ module Security
       end
     end
 
+    def policy_last_updated_at
+      strong_memoize(:policy_last_updated_at) do
+        policy_repo.last_commit_for_path(default_branch_or_main, POLICY_PATH)&.committed_date
+      end
+    end
+
     def delete_all_schedules
       rule_schedules.delete_all(:delete_all)
+    end
+
+    def scan_execution_policy
+      return [] if policy_hash.blank?
+
+      policy_hash.fetch(:scan_execution_policy, [])
     end
 
     private
@@ -105,12 +117,6 @@ module Security
 
         profiles
       end
-    end
-
-    def scan_execution_policy
-      return [] if policy_hash.blank?
-
-      policy_hash.fetch(:scan_execution_policy, [])
     end
 
     def policy_hash

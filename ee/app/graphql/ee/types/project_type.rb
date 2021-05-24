@@ -162,6 +162,14 @@ module EE
               description: "The project's path locks.",
               extras: [:lookahead],
               resolver: ::Resolvers::PathLocksResolver
+
+        field :scan_execution_policies,
+              [::Types::ScanExecutionPolicyType],
+              calls_gitaly: true,
+              null: true,
+              description: 'Scan Execution Policies of the project',
+              resolver: ::Resolvers::ScanExecutionPolicyResolver
+
       end
 
       def api_fuzzing_ci_configuration
