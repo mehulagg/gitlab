@@ -33,13 +33,6 @@ export default {
       variables() {
         return this.queryVariables;
       },
-      update(data) {
-        const iterations = data.group?.iterations?.nodes || [];
-
-        this.iterations = [...this.iterations, ...iterations];
-
-        return data;
-      },
       error() {
         this.error = __('Error loading iterations');
       },
@@ -73,33 +66,24 @@ export default {
           },
         },
       },
-      iterations: [],
-      pagination: {
-        currentPage: 1,
-      },
       afterCursor: null,
+      showMoreEnabled: true,
       error: '',
     };
   },
   computed: {
     queryVariables() {
-      const vars = {
+      return {
         fullPath: this.groupPath,
         iterationCadenceId: this.cadenceId,
+        firstPageSize: pageSize,
       };
-
-      if (this.pagination.beforeCursor) {
-        vars.beforeCursor = this.pagination.beforeCursor;
-        vars.lastPageSize = pageSize;
-      } else {
-        vars.afterCursor = this.afterCursor;
-        vars.firstPageSize = pageSize;
-      }
-
-      return vars;
     },
     pageInfo() {
       return this.group.iterations?.pageInfo || {};
+    },
+    iterations() {
+      return this.group?.iterations?.nodes || [];
     },
     loading() {
       return this.$apollo.queries.group.loading;
@@ -114,11 +98,40 @@ export default {
     },
   },
   methods: {
-    nextPage() {
-      if (this.loading) {
+    fetchMore() {
+      if (this.iterations.length === 0 || !this.showMoreEnabled || this.loading) {
         return;
       }
-      this.afterCursor = this.pageInfo.endCursor;
+
+      // Fetch more data and transform the original result
+      this.$apollo.queries.group.fetchMore({
+        variables: {
+          ...this.queryVariables,
+          afterCursor: this.pageInfo.endCursor,
+        },
+        // Transform the previous result with new data
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newIterations = fetchMoreResult.group?.iterations.nodes || [];
+          const { hasNextPage } = fetchMoreResult.group?.iterations.pageInfo || {};
+
+          this.showMoreEnabled = hasNextPage;
+
+          return {
+            group: {
+              // eslint-disable-next-line no-underscore-dangle
+              __typename: previousResult.group.__typename,
+              iterations: {
+                // eslint-disable-next-line no-underscore-dangle
+                __typename: previousResult.group.iterations.__typename,
+                // Merging the list
+                nodes: [...previousResult.group.iterations.nodes, ...newIterations],
+                pageInfo: fetchMoreResult.group?.iterations.pageInfo || {},
+                hasNextPage,
+              },
+            },
+          };
+        },
+      });
     },
     path(iterationId) {
       return {
@@ -167,18 +180,21 @@ export default {
     </gl-alert> -->
 
     <gl-collapse :visible="expanded">
+      <div v-if="loading && iterations.length === 0" class="gl-p-5!">
+        <gl-skeleton-loader :lines="3" />
+      </div>
       <gl-infinite-scroll
-        v-if="iterations.length || loading"
+        v-else-if="iterations.length || loading"
         :fetched-items="iterations.length"
         :max-list-height="250"
-        @bottomReached="nextPage"
+        @bottomReached="fetchMore"
       >
         <template #items>
           <ol class="gl-pl-0">
             <li
               v-for="iteration in iterations"
               :key="iteration.id"
-              class="gl-bg-gray-50 gl-p-5 gl-border-t-solid gl-border-gray-100 gl-border-t-1 gl-list-style-position-inside"
+              class="gl-bg-gray-10 gl-p-5 gl-border-t-solid gl-border-gray-100 gl-border-t-1 gl-list-style-position-inside"
             >
               <router-link :to="path(iteration.id)">
                 {{ iteration.title }}
@@ -190,7 +206,7 @@ export default {
           </div>
         </template>
       </gl-infinite-scroll>
-      <p v-else-if="!loading" class="gl-px-5">
+      <p v-else-if="!loading" class="gl-px-7">
         {{ s__('Iterations|No iterations in cadence') }}
       </p>
     </gl-collapse>
