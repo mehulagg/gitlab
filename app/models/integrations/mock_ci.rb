@@ -71,10 +71,10 @@ module Integrations
       return :error unless response.code == 200 || response.code == 404
 
       status = if response.code == 404
-                'pending'
-              else
-                response['status']
-              end
+                 'pending'
+               else
+                 response['status']
+               end
 
       if status.present? && ALLOWED_STATES.include?(status)
         status

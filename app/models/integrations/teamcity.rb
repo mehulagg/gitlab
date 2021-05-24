@@ -147,10 +147,10 @@ module Integrations
       return :error unless response.code == 200 || response.code == 404
 
       status = if response.code == 404
-                'Pending'
-              else
-                response['build']['status']
-              end
+                 'Pending'
+               else
+                 response['build']['status']
+               end
 
       return :error unless status.present?
 
