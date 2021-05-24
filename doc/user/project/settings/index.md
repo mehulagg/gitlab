@@ -137,7 +137,7 @@ include: # Execute individual project's configuration
   file: '$CI_PROJECT_CONFIG_PATH'
 ```
 
-##### Ensuring compliance jobs are always run
+##### Ensure compliance jobs are always run
 
 Compliance pipelines use the GitLab CI system to give you incredible amount of flexibility
 for defining any sort of compliance jobs you like. Depending on what your goals, these jobs
