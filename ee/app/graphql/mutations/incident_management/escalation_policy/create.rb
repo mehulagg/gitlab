@@ -32,7 +32,7 @@ module Mutations
                  description: 'The steps of the escalation policy.'
 
         def resolve(project_path:, **args)
-          @project = find_object(project_path: project_path, **args)
+          @project = authorized_find!(project_path: project_path, **args)
 
           args = prepare_rules_attributes(args)
 
@@ -51,7 +51,7 @@ module Mutations
 
         def find_object(project_path:, **args)
           unless project = resolve_project(full_path: project_path).sync
-            raise_project_not_found!
+            raise_project_not_found
           end
 
           unless ::Gitlab::IncidentManagement.escalation_policies_available?(project)

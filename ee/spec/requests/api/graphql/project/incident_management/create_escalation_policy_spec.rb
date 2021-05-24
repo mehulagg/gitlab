@@ -63,7 +63,7 @@ RSpec.describe 'creating escalation policy' do
       it 'raises an error' do
         resolve
 
-        expect_graphql_errors_to_include("The oncall schedule for iid 1 could not be found")
+        expect_graphql_errors_to_include("The resource that you are attempting to access does not exist or you don't have permission to perform this action")
       end
     end
 

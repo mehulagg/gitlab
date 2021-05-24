@@ -6,7 +6,7 @@ RSpec.describe IncidentManagement::EscalationRule do
   let_it_be(:policy) { create(:incident_management_escalation_policy) }
   let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: policy.project) }
 
-  subject(:rule) { build(:incident_management_escalation_rule, policy: policy) }
+  subject { build(:incident_management_escalation_rule, policy: policy) }
 
   it { is_expected.to be_valid }
 

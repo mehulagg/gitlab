@@ -30,8 +30,14 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
   describe '#resolve' do
     subject(:resolve) { mutation_for(project, current_user).resolve(project_path: project.full_path, **args) }
 
-    shared_examples 'returns an error' do |error|
+    shared_examples 'returns a GraphQL error' do |error|
       it { is_expected.to match(escalation_policy: nil, errors: [error])}
+    end
+
+    shared_examples 'raises a resource not available error' do |error|
+      specify do
+        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, error)
+      end
     end
 
     before do
@@ -43,9 +49,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
         stub_licensed_features(oncall_schedules: true)
       end
 
-      it 'raises an erorr' do
-        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, 'Escalation policies are not supported for this project')
-      end
+      it_behaves_like 'raises a resource not available error', 'Escalation policies are not supported for this project'
     end
 
     context 'project has feature' do
@@ -75,29 +79,35 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
             args[:rules] = []
           end
 
-          it_behaves_like 'returns an error', "A rule must be provided to create an escalation policy"
+          it_behaves_like 'returns a GraphQL error', "A rule must be provided to create an escalation policy"
         end
 
-        context 'scheule that does not belong to the project' do
+        context 'schedule that does not belong to the project' do
           let!(:other_schedule) {  create(:incident_management_oncall_schedule, iid: 2) }
 
           before do
             args[:rules][0][:oncall_schedule_iid] = other_schedule.iid
           end
 
-          it 'raises an erorr' do
-            expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, 'The oncall schedule for iid 2 could not be found')
-          end
+          it_behaves_like 'raises a resource not available error', 'The oncall schedule for iid 2 could not be found'
         end
       end
 
-      context 'user does not have permission' do
+      context 'user does not have permission for project' do
         before do
           project.add_reporter(current_user)
         end
 
-        it_behaves_like 'returns an error', 'You have insufficient permissions to create an escalation policy for this project'
+        it_behaves_like 'raises a resource not available error', "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
       end
+    end
+
+    context 'invalid project path' do
+      before do
+        args[:project_path] = 'something/incorrect'
+      end
+
+      it_behaves_like 'raises a resource not available error', 'The project could not be found'
     end
   end
 
