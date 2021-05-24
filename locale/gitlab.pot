@@ -13151,7 +13151,9 @@ msgid "Every two weeks"
 msgstr ""
 
 msgid "Every week"
-msgstr ""
+msgid_plural "Every %d weeks"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Every week (%{weekday} at %{time})"
 msgstr ""
@@ -18467,6 +18469,9 @@ msgstr ""
 msgid "Iterations|Duration"
 msgstr ""
 
+msgid "Iterations|Edit cadence"
+msgstr ""
+
 msgid "Iterations|Error loading iteration cadences."
 msgstr ""
 
@@ -18480,6 +18485,9 @@ msgid "Iterations|New iteration cadence"
 msgstr ""
 
 msgid "Iterations|No iteration cadences to show."
+msgstr ""
+
+msgid "Iterations|No iterations in cadence"
 msgstr ""
 
 msgid "Iterations|Number of future iterations you would like to have scheduled"

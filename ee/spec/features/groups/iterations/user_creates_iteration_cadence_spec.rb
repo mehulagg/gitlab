@@ -10,7 +10,7 @@ RSpec.describe 'User views iteration cadences', :js do
   let_it_be(:cadence_without_iterations) { create(:iterations_cadence, group: group) }
   let_it_be(:iteration_in_cadence) { create(:iteration, group: group, iterations_cadence: cadence) }
   let_it_be(:iteration_in_other_cadence) { create(:iteration, group: group, iterations_cadence: other_cadence) }
-  
+
   before do
     stub_licensed_features(iterations: true)
   end

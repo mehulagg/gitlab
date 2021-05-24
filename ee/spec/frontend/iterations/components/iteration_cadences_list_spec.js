@@ -1,4 +1,4 @@
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';

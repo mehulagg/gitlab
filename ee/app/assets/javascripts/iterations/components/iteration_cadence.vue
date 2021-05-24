@@ -3,6 +3,7 @@ import {
   GlButton,
   GlCollapse,
   GlDropdown,
+  GlDropdownItem,
   GlIcon,
   GlInfiniteScroll,
   GlSkeletonLoader,
@@ -14,7 +15,15 @@ import query from '../queries/iterations_in_cadence.query.graphql';
 const pageSize = 20;
 
 export default {
-  components: { GlButton, GlCollapse, GlDropdown, GlIcon, GlInfiniteScroll, GlSkeletonLoader },
+  components: {
+    GlButton,
+    GlCollapse,
+    GlDropdown,
+    GlDropdownItem,
+    GlIcon,
+    GlInfiniteScroll,
+    GlSkeletonLoader,
+  },
   apollo: {
     group: {
       skip() {
@@ -98,6 +107,9 @@ export default {
     editCadence() {
       return {
         name: 'edit',
+        params: {
+          cadenceId: getIdFromGraphQLId(this.cadenceId),
+        },
       };
     },
   },
