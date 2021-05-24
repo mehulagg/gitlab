@@ -338,126 +338,6 @@ variables:
 If your DAST job exceeds the job timeout and you need to reduce the scan duration, we shared some
 tips for optimizing DAST scans in a [blog post](https://about.gitlab.com/blog/2020/08/31/how-to-configure-dast-full-scans-for-complex-web-applications/).
 
-#### Domain validation
-
-WARNING:
-In GitLab 13.8, domain validation, outside of the new on-demand scan site profile validation, was deprecated. In GitLab 14.0, domain validation in CI/CD jobs will be permanently removed.
-
-The DAST job can be run anywhere, which means you can accidentally hit live web servers
-and potentially damage them. You could even take down your production environment.
-For that reason, you should use domain validation.
-
-Domain validation is not required by default. It can be required by setting the
-[CI/CD variable](#available-variables) `DAST_FULL_SCAN_DOMAIN_VALIDATION_REQUIRED` to `"true"`.
-
-```yaml
-include:
-  - template: DAST.gitlab-ci.yml
-
-variables:
-  DAST_FULL_SCAN_ENABLED: "true"
-  DAST_FULL_SCAN_DOMAIN_VALIDATION_REQUIRED: "true"
-```
-
-Since ZAP full scan actively attacks the target application, DAST sends a ping
-to the target (normally defined in `DAST_WEBSITE` or `environment_url.txt`) beforehand.
-
-- If `DAST_FULL_SCAN_DOMAIN_VALIDATION_REQUIRED` is `false` or unset, the scan
-  proceeds unless the response to the ping includes a `Gitlab-DAST-Permission`
-  header with a value of `deny`.
-- If `DAST_FULL_SCAN_DOMAIN_VALIDATION_REQUIRED` is `true`, the scan exits
-  unless the response to the ping includes a `Gitlab-DAST-Permission` header with
-  a value of `allow`.
-
-Here are some examples of adding the `Gitlab-DAST-Permission` header to a response
-in Rails, Django, and Node (with Express).
-
-##### Ruby on Rails
-
-Here's how you would add a
-[custom header in Ruby on Rails](https://guides.rubyonrails.org/action_controller_overview.html#setting-custom-headers):
-
-```ruby
-class DastWebsiteTargetController < ActionController::Base
-  def dast_website_target
-    response.headers['Gitlab-DAST-Permission'] = 'allow'
-
-    head :ok
-  end
-end
-```
-
-##### Django
-
-Here's how you would add a
-[custom header in Django](https://docs.djangoproject.com/en/2.2/ref/request-response/#setting-header-fields):
-
-```python
-class DastWebsiteTargetView(View):
-    def head(self, *args, **kwargs):
-      response = HttpResponse()
-      response['Gitlab-Dast-Permission'] = 'allow'
-
-      return response
-```
-
-##### Node (with Express)
-
-Here's how you would add a
-[custom header in Node (with Express)](http://expressjs.com/en/5x/api.html#res.append):
-
-```javascript
-app.get('/dast-website-target', function(req, res) {
-  res.append('Gitlab-DAST-Permission', 'allow')
-  res.send('Respond to DAST ping')
-})
-```
-
-##### Domain validation header via a proxy
-
-It's also possible to add the `Gitlab-DAST-Permission` header via a proxy.
-
-###### NGINX
-
-The following configuration allows NGINX to act as a reverse proxy and add the
-`Gitlab-DAST-Permission` [header](http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header):
-
-```nginx
-# default.conf
-server {
-    listen 80;
-    server_name localhost;
-
-    location / {
-        proxy_pass http://test-application;
-        add_header Gitlab-DAST-Permission allow;
-    }
-}
-```
-
-###### Apache
-
-Apache can also be used as a [reverse proxy](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html)
-to add the `Gitlab-DAST-Permission` [header](https://httpd.apache.org/docs/current/mod/mod_headers.html).
-
-To do so, add the following lines to `httpd.conf`:
-
-```plaintext
-# httpd.conf
-LoadModule proxy_module modules/mod_proxy.so
-LoadModule proxy_connect_module modules/mod_proxy_connect.so
-LoadModule proxy_http_module modules/mod_proxy_http.so
-
-<VirtualHost *:80>
-  ProxyPass "/" "http://test-application.com/"
-  ProxyPassReverse "/" "http://test-application.com/"
-  Header set Gitlab-DAST-Permission "allow"
-</VirtualHost>
-```
-
-[This snippet](https://gitlab.com/gitlab-org/security-products/dast/snippets/1894732) contains a complete `httpd.conf` file
-configured to act as a remote proxy and add the `Gitlab-DAST-Permission` header.
-
 ### API scan
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10928) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
@@ -698,7 +578,6 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_MASK_HTTP_HEADERS`     | string  | Comma-separated list of request and response headers to be masked (GitLab 13.1). Must contain **all** headers to be masked. Refer to [list of headers that are masked by default](#hide-sensitive-information). |
 | `DAST_EXCLUDE_URLS`          | URLs    | The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
 | `DAST_FULL_SCAN_ENABLED`     | boolean | Set to `true` to run a [ZAP Full Scan](https://github.com/zaproxy/zaproxy/wiki/ZAP-Full-Scan) instead of a [ZAP Baseline Scan](https://github.com/zaproxy/zaproxy/wiki/ZAP-Baseline-Scan). Default: `false` |
-| `DAST_FULL_SCAN_DOMAIN_VALIDATION_REQUIRED` | boolean | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/293595) in GitLab 13.8, to be removed in 14.0. Set to `true` to require [domain validation](#domain-validation) when running DAST full scans. Not supported for API scans. Default: `false` |
 | `DAST_AUTO_UPDATE_ADDONS`    | boolean | ZAP add-ons are pinned to specific versions in the DAST Docker image. Set to `true` to download the latest versions when the scan starts. Default: `false` |
 | `DAST_API_HOST_OVERRIDE`     | string  | Used to override domains defined in API specification files. Only supported when importing the API specification from a URL. Example: `example.com:8080` |
 | `DAST_EXCLUDE_RULES`         | string  | Set to a comma-separated list of Vulnerability Rule IDs to exclude them from running during the scan. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://github.com/zaproxy/zaproxy/blob/develop/docs/scanners.md). For example, `HTTP Parameter Override` has a rule ID of `10026`. **Note:** In earlier versions of GitLab the excluded rules were executed but alerts they generated were suppressed. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118641) in GitLab 12.10. |
