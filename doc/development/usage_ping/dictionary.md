@@ -336,7 +336,7 @@ Tiers: `free`
 
 ### `compliance_unique_visits.g_compliance_dashboard`
 
-Missing description
+Number of unique visitors to the compliance dashboard.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
 
@@ -9900,7 +9900,7 @@ Tiers: `free`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_weekly`
 
-Missing description
+Number of unique audit events accessed over API.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183940_a_compliance_audit_events_api_weekly.yml)
 
@@ -9908,7 +9908,7 @@ Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.compliance_total_unique_counts_monthly`
 

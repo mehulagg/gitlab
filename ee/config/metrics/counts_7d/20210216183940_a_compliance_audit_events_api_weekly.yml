@@ -1,6 +1,6 @@
 ---
 key_path: redis_hll_counters.compliance.a_compliance_audit_events_api_weekly
-description: ''
+description: 'Number of unique audit events accessed over API.'
 product_section: 'dev'
 product_stage: 'manage'
 product_group: 'group::compliance'
@@ -11,5 +11,7 @@ time_frame: 7d
 data_source: redis_hll
 distribution:
 - ee
-tier: []
+tier:
+- premium
+- ultimate
 skip_validation: true
