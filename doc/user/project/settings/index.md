@@ -157,15 +157,17 @@ There are a few best practices for ensuring that these jobs are always run exact
 as you define them and that downstream, project-level pipeline configurations
 cannot change them:
 
-1. Add a `rules:when:always` block to each of your compliance jobs.
-    - This ensures they are non-modifiable and will always be run.
-1. Explicitly set any variables the job may reference.
-    - This ensures that project-level pipeline configurations do not set them and alter their behavior.
-    - This includes any jobs that drive the logic of your job.
-1. Explicitly set the container image file to run the job in.
-    - This ensures that your script steps execute in the correct environment.
-1. Explicitly set any relevant GitLab pre-defined [job keywords](../../../ci/yaml/README.md#job-keywords).
-    - This ensures that your job uses the settings you intend and that they are not overriden by project-level pipelines.
+- Add a `rules:when:always` block to each of your compliance jobs. This ensures they are
+  non-modifiable and are always run.
+- Explicitly set any variables the job references. This:
+  - Ensures that project-level pipeline configurations do not set them and alter their
+    behavior.
+  - Includes any jobs that drive the logic of your job.
+- Explicitly set the container image file to run the job in. This ensures that your script
+  steps execute in the correct environment.
+- Explicitly set any relevant GitLab pre-defined [job keywords](../../../ci/yaml/README.md#job-keywords).
+  This ensures that your job uses the settings you intend and that they are not overriden by
+  project-level pipelines.
 
 ### Sharing and permissions
 
