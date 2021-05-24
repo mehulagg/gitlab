@@ -1,7 +1,7 @@
 ---
 key_path: redis_hll_counters.compliance.compliance_total_unique_counts_monthly
 description: ''
-product_section: ''
+product_section: 'dev'
 product_stage: ''
 product_group: ''
 product_category: ''

@@ -1,7 +1,7 @@
 ---
 key_path: counts_weekly.aggregated_metrics.compliance_features_track_unique_visits_union
 description: ''
-product_section: ''
+product_section: 'dev'
 product_stage: ''
 product_group: ''
 product_category: ''
