@@ -435,7 +435,7 @@ RSpec.describe 'Billing plan pages', :feature, :js do
   end
 
   context 'with unexpected JSON' do
-    let(:plan) { bronze_plan }
+    let(:plan) { free_plan }
 
     let(:plans_data) do
       [

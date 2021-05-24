@@ -127,6 +127,14 @@ module BillingPlansHelper
     end
   end
 
+  def show_start_free_trial_messages?(namespace)
+    !free_personal_namespace?(namespace) && namespace.eligible_for_trial?
+  end
+
+  def show_group_billing_ctas?(namespace)
+    free_personal_namespace?(namespace)
+  end
+
   private
 
   def add_seats_url(group)
