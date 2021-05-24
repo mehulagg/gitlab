@@ -59,7 +59,7 @@ You can view merge requests for a specific project, or for all projects in a gro
 - **All projects in a group**: Go to your group and select **Merge requests**.
   If your group contains subgroups, this view also displays merge requests from the subgroup projects.
   GitLab displays a count of open merge requests in the left sidebar, but
-  [caches the value](#cached-merge-request-count) for groups with a large number of
+  [caches the value](reviews/index.md#cached-merge-request-count) for groups with a large number of
   open merge requests.
 
 GitLab displays open merge requests, with tabs to filter the list by open and closed status:
