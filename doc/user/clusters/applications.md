@@ -380,7 +380,7 @@ least 2 people from the [APM group](https://about.gitlab.com/handbook/product/ca
 
 > [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/327908) in GitLab 13.12.
 
-GitLab Runner is installed using GitLab CI/CD by defining configuration in
+GitLab Runner is installed using GitLab CI/CD by defining the configuration in
 `.gitlab/managed-apps/config.yaml`.
 
 The following configuration is required to install GitLab Runner using GitLab CI/CD:
@@ -403,6 +403,11 @@ These values can be specified using [CI/CD variables](../../ci/variables/README.
 
 - `GITLAB_RUNNER_GITLAB_URL` is used for `gitlabUrl`.
 - `GITLAB_RUNNER_REGISTRATION_TOKEN` is used for `runnerRegistrationToken`
+
+Note: 
+1. You_must_ not add these values,`gitlabUrl` and `runnerRegistrationToken` and  to the GitLab Runner Helm Chart, `values.yaml` file. 
+1. While it is also possible to not use CI/CD variables and instead set the values for `gitlabUrl` and `runnerRegistrationToken` manually in the `.gitlab-ci.yml` file, this is highly discouraged due to the security risks of exposing those tokens in the repository. 
+
 
 You can customize the installation of GitLab Runner by defining
 `.gitlab/managed-apps/gitlab-runner/values.yaml` file in your cluster
