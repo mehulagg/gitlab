@@ -18,7 +18,7 @@ MARKDOWN
 
 POST_TABLE_MESSAGE = <<MARKDOWN
 
-To spread load more evenly across eligible reviewers, Danger has picks a candidate for each
+To spread load more evenly across eligible reviewers, Danger has picked a candidate for each
 review slot, based on their timezone. Feel free to
 [override these selections](https://about.gitlab.com/handbook/engineering/projects/#gitlab)
 if you think someone else would be better-suited
