@@ -31,7 +31,7 @@ const WORKFLOW_COLUMN_TITLES = {
 };
 
 export default {
-  name: 'StageTableNew',
+  name: 'StageTable',
   components: {
     GlEmptyState,
     GlIcon,

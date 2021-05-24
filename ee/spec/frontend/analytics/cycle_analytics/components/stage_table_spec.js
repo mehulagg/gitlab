@@ -1,6 +1,6 @@
 import { GlEmptyState, GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
-import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
+import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import { PAGINATION_SORT_FIELD_DURATION } from 'ee/analytics/cycle_analytics/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import {
@@ -33,7 +33,7 @@ const findStageEventTitle = (ev) => extendedWrapper(ev).findByTestId('vsa-stage-
 function createComponent(props = {}, shallow = false) {
   const func = shallow ? shallowMount : mount;
   return extendedWrapper(
-    func(StageTableNew, {
+    func(StageTable, {
       propsData: {
         isLoading: false,
         stageEvents: issueEvents,
