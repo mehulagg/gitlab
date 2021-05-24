@@ -17,15 +17,15 @@ Projects created from these templates serve as a common starting point.
 
 To use a custom project template for a new project:
 
-1. [Create a _templates_ subgroup](subgroups/index.md).
+1. [Create a `templates` subgroup](subgroups/index.md).
 1. [Add repositories (projects) to that new subgroup](index.md#add-projects-to-a-group),
    as your templates.
 1. Edit your group's settings to look to your _templates_ subgroup for templates:
 
-   1. In the left menu, click **{settings}** **Settings > General**. If you don't have access to the
+   1. In the left menu, select **Settings > General**. If you don't have access to the
       group's settings, you may not have sufficient privileges (for example, you may need developer
       or higher permissions).
-   1. Scroll to **Custom project templates** and click **Expand**. If no **Custom project templates**
+   1. Scroll to **Custom project templates** and select **Expand**. If no **Custom project templates**
       section displays, make sure you've created a subgroup and added a project (repository) to it.
    1. Select the **templates** subgroup.
 
