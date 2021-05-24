@@ -1,3 +1,6 @@
+
+Hello world
+
 # GitLab
 
 ## Canonical source
