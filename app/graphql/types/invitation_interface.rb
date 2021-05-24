@@ -25,6 +25,9 @@ module Types
     field :user, Types::UserType, null: true,
           description: 'User that is associated with the member object.'
 
+    field :invite_source, GraphQL::STRING_TYPE, null: true,
+          description: 'Source that triggered the member creation process.'
+
     definition_methods do
       def resolve_type(object, context)
         case object
