@@ -61,7 +61,7 @@ the results, or select a merge request to begin a review.
 The **Overview** tab of a merge request displays a sidebar. In this sidebar, you
 can assign, categorize, and track progress on a merge request:
 
-- [**Assignee**](gettings_started.md#assignee): Designate the directly responsible
+- [**Assignee**](getting_started.md#assignee): Designate the directly responsible
   individual (DRI) for a merge request. With
   [multiple assignees](getting_started.md#multiple-assignees), you can assign a
   merge request to more than one person at a time.
@@ -71,9 +71,10 @@ can assign, categorize, and track progress on a merge request:
 - [**Milestone**](../milestones/index.md): Track time-sensitive changes.
 - [**Time tracking**](../time_tracking.md): Time spent on a merge request.
 - [**Labels**](../labels.md): Categorize a merge request and display it on
-  appropriate [issue boards](../project/issue_board.md).
+  appropriate [issue boards](../issue_board.md).
 - **Participants**: A list of users participating or watching a merge request.
-- [**Notifications**](../notifications.md): A tog
+- [**Notifications**](../../profile/notifications.md): A toggle to select whether
+  or not to receive notifications for updates to a merge request.
 
 ## Merge request workflows
 
