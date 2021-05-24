@@ -72,6 +72,7 @@ module BulkImports
 
       def after_run(extracted_data)
         run if extracted_data.has_next_page?
+        extractor.remove_tmp_dir if extractor.respond_to?(:remove_tmp_dir)
       end
 
       def mark_as_failed
