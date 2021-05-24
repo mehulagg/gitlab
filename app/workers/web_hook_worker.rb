@@ -2,6 +2,7 @@
 
 # Worker cannot be idempotent: https://gitlab.com/gitlab-org/gitlab/-/issues/218559
 # rubocop:disable Scalability/IdempotentWorker
+# @deprecated: remove in 15.0
 class WebHookWorker
   include ApplicationWorker
 

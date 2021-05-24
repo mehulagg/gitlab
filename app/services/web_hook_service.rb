@@ -93,7 +93,8 @@ class WebHookService
       log_rate_limit(hook)
     else
       Gitlab::ApplicationContext.with_context(hook.application_context) do
-        WebHookWorker.perform_async(hook.id, data, hook_name)
+        json = ::Gitlab::Json.dump(data) # ensure consistent serialization
+        WebHooks::ExecuteWorker.perform_async(hook.id, json, hook_name)
       end
     end
   end
@@ -131,7 +132,7 @@ class WebHookService
       url: url,
       execution_duration: execution_duration,
       request_headers: build_headers(hook_name),
-      request_data: request_data,
+      request_data: request_data.to_h,
       response_headers: format_response_headers(response),
       response_body: safe_response_body(response),
       response_status: response.code,

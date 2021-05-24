@@ -2930,6 +2930,15 @@
   :idempotent: true
   :tags:
   - :exclude_from_kubernetes
+- :name: web_hooks_execute
+  :worker_name: WebHooks::ExecuteWorker
+  :feature_category: :integrations
+  :has_external_dependencies: true
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: wikis_git_garbage_collect
   :worker_name: Wikis::GitGarbageCollectWorker
   :feature_category: :gitaly

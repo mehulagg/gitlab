@@ -2865,10 +2865,17 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         end
 
         def have_requested_pipeline_hook(status)
+          matcher = include(
+            'builds' => have_attributes(size: 2),
+            'object_attributes' => include(
+              'status' => eq(status),
+              'created_at' => pipeline.created_at.to_json.delete('"')
+            )
+          )
+
           have_requested(:post, stubbed_hostname(hook.url)).with do |req|
-            json_body = Gitlab::Json.parse(req.body)
-            json_body['object_attributes']['status'] == status &&
-              json_body['builds'].length == 2
+            json_data = Gitlab::Json.parse(req.body)
+            matcher.matches?(json_data)
           end
         end
       end

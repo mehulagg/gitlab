@@ -39,7 +39,7 @@ module Gitlab
       # @param object [Object] the object to convert to JSON
       # @return [String]
       def dump(object)
-        adapter_dump(object)
+        adapter_dump(object, { use_raw_json: true, mode: :json })
       end
 
       # Generates JSON for an object. In Oj this takes fewer options than .dump,
@@ -227,6 +227,20 @@ module Gitlab
         return "[#{@value.join(',')}]" if @value.is_a?(Array)
 
         raise UnsupportedFormatError
+      end
+
+      def to_h
+        raise UnsupportedFormatError if @value.is_a?(Array)
+
+        ::Gitlab::Json.parse(to_s)
+      end
+
+      def to_json(*_args)
+        to_s
+      end
+
+      def raw_json(_depth, _indent)
+        to_s
       end
     end
 

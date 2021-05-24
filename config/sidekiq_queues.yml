@@ -416,6 +416,8 @@
   - 1
 - - web_hooks_destroy
   - 1
+- - web_hooks_execute
+  - 1
 - - wikis_git_garbage_collect
   - 1
 - - x509_certificate_revoke

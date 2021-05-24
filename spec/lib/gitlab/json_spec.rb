@@ -171,6 +171,12 @@ RSpec.describe Gitlab::Json do
     it "dumps a false bool" do
       expect(subject.dump(false)).to eq("false")
     end
+
+    it "dumps a precompiled JSON chunk" do
+      precompiled = Gitlab::Json::PrecompiledJson.new(%w[true false null])
+      expect(subject.dump(precompiled)).to eq("[true,false,null]")
+      expect(subject.dump({ x: precompiled })).to eq(%({"x":[true,false,null]}))
+    end
   end
 
   describe ".generate" do
@@ -211,6 +217,12 @@ RSpec.describe Gitlab::Json do
       STR
 
       expect(json).to eq(expected_string)
+    end
+
+    it "supports PrecompiledJson" do
+      precompiled = Gitlab::Json::PrecompiledJson.new(%w[true false null])
+      expect(subject.generate(precompiled)).to eq("[true,false,null]")
+      expect(subject.dump({ x: precompiled })).to eq(%({"x":[true,false,null]}))
     end
   end
 
@@ -406,6 +418,15 @@ RSpec.describe Gitlab::Json do
         it "raises an error" do
           expect { subject }.to raise_error(described_class::UnsupportedFormatError)
         end
+      end
+    end
+
+    describe '#to_h' do
+      let(:original) { { 'foo' => 'wibble', 'bar' => 'wobble', 'quuxes' => [1, 2, 3] } }
+      let(:obj) { Gitlab::Json.dump(original) }
+
+      it 'parses the encapsulated object' do
+        expect(precompiled.to_h).to eq(original)
       end
     end
   end
