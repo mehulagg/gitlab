@@ -30,6 +30,8 @@ module EE
 
       has_many :compliance_management_frameworks, class_name: "ComplianceManagement::Framework"
 
+      has_many :ci_minutes_additional_purchases, class_name: "Ci::Minutes::AdditionalPurchase"
+
       accepts_nested_attributes_for :gitlab_subscription, update_only: true
       accepts_nested_attributes_for :namespace_limit
 

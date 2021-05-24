@@ -9140,8 +9140,6 @@ CREATE TABLE analytics_devops_adoption_snapshots (
     deploy_succeeded boolean NOT NULL,
     security_scan_succeeded boolean NOT NULL,
     end_time timestamp with time zone NOT NULL,
-    total_projects_count integer,
-    code_owners_used_count integer,
     namespace_id integer
 );
 
@@ -9483,8 +9481,6 @@ CREATE TABLE application_settings (
     elasticsearch_indexed_file_size_limit_kb integer DEFAULT 1024 NOT NULL,
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
-    kroki_url character varying,
-    kroki_enabled boolean,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
@@ -9503,19 +9499,21 @@ CREATE TABLE application_settings (
     secret_detection_token_revocation_url text,
     encrypted_secret_detection_token_revocation_token text,
     encrypted_secret_detection_token_revocation_token_iv text,
+    new_user_signups_cap integer,
     domain_denylist_enabled boolean DEFAULT false,
     domain_denylist text,
     domain_allowlist text,
-    new_user_signups_cap integer,
     encrypted_cloud_license_auth_token text,
     encrypted_cloud_license_auth_token_iv text,
     secret_detection_revocation_token_types_url text,
     cloud_license_enabled boolean DEFAULT false NOT NULL,
+    kroki_url text,
+    kroki_enabled boolean DEFAULT false NOT NULL,
     disable_feed_token boolean DEFAULT false NOT NULL,
     personal_access_token_prefix text,
     rate_limiting_response_text text,
-    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     container_registry_cleanup_tags_service_max_list_size integer DEFAULT 200 NOT NULL,
+    invisible_captcha_enabled boolean DEFAULT false NOT NULL,
     enforce_ssh_key_expiration boolean DEFAULT false NOT NULL,
     git_two_factor_session_expiry integer DEFAULT 15 NOT NULL,
     keep_latest_artifact boolean DEFAULT true NOT NULL,
@@ -9548,7 +9546,7 @@ CREATE TABLE application_settings (
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_ext_pipeline_validation_service_url_text_limit CHECK ((char_length(external_pipeline_validation_service_url) <= 255)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
-    CONSTRAINT check_17d9558205 CHECK ((char_length((kroki_url)::text) <= 1024)),
+    CONSTRAINT check_17d9558205 CHECK ((char_length(kroki_url) <= 1024)),
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
@@ -10766,6 +10764,26 @@ CREATE SEQUENCE ci_job_variables_id_seq
     CACHE 1;
 
 ALTER SEQUENCE ci_job_variables_id_seq OWNED BY ci_job_variables.id;
+
+CREATE TABLE ci_minutes_additional_purchases (
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    id bigint NOT NULL,
+    expires_at date NOT NULL,
+    namespace_id bigint NOT NULL,
+    number_of_minutes integer NOT NULL,
+    purchase_id text NOT NULL,
+    CONSTRAINT check_8aac484e18 CHECK ((char_length(purchase_id) <= 255))
+);
+
+CREATE SEQUENCE ci_minutes_additional_purchases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_minutes_additional_purchases_id_seq OWNED BY ci_minutes_additional_purchases.id;
 
 CREATE TABLE ci_namespace_monthly_usages (
     id bigint NOT NULL,
@@ -15962,7 +15980,7 @@ CREATE TABLE packages_rubygems_metadata (
     require_paths text,
     required_ruby_version text,
     required_rubygems_version text,
-    requirements text,
+    requrements text,
     rubygems_version text,
     signing_key text,
     CONSTRAINT check_0154a18c82 CHECK ((char_length(description) <= 1024)),
@@ -15973,7 +15991,6 @@ CREATE TABLE packages_rubygems_metadata (
     CONSTRAINT check_545f7606f9 CHECK ((char_length(required_rubygems_version) <= 255)),
     CONSTRAINT check_5988451714 CHECK ((char_length(executables) <= 255)),
     CONSTRAINT check_5f9c84ea17 CHECK ((char_length(platform) <= 255)),
-    CONSTRAINT check_64f1cecf05 CHECK ((char_length(requirements) <= 255)),
     CONSTRAINT check_6ac7043c50 CHECK ((char_length(extra_rdoc_files) <= 255)),
     CONSTRAINT check_6ff3abe325 CHECK ((char_length(cert_chain) <= 255)),
     CONSTRAINT check_7cb01436df CHECK ((char_length(licenses) <= 255)),
@@ -15982,6 +15999,7 @@ CREATE TABLE packages_rubygems_metadata (
     CONSTRAINT check_9824fc9efc CHECK ((char_length(bindir) <= 255)),
     CONSTRAINT check_994b68eb64 CHECK ((char_length(authors) <= 255)),
     CONSTRAINT check_9d42fa48ae CHECK ((char_length(signing_key) <= 255)),
+    CONSTRAINT check_add74953fe CHECK ((char_length(requrements) <= 255)),
     CONSTRAINT check_b0f4f8c853 CHECK ((char_length(files) <= 255)),
     CONSTRAINT check_b7b296b420 CHECK ((char_length(author) <= 255)),
     CONSTRAINT check_bf16b21a47 CHECK ((char_length(rdoc_options) <= 255)),
@@ -16202,8 +16220,8 @@ CREATE TABLE plan_limits (
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL,
     ci_pipeline_deployments integer DEFAULT 500 NOT NULL,
     pull_mirror_interval_seconds integer DEFAULT 300 NOT NULL,
-    daily_invites integer DEFAULT 0 NOT NULL,
     rubygems_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
+    daily_invites integer DEFAULT 0 NOT NULL,
     terraform_module_max_file_size bigint DEFAULT 1073741824 NOT NULL,
     helm_max_file_size bigint DEFAULT 5242880 NOT NULL,
     ci_registered_group_runners integer DEFAULT 1000 NOT NULL,
@@ -16812,11 +16830,7 @@ CREATE TABLE project_repository_storage_moves (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     project_id bigint NOT NULL,
-    state smallint DEFAULT 1 NOT NULL,
-    source_storage_name text NOT NULL,
-    destination_storage_name text NOT NULL,
-    CONSTRAINT project_repository_storage_moves_destination_storage_name CHECK ((char_length(destination_storage_name) <= 255)),
-    CONSTRAINT project_repository_storage_moves_source_storage_name CHECK ((char_length(source_storage_name) <= 255))
+    repository_storage_move_id bigint
 );
 
 CREATE SEQUENCE project_repository_storage_moves_id_seq
@@ -17926,11 +17940,7 @@ CREATE TABLE snippet_repository_storage_moves (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     snippet_id bigint NOT NULL,
-    state smallint DEFAULT 1 NOT NULL,
-    source_storage_name text NOT NULL,
-    destination_storage_name text NOT NULL,
-    CONSTRAINT snippet_repository_storage_moves_destination_storage_name CHECK ((char_length(destination_storage_name) <= 255)),
-    CONSTRAINT snippet_repository_storage_moves_source_storage_name CHECK ((char_length(source_storage_name) <= 255))
+    repository_storage_move_id bigint
 );
 
 CREATE SEQUENCE snippet_repository_storage_moves_id_seq
@@ -18512,8 +18522,8 @@ CREATE TABLE user_details (
     bio_html text,
     cached_markdown_version integer,
     webauthn_xid text,
-    other_role text,
     provisioned_by_group_id bigint,
+    other_role text,
     CONSTRAINT check_245664af82 CHECK ((char_length(webauthn_xid) <= 100)),
     CONSTRAINT check_b132136b01 CHECK ((char_length(other_role) <= 100))
 );
@@ -19301,8 +19311,8 @@ CREATE TABLE web_hooks (
     encrypted_url character varying,
     encrypted_url_iv character varying,
     deployment_events boolean DEFAULT false NOT NULL,
-    releases_events boolean DEFAULT false NOT NULL,
     feature_flag_events boolean DEFAULT false NOT NULL,
+    releases_events boolean DEFAULT false NOT NULL,
     member_events boolean DEFAULT false NOT NULL,
     subgroup_events boolean DEFAULT false NOT NULL,
     recent_failures smallint DEFAULT 0 NOT NULL,
@@ -19601,6 +19611,8 @@ ALTER TABLE ONLY ci_instance_variables ALTER COLUMN id SET DEFAULT nextval('ci_i
 ALTER TABLE ONLY ci_job_artifacts ALTER COLUMN id SET DEFAULT nextval('ci_job_artifacts_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_job_variables ALTER COLUMN id SET DEFAULT nextval('ci_job_variables_id_seq'::regclass);
+
+ALTER TABLE ONLY ci_minutes_additional_purchases ALTER COLUMN id SET DEFAULT nextval('ci_minutes_additional_purchases_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_namespace_monthly_usages ALTER COLUMN id SET DEFAULT nextval('ci_namespace_monthly_usages_id_seq'::regclass);
 
@@ -20781,6 +20793,9 @@ ALTER TABLE ONLY ci_job_artifacts
 
 ALTER TABLE ONLY ci_job_variables
     ADD CONSTRAINT ci_job_variables_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_minutes_additional_purchases
+    ADD CONSTRAINT ci_minutes_additional_purchases_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_namespace_monthly_usages
     ADD CONSTRAINT ci_namespace_monthly_usages_pkey PRIMARY KEY (id);
@@ -22218,6 +22233,8 @@ CREATE INDEX finding_evidences_on_vulnerability_occurrence_id ON vulnerability_f
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
+CREATE INDEX i_ci_minutes_additional_purchases_on_namespace_id_purchase_id ON ci_minutes_additional_purchases USING btree (namespace_id, purchase_id);
+
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_award_emoji_on_user_emoji_name_awardable_type_awardable_id ON award_emoji USING btree (user_id, name, awardable_type, awardable_id);
@@ -22266,7 +22283,7 @@ CREATE UNIQUE INDEX idx_jira_connect_subscriptions_on_installation_id_namespace_
 
 CREATE INDEX idx_keys_expires_at_and_before_expiry_notification_undelivered ON keys USING btree (date(timezone('UTC'::text, expires_at)), before_expiry_notification_delivered_at) WHERE (before_expiry_notification_delivered_at IS NULL);
 
-CREATE INDEX idx_members_created_at_user_id_invite_token ON members USING btree (created_at) WHERE ((invite_token IS NOT NULL) AND (user_id IS NULL));
+CREATE INDEX idx_members_on_invite_token_access_level ON members USING btree (invite_token, access_level) WHERE ((source_type)::text = 'Project'::text);
 
 CREATE INDEX idx_merge_requests_on_id_and_merge_jid ON merge_requests USING btree (id, merge_jid) WHERE ((merge_jid IS NOT NULL) AND (state_id = 4));
 
@@ -22701,6 +22718,8 @@ CREATE INDEX index_ci_job_artifacts_on_project_id_for_security_reports ON ci_job
 CREATE INDEX index_ci_job_variables_on_job_id ON ci_job_variables USING btree (job_id);
 
 CREATE UNIQUE INDEX index_ci_job_variables_on_key_and_job_id ON ci_job_variables USING btree (key, job_id);
+
+CREATE INDEX index_ci_minutes_additional_purchases_on_namespace_id ON ci_minutes_additional_purchases USING btree (namespace_id);
 
 CREATE UNIQUE INDEX index_ci_namespace_monthly_usages_on_namespace_id_and_date ON ci_namespace_monthly_usages USING btree (namespace_id, date);
 
@@ -24937,6 +24956,10 @@ CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_b
 CREATE INDEX partial_index_deployments_for_legacy_successful_deployments ON deployments USING btree (id) WHERE ((finished_at IS NULL) AND (status = 2));
 
 CREATE INDEX partial_index_deployments_for_project_id_and_tag ON deployments USING btree (project_id) WHERE (tag IS TRUE);
+
+CREATE INDEX project_repository_storage_moves_index ON project_repository_storage_moves USING btree (repository_storage_move_id);
+
+CREATE INDEX snippet_repository_storage_moves_index ON snippet_repository_storage_moves USING btree (repository_storage_move_id);
 
 CREATE UNIQUE INDEX snippet_user_mentions_on_snippet_id_and_note_id_index ON snippet_user_mentions USING btree (snippet_id, note_id);
 
@@ -27287,6 +27310,9 @@ ALTER TABLE ONLY cluster_agent_tokens
 
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT fk_rails_d1e8b498bf FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_minutes_additional_purchases
+    ADD CONSTRAINT fk_rails_d1f585b581 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY pool_repositories
     ADD CONSTRAINT fk_rails_d2711daad4 FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE SET NULL;
