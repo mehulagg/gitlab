@@ -117,7 +117,7 @@ are used. This information is displayed on the project overview page.
 
 ![Repository Languages bar](img/repository_languages_v12_2.gif)
 
-When new files are added, this information can take up to five minutes update.
+When new files are added, this information can take up to five minutes to update.
 
 ### Add repository languages
 
