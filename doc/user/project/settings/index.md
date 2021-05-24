@@ -146,9 +146,12 @@ can be configured to be:
 - Modified by users.
 - Non-modifiable.
 
-At a high-level, if a value in a compliance job is set, it cannot be changed or overridden
-by project-level configurations. If a value is not present in a compliance job, a project-level
-configuration may set it though. This could be desirable or not depending on your use case.
+At a high-level, if a value in a compliance job:
+
+- Is set, it cannot be changed or overridden by project-level configurations.
+- Is not set, a project-level configuration may set.
+
+Either might be wanted or not depending on your use case.
 
 There are a few best practices for ensuring that these jobs are always run exactly
 as you define them and that downstream, project-level pipeline configurations
