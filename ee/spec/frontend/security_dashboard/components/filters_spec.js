@@ -1,8 +1,11 @@
 import { GlToggle } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
+import { pipelineScannerFilter } from 'ee/security_dashboard/helpers';
 import createStore from 'ee/security_dashboard/store';
+import state from 'ee/security_dashboard/store/modules/filters/state';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,17 +14,16 @@ describe('Filter component', () => {
   let wrapper;
   let store;
 
-  const createWrapper = (props = {}) => {
-    wrapper = shallowMount(Filters, {
-      localVue,
-      store,
-      propsData: {
-        ...props,
-      },
-      slots: {
-        buttons: '<div class="button-slot"></div>',
-      },
-    });
+  const createWrapper = ({ mountFn = shallowMount } = {}) => {
+    wrapper = extendedWrapper(
+      mountFn(Filters, {
+        localVue,
+        store,
+        slots: {
+          buttons: '<div class="button-slot"></div>',
+        },
+      }),
+    );
   };
 
   beforeEach(() => {
@@ -51,6 +53,36 @@ describe('Filter component', () => {
     it('should exist', () => {
       createWrapper();
       expect(wrapper.find('.button-slot').exists()).toBe(true);
+    });
+  });
+
+  describe('scanner filter', () => {
+    it('should call the setFilter action with the correct data when the scanner filter is changed', async () => {
+      const mock = jest.fn();
+      store = new Vuex.Store({
+        modules: {
+          filters: {
+            namespaced: true,
+            state,
+            actions: { setFilter: mock },
+          },
+        },
+      });
+
+      createWrapper({ mountFn: mount });
+      await wrapper.vm.$nextTick();
+      // The other filters will trigger the mock as well, so we'll clear it before clicking on a
+      // scanner filter item.
+      mock.mockClear();
+
+      const filterId = pipelineScannerFilter.id;
+      const optionId = pipelineScannerFilter.options[2].id;
+      const option = wrapper.findByTestId(`${filterId}:${optionId}`);
+      option.vm.$emit('click');
+      await wrapper.vm.$nextTick();
+
+      expect(mock).toHaveBeenCalledTimes(1);
+      expect(mock).toHaveBeenCalledWith(expect.any(Object), { [filterId]: [optionId] });
     });
   });
 });

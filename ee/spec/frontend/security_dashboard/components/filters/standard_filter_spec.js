@@ -31,7 +31,7 @@ describe('Standard Filter component', () => {
     });
   };
 
-  const dropdownItems = () => wrapper.findAll('[data-testid="filterOption"]');
+  const dropdownItems = () => wrapper.findAll(`[data-testid^=${filter.id}]`);
   const dropdownItemAt = (index) => dropdownItems().at(index);
   const allOptionItem = () => wrapper.find('[data-testid="allOption"]');
   const isChecked = (item) => item.props('isChecked');
