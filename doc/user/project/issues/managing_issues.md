@@ -290,8 +290,9 @@ issues are still displayed, but are not closed automatically.
 
 ![disable issue auto close - settings](img/disable_issue_auto_close.png)
 
-The automatic issue closing will be disabled on a project if the project has `Issues` [feature](../settings/#sharing-and-permissions) disabled. 
-Make sure to enable `Issues` feature to be able to enable automatic issue closing. 
+The automatic issue closing is also disabled in a project if the project has the issue tracker
+disabled. If you want to enable automatic issue closing, make sure to
+[enable GitLab Issues](../settings/index.md#sharing-and-permissions).
 
 This only applies to issues affected by new merge requests or commits. Already
 closed issues remain as-is. Disabling automatic issue closing only affects merge
