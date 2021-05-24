@@ -1,5 +1,7 @@
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
+export const deepCamelCase = (obj) => convertObjectPropsToCamelCase(obj, { deep: true });
+
 export const summary = [
   { value: '20', title: 'New Issues' },
   { value: null, title: 'Commits' },
@@ -184,3 +186,29 @@ export const rawEvents = [
 export const convertedEvents = rawEvents.map((ev) =>
   convertObjectPropsToCamelCase(ev, { deep: true }),
 );
+
+const stageFixtures = defaultStages.reduce((acc, stage) => {
+  const events = getJSONFixture(fixtureEndpoints.stageEvents(stage));
+  return {
+    ...acc,
+    [stage]: events,
+  };
+}, {});
+
+export const issueEvents = deepCamelCase(stageFixtures.issue);
+export const planEvents = deepCamelCase(stageFixtures.plan);
+export const reviewEvents = deepCamelCase(stageFixtures.review);
+export const codeEvents = deepCamelCase(stageFixtures.code);
+export const testEvents = deepCamelCase(stageFixtures.test);
+export const stagingEvents = deepCamelCase(stageFixtures.staging);
+export const rawCustomStage = {
+  name: 'Coolest beans stage',
+  title: 'Coolest beans stage',
+  hidden: false,
+  legend: '',
+  description: '',
+  id: 18,
+  custom: true,
+  start_event_identifier: 'issue_first_mentioned_in_commit',
+  end_event_identifier: 'issue_first_added_to_board',
+};

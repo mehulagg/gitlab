@@ -8,7 +8,6 @@ import DurationChart from 'ee/analytics/cycle_analytics/components/duration_char
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
 import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
-import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
 import {
@@ -20,6 +19,7 @@ import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
 import { toYmd } from 'ee/analytics/shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import StageTable from '~/cycle_analytics/components/stage_table.vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
