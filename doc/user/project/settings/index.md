@@ -155,7 +155,7 @@ Either might be wanted or not depending on your use case.
 
 There are a few best practices for ensuring that these jobs are always run exactly
 as you define them and that downstream, project-level pipeline configurations
-cannot change them.
+cannot change them:
 
 1. Add a `rules:when:always` block to each of your compliance jobs.
     - This ensures they are non-modifiable and will always be run.
