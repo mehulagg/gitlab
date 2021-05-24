@@ -61,6 +61,9 @@ Kubernetes version to any supported version at any time:
 
 Some GitLab features may support versions outside the range provided here.
 
+NOTE:
+GKE Cluster creation by GitLab is curently not supported for Kubernetes 1.19+. See [the related bog](https://gitlab.com/gitlab-org/gitlab/-/issues/331582#note_582391089) for more information.
+
 ### Adding and removing clusters
 
 See [Adding and removing Kubernetes clusters](add_remove_clusters.md) for details on how
