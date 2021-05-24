@@ -43,7 +43,7 @@ RSpec.describe Gitlab::ErrorTracking do
     }
   end
 
-  let(:sentry_event) { Gitlab::Json.parse(Raven.client.transport.events.last[1]) }
+  let(:sentry_event) { Gitlab::Json.parse(Sentry.client.transport.events.last[1]) }
 
   before do
     stub_sentry_settings
@@ -70,7 +70,7 @@ RSpec.describe Gitlab::ErrorTracking do
       end
 
       it 'raises the exception' do
-        expect(Raven).to receive(:capture_exception).with(exception, sentry_payload)
+        expect(Sentry).to receive(:capture_exception).with(exception, sentry_payload)
 
         expect do
           described_class.track_and_raise_for_dev_exception(
@@ -88,7 +88,7 @@ RSpec.describe Gitlab::ErrorTracking do
       end
 
       it 'logs the exception with all attributes passed' do
-        expect(Raven).to receive(:capture_exception).with(exception, sentry_payload)
+        expect(Sentry).to receive(:capture_exception).with(exception, sentry_payload)
 
         described_class.track_and_raise_for_dev_exception(
           exception,
@@ -111,7 +111,7 @@ RSpec.describe Gitlab::ErrorTracking do
 
   describe '.track_and_raise_exception' do
     it 'always raises the exception' do
-      expect(Raven).to receive(:capture_exception).with(exception, sentry_payload)
+      expect(Sentry).to receive(:capture_exception).with(exception, sentry_payload)
 
       expect do
         described_class.track_and_raise_for_dev_exception(
@@ -139,14 +139,14 @@ RSpec.describe Gitlab::ErrorTracking do
     subject(:track_exception) { described_class.track_exception(exception, extra) }
 
     before do
-      allow(Raven).to receive(:capture_exception).and_call_original
+      allow(Sentry).to receive(:capture_exception).and_call_original
       allow(Gitlab::ErrorTracking::Logger).to receive(:error)
     end
 
-    it 'calls Raven.capture_exception' do
+    it 'calls Sentry.capture_exception' do
       track_exception
 
-      expect(Raven).to have_received(:capture_exception).with(
+      expect(Sentry).to have_received(:capture_exception).with(
         exception,
         sentry_payload
       )
@@ -177,7 +177,7 @@ RSpec.describe Gitlab::ErrorTracking do
       it 'includes the extra data from the exception in the tracking information' do
         track_exception
 
-        expect(Raven).to have_received(:capture_exception).with(
+        expect(Sentry).to have_received(:capture_exception).with(
           exception, a_hash_including(extra: a_hash_including(extra_info))
         )
       end
@@ -190,7 +190,7 @@ RSpec.describe Gitlab::ErrorTracking do
       it 'just includes the other extra info' do
         track_exception
 
-        expect(Raven).to have_received(:capture_exception).with(
+        expect(Sentry).to have_received(:capture_exception).with(
           exception, a_hash_including(extra: a_hash_including(extra))
         )
       end
@@ -221,15 +221,15 @@ RSpec.describe Gitlab::ErrorTracking do
     subject(:track_exception) { described_class.track_exception(exception, extra) }
 
     before do
-      allow(Raven).to receive(:capture_exception).and_call_original
+      allow(Sentry).to receive(:capture_exception).and_call_original
       allow(Gitlab::ErrorTracking::Logger).to receive(:error)
     end
 
-    context 'custom GitLab context when using Raven.capture_exception directly' do
-      subject(:raven_capture_exception) { Raven.capture_exception(exception) }
+    context 'custom GitLab context when using Sentry.capture_exception directly' do
+      subject(:raven_capture_exception) { Sentry.capture_exception(exception) }
 
       it 'merges a default set of tags into the existing tags' do
-        allow(Raven.context).to receive(:tags).and_return(foo: 'bar')
+        allow(Sentry.context).to receive(:tags).and_return(foo: 'bar')
 
         raven_capture_exception
 
@@ -237,7 +237,7 @@ RSpec.describe Gitlab::ErrorTracking do
       end
 
       it 'merges the current user information into the existing user information' do
-        Raven.user_context(id: -1)
+        Sentry.user_context(id: -1)
 
         raven_capture_exception
 

@@ -66,7 +66,7 @@ module Gitlab
 
           def valid_exception?(exception)
             case exception
-            when Raven::SingleExceptionInterface
+            when Sentry::SingleExceptionInterface
               exception&.value
             else
               false

@@ -27,9 +27,9 @@ RSpec.describe Gitlab::ErrorTracking::LogFormatter do
   end
 
   before do
-    Raven.context.user[:user_flag] = 'flag'
-    Raven.context.tags[:shard] = 'catchall'
-    Raven.context.extra[:some_info] = 'info'
+    Sentry.context.user[:user_flag] = 'flag'
+    Sentry.context.tags[:shard] = 'catchall'
+    Sentry.context.extra[:some_info] = 'info'
 
     allow(exception).to receive(:backtrace).and_return(
       [
@@ -40,7 +40,7 @@ RSpec.describe Gitlab::ErrorTracking::LogFormatter do
   end
 
   after do
-    ::Raven::Context.clear!
+    ::Sentry::Context.clear!
   end
 
   it 'appends error-related log fields and filters sensitive Sidekiq arguments' do
