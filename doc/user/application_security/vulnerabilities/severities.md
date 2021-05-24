@@ -18,6 +18,31 @@ most to least severe:
 - `Info`
 - `Unknown`
 
+## Critical Severity
+
+Issues identified at the Critical Severity level should be investigated immediately. Issues at this level assume exploitation of the flaw could lead to full system or data compromise. Examples of critical severity flaws are Command/Code Injection and SQL Injection. Typically these flaws are rated with CVSS 3.1 between 8-10. 
+
+## High Severity
+
+High Severity issues can be charactarized as flaws that may lead to an attacker accessing application resources or unintended exposure of data. Examples of high severity flaws are External XML Entity Injection (XXE), Server Side Request Forgery (SSRF), Local File Include/Path Traversal and certain forms of Cross-Site Scripting (XSS). Typically these flaws are rated with CVSS 3.1 between 6-7.
+
+## Medium Severity
+
+Medium Severity issues usually arise from mis-configuration of systems or lack of security controls. Exploitation of these issues may lead to accessing a restricted amount of data or could be used in conjuction with other flaws to gain unintended access to systems or resources. Examples of medium severity flaws are reflected XSS, incorrect HTTP session handling and missing security controls. Typically these flaws are rated with CVSS 3.1 between 4-5.
+
+## Low Severity
+
+Low severity issues contain flaws that may not be directly exploitable but introduce unnecessary weakness to an application or system. These flaws are usually due to missing security controls or unnecessary disclose information about the application environment. Examples of low severity issues are missing cookie security directives, verbose error or exception messages. Typically these flaws are rated with CVSS 3.1 between 1-3.
+
+## Info Severity
+
+Info level severity is everything else. Typically these flaws do not have a CVSS rating.
+
+## Unknown Severity
+
+Issues identified at this level do not have enough context to clearly demonstrate severity.  
+
+
 Most GitLab vulnerability analyzers are wrappers around popular open source scanning tools. Each
 open source scanning tool provides their own native vulnerability severity level value. These values
 can be one of the following:
