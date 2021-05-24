@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PipelineProcessWorker # rubocop:disable Scalability/IdempotentWorker
+class PipelineProcessWorker
   include ApplicationWorker
 
   sidekiq_options retry: 3
@@ -11,6 +11,9 @@ class PipelineProcessWorker # rubocop:disable Scalability/IdempotentWorker
   urgency :high
   loggable_arguments 1
   data_consistency :delayed, feature_flag: :load_balancing_for_pipeline_process_worker
+
+  deduplicate :until_executed
+  idempotent!
 
   # rubocop: disable CodeReuse/ActiveRecord
   # `_build_ids` is deprecated and will be removed in 14.0
