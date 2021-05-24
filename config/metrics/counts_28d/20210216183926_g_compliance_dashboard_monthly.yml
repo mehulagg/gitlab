@@ -2,7 +2,7 @@
 key_path: redis_hll_counters.compliance.g_compliance_dashboard_monthly
 description: ''
 product_section: 'dev'
-product_stage: ''
+product_stage: 'manage'
 product_group: ''
 product_category: ''
 value_type: number
