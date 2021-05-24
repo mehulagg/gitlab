@@ -58,16 +58,15 @@ Features not found in standard Markdown:
 
 - [Color chips written in HEX, RGB or HSL](#colors)
 - [Diagrams and flowcharts](#diagrams-and-flowcharts)
-- [Emoji](#emoji)
+- [Emoji](#emojis)
 - [Front matter](#front-matter)
 - [Inline diffs](#inline-diff)
 - [Math equations and symbols written in LaTeX](#math)
-- [Special GitLab references](#special-gitlab-references)
 - [Task Lists](#task-lists)
 - [Table of Contents](#table-of-contents)
 - [Wiki specific Markdown](#wiki-specific-markdown)
 
-Features [extended from standard Markdown](#standard-markdown-and-extensions-in-gitlab):
+Features [extended from standard Markdown](#features-extended-from-standard-markdown):
 
 | Standard Markdown                     | Extended Markdown in GitLab |
 | ------------------------------------- | ------------------------- |
