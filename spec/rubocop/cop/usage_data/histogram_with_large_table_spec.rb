@@ -19,7 +19,7 @@ RSpec.describe RuboCop::Cop::UsageData::HistogramWithLargeTable do
   context 'with large tables' do
     context 'when calling histogram(Issue)' do
       it 'does not register an offense' do
-        expect_no_offenses('count(Issue, :project_id, buckets: 1..100)')
+        expect_no_offenses('histogram(Issue, :project_id, buckets: 1..100)')
       end
     end
 
@@ -27,7 +27,7 @@ RSpec.describe RuboCop::Cop::UsageData::HistogramWithLargeTable do
       it 'registers an offense' do
         expect_offense(<<~CODE)
           histogram(::Ci::Build, buckets: 1..100)
-          ^^^^^^^^^ #{msg} Ci::Build
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{msg} Ci::Build
         CODE
       end
     end
@@ -36,7 +36,7 @@ RSpec.describe RuboCop::Cop::UsageData::HistogramWithLargeTable do
       it 'registers an offense' do
         expect_offense(<<~CODE)
           histogram(Ci::Build.active)
-          ^^^^^^^^^ #{msg} Ci::Build
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{msg} Ci::Build
         CODE
       end
     end
