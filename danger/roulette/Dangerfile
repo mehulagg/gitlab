@@ -5,12 +5,15 @@ require 'digest/md5'
 MESSAGE = <<MARKDOWN
 ## Reviewer roulette
 
-Changes that require review have been detected! A merge request is normally
-reviewed by both a reviewer and a maintainer in its primary category (e.g.
-~frontend or ~backend), and by a maintainer in all other categories.
+Changes that require review have been detected!
+
+Please refer to the table below for assigning reviewers and maintainers suggested by Danger in the specified category:
 MARKDOWN
 
 CATEGORY_TABLE_HEADER = <<MARKDOWN
+
+| Category | Reviewer | Maintainer |
+| -------- | -------- | ---------- |
 
 To spread load more evenly across eligible reviewers, Danger has picked a candidate for each
 review slot, based on their timezone. Feel free to
@@ -26,9 +29,6 @@ Please consider assigning a reviewer or maintainer who is a
 
 Once you've decided who will review this merge request, assign them as a reviewer!
 Danger does not automatically notify them for you.
-
-| Category | Reviewer | Maintainer |
-| -------- | -------- | ---------- |
 MARKDOWN
 
 UNKNOWN_FILES_MESSAGE = <<MARKDOWN
