@@ -11498,9 +11498,6 @@ msgstr ""
 msgid "Didn't receive unlock instructions?"
 msgstr ""
 
-msgid "Diff content limits"
-msgstr ""
-
 msgid "Diff limits"
 msgstr ""
 
@@ -29761,6 +29758,9 @@ msgid "Set projects and maximum size limits, session duration, user options, and
 msgstr ""
 
 msgid "Set requirements for a user to sign-in. Enable mandatory two-factor authentication."
+msgstr ""
+
+msgid "Set size limits for displaying diffs in the browser."
 msgstr ""
 
 msgid "Set target branch"
