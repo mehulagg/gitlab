@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2864) in GitLab 13.10.
 > - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/290039) in GitLab 12.1.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/290039) in GitLab 14.0.
 > - Enabled on GitLab.com.
 > - Recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md).
