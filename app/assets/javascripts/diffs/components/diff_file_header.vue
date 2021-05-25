@@ -10,6 +10,7 @@ import {
   GlDropdownDivider,
   GlFormCheckbox,
   GlLoadingIcon,
+  GlTruncate,
 } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -41,6 +42,7 @@ export default {
     GlDropdownDivider,
     GlFormCheckbox,
     GlLoadingIcon,
+    GlTruncate,
     CodeQualityBadge: () => import('ee_component/diffs/components/code_quality_badge.vue'),
   },
   directives: {
@@ -274,7 +276,7 @@ export default {
     :data-qa-file-name="filePath"
     @click.self="handleToggleFile"
   >
-    <div class="file-header-content">
+    <div class="file-header-content gl-white-space-nowrap">
       <gl-icon
         v-if="collapsible"
         ref="collapseIcon"
@@ -313,16 +315,17 @@ export default {
           ></strong>
         </span>
 
-        <strong
+        <gl-truncate
           v-else
           v-gl-tooltip
           :title="filePath"
-          class="file-title-name"
+          :text="filePath"
+          position="middle"
+          class="gl-font-weight-bold"
           data-container="body"
           data-qa-selector="file_name_content"
-        >
-          {{ filePath }}
-        </strong>
+          style="max-width: 410px"
+        />
       </a>
 
       <clipboard-button
