@@ -64,6 +64,7 @@ RSpec.describe ::EE::API::Entities::UserWithAdmin do
         let(:group) { create(:group) }
         let(:saml_provider) { create(:saml_provider, group: group) }
         let!(:group_saml_identity) { create(:group_saml_identity, saml_provider: saml_provider, user: user) }
+
         before do
           user.update!(provisioned_by_group: saml_provider.group)
         end
