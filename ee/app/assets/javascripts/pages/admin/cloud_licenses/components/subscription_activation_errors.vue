@@ -7,6 +7,8 @@ import {
   connectivityIssue,
   generalActivationError,
   howToActivateSubscription,
+  INVALID_CODE,
+  invalidActivationCode,
 } from '../constants';
 
 export const troubleshootingHelpLink = helpPagePath('user/admin_area/license.html', {
@@ -22,6 +24,7 @@ export default {
     connectivityIssueHelpText: connectivityErrorAlert.helpText,
     generalActivationError,
     howToActivateSubscription,
+    invalidActivationCode,
   },
   links: {
     subscriptionActivationHelpLink,
@@ -40,11 +43,19 @@ export default {
     },
   },
   computed: {
-    hasConnectivityIssue() {
+    hasConnectivityIssueError() {
       return this.error === CONNECTIVITY_ERROR;
     },
+    hasInvalidCodeError() {
+      return this.error === INVALID_CODE;
+    },
     hasGeneralError() {
-      return this.error && !this.hasConnectivityIssue;
+      return this.error && !this.hasConnectivityIssueError;
+    },
+    secondaryAlertBody() {
+      return this.hasInvalidCodeError
+        ? this.$options.i18n.invalidActivationCode
+        : howToActivateSubscription;
     },
   },
 };
@@ -53,7 +64,7 @@ export default {
 <template>
   <div>
     <gl-alert
-      v-if="hasConnectivityIssue"
+      v-if="hasConnectivityIssueError"
       variant="danger"
       :title="$options.i18n.connectivityIssueTitle"
       :dismissible="false"
@@ -87,7 +98,7 @@ export default {
       :dismissible="false"
       data-testid="general-error-alert"
     >
-      <gl-sprintf :message="$options.i18n.howToActivateSubscription">
+      <gl-sprintf :message="secondaryAlertBody">
         <template #link="{ content }">
           <gl-link :href="$options.links.subscriptionActivationHelpLink" target="_blank">{{
             content

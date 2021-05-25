@@ -31519,6 +31519,9 @@ msgstr ""
 msgid "SuperSonics|Sync subscription details"
 msgstr ""
 
+msgid "SuperSonics|The activation code is invalid. Please make sure it is copied exactly from the Customers Portal or confirmation email. Learn more about %{linkStart}activating your subscription%{linkEnd}."
+msgstr ""
+
 msgid "SuperSonics|The subscription details synced successfully."
 msgstr ""
 

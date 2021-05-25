@@ -116,8 +116,12 @@ export const buySubscriptionCard = {
 };
 
 export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
+export const INVALID_CODE = 'CONNECTIVITY_ERROR';
 export const generalActivationError = s__(
   'SuperSonics|An error occurred while activating your subscription.',
+);
+export const invalidActivationCode = s__(
+  'SuperSonics|The activation code is invalid. Please make sure it is copied exactly from the Customers Portal or confirmation email. Learn more about %{linkStart}activating your subscription%{linkEnd}.',
 );
 export const connectivityErrorAlert = {
   subtitle: s__(
