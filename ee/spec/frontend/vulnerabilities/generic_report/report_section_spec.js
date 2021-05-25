@@ -16,10 +16,15 @@ const TEST_DATA = {
       type: REPORT_TYPES.url,
       href: 'http://bar.com',
     },
+    three: {
+      type: REPORT_TYPES.table,
+      header: [],
+      rows: [],
+    },
   },
   unsupportedTypes: {
-    three: {
-      name: 'three',
+    four: {
+      name: 'four',
       type: 'not-supported',
     },
   },
@@ -32,7 +37,7 @@ describe('ee/vulnerabilities/components/generic_report/report_section.vue', () =
     extendedWrapper(
       mount(ReportSection, {
         propsData: {
-          details: { ...TEST_DATA.supportedTypes },
+          details: { ...TEST_DATA.supportedTypes, ...TEST_DATA.unsupportedTypes },
         },
         ...options,
       }),
