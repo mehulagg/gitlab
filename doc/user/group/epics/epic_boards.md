@@ -56,8 +56,8 @@ To delete the active epic board:
 - Create workflows, like when using [issue boards](../../project/issue_board.md#create-workflows).
 - [Move epics and lists](#move-epics-and-lists).
 - Change epic labels (by dragging an epic between lists).
-- Configure the scope of the board.
 - Close an epic (by dragging it to the **Closed** list).
+- [Edit the scope of a board](#edit-the-scope-of-an-epic-board).
 
 ### Create a new list
 
@@ -133,4 +133,19 @@ target list.
 | **From Closed**              | Issue reopened   | -            | Issue reopened and label B added  | Issue reopened and Bob assigned   |
 | **From label A list**        | Label A removed  | Issue closed | Label A removed and label B added | Bob assigned                      |
 | **From assignee Alice list** | Alice unassigned | Issue closed | Label B added                     | Alice unassigned and Bob assigned |
+
+### Edit the scope of an epic board
+
+Prerequisites:
+<!-- TODO: Add this to permissions.md -->
+- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+To edit the scope of an epic board:
+
+1. In the upper-right corner, select **Edit board**.
+1. Optional:
+   - Edit the board's title.
+   - Show or hide the Open and Closed columns.
+   - Select other labels as the board's scope.
+1. Select **Save changes**.
 
