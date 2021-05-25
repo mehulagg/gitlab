@@ -107,3 +107,7 @@ Note the following:
 - If imported into a parent group, subgroups will inherit a similar level of visibility, unless otherwise restricted.
 - To preserve the member list and their respective permissions on imported groups,
   review the users in these groups. Make sure these users exist before importing the desired groups.
+
+## Rate Limits
+
+Group imports/exports are subject to the same [rate limits](../user/project/settings/import_export.md) as project import/exports.
