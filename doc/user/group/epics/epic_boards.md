@@ -6,7 +6,12 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Epic Boards **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2864) in GitLab 14.0.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2864) in GitLab 13.10.
+> - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/290039) in GitLab 12.1.
+> - Enabled on GitLab.com.
+> - Recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md).
 
 Epic boards build on the existing [epic tracking functionality](index.md) and
 [labels](../../project/labels.md). Your epics appear as cards in vertical lists, organized by their assigned
