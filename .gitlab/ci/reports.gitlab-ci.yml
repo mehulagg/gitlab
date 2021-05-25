@@ -90,7 +90,7 @@ gemnasium-python-dependency_scanning:
 package_hunter-yarn:
   extends:
     - .default-retry
-    - .reports:rules:package_hunter
+    - .reports:rules:package_hunter-yarn
   stage: test
   image:
     name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli:latest
@@ -111,7 +111,7 @@ package_hunter-yarn:
 package_hunter-bundler:
   extends:
     - .default-retry
-    - .reports:rules:package_hunter
+    - .reports:rules:package_hunter-bundler
   stage: test
   image:
     name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli:latest
