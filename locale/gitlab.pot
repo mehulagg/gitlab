@@ -37714,10 +37714,10 @@ msgstr ""
 msgid "Your SSH keys (%{count})"
 msgstr ""
 
-msgid "Your SSH keys with the following fingerprints are scheduled to expire soon:"
+msgid "Your SSH keys with the following fingerprints are scheduled to expire soon. Expired SSH keys will not be usable starting in GitLab 14.0:"
 msgstr ""
 
-msgid "Your SSH keys with the following fingerprints has expired:"
+msgid "Your SSH keys with the following fingerprints has expired. Expired SSH keys will not be usable starting in GitLab 14.0:"
 msgstr ""
 
 msgid "Your To-Do List"
