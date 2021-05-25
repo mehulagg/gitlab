@@ -1,3 +1,4 @@
+import { diffViewerModes as viewerModes } from '~/ide/constants';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { uuids } from '~/lib/utils/uuids';
 
@@ -45,6 +46,8 @@ function identifier(file) {
     seeds: [userOrGroup, project, id, file.file_identifier_hash, file.blob?.id],
   })[0];
 }
+
+export const isNotDiffable = (file) => file.viewer.name === viewerModes.not_diffable;
 
 export function prepareRawDiffFile({ file, allFiles, meta = false }) {
   const additionalProperties = {
