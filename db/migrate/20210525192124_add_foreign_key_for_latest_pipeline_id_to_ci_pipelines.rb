@@ -6,6 +6,6 @@ class AddForeignKeyForLatestPipelineIdToCiPipelines < ActiveRecord::Migration[6.
   disable_ddl_transaction!
 
   def up
-    add_concurrent_foreign_key :vulnerability_statistics, :ci_pipelines, on_delete: :nullify # why don't we have on-update?
+    add_concurrent_foreign_key :vulnerability_statistics, :ci_pipelines, column: :latest_pipeline_id, on_delete: :nullify
   end
 end
