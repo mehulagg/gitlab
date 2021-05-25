@@ -24,8 +24,8 @@ To view an epic board, in a group, select **Epics > Boards**.
 ## Create an epic board
 
 Prerequisites:
-<!-- TODO: Add this to permissions.md -->
-- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+- A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
 To create a new epic board:
 
@@ -48,9 +48,8 @@ To change these options later, [edit the board](#edit-the-scope-of-an-epic-board
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.
 
-TODO: Add this to permissions.md:
 Prerequisites:
-- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+- A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
 To delete the active epic board:
 
@@ -72,8 +71,8 @@ To delete the active epic board:
 ### Create a new list
 
 Prerequisites:
-<!-- TODO: Add this to permissions.md -->
-- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+- A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
 To create a new list:
 
@@ -89,8 +88,8 @@ Removing a list doesn't have any effect on epics and labels, as it's just the
 list view that's removed. You can always create it again later if you need.
 
 Prerequisites:
-<!-- TODO: Add this to permissions.md -->
-- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+- A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
 To remove a list from an epic board:
 
@@ -127,8 +126,8 @@ You can filter by the following:
 You can move epics and lists by dragging them.
 
 Prerequisites:
-<!-- TODO: Add this to permissions.md -->
-- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+- A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
 To move an epic, select the epic card and drag it to another position within its current list or
 onto that list. Learn about possible effects in [Dragging epics between lists](#dragging-epics-between-lists).
@@ -151,8 +150,8 @@ target list.
 ### Edit the scope of an epic board
 
 Prerequisites:
-<!-- TODO: Add this to permissions.md -->
-- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+- A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
 To edit the scope of an epic board:
 
