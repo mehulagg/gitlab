@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Epic Boards **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2864) in GitLab 13.10.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5067) in GitLab 13.10.
 > - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/290039) in GitLab 14.0.
 > - Enabled on GitLab.com.
@@ -22,6 +22,10 @@ To view an epic board, in a group, select **Epics > Boards**.
 ![GitLab epic board - Premium](img/epic_board_v13_10.png)
 
 ## Create an epic board
+
+Prerequisites:
+<!-- TODO: Add this to permissions.md -->
+- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
 
 To create a new epic board:
 
@@ -41,6 +45,12 @@ To change these options later, [edit the board](#edit-the-scope-of-an-epic-board
 
 <!-- TODO: This is not in the product
 ## Delete an epic board
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.
+
+TODO: Add this to permissions.md:
+Prerequisites:
+- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
 
 To delete the active epic board:
 
@@ -92,6 +102,8 @@ To remove a list from an epic board:
 <!-- TODO: This is not yet in the product
 ### Filter epics
 
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.
+
 Use the filters on top of your epic board to show only
 the results you want. It's similar to the filtering used in the epic list,
 as the metadata from the epics and labels is re-used in the epic board.
@@ -109,6 +121,8 @@ You can filter by the following:
 - Weight -->
 
 ### Move epics and lists
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.
 
 You can move epics and lists by dragging them.
 
