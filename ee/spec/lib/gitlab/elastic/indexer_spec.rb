@@ -214,6 +214,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         expect_popen.with(
           [
             TestEnv.indexer_bin_path,
+            "--timeout=#{Gitlab::Elastic::Indexer::TIMEOUT}",
             '--blob-type=wiki_blob',
             '--skip-commits',
             "--project-path=#{project.full_path}",
