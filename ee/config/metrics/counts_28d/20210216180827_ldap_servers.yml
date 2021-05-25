@@ -12,5 +12,5 @@ data_source: system
 distribution:
 - ee
 tier:
-  - premium
-  - ultimate
+- premium
+- ultimate
