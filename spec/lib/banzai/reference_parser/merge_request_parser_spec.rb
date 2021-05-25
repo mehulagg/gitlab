@@ -47,11 +47,11 @@ RSpec.describe Banzai::ReferenceParser::MergeRequestParser do
     let(:other_project) { create(:project, :public) }
     let(:other_merge_request) { create(:merge_request, source_project: other_project) }
 
-    let(:control_links) do
+    let!(:control_links) do
       [merge_request_link(other_merge_request)]
     end
 
-    let(:actual_links) do
+    let!(:actual_links) do
       control_links + [merge_request_link(create(:merge_request, :conflict, source_project: other_project))]
     end
 

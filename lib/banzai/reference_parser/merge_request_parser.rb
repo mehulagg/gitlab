@@ -7,6 +7,20 @@ module Banzai
 
       self.reference_type = :merge_request
 
+      def nodes_visible_to_user(user, nodes)
+        records = grouped_objects_for_nodes(
+          nodes,
+          MergeRequest.includes(target_project: [:group, :project_feature]),
+          self.class.data_attribute
+        )
+
+        nodes.select do |node|
+          merge_request = records[node]
+
+          merge_request && can_read_reference?(user, merge_request)
+        end
+      end
+
       def records_for_nodes(nodes)
         @merge_requests_for_nodes ||= grouped_objects_for_nodes(
           nodes,
