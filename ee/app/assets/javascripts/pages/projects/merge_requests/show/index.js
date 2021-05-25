@@ -14,4 +14,12 @@ initIssuableHeaderWarning(store);
 
 const assigneeDropdown = document.querySelector('.js-sidebar-assignee-dropdown');
 
-if (assigneeDropdown) trackShowInviteMemberLink(assigneeDropdown);
+if (assigneeDropdown) {
+  trackShowInviteMemberLink(assigneeDropdown);
+}
+
+const reviewerDropdown = document.querySelector('.js-sidebar-reviewer-dropdown');
+
+if (reviewerDropdown) {
+  trackShowInviteMemberLink(assigneeDropdown);
+}
