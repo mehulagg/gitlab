@@ -25,7 +25,7 @@ On the vulnerability's page, you can:
 - [Change the vulnerability's status](#change-vulnerability-status).
 - [Create an issue](#create-an-issue-for-a-vulnerability).
 - [Link issues to the vulnerability](#link-gitlab-issues-to-the-vulnerability).
-- [Remediate a vulnerability](#remediate-a-vulnerability-manually), if a solution is
+- [Remediate a vulnerability](#remediate-a-vulnerability), if a solution is
   available.
 
 ## Vulnerability status values
@@ -145,7 +145,7 @@ The selected issues are added to the **Linked issues** section, and the linked i
 
 For more details, see [Linked issues](../../project/issues/related_issues.md).
 
-## Resolve a vulnerability
+## Remediate a vulnerability
 
 For some vulnerabilities a solution is already known. In those instances, a vulnerability's page
 includes a **Resolve with merge request** option.
