@@ -25,9 +25,19 @@ To view an epic board, in a group, select **Epics > Boards**.
 
 To create a new epic board:
 
-1. Select the dropdown with the current board name in the upper left corner of the Epic Boards page.
+1. Go to your group and select **Epics > Boards**.
+1. In the upper left corner, select the dropdown with the current board name.
 1. Select **Create new board**.
-1. Enter the new board's name and select **Create**.
+1. Enter the new board's title.
+1. Optional. To hide the Open or Closed lists, clear the **Show the Open list** and
+   **Show the Closed list** checkboxes.
+1. Optional. Set board scope:
+   1. Next to **Scope**, select **Expand**.
+   1. Next to **Labels**, select **Edit** and select the labels to use as board scope.
+1. Select **Create board**.
+
+You've created an epic board. Now you can [add some lists](#create-a-new-list).
+To change these options later, [edit the board](#edit-the-scope-of-an-epic-board).
 
 ## Delete an epic board
 
