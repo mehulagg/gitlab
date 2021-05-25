@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'generator_helper'
+require 'spec_helper'
 
 RSpec.describe Gitlab::SnowplowEventDefinitionGenerator do
   let(:ce_temp_dir) { Dir.mktmpdir }
@@ -26,7 +26,9 @@ RSpec.describe Gitlab::SnowplowEventDefinitionGenerator do
     it 'creates CE event definition file using the template' do
       sample_event = ::Gitlab::Config::Loader::Yaml.new(fixture_file(File.join(sample_event_dir, 'sample_event.yml'))).load_raw!
 
-      described_class.new([], generator_options).invoke_all
+      expect do
+        described_class.new([], generator_options).invoke_all
+      end.to output.to_stdout
 
       event_definition_path = File.join(ce_temp_dir, 'groups__email_campaigns_controller_click.yml')
       expect(::Gitlab::Config::Loader::Yaml.new(File.read(event_definition_path)).load_raw!).to eq(sample_event)
@@ -35,14 +37,18 @@ RSpec.describe Gitlab::SnowplowEventDefinitionGenerator do
     context 'event definition already exists' do
       before do
         stub_const('Gitlab::VERSION', '12.11.0-pre')
-        described_class.new([], generator_options).invoke_all
+        expect do
+          described_class.new([], generator_options).invoke_all
+        end.to output.to_stdout
       end
 
       it 'overwrites event definition --force flag set to true' do
         sample_event = ::Gitlab::Config::Loader::Yaml.new(fixture_file(File.join(sample_event_dir, 'sample_event.yml'))).load_raw!
 
         stub_const('Gitlab::VERSION', '13.11.0-pre')
-        described_class.new([], generator_options.merge('force' => true)).invoke_all
+        expect do
+          described_class.new([], generator_options.merge('force' => true)).invoke_all
+        end.to output.to_stdout
 
         event_definition_path = File.join(ce_temp_dir, 'groups__email_campaigns_controller_click.yml')
         event_data = ::Gitlab::Config::Loader::Yaml.new(File.read(event_definition_path)).load_raw!
@@ -59,7 +65,9 @@ RSpec.describe Gitlab::SnowplowEventDefinitionGenerator do
     it 'creates EE event definition file using the template' do
       sample_event = ::Gitlab::Config::Loader::Yaml.new(fixture_file(File.join(sample_event_dir, 'sample_event_ee.yml'))).load_raw!
 
-      described_class.new([], generator_options.merge('ee' => true)).invoke_all
+      expect do
+        described_class.new([], generator_options.merge('ee' => true)).invoke_all
+      end.to output.to_stdout
 
       event_definition_path = File.join(ee_temp_dir, 'groups__email_campaigns_controller_click.yml')
       expect(::Gitlab::Config::Loader::Yaml.new(File.read(event_definition_path)).load_raw!).to eq(sample_event)

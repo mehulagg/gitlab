@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'generator_helper'
+require 'spec_helper'
 
 RSpec.describe Gitlab::UsageMetricDefinitionGenerator do
   include UsageDataHelpers
@@ -33,7 +33,9 @@ RSpec.describe Gitlab::UsageMetricDefinitionGenerator do
       let(:metric_definition_path) { Dir.glob(File.join(temp_dir, 'metrics/counts_7d/*_test_metric.yml')).first }
 
       it 'creates a metric definition file using the template' do
-        described_class.new([key_path], { 'dir' => dir }).invoke_all
+        expect do
+          described_class.new([key_path], { 'dir' => dir }).invoke_all
+        end.to output.to_stdout
         expect(YAML.safe_load(File.read(metric_definition_path))).to eq(sample_metric)
       end
     end
@@ -48,7 +50,9 @@ RSpec.describe Gitlab::UsageMetricDefinitionGenerator do
       end
 
       it 'creates a metric definition file using the template' do
-        described_class.new([key_path], { 'dir' => dir, 'ee': true }).invoke_all
+        expect do
+          described_class.new([key_path], { 'dir' => dir, 'ee': true }).invoke_all
+        end.to output.to_stdout
         expect(YAML.safe_load(File.read(metric_definition_path))).to eq(sample_metric)
       end
     end
@@ -93,7 +97,9 @@ RSpec.describe Gitlab::UsageMetricDefinitionGenerator do
   describe 'Name suggestions' do
     it 'adds name key to metric definition' do
       expect(::Gitlab::Usage::Metrics::NamesSuggestions::Generator).to receive(:generate).and_return('some name')
-      described_class.new([key_path], { 'dir' => dir }).invoke_all
+      expect do
+        described_class.new([key_path], { 'dir' => dir }).invoke_all
+      end.to output.to_stdout
       metric_definition_path = Dir.glob(File.join(temp_dir, 'metrics/counts_7d/*_test_metric.yml')).first
 
       expect(YAML.safe_load(File.read(metric_definition_path))).to include("name" => "some name")

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'generator_helper'
+require 'spec_helper'
 
 RSpec.describe Gitlab::UsageMetricDefinition::RedisHllGenerator do
   include UsageDataHelpers
@@ -23,7 +23,9 @@ RSpec.describe Gitlab::UsageMetricDefinition::RedisHllGenerator do
   end
 
   it 'creates metric definition files' do
-    described_class.new(args).invoke_all
+    expect do
+      described_class.new(args).invoke_all
+    end.to output.to_stdout
 
     weekly_metric_definition_path = Dir.glob(File.join(temp_dir, 'metrics/counts_7d/*i_test_event_weekly.yml')).first
     monthly_metric_definition_path = Dir.glob(File.join(temp_dir, 'metrics/counts_28d/*i_test_event_monthly.yml')).first
@@ -45,7 +47,9 @@ RSpec.describe Gitlab::UsageMetricDefinition::RedisHllGenerator do
     end
 
     it 'creates metric definition files' do
-      described_class.new(args, { 'ee': true }).invoke_all
+      expect do
+        described_class.new(args, { 'ee': true }).invoke_all
+      end.to output.to_stdout
 
       expect(weekly_metric_definition).to include("key_path" => "redis_hll_counters.test_category.i_test_event_weekly")
       expect(weekly_metric_definition["distribution"]).to include('ee')
