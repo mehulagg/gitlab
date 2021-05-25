@@ -142,7 +142,7 @@ describe('Value Stream Analytics component', () => {
       ...opts,
     });
 
-    if (withStageSelected) {
+    if (withStageSelected || selectedStage) {
       await store.dispatch(
         'receiveGroupStagesSuccess',
         mockData.customizableStagesAndEvents.stages,
@@ -350,10 +350,7 @@ describe('Value Stream Analytics component', () => {
       beforeEach(async () => {
         mock = new MockAdapter(axios);
         mockRequiredRoutes(mock);
-        wrapper = await createComponent({
-          withStageSelected: true,
-          selectedStage: mockData.issueStage,
-        });
+        wrapper = await createComponent({ selectedStage: mockData.issueStage });
       });
 
       it('displays the stage table', () => {
@@ -405,7 +402,7 @@ describe('Value Stream Analytics component', () => {
         .onGet(mockData.endpoints.stageData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
 
-      await createComponent({ withStageSelected: true, selectedStage: mockData.issueStage });
+      await createComponent({ selectedStage: mockData.issueStage });
 
       await findError('There was an error fetching data for the selected stage');
     });
@@ -456,6 +453,7 @@ describe('Value Stream Analytics component', () => {
       project_ids: null,
       sort: null,
       direction: null,
+      page: null,
     };
 
     const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
@@ -527,17 +525,20 @@ describe('Value Stream Analytics component', () => {
 
     describe('with selectedStage set', () => {
       beforeEach(async () => {
-        wrapper = await createComponent();
-        store.dispatch('setSelectedStage', selectedStage);
-        await wrapper.vm.$nextTick();
+        wrapper = await createComponent({
+          initialState: {
+            ...initialCycleAnalyticsState,
+            pagination: mockData.initialPaginationQuery,
+          },
+          selectedStage,
+        });
       });
 
-      it('sets the stage, sort and direction parameters', async () => {
+      it('sets the stage, sort, direction and page parameters', async () => {
         await shouldMergeUrlParams(wrapper, {
           ...defaultParams,
+          ...mockData.initialPaginationQuery,
           stage_id: selectedStage.id,
-          direction: PAGINATION_SORT_DIRECTION_DESC,
-          sort: PAGINATION_SORT_FIELD_END_EVENT,
         });
       });
     });

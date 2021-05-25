@@ -325,11 +325,16 @@ export const selectedProjects = [
 
 export const pathNavIssueMetric = 172800;
 
-export const initialPaginationState = {
-  page: null,
-  hasNextPage: false,
+export const initialPaginationQuery = {
+  page: 15,
   sort: PAGINATION_SORT_FIELD_END_EVENT,
   direction: PAGINATION_SORT_DIRECTION_DESC,
+};
+
+export const initialPaginationState = {
+  ...initialPaginationQuery,
+  page: null,
+  hasNextPage: false,
 };
 
 export const basePaginationResult = {
