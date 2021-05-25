@@ -768,6 +768,13 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
           update_merge_request({ target_branch: 'target' })
         end
+
+        it "does not try to mark as unchecked if it's already unchecked" do
+          expect(merge_request).to receive(:unchecked?).and_return(true)
+          expect(merge_request).to_not receive(:mark_as_unchecked)
+
+          update_merge_request({target_branch: "target"})
+        end
       end
 
       context 'when auto merge is enabled and target branch changed' do
@@ -1175,16 +1182,6 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
     it_behaves_like 'issuable record that supports quick actions' do
       let(:existing_merge_request) { create(:merge_request, source_project: project) }
       let(:issuable) { described_class.new(project: project, current_user: user, params: params).execute(existing_merge_request) }
-    end
-  end
-
-  describe 'handle_changes' do
-    it "does not try to mark as unchecked if it's already unchecked" do
-
-      # if merge_request.previous_changes.include?('target_branch') ||
-      #     merge_request.previous_changes.include?('source_branch')
-      #   merge_request.mark_as_unchecked unless merge_request.unchecked?
-      # end
     end
   end
 end
