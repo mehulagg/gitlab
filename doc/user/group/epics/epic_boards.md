@@ -48,17 +48,31 @@ To delete the active epic board:
 1. Select **Delete board**.
 1. Select **Delete**. -->
 
-## Actions you can take on an issue board
-
-- Create a new list.
 - Remove an existing list.
 - Filter epics.
 - Create workflows.
 - Drag epics between lists.
 - Drag and reorder the lists.
+## Actions you can take on an epic board
+
+- [Create a new list](#create-a-new-list).
 - Change epic labels (by dragging an epic between lists).
 - Close an epic (by dragging it to the **Done** list).
 - Configure the scope of the board.
+
+### Create a new list
+
+Prerequisites:
+<!-- TODO: Add this to permissions.md -->
+- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+To create a new list:
+
+1. Go to your group and select **Epics > Boards**.
+1. In the upper-right corner, select **Create list**.
+1. In the **New list** column expand the **Select a label** dropdown and select the label to use as
+   list scope.
+1. Select **Add to board**.
 
 If you're not able to do some of the things above, make sure you have the right
 [permissions](#permissions).
