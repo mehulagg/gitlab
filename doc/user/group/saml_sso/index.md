@@ -339,7 +339,7 @@ To link the SAML groups from the `saml:AttributeStatement` example above:
 1. **Save** the group link.
 1. Repeat to add additional group links if desired.
 
-![SAML Group Links](image.png)
+> ![SAML Group Links](img/saml_group_links_v13_9.png =1098x568)
 
 If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest access level from the groups. For example, if one group
