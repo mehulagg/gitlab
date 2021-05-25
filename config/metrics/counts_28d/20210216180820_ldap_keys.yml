@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage_monthly.manage.ldap_keys
-description: Number of keys synced as part of LDAP
+description: Number of users creating keys synced as part of LDAP for last 28 days.
 product_section: dev
 product_stage: manage
 product_group: group::acess

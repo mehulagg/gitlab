@@ -11,4 +11,6 @@ time_frame: none
 data_source: system
 distribution:
 - ee
-tier: [premium]
+tier: 
+- premium
+- ultimate

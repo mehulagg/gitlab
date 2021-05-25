@@ -1,6 +1,6 @@
 ---
 key_path: counts.keys
-description: Count of users creating keys (Need Dev to confirm)
+description: Number of keys.
 product_section: dev
 product_stage: managed
 product_group: group::access
@@ -11,5 +11,8 @@ time_frame: all
 data_source: database
 distribution:
 - ce
+- ee
 tier:
 - free
+- premium
+- ultimate
