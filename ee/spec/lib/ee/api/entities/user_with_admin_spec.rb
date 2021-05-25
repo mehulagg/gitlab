@@ -79,7 +79,7 @@ RSpec.describe ::EE::API::Entities::UserWithAdmin do
         stub_licensed_features(group_saml: false)
       end
 
-      it 'does not have the provisioned_by_group param' do
+      it 'does not have the provisioned_by_group_id param' do
         expect(subject[:provisioned_by_group_id]).to be nil
       end
     end
