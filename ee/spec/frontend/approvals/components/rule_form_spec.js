@@ -1,11 +1,11 @@
-import { GlFormGroup, GlFormInput } from '@gitlab/ui';
+import { GlAlert, GlFormGroup, GlFormInput } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
 import ApproverTypeSelect from 'ee/approvals/components/approver_type_select.vue';
 import ApproversList from 'ee/approvals/components/approvers_list.vue';
 import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
-import BranchesSelect from 'ee/approvals/components/branches_select.vue';
 import RuleForm from 'ee/approvals/components/rule_form.vue';
 import {
   TYPE_USER,
@@ -15,6 +15,7 @@ import {
 } from 'ee/approvals/constants';
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { stubComponent } from 'helpers/stub_component';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -60,6 +61,7 @@ const urlTakenError = {
     },
   },
 };
+const sentryError = new Error('Network error');
 
 Vue.use(Vuex);
 
@@ -91,11 +93,13 @@ describe('EE Approvals RuleForm', () => {
             props: ['state', 'disabled', 'value'],
             template: `<input />`,
           }),
+          BranchesSelect: stubComponent(ProtectedBranchesSelector),
         },
       }),
     );
   };
 
+  const findBranchesErrorAlert = () => wrapper.findComponent(GlAlert);
   const findForm = () => wrapper.find('form');
   const findNameInput = () => wrapper.findByTestId('name');
   const findNameValidation = () => wrapper.findByTestId('name-group');
@@ -104,7 +108,7 @@ describe('EE Approvals RuleForm', () => {
   const findApproversSelect = () => wrapper.findComponent(ApproversSelect);
   const findApproversValidation = () => wrapper.findByTestId('approvers-group');
   const findApproversList = () => wrapper.findComponent(ApproversList);
-  const findBranchesSelect = () => wrapper.findComponent(BranchesSelect);
+  const findProtectedBranchesSelector = () => wrapper.findComponent(ProtectedBranchesSelector);
   const findApproverTypeSelect = () => wrapper.findComponent(ApproverTypeSelect);
   const findExternalUrlInput = () => wrapper.findByTestId('status-checks-url');
   const findExternalUrlValidation = () => wrapper.findByTestId('status-checks-url-group');
@@ -162,7 +166,7 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('on load, it populates initial protected branch ids', () => {
-          expect(findBranchesSelect().props('initRule').protectedBranches).toEqual(
+          expect(findProtectedBranchesSelector().props('selectedBranches')).toEqual(
             TEST_PROTECTED_BRANCHES,
           );
         });
@@ -186,7 +190,7 @@ describe('EE Approvals RuleForm', () => {
             isMrEdit: false,
           });
 
-          await findBranchesSelect().vm.$emit('input', '3');
+          await findProtectedBranchesSelector().vm.$emit('input', '3');
           await findForm().trigger('submit');
           await nextTick();
 
@@ -206,7 +210,7 @@ describe('EE Approvals RuleForm', () => {
           const groups = [2, 3];
           const userRecords = users.map((id) => ({ id, type: TYPE_USER }));
           const groupRecords = groups.map((id) => ({ id, type: TYPE_GROUP }));
-          const branches = [TEST_PROTECTED_BRANCHES[0].id];
+          const branches = [TEST_PROTECTED_BRANCHES[0]];
           const expected = {
             id: null,
             name: 'Lorem',
@@ -216,16 +220,55 @@ describe('EE Approvals RuleForm', () => {
             userRecords,
             groupRecords,
             removeHiddenGroups: false,
-            protectedBranchIds: branches,
+            protectedBranchIds: branches.map((x) => x.id),
           };
 
           await findNameInput().vm.$emit('input', expected.name);
           await findApprovalsRequiredInput().vm.$emit('input', expected.approvalsRequired);
           await findApproversList().vm.$emit('input', [...groupRecords, ...userRecords]);
-          await findBranchesSelect().vm.$emit('input', branches[0]);
+          await findProtectedBranchesSelector().vm.$emit('input', branches[0]);
           await findForm().trigger('submit');
 
           expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected);
+        });
+      });
+
+      describe('Branches error alert', () => {
+        beforeEach(() => {
+          jest.spyOn(Sentry, 'captureException');
+
+          createComponent({
+            isMrEdit: false,
+          });
+        });
+
+        it('sends the error to sentry', () => {
+          findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+
+          expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentryError);
+        });
+
+        it('shows the alert', async () => {
+          expect(findBranchesErrorAlert().exists()).toBe(false);
+
+          await findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+
+          expect(findBranchesErrorAlert().exists()).toBe(true);
+        });
+
+        it('hides the alert if the apiError is reset', async () => {
+          await findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+          expect(findBranchesErrorAlert().exists()).toBe(true);
+
+          await findProtectedBranchesSelector().vm.$emit('apiError', false);
+          expect(findBranchesErrorAlert().exists()).toBe(false);
+        });
+
+        it('only calls sentry once while the branches api is failing', () => {
+          findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+          findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+
+          expect(Sentry.captureException.mock.calls).toEqual([[sentryError]]);
         });
       });
     });
@@ -265,7 +308,7 @@ describe('EE Approvals RuleForm', () => {
         it('renders the inputs for external rules', () => {
           expect(findNameInput().exists()).toBe(true);
           expect(findExternalUrlInput().exists()).toBe(true);
-          expect(findBranchesSelect().exists()).toBe(true);
+          expect(findProtectedBranchesSelector().exists()).toBe(true);
         });
 
         it('does not render the user and group input fields', () => {
@@ -296,18 +339,18 @@ describe('EE Approvals RuleForm', () => {
         });
 
         describe('with valid data', () => {
-          const branches = [TEST_PROTECTED_BRANCHES[0].id];
+          const branches = [TEST_PROTECTED_BRANCHES[0]];
           const expected = {
             id: null,
             name: 'Lorem',
             externalUrl: 'https://gitlab.com/',
-            protectedBranchIds: branches,
+            protectedBranchIds: branches.map((x) => x.id),
           };
 
           beforeEach(async () => {
             await findNameInput().vm.$emit('input', expected.name);
             await findExternalUrlInput().vm.$emit('input', expected.externalUrl);
-            await findBranchesSelect().vm.$emit('input', branches[0]);
+            await findProtectedBranchesSelector().vm.$emit('input', branches[0]);
           });
 
           it('on submit, posts external approval rule', async () => {
@@ -389,7 +432,7 @@ describe('EE Approvals RuleForm', () => {
         const groups = [2, 3];
         const userRecords = users.map((id) => ({ id, type: TYPE_USER }));
         const groupRecords = groups.map((id) => ({ id, type: TYPE_GROUP }));
-        const branches = [TEST_PROTECTED_BRANCHES[0].id];
+        const branches = [TEST_PROTECTED_BRANCHES[0]];
         const expected = {
           id: null,
           name: 'Lorem',
@@ -399,14 +442,14 @@ describe('EE Approvals RuleForm', () => {
           userRecords,
           groupRecords,
           removeHiddenGroups: false,
-          protectedBranchIds: branches,
+          protectedBranchIds: branches.map((x) => x.id),
         };
 
         beforeEach(async () => {
           await findNameInput().vm.$emit('input', expected.name);
           await findApprovalsRequiredInput().vm.$emit('input', expected.approvalsRequired);
           await findApproversList().vm.$emit('input', [...groupRecords, ...userRecords]);
-          await findBranchesSelect().vm.$emit('input', branches[0]);
+          await findProtectedBranchesSelector().vm.$emit('input', branches[0]);
         });
 
         it('on submit, posts rule', async () => {

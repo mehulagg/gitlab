@@ -1,9 +1,9 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
-import { debounce } from 'lodash';
 import Api from 'ee/api';
+import { debounce } from 'lodash';
 import { __ } from '~/locale';
-import { BRANCH_FETCH_DELAY, ANY_BRANCH } from '../constants';
+import { BRANCH_FETCH_DELAY, ANY_BRANCH } from './constants';
 
 export default {
   components: {

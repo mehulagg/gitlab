@@ -2,20 +2,20 @@ import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Api from 'ee/api';
-import BranchesSelect from 'ee/status_checks/components/branches_select.vue';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   TEST_DEFAULT_BRANCH,
   TEST_BRANCHES_SELECTIONS,
   TEST_PROJECT_ID,
   TEST_PROTECTED_BRANCHES,
-} from '../mock_data';
+} from './mock_data';
 
 const branchNames = () => TEST_BRANCHES_SELECTIONS.map((branch) => branch.name);
 const protectedBranchNames = () => TEST_PROTECTED_BRANCHES.map((branch) => branch.name);
 const error = new Error('Something went wrong');
 
-describe('Branches Select', () => {
+describe('Protected Branches Selector', () => {
   let wrapper;
 
   const findDropdown = () => wrapper.findComponent(GlDropdown);
@@ -23,7 +23,7 @@ describe('Branches Select', () => {
   const findSearch = () => wrapper.findComponent(GlSearchBoxByType);
 
   const createComponent = (props = {}, mountFn = shallowMount) => {
-    wrapper = mountFn(BranchesSelect, {
+    wrapper = mountFn(ProtectedBranchesSelector, {
       propsData: {
         projectId: '1',
         ...props,
@@ -82,7 +82,7 @@ describe('Branches Select', () => {
       expect(findDropdown().props('loading')).toBe(true);
       await waitForPromises();
 
-      expect(wrapper.emitted().apiError).toStrictEqual([[false]]);
+      expect(wrapper.emitted('apiError')).toStrictEqual([[false]]);
       expect(findDropdownItems()).toHaveLength(branchNames().length);
       expect(findDropdown().props('loading')).toBe(false);
     });
@@ -94,7 +94,7 @@ describe('Branches Select', () => {
       });
 
       it('emits the `apiError` event', () => {
-        expect(wrapper.emitted().apiError).toStrictEqual([[true, error]]);
+        expect(wrapper.emitted('apiError')).toStrictEqual([[true, error]]);
       });
 
       it('returns just the any branch dropdown items', () => {
@@ -119,7 +119,7 @@ describe('Branches Select', () => {
       await waitForPromises();
 
       expect(Api.projectProtectedBranches).toHaveBeenCalledWith(TEST_PROJECT_ID, term);
-      expect(wrapper.emitted().apiError).toStrictEqual([[false], [false]]);
+      expect(wrapper.emitted('apiError')).toStrictEqual([[false], [false]]);
       expect(findSearch().props('isLoading')).toBe(false);
     });
 
@@ -146,7 +146,7 @@ describe('Branches Select', () => {
       });
 
       it('emits the `apiError` event', () => {
-        expect(wrapper.emitted().apiError).toStrictEqual([[false], [true, error]]);
+        expect(wrapper.emitted('apiError')).toStrictEqual([[false], [true, error]]);
       });
 
       it('returns no dropdown items', () => {
@@ -163,7 +163,7 @@ describe('Branches Select', () => {
       });
 
       it('emits the `apiError` event', () => {
-        expect(wrapper.emitted().apiError).toStrictEqual([[false], [true, error]]);
+        expect(wrapper.emitted('apiError')).toStrictEqual([[false], [true, error]]);
       });
 
       it('returns just the any branch dropdown item', () => {
@@ -179,6 +179,6 @@ describe('Branches Select', () => {
     await findDropdownItems().at(1).vm.$emit('click');
 
     expect(findDropdownItems().at(1).props('isChecked')).toBe(true);
-    expect(wrapper.emitted().input).toStrictEqual([[TEST_PROTECTED_BRANCHES[0]]]);
+    expect(wrapper.emitted('input')).toStrictEqual([[TEST_PROTECTED_BRANCHES[0]]]);
   });
 });

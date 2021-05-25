@@ -1,11 +1,14 @@
 <script>
-import { GlFormGroup, GlFormInput } from '@gitlab/ui';
-import { groupBy, isNumber } from 'lodash';
+import { GlAlert, GlFormGroup, GlFormInput } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
+import { groupBy, isEqual, isNumber } from 'lodash';
 import { mapState, mapActions } from 'vuex';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { isSafeURL } from '~/lib/utils/url_utility';
 import { sprintf, __, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
+  ANY_BRANCH,
   TYPE_USER,
   TYPE_GROUP,
   TYPE_HIDDEN_GROUPS,
@@ -15,7 +18,6 @@ import {
 import ApproverTypeSelect from './approver_type_select.vue';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
-import BranchesSelect from './branches_select.vue';
 
 const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
@@ -31,9 +33,10 @@ export default {
     ApproverTypeSelect,
     ApproversList,
     ApproversSelect,
-    BranchesSelect,
+    GlAlert,
     GlFormGroup,
     GlFormInput,
+    ProtectedBranchesSelector,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -63,6 +66,7 @@ export default {
       approversToAdd: [],
       branches: [],
       branchesToAdd: [],
+      branchesApiFailed: false,
       showValidation: false,
       isFallback: false,
       containsHiddenGroups: false,
@@ -144,7 +148,10 @@ export default {
       return '';
     },
     invalidBranches() {
-      if (!this.isMrEdit && this.branches.some((id) => typeof id !== 'number')) {
+      if (
+        !this.isMrEdit &&
+        !this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id))
+      ) {
         return this.$options.i18n.validations.branchesRequired;
       }
 
@@ -219,7 +226,7 @@ export default {
         userRecords: this.users,
         groupRecords: this.groups,
         removeHiddenGroups: this.removeHiddenGroups,
-        protectedBranchIds: this.branches,
+        protectedBranchIds: this.branches.map((x) => x.id),
       };
     },
     isEditing() {
@@ -260,6 +267,13 @@ export default {
 
       this.approvers = this.approversToAdd.concat(this.approvers);
       this.approversToAdd = [];
+    },
+    setBranchApiError(hasErrored, error) {
+      if (!this.branchesApiFailed && error) {
+        Sentry.captureException(error);
+      }
+
+      this.branchesApiFailed = hasErrored;
     },
     /**
      * Validate and submit the form based on what type it is.
@@ -355,7 +369,7 @@ export default {
         return {
           name: this.initRule.name || '',
           externalUrl: this.initRule.externalUrl,
-          branches: this.initRule.protectedBranches?.map((x) => x.id) || [],
+          branches: this.initRule.protectedBranches || [],
           ruleType: this.initRule.ruleType,
           approvers: [],
         };
@@ -365,7 +379,7 @@ export default {
 
       const users = this.initRule.users.map((x) => ({ ...x, type: TYPE_USER }));
       const groups = this.initRule.groups.map((x) => ({ ...x, type: TYPE_GROUP }));
-      const branches = this.initRule.protectedBranches?.map((x) => x.id) || [];
+      const branches = this.initRule.protectedBranches || [];
 
       return {
         name: this.initRule.name || '',
@@ -405,6 +419,7 @@ export default {
       ),
       approversRequired: __('Please select and add a member'),
       branchesRequired: __('Please select a valid target branch'),
+      branchesApiFailure: __('Unable to fetch branches list, please close the form and try again'),
       ruleNameTaken: __('Rule name is already taken.'),
       ruleNameMissing: __('Please provide a name'),
       externalUrlTaken: __('External url has already been taken'),
@@ -419,95 +434,101 @@ export default {
 </script>
 
 <template>
-  <form novalidate @submit.prevent.stop="submit">
-    <gl-form-group
-      v-if="showName"
-      :label="$options.i18n.form.nameLabel"
-      :description="$options.i18n.form.nameDescription"
-      :state="isValidName"
-      :invalid-feedback="invalidName"
-      data-testid="name-group"
-    >
-      <gl-form-input
-        v-model="name"
-        :disabled="isNameDisabled"
-        :state="isValidName"
-        data-qa-selector="rule_name_field"
-        data-testid="name"
-      />
-    </gl-form-group>
-    <gl-form-group
-      v-if="showProtectedBranch"
-      :label="$options.i18n.form.protectedBranchLabel"
-      :description="$options.i18n.form.protectedBranchDescription"
-      :state="isValidBranches"
-      :invalid-feedback="invalidBranches"
-      data-testid="branches-group"
-    >
-      <branches-select
-        v-model="branchesToAdd"
-        :project-id="settings.projectId"
-        :is-invalid="!isValidBranches"
-        :init-rule="rule"
-      />
-    </gl-form-group>
-    <gl-form-group v-if="showApproverTypeSelect" :label="$options.i18n.form.approvalTypeLabel">
-      <approver-type-select
-        v-model="ruleType"
-        :approver-type-options="$options.approverTypeOptions"
-      />
-    </gl-form-group>
-    <template v-if="!isExternalApprovalRule">
+  <div>
+    <gl-alert v-if="branchesApiFailed" class="gl-mb-5" :dismissible="false" variant="danger">
+      {{ $options.i18n.validations.branchesApiFailure }}
+    </gl-alert>
+    <form novalidate @submit.prevent.stop="submit">
       <gl-form-group
-        :label="$options.i18n.form.approvalsRequiredLabel"
-        :state="isValidApprovalsRequired"
-        :invalid-feedback="invalidApprovalsRequired"
-        data-testid="approvals-required-group"
+        v-if="showName"
+        :label="$options.i18n.form.nameLabel"
+        :description="$options.i18n.form.nameDescription"
+        :state="isValidName"
+        :invalid-feedback="invalidName"
+        data-testid="name-group"
       >
         <gl-form-input
-          v-model.number="approvalsRequired"
-          :state="isValidApprovalsRequired"
-          :min="minApprovalsRequired"
-          class="mw-6em"
-          type="number"
-          data-testid="approvals-required"
-          data-qa-selector="approvals_required_field"
+          v-model="name"
+          :disabled="isNameDisabled"
+          :state="isValidName"
+          data-qa-selector="rule_name_field"
+          data-testid="name"
         />
       </gl-form-group>
       <gl-form-group
-        :label="$options.i18n.form.approversLabel"
-        :state="isValidApprovers"
-        :invalid-feedback="invalidApprovers"
-        data-testid="approvers-group"
+        v-if="showProtectedBranch"
+        :label="$options.i18n.form.protectedBranchLabel"
+        :description="$options.i18n.form.protectedBranchDescription"
+        :state="isValidBranches"
+        :invalid-feedback="invalidBranches"
+        data-testid="branches-group"
       >
-        <approvers-select
-          v-model="approversToAdd"
+        <protected-branches-selector
+          v-model="branchesToAdd"
           :project-id="settings.projectId"
-          :skip-user-ids="userIds"
-          :skip-group-ids="groupIds"
-          :is-invalid="!isValidApprovers"
-          data-qa-selector="member_select_field"
+          :is-invalid="!isValidBranches"
+          :selected-branches="branches"
+          @apiError="setBranchApiError"
         />
       </gl-form-group>
-    </template>
-    <gl-form-group
-      v-if="isExternalApprovalRule"
-      :label="$options.i18n.form.addStatusChecks"
-      :description="$options.i18n.form.statusChecksDescription"
-      :state="isValidStatusChecksUrl"
-      :invalid-feedback="invalidStatusChecksUrl"
-      data-testid="status-checks-url-group"
-    >
-      <gl-form-input
-        v-model="externalUrl"
+      <gl-form-group v-if="showApproverTypeSelect" :label="$options.i18n.form.approvalTypeLabel">
+        <approver-type-select
+          v-model="ruleType"
+          :approver-type-options="$options.approverTypeOptions"
+        />
+      </gl-form-group>
+      <template v-if="!isExternalApprovalRule">
+        <gl-form-group
+          :label="$options.i18n.form.approvalsRequiredLabel"
+          :state="isValidApprovalsRequired"
+          :invalid-feedback="invalidApprovalsRequired"
+          data-testid="approvals-required-group"
+        >
+          <gl-form-input
+            v-model.number="approvalsRequired"
+            :state="isValidApprovalsRequired"
+            :min="minApprovalsRequired"
+            class="mw-6em"
+            type="number"
+            data-testid="approvals-required"
+            data-qa-selector="approvals_required_field"
+          />
+        </gl-form-group>
+        <gl-form-group
+          :label="$options.i18n.form.approversLabel"
+          :state="isValidApprovers"
+          :invalid-feedback="invalidApprovers"
+          data-testid="approvers-group"
+        >
+          <approvers-select
+            v-model="approversToAdd"
+            :project-id="settings.projectId"
+            :skip-user-ids="userIds"
+            :skip-group-ids="groupIds"
+            :is-invalid="!isValidApprovers"
+            data-qa-selector="member_select_field"
+          />
+        </gl-form-group>
+      </template>
+      <gl-form-group
+        v-if="isExternalApprovalRule"
+        :label="$options.i18n.form.addStatusChecks"
+        :description="$options.i18n.form.statusChecksDescription"
         :state="isValidStatusChecksUrl"
-        type="url"
-        data-qa-selector="external_url_field"
-        data-testid="status-checks-url"
-      />
-    </gl-form-group>
-    <div v-if="!isExternalApprovalRule" class="bordered-box overflow-auto h-12em">
-      <approvers-list v-model="approvers" />
-    </div>
-  </form>
+        :invalid-feedback="invalidStatusChecksUrl"
+        data-testid="status-checks-url-group"
+      >
+        <gl-form-input
+          v-model="externalUrl"
+          :state="isValidStatusChecksUrl"
+          type="url"
+          data-qa-selector="external_url_field"
+          data-testid="status-checks-url"
+        />
+      </gl-form-group>
+      <div v-if="!isExternalApprovalRule" class="bordered-box overflow-auto h-12em">
+        <approvers-list v-model="approvers" />
+      </div>
+    </form>
+  </div>
 </template>
