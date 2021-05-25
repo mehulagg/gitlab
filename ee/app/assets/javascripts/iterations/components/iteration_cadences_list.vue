@@ -2,14 +2,14 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlKeysetPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import query from '../queries/iteration_cadences_list.query.graphql';
-import IterationCadence from './iteration_cadence.vue';
+import IterationCadenceListItem from './iteration_cadence_list_item.vue';
 
 const pageSize = 20;
 
 export default {
   tabTitles: [__('Open'), __('Done'), __('All')],
   components: {
-    IterationCadence,
+    IterationCadenceListItem,
     GlAlert,
     GlButton,
     GlLoadingIcon,
@@ -115,7 +115,7 @@ export default {
       </gl-alert>
       <template v-else>
         <ul v-if="cadences.length" class="content-list">
-          <iteration-cadence
+          <iteration-cadence-list-item
             v-for="cadence in cadences"
             :key="cadence.id"
             :cadence-id="cadence.id"

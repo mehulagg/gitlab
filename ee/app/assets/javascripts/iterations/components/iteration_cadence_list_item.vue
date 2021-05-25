@@ -19,6 +19,7 @@ const i18n = Object.freeze({
 });
 
 export default {
+  i18n,
   components: {
     GlAlert,
     GlButton,
@@ -152,9 +153,9 @@ export default {
   <li class="gl-py-0!">
     <div class="gl-display-flex gl-align-items-center">
       <gl-button
-        data-testid="accordion-button"
         variant="link"
         class="gl-font-weight-bold gl-text-body! gl-py-5! gl-px-3! gl-mr-auto"
+        aria-expanded="expanded"
         @click="expanded = !expanded"
       >
         <gl-icon

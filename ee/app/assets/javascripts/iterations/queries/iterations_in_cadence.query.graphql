@@ -4,8 +4,8 @@
 query Iterations(
   $fullPath: ID!
   $iterationCadenceId: ID!
-  $beforeCursor: String = ""
-  $afterCursor: String = ""
+  $beforeCursor: String
+  $afterCursor: String
   $firstPageSize: Int
   $lastPageSize: Int
 ) {

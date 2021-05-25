@@ -2,7 +2,7 @@ import { GlInfiniteScroll, GlSkeletonLoader } from '@gitlab/ui';
 import { createLocalVue, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
-import IterationCadence from 'ee/iterations/components/iteration_cadence.vue';
+import IterationCadenceListItem from 'ee/iterations/components/iteration_cadence_list_item.vue';
 import iterationsInCadenceQuery from 'ee/iterations/queries/iterations_in_cadence.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { mountExtended as mount } from 'helpers/vue_test_utils_helper';
@@ -86,7 +86,7 @@ describe('Iteration cadence list item', () => {
   } = {}) {
     apolloProvider = createMockApolloProvider([[iterationsInCadenceQuery, resolverMock]]);
 
-    wrapper = mount(IterationCadence, {
+    wrapper = mount(IterationCadenceListItem, {
       localVue,
       apolloProvider,
       mocks: {
@@ -137,7 +137,7 @@ describe('Iteration cadence list item', () => {
     await waitForPromises();
 
     expect(findLoader().exists()).toBe(false);
-    expect(wrapper.text()).toContain(wrapper.vm.i18n.noResults);
+    expect(wrapper.text()).toContain(IterationCadenceListItem.i18n.noResults);
   });
 
   it('shows iterations after loading', async () => {
@@ -162,7 +162,7 @@ describe('Iteration cadence list item', () => {
     await waitForPromises();
 
     expect(findLoader().exists()).toBe(false);
-    expect(wrapper.text()).toContain(wrapper.vm.i18n.error);
+    expect(wrapper.text()).toContain(IterationCadenceListItem.i18n.error);
   });
 
   it('calls fetchMore after scrolling down', async () => {
