@@ -54,6 +54,7 @@ To delete the active epic board:
 - [Remove an existing list](#remove-a-list).
 <!-- - [Filter epics](#filter-epics). -->
 - Create workflows, like when using [issue boards](../../project/issue_board.md#create-workflows).
+- [Move epics and lists](#move-epics-and-lists).
 - Change epic labels (by dragging an epic between lists).
 - Configure the scope of the board.
 - Close an epic (by dragging it to the **Closed** list).
@@ -106,4 +107,30 @@ You can filter by the following:
 - My Reaction
 - Release
 - Weight -->
+
+### Move epics and lists
+
+You can move epics and lists by dragging them.
+
+Prerequisites:
+<!-- TODO: Add this to permissions.md -->
+- A minimum of [Reporter](../../permissions.md) access to a group in GitLab.
+
+To move an epic, select the epic card and drag it to another position within its current list or
+onto that list. Learn about possible effects in [Dragging epics between lists](#dragging-epics-between-lists).
+
+To move a list, select its top bar, and drag it horizontally.
+You can't move the **Open** and **Closed** lists, but you can hide them when editing an epic board.
+
+#### Dragging epics between lists
+
+When you drag epics between lists, different behavior occurs depending on the source list and the
+target list.
+
+|                              | To Open          | To Closed    | To label B list                   | To assignee Bob list              |
+| ---------------------------- | ---------------- | ------------ | --------------------------------- | --------------------------------- |
+| **From Open**                | -                | Issue closed | Label B added                     | Bob assigned                      |
+| **From Closed**              | Issue reopened   | -            | Issue reopened and label B added  | Issue reopened and Bob assigned   |
+| **From label A list**        | Label A removed  | Issue closed | Label A removed and label B added | Bob assigned                      |
+| **From assignee Alice list** | Alice unassigned | Issue closed | Label B added                     | Alice unassigned and Bob assigned |
 
