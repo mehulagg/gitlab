@@ -32,7 +32,7 @@ export const setSelectedProjects = ({ commit }, projects) =>
 
 export const setSelectedStage = ({ commit, getters: { paginationParams } }, stage) => {
   commit(types.SET_SELECTED_STAGE, stage);
-  commit(types.SET_PAGINATION, { ...paginationParams, page: 1, hasNextPage: null });
+  commit(types.SET_PAGINATION, { ...paginationParams, hasNextPage: null });
 };
 
 export const setDateRange = (

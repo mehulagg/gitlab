@@ -94,6 +94,17 @@ export default {
     },
     query() {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
+      const paginationUrlParams = !this.isOverviewStageSelected
+        ? {
+            sort: this.pagination?.sort || null,
+            direction: this.pagination?.direction || null,
+            page: this.pagination?.page || null,
+          }
+        : {
+            sort: null,
+            direction: null,
+            page: null,
+          };
 
       return {
         value_stream_id: this.selectedValueStream?.id || null,
@@ -101,8 +112,7 @@ export default {
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
         stage_id: (!this.isOverviewStageSelected && this.selectedStage?.id) || null, // the `overview` stage is always the default, so dont persist the id if its selected
-        sort: (!this.isOverviewStageSelected && this.pagination?.sort) || null,
-        direction: (!this.isOverviewStageSelected && this.pagination?.direction) || null,
+        ...paginationUrlParams,
       };
     },
     stageCount() {

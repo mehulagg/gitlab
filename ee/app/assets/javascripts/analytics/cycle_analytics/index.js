@@ -28,6 +28,7 @@ export default () => {
     label_name = [],
     sort,
     direction,
+    page,
   } = urlQueryToFilter(window.location.search);
 
   store.dispatch('initializeCycleAnalytics', {
@@ -37,7 +38,11 @@ export default () => {
     selectedAssigneeList: assignee_username,
     selectedLabelList: label_name,
     featureFlags: { hasDurationChart },
-    pagination: { sort: sort?.value || null, direction: direction?.value || null },
+    pagination: {
+      sort: sort?.value || null,
+      direction: direction?.value || null,
+      page: page?.value || null,
+    },
   });
 
   return new Vue({
