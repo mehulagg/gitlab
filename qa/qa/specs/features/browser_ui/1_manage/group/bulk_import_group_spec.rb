@@ -96,10 +96,9 @@ module QA
             expect(imported_group).to eq(source_group)
             expect(imported_subgroup).to eq(subgroup)
 
-            # TODO: Improve validation logic with some potential retry mechanism built in to custom rspec matcher
-            # https://gitlab.com/gitlab-org/gitlab/-/issues/331704
-            # expect(imported_group.labels).to include(*source_group.labels)
-            expect(imported_subgroup.labels).to include(*subgroup.labels)
+            # Poll for labels within specific duration
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 5)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 5)
           end
         end
       end
