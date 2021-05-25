@@ -381,7 +381,7 @@ For more details about which findings or vulnerabilities you can view in each of
 - Change the status.
 - Create an issue.
 - Link it to an existing issue.
-- In some cases, [apply an automatic remediation for a vulnerability](vulnerabilities/index.md#remediate-a-vulnerability-automatically).
+- In some cases, [apply a remediation for a vulnerability](vulnerabilities/index.md#remediate-a-vulnerability).
 
 ## Troubleshooting
 

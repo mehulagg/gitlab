@@ -13,21 +13,19 @@ Each vulnerability in a project has a Vulnerability Page. This page contains det
 vulnerability. The details included vary according to the type of vulnerability. Details of each
 vulnerability include:
 
-- Description.
-- When it was detected.
-- Current status.
-- Available actions.
-- Linked issues.
-- Actions log.
+- Description
+- When it was detected
+- Current status
+- Available actions
+- Linked issues
+- Actions log
 
 On the vulnerability's page, you can:
 
 - [Change the vulnerability's status](#change-vulnerability-status).
 - [Create an issue](#create-an-issue-for-a-vulnerability).
 - [Link issues to the vulnerability](#link-gitlab-issues-to-the-vulnerability).
-- [Remediate a vulnerability automatically](#remediate-a-vulnerability-automatically), if an
-  automatic solution is available.
-- [Remediate a vulnerability manually](#remediate-a-vulnerability-manually), if a solution is
+- [Remediate a vulnerability](#remediate-a-vulnerability-manually), if a solution is
   available.
 
 ## Vulnerability status values
@@ -166,15 +164,15 @@ The following scanners are supported:
 
 ![Create merge request from vulnerability](img/create_mr_from_vulnerability_v13_4.png)
 
-### Resolve the vulnerability with a merge request
+### Remediate the vulnerability with a merge request
 
-To resolve the vulnerability with a merge request, go to the vulnerability's page and from the
+To remediate the vulnerability with a merge request, go to the vulnerability's page and from the
 **Resolve with merge request** dropdown select **Resolve with merge request**.
 
 A merge request is created which applies the patch required to resolve the vulnerability.
 Process the merge request according to your standard workflow.
 
-### Resolve a vulnerability manually
+### Remediate a vulnerability manually
 
 To manually apply the patch that GitLab generated for a vulnerability:
 
