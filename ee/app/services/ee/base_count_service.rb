@@ -12,5 +12,12 @@ module EE
         options[:expires_in] = 20.minutes if ::Gitlab::Geo.secondary?
       end
     end
+
+    override :delete_cache
+    def delete_cache
+      super
+
+      Geo::CacheInvalidationEventStore.new(cache_key).create! if ::Gitlab::Geo.primary?
+    end
   end
 end
