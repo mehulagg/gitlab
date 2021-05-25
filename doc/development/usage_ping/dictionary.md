@@ -16778,7 +16778,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.value_stream_management_customized_group_stages`
 
-Number of custom cycle analytics group stages.
+Number of custom value stream analytics stages.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180803_value_stream_management_customized_group_stages.yml)
 
