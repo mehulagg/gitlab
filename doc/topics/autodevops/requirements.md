@@ -156,7 +156,7 @@ for deployments to AWS EC2.
 
 ## Auto DevOps requirements for bare metal
 
-From [kubernetes/ingress-nginx docs](https://kubernetes.github.io/ingress-nginx/deploy/baremetal/):
+According to the [Kubernetes Ingress-NGINX docs](https://kubernetes.github.io/ingress-nginx/deploy/baremetal/):
 
 > In traditional cloud environments, where network load balancers are available on-demand,
 a single Kubernetes manifest suffices to provide a single point of contact to the NGINX Ingress
@@ -164,4 +164,7 @@ controller to external clients and, indirectly, to any application running insid
 Bare-metal environments lack this commodity, requiring a slightly different setup to offer the
 same kind of access to external consumers.
 
-Please consult [that page](https://kubernetes.github.io/ingress-nginx/deploy/baremetal/) which details several solutions, among them is [metallb](https://github.com/metallb/metallb). A similar alternative option is [porterlb](https://github.com/kubesphere/porterlb).
+The docs linked above explain the issue and present possible solutions, for example:
+
+- Through [MetalLB](https://github.com/metallb/metallb). 
+- Through [PorterLB](https://github.com/kubesphere/porterlb).
