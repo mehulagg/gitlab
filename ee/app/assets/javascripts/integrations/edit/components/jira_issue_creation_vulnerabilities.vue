@@ -87,6 +87,9 @@ export default {
       'isLoadingJiraIssueTypes',
       'loadingJiraIssueTypesErrorMessage',
     ]),
+    checkboxDisabled() {
+      return !this.showFullFeature || this.isInheriting;
+    },
     initialJiraIssueType() {
       return this.jiraIssueTypes?.find(({ id }) => id === this.initialIssueTypeId) || {};
     },
@@ -135,7 +138,7 @@ export default {
     <gl-form-checkbox
       v-model="isJiraVulnerabilitiesEnabled"
       data-testid="enable-jira-vulnerabilities"
-      :disabled="!showFullFeature || isInheriting"
+      :disabled="checkboxDisabled"
     >
       {{ $options.i18n.checkbox.label }}
       <template #help>

@@ -22,11 +22,14 @@ describe('JiraIssuesFields', () => {
     { id: '3', name: 'epic', description: 'epic' },
   ];
 
-  const createComponent = (mountFn) => ({ props } = {}) => {
+  const createComponent = (mountFn) => ({ isInheriting = false, props } = {}) => {
     return extendedWrapper(
       mountFn(JiraIssueCreationVulnerabilities, {
         store,
         propsData: { ...defaultProps, ...props },
+        computed: {
+          isInheriting: () => isInheriting,
+        },
       }),
     );
   };
@@ -97,6 +100,16 @@ describe('JiraIssuesFields', () => {
     it.each([true, false])('toggles the Jira issue-type selection section', async (isChecked) => {
       await setEnableJiraVulnerabilitiesChecked(isChecked);
       expect(findIssueTypeSection().exists()).toBe(isChecked);
+    });
+
+    describe('when isInheriting = true', () => {
+      beforeEach(() => {
+        wrapper = createShallowComponent({ isInheriting: true });
+      });
+
+      it('disables the checkbox', () => {
+        expect(findEnableJiraVulnerabilities().attributes('disabled')).toBe('true');
+      });
     });
   });
 
