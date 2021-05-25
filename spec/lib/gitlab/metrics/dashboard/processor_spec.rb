@@ -16,7 +16,6 @@ RSpec.describe Gitlab::Metrics::Dashboard::Processor do
         Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter,
         Gitlab::Metrics::Dashboard::Stages::CustomMetricsDetailsInserter,
         Gitlab::Metrics::Dashboard::Stages::MetricEndpointInserter,
-        Gitlab::Metrics::Dashboard::Stages::AlertsInserter,
         Gitlab::Metrics::Dashboard::Stages::PanelIdsInserter,
         Gitlab::Metrics::Dashboard::Stages::UrlValidator
       ]
@@ -118,6 +117,15 @@ RSpec.describe Gitlab::Metrics::Dashboard::Processor do
       end
     end
 
+    shared_examples_for 'does not insert an alert_path' do
+      specify do
+        target_metric = all_metrics.find { |metric| metric[:metric_id] == persisted_metric.id }
+
+        expect(target_metric).to be_a Hash
+        expect(target_metric).not_to include(:alert_path)
+      end
+    end
+
     context 'when the dashboard references persisted metrics with alerts' do
       let!(:alert) do
         create(
@@ -128,42 +136,23 @@ RSpec.describe Gitlab::Metrics::Dashboard::Processor do
         )
       end
 
-      shared_examples_for 'has saved alerts' do
-        it 'includes an alert path' do
-          target_metric = all_metrics.find { |metric| metric[:metric_id] == persisted_metric.id }
-
-          expect(target_metric).to be_a Hash
-          expect(target_metric).to include(:alert_path)
-          expect(target_metric[:alert_path]).to include(
-            project.path,
-            persisted_metric.id.to_s,
-            environment.id.to_s
-          )
-        end
-      end
-
       context 'that are shared across projects' do
         let!(:persisted_metric) { create(:prometheus_metric, :common, identifier: 'metric_a1') }
 
-        it_behaves_like 'has saved alerts'
+        it_behaves_like 'does not insert an alert_path'
       end
 
       context 'when the project has associated metrics' do
         let!(:persisted_metric) { create(:prometheus_metric, project: project, group: :business) }
 
-        it_behaves_like 'has saved alerts'
+        it_behaves_like 'does not insert an alert_path'
       end
     end
 
     context 'when there are no alerts' do
       let!(:persisted_metric) { create(:prometheus_metric, :common, identifier: 'metric_a1') }
 
-      it 'does not insert an alert_path' do
-        target_metric = all_metrics.find { |metric| metric[:metric_id] == persisted_metric.id }
-
-        expect(target_metric).to be_a Hash
-        expect(target_metric).not_to include(:alert_path)
-      end
+      it_behaves_like 'does not insert an alert_path'
     end
 
     shared_examples_for 'errors with message' do |expected_message|
