@@ -18487,7 +18487,7 @@ msgstr ""
 msgid "Iterations|No iteration cadences to show."
 msgstr ""
 
-msgid "Iterations|No iterations in cadence"
+msgid "Iterations|No iterations in cadence."
 msgstr ""
 
 msgid "Iterations|Number of future iterations you would like to have scheduled"

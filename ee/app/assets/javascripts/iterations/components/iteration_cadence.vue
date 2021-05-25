@@ -1,25 +1,28 @@
 <script>
 import {
+  GlAlert,
   GlButton,
   GlCollapse,
-  GlDropdown,
-  GlDropdownItem,
   GlIcon,
   GlInfiniteScroll,
   GlSkeletonLoader,
 } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 import query from '../queries/iterations_in_cadence.query.graphql';
 
 const pageSize = 20;
 
+const i18n = Object.freeze({
+  noResults: s__('Iterations|No iterations in cadence.'),
+  error: __('Error loading iterations'),
+});
+
 export default {
   components: {
+    GlAlert,
     GlButton,
     GlCollapse,
-    GlDropdown,
-    GlDropdownItem,
     GlIcon,
     GlInfiniteScroll,
     GlSkeletonLoader,
@@ -34,7 +37,7 @@ export default {
         return this.queryVariables;
       },
       error() {
-        this.error = __('Error loading iterations');
+        this.error = i18n.error;
       },
     },
   },
@@ -56,6 +59,7 @@ export default {
   },
   data() {
     return {
+      i18n,
       expanded: false,
       // query response
       group: {
@@ -82,6 +86,9 @@ export default {
     pageInfo() {
       return this.group.iterations?.pageInfo || {};
     },
+    hasNextPage() {
+      return this.pageInfo.hasNextPage;
+    },
     iterations() {
       return this.group?.iterations?.nodes || [];
     },
@@ -99,7 +106,7 @@ export default {
   },
   methods: {
     fetchMore() {
-      if (this.iterations.length === 0 || !this.showMoreEnabled || this.loading) {
+      if (this.iterations.length === 0 || !this.hasNextPage || this.loading) {
         return;
       }
 
@@ -112,21 +119,16 @@ export default {
         // Transform the previous result with new data
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newIterations = fetchMoreResult.group?.iterations.nodes || [];
-          const { hasNextPage } = fetchMoreResult.group?.iterations.pageInfo || {};
-
-          this.showMoreEnabled = hasNextPage;
 
           return {
             group: {
-              // eslint-disable-next-line no-underscore-dangle
-              __typename: previousResult.group.__typename,
+              // eslint-disable-next-line @gitlab/require-i18n-strings
+              __typename: 'Group',
               iterations: {
-                // eslint-disable-next-line no-underscore-dangle
-                __typename: previousResult.group.iterations.__typename,
+                __typename: 'IterationConnection',
                 // Merging the list
                 nodes: [...previousResult.group.iterations.nodes, ...newIterations],
                 pageInfo: fetchMoreResult.group?.iterations.pageInfo || {},
-                hasNextPage,
               },
             },
           };
@@ -167,22 +169,17 @@ export default {
         <gl-icon name="clock" class="gl-mr-3" />
         {{ n__('Every week', 'Every %d weeks', durationInWeeks) }}</span
       >
-      <!-- todo: v-if permission check -->
-      <gl-dropdown icon="ellipsis_v" category="tertiary" right lazy text-sr-only no-caret>
-        <gl-dropdown-item :to="editCadence">
-          {{ s__('Iterations|Edit cadence') }}
-        </gl-dropdown-item>
-      </gl-dropdown>
     </div>
 
-    <!-- <gl-alert v-if="hasError" variant="danger" :dismissible="true">
-      {{ __('Error fetching iterations') }}
-    </gl-alert> -->
+    <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="error = ''">
+      {{ error }}
+    </gl-alert>
 
     <gl-collapse :visible="expanded">
-      <div v-if="loading && iterations.length === 0" class="gl-p-5!">
-        <gl-skeleton-loader :lines="3" />
+      <div v-if="loading && iterations.length === 0" class="gl-p-5">
+        <gl-skeleton-loader :lines="2" />
       </div>
+
       <gl-infinite-scroll
         v-else-if="iterations.length || loading"
         :fetched-items="iterations.length"
@@ -201,13 +198,13 @@ export default {
               </router-link>
             </li>
           </ol>
-          <div v-if="loading" class="gl-p-5!">
-            <gl-skeleton-loader :lines="3" />
+          <div v-if="loading" class="gl-p-5">
+            <gl-skeleton-loader :lines="2" />
           </div>
         </template>
       </gl-infinite-scroll>
-      <p v-else-if="!loading" class="gl-px-7">
-        {{ s__('Iterations|No iterations in cadence') }}
+      <p v-else-if="!loading" class="gl-px-5">
+        {{ i18n.noResults }}
       </p>
     </gl-collapse>
   </li>
