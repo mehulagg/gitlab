@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../gitlab/task_helpers'
-
 module SystemCheck
   module Helpers
     include ::Gitlab::TaskHelpers

@@ -2,36 +2,6 @@
 
 require 'parallel'
 
-unless defined?(Rails)
-  require 'request_store'
-  require 'rake'
-  require 'active_support/dependencies'
-  require 'active_support/core_ext/numeric'
-  require 'active_support/string_inquirer'
-
-  module Rails
-    extend self
-
-    def root
-      Pathname.new(File.expand_path('../../..', __dir__))
-    end
-
-    def env
-      @_env ||= ActiveSupport::StringInquirer.new(ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "test")
-    end
-  end
-
-  ActiveSupport::Dependencies.autoload_paths << 'lib'
-
-  load File.expand_path('../../../lib/tasks/gitlab/helpers.rake', __dir__)
-  load File.expand_path('../../../lib/tasks/gitlab/gitaly.rake', __dir__)
-
-  # Some files required in the requiring chain of config/initializers/1_settings needs the following.
-  require_relative '../../../lib/gitlab'
-  require_relative '../../../config/initializers/0_inject_enterprise_edition_module'
-  require_relative '../../../config/initializers/1_settings'
-end
-
 module TestEnv
   extend self
 

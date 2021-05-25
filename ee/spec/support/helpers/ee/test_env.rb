@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-load File.expand_path('../../../../../lib/tasks/gitlab/helpers.rake', __dir__)
-load File.expand_path('../../../../lib/tasks/gitlab/indexer.rake', __dir__)
-
-require_relative '../../../../lib/gitlab/elastic/indexer' unless defined?(Gitlab::Elastic::Indexer)
-require_relative '../../../../../lib/gitlab/utils/override'
-
 module EE
   module TestEnv
     extend ::Gitlab::Utils::Override

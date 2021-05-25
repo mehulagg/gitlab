@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/core_ext/module/delegation'
-
 module Gitlab
   module SafeRequestStore
     NULL_STORE = Gitlab::NullRequestStore.new

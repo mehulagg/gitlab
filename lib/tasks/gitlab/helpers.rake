@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../../system_check/helpers'
-
 # Prevent StateMachine warnings from outputting during a cron task
 StateMachines::Machine.ignore_method_conflicts = true if ENV['CRON']
 
