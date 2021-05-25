@@ -6,7 +6,7 @@ module GitlabSubscriptions
   class ActivateService
     ERROR_MESSAGES = {
       not_self_managed: 'Not self-managed instance',
-      disabled: 'Cloud license is disabled'
+      disabled: 'Cloud licensing is disabled'
     }.freeze
 
     def execute(activation_code)
