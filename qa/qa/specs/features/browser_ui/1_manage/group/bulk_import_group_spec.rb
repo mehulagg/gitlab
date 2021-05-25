@@ -92,6 +92,13 @@ module QA
 
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
+
+            expect(imported_group).to eq(source_group)
+            expect(imported_subgroup).to eq(subgroup)
+
+            # Poll for labels within specific duration
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 5)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 5)
           end
         end
       end
