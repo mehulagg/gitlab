@@ -20,7 +20,7 @@ most to least severe:
 
 ## Critical Severity
 
-Issues identified at the Critical Severity level should be investigated immediately. Issues at this level assume exploitation of the flaw could lead to full system or data compromise. Examples of critical severity flaws are Command/Code Injection and SQL Injection. Typically these flaws are rated with CVSS 3.1 between 8-10. 
+Issues identified at the Critical Severity level should be investigated immediately. Issues at this level assume exploitation of the flaw could lead to full system or data compromise. Examples of critical severity flaws are Command/Code Injection and SQL Injection. Typically these flaws are rated with CVSS 3.1 between 9-10. 
 
 ## High Severity
 
