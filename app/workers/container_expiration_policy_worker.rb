@@ -15,10 +15,17 @@ class ContainerExpirationPolicyWorker # rubocop:disable Scalability/IdempotentWo
 
   def perform
     process_stale_ongoing_cleanups
+    disable_policies_without_container_repositories
     throttling_enabled? ? perform_throttled : perform_unthrottled
   end
 
   private
+
+  def disable_policies_without_container_repositories
+    ContainerExpirationPolicy.active
+                             .without_container_repositories
+                             .update_all(enabled: false)
+  end
 
   def process_stale_ongoing_cleanups
     threshold = delete_tags_service_timeout.seconds + 30.minutes
