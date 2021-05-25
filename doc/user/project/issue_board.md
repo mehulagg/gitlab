@@ -575,8 +575,8 @@ to another list, the label changes and a system note is recorded.
 You can move issues and lists by dragging them.
 
 Prerequisites:
-<!-- TODO: Add this to permissions.md -->
-- A minimum of [Reporter](../../permissions.md) access to a project in GitLab.
+
+- A minimum of [Reporter](../permissions.md#project-members-permissions) access to a project in GitLab.
 
 To move an issue, select the issue card and drag it to another position within its current list or
 onto that list. Learn about possible effects in [Dragging issues between lists](#dragging-issues-between-lists).
