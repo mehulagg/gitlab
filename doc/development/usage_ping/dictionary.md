@@ -3156,7 +3156,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.keys`
 
-Count of users creating keys (Need Dev to confirm)
+Number of keys.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180752_keys.yml)
 
@@ -3164,7 +3164,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.kubernetes_agent_gitops_sync`
 
@@ -3266,7 +3266,7 @@ Tiers: `premium`, `ultimate`
 
 Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174826_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174826_ldap_users.yml)
 
 Group: `group::access`
 
@@ -16250,7 +16250,7 @@ Tiers: `premium`
 
 ### `usage_activity_by_stage.manage.groups`
 
-Number of groups in an instance (Need Dev to confirm)
+Number of users who are group members.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180756_groups.yml)
 
@@ -16258,7 +16258,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.groups_imported`
 
@@ -16370,7 +16370,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.ldap_admin_sync_enabled`
 
-Has the instance configured LDAP Admin Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync`?
+Has the instance configured [LDAP Admin Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180811_ldap_admin_sync_enabled.yml)
 
@@ -16378,11 +16378,11 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `premium`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_group_sync_enabled`
 
-Has the instance configured LDAP Group Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync`?
+Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180809_ldap_group_sync_enabled.yml)
 
@@ -16394,9 +16394,9 @@ Tiers: `premium`
 
 ### `usage_activity_by_stage.manage.ldap_keys`
 
-Number of keys synced as part of LDAP
+Number of users creating keys synced as part of LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180800_ldap_keys.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180800_ldap_keys.yml)
 
 Group: `group::access`
 
@@ -16406,7 +16406,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.ldap_servers`
 
-Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers`
+Number of [LDAP servers configured for the instance](https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180807_ldap_servers.yml)
 
@@ -16414,13 +16414,13 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_users`
 
 Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180801_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180801_ldap_users.yml)
 
 Group: `group::access`
 
@@ -16742,7 +16742,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.users_created`
 
-Number of users in an instance (need Dev to validate)
+Number of users
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180758_users_created.yml)
 
@@ -16750,7 +16750,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.value_stream_management_customized_group_stages`
 
@@ -18204,11 +18204,11 @@ Group: `group:access`
 
 Status: `data_available`
 
-Tiers: `premium`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.groups`
 
-Number of groups in an instance
+Number of users who are group members for last 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180816_groups.yml)
 
@@ -18216,7 +18216,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.groups_imported`
 
@@ -18336,11 +18336,11 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `premium`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_group_sync_enabled`
 
-Has the instance configured LDAP Group Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync`?
+Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180829_ldap_group_sync_enabled.yml)
 
@@ -18348,13 +18348,13 @@ Group: `group::acess`
 
 Status: `data_available`
 
-Tiers: `premium`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_keys`
 
-Number of keys synced as part of LDAP
+Number of users creating keys synced as part of LDAP for last 28 days.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
 
 Group: `group::acess`
 
@@ -18372,13 +18372,13 @@ Group: `group::manage`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_users`
 
 Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180822_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180822_ldap_users.yml)
 
 Group: `group::access`
 
@@ -18708,7 +18708,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.value_stream_management_customized_group_stages`
 
