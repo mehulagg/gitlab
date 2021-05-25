@@ -61,7 +61,7 @@ GitLab allows resolving conflicts in a file where all of the below are true:
 - The file, with conflict markers added, is not over 200 KB in size
 - The file exists under the same path in both branches
 
-If any file in your merge request containing conflicts can't meet all of these
+If any file containing conflicts can't meet all of these
 criteria, you can't resolve the merge conflict in the UI.
 
 Additionally, GitLab does not detect conflicts in renames away from a path. For
