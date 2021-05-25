@@ -45,6 +45,22 @@ developed and tested. We aim to be compatible with most external
 
    This command will use your defined `external_url` in `/etc/gitlab/gitlab.rb`.
 
+1. Edit `/etc/gitlab/gitlab.rb` and add the following:
+
+   ```ruby
+   ##
+   ## Geo Primary role
+   ## - configure dependent flags automatically to enable Geo
+   ##
+   roles ['geo_primary_role']
+   ```
+
+1. Save the file and reconfigure GitLab:
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
 ### Configure the external database to be replicated
 
 To set up an external database, you can either:
