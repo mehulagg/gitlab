@@ -9949,6 +9949,23 @@ CREATE SEQUENCE batched_background_migrations_id_seq
 
 ALTER SEQUENCE batched_background_migrations_id_seq OWNED BY batched_background_migrations.id;
 
+CREATE TABLE baz (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    name text,
+    CONSTRAINT check_c020e80004 CHECK ((char_length(name) <= 255))
+);
+
+CREATE SEQUENCE baz_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE baz_id_seq OWNED BY baz.id;
+
 CREATE TABLE board_assignees (
     id integer NOT NULL,
     board_id integer NOT NULL,

@@ -7,6 +7,7 @@ class AddDummyMigration < ActiveRecord::Migration[6.0]
     create_table_with_constraints :baz do |t|
       t.timestamps_with_timezone null: false
 
+      t.text :name
       t.text_limit :name, 255
     end
   end
