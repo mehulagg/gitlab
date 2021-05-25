@@ -689,7 +689,7 @@ those with the given IDs.
 
 By default, several rules are disabled because they either take a long time to
 run or frequently generate false positives. The complete list of disabled rules
-can be found in [LINK_TO_FILE](to_be_filled_in).
+can be found in [exclude_rules.yml](https://gitlab.com/gitlab-org/security-products/dast/-/blob/master/src/config/exclude_rules.yml).
 
 ### Available variables
 
