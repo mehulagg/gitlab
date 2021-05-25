@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import Component from 'ee/vue_shared/security_reports/components/artifact_downloads/merge_request_artifact_download.vue';
+import Component from 'vue_shared/security_reports/components/artifact_downloads/merge_request_artifact_download.vue';
 import {
   REPORT_TYPE_SAST,
   REPORT_TYPE_SECRET_DETECTION,
-} from 'ee/vue_shared/security_reports/constants';
+} from 'vue_shared/security_reports/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import {
   expectedDownloadDropdownProps,
