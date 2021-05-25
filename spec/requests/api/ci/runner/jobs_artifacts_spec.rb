@@ -23,8 +23,9 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master') }
     let(:runner) { create(:ci_runner, :project, projects: [project]) }
     let(:user) { create(:user) }
+
     let(:job) do
-      create(:ci_build, :artifacts, :extended_options,
+      create(:ci_build, :artifacts, :extended_options, :pending,
              pipeline: pipeline, name: 'spinach', stage: 'test', stage_idx: 0)
     end
 
@@ -320,7 +321,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
           end
 
           context 'when job has been erased' do
-            let(:job) { create(:ci_build, erased_at: Time.now) }
+            let(:job) { create(:ci_build, :pending, erased_at: Time.now) }
 
             before do
               upload_artifacts(file_upload, headers_with_token)
@@ -817,7 +818,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
         end
 
         context 'when job has artifacts' do
-          let(:job) { create(:ci_build) }
+          let(:job) { create(:ci_build, :pending) }
           let(:store) { JobArtifactUploader::Store::LOCAL }
 
           before do
@@ -843,7 +844,7 @@ RSpec.describe API::Ci::Runner, :clean_gitlab_redis_shared_state do
 
             context 'when artifacts are stored remotely' do
               let(:store) { JobArtifactUploader::Store::REMOTE }
-              let!(:job) { create(:ci_build) }
+              let!(:job) { create(:ci_build, :pending) }
 
               context 'when proxy download is being used' do
                 before do

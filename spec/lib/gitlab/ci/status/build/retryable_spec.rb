@@ -52,7 +52,7 @@ RSpec.describe Gitlab::Ci::Status::Build::Retryable do
 
   describe '#badge_tooltip' do
     let(:user) { create(:user) }
-    let(:build) { create(:ci_build) }
+    let(:build) { create(:ci_build, :pending) }
     let(:status) { Gitlab::Ci::Status::Core.new(build, user) }
 
     it 'does return status' do

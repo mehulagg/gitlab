@@ -12,8 +12,8 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
   let(:project) { create(:project, :repository) }
   let(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit('HEAD').sha) }
 
-  let(:job) { create(:ci_build, :trace_live, pipeline: pipeline) }
-  let(:job2) { create(:ci_build) }
+  let(:job) { create(:ci_build, :pending, :trace_live, pipeline: pipeline) }
+  let(:job2) { create(:ci_build, :pending) }
 
   let(:artifacts_file) do
     fixture_file_upload('spec/fixtures/banana_sample.gif', 'image/gif')
@@ -38,7 +38,7 @@ RSpec.describe 'Jobs', :clean_gitlab_redis_shared_state do
     end
 
     context 'with a job' do
-      let!(:job) { create(:ci_build, pipeline: pipeline) }
+      let!(:job) { create(:ci_build, :pending, pipeline: pipeline) }
 
       context "Pending scope" do
         before do

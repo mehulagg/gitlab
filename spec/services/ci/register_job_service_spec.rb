@@ -11,7 +11,7 @@ module Ci
     let!(:shared_runner) { create(:ci_runner, :instance) }
     let!(:specific_runner) { create(:ci_runner, :project, projects: [project]) }
     let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-    let!(:pending_job) { create(:ci_build, pipeline: pipeline) }
+    let!(:pending_job) { create(:ci_build, :pending, pipeline: pipeline) }
 
     describe '#execute' do
       shared_examples 'handles runner assignment' do
@@ -227,11 +227,11 @@ module Ci
             let!(:pipeline3) { create(:ci_pipeline, project: project3) }
 
             let!(:build1_project1) { pending_job }
-            let!(:build2_project1) { create(:ci_build, pipeline: pipeline) }
-            let!(:build3_project1) { create(:ci_build, pipeline: pipeline) }
-            let!(:build1_project2) { create(:ci_build, pipeline: pipeline2) }
-            let!(:build2_project2) { create(:ci_build, pipeline: pipeline2) }
-            let!(:build1_project3) { create(:ci_build, pipeline: pipeline3) }
+            let!(:build2_project1) { create(:ci_build, :pending, pipeline: pipeline) }
+            let!(:build3_project1) { create(:ci_build, :pending, pipeline: pipeline) }
+            let!(:build1_project2) { create(:ci_build, :pending, pipeline: pipeline2) }
+            let!(:build2_project2) { create(:ci_build, :pending, pipeline: pipeline2) }
+            let!(:build1_project3) { create(:ci_build, :pending, pipeline: pipeline3) }
 
             # these shouldn't influence the scheduling
             let!(:unrelated_group) { create(:group) }
