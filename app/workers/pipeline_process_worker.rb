@@ -11,7 +11,7 @@ class PipelineProcessWorker
   urgency :high
   loggable_arguments 1
 
-  deduplicate :until_executed
+  deduplicate :until_executing
   idempotent!
 
   # rubocop: disable CodeReuse/ActiveRecord
