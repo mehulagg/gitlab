@@ -1,6 +1,6 @@
 ---
 key_path: compliance_unique_visits.i_compliance_audit_events
-description: ''
+description: 'Unique users that have viewed the instance-level audit events screen'
 product_section: 'dev'
 product_stage: 'manage'
 product_group: 'group::compliance'
@@ -8,9 +8,10 @@ product_category: 'audit_events'
 value_type: number
 status: data_available
 time_frame: all
-data_source:
+data_source: database
 distribution:
-- ce
+- ee
 tier:
-- free
+- premium
+- ultimate
 skip_validation: true
