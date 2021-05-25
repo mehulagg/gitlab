@@ -81,7 +81,6 @@ initRails();
 function deferredInitialisation() {
   const $body = $('body');
 
-  initTopNav();
   initBreadcrumbs();
   initTodoToggle();
   initLogoAnimation();
@@ -134,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $document = $(document);
   const bootstrapBreakpoint = bp.getBreakpointSize();
 
+  initTopNav();
   initUserTracking();
   initLayoutNav();
   initAlertHandler();
