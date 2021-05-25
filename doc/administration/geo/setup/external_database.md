@@ -184,6 +184,9 @@ to grant additional roles to your tracking database user (by default, this is
 - Azure Database for PostgreSQL requires the [`azure_pg_admin`](https://docs.microsoft.com/en-us/azure/postgresql/howto-create-users#how-to-create-additional-admin-users-in-azure-database-for-postgresql) role.
 - Google Cloud SQL requires the [`cloudsqlsuperuser`](https://cloud.google.com/sql/docs/postgres/users#default-users) role.
 
+This is for the installation of extensions during installation and upgrades. As an alternative,
+[ensure the extensions are installed manually, and read about the problems that may arise during future GitLab upgrades](../../../install/postgresql_extensions.md).
+
 If you have an external database ready to be used as the tracking database,
 follow the instructions below to use it:
 
