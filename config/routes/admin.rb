@@ -124,12 +124,14 @@ namespace :admin do
     end
   end
 
-  resource :appearances, only: [:show, :create, :update], path: 'appearance' do
-    member do
-      get :preview_sign_in
-      delete :logo
-      delete :header_logos
-      delete :favicon
+  namespace :application_settings do
+    resource :appearances, only: [:show, :create, :update], path: 'appearance' do
+      member do
+        get :preview_sign_in
+        delete :logo
+        delete :header_logos
+        delete :favicon
+      end
     end
   end
 
