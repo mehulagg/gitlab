@@ -424,6 +424,15 @@ module IssuablesHelper
   def parent
     @project || @group
   end
+
+  def can_create_or_update_issuable?(issuable)
+    return true if can?(current_user, :"admin_#{issuable.to_ability_name}", issuable.project)
+
+    if issuable.is_a?(Issue)
+      return can?(current_user, :"create_#{issuable.to_ability_name}", issuable.project) unless issuable.persisted?
+      return can?(current_user, :"admin_#{issuable.to_ability_name}", issuable.project) if issuable.persisted?
+    end
+  end
 end
 
 IssuablesHelper.prepend_mod_with('IssuablesHelper')
