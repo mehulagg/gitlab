@@ -68,7 +68,6 @@ RSpec.describe ::EE::API::Entities::UserWithAdmin do
           user.update!(provisioned_by_group: saml_provider.group)
         end
         it 'returns group_id' do
-          puts user.provisioned_by_group_id
           expect(subject[:provisioned_by_group_id]).to eq(group.id)
         end
       end
