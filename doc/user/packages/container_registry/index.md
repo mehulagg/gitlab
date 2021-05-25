@@ -489,8 +489,8 @@ Cleanup policies can be run on all projects, with these exceptions:
   ```
 
 WARNING:
-Due to performance reasons, on GitLab.com, enabled cleanup policies for projects
-that don't have any container image will be automatically disabled.
+For performance reasons, enabled cleanup policies are automatically disabled for projects on
+GitLab.com that don't have a container image.
 
 ### How the cleanup policy works
 
