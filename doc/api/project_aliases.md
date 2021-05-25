@@ -68,8 +68,8 @@ Example response:
 
 ## Create a project alias
 
-Add a new alias for a project. Responds with a 201 when successful,
-400 when there are validation errors (e.g. alias already exists):
+Add a new alias for a project. Responds with a `201 Created` when successful,
+`400 Bad Request` when there are validation errors, such as if the alias already exists:
 
 ```plaintext
 POST /project_aliases
