@@ -13,7 +13,7 @@ RSpec.describe 'gitlab:terraform_states' do
   end
 
   before do
-    allow(Logger).to receive(:new).with(STDOUT).and_return(logger)
+    allow(Logger).to receive(:new).with($stdout).and_return(logger)
   end
 
   describe 'gitlab:terraform_states:migrate' do
