@@ -97,8 +97,8 @@ module QA
             expect(imported_subgroup).to eq(subgroup)
 
             # Poll for labels within specific duration
-            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 5)
-            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 5)
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 10)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 10)
           end
         end
       end
