@@ -66,7 +66,7 @@ module Pages
     # we support this till 14.3 to allow people to still use legacy storage if something goes very wrong
     # on self-hosted installations, and we'll need some time to fix it
     def legacy_source
-      return unless ::Settings.pages.local_store.enabled
+      return unless ::Settings.pages.use_legacy_storage
 
       {
         type: 'file',
