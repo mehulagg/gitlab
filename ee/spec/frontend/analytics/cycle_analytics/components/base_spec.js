@@ -11,10 +11,6 @@ import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigat
 import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
-import {
-  PAGINATION_SORT_FIELD_END_EVENT,
-  PAGINATION_SORT_DIRECTION_DESC,
-} from 'ee/analytics/cycle_analytics/constants';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';

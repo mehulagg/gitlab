@@ -144,7 +144,7 @@ export default {
         this.setDefaultSelectedStage();
       } else {
         this.setSelectedStage(stage);
-        this.fetchStageData(stage.slug);
+        this.updateStageTablePagination({ ...this.pagination, page: 1 });
       }
     },
     onHandleUpdatePagination(data) {

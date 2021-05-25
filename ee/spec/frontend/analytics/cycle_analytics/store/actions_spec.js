@@ -92,12 +92,10 @@ describe('Value Stream Analytics actions', () => {
 
   describe('setSelectedStage', () => {
     const data = { id: 'someStageId' };
-    const payload = { hasNextPage: null };
 
     it(`dispatches the ${types.SET_SELECTED_STAGE} and ${types.SET_PAGINATION} actions`, () => {
       return testAction(actions.setSelectedStage, data, { ...state, selectedValueStream: {} }, [
         { type: types.SET_SELECTED_STAGE, payload: data },
-        { type: types.SET_PAGINATION, payload },
       ]);
     });
   });
