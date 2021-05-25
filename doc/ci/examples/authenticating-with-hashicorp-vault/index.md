@@ -202,6 +202,10 @@ read_secrets:
     - export PASSWORD="$(vault kv get -field=password secret/myproject/production/db)"
 ```
 
+NOTE:
+If you're following along with a HashiCorp Cloud Platform provided Vault instance, 
+you will also need to export the `VAULT_NAMESPACE` variable. The default namespace is `admin`.
+
 ![read_secrets staging](img/vault-read-secrets-staging.png)
 
 The following job is able to authenticate using the `myproject-production` role and read secrets under `/secret/myproject/production/`:
