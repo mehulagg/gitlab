@@ -147,15 +147,15 @@ The selected issues are added to the **Linked issues** section, and the linked i
 
 For more details, see [Linked issues](../../project/issues/related_issues.md).
 
-## Resolve a vulnerability
+## Remediate a vulnerability
 
 For some vulnerabilities a solution is already known. In those instances, a vulnerability's page
 includes a **Resolve with merge request** option.
 
 To resolve the vulnerability, you can either:
 
-- [Resolve the vulnerability with a merge request](#resolve-the-vulnerability-with-a-merge-request).
-- [Resolve the vulnerability manually](#resolve-the-vulnerability-manually).
+- [Remediate the vulnerability with a merge request](#resolve-the-vulnerability-with-a-merge-request).
+- [Remediate the vulnerability manually](#resolve-the-vulnerability-manually).
 
 The following scanners are supported:
 
@@ -166,7 +166,7 @@ The following scanners are supported:
 
 ![Create merge request from vulnerability](img/create_mr_from_vulnerability_v13_4.png)
 
-### Resolve the vulnerability with a merge request
+### Remediate the vulnerability with a merge request
 
 To resolve the vulnerability with a merge request, go to the vulnerability's page and from the
 **Resolve with merge request** dropdown select **Resolve with merge request**.
