@@ -55,6 +55,8 @@ module Ci
 
     has_one :last_build, -> { order('id DESC') }, class_name: 'Ci::Build'
 
+    belongs_to :runner_group, required: false
+
     before_save :ensure_token
 
     scope :active, -> { where(active: true) }
