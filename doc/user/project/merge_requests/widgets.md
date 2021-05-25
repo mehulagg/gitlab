@@ -5,7 +5,14 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Widgets area of merge requests
+# Merge request widgets **(FREE)**
+
+The **Overview** page of a merge request displays status updates from services
+that perform actions on your merge request. All subscription levels display a
+widgets area, but the content of the area depends on your subscription level
+and the services you configure for your project.
+
+## Pipeline information
 
 If you've set up [GitLab CI/CD](../../../ci/README.md) in your project,
 a [merge request](index.md) displays pipeline information in the widgets area
