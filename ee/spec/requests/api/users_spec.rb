@@ -130,6 +130,9 @@ RSpec.describe API::Users do
   end
 
   context 'with group SAML' do
+    before do
+      stub_licensed_features(group_saml: true)
+    end
     let(:saml_provider) { create(:saml_provider) }
 
     it 'creates user with new identity' do
@@ -171,11 +174,8 @@ RSpec.describe API::Users do
       expect(json_response['message']).to eq({ "identities.provider" => ["can't be blank"] })
     end
 
-    ## FIX
     it 'contains provisioned_by_group_id parameter' do
-      before do
-        user.update!(provisioned_by_group: saml_provider.group)
-      end
+      user.update!(provisioned_by_group: saml_provider.group)
       get api("/users/#{user.id}", admin)
 
       expect(json_response).to have_key('provisioned_by_group_id')
