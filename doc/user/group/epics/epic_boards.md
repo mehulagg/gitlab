@@ -52,6 +52,7 @@ To delete the active epic board:
 
 - [Create a new list](#create-a-new-list).
 - [Remove an existing list](#remove-a-list).
+<!-- - [Filter epics](#filter-epics). -->
 - Change epic labels (by dragging an epic between lists).
 - Close an epic (by dragging it to the **Done** list).
 - Configure the scope of the board.
@@ -85,4 +86,23 @@ To remove a list from an epic board:
    The list settings sidebar opens on the right.
 1. Select **Remove list**. A confirmation dialog appears.
 1. Select **OK**.
+
+<!-- TODO: This is not yet in the product
+### Filter epics
+
+Use the filters on top of your epic board to show only
+the results you want. It's similar to the filtering used in the epic list,
+as the metadata from the epics and labels is re-used in the epic board.
+
+You can filter by the following:
+
+- Assignee
+- Author
+- Epic
+- Iteration
+- Label
+- Milestone
+- My Reaction
+- Release
+- Weight -->
 
