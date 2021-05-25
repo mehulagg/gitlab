@@ -115,7 +115,13 @@ export default {
       </gl-alert>
       <template v-else>
         <ul v-if="cadences.length" class="content-list">
-          <iteration-cadence v-for="cadence in cadences" :key="cadence.id" :title="cadence.title" />
+          <iteration-cadence
+            v-for="cadence in cadences"
+            :key="cadence.id"
+            :cadence-id="cadence.id"
+            :duration-in-weeks="cadence.durationInWeeks"
+            :title="cadence.title"
+          />
         </ul>
         <p v-else class="nothing-here-block">
           {{ s__('Iterations|No iteration cadences to show.') }}

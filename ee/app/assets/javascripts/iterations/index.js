@@ -73,10 +73,12 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      fullPath,
+    },
     render(createElement) {
       return createElement(IterationReport, {
         props: {
-          fullPath,
           hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
           iterationId,
           labelsFetchPath,
