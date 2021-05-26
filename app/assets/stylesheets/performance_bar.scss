@@ -136,6 +136,6 @@
   color: $black;
 }
 
-.with-performance-bar .nav-sidebar {
+html.with-performance-bar .nav-sidebar {
   top: $header-height + $performance-bar-height;
 }

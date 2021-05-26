@@ -178,8 +178,6 @@
 
   // Sidebar
   .nav-sidebar li.active {
-    box-shadow: inset 4px 0 0 $border-and-box-shadow;
-
     > a {
       color: $sidebar-text;
     }
