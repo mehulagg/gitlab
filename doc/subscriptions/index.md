@@ -68,7 +68,7 @@ click D "./gitlab_com/index.html#view-your-gitlabcom-subscription"
 click E "./self_managed/index.html#view-your-subscription"
 ```
 
-## Customers portal
+## Customers Portal
 
 With the [Customers Portal](https://customers.gitlab.com/) you can:
 
@@ -181,68 +181,82 @@ Find more information on how to apply and renew at
 For qualifying open source projects, the [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/) program provides 
 the top GitLab tier, plus 50,000 CI minutes per month. 
 
-You can find more information about the [program requirements](https://about.gitlab.com/solutions/open-source/join/#requirements), [renewals](https://about.gitlab.com/solutions/open-source/join/$renewals),
+You can find more information about the [program requirements](https://about.gitlab.com/solutions/open-source/join/#requirements),
+[renewals](https://about.gitlab.com/solutions/open-source/join/$renewals),
 and benefits on the [GitLab for Open Source application page](https://about.gitlab.com/solutions/open-source/join/).
 
 If you have any questions, send an email to `opensource@gitlab.com` for assistance.
 
-#### Verification for Open Source Program
+#### Verification for Open Source program
 
-You will need to upload three screenshots as part of the verification process to help us qualify you for the [GitLab for Open Source program](https://about.gitlab.com/solutions/open-source/). 
+As part of the verification process, you must upload three screenshots.
+These screenshots are needed to qualify you for the GitLab for Open Source program.
 
-Below, please find instructions and examples to help you take the correct screenshots. 
+- [OSI-approved license overview](#license-overview)
+- [OSI-approved license file](#license-file)
+- [Publicly visible settings](#publicly-visible-settings)
 
-##### OSI Approved license
+##### OSI-approved license
 
-Please make sure you have added an [OSI-approved license](https://opensource.org/licenses/) to each of the projects in your GitLab group. 
+You must apply an [OSI-approved license](https://opensource.org/licenses/) to each project in your group before you can be verified.
 
-You'll need to apply a license to each project in your group before we're able to verify you for our program. The license should be added to the LICENSE file so that it shows up in the overview section of the project. This allows contributors to see it at a glance.
+Add the license to the LICENSE file so that it shows up in the overview section of the project. This allows contributors to see it at a glance.
 
-It's best to copy and paste the entire license into the file in its original form. GitLab will default to "All rights reserved" if there's no license file mentioned, so you'll need to ensure that you add the correct license to each project within your group.
+It's best to copy and paste the entire license into the file in its original form. GitLab defaults to **All rights reserved** if no license file is mentioned.
+You must ensure that you add the correct license to each project within your group.
 
-Once you have ensured that you are using OSI approved licenses for your projects, take a screenshot of one of the projects with the following views: 
+After you ensure that you are using OSI-approved licenses for your projects, you can take your screenshots.
 
-**License Overview**
-Click on the `Project Overview`>`Details` menu item in the top left-hand corner. You'll see an overview of your project. Take a screenshot that includes a view of the license you've chosen for your project. 
+###### License overview
 
-FIXME: [insert image: license-overview]
+Go to **Project Overview > Details**. Take a screenshot that includes a view of the license you've chosen for your project.
 
-**License File**
-Navigate to one of the license files that you uploaded. You can usually find this by clicking on the `Project Overview`>`Details` menu item and scanning the page for the license. Click on this button and take an image of the file. Make sure it includes the title of the license in the shot.
+![License overview](img/license-overview.png)
 
-FIXME: [insert image: license-file]
+###### License file
 
+Navigate to one of the license files that you uploaded. You can usually find the license file by selecting **Project Overview > Details** and scanning the page for the license.
+Make sure the screenshot includes the title of the license.
 
-##### Publicly Visible Settings
+![License file](img/license-file.png)
 
-The goal of the GitLab for Open Source program is to enable collaboration on open source projects. As a pre-condition to collaboration, people must be able to view the open source project, so we ask that all projects under this license be made publicly visible. 
+##### Publicly visible settings
+
+The goal of the GitLab for Open Source program is to enable collaboration on open source projects.
+As a pre-condition to collaboration, people must be able to view the open source project.
+As a result, we ask that all projects under this license are publicly visible.
 
 Follow these instructions to take a screenshot of the publicly visible settings:
 
- 1. Go to the `Settings` menu item on the lower left-hand side. 
- 1. Scroll to `Visibility, project features, permissions`.
- 1. Make sure that `Project Visibility` is set to `publicly visible` and you have enabled people to request access by checking the checkbox: `Users can request access`.
- 1. Take the screenshot including as much of the publicly visible settings as possible. Make sure to include your project's name in the screenshot.
+ 1. Go to your project and select **Settings**. 
+ 1. Expand **Visibility, project features, permissions**.
+ 1. Set **Project Visibility** to **Public**.
+ 1. Ensure others can request access by selecting the **Users can request access** checkbox.
+ 1. Take the screenshot. Include as much of the publicly visible settings as possible. Make sure to include your project's name in the screenshot.
 
-FIXME: [Insert image: publicly-visible]
+![Publicly visible setting](img/publicly-visible.png)
 
-Note: From time to time, we allow exceptions for one or two projects within a group to be private if there is a legitimate need for it, for example, a project that needs to hold sensitive data. Please email us at opensource@gitlab.com for written permission if you believe you have a legitimate use case. 
+NOTE:
+From time to time, GitLab allows exceptions. One or two projects within a group can be private if there is a legitimate need for it, for example,
+if a project holds sensitive data. Email `opensource@gitlab.com` with details and request for exceptions. 
 
 ### GitLab for Startups
 
-The [GitLab for Startups](https://about.gitlab.com/solutions/startups/) program gives 
-our top tier, plus 50,000 CI mins/month, to qualifying startups for 12 months. 
+For qualifying startups, the [GitLab for Startups](https://about.gitlab.com/solutions/startups/) program provides 
+the top GitLab tier, plus 50,000 CI minutes per month for 12 months. 
 
-For more information, including program requirements, please see the [Startup program's landing page](https://about.gitlab.com/solutions/startups/). 
+For more information, including program requirements, see the [Startup program's landing page](https://about.gitlab.com/solutions/startups/). 
 
-All questions and requests related to the GitLab for Startups program should be sent to: startups@gitlab.com.
+Send all questions and requests related to the GitLab for Startups program to `startups@gitlab.com`.
 
 ### Support for Community Programs
-Since our Community Programs are free of cost, our regular Priority Support is not included, but can be purchased at a 95% discount in some cases. If interested, please email the relevant community program team: education@gitlab.com, opensource@gitlab.com, startups@gitlab.com.
 
-Here is a diagram to help community program members find support for various reasons: 
+Because these Community Programs are free of cost, regular Priority Support is not included. However, it can be purchased at a 95% discount in some cases.
+If interested, email the relevant community program team: `education@gitlab.com`, `opensource@gitlab.com`, or `startups@gitlab.com`.
 
-FIXME: [Insert image: support-diagram-community-programs]
+Here is a diagram to help community program members find support: 
+
+<!-- FIXME: [Insert image: support-diagram-community-programs] -->
 
 ## Contact Support
 
