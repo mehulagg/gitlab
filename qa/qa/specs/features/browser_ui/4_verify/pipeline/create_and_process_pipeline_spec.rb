@@ -47,7 +47,7 @@ module QA
                       - echo 'FAILURE'
                       - exit 1
 
-                  test-tags:
+                  test-tags-mismatch:
                     tags:
                      - invalid
                     script: echo 'NOOP'
@@ -70,7 +70,7 @@ module QA
         {
           'test-success': :passed,
           'test-failure': :failed,
-          'test-tags': :pending,
+          'test-tags-mismatch': :failed,
           'test-artifacts': :passed
         }.each do |job, status|
           Page::Project::Pipeline::Show.perform do |pipeline|
