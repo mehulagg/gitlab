@@ -45,6 +45,10 @@ module Gitlab
         Gitlab.config.gitlab_kas.external_url
       end
 
+      def internal_url
+        Gitlab.config.gitlab_kas.internal_url
+      end
+
       # Return whether GitLab KAS is enabled
       #
       # @return [Boolean] external_url

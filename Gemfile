@@ -481,6 +481,12 @@ gem 'spamcheck', '~> 0.1.0'
 # Gitaly GRPC protocol definitions
 gem 'gitaly', '~> 13.12.0.pre.rc1'
 
+# KAS GRPC protocol definitions
+gem 'kas-grpc',
+  git: 'https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent.git',
+  branch: 'ash2k/ruby-gen',
+  glob: 'ruby/*.gemspec'
+
 gem 'grpc', '~> 1.30.2'
 
 gem 'google-protobuf', '~> 3.15.8'

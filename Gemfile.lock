@@ -1,3 +1,12 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent.git
+  revision: 8207d946695b4f785ec91c41b9274be7fc5b6a3a
+  branch: ash2k/ruby-gen
+  glob: ruby/*.gemspec
+  specs:
+    kas-grpc (0.0.1)
+      grpc (~> 1.0)
+
 PATH
   remote: vendor/gems/mail-smtp_pool
   specs:
@@ -1520,6 +1529,7 @@ DEPENDENCIES
   json_schemer (~> 0.2.12)
   jwt (~> 2.1.0)
   kaminari (~> 1.0)
+  kas-grpc!
   knapsack (~> 1.21.1)
   kramdown (~> 2.3.1)
   kubeclient (~> 4.9.1)
