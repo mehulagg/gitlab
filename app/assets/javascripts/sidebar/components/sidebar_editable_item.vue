@@ -135,10 +135,10 @@ export default {
       </gl-button>
     </div>
     <template v-if="!initialLoading">
-      <div v-if="!edit" data-testid="collapsed-content">
+      <div v-show="!edit" data-testid="collapsed-content">
         <slot name="collapsed">{{ __('None') }}</slot>
       </div>
-      <div v-else data-testid="expanded-content" :class="{ 'gl-mt-3': !isClassicSidebar }">
+      <div v-show="edit" data-testid="expanded-content" :class="{ 'gl-mt-3': !isClassicSidebar }">
         <slot :edit="edit"></slot>
       </div>
     </template>

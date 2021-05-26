@@ -60,6 +60,11 @@ export default {
       required: false,
       default: 'issue',
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     return {
@@ -79,6 +84,9 @@ export default {
           iid: this.iid,
           fullPath: this.fullPath,
         };
+      },
+      skip() {
+        return !this.isEditing;
       },
       update(data) {
         return data.workspace?.issuable?.participants.nodes;
