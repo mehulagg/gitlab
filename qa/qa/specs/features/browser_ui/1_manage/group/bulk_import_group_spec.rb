@@ -2,7 +2,7 @@
 
 module QA
   RSpec.describe 'Manage', :requires_admin do
-    describe 'Group bulk import' do
+    describe 'Bulk group import' do
       let!(:api_client) { Runtime::API::Client.as_admin }
       let!(:user) do
         Resource::User.fabricate_via_api! do |usr|
@@ -60,6 +60,38 @@ module QA
       end
 
       before do
+        sandbox.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
+        source_group.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
+
+        Flow::Login.sign_in(as: user)
+        Page::Main::Menu.new.go_to_import_group
+        Page::Group::New.new.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
+      end
+
+      it(
+        'imports group with subgroups',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
+        quarantine: { only: { job: 'relative_url' }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330344' },
+        issue_2: 'https://gitlab.com/gitlab-org/gitlab/-/issues/331252'
+      ) do
+        Page::Group::BulkImport.perform do |import_page|
+          import_page.import_group(source_group.path, sandbox.path)
+
+          aggregate_failures do
+            expect(import_page).to have_imported_group(source_group.path, wait: 120)
+
+            expect(imported_group).to eq(source_group)
+            expect(imported_subgroup).to eq(subgroup)
+          end
+        end
+      end
+
+      it(
+        'imports group labels',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
+        only: { job: 'review-qa-all' },
+        issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/331704'
+      ) do
         Resource::GroupLabel.fabricate_via_api! do |label|
           label.api_client = api_client
           label.group = source_group
@@ -71,34 +103,15 @@ module QA
           label.title = "subgroup-#{SecureRandom.hex(4)}"
         end
 
-        sandbox.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
-        source_group.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
-
-        Flow::Login.sign_in(as: user)
-        Page::Main::Menu.new.go_to_import_group
-        Page::Group::New.new.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
-      end
-
-      it(
-        'performs bulk group import from another gitlab instance',
-        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
-        exclude: { job: ['ce:relative_url', 'ee:relative_url'] },
-        issue_1: "https://gitlab.com/gitlab-org/gitlab/-/issues/330344",
-        issue_2: "https://gitlab.com/gitlab-org/gitlab/-/issues/331252",
-        issue_3: "https://gitlab.com/gitlab-org/gitlab/-/issues/331704"
-      ) do
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
 
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
 
-            expect(imported_group).to eq(source_group)
-            expect(imported_subgroup).to eq(subgroup)
-
             # Poll for labels within specific duration
-            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 5)
-            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 5)
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 10)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 10)
           end
         end
       end
