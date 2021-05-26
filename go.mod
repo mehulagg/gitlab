@@ -1,4 +1,4 @@
-module gitlab.com/gitlab-org/gitlab-workhorse
+module gitlab.com/gitlab-org/gitlab
 
 go 1.15
 

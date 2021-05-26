@@ -15,12 +15,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/gitlab-org/labkit/correlation"
 
-	"gitlab.com/gitlab-org/gitlab-workhorse/internal/config"
-	"gitlab.com/gitlab-org/gitlab-workhorse/internal/helper"
-	"gitlab.com/gitlab-org/gitlab-workhorse/internal/rejectmethods"
-	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upload"
-	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upstream/roundtripper"
-	"gitlab.com/gitlab-org/gitlab-workhorse/internal/urlprefix"
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/config"
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/helper"
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/rejectmethods"
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/upload"
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/upstream/roundtripper"
+	"gitlab.com/gitlab-org/gitlab/workhorse/internal/urlprefix"
 )
 
 var (
