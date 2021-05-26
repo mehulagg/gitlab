@@ -29349,7 +29349,7 @@ msgstr ""
 msgid "Select a repository"
 msgstr ""
 
-msgid "Select a repository for all projects on this instance to share a set of templates."
+msgid "Select a shared template repository for all projects on this instance."
 msgstr ""
 
 msgid "Select a template repository"
@@ -31915,7 +31915,7 @@ msgstr ""
 msgid "Template to append to all Service Desk issues"
 msgstr ""
 
-msgid "TemplateRepository|When selected, all templates in this repository will be available to all projects. %{link_start}What should the repository contain?%{link_end} "
+msgid "TemplateRepository|Select a repository to make its templates available to all projects. %{link_start}What should the repository contain?%{link_end} "
 msgstr ""
 
 msgid "Templates"
