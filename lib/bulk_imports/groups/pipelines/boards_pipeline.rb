@@ -3,10 +3,10 @@
 module BulkImports
   module Groups
     module Pipelines
-      class MilestonesPipeline
+      class BoardsPipeline
         include NdjsonPipeline
 
-        RELATION = 'milestones'
+        RELATION = 'boards'
 
         extractor ::BulkImports::Common::Extractors::NdjsonExtractor, relation: RELATION
 
@@ -21,7 +21,7 @@ module BulkImports
               relation_sym: key.to_sym,
               relation_hash: hash,
               importable: context.portable,
-              members_mapper: nil,
+              members_mapper: members_mapper,
               object_builder: object_builder,
               user: context.current_user,
               excluded_keys: import_export_config.relation_excluded_keys(key)
@@ -29,10 +29,20 @@ module BulkImports
           end
         end
 
-        def load(_, milestone)
-          return unless milestone
+        def load(_, board)
+          return unless board
 
-          milestone.save! unless milestone.persisted?
+          board.save! unless board.persisted?
+        end
+
+        private
+
+        def members_mapper
+          @members_mapper ||= Gitlab::ImportExport::MembersMapper.new(
+            exported_members: [],
+            user: context.current_user,
+            importable: context.portable
+          )
         end
       end
     end
