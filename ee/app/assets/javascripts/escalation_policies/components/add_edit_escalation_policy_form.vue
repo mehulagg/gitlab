@@ -1,8 +1,10 @@
 <script>
 import { GlLink, GlForm, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
+import createFlash from '~/flash';
 import { s__, __ } from '~/locale';
 import { defaultEscalationRule } from '../constants';
+import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import EscalationRule from './escalation_rule.vue';
 
 export const i18n = {
@@ -19,6 +21,7 @@ export const i18n = {
     },
   },
   addRule: s__('EscalationPolicies|+ Add an additional rule'),
+  failedLoadingSchedules: s__('EscalationPolicies|Failed to load oncall-schedules'),
 };
 
 export default {
@@ -30,6 +33,7 @@ export default {
     GlFormInput,
     EscalationRule,
   },
+  inject: ['projectPath'],
   props: {
     form: {
       type: Object,
@@ -42,12 +46,50 @@ export default {
   },
   data() {
     return {
-      rules: [cloneDeep(defaultEscalationRule)],
+      schedules: [],
+      rules: [],
+      uid: 0,
     };
+  },
+  apollo: {
+    schedules: {
+      query: getOncallSchedulesQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update(data) {
+        const nodes = data.project?.incidentManagementOncallSchedules?.nodes ?? [];
+        return nodes;
+      },
+      error(error) {
+        createFlash({ message: i18n.failedLoadingSchedules, captureError: true, error });
+      },
+    },
+  },
+  mounted() {
+    this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
   },
   methods: {
     addRule() {
-      this.rules.push(cloneDeep(defaultEscalationRule));
+      this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
+      this.emitUpdate();
+    },
+    updateEscalationRules(index, rule) {
+      this.rules[index] = rule;
+      this.emitUpdate();
+    },
+    removeEscalationRule(index) {
+      this.rules.splice(index, 1);
+      this.emitUpdate();
+    },
+    emitUpdate() {
+      this.$emit('update-escalation-policy-form', { field: 'rules', value: this.rules });
+    },
+    getUid() {
+      this.uid += 1;
+      return this.uid;
     },
   },
 };
@@ -92,13 +134,17 @@ export default {
       </gl-form-group>
     </div>
 
-    <gl-form-group
-      class="escalation-policy-rules"
-      :label="$options.i18n.fields.rules.title"
-      label-size="sm"
-      :state="validationState.rules"
-    >
-      <escalation-rule v-for="(rule, index) in rules" :key="index" :rule="rule" />
+    <gl-form-group class="gl-mb-3" :label="$options.i18n.fields.rules.title" label-size="sm">
+      <escalation-rule
+        v-for="(rule, index) in rules"
+        :key="rule.key"
+        :rule="rule"
+        :index="index"
+        :schedules="schedules"
+        :is-valid="validationState.rules[index]"
+        @update-escalation-rule="updateEscalationRules"
+        @remove-escalation-rule="removeEscalationRule"
+      />
     </gl-form-group>
     <gl-link @click="addRule">
       <span>{{ $options.i18n.addRule }}</span>

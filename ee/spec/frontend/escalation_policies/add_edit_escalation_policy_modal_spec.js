@@ -1,18 +1,23 @@
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AddEscalationPolicyForm from 'ee/escalation_policies/components/add_edit_escalation_policy_form.vue';
 import AddEscalationPolicyModal, {
   i18n,
 } from 'ee/escalation_policies/components/add_edit_escalation_policy_modal.vue';
+import waitForPromises from 'helpers/wait_for_promises';
+import mockPolicy from './mocks/mockPolicy.json';
 
 describe('AddEscalationPolicyModal', () => {
   let wrapper;
   const projectPath = 'group/project';
+  const mockHideModal = jest.fn();
+  const mutate = jest.fn();
 
   const createComponent = ({ escalationPolicy, data } = {}) => {
     wrapper = shallowMount(AddEscalationPolicyModal, {
       data() {
         return {
+          form: mockPolicy,
           ...data,
         };
       },
@@ -22,7 +27,14 @@ describe('AddEscalationPolicyModal', () => {
       provide: {
         projectPath,
       },
+      mocks: {
+        $apollo: {
+          mutate,
+        },
+      },
     });
+
+    wrapper.vm.$refs.addUpdateEscalationPolicyModal.hide = mockHideModal;
   };
   beforeEach(() => {
     createComponent();
@@ -34,6 +46,7 @@ describe('AddEscalationPolicyModal', () => {
 
   const findModal = () => wrapper.findComponent(GlModal);
   const findEscalationPolicyForm = () => wrapper.findComponent(AddEscalationPolicyForm);
+  const findAlert = () => wrapper.findComponent(GlAlert);
 
   describe('renders create modal with the correct information', () => {
     it('renders modal title', () => {
@@ -42,6 +55,49 @@ describe('AddEscalationPolicyModal', () => {
 
     it('renders the form inside the modal', () => {
       expect(findEscalationPolicyForm().exists()).toBe(true);
+    });
+
+    it('makes a request with form data to create an escalation policy', () => {
+      mutate.mockResolvedValueOnce({});
+      findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      expect(mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: {
+            input: {
+              projectPath,
+              ...mockPolicy,
+            },
+          },
+        }),
+      );
+    });
+
+    it('hides the modal on successful policy creation', async () => {
+      mutate.mockResolvedValueOnce({ data: { escalationPolicyCreate: { errors: [] } } });
+      findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      await waitForPromises();
+      expect(mockHideModal).toHaveBeenCalled();
+    });
+
+    it("doesn't hide a modal and shows error alert on creation failure", async () => {
+      const error = 'some error';
+      mutate.mockResolvedValueOnce({ data: { escalationPolicyCreate: { errors: [error] } } });
+      findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      await waitForPromises();
+      const alert = findAlert();
+      expect(mockHideModal).not.toHaveBeenCalled();
+      expect(alert.exists()).toBe(true);
+      expect(alert.text()).toContain(error);
+    });
+
+    it('clears the form on modal close', () => {
+      expect(wrapper.vm.form).toEqual(mockPolicy);
+      findModal().vm.$emit('cancel', { preventDefault: jest.fn() });
+      expect(wrapper.vm.form).toEqual({
+        name: '',
+        description: '',
+        rules: [],
+      });
     });
   });
 

@@ -26,7 +26,7 @@ RSpec.describe Sidebars::Projects::Menus::MonitorMenu do
       end
     end
 
-    describe 'Escalation policies' do
+    describe 'Escalation Policies' do
       let(:item_id) { :escalation_policies }
 
       before do

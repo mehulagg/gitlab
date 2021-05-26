@@ -13,10 +13,7 @@ export const defaultEscalationRule = {
   status: 'ACKNOWLEDGED',
   elapsedTimeSeconds: 0,
   action: 'EMAIL_ONCALL_SCHEDULE_USER',
-  oncallSchedule: {
-    iid: null,
-    name: null,
-  },
+  oncallScheduleIid: null,
 };
 
 export const addEscalationPolicyModalId = 'addEscalationPolicyModal';

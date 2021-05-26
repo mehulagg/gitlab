@@ -1,5 +1,13 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import EscalationPoliciesWrapper from './components/escalation_policies_wrapper.vue';
+
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(),
+});
 
 export default () => {
   const el = document.querySelector('.js-escalation-policies');
@@ -10,6 +18,7 @@ export default () => {
 
   return new Vue({
     el,
+    apolloProvider,
     provide: {
       projectPath,
       emptyEscalationPoliciesSvgPath,
