@@ -32,7 +32,7 @@ class LegacyDiffNote < Note
   end
 
   def diff_file
-    @diff_file ||= Gitlab::Diff::File.new(diff, repository: project_repository) if diff
+    @diff_file ||= Gitlab::Diff::File.new(diff, repository: project_repository, diff_refs: noteable.diff_refs) if diff
   end
 
   def diff_line
