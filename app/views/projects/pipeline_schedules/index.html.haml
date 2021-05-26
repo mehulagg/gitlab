@@ -14,6 +14,7 @@
 
 - if @schedules.present?
   %ul.content-list
+    #pipeline-schedules-quota{ data: { docs_url: help_page_path('ci/pipelines/schedules') } }
     = render partial: "table"
 - else
   .card.bg-light.gl-mt-3
