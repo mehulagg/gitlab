@@ -20,23 +20,23 @@ most to least severe:
 
 ## Critical Severity
 
-Issues identified at the Critical Severity level should be investigated immediately. Issues at this level assume exploitation of the flaw could lead to full system or data compromise. Examples of critical severity flaws are Command/Code Injection and SQL Injection. Typically these flaws are rated with CVSS 3.1 between 9-10. 
+Issues identified at the Critical Severity level should be investigated immediately. Issues at this level assume exploitation of the flaw could lead to full system or data compromise. Examples of critical severity flaws are Command/Code Injection and SQL Injection. Typically these flaws are rated with CVSS 3.1 between 9.0-10.0. 
 
 ## High Severity
 
-High Severity issues can be charactarized as flaws that may lead to an attacker accessing application resources or unintended exposure of data. Examples of high severity flaws are External XML Entity Injection (XXE), Server Side Request Forgery (SSRF), Local File Include/Path Traversal and certain forms of Cross-Site Scripting (XSS). Typically these flaws are rated with CVSS 3.1 between 6-7.
+High Severity issues can be charactarized as flaws that may lead to an attacker accessing application resources or unintended exposure of data. Examples of high severity flaws are External XML Entity Injection (XXE), Server Side Request Forgery (SSRF), Local File Include/Path Traversal and certain forms of Cross-Site Scripting (XSS). Typically these flaws are rated with CVSS 3.1 between 7.0-8.9.
 
 ## Medium Severity
 
-Medium Severity issues usually arise from mis-configuration of systems or lack of security controls. Exploitation of these issues may lead to accessing a restricted amount of data or could be used in conjuction with other flaws to gain unintended access to systems or resources. Examples of medium severity flaws are reflected XSS, incorrect HTTP session handling and missing security controls. Typically these flaws are rated with CVSS 3.1 between 4-5.
+Medium Severity issues usually arise from mis-configuration of systems or lack of security controls. Exploitation of these issues may lead to accessing a restricted amount of data or could be used in conjuction with other flaws to gain unintended access to systems or resources. Examples of medium severity flaws are reflected XSS, incorrect HTTP session handling and missing security controls. Typically these flaws are rated with CVSS 3.1 between 4.0-6.9.
 
 ## Low Severity
 
-Low severity issues contain flaws that may not be directly exploitable but introduce unnecessary weakness to an application or system. These flaws are usually due to missing security controls or unnecessary disclose information about the application environment. Examples of low severity issues are missing cookie security directives, verbose error or exception messages. Typically these flaws are rated with CVSS 3.1 between 1-3.
+Low severity issues contain flaws that may not be directly exploitable but introduce unnecessary weakness to an application or system. These flaws are usually due to missing security controls or unnecessary disclose information about the application environment. Examples of low severity issues are missing cookie security directives, verbose error or exception messages. Typically these flaws are rated with CVSS 3.1 between 1.0-3.9.
 
 ## Info Severity
 
-Info level severity is everything else. Typically these flaws do not have a CVSS rating.
+Info level severity issues contain information that may have value, but are not necessarily associated to a particular flaw or weakness. Typically these issues do not have a CVSS rating.
 
 ## Unknown Severity
 
