@@ -77,13 +77,13 @@ export default {
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = {
       stages: this.isEditing
-        ? cloneDeep(initialStages)
+        ? cloneDeep(initialStages.filter(({ hidden = false }) => !hidden))
         : initializeStages(defaultStageConfig, initialPreset),
       stageErrors:
         cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
     };
     return {
-      hiddenStages: [],
+      hiddenStages: initialStages.filter(({ hidden = false }) => hidden),
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
       name: initialName,

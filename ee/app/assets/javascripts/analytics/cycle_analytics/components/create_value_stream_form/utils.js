@@ -216,6 +216,16 @@ const prepareDefaultStage = (defaultStageConfig, { name, ...rest }) => {
   };
 };
 
+const generateHiddenDefaultStages = (defaultStageConfig, stageNames) => {
+  // We use the stage name to check for any default stages that might be hidden
+  // Currently the default stages can't be renamed
+  console.log('defaultStageConfig', defaultStageConfig);
+  console.log('stageNames', stageNames);
+  return defaultStageConfig
+    .filter(({ name }) => !stageNames.includes(name.toLowerCase()))
+    .map((data) => ({ ...data, hidden: true }));
+};
+
 /**
  * Returns a valid array of value stream stages for
  * use in the value stream form
@@ -224,8 +234,13 @@ const prepareDefaultStage = (defaultStageConfig, { name, ...rest }) => {
  * @param {Array} stage an array of raw value stream stages retrieved from the vuex store
  * @returns {Object} the same stage with fields adjusted for the value stream form
  */
-export const generateInitialStageData = (defaultStageConfig, selectedValueStreamStages) =>
-  selectedValueStreamStages.map(
+export const generateInitialStageData = (defaultStageConfig, selectedValueStreamStages) => {
+  const hiddenDefaultStages = generateHiddenDefaultStages(
+    defaultStageConfig,
+    selectedValueStreamStages.map((s) => s.name.toLowerCase()),
+  );
+  const combinedStages = [...selectedValueStreamStages, ...hiddenDefaultStages];
+  return combinedStages.map(
     ({ startEventIdentifier = null, endEventIdentifier = null, custom = false, ...rest }) => {
       const stageData =
         custom && startEventIdentifier && endEventIdentifier
@@ -241,3 +256,4 @@ export const generateInitialStageData = (defaultStageConfig, selectedValueStream
       return {};
     },
   );
+};
