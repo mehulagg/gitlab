@@ -179,9 +179,9 @@ module API
         end
       end
 
-      # Workhorse calls this to determine if it is a Geo secondary site
-      # that should proxy requests. FOSS will just non-success the non-existent
-      # endpoint, which Workhorse can simply treat as "not a Geo secondary".
+      # Workhorse calls this to determine if it is a Geo site that should proxy
+      # requests. FOSS will return non-success since the endpoint doesn't exist,
+      # which Workhorse will treat as "not a Geo proxy".
       get '/proxy' do
         require_gitlab_workhorse!
 
