@@ -25,6 +25,9 @@ module Types
     field :user, Types::UserType, null: false,
           description: 'User that is associated with the member object.'
 
+    field :invite_source, GraphQL::STRING_TYPE, null: true,
+          description: 'Source that triggered the member creation process. See https://gitlab.com/gitlab-org/gitlab/-/issues/327120.'
+
     definition_methods do
       def resolve_type(object, context)
         case object

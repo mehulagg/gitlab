@@ -12,6 +12,7 @@ RSpec.describe Types::MemberInterface do
       updated_at
       expires_at
       user
+      invite_source
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)
