@@ -7,6 +7,11 @@ module CycleAnalyticsHelpers
     page.find('[data-testid="dropdown-value-streams"]').click
   end
 
+  def path_nav_stage_names_without_median
+    # Returns the path names with the median value stripped out
+    page.all('.gl-path-button').collect(&:text).map {|name_with_median| name_with_median.split("\n")[0] }
+  end
+
   def add_custom_stage_to_form
     page.find_button(s_('CreateValueStreamForm|Add another stage')).click
 
@@ -200,12 +205,5 @@ module CycleAnalyticsHelpers
 
       branch_update
     end
-  end
-
-  def create_value_stream(name)
-    fill_in 'create-value-stream-name', with: name
-
-    page.find_button(_('Create Value Stream')).click
-    wait_for_requests
   end
 end
