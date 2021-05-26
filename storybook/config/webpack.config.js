@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 
 const { statSync } = require('fs');
+const path = require('path');
 const sass = require('node-sass');
 const { buildIncludePaths, resolveGlobUrl } = require('node-sass-magic-importer/dist/toolbox');
-const path = require('path');
 const webpack = require('webpack');
 const gitlabWebpackConfig = require('../../config/webpack.config.js');
 

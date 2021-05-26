@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved, import/no-commonjs */
 const stylesheetsRequireCtx = require.context(
   '../../app/assets/stylesheets',
   true,
