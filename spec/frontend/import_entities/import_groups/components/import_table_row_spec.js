@@ -1,8 +1,9 @@
-import { GlButton, GlDropdown, GlDropdownItem, GlLink, GlFormInput } from '@gitlab/ui';
+import { GlButton, GlDropdownItem, GlLink, GlFormInput } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import ImportGroupDropdown from '~/import_entities/components/group_dropdown.vue';
 import { STATUSES } from '~/import_entities/constants';
 import ImportTableRow from '~/import_entities/import_groups/components/import_table_row.vue';
 import groupQuery from '~/import_entities/import_groups/graphql/queries/group.query.graphql';
@@ -36,7 +37,7 @@ describe('import table row', () => {
   };
   const findImportButton = () => findByText(GlButton, 'Import');
   const findNameInput = () => wrapper.find(GlFormInput);
-  const findNamespaceDropdown = () => wrapper.find(GlDropdown);
+  const findNamespaceDropdown = () => wrapper.find(ImportGroupDropdown);
 
   const createComponent = (props) => {
     apolloProvider = createMockApollo([
@@ -54,6 +55,7 @@ describe('import table row', () => {
 
     wrapper = shallowMount(ImportTableRow, {
       apolloProvider,
+      stubs: { ImportGroupDropdown },
       propsData: {
         availableNamespaces: availableNamespacesFixture,
         groupPathRegex: /.*/,
@@ -84,6 +86,7 @@ describe('import table row', () => {
     });
 
     it('emits update-target-namespace when dropdown option is clicked', () => {
+      console.log(wrapper.html());
       const dropdownItem = findNamespaceDropdown().findAllComponents(GlDropdownItem).at(2);
       const dropdownItemText = dropdownItem.text();
 

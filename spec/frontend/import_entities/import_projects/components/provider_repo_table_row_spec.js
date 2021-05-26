@@ -3,6 +3,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Vuex from 'vuex';
 import { STATUSES } from '~/import_entities//constants';
+import ImportGroupDropdown from '~/import_entities/components/group_dropdown.vue';
 import ImportStatus from '~/import_entities/components/import_status.vue';
 import ProviderRepoTableRow from '~/import_entities/import_projects/components/provider_repo_table_row.vue';
 import Select2Select from '~/vue_shared/components/select2_select.vue';
@@ -16,10 +17,8 @@ describe('ProviderRepoTableRow', () => {
     newName: 'newName',
   };
 
-  const availableNamespaces = [
-    { text: 'Groups', children: [{ id: 'test', text: 'test' }] },
-    { text: 'Users', children: [{ id: 'root', text: 'root' }] },
-  ];
+  const availableNamespaces = ['test'];
+  const userNamespace = 'root';
 
   function initStore(initialState) {
     const store = new Vuex.Store({
@@ -48,7 +47,7 @@ describe('ProviderRepoTableRow', () => {
     wrapper = shallowMount(ProviderRepoTableRow, {
       localVue,
       store,
-      propsData: { availableNamespaces, ...props },
+      propsData: { availableNamespaces, userNamespace, ...props },
     });
   }
 
@@ -81,9 +80,8 @@ describe('ProviderRepoTableRow', () => {
       expect(wrapper.find(ImportStatus).props().status).toBe(STATUSES.NONE);
     });
 
-    it('renders a select2 namespace select', () => {
-      expect(wrapper.find(Select2Select).exists()).toBe(true);
-      expect(wrapper.find(Select2Select).props().options.data).toBe(availableNamespaces);
+    it('renders a group namespace select', () => {
+      expect(wrapper.find(ImportGroupDropdown).props().namespaces).toBe(availableNamespaces);
     });
 
     it('renders import button', () => {
