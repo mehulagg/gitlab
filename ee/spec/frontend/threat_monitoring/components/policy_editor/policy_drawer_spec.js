@@ -68,7 +68,7 @@ describe('PolicyDrawer component', () => {
     it('does render the policy preview', () => {
       expect(findPolicyPreview().exists()).toBe(true);
       expect(findPolicyPreview().props()).toStrictEqual({
-        initialTab: 0,
+        initialTab: 1,
         policyDescription: null,
         policyYaml: unsupportedYaml,
       });

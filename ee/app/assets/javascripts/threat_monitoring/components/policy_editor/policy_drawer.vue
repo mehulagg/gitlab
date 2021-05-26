@@ -15,6 +15,9 @@ export default {
     },
   },
   computed: {
+    initialTab() {
+      return this.policy ? 0 : 1;
+    },
     policy() {
       const policy = fromYaml(this.value);
       return policy.error ? null : policy;
@@ -49,6 +52,7 @@ export default {
 
     <policy-preview
       class="gl-mt-4"
+      :initial-tab="initialTab"
       :policy-yaml="policyYaml"
       :policy-description="humanizedPolicy"
     />
