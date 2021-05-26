@@ -28,9 +28,19 @@ FactoryBot.define do
       approvals_required { rand(1..ApprovalProjectRule::APPROVALS_REQUIRED_MAX) }
     end
 
+    trait :vulnerability do
+      name { ApprovalRuleLike::DEFAULT_NAME_FOR_VULNERABILITY_REPORT }
+      report_type { :vulnerability }
+    end
+
     trait :license_scanning do
       name { ApprovalRuleLike::DEFAULT_NAME_FOR_LICENSE_REPORT }
       report_type { :license_scanning }
+    end
+
+    trait :code_coverage do
+      name { ApprovalRuleLike::DEFAULT_NAME_FOR_COVERAGE }
+      report_type { :code_coverage }
     end
   end
 
@@ -59,6 +69,11 @@ FactoryBot.define do
 
     trait :license_scanning do
       name { ApprovalRuleLike::DEFAULT_NAME_FOR_LICENSE_REPORT }
+      rule_type { :report_approver }
+    end
+
+    trait :code_coverage do
+      name { ApprovalRuleLike::DEFAULT_NAME_FOR_COVERAGE }
       rule_type { :report_approver }
     end
   end

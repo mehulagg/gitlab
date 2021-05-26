@@ -12,87 +12,64 @@ RSpec.describe MergeRequests::SyncReportApproverApprovalRules do
       stub_licensed_features(report_approver_rules: true)
     end
 
-    context "when a project has a single `#{ApprovalProjectRule::DEFAULT_NAME_FOR_VULNERABILITY_REPORT}` approval rule" do
-      let!(:vulnerability_approval_project_rule) { create(:approval_project_rule, :vulnerability_report, project: merge_request.target_project, approvals_required: 2) }
-
-      context 'when report_approver_rules are enabled' do
+    ApprovalRuleLike::REPORT_TYPES_BY_DEFAULT_NAME.keys.each do |default_name|
+      context "when a project has a single `#{default_name}` approval rule" do
+        let(:report_type) { ApprovalRuleLike::REPORT_TYPES_BY_DEFAULT_NAME[default_name] }
+        let!(:report_approval_project_rule) { create(:approval_project_rule, report_type, project: merge_request.target_project, approvals_required: 2) }
         let!(:regular_approval_project_rule) { create(:approval_project_rule, project: merge_request.target_project) }
 
-        it 'creates rule for report approvers' do
-          expect { service.execute }
-            .to change { merge_request.approval_rules.vulnerability_report.count }.from(0).to(1)
+        context 'when report_approver_rules are enabled' do
+          it 'creates rule for report approvers' do
+            expect { service.execute }
+              .to change { merge_request.approval_rules.where(name: default_name).count }.from(0).to(1)
 
-          rule = merge_request.approval_rules.vulnerability_report.first
+            rule = merge_request.approval_rules.find_by(name: default_name)
 
-          expect(rule).to be_report_approver
-          expect(rule.report_type).to eq 'vulnerability'
-          expect(rule.name).to eq(vulnerability_approval_project_rule.name)
-          expect(rule.approval_project_rule).to eq(vulnerability_approval_project_rule)
+            expect(rule).to be_report_approver
+            expect(rule.report_type).to eq(report_type.to_s)
+            expect(rule.name).to eq(report_approval_project_rule.name)
+            expect(rule.approvals_required).to eq(report_approval_project_rule.approvals_required)
+            expect(rule.approval_project_rule).to eq(report_approval_project_rule)
+          end
+
+          it 'updates previous report approval rule if defined' do
+            previous_rule = create(:report_approver_rule, report_type, merge_request: merge_request, approvals_required: 0)
+
+            expect { service.execute }
+              .not_to change { merge_request.approval_rules.where(name: default_name).count }
+
+            expect(previous_rule.reload).to be_report_approver
+            expect(previous_rule.report_type).to eq(report_type.to_s)
+            expect(previous_rule.name).to eq(report_approval_project_rule.name)
+            expect(previous_rule.approvals_required).to eq(report_approval_project_rule.approvals_required)
+            expect(previous_rule.approval_project_rule).to eq(report_approval_project_rule)
+          end
         end
-
-        it 'updates previous rules if defined' do
-          mr_rule = create(:report_approver_rule, merge_request: merge_request, approvals_required: 0)
-
-          expect { service.execute }
-            .not_to change { merge_request.approval_rules.vulnerability_report.count }
-
-          expect(mr_rule.reload).to be_report_approver
-          expect(mr_rule.report_type).to eq 'vulnerability'
-          expect(mr_rule.name).to eq(vulnerability_approval_project_rule.name)
-          expect(mr_rule.approvals_required).to eq vulnerability_approval_project_rule.approvals_required
-          expect(mr_rule.approval_project_rule).to eq(vulnerability_approval_project_rule)
-        end
-      end
-    end
-
-    context "when a project has a single `#{ApprovalProjectRule::DEFAULT_NAME_FOR_LICENSE_REPORT}` approval rule" do
-      let!(:project_rule) { create(:approval_project_rule, :license_scanning, project: merge_request.target_project) }
-
-      context "when the rule has not been synchronized to the merge request yet" do
-        let(:result) { merge_request.reload.approval_rules.last }
-
-        before do
-          service.execute
-        end
-
-        specify { expect(merge_request.reload.approval_rules.count).to be(1) }
-        specify { expect(result).to be_report_approver }
-        specify { expect(result.report_type).to eq('license_scanning') }
-        specify { expect(result.name).to eq(project_rule.name) }
-        specify { expect(result.approval_project_rule).to eq(project_rule) }
-        specify { expect(result.approvals_required).to eql(project_rule.approvals_required) }
-      end
-
-      context "when the rule had previously been synchronized" do
-        let!(:previous_rule) { create(:report_approver_rule, :license_scanning, merge_request: merge_request) }
-
-        before do
-          service.execute
-        end
-
-        specify { expect(merge_request.reload.approval_rules.count).to be(1) }
-        specify { expect(merge_request.reload.approval_rules[0]).to eql(previous_rule) }
       end
     end
 
     context "when a project has multiple report approval rules" do
       let!(:vulnerability_project_rule) { create(:approval_project_rule, :vulnerability_report, project: merge_request.target_project) }
       let!(:license_compliance_project_rule) { create(:approval_project_rule, :license_scanning, project: merge_request.target_project) }
+      let!(:coverage_project_rule) { create(:approval_project_rule, :code_coverage, project: merge_request.target_project) }
 
       context "when none of the rules have been synchronized to the merge request yet" do
         let(:vulnerability_check_rule) { merge_request.reload.approval_rules.vulnerability_report.last }
-        let(:license_check_rule) { merge_request.reload.approval_rules.find_by(name: ApprovalProjectRule::DEFAULT_NAME_FOR_LICENSE_REPORT) }
+        let(:license_check_rule) { merge_request.reload.approval_rules.license_compliance.last }
+        let(:coverage_check_rule) { merge_request.reload.approval_rules.coverage.last }
 
         before do
           vulnerability_project_rule.users << create(:user)
           vulnerability_project_rule.groups << create(:group)
           license_compliance_project_rule.users << create(:user)
           license_compliance_project_rule.groups << create(:group)
+          coverage_project_rule.users << create(:user)
+          coverage_project_rule.groups << create(:group)
 
           service.execute
         end
 
-        specify { expect(merge_request.reload.approval_rules.count).to be(2) }
+        specify { expect(merge_request.reload.approval_rules.count).to be(3) }
         specify { expect(vulnerability_check_rule).to be_report_approver }
         specify { expect(vulnerability_check_rule.approvals_required).to eql(vulnerability_project_rule.approvals_required) }
         specify { expect(vulnerability_check_rule).to be_vulnerability }
@@ -103,6 +80,11 @@ RSpec.describe MergeRequests::SyncReportApproverApprovalRules do
         specify { expect(license_check_rule).to be_license_scanning }
         specify { expect(license_check_rule.name).to eq(license_compliance_project_rule.name) }
         specify { expect(license_check_rule.approval_project_rule).to eq(license_compliance_project_rule) }
+        specify { expect(coverage_check_rule).to be_report_approver }
+        specify { expect(coverage_check_rule.approvals_required).to eql(coverage_project_rule.approvals_required) }
+        specify { expect(coverage_check_rule).to be_code_coverage }
+        specify { expect(coverage_check_rule.name).to eq(coverage_project_rule.name) }
+        specify { expect(coverage_check_rule.approval_project_rule).to eq(coverage_project_rule) }
       end
 
       context "when some of the rules have been synchronized to the merge request" do
@@ -112,9 +94,10 @@ RSpec.describe MergeRequests::SyncReportApproverApprovalRules do
           service.execute
         end
 
-        specify { expect(merge_request.reload.approval_rules.count).to be(2) }
+        specify { expect(merge_request.reload.approval_rules.count).to be(3) }
         specify { expect(merge_request.reload.approval_rules.vulnerability_report.count).to be(1) }
-        specify { expect(merge_request.reload.approval_rules.where(report_type: :license_scanning)).to match_array([previous_rule]) }
+        specify { expect(merge_request.reload.approval_rules.coverage.count).to be(1) }
+        specify { expect(merge_request.reload.approval_rules.license_compliance).to match_array([previous_rule]) }
       end
     end
 
