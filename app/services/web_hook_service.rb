@@ -123,20 +123,32 @@ class WebHookService
   end
 
   def log_execution(trigger:, url:, request_data:, response:, execution_duration:, error_message: nil)
-    handle_failure(response, hook)
+    with_non_sticky_writes_if_load_balanced do
+      handle_failure(response, hook)
 
-    WebHookLog.create(
-      web_hook: hook,
-      trigger: trigger,
-      url: url,
-      execution_duration: execution_duration,
-      request_headers: build_headers(hook_name),
-      request_data: request_data,
-      response_headers: format_response_headers(response),
-      response_body: safe_response_body(response),
-      response_status: response.code,
-      internal_error_message: error_message
-    )
+      WebHookLog.create(
+        web_hook: hook,
+        trigger: trigger,
+        url: url,
+        execution_duration: execution_duration,
+        request_headers: build_headers(hook_name),
+        request_data: request_data,
+        response_headers: format_response_headers(response),
+        response_body: safe_response_body(response),
+        response_status: response.code,
+        internal_error_message: error_message
+      )
+    end
+  end
+
+  def with_non_sticky_writes_if_load_balanced
+    if Feature.enabled?(:load_balancing_for_web_hook_worker)
+      ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes do
+        yield
+      end
+    else
+      yield
+    end
   end
 
   def handle_failure(response, hook)

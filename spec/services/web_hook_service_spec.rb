@@ -326,6 +326,24 @@ RSpec.describe WebHookService do
         end
       end
     end
+
+    context 'with load balancing' do
+      it 'does not stick to DB primary for reads when LB feature enabled' do
+        stub_feature_flags(load_balancing_for_web_hook_worker: true)
+        expect(::Gitlab::Database::LoadBalancing::Session).to receive(:without_sticky_writes).and_call_original
+        stub_full_request(project_hook.url, method: :post).to_return(status: 201, body: 'Success')
+
+        service_instance.execute
+      end
+
+      it 'uses default behavior when LB feature disabled' do
+        stub_feature_flags(load_balancing_for_web_hook_worker: false)
+        expect(::Gitlab::Database::LoadBalancing::Session).not_to receive(:without_sticky_writes)
+        stub_full_request(project_hook.url, method: :post).to_return(status: 201, body: 'Success')
+
+        service_instance.execute
+      end
+    end
   end
 
   describe '#async_execute' do
