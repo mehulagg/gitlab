@@ -4,7 +4,7 @@ group: Product Planning
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Epic Boards **(PREMIUM)**
+# Epic boards **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5067) in GitLab 13.10.
 > - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
