@@ -236,7 +236,7 @@ commits `A-B-C-D` and you want to delete commit `B`.
 You can modify a specific commit. For example, if you have
 commits `A-B-C-D` and you want to modify something introduced in commit `B`.
 
-1. Rebase the range from current commit `D` to `A`:
+1. Rebase the range from current commit `D` to `B`:
 
    ```shell
    git rebase -i A
@@ -279,8 +279,8 @@ eb37e74 HEAD@{6}: rebase -i (pick): Commit C
 This output shows the repository history, including:
 
 - The commit SHA.
-- How many `HEAD`-changing operations ago the commit was made (`HEAD@{12}` was 12 commits ago).
-- The action that was taken, for example, commit, rebase, merge.
+- How many `HEAD`-changing actions ago the commit was made (`HEAD@{12}` was 12 `HEAD`-changing actions ago).
+- The action that was taken, for example: commit, rebase, merge.
 - A description of the action that changed `HEAD`.
 
 ## Undo remote changes without changing history
@@ -293,7 +293,7 @@ other developers are using as the base for their work (for example, `main`).
 
 ![Use revert to keep branch flowing](img/revert.png)
 
-To revert changes introduced in a specific `commit-SHA`:
+To revert changes introduced in a specific commit `B`:
 
 ```shell
 git revert B
@@ -304,8 +304,8 @@ git revert B
 You can undo remote changes and change history.
 
 Even with an updated history, old commits can still be
-accessed by commit SHA, at least until all repositories perform
-the automated cleanup of detached commits, or cleanup is run manually. Even the cleanup might not remove old commits if there are still refs pointing to them.
+accessed by commit SHA, at least until all the automated cleanup
+of detached commits is performed, or a cleanup is run manually. Even the cleanup might not remove old commits if there are still refs pointing to them.
 
 ![Modifying history causes problems on remote branch](img/rebase_reset.png)
 
