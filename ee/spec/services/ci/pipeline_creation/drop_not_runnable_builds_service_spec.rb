@@ -29,12 +29,26 @@ RSpec.describe Ci::PipelineCreation::DropNotRunnableBuildsService do
     end
 
     shared_examples 'limit exceeded' do
-      it 'drops the job' do
+      it 'drops the job with ci_quota_exceeded reason' do
         execute
         job.reload
 
         expect(job).to be_failed
         expect(job.failure_reason).to eq('ci_quota_exceeded')
+      end
+
+      context 'when shared runners are disabled' do
+        before do
+          pipeline.project.update!(shared_runners_enabled: false)
+        end
+
+        it 'drops the job with no_matching_runner reason' do
+          execute
+          job.reload
+
+          expect(job).to be_failed
+          expect(job.failure_reason).to eq('no_matching_runner')
+        end
       end
     end
 
@@ -66,7 +80,7 @@ RSpec.describe Ci::PipelineCreation::DropNotRunnableBuildsService do
 
       context 'when the Ci quota is exceeded' do
         before do
-          expect(pipeline.project).to receive(:ci_minutes_quota)
+          allow(pipeline.project).to receive(:ci_minutes_quota)
             .and_return(double('quota', minutes_used_up?: true))
         end
 
@@ -83,7 +97,7 @@ RSpec.describe Ci::PipelineCreation::DropNotRunnableBuildsService do
 
       context 'when the Ci quota is exceeded' do
         before do
-          expect(pipeline.project).to receive(:ci_minutes_quota)
+          allow(pipeline.project).to receive(:ci_minutes_quota)
             .and_return(double('quota', minutes_used_up?: true))
         end
 

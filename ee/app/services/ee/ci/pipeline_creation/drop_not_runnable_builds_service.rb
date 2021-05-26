@@ -17,11 +17,17 @@ module EE
 
         override :matching_failure_reason
         def matching_failure_reason(build_matcher)
-          if matching_instance_runners?(build_matcher)
+          if build_matcher.project.shared_runners_enabled? && !matching_instance_runners_quota?(build_matcher)
             :ci_quota_exceeded
           else
             :no_matching_runner
           end
+        end
+
+        def matching_instance_runners_quota?(build_matcher)
+          instance_runners
+            .find { |matcher| matcher.matches_quota?(build_matcher) }
+            .present?
         end
       end
     end
