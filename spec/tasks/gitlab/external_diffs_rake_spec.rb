@@ -13,7 +13,7 @@ RSpec.describe 'gitlab:external_diffs rake tasks' do
       file = create(:merge_request).merge_request_diff.tap { |o| o.update_columns(stored_externally: true, external_diff_store: 1) }
       object = create(:merge_request).merge_request_diff.tap { |o| o.update_columns(stored_externally: true, external_diff_store: 2) }
 
-      run_rake_task('gitlab:external_diffs:force_object_storage')
+      run_rake_task('gitlab:external_diffs:force_object_storage', mock_stdout: true)
 
       expect(db.reload).not_to be_stored_externally
       expect(file.reload).to be_stored_externally
@@ -28,7 +28,7 @@ RSpec.describe 'gitlab:external_diffs rake tasks' do
 
       expect(MergeRequestDiff).to receive(:in_batches).with(start: 'foo', finish: 'bar', of: 'baz')
 
-      run_rake_task('gitlab:external_diffs:force_object_storage')
+      run_rake_task('gitlab:external_diffs:force_object_storage', mock_stdout: true)
     end
   end
 end

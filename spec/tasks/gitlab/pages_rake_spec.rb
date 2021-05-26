@@ -11,13 +11,15 @@ RSpec.describe 'gitlab:pages' do
     subject { run_rake_task('gitlab:pages:migrate_legacy_storage') }
 
     it 'calls migration service' do
-      expect_next_instance_of(::Pages::MigrateFromLegacyStorageService, anything,
-                              ignore_invalid_entries: false,
-                              mark_projects_as_not_deployed: false) do |service|
-        expect(service).to receive(:execute_with_threads).with(threads: 3, batch_size: 10).and_call_original
-      end
+      expect do
+        expect_next_instance_of(::Pages::MigrateFromLegacyStorageService, anything,
+                                ignore_invalid_entries: false,
+                                mark_projects_as_not_deployed: false) do |service|
+          expect(service).to receive(:execute_with_threads).with(threads: 3, batch_size: 10).and_call_original
+        end
 
-      subject
+        subject
+      end.to output.to_stdout
     end
 
     it 'uses PAGES_MIGRATION_THREADS environment variable' do
@@ -88,7 +90,7 @@ RSpec.describe 'gitlab:pages' do
   end
 
   describe 'gitlab:pages:deployments:migrate_to_object_storage' do
-    subject { run_rake_task('gitlab:pages:deployments:migrate_to_object_storage') }
+    subject { run_rake_task('gitlab:pages:deployments:migrate_to_object_storage', mock_stdout: true) }
 
     before do
       stub_pages_object_storage(::Pages::DeploymentUploader, enabled: object_storage_enabled)
@@ -131,7 +133,7 @@ RSpec.describe 'gitlab:pages' do
   end
 
   describe 'gitlab:pages:deployments:migrate_to_local' do
-    subject { run_rake_task('gitlab:pages:deployments:migrate_to_local') }
+    subject { run_rake_task('gitlab:pages:deployments:migrate_to_local', mock_stdout: true) }
 
     before do
       stub_pages_object_storage(::Pages::DeploymentUploader, enabled: object_storage_enabled)

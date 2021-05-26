@@ -17,7 +17,7 @@ RSpec.describe 'gitlab:praefect:replicas' do
       it "calls praefect info service's replicas method" do
         expect_any_instance_of(Gitlab::GitalyClient::PraefectInfoService).to receive(:replicas).and_call_original
 
-        run_rake_task('gitlab:praefect:replicas', project_arg)
+        run_rake_task('gitlab:praefect:replicas', project_arg, mock_stdout: true)
       end
 
       it 'prints out the expected row' do
@@ -33,7 +33,7 @@ RSpec.describe 'gitlab:praefect:replicas' do
       it "does not call praefect info service's replicas method" do
         expect_any_instance_of(Gitlab::GitalyClient::PraefectInfoService).not_to receive(:replicas)
 
-        run_rake_task('gitlab:praefect:replicas', project_arg)
+        run_rake_task('gitlab:praefect:replicas', project_arg, mock_stdout: true)
       end
     end
 

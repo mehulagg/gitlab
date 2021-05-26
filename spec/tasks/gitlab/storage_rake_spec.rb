@@ -68,7 +68,7 @@ RSpec.describe 'rake gitlab:storage:*' do
           expect(worker_klass).to receive(:perform_async).with(project.id, project.id)
         end
 
-        run_rake_task(task)
+        run_rake_task(task, mock_stdout: true)
       end
     end
 
@@ -83,7 +83,7 @@ RSpec.describe 'rake gitlab:storage:*' do
           expect(worker_klass).to receive(:perform_async).with(first, last)
         end
 
-        run_rake_task(task)
+        run_rake_task(task, mock_stdout: true)
       end
     end
   end

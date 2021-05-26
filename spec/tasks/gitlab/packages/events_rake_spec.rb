@@ -14,7 +14,7 @@ RSpec.describe 'gitlab:packages:events namespace rake task' do
     allow(file).to receive(:<<) { |contents| yml_file = contents }
     allow(File).to receive(:open).and_yield(file)
 
-    run_rake_task("gitlab:packages:events:#{task}")
+    run_rake_task("gitlab:packages:events:#{task}", mock_stdout: true)
 
     YAML.safe_load(yml_file)
   end

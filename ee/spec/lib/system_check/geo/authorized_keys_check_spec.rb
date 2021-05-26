@@ -11,6 +11,12 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
       allow(File).to receive(:file?).with('/opt/gitlab/embedded/service/gitlab-shell/bin/gitlab-shell-authorized-keys-check') { true }
     end
 
+    def multi_check
+      expect do
+        subject.multi_check
+      end.to output.to_stdout
+    end
+
     context 'OpenSSH config file' do
       context 'in docker' do
         it 'fails when config file does not exist' do
@@ -19,7 +25,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
           expect_failure('Cannot find OpenSSH configuration file at: /assets/sshd_config')
 
-          subject.multi_check
+          multi_check
         end
       end
 
@@ -29,7 +35,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_failure('Cannot find OpenSSH configuration file at: /etc/ssh/sshd_config')
 
-        subject.multi_check
+        multi_check
       end
 
       it 'skips when config file is not readable' do
@@ -38,7 +44,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_skipped('Cannot access OpenSSH configuration file')
 
-        subject.multi_check
+        multi_check
       end
     end
 
@@ -48,7 +54,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_failure('OpenSSH configuration file does not contain a AuthorizedKeysCommand')
 
-        subject.multi_check
+        multi_check
       end
 
       it 'warns when config file does not contain the correct AuthorizedKeysCommand' do
@@ -56,7 +62,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_warning('OpenSSH configuration file points to a different AuthorizedKeysCommand')
 
-        subject.multi_check
+        multi_check
       end
 
       it 'fails when cannot find referred authorized keys file on disk' do
@@ -65,7 +71,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_failure('Cannot find configured AuthorizedKeysCommand: /tmp/nonexistent/authorized_keys')
 
-        subject.multi_check
+        multi_check
       end
     end
 
@@ -75,7 +81,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_failure('OpenSSH configuration file does not contain a AuthorizedKeysCommandUser')
 
-        subject.multi_check
+        multi_check
       end
 
       it 'fails when config file does not contain the correct AuthorizedKeysCommandUser' do
@@ -83,7 +89,7 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
 
         expect_warning('OpenSSH configuration file points to a different AuthorizedKeysCommandUser')
 
-        subject.multi_check
+        multi_check
       end
     end
 
@@ -91,9 +97,10 @@ RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
       override_sshd_config('system_check/sshd_config')
       allow(subject).to receive(:gitlab_user) { 'git' }
 
-      result = subject.multi_check
-      expect($stdout.string).to include('yes')
-      expect(result).to be_truthy
+      expect do
+        result = subject.multi_check
+        expect(result).to be_truthy
+      end.to output("yes\n").to_stdout
     end
   end
 

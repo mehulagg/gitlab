@@ -19,7 +19,7 @@ RSpec.describe 'gitlab:packages:build_composer_cache namespace rake task' do
   end
 
   subject do
-    run_rake_task("gitlab:packages:build_composer_cache")
+    run_rake_task("gitlab:packages:build_composer_cache", mock_stdout: true)
   end
 
   it 'generates the cache files' do

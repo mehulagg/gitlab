@@ -19,7 +19,7 @@ RSpec.describe 'gitlab:web_hook namespace rake tasks' do
   describe 'gitlab:web_hook:add' do
     it 'adds a web hook to all projects' do
       stub_env('URL' => url)
-      run_rake_task('gitlab:web_hook:add')
+      run_rake_task('gitlab:web_hook:add', mock_stdout: true)
 
       expect(hook_urls).to contain_exactly(url, url)
       expect(other_group_hook_urls).to contain_exactly(url)
@@ -27,7 +27,7 @@ RSpec.describe 'gitlab:web_hook namespace rake tasks' do
 
     it 'adds a web hook to projects in the specified namespace' do
       stub_env('URL' => url, 'NAMESPACE' => group.full_path)
-      run_rake_task('gitlab:web_hook:add')
+      run_rake_task('gitlab:web_hook:add', mock_stdout: true)
 
       expect(hook_urls).to contain_exactly(url, url)
       expect(other_group_hook_urls).to be_empty
@@ -38,7 +38,7 @@ RSpec.describe 'gitlab:web_hook namespace rake tasks' do
 
       group.destroy!
 
-      expect { run_rake_task('gitlab:web_hook:add') }.to raise_error(SystemExit)
+      expect { run_rake_task('gitlab:web_hook:add', mock_stdout: true) }.to raise_error(SystemExit)
     end
   end
 
@@ -52,7 +52,7 @@ RSpec.describe 'gitlab:web_hook namespace rake tasks' do
 
     it 'removes a web hook from all projects by URL' do
       stub_env('URL' => url)
-      run_rake_task('gitlab:web_hook:rm')
+      run_rake_task('gitlab:web_hook:rm', mock_stdout: true)
 
       expect(hook_urls).to contain_exactly(other_url)
       expect(other_group_hook_urls).to be_empty
@@ -60,7 +60,7 @@ RSpec.describe 'gitlab:web_hook namespace rake tasks' do
 
     it 'removes a web hook from projects in the specified namespace by URL' do
       stub_env('NAMESPACE' => group.full_path, 'URL' => url)
-      run_rake_task('gitlab:web_hook:rm')
+      run_rake_task('gitlab:web_hook:rm', mock_stdout: true)
 
       expect(hook_urls).to contain_exactly(other_url)
       expect(other_group_hook_urls).to contain_exactly(url)
@@ -71,7 +71,7 @@ RSpec.describe 'gitlab:web_hook namespace rake tasks' do
 
       group.destroy!
 
-      expect { run_rake_task('gitlab:web_hook:rm') }.to raise_error(SystemExit)
+      expect { run_rake_task('gitlab:web_hook:rm', mock_stdout: true) }.to raise_error(SystemExit)
     end
   end
 

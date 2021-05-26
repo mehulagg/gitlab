@@ -48,7 +48,7 @@ RSpec.describe 'gettext' do
       end
 
       it 'raises an error' do
-        expect { run_rake_task('gettext:regenerate') }
+        expect { run_rake_task('gettext:regenerate', mock_stdout: true) }
           .to raise_error(/Cannot find '#{locale_path}' folder/)
       end
     end
@@ -65,7 +65,7 @@ RSpec.describe 'gettext' do
       end
 
       it 'does not remove that locale' do
-        expect { run_rake_task('gettext:regenerate') }
+        expect { run_rake_task('gettext:regenerate', mock_stdout: true) }
           .not_to change { Dir.exist?(locale_nz_path) }
       end
     end
@@ -80,7 +80,7 @@ RSpec.describe 'gettext' do
       end
 
       it 'removes those folders' do
-        expect { run_rake_task('gettext:regenerate') }
+        expect { run_rake_task('gettext:regenerate', mock_stdout: true) }
           .to change { Dir.exist?(empty_locale_path) }
           .to eq false
       end
@@ -90,7 +90,7 @@ RSpec.describe 'gettext' do
       let(:invoke_find) { -> { true } }
 
       it 'prints an error' do
-        expect { run_rake_task('gettext:regenerate') }
+        expect { run_rake_task('gettext:regenerate', mock_stdout: true) }
           .to raise_error(/gitlab.pot file not generated/)
       end
     end
@@ -107,7 +107,7 @@ RSpec.describe 'gettext' do
         expect(pot_file).to include('PO-Revision-Date: 2017-07-13 12:10-0500')
         expect(pot_file).to include('PO-Creation-Date: 2016-07-13 12:11-0500')
 
-        run_rake_task('gettext:regenerate')
+        run_rake_task('gettext:regenerate', mock_stdout: true)
 
         pot_file = File.read(pot_file_path)
         expect(pot_file).not_to include('PO-Revision-Date: 2017-07-13 12:10-0500')
@@ -137,7 +137,7 @@ RSpec.describe 'gettext' do
       end
 
       it 'completes without error' do
-        expect { run_rake_task('gettext:lint') }
+        expect { run_rake_task('gettext:lint', mock_stdout: true) }
           .not_to raise_error
       end
     end
@@ -153,7 +153,7 @@ RSpec.describe 'gettext' do
       end
 
       it 'raises an error' do
-        expect { run_rake_task('gettext:lint') }
+        expect { run_rake_task('gettext:lint', mock_stdout: true) }
           .to raise_error(/Not all PO-files are valid/)
       end
     end
@@ -169,7 +169,7 @@ RSpec.describe 'gettext' do
       end
 
       it 'raises an error' do
-        expect { run_rake_task('gettext:lint') }
+        expect { run_rake_task('gettext:lint', mock_stdout: true) }
           .to raise_error(/Not all PO-files are valid/)
       end
     end

@@ -13,7 +13,7 @@ RSpec.describe 'gitlab:gitaly namespace rake task' do
     let(:storage_path) { Rails.root.join('tmp/tests/repositories').to_s }
     let(:version) { File.read(Rails.root.join(Gitlab::GitalyClient::SERVER_VERSION_FILE)).chomp }
 
-    subject { run_rake_task('gitlab:gitaly:install', clone_path, storage_path) }
+    subject { run_rake_task('gitlab:gitaly:install', clone_path, storage_path, mock_stdout: true) }
 
     context 'no dir given' do
       it 'aborts and display a help message' do

@@ -16,7 +16,7 @@ RSpec.describe 'gitlab:lfs namespace rake task' do
     end
 
     describe 'migrate' do
-      subject { run_rake_task('gitlab:lfs:migrate') }
+      subject { run_rake_task('gitlab:lfs:migrate', mock_stdout: true) }
 
       let!(:lfs_object) { create(:lfs_object, :with_file) }
 
@@ -38,7 +38,7 @@ RSpec.describe 'gitlab:lfs namespace rake task' do
     end
 
     describe 'migrate_to_local' do
-      subject { run_rake_task('gitlab:lfs:migrate_to_local') }
+      subject { run_rake_task('gitlab:lfs:migrate_to_local', mock_stdout: true) }
 
       let(:lfs_object) { create(:lfs_object, :with_file, :object_storage) }
 

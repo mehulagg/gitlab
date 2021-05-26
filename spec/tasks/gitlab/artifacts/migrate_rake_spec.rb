@@ -14,7 +14,7 @@ RSpec.describe 'gitlab:artifacts namespace rake task' do
   end
 
   describe 'gitlab:artifacts:migrate' do
-    subject { run_rake_task('gitlab:artifacts:migrate') }
+    subject { run_rake_task('gitlab:artifacts:migrate', mock_stdout: true) }
 
     let!(:artifact) { create(:ci_job_artifact, :archive, file_store: store) }
     let!(:job_trace) { create(:ci_job_artifact, :trace, file_store: store) }
@@ -59,7 +59,7 @@ RSpec.describe 'gitlab:artifacts namespace rake task' do
   describe 'gitlab:artifacts:migrate_to_local' do
     let(:object_storage_enabled) { true }
 
-    subject { run_rake_task('gitlab:artifacts:migrate_to_local') }
+    subject { run_rake_task('gitlab:artifacts:migrate_to_local', mock_stdout: true) }
 
     let!(:artifact) { create(:ci_job_artifact, :archive, file_store: store) }
     let!(:job_trace) { create(:ci_job_artifact, :trace, file_store: store) }

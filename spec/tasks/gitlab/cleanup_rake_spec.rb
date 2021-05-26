@@ -167,7 +167,7 @@ RSpec.describe 'gitlab:cleanup rake tasks' do
 
   context 'sessions' do
     describe 'gitlab:cleanup:sessions:active_sessions_lookup_keys', :clean_gitlab_redis_shared_state do
-      subject(:rake_task) { run_rake_task('gitlab:cleanup:sessions:active_sessions_lookup_keys') }
+      subject(:rake_task) { run_rake_task('gitlab:cleanup:sessions:active_sessions_lookup_keys', mock_stdout: true) }
 
       let!(:user) { create(:user) }
       let(:existing_session_id) { '5' }

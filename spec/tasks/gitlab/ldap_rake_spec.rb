@@ -10,7 +10,7 @@ RSpec.describe 'gitlab:ldap:rename_provider rake task' do
 
     create(:identity) # Necessary to prevent `exit 1` from the task.
 
-    run_rake_task('gitlab:ldap:rename_provider', 'ldapmain', 'ldapfoo')
+    run_rake_task('gitlab:ldap:rename_provider', 'ldapmain', 'ldapfoo', mock_stdout: true)
   end
 end
 

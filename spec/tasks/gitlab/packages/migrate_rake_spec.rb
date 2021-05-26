@@ -13,7 +13,7 @@ RSpec.describe 'gitlab:packages namespace rake task' do
     let!(:package_file) { create(:package_file, :pom, file_store: local) }
 
     def packages_migrate
-      run_rake_task('gitlab:packages:migrate')
+      run_rake_task('gitlab:packages:migrate', mock_stdout: true)
     end
 
     context 'object storage disabled' do

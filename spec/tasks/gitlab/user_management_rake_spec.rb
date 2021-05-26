@@ -23,7 +23,7 @@ RSpec.describe 'gitlab:user_management tasks' do
 
       shared_examples 'updates proper users' do
         it 'updates members' do
-          run_rake
+          expect { run_rake }.to output.to_stdout
 
           expect(user_1.reload.projects_limit).to eq(0)
           expect(user_1.can_create_group).to eq(false)
@@ -32,7 +32,7 @@ RSpec.describe 'gitlab:user_management tasks' do
         end
 
         it 'does not update other users' do
-          run_rake
+          expect { run_rake }.to output.to_stdout
 
           expect(user_other.reload.projects_limit).to eq(10)
           expect(user_other.reload.can_create_group).to eq(true)

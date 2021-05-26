@@ -27,7 +27,7 @@ RSpec.describe 'gitlab:update_project_templates rake task' do
   end
 
   it 'updates valid project templates' do
-    expect { run_rake_task('gitlab:update_project_templates', ['rails']) }
+    expect { run_rake_task('gitlab:update_project_templates', ['rails'], mock_stdout: true) }
       .to change { Dir.entries(tmpdir) }
         .by(['rails.tar.gz'])
   end

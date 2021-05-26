@@ -7,7 +7,7 @@
 RSpec.shared_examples 'enqueue upload migration jobs in batch' do |batch:|
   def run(task)
     args = [uploader_class.to_s, model_class.to_s, mounted_as].compact
-    run_rake_task(task, *args)
+    run_rake_task(task, *args, mock_stdout: true)
   end
 
   it 'migrates local storage to remote object storage' do

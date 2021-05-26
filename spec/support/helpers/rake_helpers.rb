@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
 module RakeHelpers
-  def run_rake_task(task_name, *args)
+  def run_rake_task(task_name, *args, mock_stdout: false)
     Rake::Task[task_name].reenable
-    Rake.application.invoke_task("#{task_name}[#{args.join(',')}]")
+
+    task = "#{task_name}[#{args.join(',')}]"
+
+    if mock_stdout
+      expect do
+        Rake.application.invoke_task(task)
+      end.to output.to_stdout
+    else
+      Rake.application.invoke_task(task)
+    end
   end
 
   def stub_warn_user_is_not_gitlab

@@ -20,9 +20,7 @@ RSpec.describe 'gitlab:env:info' do
       let(:git_version) { 'git version 2.10.0' }
 
       it 'prints git version' do
-        run_rake_task('gitlab:env:info')
-
-        expect($stdout.string).to match(/Git Version:(.*)2.10.0/)
+        expect { run_rake_task('gitlab:env:info') }.to output(/Git Version:(.*)2.10.0/).to_stdout
       end
     end
 
@@ -30,9 +28,7 @@ RSpec.describe 'gitlab:env:info' do
       let(:git_version) { '' }
 
       it 'prints unknown' do
-        run_rake_task('gitlab:env:info')
-
-        expect($stdout.string).to match(/Git Version:(.*)unknown/)
+        expect { run_rake_task('gitlab:env:info') }.to output(/Git Version:(.*)unknown/).to_stdout
       end
     end
   end

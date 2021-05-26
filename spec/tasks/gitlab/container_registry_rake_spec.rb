@@ -16,11 +16,11 @@ RSpec.describe 'gitlab:container_registry namespace rake tasks' do
       it 'does not call UpdateContainerRegistryInfoService' do
         expect_any_instance_of(UpdateContainerRegistryInfoService).not_to receive(:execute)
 
-        subject
+        expect { subject }.to output.to_stdout
       end
 
       it 'does not raise an error' do
-        expect { subject }.not_to raise_error
+        expect { expect { subject }.to output.to_stdout }.not_to raise_error
       end
 
       it 'prints a warning message' do

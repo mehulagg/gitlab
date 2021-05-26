@@ -71,7 +71,7 @@ RSpec.describe 'check.rake' do
         expect(Gitlab::Auth::Ldap::Config).not_to receive(:providers)
         expect(Gitlab::Auth::Ldap::Adapter).not_to receive(:open)
 
-        subject
+        expect { subject }.to output.to_stdout
       end
     end
 
@@ -94,7 +94,7 @@ RSpec.describe 'check.rake' do
 
         expect(ldap).to receive(:bind)
 
-        subject
+        expect { subject }.to output.to_stdout
       end
 
       it 'searches for 100 LDAP users' do
@@ -102,7 +102,7 @@ RSpec.describe 'check.rake' do
 
         expect(adapter).to receive(:users).with('uid', '*', 100)
 
-        subject
+        expect { subject }.to output.to_stdout
       end
 
       it 'sanitizes output' do

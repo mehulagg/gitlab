@@ -8,7 +8,7 @@ RSpec.describe 'gitlab:x509 namespace rake task' do
   end
 
   describe 'update_signatures' do
-    subject { run_rake_task('gitlab:x509:update_signatures') }
+    subject { run_rake_task('gitlab:x509:update_signatures', mock_stdout: true) }
 
     let(:project) { create :project, :repository, path: X509Helpers::User1.path }
     let(:x509_signed_commit) { project.commit_by(oid: '189a6c924013fc3fe40d6f1ec1dc20214183bc97') }

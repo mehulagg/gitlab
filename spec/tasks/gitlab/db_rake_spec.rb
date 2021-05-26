@@ -49,7 +49,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
       expect(Rake::Task['db:migrate']).not_to receive(:invoke)
       expect(Rake::Task['db:structure:load']).not_to receive(:invoke)
       expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
-      expect { run_rake_task('gitlab:db:configure') }.to raise_error(RuntimeError, 'error')
+      expect { run_rake_task('gitlab:db:configure', mock_stdout: true) }.to raise_error(RuntimeError, 'error')
       # unstub connection so that the database cleaner still works
       allow(ActiveRecord::Base).to receive(:connection).and_call_original
     end
@@ -60,7 +60,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
       expect(Rake::Task['db:structure:load']).to receive(:invoke)
       expect(Rake::Task['db:seed_fu']).not_to receive(:invoke)
       expect(Rake::Task['db:migrate']).not_to receive(:invoke)
-      expect { run_rake_task('gitlab:db:configure') }.to raise_error(RuntimeError, 'error')
+      expect { run_rake_task('gitlab:db:configure', mock_stdout: true) }.to raise_error(RuntimeError, 'error')
     end
 
     context 'SKIP_POST_DEPLOYMENT_MIGRATIONS environment variable set' do
@@ -115,7 +115,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
       it 'outputs changed message for automation after operations happen' do
         allow(ActiveRecord::Base.connection.schema_migration).to receive(:table_exists?).and_return(schema_migration_table_exists)
         allow_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(needs_migrations)
-        expect { run_rake_task('gitlab:db:unattended') }. to output(/^#{rake_output}$/).to_stdout
+        expect { run_rake_task('gitlab:db:unattended') }.to output(/^#{rake_output}$/).to_stdout
       end
     end
   end
@@ -165,7 +165,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
       expect(Kernel).to receive(:system)
         .with('psql', any_args, custom_filepath.to_path, db_config['database']).and_return(nil)
 
-      expect { run_rake_task(custom_load_task) }.to raise_error(/failed to execute:\s*psql/)
+      expect { run_rake_task(custom_load_task, mock_stdout: true) }.to raise_error(/failed to execute:\s*psql/)
     end
   end
 
@@ -259,11 +259,11 @@ RSpec.describe 'gitlab:db namespace rake task' do
       it 'raises an error if the index does not exist' do
         allow(indexes).to receive(:where).with(identifier: 'public.absent_index').and_return([])
 
-        expect { run_rake_task('gitlab:db:reindex', 'public.absent_index') }.to raise_error(/Index not found/)
+        expect { run_rake_task('gitlab:db:reindex', 'public.absent_index', mock_stdout: true) }.to raise_error(/Index not found/)
       end
 
       it 'raises an error if the index is not fully qualified with a schema' do
-        expect { run_rake_task('gitlab:db:reindex', 'foo_idx') }.to raise_error(/Index name is not fully qualified/)
+        expect { run_rake_task('gitlab:db:reindex', 'foo_idx', mock_stdout: true) }.to raise_error(/Index name is not fully qualified/)
       end
     end
   end
@@ -287,7 +287,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
         allow_any_instance_of(ApplicationSetting).to receive(:self_monitoring_project).and_return(self_monitoring_project)
         allow(Project).to receive(:count).and_return(project_count)
 
-        expect { run_rake_task(task) }.to raise_error do |error|
+        expect { run_rake_task(task, mock_stdout: true) }.to raise_error do |error|
           expect(error).to be_a(SystemExit)
           expect(error.status).to eq(exit_status)
           expect(error.success?).to be(exit_code)
