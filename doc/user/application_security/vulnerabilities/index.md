@@ -120,9 +120,9 @@ NOTE:
 If Jira issue support is enabled, GitLab issues are disabled so this feature is not available.
 
 You can link one or more existing GitLab issues to a vulnerability. Adding a link helps track
-the issue that resolves or mitigates a vulnerability, and the other way around.
+the issue that resolves or mitigates a vulnerability.
 
-Linked issues are shown in the Vulnerability Report and the vulnerability's page.
+Issues linked to a vulnerability are shown in the Vulnerability Report and the vulnerability's page.
 
 NOTE:
 
