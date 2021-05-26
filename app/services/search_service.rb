@@ -28,6 +28,21 @@ class SearchService
   # rubocop: enable CodeReuse/ActiveRecord
 
   # rubocop: disable CodeReuse/ActiveRecord
+  def projects
+    return @projects if defined?(@projects)
+
+    @projects =
+      if params[:project_ids].present?
+        project_ids = params[:project_ids].split(',')
+        the_projects = Project.where(id: project_ids)
+        the_projects.find_all { |p| can?(current_user, :read_project, p) }
+      else
+        nil
+      end
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # rubocop: disable CodeReuse/ActiveRecord
   def group
     return @group if defined?(@group)
 

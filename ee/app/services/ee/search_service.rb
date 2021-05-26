@@ -2,6 +2,8 @@
 
 module EE
   module SearchService
+    extend ::Gitlab::Utils::Override
+
     # This is a proper method instead of a `delegate` in order to
     # avoid adding unnecessary methods to Search::SnippetService
     def use_elasticsearch?
@@ -26,6 +28,13 @@ module EE
 
     def show_elasticsearch_tabs?
       ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: search_service.elasticsearchable_scope)
+    end
+
+    override :search_service
+    def search_service
+      @search_service ||= ::Search::ProjectService.new(projects, current_user, params) if projects # rubocop:disable Gitlab/ModuleWithInstanceVariables
+
+      super
     end
   end
 end

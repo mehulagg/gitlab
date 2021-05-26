@@ -10,14 +10,16 @@ module Gitlab
 
       def initialize(current_user, query, project:, repository_ref: nil, order_by: nil, sort: nil, filters: {})
         @project = project
-        @repository_ref = repository_ref.presence || project.default_branch
+        @repository_ref = repository_ref.presence || project.is_a?(Project) && project.default_branch
 
-        super(current_user, query, [project.id], public_and_internal_projects: false, order_by: order_by, sort: sort, filters: filters)
+        project_ids = project.is_a?(Array) ? project.pluck(:id) : [project.id] # rubocop:disable CodeReuse/ActiveRecord
+        super(current_user, query, project_ids, public_and_internal_projects: false, order_by: order_by, sort: sort, filters: filters)
       end
 
       private
 
       def blobs(page: 1, per_page: DEFAULT_PER_PAGE, count_only: false, preload_method: nil)
+        return super if project.is_a?(Array)
         return Kaminari.paginate_array([]) unless Ability.allowed?(@current_user, :download_code, project)
         return Kaminari.paginate_array([]) if project.empty_repo? || query.blank?
         return Kaminari.paginate_array([]) unless root_ref?

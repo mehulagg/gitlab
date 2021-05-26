@@ -22,6 +22,7 @@ class SearchController < ApplicationController
 
   def show
     @project = search_service.project
+    @projects = search_service.projects
     @group = search_service.group
 
     return if params[:search].blank?
