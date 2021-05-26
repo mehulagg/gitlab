@@ -505,7 +505,20 @@ Feature.disable(:webauthn)
 
 If you are receiving an `invalid pin code` error, this may indicate that there is a time sync issue between the authentication application and the GitLab instance itself.
 
-Most authentication apps have a feature in the settings for syncing the time for the codes themselves. For Google Authenticator for example, go to `Settings > Time correction for codes`.
+Most authentication apps have a feature in the settings for syncing the time for the codes themselves. For Google Authenticator for example:
+
+- If you are on Andriod: 
+    1. Go to the Main Menu on the app.
+    2. Select Settings.
+    3. Select the Time correction for the codes.
+    4. Select Sync now.
+
+- If you are on iOS (Apple iPhone):
+    1. Go to the iPhone Settings App. (your phone settings area).
+    2. Select General.
+    3. Select Date & Time.
+    4. Enable Set Automatically (if it’s already enabled, disable it, wait a few seconds and re-enable).
+
 
 <!-- ## Troubleshooting
 
