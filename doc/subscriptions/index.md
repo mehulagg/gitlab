@@ -163,19 +163,47 @@ To change the password for this customers portal account:
 1. Make the required changes to the **Your password** section.
 1. Click **Save changes**.
 
-## GitLab for Education subscriptions
+## Community Program Subscriptions 
 
-The GitLab Education license can only be used for instructional-use or
+### GitLab for Education program subscriptions
+
+The [GitLab for Education](https://about.gitlab.com/solutions/education/) program gives 
+our top tier, plus 50,000 CI mins/month, to qualifying non-profit educational institutions. 
+
+The GitLab for Education license can only be used for instructional-use or
 non-commercial academic research.
 
-Find more information how to apply and renew at
+Find more information on how to apply and renew at
 [GitLab for Education](https://about.gitlab.com/solutions/education/).
 
-## GitLab for Open Source subscriptions
+### GitLab for Open Source program subscriptions
 
-All [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/)
-requests, including subscription renewals, must be made by using the application process.
+The [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/) program gives 
+our top tier, plus 50,000 CI mins/month, to qualifying open source projects. 
+
+You can find more information about the [program requirements](https://about.gitlab.com/solutions/open-source/join/#requirements), [renewals](https://about.gitlab.com/solutions/open-source/join/$renewals),
+and benefits on the [GitLab for Open Source application page](https://about.gitlab.com/solutions/open-source/join/).
+
 If you have any questions, send an email to `opensource@gitlab.com` for assistance.
+
+#### Screenshots for Open Source Program Verification
+
+You will need to upload three screenshots as part of the verification process to help us qualify you for the [GitLab for Open Source program](https://about.gitlab.com/solutions/open-source/). Below, please find instructions and examples to help you take the correct screenshots. 
+
+##### OSI Approved license
+
+### GitLab for Startups program subscriptions
+
+
+
+##### Publicly Visible Settings
+
+The [GitLab for Startups](https://about.gitlab.com/solutions/startups/) program gives 
+our top tier, plus 50,000 CI mins/month, to qualifying startups for 12 months. 
+
+For more information, including program requirements, please see the [Startup program's landing page](https://about.gitlab.com/solutions/startups/). 
+
+All questions and requests related to the GitLab for Startups program should be sent to: startups@gitlab.com.
 
 ## Contact Support
 
