@@ -135,29 +135,9 @@ size 177735
 ```
 
 Starting with GitLab 13.5, these pointers are converted to the uploaded
-LFS object if the `include_lfs_blobs_in_archive` feature flag is
-enabled.
+LFS object.
 
 Technical details about how this works can be found in the [development documentation for LFS](../../../development/lfs.md#including-lfs-blobs-in-project-archives).
-
-### Enable or disable LFS objects in project archives
-
-_LFS objects in project archives_ is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:include_lfs_blobs_in_archive)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:include_lfs_blobs_in_archive)
-```
 
 ## Troubleshooting
 
