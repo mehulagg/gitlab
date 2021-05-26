@@ -452,6 +452,93 @@ RSpec.describe Iteration do
     end
   end
 
+  context 'sets correct state based on iteration dates' do
+    let_it_be(:iterations_cadence) { create(:iterations_cadence, group: group, start_date: 10.days.ago) }
+    let(:iteration) { build(:iteration, group: iterations_cadence.group, iterations_cadence: iterations_cadence, start_date: start_date, due_date: start_date + 2.weeks) }
+
+    context 'start_date is in the future' do
+      let(:start_date) { 1.day.from_now }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('upcoming')
+      end
+    end
+
+    context 'start_date is Today' do
+      let(:start_date) { Date.today }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('started')
+      end
+    end
+
+    context 'start_date is in the past and due date is still in the future' do
+      let(:start_date) { 1.week.ago }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('started')
+      end
+    end
+
+    context 'start_date is in the past and due date is also in the past' do
+      let(:start_date) { 3.week.ago }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('closed')
+      end
+    end
+
+    context 'when dates for an existing iteration change' do
+      context 'when iteration dates go from future to past' do
+        let(:iteration) { create(:iteration, group: iterations_cadence.group, iterations_cadence: iterations_cadence, start_date: 2.weeks.from_now, due_date: 3.weeks.from_now)}
+
+        it 'sets state to closed' do
+          expect(iteration.state).to eq('upcoming')
+
+          iteration.start_date -= 4.weeks
+          iteration.due_date -= 4.weeks
+          iteration.save!
+
+          expect(iteration.state).to eq('closed')
+        end
+      end
+
+      context 'when iteration dates go from past to future' do
+        let_it_be_with_reload(:iteration) { create(:iteration, group: iterations_cadence.group, iterations_cadence: iterations_cadence, start_date: 2.weeks.ago, due_date: 1.week.ago)}
+
+        it 'sets state to upcoming' do
+          expect(iteration.state).to eq('closed')
+
+          iteration.start_date += 3.weeks
+          iteration.due_date += 3.weeks
+          iteration.save!
+
+          expect(iteration.state).to eq('upcoming')
+        end
+
+        context 'and today is between iteration start and due dates' do
+          it 'sets state to started' do
+            expect(iteration.state).to eq('closed')
+
+            iteration.start_date += 2.weeks
+            iteration.due_date += 2.weeks
+            iteration.save!
+
+            expect(iteration.state).to eq('started')
+          end
+        end
+      end
+    end
+  end
+
   it_behaves_like 'a timebox', :iteration do
     let(:timebox_args) { [:skip_project_validation] }
     let(:timebox_table_name) { described_class.table_name.to_sym }
