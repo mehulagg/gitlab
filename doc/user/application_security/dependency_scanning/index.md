@@ -235,7 +235,7 @@ Once a vulnerability is found, you can interact with it. Read more on how to
 
 Some vulnerabilities can be fixed by applying the solution that GitLab
 automatically generates. Read more about the
-[solutions for vulnerabilities](../vulnerabilities/index.md#remediate-a-vulnerability).
+[solutions for vulnerabilities](../vulnerabilities/index.md#resolve-a-vulnerability).
 
 ## Security Dashboard
 
