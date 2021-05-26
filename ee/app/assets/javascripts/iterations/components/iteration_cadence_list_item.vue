@@ -160,7 +160,7 @@ export default {
       <gl-button
         variant="link"
         class="gl-font-weight-bold gl-text-body! gl-py-5! gl-px-3! gl-mr-auto"
-        aria-expanded="expanded"
+        :aria-expanded="expanded"
         @click="expanded = !expanded"
       >
         <gl-icon
