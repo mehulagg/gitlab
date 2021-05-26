@@ -189,7 +189,7 @@ If you have any questions, send an email to `opensource@gitlab.com` for assistan
 
 #### Verification for Open Source program
 
-As part of the verification process, you must upload three screenshots.
+As part of the [application verification process](https://about.gitlab.com/solutions/open-source/join/), you must upload three screenshots.
 These screenshots are needed to qualify you for the GitLab for Open Source program.
 
 - [OSI-approved license overview](#license-overview)
