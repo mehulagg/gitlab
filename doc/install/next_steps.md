@@ -14,8 +14,6 @@ installation.
 - [SMTP](https://docs.gitlab.com/omnibus/settings/smtp.html): Configure SMTP
   for proper email notifications support.
 
-- Sign up for our [Security Newsletter]() to get notified for security updates upon release.
-
 ## CI/CD
 
 - [Set up runners](https://docs.gitlab.com/runner/): Set up one or more GitLab
@@ -30,6 +28,8 @@ installation.
 
 - [Secure GitLab](../security/README.md#securing-your-gitlab-installation):
   Recommended practices to secure your GitLab instance.
+
+- Sign up for our [Security Newsletter]() to get notified for security updates upon release.
 
 ## Authentication
 
