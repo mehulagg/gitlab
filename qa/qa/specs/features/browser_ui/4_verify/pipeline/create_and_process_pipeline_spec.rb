@@ -20,11 +20,20 @@ module QA
         end
       end
 
+      before do
+        Runtime::Feature.enable(:ci_drop_new_builds_when_ci_quota_exceeded, project: project)
+      end
+
       after do
+        Runtime::Feature.disable(:ci_drop_new_builds_when_ci_quota_exceeded, project: project)
         runner.remove_via_api!
       end
 
-      it 'users creates a pipeline which gets processed', :smoke, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1849' do
+      it(
+        'users creates a pipeline which gets processed',
+        :smoke,
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1849'
+      ) do
         Flow::Login.sign_in
 
         Resource::Repository::Commit.fabricate_via_api! do |commit|
@@ -70,7 +79,7 @@ module QA
         {
           'test-success': :passed,
           'test-failure': :failed,
-          'test-tags': :pending,
+          'test-tags': :failed,
           'test-artifacts': :passed
         }.each do |job, status|
           Page::Project::Pipeline::Show.perform do |pipeline|
