@@ -43,7 +43,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | `milestone`         | no       | The milestone when the metric is introduced. |
 | `milestone_removed` | no       | The milestone when the metric is removed. |
 | `introduced_by_url` | no       | The URL to the Merge Request that introduced the metric. |
-| `repair_issue_url`  | no       | The URL of issue that was created to repair metrics marked with `broken` status |
+| `repair_issue_url`  | no       | The URL of the issue that was created to repair a metric with a `broken` status. |
 | `options`           | no       | `object`: options information needed to calculate the metric value. |
 | `skip_validation`   | no       | This should **not** be set. [Used for imported metrics until we review, update and make them valid](https://gitlab.com/groups/gitlab-org/-/epics/5425). |
 
@@ -54,7 +54,7 @@ Metric definitions can have one of the following statuses:
 - `data_available`: Metric data is available and used in a Sisense dashboard.
 - `implemented`: Metric is implemented but data is not yet available. This is a temporary
   status for newly added metrics awaiting inclusion in a new release.
-- `broken`: Metric reports broken data (eg: -1 fallback), or does not report data at all. Metrics marked as broken must also have `repair_issue_url` attribute.
+- `broken`: Metric reports broken data (for example, -1 fallback), or does not report data at all. A metric marked as `broken` must also have the `repair_issue_url` attribute.
 - `not_used`: Metric is not used in any dashboard.
 - `deprecated`: Metric is deprecated and possibly planned to be removed.
 - `removed`: Metric was removed, but it may appear in Usage Ping payloads sent from instances running on older versions of GitLab.
