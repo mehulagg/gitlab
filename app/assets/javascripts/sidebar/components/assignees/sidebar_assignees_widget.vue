@@ -186,7 +186,8 @@ export default {
     expandWidget() {
       this.$refs.toggle.expand();
     },
-    focusSearch() {
+    async focusSearch() {
+      await this.$nextTick();
       this.$refs.userSelect.focusSearch();
     },
     showError() {
@@ -229,7 +230,7 @@ export default {
           @expand-widget="expandWidget"
         />
       </template>
-      <template #default="{ edit }">
+      <template #default>
         <user-select
           ref="userSelect"
           v-model="selected"
@@ -240,7 +241,6 @@ export default {
           :allow-multiple-assignees="allowMultipleAssignees"
           :current-user="currentUser"
           :issuable-type="issuableType"
-          :is-editing="edit"
           class="gl-w-full dropdown-menu-user"
           @toggle="collapseWidget"
           @error="showError"
