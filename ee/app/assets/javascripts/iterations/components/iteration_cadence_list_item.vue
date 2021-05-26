@@ -57,6 +57,10 @@ export default {
       type: String,
       required: true,
     },
+    iterationState: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -82,6 +86,7 @@ export default {
         fullPath: this.groupPath,
         iterationCadenceId: this.cadenceId,
         firstPageSize: pageSize,
+        state: this.iterationState,
       };
     },
     pageInfo() {

@@ -2,7 +2,6 @@
 
 query IterationCadences(
   $fullPath: ID!
-  $active: Boolean
   $beforeCursor: String = ""
   $afterCursor: String = ""
   $firstPageSize: Int
@@ -10,7 +9,6 @@ query IterationCadences(
 ) {
   group(fullPath: $fullPath) {
     iterationCadences(
-      active: $active
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize

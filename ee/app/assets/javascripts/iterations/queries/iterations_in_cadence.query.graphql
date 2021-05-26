@@ -4,6 +4,7 @@
 query Iterations(
   $fullPath: ID!
   $iterationCadenceId: ID!
+  $state: IterationState!
   $beforeCursor: String
   $afterCursor: String
   $firstPageSize: Int
@@ -12,6 +13,7 @@ query Iterations(
   group(fullPath: $fullPath) {
     iterations(
       iterationCadenceIds: [$iterationCadenceId]
+      state: $state
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize

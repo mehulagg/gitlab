@@ -102,6 +102,7 @@ describe('Iteration cadence list item', () => {
       propsData: {
         title: cadence.title,
         cadenceId: cadence.id,
+        iterationState: 'open',
         ...props,
       },
     });

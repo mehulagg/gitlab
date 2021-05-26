@@ -49,10 +49,6 @@ export default {
         fullPath: this.groupPath,
       };
 
-      if (this.active !== undefined) {
-        vars.active = this.active;
-      }
-
       if (this.pagination.beforeCursor) {
         vars.beforeCursor = this.pagination.beforeCursor;
         vars.lastPageSize = pageSize;
@@ -72,15 +68,15 @@ export default {
     loading() {
       return this.$apollo.queries.group.loading;
     },
-    active() {
+    state() {
       switch (this.tabIndex) {
         default:
         case 0:
-          return true;
+          return 'opened';
         case 1:
-          return false;
+          return 'closed';
         case 2:
-          return undefined;
+          return 'all';
       }
     },
   },
@@ -121,6 +117,7 @@ export default {
             :cadence-id="cadence.id"
             :duration-in-weeks="cadence.durationInWeeks"
             :title="cadence.title"
+            :iteration-state="state"
           />
         </ul>
         <p v-else class="nothing-here-block">

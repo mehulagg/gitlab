@@ -7,8 +7,8 @@ RSpec.describe 'User views iteration cadences', :js do
   let_it_be(:group) { create(:group) }
   let_it_be(:cadence) { create(:iterations_cadence, group: group) }
   let_it_be(:other_cadence) { create(:iterations_cadence, group: group) }
-  let_it_be(:cadence_without_iterations) { create(:iterations_cadence, group: group) }
   let_it_be(:iteration_in_cadence) { create(:iteration, group: group, iterations_cadence: cadence) }
+  let_it_be(:closed_iteration_in_cadence) { create(:closed_iteration, group: group, iterations_cadence: cadence) }
   let_it_be(:iteration_in_other_cadence) { create(:iteration, group: group, iterations_cadence: other_cadence) }
 
   before do
@@ -28,5 +28,15 @@ RSpec.describe 'User views iteration cadences', :js do
 
     expect(page).to have_content(iteration_in_cadence.title)
     expect(page).not_to have_content(iteration_in_other_cadence.title)
+    expect(page).not_to have_content(closed_iteration_in_cadence.title)
+
+    click_link 'Done'
+
+    expect(page).not_to have_content(iteration_in_cadence.title)
+
+    click_button cadence.title
+
+    expect(page).not_to have_content(iteration_in_cadence.title)
+    expect(page).to have_content(closed_iteration_in_cadence.title)
   end
 end
