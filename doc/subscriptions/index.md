@@ -163,12 +163,12 @@ To change the password for this customers portal account:
 1. Make the required changes to the **Your password** section.
 1. Click **Save changes**.
 
-## Community Program Subscriptions 
+## Community program subscriptions 
 
-### GitLab for Education program subscriptions
+### GitLab for Education
 
-The [GitLab for Education](https://about.gitlab.com/solutions/education/) program gives 
-our top tier, plus 50,000 CI mins/month, to qualifying non-profit educational institutions. 
+For qualifying non-profit educational institutions, the [GitLab for Education](https://about.gitlab.com/solutions/education/) program provides 
+the top GitLab tier, plus 50,000 CI minutes per month. 
 
 The GitLab for Education license can only be used for instructional-use or
 non-commercial academic research.
