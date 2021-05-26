@@ -11,7 +11,7 @@ module EE
       def complete_post_processing_tasks
         super
 
-        notify_oncall if oncall_notification_recipients.present? && notifying_alert?
+        notify_oncall if ::Feature.disabled?(:escalation_policies_mvc, project) && oncall_notification_recipients.present? && notifying_alert?
       end
 
       def notify_oncall
