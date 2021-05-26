@@ -75,7 +75,7 @@ module Gitlab
         vars = build_envvars(base_sha, to_sha, target)
         path_to_indexer = Gitlab.config.elasticsearch.indexer_path
 
-        timeout_argument = "--timeout=#{TIMEOUT.to_i}"
+        timeout_argument = "--timeout=#{TIMEOUT.to_i}s"
 
         command =
           if index_wiki?
