@@ -81,6 +81,7 @@ EE: true
 
 - Any user-facing change **should** have a changelog entry. Example: "GitLab now
   uses system fonts for all text."
+    - This includes any user-facing interfaces such as changes to the REST or GraphQL APIs.
 - A fix for a regression introduced and then fixed in the same release (such as
   fixing a bug introduced during a monthly release candidate) **should not**
   have a changelog entry.
