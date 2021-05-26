@@ -7,7 +7,11 @@ module Gitlab
       # "connection" method.
       module ActiveRecordProxy
         def connection
-          LoadBalancing.proxy
+          if ancestors.include?(::Ci::ApplicationRecord)
+            LoadBalancing.ci_proxy
+          else
+            LoadBalancing.proxy
+          end
         end
       end
     end
