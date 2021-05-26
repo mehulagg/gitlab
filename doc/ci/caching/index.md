@@ -7,8 +7,8 @@ type: index, concepts, howto
 
 # Caching in GitLab CI/CD
 
-Cache is job output that GitLab stores so you can reuse it in a subsequent job.
-When you use cache, subsequent jobs execute more quickly.
+A cache is one or more files that a job downloads and saves. Subsequent jobs that use
+the same cache don't have to download the files again, so they execute more quickly.
 
 To learn how to define the cache in your `.gitlab-ci.yml` file,
 see the [`cache` reference](../yaml/README.md#cache).
