@@ -124,9 +124,7 @@ export default {
       this.hasError = true;
     },
     onProjectClick() {
-      if (this.glFeatures.usageDataITestingGroupCodeCoverageProjectClickTotal) {
-        api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
-      }
+      api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
     },
     selectAllProjects() {
       this.allProjectsSelected = true;
