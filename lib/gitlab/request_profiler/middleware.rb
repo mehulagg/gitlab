@@ -2,6 +2,7 @@
 
 require 'ruby-prof'
 require 'memory_profiler'
+require 'stackprof'
 
 module Gitlab
   module RequestProfiler
@@ -34,6 +35,8 @@ module Gitlab
           call_with_call_stack_profiling(env)
         when 'memory'
           call_with_memory_profiling(env)
+        when 'speedscope'
+          call_with_speedscope(env)
         else
           raise ActionController::BadRequest, invalid_profile_mode(env)
         end
@@ -45,6 +48,7 @@ module Gitlab
           Supported profile mode request header:
             - X-Profile-Mode: execution
             - X-Profile-Mode: memory
+            - X-Profile-Mode: speedscope
         HEREDOC
       end
 
@@ -74,6 +78,26 @@ module Gitlab
 
         generate_report(env, 'memory', 'txt') do |file|
           report.pretty_print(to_file: file)
+        end
+
+        handle_request_ret(ret)
+      end
+
+      def call_with_speedscope(env)
+        ret = nil
+        flamegraph = ::StackProf.run(
+          mode: :wall,
+          raw: true,
+          aggregate: false,
+          interval: ::Gitlab::StackProf::DEFAULT_INTERVAL_US
+        ) do
+          ret = catch(:warden) do # rubocop:disable Cop/BanCatchThrow
+            @app.call(env)
+          end
+        end
+
+        generate_report(env, 'speedscope', 'txt') do |file|
+          file.write(Gitlab::Json.generate(flamegraph))
         end
 
         handle_request_ret(ret)
