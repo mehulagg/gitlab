@@ -68,62 +68,87 @@ RSpec.describe 'Multiple value streams', :js do
     end
   end
 
+  def path_nav_stage_names
+    # Returns the path names with the median value stripped out
+    stages = page.all('.gl-path-button').collect(&:text).map {|name_with_median| name_with_median.split("\n")[0] }
+  end
+
   describe 'Edit value stream' do
     before do
       select_group(group)
 
       create_custom_value_stream(custom_value_stream_name)
+    end
+
+    it 'can reorder stages' do
+      stages = path_nav_stage_names
+      expect(stages).to eq(["Overview", "Issue", "Plan", "Code", "Test", "Review", "Staging", "Cool custom stage - name 7"])
 
       page.find_button(_('Edit')).click
-    end
-
-    it 'includes additional form fields' do
-      expect(page).to have_selector(extended_form_fields_selector)
-      expect(page).to have_button("Save Value Stream")
-    end
-
-    it 'can update the value stream name' do
-      edited_name = "Edit new value stream"
-      fill_in 'create-value-stream-name', with: edited_name
+      # Re-arrange a few stages
+      page.all("[data-testid*='stage-action-move-down-']").first.click
+      page.all("[data-testid*='stage-action-move-up-']").last.click
 
       page.find_button(_('Save Value Stream')).click
       wait_for_requests
 
-      expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: edited_name })
+      updated_stages = path_nav_stage_names
+      expect(updated_stages).to eq(["Overview", "Plan", "Issue", "Code", "Test", "Review", "Cool custom stage - name 7", "Staging"])
     end
 
-    it 'can add and remove custom stages' do
-      add_custom_stage_to_form
+    context 'Editing' do
+      before do
+        page.find_button(_('Edit')).click
+      end
 
-      page.find_button(_('Save Value Stream')).click
-      wait_for_requests
+      it 'includes additional form fields' do
+        expect(page).to have_selector(extended_form_fields_selector)
+        expect(page).to have_button("Save Value Stream")
+      end
 
-      expect(page.find('[data-testid="gl-path-nav"]')).to have_text("Cool custom stage - name")
+      it 'can update the value stream name' do
+        edited_name = "Edit new value stream"
+        fill_in 'create-value-stream-name', with: edited_name
 
-      page.find_button(_('Edit')).click
+        page.find_button(_('Save Value Stream')).click
+        wait_for_requests
 
-      # Delete the custom stages, delete the last one first since the list gets reordered after a deletion
-      page.find('[data-testid*="stage-action-remove-7"]').click
-      page.find('[data-testid*="stage-action-remove-6"]').click
+        expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: edited_name })
+      end
 
-      page.find_button(_('Save Value Stream')).click
-      wait_for_requests
+      it 'can add and remove custom stages' do
+        add_custom_stage_to_form
 
-      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Cool custom stage - name")
-    end
+        page.find_button(_('Save Value Stream')).click
+        wait_for_requests
 
-    it 'can hide default stages' do
-      page.find("[data-testid='stage-action-hide-5']").click
-      page.find("[data-testid='stage-action-hide-4']").click
-      page.find("[data-testid='stage-action-hide-3']").click
+        expect(page.find('[data-testid="gl-path-nav"]')).to have_text("Cool custom stage - name")
 
-      page.find_button(_('Save Value Stream')).click
-      wait_for_requests
+        page.find_button(_('Edit')).click
 
-      expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: custom_value_stream_name })
-      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Staging")
-      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Review")
-      expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Test")
+        # Delete the custom stages, delete the last one first since the list gets reordered after a deletion
+        page.find('[data-testid*="stage-action-remove-7"]').click
+        page.find('[data-testid*="stage-action-remove-6"]').click
+
+        page.find_button(_('Save Value Stream')).click
+        wait_for_requests
+
+        expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Cool custom stage - name")
+      end
+
+      it 'can hide default stages' do
+        page.find("[data-testid='stage-action-hide-5']").click
+        page.find("[data-testid='stage-action-hide-4']").click
+        page.find("[data-testid='stage-action-hide-3']").click
+
+        page.find_button(_('Save Value Stream')).click
+        wait_for_requests
+
+        expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: custom_value_stream_name })
+        expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Staging")
+        expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Review")
+        expect(page.find('[data-testid="gl-path-nav"]')).not_to have_text("Test")
+      end
     end
   end
 
