@@ -4,45 +4,45 @@ module BulkImports
   module Groups
     module Pipelines
       class EpicsPipeline
-        include ::BulkImports::Pipeline
+        include BulkImports::NdjsonPipeline
 
-        extractor ::BulkImports::Common::Extractors::GraphqlExtractor,
-          query: ::BulkImports::Groups::Graphql::GetEpicsQuery
+        RELATION = 'epics'
 
-        transformer ::BulkImports::Common::Transformers::ProhibitedAttributesTransformer
-        transformer ::BulkImports::Common::Transformers::UserReferenceTransformer, reference: 'author'
-        transformer ::BulkImports::Groups::Transformers::EpicAttributesTransformer
+        extractor ::BulkImports::Common::Extractors::NdjsonExtractor, relation: RELATION
 
-        def transform(_, data)
-          cache_epic_source_params(data)
+        def transform(context, data)
+          relation_hash = data.first
+          relation_index = data.last
+          relation_definition = import_export_config.top_relation_tree(RELATION)
+
+          deep_transform_relation!(relation_hash, RELATION, relation_definition) do |key, hash|
+            Gitlab::ImportExport::Group::RelationFactory.create(
+              relation_index: relation_index,
+              relation_sym: key.to_sym,
+              relation_hash: hash,
+              importable: context.portable,
+              members_mapper: members_mapper,
+              object_builder: object_builder,
+              user: context.current_user,
+              excluded_keys: import_export_config.relation_excluded_keys(key)
+            )
+          end
         end
 
-        def load(context, data)
-          raise ::BulkImports::Pipeline::NotAllowedError unless authorized?
+        def load(_, epic)
+          return unless epic
 
-          context.group.epics.create!(data)
+          epic.save! unless epic.persisted?
         end
 
         private
 
-        def authorized?
-          context.current_user.can?(:admin_epic, context.group)
-        end
-
-        def cache_epic_source_params(data)
-          source_id = GlobalID.parse(data['id'])&.model_id
-          source_iid = data['iid']
-
-          if source_id
-            cache_key = "bulk_import:#{context.bulk_import.id}:entity:#{context.entity.id}:epic:#{source_iid}"
-            source_params = { source_id: source_id }
-
-            ::Gitlab::Redis::Cache.with do |redis|
-              redis.set(cache_key, source_params.to_json, ex: ::BulkImports::Pipeline::CACHE_KEY_EXPIRATION)
-            end
-          end
-
-          data
+        def members_mapper
+          @members_mapper ||= Gitlab::ImportExport::MembersMapper.new(
+            exported_members: [], # importer user is authoring everything for now
+            user: context.current_user,
+            importable: context.portable
+          )
         end
       end
     end
