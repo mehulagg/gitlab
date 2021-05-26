@@ -112,14 +112,6 @@ export default {
     loading() {
       return this.$apollo.queries.group.loading;
     },
-    editCadence() {
-      return {
-        name: 'edit',
-        params: {
-          cadenceId: getIdFromGraphQLId(this.cadenceId),
-        },
-      };
-    },
   },
   methods: {
     fetchMore() {
@@ -176,7 +168,7 @@ export default {
     <div class="gl-display-flex gl-align-items-center">
       <gl-button
         variant="link"
-        class="gl-font-weight-bold gl-text-body! gl-py-5! gl-px-3! gl-mr-auto"
+        class="gl-font-weight-bold gl-text-body! gl-py-5! gl-px-3! gl-mr-auto gl-min-w-0"
         :aria-expanded="expanded"
         @click="expanded = !expanded"
       >
@@ -188,7 +180,7 @@ export default {
         {{ title }}
       </gl-button>
 
-      <span v-if="durationInWeeks" class="gl-mr-5">
+      <span v-if="durationInWeeks" class="gl-mr-5 gl-display-none gl-sm-display-inline-block">
         <gl-icon name="clock" class="gl-mr-3" />
         {{ n__('Every week', 'Every %d weeks', durationInWeeks) }}</span
       >
@@ -201,9 +193,6 @@ export default {
         text-sr-only
         no-caret
       >
-        <gl-dropdown-item :to="editCadence">
-          {{ s__('Iterations|Edit cadence') }}
-        </gl-dropdown-item>
         <gl-dropdown-item @click="showModal">
           {{ s__('Iterations|Delete cadence') }}
         </gl-dropdown-item>
