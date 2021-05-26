@@ -1,9 +1,9 @@
 import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import Vue from 'vue';
+import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceForm from 'ee/iterations/components/iteration_cadence_form.vue';
-import createCadence from 'ee/iterations/queries/create_cadence.mutation.graphql';
+import createCadence from 'ee/iterations/queries/cadence_create.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -11,6 +11,9 @@ import waitForPromises from 'helpers/wait_for_promises';
 
 const push = jest.fn();
 const $router = {
+  currentRoute: {
+    params: {},
+  },
   push,
 };
 
@@ -25,7 +28,7 @@ describe('Iteration cadence form', () => {
   const groupPath = 'gitlab-org';
   const id = 72;
   const iterationCadence = {
-    id: `gid://gitlab/Iteration/${id}`,
+    id: `gid://gitlab/Iterations::Cadence/${id}`,
     title: 'An iteration',
     description: 'The words',
     startDate: '2020-06-28',
@@ -41,8 +44,8 @@ describe('Iteration cadence form', () => {
     },
   };
 
-  function createComponent({ resolverMock } = {}) {
-    const apolloProvider = createMockApolloProvider([[createCadence, resolverMock]]);
+  function createComponent({ query = createCadence, resolverMock } = {}) {
+    const apolloProvider = createMockApolloProvider([[query, resolverMock]]);
     wrapper = extendedWrapper(
       mount(IterationCadenceForm, {
         apolloProvider,
@@ -71,6 +74,13 @@ describe('Iteration cadence form', () => {
   const findStartDate = () => wrapper.find('#cadence-start-date');
   const findFutureIterations = () => wrapper.find('#cadence-schedule-future-iterations');
   const findDuration = () => wrapper.find('#cadence-duration');
+
+  const findAllFields = () => [
+    findTitle(),
+    findStartDate(),
+    findFutureIterations(),
+    findDuration(),
+  ];
 
   const findSaveButton = () => wrapper.findByTestId('save-cadence');
   const findCancelButton = () => wrapper.findByTestId('cancel-create-cadence');
@@ -188,6 +198,52 @@ describe('Iteration cadence form', () => {
             active: true,
           },
         });
+      });
+    });
+  });
+
+  describe('Edit cadence', () => {
+    beforeEach(() => {
+      $router.currentRoute.params.cadenceId = id;
+    });
+
+    afterEach(() => {
+      delete $router.currentRoute.params.cadenceId;
+    });
+
+    it('shows correct title and button text', () => {
+      const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
+      createComponent({ resolverMock });
+
+      expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.title);
+      expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.save);
+    });
+
+    it('disables fields while loading', async () => {
+      const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
+      createComponent({ resolverMock });
+
+      await nextTick();
+
+      findAllFields().forEach(({ element }) => {
+        expect(element).toBeDisabled();
+      });
+
+      await waitForPromises();
+
+      findAllFields().forEach(({ element }) => {
+        expect(element).not.toBeDisabled();
+      });
+    });
+
+    it('fills fields with existing cadence info after loading', async () => {
+      const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
+      createComponent({ resolverMock });
+
+      await waitForPromises();
+
+      findAllFields().forEach(({ element }) => {
+        expect(element).not.toBeDisabled();
       });
     });
   });

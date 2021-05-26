@@ -9,8 +9,11 @@ import {
   GlFormInput,
   GlFormSelect,
 } from '@gitlab/ui';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
-import createCadence from '../queries/create_cadence.mutation.graphql';
+import createCadence from '../queries/cadence_create.mutation.graphql';
+import updateCadence from '../queries/cadence_update.mutation.graphql';
+import readCadence from '../queries/iteration_cadence.query.graphql';
 
 const i18n = Object.freeze({
   title: {
@@ -73,6 +76,7 @@ export default {
   inject: ['groupPath', 'cadencesListPath'],
   data() {
     return {
+      loadingCadence: false,
       loading: false,
       errorMessage: '',
       title: '',
@@ -91,8 +95,11 @@ export default {
     };
   },
   computed: {
+    cadenceId() {
+      return this.$router.currentRoute.params.cadenceId;
+    },
     isEdit() {
-      return Boolean(this.$router.currentRoute.params.cadenceId);
+      return Boolean(this.cadenceId);
     },
     page() {
       return this.isEdit ? 'edit' : 'new';
@@ -101,28 +108,59 @@ export default {
       return !Object.values(this.validationState).includes(false);
     },
     variables() {
+      const id = this.isEdit
+        ? convertToGraphQLId('Iterations::Cadence', this.cadenceId)
+        : undefined;
+      const groupPath = this.isEdit ? undefined : this.groupPath;
+
       const vars = {
         input: {
-          groupPath: this.groupPath,
+          groupPath,
+          id,
           title: this.title,
           automatic: this.automatic,
           startDate: this.startDate,
           durationInWeeks: this.durationInWeeks,
           active: true,
+          iterationsInAdvance: this.automatic ? this.iterationsInAdvance : undefined,
         },
       };
-      if (this.automatic) {
-        vars.input = {
-          ...vars.input,
-          iterationsInAdvance: this.iterationsInAdvance,
-        };
-      }
+
       return vars;
     },
   },
   mounted() {
     if (this.isEdit) {
-      // fetch existing cadence and prefill fields
+      this.loadingCadence = true;
+
+      this.$apollo
+        .query({
+          query: readCadence,
+          variables: {
+            fullPath: this.groupPath,
+            id: this.cadenceId,
+          },
+        })
+        .then(({ data: { group, errors } }) => {
+          if (errors?.length) {
+            throw errors[0];
+          }
+
+          const cadence = group?.iterationCadences?.nodes?.[0];
+
+          this.title = cadence.title;
+          this.automatic = cadence.automatic;
+          this.startDate = cadence.startDate;
+          this.durationInWeeks = cadence.durationInWeeks;
+          this.rollOverIssues = cadence.rollOverIssues;
+          this.iterationsInAdvance = cadence.iterationsInAdvance;
+        })
+        .catch((err) => {
+          this.errorMessage = err;
+        })
+        .finally(() => {
+          this.loadingCadence = false;
+        });
     }
   },
   methods: {
@@ -163,7 +201,7 @@ export default {
     createCadence() {
       return this.$apollo
         .mutate({
-          mutation: createCadence,
+          mutation: this.isEdit ? updateCadence : createCadence,
           variables: this.variables,
         })
         .then(({ data, errors: topLevelErrors = [] }) => {
@@ -172,7 +210,9 @@ export default {
             return;
           }
 
-          const { errors } = data.iterationCadenceCreate;
+          const { errors } = this.isEdit
+            ? data.iterationCadenceUpdate
+            : data.iterationCadenceCreate;
 
           if (errors.length > 0) {
             [this.errorMessage] = errors;
@@ -221,6 +261,7 @@ export default {
           :placeholder="i18n.title.placeholder"
           size="xl"
           :state="validationState.title"
+          :disabled="loadingCadence"
           @blur="validate('title')"
         />
       </gl-form-group>
@@ -234,6 +275,7 @@ export default {
         <gl-form-checkbox
           id="cadence-automated-scheduling"
           v-model="automatic"
+          :disabled="loadingCadence"
           @change="clearValidation"
         >
           <span class="gl-font-weight-bold">{{ i18n.automatedScheduling.label }}</span>
@@ -259,6 +301,7 @@ export default {
             inputmode="none"
             required
             :state="validationState.startDate"
+            :disabled="loadingCadence"
             data-qa-selector="cadence_start_date"
             @blur="validate('startDate')"
           />
@@ -281,6 +324,7 @@ export default {
           class="gl-form-input-md"
           required
           data-qa-selector="iteration_cadence_name_field"
+          :disabled="loadingCadence"
           @change="validate('durationInWeeks')"
         />
       </gl-form-group>
@@ -298,7 +342,7 @@ export default {
         <gl-form-select
           id="cadence-schedule-future-iterations"
           v-model.number="iterationsInAdvance"
-          :disabled="!automatic"
+          :disabled="!automatic || loadingCadence"
           :options="$options.availableFutureIterations"
           :required="automatic"
           class="gl-form-input-md"

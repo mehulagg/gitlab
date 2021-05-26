@@ -1,0 +1,9 @@
+mutation updateIterationCadence($input: IterationCadenceUpdateInput!) {
+  iterationCadenceUpdate(input: $input) {
+    iterationCadence {
+      id
+      title
+    }
+    errors
+  }
+}

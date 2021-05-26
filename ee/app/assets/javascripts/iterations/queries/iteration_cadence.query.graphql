@@ -1,0 +1,17 @@
+# todo: should this use IterationsCadenceID! ?
+query IterationCadences($fullPath: ID!, $id: ID!) {
+  group(fullPath: $fullPath) {
+    iterationCadences(id: $id) {
+      nodes {
+        id
+        title
+        automatic
+        startDate
+        durationInWeeks
+        rollOver
+        iterationsInAdvance
+        description
+      }
+    }
+  }
+}
