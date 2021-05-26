@@ -186,7 +186,7 @@ and benefits on the [GitLab for Open Source application page](https://about.gitl
 
 If you have any questions, send an email to `opensource@gitlab.com` for assistance.
 
-#### Screenshots for Open Source Program Verification
+#### Verification for Open Source Program
 
 You will need to upload three screenshots as part of the verification process to help us qualify you for the [GitLab for Open Source program](https://about.gitlab.com/solutions/open-source/). 
 
