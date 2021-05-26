@@ -228,7 +228,7 @@ FIXME: [Insert image: publicly-visible]
 
 Note: From time to time, we allow exceptions for one or two projects within a group to be private if there is a legitimate need for it, for example, a project that needs to hold sensitive data. Please email us at opensource@gitlab.com for written permission if you believe you have a legitimate use case. 
 
-### GitLab for Startups program subscriptions
+### GitLab for Startups
 
 The [GitLab for Startups](https://about.gitlab.com/solutions/startups/) program gives 
 our top tier, plus 50,000 CI mins/month, to qualifying startups for 12 months. 
