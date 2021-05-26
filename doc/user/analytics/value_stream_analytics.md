@@ -132,7 +132,7 @@ From the previous example we see the time used for each stage:
 
 More information:
 
-- Although the previous example specifies the issue number in a latter commit, the process
+- Although the previous example specifies the issue number in a later commit, the process
   still collects analytics data for the issue.
 - The time required in the **Test** stage isn't included in the overall time of
   the cycle. The time is included in the **Review** process, as every merge request should be
