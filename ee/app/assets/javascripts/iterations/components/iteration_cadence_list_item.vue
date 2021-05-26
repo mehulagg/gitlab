@@ -13,7 +13,6 @@ import {
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, s__ } from '~/locale';
 import query from '../queries/iterations_in_cadence.query.graphql';
-import destroyIterationCadence from '../queries/destroy_cadence.mutation.graphql';
 
 const pageSize = 20;
 
@@ -168,30 +167,6 @@ export default {
     focusMenu() {
       this.$refs.menu.$el.focus();
     },
-    deleteCadence() {
-      this.$apollo
-        .mutate({
-          mutation: destroyIterationCadence,
-          variables: {
-            id: this.cadenceId,
-          },
-          update: (store, data) => {
-            console.log(store, data);
-
-            debugger;
-          },
-        })
-        .then(({ errors }) => {
-          if (errors) {
-            throw new Error(errors[0]);
-          }
-
-          this.$emit('cadence-deleted', this.cadenceId);
-        })
-        .catch((err) => {
-          this.$emit('cadence-deletion-error', err);
-        });
-    },
   },
 };
 </script>
@@ -240,7 +215,7 @@ export default {
         :ok-title="i18n.modalConfirm"
         ok-variant="danger"
         @hidden="focusMenu"
-        @ok="deleteCadence"
+        @ok="$emit('delete-cadence', cadenceId)"
       >
         {{ i18n.modalText }}
       </gl-modal>
