@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :runner do
+  #TODO: Remove `:requires_admin` meta once the feature flag `ci_drop_new_builds_when_ci_quota_exceeded` is removed
+  RSpec.describe 'Verify', :runner, :requires_admin do
     describe 'Pipeline creation and processing' do
       let(:executor) { "qa-runner-#{Time.now.to_i}" }
       let(:max_wait) { 30 }
@@ -22,6 +23,11 @@ module QA
 
       after do
         runner.remove_via_api!
+        Runtime::Feature.disable(:ci_drop_new_builds_when_ci_quota_exceeded, project: project)
+      end
+
+      before do
+        Runtime::Feature.enable(:ci_drop_new_builds_when_ci_quota_exceeded, project: project)
       end
 
       it 'users creates a pipeline which gets processed', :smoke, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1849' do
@@ -70,7 +76,7 @@ module QA
         {
           'test-success': :passed,
           'test-failure': :failed,
-          'test-tags': :pending,
+          'test-tags': :failed,
           'test-artifacts': :passed
         }.each do |job, status|
           Page::Project::Pipeline::Show.perform do |pipeline|
