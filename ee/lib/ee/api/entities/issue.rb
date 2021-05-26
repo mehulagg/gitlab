@@ -24,6 +24,10 @@ module EE
           with_options if: -> (issue) { issue.project.feature_available?(:issuable_health_status) } do
             expose :health_status
           end
+
+          with_options if: -> (issue, _) { issue.project.namespace.group? && issue.project.namespace.feature_available?(:iterations) } do
+            expose :iteration, using: ::API::Entities::Iteration
+          end
         end
       end
     end

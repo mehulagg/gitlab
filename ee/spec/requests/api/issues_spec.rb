@@ -109,6 +109,54 @@ RSpec.describe API::Issues, :mailer do
     end
   end
 
+  shared_examples 'exposes iteration' do
+    context 'with iterations feature' do
+      before do
+        stub_licensed_features(iterations: true)
+      end
+
+      it 'contains iteration in response' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:success)
+        expect(iteration_response_for(issue)['iteration']).to eq({ 'id' => iteration.id,
+          'iid' => iteration.iid,
+          'group_id' => iteration.group_id,
+          'title' => iteration.title,
+          'start_date' => iteration.start_date,
+          'due_date' => iteration.due_date,
+          'web_url' => group_iteration_path(iteration.group, iteration)
+        })
+      end
+
+      context 'and iteration is not present' do
+        before do
+          issue.update(iteration: nil)
+        end
+
+        it 'exposes epic as nil' do
+          subject
+
+          response = iteration_response_for(issue)
+          expect(response['iteration']).to eq(nil)
+        end
+      end
+    end
+
+    context 'without iterations feature' do
+      before do
+        stub_licensed_features(iterations: false)
+      end
+
+      it 'does not contain iteration in response' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:success)
+        expect(iteration_response_for(issue)).not_to have_key('iteration')
+      end
+    end
+  end
+
   describe "GET /issues" do
     context "when authenticated" do
       it 'matches V4 response schema' do
@@ -256,6 +304,11 @@ RSpec.describe API::Issues, :mailer do
       let!(:issue_with_epic) { create(:issue, project: group_project, epic: epic) }
     end
 
+    it_behaves_like 'exposes iteration' do
+      let_it_be(:iteration) { create(:iteration, group: group) }
+      let_it_be(:issue) { create(:issue, project: group_project, iteration: iteration) }
+    end
+
     context 'filtering by iteration' do
       let_it_be(:iteration_1) { create(:iteration, group: group, start_date: Date.today) }
       let_it_be(:iteration_2) { create(:iteration, group: group) }
@@ -339,6 +392,11 @@ RSpec.describe API::Issues, :mailer do
       subject { get api("/projects/#{group_project.id}/issues", user) }
 
       it_behaves_like 'exposes epic'
+
+      it_behaves_like 'exposes iteration' do
+        let_it_be(:iteration) { create(:iteration, group: group) }
+        let_it_be(:issue) { create(:issue, project: group_project, iteration: iteration) }
+      end
     end
 
     context 'filtering by iteration' do
@@ -812,5 +870,9 @@ RSpec.describe API::Issues, :mailer do
 
   def epic_issue_response_for(epic_issue)
     Array.wrap(json_response).find { |issue| issue['id'] == epic_issue.id }
+  end
+
+  def iteration_response_for(the_issue)
+    Array.wrap(json_response).find { |issue| issue['id'] == the_issue.id }
   end
 end
