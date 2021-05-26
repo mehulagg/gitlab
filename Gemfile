@@ -2,6 +2,9 @@
 
 source 'https://rubygems.org'
 
+#trigger security scan
+gem 'gitlab-development-kit'
+
 gem 'rails', '~> 6.0.3.7'
 
 gem 'bootsnap', '~> 1.4.6'
