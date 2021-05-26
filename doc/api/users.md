@@ -632,7 +632,14 @@ GET /user
 }
 ```
 
-Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, `extra_shared_runners_minutes_limit`, `is_auditor`, `provisioned_by_group_id`, and `using_license_seat` parameters.
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see these
+parameters:
+
+- `shared_runners_minutes_limit`
+- `extra_shared_runners_minutes_limit`
+- `is_auditor`
+- `provisioned_by_group_id`
+- `using_license_seat`
 
 ## User status
 
