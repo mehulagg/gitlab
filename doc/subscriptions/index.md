@@ -154,6 +154,8 @@ To change the namespace linked to a subscription:
 
 Subscription charges are calculated based on the total number of users in a group, including its subgroups and nested projects. If the total number of users exceeds the number of seats in your subscription, your account is charged for the additional users.
 
+Note that it is only possible to have one namespace linked to a subscription.
+
 ### Change Customers Portal account password
 
 To change the password for this customers portal account:
