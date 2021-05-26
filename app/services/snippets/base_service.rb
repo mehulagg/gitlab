@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Snippets
+  # TODO: Placeholder commit to start branch and MR.. Remove this comment after actual changes are started.
   class BaseService < ::BaseService
     UPDATE_COMMIT_MSG = 'Update snippet'
     INITIAL_COMMIT_MSG = 'Initial commit'
