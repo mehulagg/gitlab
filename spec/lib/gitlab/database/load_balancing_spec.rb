@@ -5,10 +5,6 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::LoadBalancing do
   include_context 'clear DB Load Balancing configuration'
 
-  before do
-    stub_env('ENABLE_LOAD_BALANCING_FOR_FOSS', 'true')
-  end
-
   describe '.proxy' do
     context 'when configured' do
       before do
@@ -178,31 +174,6 @@ RSpec.describe Gitlab::Database::LoadBalancing do
 
       it 'returns true when Sidekiq is being used' do
         allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
-
-        expect(described_class.enable?).to eq(true)
-      end
-    end
-
-    context 'FOSS' do
-      before do
-        allow(Gitlab).to receive(:ee?).and_return(false)
-
-        stub_env('ENABLE_LOAD_BALANCING_FOR_FOSS', 'false')
-      end
-
-      it 'is disabled' do
-        expect(described_class.enable?).to eq(false)
-      end
-    end
-
-    context 'EE' do
-      before do
-        allow(Gitlab).to receive(:ee?).and_return(true)
-      end
-
-      it 'is enabled' do
-        allow(described_class).to receive(:hosts).and_return(%w(foo))
-        allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(false)
 
         expect(described_class.enable?).to eq(true)
       end
