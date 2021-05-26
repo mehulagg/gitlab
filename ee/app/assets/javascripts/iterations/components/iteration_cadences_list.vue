@@ -94,6 +94,12 @@ export default {
     handleTabChange() {
       this.pagination = {};
     },
+    setCadenceDeletedError(error) {
+      this.error = error;
+    },
+    cadenceDeleted(args) {
+      console.log('cadence deleted', args);
+    },
   },
 };
 </script>
@@ -118,6 +124,8 @@ export default {
             :duration-in-weeks="cadence.durationInWeeks"
             :title="cadence.title"
             :iteration-state="state"
+            @cadence-deleted="cadenceDeleted"
+            @cadence-deleted-error="setCadenceDeletedError"
           />
         </ul>
         <p v-else class="nothing-here-block">

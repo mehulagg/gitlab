@@ -3,19 +3,28 @@ import {
   GlAlert,
   GlButton,
   GlCollapse,
+  GlDropdown,
+  GlDropdownItem,
   GlIcon,
   GlInfiniteScroll,
+  GlModal,
   GlSkeletonLoader,
 } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __, s__ } from '~/locale';
 import query from '../queries/iterations_in_cadence.query.graphql';
+import destroyIterationCadence from '../queries/destroy_cadence.mutation.graphql';
 
 const pageSize = 20;
 
 const i18n = Object.freeze({
   noResults: s__('Iterations|No iterations in cadence.'),
   error: __('Error loading iterations'),
+
+  modalTitle: s__('Iterations|Delete iteration cadence'),
+  modalText: s__('Iterations|Deleting an iteration cadence also deletes the iterations'),
+  modalConfirm: s__('Iterations|Delete cadence'),
+  modalCancel: __('Cancel'),
 });
 
 export default {
@@ -24,8 +33,11 @@ export default {
     GlAlert,
     GlButton,
     GlCollapse,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
     GlInfiniteScroll,
+    GlModal,
     GlSkeletonLoader,
   },
   apollo: {
@@ -42,7 +54,7 @@ export default {
       },
     },
   },
-  inject: ['groupPath'],
+  inject: ['groupPath', 'canEditCadence'],
   props: {
     title: {
       type: String,
@@ -150,6 +162,36 @@ export default {
         },
       };
     },
+    showModal() {
+      this.$refs.modal.show();
+    },
+    focusMenu() {
+      this.$refs.menu.$el.focus();
+    },
+    deleteCadence() {
+      this.$apollo
+        .mutate({
+          mutation: destroyIterationCadence,
+          variables: {
+            id: this.cadenceId,
+          },
+          update: (store, data) => {
+            console.log(store, data);
+
+            debugger;
+          },
+        })
+        .then(({ errors }) => {
+          if (errors) {
+            throw new Error(errors[0]);
+          }
+
+          this.$emit('cadence-deleted', this.cadenceId);
+        })
+        .catch((err) => {
+          this.$emit('cadence-deletion-error', err);
+        });
+    },
   },
 };
 </script>
@@ -175,6 +217,33 @@ export default {
         <gl-icon name="clock" class="gl-mr-3" />
         {{ n__('Every week', 'Every %d weeks', durationInWeeks) }}</span
       >
+      <gl-dropdown
+        ref="menu"
+        icon="ellipsis_v"
+        category="tertiary"
+        right
+        lazy
+        text-sr-only
+        no-caret
+      >
+        <gl-dropdown-item :to="editCadence">
+          {{ s__('Iterations|Edit cadence') }}
+        </gl-dropdown-item>
+        <gl-dropdown-item @click="showModal">
+          {{ s__('Iterations|Delete cadence') }}
+        </gl-dropdown-item>
+      </gl-dropdown>
+      <gl-modal
+        ref="modal"
+        :modal-id="`${cadenceId}-delete-modal`"
+        :title="i18n.modalTitle"
+        :ok-title="i18n.modalConfirm"
+        ok-variant="danger"
+        @hidden="focusMenu"
+        @ok="deleteCadence"
+      >
+        {{ i18n.modalText }}
+      </gl-modal>
     </div>
 
     <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="error = ''">
