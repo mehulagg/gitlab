@@ -6,7 +6,6 @@ import AddEscalationPolicyForm, {
 import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
 import { defaultEscalationRule } from 'ee/escalation_policies/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-
 import mockPolicy from './mocks/mockPolicy.json';
 
 describe('AddEscalationPolicyForm', () => {
@@ -23,6 +22,7 @@ describe('AddEscalationPolicyForm', () => {
           },
           validationState: {
             name: true,
+            rules: [],
           },
           ...props,
         },
@@ -46,13 +46,15 @@ describe('AddEscalationPolicyForm', () => {
   const findAddRuleLink = () => wrapper.findComponent(GlLink);
 
   describe('Escalation policy form validation', () => {
-    it('should show feedback for an invalid name input validation state', async () => {
+    it('should set correct validation state for validated controls', async () => {
       createComponent({
         props: {
-          validationState: { name: false },
+          validationState: { name: false, rules: [false] },
         },
       });
-      expect(findPolicyName().attributes('state')).toBeFalsy();
+      await wrapper.vm.$nextTick();
+      expect(findPolicyName().attributes('state')).toBeUndefined();
+      expect(findRules().at(0).attributes('is-valid')).toBeUndefined();
     });
   });
 
@@ -72,7 +74,40 @@ describe('AddEscalationPolicyForm', () => {
       await wrapper.vm.$nextTick();
       const rules = findRules();
       expect(rules.length).toBe(2);
-      expect(rules.at(1).props('rule')).toEqual(defaultEscalationRule);
+      expect(rules.at(1).props('rule')).toMatchObject(defaultEscalationRule);
+    });
+
+    it('should emit updates when rule is added', async () => {
+      findAddRuleLink().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted('update-escalation-policy-form')[0]).toMatchObject([
+        {
+          field: 'rules',
+          value: [
+            expect.objectContaining(defaultEscalationRule),
+            expect.objectContaining(defaultEscalationRule),
+          ],
+        },
+      ]);
+    });
+
+    it('on rule update emitted should update rules array and emit updates up', () => {
+      const updatedRule = {
+        status: 'TRIGGERED',
+        elapsedTimeSeconds: 30,
+        oncallScheduleIid: 2,
+      };
+      findRules().at(0).vm.$emit('update-escalation-rule', 0, updatedRule);
+      expect(wrapper.emitted('update-escalation-policy-form')[0]).toEqual([
+        { field: 'rules', value: [updatedRule] },
+      ]);
+    });
+
+    it('on rule removal emitted should update rules array and emit updates up', () => {
+      findRules().at(0).vm.$emit('remove-escalation-rule', 0);
+      expect(wrapper.emitted('update-escalation-policy-form')[0]).toEqual([
+        { field: 'rules', value: [] },
+      ]);
     });
   });
 });

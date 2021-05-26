@@ -1,4 +1,4 @@
-import { GlDropdownItem, GlSprintf } from '@gitlab/ui';
+import { GlDropdownItem, GlFormGroup, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { cloneDeep } from 'lodash';
 import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
@@ -19,6 +19,8 @@ describe('EscalationRule', () => {
         propsData: {
           rule: cloneDeep(defaultEscalationRule),
           schedules: mockSchedules,
+          index: 0,
+          isValid: false,
           ...props,
         },
         stubs: {
@@ -44,6 +46,8 @@ describe('EscalationRule', () => {
 
   const findSchedulesDropdown = () => wrapper.findByTestId('schedules-dropdown');
   const findSchedulesDropdownOptions = () => findSchedulesDropdown().findAll(GlDropdownItem);
+
+  const findFormGroup = () => wrapper.findComponent(GlFormGroup);
 
   describe('Status dropdown', () => {
     it('should have correct alert status options', () => {
@@ -74,6 +78,21 @@ describe('EscalationRule', () => {
       expect(findSchedulesDropdownOptions().wrappers.map((w) => w.text())).toStrictEqual(
         mockSchedules.map(({ name }) => name),
       );
+    });
+  });
+
+  describe('Validation', () => {
+    it.each`
+      isValid  | state
+      ${true}  | ${'true'}
+      ${false} | ${undefined}
+    `('when $isValid sets from group state to $state', ({ isValid, state }) => {
+      createComponent({
+        props: {
+          isValid,
+        },
+      });
+      expect(findFormGroup().attributes('state')).toBe(state);
     });
   });
 });
