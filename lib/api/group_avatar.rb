@@ -11,6 +11,7 @@ module API
         detail 'This feature was introduced in GitLab 14.0'
       end
       get ':id/avatar' do
+        header "X-Gitlab-Avatar-Filename", user_group.avatar&.filename
         present_carrierwave_file!(user_group.avatar)
       end
     end

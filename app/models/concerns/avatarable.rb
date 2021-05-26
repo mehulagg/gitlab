@@ -9,13 +9,15 @@ module Avatarable
 
   ALLOWED_IMAGE_SCALER_WIDTHS = (USER_AVATAR_SIZES | PROJECT_AVATAR_SIZES | GROUP_AVATAR_SIZES).freeze
 
+  MAXIMUM_FILE_SIZE = 200.kilobytes.to_i
+
   included do
     prepend ShadowMethods
     include ObjectStorage::BackgroundMove
     include Gitlab::Utils::StrongMemoize
 
     validate :avatar_type, if: ->(user) { user.avatar.present? && user.avatar_changed? }
-    validates :avatar, file_size: { maximum: 200.kilobytes.to_i }, if: :avatar_changed?
+    validates :avatar, file_size: { maximum: MAXIMUM_FILE_SIZE }, if: :avatar_changed?
 
     mount_uploader :avatar, AvatarUploader
 
