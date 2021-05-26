@@ -11,7 +11,10 @@
     = render "layouts/init_client_detection_flags"
     = render 'peek/bar'
     = header_message
-    = render partial: "layouts/header/default", locals: { project: @project, group: @group }
+    - if @empty_header
+      = render "layouts/header/empty"
+    - else
+      = render partial: "layouts/header/default", locals: { project: @project, group: @group }
     = render 'layouts/page', sidebar: sidebar, nav: nav
     = footer_message
 

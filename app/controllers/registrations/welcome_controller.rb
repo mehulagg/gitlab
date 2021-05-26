@@ -2,13 +2,16 @@
 
 module Registrations
   class WelcomeController < ApplicationController
-    layout 'welcome'
+    layout 'application'
     skip_before_action :authenticate_user!, :required_signup_info, :check_two_factor_requirement, only: [:show, :update]
     before_action :require_current_user
 
     feature_category :authentication_and_authorization
 
     def show
+      @hide_breadcrumbs = true
+      @empty_header = true
+      @content_class = "limit-container-width limited-inner-width-container"
       return redirect_to path_for_signed_in_user(current_user) if completed_welcome_step?
     end
 
