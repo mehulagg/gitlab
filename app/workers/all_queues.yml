@@ -1097,15 +1097,6 @@
   :weight: 2
   :idempotent:
   :tags: []
-- :name: incident_management:incident_management_process_alert
-  :worker_name: IncidentManagement::ProcessAlertWorker
-  :feature_category: :incident_management
-  :has_external_dependencies:
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 2
-  :idempotent:
-  :tags: []
 - :name: incident_management:incident_management_process_alert_worker_v2
   :worker_name: IncidentManagement::ProcessAlertWorkerV2
   :feature_category: :incident_management
