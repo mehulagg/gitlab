@@ -239,7 +239,7 @@ Follow these instructions to take a screenshot of the publicly visible settings:
 
 NOTE:
 From time to time, GitLab allows exceptions. One or two projects within a group can be private if there is a legitimate need for it, for example,
-if a project holds sensitive data. Email `opensource@gitlab.com` with details and request for exceptions. 
+if a project holds sensitive data. Email `opensource@gitlab.com` with details of your use case to request written permission for exceptions. 
 
 ### GitLab for Startups
 
