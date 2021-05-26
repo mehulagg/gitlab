@@ -155,7 +155,8 @@ module API
         use :with_custom_attributes
       end
       get do
-        groups = find_groups(declared_params(include_missing: false), params[:id])
+        # Search request hits here
+        groups = find_groups(declared_params(include_missing: false).merge(include_parent_descendants: true), params[:id])
         present_groups params, groups
       end
 

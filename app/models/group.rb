@@ -123,6 +123,10 @@ class Group < Namespace
       .where(project_authorizations: { user_id: user_ids })
   end
 
+  delegate :share_within_hierarchy_lock, to: :namespace_settings
+
+  # accepts_nested_attributes_for :namespace_settings
+
   class << self
     def sort_by_attribute(method)
       if method == 'storage_size_desc'

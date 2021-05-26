@@ -7,6 +7,16 @@
     .form-group
       = render 'shared/allow_request_access', form: f
 
+    - if @group.root?
+      .form-group.gl-mb-3
+        .gl-form-checkbox.custom-control.custom-checkbox
+          = f.check_box :share_within_hierarchy_lock, disabled: !can_change_share_within_hierarchy_lock?(@group), class: 'custom-control-input'
+          = f.label :share_within_hierarchy_lock, class: 'custom-control-label' do
+            %span
+              - group_link = link_to @group.name, group_path(@group)
+              = s_('GroupSettings|Prevent sharing a group within %{group} with groups outside the group hierarchy').html_safe % { group: group_link }
+            %p.js-descr.help-text= share_within_hierarchy_lock_help_text(@group)
+
     .form-group.gl-mb-3
       .gl-form-checkbox.custom-control.custom-checkbox
         = f.check_box :share_with_group_lock, disabled: !can_change_share_with_group_lock?(@group), class: 'custom-control-input'

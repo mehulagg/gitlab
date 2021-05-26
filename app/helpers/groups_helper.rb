@@ -77,6 +77,10 @@ module GroupsHelper
     can?(current_user, :change_share_with_group_lock, group)
   end
 
+  def can_change_share_within_hierarchy_lock?(group)
+    can?(current_user, :change_share_within_hierarchy_lock, group)
+  end
+
   def can_disable_group_emails?(group)
     can?(current_user, :set_emails_disabled, group) && !group.parent&.emails_disabled?
   end
@@ -194,6 +198,15 @@ module GroupsHelper
     else
       ancestor_locked_and_has_been_overridden(group)
     end
+  end
+
+  def share_within_hierarchy_lock_help_text(group)
+    s_("GroupSettings|This setting does things for the group.")
+    # if group.share_within_hierarchy_lock?
+    #   s_("GroupSettings|This setting is applied on %group_name}.").html_safe % { group_name: group.name }
+    # else
+    #   s_("GroupSettings|This setting is not applied on %group_name}.").html_safe % { group_name: group.name }
+    # end
   end
 
   def parent_group_options(current_group)

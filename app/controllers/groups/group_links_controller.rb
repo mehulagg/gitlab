@@ -7,6 +7,7 @@ class Groups::GroupLinksController < Groups::ApplicationController
   feature_category :subgroups
 
   def create
+    # Decide if the group is within the other group's hierarchy.
     shared_with_group = Group.find(params[:shared_with_group_id]) if params[:shared_with_group_id].present?
 
     if shared_with_group

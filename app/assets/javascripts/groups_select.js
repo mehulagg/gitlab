@@ -16,9 +16,8 @@ const groupsSelect = () => {
         const allAvailable = $select.data('allAvailable');
         const skipGroups = $select.data('skipGroups') || [];
         const parentGroupID = $select.data('parentId');
-        const groupsPath = parentGroupID
-          ? Api.subgroupsPath.replace(':id', parentGroupID)
-          : Api.groupsPath;
+        const descendantGroups = $select.data('descendantGroups');
+        const groupsPath = getGroupsPath(parentGroupID, descendantGroups);
 
         $select.select2({
           placeholder: __('Search for a group'),
@@ -79,6 +78,16 @@ const groupsSelect = () => {
       });
     })
     .catch(() => {});
+};
+
+const getGroupsPath = (parentGroupID, descendantGroups) => {
+  if(descendantGroups) {
+    return Api.descendantGroupsPath.replace(':id', parentGroupID);
+  } else {
+    return parentGroupID
+      ? Api.subgroupsPath.replace(':id', parentGroupID)
+      : Api.groupsPath;
+  }
 };
 
 export default () => {

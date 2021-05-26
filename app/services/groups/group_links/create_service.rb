@@ -6,7 +6,8 @@ module Groups
       def execute(shared_group)
         unless group && shared_group &&
                can?(current_user, :admin_group_member, shared_group) &&
-               can?(current_user, :read_group, group)
+               can?(current_user, :read_group, group) &&
+               group_share_hierarchy_lock_check(shared_group, group)
           return error('Not Found', 404)
         end
 
@@ -22,6 +23,18 @@ module Groups
           success(link: link)
         else
           error(link.errors.full_messages.to_sentence, 409)
+        end
+      end
+
+      private
+
+      def group_share_hierarchy_lock_check(group, shared_group)
+        root_group = group.root_ancestor
+
+        if root_group.share_within_hierarchy_lock
+          root_group.self_and_descendants.ids.include?(shared_group.id)
+        else
+          true
         end
       end
     end
