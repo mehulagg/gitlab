@@ -13,6 +13,11 @@ const routes = [
     component: IterationCadenceForm,
   },
   {
+    name: 'edit',
+    path: '/:cadenceId/edit',
+    component: IterationCadenceForm,
+  },
+  {
     name: 'index',
     path: '/',
     component: IterationCadenceList,

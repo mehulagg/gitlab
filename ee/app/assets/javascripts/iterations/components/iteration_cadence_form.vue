@@ -36,8 +36,14 @@ const i18n = Object.freeze({
     description: s__('Iterations|Number of future iterations you would like to have scheduled'),
     placeholder: s__('Iterations|Select number'),
   },
-  pageTitle: s__('Iterations|New iteration cadence'),
-  create: s__('Iterations|Create cadence'),
+  edit: {
+    title: s__('Iterations|Edit iteration cadence'),
+    save: s__('Iterations|Save cadence'),
+  },
+  new: {
+    title: s__('Iterations|New iteration cadence'),
+    save: s__('Iterations|Create cadence'),
+  },
   cancel: __('Cancel'),
   requiredField: __('This field is required.'),
 });
@@ -67,7 +73,6 @@ export default {
   inject: ['groupPath', 'cadencesListPath'],
   data() {
     return {
-      cadences: [],
       loading: false,
       errorMessage: '',
       title: '',
@@ -86,6 +91,12 @@ export default {
     };
   },
   computed: {
+    isEdit() {
+      return Boolean(this.$router.currentRoute.params.cadenceId);
+    },
+    page() {
+      return this.isEdit ? 'edit' : 'new';
+    },
     valid() {
       return !Object.values(this.validationState).includes(false);
     },
@@ -108,6 +119,11 @@ export default {
       }
       return vars;
     },
+  },
+  mounted() {
+    if (this.isEdit) {
+      // fetch existing cadence and prefill fields
+    }
   },
   methods: {
     validate(field) {
@@ -181,7 +197,7 @@ export default {
   <article>
     <div class="gl-display-flex">
       <h3 ref="pageTitle" class="page-title">
-        {{ i18n.pageTitle }}
+        {{ i18n[page].title }}
       </h3>
     </div>
     <gl-form>
@@ -299,7 +315,7 @@ export default {
           data-qa-selector="save_cadence_button"
           @click="save"
         >
-          {{ i18n.create }}
+          {{ i18n[page].save }}
         </gl-button>
         <gl-button class="ml-auto" data-testid="cancel-create-cadence" @click="cancel">
           {{ i18n.cancel }}
