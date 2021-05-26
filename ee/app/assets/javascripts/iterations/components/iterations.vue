@@ -77,6 +77,7 @@ export default {
       const vars = {
         fullPath: this.fullPath,
         isGroup: this.namespaceType === Namespace.Group,
+        state: this.state,
       };
 
       if (this.pagination.beforeCursor) {
@@ -151,7 +152,7 @@ export default {
         </gl-alert>
       </div>
       <div v-else>
-        <iterations-list :iterations="iterations" :namespace-type="namespaceType" :state="state" />
+        <iterations-list :iterations="iterations" :namespace-type="namespaceType" />
         <gl-pagination
           v-if="prevPage || nextPage"
           :value="pagination.currentPage"
