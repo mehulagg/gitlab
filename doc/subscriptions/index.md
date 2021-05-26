@@ -12,8 +12,8 @@ have access to. Subscriptions are valid for 12 months.
 
 GitLab provides special subscriptions to participants in:
 
-- [Education](#gitlab-for-education-subscriptions)
-- [Open Source](#gitlab-for-open-source-subscriptions)
+- [Education](#gitlab-for-education)
+- [Open Source](#gitlab-for-open-source)
 
 ## Choose a GitLab subscription
 
@@ -232,7 +232,8 @@ Follow these instructions to take a screenshot of the publicly visible settings:
  1. Expand **Visibility, project features, permissions**.
  1. Set **Project Visibility** to **Public**.
  1. Ensure others can request access by selecting the **Users can request access** checkbox.
- 1. Take the screenshot. Include as much of the publicly visible settings as possible. Make sure to include your project's name in the screenshot.
+ 1. Take the screenshot. Include as much of the publicly visible settings as possible. Make sure to include your project's name in the
+    upper-left of the screenshot.
 
 ![Publicly visible setting](img/publicly-visible.png)
 
