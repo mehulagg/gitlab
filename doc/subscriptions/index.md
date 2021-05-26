@@ -176,10 +176,10 @@ non-commercial academic research.
 Find more information on how to apply and renew at
 [GitLab for Education](https://about.gitlab.com/solutions/education/).
 
-### GitLab for Open Source program subscriptions
+### GitLab for Open Source
 
-The [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/) program gives 
-our top tier, plus 50,000 CI mins/month, to qualifying open source projects. 
+For qualifying open source projects, the [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/) program provides 
+the top GitLab tier, plus 50,000 CI minutes per month. 
 
 You can find more information about the [program requirements](https://about.gitlab.com/solutions/open-source/join/#requirements), [renewals](https://about.gitlab.com/solutions/open-source/join/$renewals),
 and benefits on the [GitLab for Open Source application page](https://about.gitlab.com/solutions/open-source/join/).
