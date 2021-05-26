@@ -459,7 +459,7 @@ it links to `<your_wiki>/documentation/file.md`:
 A hierarchical link can be constructed relative to the current wiki page by using `./<page>`,
 `../<page>`, and so on.
 
-If this example is on on a page at `<your_wiki>/documentation/main`,
+If this example is on a page at `<your_wiki>/documentation/main`,
 it links to `<your_wiki>/documentation/related`:
 
 ```markdown
