@@ -43,19 +43,19 @@ To create a new epic board:
 You've created an epic board. Now you can [add some lists](#create-a-new-list).
 To change these options later, [edit the board](#edit-the-scope-of-an-epic-board).
 
-<!-- TODO: This is not in the product
 ## Delete an epic board
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.
 
 Prerequisites:
 - A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
+- A minimum of two boards present in a group.
 
 To delete the active epic board:
 
 1. Select the dropdown with the current board name in the upper left corner of the Epic Boards page.
 1. Select **Delete board**.
-1. Select **Delete**. -->
+1. Select **Delete**.
 
 ## Actions you can take on an epic board
 
