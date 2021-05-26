@@ -132,7 +132,6 @@ NOTE:
 Once executed, it is possible that broken file references will be reported when running [`sudo gitlab-rake gitlab:artifacts:check`](raketasks/check.md#uploaded-files-integrity).
 For more information follow [delete references to missing artifacts](raketasks/check.md#delete-references-to-missing-artifacts)
 
-
 ## Incremental logging architecture
 
 > - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
