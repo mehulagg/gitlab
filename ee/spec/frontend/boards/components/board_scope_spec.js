@@ -64,7 +64,7 @@ describe('BoardScope', () => {
       });
 
       it('adds provided `label` to board.labels', () => {
-        vm.handleLabelClick(label);
+        vm.handleLabelClick([label]);
 
         expect(vm.board.labels).toHaveLength(1);
         expect(vm.board.labels[0].id).toBe(label.id);

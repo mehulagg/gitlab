@@ -30,10 +30,6 @@ module QA
               element :labels_dropdown_content
             end
 
-            base.view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select/dropdown_title.vue' do
-              element :labels_edit_button
-            end
-
             base.view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select_vue/dropdown_contents_labels_view.vue' do
               element :dropdown_input_field
             end

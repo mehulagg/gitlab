@@ -1,8 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import ListLabel from '~/boards/models/label';
 import { __ } from '~/locale';
-import BoardLabelsSelect from '~/vue_shared/components/sidebar/labels_select/base.vue';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 import AssigneeSelect from './assignee_select.vue';
 import BoardScopeCurrentIteration from './board_scope_current_iteration.vue';
 import BoardMilestoneSelect from './milestone_select.vue';
@@ -11,12 +10,11 @@ import BoardWeightSelect from './weight_select.vue';
 export default {
   components: {
     AssigneeSelect,
-    BoardLabelsSelect,
+    LabelsSelect,
     BoardMilestoneSelect,
     BoardScopeCurrentIteration,
     BoardWeightSelect,
   },
-
   props: {
     collapseScope: {
       type: Boolean,
@@ -74,23 +72,8 @@ export default {
   },
 
   methods: {
-    handleLabelClick(label) {
-      if (label.isAny) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.board.labels = [];
-      } else if (!this.board.labels.find((l) => l.id === label.id)) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.board.labels.push(
-          new ListLabel({
-            id: label.id,
-            title: label.title,
-            color: label.color,
-            textColor: label.text_color,
-          }),
-        );
-      } else {
-        let { labels } = this.board;
-        labels = labels.filter((selected) => selected.id !== label.id);
+    handleLabelClick(labels) {
+      if (labels.length) {
         // eslint-disable-next-line vue/no-mutating-props
         this.board.labels = labels;
       }
@@ -126,18 +109,30 @@ export default {
         @set-iteration="$emit('set-iteration', $event)"
       />
 
-      <board-labels-select
-        :context="board"
-        :labels-path="labelsPath"
-        :labels-web-url="labelsWebUrl"
-        :can-edit="canAdminBoard"
-        :show-create="canAdminBoard"
-        :enable-scoped-labels="enableScopedLabels"
-        variant="standalone"
-        ability-name="issue"
-        @onLabelClick="handleLabelClick"
-        >{{ __('Any label') }}</board-labels-select
-      >
+      <div class="block labels">
+        <p class="title hide-collapsed gl-display-flex gl-justify-content-space-between gl-mb-3">
+          <span>{{ __('Labels') }}</span>
+        </p>
+        <labels-select
+          ref="labelsSelect"
+          :key="labelsPath"
+          :allow-label-edit="canAdminBoard"
+          :allow-label-create="canAdminBoard"
+          :allow-multiselect="true"
+          :allow-scoped-labels="true"
+          :selected-labels="board.labels"
+          :labels-fetch-path="labelsPath"
+          :labels-manage-path="labelsWebUrl"
+          :labels-filter-base-path="labelsWebUrl"
+          :labels-list-title="__('Select label')"
+          :dropdown-button-text="__('Choose labels')"
+          variant="embedded"
+          class="gl-display-block labels gl-w-full"
+          @updateSelectedLabels="handleLabelClick"
+        >
+          {{ __('Any Label') }}
+        </labels-select>
+      </div>
 
       <assignee-select
         v-if="isIssueBoard"
