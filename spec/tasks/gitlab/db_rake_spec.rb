@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-require 'rake'
+require 'rake_helper'
 
 RSpec.describe 'gitlab:db namespace rake task' do
   before :all do
@@ -254,17 +253,17 @@ RSpec.describe 'gitlab:db namespace rake task' do
         allow(indexes).to receive(:where).with(identifier: 'public.foo_idx').and_return([index])
         expect(Gitlab::Database::Reindexing).to receive(:perform).with([index])
 
-        run_rake_task('gitlab:db:reindex', '[public.foo_idx]')
+        run_rake_task('gitlab:db:reindex', 'public.foo_idx')
       end
 
       it 'raises an error if the index does not exist' do
         allow(indexes).to receive(:where).with(identifier: 'public.absent_index').and_return([])
 
-        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(/Index not found/)
+        expect { run_rake_task('gitlab:db:reindex', 'public.absent_index') }.to raise_error(/Index not found/)
       end
 
       it 'raises an error if the index is not fully qualified with a schema' do
-        expect { run_rake_task('gitlab:db:reindex', '[foo_idx]') }.to raise_error(/Index name is not fully qualified/)
+        expect { run_rake_task('gitlab:db:reindex', 'foo_idx') }.to raise_error(/Index name is not fully qualified/)
       end
     end
   end
@@ -368,11 +367,6 @@ RSpec.describe 'gitlab:db namespace rake task' do
 
       subject
     end
-  end
-
-  def run_rake_task(task_name, arguments = '')
-    Rake::Task[task_name].reenable
-    Rake.application.invoke_task("#{task_name}#{arguments}")
   end
 
   def expect_multiple_executions_of_task(test_task_name, task_to_invoke, count: 2)

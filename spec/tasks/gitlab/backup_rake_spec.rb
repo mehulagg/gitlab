@@ -39,6 +39,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
     FileUtils.rm(tars_glob, force: true)
     FileUtils.rm(backup_files, force: true)
     FileUtils.rm_rf(backup_directories, secure: true)
+    FileUtils.mkdir_p('tmp/tests/public/uploads')
     reenable_backup_sub_tasks
     stub_container_registry_config(enabled: enable_registry)
   end
@@ -47,12 +48,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
     FileUtils.rm(tars_glob, force: true)
     FileUtils.rm(backup_files, force: true)
     FileUtils.rm_rf(backup_directories, secure: true)
-  end
-
-  def run_rake_task(task_name)
-    FileUtils.mkdir_p('tmp/tests/public/uploads')
-    Rake::Task[task_name].reenable
-    Rake.application.invoke_task task_name
+    FileUtils.rm_rf('tmp/tests/public/uploads', secure: true)
   end
 
   def reenable_backup_sub_tasks

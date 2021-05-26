@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-require 'rake'
+require 'rake_helper'
 
 RSpec.describe 'schema_version_check rake task' do
   include StubENV
@@ -39,10 +38,5 @@ RSpec.describe 'schema_version_check rake task' do
   it 'allows migrations on fresh databases' do
     allow(ActiveRecord::Migrator).to receive(:current_version).and_return(0)
     expect { run_rake_task('schema_version_check') }.not_to raise_error
-  end
-
-  def run_rake_task(task_name)
-    Rake::Task[task_name].reenable
-    Rake.application.invoke_task task_name
   end
 end
