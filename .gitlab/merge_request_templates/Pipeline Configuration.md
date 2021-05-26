@@ -14,19 +14,19 @@
 
 Consider the effect of the changes in this merge request on the following:
 
-- [ ] Effects on different [pipeline types](https://docs.gitlab.com/ee/development/pipelines.html#pipelines-for-merge-requests)
-- Effects on non-canonical projects:
+- [ ] Different [pipeline types](https://docs.gitlab.com/ee/development/pipelines.html#pipelines-for-merge-requests)
+- Non-canonical projects:
   - [ ] `gitlab-foss`
   - [ ] `security`
   - [ ] `dev`
   - [ ] personal forks
-- [ ] Effects on [pipeline performance](https://about.gitlab.com/handbook/engineering/quality/performance-indicators/#average-merge-request-pipeline-duration-for-gitlab)
+- [ ] [Pipeline performance](https://about.gitlab.com/handbook/engineering/quality/performance-indicators/#average-merge-request-pipeline-duration-for-gitlab)
 
 **If new jobs are added:**
 
 - [ ] Change-related rules (e.g. frontend/backend/database file changes): _____
 - [ ] Frequency they are running (MRs, main branch, nightly, bi-hourly): _____
-- [ ] Add a duration chart to https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations
+- [ ] Add a duration chart to https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations if there are new jobs added to merge request pipelines
 
 This will help keep track of expected cost increases to the [GitLab project average pipeline cost per merge request](https://about.gitlab.com/handbook/engineering/quality/performance-indicators/#gitlab-project-average-pipeline-cost-per-merge-request) RPI
 
