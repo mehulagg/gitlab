@@ -48,6 +48,7 @@ To change these options later, [edit the board](#edit-the-scope-of-an-epic-board
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.
 
 Prerequisites:
+
 - A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 - A minimum of two boards present in a group.
 
