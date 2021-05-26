@@ -328,17 +328,16 @@ RSpec.describe Projects::MergeRequestsController do
     end
 
     def expect_rebase_worker_for(user)
-      expect(RebaseWorker).to receive(:perform_async).with(merge_request.id, user.id, false)
+      expect(RebaseWorker).to have_enqueued_sidekiq_job(merge_request.id, user.id, false)
     end
 
     context 'approvals pending' do
       let(:project) { create(:project, :repository, approvals_before_merge: 1) }
 
       it 'returns 200' do
-        expect_rebase_worker_for(viewer)
-
         post_rebase
 
+        expect_rebase_worker_for(viewer)
         expect(response).to have_gitlab_http_status(:ok)
       end
     end
