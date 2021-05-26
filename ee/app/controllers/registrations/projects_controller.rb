@@ -3,7 +3,7 @@
 module Registrations
   class ProjectsController < ApplicationController
     include LearnGitlabHelper
-    layout 'checkout'
+    layout 'minimal'
 
     LEARN_GITLAB_TEMPLATE = 'learn_gitlab.tar.gz'
     LEARN_GITLAB_ULTIMATE_TEMPLATE = 'learn_gitlab_ultimate_trial.tar.gz'

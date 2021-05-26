@@ -1,0 +1,14 @@
+- page_classes = page_class.push(@html_class).flatten.compact
+
+!!! 5
+%html{ lang: I18n.locale, class: page_classes }
+  = render "layouts/head"
+  %body{ data: body_data }
+    = render "layouts/header/empty"
+    .layout-page
+      .content-wrapper
+        .alert-wrapper.gl-force-block-formatting-context
+          = render "layouts/broadcast"
+        .limit-container-width.minimal-width-container{ class: container_class }
+          %main#content-body.content
+            = yield

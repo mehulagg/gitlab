@@ -4,7 +4,7 @@ module Registrations
   class GroupsController < ApplicationController
     include ::Gitlab::Utils::StrongMemoize
 
-    layout 'checkout'
+    layout 'minimal'
 
     before_action :check_signup_onboarding_enabled
     before_action :authorize_create_group!, only: :new
