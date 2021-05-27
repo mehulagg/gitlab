@@ -16,12 +16,16 @@ RSpec.describe Gitlab::Redis::Wrapper do
   let(:sentinel_port) { redis_port + 20000 }
   let(:config_with_environment_variable_inside) { "spec/fixtures/config/redis_config_with_env.yml"}
   let(:config_env_variable_url) {"TEST_GITLAB_REDIS_URL"}
-  let(:class_redis_url) { Gitlab::Redis::Wrapper::DEFAULT_REDIS_URL }
+  let(:class_redis_url) { 'redis://localhost:6379' }
 
   include_examples "redis_shared_examples" do
     before do
       allow(described_class).to receive(:instrumentation_class) do
         ::Gitlab::Instrumentation::Redis::Cache
+      end
+
+      allow(described_class).to receive(:default_url) do
+        'redis://localhost:6379'
       end
     end
   end
@@ -33,17 +37,26 @@ RSpec.describe Gitlab::Redis::Wrapper do
   end
 
   describe '.instrumentation_class' do
-    it 'raises a NotImplementedError' do
+    it 'raises a NameError' do
       expect(described_class).to receive(:instrumentation_class).and_call_original
 
-      expect { described_class.instrumentation_class }.to raise_error(NotImplementedError)
+      expect { described_class.instrumentation_class }.to raise_error(NameError)
     end
   end
 
   describe '.config_file_path' do
     it 'returns the absolute path to the configuration file' do
-      expect(described_class.config_file_path('foo.yml'))
-        .to eq Rails.root.join('config', 'foo.yml').to_s
+      # This method is not meant for looking up routes.rb, but it's a file we know must exist.
+      expect(described_class.config_file_path('routes.rb'))
+        .to eq Rails.root.join('config', 'routes.rb').to_s
+    end
+  end
+
+  describe '.default_url' do
+    it 'is not implemented' do
+      expect(described_class).to receive(:default_url).and_call_original
+
+      expect { described_class.default_url }.to raise_error(NotImplementedError)
     end
   end
 end

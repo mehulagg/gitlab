@@ -16,7 +16,7 @@ RSpec.describe Gitlab::Redis::SharedState do
   let(:sentinel_port) { redis_port + 20000 }
   let(:config_with_environment_variable_inside) { "spec/fixtures/config/redis_shared_state_config_with_env.yml"}
   let(:config_env_variable_url) {"TEST_GITLAB_REDIS_SHARED_STATE_URL"}
-  let(:class_redis_url) { Gitlab::Redis::SharedState::DEFAULT_REDIS_SHARED_STATE_URL }
+  let(:class_redis_url) { 'redis://localhost:6382' }
 
   include_examples "redis_shared_examples"
 end
