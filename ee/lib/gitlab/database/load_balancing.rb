@@ -52,6 +52,10 @@ module Gitlab
         Gitlab::Database.config[:load_balancing] || {}
       end
 
+      def self.ci_configuration
+        Gitlab::Database.ci_config[:load_balancing] || {}
+      end
+
       # Returns the maximum replica lag size in bytes.
       def self.max_replication_difference
         (configuration['max_replication_difference'] || 8.megabytes).to_i
@@ -70,7 +74,7 @@ module Gitlab
 
       # Returns the additional hosts to use for load balancing.
       def self.ci_hosts
-        configuration['ci_hosts'] || []
+        ci_configuration['hosts'] || []
       end
 
       def self.service_discovery_enabled?

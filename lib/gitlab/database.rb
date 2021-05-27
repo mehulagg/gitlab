@@ -68,6 +68,15 @@ module Gitlab
       end
     end
 
+    def self.ci_config
+      config_hash = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env, name: :ci)&.configuration_hash || {}
+
+      config_hash.with_indifferent_access.tap do |hash|
+        # Match config/initializers/database_config.rb
+        hash[:pool] ||= default_pool_size
+      end
+    end
+
     def self.username
       config['username'] || ENV['USER']
     end
