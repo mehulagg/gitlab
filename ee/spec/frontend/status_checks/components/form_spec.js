@@ -111,11 +111,19 @@ describe('Status checks form', () => {
     it('shows the serverValidationErrors if given', async () => {
       createWrapper({
         serverValidationErrors: [NAME_TAKEN_SERVER_ERROR, URL_TAKEN_SERVER_ERROR],
+        statusCheck,
       });
 
       await findForm().trigger('submit');
 
-      expect(wrapper.emitted('submit')).toBe(undefined);
+      expect(wrapper.emitted('submit')).toContainEqual([
+        {
+          branches: statusCheck.protectedBranches,
+          name: statusCheck.name,
+          url: statusCheck.externalUrl,
+        },
+      ]);
+
       expect(inputsAreValid()).toBe(false);
       expect(findNameValidation().props('invalidFeedback')).toBe('Name is already taken.');
       expect(findUrlValidation().props('invalidFeedback')).toBe(
