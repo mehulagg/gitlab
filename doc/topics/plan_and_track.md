@@ -4,7 +4,7 @@ group:
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Plan and track work
+# Plan and track work **(FREE)**
 
 - [Epics](../user/group/epics/index.md)
 - [Issues](../user/project/issues/index.md)

@@ -4,7 +4,7 @@ group:
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Use GitLab
+# Use GitLab **(FREE)**
 
 - [Set up your organization](set_up_organization.md)
 - [Organize work with projects](../user/project/index.md)
