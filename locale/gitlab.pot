@@ -4184,6 +4184,9 @@ msgstr ""
 msgid "Approvers"
 msgstr ""
 
+msgid "Approvers from private group(s) not shown"
+msgstr ""
+
 msgid "Apr"
 msgstr ""
 
