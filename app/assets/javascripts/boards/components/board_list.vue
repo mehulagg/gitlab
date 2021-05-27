@@ -108,7 +108,7 @@ export default {
   watch: {
     boardItems() {
       this.$nextTick(() => {
-        this.showCount = this.scrollHeight() > Math.ceil(this.listHeight());
+        this.showCount = this.scrollHeight() + 10 > Math.ceil(this.listHeight());
       });
     },
   },
@@ -239,7 +239,7 @@ export default {
           data-testid="count-loading-icon"
         />
         <span v-if="showingAllItems">{{ showingAllItemsText }}</span>
-        <gl-intersection-observer v-else @update="onReachingListBottom">
+        <gl-intersection-observer v-else @appear="onReachingListBottom">
           <span>{{ paginatedIssueText }}</span>
         </gl-intersection-observer>
       </li>
