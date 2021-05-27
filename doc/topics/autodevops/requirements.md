@@ -44,7 +44,7 @@ To make full use of Auto DevOps with Kubernetes, you need:
      `prometheus.io/scrape: "true"` and `prometheus.io/port: "10254"`.
 
      NOTE:
-     If your cluster is installed on bare metal, please consult 
+     If your cluster is installed on bare metal, see
      [Auto DevOps Requirements for bare metal](#auto-devops-requirements-for-bare-metal).
 
 - **Base domain** (for [Auto Review Apps](stages.md#auto-review-apps),
