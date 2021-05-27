@@ -80,6 +80,7 @@ module Members
 
     def invite_source
       params[:invite_source] || 'unknown'
+      # hmm add a raise here and we can root out any that don't exist....
     end
 
     def tracking_property(member)
