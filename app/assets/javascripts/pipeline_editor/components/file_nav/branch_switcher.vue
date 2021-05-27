@@ -7,7 +7,8 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
 } from '@gitlab/ui';
-import produce from 'immer';
+import Vue from 'vue';
+import { fetchPolicies } from '~/lib/graphql';
 import { historyPushState } from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
@@ -56,7 +57,14 @@ export default {
   apollo: {
     availableBranches: {
       query: getAvailableBranches,
+      fetchPolicy: fetchPolicies.NO_CACHE,
       variables() {
+        console.log('VARS', {
+          limit: this.page.limit,
+          offset: this.page.offset,
+          projectFullPath: this.projectFullPath,
+          searchPattern: this.searchPattern,
+        });
         return {
           limit: this.page.limit,
           offset: this.page.offset,
@@ -70,6 +78,7 @@ export default {
       result({ data }) {
         const newBranches = data.project?.repository?.branchNames || [];
         this.branches = this.branches.concat(newBranches);
+        console.log('RESULT', newBranches);
         this.pageCounter += 1;
       },
       error() {
@@ -139,11 +148,11 @@ export default {
     setSearchTerm(newSearchTerm) {
       this.branches = [];
       this.pageCounter = 0;
-      this.page = {
+      Vue.set(this, 'page', {
         limit: newSearchTerm.trim() === '' ? this.paginationLimit : this.totalBranches,
         offset: 0,
         searchTerm: newSearchTerm.trim(),
-      };
+      });
     },
   },
 };
