@@ -313,7 +313,8 @@ of detached commits is performed, or a cleanup is run manually. Even the cleanup
 
 You should not change the history when you're working in a public branch
 or a branch that might be used by other developers.
-When you contribute to large open source repositories like [GitLab](https://gitlab.com/gitlab-org/gitlab)),
+
+When you contribute to large open source repositories, like [GitLab](https://gitlab.com/gitlab-org/gitlab),
 you can squash your commits into a single one.
 
 A feature branch of a merge request is a public branch and might be used by
