@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 - [Epics](../user/group/epics/index.md)
 - [Issues](../user/project/issues/index.md)
-- [Labels](../user/project/labels.html)
+- [Labels](../user/project/labels.md)
 - [Discussions](../user/discussions/index.md)
 - [Iterations](../user/group/iterations/index.md)
 - [Milestones](../user/project/milestones/index.md)
