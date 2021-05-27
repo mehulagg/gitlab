@@ -8,9 +8,6 @@ require 'active_support/core_ext/module/delegation'
 module Gitlab
   module Redis
     class Wrapper
-      DEFAULT_REDIS_URL = 'redis://localhost:6379'
-      REDIS_CONFIG_ENV_VAR_NAME = 'GITLAB_REDIS_CONFIG_FILE'
-
       class << self
         delegate :params, :url, to: :new
 
@@ -52,7 +49,7 @@ module Gitlab
         end
 
         def default_url
-          DEFAULT_REDIS_URL
+          'redis://localhost:6379'
         end
 
         # Return the absolute path to a Rails configuration file
@@ -60,23 +57,26 @@ module Gitlab
         # We use this instead of `Rails.root` because for certain tasks
         # utilizing these classes, `Rails` might not be available.
         def config_file_path(filename)
-          File.expand_path("../../../config/#{filename}", __dir__)
+          path = File.expand_path("../../../config/#{filename}", __dir__)
+          return path if File.file?(path)
         end
 
         def config_file_name
-          # if ENV set for wrapper class, use it even if it points to a file does not exist
-          file_name = ENV[REDIS_CONFIG_ENV_VAR_NAME]
-          return file_name unless file_name.nil?
+          [
+            ENV["GITLAB_REDIS_#{store_name.underscore.upcase}_CONFIG_FILE"],
+            config_file_path("redis.#{store_name.underscore}.yml"),
+            ENV['GITLAB_REDIS_CONFIG_FILE'],
+            config_file_path('resque.yml')
+          ].compact.first
+        end
 
-          # otherwise, if config files exists for wrapper class, use it
-          file_name = config_file_path('resque.yml')
-          return file_name if File.file?(file_name)
-
-          # nil will force use of DEFAULT_REDIS_URL when config file is absent
-          nil
+        def store_name
+          name.split('::').last
         end
 
         def instrumentation_class
+          const_get("::Gitlab::Instrumentation::Redis::#{store_name}", false)
+        rescue NameError
           raise NotImplementedError
         end
       end

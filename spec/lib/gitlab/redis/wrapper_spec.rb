@@ -16,7 +16,7 @@ RSpec.describe Gitlab::Redis::Wrapper do
   let(:sentinel_port) { redis_port + 20000 }
   let(:config_with_environment_variable_inside) { "spec/fixtures/config/redis_config_with_env.yml"}
   let(:config_env_variable_url) {"TEST_GITLAB_REDIS_URL"}
-  let(:class_redis_url) { Gitlab::Redis::Wrapper::DEFAULT_REDIS_URL }
+  let(:class_redis_url) { 'redis://localhost:6379' }
 
   include_examples "redis_shared_examples" do
     before do
@@ -42,8 +42,9 @@ RSpec.describe Gitlab::Redis::Wrapper do
 
   describe '.config_file_path' do
     it 'returns the absolute path to the configuration file' do
-      expect(described_class.config_file_path('foo.yml'))
-        .to eq Rails.root.join('config', 'foo.yml').to_s
+      # This method is not meant for looking up routes.rb, but it's a file we know must exist.
+      expect(described_class.config_file_path('routes.rb'))
+        .to eq Rails.root.join('config', 'routes.rb').to_s
     end
   end
 end

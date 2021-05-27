@@ -16,7 +16,7 @@ RSpec.describe Gitlab::Redis::Cache do
   let(:sentinel_port) { redis_port + 20000 }
   let(:config_with_environment_variable_inside) { "spec/fixtures/config/redis_cache_config_with_env.yml"}
   let(:config_env_variable_url) {"TEST_GITLAB_REDIS_CACHE_URL"}
-  let(:class_redis_url) { Gitlab::Redis::Cache::DEFAULT_REDIS_CACHE_URL }
+  let(:class_redis_url) { 'redis://localhost:6380' }
 
   include_examples "redis_shared_examples"
 end
