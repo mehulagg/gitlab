@@ -578,8 +578,8 @@ Prerequisites:
 
 - A minimum of [Reporter](../permissions.md#project-members-permissions) access to a project in GitLab.
 
-To move an issue, select the issue card and drag it to another position within its current list or
-onto that list. Learn about possible effects in [Dragging issues between lists](#dragging-issues-between-lists).
+To move an issue, select the issue card and drag it to another position in its current list or
+into a different list. Learn about possible effects in [Dragging issues between lists](#dragging-issues-between-lists).
 
 To move a list, select its top bar, and drag it horizontally.
 You can't move the **Open** and **Closed** lists, but you can hide them when editing an issue board.
@@ -588,8 +588,8 @@ You can't move the **Open** and **Closed** lists, but you can hide them when edi
 
 To move an issue to another list, select the issue card and drag it onto that list.
 
-When you drag issues between lists, different behavior occurs depending on the source list and the
-target list.
+When you drag issues between lists, the result is different depending on the source list
+and the target list.
 
 |                              | To Open          | To Closed    | To label B list                   | To assignee Bob list              |
 | ---------------------------- | ---------------- | ------------ | --------------------------------- | --------------------------------- |

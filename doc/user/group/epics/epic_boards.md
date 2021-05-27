@@ -40,7 +40,7 @@ To create a new epic board:
    1. Next to **Labels**, select **Edit** and select the labels to use as board scope.
 1. Select **Create board**.
 
-You've created an epic board. Now you can [add some lists](#create-a-new-list).
+Now you can [add some lists](#create-a-new-list).
 To change these options later, [edit the board](#edit-the-scope-of-an-epic-board).
 
 ## Delete an epic board
@@ -130,16 +130,16 @@ Prerequisites:
 
 - A minimum of [Reporter](../../permissions.md#group-members-permissions) access to a group in GitLab.
 
-To move an epic, select the epic card and drag it to another position within its current list or
-onto that list. Learn about possible effects in [Dragging epics between lists](#dragging-epics-between-lists).
+To move an epic, select the epic card and drag it to another position in its current list or
+into another list. Learn about possible effects in [Dragging epics between lists](#dragging-epics-between-lists).
 
 To move a list, select its top bar, and drag it horizontally.
 You can't move the **Open** and **Closed** lists, but you can hide them when editing an epic board.
 
 #### Dragging epics between lists
 
-When you drag epics between lists, different behavior occurs depending on the source list and the
-target list.
+When you drag epics between lists, the result is different depending on the source list
+and the target list.
 
 |                              | To Open          | To Closed    | To label B list                   | To assignee Bob list              |
 | ---------------------------- | ---------------- | ------------ | --------------------------------- | --------------------------------- |
