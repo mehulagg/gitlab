@@ -123,17 +123,14 @@ reports are available to download. To download a report, click on the
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9928) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.2.
 
-You can enforce additional approval of a merge request that would introduce a vulnerability of
-the following severities:
+You can implement merge request approvals to require approval by selected users or a group when a
+merge request would introduce one of the following security issues:
 
-- `high`
-- `critical`
-- `unknown`
+- A security vulnerability
+- A software license compliance violation
 
-With the **Vulnerability-Check** approval rule enabled, any such merge request must be
-approved by selected users or groups.
-
-An approval is required when the latest security report in a merge request:
+When the Vulnerability-Check merge request rule is enabled, additional merge request approval
+is required when the latest security report in a merge request:
 
 - Contains a vulnerability of `high`, `critical`, or `unknown` severity that is not present in the
   target branch. Note that approval is still required for dismissed vulnerabilities.
@@ -143,6 +140,9 @@ An approval is optional when the security report:
 
 - Contains no new vulnerabilities when compared to the target branch.
 - Contains only new vulnerabilities of `low` or `medium` severity.
+
+When the License-Check merge request rule is enabled, additional approval is required if a merge
+request contains a denied license. For more details, see [Enabling license approvals within a project](../compliance/license_compliance/index.md#enabling-license-approvals-within-a-project).
 
 ### Enable the Vulnerability-Check rule
 
