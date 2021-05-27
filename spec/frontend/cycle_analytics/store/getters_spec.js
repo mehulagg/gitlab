@@ -6,10 +6,10 @@ import {
   selectedStage,
 } from '../mock_data';
 
-console.log('allowedStages', allowedStages);
-console.log('stageMedians', stageMedians);
-console.log('transformedProjectStagePathData', transformedProjectStagePathData);
-console.log('selectedStage', selectedStage);
+// console.log('allowedStages', allowedStages);
+// console.log('stageMedians', stageMedians);
+// console.log('transformedProjectStagePathData', transformedProjectStagePathData);
+// console.log('selectedStage', selectedStage);
 
 describe('Value stream analytics getters', () => {
   describe('pathNavigationData', () => {
