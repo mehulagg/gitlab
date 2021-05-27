@@ -34,6 +34,11 @@ module API
       end
 
       def current_runner
+        if params[:token]
+          ::Gitlab::Database::LoadBalancing::RackMiddleware
+            .stick_or_unstick(env, :runner, params[:token])
+        end
+
         strong_memoize(:current_runner) do
           ::Ci::Runner.find_by_token(params[:token].to_s)
         end
@@ -65,6 +70,11 @@ module API
       end
 
       def current_job
+        if params[:id]
+          ::Gitlab::Database::LoadBalancing::RackMiddleware
+            .stick_or_unstick(env, :build, params[:id])
+        end
+
         strong_memoize(:current_job) do
           ::Ci::Build.find_by_id(params[:id])
         end

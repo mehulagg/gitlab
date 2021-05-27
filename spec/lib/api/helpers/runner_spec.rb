@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::API::Helpers::Runner do
+RSpec.describe API::Helpers::Runner do
   let(:helper) { Class.new { include API::Helpers::Runner }.new }
 
   before do
