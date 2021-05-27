@@ -1,6 +1,6 @@
 # Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/browser_performance_testing.html
 
-performance:
+browser_performance:
   stage: performance
   image: docker:19.03.12
   allow_failure: true
