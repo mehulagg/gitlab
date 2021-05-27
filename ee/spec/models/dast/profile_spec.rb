@@ -122,19 +122,13 @@ RSpec.describe Dast::Profile, type: :model do
       end
     end
 
-    describe '#ci_variables' do
-      context 'when there are no secret_variables' do
-        it 'returns an empty collection' do
-          expect(subject.ci_variables.size).to be_zero
-        end
-      end
+    describe '#secret_ci_variables' do
+      it 'delegates to #dast_site_profile' do
+        user = User.new
 
-      context 'when there are secret_variables' do
-        it 'returns a collection containing that variable' do
-          variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject.dast_site_profile)
+        expect(subject.dast_site_profile).to receive(:secret_ci_variables).with(user)
 
-          expect(subject.ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
-        end
+        subject.secret_ci_variables(user)
       end
     end
   end

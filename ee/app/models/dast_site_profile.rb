@@ -28,8 +28,12 @@ class DastSiteProfile < ApplicationRecord
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
-  def ci_variables
-    ::Gitlab::Ci::Variables::Collection.new(secret_variables)
+  def secret_ci_variables(user)
+    collection = ::Gitlab::Ci::Variables::Collection.new
+
+    return collection unless Ability.allowed?(user, :create_on_demand_dast_scan, self)
+
+    collection.concat(secret_variables)
   end
 
   def status

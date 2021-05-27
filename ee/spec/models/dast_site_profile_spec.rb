@@ -194,18 +194,38 @@ RSpec.describe DastSiteProfile, type: :model do
       end
     end
 
-    describe '#ci_variables' do
-      context 'when there are no secret_variables' do
-        it 'returns an empty collection' do
-          expect(subject.ci_variables.size).to be_zero
+    describe '#secret_ci_variables' do
+      context 'when user can read secrets' do
+        let_it_be(:user) { create(:user) }
+
+        before do
+          subject.project.add_developer(user)
+        end
+
+        context 'when there are no secret_variables' do
+          it 'returns an empty collection' do
+            expect(subject.secret_ci_variables(user).size).to be_zero
+          end
+        end
+
+        context 'when there are secret_variables' do
+          it 'returns a collection containing that variable' do
+            variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject)
+
+            expect(subject.secret_ci_variables(user).to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
+          end
         end
       end
 
-      context 'when there are secret_variables' do
-        it 'returns a collection containing that variable' do
-          variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject)
+      context 'when user cannot read secrets' do
+        let_it_be(:user) { create(:user) }
 
-          expect(subject.ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
+        before do
+          create(:dast_site_profile_secret_variable, dast_site_profile: subject)
+        end
+
+        it 'returns an empty collection' do
+          expect(subject.secret_ci_variables(user).size).to be_zero
         end
       end
     end
