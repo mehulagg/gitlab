@@ -112,7 +112,7 @@ export default {
         } else if (openMergeRequest) {
           this.redirectToNewMergeRequest(targetBranch);
         } else {
-          this.$emit('commit', { type: COMMIT_SUCCESS });
+          this.$emit('commit', { targetBranch, type: COMMIT_SUCCESS });
         }
       } catch (error) {
         this.$emit('showError', { type: COMMIT_FAILURE, reasons: [error?.message] });

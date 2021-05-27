@@ -17,6 +17,7 @@ import {
 } from '~/pipeline_editor/constants';
 import getAvailableBranches from '~/pipeline_editor/graphql/queries/available_branches.graphql';
 import getCurrentBranch from '~/pipeline_editor/graphql/queries/client/current_branch.graphql';
+import getLastBranchCommitted from '~/pipeline_editor/graphql/queries/client/last_branch_committed.graphql';
 
 export default {
   i18n: {
@@ -82,6 +83,9 @@ export default {
     },
     currentBranch: {
       query: getCurrentBranch,
+    },
+    lastBranchCommitted: {
+      query: getLastBranchCommitted,
     },
   },
   computed: {

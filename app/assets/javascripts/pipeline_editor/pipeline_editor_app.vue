@@ -20,6 +20,7 @@ import getCiConfigData from './graphql/queries/ci_config.graphql';
 import getAppStatus from './graphql/queries/client/app_status.graphql';
 import getCurrentBranch from './graphql/queries/client/current_branch.graphql';
 import getIsNewCiConfigFile from './graphql/queries/client/is_new_ci_config_file.graphql';
+import getLastBranchCommitted from './graphql/queries/client/last_branch_committed.graphql';
 import PipelineEditorHome from './pipeline_editor_home.vue';
 
 export default {
@@ -220,8 +221,12 @@ export default {
     updateCiConfig(ciFileContent) {
       this.currentCiFileContent = ciFileContent;
     },
-    updateOnCommit({ type }) {
+    updateOnCommit({ targetBranch, type }) {
       this.reportSuccess(type);
+
+      this.$apollo
+        .getClient()
+        .writeQuery({ query: getLastBranchCommitted, data: { lastBranchCommitted: targetBranch } });
 
       if (this.isNewCiConfigFile) {
         this.$apollo
