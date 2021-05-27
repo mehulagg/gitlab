@@ -17,6 +17,7 @@ import (
 var (
 	keyWatcher            = make(map[string][]chan string)
 	keyWatcherMutex       sync.Mutex
+	shutdown              bool
 	redisReconnectTimeout = backoff.Backoff{
 		//These are the defaults
 		Min:    100 * time.Millisecond,
@@ -39,7 +40,8 @@ var (
 )
 
 const (
-	keySubChannel = "workhorse:notifications"
+	keySubChannel   = "workhorse:notifications"
+	shutdownMessage = "shutdown:keywatcher"
 )
 
 // KeyChan holds a key and a channel
@@ -112,6 +114,31 @@ func Process() {
 	}
 }
 
+// Shutdown() will send a message to all the watchers to kick them out of
+// their channel.
+func Shutdown() {
+	log.Info("keywatcher: shutting down")
+
+	keyWatcherMutex.Lock()
+	defer keyWatcherMutex.Unlock()
+	shutdown = true
+
+	for key, chanList := range keyWatcher {
+		for _, c := range chanList {
+			c <- shutdownMessage
+			keyWatchers.Dec()
+		}
+		delete(keyWatcher, key)
+	}
+}
+
+func inShutdown() bool {
+	keyWatcherMutex.Lock()
+	defer keyWatcherMutex.Unlock()
+
+	return shutdown
+}
+
 func notifyChanWatchers(key, value string) {
 	keyWatcherMutex.Lock()
 	defer keyWatcherMutex.Unlock()
@@ -165,6 +192,10 @@ const (
 
 // WatchKey waits for a key to be updated or expired
 func WatchKey(key, value string, timeout time.Duration) (WatchKeyStatus, error) {
+	if inShutdown() {
+		return WatchKeyStatusNoChange, nil
+	}
+
 	kw := &KeyChan{
 		Key:  key,
 		Chan: make(chan string, 1),
@@ -183,6 +214,9 @@ func WatchKey(key, value string, timeout time.Duration) (WatchKeyStatus, error) 
 
 	select {
 	case currentValue := <-kw.Chan:
+		if currentValue == shutdownMessage {
+			return WatchKeyStatusNoChange, nil
+		}
 		if currentValue == "" {
 			return WatchKeyStatusNoChange, fmt.Errorf("keywatcher: redis GET failed")
 		}

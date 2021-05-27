@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/signal"
 	"syscall"
 	"time"
 
@@ -225,7 +227,21 @@ func run(boot bootConfig, cfg config.Config) error {
 
 	up := wrapRaven(upstream.NewUpstream(cfg, accessLogger))
 
-	go func() { finalErrors <- http.Serve(listener, up) }()
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	return <-finalErrors
+	server := http.Server{Handler: up}
+	go func() { finalErrors <- server.Serve(listener) }()
+
+	select {
+	case err := <-finalErrors:
+		return err
+	case <-done:
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.ShutdownTimeout)*time.Second)
+		defer cancel()
+
+		redis.Shutdown()
+		server.Shutdown(ctx)
+		return nil
+	}
 }

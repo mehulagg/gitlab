@@ -106,6 +106,7 @@ type Config struct {
 	PropagateCorrelationID   bool                     `toml:"-"`
 	ImageResizerConfig       ImageResizerConfig       `toml:"image_resizer"`
 	AltDocumentRoot          string                   `toml:"alt_document_root"`
+	ShutdownTimeout          int                      `toml:"shutdown_timeout"`
 }
 
 var DefaultImageResizerConfig = ImageResizerConfig{
