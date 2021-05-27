@@ -1,11 +1,8 @@
 import {
-  mapExternalApprovalRuleRequest,
   mapApprovalRuleRequest,
   mapApprovalSettingsResponse,
   mapApprovalFallbackRuleRequest,
-  mapExternalApprovalResponse,
 } from 'ee/approvals/mappers';
-import { joinRuleResponses } from 'ee/approvals/utils';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
@@ -13,10 +10,6 @@ import * as types from '../base/mutation_types';
 
 const fetchSettings = ({ settingsPath }) => {
   return axios.get(settingsPath).then((res) => mapApprovalSettingsResponse(res.data));
-};
-
-const fetchExternalApprovalRules = ({ externalApprovalRulesPath }) => {
-  return axios.get(externalApprovalRulesPath).then((res) => mapExternalApprovalResponse(res.data));
 };
 
 export const requestRules = ({ commit }) => {
@@ -37,45 +30,14 @@ export const receiveRulesError = () => {
 export const fetchRules = ({ rootState, dispatch }) => {
   dispatch('requestRules');
 
-  const requests = [fetchSettings(rootState.settings)];
-
-  if (gon?.features?.ffComplianceApprovalGates) {
-    requests.push(fetchExternalApprovalRules(rootState.settings));
-  }
-
-  return Promise.all(requests)
-    .then((responses) => dispatch('receiveRulesSuccess', joinRuleResponses(responses)))
+  return fetchSettings(rootState.settings)
+    .then((response) => dispatch('receiveRulesSuccess', response))
     .catch(() => dispatch('receiveRulesError'));
 };
 
 export const postRuleSuccess = ({ dispatch }) => {
   dispatch('createModal/close');
   dispatch('fetchRules');
-};
-
-export const putExternalApprovalRule = ({ rootState, dispatch }, { id, ...newRule }) => {
-  const { externalApprovalRulesPath } = rootState.settings;
-
-  return axios
-    .put(`${externalApprovalRulesPath}/${id}`, mapExternalApprovalRuleRequest(newRule))
-    .then(() => dispatch('postRuleSuccess'));
-};
-
-export const deleteExternalApprovalRule = ({ rootState, dispatch }, id) => {
-  const { externalApprovalRulesPath } = rootState.settings;
-
-  return axios
-    .delete(`${externalApprovalRulesPath}/${id}`)
-    .then(() => dispatch('deleteRuleSuccess'))
-    .catch(() => dispatch('deleteRuleError'));
-};
-
-export const postExternalApprovalRule = ({ rootState, dispatch }, rule) => {
-  const { externalApprovalRulesPath } = rootState.settings;
-
-  return axios
-    .post(externalApprovalRulesPath, mapExternalApprovalRuleRequest(rule))
-    .then(() => dispatch('postRuleSuccess'));
 };
 
 export const postRule = ({ rootState, dispatch }, rule) => {

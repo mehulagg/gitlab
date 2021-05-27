@@ -6,11 +6,10 @@ import ProjectRules from 'ee/approvals/components/project_settings/project_rules
 import RuleName from 'ee/approvals/components/rule_name.vue';
 import Rules from 'ee/approvals/components/rules.vue';
 import UnconfiguredSecurityRules from 'ee/approvals/components/security_configuration/unconfigured_security_rules.vue';
-import StatusChecksIcon from 'ee/approvals/components/status_checks_icon.vue';
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
-import { createProjectRules, createExternalRule } from '../../mocks';
+import { createProjectRules } from '../../mocks';
 
 const TEST_RULES = createProjectRules();
 
@@ -147,28 +146,6 @@ describe('Approvals ProjectRules', () => {
 
     it(`should render the unconfigured-security-rules component`, () => {
       expect(wrapper.find(UnconfiguredSecurityRules).exists()).toBe(true);
-    });
-  });
-
-  describe('when the rule is external', () => {
-    const rule = createExternalRule();
-
-    beforeEach(() => {
-      store.modules.approvals.state.rules = [rule];
-
-      factory();
-    });
-
-    it('renders the status check component with URL', () => {
-      expect(wrapper.findComponent(StatusChecksIcon).props('url')).toBe(rule.externalUrl);
-    });
-
-    it('does not render a user avatar component', () => {
-      expect(wrapper.findComponent(UserAvatarList).exists()).toBe(false);
-    });
-
-    it('does not render the approvals required input', () => {
-      expect(wrapper.findComponent(RuleInput).exists()).toBe(false);
     });
   });
 });

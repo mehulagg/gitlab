@@ -4133,13 +4133,7 @@ msgstr ""
 msgid "ApprovalRule|Rule name"
 msgstr ""
 
-msgid "ApprovalRule|Status check"
-msgstr ""
-
 msgid "ApprovalRule|Target branch"
-msgstr ""
-
-msgid "ApprovalRule|Users or groups"
 msgstr ""
 
 msgid "ApprovalStatusTooltip|Adheres to separation of duties"
@@ -13396,9 +13390,6 @@ msgid "External storage URL"
 msgstr ""
 
 msgid "External storage authentication token"
-msgstr ""
-
-msgid "External url has already been taken"
 msgstr ""
 
 msgid "ExternalAuthorizationService|Classification label"
@@ -31102,9 +31093,6 @@ msgid "StatusCheck|Examples: QA, Security."
 msgstr ""
 
 msgid "StatusCheck|External API is already in use by another status check."
-msgstr ""
-
-msgid "StatusCheck|Invoke an external API as part of the approvals"
 msgstr ""
 
 msgid "StatusCheck|Invoke an external API as part of the pipeline process."
