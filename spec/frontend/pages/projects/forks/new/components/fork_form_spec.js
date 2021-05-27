@@ -348,15 +348,11 @@ describe('ForkForm component', () => {
       });
 
       it('display flash when POST is unsuccessful', async () => {
-        const dummyError = 'Fork project failed';
-
-        jest.spyOn(axios, 'post').mockRejectedValue(dummyError);
-
         await submitForm();
 
         expect(urlUtility.redirectTo).not.toHaveBeenCalled();
         expect(createFlash).toHaveBeenCalledWith({
-          message: dummyError,
+          message: 'An error occurred while forking the project, please try again.',
         });
       });
     });
