@@ -6,6 +6,10 @@ import { __, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
+const trackingMixin = Tracking.mixin({
+  property: 'experiment:highlight_paid_features_during_active_trial',
+  experiment: 'highlight_paid_features_during_active_trial',
+});
 
 export default {
   components: {
@@ -15,7 +19,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [Tracking.mixin()],
+  mixins: [trackingMixin],
   props: {
     featureName: {
       type: String,
@@ -32,6 +36,11 @@ export default {
   data() {
     return {
       tooltipDisabled: false,
+      tracking: {
+        events: {
+          displayBadge: { action: 'display_badge', label: 'feature_highlight_badge' },
+        },
+      },
     };
   },
   computed: {
@@ -57,10 +66,8 @@ export default {
       this.updateTooltipDisabledState();
     },
     trackBadgeDisplayedForExperiment() {
-      this.track('display_badge', {
-        label: 'feature_highlight_badge',
-        property: 'experiment:highlight_paid_features_during_active_trial',
-      });
+      const { action, ...options } = this.tracking.events.displayBadge;
+      this.track(action, options);
     },
     updateTooltipDisabledState() {
       this.tooltipDisabled = bp.getBreakpointSize() !== 'xs';
