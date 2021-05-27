@@ -221,11 +221,11 @@ commits `A-B-C-D` and you want to delete commit `B`.
 
 1. Rebase the range from current commit `D` to `B`:
 
-  ```shell
-  git rebase -i A
-  ```
+   ```shell
+   git rebase -i A
+   ```
 
-  A list of commits is displayed in your editor.
+   A list of commits is displayed in your editor.
 
 1. In front of commit `B`, replace `pick` with `drop`.
 1. Leave the default, `pick`, for all other commits.
