@@ -189,7 +189,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
       .catch(() => commit(types.SET_RETRIEVING_BATCHES, false));
 
   return getBatch()
-    .then(handleLocationHash)
+    .then(() => handleLocationHash())
     .catch(() => null);
 };
 

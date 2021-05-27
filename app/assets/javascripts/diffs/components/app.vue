@@ -323,6 +323,14 @@ export default {
       this.setHighlightedRow(id.split('diff-content').pop().slice(1));
     }
 
+    if (window.gon?.features?.diffsVirtualScrolling) {
+      window.addEventListener('afterHandleLocationHash', () =>
+        this.scrollVirtualScrollerToFileHash(
+          window.location.hash.split('diff-content').pop().slice(1),
+        ),
+      );
+    }
+
     if (window.gon?.features?.diffSettingsUsageData) {
       if (this.renderTreeList) {
         api.trackRedisHllUserEvent(TRACKING_FILE_BROWSER_TREE);
@@ -504,6 +512,15 @@ export default {
 
       return this.setShowTreeList({ showTreeList, saving: false });
     },
+    scrollVirtualScrollerToFileHash(hash, callback = () => {}) {
+      const index = this.diffFiles.findIndex((f) => f.file_hash === hash);
+
+      if (index !== -1) {
+        this.$refs.virtualScroller.scrollToItem(index);
+        window.scrollBy(0, -154);
+        callback();
+      }
+    },
   },
   minTreeWidth: MIN_TREE_WIDTH,
   maxTreeWidth: MAX_TREE_WIDTH,
@@ -568,6 +585,7 @@ export default {
           <template v-else-if="renderDiffFiles">
             <dynamic-scroller
               v-if="isVirtualScrollingEnabled"
+              ref="virtualScroller"
               :items="diffs"
               :min-item-size="70"
               :buffer="1000"

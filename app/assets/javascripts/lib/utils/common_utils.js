@@ -132,6 +132,7 @@ export const handleLocationHash = () => {
 
   setTimeout(() => {
     window.scrollBy(0, adjustment);
+    window.dispatchEvent(new CustomEvent('afterHandleLocationHash'));
   });
 };
 
