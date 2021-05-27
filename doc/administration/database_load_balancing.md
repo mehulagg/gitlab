@@ -6,7 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Database Load Balancing **(PREMIUM SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1283) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
+>- [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1283) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
+>- [Available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60894) in GitLab Free 14.0 behind the `ENABLE_LOAD_BALANCING_FOR_FOSS` environment variable. This is not ready for production use.
 
 Distribute read-only queries among multiple database servers.
 
