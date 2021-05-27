@@ -7,6 +7,7 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
 } from '@gitlab/ui';
+import produce from 'immer';
 import { historyPushState } from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
@@ -89,6 +90,11 @@ export default {
     },
   },
   computed: {
+    hasCommittedNewBranch() {
+      // can only commit to current branch or make a new branch
+      // no need to check for existing branches
+      return this.lastBranchCommitted && this.currentBranch !== this.lastBranchCommitted;
+    },
     isBranchesLoading() {
       return this.$apollo.queries.availableBranches.loading;
     },
@@ -101,6 +107,33 @@ export default {
       }
 
       return `*${this.page.searchTerm}*`;
+    },
+  },
+  watch: {
+    async hasCommittedNewBranch(flag) {
+      if (flag) {
+        const queryAndParams = {
+          query: getAvailableBranches,
+          variables: {
+            limit: BRANCH_PAGINATION_LIMIT,
+            offset: 0,
+            projectFullPath: this.projectFullPath,
+            searchPattern: '*',
+          },
+        };
+
+        const sourceData = await this.$apollo.getClient().readQuery(queryAndParams);
+        const data = produce(sourceData, (draftData) => {
+          draftData.project.repository.branchNames = [this.lastBranchCommitted].concat(sourceData.project.repository.branchNames);
+        });
+
+        this.branches  = [];
+        await this.$apollo.getClient().writeQuery({ ...queryAndParams, data });
+        await this.$apollo.getClient().writeQuery({
+          query: getCurrentBranch,
+          data: { currentBranch: this.lastBranchCommitted },
+        });
+      }
     },
   },
   methods: {
