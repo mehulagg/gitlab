@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GithubService::StatusMessage do
+RSpec.describe Integrations::Github::StatusMessage do
   include Rails.application.routes.url_helpers
 
   let(:project) { double(:project, namespace: "me", to_s: 'example_project') }
@@ -101,7 +101,7 @@ RSpec.describe GithubService::StatusMessage do
       described_class.from_pipeline_data(project, service, sample_data)
     end
 
-    it 'builds an instance of GithubService::StatusMessage' do
+    it 'builds an instance of Integrations::Github::StatusMessage' do
       expect(subject).to be_a described_class
     end
 

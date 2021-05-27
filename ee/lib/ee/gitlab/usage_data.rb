@@ -206,7 +206,7 @@ module EE
                                                                   start: minimum_id(::MergeRequest),
                                                                   finish: maximum_id(::MergeRequest)),
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
-                projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
+                projects_reporting_ci_cd_back_to_github: count(::Integrations::Github.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
                 status_page_issues: count(::Issue.on_status_page, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 template_repositories: add(count(::Project.with_repos_templates), count(::Project.with_groups_level_repos_templates))

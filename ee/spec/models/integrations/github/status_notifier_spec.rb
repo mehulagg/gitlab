@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GithubService::StatusNotifier do
+RSpec.describe Integrations::Github::StatusNotifier do
   let(:access_token) { 'aaaaa' }
   let(:repo_path) { 'myself/my-project' }
 

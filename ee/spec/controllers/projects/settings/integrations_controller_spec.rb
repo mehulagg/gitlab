@@ -28,14 +28,14 @@ RSpec.describe Projects::Settings::IntegrationsController do
   end
 
   context 'sets correct services list' do
-    let(:active_services) { assigns(:services).map(&:type) }
-    let(:disabled_services) { %w[GithubService] }
+    let(:active_services) { assigns(:services).map(&:model_name) }
+    let(:disabled_services) { %w[Integrations::Github] }
 
     it 'enables SlackSlashCommandsService and disables GitlabSlackApplication' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
       expect(active_services).to include('SlackSlashCommandsService')
-      expect(active_services).not_to include('GitlabSlackApplicationService')
+      expect(active_services).not_to include('Integrations::GitlabSlackApplication')
     end
 
     it 'enables GitlabSlackApplication and disables SlackSlashCommandsService' do
@@ -44,7 +44,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
 
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(active_services).to include('GitlabSlackApplicationService')
+      expect(active_services).to include('Integrations::GitlabSlackApplication')
       expect(active_services).not_to include('SlackSlashCommandsService')
     end
 

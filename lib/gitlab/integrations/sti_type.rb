@@ -7,6 +7,8 @@ module Gitlab
         Asana Assembla Bamboo Bugzilla Buildkite Campfire Confluence CustomIssueTracker Datadog
         DroneCi EmailsOnPush Ewm ExternalWiki Flowdock IssueTracker Irker Jenkins Jira MockCi Packagist
         PipelinesEmail Pivotaltracker Redmine Teamcity Youtrack
+
+        Github GitlabSlackApplication
       )).freeze
 
       def cast(value)

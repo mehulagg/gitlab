@@ -23,20 +23,20 @@ alternative authentication methods to your users.
 
 ### Remove Service Integration entries from the database
 
-The `GithubService` class is only available in the Enterprise Edition codebase,
+The `Integrations::Github` class is only available in the Enterprise Edition codebase,
 so if you downgrade to the Community Edition, the following error displays:
 
 ```plaintext
 Completed 500 Internal Server Error in 497ms (ActiveRecord: 32.2ms)
 
-ActionView::Template::Error (The single-table inheritance mechanism failed to locate the subclass: 'GithubService'. This
+ActionView::Template::Error (The single-table inheritance mechanism failed to locate the subclass: 'Integrations::Github'. This
 error is raised because the column 'type' is reserved for storing the class in case of inheritance. Please rename this
 column if you didn't intend it to be used for storing the inheritance class or overwrite Integration.inheritance_column to
 use another column for that information.)
 ```
 
-All services are created automatically for every project you have, so in order
-to avoid getting this error, you need to remove all instances of the
+All integrations are created automatically for every project you have, so in order
+to avoid getting this error, you need to remove all records with the type set to
 `GithubService` from your database:
 
 **Omnibus Installation**

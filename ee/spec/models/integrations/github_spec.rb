@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GithubService do
+RSpec.describe Integrations::Github do
   let(:project) { create(:project) }
   let(:pipeline) { create(:ci_pipeline, project: project) }
   let(:pipeline_sample_data) { Gitlab::DataBuilder::Pipeline.build(pipeline) }
@@ -133,13 +133,13 @@ RSpec.describe GithubService do
     let(:sha) { pipeline.sha }
     let(:status_options) { { context: 'security', target_url: 'https://localhost.pipeline.example.com', description: "SAST passed" } }
     let(:status_message) { double(sha: sha, status: :success, status_options: status_options) }
-    let(:notifier) { instance_double(GithubService::StatusNotifier) }
+    let(:notifier) { instance_double(Integrations::Github::StatusNotifier) }
 
     context 'the service is invalid' do
       it 'does not notify GitHub of a status change' do
         allow(subject).to receive(:invalid?).and_return(true)
 
-        expect(GithubService::StatusMessage).not_to receive(:from_pipeline_data)
+        expect(Integrations::Github::StatusMessage).not_to receive(:from_pipeline_data)
 
         subject.execute(pipeline_sample_data)
       end
@@ -147,7 +147,7 @@ RSpec.describe GithubService do
 
     it 'notifies GitHub of a status change' do
       expect(notifier).to receive(:notify)
-      expect(GithubService::StatusNotifier).to receive(:new).with(token, remote_repo_path, anything)
+      expect(Integrations::Github::StatusNotifier).to receive(:new).with(token, remote_repo_path, anything)
                                                             .and_return(notifier)
 
       subject.execute(pipeline_sample_data)
@@ -156,7 +156,7 @@ RSpec.describe GithubService do
     it 'uses StatusMessage to build message' do
       allow(subject).to receive(:update_status)
 
-      expect(GithubService::StatusMessage)
+      expect(Integrations::Github::StatusMessage)
         .to receive(:from_pipeline_data)
         .with(project, subject, pipeline_sample_data)
         .and_return(status_message)
@@ -166,8 +166,8 @@ RSpec.describe GithubService do
 
     describe 'passes StatusMessage values to StatusNotifier' do
       before do
-        allow(GithubService::StatusNotifier).to receive(:new).and_return(notifier)
-        allow(GithubService::StatusMessage).to receive(:from_pipeline_data).and_return(status_message)
+        allow(Integrations::Github::StatusNotifier).to receive(:new).and_return(notifier)
+        allow(Integrations::Github::StatusMessage).to receive(:from_pipeline_data).and_return(status_message)
       end
 
       specify 'sha' do
@@ -223,7 +223,7 @@ RSpec.describe GithubService do
 
       it 'hands custom api url to StatusNotifier' do
         allow(notifier).to receive(:notify)
-        expect(GithubService::StatusNotifier).to receive(:new).with(anything, anything, api_endpoint: api_url)
+        expect(Integrations::Github::StatusNotifier).to receive(:new).with(anything, anything, api_endpoint: api_url)
                                                               .and_return(notifier)
 
         subject.execute(pipeline_sample_data)
@@ -242,7 +242,7 @@ RSpec.describe GithubService do
 
       it 'does not send notification' do
         expect(subject).not_to receive(:update_status)
-        expect(GithubService::StatusMessage).not_to receive(:from_pipeline_data)
+        expect(Integrations::Github::StatusMessage).not_to receive(:from_pipeline_data)
 
         expect(subject.execute(pipeline_sample_data)).to be_nil
       end
@@ -251,7 +251,7 @@ RSpec.describe GithubService do
         pipeline_sample_data[:object_attributes].delete(:sha)
 
         expect(subject).to receive(:update_status)
-        expect(GithubService::StatusMessage).to receive(:from_pipeline_data)
+        expect(Integrations::Github::StatusMessage).to receive(:from_pipeline_data)
 
         subject.execute(pipeline_sample_data)
       end
@@ -268,7 +268,7 @@ RSpec.describe GithubService do
 
       it 'sends notification' do
         expect(subject).to receive(:update_status)
-        expect(GithubService::StatusMessage).to receive(:from_pipeline_data)
+        expect(Integrations::Github::StatusMessage).to receive(:from_pipeline_data)
 
         subject.execute(pipeline_sample_data)
       end
