@@ -1195,31 +1195,12 @@ Migrate to [repository-specific primary nodes](#repository-specific-primary-node
 ## Primary Node Failure
 
 Gitaly Cluster recovers from a failing primary Gitaly node by promoting a healthy secondary as the
-new primary.
+new primary. If the failed primary contained unreplicated writes, [data loss can occur](#check-for-data-loss).
 
-To minimize data loss, Gitaly Cluster:
+## Unavailable repositories
 
-- Switches repositories that are outdated on the new primary to [read-only mode](#read-only-mode).
-- Elects the secondary with the least unreplicated writes from the primary to be the new primary.
-  Because there can still be some unreplicated writes, [data loss can occur](#check-for-data-loss).
-
-### Read-only mode
-
-> - Introduced in GitLab 13.0 as [generally available](https://about.gitlab.com/handbook/product/gitlab-the-product/#generally-available-ga).
-> - Between GitLab 13.0 and GitLab 13.2, read-only mode applied to the whole virtual storage and occurred whenever failover occurred.
-> - [In GitLab 13.3 and later](https://gitlab.com/gitlab-org/gitaly/-/issues/2862), read-only mode applies on a per-repository basis and only occurs if a new primary is out of date.
-
-When Gitaly Cluster switches to a new primary, repositories enter read-only mode if they are out of
-date. This can happen after failing over to an outdated secondary. Read-only mode eases data
-recovery efforts by preventing writes that may conflict with the unreplicated writes on other nodes.
-
-To enable writes again, an administrator can:
-
-1. [Check](#check-for-data-loss) for data loss.
-1. Attempt to [recover](#data-recovery) missing data.
-1. Either [enable writes](#enable-writes-or-accept-data-loss) in the virtual storage or
-   [accept data loss](#enable-writes-or-accept-data-loss) if necessary, depending on the version of
-   GitLab.
+A repository is unavailable if all of its up to date replicas are unavailable. Unavailable repositories are
+no accessible through Praefect to prevent serving stale data which may break automated tooling.
 
 ### Check for data loss
 
@@ -1332,30 +1313,21 @@ Virtual storage: default
 To check a project's repository checksums across on all Gitaly nodes, run the
 [replicas Rake task](../raketasks/praefect.md#replica-checksums) on the main GitLab node.
 
-### Enable writes or accept data loss
-
-Praefect provides the following sub-commands to re-enable writes:
-
-- In GitLab 13.2 and earlier, `enable-writes` to re-enable virtual storage for writes after data
-  recovery attempts.
-
-   ```shell
-   sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml enable-writes -virtual-storage <virtual-storage>
-   ```
-
-- [In GitLab 13.3](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/2415) and later,
-  `accept-dataloss` to accept data loss and re-enable writes for repositories after data recovery
-  attempts have failed. Accepting data loss causes current version of the repository on the
-  authoritative storage to be considered latest. Other storages are brought up to date with the
-  authoritative storage by scheduling replication jobs.
-
-  ```shell
-  sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml accept-dataloss -virtual-storage <virtual-storage> -repository <relative-path> -authoritative-storage <storage-name>
-  ```
+### Accept data loss
 
 WARNING:
 `accept-dataloss` causes permanent data loss by overwriting other versions of the repository. Data
 [recovery efforts](#data-recovery) must be performed before using it.
+
+If it is not possible to bring one of the up to date replicas back online, you may have to accept data
+loss. When accepting data loss, Praefect marks the chosen replica of the repository as the latest version
+and replicates it to the other assigned Gitaly nodes. This process overwrites any other version of the
+repository so care must be taken.
+
+```shell
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml accept-dataloss
+-virtual-storage <virtual-storage> -repository <relative-path> -authoritative-storage <storage-name>
+```
 
 ## Data recovery
 
