@@ -161,6 +161,28 @@ Feature.disable(:include_lfs_blobs_in_archive)
 
 ## Troubleshooting
 
+### Encountered `n` file(s) that should have been pointers, but weren't:
+
+As the error indicates, the file(s) are expected to be tracked by LFS, but for some reason the repository did not track them as LFS.
+To resolve this, you need to migrate these file(s) and push back to the repository:
+
+1. Migrate the file to LFS:
+   ```
+   git lfs migrate import --yes --no-rewrite "<your-file>"
+   ```
+1. Push back to your repository
+   ```
+   git push
+   ```
+1. Optional: Clean up your `.git` folder
+   ```
+   git reflog expire --expire-unreachable=now --all
+   git gc --prune=now
+   ```
+
+NOTE:
+One possible reason for you to see this error, is because you may have been affected by this issue: [Files not tracked with LFS when uploaded through the web interface](https://gitlab.com/gitlab-org/gitlab/-/issues/326342#note_586820485)
+
 ### error: Repository or object not found
 
 There are a couple of reasons why this error can occur:
