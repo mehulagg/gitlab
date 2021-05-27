@@ -42,7 +42,6 @@ RSpec.describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
   it { is_expected.to delegate_method(:available?).to(:application_helm).with_prefix }
   it { is_expected.to delegate_method(:available?).to(:application_ingress).with_prefix }
   it { is_expected.to delegate_method(:available?).to(:application_knative).with_prefix }
-  it { is_expected.to delegate_method(:available?).to(:application_elastic_stack).with_prefix }
   it { is_expected.to delegate_method(:external_ip).to(:application_ingress).with_prefix }
   it { is_expected.to delegate_method(:external_hostname).to(:application_ingress).with_prefix }
 
@@ -1349,45 +1348,23 @@ RSpec.describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     end
   end
 
-  describe '#application_prometheus_available?' do
+  describe '#integration_prometheus_available?' do
     let_it_be_with_reload(:cluster) { create(:cluster, :project) }
 
-    subject { cluster.application_prometheus_available? }
+    subject { cluster.integration_prometheus_available? }
 
     it { is_expected.to be_falsey }
 
-    context 'has a integration_prometheus' do
-      let_it_be(:integration) { create(:clusters_integrations_prometheus, cluster: cluster) }
+    let_it_be(:integration) { create(:clusters_integrations_prometheus, cluster: cluster) }
 
-      it { is_expected.to be_truthy }
+    it { is_expected.to be_truthy }
 
-      context 'disabled' do
-        before do
-          cluster.integration_prometheus.enabled = false
-        end
-
-        it { is_expected.to be_falsey }
-      end
-    end
-
-    context 'has a application_prometheus' do
-      let_it_be(:application) { create(:clusters_applications_prometheus, :installed, :no_helm_installed, cluster: cluster) }
-
-      it { is_expected.to be_truthy }
-
-      context 'errored' do
-        before do
-          cluster.application_prometheus.status = Clusters::Applications::Prometheus.state_machines[:status].states[:errored]
-        end
-
-        it { is_expected.to be_falsey }
+    context 'disabled' do
+      before do
+        cluster.integration_prometheus.enabled = false
       end
 
-      context 'also has a integration_prometheus' do
-        let_it_be(:integration) { create(:clusters_integrations_prometheus, cluster: cluster) }
-
-        it { is_expected.to be_truthy }
-      end
+      it { is_expected.to be_falsey }
     end
   end
 
