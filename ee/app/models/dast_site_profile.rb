@@ -29,7 +29,35 @@ class DastSiteProfile < ApplicationRecord
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
   def ci_variables
-    ::Gitlab::Ci::Variables::Collection.new(secret_variables)
+    url = dast_site.url
+
+    collection = ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      if target_type == 'website'
+        variables.append(key: 'DAST_WEBSITE', value: url)
+      else
+        variables.append(key: 'DAST_API_SPECIFICATION', value: url)
+        variables.append(key: 'DAST_API_HOST_OVERRIDE', value: URI(url).host)
+      end
+
+      variables.append(key: 'DAST_EXCLUDE_URLS', value: excluded_urls.join(',')) unless excluded_urls.empty?
+
+      if auth_enabled
+        variables.append(key: 'DAST_AUTH_URL', value: auth_url)
+        variables.append(key: 'DAST_USERNAME', value: auth_username)
+        variables.append(key: 'DAST_USERNAME_FIELD', value: auth_username_field)
+        variables.append(key: 'DAST_PASSWORD_FIELD', value: auth_password_field)
+      end
+    end
+
+    collection.compact
+  end
+
+  def secret_ci_variables(user)
+    collection = ::Gitlab::Ci::Variables::Collection.new
+
+    return collection unless Ability.allowed?(user, :read_on_demand_scans, self)
+
+    collection.concat(secret_variables)
   end
 
   def status

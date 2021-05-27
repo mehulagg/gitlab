@@ -14,6 +14,16 @@ class DastScannerProfile < ApplicationRecord
     active: 2
   }
 
+  def ci_variables
+    ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+      variables.append(key: 'DAST_SPIDER_MINS', value: String(spider_timeout)) if spider_timeout
+      variables.append(key: 'DAST_TARGET_AVAILABILITY_TIMEOUT', value: String(target_timeout)) if target_timeout
+      variables.append(key: 'DAST_FULL_SCAN_ENABLED', value: String(full_scan_enabled?))
+      variables.append(key: 'DAST_USE_AJAX_SPIDER', value: String(use_ajax_spider))
+      variables.append(key: 'DAST_DEBUG', value: String(show_debug_messages))
+    end
+  end
+
   def full_scan_enabled?
     scan_type == 'active'
   end

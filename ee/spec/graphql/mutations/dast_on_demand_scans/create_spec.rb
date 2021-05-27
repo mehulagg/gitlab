@@ -78,11 +78,11 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
 
           it 'passes additional arguments to the underlying service object' do
             args = hash_including(
-              spider_timeout: dast_scanner_profile.spider_timeout,
-              target_timeout: dast_scanner_profile.target_timeout,
-              use_ajax_spider: dast_scanner_profile.use_ajax_spider,
-              show_debug_messages: dast_scanner_profile.show_debug_messages,
-              full_scan_enabled: dast_scanner_profile.full_scan_enabled?
+              branch: project.default_branch,
+              dast_profile: nil,
+              dast_site_profile: dast_site_profile,
+              dast_scanner_profile: dast_scanner_profile,
+              ci_configuration: kind_of(String)
             )
 
             expect_any_instance_of(::Ci::RunDastScanService).to receive(:execute).with(args).and_call_original
