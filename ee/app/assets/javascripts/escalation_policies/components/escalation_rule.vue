@@ -7,6 +7,7 @@ import {
   GlCard,
   GlIcon,
   GlSprintf,
+  GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { ACTIONS, ALERT_STATUSES } from '../constants';
@@ -19,6 +20,9 @@ export const i18n = {
       selectSchedule: s__('EscalationPolicies|Select schedule'),
       validationMsg: s__(
         'EscalationPolicies|A schedule is required for adding an escalation policy.',
+      ),
+      noSchedules: s__(
+        'EscalationPolicies|A schedule is required for adding an escalation policy. Please create a schedule first.',
       ),
     },
   },
@@ -37,6 +41,9 @@ export default {
     GlIcon,
     GlSprintf,
   },
+  directives: {
+    GlTooltip,
+  },
   props: {
     rule: {
       type: Object,
@@ -46,6 +53,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    schedulesLoading: {
+      type: Boolean,
+      required: true,
+      default: true,
     },
     index: {
       type: Number,
@@ -71,6 +83,9 @@ export default {
       return this.oncallScheduleIid
         ? this.schedules.find(({ iid }) => iid === this.oncallScheduleIid)?.name
         : i18n.fields.rules.selectSchedule;
+    },
+    noSchedules() {
+      return !this.schedulesLoading && !this.schedules.length;
     },
   },
   methods: {
@@ -157,6 +172,7 @@ export default {
           </template>
           <template #schedule>
             <gl-dropdown
+              :disabled="noSchedules"
               class="rule-control"
               :text="scheduleDropdownTitle"
               data-testid="schedules-dropdown"
@@ -176,6 +192,14 @@ export default {
                 {{ schedule.name }}
               </gl-dropdown-item>
             </gl-dropdown>
+            <gl-icon
+              v-if="noSchedules"
+              v-gl-tooltip
+              :title="$options.i18n.fields.rules.noSchedules"
+              name="information-o"
+              class="gl-text-gray-500 gl-ml-3"
+              data-testid="no-schedules-info-icon"
+            />
           </template>
         </gl-sprintf>
       </div>

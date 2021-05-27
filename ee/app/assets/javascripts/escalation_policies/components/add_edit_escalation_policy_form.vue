@@ -68,6 +68,11 @@ export default {
       },
     },
   },
+  computed: {
+    schedulesLoading() {
+      return this.$apollo.queries.schedules.loading;
+    },
+  },
   mounted() {
     this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
   },
@@ -141,6 +146,7 @@ export default {
         :rule="rule"
         :index="index"
         :schedules="schedules"
+        :schedules-loading="schedulesLoading"
         :is-valid="validationState.rules[index]"
         @update-escalation-rule="updateEscalationRules"
         @remove-escalation-rule="removeEscalationRule"
